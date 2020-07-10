@@ -5,3 +5,7 @@ It uses the following tools listed below:
 
 1. https://github.com/nimakarimipour/AnnotationInjector
 2. https://github.com/nimakarimipour/NullAway/tree/autofix
+
+## Installation
+
+Run ```dependecies.sh``` to install the dependencies in maven local repository.
