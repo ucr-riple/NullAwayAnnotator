@@ -1,16 +1,42 @@
+import net.ltgt.gradle.errorprone.CheckSeverity
+
+buildscript {
+    repositories {
+        google() // For Gradle 4.0+
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.6.0-rc01'
+    }
+}
 plugins {
     id 'java'
+    id "net.ltgt.errorprone" version "0.7" apply false
+    id "com.github.johnrengelman.shadow" version "2.0.4" apply false
+    id 'com.github.kt3k.coveralls' version '2.6.3' apply false
 }
 
 group 'org.example'
 version '1.0-SNAPSHOT'
 
+apply from: "gradle/dependencies.gradle"
+
 repositories {
     mavenLocal()
     mavenCentral()
+    jcenter()
+    google()
+}
+
+
+if (JavaVersion.current().java9Compatible) {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs += [ "--release", "8" ]
+    }
 }
 
 dependencies {
+
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
     implementation "edu.ucr.cs.riple:AnnotationInjector:1.0-SNAPSHOT"
@@ -18,4 +44,17 @@ dependencies {
 
     implementation "edu.ucr.cs.riple:nullaway:0.7.12-SNAPSHOT"
     testImplementation "edu.ucr.cs.riple:nullaway:0.7.12-SNAPSHOT"
+
+    implementation "com.google.errorprone:error_prone_core:2.4.0"
+    testImplementation "com.google.errorprone:error_prone_core:2.4.0"
+
+
+    implementation "com.google.errorprone:error_prone_check_api:2.4.0"
+    testImplementation "com.google.errorprone:error_prone_check_api:2.4.0"
+
+    implementation "com.google.errorprone:javac:9+181-r4173-1"
+    testImplementation "com.google.errorprone:javac:9+181-r4173-1"
+
+    implementation "com.google.errorprone:error_prone_test_helpers:2.4.0"
+    testImplementation "com.google.errorprone:error_prone_test_helpers:2.4.0"
 }
