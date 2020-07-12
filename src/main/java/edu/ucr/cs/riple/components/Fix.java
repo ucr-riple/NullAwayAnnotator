@@ -1,4 +1,4 @@
-package edu.ucr.cs.riple;
+package edu.ucr.cs.riple.components;
 
 import com.uber.nullaway.fixer.KEYS;
 import java.util.Objects;

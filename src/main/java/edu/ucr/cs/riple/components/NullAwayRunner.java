@@ -1,4 +1,4 @@
-package edu.ucr.cs.riple;
+package edu.ucr.cs.riple.components;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.BaseErrorProneJavaCompiler;
