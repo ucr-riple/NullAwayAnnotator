@@ -9,4 +9,5 @@ public class NullAwayAutoFixPlugin implements Plugin<Project> {
         project.getExtensions().create("demoSetting", NullAwayAutoFixExtension.class);
         project.getTasks().create("demo", AutoFix.class);
     }
+
 }
