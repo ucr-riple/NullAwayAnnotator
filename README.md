@@ -1,5 +1,5 @@
 # NullAwayAutoFixer
-NullAwayAutoFixer is a tool that automatically fixes source code to pass NullAway checks.
+NullAwayAutoFixer is a tool that automatically fixes source code to pass NullAway checks delivered as a gradle plugin.
 
 It uses the following tools listed below:
 
