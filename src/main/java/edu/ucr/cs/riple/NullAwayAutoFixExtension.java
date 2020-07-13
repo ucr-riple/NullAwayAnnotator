@@ -1,13 +1,14 @@
 package edu.ucr.cs.riple;
 
 public class NullAwayAutoFixExtension {
-    private String message = "NullAwayAutoFix Extension class";
 
-    public String getMessage() {
-        return message;
+    private String mode = "overwrite";
+
+    public String getMode() {
+        return mode;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setMode(String mode) {
+        this.mode = mode;
     }
 }
