@@ -11,7 +11,7 @@ class NullAwayAutoFixPluginTest {
     @Test
     void demo_plugin_should_add_task_to_project() {
         Project project = ProjectBuilder.builder().build()
-        project.getPlugins().apply 'edu.ucr.cs.riple.demo.plugin'
+        project.getPlugins().apply 'edu.ucr.cs.riple.plugin'
 
         assertTrue(project.tasks.autofix instanceof AutoFix)
     }
