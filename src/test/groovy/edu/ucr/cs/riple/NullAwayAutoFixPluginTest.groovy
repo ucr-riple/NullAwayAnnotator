@@ -19,7 +19,7 @@ class NullAwayAutoFixPluginTest {
     @Test
     void should_be_able_to_add_task_to_project() {
         Project project = ProjectBuilder.builder().build()
-        def task = project.task('demo', type: AutoFix)
+        def task = project.task('autofix', type: AutoFix)
         assertTrue(task instanceof AutoFix)
     }
 }
