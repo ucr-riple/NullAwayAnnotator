@@ -9,15 +9,21 @@ buildscript {
         classpath 'com.android.tools.build:gradle:3.6.0-rc01'
     }
 }
+
 plugins {
     id 'java'
     id "net.ltgt.errorprone" version "0.7" apply false
     id 'groovy'
+    id 'maven'
     id "com.github.johnrengelman.shadow" version "2.0.4" apply false
     id 'com.github.kt3k.coveralls' version '2.6.3' apply false
 }
 
-group 'org.example'
+configurations {
+    compile.exclude group:'ch.qos.logback'
+}
+
+group 'edu.ucr.cs.riple'
 version '1.0-SNAPSHOT'
 
 apply from: "gradle/dependencies.gradle"

@@ -31,3 +31,16 @@ else
 fi
 
 
+if [ mvn dependency:get -Dartifact=edu.ucr.cs.riple:NullAwayAutoFixer:1.0-SNAPSHOT -o -DrepoUrl=file://~/.m2/repository]; then
+    :
+else
+    pushd /tmp/
+    git clone git@github.com:nimakarimipour/NullAwayAutoFixer.git
+    pushd NullAwayAutoFixer
+
+    ./gradlew install
+
+    popd
+    popd
+fi
+

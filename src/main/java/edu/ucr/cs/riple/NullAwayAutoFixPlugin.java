@@ -7,7 +7,6 @@ public class NullAwayAutoFixPlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
         project.getExtensions().create("demoSetting", NullAwayAutoFixExtension.class);
-        project.getTasks().create("demo", AutoFix.class);
+        project.getTasks().create("autofix", AutoFix.class);
     }
-
 }
