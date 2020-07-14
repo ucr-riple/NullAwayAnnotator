@@ -1,6 +1,5 @@
 package edu.ucr.cs.riple;
 
-import edu.riple.annotationinjector.Fix;
 import edu.riple.annotationinjector.Injector;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
@@ -12,21 +11,29 @@ import org.json.simple.parser.ParseException;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 
 
 public class AutoFix extends DefaultTask {
 
     Injector injector = null;
+    String executable = "gradlew";
 
-    static void runTask(Project project, String task){
-        String command = "cd " + project.getProjectDir().getAbsolutePath() + " && ./gradlew" + " " + task;
-        Process proc = null;
+    void buildProject(Project project){
+        String task = "build";
+        String setToJava11 = "export JAVA_HOME=`/usr/libexec/java_home -v 11` && ";
+        String command = setToJava11
+                + "cd "
+                + project.getProjectDir().getAbsolutePath()
+                + " && ./"
+                + executable + " "
+                + task + " "
+                + "--rerun-tasks";
+
+        Process proc;
         try {
             proc = Runtime.getRuntime().exec(new String[] { "/bin/sh", "-c", command });
             if (proc != null) {
@@ -47,11 +54,17 @@ public class AutoFix extends DefaultTask {
         //todo: use later
         String mode = extension.getMode();
 
+        executable = extension.getExecutable();
         String fixPath = extension.getFixPath() == null ? getProject().getProjectDir().getAbsolutePath() : extension.getFixPath();
         fixPath = (fixPath.endsWith("/") ? fixPath : fixPath + "/") + "fixes.json";
 
-
-        System.out.println("Fix path: " + fixPath);
+        System.out.println("\n" +
+                "==========" + "\n" +
+                "Process info:" + "\n" +
+                "Mode: " + mode + "\n" +
+                "Executable: " + executable + "\n" +
+                "Fix path: " + fixPath
+        );
         injector = Injector.builder(Injector.MODE.OVERWRITE).setFixesJsonFilePath(fixPath).build();
         run(fixPath);
     }
@@ -60,11 +73,11 @@ public class AutoFix extends DefaultTask {
         boolean finished = false;
 
         while (!finished) {
-            runTask(getProject(), "build");
+            buildProject(getProject());
             if(newFixRequested(fixPath)) {
                 System.out.println("NullAway found some error(s), going for next round...");
                 injector.start();
-                new File(fixPath).delete();
+                System.out.println("Cleared fix path for new run: " + new File(fixPath).delete());
             }
             else {
                 System.out.println("NullAway found no errors, shutting down.");

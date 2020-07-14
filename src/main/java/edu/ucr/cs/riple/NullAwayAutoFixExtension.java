@@ -4,6 +4,15 @@ public class NullAwayAutoFixExtension {
 
     private String mode = "overwrite";
     private String fixPath = null;
+    private String executable = "gradlew";
+
+    public String getExecutable() {
+        return executable;
+    }
+
+    public void setExecutable(String executable) {
+        this.executable = executable;
+    }
 
     public String getFixPath() {
         return fixPath;
