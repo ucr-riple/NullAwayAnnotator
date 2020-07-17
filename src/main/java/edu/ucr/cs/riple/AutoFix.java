@@ -11,7 +11,11 @@ import org.json.simple.parser.ParseException;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -25,13 +29,17 @@ public class AutoFix extends DefaultTask {
     void buildProject(Project project){
         String task = "build";
         String setToJava11 = "export JAVA_HOME=`/usr/libexec/java_home -v 11` && ";
-        String command = setToJava11
+        String hideOutput = "> /dev/null 2>&1";
+        String command = ""
                 + "cd "
                 + project.getProjectDir().getAbsolutePath()
                 + " && ./"
                 + executable + " "
                 + task + " "
-                + "--rerun-tasks";
+                + "--rerun-tasks "
+                + hideOutput;
+
+        System.out.println("Running: " + command);
 
         Process proc;
         try {
@@ -73,18 +81,19 @@ public class AutoFix extends DefaultTask {
         boolean finished = false;
 
         while (!finished) {
+            System.out.println("Cleared fix path for new run: " + new File(fixPath).delete());
             buildProject(getProject());
             if(newFixRequested(fixPath)) {
                 System.out.println("NullAway found some error(s), going for next round...");
                 injector.start();
-                System.out.println("Cleared fix path for new run: " + new File(fixPath).delete());
             }
             else {
-                System.out.println("NullAway found no errors, shutting down.");
+                System.out.println("NullAway found no fixable errors, shutting down.");
                 finished = true;
             }
         }
     }
+
 
     private boolean newFixRequested(String path){
         try {
