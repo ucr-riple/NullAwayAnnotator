@@ -11,11 +11,7 @@ import org.json.simple.parser.ParseException;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -93,7 +89,6 @@ public class AutoFix extends DefaultTask {
             }
         }
     }
-
 
     private boolean newFixRequested(String path){
         try {
