@@ -80,7 +80,7 @@ public class AutoFix extends DefaultTask {
             System.out.println("Cleared fix path for new run: " + new File(fixPath).delete());
             buildProject(getProject());
             if(newFixRequested(fixPath)) {
-                System.out.println("NullAway found some error(s), going for next round...");
+                System.out.println("NullAway found some fixable error(s), going for next round...");
                 injector.start();
             }
             else {
