@@ -5,7 +5,6 @@ It uses the following tools listed below:
 
 1. https://github.com/nimakarimipour/AnnotationInjector
 2. https://github.com/nimakarimipour/NullAway/tree/autofix
-3. https://github.com/nimakarimipour/NullAwayAutoFixer.git
 
 ## Installation
 
