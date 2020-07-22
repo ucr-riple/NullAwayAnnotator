@@ -75,9 +75,11 @@ public class AutoFix extends DefaultTask {
 
     private void run(String fixPath) {
         boolean finished = false;
+        int round = 0;
 
         while (!finished) {
             System.out.println("Cleared fix path for new run: " + new File(fixPath).delete());
+            System.out.println("Round " + round + "...");
             buildProject(getProject());
             if(newFixRequested(fixPath)) {
                 System.out.println("NullAway found some fixable error(s), going for next round...");
