@@ -30,8 +30,6 @@ public class AutoFix extends DefaultTask {
     String task = "build";
     String hideOutput = "> /dev/null 2>&1";
     String command = ""
-//            + "export JAVA_HOME=`/usr/libexec/java_home -v 1.8`"
-//            + " && cd "
             + "cd "
             + executablePath
             + " && ./"
