@@ -19,7 +19,9 @@ import java.nio.file.Paths;
 public class AutoFix extends DefaultTask {
 
   Injector injector = null;
-  String executable = "gradlew";
+  String executable;
+  boolean hideNullAwayOutput;
+  private int maximumRound;
 
   void buildProject(Project project) {
     String executablePath = project.getProjectDir().getAbsolutePath();
@@ -27,7 +29,7 @@ public class AutoFix extends DefaultTask {
     if (executablePath.endsWith(subProjectPath)) {
       executablePath = executablePath.replace(subProjectPath, "");
     }
-    String task = "build";
+    String task = (project.getPath().equals(":") ? "" : project.getPath() + ":") + "build";
     String hideOutput = "> /dev/null 2>&1";
     String command = ""
             + "cd "
@@ -37,8 +39,8 @@ public class AutoFix extends DefaultTask {
             + " "
             + task
             + " "
-            + "--rerun-tasks "
-            + hideOutput;
+            + "--rerun-tasks";
+    if(hideNullAwayOutput) command += hideOutput;
 
     System.out.println("Running: " + command);
 
@@ -66,10 +68,11 @@ public class AutoFix extends DefaultTask {
       extension = new NullAwayAutoFixExtension();
     }
 
-    // todo: use mode later
-    String mode = extension.getMode();
-
+    hideNullAwayOutput = extension.shouldHideNullAwayOutput();
+    maximumRound = extension.getMaximumRound();
     executable = extension.getExecutable();
+
+
     String fixPath =
         extension.getFixPath() == null
             ? getProject().getProjectDir().getAbsolutePath()
@@ -81,9 +84,6 @@ public class AutoFix extends DefaultTask {
             + "=========="
             + "\n"
             + "Process info:"
-            + "\n"
-            + "Mode: "
-            + mode
             + "\n"
             + "Executable: "
             + executable
@@ -101,7 +101,7 @@ public class AutoFix extends DefaultTask {
     boolean finished = false;
     int round = 0;
 
-    while (!finished) {
+    while (!finished && round < maximumRound) {
       System.out.println("Cleared fix path for new run: " + new File(fixPath).delete());
       System.out.println("Round " + (++round) + "...");
       buildProject(getProject());
@@ -113,6 +113,7 @@ public class AutoFix extends DefaultTask {
         finished = true;
       }
     }
+    if (round >= maximumRound) System.out.println("Exceeded maximum round");
   }
 
   private boolean newFixRequested(String path) {

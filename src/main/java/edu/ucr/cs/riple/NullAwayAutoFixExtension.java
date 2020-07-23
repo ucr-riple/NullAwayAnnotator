@@ -2,9 +2,26 @@ package edu.ucr.cs.riple;
 
 public class NullAwayAutoFixExtension {
 
-    private String mode = "overwrite";
     private String fixPath = null;
     private String executable = "gradlew";
+    private boolean hideNullAwayOutput = true;
+    private int maximumRound = Integer.MAX_VALUE;
+
+    public int getMaximumRound() {
+        return maximumRound;
+    }
+
+    public void setMaximumRound(int maximumRound) {
+        this.maximumRound = maximumRound;
+    }
+
+    public boolean shouldHideNullAwayOutput() {
+        return hideNullAwayOutput;
+    }
+
+    public void setHideNullAwayOutput(boolean hideNullAwayOutput) {
+        this.hideNullAwayOutput = hideNullAwayOutput;
+    }
 
     public String getExecutable() {
         return executable;
@@ -20,13 +37,5 @@ public class NullAwayAutoFixExtension {
 
     public void setFixPath(String fixPath) {
         this.fixPath = fixPath;
-    }
-
-    public String getMode() {
-        return mode;
-    }
-
-    public void setMode(String mode) {
-        this.mode = mode;
     }
 }
