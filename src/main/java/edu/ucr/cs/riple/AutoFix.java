@@ -28,12 +28,10 @@ public class AutoFix extends DefaultTask {
       executablePath = executablePath.replace(subProjectPath, "");
     }
     String task = "build";
-    String setToJava8 = javaEnvironmentCommand("1.8");
     String hideOutput = "> /dev/null 2>&1";
-    String command =
-        ""
-            + setToJava8
-            + " && "
+    String command = ""
+//            + "export JAVA_HOME=`/usr/libexec/java_home -v 1.8`"
+//            + " && cd "
             + "cd "
             + executablePath
             + " && ./"
@@ -41,7 +39,7 @@ public class AutoFix extends DefaultTask {
             + " "
             + task
             + " "
-            + "--rerun-tasks"
+            + "--rerun-tasks "
             + hideOutput;
 
     System.out.println("Running: " + command);
@@ -52,13 +50,14 @@ public class AutoFix extends DefaultTask {
       if (proc != null) {
         proc.waitFor();
       }
+      command = "export JAVA_HOME=`/usr/libexec/java_home -v 11`";
+      proc = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
+      if (proc != null) {
+        proc.waitFor();
+      }
     } catch (Exception e) {
       throw new RuntimeException("Could not run command: " + task + " from gradle");
     }
-  }
-
-  private String javaEnvironmentCommand(String version) {
-    return "export JAVA_HOME=`/usr/libexec/java_home -v " + version + "`";
   }
 
   @TaskAction
@@ -69,7 +68,7 @@ public class AutoFix extends DefaultTask {
       extension = new NullAwayAutoFixExtension();
     }
 
-    // todo: use later
+    // todo: use mode later
     String mode = extension.getMode();
 
     executable = extension.getExecutable();
@@ -93,7 +92,10 @@ public class AutoFix extends DefaultTask {
             + "\n"
             + "Fix path: "
             + fixPath);
+
+    System.out.println("Building Injector");
     injector = Injector.builder(Injector.MODE.OVERWRITE).setFixesJsonFilePath(fixPath).build();
+    System.out.println("Built.");
     run(fixPath);
   }
 
