@@ -4,6 +4,7 @@ public class NullAwayAutoFixExtension {
 
     private String fixPath = null;
     private String executable = "gradlew";
+    private String formatTask = "";
     private boolean hideNullAwayOutput = true;
     private int maximumRound = Integer.MAX_VALUE;
 
@@ -37,5 +38,13 @@ public class NullAwayAutoFixExtension {
 
     public void setFixPath(String fixPath) {
         this.fixPath = fixPath;
+    }
+
+    public String getFormatTask() {
+        return formatTask;
+    }
+
+    public void setFormatTask(String formatTask) {
+        this.formatTask = formatTask;
     }
 }

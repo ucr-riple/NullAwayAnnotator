@@ -19,51 +19,15 @@ import java.nio.file.Paths;
 public class AutoFix extends DefaultTask {
 
   Injector injector = null;
-  String executable;
+  private String executable;
+  private String reformat;
   boolean hideNullAwayOutput;
   private int maximumRound;
-
-  void buildProject(Project project) {
-    String executablePath = project.getProjectDir().getAbsolutePath();
-    String subProjectPath = project.getPath().replace(":", "");
-    if (executablePath.endsWith(subProjectPath)) {
-      executablePath = executablePath.replace(subProjectPath, "");
-    }
-    String task = (project.getPath().equals(":") ? "" : project.getPath() + ":") + "build";
-    String hideOutput = "> /dev/null 2>&1";
-    String command = ""
-            + "cd "
-            + executablePath
-            + " && ./"
-            + executable
-            + " "
-            + task
-            + " "
-            + "--rerun-tasks";
-    if(hideNullAwayOutput) command += hideOutput;
-
-    System.out.println("Running: " + command);
-
-    Process proc;
-    try {
-      proc = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
-      if (proc != null) {
-        proc.waitFor();
-      }
-      command = "export JAVA_HOME=`/usr/libexec/java_home -v 11`";
-      proc = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
-      if (proc != null) {
-        proc.waitFor();
-      }
-    } catch (Exception e) {
-      throw new RuntimeException("Could not run command: " + task + " from gradle");
-    }
-  }
 
   @TaskAction
   public void autoFix() {
     NullAwayAutoFixExtension extension =
-        getProject().getExtensions().findByType(NullAwayAutoFixExtension.class);
+            getProject().getExtensions().findByType(NullAwayAutoFixExtension.class);
     if (extension == null) {
       extension = new NullAwayAutoFixExtension();
     }
@@ -71,27 +35,30 @@ public class AutoFix extends DefaultTask {
     hideNullAwayOutput = extension.shouldHideNullAwayOutput();
     maximumRound = extension.getMaximumRound();
     executable = extension.getExecutable();
-
+    reformat = extension.getFormatTask();
 
     String fixPath =
-        extension.getFixPath() == null
-            ? getProject().getProjectDir().getAbsolutePath()
-            : extension.getFixPath();
+            extension.getFixPath() == null
+                    ? getProject().getProjectDir().getAbsolutePath()
+                    : extension.getFixPath();
     fixPath = (fixPath.endsWith("/") ? fixPath : fixPath + "/") + "fixes.json";
 
+    String reformatSummary =
+            (reformat != null && !reformat.equals("")) ? "Reformat Task: " + reformat + "\n" : "";
     System.out.println(
-        "\n"
-            + "=========="
-            + "\n"
-            + "Process info:"
-            + "\n"
-            + "Executable: "
-            + executable
-            + "\n"
-            + "Fix path: "
-            + fixPath);
+            "\n"
+                    + "=========="
+                    + "\n"
+                    + "Process info:"
+                    + "\n"
+                    + "Executable: "
+                    + executable
+                    + "\n"
+                    + reformatSummary
+                    + "Fix path: "
+                    + fixPath);
 
-    System.out.println("Building Injector");
+    System.out.println("Building Injector....");
     injector = Injector.builder(Injector.MODE.OVERWRITE).setFixesJsonFilePath(fixPath).build();
     System.out.println("Built.");
     run(fixPath);
@@ -104,7 +71,7 @@ public class AutoFix extends DefaultTask {
     while (!finished && round < maximumRound) {
       System.out.println("Cleared fix path for new run: " + new File(fixPath).delete());
       System.out.println("Round " + (++round) + "...");
-      buildProject(getProject());
+      execute(getProject(), "build", true, false);
       if (newFixRequested(fixPath)) {
         System.out.println("NullAway found some fixable error(s), going for next round...");
         injector.start();
@@ -114,6 +81,11 @@ public class AutoFix extends DefaultTask {
       }
     }
     if (round >= maximumRound) System.out.println("Exceeded maximum round");
+    if (reformat != null && !reformat.equals("")) {
+      System.out.println("Reformatting project...");
+      execute(getProject(), reformat, false, true);
+    }
+    System.out.println("Finished");
   }
 
   private boolean newFixRequested(String path) {
@@ -128,6 +100,39 @@ public class AutoFix extends DefaultTask {
       return false;
     } catch (ParseException e) {
       throw new RuntimeException("Error in parsing object: " + e);
+    }
+  }
+
+  private void execute(Project project, String taskName, boolean rerun, boolean topLevel){
+    String task = "";
+    String executablePath = project.getProjectDir().getAbsolutePath();
+    String subProjectPath = project.getPath().replace(":", "");
+    if (!topLevel) {
+      if (executablePath.endsWith(subProjectPath)) executablePath = executablePath.replace(subProjectPath, "");
+      task = (project.getPath().equals(":") ? "" : project.getPath() + ":") + taskName;
+    }else{
+      task = taskName;
+      executablePath = executablePath.replace(project.getPath().substring(1), "");
+    }
+    String hideOutput = "> /dev/null 2>&1";
+    String command = ""
+            + "cd "
+            + executablePath
+            + " && ./"
+            + executable
+            + " "
+            + task
+            + " ";
+    if(rerun) command += "--rerun-tasks";
+    if(hideNullAwayOutput) command += hideOutput;
+    Process proc;
+    try {
+      proc = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
+      if (proc != null) {
+        proc.waitFor();
+      }
+    } catch (Exception e) {
+      throw new RuntimeException("Could not run command: " + task + " from gradle");
     }
   }
 }
