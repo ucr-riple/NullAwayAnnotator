@@ -59,7 +59,12 @@ public class AutoFix extends DefaultTask {
                     + fixPath);
 
     System.out.println("Building Injector....");
-    injector = Injector.builder(Injector.MODE.OVERWRITE).setFixesJsonFilePath(fixPath).build();
+    injector = Injector.builder()
+            .setMode(Injector.MODE.OVERWRITE)
+            .setFixesJsonFilePath(fixPath)
+            .setCleanImports(false)
+            .setNumberOfWorkers(1)
+            .build();
     System.out.println("Built.");
     run(fixPath);
   }
@@ -74,11 +79,15 @@ public class AutoFix extends DefaultTask {
       execute(getProject(), "build", true, false);
       if (newFixRequested(fixPath)) {
         System.out.println("NullAway found some fixable error(s), going for next round...");
+        long startTime = System.currentTimeMillis();
         injector.start();
+        long stopTime = System.currentTimeMillis();
+        System.out.println("It took: " + (stopTime - startTime));
       } else {
         System.out.println("NullAway found no fixable errors, shutting down.");
         finished = true;
       }
+      System.gc();
     }
     if (round >= maximumRound) System.out.println("Exceeded maximum round");
     if (reformat != null && !reformat.equals("")) {
