@@ -1,6 +1,7 @@
 package edu.ucr.cs.riple;
 
 import edu.riple.annotationinjector.Injector;
+import edu.riple.annotationinjector.Report;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
@@ -79,10 +80,12 @@ public class AutoFix extends DefaultTask {
       execute(getProject(), "build", true, false);
       if (newFixRequested(fixPath)) {
         System.out.println("NullAway found some fixable error(s), going for next round...");
-        long startTime = System.currentTimeMillis();
-        injector.start();
-        long stopTime = System.currentTimeMillis();
-        System.out.println("It took: " + (stopTime - startTime));
+        Report report = injector.start();
+        System.out.println("Report: " + report);
+        if(report.processed == 0){
+          System.out.println("No new fixable error has been discovered compared to last iteration, shutting down.");
+          finished = true;
+        }
       } else {
         System.out.println("NullAway found no fixable errors, shutting down.");
         finished = true;
@@ -104,6 +107,7 @@ public class AutoFix extends DefaultTask {
       JSONObject obj = (JSONObject) new JSONParser().parse(bufferedReader);
       JSONArray fixesJson = (JSONArray) obj.get("fixes");
       bufferedReader.close();
+      System.out.println("Number of fixable errors found by NullAway: " + fixesJson.size());
       return fixesJson.size() > 0;
     } catch (IOException ex) {
       return false;
