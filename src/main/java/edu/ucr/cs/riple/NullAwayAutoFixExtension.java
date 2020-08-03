@@ -5,7 +5,6 @@ public class NullAwayAutoFixExtension {
     private String fixPath = null;
     private String executable = "gradlew";
     private String formatTask = "";
-    private boolean hideNullAwayOutput = true;
     private int maximumRound = Integer.MAX_VALUE;
 
     public int getMaximumRound() {
@@ -14,14 +13,6 @@ public class NullAwayAutoFixExtension {
 
     public void setMaximumRound(int maximumRound) {
         this.maximumRound = maximumRound;
-    }
-
-    public boolean shouldHideNullAwayOutput() {
-        return hideNullAwayOutput;
-    }
-
-    public void setHideNullAwayOutput(boolean hideNullAwayOutput) {
-        this.hideNullAwayOutput = hideNullAwayOutput;
     }
 
     public String getExecutable() {

@@ -13,16 +13,20 @@ import org.json.simple.parser.ParseException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AutoFix extends DefaultTask {
 
   Injector injector = null;
   private String executable;
   private String reformat;
-  boolean hideNullAwayOutput;
   private int maximumRound;
 
   @TaskAction
@@ -33,7 +37,6 @@ public class AutoFix extends DefaultTask {
       extension = new NullAwayAutoFixExtension();
     }
 
-    hideNullAwayOutput = extension.shouldHideNullAwayOutput();
     maximumRound = extension.getMaximumRound();
     executable = extension.getExecutable();
     reformat = extension.getFormatTask();
@@ -74,16 +77,23 @@ public class AutoFix extends DefaultTask {
     boolean finished = false;
     int round = 0;
 
+    ArrayList<IterationReport> reports = new ArrayList<>();
     while (!finished && round < maximumRound) {
+      IterationReport r = new IterationReport();
       System.out.println("Cleared fix path for new run: " + new File(fixPath).delete());
       System.out.println("Round " + (++round) + "...");
-      execute(getProject(), "build", true, false);
+      r.round = round;
+      int totalNumberOfErrors = buildProject(getProject());
+      r.totalErrors = totalNumberOfErrors;
+      System.out.println("Total number of errors found by NullAway: " + totalNumberOfErrors);
       if (newFixRequested(fixPath)) {
         System.out.println("NullAway found some fixable error(s), going for next round...");
         Report report = injector.start();
+        r.fixableErrors = report.totalNumberOfDistinctFixes;
+        r.processed = report.processed;
         System.out.println("Report: " + report);
         if(report.processed == 0){
-          System.out.println("No new fixable error has been discovered compared to last iteration, shutting down.");
+          System.out.println("No new fixable error has been discovered compared to the last iteration, shutting down.");
           finished = true;
         }
       } else {
@@ -91,11 +101,15 @@ public class AutoFix extends DefaultTask {
         finished = true;
       }
       System.gc();
+      reports.add(r);
     }
+
+//    System.out.println("Summary:\n" + Arrays.toString(new ArrayList[]{reports}));
+
     if (round >= maximumRound) System.out.println("Exceeded maximum round");
     if (reformat != null && !reformat.equals("")) {
       System.out.println("Reformatting project...");
-      execute(getProject(), reformat, false, true);
+      reformat(getProject());
     }
     System.out.println("Finished");
   }
@@ -116,17 +130,45 @@ public class AutoFix extends DefaultTask {
     }
   }
 
-  private void execute(Project project, String taskName, boolean rerun, boolean topLevel){
-    String task = "";
+  private int buildProject(Project project){
+    int totalNumberOfErrors = 0;
     String executablePath = project.getProjectDir().getAbsolutePath();
     String subProjectPath = project.getPath().replace(":", "");
-    if (!topLevel) {
-      if (executablePath.endsWith(subProjectPath)) executablePath = executablePath.replace(subProjectPath, "");
-      task = (project.getPath().equals(":") ? "" : project.getPath() + ":") + taskName;
-    }else{
-      task = taskName;
-      executablePath = executablePath.replace(project.getPath().substring(1), "");
+    if (executablePath.endsWith(subProjectPath)) executablePath = executablePath.replace(subProjectPath, "");
+    String task = (project.getPath().equals(":") ? "" : project.getPath() + ":") + "build";
+    String command = ""
+            + "cd "
+            + executablePath
+            + " && ./"
+            + executable
+            + " "
+            + task;
+    Process proc;
+    try {
+      proc = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
+      String line;
+      if (proc != null) {
+        BufferedReader input = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+        final String innerClassInstantiationByReferenceRegex = "^\\d+\\s+errors";
+        while ((line = input.readLine()) != null) {
+          Matcher matcher = Pattern.compile(innerClassInstantiationByReferenceRegex).matcher(line);
+          if(matcher.find())
+            totalNumberOfErrors = Integer.parseInt(matcher.group().split(" ")[0]);
+        }
+        input.close();
+      }
+    } catch (Exception e) {
+      System.out.println("Error happened: " + e.getMessage());
+      throw new RuntimeException("Could not run command: " + command + " from gradle");
     }
+    return totalNumberOfErrors;
+  }
+
+  private void reformat(Project project){
+    String task;
+    String executablePath = project.getProjectDir().getAbsolutePath();
+    task = reformat;
+    executablePath = executablePath.replace(project.getPath().substring(1), "");
     String hideOutput = "> /dev/null 2>&1";
     String command = ""
             + "cd "
@@ -136,8 +178,7 @@ public class AutoFix extends DefaultTask {
             + " "
             + task
             + " ";
-    if(rerun) command += "--rerun-tasks";
-    if(hideNullAwayOutput) command += hideOutput;
+    command += hideOutput;
     Process proc;
     try {
       proc = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
