@@ -7,7 +7,7 @@ fixable = []
 processed = []
 
 
-info = [
+info1 = [
     [1, 933, 513, 511],
     [2, 891, 336, 334],
     [3, 1230, 324, 322],
@@ -21,6 +21,23 @@ info = [
     [11, 1545, 31, 25],
     [12, 1536, 17, 11],
     [13, 1526, 6, 0],
+]
+
+info = [
+    [1, 933, 655, 653]
+    , [2, 1083, 389, 387]
+    , [3, 1514, 385, 383]
+    , [4, 1643, 298, 296]
+    , [5, 1703, 173, 167]
+    , [6, 1769, 123, 117]
+    , [7, 1857, 80, 74]
+    , [8, 1914, 93, 87]
+    , [9, 1975, 84, 78]
+    , [10, 1944, 39, 33]
+    , [11, 1949, 27, 21]
+    , [12, 1929, 10, 4]
+    , [13, 1927, 7, 1]
+    , [14, 1927, 6, 0]
 ]
 
 for round_info in info:
@@ -51,4 +68,4 @@ layout = dict(title='Number of Errors VS. Iteration',
 
 data = [trace0, trace1]
 fig = dict(data=data, layout=layout)
-plotly.offline.plot(fig, filename='Errors_Iteration')
+plotly.offline.plot(fig, filename='Errors_Iteration_v1')
