@@ -145,6 +145,7 @@ public class AutoFix extends DefaultTask {
             + task;
     Process proc;
     try {
+      System.out.println("NullAway is Running...");
       proc = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
       String line;
       if (proc != null) {
@@ -161,6 +162,7 @@ public class AutoFix extends DefaultTask {
       System.out.println("Error happened: " + e.getMessage());
       throw new RuntimeException("Could not run command: " + command + " from gradle");
     }
+    System.out.println("NullAway is finished.");
     return totalNumberOfErrors;
   }
 
