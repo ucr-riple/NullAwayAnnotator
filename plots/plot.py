@@ -51,7 +51,7 @@ trace0 = go.Line(
     x=rounds,
     y=processed,
     mode='lines+markers',
-    name='Processed Errors'
+    name='Number of Injected Fixes'
 )
 
 trace1 = go.Line(
