@@ -14,6 +14,7 @@ class NullAwayAutoFixPluginTest {
         project.getPlugins().apply 'edu.ucr.cs.riple.plugin'
 
         assertTrue(project.tasks.autofix instanceof AutoFix)
+        assertTrue(project.tasks.annotedit instanceof AnnotationEditor)
     }
 
     @Test
@@ -21,5 +22,8 @@ class NullAwayAutoFixPluginTest {
         Project project = ProjectBuilder.builder().build()
         def task = project.task('autofix', type: AutoFix)
         assertTrue(task instanceof AutoFix)
+
+        task = project.task('annotedit', type: AnnotationEditor)
+        assertTrue(task instanceof AnnotationEditor)
     }
 }

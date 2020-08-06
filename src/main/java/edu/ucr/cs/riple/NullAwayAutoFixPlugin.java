@@ -8,5 +8,8 @@ public class NullAwayAutoFixPlugin implements Plugin<Project> {
     public void apply(Project project) {
         project.getExtensions().create("autoFixMode", NullAwayAutoFixExtension.class);
         project.getTasks().create("autofix", AutoFix.class);
+
+        project.getExtensions().create("annotationEditor", AnnotationEditorExtension.class);
+        project.getTasks().create("annotedit", AnnotationEditor.class);
     }
 }

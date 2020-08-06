@@ -106,7 +106,7 @@ public class AutoFix extends DefaultTask {
 
 //    System.out.println("Summary:\n" + Arrays.toString(new ArrayList[]{reports}));
 
-    if (round >= maximumRound) System.out.println("Exceeded maximum round");
+    if (round >= maximumRound && !finished) System.out.println("Exceeded maximum round");
     if (reformat != null && !reformat.equals("")) {
       System.out.println("Reformatting project...");
       reformat(getProject());
