@@ -18,7 +18,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -143,6 +142,8 @@ public class AutoFix extends DefaultTask {
             + executable
             + " "
             + task;
+    //todo: remove this later.
+    command = "cd /Users/nima/Developer/caffeine/ && ./gradlew :caffeine:build";
     Process proc;
     try {
       System.out.println("NullAway is Running...");

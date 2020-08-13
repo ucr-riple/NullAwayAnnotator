@@ -31,6 +31,7 @@ public class AnnotationEditor extends DefaultTask {
       System.out.println("Nothing to remove, shutting down.");
       return;
     }
+    System.out.println("Removing: " + remove);
     String[] names = remove.split("\\.");
     if (names.length > 1) toRemove = names[names.length - 1];
     else toRemove = remove;
