@@ -14,9 +14,6 @@ import java.util.Collection;
 
 public class AnnotationEditor extends DefaultTask {
 
-  private String toRemove;
-  private String remove;
-
   @TaskAction
   public void AnnotEdit() {
     System.out.println("Annotation Editor Started...");
@@ -25,16 +22,17 @@ public class AnnotationEditor extends DefaultTask {
     if (extension == null) {
       extension = new AnnotationEditorExtension();
     }
-    remove = extension.getRemove();
+    String[] remove = extension.getRemove();
     String[] srcSets = extension.getSrcSets();
-    if (remove == null || remove.equals("")) {
+    if (remove == null || remove.length == 0) {
       System.out.println("Nothing to remove, shutting down.");
       return;
     }
-    System.out.println("Removing: " + remove);
-    String[] names = remove.split("\\.");
-    if (names.length > 1) toRemove = names[names.length - 1];
-    else toRemove = remove;
+
+    System.out.println("Processing:");
+    for (int i = 0; i < remove.length; i++) {
+      System.out.println(i + ": " + remove[i]);
+    }
 
     boolean processAll = false;
     String rootPath = getProject().getProjectDir().getPath() + "/src/";
@@ -50,31 +48,36 @@ public class AnnotationEditor extends DefaultTask {
     File[] directories = new File(rootPath).listFiles(File::isDirectory);
     if (directories == null) return;
     for (File f : directories) {
-      if (shouldProcess(f, rootPath, processAll, srcSets)) process(f);
+      for (String annot : remove) {
+        if (shouldProcess(f, rootPath, processAll, srcSets)) process(f, annot);
+      }
     }
     System.out.println("Finished.");
   }
 
-  private void process(File root) {
+  private void process(File root, String annot) {
     if (root.isDirectory()) {
       String[] paths;
       paths = root.list();
       if (paths == null) return;
       for (String path : paths) {
         File f = new File(root.getAbsolutePath() + "/" + path);
-        if (f.isDirectory()) process(f);
-        else modifyFile(f);
+        if (f.isDirectory()) process(f, annot);
+        else modifyFile(f, annot);
       }
     }
-    modifyFile(root);
+    modifyFile(root, annot);
   }
 
-  private void modifyFile(File file) {
+  private void modifyFile(File file, String annot) {
+    String toRemove = annot;
+    String[] names = annot.split("\\.");
+    if(names.length > 1) toRemove = names[names.length - 1];
     if (!file.getAbsolutePath().endsWith(".java")) return;
     try {
       String text = readFile(file.getAbsolutePath(), Charset.defaultCharset());
-      text = text.replaceAll("import+\\s+" + remove + "+\\s*;", "");
       text = text.replaceAll("@" + toRemove, "");
+      text = text.replaceAll("@" + annot, "");
       try {
         FileWriter myWriter = new FileWriter(file);
         myWriter.write(text);

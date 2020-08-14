@@ -2,7 +2,7 @@ package edu.ucr.cs.riple;
 
 public class AnnotationEditorExtension {
 
-    private String remove;
+    private String[] remove;
     private String[] srcSets;
 
     public String[] getSrcSets() {
@@ -13,11 +13,11 @@ public class AnnotationEditorExtension {
         this.srcSets = srcSets;
     }
 
-    public String getRemove() {
+    public String[] getRemove() {
         return remove;
     }
 
-    public void setRemove(String remove) {
+    public void setRemove(String[] remove) {
         this.remove = remove;
     }
 }
