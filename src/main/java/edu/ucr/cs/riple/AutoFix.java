@@ -14,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -31,7 +32,7 @@ public class AutoFix extends DefaultTask {
   @TaskAction
   public void autoFix() {
     NullAwayAutoFixExtension extension =
-            getProject().getExtensions().findByType(NullAwayAutoFixExtension.class);
+        getProject().getExtensions().findByType(NullAwayAutoFixExtension.class);
     if (extension == null) {
       extension = new NullAwayAutoFixExtension();
     }
@@ -41,28 +42,29 @@ public class AutoFix extends DefaultTask {
     reformat = extension.getFormatTask();
 
     String fixPath =
-            extension.getFixPath() == null
-                    ? getProject().getProjectDir().getAbsolutePath()
-                    : extension.getFixPath();
+        extension.getFixPath() == null
+            ? getProject().getProjectDir().getAbsolutePath()
+            : extension.getFixPath();
     fixPath = (fixPath.endsWith("/") ? fixPath : fixPath + "/") + "fixes.json";
 
     String reformatSummary =
-            (reformat != null && !reformat.equals("")) ? "Reformat Task: " + reformat + "\n" : "";
+        (reformat != null && !reformat.equals("")) ? "Reformat Task: " + reformat + "\n" : "";
     System.out.println(
-            "\n"
-                    + "=========="
-                    + "\n"
-                    + "Process info:"
-                    + "\n"
-                    + "Executable: "
-                    + executable
-                    + "\n"
-                    + reformatSummary
-                    + "Fix path: "
-                    + fixPath);
+        "\n"
+            + "=========="
+            + "\n"
+            + "Process info:"
+            + "\n"
+            + "Executable: "
+            + executable
+            + "\n"
+            + reformatSummary
+            + "Fix path: "
+            + fixPath);
 
     System.out.println("Building Injector....");
-    injector = Injector.builder()
+    injector =
+        Injector.builder()
             .setMode(Injector.MODE.OVERWRITE)
             .setFixesJsonFilePath(fixPath)
             .setCleanImports(false)
@@ -75,7 +77,6 @@ public class AutoFix extends DefaultTask {
   private void run(String fixPath) {
     boolean finished = false;
     int round = 0;
-
     ArrayList<IterationReport> reports = new ArrayList<>();
     while (!finished && round < maximumRound) {
       IterationReport r = new IterationReport();
@@ -91,8 +92,9 @@ public class AutoFix extends DefaultTask {
         r.fixableErrors = report.totalNumberOfDistinctFixes;
         r.processed = report.processed;
         System.out.println("Report: " + report);
-        if(report.processed == 0){
-          System.out.println("No new fixable error has been discovered compared to the last iteration, shutting down.");
+        if (report.processed == 0) {
+          System.out.println(
+              "No new fixable error has been discovered compared to the last iteration, shutting down.");
           finished = true;
         }
       } else {
@@ -102,15 +104,26 @@ public class AutoFix extends DefaultTask {
       System.gc();
       reports.add(r);
     }
-
-//    System.out.println("Summary:\n" + Arrays.toString(new ArrayList[]{reports}));
-
+    writeReports(reports, fixPath);
     if (round >= maximumRound && !finished) System.out.println("Exceeded maximum round");
     if (reformat != null && !reformat.equals("")) {
       System.out.println("Reformatting project...");
       reformat(getProject());
     }
     System.out.println("Finished");
+  }
+
+  @SuppressWarnings("unchecked")
+  private void writeReports(ArrayList<IterationReport> reports, String fixPath) {
+    JSONObject object = new JSONObject();
+    object.put("reports", reports);
+    fixPath = fixPath.substring(0, fixPath.lastIndexOf("/")).concat("/reports.json");
+    try (Writer writer = Files.newBufferedWriter(Paths.get(fixPath), Charset.defaultCharset())) {
+      writer.write(object.toJSONString().replace("\\", ""));
+      writer.flush();
+    } catch (IOException e) {
+      throw new RuntimeException("Could not create the fix json file");
+    }
   }
 
   private boolean newFixRequested(String path) {
@@ -129,21 +142,18 @@ public class AutoFix extends DefaultTask {
     }
   }
 
-  private int buildProject(Project project){
+  private int buildProject(Project project) {
     int totalNumberOfErrors = 0;
     String executablePath = project.getProjectDir().getAbsolutePath();
-    String subProjectPath = project.getPath().replace(":", "");
-    if (executablePath.endsWith(subProjectPath)) executablePath = executablePath.replace(subProjectPath, "");
-    String task = (project.getPath().equals(":") ? "" : project.getPath() + ":") + "build";
-    String command = ""
-            + "cd "
-            + executablePath
-            + " && ./"
-            + executable
-            + " "
-            + task;
-    //todo: remove this later.
-    command = "cd /Users/nima/Developer/caffeine/ && ./gradlew :caffeine:build";
+    String task = "";
+    if (!project.getPath().equals(":")) {
+      String subProjectPath = project.getPath().replace(":", "");
+      executablePath =
+          executablePath.substring(0, executablePath.length() - subProjectPath.length());
+      task = project.getPath() + ":";
+    }
+    task += "build";
+    String command = "" + "cd " + executablePath + " && ./" + executable + " " + task;
     Process proc;
     try {
       System.out.println("NullAway is Running...");
@@ -154,8 +164,7 @@ public class AutoFix extends DefaultTask {
         final String innerClassInstantiationByReferenceRegex = "^\\d+\\s+errors";
         while ((line = input.readLine()) != null) {
           Matcher matcher = Pattern.compile(innerClassInstantiationByReferenceRegex).matcher(line);
-          if(matcher.find())
-            totalNumberOfErrors = Integer.parseInt(matcher.group().split(" ")[0]);
+          if (matcher.find()) totalNumberOfErrors = Integer.parseInt(matcher.group().split(" ")[0]);
         }
         input.close();
       }
@@ -167,20 +176,13 @@ public class AutoFix extends DefaultTask {
     return totalNumberOfErrors;
   }
 
-  private void reformat(Project project){
+  private void reformat(Project project) {
     String task;
     String executablePath = project.getProjectDir().getAbsolutePath();
     task = reformat;
     executablePath = executablePath.replace(project.getPath().substring(1), "");
     String hideOutput = "> /dev/null 2>&1";
-    String command = ""
-            + "cd "
-            + executablePath
-            + " && ./"
-            + executable
-            + " "
-            + task
-            + " ";
+    String command = "" + "cd " + executablePath + " && ./" + executable + " " + task + " ";
     command += hideOutput;
     Process proc;
     try {

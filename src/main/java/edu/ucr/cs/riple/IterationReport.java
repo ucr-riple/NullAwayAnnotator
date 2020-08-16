@@ -8,6 +8,11 @@ public class IterationReport {
 
     @Override
     public String toString() {
-        return "[" + round + ", " + totalErrors + ", " + fixableErrors + ", " + processed + "]\n";
+    return "{\n"
+        + "\"round\":" + round + ","
+        + "\"totalErrors\":" + totalErrors + ","
+        + "\"fixableErrors\":" + fixableErrors + ","
+        + "\"processed\":" + processed
+        + "}";
     }
 }
