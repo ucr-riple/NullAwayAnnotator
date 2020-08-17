@@ -21,6 +21,8 @@ public class AnnotationEditor extends DefaultTask {
   @TaskAction
   public void AnnotEdit() {
     System.out.println("Annotation Editor Started...");
+
+    System.out.println("GETPATH: " + getProject().getPath());
     AnnotationEditorExtension extension =
         getProject().getExtensions().findByType(AnnotationEditorExtension.class);
     if (extension == null) {
@@ -39,12 +41,14 @@ public class AnnotationEditor extends DefaultTask {
       System.out.println(i + ": " + remove[i]);
     }
 
-    List<String> workList;
-    if (subProjects != null) workList = Arrays.asList(subProjects);
-    else workList = new ArrayList<>();
+    List<String> subProjectsList;
+    if (subProjects != null) subProjectsList = Arrays.asList(subProjects);
+    else subProjectsList = new ArrayList<>();
 
-    for (Project p : getProject().getSubprojects()) {
-      if (workList.size() == 0 || workList.contains(p.getPath().replace(":", ""))) {
+    Set<Project> workList = getProject().getSubprojects();
+    if (subProjectsList.size() == 0) workList.add(getProject());
+    for (Project p : workList) {
+      if (subProjectsList.size() == 1 || subProjectsList.contains(p.getPath().replace(":", ""))) {
         boolean processAll = false;
         String rootPath = p.getProjectDir().getPath() + "/src/";
         if (srcSets == null || srcSets.length == 0) {
