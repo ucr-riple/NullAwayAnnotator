@@ -1,6 +1,7 @@
 package edu.ucr.cs.riple;
 
 import org.gradle.api.DefaultTask;
+import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
@@ -9,8 +10,11 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 public class AnnotationEditor extends DefaultTask {
 
@@ -24,6 +28,7 @@ public class AnnotationEditor extends DefaultTask {
     }
     String[] remove = extension.getRemove();
     String[] srcSets = extension.getSrcSets();
+    String[] subProjects = extension.getSubProjects();
     if (remove == null || remove.length == 0) {
       System.out.println("Nothing to remove, shutting down.");
       return;
@@ -34,22 +39,28 @@ public class AnnotationEditor extends DefaultTask {
       System.out.println(i + ": " + remove[i]);
     }
 
-    boolean processAll = false;
-    String rootPath = getProject().getProjectDir().getPath() + "/src/";
+    List<String> workList;
+    if (subProjects != null) workList = Arrays.asList(subProjects);
+    else workList = new ArrayList<>();
 
-    if (srcSets == null || srcSets.length == 0) {
-      processAll = true;
-    } else {
-      for (int i = 0; i < srcSets.length; i++) {
-        srcSets[i] = rootPath + srcSets[i];
-      }
-    }
-
-    File[] directories = new File(rootPath).listFiles(File::isDirectory);
-    if (directories == null) return;
-    for (File f : directories) {
-      for (String annot : remove) {
-        if (shouldProcess(f, rootPath, processAll, srcSets)) process(f, annot);
+    for (Project p : getProject().getSubprojects()) {
+      if (workList.size() == 0 || workList.contains(p.getPath().replace(":", ""))) {
+        boolean processAll = false;
+        String rootPath = p.getProjectDir().getPath() + "/src/";
+        if (srcSets == null || srcSets.length == 0) {
+          processAll = true;
+        } else {
+          for (int i = 0; i < srcSets.length; i++) {
+            srcSets[i] = rootPath + srcSets[i];
+          }
+        }
+        File[] directories = new File(rootPath).listFiles(File::isDirectory);
+        if (directories == null) return;
+        for (File f : directories) {
+          for (String annot : remove) {
+            if (shouldProcess(f, rootPath, processAll, srcSets)) process(f, annot);
+          }
+        }
       }
     }
     System.out.println("Finished.");

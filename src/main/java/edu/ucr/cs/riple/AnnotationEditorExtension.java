@@ -4,6 +4,15 @@ public class AnnotationEditorExtension {
 
     private String[] remove;
     private String[] srcSets;
+    private String[] subProjects;
+
+    public String[] getSubProjects() {
+        return subProjects;
+    }
+
+    public void setSubProjects(String[] subProjects) {
+        this.subProjects = subProjects;
+    }
 
     public String[] getSrcSets() {
         return srcSets;
