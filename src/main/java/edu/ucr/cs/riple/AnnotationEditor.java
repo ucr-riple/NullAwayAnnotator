@@ -50,7 +50,7 @@ public class AnnotationEditor extends DefaultTask {
     for (Project p : workList) {
       if (subProjectsList.size() == 1 || subProjectsList.contains(p.getPath().replace(":", ""))) {
         boolean processAll = false;
-        String rootPath = p.getProjectDir().getPath() + "/src/";
+        String rootPath = p.getProjectDir().getPath();
         if (srcSets == null || srcSets.length == 0) {
           processAll = true;
         } else {
@@ -110,7 +110,7 @@ public class AnnotationEditor extends DefaultTask {
     if (f.getAbsolutePath().equals(rootPath)) return false;
     if (processAll) return true;
     Collection<String> collection = Arrays.asList(srcSets);
-    return collection.contains(f.getAbsolutePath());
+    return true;
   }
 
   static String readFile(String path, Charset encoding) throws IOException {
