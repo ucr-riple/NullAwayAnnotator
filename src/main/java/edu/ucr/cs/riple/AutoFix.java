@@ -152,7 +152,7 @@ public class AutoFix extends DefaultTask {
           executablePath.substring(0, executablePath.length() - subProjectPath.length());
       task = project.getPath() + ":";
     }
-    task += "build";
+    task += "build -x test";
     String command = "" + "cd " + executablePath + " && ./" + executable + " " + task;
     Process proc;
     try {
