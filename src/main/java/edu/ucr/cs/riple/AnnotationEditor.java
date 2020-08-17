@@ -12,7 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -29,7 +28,6 @@ public class AnnotationEditor extends DefaultTask {
       extension = new AnnotationEditorExtension();
     }
     String[] remove = extension.getRemove();
-    String[] srcSets = extension.getSrcSets();
     String[] subProjects = extension.getSubProjects();
     if (remove == null || remove.length == 0) {
       System.out.println("Nothing to remove, shutting down.");
@@ -49,20 +47,12 @@ public class AnnotationEditor extends DefaultTask {
     if (subProjectsList.size() == 0) workList.add(getProject());
     for (Project p : workList) {
       if (subProjectsList.size() == 1 || subProjectsList.contains(p.getPath().replace(":", ""))) {
-        boolean processAll = false;
         String rootPath = p.getProjectDir().getPath();
-        if (srcSets == null || srcSets.length == 0) {
-          processAll = true;
-        } else {
-          for (int i = 0; i < srcSets.length; i++) {
-            srcSets[i] = rootPath + srcSets[i];
-          }
-        }
         File[] directories = new File(rootPath).listFiles(File::isDirectory);
         if (directories == null) return;
         for (File f : directories) {
           for (String annot : remove) {
-            if (shouldProcess(f, rootPath, processAll, srcSets)) process(f, annot);
+            if (shouldProcess(f, rootPath)) process(f, annot);
           }
         }
       }
@@ -106,11 +96,8 @@ public class AnnotationEditor extends DefaultTask {
     }
   }
 
-  private boolean shouldProcess(File f, String rootPath, boolean processAll, String[] srcSets) {
-    if (f.getAbsolutePath().equals(rootPath)) return false;
-    if (processAll) return true;
-    Collection<String> collection = Arrays.asList(srcSets);
-    return true;
+  private boolean shouldProcess(File f, String rootPath) {
+    return !f.getAbsolutePath().equals(rootPath);
   }
 
   static String readFile(String path, Charset encoding) throws IOException {
