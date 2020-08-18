@@ -19,6 +19,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -144,14 +145,9 @@ public class AutoFix extends DefaultTask {
 
   private int buildProject(Project project) {
     int totalNumberOfErrors = 0;
-    String executablePath = project.getProjectDir().getAbsolutePath();
+    String executablePath = findPathToExecutable(project.getProjectDir().getAbsolutePath(), executable);
     String task = "";
-    if (!project.getPath().equals(":")) {
-      String subProjectPath = project.getPath().replace(":", "");
-      executablePath =
-          executablePath.substring(0, executablePath.length() - subProjectPath.length());
-      task = project.getPath() + ":";
-    }
+    if (!project.getPath().equals(":")) task = project.getPath() + ":";
     task += "build -x test";
     String command = "" + "cd " + executablePath + " && ./" + executable + " " + task;
     Process proc;
@@ -174,6 +170,14 @@ public class AutoFix extends DefaultTask {
     }
     System.out.println("NullAway is finished.");
     return totalNumberOfErrors;
+  }
+
+  private String findPathToExecutable(String path, String executable){
+    final File folder = new File(path);
+    for (final File fileEntry : Objects.requireNonNull(folder.listFiles())) {
+      if(fileEntry.getName().equals(executable)) return path;
+    }
+    return findPathToExecutable(path.substring(0, path.lastIndexOf("/")), executable);
   }
 
   private void reformat(Project project) {
