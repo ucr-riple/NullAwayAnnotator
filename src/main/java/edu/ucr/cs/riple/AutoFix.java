@@ -84,6 +84,7 @@ public class AutoFix extends DefaultTask {
       System.out.println("Cleared fix path for new run: " + new File(fixPath).delete());
       System.out.println("Round " + (++round) + "...");
       r.round = round;
+      System.out.println("Building project...");
       int totalNumberOfErrors = buildProject(getProject());
       r.totalErrors = totalNumberOfErrors;
       System.out.println("Total number of errors found by NullAway: " + totalNumberOfErrors);

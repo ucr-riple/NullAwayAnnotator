@@ -20,8 +20,6 @@ public class AnnotationEditor extends DefaultTask {
   @TaskAction
   public void AnnotEdit() {
     System.out.println("Annotation Editor Started...");
-
-    System.out.println("GETPATH: " + getProject().getPath());
     AnnotationEditorExtension extension =
         getProject().getExtensions().findByType(AnnotationEditorExtension.class);
     if (extension == null) {
@@ -44,7 +42,7 @@ public class AnnotationEditor extends DefaultTask {
     else subProjectsList = new ArrayList<>();
 
     Set<Project> workList = getProject().getSubprojects();
-    if (subProjectsList.size() == 0) workList.add(getProject());
+    if (subProjectsList.size() == 0 || workList.size() == 0) workList.add(getProject());
     for (Project p : workList) {
       if (subProjectsList.size() == 1 || subProjectsList.contains(p.getPath().replace(":", ""))) {
         String rootPath = p.getProjectDir().getPath();
