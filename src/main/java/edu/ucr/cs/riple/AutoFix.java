@@ -129,6 +129,7 @@ public class AutoFix extends DefaultTask {
   }
 
   private boolean newFixRequested(String path) {
+    System.out.println("Checking for file location at: " + path);
     try {
       BufferedReader bufferedReader =
           Files.newBufferedReader(Paths.get(path), Charset.defaultCharset());
@@ -138,6 +139,7 @@ public class AutoFix extends DefaultTask {
       System.out.println("Number of fixable errors found by NullAway: " + fixesJson.size());
       return fixesJson.size() > 0;
     } catch (IOException ex) {
+      System.out.println("IO Exception happened: " + ex.getMessage() + "\nShutting Down.");
       return false;
     } catch (ParseException e) {
       throw new RuntimeException("Error in parsing object: " + e);
@@ -150,7 +152,8 @@ public class AutoFix extends DefaultTask {
     String task = "";
     if (!project.getPath().equals(":")) task = project.getPath() + ":";
     task += "build -x test";
-    String command = "" + "cd " + executablePath + " && ./" + executable + " " + task;
+    String command = "cd " + executablePath + " && ./" + executable + " " + task;
+    System.out.println("Detected build command: " + command);
     Process proc;
     try {
       System.out.println("NullAway is Running...");
