@@ -1,5 +1,7 @@
 package edu.ucr.cs.riple
 
+import edu.ucr.cs.riple.diagnose.Diagnose
+import edu.ucr.cs.riple.diagnose.DiagnoseExtension
 import org.junit.Test
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.api.Project
@@ -15,15 +17,20 @@ class NullAwayAutoFixPluginTest {
 
         assertTrue(project.tasks.autofix instanceof AutoFix)
         assertTrue(project.tasks.annotedit instanceof AnnotationEditor)
+        assertTrue(project.tasks.diagnose instanceof Diagnose)
     }
 
     @Test
     void should_be_able_to_add_task_to_project() {
         Project project = ProjectBuilder.builder().build()
+
         def task = project.task('autofix', type: AutoFix)
         assertTrue(task instanceof AutoFix)
 
         task = project.task('annotedit', type: AnnotationEditor)
         assertTrue(task instanceof AnnotationEditor)
+
+        task = project.task('diagnose', type: Diagnose)
+        assertTrue(task instanceof Diagnose)
     }
 }

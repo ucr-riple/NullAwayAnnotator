@@ -2,6 +2,7 @@ package edu.ucr.cs.riple;
 
 import edu.riple.annotationinjector.Injector;
 import edu.riple.annotationinjector.Report;
+import edu.riple.annotationinjector.WorkListBuilder;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
@@ -66,8 +67,7 @@ public class AutoFix extends DefaultTask {
     System.out.println("Building Injector....");
     injector =
         Injector.builder()
-            .setMode(Injector.MODE.OVERWRITE)
-            .setFixesJsonFilePath(fixPath)
+            .setMode(Injector.MODE.BATCH)
             .setCleanImports(false)
             .setNumberOfWorkers(1)
             .build();
@@ -90,7 +90,7 @@ public class AutoFix extends DefaultTask {
       System.out.println("Total number of errors found by NullAway: " + totalNumberOfErrors);
       if (newFixRequested(fixPath)) {
         System.out.println("NullAway found some fixable error(s), going for next round...");
-        Report report = injector.start();
+        Report report = injector.start(new WorkListBuilder(fixPath).getWorkLists());
         r.fixableErrors = report.totalNumberOfDistinctFixes;
         r.processed = report.processed;
         System.out.println("Report: " + report);
@@ -176,7 +176,7 @@ public class AutoFix extends DefaultTask {
     return totalNumberOfErrors;
   }
 
-  private String findPathToExecutable(String path, String executable){
+  public static String findPathToExecutable(String path, String executable){
     final File folder = new File(path);
     for (final File fileEntry : Objects.requireNonNull(folder.listFiles())) {
       if(fileEntry.getName().equals(executable)) return path;
