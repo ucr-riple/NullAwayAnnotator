@@ -57,7 +57,34 @@ public class Diagnose extends DefaultTask {
       for(Fix fix: workList.getFixes()){
         injector.start(Collections.singletonList(new WorkList(Collections.singletonList(fix))));
         fixReportMap.put(fix, makeReport());
+        reset();
       }
+    }
+    if(base == null){
+      return;
+    }
+
+    System.out.println("Base errors: " + base.getErrors().size());
+
+    for(Fix fix: fixReportMap.keySet()){
+      System.out.println("For fix: " + fix + "\nAfter applying: " + fixReportMap.get(fix).getErrors().size());
+    }
+  }
+
+  private void reset() {
+    String executablePath = project.getRootProject().getProjectDir().getAbsolutePath();
+    String hideOutput = "> /dev/null 2>&1";
+    String resetCommand = "cd " + executablePath + " && git reset --hard";
+    resetCommand += hideOutput;
+    System.out.println("Reset command: " + resetCommand);
+    Process proc;
+    try {
+      proc = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", resetCommand});
+      if (proc != null) {
+        proc.waitFor();
+      }
+    } catch (Exception e) {
+      throw new RuntimeException("Could not run command: " + resetCommand);
     }
   }
 
@@ -93,5 +120,3 @@ public class Diagnose extends DefaultTask {
     }
   }
 }
-
-

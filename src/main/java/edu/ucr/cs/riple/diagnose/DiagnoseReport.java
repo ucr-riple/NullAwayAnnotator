@@ -9,4 +9,8 @@ public class DiagnoseReport {
     public DiagnoseReport(List<String> errors) {
         this.errors = errors;
     }
+
+    public List<String> getErrors(){
+        return errors;
+    }
 }
