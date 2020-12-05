@@ -9,9 +9,16 @@ import edu.ucr.cs.riple.NullAwayAutoFixExtension;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Writer;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,9 +37,21 @@ public class Diagnose extends DefaultTask {
   public void diagnose() {
     NullAwayAutoFixExtension autoFixExtension =
         getProject().getExtensions().findByType(NullAwayAutoFixExtension.class);
+    String fixPath;
     if (autoFixExtension == null) {
       autoFixExtension = new NullAwayAutoFixExtension();
     }
+    DiagnoseExtension diagnoseExtension = getProject().getExtensions().findByType(DiagnoseExtension.class);
+    if(diagnoseExtension != null){
+      fixPath = diagnoseExtension.getFixPath();
+    }else{
+      fixPath =
+              autoFixExtension.getFixPath() == null
+                      ? getProject().getProjectDir().getAbsolutePath()
+                      : autoFixExtension.getFixPath();
+      fixPath = (fixPath.endsWith("/") ? fixPath : fixPath + "/") + "fixes.json";
+    }
+
     executable = autoFixExtension.getExecutable();
     injector =
             Injector.builder()
@@ -43,13 +62,6 @@ public class Diagnose extends DefaultTask {
     project = getProject();
     buildCommand = detectBuildCommand();
     fixReportMap = new HashMap<>();
-
-    String fixPath =
-        autoFixExtension.getFixPath() == null
-            ? getProject().getProjectDir().getAbsolutePath()
-            : autoFixExtension.getFixPath();
-    fixPath = (fixPath.endsWith("/") ? fixPath : fixPath + "/") + "fixes.json";
-
     List<WorkList> workListLists = new WorkListBuilder(fixPath).getWorkLists();
 
     DiagnoseReport base = makeReport();
@@ -63,11 +75,29 @@ public class Diagnose extends DefaultTask {
     if(base == null){
       return;
     }
+    writeReports(base);
+  }
 
-    System.out.println("Base errors: " + base.getErrors().size());
-
+  private void writeReports(DiagnoseReport base) {
+    JSONObject result = new JSONObject();
+    JSONArray reports = new JSONArray();
     for(Fix fix: fixReportMap.keySet()){
-      System.out.println("For fix: " + fix + "\nAfter applying: " + fixReportMap.get(fix).getErrors().size());
+      JSONObject report = fix.getJson();
+      DiagnoseReport diagnoseReport = fixReportMap.get(fix);
+      report.put("jump", diagnoseReport.getErrors().size() - base.getErrors().size());
+      JSONArray errors = diagnoseReport.compare(base);
+      report.put("errors", errors);
+      reports.add(report);
+    }
+    result.put("reports", reports);
+
+    try (Writer writer =
+                 Files.newBufferedWriter(
+                         Paths.get("/tmp/NullAwayFix/diagnose_report.json"), Charset.defaultCharset())) {
+      writer.write(result.toJSONString().replace("\\/", "/").replace("\\\\\\", "\\"));
+      writer.flush();
+    } catch (IOException e) {
+      throw new RuntimeException("Could not create the diagnose report json file");
     }
   }
 
