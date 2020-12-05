@@ -31,6 +31,7 @@ public class Diagnose extends DefaultTask {
   Injector injector;
   Project project;
   String buildCommand;
+  String resetCommand;
   Map<Fix, DiagnoseReport> fixReportMap;
 
   @TaskAction
@@ -60,7 +61,11 @@ public class Diagnose extends DefaultTask {
                     .setNumberOfWorkers(1)
                     .build();
     project = getProject();
-    buildCommand = detectBuildCommand();
+    detectCommands();
+
+    System.out.println("Reset command: " + resetCommand);
+    System.out.println("Build command: " + buildCommand);
+
     fixReportMap = new HashMap<>();
     List<WorkList> workListLists = new WorkListBuilder(fixPath).getWorkLists();
 
@@ -89,6 +94,17 @@ public class Diagnose extends DefaultTask {
       report.put("errors", errors);
       reports.add(report);
     }
+    reports.sort((o1, o2) -> {
+          Integer first = (Integer) ((JSONObject) o1).get("jump");
+          Integer second = (Integer) ((JSONObject) o2).get("jump");
+          if (first.equals(second)) {
+            return 0;
+          }
+          if (first < second) {
+            return 1;
+          }
+          return -1;
+        });
     result.put("reports", reports);
 
     try (Writer writer =
@@ -102,11 +118,6 @@ public class Diagnose extends DefaultTask {
   }
 
   private void reset() {
-    String executablePath = project.getRootProject().getProjectDir().getAbsolutePath();
-    String hideOutput = "> /dev/null 2>&1";
-    String resetCommand = "cd " + executablePath + " && git reset --hard";
-    resetCommand += hideOutput;
-    System.out.println("Reset command: " + resetCommand);
     Process proc;
     try {
       proc = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", resetCommand});
@@ -118,12 +129,13 @@ public class Diagnose extends DefaultTask {
     }
   }
 
-  private String detectBuildCommand() {
+  private void detectCommands() {
     String executablePath = AutoFix.findPathToExecutable(project.getProjectDir().getAbsolutePath(), executable);
     String task = "";
     if (!project.getPath().equals(":")) task = project.getPath() + ":";
     task += "build -x test";
-    return "cd " + executablePath + " && ./" + executable + " " + task;
+    buildCommand = "cd " + executablePath + " && ./" + executable + " " + task;
+    resetCommand = "cd " + executablePath + " && git reset --hard> /dev/null 2>&1";
   }
 
   private DiagnoseReport makeReport() {
