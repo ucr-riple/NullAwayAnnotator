@@ -1,7 +1,7 @@
 package edu.ucr.cs.riple
 
 import edu.ucr.cs.riple.diagnose.Diagnose
-import edu.ucr.cs.riple.diagnose.DiagnoseExtension
+import edu.ucr.cs.riple.editors.AnnotationEditor
 import org.junit.Test
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.api.Project

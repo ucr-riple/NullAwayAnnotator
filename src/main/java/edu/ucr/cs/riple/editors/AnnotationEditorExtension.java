@@ -1,4 +1,4 @@
-package edu.ucr.cs.riple;
+package edu.ucr.cs.riple.editors;
 
 public class AnnotationEditorExtension {
 

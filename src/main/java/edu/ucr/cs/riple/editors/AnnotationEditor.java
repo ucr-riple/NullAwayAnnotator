@@ -1,4 +1,4 @@
-package edu.ucr.cs.riple;
+package edu.ucr.cs.riple.editors;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
