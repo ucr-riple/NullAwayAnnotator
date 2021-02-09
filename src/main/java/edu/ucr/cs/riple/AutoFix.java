@@ -69,7 +69,6 @@ public class AutoFix extends DefaultTask {
         Injector.builder()
             .setMode(Injector.MODE.BATCH)
             .setCleanImports(false)
-            .setNumberOfWorkers(1)
             .build();
     System.out.println("Built.");
     run(fixPath);

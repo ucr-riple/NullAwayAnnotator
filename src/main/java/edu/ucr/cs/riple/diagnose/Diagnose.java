@@ -58,7 +58,6 @@ public class Diagnose extends DefaultTask {
             Injector.builder()
                     .setMode(Injector.MODE.BATCH)
                     .setCleanImports(false)
-                    .setNumberOfWorkers(1)
                     .build();
     project = getProject();
     detectCommands();
