@@ -18,6 +18,7 @@ import java.io.InputStreamReader;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +32,6 @@ public class Diagnose extends DefaultTask {
   Injector injector;
   Project project;
   String buildCommand;
-  String resetCommand;
   Map<Fix, DiagnoseReport> fixReportMap;
 
   @TaskAction
@@ -42,41 +42,45 @@ public class Diagnose extends DefaultTask {
     if (autoFixExtension == null) {
       autoFixExtension = new NullAwayAutoFixExtension();
     }
-    DiagnoseExtension diagnoseExtension = getProject().getExtensions().findByType(DiagnoseExtension.class);
-    if(diagnoseExtension != null){
+    DiagnoseExtension diagnoseExtension =
+        getProject().getExtensions().findByType(DiagnoseExtension.class);
+    if (diagnoseExtension != null) {
       fixPath = diagnoseExtension.getFixPath();
-    }else{
+    } else {
       fixPath =
-              autoFixExtension.getFixPath() == null
-                      ? getProject().getProjectDir().getAbsolutePath()
-                      : autoFixExtension.getFixPath();
+          autoFixExtension.getFixPath() == null
+              ? getProject().getProjectDir().getAbsolutePath()
+              : autoFixExtension.getFixPath();
       fixPath = (fixPath.endsWith("/") ? fixPath : fixPath + "/") + "fixes.json";
     }
 
     executable = autoFixExtension.getExecutable();
-    injector =
-            Injector.builder()
-                    .setMode(Injector.MODE.BATCH)
-                    .setCleanImports(false)
-                    .build();
+    injector = Injector.builder().setMode(Injector.MODE.BATCH).setCleanImports(false).build();
     project = getProject();
     detectCommands();
 
-    System.out.println("Reset command: " + resetCommand);
     System.out.println("Build command: " + buildCommand);
 
     fixReportMap = new HashMap<>();
     List<WorkList> workListLists = new WorkListBuilder(fixPath).getWorkLists();
 
     DiagnoseReport base = makeReport();
-    for(WorkList workList: workListLists){
-      for(Fix fix: workList.getFixes()){
-        injector.start(Collections.singletonList(new WorkList(Collections.singletonList(fix))));
-        fixReportMap.put(fix, makeReport());
-        reset();
+    byte[] fileContents;
+    Path path;
+    try {
+      for (WorkList workList : workListLists) {
+        for (Fix fix : workList.getFixes()) {
+          path = Paths.get(fix.uri);
+          fileContents = Files.readAllBytes(path);
+          injector.start(Collections.singletonList(new WorkList(Collections.singletonList(fix))));
+          fixReportMap.put(fix, makeReport());
+          Files.write(path, fileContents);
+        }
       }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
-    if(base == null){
+    if (base == null) {
       return;
     }
     writeReports(base);
@@ -116,25 +120,12 @@ public class Diagnose extends DefaultTask {
     }
   }
 
-  private void reset() {
-    Process proc;
-    try {
-      proc = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", resetCommand});
-      if (proc != null) {
-        proc.waitFor();
-      }
-    } catch (Exception e) {
-      throw new RuntimeException("Could not run command: " + resetCommand);
-    }
-  }
-
   private void detectCommands() {
     String executablePath = AutoFix.findPathToExecutable(project.getProjectDir().getAbsolutePath(), executable);
     String task = "";
     if (!project.getPath().equals(":")) task = project.getPath() + ":";
     task += "build -x test";
     buildCommand = "cd " + executablePath + " && ./" + executable + " " + task;
-    resetCommand = "cd " + executablePath + " && git reset --hard> /dev/null 2>&1";
   }
 
   private DiagnoseReport makeReport() {
