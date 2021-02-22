@@ -1,11 +1,12 @@
 package edu.ucr.cs.riple.diagnose;
 
-import edu.riple.annotationinjector.Fix;
-import edu.riple.annotationinjector.Injector;
-import edu.riple.annotationinjector.WorkList;
-import edu.riple.annotationinjector.WorkListBuilder;
+
 import edu.ucr.cs.riple.AutoFix;
 import edu.ucr.cs.riple.NullAwayAutoFixExtension;
+import edu.ucr.cs.riple.annotationinjector.Fix;
+import edu.ucr.cs.riple.annotationinjector.Injector;
+import edu.ucr.cs.riple.annotationinjector.WorkList;
+import edu.ucr.cs.riple.annotationinjector.WorkListBuilder;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
@@ -27,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 
 public class Diagnose extends DefaultTask {
+
+
 
   String executable;
   Injector injector;

@@ -1,8 +1,9 @@
 package edu.ucr.cs.riple;
 
-import edu.riple.annotationinjector.Injector;
-import edu.riple.annotationinjector.Report;
-import edu.riple.annotationinjector.WorkListBuilder;
+
+import edu.ucr.cs.riple.annotationinjector.Injector;
+import edu.ucr.cs.riple.annotationinjector.Report;
+import edu.ucr.cs.riple.annotationinjector.WorkListBuilder;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
