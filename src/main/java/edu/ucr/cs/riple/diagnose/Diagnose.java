@@ -44,6 +44,7 @@ public class Diagnose extends DefaultTask {
 
   @TaskAction
   public void diagnose() {
+    System.out.println("Diagnose Started...");
     NullAwayAutoFixExtension autoFixExtension =
         getProject().getExtensions().findByType(NullAwayAutoFixExtension.class);
     deep = false;
