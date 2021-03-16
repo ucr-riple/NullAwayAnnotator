@@ -12,8 +12,11 @@ import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
@@ -29,54 +32,57 @@ import java.util.Map;
 
 public class Diagnose extends DefaultTask {
 
-
-
   String executable;
   Injector injector;
   Project project;
   String buildCommand;
   Map<Fix, DiagnoseReport> fixReportMap;
+  String fixPath;
+  String diagnosePath;
+
+  boolean deep;
 
   @TaskAction
   public void diagnose() {
     NullAwayAutoFixExtension autoFixExtension =
         getProject().getExtensions().findByType(NullAwayAutoFixExtension.class);
-    String fixPath;
+    deep = false;
     if (autoFixExtension == null) {
       autoFixExtension = new NullAwayAutoFixExtension();
     }
-    DiagnoseExtension diagnoseExtension =
-        getProject().getExtensions().findByType(DiagnoseExtension.class);
+    DiagnoseExtension diagnoseExtension = getProject().getExtensions().findByType(DiagnoseExtension.class);
     if (diagnoseExtension != null) {
-      fixPath = diagnoseExtension.getFixPath();
+      diagnosePath = diagnoseExtension.getFixPath();
+      deep = diagnoseExtension.getDeep();
     } else {
-      fixPath =
+      diagnosePath =
           autoFixExtension.getFixPath() == null
               ? getProject().getProjectDir().getAbsolutePath()
               : autoFixExtension.getFixPath();
-      fixPath = (fixPath.endsWith("/") ? fixPath : fixPath + "/") + "fixes.json";
+      diagnosePath = (diagnosePath.endsWith("/") ? diagnosePath : diagnosePath + "/") + "diagnose.json";
     }
 
     executable = autoFixExtension.getExecutable();
     injector = Injector.builder().setMode(Injector.MODE.BATCH).setCleanImports(false).build();
     project = getProject();
-    detectCommands();
-
+    detectCommandsAndPaths();
+    prepare(true);
     System.out.println("Build command: " + buildCommand);
 
     fixReportMap = new HashMap<>();
-    List<WorkList> workListLists = new WorkListBuilder(fixPath).getWorkLists();
+    List<WorkList> workListLists = new WorkListBuilder(diagnosePath).getWorkLists();
+
 
     DiagnoseReport base = makeReport();
     byte[] fileContents;
     Path path;
+
     try {
       for (WorkList workList : workListLists) {
         for (Fix fix : workList.getFixes()) {
           path = Paths.get(fix.uri);
           fileContents = Files.readAllBytes(path);
-          injector.start(Collections.singletonList(new WorkList(Collections.singletonList(fix))));
-          fixReportMap.put(fix, makeReport());
+          analyze(fix);
           Files.write(path, fileContents);
         }
       }
@@ -89,6 +95,78 @@ public class Diagnose extends DefaultTask {
     writeReports(base);
   }
 
+  private void analyze(Fix fix) {
+    if (!deep) {
+      injector.start(Collections.singletonList(new WorkList(Collections.singletonList(fix))));
+      fixReportMap.put(fix, makeReport());
+      return;
+    }
+    boolean finished;
+    prepare(false);
+    List<Fix> baseFixes = readFixes();
+    if(baseFixes == null){
+      return;
+    }
+
+    injector.start(Collections.singletonList(new WorkList(Collections.singletonList(fix))));
+    ArrayList<Fix> applied = new ArrayList<>();
+    do {
+      List<Fix> currentFixes = readFixes();
+      if(currentFixes != null) {
+        currentFixes.removeAll(baseFixes);
+        finished = true;
+        for (Fix newFix : currentFixes) {
+          applied.add(newFix);
+          injector.start(
+              Collections.singletonList(new WorkList(Collections.singletonList(newFix))));
+          finished = false;
+        }
+      }else {
+        finished = true;
+      }
+      if(!finished){
+        prepare(false);
+      }
+    } while (!finished);
+
+    DeepReport report = new DeepReport(makeReport().getErrors(), applied);
+    fixReportMap.put(fix, report);
+  }
+
+  private List<Fix> readFixes(){
+    try
+    {
+      JSONObject obj = (JSONObject) new JSONParser().parse(new FileReader(fixPath));
+      JSONArray fixesJson = (JSONArray) obj.get("fixes");
+      List<Fix> fixes = new ArrayList<>();
+      for (Object o : fixesJson) {
+        fixes.add(Fix.createFromJson((JSONObject) o));
+      }
+      return fixes;
+    }catch (Exception e){
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  private void prepare(boolean copy) {
+    try {
+      Process p = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", buildCommand});
+      p.waitFor();
+      new File(diagnosePath).delete();
+      if (copy) {
+        Process p2 = Runtime.getRuntime()
+            .exec(
+                new String[] {
+                  "/bin/sh", "-c", "cp " + fixPath + " " + diagnosePath
+                });
+        p2.waitFor();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
   private void writeReports(DiagnoseReport base) {
     JSONObject result = new JSONObject();
     JSONArray reports = new JSONArray();
@@ -98,6 +176,9 @@ public class Diagnose extends DefaultTask {
       report.put("jump", diagnoseReport.getErrors().size() - base.getErrors().size());
       JSONArray errors = diagnoseReport.compare(base);
       report.put("errors", errors);
+      if(deep){
+        report.put("suggested", ((DeepReport) diagnoseReport).getFixes());
+      }
       reports.add(report);
     }
     reports.sort((o1, o2) -> {
@@ -123,12 +204,14 @@ public class Diagnose extends DefaultTask {
     }
   }
 
-  private void detectCommands() {
+  private void detectCommandsAndPaths() {
     String executablePath = AutoFix.findPathToExecutable(project.getProjectDir().getAbsolutePath(), executable);
     String task = "";
     if (!project.getPath().equals(":")) task = project.getPath() + ":";
     task += "build -x test";
     buildCommand = "cd " + executablePath + " && ./" + executable + " " + task;
+    String diagnoseDir = diagnosePath.substring(0, diagnosePath.length() - "diagnose.json".length());
+    fixPath = diagnoseDir + "/fixes.json";
   }
 
   private DiagnoseReport makeReport() {
