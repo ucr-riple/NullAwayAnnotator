@@ -42,6 +42,21 @@ public class Diagnose extends DefaultTask {
 
   boolean deep;
 
+  private static void executeCommand(String command) {
+    try {
+      System.out.println("Executing command: " + command);
+      Process p = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
+      System.out.println("Requested command: " + command);
+      BufferedReader reader =
+              new BufferedReader(new InputStreamReader(p.getInputStream()));
+      while ((reader.readLine()) != null) {}
+      p.waitFor();
+      System.out.println("Finished.");
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
   @TaskAction
   public void diagnose() {
     System.out.println("Diagnose Started...");
@@ -154,20 +169,12 @@ public class Diagnose extends DefaultTask {
   private void prepare(boolean copy) {
     try {
       System.out.println("Preparing project: " + copy);
-      Process p = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", buildCommand});
-      System.out.println("Building with command: " + buildCommand);
-      p.waitFor();
-      System.out.println("Built.");
+      executeCommand(buildCommand);
       new File(diagnosePath).delete();
       System.out.println("Deleted old diagnose file.");
       if (copy) {
         System.out.println("Making new diagnose.json.");
-        Process p2 = Runtime.getRuntime()
-            .exec(
-                new String[] {
-                  "/bin/sh", "-c", "cp " + fixPath + " " + diagnosePath
-                });
-        p2.waitFor();
+        executeCommand("cp " + fixPath + " " + diagnosePath);
         System.out.println("Made.");
       }
       System.out.println("Prepare done");
@@ -218,7 +225,7 @@ public class Diagnose extends DefaultTask {
     String task = "";
     if (!project.getPath().equals(":")) task = project.getPath() + ":";
     task += "build -x test";
-    buildCommand = "cd " + executablePath + " && ./" + executable + " " + task;
+    buildCommand = "cd " + executablePath + " && ./" + executable + " " + task + " && echo done";
     String diagnoseDir = diagnosePath.substring(0, diagnosePath.length() - "diagnose.json".length());
     fixPath = diagnoseDir + "/fixes.json";
   }
