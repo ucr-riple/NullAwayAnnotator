@@ -48,7 +48,7 @@ public class Diagnose extends DefaultTask {
       Process p = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
       System.out.println("Requested command: " + command);
       BufferedReader reader =
-              new BufferedReader(new InputStreamReader(p.getInputStream()));
+              new BufferedReader(new InputStreamReader(p.getErrorStream()));
       while ((reader.readLine()) != null) {}
       p.waitFor();
       System.out.println("Finished.");
