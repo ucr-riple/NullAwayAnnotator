@@ -67,6 +67,7 @@ public class Diagnose extends DefaultTask {
     injector = Injector.builder().setMode(Injector.MODE.BATCH).setCleanImports(false).build();
     project = getProject();
     detectCommandsAndPaths();
+    System.out.println("Requesting preparation");
     prepare(true);
     System.out.println("Build command: " + buildCommand);
 
