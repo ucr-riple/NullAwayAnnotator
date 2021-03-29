@@ -155,7 +155,7 @@ public class Diagnose extends DefaultTask {
     try {
       System.out.println("Preparing project: " + copy);
       Process p = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", buildCommand});
-      System.out.println("Building...");
+      System.out.println("Building with command: " + buildCommand);
       p.waitFor();
       System.out.println("Built.");
       new File(diagnosePath).delete();
