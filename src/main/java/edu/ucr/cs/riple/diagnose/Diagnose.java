@@ -152,17 +152,24 @@ public class Diagnose extends DefaultTask {
 
   private void prepare(boolean copy) {
     try {
+      System.out.println("Preparing project: " + copy);
       Process p = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", buildCommand});
+      System.out.println("Building...");
       p.waitFor();
+      System.out.println("Built.");
       new File(diagnosePath).delete();
+      System.out.println("Deleted old diagnose file.");
       if (copy) {
+        System.out.println("Making new diagnose.json.");
         Process p2 = Runtime.getRuntime()
             .exec(
                 new String[] {
                   "/bin/sh", "-c", "cp " + fixPath + " " + diagnosePath
                 });
         p2.waitFor();
+        System.out.println("Made.");
       }
+      System.out.println("Prepare done");
     } catch (Exception e) {
       e.printStackTrace();
     }
