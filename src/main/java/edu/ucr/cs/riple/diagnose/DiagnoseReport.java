@@ -11,6 +11,7 @@ public class DiagnoseReport {
 
     public DiagnoseReport(List<String> errors) {
         this.errors = errors;
+        System.out.println("Number of errors with this fix applied: " + errors.size());
     }
 
     public List<String> getErrors(){
