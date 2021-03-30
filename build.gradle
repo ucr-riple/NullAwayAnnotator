@@ -37,3 +37,14 @@ dependencies {
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
     testImplementation 'com.googlecode.json-simple:json-simple:1.1.1'
 }
+
+//create a single Jar with all dependencies
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File Example',
+                'Implementation-Version': version,
+                'Main-Class': 'Main'
+    }
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
