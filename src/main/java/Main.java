@@ -2,7 +2,12 @@ import edu.ucr.cs.riple.annotationinjector.Injector;
 import edu.ucr.cs.riple.annotationinjector.WorkList;
 import edu.ucr.cs.riple.annotationinjector.WorkListBuilder;
 import edu.ucr.cs.riple.diagnose.DiagnoseJar;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -20,6 +25,8 @@ public class Main {
       case "diagnose":
         diagnose(args);
         break;
+      case "loop":
+        loop(args);
       default:
         throw new RuntimeException("Unknown command: " + command);
     }
@@ -36,8 +43,7 @@ public class Main {
     String fixPath = args[1];
     String runCommand = args[2];
     String dir = fixPath.contains("/") ? fixPath.substring(0, fixPath.lastIndexOf("/")) : "/";
-    String diagnosePath = dir + "/diagnose.json";
-    diagnose.start(runCommand, fixPath, diagnosePath);
+    diagnose.start(runCommand, dir, false);
   }
 
   private static void apply(String[] args) {
@@ -53,5 +59,42 @@ public class Main {
     System.out.println("Injecting...");
     injector.start(new WorkListBuilder(args[1]).getWorkLists());
     System.out.println("Finished");
+  }
+
+  private static void loop(String[] args) {
+    DiagnoseJar diagnose = new DiagnoseJar();
+    System.out.println("Number of received arguments: " + args.length);
+    System.out.println("Actual Arguments: " + Arrays.toString(args));
+    if (args.length != 3) {
+      throw new RuntimeException(
+          "Loop needs exactly two arguments: 1. command to execute NullAway, 2. path to the suggested fix file");
+    }
+    String fixPath = args[1];
+    String runCommand = args[2];
+    String dir = fixPath.contains("/") ? fixPath.substring(0, fixPath.lastIndexOf("/")) : "/";
+    boolean finished = false;
+
+    while (!finished){
+      diagnose.start(runCommand, dir, true);
+      System.out.println("Adding diagnosed fixes to repo");
+      try {
+        Object obj = new JSONParser().parse(new FileReader(dir + "/diagnose.json"));
+        JSONObject fixes = (JSONObject) obj;
+        JSONArray newFixes = (JSONArray) fixes.get("fixes");
+        obj = new JSONParser().parse(new FileReader(dir + "/diagnosed.json"));
+        fixes = (JSONObject) obj;
+        JSONArray oldFixes = (JSONArray) fixes.get("fixes");
+        int oldSize = oldFixes.size();
+        oldFixes.addAll(newFixes);
+        int newSize = oldFixes.size();
+        FileWriter writer = new FileWriter(dir + "/diagnosed.json");
+        writer.write(fixes.toJSONString());
+        if(oldSize == newSize){
+          finished = true;
+        }
+      } catch (Exception exception) {
+        System.out.println("Error happened in storing new fixes: " + exception.getMessage());
+      }
+    }
   }
 }
