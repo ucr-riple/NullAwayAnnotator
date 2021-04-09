@@ -90,6 +90,14 @@ public class DiagnoseJar {
     try {
       System.out.println("Preparing project: " + true);
       executeCommand(buildCommand);
+      if(! new File(fixPath).exists()){
+        JSONObject toDiagnose = new JSONObject();
+        toDiagnose.put("fixes", new JSONArray());
+        FileWriter writer = new FileWriter(diagnosePath);
+        writer.write(toDiagnose.toJSONString());
+        System.out.println("No new fixes from NullAway, created empty list.");
+        return;
+      }
       new File(diagnosePath).delete();
       System.out.println("Deleted old diagnose file.");
       System.out.println("Making new diagnose.json.");
