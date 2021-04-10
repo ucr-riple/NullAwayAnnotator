@@ -95,6 +95,7 @@ public class DiagnoseJar {
         toDiagnose.put("fixes", new JSONArray());
         FileWriter writer = new FileWriter(diagnosePath);
         writer.write(toDiagnose.toJSONString());
+        writer.flush();
         System.out.println("No new fixes from NullAway, created empty list.");
         return;
       }
@@ -116,6 +117,7 @@ public class DiagnoseJar {
           JSONObject toDiagnose = new JSONObject();
           toDiagnose.put("fixes", fixes_array);
           FileWriter writer = new FileWriter(diagnosePath);
+          writer.flush();
           writer.write(toDiagnose.toJSONString());
         }catch (RuntimeException exception){
           System.out.println("Exception happened while optimizing suggested fixes.");
