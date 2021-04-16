@@ -5,7 +5,6 @@ import edu.ucr.cs.riple.annotationinjector.Injector;
 import edu.ucr.cs.riple.annotationinjector.WorkList;
 import edu.ucr.cs.riple.annotationinjector.WorkListBuilder;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -15,12 +14,12 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -68,7 +67,17 @@ public class DiagnoseJar {
           path = Paths.get(fix.uri);
           fileContents = Files.readAllBytes(path);
           analyze(fix);
-          Files.write(path, fileContents);
+          try (OutputStream out = Files.newOutputStream(path)) {
+            int len = fileContents.length;
+            int rem = len;
+            while (rem > 0) {
+              int n = Math.min(rem, 8192);
+              out.write(fileContents, (len - rem), n);
+              rem -= n;
+            }
+            out.flush();
+            out.close();
+          }
         }
       }
     } catch (Exception e) {
@@ -76,7 +85,6 @@ public class DiagnoseJar {
     }
     writeReports(base);
   }
-
   private void analyze(Fix fix) {
     injector.start(Collections.singletonList(new WorkList(Collections.singletonList(fix))));
     fixReportMap.put(fix, makeReport());
