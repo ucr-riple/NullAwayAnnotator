@@ -74,9 +74,6 @@ public class DiagnoseJar {
     } catch (Exception e) {
       e.printStackTrace();
     }
-    if (base == null) {
-      return;
-    }
     writeReports(base);
   }
 
@@ -168,25 +165,17 @@ public class DiagnoseJar {
 
   private DiagnoseReport makeReport() {
     try {
-      Process proc = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", buildCommand});
-      String line;
-      if (proc != null) {
-        BufferedReader input = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
-        final String nullAwayErrorMessagePattern = "error:";
-        List<String> errors = new ArrayList<>();
-        while ((line = input.readLine()) != null) {
-          if (line.contains(nullAwayErrorMessagePattern)) {
-            String errorMessage = line.substring(line.indexOf("Away] ") + 6);
-            errors.add(errorMessage);
-          }
-        }
-        input.close();
-        return new DiagnoseReport(errors);
+      executeCommand(buildCommand);
+      File tempFile = new File("/tmp/NullAwayFix/errors.json");
+      boolean exists = tempFile.exists();
+      if(exists){
+        Object obj = new JSONParser().parse(new FileReader("/tmp/NullAwayFix/errors.json"));
+        return new DiagnoseReport((JSONObject)obj);
       }
-      return null;
+      return DiagnoseReport.empty();
     } catch (Exception e) {
       System.out.println("Error happened: " + e.getMessage());
-      throw new RuntimeException("Could not run command: " + buildCommand + " from gradle");
+      throw new RuntimeException("Could not run command: " + buildCommand);
     }
   }
 }
