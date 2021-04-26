@@ -1,16 +1,8 @@
-import edu.ucr.cs.riple.annotationinjector.Injector;
-import edu.ucr.cs.riple.annotationinjector.WorkList;
-import edu.ucr.cs.riple.annotationinjector.WorkListBuilder;
+import edu.ucr.cs.riple.injector.Injector;
+import edu.ucr.cs.riple.injector.WorkListBuilder;
 import edu.ucr.cs.riple.diagnose.DiagnoseJar;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 public class Main {
   public static void main(String[] args) {
@@ -53,7 +45,7 @@ public class Main {
               "Diagnose needs exactly one arguments: 1. path to the suggested fix file");
     }
     System.out.println("Building Injector...");
-    Injector injector = Injector.builder().setMode(Injector.MODE.BATCH).setCleanImports(false).build();
+    Injector injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
     System.out.println("built.");
     System.out.println("Injecting...");
     injector.start(new WorkListBuilder(args[1]).getWorkLists());

@@ -1,7 +1,7 @@
 package edu.ucr.cs.riple.diagnose;
 
 
-import edu.ucr.cs.riple.annotationinjector.Fix;
+import edu.ucr.cs.riple.injector.Fix;
 
 import java.util.List;
 

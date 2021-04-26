@@ -1,9 +1,9 @@
 package edu.ucr.cs.riple.diagnose;
 
-import edu.ucr.cs.riple.annotationinjector.Fix;
-import edu.ucr.cs.riple.annotationinjector.Injector;
-import edu.ucr.cs.riple.annotationinjector.WorkList;
-import edu.ucr.cs.riple.annotationinjector.WorkListBuilder;
+import edu.ucr.cs.riple.injector.Fix;
+import edu.ucr.cs.riple.injector.Injector;
+import edu.ucr.cs.riple.injector.WorkList;
+import edu.ucr.cs.riple.injector.WorkListBuilder;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -52,7 +52,7 @@ public class DiagnoseJar {
     this.fixPath = out_dir + "/fixes.json";
     this.diagnosePath = out_dir + "/diagnose.json";
     System.out.println("Diagnose Started...");
-    injector = Injector.builder().setMode(Injector.MODE.BATCH).setCleanImports(false).build();
+    injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
     System.out.println("Requesting preparation");
     prepare(out_dir, optimized);
     System.out.println("Build command: " + buildCommand);
