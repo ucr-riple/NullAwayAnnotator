@@ -14,12 +14,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -62,6 +56,7 @@ public class DiagnoseJar {
     try {
       for (WorkList workList : workListLists) {
         for (Fix fix : workList.getFixes()) {
+          System.out.println("WORKING on FIX: " + fix);
           analyze(fix);
           remove(fix);
         }
@@ -153,9 +148,8 @@ public class DiagnoseJar {
           return -1;
         });
     result.put("reports", reports);
-    try (Writer writer =
-        Files.newBufferedWriter(
-            Paths.get("/tmp/NullAwayFix/diagnose_report.json"), Charset.defaultCharset())) {
+    try  {
+      FileWriter writer = new FileWriter("/tmp/NullAwayFix/diagnose_report.json");
       writer.write(result.toJSONString().replace("\\/", "/").replace("\\\\\\", "\\"));
       writer.flush();
     } catch (IOException e) {
