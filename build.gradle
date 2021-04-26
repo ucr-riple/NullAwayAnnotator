@@ -20,12 +20,6 @@ repositories {
     google()
 }
 
-ext{
-    rewrite = '6.1.21'
-}
-
-
-
 dependencies {
 
     compile gradleApi()
