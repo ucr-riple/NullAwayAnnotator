@@ -109,8 +109,8 @@ public class DiagnoseJar {
           JSONObject toDiagnose = new JSONObject();
           toDiagnose.put("fixes", fixes_array);
           FileWriter writer = new FileWriter(diagnosePath);
-          writer.flush();
           writer.write(toDiagnose.toJSONString());
+          writer.flush();
         }catch (RuntimeException exception){
           System.out.println("Exception happened while optimizing suggested fixes.");
           System.out.println("Continuing...");
