@@ -1,8 +1,8 @@
 package edu.ucr.cs.riple.editors;
 
 
-import edu.ucr.cs.riple.annotationinjector.Injector;
-import edu.ucr.cs.riple.annotationinjector.WorkListBuilder;
+import edu.ucr.cs.riple.injector.Injector;
+import edu.ucr.cs.riple.injector.WorkListBuilder;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.TaskAction;
 
@@ -20,7 +20,6 @@ public class ApplyBatch extends DefaultTask {
     Injector injector =
         Injector.builder()
             .setMode(Injector.MODE.BATCH)
-            .setCleanImports(false)
             .build();
 
     System.out.println("Built Injector.");

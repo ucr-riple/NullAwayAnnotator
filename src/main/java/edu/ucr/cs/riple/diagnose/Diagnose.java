@@ -3,10 +3,10 @@ package edu.ucr.cs.riple.diagnose;
 
 import edu.ucr.cs.riple.AutoFix;
 import edu.ucr.cs.riple.NullAwayAutoFixExtension;
-import edu.ucr.cs.riple.annotationinjector.Fix;
-import edu.ucr.cs.riple.annotationinjector.Injector;
-import edu.ucr.cs.riple.annotationinjector.WorkList;
-import edu.ucr.cs.riple.annotationinjector.WorkListBuilder;
+import edu.ucr.cs.riple.injector.Fix;
+import edu.ucr.cs.riple.injector.Injector;
+import edu.ucr.cs.riple.injector.WorkList;
+import edu.ucr.cs.riple.injector.WorkListBuilder;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
@@ -79,7 +79,7 @@ public class Diagnose extends DefaultTask {
     }
 
     executable = autoFixExtension.getExecutable();
-    injector = Injector.builder().setMode(Injector.MODE.BATCH).setCleanImports(false).build();
+    injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
     project = getProject();
     detectCommandsAndPaths();
     System.out.println("Requesting preparation");

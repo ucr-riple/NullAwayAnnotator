@@ -1,9 +1,9 @@
 package edu.ucr.cs.riple;
 
 
-import edu.ucr.cs.riple.annotationinjector.Injector;
-import edu.ucr.cs.riple.annotationinjector.Report;
-import edu.ucr.cs.riple.annotationinjector.WorkListBuilder;
+import edu.ucr.cs.riple.injector.Injector;
+import edu.ucr.cs.riple.injector.Report;
+import edu.ucr.cs.riple.injector.WorkListBuilder;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
@@ -69,7 +69,6 @@ public class AutoFix extends DefaultTask {
     injector =
         Injector.builder()
             .setMode(Injector.MODE.BATCH)
-            .setCleanImports(false)
             .build();
     System.out.println("Built.");
     run(fixPath);
