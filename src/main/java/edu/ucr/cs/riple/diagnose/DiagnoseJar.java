@@ -59,25 +59,11 @@ public class DiagnoseJar {
     fixReportMap = new HashMap<>();
     List<WorkList> workListLists = new WorkListBuilder(diagnosePath).getWorkLists();
     DiagnoseReport base = makeReport();
-    byte[] fileContents;
-    Path path;
     try {
       for (WorkList workList : workListLists) {
         for (Fix fix : workList.getFixes()) {
-          path = Paths.get(fix.uri);
-          fileContents = Files.readAllBytes(path);
           analyze(fix);
-          try (OutputStream out = Files.newOutputStream(path)) {
-            int len = fileContents.length;
-            int rem = len;
-            while (rem > 0) {
-              int n = Math.min(rem, 8192);
-              out.write(fileContents, (len - rem), n);
-              rem -= n;
-            }
-            out.flush();
-            out.close();
-          }
+          remove(fix);
         }
       }
     } catch (Exception e) {
@@ -85,6 +71,12 @@ public class DiagnoseJar {
     }
     writeReports(base);
   }
+
+  private void remove(Fix fix) {
+    Fix removeFix = new Fix(fix.annotation, fix.method, fix.param, fix.location, fix.className, fix.pkg, fix.uri, "false");
+    injector.start(Collections.singletonList(new WorkList(Collections.singletonList(removeFix))));
+  }
+
   private void analyze(Fix fix) {
     injector.start(Collections.singletonList(new WorkList(Collections.singletonList(fix))));
     fixReportMap.put(fix, makeReport());
