@@ -31,7 +31,7 @@ public class DiagnoseJar {
     try {
       System.out.println("Executing command: " + command);
       Process p = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
-      System.out.println("Requested command: " + command);
+      System.out.println("Requested");
       BufferedReader reader = new BufferedReader(new InputStreamReader(p.getErrorStream()));
       while ((reader.readLine()) != null) {}
       p.waitFor();
@@ -56,7 +56,6 @@ public class DiagnoseJar {
     try {
       for (WorkList workList : workListLists) {
         for (Fix fix : workList.getFixes()) {
-          System.out.println("WORKING on FIX: " + fix);
           analyze(fix);
           remove(fix);
         }
