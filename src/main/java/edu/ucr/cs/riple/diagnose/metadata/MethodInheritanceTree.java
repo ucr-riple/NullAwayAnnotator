@@ -1,6 +1,5 @@
 package edu.ucr.cs.riple.diagnose.metadata;
 
-import edu.ucr.cs.riple.injector.WorkList;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
