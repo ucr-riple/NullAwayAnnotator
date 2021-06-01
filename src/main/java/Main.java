@@ -22,6 +22,9 @@ public class Main {
 //        throw new RuntimeException("Unknown command: " + command);
 //    }
     MethodInheritanceTree m = new MethodInheritanceTree("/tmp/NullAwayFix/method_info.json");
+    String method = "adapt(retrofit2.Call<R>)";
+    String clazz = "retrofit2.CallAdapter";
+    System.out.println(m.getSubMethods(method, clazz));
   }
 
   private static void diagnose(String[] args) {

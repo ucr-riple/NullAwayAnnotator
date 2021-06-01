@@ -66,7 +66,6 @@ public class MethodInheritanceTree {
                 parent.addChild(id);
             }
         }
-        System.out.println(idHash);
     }
 
     private MethodNode findNode(String method, String clazz){

@@ -1,5 +1,7 @@
 package edu.ucr.cs.riple.diagnose;
 
+import edu.ucr.cs.riple.diagnose.metadata.MethodInfo;
+import edu.ucr.cs.riple.diagnose.metadata.MethodInheritanceTree;
 import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkList;
@@ -14,6 +16,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +30,7 @@ public class DiagnoseJar {
   Map<Fix, DiagnoseReport> fixReportMap;
   String fixPath;
   String diagnosePath;
+  MethodInheritanceTree methodInheritanceTree;
 
   private static void executeCommand(String command) {
     try {
@@ -45,6 +50,7 @@ public class DiagnoseJar {
     this.buildCommand = buildCommand;
     this.fixPath = out_dir + "/fixes.json";
     this.diagnosePath = out_dir + "/diagnose.json";
+    methodInheritanceTree = new MethodInheritanceTree(out_dir + "/method_info.json");
     System.out.println("Diagnose Started...");
     injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
     System.out.println("Requesting preparation");
@@ -56,8 +62,8 @@ public class DiagnoseJar {
     try {
       for (WorkList workList : workListLists) {
         for (Fix fix : workList.getFixes()) {
-          analyze(fix);
-          remove(fix);
+          List<Fix> appliedFixes = analyze(fix);
+          remove(appliedFixes);
         }
       }
     } catch (Exception e) {
@@ -66,14 +72,55 @@ public class DiagnoseJar {
     writeReports(base);
   }
 
-  private void remove(Fix fix) {
-    Fix removeFix = new Fix(fix.annotation, fix.method, fix.param, fix.location, fix.className, fix.pkg, fix.uri, "false");
-    injector.start(Collections.singletonList(new WorkList(Collections.singletonList(removeFix))));
+  private void remove(List<Fix> fixes) {
+    List<Fix> toRemove = new ArrayList<>();
+    for(Fix fix: fixes){
+      Fix removeFix = new Fix(fix.annotation, fix.method, fix.param, fix.location, fix.className, fix.pkg, fix.uri, "false");
+      toRemove.add(removeFix);
+    }
+    injector.start(Collections.singletonList(new WorkList(toRemove)));
   }
 
-  private void analyze(Fix fix) {
-    injector.start(Collections.singletonList(new WorkList(Collections.singletonList(fix))));
+  private List<Fix> analyze(Fix fix) {
+    List<Fix> suggestedFix = new ArrayList<>();
+    suggestedFix.add(fix);
+    if(fix.location.equals("METHOD_PARAM")){
+      List<MethodInfo> subMethods = methodInheritanceTree.getSubMethods(fix.method, fix.className);
+      if(subMethods != null) {
+        for (MethodInfo info : subMethods) {
+          suggestedFix.add(new Fix(
+                  fix.annotation,
+                  info.method,
+                  fix.param,
+                  fix.location,
+                  info.clazz,
+                  fix.pkg,
+                  info.uri,
+                  fix.inject
+          ));
+        }
+      }
+    }
+    if(fix.location.equals("METHOD_RETURN")){
+      List<MethodInfo> subMethods = methodInheritanceTree.getSuperMethods(fix.method, fix.className);
+      if(subMethods != null) {
+        for (MethodInfo info : subMethods) {
+          suggestedFix.add(new Fix(
+                  fix.annotation,
+                  info.method,
+                  fix.param,
+                  fix.location,
+                  info.clazz,
+                  fix.pkg,
+                  info.uri,
+                  fix.inject
+          ));
+        }
+      }
+    }
+    injector.start(Collections.singletonList(new WorkList(suggestedFix)));
     fixReportMap.put(fix, makeReport());
+    return suggestedFix;
   }
 
   @SuppressWarnings("Unchecked")
