@@ -1,3 +1,4 @@
+import edu.ucr.cs.riple.diagnose.metadata.MethodInheritanceTree;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkListBuilder;
 import edu.ucr.cs.riple.diagnose.DiagnoseJar;
@@ -6,20 +7,21 @@ import java.util.Arrays;
 
 public class Main {
   public static void main(String[] args) {
-    if(args.length == 0){
-      throw new RuntimeException("command not specified");
-    }
-    String command = args[0];
-    switch (command){
-      case "apply":
-        apply(args);
-        break;
-      case "diagnose":
-        diagnose(args);
-        break;
-      default:
-        throw new RuntimeException("Unknown command: " + command);
-    }
+//    if(args.length == 0){
+//      throw new RuntimeException("command not specified");
+//    }
+//    String command = args[0];
+//    switch (command){
+//      case "apply":
+//        apply(args);
+//        break;
+//      case "diagnose":
+//        diagnose(args);
+//        break;
+//      default:
+//        throw new RuntimeException("Unknown command: " + command);
+//    }
+    MethodInheritanceTree m = new MethodInheritanceTree("/tmp/NullAwayFix/method_info.json");
   }
 
   private static void diagnose(String[] args) {
