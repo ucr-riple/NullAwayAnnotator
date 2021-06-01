@@ -1,5 +1,6 @@
 package edu.ucr.cs.riple.diagnose.metadata;
 
+import edu.ucr.cs.riple.injector.WorkList;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -8,8 +9,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public class MethodInheritanceTree {
 
@@ -110,8 +113,18 @@ public class MethodInheritanceTree {
             return null;
         }
         List<MethodInfo> ans = new ArrayList<>();
-        for(Long id: node.children){
-            ans.add(nodes.get(id).value);
+        Set<Long> workList = new HashSet<>(node.children);
+        while (!workList.isEmpty()){
+            Set<Long> tmp = new HashSet<>();
+            for(Long id: workList){
+                MethodNode selected = nodes.get(id);
+                if(!ans.contains(selected.value)){
+                    ans.add(selected.value);
+                    tmp.addAll(selected.children);
+                }
+            }
+            workList.clear();
+            workList.addAll(tmp);
         }
         return ans;
     }
