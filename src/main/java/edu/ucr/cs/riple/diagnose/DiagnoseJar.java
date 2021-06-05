@@ -49,7 +49,7 @@ public class DiagnoseJar {
     this.buildCommand = buildCommand;
     this.fixPath = out_dir + "/fixes.json";
     this.diagnosePath = out_dir + "/diagnose.json";
-    methodInheritanceTree = new MethodInheritanceTree(out_dir + "/method_info.json");
+    methodInheritanceTree = new MethodInheritanceTree(out_dir + "/method_info.csv");
     System.out.println("Diagnose Started...");
     injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
     System.out.println("Requesting preparation");

@@ -1,9 +1,8 @@
 package edu.ucr.cs.riple.diagnose.metadata;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,39 +33,44 @@ public class MethodInheritanceTree {
     }
 
     private void fillNodes(String filePath) throws IOException, ParseException {
-        JSONObject jsonObject =  (JSONObject) new JSONParser().parse(new FileReader(filePath));
-        JSONObject methods = (JSONObject) jsonObject.get("methods");
-        for(Object key: methods.keySet()){
-            Long id = Long.parseLong((String) key);
-            JSONObject methodJson = (JSONObject) methods.get(key);
-            MethodInfo info = new MethodInfo(Integer.parseInt(String.valueOf(key)), methodJson);
-            MethodNode node;
-            if(nodes.containsKey(id)){
-                node = nodes.get(id);
-            }
-            else{
-                node = new MethodNode();
-                nodes.put(id, node);
-            }
-            Long parentId = (Long) methodJson.get("parent");
-            node.fillInformation(info, parentId);
-
-            Integer hash = info.hashCode();
-            if(idHash.containsKey(hash)){
-                idHash.get(hash).add(id);
-            }else{
-                List<Long> singleHash = new ArrayList<>(List.of(id));
-                idHash.put(hash, singleHash);
-            }
-
-            if(parentId != -1){
-                MethodNode parent = nodes.get(parentId);
-                if(parent == null){
-                    parent = new MethodNode();
-                    nodes.put(parentId, parent);
+        BufferedReader reader;
+        try {
+            reader = new BufferedReader(new FileReader(filePath));
+            String line = reader.readLine();
+            while (line != null) {
+                String[] values = line.split("%\\*%");
+                Long id = Long.parseLong(values[0]);
+                MethodInfo info = new MethodInfo(id, values[1], values[2], values[5]);
+                MethodNode node;
+                if(nodes.containsKey(id)){
+                    node = nodes.get(id);
                 }
-                parent.addChild(id);
+                else{
+                    node = new MethodNode();
+                    nodes.put(id, node);
+                }
+                Long parentId = Long.parseLong(values[3]);
+                node.fillInformation(info, parentId);
+                Integer hash = info.hashCode();
+                if(idHash.containsKey(hash)){
+                    idHash.get(hash).add(id);
+                }else{
+                    List<Long> singleHash = new ArrayList<>(List.of(id));
+                    idHash.put(hash, singleHash);
+                }
+                if(parentId != -1){
+                    MethodNode parent = nodes.get(parentId);
+                    if(parent == null){
+                        parent = new MethodNode();
+                        nodes.put(parentId, parent);
+                    }
+                    parent.addChild(id);
+                }
+                line = reader.readLine();
             }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -119,7 +123,9 @@ public class MethodInheritanceTree {
                 MethodNode selected = nodes.get(id);
                 if(!ans.contains(selected.value)){
                     ans.add(selected.value);
-                    tmp.addAll(selected.children);
+                    if(selected.children != null) {
+                        tmp.addAll(selected.children);
+                    }
                 }
             }
             workList.clear();

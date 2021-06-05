@@ -1,21 +1,20 @@
 package edu.ucr.cs.riple.diagnose.metadata;
 
-import org.json.simple.JSONObject;
 
 import java.util.Objects;
 
 public class MethodInfo {
 
-    public final int id;
+    public final long id;
     public final String method;
     public final String clazz;
     public final String uri;
 
-    public MethodInfo(int id, JSONObject info){
+    public MethodInfo(long id, String clazz, String method, String uri) {
         this.id = id;
-        this.method = String.valueOf(info.get("method"));
-        this.clazz = String.valueOf(info.get("class"));
-        this.uri = String.valueOf(info.get("uri"));
+        this.method = method;
+        this.clazz = clazz;
+        this.uri = uri;
     }
 
     @Override
