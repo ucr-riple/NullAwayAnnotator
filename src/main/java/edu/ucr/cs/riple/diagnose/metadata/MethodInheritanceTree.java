@@ -33,44 +33,39 @@ public class MethodInheritanceTree {
 
     private void fillNodes(String filePath) throws IOException, ParseException {
         BufferedReader reader;
-        try {
-            reader = new BufferedReader(new FileReader(filePath));
-            String line = reader.readLine();
-            while (line != null) {
-                String[] values = line.split("%\\*%");
-                Long id = Long.parseLong(values[0]);
-                MethodInfo info = new MethodInfo(id, values[1], values[2], values[5]);
-                MethodNode node;
-                if(nodes.containsKey(id)){
-                    node = nodes.get(id);
-                }
-                else{
-                    node = new MethodNode();
-                    nodes.put(id, node);
-                }
-                Long parentId = Long.parseLong(values[3]);
-                node.fillInformation(info, parentId);
-                Integer hash = info.hashCode();
-                if(idHash.containsKey(hash)){
-                    idHash.get(hash).add(id);
-                }else{
-                    List<Long> singleHash = new ArrayList<>(List.of(id));
-                    idHash.put(hash, singleHash);
-                }
-                if(parentId != -1){
-                    MethodNode parent = nodes.get(parentId);
-                    if(parent == null){
-                        parent = new MethodNode();
-                        nodes.put(parentId, parent);
-                    }
-                    parent.addChild(id);
-                }
-                line = reader.readLine();
+        reader = new BufferedReader(new FileReader(filePath));
+        String line = reader.readLine();
+        while (line != null) {
+            String[] values = line.split("%\\*%");
+            Long id = Long.parseLong(values[0]);
+            MethodInfo info = new MethodInfo(id, values[1], values[2], values[5]);
+            MethodNode node;
+            if (nodes.containsKey(id)) {
+                node = nodes.get(id);
+            } else {
+                node = new MethodNode();
+                nodes.put(id, node);
             }
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            Long parentId = Long.parseLong(values[3]);
+            node.fillInformation(info, parentId);
+            Integer hash = info.hashCode();
+            if (idHash.containsKey(hash)) {
+                idHash.get(hash).add(id);
+            } else {
+                List<Long> singleHash = new ArrayList<>(List.of(id));
+                idHash.put(hash, singleHash);
+            }
+            if (parentId != -1) {
+                MethodNode parent = nodes.get(parentId);
+                if (parent == null) {
+                    parent = new MethodNode();
+                    nodes.put(parentId, parent);
+                }
+                parent.addChild(id);
+            }
+            line = reader.readLine();
         }
+        reader.close();
     }
 
     private MethodNode findNode(String method, String clazz){
