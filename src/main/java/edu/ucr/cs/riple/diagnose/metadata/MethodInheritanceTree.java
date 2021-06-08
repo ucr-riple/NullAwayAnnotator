@@ -23,8 +23,7 @@ public class MethodInheritanceTree {
             idHash = new HashMap<>();
             fillNodes(filePath);
         }catch (IOException e){
-            System.err.println("Error happened in IO");
-            e.printStackTrace();
+            System.out.println("File at: " + filePath + " not found, skipping inheritance tree creation.");
         }
         catch (ParseException e){
             System.err.println("Error happened in Parsing");
@@ -92,11 +91,11 @@ public class MethodInheritanceTree {
     }
 
     public List<MethodInfo> getSuperMethods(String method, String clazz){
+        List<MethodInfo> ans = new ArrayList<>();
         MethodNode node = findNode(method, clazz);
         if(node == null) {
-            return null;
+            return ans;
         }
-        List<MethodInfo> ans = new ArrayList<>();
         while (node != null){
             MethodNode parent = nodes.get(node.parent);
             if(parent != null){
@@ -108,14 +107,14 @@ public class MethodInheritanceTree {
     }
 
     public List<MethodInfo> getSubMethods(String method, String clazz){
+        List<MethodInfo> ans = new ArrayList<>();
         MethodNode node = findNode(method, clazz);
         if(node == null) {
-            return null;
+            return ans;
         }
         if(node.children == null){
-            return null;
+            return ans;
         }
-        List<MethodInfo> ans = new ArrayList<>();
         Set<Long> workList = new HashSet<>(node.children);
         while (!workList.isEmpty()){
             Set<Long> tmp = new HashSet<>();

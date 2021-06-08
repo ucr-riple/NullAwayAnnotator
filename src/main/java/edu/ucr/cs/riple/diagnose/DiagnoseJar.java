@@ -83,38 +83,34 @@ public class DiagnoseJar {
   private List<Fix> analyze(Fix fix) {
     List<Fix> suggestedFix = new ArrayList<>();
     suggestedFix.add(fix);
-    if(fix.location.equals("METHOD_PARAM")){
+    if(fix.location.equals("METHOD_PARAM")) {
       List<MethodInfo> subMethods = methodInheritanceTree.getSubMethods(fix.method, fix.className);
-      if(subMethods != null) {
-        for (MethodInfo info : subMethods) {
-          suggestedFix.add(new Fix(
-                  fix.annotation,
-                  info.method,
-                  fix.param,
-                  fix.location,
-                  info.clazz,
-                  fix.pkg,
-                  info.uri,
-                  fix.inject
-          ));
-        }
+      for (MethodInfo info : subMethods) {
+        suggestedFix.add(new Fix(
+                fix.annotation,
+                info.method,
+                fix.param,
+                fix.location,
+                info.clazz,
+                fix.pkg,
+                info.uri,
+                fix.inject
+        ));
       }
     }
-    if(fix.location.equals("METHOD_RETURN")){
+    if(fix.location.equals("METHOD_RETURN")) {
       List<MethodInfo> subMethods = methodInheritanceTree.getSuperMethods(fix.method, fix.className);
-      if(subMethods != null) {
-        for (MethodInfo info : subMethods) {
-          suggestedFix.add(new Fix(
-                  fix.annotation,
-                  info.method,
-                  fix.param,
-                  fix.location,
-                  info.clazz,
-                  fix.pkg,
-                  info.uri,
-                  fix.inject
-          ));
-        }
+      for (MethodInfo info : subMethods) {
+        suggestedFix.add(new Fix(
+                fix.annotation,
+                info.method,
+                fix.param,
+                fix.location,
+                info.clazz,
+                fix.pkg,
+                info.uri,
+                fix.inject
+        ));
       }
     }
     injector.start(Collections.singletonList(new WorkList(suggestedFix)));
