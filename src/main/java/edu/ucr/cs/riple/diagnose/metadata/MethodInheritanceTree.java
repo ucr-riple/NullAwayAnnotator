@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -52,7 +53,7 @@ public class MethodInheritanceTree {
             if (idHash.containsKey(hash)) {
                 idHash.get(hash).add(id);
             } else {
-                List<Long> singleHash = new ArrayList<>(List.of(id));
+                List<Long> singleHash = Collections.singletonList(id);
                 idHash.put(hash, singleHash);
             }
             if (parentId != -1) {
