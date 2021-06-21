@@ -1,6 +1,6 @@
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkListBuilder;
-import edu.ucr.cs.riple.diagnose.DiagnoseJar;
+import edu.ucr.cs.riple.diagnose.Diagnose;
 
 import java.util.Arrays;
 
@@ -23,7 +23,7 @@ public class Main {
   }
 
   private static void diagnose(String[] args) {
-    DiagnoseJar diagnose = new DiagnoseJar();
+    Diagnose diagnose = new Diagnose();
     System.out.println("Number of received arguments: " + args.length);
     System.out.println("Actual Arguments: " + Arrays.toString(args));
     if (!(args.length == 3 || args.length == 4)) {

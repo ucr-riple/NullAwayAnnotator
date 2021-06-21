@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DiagnoseJar {
+public class Diagnose {
 
   Injector injector;
   String buildCommand;
