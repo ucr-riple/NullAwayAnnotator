@@ -2,7 +2,10 @@ plugins {
     id 'java'
 }
 
-
+compileJava {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+}
 
 group 'edu.ucr.cs.riple'
 version '1.0-SNAPSHOT'
