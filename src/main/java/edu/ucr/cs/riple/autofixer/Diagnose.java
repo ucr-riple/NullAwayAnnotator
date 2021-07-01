@@ -1,7 +1,7 @@
-package edu.ucr.cs.riple.diagnose;
+package edu.ucr.cs.riple.autofixer;
 
-import com.uber.nullaway.autofix.out.display.FixDisplay;
-import edu.ucr.cs.riple.diagnose.metadata.MethodInheritanceTree;
+import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
+import edu.ucr.cs.riple.autofixer.nullaway.FixDisplay;
 import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkList;
@@ -141,6 +141,7 @@ public class Diagnose {
       System.out.println("Making new diagnose.json.");
       if(!optimized){
         executeCommand("cp " + fixPath + " " + diagnosePath);
+        convertCSVToJSON(diagnosePath, diagnosePath);
       }else{
         try{
           System.out.println("Removing already diagnosed fixes...");
@@ -170,15 +171,16 @@ public class Diagnose {
   }
 
   private void convertCSVToJSON(String csvPath, String jsonPath) {
-    ArrayList<FixDisplay> fixes = new ArrayList<>();
+    JSONArray fixes = new JSONArray();
     BufferedReader reader;
     FileWriter writer;
     try {
       reader = Files.newBufferedReader(Paths.get(csvPath), Charset.defaultCharset());
       String line = reader.readLine();
+      if(line != null) line = reader.readLine();
       while (line != null) {
         FixDisplay fix = FixDisplay.fromCSVLine(line);
-        fixes.add(fix);
+        fixes.add(fix.getJson());
         line = reader.readLine();
       }
       reader.close();
@@ -187,7 +189,8 @@ public class Diagnose {
       fixesArray.addAll(fixes);
       res.put("fixes", fixesArray);
       writer = new FileWriter(jsonPath);
-      writer.write(res.toJSONString());
+      writer.write(res.toJSONString().replace("\\/", "/").replace("\\\\\\", "\\"));
+      writer.flush();
     } catch (IOException e) {
       System.err.println("Error happened in converting csv to json!");
     }

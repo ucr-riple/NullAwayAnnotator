@@ -1,13 +1,13 @@
-package edu.ucr.cs.riple.diagnose.explorer;
+package edu.ucr.cs.riple.autofixer.explorer;
 
-import com.uber.nullaway.autofix.out.display.FixDisplay;
+import edu.ucr.cs.riple.autofixer.nullaway.FixDisplay;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-@SuppressWarnings("ALL")
 
+@SuppressWarnings("ALL")
 public class Context {
 
     static final Map<Integer, List<Node>> nodes = new HashMap<>();

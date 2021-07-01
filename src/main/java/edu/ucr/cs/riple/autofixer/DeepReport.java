@@ -1,4 +1,4 @@
-package edu.ucr.cs.riple.diagnose;
+package edu.ucr.cs.riple.autofixer;
 
 
 import edu.ucr.cs.riple.injector.Fix;

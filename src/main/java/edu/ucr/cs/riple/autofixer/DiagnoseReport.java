@@ -1,4 +1,4 @@
-package edu.ucr.cs.riple.diagnose;
+package edu.ucr.cs.riple.autofixer;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

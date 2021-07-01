@@ -1,5 +1,5 @@
-package edu.ucr.cs.riple.diagnose.explorer;
-import com.uber.nullaway.autofix.AutoFixConfig;
+package edu.ucr.cs.riple.autofixer.explorer;
+import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.injector.Fix;
 
 public abstract class AbstractExplorer {

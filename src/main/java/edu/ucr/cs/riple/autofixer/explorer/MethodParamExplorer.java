@@ -1,6 +1,7 @@
-package edu.ucr.cs.riple.diagnose.explorer;
+package edu.ucr.cs.riple.autofixer.explorer;
 
-import com.uber.nullaway.autofix.AutoFixConfig;
+
+import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.injector.Fix;
 
 

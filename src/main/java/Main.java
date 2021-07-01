@@ -1,6 +1,6 @@
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkListBuilder;
-import edu.ucr.cs.riple.diagnose.Diagnose;
+import edu.ucr.cs.riple.autofixer.Diagnose;
 
 import java.util.Arrays;
 

@@ -1,4 +1,4 @@
-package edu.ucr.cs.riple.diagnose.metadata;
+package edu.ucr.cs.riple.autofixer.metadata;
 
 
 import java.util.Objects;

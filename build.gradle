@@ -26,8 +26,7 @@ dependencies {
     implementation "edu.ucr.cs.riple:injector:1.0-SNAPSHOT"
     testImplementation "edu.ucr.cs.riple:injector:1.0-SNAPSHOT"
 
-    implementation "edu.ucr.cs.riple:nullaway:0.7.12-SNAPSHOT"
-    testImplementation "edu.ucr.cs.riple:nullaway:0.7.12-SNAPSHOT"
+    implementation group: 'com.google.guava', name: 'guava', version: 'r05'
 
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
     testImplementation 'com.googlecode.json-simple:json-simple:1.1.1'
