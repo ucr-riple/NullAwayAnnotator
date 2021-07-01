@@ -49,3 +49,19 @@ task fatJar(type: Jar) {
     exclude 'META-INF/*.SF'
     exclude 'META-INF/*.DSA'
 }
+
+fatJar.doLast{
+    def name = 'NullAwayAutoFixer.jar'
+    def path = "$project.buildDir/libs/"+name
+    if ( file(path).exists() ) {
+        file(path).delete()
+    }
+}
+
+fatJar.doLast{
+    def oldName = 'NullAwayAutoFixer-1.0-SNAPSHOT.jar'
+    def newName = 'NullAwayAutoFixer.jar'
+    def oldPath = "$project.buildDir/libs/"+oldName
+    def newPath = "$project.buildDir/libs/"+newName
+    file( oldPath ).renameTo( file( newPath ) )
+}

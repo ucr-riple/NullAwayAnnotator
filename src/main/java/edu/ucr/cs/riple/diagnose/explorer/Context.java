@@ -1,6 +1,6 @@
 package edu.ucr.cs.riple.diagnose.explorer;
 
-import com.uber.nullaway.autofix.fixer.Fix;
+import com.uber.nullaway.autofix.out.display.FixDisplay;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,15 +19,15 @@ public class Context {
         int referred;
         int effect;
 
-        final Fix fix;
+        final FixDisplay fix;
         List<Node> neighbors;
 
-        private Node(Fix fix, int id){
+        private Node(FixDisplay fix, int id){
             this.fix = fix;
             this.id = id;
         }
 
-        static Node findOrCreate(Fix fix){
+        static Node findOrCreate(FixDisplay fix){
             int hash = fix.hashCode();
             List<Node> candidates = nodes.get(hash);
             if(candidates == null){
@@ -47,7 +47,7 @@ public class Context {
             return node;
         }
 
-        static Node find(Fix fix){
+        static Node find(FixDisplay fix){
             List<Node> candidates = nodes.get(fix.hashCode());
             if(candidates != null) {
                 for (Node candidate : candidates) {
@@ -60,21 +60,21 @@ public class Context {
         }
     }
 
-    public Node getNode(Fix fix){
+    public Node getNode(FixDisplay fix){
         return Node.find(fix);
     }
 
-    public void updateStateWithFix(Fix fix){
+    public void updateStateWithFix(FixDisplay fix){
         Node node = Node.findOrCreate(fix);
         node.referred++;
     }
 
-    public void updateFixEffect(Fix fix, int effect){
+    public void updateFixEffect(FixDisplay fix, int effect){
         Node node = Node.findOrCreate(fix);
         node.effect = effect;
     }
 
-    public void addNeighbor(Fix cause, Fix fix){
+    public void addNeighbor(FixDisplay cause, FixDisplay fix){
         Node base = Node.findOrCreate(cause);
         Node neighbor = Node.findOrCreate(fix);
         base.neighbors.add(neighbor);

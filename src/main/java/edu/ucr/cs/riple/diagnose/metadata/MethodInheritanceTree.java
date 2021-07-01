@@ -1,5 +1,6 @@
 package edu.ucr.cs.riple.diagnose.metadata;
 
+import com.uber.nullaway.autofix.Writer;
 import org.json.simple.parser.ParseException;
 
 import java.io.BufferedReader;
@@ -36,8 +37,9 @@ public class MethodInheritanceTree {
         BufferedReader reader;
         reader = new BufferedReader(new FileReader(filePath));
         String line = reader.readLine();
+        if(line != null) line = reader.readLine();
         while (line != null) {
-            String[] values = line.split("%\\*%");
+            String[] values = line.split("(\\$\\*\\$)");
             Long id = Long.parseLong(values[0]);
             MethodInfo info = new MethodInfo(id, values[1], values[2], values[5]);
             MethodNode node;

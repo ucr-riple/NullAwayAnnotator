@@ -1,6 +1,6 @@
 package edu.ucr.cs.riple.diagnose;
 
-import edu.ucr.cs.riple.diagnose.metadata.MethodInfo;
+import com.uber.nullaway.autofix.out.display.FixDisplay;
 import edu.ucr.cs.riple.diagnose.metadata.MethodInheritanceTree;
 import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
@@ -16,6 +16,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -47,12 +50,12 @@ public class Diagnose {
 
   public void start(String buildCommand, String out_dir, boolean optimized) {
     this.buildCommand = buildCommand;
-    this.fixPath = out_dir + "/fixes.json";
+    this.fixPath = out_dir + "/fixes.csv";
     this.diagnosePath = out_dir + "/diagnose.json";
     methodInheritanceTree = new MethodInheritanceTree(out_dir + "/method_info.csv");
     System.out.println("Diagnose Started...");
     injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
-    System.out.println("Requesting preparation");
+    System.out.println("Starting preparation");
     prepare(out_dir, optimized);
     System.out.println("Build command: " + buildCommand);
     fixReportMap = new HashMap<>();
@@ -83,36 +86,36 @@ public class Diagnose {
   private List<Fix> analyze(Fix fix) {
     List<Fix> suggestedFix = new ArrayList<>();
     suggestedFix.add(fix);
-    if(fix.location.equals("METHOD_PARAM")) {
-      List<MethodInfo> subMethods = methodInheritanceTree.getSubMethods(fix.method, fix.className);
-      for (MethodInfo info : subMethods) {
-        suggestedFix.add(new Fix(
-                fix.annotation,
-                info.method,
-                fix.param,
-                fix.location,
-                info.clazz,
-                fix.pkg,
-                info.uri,
-                fix.inject
-        ));
-      }
-    }
-    if(fix.location.equals("METHOD_RETURN")) {
-      List<MethodInfo> subMethods = methodInheritanceTree.getSuperMethods(fix.method, fix.className);
-      for (MethodInfo info : subMethods) {
-        suggestedFix.add(new Fix(
-                fix.annotation,
-                info.method,
-                fix.param,
-                fix.location,
-                info.clazz,
-                fix.pkg,
-                info.uri,
-                fix.inject
-        ));
-      }
-    }
+//    if(fix.location.equals("METHOD_PARAM")) {
+//      List<MethodInfo> subMethods = methodInheritanceTree.getSubMethods(fix.method, fix.className);
+//      for (MethodInfo info : subMethods) {
+//        suggestedFix.add(new Fix(
+//                fix.annotation,
+//                info.method,
+//                fix.param,
+//                fix.location,
+//                info.clazz,
+//                fix.pkg,
+//                info.uri,
+//                fix.inject
+//        ));
+//      }
+//    }
+//    if(fix.location.equals("METHOD_RETURN")) {
+//      List<MethodInfo> subMethods = methodInheritanceTree.getSuperMethods(fix.method, fix.className);
+//      for (MethodInfo info : subMethods) {
+//        suggestedFix.add(new Fix(
+//                fix.annotation,
+//                info.method,
+//                fix.param,
+//                fix.location,
+//                info.clazz,
+//                fix.pkg,
+//                info.uri,
+//                fix.inject
+//        ));
+//      }
+//    }
     injector.start(Collections.singletonList(new WorkList(suggestedFix)));
     fixReportMap.put(fix, makeReport());
     return suggestedFix;
@@ -121,7 +124,7 @@ public class Diagnose {
   @SuppressWarnings("Unchecked")
   private void prepare(String out_dir, boolean optimized) {
     try {
-      System.out.println("Preparing project: " + true);
+      System.out.println("Preparing project: with optimization flag:" + optimized);
       executeCommand(buildCommand);
       if(! new File(fixPath).exists()){
         JSONObject toDiagnose = new JSONObject();
@@ -133,6 +136,7 @@ public class Diagnose {
         return;
       }
       new File(diagnosePath).delete();
+      convertCSVToJSON(out_dir + "/fixes.csv", out_dir + "/fixes.json");
       System.out.println("Deleted old diagnose file.");
       System.out.println("Making new diagnose.json.");
       if(!optimized){
@@ -162,6 +166,30 @@ public class Diagnose {
       System.out.println("Preparation done");
     } catch (Exception e) {
       e.printStackTrace();
+    }
+  }
+
+  private void convertCSVToJSON(String csvPath, String jsonPath) {
+    ArrayList<FixDisplay> fixes = new ArrayList<>();
+    BufferedReader reader;
+    FileWriter writer;
+    try {
+      reader = Files.newBufferedReader(Paths.get(csvPath), Charset.defaultCharset());
+      String line = reader.readLine();
+      while (line != null) {
+        FixDisplay fix = FixDisplay.fromCSVLine(line);
+        fixes.add(fix);
+        line = reader.readLine();
+      }
+      reader.close();
+      JSONObject res = new JSONObject();
+      JSONArray fixesArray = new JSONArray();
+      fixesArray.addAll(fixes);
+      res.put("fixes", fixesArray);
+      writer = new FileWriter(jsonPath);
+      writer.write(res.toJSONString());
+    } catch (IOException e) {
+      System.err.println("Error happened in converting csv to json!");
     }
   }
 
