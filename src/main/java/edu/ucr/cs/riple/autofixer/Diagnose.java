@@ -1,5 +1,6 @@
 package edu.ucr.cs.riple.autofixer;
 
+import edu.ucr.cs.riple.autofixer.metadata.CallGraph;
 import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
 import edu.ucr.cs.riple.autofixer.nullaway.FixDisplay;
 import edu.ucr.cs.riple.injector.Fix;
@@ -33,6 +34,7 @@ public class Diagnose {
   String fixPath;
   String diagnosePath;
   MethodInheritanceTree methodInheritanceTree;
+  CallGraph callGraph;
 
   private static void executeCommand(String command) {
     try {
@@ -53,6 +55,7 @@ public class Diagnose {
     this.fixPath = out_dir + "/fixes.csv";
     this.diagnosePath = out_dir + "/diagnose.json";
     methodInheritanceTree = new MethodInheritanceTree(out_dir + "/method_info.csv");
+    callGraph = new CallGraph(out_dir + "/call_graph.csv");
     System.out.println("Diagnose Started...");
     injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
     System.out.println("Starting preparation");
