@@ -232,8 +232,8 @@ public class AutoFixConfig {
             return this;
         }
 
-        public AutoFixConfigWriter setWorkList(Set<String> workList) {
-            WORK_LIST = workList;
+        public AutoFixConfigWriter setWorkList(String[] workList) {
+            WORK_LIST = new HashSet<>(Arrays.asList(workList));
             return this;
         }
 
