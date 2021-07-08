@@ -2,13 +2,15 @@ package edu.ucr.cs.riple.autofixer;
 
 import static edu.ucr.cs.riple.autofixer.Utility.*;
 
+import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
+import edu.ucr.cs.riple.autofixer.explorers.ClassFieldExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.Explorer;
 import edu.ucr.cs.riple.autofixer.explorers.MethodParamExplorer;
+import edu.ucr.cs.riple.autofixer.explorers.MethodReturnExplorer;
 import edu.ucr.cs.riple.autofixer.metadata.CallGraph;
 import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
 import edu.ucr.cs.riple.autofixer.metadata.MethodNode;
-import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkList;
@@ -29,6 +31,7 @@ public class Diagnose {
   String buildCommand;
   String fixPath;
   String diagnosePath;
+  public String out_dir;
   List<DiagnoseReport> finishedReports;
   Injector injector;
   Bank bank;
@@ -38,7 +41,8 @@ public class Diagnose {
 
   public void start(String buildCommand, String out_dir, boolean optimized) {
     System.out.println("Diagnose Started...");
-    init(out_dir, buildCommand);
+    this.out_dir = out_dir;
+    init(buildCommand);
     injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
     System.out.println("Starting preparation");
     prepare(out_dir, optimized);
@@ -59,15 +63,15 @@ public class Diagnose {
     writeReports(finishedReports);
   }
 
-  private void init(String out_dir, String buildCommand) {
+  private void init(String buildCommand) {
     this.buildCommand = buildCommand;
     this.fixPath = out_dir + "/fixes.csv";
     this.diagnosePath = out_dir + "/diagnose.json";
     this.finishedReports = new ArrayList<>();
     this.explorers = new ArrayList<>();
-    Explorer methodExplorer = new MethodParamExplorer();
-    methodExplorer.init();
-    explorers.add(new MethodParamExplorer());
+    explorers.add(new MethodParamExplorer(this, bank));
+    explorers.add(new ClassFieldExplorer(this, bank));
+    explorers.add(new MethodReturnExplorer(this, bank));
     bank = new Bank();
     bank.setup();
     methodInheritanceTree = new MethodInheritanceTree(out_dir + "/method_info.csv");
@@ -86,28 +90,17 @@ public class Diagnose {
   private List<Fix> analyze(Fix fix) {
     System.out.println("FIX TYPE IS: " + fix.location);
     List<Fix> suggestedFix = new ArrayList<>();
-    DiagnoseReport diagnoseReport;
+    DiagnoseReport diagnoseReport = null;
     suggestedFix.add(fix);
 //    protectInheritanceRules(fix, suggestedFix);
     injector.start(Collections.singletonList(new WorkList(suggestedFix)));
-    if ("METHOD_RETURN".equals(fix.location)) {
-      String[] workList = callGraph.getUserClassesOfMethod(fix.method, fix.className);
-      if (workList == null) {
-        diagnoseReport = new DiagnoseReport(fix, -1);
-        finishedReports.add(diagnoseReport);
-        return suggestedFix;
+    for(Explorer explorer: explorers){
+      if(explorer.isApplicable(fix)){
+        diagnoseReport = explorer.effect(fix);
+        break;
       }
-      AutoFixConfig.AutoFixConfigWriter writer = new AutoFixConfig.AutoFixConfigWriter()
-              .setLogError(true, false)
-              .setMakeCallGraph(false)
-              .setOptimized(false)
-              .setMethodInheritanceTree(false)
-              .setSuggest(true)
-              .setMakeCallGraph(false)
-              .setWorkList(workList);
-      writer.write("/tmp/NullAwayFix/explorer.config");
     }
-    diagnoseReport = makeReport(fix);
+    Preconditions.checkNotNull(diagnoseReport);
     finishedReports.add(diagnoseReport);
     return suggestedFix;
   }
@@ -194,7 +187,15 @@ public class Diagnose {
     }
   }
 
-  private DiagnoseReport makeReport(Fix fix) {
+  public void buildProject(){
+    try {
+      executeCommand(buildCommand);
+    } catch (Exception e) {
+      throw new RuntimeException("Could not run command: " + buildCommand);
+    }
+  }
+
+  public DiagnoseReport makeReport(Fix fix) {
     try {
       executeCommand(buildCommand);
       File tempFile = new File("/tmp/NullAwayFix/errors.csv");

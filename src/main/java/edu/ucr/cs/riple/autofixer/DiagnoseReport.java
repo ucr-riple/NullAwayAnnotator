@@ -18,7 +18,7 @@ public class DiagnoseReport {
 
     }
 
-    static DiagnoseReport empty(Fix fix){
+    public static DiagnoseReport empty(Fix fix){
         return new DiagnoseReport(fix, 0);
     }
 }
