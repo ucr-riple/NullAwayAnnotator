@@ -233,7 +233,6 @@ public class AutoFixConfig {
         }
 
         public AutoFixConfigWriter setWorkList(String[] workList) {
-            System.out.println("SETTING WorkList: " + Arrays.toString(workList));
             if(workList == null){
                 WORK_LIST = Collections.singleton("-");
                 return this;

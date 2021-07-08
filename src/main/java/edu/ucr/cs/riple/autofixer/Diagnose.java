@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -91,8 +90,6 @@ public class Diagnose {
         finishedReports.add(diagnoseReport);
         return suggestedFix;
       }
-      System.out.println("SETTING workList FOR: " + fix);
-      System.out.println("LIST OF CLASSES: " + Arrays.toString(workList));
       AutoFixConfig.AutoFixConfigWriter writer = new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, false)
               .setMakeCallGraph(false)
