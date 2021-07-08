@@ -18,13 +18,10 @@ public class Utility {
     @SuppressWarnings("StatementWithEmptyBody")
     public static void executeCommand(String command) {
         try {
-            System.out.println("Executing command: " + command);
             Process p = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
-            System.out.println("Requested");
             BufferedReader reader = new BufferedReader(new InputStreamReader(p.getErrorStream()));
             while ((reader.readLine()) != null) {}
             p.waitFor();
-            System.out.println("Finished.");
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -1,4 +1,4 @@
-package edu.ucr.cs.riple.autofixer.explorer;
+package edu.ucr.cs.riple.autofixer.explorers;
 
 import edu.ucr.cs.riple.autofixer.nullaway.FixDisplay;
 

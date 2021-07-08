@@ -3,6 +3,8 @@ package edu.ucr.cs.riple.autofixer;
 import static edu.ucr.cs.riple.autofixer.Utility.*;
 
 import edu.ucr.cs.riple.autofixer.errors.Bank;
+import edu.ucr.cs.riple.autofixer.explorers.Explorer;
+import edu.ucr.cs.riple.autofixer.explorers.MethodParamExplorer;
 import edu.ucr.cs.riple.autofixer.metadata.CallGraph;
 import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
 import edu.ucr.cs.riple.autofixer.metadata.MethodNode;
@@ -24,30 +26,22 @@ import java.util.List;
 
 public class Diagnose {
 
-  Injector injector;
   String buildCommand;
-  List<DiagnoseReport> finishedReports;
   String fixPath;
   String diagnosePath;
-  MethodInheritanceTree methodInheritanceTree;
-  CallGraph callGraph;
+  List<DiagnoseReport> finishedReports;
+  Injector injector;
   Bank bank;
-  boolean protectInheritance = false;
+  List<Explorer> explorers;
+  CallGraph callGraph;
+  MethodInheritanceTree methodInheritanceTree;
 
   public void start(String buildCommand, String out_dir, boolean optimized) {
-    this.buildCommand = buildCommand;
-    this.fixPath = out_dir + "/fixes.csv";
-    this.diagnosePath = out_dir + "/diagnose.json";
-    this.finishedReports = new ArrayList<>();
-    bank = new Bank();
-    bank.setup();
-    methodInheritanceTree = new MethodInheritanceTree(out_dir + "/method_info.csv");
-    callGraph = new CallGraph(out_dir + "/call_graph.csv");
     System.out.println("Diagnose Started...");
+    init(out_dir, buildCommand);
     injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
     System.out.println("Starting preparation");
     prepare(out_dir, optimized);
-    System.out.println("Build command: " + buildCommand);
     List<WorkList> workListLists = new WorkListBuilder(diagnosePath).getWorkLists();
     try {
       for (WorkList workList : workListLists) {
@@ -65,6 +59,21 @@ public class Diagnose {
     writeReports(finishedReports);
   }
 
+  private void init(String out_dir, String buildCommand) {
+    this.buildCommand = buildCommand;
+    this.fixPath = out_dir + "/fixes.csv";
+    this.diagnosePath = out_dir + "/diagnose.json";
+    this.finishedReports = new ArrayList<>();
+    this.explorers = new ArrayList<>();
+    Explorer methodExplorer = new MethodParamExplorer();
+    methodExplorer.init();
+    explorers.add(new MethodParamExplorer());
+    bank = new Bank();
+    bank.setup();
+    methodInheritanceTree = new MethodInheritanceTree(out_dir + "/method_info.csv");
+    callGraph = new CallGraph(out_dir + "/call_graph.csv");
+  }
+
   private void remove(List<Fix> fixes) {
     List<Fix> toRemove = new ArrayList<>();
     for(Fix fix: fixes){
@@ -77,12 +86,10 @@ public class Diagnose {
   private List<Fix> analyze(Fix fix) {
     System.out.println("FIX TYPE IS: " + fix.location);
     List<Fix> suggestedFix = new ArrayList<>();
-    suggestedFix.add(fix);
-    if (protectInheritance) {
-      protectInheritanceRules(fix, suggestedFix);
-    }
-    injector.start(Collections.singletonList(new WorkList(suggestedFix)));
     DiagnoseReport diagnoseReport;
+    suggestedFix.add(fix);
+//    protectInheritanceRules(fix, suggestedFix);
+    injector.start(Collections.singletonList(new WorkList(suggestedFix)));
     if ("METHOD_RETURN".equals(fix.location)) {
       String[] workList = callGraph.getUserClassesOfMethod(fix.method, fix.className);
       if (workList == null) {
