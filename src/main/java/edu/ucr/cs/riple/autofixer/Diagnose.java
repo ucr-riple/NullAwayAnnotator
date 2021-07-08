@@ -1,7 +1,9 @@
 package edu.ucr.cs.riple.autofixer;
 
+import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.autofixer.metadata.CallGraph;
 import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
+import edu.ucr.cs.riple.autofixer.metadata.MethodNode;
 import edu.ucr.cs.riple.autofixer.nullaway.FixDisplay;
 import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
@@ -22,20 +24,23 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class Diagnose {
 
   Injector injector;
   String buildCommand;
-  Map<Fix, DiagnoseReport> fixReportMap;
+  List<DiagnoseReport> finishedReports;
   String fixPath;
   String diagnosePath;
   MethodInheritanceTree methodInheritanceTree;
   CallGraph callGraph;
+  boolean protectInheritance = false;
+  Bank bank;
 
+  @SuppressWarnings("StatementWithEmptyBody")
   private static void executeCommand(String command) {
     try {
       System.out.println("Executing command: " + command);
@@ -54,6 +59,8 @@ public class Diagnose {
     this.buildCommand = buildCommand;
     this.fixPath = out_dir + "/fixes.csv";
     this.diagnosePath = out_dir + "/diagnose.json";
+    bank = new Bank();
+    bank.setup();
     methodInheritanceTree = new MethodInheritanceTree(out_dir + "/method_info.csv");
     callGraph = new CallGraph(out_dir + "/call_graph.csv");
     System.out.println("Diagnose Started...");
@@ -61,12 +68,13 @@ public class Diagnose {
     System.out.println("Starting preparation");
     prepare(out_dir, optimized);
     System.out.println("Build command: " + buildCommand);
-    fixReportMap = new HashMap<>();
     List<WorkList> workListLists = new WorkListBuilder(diagnosePath).getWorkLists();
-    DiagnoseReport base = makeReport();
     try {
       for (WorkList workList : workListLists) {
         for (Fix fix : workList.getFixes()) {
+          if(finishedReports.stream().anyMatch(diagnoseReport -> diagnoseReport.fix.equals(fix))){
+            continue;
+          }
           List<Fix> appliedFixes = analyze(fix);
           remove(appliedFixes);
         }
@@ -74,7 +82,7 @@ public class Diagnose {
     } catch (Exception e) {
       e.printStackTrace();
     }
-    writeReports(base);
+    writeReports();
   }
 
   private void remove(List<Fix> fixes) {
@@ -89,42 +97,48 @@ public class Diagnose {
   private List<Fix> analyze(Fix fix) {
     List<Fix> suggestedFix = new ArrayList<>();
     suggestedFix.add(fix);
-//    if(fix.location.equals("METHOD_PARAM")) {
-//      List<MethodInfo> subMethods = methodInheritanceTree.getSubMethods(fix.method, fix.className);
-//      for (MethodInfo info : subMethods) {
-//        suggestedFix.add(new Fix(
-//                fix.annotation,
-//                info.method,
-//                fix.param,
-//                fix.location,
-//                info.clazz,
-//                fix.pkg,
-//                info.uri,
-//                fix.inject
-//        ));
-//      }
-//    }
-//    if(fix.location.equals("METHOD_RETURN")) {
-//      List<MethodInfo> subMethods = methodInheritanceTree.getSuperMethods(fix.method, fix.className);
-//      for (MethodInfo info : subMethods) {
-//        suggestedFix.add(new Fix(
-//                fix.annotation,
-//                info.method,
-//                fix.param,
-//                fix.location,
-//                info.clazz,
-//                fix.pkg,
-//                info.uri,
-//                fix.inject
-//        ));
-//      }
-//    }
+    if(protectInheritance){
+      protectInheritanceRules(fix, suggestedFix);
+    }
     injector.start(Collections.singletonList(new WorkList(suggestedFix)));
-    fixReportMap.put(fix, makeReport());
+    finishedReports.add(makeReport(fix));
     return suggestedFix;
   }
 
-  @SuppressWarnings("Unchecked")
+  private void protectInheritanceRules(Fix fix, List<Fix> suggestedFix) {
+        if(fix.location.equals("METHOD_PARAM")) {
+      List<MethodNode> subMethods = methodInheritanceTree.getSubMethods(fix.method, fix.className);
+      for (MethodNode info : subMethods) {
+        suggestedFix.add(new Fix(
+                fix.annotation,
+                info.method,
+                fix.param,
+                fix.location,
+                info.clazz,
+                fix.pkg,
+                info.uri,
+                fix.inject
+        ));
+      }
+    }
+    if(fix.location.equals("METHOD_RETURN")) {
+      List<MethodNode> subMethods = methodInheritanceTree.getSuperMethods(fix.method, fix.className);
+      for (MethodNode info : subMethods) {
+        suggestedFix.add(new Fix(
+                fix.annotation,
+                info.method,
+                fix.param,
+                fix.location,
+                info.clazz,
+                fix.pkg,
+                info.uri,
+                fix.inject
+        ));
+      }
+    }
+  }
+
+  @SuppressWarnings("ALL")
   private void prepare(String out_dir, boolean optimized) {
     try {
       System.out.println("Preparing project: with optimization flag:" + optimized);
@@ -173,6 +187,7 @@ public class Diagnose {
     }
   }
 
+  @SuppressWarnings("ALL")
   private void convertCSVToJSON(String csvPath, String jsonPath) {
     JSONArray fixes = new JSONArray();
     BufferedReader reader;
@@ -199,18 +214,16 @@ public class Diagnose {
     }
   }
 
-  private void writeReports(DiagnoseReport base) {
+  @SuppressWarnings("ALL")
+  private void writeReports() {
     JSONObject result = new JSONObject();
-    JSONArray reports = new JSONArray();
-    for (Fix fix : fixReportMap.keySet()) {
-      JSONObject report = fix.getJson();
-      DiagnoseReport diagnoseReport = fixReportMap.get(fix);
-      report.put("jump", diagnoseReport.getErrors().size() - base.getErrors().size());
-      JSONArray errors = diagnoseReport.compare(base);
-      report.put("errors", errors);
-      reports.add(report);
+    JSONArray reportsJson = new JSONArray();
+    for (DiagnoseReport report : finishedReports) {
+      JSONObject reportJson = report.fix.getJson();
+      reportJson.put("jump", report.effectiveNess);
+      reportsJson.add(reportJson);
     }
-    reports.sort(
+    reportsJson.sort(
         (o1, o2) -> {
           Integer first = (Integer) ((JSONObject) o1).get("jump");
           Integer second = (Integer) ((JSONObject) o2).get("jump");
@@ -222,7 +235,7 @@ public class Diagnose {
           }
           return -1;
         });
-    result.put("reports", reports);
+    result.put("reports", reportsJson);
     try  {
       FileWriter writer = new FileWriter("/tmp/NullAwayFix/diagnose_report.json");
       writer.write(result.toJSONString().replace("\\/", "/").replace("\\\\\\", "\\"));
@@ -232,16 +245,15 @@ public class Diagnose {
     }
   }
 
-  private DiagnoseReport makeReport() {
+  private DiagnoseReport makeReport(Fix fix) {
     try {
       executeCommand(buildCommand);
-      File tempFile = new File("/tmp/NullAwayFix/errors.json");
+      File tempFile = new File("/tmp/NullAwayFix/errors.csv");
       boolean exists = tempFile.exists();
       if(exists){
-        Object obj = new JSONParser().parse(new FileReader("/tmp/NullAwayFix/errors.json"));
-        return new DiagnoseReport((JSONObject)obj);
+        return new DiagnoseReport(fix, bank.compare());
       }
-      return DiagnoseReport.empty();
+      return DiagnoseReport.empty(fix);
     } catch (Exception e) {
       System.out.println("Error happened: " + e.getMessage());
       throw new RuntimeException("Could not run command: " + buildCommand);

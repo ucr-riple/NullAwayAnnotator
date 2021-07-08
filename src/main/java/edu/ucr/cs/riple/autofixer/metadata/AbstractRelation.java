@@ -6,16 +6,17 @@ import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public abstract class AbstractRelation<T> {
-    HashMap<Integer, T> nodes;
-    HashMap<Integer, List<Integer>> idHash;
+    HashMap<Integer, List<T>> idHash;
 
     public AbstractRelation(String filePath){
-        nodes = new HashMap<>();
         idHash = new HashMap<>();
         try {
             fillNodes(filePath);
@@ -29,11 +30,12 @@ public abstract class AbstractRelation<T> {
         String line = reader.readLine();
         if(line != null) line = reader.readLine();
         while (line != null) {
-            Integer hash = addNodeByLine(line.split(Writer.getDelimiterRegex()));
+            T node = addNodeByLine(line.split(Writer.getDelimiterRegex()));
+            Integer hash = node.hashCode();
             if (idHash.containsKey(hash)) {
-                idHash.get(hash).add(hash);
+                idHash.get(hash).add(node);
             } else {
-                List<Integer> singleHash = Collections.singletonList(hash);
+                List<T> singleHash = Collections.singletonList(node);
                 idHash.put(hash, singleHash);
             }
             line = reader.readLine();
@@ -41,5 +43,40 @@ public abstract class AbstractRelation<T> {
         reader.close();
     }
 
-    protected abstract Integer addNodeByLine(String[] values);
+    protected abstract T addNodeByLine(String[] values);
+
+    interface Comparator<T>{
+        boolean equals(T candidate, String... arguments);
+    }
+
+    protected T findNode(Comparator<T> c, String... arguments){
+        T node = null;
+        int hash = Arrays.hashCode(arguments);
+        List<T> candidateIds = idHash.get(hash);
+        if(candidateIds == null){
+            return null;
+        }
+        for(T candidate: candidateIds){
+            if(c.equals(candidate, arguments)){
+                node = candidate;
+                break;
+            }
+        }
+        return node;
+    }
+
+    protected List<T> findAllNodes(Comparator<T> c, String... arguments){
+        int hash = Arrays.hashCode(arguments);
+        List<T> candidateIds = idHash.get(hash);
+        if(candidateIds == null){
+            return null;
+        }
+        List<T> nodes = new ArrayList<>();
+        for(T candidate: candidateIds){
+            if(c.equals(candidate, arguments)){
+                nodes.add(candidate);
+            }
+        }
+        return nodes;
+    }
 }
