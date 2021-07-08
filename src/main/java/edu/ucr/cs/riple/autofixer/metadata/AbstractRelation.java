@@ -8,22 +8,25 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
 public abstract class AbstractRelation<T> {
     HashMap<Integer, List<T>> idHash;
 
     public AbstractRelation(String filePath){
-        idHash = new HashMap<>();
+        setup();
         try {
             fillNodes(filePath);
         }catch (IOException e){
             System.out.println("Not found: " + filePath);
         }
     }
+
+    protected void setup(){
+        idHash = new HashMap<>();
+    }
+
     protected void fillNodes(String filePath) throws IOException{
         BufferedReader reader;
         reader = new BufferedReader(new FileReader(filePath));
@@ -35,7 +38,8 @@ public abstract class AbstractRelation<T> {
             if (idHash.containsKey(hash)) {
                 idHash.get(hash).add(node);
             } else {
-                List<T> singleHash = Collections.singletonList(node);
+                List<T> singleHash = new ArrayList<>();
+                singleHash.add(node);
                 idHash.put(hash, singleHash);
             }
             line = reader.readLine();

@@ -15,11 +15,11 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,15 +32,14 @@ public class Diagnose {
   String diagnosePath;
   MethodInheritanceTree methodInheritanceTree;
   CallGraph callGraph;
-  boolean protectInheritance = false;
   Bank bank;
-
-
+  boolean protectInheritance = false;
 
   public void start(String buildCommand, String out_dir, boolean optimized) {
     this.buildCommand = buildCommand;
     this.fixPath = out_dir + "/fixes.csv";
     this.diagnosePath = out_dir + "/diagnose.json";
+    this.finishedReports = new ArrayList<>();
     bank = new Bank();
     bank.setup();
     methodInheritanceTree = new MethodInheritanceTree(out_dir + "/method_info.csv");
@@ -77,14 +76,23 @@ public class Diagnose {
   }
 
   private List<Fix> analyze(Fix fix) {
+    System.out.println("FIX TYPE IS: " + fix.location);
     List<Fix> suggestedFix = new ArrayList<>();
     suggestedFix.add(fix);
-    if(protectInheritance){
+    if (protectInheritance) {
       protectInheritanceRules(fix, suggestedFix);
     }
     injector.start(Collections.singletonList(new WorkList(suggestedFix)));
     DiagnoseReport diagnoseReport;
     if ("METHOD_RETURN".equals(fix.location)) {
+      String[] workList = callGraph.getUserClassesOfMethod(fix.method, fix.className);
+      if (workList == null) {
+        diagnoseReport = new DiagnoseReport(fix, -1);
+        finishedReports.add(diagnoseReport);
+        return suggestedFix;
+      }
+      System.out.println("SETTING workList FOR: " + fix);
+      System.out.println("LIST OF CLASSES: " + Arrays.toString(workList));
       AutoFixConfig.AutoFixConfigWriter writer = new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, false)
               .setMakeCallGraph(false)
@@ -92,7 +100,7 @@ public class Diagnose {
               .setMethodInheritanceTree(false)
               .setSuggest(true)
               .setMakeCallGraph(false)
-              .setWorkList(callGraph.getUserClassesOfMethod(fix.method, fix.className));
+              .setWorkList(workList);
       writer.write("/tmp/NullAwayFix/explorer.config");
     }
     diagnoseReport = makeReport(fix);

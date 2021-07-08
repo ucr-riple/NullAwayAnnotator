@@ -7,10 +7,16 @@ import java.util.List;
 import java.util.Set;
 
 public class MethodInheritanceTree extends AbstractRelation<MethodNode>{
+
     HashMap<Integer, MethodNode> nodes;
 
     public MethodInheritanceTree(String filePath) {
         super(filePath);
+    }
+
+    @Override
+    protected void setup() {
+        super.setup();
         nodes = new HashMap<>();
     }
 
