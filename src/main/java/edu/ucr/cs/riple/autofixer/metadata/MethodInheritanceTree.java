@@ -9,6 +9,7 @@ import java.util.Set;
 public class MethodInheritanceTree extends AbstractRelation<MethodNode>{
 
     HashMap<Integer, MethodNode> nodes;
+    int maxsize = 0;
 
     public MethodInheritanceTree(String filePath) {
         super(filePath);
@@ -31,7 +32,11 @@ public class MethodInheritanceTree extends AbstractRelation<MethodNode>{
             nodes.put(id, node);
         }
         Integer parentId = Integer.parseInt(values[3]);
-        node.fillInformation(id, values[1], values[2], values[5], parentId);
+        int size = Integer.parseInt(values[6]);
+        if(size > maxsize){
+            maxsize = size;
+        }
+        node.fillInformation(id, values[1], values[2], values[5], parentId, size);
         if (parentId != -1) {
             MethodNode parent = nodes.get(parentId);
             if (parent == null) {
@@ -84,5 +89,9 @@ public class MethodInheritanceTree extends AbstractRelation<MethodNode>{
             workList.addAll(tmp);
         }
         return ans;
+    }
+
+    public int maxParamSize(){
+        return maxsize;
     }
 }

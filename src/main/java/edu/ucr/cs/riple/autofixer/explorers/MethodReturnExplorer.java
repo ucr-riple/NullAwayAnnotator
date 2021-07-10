@@ -16,12 +16,7 @@ public class MethodReturnExplorer extends Explorer{
 
     public MethodReturnExplorer(Diagnose diagnose, Bank bank) {
         super(diagnose, bank);
-        callGraph = new CallGraph(diagnose.out_dir + "/call_graph.csv");
-    }
-
-    @Override
-    public void init() {
-
+        callGraph = diagnose.callGraph;
     }
 
     @Override

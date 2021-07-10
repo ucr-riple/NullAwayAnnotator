@@ -31,8 +31,9 @@ public class Index{
     public void index(){
         try (BufferedReader br = new BufferedReader(new FileReader(Writer.ERROR))) {
             String line;
+            String delimiter = Writer.getDelimiterRegex();
             while ((line = br.readLine()) != null) {
-                String[] infos = line.split(Writer.getDelimiterRegex());
+                String[] infos = line.split(delimiter);
                 Error error = new Error(infos[0], infos[1], infos[2], infos[3]);
                 total++;
                 int hash;

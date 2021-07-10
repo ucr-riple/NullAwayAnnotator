@@ -1,6 +1,6 @@
 package edu.ucr.cs.riple.autofixer;
 
-import static edu.ucr.cs.riple.autofixer.Utility.*;
+import static edu.ucr.cs.riple.autofixer.util.Utility.*;
 
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
@@ -11,6 +11,7 @@ import edu.ucr.cs.riple.autofixer.explorers.MethodReturnExplorer;
 import edu.ucr.cs.riple.autofixer.metadata.CallGraph;
 import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
 import edu.ucr.cs.riple.autofixer.metadata.MethodNode;
+import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkList;
@@ -28,16 +29,16 @@ import java.util.List;
 
 public class Diagnose {
 
+  String out_dir;
   String buildCommand;
   String fixPath;
   String diagnosePath;
-  public String out_dir;
   List<DiagnoseReport> finishedReports;
   Injector injector;
   Bank bank;
   List<Explorer> explorers;
-  CallGraph callGraph;
-  MethodInheritanceTree methodInheritanceTree;
+  public CallGraph callGraph;
+  public MethodInheritanceTree methodInheritanceTree;
 
   public void start(String buildCommand, String out_dir, boolean optimized) {
     System.out.println("Diagnose Started...");
@@ -68,14 +69,14 @@ public class Diagnose {
     this.fixPath = out_dir + "/fixes.csv";
     this.diagnosePath = out_dir + "/diagnose.json";
     this.finishedReports = new ArrayList<>();
+    this.methodInheritanceTree = new MethodInheritanceTree(out_dir + "/method_info.csv");
+    this.callGraph = new CallGraph(out_dir + "/call_graph.csv");
     this.explorers = new ArrayList<>();
     explorers.add(new MethodParamExplorer(this, bank));
     explorers.add(new ClassFieldExplorer(this, bank));
     explorers.add(new MethodReturnExplorer(this, bank));
     bank = new Bank();
     bank.setup();
-    methodInheritanceTree = new MethodInheritanceTree(out_dir + "/method_info.csv");
-    callGraph = new CallGraph(out_dir + "/call_graph.csv");
   }
 
   private void remove(List<Fix> fixes) {
@@ -195,19 +196,8 @@ public class Diagnose {
     }
   }
 
-  public DiagnoseReport makeReport(Fix fix) {
-    try {
-      executeCommand(buildCommand);
-      File tempFile = new File("/tmp/NullAwayFix/errors.csv");
-      boolean exists = tempFile.exists();
-      if(exists){
-        return new DiagnoseReport(fix, bank.compare());
-      }
-      return DiagnoseReport.empty(fix);
-    } catch (Exception e) {
-      System.out.println("Error happened: " + e.getMessage());
-      throw new RuntimeException("Could not run command: " + buildCommand);
-    }
+  public void writeConfig(AutoFixConfig.AutoFixConfigWriter writer){
+    writer.write(out_dir + "/explorer.config");
   }
 }
 

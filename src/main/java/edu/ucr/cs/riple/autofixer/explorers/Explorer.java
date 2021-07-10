@@ -13,10 +13,7 @@ public abstract class Explorer {
     public Explorer(Diagnose diagnose, Bank bank) {
         this.diagnose = diagnose;
         this.bank = bank;
-        init();
     }
-
-    protected abstract void init();
 
     public abstract DiagnoseReport effect(Fix fix);
 

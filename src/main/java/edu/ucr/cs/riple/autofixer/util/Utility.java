@@ -1,5 +1,6 @@
-package edu.ucr.cs.riple.autofixer;
+package edu.ucr.cs.riple.autofixer.util;
 
+import edu.ucr.cs.riple.autofixer.DiagnoseReport;
 import edu.ucr.cs.riple.autofixer.nullaway.FixDisplay;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

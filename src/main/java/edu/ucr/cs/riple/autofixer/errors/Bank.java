@@ -27,8 +27,9 @@ public class Bank {
         int errors = 0;
         try (BufferedReader br = new BufferedReader(new FileReader(Writer.ERROR))) {
             String line;
+            String delimiter = Writer.getDelimiterRegex();
             while ((line = br.readLine()) != null) {
-                String[] infos = line.split(Writer.getDelimiterRegex());
+                String[] infos = line.split(delimiter);
                 if(infos[2].equals(className)){
                     errors++;
                 }
@@ -45,8 +46,9 @@ public class Bank {
         int errors = 0;
         try (BufferedReader br = new BufferedReader(new FileReader(Writer.ERROR))) {
             String line;
+            String delimiter = Writer.getDelimiterRegex();
             while ((line = br.readLine()) != null) {
-                String[] infos = line.split(Writer.getDelimiterRegex());
+                String[] infos = line.split(delimiter);
                 if (infos[2].equals(className) && infos[3].equals(methodName)) {
                     errors++;
                 }

@@ -6,8 +6,8 @@ import java.util.List;
 
 public class DiagnoseReport {
 
-    int effectiveNess;
-    Fix fix;
+    public int effectiveNess;
+    public Fix fix;
 
     public DiagnoseReport(Fix fix, int effectiveNess) {
         this.effectiveNess = effectiveNess;

@@ -11,13 +11,15 @@ public class MethodNode{
     public String method;
     public String clazz;
     public String uri;
+    public int size;
 
-    void fillInformation(Integer id, String clazz, String method, String uri, Integer parent){
+    void fillInformation(Integer id, String clazz, String method, String uri, Integer parent, int size){
         this.parent = parent;
         this.id = id;
         this.method = method;
         this.clazz = clazz;
         this.uri = uri;
+        this.size = size;
     }
 
     void addChild(Integer id){
@@ -36,6 +38,7 @@ public class MethodNode{
                 ", method='" + method + '\'' +
                 ", clazz='" + clazz + '\'' +
                 ", uri='" + uri + '\'' +
+                ", size=" + size +
                 '}';
     }
 
@@ -49,6 +52,6 @@ public class MethodNode{
 
     @Override
     public int hashCode() {
-        return Objects.hash(children, parent, id, method, clazz, uri);
+        return Objects.hash(children, parent, id, method, clazz, uri, size);
     }
 }

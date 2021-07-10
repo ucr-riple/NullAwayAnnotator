@@ -15,11 +15,6 @@ public class ClassFieldExplorer extends Explorer {
     }
 
     @Override
-    protected void init() {
-
-    }
-
-    @Override
     public DiagnoseReport effect(Fix fix) {
         diagnose.buildProject();
         File tempFile = new File(Writer.ERROR);

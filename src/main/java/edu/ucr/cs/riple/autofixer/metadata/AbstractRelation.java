@@ -32,8 +32,9 @@ public abstract class AbstractRelation<T> {
         reader = new BufferedReader(new FileReader(filePath));
         String line = reader.readLine();
         if(line != null) line = reader.readLine();
+        String delimiter = Writer.getDelimiterRegex();
         while (line != null) {
-            T node = addNodeByLine(line.split(Writer.getDelimiterRegex()));
+            T node = addNodeByLine(line.split(delimiter));
             Integer hash = node.hashCode();
             if (idHash.containsKey(hash)) {
                 idHash.get(hash).add(node);
