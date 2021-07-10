@@ -4,6 +4,7 @@ package edu.ucr.cs.riple.autofixer.explorers;
 import edu.ucr.cs.riple.autofixer.Diagnose;
 import edu.ucr.cs.riple.autofixer.DiagnoseReport;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
+import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import edu.ucr.cs.riple.injector.Fix;
@@ -18,8 +19,11 @@ import java.util.Objects;
 
 public class MethodParamExplorer extends Explorer {
 
+    MethodInheritanceTree mit;
+
     public MethodParamExplorer(Diagnose diagnose, Bank bank) {
         super(diagnose, bank);
+        mit = diagnose.methodInheritanceTree;
         makeAllNodes();
         measureNullSafetyAllMethods(diagnose, bank);
     }
@@ -55,8 +59,17 @@ public class MethodParamExplorer extends Explorer {
                     .setMethodParamTest(true, i);
             diagnose.writeConfig(writer);
             diagnose.buildProject();
-
+            for(List<Node> list: Node.nodes.values()){
+                for(Node node : list){
+                    int localEffect = bank.compareByMethod(node.clazz, node.method);
+                    node.effect = localEffect + calculateInheritanceViolationError(node);
+                }
+            }
         }
+    }
+
+    private int calculateInheritanceViolationError(Node node) {
+        return 0;
     }
 
     @Override
