@@ -108,7 +108,7 @@ public class Diagnose {
 
   private void protectInheritanceRules(Fix fix, List<Fix> suggestedFix) {
         if(fix.location.equals("METHOD_PARAM")) {
-      List<MethodNode> subMethods = methodInheritanceTree.getSubMethods(fix.method, fix.className);
+      List<MethodNode> subMethods = methodInheritanceTree.getSubMethods(fix.method, fix.className, true);
       for (MethodNode info : subMethods) {
         suggestedFix.add(new Fix(
                 fix.annotation,
@@ -123,7 +123,7 @@ public class Diagnose {
       }
     }
     if(fix.location.equals("METHOD_RETURN")) {
-      List<MethodNode> subMethods = methodInheritanceTree.getSuperMethods(fix.method, fix.className);
+      List<MethodNode> subMethods = methodInheritanceTree.getSuperMethods(fix.method, fix.className, true);
       for (MethodNode info : subMethods) {
         suggestedFix.add(new Fix(
                 fix.annotation,

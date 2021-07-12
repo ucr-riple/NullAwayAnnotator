@@ -14,6 +14,8 @@ public class Bank {
 
     private Index rootInClass;
     private Index rootInMethod;
+    private Index currentInMethod;
+    private Index currentInClass;
 
     public void setup(){
         rootInClass = new Index(Index.Type.BY_CLASS);
@@ -23,42 +25,35 @@ public class Bank {
         Preconditions.checkArgument(rootInClass.total == rootInMethod.total);
     }
 
-    public int compareByClass(String className){
-        int errors = 0;
-        try (BufferedReader br = new BufferedReader(new FileReader(Writer.ERROR))) {
-            String line;
-            String delimiter = Writer.getDelimiterRegex();
-            while ((line = br.readLine()) != null) {
-                String[] infos = line.split(delimiter);
-                if(infos[2].equals(className)){
-                    errors++;
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void saveState(boolean saveClass, boolean saveMethod){
+        if(saveClass){
+            currentInClass = new Index(Index.Type.BY_CLASS);
         }
-        List<Error> previousErrors = rootInClass.getByHash(Objects.hash(className));
-        previousErrors = previousErrors.stream().filter(error -> error.clazz.equals(className)).collect(Collectors.toList());
-        return errors - previousErrors.size();
+        if(saveMethod){
+            currentInMethod = new Index(Index.Type.BY_METHOD);
+        }
     }
 
-    public int compareByMethod(String className, String methodName) {
-        int errors = 0;
-        try (BufferedReader br = new BufferedReader(new FileReader(Writer.ERROR))) {
-            String line;
-            String delimiter = Writer.getDelimiterRegex();
-            while ((line = br.readLine()) != null) {
-                String[] infos = line.split(delimiter);
-                if (infos[2].equals(className) && infos[3].equals(methodName)) {
-                    errors++;
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+    public int compareByClass(String className, boolean fresh){
+        if(fresh){
+            saveState(true, false);
         }
+        List<Error> currentErrors = currentInClass.getByHash(Objects.hash(className));
+        currentErrors = currentErrors.stream().filter(error -> error.clazz.equals(className)).collect(Collectors.toList());
+        List<Error> previousErrors = rootInClass.getByHash(Objects.hash(className));
+        previousErrors = previousErrors.stream().filter(error -> error.clazz.equals(className)).collect(Collectors.toList());
+        return currentErrors.size() - previousErrors.size();
+    }
+
+    public int compareByMethod(String className, String methodName, boolean fresh) {
+        if(fresh){
+            saveState(false, true);
+        }
+        List<Error> currentErrors = currentInMethod.getByHash(Objects.hash(className, methodName));
+        currentErrors = currentErrors.stream().filter(error -> error.clazz.equals(className) && error.method.equals(methodName)).collect(Collectors.toList());
         List<Error> previousErrors = rootInMethod.getByHash(Objects.hash(className, methodName));
         previousErrors = previousErrors.stream().filter(error -> error.clazz.equals(className) && error.method.equals(methodName)).collect(Collectors.toList());
-        return errors - previousErrors.size();
+        return currentErrors.size() - previousErrors.size();
     }
 
     public int compare(){

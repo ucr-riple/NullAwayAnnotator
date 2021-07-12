@@ -1,5 +1,6 @@
 package edu.ucr.cs.riple.autofixer.util;
 
+import com.google.common.primitives.Booleans;
 import edu.ucr.cs.riple.autofixer.DiagnoseReport;
 import edu.ucr.cs.riple.autofixer.nullaway.FixDisplay;
 import org.json.simple.JSONArray;
@@ -12,7 +13,10 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Utility {
 
@@ -84,5 +88,17 @@ public class Utility {
         } catch (IOException e) {
             System.err.println("Error happened in converting csv to json!");
         }
+    }
+
+    public static boolean[] convertStringToArray(String content){
+        if(content == null){
+            return new boolean[0];
+        }
+        content = content.substring(1, content.length() - 1);
+        if(content.length() == 0){
+            return new boolean[0];
+        }
+        content = content.replaceAll("\\s","");
+        return Booleans.toArray(Arrays.stream(content.split(",")).map(Boolean::parseBoolean).collect(Collectors.toList()));
     }
 }

@@ -1,3 +1,4 @@
+import edu.ucr.cs.riple.autofixer.util.Utility;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkListBuilder;
 import edu.ucr.cs.riple.autofixer.Diagnose;

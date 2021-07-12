@@ -5,6 +5,7 @@ import edu.ucr.cs.riple.autofixer.Diagnose;
 import edu.ucr.cs.riple.autofixer.DiagnoseReport;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
+import edu.ucr.cs.riple.autofixer.metadata.MethodNode;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import edu.ucr.cs.riple.injector.Fix;
@@ -59,17 +60,37 @@ public class MethodParamExplorer extends Explorer {
                     .setMethodParamTest(true, i);
             diagnose.writeConfig(writer);
             diagnose.buildProject();
+            bank.saveState(false, true);
             for(List<Node> list: Node.nodes.values()){
                 for(Node node : list){
-                    int localEffect = bank.compareByMethod(node.clazz, node.method);
-                    node.effect = localEffect + calculateInheritanceViolationError(node);
+                    int localEffect = bank.compareByMethod(node.clazz, node.method, false);
+                    node.effect = localEffect + calculateInheritanceViolationError(node, i);
                 }
             }
         }
     }
 
-    private int calculateInheritanceViolationError(Node node) {
-        return 0;
+
+    private int calculateInheritanceViolationError(Node node, int index) {
+        int effect = 0;
+        boolean[] thisMethodFlag = mit.findNode(node.method, node.clazz).annotFlags;
+        for(MethodNode subMethod: mit.getSubMethods(node.method, node.clazz, false)) {
+            if (!thisMethodFlag[index]) {
+                if (!subMethod.annotFlags[index]) {
+                    effect++;
+                }
+            }
+        }
+        List<MethodNode> superMethods = mit.getSuperMethods(node.method, node.clazz, false);
+        if(superMethods.size() != 0){
+            MethodNode superMethod = superMethods.get(0);
+            if (!thisMethodFlag[index]) {
+                if (superMethod.annotFlags[index]) {
+                    effect--;
+                }
+            }
+        }
+        return effect;
     }
 
     @Override

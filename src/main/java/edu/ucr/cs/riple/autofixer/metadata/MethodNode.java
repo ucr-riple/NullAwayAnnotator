@@ -12,14 +12,16 @@ public class MethodNode{
     public String clazz;
     public String uri;
     public int size;
+    public boolean[] annotFlags;
 
-    void fillInformation(Integer id, String clazz, String method, String uri, Integer parent, int size){
+    void fillInformation(Integer id, String clazz, String method, String uri, Integer parent, int size, boolean[] annotFlags){
         this.parent = parent;
         this.id = id;
         this.method = method;
         this.clazz = clazz;
         this.uri = uri;
         this.size = size;
+        this.annotFlags = annotFlags;
     }
 
     void addChild(Integer id){

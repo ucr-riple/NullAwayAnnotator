@@ -38,7 +38,7 @@ public class MethodReturnExplorer extends Explorer{
         File tempFile = new File(Writer.ERROR);
         boolean exists = tempFile.exists();
         if(exists){
-            return new DiagnoseReport(fix, bank.compareByClass(fix.className));
+            return new DiagnoseReport(fix, bank.compareByClass(fix.className, true));
         }
         return DiagnoseReport.empty(fix);
     }

@@ -1,5 +1,7 @@
 package edu.ucr.cs.riple.autofixer.metadata;
 
+import edu.ucr.cs.riple.autofixer.util.Utility;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,7 +38,7 @@ public class MethodInheritanceTree extends AbstractRelation<MethodNode>{
         if(size > maxsize){
             maxsize = size;
         }
-        node.fillInformation(id, values[1], values[2], values[5], parentId, size);
+        node.fillInformation(id, values[1], values[2], values[5], parentId, size, Utility.convertStringToArray(values[7]));
         if (parentId != -1) {
             MethodNode parent = nodes.get(parentId);
             if (parent == null) {
@@ -48,9 +50,9 @@ public class MethodInheritanceTree extends AbstractRelation<MethodNode>{
         return node;
     }
 
-    public List<MethodNode> getSuperMethods(String method, String clazz) {
+    public List<MethodNode> getSuperMethods(String method, String clazz, boolean deep) {
         List<MethodNode> ans = new ArrayList<>();
-        MethodNode node = findNode((candidate, values) -> candidate.method.equals(values[0]) && candidate.clazz.equals(values[1]), method, clazz);
+        MethodNode node = findNode(method, clazz);
         if (node == null) {
             return ans;
         }
@@ -58,15 +60,18 @@ public class MethodInheritanceTree extends AbstractRelation<MethodNode>{
             MethodNode parent = nodes.get(node.parent);
             if (parent != null) {
                 ans.add(parent);
+                if(!deep){
+                    break;
+                }
             }
             node = parent;
         }
         return ans;
     }
 
-    public List<MethodNode> getSubMethods(String method, String clazz){
+    public List<MethodNode> getSubMethods(String method, String clazz, boolean deep){
         List<MethodNode> ans = new ArrayList<>();
-        MethodNode node = findNode((candidate, values) -> candidate.method.equals(values[0]) && candidate.clazz.equals(values[1]), method, clazz);
+        MethodNode node = findNode(method, clazz);
         if(node == null) {
             return ans;
         }
@@ -85,6 +90,9 @@ public class MethodInheritanceTree extends AbstractRelation<MethodNode>{
                     }
                 }
             }
+            if(!deep){
+                break;
+            }
             workList.clear();
             workList.addAll(tmp);
         }
@@ -93,5 +101,9 @@ public class MethodInheritanceTree extends AbstractRelation<MethodNode>{
 
     public int maxParamSize(){
         return maxsize;
+    }
+
+    public MethodNode findNode(String method, String clazz){
+        return findNode((candidate, values) -> candidate.method.equals(values[0]) && candidate.clazz.equals(values[1]), method, clazz);
     }
 }
