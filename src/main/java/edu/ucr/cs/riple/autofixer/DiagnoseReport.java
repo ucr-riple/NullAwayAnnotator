@@ -2,8 +2,6 @@ package edu.ucr.cs.riple.autofixer;
 
 import edu.ucr.cs.riple.injector.Fix;
 
-import java.util.List;
-
 public class DiagnoseReport {
 
     public int effectiveNess;
@@ -12,10 +10,6 @@ public class DiagnoseReport {
     public DiagnoseReport(Fix fix, int effectiveNess) {
         this.effectiveNess = effectiveNess;
         this.fix = fix;
-    }
-
-    public DiagnoseReport(List<String> errors) {
-
     }
 
     public static DiagnoseReport empty(Fix fix){
