@@ -82,7 +82,7 @@ public class Diagnose {
   private void remove(List<Fix> fixes) {
     List<Fix> toRemove = new ArrayList<>();
     for(Fix fix: fixes){
-      Fix removeFix = new Fix(fix.annotation, fix.method, fix.param, fix.location, fix.className, fix.pkg, fix.uri, "false");
+      Fix removeFix = new Fix(fix.annotation, fix.method, fix.param, fix.location, fix.className, fix.pkg, fix.uri, "false", "true");
       toRemove.add(removeFix);
     }
     injector.start(Collections.singletonList(new WorkList(toRemove)));
@@ -118,7 +118,8 @@ public class Diagnose {
                 info.clazz,
                 fix.pkg,
                 info.uri,
-                fix.inject
+                fix.inject,
+                fix.compulsory
         ));
       }
     }
@@ -133,7 +134,8 @@ public class Diagnose {
                 info.clazz,
                 fix.pkg,
                 info.uri,
-                fix.inject
+                fix.inject,
+                fix.compulsory
         ));
       }
     }

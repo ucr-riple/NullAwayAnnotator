@@ -2,7 +2,8 @@ package edu.ucr.cs.riple.autofixer.util;
 
 import com.google.common.primitives.Booleans;
 import edu.ucr.cs.riple.autofixer.DiagnoseReport;
-import edu.ucr.cs.riple.autofixer.nullaway.FixDisplay;
+import edu.ucr.cs.riple.autofixer.nullaway.Writer;
+import edu.ucr.cs.riple.injector.Fix;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -15,7 +16,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Utility {
@@ -73,7 +73,7 @@ public class Utility {
             String line = reader.readLine();
             if(line != null) line = reader.readLine();
             while (line != null) {
-                FixDisplay fix = FixDisplay.fromCSVLine(line);
+                Fix fix = Fix.fromCSVLine(line, Writer.getDelimiterRegex());
                 fixes.add(fix.getJson());
                 line = reader.readLine();
             }
