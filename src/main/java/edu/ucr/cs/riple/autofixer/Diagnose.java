@@ -17,16 +17,15 @@ import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkList;
 import edu.ucr.cs.riple.injector.WorkListBuilder;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 public class Diagnose {
 
@@ -53,7 +52,7 @@ public class Diagnose {
     try {
       for (WorkList workList : workListLists) {
         for (Fix fix : workList.getFixes()) {
-          if(finishedReports.stream().anyMatch(diagnoseReport -> diagnoseReport.fix.equals(fix))){
+          if (finishedReports.stream().anyMatch(diagnoseReport -> diagnoseReport.fix.equals(fix))) {
             continue;
           }
           List<Fix> appliedFixes = analyze(fix);
@@ -76,7 +75,6 @@ public class Diagnose {
     this.fieldGraph = new FieldGraph(out_dir + "/field_graph.csv");
     this.explorers = new ArrayList<>();
     bank = new Bank();
-    bank.setup();
     explorers.add(new MethodParamExplorer(this, bank));
     explorers.add(new ClassFieldExplorer(this, bank));
     explorers.add(new MethodReturnExplorer(this, bank));
@@ -84,8 +82,10 @@ public class Diagnose {
 
   private void remove(List<Fix> fixes) {
     List<Fix> toRemove = new ArrayList<>();
-    for(Fix fix: fixes){
-      Fix removeFix = new Fix(fix.annotation, fix.method, fix.param, fix.location, fix.className, fix.uri, "false");
+    for (Fix fix : fixes) {
+      Fix removeFix =
+          new Fix(
+              fix.annotation, fix.method, fix.param, fix.location, fix.className, fix.uri, "false");
       toRemove.add(removeFix);
     }
     injector.start(Collections.singletonList(new WorkList(toRemove)));
@@ -96,10 +96,10 @@ public class Diagnose {
     List<Fix> suggestedFix = new ArrayList<>();
     DiagnoseReport diagnoseReport = null;
     suggestedFix.add(fix);
-//    protectInheritanceRules(fix, suggestedFix);
+    //    protectInheritanceRules(fix, suggestedFix);
     injector.start(Collections.singletonList(new WorkList(suggestedFix)));
-    for(Explorer explorer: explorers){
-      if(explorer.isApplicable(fix)){
+    for (Explorer explorer : explorers) {
+      if (explorer.isApplicable(fix)) {
         diagnoseReport = explorer.effect(fix);
         break;
       }
@@ -110,32 +110,34 @@ public class Diagnose {
   }
 
   private void protectInheritanceRules(Fix fix, List<Fix> suggestedFix) {
-        if(fix.location.equals("METHOD_PARAM")) {
-      List<MethodNode> subMethods = methodInheritanceTree.getSubMethods(fix.method, fix.className, true);
+    if (fix.location.equals("METHOD_PARAM")) {
+      List<MethodNode> subMethods =
+          methodInheritanceTree.getSubMethods(fix.method, fix.className, true);
       for (MethodNode info : subMethods) {
-        suggestedFix.add(new Fix(
+        suggestedFix.add(
+            new Fix(
                 fix.annotation,
                 info.method,
                 fix.param,
                 fix.location,
                 info.clazz,
                 info.uri,
-                fix.inject
-        ));
+                fix.inject));
       }
     }
-    if(fix.location.equals("METHOD_RETURN")) {
-      List<MethodNode> subMethods = methodInheritanceTree.getSuperMethods(fix.method, fix.className, true);
+    if (fix.location.equals("METHOD_RETURN")) {
+      List<MethodNode> subMethods =
+          methodInheritanceTree.getSuperMethods(fix.method, fix.className, true);
       for (MethodNode info : subMethods) {
-        suggestedFix.add(new Fix(
+        suggestedFix.add(
+            new Fix(
                 fix.annotation,
                 info.method,
                 fix.param,
                 fix.location,
                 info.clazz,
                 info.uri,
-                fix.inject
-        ));
+                fix.inject));
       }
     }
   }
@@ -145,7 +147,7 @@ public class Diagnose {
     try {
       System.out.println("Preparing project: with optimization flag:" + optimized);
       executeCommand(buildCommand);
-      if(! new File(fixPath).exists()){
+      if (!new File(fixPath).exists()) {
         JSONObject toDiagnose = new JSONObject();
         toDiagnose.put("fixes", new JSONArray());
         FileWriter writer = new FileWriter(diagnosePath);
@@ -158,11 +160,11 @@ public class Diagnose {
       convertCSVToJSON(this.fixPath, out_dir + "/fixes.json");
       System.out.println("Deleted old diagnose file.");
       System.out.println("Making new diagnose.json.");
-      if(!optimized){
+      if (!optimized) {
         executeCommand("cp " + this.fixPath + " " + this.diagnosePath);
         convertCSVToJSON(diagnosePath, diagnosePath);
-      }else{
-        try{
+      } else {
+        try {
           System.out.println("Removing already diagnosed fixes...");
           Object obj = new JSONParser().parse(new FileReader(out_dir + "/fixes.json"));
           JSONObject fixes = (JSONObject) obj;
@@ -176,7 +178,7 @@ public class Diagnose {
           FileWriter writer = new FileWriter(diagnosePath);
           writer.write(toDiagnose.toJSONString());
           writer.flush();
-        }catch (RuntimeException exception){
+        } catch (RuntimeException exception) {
           System.out.println("Exception happened while optimizing suggested fixes.");
           System.out.println("Continuing...");
           executeCommand("cp " + fixPath + " " + diagnosePath);
@@ -189,7 +191,7 @@ public class Diagnose {
     }
   }
 
-  public void buildProject(){
+  public void buildProject() {
     try {
       executeCommand(buildCommand);
     } catch (Exception e) {
@@ -197,8 +199,7 @@ public class Diagnose {
     }
   }
 
-  public void writeConfig(AutoFixConfig.AutoFixConfigWriter writer){
+  public void writeConfig(AutoFixConfig.AutoFixConfigWriter writer) {
     writer.write(out_dir + "/explorer.config");
   }
 }
-

@@ -1,17 +1,15 @@
-import edu.ucr.cs.riple.autofixer.util.Utility;
+import edu.ucr.cs.riple.autofixer.Diagnose;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkListBuilder;
-import edu.ucr.cs.riple.autofixer.Diagnose;
-
 import java.util.Arrays;
 
 public class Main {
   public static void main(String[] args) {
-    if(args.length == 0){
+    if (args.length == 0) {
       throw new RuntimeException("command not specified");
     }
     String command = args[0];
-    switch (command){
+    switch (command) {
       case "apply":
         apply(args);
         break;
@@ -29,8 +27,8 @@ public class Main {
     System.out.println("Actual Arguments: " + Arrays.toString(args));
     if (!(args.length == 3 || args.length == 4)) {
       throw new RuntimeException(
-              "Diagnose needs two/three arguments: 1. command to execute NullAway, " +
-                      "2. output directory, 3. optimized [optional]");
+          "Diagnose needs two/three arguments: 1. command to execute NullAway, "
+              + "2. output directory, 3. optimized [optional]");
     }
     boolean optimized = args.length == 4 && Boolean.getBoolean(args[3]);
     String dir = args[1];
@@ -43,7 +41,7 @@ public class Main {
     System.out.println("Actual Arguments: " + Arrays.toString(args));
     if (args.length != 2) {
       throw new RuntimeException(
-              "Diagnose needs exactly one arguments: 1. path to the suggested fix file");
+          "Diagnose needs exactly one arguments: 1. path to the suggested fix file");
     }
     System.out.println("Building Injector...");
     Injector injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
