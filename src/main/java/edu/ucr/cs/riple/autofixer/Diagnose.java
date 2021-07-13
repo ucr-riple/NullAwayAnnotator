@@ -154,16 +154,16 @@ public class Diagnose {
         return;
       }
       new File(diagnosePath).delete();
-      convertCSVToJSON(out_dir + "/fixes.csv", out_dir + "/fixes.json");
+      convertCSVToJSON(this.fixPath, out_dir + "/fixes.json");
       System.out.println("Deleted old diagnose file.");
       System.out.println("Making new diagnose.json.");
       if(!optimized){
-        executeCommand("cp " + fixPath + " " + diagnosePath);
+        executeCommand("cp " + this.fixPath + " " + this.diagnosePath);
         convertCSVToJSON(diagnosePath, diagnosePath);
       }else{
         try{
           System.out.println("Removing already diagnosed fixes...");
-          Object obj = new JSONParser().parse(new FileReader(fixPath));
+          Object obj = new JSONParser().parse(new FileReader(out_dir + "/fixes.json"));
           JSONObject fixes = (JSONObject) obj;
           obj = new JSONParser().parse(new FileReader(out_dir + "/diagnosed.json"));
           JSONObject diagnosed = (JSONObject) obj;

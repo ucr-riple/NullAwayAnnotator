@@ -93,9 +93,20 @@ public class FixDisplay {
     }
 
     public static FixDisplay fromCSVLine(String line) {
+        //location$*$pkg$*$class$*$method$*$param$*$index$*$uri$*$reason$*$annotation$*$compulsory$*$inject
+        //    0       1       2       3        4      5       6      7          8         9            10
+        //            String annotation   8
+        //            String method       3
+        //            String param        4
+        //            String location     0
+        //            String className    2
+        //            String pkg          1
+        //            String uri          6
+        //            String inject       10
+        //            String compulsory   9
         String[] infos = line.split(Writer.getDelimiterRegex());
         return new FixDisplay(
-                infos[7], infos[3], infos[4], infos[0], infos[2], infos[1], infos[5], infos[9], infos[8]);
+                infos[8], infos[3], infos[4], infos[0], infos[2], infos[1], infos[6], infos[10], infos[9]);
     }
 
     public JSONObject getJson(){
