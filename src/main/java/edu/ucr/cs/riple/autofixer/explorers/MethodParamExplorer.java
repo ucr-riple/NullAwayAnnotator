@@ -95,7 +95,11 @@ public class MethodParamExplorer extends Explorer {
 
     @Override
     public DiagnoseReport effect(Fix fix) {
-        return null;
+        Node node = Node.find(Integer.parseInt(fix.index), fix.method, fix.className);
+        if(node != null){
+            return new DiagnoseReport(fix, node.effect - node.referred);
+        }
+        return super.effect(fix);
     }
 
     @Override
@@ -110,7 +114,6 @@ class Node{
     final String clazz;
     int referred;
     int effect;
-    List<Node> neighbors;
     static HashMap<Integer, List<Node>> nodes = new HashMap<>();
 
     private Node(int index, String method, String clazz) {

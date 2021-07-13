@@ -72,17 +72,17 @@ public class Diagnose {
     this.methodInheritanceTree = new MethodInheritanceTree(out_dir + "/method_info.csv");
     this.callGraph = new CallGraph(out_dir + "/call_graph.csv");
     this.explorers = new ArrayList<>();
+    bank = new Bank();
+    bank.setup();
     explorers.add(new MethodParamExplorer(this, bank));
     explorers.add(new ClassFieldExplorer(this, bank));
     explorers.add(new MethodReturnExplorer(this, bank));
-    bank = new Bank();
-    bank.setup();
   }
 
   private void remove(List<Fix> fixes) {
     List<Fix> toRemove = new ArrayList<>();
     for(Fix fix: fixes){
-      Fix removeFix = new Fix(fix.annotation, fix.method, fix.param, fix.location, fix.className, fix.pkg, fix.uri, "false", "true");
+      Fix removeFix = new Fix(fix.annotation, fix.method, fix.param, fix.location, fix.className, fix.uri, "false");
       toRemove.add(removeFix);
     }
     injector.start(Collections.singletonList(new WorkList(toRemove)));
@@ -116,10 +116,8 @@ public class Diagnose {
                 fix.param,
                 fix.location,
                 info.clazz,
-                fix.pkg,
                 info.uri,
-                fix.inject,
-                fix.compulsory
+                fix.inject
         ));
       }
     }
@@ -132,10 +130,8 @@ public class Diagnose {
                 fix.param,
                 fix.location,
                 info.clazz,
-                fix.pkg,
                 info.uri,
-                fix.inject,
-                fix.compulsory
+                fix.inject
         ));
       }
     }
