@@ -19,6 +19,7 @@ public class AutoFixConfig {
 
     public final boolean MAKE_METHOD_TREE_INHERITANCE_ENABLED;
     public final boolean MAKE_CALL_GRAPH_ENABLED;
+    public final boolean MAKE_FIELD_GRAPH_ENABLED;
     public final boolean SUGGEST_ENABLED;
     public final boolean PARAM_TEST_ENABLED;
     public final boolean LOG_ERROR_ENABLED;
@@ -36,6 +37,7 @@ public class AutoFixConfig {
         LOG_ERROR_DEEP = false;
         OPTIMIZED = false;
         MAKE_CALL_GRAPH_ENABLED = false;
+        MAKE_FIELD_GRAPH_ENABLED = false;
         PARAM_INDEX = 0L;
         ANNOTATION_FACTORY = new AnnotationFactory();
         WORK_LIST = Collections.singleton("*");
@@ -59,6 +61,9 @@ public class AutoFixConfig {
                         && autofixEnabled;
         MAKE_CALL_GRAPH_ENABLED =
                 getValueFromKey(jsonObject, "MAKE_CALL_GRAPH", Boolean.class).orElse(false)
+                        && autofixEnabled;
+        MAKE_FIELD_GRAPH_ENABLED =
+                getValueFromKey(jsonObject, "MAKE_FIELD_GRAPH", Boolean.class).orElse(false)
                         && autofixEnabled;
         SUGGEST_ENABLED =
                 getValueFromKey(jsonObject, "SUGGEST", Boolean.class).orElse(false) && autofixEnabled;
@@ -126,6 +131,7 @@ public class AutoFixConfig {
 
         private boolean MAKE_METHOD_TREE_INHERITANCE_ENABLED;
         private boolean MAKE_CALL_GRAPH_ENABLED;
+        private boolean MAKE_FIELD_GRAPH_ENABLED;
         private boolean SUGGEST_ENABLED;
         private boolean PARAM_TEST_ENABLED;
         private boolean LOG_ERROR_ENABLED;
@@ -139,6 +145,7 @@ public class AutoFixConfig {
         public AutoFixConfigWriter() {
             MAKE_METHOD_TREE_INHERITANCE_ENABLED = false;
             MAKE_CALL_GRAPH_ENABLED = false;
+            MAKE_FIELD_GRAPH_ENABLED = false;
             SUGGEST_ENABLED = false;
             PARAM_TEST_ENABLED = false;
             LOG_ERROR_ENABLED = false;
@@ -174,6 +181,7 @@ public class AutoFixConfig {
             paramTest.put("INDEX", PARAM_INDEX);
             res.put("METHOD_PARAM_TEST", paramTest);
             res.put("MAKE_CALL_GRAPH", MAKE_CALL_GRAPH_ENABLED);
+            res.put("MAKE_FIELD_GRAPH", MAKE_FIELD_GRAPH_ENABLED);
             res.put("WORK_LIST", workListDisplay());
             try {
                 BufferedWriter file = Files.newBufferedWriter(Paths.get(path), Charset.defaultCharset());
@@ -229,6 +237,11 @@ public class AutoFixConfig {
 
         public AutoFixConfigWriter setMakeCallGraph(boolean value) {
             MAKE_CALL_GRAPH_ENABLED = value;
+            return this;
+        }
+
+        public AutoFixConfigWriter setMakeFieldGraph(boolean value) {
+            MAKE_FIELD_GRAPH_ENABLED = value;
             return this;
         }
 

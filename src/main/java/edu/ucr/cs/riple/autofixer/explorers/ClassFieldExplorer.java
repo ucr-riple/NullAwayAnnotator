@@ -28,11 +28,11 @@ public class ClassFieldExplorer extends Explorer {
         }
         AutoFixConfig.AutoFixConfigWriter writer = new AutoFixConfig.AutoFixConfigWriter()
                 .setLogError(true, false)
-                .setMakeCallGraph(false)
                 .setOptimized(false)
                 .setMethodInheritanceTree(false)
                 .setSuggest(true)
                 .setMakeCallGraph(false)
+                .setMakeFieldGraph(false)
                 .setWorkList(workList);
         writer.write("/tmp/NullAwayFix/explorer.config");
         diagnose.buildProject();

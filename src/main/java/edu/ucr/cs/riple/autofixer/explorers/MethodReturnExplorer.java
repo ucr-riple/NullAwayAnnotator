@@ -28,10 +28,10 @@ public class MethodReturnExplorer extends Explorer{
         AutoFixConfig.AutoFixConfigWriter writer = new AutoFixConfig.AutoFixConfigWriter()
                 .setLogError(true, false)
                 .setMakeCallGraph(false)
+                .setMakeFieldGraph(false)
                 .setOptimized(false)
                 .setMethodInheritanceTree(false)
                 .setSuggest(true)
-                .setMakeCallGraph(false)
                 .setWorkList(workList);
         writer.write("/tmp/NullAwayFix/explorer.config");
         diagnose.buildProject();
