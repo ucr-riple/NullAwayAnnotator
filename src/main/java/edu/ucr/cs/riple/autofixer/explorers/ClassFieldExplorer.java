@@ -13,7 +13,7 @@ import java.io.File;
 
 public class ClassFieldExplorer extends Explorer {
 
-    private FieldGraph fieldGraph;
+    private final FieldGraph fieldGraph;
 
     public ClassFieldExplorer(Diagnose diagnose, Bank bank) {
         super(diagnose, bank);
