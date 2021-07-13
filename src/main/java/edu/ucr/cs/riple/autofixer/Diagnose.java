@@ -9,6 +9,7 @@ import edu.ucr.cs.riple.autofixer.explorers.Explorer;
 import edu.ucr.cs.riple.autofixer.explorers.MethodParamExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.MethodReturnExplorer;
 import edu.ucr.cs.riple.autofixer.metadata.CallGraph;
+import edu.ucr.cs.riple.autofixer.metadata.FieldGraph;
 import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
 import edu.ucr.cs.riple.autofixer.metadata.MethodNode;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
@@ -39,6 +40,7 @@ public class Diagnose {
   List<Explorer> explorers;
   public CallGraph callGraph;
   public MethodInheritanceTree methodInheritanceTree;
+  public FieldGraph fieldGraph;
 
   public void start(String buildCommand, String out_dir, boolean optimized) {
     System.out.println("Diagnose Started...");
@@ -71,6 +73,7 @@ public class Diagnose {
     this.finishedReports = new ArrayList<>();
     this.methodInheritanceTree = new MethodInheritanceTree(out_dir + "/method_info.csv");
     this.callGraph = new CallGraph(out_dir + "/call_graph.csv");
+    this.fieldGraph = new FieldGraph(out_dir + "/field_graph.csv");
     this.explorers = new ArrayList<>();
     bank = new Bank();
     bank.setup();
