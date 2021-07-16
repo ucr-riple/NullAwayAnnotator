@@ -11,7 +11,6 @@ import edu.ucr.cs.riple.autofixer.explorers.MethodReturnExplorer;
 import edu.ucr.cs.riple.autofixer.metadata.CallGraph;
 import edu.ucr.cs.riple.autofixer.metadata.FieldGraph;
 import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
-import edu.ucr.cs.riple.autofixer.metadata.MethodNode;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
@@ -88,16 +87,15 @@ public class Diagnose {
               fix.annotation, fix.method, fix.param, fix.location, fix.className, fix.uri, "false");
       toRemove.add(removeFix);
     }
-    injector.start(Collections.singletonList(new WorkList(toRemove)));
+    injector.start(Collections.singletonList(new WorkList(toRemove)), false);
   }
 
   private List<Fix> analyze(Fix fix) {
-    System.out.println("FIX TYPE IS: " + fix.location);
+    System.out.println("Fix Type: " + fix.location);
     List<Fix> suggestedFix = new ArrayList<>();
     DiagnoseReport diagnoseReport = null;
     suggestedFix.add(fix);
-    //    protectInheritanceRules(fix, suggestedFix);
-    injector.start(Collections.singletonList(new WorkList(suggestedFix)));
+    injector.start(Collections.singletonList(new WorkList(suggestedFix)), true);
     for (Explorer explorer : explorers) {
       if (explorer.isApplicable(fix)) {
         diagnoseReport = explorer.effect(fix);
@@ -109,44 +107,11 @@ public class Diagnose {
     return suggestedFix;
   }
 
-  private void protectInheritanceRules(Fix fix, List<Fix> suggestedFix) {
-    if (fix.location.equals("METHOD_PARAM")) {
-      List<MethodNode> subMethods =
-          methodInheritanceTree.getSubMethods(fix.method, fix.className, true);
-      for (MethodNode info : subMethods) {
-        suggestedFix.add(
-            new Fix(
-                fix.annotation,
-                info.method,
-                fix.param,
-                fix.location,
-                info.clazz,
-                info.uri,
-                fix.inject));
-      }
-    }
-    if (fix.location.equals("METHOD_RETURN")) {
-      List<MethodNode> subMethods =
-          methodInheritanceTree.getSuperMethods(fix.method, fix.className, true);
-      for (MethodNode info : subMethods) {
-        suggestedFix.add(
-            new Fix(
-                fix.annotation,
-                info.method,
-                fix.param,
-                fix.location,
-                info.clazz,
-                info.uri,
-                fix.inject));
-      }
-    }
-  }
-
   @SuppressWarnings("ALL")
   private void prepare(String out_dir, boolean optimized) {
     try {
       System.out.println("Preparing project: with optimization flag:" + optimized);
-      executeCommand(buildCommand);
+      buildProject();
       if (!new File(fixPath).exists()) {
         JSONObject toDiagnose = new JSONObject();
         toDiagnose.put("fixes", new JSONArray());
