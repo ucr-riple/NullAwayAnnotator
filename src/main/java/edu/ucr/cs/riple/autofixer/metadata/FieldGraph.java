@@ -1,7 +1,7 @@
 package edu.ucr.cs.riple.autofixer.metadata;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class FieldGraph extends AbstractRelation<FieldGraphNode> {
 
@@ -14,20 +14,16 @@ public class FieldGraph extends AbstractRelation<FieldGraphNode> {
     return new FieldGraphNode(values[0], values[1], values[2]);
   }
 
-  public String[] getUserClassOfField(String field, String inClass) {
+  public List<String> getUserClassOfField(String field, String inClass) {
     List<FieldGraphNode> nodes =
         findAllNodes(
             (candidate, values) ->
                 candidate.calleeField.equals(values[0]) && candidate.calleeClass.equals(values[1]),
             field,
             inClass);
-    if (nodes == null || nodes.size() == 0) {
+    if (nodes == null) {
       return null;
     }
-    List<String> ans = new ArrayList<>();
-    for (FieldGraphNode node : nodes) {
-      ans.add(node.callerClass);
-    }
-    return ans.toArray(new String[0]);
+    return nodes.stream().map(fieldGraphNode -> fieldGraphNode.callerClass).collect(Collectors.toList());
   }
 }

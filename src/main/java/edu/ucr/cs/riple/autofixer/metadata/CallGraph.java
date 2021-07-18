@@ -1,7 +1,7 @@
 package edu.ucr.cs.riple.autofixer.metadata;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CallGraph extends AbstractRelation<CallGraphNode> {
 
@@ -14,20 +14,16 @@ public class CallGraph extends AbstractRelation<CallGraphNode> {
     return new CallGraphNode(values[0], values[1], values[2]);
   }
 
-  public String[] getUserClassesOfMethod(String method, String inClass) {
+  public List<String> getUserClassesOfMethod(String method, String inClass) {
     List<CallGraphNode> nodes =
         findAllNodes(
             (candidate, values) ->
                 candidate.calleeMethod.equals(values[0]) && candidate.calleeClass.equals(values[1]),
             method,
             inClass);
-    if (nodes == null || nodes.size() == 0) {
+    if (nodes == null) {
       return null;
     }
-    List<String> ans = new ArrayList<>();
-    for (CallGraphNode node : nodes) {
-      ans.add(node.callerClass);
-    }
-    return ans.toArray(new String[0]);
+    return nodes.stream().map(callGraphNode -> callGraphNode.callerClass).collect(Collectors.toList());
   }
 }

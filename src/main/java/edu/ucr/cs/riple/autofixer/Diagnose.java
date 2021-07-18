@@ -4,6 +4,7 @@ import static edu.ucr.cs.riple.autofixer.util.Utility.*;
 
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
+import edu.ucr.cs.riple.autofixer.explorers.BasicExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.ClassFieldExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.Explorer;
 import edu.ucr.cs.riple.autofixer.explorers.MethodParamExplorer;
@@ -77,7 +78,9 @@ public class Diagnose {
     explorers.add(new MethodParamExplorer(this, bank));
     explorers.add(new ClassFieldExplorer(this, bank));
     explorers.add(new MethodReturnExplorer(this, bank));
+    explorers.add(new BasicExplorer(this, bank));
   }
+
 
   private void remove(List<Fix> fixes) {
     List<Fix> toRemove = new ArrayList<>();

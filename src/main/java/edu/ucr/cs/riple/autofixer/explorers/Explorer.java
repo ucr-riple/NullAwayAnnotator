@@ -7,6 +7,8 @@ import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import edu.ucr.cs.riple.injector.Fix;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class Explorer {
 
@@ -28,10 +30,11 @@ public abstract class Explorer {
     return DiagnoseReport.empty(fix);
   }
 
-  public DiagnoseReport effectByScope(Fix fix, String[] workList) {
+  public DiagnoseReport effectByScope(Fix fix, List<String> workList) {
     if (workList == null) {
-      return new DiagnoseReport(fix, -1);
+      workList = new ArrayList<>();
     }
+    workList.add(fix.className);
     AutoFixConfig.AutoFixConfigWriter writer =
         new AutoFixConfig.AutoFixConfigWriter()
             .setLogError(true, false)
@@ -40,7 +43,7 @@ public abstract class Explorer {
             .setOptimized(false)
             .setMethodInheritanceTree(false)
             .setSuggest(true)
-            .setWorkList(workList);
+            .setWorkList(workList.toArray(new String[0]));
     diagnose.writeConfig(writer);
     diagnose.buildProject();
     if (new File(Writer.ERROR).exists()) {
