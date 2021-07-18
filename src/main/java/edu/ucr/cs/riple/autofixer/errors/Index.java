@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 
 public class Index {
 
-  HashMap<Integer, List<Error>> errors;
-  int total;
+  public HashMap<Integer, List<Error>> errors;
+  public int total;
 
   public enum Type {
     BY_METHOD,
@@ -32,6 +32,7 @@ public class Index {
     try (BufferedReader br = new BufferedReader(new FileReader(Writer.ERROR))) {
       String line;
       String delimiter = Writer.getDelimiterRegex();
+      br.readLine();
       while ((line = br.readLine()) != null) {
         String[] infos = line.split(delimiter);
         Error error = new Error(infos[0], infos[1], infos[2], infos[3]);

@@ -22,9 +22,7 @@ public abstract class Explorer {
 
   public DiagnoseReport effect(Fix fix) {
     diagnose.buildProject();
-    File tempFile = new File(Writer.ERROR);
-    boolean exists = tempFile.exists();
-    if (exists) {
+    if (new File(Writer.ERROR).exists()) {
       return new DiagnoseReport(fix, bank.compare());
     }
     return DiagnoseReport.empty(fix);

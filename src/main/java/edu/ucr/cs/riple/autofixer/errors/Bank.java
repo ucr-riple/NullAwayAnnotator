@@ -9,8 +9,8 @@ import java.util.List;
 
 public class Bank {
 
-  private final Index rootInClass;
-  private final Index rootInMethod;
+  public final Index rootInClass;
+  public final Index rootInMethod;
   private Index currentInMethod;
   private Index currentInClass;
 
@@ -54,6 +54,7 @@ public class Bank {
     int lines = 0;
     try {
       reader = new BufferedReader(new FileReader(Writer.ERROR));
+      reader.readLine();
       while (reader.readLine() != null) lines++;
       reader.close();
     } catch (IOException e) {
