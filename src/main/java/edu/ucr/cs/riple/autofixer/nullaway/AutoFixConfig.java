@@ -158,8 +158,11 @@ public class AutoFixConfig {
     }
 
     private String workListDisplay() {
-      String display = WORK_LIST.toString();
-      return display.substring(0, display.length() - 1);
+      if(WORK_LIST == null || WORK_LIST.size() == 0){
+        return "*";
+      }
+      String display = WORK_LIST.toString().replaceAll("\\s","");
+      return display.substring(1, display.length() - 1);
     }
 
     @SuppressWarnings("unchecked")

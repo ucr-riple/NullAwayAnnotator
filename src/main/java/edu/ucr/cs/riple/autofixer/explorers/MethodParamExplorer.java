@@ -52,13 +52,12 @@ public class MethodParamExplorer extends Explorer {
   private void measureNullSafetyAllMethods(Diagnose diagnose, Bank bank) {
     int maxsize = diagnose.methodInheritanceTree.maxParamSize();
     for (int i = 0; i < maxsize; i++) {
-      AutoFixConfig.AutoFixConfigWriter writer =
+      AutoFixConfig.AutoFixConfigWriter config =
           new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, true)
               .setSuggest(true)
               .setMethodParamTest(true, i);
-      diagnose.writeConfig(writer);
-      diagnose.buildProject();
+      diagnose.buildProject(config);
       bank.saveState(false, true);
       for (List<Node> list : Node.nodes.values()) {
         for (Node node : list) {

@@ -21,7 +21,16 @@ public abstract class Explorer {
   }
 
   public DiagnoseReport effect(Fix fix) {
-    diagnose.buildProject();
+    AutoFixConfig.AutoFixConfigWriter config =
+            new AutoFixConfig.AutoFixConfigWriter()
+                    .setLogError(true, true)
+                    .setMakeCallGraph(false)
+                    .setMakeFieldGraph(false)
+                    .setOptimized(false)
+                    .setMethodInheritanceTree(false)
+                    .setSuggest(true)
+                    .setWorkList(new String[]{"*"});
+    diagnose.buildProject(config);
     if (new File(Writer.ERROR).exists()) {
       return new DiagnoseReport(fix, bank.compare());
     }
@@ -33,17 +42,16 @@ public abstract class Explorer {
       workList = new ArrayList<>();
     }
     workList.add(fix.className);
-    AutoFixConfig.AutoFixConfigWriter writer =
+    AutoFixConfig.AutoFixConfigWriter config =
         new AutoFixConfig.AutoFixConfigWriter()
-            .setLogError(true, false)
+            .setLogError(true, true)
             .setMakeCallGraph(false)
             .setMakeFieldGraph(false)
             .setOptimized(false)
             .setMethodInheritanceTree(false)
             .setSuggest(true)
             .setWorkList(workList.toArray(new String[0]));
-    diagnose.writeConfig(writer);
-    diagnose.buildProject();
+    diagnose.buildProject(config);
     if (new File(Writer.ERROR).exists()) {
       int totalEffect = 0;
       for (String clazz : workList) {

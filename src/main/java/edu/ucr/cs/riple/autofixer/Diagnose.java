@@ -74,6 +74,16 @@ public class Diagnose {
     this.callGraph = new CallGraph(out_dir + "/call_graph.csv");
     this.fieldGraph = new FieldGraph(out_dir + "/field_graph.csv");
     this.explorers = new ArrayList<>();
+    AutoFixConfig.AutoFixConfigWriter config =
+            new AutoFixConfig.AutoFixConfigWriter()
+                    .setLogError(true, true)
+                    .setMakeCallGraph(false)
+                    .setMakeFieldGraph(false)
+                    .setOptimized(false)
+                    .setMethodInheritanceTree(false)
+                    .setSuggest(true)
+                    .setWorkList(new String[]{"*"});
+    buildProject(config);
     bank = new Bank();
     explorers.add(new MethodParamExplorer(this, bank));
     explorers.add(new ClassFieldExplorer(this, bank));
@@ -114,7 +124,16 @@ public class Diagnose {
   private void prepare(String out_dir, boolean optimized) {
     try {
       System.out.println("Preparing project: with optimization flag:" + optimized);
-      buildProject();
+      AutoFixConfig.AutoFixConfigWriter config =
+              new AutoFixConfig.AutoFixConfigWriter()
+                      .setLogError(true, false)
+                      .setMakeCallGraph(false)
+                      .setMakeFieldGraph(false)
+                      .setOptimized(false)
+                      .setMethodInheritanceTree(false)
+                      .setSuggest(true)
+                      .setWorkList(new String[]{"*"});
+      buildProject(config);
       if (!new File(fixPath).exists()) {
         JSONObject toDiagnose = new JSONObject();
         toDiagnose.put("fixes", new JSONArray());
@@ -159,15 +178,12 @@ public class Diagnose {
     }
   }
 
-  public void buildProject() {
+  public void buildProject(AutoFixConfig.AutoFixConfigWriter writer) {
+    writer.write(out_dir + "/explorer.config");
     try {
       executeCommand(buildCommand);
     } catch (Exception e) {
       throw new RuntimeException("Could not run command: " + buildCommand);
     }
-  }
-
-  public void writeConfig(AutoFixConfig.AutoFixConfigWriter writer) {
-    writer.write(out_dir + "/explorer.config");
   }
 }
