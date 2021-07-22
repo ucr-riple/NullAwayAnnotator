@@ -64,7 +64,8 @@ public class MethodParamExplorer extends Explorer {
       bank.saveState(false, true);
       for (List<Node> list : Node.nodes.values()) {
         int finalI = i;
-        for (Node node : list.stream().filter(node -> node.index == finalI).collect(Collectors.toList())) {
+        for (Node node :
+            list.stream().filter(node -> node.index == finalI).collect(Collectors.toList())) {
           int localEffect = bank.compareByMethod(node.clazz, node.method, false);
           node.effect = localEffect + calculateInheritanceViolationError(node, i);
         }
@@ -76,7 +77,7 @@ public class MethodParamExplorer extends Explorer {
   private int calculateInheritanceViolationError(Node node, int index) {
     int effect = 0;
     boolean[] thisMethodFlag = mit.findNode(node.method, node.clazz).annotFlags;
-    if(index >= thisMethodFlag.length){
+    if (index >= thisMethodFlag.length) {
       return 0;
     }
     for (MethodNode subMethod : mit.getSubMethods(node.method, node.clazz, false)) {
@@ -182,12 +183,19 @@ class Node {
 
   @Override
   public String toString() {
-    return "Node{" +
-            "index=" + index +
-            ", method='" + method + '\'' +
-            ", clazz='" + clazz + '\'' +
-            ", referred=" + referred +
-            ", effect=" + effect +
-            '}';
+    return "Node{"
+        + "index="
+        + index
+        + ", method='"
+        + method
+        + '\''
+        + ", clazz='"
+        + clazz
+        + '\''
+        + ", referred="
+        + referred
+        + ", effect="
+        + effect
+        + '}';
   }
 }

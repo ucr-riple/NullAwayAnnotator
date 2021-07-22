@@ -16,14 +16,13 @@ import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkList;
+import edu.ucr.cs.riple.injector.WorkListBuilder;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import edu.ucr.cs.riple.injector.WorkListBuilder;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -72,14 +71,14 @@ public class Diagnose {
     this.diagnosePath = out_dir + "/diagnose.json";
     this.finishedReports = new ArrayList<>();
     AutoFixConfig.AutoFixConfigWriter config =
-            new AutoFixConfig.AutoFixConfigWriter()
-                    .setLogError(true, true)
-                    .setMakeCallGraph(true)
-                    .setMakeFieldGraph(true)
-                    .setOptimized(true)
-                    .setMethodInheritanceTree(true)
-                    .setSuggest(true)
-                    .setWorkList(new String[] {"*"});
+        new AutoFixConfig.AutoFixConfigWriter()
+            .setLogError(true, true)
+            .setMakeCallGraph(true)
+            .setMakeFieldGraph(true)
+            .setOptimized(true)
+            .setMethodInheritanceTree(true)
+            .setSuggest(true)
+            .setWorkList(new String[] {"*"});
     buildProject(config);
     this.methodInheritanceTree = new MethodInheritanceTree(out_dir + "/method_info.csv");
     this.callGraph = new CallGraph(out_dir + "/call_graph.csv");
@@ -93,7 +92,7 @@ public class Diagnose {
   }
 
   private void remove(List<Fix> fixes) {
-    if(fixes.size() == 0){
+    if (fixes.size() == 0) {
       return;
     }
     List<Fix> toRemove = new ArrayList<>();
@@ -112,7 +111,7 @@ public class Diagnose {
     DiagnoseReport diagnoseReport = null;
     for (Explorer explorer : explorers) {
       if (explorer.isApplicable(fix)) {
-        if(explorer.requiresInjection(fix)){
+        if (explorer.requiresInjection(fix)) {
           suggestedFix.add(fix);
           injector.start(Collections.singletonList(new WorkList(suggestedFix)), true);
         }
