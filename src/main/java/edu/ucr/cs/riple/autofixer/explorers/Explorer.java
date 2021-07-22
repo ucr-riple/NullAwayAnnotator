@@ -8,7 +8,9 @@ import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import edu.ucr.cs.riple.injector.Fix;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public abstract class Explorer {
 
@@ -42,6 +44,7 @@ public abstract class Explorer {
       workList = new ArrayList<>();
     }
     workList.add(fix.className);
+    Set<String> workSet = new HashSet<>(workList);
     AutoFixConfig.AutoFixConfigWriter config =
         new AutoFixConfig.AutoFixConfigWriter()
             .setLogError(true, true)
@@ -50,17 +53,17 @@ public abstract class Explorer {
             .setOptimized(false)
             .setMethodInheritanceTree(false)
             .setSuggest(true)
-            .setWorkList(workList.toArray(new String[0]));
+            .setWorkList(workSet.toArray(new String[0]));
     diagnose.buildProject(config);
     if (new File(Writer.ERROR).exists()) {
       int totalEffect = 0;
-      for (String clazz : workList) {
+      totalEffect += bank.compareByClass(fix.className, true);
+      for (String clazz : workSet) {
         if (clazz.equals(fix.className)) {
           continue;
         }
-        totalEffect += bank.compareByClass(clazz, true);
+        totalEffect += bank.compareByClass(clazz, false);
       }
-      totalEffect += bank.compareByClass(fix.className, true);
       return new DiagnoseReport(fix, totalEffect);
     }
     return DiagnoseReport.empty(fix);
