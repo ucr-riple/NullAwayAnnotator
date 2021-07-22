@@ -53,7 +53,7 @@ public class MethodParamExplorer extends Explorer {
     int maxsize = MethodInheritanceTree.maxParamSize();
     System.out.println("Max size for method parameter list is: " + maxsize);
     for (int i = 0; i < maxsize; i++) {
-      System.out.println("Building for all params at index: " + i);
+      System.out.println("Analyzing params at index: " + i + " for all methods...");
       AutoFixConfig.AutoFixConfigWriter config =
           new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, true)
