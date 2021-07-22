@@ -15,15 +15,7 @@ public class CallGraph extends AbstractRelation<CallGraphNode> {
   }
 
   public List<String> getUserClassesOfMethod(String method, String inClass) {
-    List<CallGraphNode> nodes =
-        findAllNodes(
-            (candidate, values) ->
-                candidate.calleeMethod.equals(values[0]) && candidate.calleeClass.equals(values[1]),
-            method,
-            inClass);
-    if (nodes == null) {
-      return null;
-    }
+    List<CallGraphNode> nodes = findAllNodes(candidate -> candidate.calleeClass.equals(inClass) && candidate.calleeMethod.equals(method));
     return nodes.stream().map(callGraphNode -> callGraphNode.callerClass).collect(Collectors.toList());
   }
 }

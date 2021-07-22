@@ -12,4 +12,14 @@ public class Error {
     this.method = method;
     this.clazz = clazz;
   }
+
+  @Override
+  public String toString() {
+    return "Error{" +
+            "messageType='" + messageType + '\'' +
+            ", message='" + message + '\'' +
+            ", clazz='" + clazz + '\'' +
+            ", method='" + method + '\'' +
+            '}';
+  }
 }

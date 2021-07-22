@@ -110,10 +110,6 @@ public class MethodInheritanceTree extends AbstractRelation<MethodNode> {
   }
 
   public MethodNode findNode(String method, String clazz) {
-    return findNode(
-        (candidate, values) ->
-            candidate.method.equals(values[0]) && candidate.clazz.equals(values[1]),
-        method,
-        clazz);
+    return findNode(candidate -> candidate.clazz.equals(clazz) && candidate.method.equals(method));
   }
 }

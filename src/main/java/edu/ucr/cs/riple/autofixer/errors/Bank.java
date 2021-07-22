@@ -25,9 +25,11 @@ public class Bank {
   public void saveState(boolean saveClass, boolean saveMethod) {
     if (saveClass) {
       currentInClass = new Index(Index.Type.BY_CLASS);
+      currentInClass.index();
     }
     if (saveMethod) {
       currentInMethod = new Index(Index.Type.BY_METHOD);
+      currentInMethod.index();
     }
   }
 

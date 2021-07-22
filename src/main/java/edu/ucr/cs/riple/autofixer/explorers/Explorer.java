@@ -23,7 +23,7 @@ public abstract class Explorer {
   public DiagnoseReport effect(Fix fix) {
     AutoFixConfig.AutoFixConfigWriter config =
             new AutoFixConfig.AutoFixConfigWriter()
-                    .setLogError(true, true)
+                    .setLogError(true, false)
                     .setMakeCallGraph(false)
                     .setMakeFieldGraph(false)
                     .setOptimized(false)

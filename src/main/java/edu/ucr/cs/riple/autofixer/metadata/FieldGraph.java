@@ -15,12 +15,7 @@ public class FieldGraph extends AbstractRelation<FieldGraphNode> {
   }
 
   public List<String> getUserClassOfField(String field, String inClass) {
-    List<FieldGraphNode> nodes =
-        findAllNodes(
-            (candidate, values) ->
-                candidate.calleeField.equals(values[0]) && candidate.calleeClass.equals(values[1]),
-            field,
-            inClass);
+    List<FieldGraphNode> nodes = findAllNodes(candidate -> candidate.calleeClass.equals(inClass) && candidate.calleeField.equals(field));
     if (nodes == null) {
       return null;
     }

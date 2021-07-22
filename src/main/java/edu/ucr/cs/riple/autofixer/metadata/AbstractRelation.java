@@ -49,7 +49,7 @@ public abstract class AbstractRelation<T> {
   protected abstract T addNodeByLine(String[] values);
 
   interface Comparator<T> {
-    boolean equals(T candidate, String... arguments);
+    boolean matches(T candidate);
   }
 
   protected T findNode(Comparator<T> c, String... arguments) {
@@ -60,7 +60,7 @@ public abstract class AbstractRelation<T> {
       return null;
     }
     for (T candidate : candidateIds) {
-      if (c.equals(candidate, arguments)) {
+      if (c.matches(candidate)) {
         node = candidate;
         break;
       }
@@ -76,7 +76,7 @@ public abstract class AbstractRelation<T> {
     }
     List<T> nodes = new ArrayList<>();
     for (T candidate : candidateIds) {
-      if (c.equals(candidate, arguments)) {
+      if (c.equals(candidate)) {
         nodes.add(candidate);
       }
     }
