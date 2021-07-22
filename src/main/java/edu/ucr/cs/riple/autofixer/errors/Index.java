@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -58,11 +59,17 @@ public class Index {
 
   public List<Error> getByClass(String clazz) {
     List<Error> ans = errors.get(Objects.hash(clazz));
+    if (ans == null) {
+      return Collections.emptyList();
+    }
     return ans.stream().filter(error -> error.clazz.equals(clazz)).collect(Collectors.toList());
   }
 
   public List<Error> getByMethod(String clazz, String method) {
     List<Error> ans = errors.get(Objects.hash(clazz, method));
+    if (ans == null) {
+      return Collections.emptyList();
+    }
     return ans.stream()
         .filter(error -> error.clazz.equals(clazz) && error.method.equals(method))
         .collect(Collectors.toList());

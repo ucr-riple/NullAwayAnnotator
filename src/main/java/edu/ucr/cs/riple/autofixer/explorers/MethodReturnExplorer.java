@@ -18,10 +18,8 @@ public class MethodReturnExplorer extends Explorer {
 
   @Override
   public DiagnoseReport effect(Fix fix) {
-    System.out.println("method: " + fix.method + " class: " + fix.className);
     List<String> users = callGraph.getUserClassesOfMethod(fix.method, fix.className);
-    System.out.println("USERS: " + users);
-    return effectByScope(fix, callGraph.getUserClassesOfMethod(fix.method, fix.className));
+    return effectByScope(fix, users);
   }
 
   @Override
