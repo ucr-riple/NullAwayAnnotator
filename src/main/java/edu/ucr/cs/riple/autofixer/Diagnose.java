@@ -113,8 +113,8 @@ public class Diagnose {
     for (Explorer explorer : explorers) {
       if (explorer.isApplicable(fix)) {
         if(explorer.requiresInjection(fix)){
-          injector.start(Collections.singletonList(new WorkList(suggestedFix)), true);
           suggestedFix.add(fix);
+          injector.start(Collections.singletonList(new WorkList(suggestedFix)), true);
         }
         diagnoseReport = explorer.effect(fix);
         break;
