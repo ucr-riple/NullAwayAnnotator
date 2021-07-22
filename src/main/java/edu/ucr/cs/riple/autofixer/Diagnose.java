@@ -16,7 +16,6 @@ import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkList;
-import edu.ucr.cs.riple.injector.WorkListBuilder;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -29,17 +28,17 @@ import org.json.simple.parser.JSONParser;
 
 public class Diagnose {
 
-  String out_dir;
-  String buildCommand;
-  String fixPath;
-  String diagnosePath;
-  List<DiagnoseReport> finishedReports;
-  Injector injector;
-  Bank bank;
-  List<Explorer> explorers;
+  private String out_dir;
+  private String buildCommand;
+  private String fixPath;
+  private String diagnosePath;
+  private Injector injector;
+  private List<DiagnoseReport> finishedReports;
+  private List<Explorer> explorers;
+
   public CallGraph callGraph;
-  public MethodInheritanceTree methodInheritanceTree;
   public FieldGraph fieldGraph;
+  public MethodInheritanceTree methodInheritanceTree;
 
   public void start(String buildCommand, String out_dir, boolean optimized) {
     System.out.println("Diagnose Started...");
@@ -48,20 +47,18 @@ public class Diagnose {
     injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
     System.out.println("Starting preparation");
     prepare(out_dir, optimized);
-    List<WorkList> workListLists = new WorkListBuilder(diagnosePath).getWorkLists();
-    try {
-      for (WorkList workList : workListLists) {
-        for (Fix fix : workList.getFixes()) {
-          if (finishedReports.stream().anyMatch(diagnoseReport -> diagnoseReport.fix.equals(fix))) {
-            continue;
-          }
-          List<Fix> appliedFixes = analyze(fix);
-          remove(appliedFixes);
-        }
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    Fix fix =
+        new Fix(
+            "javax.annotation.Nullable",
+            "PluginInitializer(org.mockito.plugins.PluginSwitch,java.lang.String,org.mockito.internal.configuration.plugins.DefaultMockitoPlugins)",
+            "alias",
+            "METHOD_PARAM",
+            "org.mockito.internal.configuration.plugins.PluginInitializer",
+            "//Users/nima/Developer/NullAwayFixer/Projects/mockito/src/main/java/org/mockito/internal/configuration/plugins/PluginInitializer.java",
+            "true");
+    fix.index = "1";
+    List<Fix> appliedFixes = analyze(fix);
+    remove(appliedFixes);
     writeReports(finishedReports);
   }
 
@@ -70,21 +67,21 @@ public class Diagnose {
     this.fixPath = out_dir + "/fixes.csv";
     this.diagnosePath = out_dir + "/diagnose.json";
     this.finishedReports = new ArrayList<>();
+    AutoFixConfig.AutoFixConfigWriter config =
+            new AutoFixConfig.AutoFixConfigWriter()
+                    .setLogError(true, true)
+                    .setMakeCallGraph(true)
+                    .setMakeFieldGraph(true)
+                    .setOptimized(true)
+                    .setMethodInheritanceTree(true)
+                    .setSuggest(true)
+                    .setWorkList(new String[] {"*"});
+    buildProject(config);
     this.methodInheritanceTree = new MethodInheritanceTree(out_dir + "/method_info.csv");
     this.callGraph = new CallGraph(out_dir + "/call_graph.csv");
     this.fieldGraph = new FieldGraph(out_dir + "/field_graph.csv");
     this.explorers = new ArrayList<>();
-    AutoFixConfig.AutoFixConfigWriter config =
-        new AutoFixConfig.AutoFixConfigWriter()
-            .setLogError(true, true)
-            .setMakeCallGraph(false)
-            .setMakeFieldGraph(false)
-            .setOptimized(false)
-            .setMethodInheritanceTree(false)
-            .setSuggest(true)
-            .setWorkList(new String[] {"*"});
-    buildProject(config);
-    bank = new Bank();
+    Bank bank = new Bank();
     explorers.add(new MethodParamExplorer(this, bank));
     explorers.add(new ClassFieldExplorer(this, bank));
     explorers.add(new MethodReturnExplorer(this, bank));

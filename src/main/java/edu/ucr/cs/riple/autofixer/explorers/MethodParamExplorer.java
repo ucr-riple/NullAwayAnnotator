@@ -50,8 +50,10 @@ public class MethodParamExplorer extends Explorer {
   }
 
   private void measureNullSafetyAllMethods(Diagnose diagnose, Bank bank) {
-    int maxsize = diagnose.methodInheritanceTree.maxParamSize();
+    int maxsize = MethodInheritanceTree.maxParamSize();
+    System.out.println("Max size for method parameter list is: " + maxsize);
     for (int i = 0; i < maxsize; i++) {
+      System.out.println("Building for all params at index: " + i);
       AutoFixConfig.AutoFixConfigWriter config =
           new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, true)
@@ -66,11 +68,15 @@ public class MethodParamExplorer extends Explorer {
         }
       }
     }
+    System.out.println("Captured all methods behavior against nullability of parameter.");
   }
 
   private int calculateInheritanceViolationError(Node node, int index) {
     int effect = 0;
     boolean[] thisMethodFlag = mit.findNode(node.method, node.clazz).annotFlags;
+    if(index >= thisMethodFlag.length){
+      return 0;
+    }
     for (MethodNode subMethod : mit.getSubMethods(node.method, node.clazz, false)) {
       if (!thisMethodFlag[index]) {
         if (!subMethod.annotFlags[index]) {

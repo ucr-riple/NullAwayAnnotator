@@ -10,7 +10,7 @@ import java.util.Set;
 public class MethodInheritanceTree extends AbstractRelation<MethodNode> {
 
   HashMap<Integer, MethodNode> nodes;
-  int maxsize = 0;
+  private static int maxsize = 0;
 
   public MethodInheritanceTree(String filePath) {
     super(filePath);
@@ -105,7 +105,7 @@ public class MethodInheritanceTree extends AbstractRelation<MethodNode> {
     return ans;
   }
 
-  public int maxParamSize() {
+  public static int maxParamSize() {
     return maxsize;
   }
 
