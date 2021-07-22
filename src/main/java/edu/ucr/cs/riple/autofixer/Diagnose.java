@@ -22,6 +22,8 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import edu.ucr.cs.riple.injector.WorkListBuilder;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -47,18 +49,20 @@ public class Diagnose {
     injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
     System.out.println("Starting preparation");
     prepare(out_dir, optimized);
-    Fix fix =
-        new Fix(
-            "javax.annotation.Nullable",
-            "PluginInitializer(org.mockito.plugins.PluginSwitch,java.lang.String,org.mockito.internal.configuration.plugins.DefaultMockitoPlugins)",
-            "alias",
-            "METHOD_PARAM",
-            "org.mockito.internal.configuration.plugins.PluginInitializer",
-            "//Users/nima/Developer/NullAwayFixer/Projects/mockito/src/main/java/org/mockito/internal/configuration/plugins/PluginInitializer.java",
-            "true");
-    fix.index = "1";
-    List<Fix> appliedFixes = analyze(fix);
-    remove(appliedFixes);
+    List<WorkList> workListLists = new WorkListBuilder(diagnosePath).getWorkLists();
+    try {
+      for (WorkList workList : workListLists) {
+        for (Fix fix : workList.getFixes()) {
+          if (finishedReports.stream().anyMatch(diagnoseReport -> diagnoseReport.fix.equals(fix))) {
+            continue;
+          }
+          List<Fix> appliedFixes = analyze(fix);
+          remove(appliedFixes);
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
     writeReports(finishedReports);
   }
 
@@ -89,6 +93,9 @@ public class Diagnose {
   }
 
   private void remove(List<Fix> fixes) {
+    if(fixes.size() == 0){
+      return;
+    }
     List<Fix> toRemove = new ArrayList<>();
     for (Fix fix : fixes) {
       Fix removeFix =
@@ -103,10 +110,12 @@ public class Diagnose {
     System.out.println("Fix Type: " + fix.location);
     List<Fix> suggestedFix = new ArrayList<>();
     DiagnoseReport diagnoseReport = null;
-    suggestedFix.add(fix);
-    injector.start(Collections.singletonList(new WorkList(suggestedFix)), true);
     for (Explorer explorer : explorers) {
       if (explorer.isApplicable(fix)) {
+        if(explorer.requiresInjection(fix)){
+          injector.start(Collections.singletonList(new WorkList(suggestedFix)), true);
+          suggestedFix.add(fix);
+        }
         diagnoseReport = explorer.effect(fix);
         break;
       }

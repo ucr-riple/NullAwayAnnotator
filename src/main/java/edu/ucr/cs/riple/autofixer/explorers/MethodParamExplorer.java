@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class MethodParamExplorer extends Explorer {
 
@@ -62,7 +63,8 @@ public class MethodParamExplorer extends Explorer {
       diagnose.buildProject(config);
       bank.saveState(false, true);
       for (List<Node> list : Node.nodes.values()) {
-        for (Node node : list) {
+        int finalI = i;
+        for (Node node : list.stream().filter(node -> node.index == finalI).collect(Collectors.toList())) {
           int localEffect = bank.compareByMethod(node.clazz, node.method, false);
           node.effect = localEffect + calculateInheritanceViolationError(node, i);
         }
@@ -108,6 +110,11 @@ public class MethodParamExplorer extends Explorer {
   @Override
   public boolean isApplicable(Fix fix) {
     return fix.location.equals("METHOD_PARAM");
+  }
+
+  @Override
+  public boolean requiresInjection(Fix fix) {
+    return false;
   }
 }
 
@@ -171,5 +178,16 @@ class Node {
   @Override
   public int hashCode() {
     return Objects.hash(index, method, clazz);
+  }
+
+  @Override
+  public String toString() {
+    return "Node{" +
+            "index=" + index +
+            ", method='" + method + '\'' +
+            ", clazz='" + clazz + '\'' +
+            ", referred=" + referred +
+            ", effect=" + effect +
+            '}';
   }
 }

@@ -24,4 +24,9 @@ public class ClassFieldExplorer extends Explorer {
   public boolean isApplicable(Fix fix) {
     return fix.location.equals("CLASS_FIELD");
   }
+
+  @Override
+  public boolean requiresInjection(Fix fix) {
+    return true;
+  }
 }

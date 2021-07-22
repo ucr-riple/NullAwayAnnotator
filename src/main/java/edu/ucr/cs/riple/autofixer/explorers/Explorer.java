@@ -70,4 +70,6 @@ public abstract class Explorer {
   }
 
   public abstract boolean isApplicable(Fix fix);
+
+  public abstract boolean requiresInjection(Fix fix);
 }

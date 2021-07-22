@@ -14,4 +14,9 @@ public class BasicExplorer extends Explorer {
   public boolean isApplicable(Fix fix) {
     return true;
   }
+
+  @Override
+  public boolean requiresInjection(Fix fix) {
+    return true;
+  }
 }
