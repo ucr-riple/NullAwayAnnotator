@@ -26,7 +26,7 @@ public class FieldGraphNode {
 
   @Override
   public int hashCode() {
-    return Objects.hash(callerClass, calleeField, calleeClass);
+    return Objects.hash(calleeField, calleeClass);
   }
 
   @Override

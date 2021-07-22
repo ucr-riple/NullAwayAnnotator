@@ -76,6 +76,6 @@ public class MethodNode {
 
   @Override
   public int hashCode() {
-    return Objects.hash(children, parent, id, method, clazz, uri, size);
+    return Objects.hash(method, clazz);
   }
 }

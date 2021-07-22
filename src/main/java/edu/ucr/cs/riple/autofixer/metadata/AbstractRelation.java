@@ -69,12 +69,11 @@ public abstract class AbstractRelation<T> {
   }
 
   protected List<T> findAllNodes(Comparator<T> c, String... keys) {
-    int hash = Arrays.hashCode(keys);
-    List<T> candidateIds = idHash.get(hash);
-    if (candidateIds == null) {
-      return null;
-    }
     List<T> nodes = new ArrayList<>();
+    List<T> candidateIds = idHash.get(Arrays.hashCode(keys));
+    if (candidateIds == null) {
+      return nodes;
+    }
     for (T candidate : candidateIds) {
       if (c.matches(candidate)) {
         nodes.add(candidate);

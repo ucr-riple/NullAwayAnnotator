@@ -25,7 +25,7 @@ public class CallGraphNode {
 
   @Override
   public int hashCode() {
-    return Objects.hash(callerClass, calleeMethod, calleeClass);
+    return Objects.hash(calleeMethod, calleeClass);
   }
 
   @Override
