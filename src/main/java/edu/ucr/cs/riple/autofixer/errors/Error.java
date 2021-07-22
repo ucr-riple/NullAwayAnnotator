@@ -15,11 +15,19 @@ public class Error {
 
   @Override
   public String toString() {
-    return "Error{" +
-            "messageType='" + messageType + '\'' +
-            ", message='" + message + '\'' +
-            ", clazz='" + clazz + '\'' +
-            ", method='" + method + '\'' +
-            '}';
+    return "Error{"
+        + "messageType='"
+        + messageType
+        + '\''
+        + ", message='"
+        + message
+        + '\''
+        + ", clazz='"
+        + clazz
+        + '\''
+        + ", method='"
+        + method
+        + '\''
+        + '}';
   }
 }

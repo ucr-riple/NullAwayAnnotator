@@ -68,15 +68,15 @@ public abstract class AbstractRelation<T> {
     return node;
   }
 
-  protected List<T> findAllNodes(Comparator<T> c, String... arguments) {
-    int hash = Arrays.hashCode(arguments);
+  protected List<T> findAllNodes(Comparator<T> c, String... keys) {
+    int hash = Arrays.hashCode(keys);
     List<T> candidateIds = idHash.get(hash);
     if (candidateIds == null) {
       return null;
     }
     List<T> nodes = new ArrayList<>();
     for (T candidate : candidateIds) {
-      if (c.equals(candidate)) {
+      if (c.matches(candidate)) {
         nodes.add(candidate);
       }
     }

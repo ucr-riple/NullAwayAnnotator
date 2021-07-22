@@ -75,14 +75,14 @@ public class Diagnose {
     this.fieldGraph = new FieldGraph(out_dir + "/field_graph.csv");
     this.explorers = new ArrayList<>();
     AutoFixConfig.AutoFixConfigWriter config =
-            new AutoFixConfig.AutoFixConfigWriter()
-                    .setLogError(true, true)
-                    .setMakeCallGraph(false)
-                    .setMakeFieldGraph(false)
-                    .setOptimized(false)
-                    .setMethodInheritanceTree(false)
-                    .setSuggest(true)
-                    .setWorkList(new String[]{"*"});
+        new AutoFixConfig.AutoFixConfigWriter()
+            .setLogError(true, true)
+            .setMakeCallGraph(false)
+            .setMakeFieldGraph(false)
+            .setOptimized(false)
+            .setMethodInheritanceTree(false)
+            .setSuggest(true)
+            .setWorkList(new String[] {"*"});
     buildProject(config);
     bank = new Bank();
     explorers.add(new MethodParamExplorer(this, bank));
@@ -90,7 +90,6 @@ public class Diagnose {
     explorers.add(new MethodReturnExplorer(this, bank));
     explorers.add(new BasicExplorer(this, bank));
   }
-
 
   private void remove(List<Fix> fixes) {
     List<Fix> toRemove = new ArrayList<>();
@@ -125,14 +124,14 @@ public class Diagnose {
     try {
       System.out.println("Preparing project: with optimization flag:" + optimized);
       AutoFixConfig.AutoFixConfigWriter config =
-              new AutoFixConfig.AutoFixConfigWriter()
-                      .setLogError(true, false)
-                      .setMakeCallGraph(false)
-                      .setMakeFieldGraph(false)
-                      .setOptimized(false)
-                      .setMethodInheritanceTree(false)
-                      .setSuggest(true)
-                      .setWorkList(new String[]{"*"});
+          new AutoFixConfig.AutoFixConfigWriter()
+              .setLogError(true, false)
+              .setMakeCallGraph(false)
+              .setMakeFieldGraph(false)
+              .setOptimized(false)
+              .setMethodInheritanceTree(false)
+              .setSuggest(true)
+              .setWorkList(new String[] {"*"});
       buildProject(config);
       if (!new File(fixPath).exists()) {
         JSONObject toDiagnose = new JSONObject();

@@ -158,10 +158,10 @@ public class AutoFixConfig {
     }
 
     private String workListDisplay() {
-      if(WORK_LIST == null || WORK_LIST.size() == 0){
+      if (WORK_LIST == null || WORK_LIST.size() == 0) {
         return "*";
       }
-      String display = WORK_LIST.toString().replaceAll("\\s","");
+      String display = WORK_LIST.toString().replaceAll("\\s", "");
       return display.substring(1, display.length() - 1);
     }
 

@@ -15,10 +15,18 @@ public class FieldGraph extends AbstractRelation<FieldGraphNode> {
   }
 
   public List<String> getUserClassOfField(String field, String inClass) {
-    List<FieldGraphNode> nodes = findAllNodes(candidate -> candidate.calleeClass.equals(inClass) && candidate.calleeField.equals(field));
+    List<FieldGraphNode> nodes =
+        findAllNodes(
+            candidate ->
+                candidate.calleeClass.equals(inClass) && candidate.calleeField.equals(field),
+            field,
+            inClass);
     if (nodes == null) {
       return null;
     }
-    return nodes.stream().map(fieldGraphNode -> fieldGraphNode.callerClass).collect(Collectors.toList());
+    return nodes
+        .stream()
+        .map(fieldGraphNode -> fieldGraphNode.callerClass)
+        .collect(Collectors.toList());
   }
 }

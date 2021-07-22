@@ -22,14 +22,14 @@ public abstract class Explorer {
 
   public DiagnoseReport effect(Fix fix) {
     AutoFixConfig.AutoFixConfigWriter config =
-            new AutoFixConfig.AutoFixConfigWriter()
-                    .setLogError(true, false)
-                    .setMakeCallGraph(false)
-                    .setMakeFieldGraph(false)
-                    .setOptimized(false)
-                    .setMethodInheritanceTree(false)
-                    .setSuggest(true)
-                    .setWorkList(new String[]{"*"});
+        new AutoFixConfig.AutoFixConfigWriter()
+            .setLogError(true, false)
+            .setMakeCallGraph(false)
+            .setMakeFieldGraph(false)
+            .setOptimized(false)
+            .setMethodInheritanceTree(false)
+            .setSuggest(true)
+            .setWorkList(new String[] {"*"});
     diagnose.buildProject(config);
     if (new File(Writer.ERROR).exists()) {
       return new DiagnoseReport(fix, bank.compare());

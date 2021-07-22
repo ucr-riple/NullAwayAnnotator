@@ -5,7 +5,6 @@ import edu.ucr.cs.riple.autofixer.DiagnoseReport;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.autofixer.metadata.CallGraph;
 import edu.ucr.cs.riple.injector.Fix;
-
 import java.util.List;
 
 public class MethodReturnExplorer extends Explorer {
