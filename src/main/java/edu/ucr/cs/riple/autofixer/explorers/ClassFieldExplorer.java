@@ -17,7 +17,7 @@ public class ClassFieldExplorer extends Explorer {
 
   @Override
   public DiagnoseReport effect(Fix fix) {
-    return effectByScope(fix, fieldGraph.getUserClassOfField(fix.method, fix.className));
+    return effectByScope(fix, fieldGraph.getUserClassOfField(fix.param, fix.className));
   }
 
   @Override
