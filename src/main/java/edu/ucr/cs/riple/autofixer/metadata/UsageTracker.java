@@ -1,5 +1,6 @@
 package edu.ucr.cs.riple.autofixer.metadata;
 
+import edu.ucr.cs.riple.injector.Fix;
 import java.util.List;
 
 public interface UsageTracker {
@@ -13,7 +14,7 @@ public interface UsageTracker {
     }
   }
 
-  List<Usage> getUsage(String method, String className);
+  List<String> getUsers(Fix fix);
 
-  List<FixGraph.Node> getAllNodes();
+  List<Usage> getUsage(Fix fix);
 }

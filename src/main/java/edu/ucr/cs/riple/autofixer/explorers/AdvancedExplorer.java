@@ -26,7 +26,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
           if (!isApplicable(fix)) {
             continue;
           }
-          FixGraph.Node node = fixGraph.findOrCreate(fix.index, fix.method, fix.className);
+          FixGraph.Node node = fixGraph.findOrCreate(fix);
           node.referred++;
         }
       }

@@ -5,10 +5,7 @@ import edu.ucr.cs.riple.autofixer.DiagnoseReport;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.autofixer.metadata.FieldNode;
 import edu.ucr.cs.riple.autofixer.metadata.FieldUsageTracker;
-import edu.ucr.cs.riple.autofixer.metadata.UsageTracker;
 import edu.ucr.cs.riple.injector.Fix;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class ClassFieldExplorer extends AdvancedExplorer {
 
@@ -30,8 +27,7 @@ public class ClassFieldExplorer extends AdvancedExplorer {
 
   @Override
   protected DiagnoseReport effectByScope(Fix fix) {
-    return super.effectByScope(
-        fix, fieldUsageTracker.getUserClassOfField(fix.param, fix.className));
+    return super.effectByScope(fix, fieldUsageTracker.getUsers(fix));
   }
 
   @Override
@@ -44,7 +40,7 @@ public class ClassFieldExplorer extends AdvancedExplorer {
     return true;
   }
 
-  static class ReversedFieldTracker extends FieldUsageTracker implements UsageTracker {
+  static class ReversedFieldTracker extends FieldUsageTracker {
 
     public ReversedFieldTracker(String filePath) {
       super(filePath);
@@ -53,20 +49,6 @@ public class ClassFieldExplorer extends AdvancedExplorer {
     @Override
     protected FieldNode addNodeByLine(String[] values) {
       return new FieldNode(values[2], values[3], values[0], values[1]);
-    }
-
-    @Override
-    public List<Usage> getUsage(String field, String className) {
-      List<FieldNode> nodes =
-          findAllNodes(
-              candidate ->
-                  candidate.calleeClass.equals(className) && candidate.calleeField.equals(field),
-              className,
-                  field);
-      return nodes
-          .stream()
-          .map(fieldNode -> new Usage(fieldNode.callerMethod, fieldNode.callerClass))
-          .collect(Collectors.toList());
     }
   }
 }

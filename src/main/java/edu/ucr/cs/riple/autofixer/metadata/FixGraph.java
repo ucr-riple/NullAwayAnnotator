@@ -1,7 +1,6 @@
 package edu.ucr.cs.riple.autofixer.metadata;
 
 import edu.ucr.cs.riple.injector.Fix;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,21 +14,21 @@ public class FixGraph {
     nodes = new HashMap<>();
   }
 
-  public Node findOrCreate(String index, String method, String className) {
-    int hash = Objects.hash(index, method, className);
+  public Node findOrCreate(Fix fix) {
+    int hash = Objects.hash(fix.index, fix.method, fix.className);
     if (nodes.containsKey(hash)) {
       for (Node candidate : nodes.get(hash)) {
-        if (candidate.index.equals(index)
-            && candidate.method.equals(method)
-            && candidate.className.equals(className)) {
+        if (candidate.fix.index.equals(fix.index)
+            && candidate.fix.method.equals(fix.method)
+            && candidate.fix.className.equals(fix.className)) {
           return candidate;
         }
       }
-      Node newNode = new Node(index, method, className);
+      Node newNode = new Node(fix);
       nodes.get(hash).add(newNode);
       return newNode;
     }
-    Node newNode = new Node(index, method, className);
+    Node newNode = new Node(fix);
     List<Node> newList = new ArrayList<>();
     newList.add(newNode);
     nodes.put(hash, newList);
@@ -60,7 +59,7 @@ public class FixGraph {
   }
 
   public static class Node {
-    Fix fix;
+    public final Fix fix;
     public int referred;
     public int effect;
     List<Node> neighbors;
