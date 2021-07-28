@@ -5,11 +5,13 @@ import java.util.Objects;
 public class FieldGraphNode {
 
   public final String callerClass;
+  public final String callerMethod;
   public final String calleeField;
   public final String calleeClass;
 
-  public FieldGraphNode(String callerClass, String calleeField, String calleeClass) {
+  public FieldGraphNode(String callerClass, String callerMethod, String calleeField, String calleeClass) {
     this.callerClass = callerClass;
+    this.callerMethod = callerMethod;
     this.calleeField = calleeField;
     this.calleeClass = calleeClass;
   }

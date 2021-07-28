@@ -4,13 +4,15 @@ import java.util.Objects;
 
 public class CallGraphNode {
   public final String callerClass;
+  public final String callerMethod;
   public final String calleeMethod;
   public final String calleeClass;
 
-  public CallGraphNode(String callerClass, String calleeMethod, String calleeClass) {
+  public CallGraphNode(String callerClass, String callerMethod, String calleeMethod, String calleeClass) {
     this.callerClass = callerClass;
     this.calleeMethod = calleeMethod;
     this.calleeClass = calleeClass;
+    this.callerMethod = callerMethod;
   }
 
   @Override

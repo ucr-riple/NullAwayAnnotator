@@ -11,7 +11,7 @@ public class CallGraph extends AbstractRelation<CallGraphNode> {
 
   @Override
   protected CallGraphNode addNodeByLine(String[] values) {
-    return new CallGraphNode(values[0], values[1], values[2]);
+    return new CallGraphNode(values[0], values[1], values[2], values[3]);
   }
 
   public List<String> getUserClassesOfMethod(String method, String inClass) {

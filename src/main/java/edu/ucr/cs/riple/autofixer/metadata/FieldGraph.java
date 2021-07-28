@@ -11,7 +11,7 @@ public class FieldGraph extends AbstractRelation<FieldGraphNode> {
 
   @Override
   protected FieldGraphNode addNodeByLine(String[] values) {
-    return new FieldGraphNode(values[0], values[1], values[2]);
+    return new FieldGraphNode(values[0], values[1], values[2], values[3]);
   }
 
   public List<String> getUserClassOfField(String field, String inClass) {
