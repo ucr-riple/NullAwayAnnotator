@@ -26,7 +26,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
           if (!isApplicable(fix)) {
             continue;
           }
-          FixGraph.Node node = fixGraph.findOrCreate(fix);
+          FixGraph.Node node = fixGraph.findOrCreate(fix.index, fix.method, fix.className);
           node.referred++;
         }
       }
@@ -42,7 +42,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
   protected abstract void init();
 
   protected DiagnoseReport predict(Fix fix) {
-    FixGraph.Node node = fixGraph.find(fix);
+    FixGraph.Node node = fixGraph.find(fix.index, fix.method, fix.className);
     if (node == null) {
       return null;
     }

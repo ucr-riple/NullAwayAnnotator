@@ -4,9 +4,9 @@ import edu.ucr.cs.riple.injector.Fix;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class FieldUsage extends AbstractRelation<FieldNode> implements UsageTracker {
+public class FieldUsageTracker extends AbstractRelation<FieldNode> implements UsageTracker {
 
-  public FieldUsage(String filePath) {
+  public FieldUsageTracker(String filePath) {
     super(filePath);
   }
 

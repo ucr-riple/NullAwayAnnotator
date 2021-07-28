@@ -41,9 +41,9 @@ public class MethodParamExplorer extends AdvancedExplorer {
         int finalI = i;
         for (FixGraph.Node node :
             list.stream()
-                .filter(node -> Integer.parseInt(node.fix.index) == finalI)
+                .filter(node -> Integer.parseInt(node.index) == finalI)
                 .collect(Collectors.toList())) {
-          int localEffect = bank.compareByMethod(node.fix.className, node.fix.method, false);
+          int localEffect = bank.compareByMethod(node.className, node.method, false);
           node.effect = localEffect + calculateInheritanceViolationError(node, i);
         }
       }
@@ -53,7 +53,7 @@ public class MethodParamExplorer extends AdvancedExplorer {
 
   @Override
   protected DiagnoseReport predict(Fix fix) {
-    FixGraph.Node node = fixGraph.find(fix);
+    FixGraph.Node node = fixGraph.find(fix.index, fix.method, fix.className);
     if (node == null) {
       return null;
     }
@@ -72,23 +72,23 @@ public class MethodParamExplorer extends AdvancedExplorer {
 
   @Override
   public boolean requiresInjection(Fix fix) {
-    return fixGraph.find(fix) == null;
+    return fixGraph.find(fix.index, fix.method, fix.className) == null;
   }
 
   private int calculateInheritanceViolationError(FixGraph.Node node, int index) {
     int effect = 0;
-    boolean[] thisMethodFlag = mit.findNode(node.fix.method, node.fix.className).annotFlags;
+    boolean[] thisMethodFlag = mit.findNode(node.method, node.className).annotFlags;
     if (index >= thisMethodFlag.length) {
       return 0;
     }
-    for (MethodNode subMethod : mit.getSubMethods(node.fix.method, node.fix.className, false)) {
+    for (MethodNode subMethod : mit.getSubMethods(node.method, node.className, false)) {
       if (!thisMethodFlag[index]) {
         if (!subMethod.annotFlags[index]) {
           effect++;
         }
       }
     }
-    List<MethodNode> superMethods = mit.getSuperMethods(node.fix.method, node.fix.className, false);
+    List<MethodNode> superMethods = mit.getSuperMethods(node.method, node.className, false);
     if (superMethods.size() != 0) {
       MethodNode superMethod = superMethods.get(0);
       if (!thisMethodFlag[index]) {

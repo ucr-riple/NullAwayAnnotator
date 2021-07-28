@@ -4,9 +4,9 @@ import edu.ucr.cs.riple.injector.Fix;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CallUsage extends AbstractRelation<CallNode> implements UsageTracker {
+public class CallUsageTracker extends AbstractRelation<CallNode> implements UsageTracker {
 
-  public CallUsage(String filePath) {
+  public CallUsageTracker(String filePath) {
     super(filePath);
   }
 

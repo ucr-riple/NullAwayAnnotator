@@ -3,12 +3,13 @@ package edu.ucr.cs.riple.autofixer.explorers;
 import edu.ucr.cs.riple.autofixer.Diagnose;
 import edu.ucr.cs.riple.autofixer.DiagnoseReport;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
-import edu.ucr.cs.riple.autofixer.metadata.FieldUsage;
+import edu.ucr.cs.riple.autofixer.metadata.FieldNode;
+import edu.ucr.cs.riple.autofixer.metadata.FieldUsageTracker;
 import edu.ucr.cs.riple.injector.Fix;
 
 public class ClassFieldExplorer extends AdvancedExplorer {
 
-  private FieldUsage fieldUsage;
+  private FieldUsageTracker fieldUsageTracker;
 
   public ClassFieldExplorer(Diagnose diagnose, Bank bank) {
     super(diagnose, bank);
@@ -16,8 +17,9 @@ public class ClassFieldExplorer extends AdvancedExplorer {
 
   @Override
   protected void init() {
-    this.fieldUsage = diagnose.fieldUsage;
-    fixGraph.findGroups(fieldUsage);
+    this.fieldUsageTracker = diagnose.fieldUsageTracker;
+    ReversedFieldTracker reversed = new ReversedFieldTracker(fieldUsageTracker.filePath);
+    fixGraph.findGroups(fieldUsageTracker, reversed);
   }
 
   @Override
@@ -25,7 +27,8 @@ public class ClassFieldExplorer extends AdvancedExplorer {
 
   @Override
   protected DiagnoseReport effectByScope(Fix fix) {
-    return super.effectByScope(fix, fieldUsage.getUserClassOfField(fix.param, fix.className));
+    return super.effectByScope(
+        fix, fieldUsageTracker.getUserClassOfField(fix.param, fix.className));
   }
 
   @Override
@@ -36,5 +39,17 @@ public class ClassFieldExplorer extends AdvancedExplorer {
   @Override
   public boolean requiresInjection(Fix fix) {
     return true;
+  }
+
+  static class ReversedFieldTracker extends FieldUsageTracker {
+
+    public ReversedFieldTracker(String filePath) {
+      super(filePath);
+    }
+
+    @Override
+    protected FieldNode addNodeByLine(String[] values) {
+      return new FieldNode(values[2], values[3], values[0], values[1]);
+    }
   }
 }

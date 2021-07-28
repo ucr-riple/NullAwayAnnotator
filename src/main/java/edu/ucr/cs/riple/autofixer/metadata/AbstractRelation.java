@@ -11,8 +11,10 @@ import java.util.List;
 
 public abstract class AbstractRelation<T> {
   HashMap<Integer, List<T>> idHash;
+  public final String filePath;
 
   public AbstractRelation(String filePath) {
+    this.filePath = filePath;
     setup();
     try {
       fillNodes(filePath);

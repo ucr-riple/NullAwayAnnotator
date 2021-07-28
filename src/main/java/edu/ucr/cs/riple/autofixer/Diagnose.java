@@ -9,8 +9,8 @@ import edu.ucr.cs.riple.autofixer.explorers.ClassFieldExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.Explorer;
 import edu.ucr.cs.riple.autofixer.explorers.MethodParamExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.MethodReturnExplorer;
-import edu.ucr.cs.riple.autofixer.metadata.CallUsage;
-import edu.ucr.cs.riple.autofixer.metadata.FieldUsage;
+import edu.ucr.cs.riple.autofixer.metadata.CallUsageTracker;
+import edu.ucr.cs.riple.autofixer.metadata.FieldUsageTracker;
 import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.injector.Fix;
@@ -37,8 +37,8 @@ public class Diagnose {
   private List<DiagnoseReport> finishedReports;
   private List<Explorer> explorers;
 
-  public CallUsage callUsage;
-  public FieldUsage fieldUsage;
+  public CallUsageTracker callUsageTracker;
+  public FieldUsageTracker fieldUsageTracker;
   public MethodInheritanceTree methodInheritanceTree;
 
   public void start(String buildCommand, String out_dir, boolean optimized) {
@@ -81,8 +81,8 @@ public class Diagnose {
             .setWorkList(new String[] {"*"});
     buildProject(config);
     this.methodInheritanceTree = new MethodInheritanceTree(out_dir + "/method_info.csv");
-    this.callUsage = new CallUsage(out_dir + "/call_graph.csv");
-    this.fieldUsage = new FieldUsage(out_dir + "/field_graph.csv");
+    this.callUsageTracker = new CallUsageTracker(out_dir + "/call_graph.csv");
+    this.fieldUsageTracker = new FieldUsageTracker(out_dir + "/field_graph.csv");
     this.explorers = new ArrayList<>();
     Bank bank = new Bank();
     explorers.add(new MethodParamExplorer(this, bank));
