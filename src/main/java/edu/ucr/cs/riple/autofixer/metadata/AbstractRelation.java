@@ -50,7 +50,7 @@ public abstract class AbstractRelation<T> {
 
   protected abstract T addNodeByLine(String[] values);
 
-  interface Comparator<T> {
+  public interface Comparator<T> {
     boolean matches(T candidate);
   }
 

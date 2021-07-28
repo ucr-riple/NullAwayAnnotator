@@ -1,10 +1,9 @@
 package edu.ucr.cs.riple.autofixer.metadata;
 
-import edu.ucr.cs.riple.injector.Fix;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class FieldUsageTracker extends AbstractRelation<FieldNode> implements UsageTracker {
+public class FieldUsageTracker extends AbstractRelation<FieldNode> {
 
   public FieldUsageTracker(String filePath) {
     super(filePath);
@@ -28,21 +27,6 @@ public class FieldUsageTracker extends AbstractRelation<FieldNode> implements Us
     return nodes
         .stream()
         .map(fieldGraphNode -> fieldGraphNode.callerClass)
-        .collect(Collectors.toList());
-  }
-
-  @Override
-  public List<Usage> getUsage(Fix fix) {
-    List<FieldNode> nodes =
-        findAllNodes(
-            candidate ->
-                candidate.calleeClass.equals(fix.className)
-                    && candidate.calleeField.equals(fix.param),
-            fix.className,
-            fix.param);
-    return nodes
-        .stream()
-        .map(fieldNode -> new Usage(fieldNode.callerMethod, fieldNode.callerClass))
         .collect(Collectors.toList());
   }
 }

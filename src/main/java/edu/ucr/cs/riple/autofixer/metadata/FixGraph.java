@@ -1,5 +1,7 @@
 package edu.ucr.cs.riple.autofixer.metadata;
 
+import edu.ucr.cs.riple.injector.Fix;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,9 +40,9 @@ public class FixGraph {
     int hash = Objects.hash(index, method, className);
     if (nodes.containsKey(hash)) {
       for (Node candidate : nodes.get(hash)) {
-        if (candidate.index.equals(index)
-            && candidate.method.equals(method)
-            && candidate.className.equals(className)) {
+        if (candidate.fix.index.equals(index)
+            && candidate.fix.method.equals(method)
+            && candidate.fix.className.equals(className)) {
           return candidate;
         }
       }
@@ -48,30 +50,29 @@ public class FixGraph {
     return null;
   }
 
-  public void findGroups(UsageTracker srcToDest, UsageTracker destToSrc) {
+  public void findGroups(UsageTracker tracker) {
     for (List<Node> nodesSet : nodes.values()) {
-      for (Node node : nodesSet) {}
+      for (Node node : nodesSet) {
+
+        //        List<Node> neighbors = destToSrc.getUsage()
+      }
     }
   }
 
   public static class Node {
-    public String index;
-    public String method;
-    public String className;
+    Fix fix;
     public int referred;
     public int effect;
     List<Node> neighbors;
 
-    private Node(String index, String method, String className) {
-      this.index = index;
-      this.method = method;
-      this.className = className;
+    private Node(Fix fix) {
+      this.fix = fix;
       neighbors = new ArrayList<>();
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(index, className, method);
+      return Objects.hash(fix.index, fix.className, fix.method);
     }
   }
 }
