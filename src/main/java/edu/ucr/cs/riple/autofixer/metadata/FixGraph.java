@@ -1,6 +1,5 @@
-package edu.ucr.cs.riple.autofixer.explorers;
+package edu.ucr.cs.riple.autofixer.metadata;
 
-import edu.ucr.cs.riple.autofixer.metadata.UsageTracker;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,10 +7,10 @@ import java.util.List;
 import java.util.Objects;
 
 public class FixGraph {
-  final HashMap<Integer, List<Node>> nodes;
+  public final HashMap<Integer, List<Node>> nodes;
   private List<List<Node>> groups;
 
-  FixGraph() {
+  public FixGraph() {
     nodes = new HashMap<>();
   }
 
@@ -50,7 +49,7 @@ public class FixGraph {
     return null;
   }
 
-  static class Node {
+  public static class Node {
     public final Fix fix;
     public int referred;
     public int effect;
