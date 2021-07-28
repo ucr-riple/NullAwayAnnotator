@@ -44,8 +44,8 @@ public class FixGraph {
     return null;
   }
 
-  public List<List<Node>> getGroups(){
-      return null;
+  public List<List<Node>> getGroups() {
+    return null;
   }
 
   static class Node {

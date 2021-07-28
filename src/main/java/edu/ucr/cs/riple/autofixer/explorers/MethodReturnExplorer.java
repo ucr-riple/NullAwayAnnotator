@@ -3,13 +3,13 @@ package edu.ucr.cs.riple.autofixer.explorers;
 import edu.ucr.cs.riple.autofixer.Diagnose;
 import edu.ucr.cs.riple.autofixer.DiagnoseReport;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
-import edu.ucr.cs.riple.autofixer.metadata.CallContext;
+import edu.ucr.cs.riple.autofixer.metadata.CallUsage;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.List;
 
 public class MethodReturnExplorer extends AdvancedExplorer {
 
-  private CallContext callGraph;
+  private CallUsage callUsage;
 
   public MethodReturnExplorer(Diagnose diagnose, Bank bank) {
     super(diagnose, bank);
@@ -17,7 +17,7 @@ public class MethodReturnExplorer extends AdvancedExplorer {
 
   @Override
   protected void init() {
-    callGraph = diagnose.callGraph;
+    callUsage = diagnose.callUsage;
   }
 
   @Override
@@ -25,7 +25,7 @@ public class MethodReturnExplorer extends AdvancedExplorer {
 
   @Override
   protected DiagnoseReport effectByScope(Fix fix) {
-    List<String> users = callGraph.getUserClassesOfMethod(fix.method, fix.className);
+    List<String> users = callUsage.getUserClassesOfMethod(fix.method, fix.className);
     return super.effectByScope(fix, users);
   }
 

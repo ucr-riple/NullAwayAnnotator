@@ -2,43 +2,43 @@ package edu.ucr.cs.riple.autofixer.metadata;
 
 import java.util.Objects;
 
-public class FieldContextNode {
+public class CallUsageNode {
   public final String callerClass;
   public final String callerMethod;
-  public final String calleeField;
+  public final String calleeMethod;
   public final String calleeClass;
 
-  public FieldContextNode(
-      String callerClass, String callerMethod, String calleeField, String calleeClass) {
+  public CallUsageNode(
+      String callerClass, String callerMethod, String calleeMethod, String calleeClass) {
     this.callerClass = callerClass;
-    this.callerMethod = callerMethod;
-    this.calleeField = calleeField;
+    this.calleeMethod = calleeMethod;
     this.calleeClass = calleeClass;
+    this.callerMethod = callerMethod;
   }
 
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof FieldContextNode)) return false;
-    FieldContextNode that = (FieldContextNode) o;
+    if (!(o instanceof CallUsageNode)) return false;
+    CallUsageNode that = (CallUsageNode) o;
     return callerClass.equals(that.callerClass)
-        && calleeField.equals(that.calleeField)
+        && calleeMethod.equals(that.calleeMethod)
         && calleeClass.equals(that.calleeClass);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(calleeField, calleeClass);
+    return Objects.hash(calleeMethod, calleeClass);
   }
 
   @Override
   public String toString() {
-    return "FieldContextNode{"
+    return "CallGraphDisplay{"
         + "callerClass='"
         + callerClass
         + '\''
-        + ", calleeField='"
-        + calleeField
+        + ", calleeMethod='"
+        + calleeMethod
         + '\''
         + ", calleeClass='"
         + calleeClass

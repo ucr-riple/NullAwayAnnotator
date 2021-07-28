@@ -3,12 +3,12 @@ package edu.ucr.cs.riple.autofixer.explorers;
 import edu.ucr.cs.riple.autofixer.Diagnose;
 import edu.ucr.cs.riple.autofixer.DiagnoseReport;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
-import edu.ucr.cs.riple.autofixer.metadata.FieldContext;
+import edu.ucr.cs.riple.autofixer.metadata.FieldUsage;
 import edu.ucr.cs.riple.injector.Fix;
 
 public class ClassFieldExplorer extends AdvancedExplorer {
 
-  private FieldContext fieldGraph;
+  private FieldUsage fieldUsage;
 
   public ClassFieldExplorer(Diagnose diagnose, Bank bank) {
     super(diagnose, bank);
@@ -16,17 +16,15 @@ public class ClassFieldExplorer extends AdvancedExplorer {
 
   @Override
   protected void init() {
-    this.fieldGraph = diagnose.fieldGraph;
+    this.fieldUsage = diagnose.fieldUsage;
   }
 
   @Override
-  protected void explore() {
-
-  }
+  protected void explore() {}
 
   @Override
   protected DiagnoseReport effectByScope(Fix fix) {
-    return super.effectByScope(fix, fieldGraph.getUserClassOfField(fix.param, fix.className));
+    return super.effectByScope(fix, fieldUsage.getUserClassOfField(fix.param, fix.className));
   }
 
   @Override
