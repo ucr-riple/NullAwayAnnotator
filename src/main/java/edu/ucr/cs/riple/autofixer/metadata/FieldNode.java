@@ -2,13 +2,13 @@ package edu.ucr.cs.riple.autofixer.metadata;
 
 import java.util.Objects;
 
-public class FieldUsageNode {
+public class FieldNode {
   public final String callerClass;
   public final String callerMethod;
   public final String calleeField;
   public final String calleeClass;
 
-  public FieldUsageNode(
+  public FieldNode(
       String callerClass, String callerMethod, String calleeField, String calleeClass) {
     this.callerClass = callerClass;
     this.callerMethod = callerMethod;
@@ -19,8 +19,8 @@ public class FieldUsageNode {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof FieldUsageNode)) return false;
-    FieldUsageNode that = (FieldUsageNode) o;
+    if (!(o instanceof FieldNode)) return false;
+    FieldNode that = (FieldNode) o;
     return callerClass.equals(that.callerClass)
         && calleeField.equals(that.calleeField)
         && calleeClass.equals(that.calleeClass);
@@ -33,7 +33,7 @@ public class FieldUsageNode {
 
   @Override
   public String toString() {
-    return "FieldUsageNode{"
+    return "FieldNode{"
         + "callerClass='"
         + callerClass
         + '\''

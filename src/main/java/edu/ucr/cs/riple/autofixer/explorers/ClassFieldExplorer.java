@@ -17,6 +17,7 @@ public class ClassFieldExplorer extends AdvancedExplorer {
   @Override
   protected void init() {
     this.fieldUsage = diagnose.fieldUsage;
+    fixGraph.findGroups(fieldUsage);
   }
 
   @Override
