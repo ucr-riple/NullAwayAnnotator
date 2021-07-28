@@ -9,7 +9,8 @@ public class FieldGraphNode {
   public final String calleeField;
   public final String calleeClass;
 
-  public FieldGraphNode(String callerClass, String callerMethod, String calleeField, String calleeClass) {
+  public FieldGraphNode(
+      String callerClass, String callerMethod, String calleeField, String calleeClass) {
     this.callerClass = callerClass;
     this.callerMethod = callerMethod;
     this.calleeField = calleeField;
