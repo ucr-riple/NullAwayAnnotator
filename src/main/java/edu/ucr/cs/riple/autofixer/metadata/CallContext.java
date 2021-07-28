@@ -3,19 +3,19 @@ package edu.ucr.cs.riple.autofixer.metadata;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CallGraph extends AbstractRelation<CallGraphNode> {
+public class CallContext extends AbstractRelation<CallContextNode> {
 
-  public CallGraph(String filePath) {
+  public CallContext(String filePath) {
     super(filePath);
   }
 
   @Override
-  protected CallGraphNode addNodeByLine(String[] values) {
-    return new CallGraphNode(values[0], values[1], values[2], values[3]);
+  protected CallContextNode addNodeByLine(String[] values) {
+    return new CallContextNode(values[0], values[1], values[2], values[3]);
   }
 
   public List<String> getUserClassesOfMethod(String method, String inClass) {
-    List<CallGraphNode> nodes =
+    List<CallContextNode> nodes =
         findAllNodes(
             candidate ->
                 candidate.calleeClass.equals(inClass) && candidate.calleeMethod.equals(method),

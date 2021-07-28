@@ -2,14 +2,14 @@ package edu.ucr.cs.riple.autofixer.metadata;
 
 import java.util.Objects;
 
-public class FieldGraphNode {
+public class FieldContextNode {
 
   public final String callerClass;
   public final String callerMethod;
   public final String calleeField;
   public final String calleeClass;
 
-  public FieldGraphNode(
+  public FieldContextNode(
       String callerClass, String callerMethod, String calleeField, String calleeClass) {
     this.callerClass = callerClass;
     this.callerMethod = callerMethod;
@@ -20,8 +20,8 @@ public class FieldGraphNode {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof FieldGraphNode)) return false;
-    FieldGraphNode that = (FieldGraphNode) o;
+    if (!(o instanceof FieldContextNode)) return false;
+    FieldContextNode that = (FieldContextNode) o;
     return callerClass.equals(that.callerClass)
         && calleeField.equals(that.calleeField)
         && calleeClass.equals(that.calleeClass);
@@ -34,7 +34,7 @@ public class FieldGraphNode {
 
   @Override
   public String toString() {
-    return "FieldGraphNode{"
+    return "FieldContextNode{"
         + "callerClass='"
         + callerClass
         + '\''

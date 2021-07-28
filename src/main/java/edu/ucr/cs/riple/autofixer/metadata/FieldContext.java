@@ -3,19 +3,19 @@ package edu.ucr.cs.riple.autofixer.metadata;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class FieldGraph extends AbstractRelation<FieldGraphNode> {
+public class FieldContext extends AbstractRelation<FieldContextNode> {
 
-  public FieldGraph(String filePath) {
+  public FieldContext(String filePath) {
     super(filePath);
   }
 
   @Override
-  protected FieldGraphNode addNodeByLine(String[] values) {
-    return new FieldGraphNode(values[0], values[1], values[2], values[3]);
+  protected FieldContextNode addNodeByLine(String[] values) {
+    return new FieldContextNode(values[0], values[1], values[2], values[3]);
   }
 
   public List<String> getUserClassOfField(String field, String inClass) {
-    List<FieldGraphNode> nodes =
+    List<FieldContextNode> nodes =
         findAllNodes(
             candidate ->
                 candidate.calleeClass.equals(inClass) && candidate.calleeField.equals(field),

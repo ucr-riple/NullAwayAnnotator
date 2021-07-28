@@ -21,6 +21,89 @@ public class MethodParamExplorer extends Explorer {
 
   MethodInheritanceTree mit;
 
+  static class MethodParamNode {
+    final int index;
+    final String method;
+    final String clazz;
+    int referred;
+    int effect;
+    static HashMap<Integer, List<MethodParamNode>> nodes = new HashMap<>();
+
+    private MethodParamNode(int index, String method, String clazz) {
+      this.index = index;
+      this.method = method;
+      this.clazz = clazz;
+    }
+
+    public static MethodParamNode findOrCreate(int index, String method, String clazz) {
+      int hash = Objects.hash(index, method, clazz);
+      if (nodes.containsKey(hash)) {
+        for (MethodParamNode candidate : nodes.get(hash)) {
+          if (candidate.method.equals(method)
+              && candidate.clazz.equals(clazz)
+              && candidate.index == index) {
+            return candidate;
+          }
+        }
+        MethodParamNode newMethodParamNode = new MethodParamNode(index, method, clazz);
+        nodes.get(hash).add(newMethodParamNode);
+        return newMethodParamNode;
+      }
+      MethodParamNode newMethodParamNode = new MethodParamNode(index, method, clazz);
+      List<MethodParamNode> newList = new ArrayList<>();
+      newList.add(newMethodParamNode);
+      nodes.put(hash, newList);
+      return newMethodParamNode;
+    }
+
+    public static MethodParamNode find(int index, String method, String clazz) {
+      int hash = Objects.hash(index, method, clazz);
+      if (nodes.containsKey(hash)) {
+        for (MethodParamNode candidate : nodes.get(hash)) {
+          if (candidate.method.equals(method)
+              && candidate.clazz.equals(clazz)
+              && candidate.index == index) {
+            return candidate;
+          }
+        }
+      }
+      return null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof MethodParamNode)) return false;
+      MethodParamNode methodParamNode = (MethodParamNode) o;
+      return index == methodParamNode.index
+          && method.equals(methodParamNode.method)
+          && clazz.equals(methodParamNode.clazz);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(index, method, clazz);
+    }
+
+    @Override
+    public String toString() {
+      return "MethodParamNode{"
+          + "index="
+          + index
+          + ", method='"
+          + method
+          + '\''
+          + ", clazz='"
+          + clazz
+          + '\''
+          + ", referred="
+          + referred
+          + ", effect="
+          + effect
+          + '}';
+    }
+  }
+
   public MethodParamExplorer(Diagnose diagnose, Bank bank) {
     super(diagnose, bank);
     mit = diagnose.methodInheritanceTree;
@@ -41,8 +124,8 @@ public class MethodParamExplorer extends Explorer {
           String clazz = infos[2];
           String method = infos[3];
           int index = Integer.parseInt(infos[5]);
-          Node node = Node.findOrCreate(index, method, clazz);
-          node.referred++;
+          MethodParamNode methodParamNode = MethodParamNode.findOrCreate(index, method, clazz);
+          methodParamNode.referred++;
         }
       }
     } catch (IOException e) {
@@ -62,32 +145,39 @@ public class MethodParamExplorer extends Explorer {
               .setMethodParamTest(true, i);
       diagnose.buildProject(config);
       bank.saveState(false, true);
-      for (List<Node> list : Node.nodes.values()) {
+      for (List<MethodParamNode> list : MethodParamNode.nodes.values()) {
         int finalI = i;
-        for (Node node :
-            list.stream().filter(node -> node.index == finalI).collect(Collectors.toList())) {
-          int localEffect = bank.compareByMethod(node.clazz, node.method, false);
-          node.effect = localEffect + calculateInheritanceViolationError(node, i);
+        for (MethodParamNode methodParamNode :
+            list.stream()
+                .filter(methodParamNode -> methodParamNode.index == finalI)
+                .collect(Collectors.toList())) {
+          int localEffect =
+              bank.compareByMethod(methodParamNode.clazz, methodParamNode.method, false);
+          methodParamNode.effect =
+              localEffect + calculateInheritanceViolationError(methodParamNode, i);
         }
       }
     }
     System.out.println("Captured all methods behavior against nullability of parameter.");
   }
 
-  private int calculateInheritanceViolationError(Node node, int index) {
+  private int calculateInheritanceViolationError(MethodParamNode methodParamNode, int index) {
     int effect = 0;
-    boolean[] thisMethodFlag = mit.findNode(node.method, node.clazz).annotFlags;
+    boolean[] thisMethodFlag =
+        mit.findNode(methodParamNode.method, methodParamNode.clazz).annotFlags;
     if (index >= thisMethodFlag.length) {
       return 0;
     }
-    for (MethodNode subMethod : mit.getSubMethods(node.method, node.clazz, false)) {
+    for (MethodNode subMethod :
+        mit.getSubMethods(methodParamNode.method, methodParamNode.clazz, false)) {
       if (!thisMethodFlag[index]) {
         if (!subMethod.annotFlags[index]) {
           effect++;
         }
       }
     }
-    List<MethodNode> superMethods = mit.getSuperMethods(node.method, node.clazz, false);
+    List<MethodNode> superMethods =
+        mit.getSuperMethods(methodParamNode.method, methodParamNode.clazz, false);
     if (superMethods.size() != 0) {
       MethodNode superMethod = superMethods.get(0);
       if (!thisMethodFlag[index]) {
@@ -101,9 +191,10 @@ public class MethodParamExplorer extends Explorer {
 
   @Override
   public DiagnoseReport effect(Fix fix) {
-    Node node = Node.find(Integer.parseInt(fix.index), fix.method, fix.className);
-    if (node != null) {
-      return new DiagnoseReport(fix, node.effect - node.referred);
+    MethodParamNode methodParamNode =
+        MethodParamNode.find(Integer.parseInt(fix.index), fix.method, fix.className);
+    if (methodParamNode != null) {
+      return new DiagnoseReport(fix, methodParamNode.effect - methodParamNode.referred);
     }
     return super.effect(fix);
   }
@@ -116,86 +207,5 @@ public class MethodParamExplorer extends Explorer {
   @Override
   public boolean requiresInjection(Fix fix) {
     return false;
-  }
-}
-
-class Node {
-  final int index;
-  final String method;
-  final String clazz;
-  int referred;
-  int effect;
-  static HashMap<Integer, List<Node>> nodes = new HashMap<>();
-
-  private Node(int index, String method, String clazz) {
-    this.index = index;
-    this.method = method;
-    this.clazz = clazz;
-  }
-
-  public static Node findOrCreate(int index, String method, String clazz) {
-    int hash = Objects.hash(index, method, clazz);
-    if (nodes.containsKey(hash)) {
-      for (Node candidate : nodes.get(hash)) {
-        if (candidate.method.equals(method)
-            && candidate.clazz.equals(clazz)
-            && candidate.index == index) {
-          return candidate;
-        }
-      }
-      Node newNode = new Node(index, method, clazz);
-      nodes.get(hash).add(newNode);
-      return newNode;
-    }
-    Node newNode = new Node(index, method, clazz);
-    List<Node> newList = new ArrayList<>();
-    newList.add(newNode);
-    nodes.put(hash, newList);
-    return newNode;
-  }
-
-  public static Node find(int index, String method, String clazz) {
-    int hash = Objects.hash(index, method, clazz);
-    if (nodes.containsKey(hash)) {
-      for (Node candidate : nodes.get(hash)) {
-        if (candidate.method.equals(method)
-            && candidate.clazz.equals(clazz)
-            && candidate.index == index) {
-          return candidate;
-        }
-      }
-    }
-    return null;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Node)) return false;
-    Node node = (Node) o;
-    return index == node.index && method.equals(node.method) && clazz.equals(node.clazz);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(index, method, clazz);
-  }
-
-  @Override
-  public String toString() {
-    return "Node{"
-        + "index="
-        + index
-        + ", method='"
-        + method
-        + '\''
-        + ", clazz='"
-        + clazz
-        + '\''
-        + ", referred="
-        + referred
-        + ", effect="
-        + effect
-        + '}';
   }
 }
