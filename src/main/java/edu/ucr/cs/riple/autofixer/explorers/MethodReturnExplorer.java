@@ -21,16 +21,6 @@ public class MethodReturnExplorer extends AdvancedExplorer {
   }
 
   @Override
-  protected boolean isPredictable(Fix fix) {
-    return false;
-  }
-
-  @Override
-  protected DiagnoseReport predict(Fix fix) {
-    return null;
-  }
-
-  @Override
   protected void explore() {}
 
   @Override

@@ -3,22 +3,35 @@ package edu.ucr.cs.riple.autofixer.explorers;
 import edu.ucr.cs.riple.autofixer.Diagnose;
 import edu.ucr.cs.riple.autofixer.DiagnoseReport;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
+import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import edu.ucr.cs.riple.injector.Fix;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
-public abstract class AdvancedExplorer<T> extends BasicExplorer {
+public abstract class AdvancedExplorer extends BasicExplorer {
 
-  protected List<T> nodes;
-
-  class Node {
-    T value;
-    List<T> neighbors;
-  }
+  final FixGraph fixGraph;
 
   public AdvancedExplorer(Diagnose diagnose, Bank bank) {
     super(diagnose, bank);
-    nodes = new ArrayList<>();
+    fixGraph = new FixGraph();
+    try {
+      try (BufferedReader br = new BufferedReader(new FileReader(Writer.SUGGEST_FIX))) {
+        String line;
+        String delimiter = Writer.getDelimiterRegex();
+        while ((line = br.readLine()) != null) {
+          Fix fix = Fix.fromCSVLine(line, delimiter);
+          if (!isApplicable(fix)) {
+            continue;
+          }
+          FixGraph.Node node = fixGraph.findOrCreate(fix);
+          node.referred++;
+        }
+      }
+    } catch (IOException e) {
+      System.err.println("Exception happened in initializing MethodParamExplorer...");
+    }
     init();
     explore();
   }
@@ -27,16 +40,21 @@ public abstract class AdvancedExplorer<T> extends BasicExplorer {
 
   protected abstract void init();
 
-  protected abstract boolean isPredictable(Fix fix);
-
-  protected abstract DiagnoseReport predict(Fix fix);
+  protected DiagnoseReport predict(Fix fix) {
+    FixGraph.Node node = fixGraph.find(fix);
+    if (node == null) {
+      return null;
+    }
+    return new DiagnoseReport(fix, node.effect);
+  }
 
   protected abstract DiagnoseReport effectByScope(Fix fix);
 
   @Override
   public DiagnoseReport effect(Fix fix) {
-    if (isPredictable(fix)) {
-      return predict(fix);
+    DiagnoseReport report = predict(fix);
+    if (report != null) {
+      return report;
     }
     return effectByScope(fix);
   }

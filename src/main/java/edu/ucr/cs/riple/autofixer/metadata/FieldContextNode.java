@@ -3,7 +3,6 @@ package edu.ucr.cs.riple.autofixer.metadata;
 import java.util.Objects;
 
 public class FieldContextNode {
-
   public final String callerClass;
   public final String callerMethod;
   public final String calleeField;

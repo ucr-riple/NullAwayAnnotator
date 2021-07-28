@@ -6,9 +6,7 @@ import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.autofixer.metadata.FieldContext;
 import edu.ucr.cs.riple.injector.Fix;
 
-public class ClassFieldExplorer extends AdvancedExplorer<ClassFieldExplorer.FieldNode> {
-
-  static class FieldNode {}
+public class ClassFieldExplorer extends AdvancedExplorer {
 
   private FieldContext fieldGraph;
 
@@ -22,17 +20,9 @@ public class ClassFieldExplorer extends AdvancedExplorer<ClassFieldExplorer.Fiel
   }
 
   @Override
-  protected boolean isPredictable(Fix fix) {
-    return false;
-  }
+  protected void explore() {
 
-  @Override
-  protected DiagnoseReport predict(Fix fix) {
-    return null;
   }
-
-  @Override
-  protected void explore() {}
 
   @Override
   protected DiagnoseReport effectByScope(Fix fix) {
