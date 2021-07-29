@@ -3,7 +3,6 @@ package edu.ucr.cs.riple.autofixer.explorers;
 import edu.ucr.cs.riple.autofixer.Diagnose;
 import edu.ucr.cs.riple.autofixer.DiagnoseReport;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
-import edu.ucr.cs.riple.autofixer.metadata.CallNode;
 import edu.ucr.cs.riple.autofixer.metadata.CallUsageTracker;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.List;
@@ -19,8 +18,7 @@ public class MethodReturnExplorer extends AdvancedExplorer {
   @Override
   protected void init() {
     callUsageTracker = diagnose.callUsageTracker;
-    ReversedCallTracker reversed = new ReversedCallTracker(callUsageTracker.filePath);
-    fixGraph.findGroups(reversed);
+    fixGraph.findGroups(callUsageTracker);
   }
 
   @Override
@@ -40,17 +38,5 @@ public class MethodReturnExplorer extends AdvancedExplorer {
   @Override
   public boolean requiresInjection(Fix fix) {
     return true;
-  }
-
-  static class ReversedCallTracker extends CallUsageTracker {
-
-    public ReversedCallTracker(String filePath) {
-      super(filePath);
-    }
-
-    @Override
-    protected CallNode addNodeByLine(String[] values) {
-      return new CallNode(values[2], values[3], values[0], values[1]);
-    }
   }
 }

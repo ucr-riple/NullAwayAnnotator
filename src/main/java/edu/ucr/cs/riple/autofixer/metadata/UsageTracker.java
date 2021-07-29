@@ -2,6 +2,7 @@ package edu.ucr.cs.riple.autofixer.metadata;
 
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.List;
+import java.util.Objects;
 
 public interface UsageTracker {
   class Usage {
@@ -11,6 +12,14 @@ public interface UsageTracker {
     public Usage(String method, String clazz) {
       this.method = method;
       this.clazz = clazz;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof Usage)) return false;
+      Usage usage = (Usage) o;
+      return Objects.equals(method, usage.method) && Objects.equals(clazz, usage.clazz);
     }
   }
 

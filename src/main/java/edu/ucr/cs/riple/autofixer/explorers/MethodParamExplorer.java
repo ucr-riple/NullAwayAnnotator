@@ -53,7 +53,7 @@ public class MethodParamExplorer extends AdvancedExplorer {
 
   @Override
   protected DiagnoseReport predict(Fix fix) {
-    FixGraph.Node node = fixGraph.find(fix.index, fix.method, fix.className);
+    FixGraph.Node node = fixGraph.find(fix);
     if (node == null) {
       return null;
     }
@@ -72,7 +72,7 @@ public class MethodParamExplorer extends AdvancedExplorer {
 
   @Override
   public boolean requiresInjection(Fix fix) {
-    return fixGraph.find(fix.index, fix.method, fix.className) == null;
+    return fixGraph.find(fix) == null;
   }
 
   private int calculateInheritanceViolationError(FixGraph.Node node, int index) {

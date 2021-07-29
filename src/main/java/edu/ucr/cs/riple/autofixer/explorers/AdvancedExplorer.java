@@ -42,7 +42,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
   protected abstract void init();
 
   protected DiagnoseReport predict(Fix fix) {
-    FixGraph.Node node = fixGraph.find(fix.index, fix.method, fix.className);
+    FixGraph.Node node = fixGraph.find(fix);
     if (node == null) {
       return null;
     }
