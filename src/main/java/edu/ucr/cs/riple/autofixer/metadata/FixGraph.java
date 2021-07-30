@@ -123,7 +123,7 @@ public class FixGraph {
     System.out.println("FOUND: " + groups.size() + " number of groups");
 
     // todo
-    writeGroups();
+    //    writeGroups();
   }
 
   private void writeGroups() {
