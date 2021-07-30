@@ -16,13 +16,18 @@ public class FixGraph {
     nodes = new HashMap<>();
   }
 
+  private boolean fixMatcher(Fix fix, Fix other) {
+    return fix.className.equals(other.className)
+        && fix.method.equals(other.method)
+        && fix.index.equals(other.index)
+        && fix.param.equals(other.param);
+  }
+
   public Node findOrCreate(Fix fix) {
     int hash = Objects.hash(fix.index, fix.method, fix.className);
     if (nodes.containsKey(hash)) {
       for (Node candidate : nodes.get(hash)) {
-        if (candidate.fix.index.equals(fix.index)
-            && candidate.fix.method.equals(fix.method)
-            && candidate.fix.className.equals(fix.className)) {
+        if (fixMatcher(candidate.fix, fix)) {
           return candidate;
         }
       }
@@ -41,9 +46,7 @@ public class FixGraph {
     int hash = Objects.hash(fix.index, fix.method, fix.className);
     if (nodes.containsKey(hash)) {
       for (Node candidate : nodes.get(hash)) {
-        if (candidate.fix.index.equals(fix.index)
-            && candidate.fix.method.equals(fix.method)
-            && candidate.fix.className.equals(fix.className)) {
+        if (fixMatcher(candidate.fix, fix)) {
           return candidate;
         }
       }
@@ -108,6 +111,7 @@ public class FixGraph {
         groups.get(result[i]).add(allNodes.get(i));
       }
     }
+    System.out.println("FOUND: " + groups.size() + " number of groups");
   }
 
   public static class Node {

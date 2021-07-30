@@ -1,24 +1,30 @@
 import edu.ucr.cs.riple.autofixer.Diagnose;
+import edu.ucr.cs.riple.autofixer.errors.Bank;
+import edu.ucr.cs.riple.autofixer.explorers.MethodReturnExplorer;
+import edu.ucr.cs.riple.autofixer.metadata.CallUsageTracker;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkListBuilder;
 import java.util.Arrays;
 
 public class Main {
   public static void main(String[] args) {
-    if (args.length == 0) {
-      throw new RuntimeException("command not specified");
-    }
-    String command = args[0];
-    switch (command) {
-      case "apply":
-        apply(args);
-        break;
-      case "diagnose":
-        diagnose(args);
-        break;
-      default:
-        throw new RuntimeException("Unknown command: " + command);
-    }
+        if (args.length == 0) {
+          throw new RuntimeException("command not specified");
+        }
+        String command = args[0];
+        switch (command) {
+          case "apply":
+            apply(args);
+            break;
+          case "diagnose":
+            diagnose(args);
+            break;
+          default:
+            throw new RuntimeException("Unknown command: " + command);
+        }
+//    Diagnose diagnose = new Diagnose();
+//    diagnose.callUsageTracker = new CallUsageTracker("/tmp/NUllAwayFix/call_graph.csv");
+//    MethodReturnExplorer returnExplorer = new MethodReturnExplorer(diagnose, new Bank());
   }
 
   private static void diagnose(String[] args) {

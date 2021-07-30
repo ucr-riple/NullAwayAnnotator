@@ -37,8 +37,8 @@ public class CallUsageTracker extends AbstractRelation<CallNode> implements Usag
             candidate ->
                 candidate.calleeClass.equals(fix.className)
                     && candidate.calleeMethod.equals(fix.method),
-            fix.className,
-            fix.method);
+            fix.method,
+            fix.className);
     return nodes
         .stream()
         .map(callUsageNode -> new Usage(callUsageNode.callerMethod, callUsageNode.callerClass))

@@ -34,7 +34,9 @@ public class MethodParamExplorer extends AdvancedExplorer {
           new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, true)
               .setSuggest(true)
-              .setMethodParamTest(true, i);
+              .setMethodParamTest(true, i)
+              .setMakeCallGraph(false)
+              .setMakeFieldGraph(false);
       diagnose.buildProject(config);
       bank.saveState(false, true);
       for (List<FixGraph.Node> list : fixGraph.nodes.values()) {
