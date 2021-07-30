@@ -1,7 +1,7 @@
 package edu.ucr.cs.riple.autofixer.explorers;
 
-import edu.ucr.cs.riple.autofixer.Diagnose;
-import edu.ucr.cs.riple.autofixer.DiagnoseReport;
+import edu.ucr.cs.riple.autofixer.AutoFixer;
+import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.autofixer.metadata.FixGraph;
 import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
@@ -15,13 +15,13 @@ public class MethodParamExplorer extends AdvancedExplorer {
 
   private MethodInheritanceTree mit;
 
-  public MethodParamExplorer(Diagnose diagnose, Bank bank) {
-    super(diagnose, bank);
+  public MethodParamExplorer(AutoFixer autoFixer, Bank bank) {
+    super(autoFixer, bank);
   }
 
   @Override
   protected void init() {
-    mit = diagnose.methodInheritanceTree;
+    mit = autoFixer.methodInheritanceTree;
   }
 
   @Override
@@ -37,7 +37,7 @@ public class MethodParamExplorer extends AdvancedExplorer {
               .setMethodParamTest(true, i)
               .setMakeCallGraph(false)
               .setMakeFieldGraph(false);
-      diagnose.buildProject(config);
+      autoFixer.buildProject(config);
       bank.saveState(false, true);
       for (List<FixGraph.Node> list : fixGraph.nodes.values()) {
         int finalI = i;
@@ -54,16 +54,16 @@ public class MethodParamExplorer extends AdvancedExplorer {
   }
 
   @Override
-  protected DiagnoseReport predict(Fix fix) {
+  protected Report predict(Fix fix) {
     FixGraph.Node node = fixGraph.find(fix);
     if (node == null) {
       return null;
     }
-    return new DiagnoseReport(fix, node.effect - node.referred);
+    return new Report(fix, node.effect - node.referred);
   }
 
   @Override
-  protected DiagnoseReport effectByScope(Fix fix) {
+  protected Report effectByScope(Fix fix) {
     return effectByScope(fix, null);
   }
 

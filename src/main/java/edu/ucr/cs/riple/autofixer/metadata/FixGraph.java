@@ -16,6 +16,7 @@ import org.json.simple.JSONObject;
 
 public class FixGraph {
   public final HashMap<Integer, List<Node>> nodes;
+
   private HashMap<Integer, List<Node>> groups;
 
   public FixGraph() {
@@ -126,6 +127,10 @@ public class FixGraph {
     //    writeGroups();
   }
 
+  public HashMap<Integer, List<Node>> getGroups() {
+    return groups;
+  }
+
   private void writeGroups() {
     JSONObject obj = new JSONObject();
     for (int i = 0; i < groups.size(); i++) {
@@ -168,18 +173,19 @@ public class FixGraph {
 
   public static class Node {
     public final Fix fix;
+    public List<UsageTracker.Usage> usages;
     public int referred;
     public int effect;
     public int id;
     boolean isDangling;
     List<Node> neighbors;
-    List<UsageTracker.Usage> usages;
     List<String> classes;
 
     private Node(Fix fix) {
       this.fix = fix;
       isDangling = false;
       neighbors = new ArrayList<>();
+      classes = new ArrayList<>();
     }
 
     @Override
@@ -192,14 +198,12 @@ public class FixGraph {
         usages.add(new UsageTracker.Usage(null, fix.className));
       }
       this.usages = usages;
+      this.classes = usages.stream().map(usage -> usage.clazz).collect(Collectors.toList());
       for (UsageTracker.Usage usage : usages) {
         if (usage.method == null || usage.method.equals("null")) {
           isDangling = true;
           break;
         }
-      }
-      if (isDangling) {
-        classes = usages.stream().map(usage -> usage.clazz).collect(Collectors.toList());
       }
     }
 

@@ -26,14 +26,14 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-public class Diagnose {
+public class AutoFixer {
 
   private String out_dir;
   private String buildCommand;
   private String fixPath;
   private String diagnosePath;
   private Injector injector;
-  private List<DiagnoseReport> finishedReports;
+  private List<Report> finishedReports;
   private List<Explorer> explorers;
 
   public CallUsageTracker callUsageTracker;
@@ -41,7 +41,7 @@ public class Diagnose {
   public MethodInheritanceTree methodInheritanceTree;
 
   public void start(String buildCommand, String out_dir, boolean optimized) {
-    System.out.println("Diagnose Started...");
+    System.out.println("AutoFixer Started...");
     this.out_dir = out_dir;
     init(buildCommand);
     injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
@@ -67,7 +67,7 @@ public class Diagnose {
   private void init(String buildCommand) {
     this.buildCommand = buildCommand;
     this.fixPath = out_dir + "/fixes.csv";
-    this.diagnosePath = out_dir + "/diagnose.json";
+    this.diagnosePath = out_dir + "/autoFixer.json";
     this.finishedReports = new ArrayList<>();
     AutoFixConfig.AutoFixConfigWriter config =
         new AutoFixConfig.AutoFixConfigWriter()
@@ -90,7 +90,7 @@ public class Diagnose {
     explorers.add(new BasicExplorer(this, bank));
   }
 
-  private void remove(List<Fix> fixes) {
+  public void remove(List<Fix> fixes) {
     if (fixes.size() == 0) {
       return;
     }
@@ -104,22 +104,26 @@ public class Diagnose {
     injector.start(Collections.singletonList(new WorkList(toRemove)), false);
   }
 
+  public void inject(List<Fix> fixes) {
+    injector.start(Collections.singletonList(new WorkList(fixes)), true);
+  }
+
   private List<Fix> analyze(Fix fix) {
     System.out.println("Fix Type: " + fix.location);
     List<Fix> suggestedFix = new ArrayList<>();
-    DiagnoseReport diagnoseReport = null;
+    Report report = null;
     for (Explorer explorer : explorers) {
       if (explorer.isApplicable(fix)) {
         if (explorer.requiresInjection(fix)) {
           suggestedFix.add(fix);
-          injector.start(Collections.singletonList(new WorkList(suggestedFix)), true);
+          inject(suggestedFix);
         }
-        diagnoseReport = explorer.effect(fix);
+        report = explorer.effect(fix);
         break;
       }
     }
-    Preconditions.checkNotNull(diagnoseReport);
-    finishedReports.add(diagnoseReport);
+    Preconditions.checkNotNull(report);
+    finishedReports.add(report);
     return suggestedFix;
   }
 
@@ -148,8 +152,8 @@ public class Diagnose {
       }
       new File(diagnosePath).delete();
       convertCSVToJSON(this.fixPath, out_dir + "/fixes.json");
-      System.out.println("Deleted old diagnose file.");
-      System.out.println("Making new diagnose.json.");
+      System.out.println("Deleted old autoFixer file.");
+      System.out.println("Making new autoFixer.json.");
       if (!optimized) {
         executeCommand("cp " + this.fixPath + " " + this.diagnosePath);
         convertCSVToJSON(diagnosePath, diagnosePath);

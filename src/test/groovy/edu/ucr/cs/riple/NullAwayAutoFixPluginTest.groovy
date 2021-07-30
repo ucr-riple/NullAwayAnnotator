@@ -30,7 +30,7 @@ class NullAwayAutoFixPluginTest {
         task = project.task('annotedit', type: AnnotationEditor)
         assertTrue(task instanceof AnnotationEditor)
 
-        task = project.task('diagnose', type: Diagnose)
+        task = project.task('autoFixer', type: Diagnose)
         assertTrue(task instanceof Diagnose)
     }
 }

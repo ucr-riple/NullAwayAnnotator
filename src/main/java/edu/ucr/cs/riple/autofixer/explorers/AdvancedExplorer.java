@@ -1,21 +1,26 @@
 package edu.ucr.cs.riple.autofixer.explorers;
 
-import edu.ucr.cs.riple.autofixer.Diagnose;
-import edu.ucr.cs.riple.autofixer.DiagnoseReport;
+import edu.ucr.cs.riple.autofixer.AutoFixer;
+import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.autofixer.metadata.FixGraph;
+import edu.ucr.cs.riple.autofixer.metadata.UsageTracker;
+import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import edu.ucr.cs.riple.injector.Fix;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class AdvancedExplorer extends BasicExplorer {
 
   final FixGraph fixGraph;
 
-  public AdvancedExplorer(Diagnose diagnose, Bank bank) {
-    super(diagnose, bank);
+  public AdvancedExplorer(AutoFixer autoFixer, Bank bank) {
+    super(autoFixer, bank);
     fixGraph = new FixGraph();
     try {
       try (BufferedReader br = new BufferedReader(new FileReader(Writer.SUGGEST_FIX))) {
@@ -37,23 +42,47 @@ public abstract class AdvancedExplorer extends BasicExplorer {
     explore();
   }
 
-  protected abstract void explore();
+  protected void explore() {
+    HashMap<Integer, List<FixGraph.Node>> groups = fixGraph.getGroups();
+    for (List<FixGraph.Node> nodes : groups.values()) {
+      List<Fix> fixes = nodes.stream().map(node -> node.fix).collect(Collectors.toList());
+      autoFixer.inject(fixes);
+      AutoFixConfig.AutoFixConfigWriter writer =
+          new AutoFixConfig.AutoFixConfigWriter()
+              .setWorkList(new String[] {"*"})
+              .setLogError(true, true)
+              .setSuggest(true);
+      autoFixer.buildProject(writer);
+      bank.saveState(true, true);
+      for (FixGraph.Node node : nodes) {
+        int totalEffect = 0;
+        for (UsageTracker.Usage usage : node.usages) {
+          if (usage.method == null) {
+            totalEffect += bank.compareByClass(usage.clazz, false);
+          } else {
+            totalEffect += bank.compareByMethod(usage.clazz, usage.method, false);
+          }
+        }
+        node.effect = totalEffect;
+      }
+    }
+  }
 
   protected abstract void init();
 
-  protected DiagnoseReport predict(Fix fix) {
+  protected Report predict(Fix fix) {
     FixGraph.Node node = fixGraph.find(fix);
     if (node == null) {
       return null;
     }
-    return new DiagnoseReport(fix, node.effect);
+    return new Report(fix, node.effect);
   }
 
-  protected abstract DiagnoseReport effectByScope(Fix fix);
+  protected abstract Report effectByScope(Fix fix);
 
   @Override
-  public DiagnoseReport effect(Fix fix) {
-    DiagnoseReport report = predict(fix);
+  public Report effect(Fix fix) {
+    Report report = predict(fix);
     if (report != null) {
       return report;
     }

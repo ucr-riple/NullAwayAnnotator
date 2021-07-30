@@ -1,7 +1,7 @@
 package edu.ucr.cs.riple.autofixer.explorers;
 
-import edu.ucr.cs.riple.autofixer.Diagnose;
-import edu.ucr.cs.riple.autofixer.DiagnoseReport;
+import edu.ucr.cs.riple.autofixer.AutoFixer;
+import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.autofixer.nullaway.Writer;
@@ -14,15 +14,15 @@ import java.util.Set;
 
 public abstract class Explorer {
 
-  protected final Diagnose diagnose;
+  protected final AutoFixer autoFixer;
   protected final Bank bank;
 
-  public Explorer(Diagnose diagnose, Bank bank) {
-    this.diagnose = diagnose;
+  public Explorer(AutoFixer autoFixer, Bank bank) {
+    this.autoFixer = autoFixer;
     this.bank = bank;
   }
 
-  public DiagnoseReport effect(Fix fix) {
+  public Report effect(Fix fix) {
     AutoFixConfig.AutoFixConfigWriter config =
         new AutoFixConfig.AutoFixConfigWriter()
             .setLogError(true, false)
@@ -32,14 +32,14 @@ public abstract class Explorer {
             .setMethodInheritanceTree(false)
             .setSuggest(true)
             .setWorkList(new String[] {"*"});
-    diagnose.buildProject(config);
+    autoFixer.buildProject(config);
     if (new File(Writer.ERROR).exists()) {
-      return new DiagnoseReport(fix, bank.compare());
+      return new Report(fix, bank.compare());
     }
-    return DiagnoseReport.empty(fix);
+    return Report.empty(fix);
   }
 
-  public DiagnoseReport effectByScope(Fix fix, List<String> workList) {
+  public Report effectByScope(Fix fix, List<String> workList) {
     if (workList == null) {
       workList = new ArrayList<>();
     }
@@ -54,7 +54,7 @@ public abstract class Explorer {
             .setMethodInheritanceTree(false)
             .setSuggest(true)
             .setWorkList(workSet.toArray(new String[0]));
-    diagnose.buildProject(config);
+    autoFixer.buildProject(config);
     if (new File(Writer.ERROR).exists()) {
       int totalEffect = 0;
       totalEffect += bank.compareByClass(fix.className, true);
@@ -64,9 +64,9 @@ public abstract class Explorer {
         }
         totalEffect += bank.compareByClass(clazz, false);
       }
-      return new DiagnoseReport(fix, totalEffect);
+      return new Report(fix, totalEffect);
     }
-    return DiagnoseReport.empty(fix);
+    return Report.empty(fix);
   }
 
   public abstract boolean isApplicable(Fix fix);
