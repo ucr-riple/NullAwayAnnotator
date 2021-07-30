@@ -18,6 +18,7 @@ public class MethodReturnExplorer extends AdvancedExplorer {
   @Override
   protected void init() {
     callUsageTracker = diagnose.callUsageTracker;
+    System.out.println("Trying to find groups for Method Return fixes");
     fixGraph.findGroups(callUsageTracker);
   }
 

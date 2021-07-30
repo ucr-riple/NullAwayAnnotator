@@ -17,7 +17,7 @@ public class ClassFieldExplorer extends AdvancedExplorer {
   @Override
   protected void init() {
     this.fieldUsageTracker = diagnose.fieldUsageTracker;
-    System.out.println("TRYING TO FIND THE GROUPS for Class Field");
+    System.out.println("Trying to find groups for Class Field fixes");
     fixGraph.findGroups(fieldUsageTracker);
   }
 
