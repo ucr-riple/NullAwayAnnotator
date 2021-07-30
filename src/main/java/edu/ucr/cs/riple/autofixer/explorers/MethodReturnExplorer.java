@@ -23,9 +23,6 @@ public class MethodReturnExplorer extends AdvancedExplorer {
   }
 
   @Override
-  protected void explore() {}
-
-  @Override
   protected Report effectByScope(Fix fix) {
     List<String> users = callUsageTracker.getUsers(fix);
     return super.effectByScope(fix, users);

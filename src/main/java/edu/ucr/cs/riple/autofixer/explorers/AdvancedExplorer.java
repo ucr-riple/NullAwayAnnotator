@@ -44,7 +44,9 @@ public abstract class AdvancedExplorer extends BasicExplorer {
 
   protected void explore() {
     HashMap<Integer, List<FixGraph.Node>> groups = fixGraph.getGroups();
+    System.out.println("Building for: " + groups.size() + " number of times");
     for (List<FixGraph.Node> nodes : groups.values()) {
+      System.out.println("Building..");
       List<Fix> fixes = nodes.stream().map(node -> node.fix).collect(Collectors.toList());
       autoFixer.inject(fixes);
       AutoFixConfig.AutoFixConfigWriter writer =
@@ -65,6 +67,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
         }
         node.effect = totalEffect;
       }
+      autoFixer.remove(fixes);
     }
   }
 

@@ -7,6 +7,7 @@ import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.autofixer.explorers.BasicExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.ClassFieldExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.Explorer;
+import edu.ucr.cs.riple.autofixer.explorers.MethodParamExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.MethodReturnExplorer;
 import edu.ucr.cs.riple.autofixer.metadata.CallUsageTracker;
 import edu.ucr.cs.riple.autofixer.metadata.FieldUsageTracker;
@@ -44,7 +45,6 @@ public class AutoFixer {
     System.out.println("AutoFixer Started...");
     this.out_dir = out_dir;
     init(buildCommand);
-    injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
     System.out.println("Starting preparation");
     prepare(out_dir, optimized);
     List<WorkList> workListLists = new WorkListBuilder(diagnosePath).getWorkLists();
@@ -79,12 +79,13 @@ public class AutoFixer {
             .setSuggest(true)
             .setWorkList(new String[] {"*"});
     buildProject(config);
+    this.injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
     this.methodInheritanceTree = new MethodInheritanceTree(out_dir + "/method_info.csv");
     this.callUsageTracker = new CallUsageTracker(out_dir + "/call_graph.csv");
     this.fieldUsageTracker = new FieldUsageTracker(out_dir + "/field_graph.csv");
     this.explorers = new ArrayList<>();
     Bank bank = new Bank();
-    //    explorers.add(new MethodParamExplorer(this, bank));
+    explorers.add(new MethodParamExplorer(this, bank));
     explorers.add(new ClassFieldExplorer(this, bank));
     explorers.add(new MethodReturnExplorer(this, bank));
     explorers.add(new BasicExplorer(this, bank));
@@ -105,7 +106,11 @@ public class AutoFixer {
   }
 
   public void inject(List<Fix> fixes) {
-    injector.start(Collections.singletonList(new WorkList(fixes)), true);
+    if (fixes.size() == 1) {
+      injector.start(Collections.singletonList(new WorkList(fixes)), true);
+    } else {
+      injector.start(new WorkListBuilder(fixes).getWorkLists());
+    }
   }
 
   private List<Fix> analyze(Fix fix) {
