@@ -5,26 +5,20 @@ import java.util.Arrays;
 
 public class Main {
   public static void main(String[] args) {
-    //        if (args.length == 0) {
-    //          throw new RuntimeException("command not specified");
-    //        }
-    //        String command = args[0];
-    //        switch (command) {
-    //          case "apply":
-    //            apply(args);
-    //            break;
-    //          case "autoFixer":
-    //            autoFixer(args);
-    //            break;
-    //          default:
-    //            throw new RuntimeException("Unknown command: " + command);
-    //        }
-    //    AutoFixer autoFixer = new AutoFixer();
-    //    autoFixer.callUsageTracker = new CallUsageTracker("/tmp/NUllAwayFix/call_graph.csv");
-    //    MethodReturnExplorer returnExplorer = new MethodReturnExplorer(autoFixer, new Bank());
-    //    AutoFixer d = new AutoFixer();
-    //    d.fieldUsageTracker = new FieldUsageTracker("/tmp/NUllAwayFix/field_graph.csv");
-    //    ClassFieldExplorer classFieldExplorer = new ClassFieldExplorer(d, new Bank());
+    if (args.length == 0) {
+      throw new RuntimeException("command not specified");
+    }
+    String command = args[0];
+    switch (command) {
+      case "apply":
+        apply(args);
+        break;
+      case "diagnose":
+        diagnose(args);
+        break;
+      default:
+        throw new RuntimeException("Unknown command: " + command);
+    }
   }
 
   private static void diagnose(String[] args) {
