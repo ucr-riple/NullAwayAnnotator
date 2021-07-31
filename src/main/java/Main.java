@@ -21,6 +21,17 @@ public class Main {
     }
   }
 
+  private static void helperRunner() {
+    AutoFixer autoFixer = new AutoFixer();
+    String dir = "/tmp/NullAwayFix";
+    String runCommand =
+        "cd "
+            + "/Users/nima/Developer/NullAwayFixer/Projects/mockito"
+            + " && "
+            + "./gradlew build -x test";
+    autoFixer.start(runCommand, dir, false);
+  }
+
   private static void diagnose(String[] args) {
     AutoFixer autoFixer = new AutoFixer();
     System.out.println("Number of received arguments: " + args.length);

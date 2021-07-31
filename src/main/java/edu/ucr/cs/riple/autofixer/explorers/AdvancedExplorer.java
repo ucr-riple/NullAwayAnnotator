@@ -42,13 +42,15 @@ public abstract class AdvancedExplorer extends BasicExplorer {
     explore();
   }
 
+  protected abstract void init();
+
   protected void explore() {
     HashMap<Integer, List<FixGraph.Node>> groups = fixGraph.getGroups();
     System.out.println("Building for: " + groups.size() + " number of times");
     for (List<FixGraph.Node> nodes : groups.values()) {
       System.out.println("Building..");
       List<Fix> fixes = nodes.stream().map(node -> node.fix).collect(Collectors.toList());
-      autoFixer.inject(fixes);
+      autoFixer.apply(fixes);
       AutoFixConfig.AutoFixConfigWriter writer =
           new AutoFixConfig.AutoFixConfigWriter()
               .setWorkList(new String[] {"*"})
@@ -70,8 +72,6 @@ public abstract class AdvancedExplorer extends BasicExplorer {
       autoFixer.remove(fixes);
     }
   }
-
-  protected abstract void init();
 
   protected Report predict(Fix fix) {
     FixGraph.Node node = fixGraph.find(fix);

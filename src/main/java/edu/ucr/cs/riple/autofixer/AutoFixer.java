@@ -21,8 +21,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -67,7 +67,7 @@ public class AutoFixer {
   private void init(String buildCommand) {
     this.buildCommand = buildCommand;
     this.fixPath = out_dir + "/fixes.csv";
-    this.diagnosePath = out_dir + "/autoFixer.json";
+    this.diagnosePath = out_dir + "/diagnose.json";
     this.finishedReports = new ArrayList<>();
     AutoFixConfig.AutoFixConfigWriter config =
         new AutoFixConfig.AutoFixConfigWriter()
@@ -92,25 +92,28 @@ public class AutoFixer {
   }
 
   public void remove(List<Fix> fixes) {
-    if (fixes.size() == 0) {
+    if (fixes == null || fixes.size() == 0) {
       return;
     }
-    List<Fix> toRemove = new ArrayList<>();
-    for (Fix fix : fixes) {
-      Fix removeFix =
-          new Fix(
-              fix.annotation, fix.method, fix.param, fix.location, fix.className, fix.uri, "false");
-      toRemove.add(removeFix);
-    }
-    injector.start(Collections.singletonList(new WorkList(toRemove)), false);
+    List<Fix> toRemove =
+        fixes
+            .stream()
+            .map(
+                fix ->
+                    new Fix(
+                        fix.annotation,
+                        fix.method,
+                        fix.param,
+                        fix.location,
+                        fix.className,
+                        fix.uri,
+                        "false"))
+            .collect(Collectors.toList());
+    apply(toRemove);
   }
 
-  public void inject(List<Fix> fixes) {
-    if (fixes.size() == 1) {
-      injector.start(Collections.singletonList(new WorkList(fixes)), true);
-    } else {
-      injector.start(new WorkListBuilder(fixes).getWorkLists());
-    }
+  public void apply(List<Fix> fixes) {
+    injector.start(new WorkListBuilder(fixes).getWorkLists(), true);
   }
 
   private List<Fix> analyze(Fix fix) {
@@ -121,7 +124,7 @@ public class AutoFixer {
       if (explorer.isApplicable(fix)) {
         if (explorer.requiresInjection(fix)) {
           suggestedFix.add(fix);
-          inject(suggestedFix);
+          apply(suggestedFix);
         }
         report = explorer.effect(fix);
         break;
@@ -157,8 +160,8 @@ public class AutoFixer {
       }
       new File(diagnosePath).delete();
       convertCSVToJSON(this.fixPath, out_dir + "/fixes.json");
-      System.out.println("Deleted old autoFixer file.");
-      System.out.println("Making new autoFixer.json.");
+      System.out.println("Deleted old diagnose file.");
+      System.out.println("Making new diagnose.json.");
       if (!optimized) {
         executeCommand("cp " + this.fixPath + " " + this.diagnosePath);
         convertCSVToJSON(diagnosePath, diagnosePath);
