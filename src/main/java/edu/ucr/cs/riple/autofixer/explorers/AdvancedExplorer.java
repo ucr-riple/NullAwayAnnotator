@@ -60,7 +60,6 @@ public abstract class AdvancedExplorer extends BasicExplorer {
       for (FixGraph.Node node : nodes) {
         int totalEffect = 0;
         for (UsageTracker.Usage usage : node.usages) {
-          System.out.println(usage);
           if (usage.method == null || usage.method.equals("null")) {
             totalEffect += bank.compareByClass(usage.clazz, false);
           } else {
