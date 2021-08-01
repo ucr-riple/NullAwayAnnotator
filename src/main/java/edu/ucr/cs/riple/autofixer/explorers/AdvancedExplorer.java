@@ -74,7 +74,6 @@ public abstract class AdvancedExplorer extends BasicExplorer {
 
   protected Report predict(Fix fix) {
     FixGraph.Node node = fixGraph.find(fix);
-    System.out.println(node);
     if (node == null) {
       return null;
     }
