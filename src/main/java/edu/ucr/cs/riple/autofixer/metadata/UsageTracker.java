@@ -21,6 +21,11 @@ public interface UsageTracker {
       Usage usage = (Usage) o;
       return Objects.equals(method, usage.method) && Objects.equals(clazz, usage.clazz);
     }
+
+    @Override
+    public String toString() {
+      return "Usage{" + "method='" + method + '\'' + ", clazz='" + clazz + '\'' + '}';
+    }
   }
 
   List<String> getUsers(Fix fix);

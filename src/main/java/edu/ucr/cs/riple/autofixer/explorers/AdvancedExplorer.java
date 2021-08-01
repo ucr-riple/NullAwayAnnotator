@@ -28,11 +28,10 @@ public abstract class AdvancedExplorer extends BasicExplorer {
         String delimiter = Writer.getDelimiterRegex();
         while ((line = br.readLine()) != null) {
           Fix fix = Fix.fromCSVLine(line, delimiter);
-          if (!isApplicable(fix)) {
-            continue;
+          if (isApplicable(fix)) {
+            FixGraph.Node node = fixGraph.findOrCreate(fix);
+            node.referred++;
           }
-          FixGraph.Node node = fixGraph.findOrCreate(fix);
-          node.referred++;
         }
       }
     } catch (IOException e) {

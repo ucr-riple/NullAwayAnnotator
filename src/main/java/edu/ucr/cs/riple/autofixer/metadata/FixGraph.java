@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -122,9 +123,6 @@ public class FixGraph {
       }
     }
     System.out.println("FOUND: " + groups.size() + " number of groups");
-
-    // todo
-    //    writeGroups();
   }
 
   public HashMap<Integer, List<Node>> getGroups() {
@@ -194,9 +192,7 @@ public class FixGraph {
     }
 
     public void setUsages(List<UsageTracker.Usage> usages) {
-      if (fix.location.equals("CLASS_FIELD")) {
-        usages.add(new UsageTracker.Usage(null, fix.className));
-      }
+      usages = new ArrayList<>(new HashSet<>(usages));
       this.usages = usages;
       this.classes = usages.stream().map(usage -> usage.clazz).collect(Collectors.toList());
       for (UsageTracker.Usage usage : usages) {
@@ -228,6 +224,10 @@ public class FixGraph {
           + "]"
           + ", id="
           + id
+          + ", effect="
+          + effect
+          + ", referred="
+          + referred
           + ", isDangling="
           + isDangling
           + '}';

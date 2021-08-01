@@ -39,9 +39,12 @@ public class CallUsageTracker extends AbstractRelation<CallNode> implements Usag
                     && candidate.calleeMethod.equals(fix.method),
             fix.method,
             fix.className);
-    return nodes
-        .stream()
-        .map(callUsageNode -> new Usage(callUsageNode.callerMethod, callUsageNode.callerClass))
-        .collect(Collectors.toList());
+    List<Usage> ans =
+        nodes
+            .stream()
+            .map(callUsageNode -> new Usage(callUsageNode.callerMethod, callUsageNode.callerClass))
+            .collect(Collectors.toList());
+    ans.add(new Usage(fix.method, fix.className));
+    return ans;
   }
 }

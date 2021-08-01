@@ -42,9 +42,12 @@ public class FieldUsageTracker extends AbstractRelation<FieldNode> implements Us
                     && candidate.calleeField.equals(fix.param),
             fix.param,
             fix.className);
-    return nodes
-        .stream()
-        .map(fieldNode -> new Usage(fieldNode.callerMethod, fieldNode.callerClass))
-        .collect(Collectors.toList());
+    List<Usage> ans =
+        nodes
+            .stream()
+            .map(fieldNode -> new Usage(fieldNode.callerMethod, fieldNode.callerClass))
+            .collect(Collectors.toList());
+    ans.add(new Usage("null", fix.className));
+    return ans;
   }
 }
