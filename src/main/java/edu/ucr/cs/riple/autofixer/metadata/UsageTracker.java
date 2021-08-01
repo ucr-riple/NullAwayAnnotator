@@ -23,6 +23,11 @@ public interface UsageTracker {
     }
 
     @Override
+    public int hashCode() {
+      return Objects.hash(method, clazz);
+    }
+
+    @Override
     public String toString() {
       return "Usage{" + "method='" + method + '\'' + ", clazz='" + clazz + '\'' + '}';
     }
