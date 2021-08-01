@@ -5,21 +5,20 @@ import java.util.Arrays;
 
 public class Main {
   public static void main(String[] args) {
-    //    if (args.length == 0) {
-    //      throw new RuntimeException("command not specified");
-    //    }
-    //    String command = args[0];
-    //    switch (command) {
-    //      case "apply":
-    //        apply(args);
-    //        break;
-    //      case "diagnose":
-    //        diagnose(args);
-    //        break;
-    //      default:
-    //        throw new RuntimeException("Unknown command: " + command);
-    //    }
-    helperRunner();
+    if (args.length == 0) {
+      throw new RuntimeException("command not specified");
+    }
+    String command = args[0];
+    switch (command) {
+      case "apply":
+        apply(args);
+        break;
+      case "diagnose":
+        diagnose(args);
+        break;
+      default:
+        throw new RuntimeException("Unknown command: " + command);
+    }
   }
 
   private static void helperRunner() {
