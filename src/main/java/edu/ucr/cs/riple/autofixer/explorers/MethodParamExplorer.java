@@ -34,7 +34,7 @@ public class MethodParamExplorer extends AdvancedExplorer {
       allNodes.addAll(subList);
     }
     for (int i = 0; i < maxsize; i++) {
-      System.out.println("Analyzing params at index: " + i + " for all methods...");
+      System.out.println("Analyzing params at index: (" + i + " out of " + maxsize + ") for all methods...");
       int finalI1 = i;
       List<FixGraph.Node> subList =
           allNodes
@@ -51,9 +51,7 @@ public class MethodParamExplorer extends AdvancedExplorer {
           new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, true)
               .setSuggest(true)
-              .setMethodParamTest(true)
-              .setMakeCallGraph(false)
-              .setMakeFieldGraph(false);
+              .setMethodParamTest(true);
       autoFixer.buildProject(config);
       bank.saveState(false, true);
       for (FixGraph.Node node : subList) {

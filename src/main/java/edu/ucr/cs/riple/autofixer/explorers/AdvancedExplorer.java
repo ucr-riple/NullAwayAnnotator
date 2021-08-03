@@ -49,20 +49,16 @@ public abstract class AdvancedExplorer extends BasicExplorer {
   protected void explore() {
     HashMap<Integer, List<FixGraph.Node>> groups = fixGraph.getGroups();
     System.out.println("Building for: " + groups.size() + " number of times");
+    int i = 0;
     for (List<FixGraph.Node> nodes : groups.values()) {
-      Set<String> workList = new HashSet<>();
-      System.out.println("Building..");
+      System.out.println("Building: (Iteration " + i++ + " out of: " + groups.size() + ")");
       List<Fix> fixes = nodes.stream().map(node -> node.fix).collect(Collectors.toList());
-      for (Fix fix : fixes) {
-        workList.addAll(tracker.getUsers(fix));
-        workList.add(fix.className);
-      }
       autoFixer.apply(fixes);
       AutoFixConfig.AutoFixConfigWriter writer =
           new AutoFixConfig.AutoFixConfigWriter()
-              .setWorkList(workList.toArray(new String[0]))
               .setLogError(true, true)
-              .setSuggest(true);
+              .setSuggest(true)
+                  .setWorkList(new String[]{"*"});
       autoFixer.buildProject(writer);
       bank.saveState(true, true);
       for (FixGraph.Node node : nodes) {
@@ -82,9 +78,12 @@ public abstract class AdvancedExplorer extends BasicExplorer {
 
   protected Report predict(Fix fix) {
     FixGraph.Node node = fixGraph.find(fix);
+    System.out.print("Trying to predict: " + fix.className + " " + fix.method + " " + fix.param + " " + fix.param + ": ");
     if (node == null) {
+      System.out.println("Not found...");
       return null;
     }
+    System.out.println("Predicted...");
     return new Report(fix, node.effect);
   }
 
