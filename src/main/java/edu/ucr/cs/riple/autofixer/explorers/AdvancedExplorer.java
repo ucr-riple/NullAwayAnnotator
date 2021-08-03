@@ -12,9 +12,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class AdvancedExplorer extends BasicExplorer {
@@ -49,7 +47,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
   protected void explore() {
     HashMap<Integer, List<FixGraph.Node>> groups = fixGraph.getGroups();
     System.out.println("Building for: " + groups.size() + " number of times");
-    int i = 0;
+    int i = 1;
     for (List<FixGraph.Node> nodes : groups.values()) {
       System.out.println("Building: (Iteration " + i++ + " out of: " + groups.size() + ")");
       List<Fix> fixes = nodes.stream().map(node -> node.fix).collect(Collectors.toList());
@@ -78,7 +76,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
 
   protected Report predict(Fix fix) {
     FixGraph.Node node = fixGraph.find(fix);
-    System.out.print("Trying to predict: " + fix.className + " " + fix.method + " " + fix.param + " " + fix.param + ": ");
+    System.out.print("Trying to predict: " + fix.className + " " + fix.method + " " + fix.param + " " + fix.location + ": ");
     if (node == null) {
       System.out.println("Not found...");
       return null;
