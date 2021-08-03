@@ -8,12 +8,8 @@ import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
 import edu.ucr.cs.riple.autofixer.metadata.MethodNode;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.injector.Fix;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class MethodParamExplorer extends AdvancedExplorer {
@@ -41,11 +37,12 @@ public class MethodParamExplorer extends AdvancedExplorer {
       System.out.println("Analyzing params at index: " + i + " for all methods...");
       int finalI1 = i;
       List<FixGraph.Node> subList =
-          allNodes.stream()
+          allNodes
+              .stream()
               .filter(node -> node.fix.index.equals(finalI1 + ""))
               .collect(Collectors.toList());
       List<Fix> appliedFixes = subList.stream().map(node -> node.fix).collect(Collectors.toList());
-      if(appliedFixes.size() == 0){
+      if (appliedFixes.size() == 0) {
         System.out.println("No fix at this index, skipping...");
         continue;
       }
@@ -54,7 +51,7 @@ public class MethodParamExplorer extends AdvancedExplorer {
           new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, true)
               .setSuggest(true)
-              .setMethodParamTest(true, i)
+              .setMethodParamTest(true)
               .setMakeCallGraph(false)
               .setMakeFieldGraph(false);
       autoFixer.buildProject(config);

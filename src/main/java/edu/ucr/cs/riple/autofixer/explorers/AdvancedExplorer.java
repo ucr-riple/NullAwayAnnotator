@@ -12,12 +12,15 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class AdvancedExplorer extends BasicExplorer {
 
   final FixGraph fixGraph;
+  protected UsageTracker tracker;
 
   public AdvancedExplorer(AutoFixer autoFixer, Bank bank) {
     super(autoFixer, bank);
@@ -47,12 +50,17 @@ public abstract class AdvancedExplorer extends BasicExplorer {
     HashMap<Integer, List<FixGraph.Node>> groups = fixGraph.getGroups();
     System.out.println("Building for: " + groups.size() + " number of times");
     for (List<FixGraph.Node> nodes : groups.values()) {
+      Set<String> workList = new HashSet<>();
       System.out.println("Building..");
       List<Fix> fixes = nodes.stream().map(node -> node.fix).collect(Collectors.toList());
+      for (Fix fix : fixes) {
+        workList.addAll(tracker.getUsers(fix));
+        workList.add(fix.className);
+      }
       autoFixer.apply(fixes);
       AutoFixConfig.AutoFixConfigWriter writer =
           new AutoFixConfig.AutoFixConfigWriter()
-              .setWorkList(new String[] {"*"})
+              .setWorkList(workList.toArray(new String[0]))
               .setLogError(true, true)
               .setSuggest(true);
       autoFixer.buildProject(writer);
