@@ -8,7 +8,12 @@ import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
 import edu.ucr.cs.riple.autofixer.metadata.MethodNode;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.injector.Fix;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class MethodParamExplorer extends AdvancedExplorer {
@@ -28,8 +33,23 @@ public class MethodParamExplorer extends AdvancedExplorer {
   protected void explore() {
     int maxsize = MethodInheritanceTree.maxParamSize();
     System.out.println("Max size for method parameter list is: " + maxsize);
+    List<FixGraph.Node> allNodes = new ArrayList<>();
+    for (List<FixGraph.Node> subList : fixGraph.nodes.values()) {
+      allNodes.addAll(subList);
+    }
     for (int i = 0; i < maxsize; i++) {
       System.out.println("Analyzing params at index: " + i + " for all methods...");
+      int finalI1 = i;
+      List<FixGraph.Node> subList =
+          allNodes.stream()
+              .filter(node -> node.fix.index.equals(finalI1 + ""))
+              .collect(Collectors.toList());
+      List<Fix> appliedFixes = subList.stream().map(node -> node.fix).collect(Collectors.toList());
+      if(appliedFixes.size() == 0){
+        System.out.println("No fix at this index, skipping...");
+        continue;
+      }
+      autoFixer.apply(appliedFixes);
       AutoFixConfig.AutoFixConfigWriter config =
           new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, true)
@@ -39,16 +59,11 @@ public class MethodParamExplorer extends AdvancedExplorer {
               .setMakeFieldGraph(false);
       autoFixer.buildProject(config);
       bank.saveState(false, true);
-      for (List<FixGraph.Node> list : fixGraph.nodes.values()) {
-        int finalI = i;
-        for (FixGraph.Node node :
-            list.stream()
-                .filter(node -> Integer.parseInt(node.fix.index) == finalI)
-                .collect(Collectors.toList())) {
-          int localEffect = bank.compareByMethod(node.fix.className, node.fix.method, false);
-          node.effect = localEffect + calculateInheritanceViolationError(node, i);
-        }
+      for (FixGraph.Node node : subList) {
+        int localEffect = bank.compareByMethod(node.fix.className, node.fix.method, false);
+        node.effect = localEffect + calculateInheritanceViolationError(node, i);
       }
+      autoFixer.remove(appliedFixes);
     }
     System.out.println("Captured all methods behavior against nullability of parameter.");
   }
