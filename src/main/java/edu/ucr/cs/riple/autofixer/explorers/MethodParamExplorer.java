@@ -34,7 +34,8 @@ public class MethodParamExplorer extends AdvancedExplorer {
       allNodes.addAll(subList);
     }
     for (int i = 0; i < maxsize; i++) {
-      System.out.println("Analyzing params at index: (" + (i+1) + " out of " + maxsize + ") for all methods...");
+      System.out.println(
+          "Analyzing params at index: (" + (i + 1) + " out of " + maxsize + ") for all methods...");
       int finalI1 = i;
       List<FixGraph.Node> subList =
           allNodes
@@ -66,7 +67,14 @@ public class MethodParamExplorer extends AdvancedExplorer {
   @Override
   protected Report predict(Fix fix) {
     FixGraph.Node node = fixGraph.find(fix);
-    System.out.print("Trying to predict: " + fix.className + " " + fix.method + " " + fix.param + " METHOD_PARAM: ");
+    System.out.print(
+        "Trying to predict: "
+            + fix.className
+            + " "
+            + fix.method
+            + " "
+            + fix.param
+            + " METHOD_PARAM: ");
     if (node == null) {
       System.out.println("Not found...");
       return null;

@@ -56,7 +56,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
           new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, true)
               .setSuggest(true)
-                  .setWorkList(new String[]{"*"});
+              .setWorkList(new String[] {"*"});
       autoFixer.buildProject(writer);
       bank.saveState(true, true);
       for (FixGraph.Node node : nodes) {
@@ -76,7 +76,16 @@ public abstract class AdvancedExplorer extends BasicExplorer {
 
   protected Report predict(Fix fix) {
     FixGraph.Node node = fixGraph.find(fix);
-    System.out.print("Trying to predict: " + fix.className + " " + fix.method + " " + fix.param + " " + fix.location + ": ");
+    System.out.print(
+        "Trying to predict: "
+            + fix.className
+            + " "
+            + fix.method
+            + " "
+            + fix.param
+            + " "
+            + fix.location
+            + ": ");
     if (node == null) {
       System.out.println("Not found...");
       return null;

@@ -6,8 +6,8 @@ import java.util.Objects;
 
 public interface UsageTracker {
   class Usage {
-    public String method;
-    public String clazz;
+    public final String method;
+    public final String clazz;
 
     public Usage(String method, String clazz) {
       this.method = method;
