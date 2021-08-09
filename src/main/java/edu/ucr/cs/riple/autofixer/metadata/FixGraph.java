@@ -175,7 +175,7 @@ public class FixGraph {
     public int referred;
     public int effect;
     public int id;
-    boolean isDangling;
+    public boolean isDangling;
     List<Node> neighbors;
     List<String> classes;
 
