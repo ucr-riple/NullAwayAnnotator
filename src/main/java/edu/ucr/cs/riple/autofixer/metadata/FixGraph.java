@@ -86,8 +86,6 @@ public class FixGraph {
           continue;
         }
         if (node.hasConflictInUsage(other)) {
-          node.neighbors.add(other);
-          other.neighbors.add(node);
           adj[node.id].add(other.id);
         }
       }
@@ -172,19 +170,18 @@ public class FixGraph {
 
   public static class Node {
     public final Fix fix;
-    public List<UsageTracker.Usage> usages;
+    public Set<UsageTracker.Usage> usages;
+    public Set<String> classes;
     public int referred;
     public int effect;
     public int id;
     public boolean isDangling;
-    public Set<String> classes;
 
-    List<Node> neighbors;
+
 
     private Node(Fix fix) {
       this.fix = fix;
       isDangling = false;
-      neighbors = new ArrayList<>();
       classes = new HashSet<>();
     }
 
@@ -194,8 +191,7 @@ public class FixGraph {
     }
 
     public void setUsages(List<UsageTracker.Usage> usages) {
-      usages = new ArrayList<>(new HashSet<>(usages));
-      this.usages = usages;
+      this.usages = new HashSet<>(usages);
       this.classes = usages.stream().map(usage -> usage.clazz).collect(Collectors.toSet());
       for (UsageTracker.Usage usage : usages) {
         if (usage.method == null || usage.method.equals("null")) {
