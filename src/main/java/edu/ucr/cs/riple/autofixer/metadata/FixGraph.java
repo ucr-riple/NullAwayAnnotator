@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -176,14 +177,15 @@ public class FixGraph {
     public int effect;
     public int id;
     public boolean isDangling;
+    public Set<String> classes;
+
     List<Node> neighbors;
-    List<String> classes;
 
     private Node(Fix fix) {
       this.fix = fix;
       isDangling = false;
       neighbors = new ArrayList<>();
-      classes = new ArrayList<>();
+      classes = new HashSet<>();
     }
 
     @Override
@@ -194,7 +196,7 @@ public class FixGraph {
     public void setUsages(List<UsageTracker.Usage> usages) {
       usages = new ArrayList<>(new HashSet<>(usages));
       this.usages = usages;
-      this.classes = usages.stream().map(usage -> usage.clazz).collect(Collectors.toList());
+      this.classes = usages.stream().map(usage -> usage.clazz).collect(Collectors.toSet());
       for (UsageTracker.Usage usage : usages) {
         if (usage.method == null || usage.method.equals("null")) {
           isDangling = true;
