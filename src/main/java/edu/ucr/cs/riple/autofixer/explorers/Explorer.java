@@ -7,9 +7,7 @@ import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import edu.ucr.cs.riple.injector.Fix;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public abstract class Explorer {
@@ -39,12 +37,11 @@ public abstract class Explorer {
     return Report.empty(fix);
   }
 
-  public Report effectByScope(Fix fix, List<String> workList) {
-    if (workList == null) {
-      workList = new ArrayList<>();
+  public Report effectByScope(Fix fix, Set<String> workSet) {
+    if (workSet == null) {
+      workSet = new HashSet<>();
     }
-    workList.add(fix.className);
-    Set<String> workSet = new HashSet<>(workList);
+    workSet.add(fix.className);
     AutoFixConfig.AutoFixConfigWriter config =
         new AutoFixConfig.AutoFixConfigWriter()
             .setLogError(true, true)

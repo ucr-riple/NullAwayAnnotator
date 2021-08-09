@@ -177,8 +177,6 @@ public class FixGraph {
     public int id;
     public boolean isDangling;
 
-
-
     private Node(Fix fix) {
       this.fix = fix;
       isDangling = false;
@@ -190,8 +188,8 @@ public class FixGraph {
       return Objects.hash(fix.index, fix.className, fix.method);
     }
 
-    public void setUsages(List<UsageTracker.Usage> usages) {
-      this.usages = new HashSet<>(usages);
+    public void setUsages(Set<UsageTracker.Usage> usages) {
+      this.usages = usages;
       this.classes = usages.stream().map(usage -> usage.clazz).collect(Collectors.toSet());
       for (UsageTracker.Usage usage : usages) {
         if (usage.method == null || usage.method.equals("null")) {

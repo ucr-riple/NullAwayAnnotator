@@ -61,11 +61,11 @@ public abstract class AdvancedExplorer extends BasicExplorer {
       bank.saveState(true, true);
       for (FixGraph.Node node : nodes) {
         int totalEffect = 0;
-        if(node.isDangling){
-          for(String clazz : node.classes){
+        if (node.isDangling) {
+          for (String clazz : node.classes) {
             totalEffect += bank.compareByClass(clazz, false);
           }
-        }else{
+        } else {
           for (UsageTracker.Usage usage : node.usages) {
             if (usage.method == null || usage.method.equals("null")) {
               totalEffect += bank.compareByClass(usage.clazz, false);

@@ -2,6 +2,7 @@ package edu.ucr.cs.riple.autofixer.metadata;
 
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CallUsageTracker extends AbstractRelation<CallNode> implements UsageTracker {
@@ -16,7 +17,7 @@ public class CallUsageTracker extends AbstractRelation<CallNode> implements Usag
   }
 
   @Override
-  public List<String> getUsers(Fix fix) {
+  public Set<String> getUsers(Fix fix) {
     List<CallNode> nodes =
         findAllNodes(
             candidate ->
@@ -27,11 +28,11 @@ public class CallUsageTracker extends AbstractRelation<CallNode> implements Usag
     return nodes
         .stream()
         .map(callGraphNode -> callGraphNode.callerClass)
-        .collect(Collectors.toList());
+        .collect(Collectors.toSet());
   }
 
   @Override
-  public List<Usage> getUsage(Fix fix) {
+  public Set<Usage> getUsage(Fix fix) {
     List<CallNode> nodes =
         findAllNodes(
             candidate ->
@@ -39,11 +40,11 @@ public class CallUsageTracker extends AbstractRelation<CallNode> implements Usag
                     && candidate.calleeMethod.equals(fix.method),
             fix.method,
             fix.className);
-    List<Usage> ans =
+    Set<Usage> ans =
         nodes
             .stream()
             .map(callUsageNode -> new Usage(callUsageNode.callerMethod, callUsageNode.callerClass))
-            .collect(Collectors.toList());
+            .collect(Collectors.toSet());
     ans.add(new Usage(fix.method, fix.className));
     return ans;
   }
