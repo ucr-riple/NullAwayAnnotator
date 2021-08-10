@@ -1,8 +1,6 @@
 package edu.ucr.cs.riple.autofixer.metadata;
 
 import edu.ucr.cs.riple.injector.Fix;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,8 +11,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 public class FixGraph {
   public final HashMap<Integer, List<Node>> nodes;
@@ -126,46 +122,6 @@ public class FixGraph {
 
   public HashMap<Integer, List<Node>> getGroups() {
     return groups;
-  }
-
-  private void writeGroups() {
-    JSONObject obj = new JSONObject();
-    for (int i = 0; i < groups.size(); i++) {
-      JSONArray g = new JSONArray();
-      g.addAll(
-          groups
-              .get(i)
-              .stream()
-              .map(
-                  node -> {
-                    JSONObject object = new JSONObject();
-                    JSONObject fixObject = new JSONObject();
-                    fixObject.put("Method", node.fix.method);
-                    fixObject.put("class", node.fix.className);
-                    fixObject.put("param", node.fix.param);
-                    fixObject.put("loc", node.fix.location);
-                    object.put("Fix", fixObject);
-                    JSONArray usageArray = new JSONArray();
-                    for (UsageTracker.Usage u : node.usages) {
-                      JSONObject sm = new JSONObject();
-                      sm.put("method", u.method);
-                      sm.put("class", u.clazz);
-                      usageArray.add(sm);
-                    }
-                    object.put("Usage", usageArray);
-                    object.put("Dangling", node.isDangling);
-                    return object;
-                  })
-              .collect(Collectors.toList()));
-      obj.put(i, g);
-    }
-    try {
-      FileWriter file = new FileWriter("/tmp/NullAwayFix/groups.json");
-      file.write(obj.toJSONString());
-      file.flush();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
   }
 
   public static class Node {
