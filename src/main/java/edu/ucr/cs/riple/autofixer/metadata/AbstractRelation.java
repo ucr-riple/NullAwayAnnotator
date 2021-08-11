@@ -35,7 +35,10 @@ public abstract class AbstractRelation<T> {
       T node = addNodeByLine(line.split(delimiter));
       Integer hash = node.hashCode();
       if (idHash.containsKey(hash)) {
-        idHash.get(hash).add(node);
+        List<T> localList = idHash.get(hash);
+        if(!localList.contains(node)){
+          localList.add(node);
+        }
       } else {
         List<T> singleHash = new ArrayList<>();
         singleHash.add(node);
