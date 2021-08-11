@@ -23,7 +23,8 @@ public class FieldNode {
     FieldNode that = (FieldNode) o;
     return callerClass.equals(that.callerClass)
         && calleeField.equals(that.calleeField)
-        && calleeClass.equals(that.calleeClass);
+        && calleeClass.equals(that.calleeClass)
+        && callerMethod.equals(that.callerMethod);
   }
 
   @Override

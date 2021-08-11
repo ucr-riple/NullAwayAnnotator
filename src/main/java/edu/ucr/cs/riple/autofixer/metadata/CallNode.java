@@ -23,7 +23,8 @@ public class CallNode {
     CallNode that = (CallNode) o;
     return callerClass.equals(that.callerClass)
         && calleeMethod.equals(that.calleeMethod)
-        && calleeClass.equals(that.calleeClass);
+        && calleeClass.equals(that.calleeClass)
+        && callerMethod.equals(that.callerMethod);
   }
 
   @Override

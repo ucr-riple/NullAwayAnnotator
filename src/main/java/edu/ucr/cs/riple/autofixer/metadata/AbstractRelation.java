@@ -36,7 +36,7 @@ public abstract class AbstractRelation<T> {
       Integer hash = node.hashCode();
       if (idHash.containsKey(hash)) {
         List<T> localList = idHash.get(hash);
-        if(!localList.contains(node)){
+        if (!localList.contains(node)) {
           localList.add(node);
         }
       } else {
