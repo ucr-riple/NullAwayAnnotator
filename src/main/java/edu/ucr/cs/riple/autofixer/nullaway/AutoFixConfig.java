@@ -67,9 +67,11 @@ public class AutoFixConfig {
     SUGGEST_ENABLED =
         getValueFromKey(jsonObject, "SUGGEST", Boolean.class).orElse(false) && autofixEnabled;
     PARAM_TEST_ENABLED =
-            getValueFromKey(jsonObject, "METHOD_PARAM_TEST:ACTIVE", Boolean.class).orElse(false)
-                    && autofixEnabled;
-    PARAM_INDEX = getValueFromKey(jsonObject, "METHOD_PARAM_TEST:INDEX", Integer.class).orElse(Integer.MAX_VALUE);
+        getValueFromKey(jsonObject, "METHOD_PARAM_TEST:ACTIVE", Boolean.class).orElse(false)
+            && autofixEnabled;
+    PARAM_INDEX =
+        getValueFromKey(jsonObject, "METHOD_PARAM_TEST:INDEX", Integer.class)
+            .orElse(Integer.MAX_VALUE);
     LOG_ERROR_ENABLED =
         getValueFromKey(jsonObject, "LOG_ERROR:ACTIVE", Boolean.class).orElse(false)
             && autofixEnabled;
@@ -223,7 +225,7 @@ public class AutoFixConfig {
 
     public AutoFixConfigWriter setMethodParamTest(boolean value, int index) {
       PARAM_TEST_ENABLED = value;
-      if(value){
+      if (value) {
         PARAM_INDEX = index;
       }
       return this;
