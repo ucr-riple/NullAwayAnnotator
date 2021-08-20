@@ -42,24 +42,21 @@ public class MethodParamExplorer extends AdvancedExplorer {
               .stream()
               .filter(node -> node.fix.index.equals(finalI1 + ""))
               .collect(Collectors.toList());
-      List<Fix> appliedFixes = subList.stream().map(node -> node.fix).collect(Collectors.toList());
-      if (appliedFixes.size() == 0) {
+      if (subList.size() == 0) {
         System.out.println("No fix at this index, skipping...");
         continue;
       }
-      autoFixer.apply(appliedFixes);
       AutoFixConfig.AutoFixConfigWriter config =
           new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, true)
               .setSuggest(true)
-              .setMethodParamTest(true);
+              .setMethodParamTest(true, i);
       autoFixer.buildProject(config);
       bank.saveState(false, true);
       for (FixGraph.Node node : subList) {
         int localEffect = bank.compareByMethod(node.fix.className, node.fix.method, false);
         node.effect = localEffect + calculateInheritanceViolationError(node, i);
       }
-      autoFixer.remove(appliedFixes);
     }
     System.out.println("Captured all methods behavior against nullability of parameter.");
   }
