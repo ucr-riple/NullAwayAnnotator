@@ -24,7 +24,7 @@ public class AutoFixConfig {
   public final boolean LOG_ERROR_ENABLED;
   public final boolean LOG_ERROR_DEEP;
   public final boolean OPTIMIZED;
-  public final Integer PARAM_INDEX;
+  public final Long PARAM_INDEX;
   public final AnnotationFactory ANNOTATION_FACTORY;
   public final Set<String> WORK_LIST;
 
@@ -39,7 +39,7 @@ public class AutoFixConfig {
     MAKE_FIELD_GRAPH_ENABLED = false;
     ANNOTATION_FACTORY = new AnnotationFactory();
     WORK_LIST = Collections.singleton("*");
-    PARAM_INDEX = Integer.MAX_VALUE;
+    PARAM_INDEX = Long.MAX_VALUE;
     Writer.reset(this);
   }
 
@@ -70,8 +70,7 @@ public class AutoFixConfig {
         getValueFromKey(jsonObject, "METHOD_PARAM_TEST:ACTIVE", Boolean.class).orElse(false)
             && autofixEnabled;
     PARAM_INDEX =
-        getValueFromKey(jsonObject, "METHOD_PARAM_TEST:INDEX", Integer.class)
-            .orElse(Integer.MAX_VALUE);
+        getValueFromKey(jsonObject, "METHOD_PARAM_TEST:INDEX", Long.class).orElse(Long.MAX_VALUE);
     LOG_ERROR_ENABLED =
         getValueFromKey(jsonObject, "LOG_ERROR:ACTIVE", Boolean.class).orElse(false)
             && autofixEnabled;
@@ -136,7 +135,7 @@ public class AutoFixConfig {
     private boolean LOG_ERROR_ENABLED;
     private boolean LOG_ERROR_DEEP;
     private boolean OPTIMIZED;
-    private Integer PARAM_INDEX;
+    private Long PARAM_INDEX;
     private String NULLABLE;
     private String NONNULL;
     private Set<String> WORK_LIST;
@@ -150,7 +149,7 @@ public class AutoFixConfig {
       LOG_ERROR_ENABLED = false;
       LOG_ERROR_DEEP = false;
       OPTIMIZED = false;
-      PARAM_INDEX = Integer.MAX_VALUE;
+      PARAM_INDEX = Long.MAX_VALUE;
       NULLABLE = "javax.annotation.Nullable";
       NONNULL = "javax.annotation.Nonnull";
       WORK_LIST = Collections.singleton("*");
@@ -226,7 +225,7 @@ public class AutoFixConfig {
     public AutoFixConfigWriter setMethodParamTest(boolean value, int index) {
       PARAM_TEST_ENABLED = value;
       if (value) {
-        PARAM_INDEX = index;
+        PARAM_INDEX = (long) index;
       }
       return this;
     }
