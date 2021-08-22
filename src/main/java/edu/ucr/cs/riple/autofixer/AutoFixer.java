@@ -76,7 +76,7 @@ public class AutoFixer {
             .setMakeFieldGraph(true)
             .setOptimized(true)
             .setMethodInheritanceTree(true)
-            .setSuggest(true)
+            .setSuggest(true, false)
             .setWorkList(new String[] {"*"});
     buildProject(config);
     this.injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
@@ -146,7 +146,7 @@ public class AutoFixer {
               .setMakeFieldGraph(false)
               .setOptimized(false)
               .setMethodInheritanceTree(false)
-              .setSuggest(true)
+              .setSuggest(true, false)
               .setWorkList(new String[] {"*"});
       buildProject(config);
       if (!new File(fixPath).exists()) {

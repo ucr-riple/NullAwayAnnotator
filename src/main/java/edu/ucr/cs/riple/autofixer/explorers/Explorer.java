@@ -28,7 +28,7 @@ public abstract class Explorer {
             .setMakeFieldGraph(false)
             .setOptimized(false)
             .setMethodInheritanceTree(false)
-            .setSuggest(true)
+            .setSuggest(true, false)
             .setWorkList(new String[] {"*"});
     autoFixer.buildProject(config);
     if (new File(Writer.ERROR).exists()) {
@@ -49,7 +49,7 @@ public abstract class Explorer {
             .setMakeFieldGraph(false)
             .setOptimized(false)
             .setMethodInheritanceTree(false)
-            .setSuggest(true)
+            .setSuggest(true, false)
             .setWorkList(workSet.toArray(new String[0]));
     autoFixer.buildProject(config);
     if (new File(Writer.ERROR).exists()) {

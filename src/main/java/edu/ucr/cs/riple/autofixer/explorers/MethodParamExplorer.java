@@ -49,7 +49,7 @@ public class MethodParamExplorer extends AdvancedExplorer {
       AutoFixConfig.AutoFixConfigWriter config =
           new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, true)
-              .setSuggest(true)
+              .setSuggest(true, false)
               .setMethodParamTest(true, i);
       autoFixer.buildProject(config);
       bank.saveState(false, true);

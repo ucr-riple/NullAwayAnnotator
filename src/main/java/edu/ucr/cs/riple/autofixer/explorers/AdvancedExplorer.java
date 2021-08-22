@@ -55,7 +55,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
       AutoFixConfig.AutoFixConfigWriter writer =
           new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, true)
-              .setSuggest(true)
+              .setSuggest(true, false)
               .setWorkList(new String[] {"*"});
       autoFixer.buildProject(writer);
       bank.saveState(true, true);
