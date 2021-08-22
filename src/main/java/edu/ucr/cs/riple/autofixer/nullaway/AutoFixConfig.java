@@ -50,7 +50,6 @@ public class AutoFixConfig {
       Object obj =
           new JSONParser()
               .parse(Files.newBufferedReader(Paths.get(filePath), Charset.defaultCharset()));
-      ;
       jsonObject = (JSONObject) obj;
     } catch (Exception e) {
       throw new RuntimeException("Error in reading/parsing config at path: " + filePath);
