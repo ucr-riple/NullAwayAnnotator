@@ -1,16 +1,17 @@
 package edu.ucr.cs.riple.autofixer.explorers;
 
+import com.uber.nullaway.autofix.AutoFixConfig;
+import com.uber.nullaway.autofix.Writer;
 import edu.ucr.cs.riple.autofixer.AutoFixer;
 import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.autofixer.metadata.FixGraph;
 import edu.ucr.cs.riple.autofixer.metadata.UsageTracker;
-import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
-import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import edu.ucr.cs.riple.injector.Fix;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -56,7 +57,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
           new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, true)
               .setSuggest(true, false)
-              .setWorkList(new String[] {"*"});
+              .setWorkList(Collections.singleton("*"));
       autoFixer.buildProject(writer);
       bank.saveState(true, true);
       for (FixGraph.Node node : nodes) {

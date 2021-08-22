@@ -3,6 +3,7 @@ package edu.ucr.cs.riple.autofixer;
 import static edu.ucr.cs.riple.autofixer.util.Utility.*;
 
 import com.google.common.base.Preconditions;
+import com.uber.nullaway.autofix.AutoFixConfig;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.autofixer.explorers.BasicExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.ClassFieldExplorer;
@@ -12,7 +13,6 @@ import edu.ucr.cs.riple.autofixer.explorers.MethodReturnExplorer;
 import edu.ucr.cs.riple.autofixer.metadata.CallUsageTracker;
 import edu.ucr.cs.riple.autofixer.metadata.FieldUsageTracker;
 import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
-import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkList;
@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.json.simple.JSONArray;
@@ -77,7 +78,7 @@ public class AutoFixer {
             .setOptimized(true)
             .setMethodInheritanceTree(true)
             .setSuggest(true, false)
-            .setWorkList(new String[] {"*"});
+            .setWorkList(Collections.singleton("*"));
     buildProject(config);
     this.injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
     this.methodInheritanceTree = new MethodInheritanceTree(out_dir + "/method_info.csv");
@@ -147,7 +148,7 @@ public class AutoFixer {
               .setOptimized(false)
               .setMethodInheritanceTree(false)
               .setSuggest(true, false)
-              .setWorkList(new String[] {"*"});
+              .setWorkList(Collections.singleton("*"));
       buildProject(config);
       if (!new File(fixPath).exists()) {
         JSONObject toDiagnose = new JSONObject();

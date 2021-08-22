@@ -1,8 +1,8 @@
 package edu.ucr.cs.riple.autofixer.util;
 
 import com.google.common.primitives.Booleans;
+import com.uber.nullaway.autofix.Writer;
 import edu.ucr.cs.riple.autofixer.Report;
-import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import edu.ucr.cs.riple.injector.Fix;
 import java.io.BufferedReader;
 import java.io.FileWriter;
