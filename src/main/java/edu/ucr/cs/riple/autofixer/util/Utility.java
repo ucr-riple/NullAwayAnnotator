@@ -89,7 +89,7 @@ public class Utility {
     }
   }
 
-  public static boolean[] convertStringToArray(String content) {
+  public static boolean[] convertStringToBooleanArray(String content) {
     if (content == null) {
       return new boolean[0];
     }

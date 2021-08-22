@@ -44,7 +44,7 @@ public class MethodInheritanceTree extends AbstractRelation<MethodNode> {
         values[5],
         parentId,
         size,
-        Utility.convertStringToArray(values[7]));
+        Utility.convertStringToBooleanArray(values[7]));
     if (parentId != -1) {
       MethodNode parent = nodes.get(parentId);
       if (parent == null) {
