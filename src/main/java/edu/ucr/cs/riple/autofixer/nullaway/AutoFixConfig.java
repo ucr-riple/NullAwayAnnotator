@@ -155,7 +155,7 @@ public class AutoFixConfig {
       LOG_ERROR_ENABLED = false;
       LOG_ERROR_DEEP = false;
       OPTIMIZED = false;
-      PARAM_INDEX = Long.MAX_VALUE;
+      PARAM_INDEX = 1000L;
       NULLABLE = "javax.annotation.Nullable";
       NONNULL = "javax.annotation.Nonnull";
       WORK_LIST = Collections.singleton("*");
