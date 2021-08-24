@@ -59,9 +59,7 @@ public class FixGraph {
     return null;
   }
 
-  @SuppressWarnings("All")
-  public void findGroups(UsageTracker tracker) {
-    groups = new HashMap<>();
+  public void updateUsages(UsageTracker tracker) {
     List<Node> allNodes = new ArrayList<>();
     for (List<Node> nodesSet : nodes.values()) {
       allNodes.addAll(nodesSet);
@@ -69,7 +67,16 @@ public class FixGraph {
     for (int i = 0; i < allNodes.size(); i++) {
       Node node = allNodes.get(i);
       node.id = i;
-      node.setUsages(tracker.getUsage(node.fix));
+      node.updateUsages(tracker.getUsage(node.fix));
+    }
+  }
+
+  @SuppressWarnings("All")
+  public void findGroups() {
+    groups = new HashMap<>();
+    List<Node> allNodes = new ArrayList<>();
+    for (List<Node> nodesSet : nodes.values()) {
+      allNodes.addAll(nodesSet);
     }
     int size = allNodes.size();
     LinkedList<Integer>[] adj = new LinkedList[size];
@@ -126,8 +133,8 @@ public class FixGraph {
 
   public static class Node {
     public final Fix fix;
-    public Set<UsageTracker.Usage> usages;
-    public Set<String> classes;
+    public final Set<UsageTracker.Usage> usages;
+    public final Set<String> classes;
     public int referred;
     public int effect;
     public int id;
@@ -136,7 +143,8 @@ public class FixGraph {
     private Node(Fix fix) {
       this.fix = fix;
       isDangling = false;
-      classes = new HashSet<>();
+      this.usages = new HashSet<>();
+      this.classes = new HashSet<>();
     }
 
     @Override
@@ -144,9 +152,9 @@ public class FixGraph {
       return Objects.hash(fix.index, fix.className, fix.method);
     }
 
-    public void setUsages(Set<UsageTracker.Usage> usages) {
-      this.usages = usages;
-      this.classes = usages.stream().map(usage -> usage.clazz).collect(Collectors.toSet());
+    public void updateUsages(Set<UsageTracker.Usage> usages) {
+      this.usages.addAll(usages);
+      this.classes.addAll(usages.stream().map(usage -> usage.clazz).collect(Collectors.toSet()));
       for (UsageTracker.Usage usage : usages) {
         if (usage.method == null || usage.method.equals("null")) {
           isDangling = true;

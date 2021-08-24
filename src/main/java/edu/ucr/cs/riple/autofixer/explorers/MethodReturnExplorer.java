@@ -15,7 +15,8 @@ public class MethodReturnExplorer extends AdvancedExplorer {
   protected void init() {
     tracker = autoFixer.callUsageTracker;
     System.out.println("Trying to find groups for Method Return fixes");
-    fixGraph.findGroups(tracker);
+    fixGraph.updateUsages(tracker);
+    fixGraph.findGroups();
   }
 
   @Override
