@@ -2,44 +2,47 @@ package edu.ucr.cs.riple.autofixer.metadata;
 
 import java.util.Objects;
 
-public class FieldNode {
+public class TrackerNode {
   public final String callerClass;
   public final String callerMethod;
-  public final String calleeField;
+  public final String calleeMember;
   public final String calleeClass;
 
-  public FieldNode(
-      String callerClass, String callerMethod, String calleeField, String calleeClass) {
+  public TrackerNode(
+      String callerClass, String callerMethod, String calleeMember, String calleeClass) {
     this.callerClass = callerClass;
     this.callerMethod = callerMethod;
-    this.calleeField = calleeField;
+    this.calleeMember = calleeMember;
     this.calleeClass = calleeClass;
   }
 
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof FieldNode)) return false;
-    FieldNode that = (FieldNode) o;
+    if (!(o instanceof TrackerNode)) return false;
+    TrackerNode that = (TrackerNode) o;
     return callerClass.equals(that.callerClass)
-        && calleeField.equals(that.calleeField)
+        && calleeMember.equals(that.calleeMember)
         && calleeClass.equals(that.calleeClass)
         && callerMethod.equals(that.callerMethod);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(calleeField, calleeClass);
+    return Objects.hash(calleeMember, calleeClass);
   }
 
   @Override
   public String toString() {
-    return "FieldNode{"
+    return "CallNode{"
         + "callerClass='"
         + callerClass
         + '\''
-        + ", calleeField='"
-        + calleeField
+        + ", callerMethod='"
+        + callerMethod
+        + '\''
+        + ", calleeMember='"
+        + calleeMember
         + '\''
         + ", calleeClass='"
         + calleeClass

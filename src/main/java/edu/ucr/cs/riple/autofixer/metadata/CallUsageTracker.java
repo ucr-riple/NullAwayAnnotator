@@ -5,24 +5,24 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class CallUsageTracker extends AbstractRelation<CallNode> implements UsageTracker {
+public class CallUsageTracker extends AbstractRelation<TrackerNode> implements UsageTracker {
 
   public CallUsageTracker(String filePath) {
     super(filePath);
   }
 
   @Override
-  protected CallNode addNodeByLine(String[] values) {
-    return new CallNode(values[0], values[1], values[2], values[3]);
+  protected TrackerNode addNodeByLine(String[] values) {
+    return new TrackerNode(values[0], values[1], values[2], values[3]);
   }
 
   @Override
   public Set<String> getUsers(Fix fix) {
-    List<CallNode> nodes =
+    List<TrackerNode> nodes =
         findAllNodes(
             candidate ->
                 candidate.calleeClass.equals(fix.className)
-                    && candidate.calleeMethod.equals(fix.method),
+                    && candidate.calleeMember.equals(fix.method),
             fix.method,
             fix.className);
     return nodes
@@ -33,11 +33,11 @@ public class CallUsageTracker extends AbstractRelation<CallNode> implements Usag
 
   @Override
   public Set<Usage> getUsage(Fix fix) {
-    List<CallNode> nodes =
+    List<TrackerNode> nodes =
         findAllNodes(
             candidate ->
                 candidate.calleeClass.equals(fix.className)
-                    && candidate.calleeMethod.equals(fix.method),
+                    && candidate.calleeMember.equals(fix.method),
             fix.method,
             fix.className);
     Set<Usage> ans =

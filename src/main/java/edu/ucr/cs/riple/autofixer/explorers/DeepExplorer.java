@@ -5,21 +5,17 @@ import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.injector.Fix;
 
-public class DeepExplorer extends AdvancedExplorer{
+public class DeepExplorer extends AdvancedExplorer {
 
-    public DeepExplorer(AutoFixer autoFixer, Bank bank) {
-        super(autoFixer, bank);
-    }
+  public DeepExplorer(AutoFixer autoFixer, Bank bank) {
+    super(autoFixer, bank);
+  }
 
-    @Override
-    protected void init() {
+  @Override
+  protected void init() {}
 
-    }
-
-    @Override
-    protected Report effectByScope(Fix fix) {
-        return null;
-    }
-
-
+  @Override
+  protected Report effectByScope(Fix fix) {
+    return null;
+  }
 }
