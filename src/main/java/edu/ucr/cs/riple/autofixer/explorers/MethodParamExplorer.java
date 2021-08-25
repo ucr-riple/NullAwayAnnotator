@@ -10,6 +10,7 @@ import edu.ucr.cs.riple.autofixer.metadata.graph.Node;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MethodParamExplorer extends AdvancedExplorer {
@@ -30,7 +31,7 @@ public class MethodParamExplorer extends AdvancedExplorer {
     int maxsize = MethodInheritanceTree.maxParamSize();
     System.out.println("Max size for method parameter list is: " + maxsize);
     List<Node> allNodes = new ArrayList<>();
-    for (List<Node> subList : fixGraph.nodes.values()) {
+    for (Set<Node> subList : fixGraph.nodes.values()) {
       allNodes.addAll(subList);
     }
     for (int i = 0; i < maxsize; i++) {

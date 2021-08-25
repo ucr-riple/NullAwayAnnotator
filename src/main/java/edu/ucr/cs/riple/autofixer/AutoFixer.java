@@ -7,6 +7,7 @@ import com.uber.nullaway.autofix.AutoFixConfig;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.autofixer.explorers.BasicExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.ClassFieldExplorer;
+import edu.ucr.cs.riple.autofixer.explorers.DeepExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.Explorer;
 import edu.ucr.cs.riple.autofixer.explorers.MethodParamExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.MethodReturnExplorer;
@@ -37,33 +38,11 @@ public class AutoFixer {
   private Injector injector;
   private List<Report> finishedReports;
   private List<Explorer> explorers;
+  private DeepExplorer deepExplorer;
 
   public CallUsageTracker callUsageTracker;
   public FieldUsageTracker fieldUsageTracker;
   public MethodInheritanceTree methodInheritanceTree;
-
-  public void start(String buildCommand, String out_dir, boolean optimized) {
-    System.out.println("AutoFixer Started...");
-    this.out_dir = out_dir;
-    init(buildCommand);
-    System.out.println("Starting preparation");
-    prepare(out_dir, optimized);
-    List<WorkList> workListLists = new WorkListBuilder(diagnosePath).getWorkLists();
-    try {
-      for (WorkList workList : workListLists) {
-        for (Fix fix : workList.getFixes()) {
-          if (finishedReports.stream().anyMatch(diagnoseReport -> diagnoseReport.fix.equals(fix))) {
-            continue;
-          }
-          List<Fix> appliedFixes = analyze(fix);
-          remove(appliedFixes);
-        }
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    writeReports(finishedReports);
-  }
 
   private void init(String buildCommand) {
     this.buildCommand = buildCommand;
@@ -86,10 +65,54 @@ public class AutoFixer {
     this.fieldUsageTracker = new FieldUsageTracker(out_dir + "/field_graph.csv");
     this.explorers = new ArrayList<>();
     Bank bank = new Bank();
+    this.deepExplorer = new DeepExplorer(this, bank);
     explorers.add(new MethodParamExplorer(this, bank));
     explorers.add(new ClassFieldExplorer(this, bank));
     explorers.add(new MethodReturnExplorer(this, bank));
     explorers.add(new BasicExplorer(this, bank));
+  }
+
+  public void start(String buildCommand, String out_dir, boolean optimized, int depth) {
+    System.out.println("AutoFixer Started...");
+    this.out_dir = out_dir;
+    init(buildCommand);
+    System.out.println("Starting preparation");
+    prepare(out_dir, optimized);
+    List<WorkList> workListLists = new WorkListBuilder(diagnosePath).getWorkLists();
+    try {
+      for (WorkList workList : workListLists) {
+        for (Fix fix : workList.getFixes()) {
+          if (finishedReports.stream().anyMatch(diagnoseReport -> diagnoseReport.fix.equals(fix))) {
+            continue;
+          }
+          List<Fix> appliedFixes = analyze(fix);
+          remove(appliedFixes);
+        }
+      }
+      deepExplorer.start(finishedReports, depth);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    writeReports(finishedReports);
+  }
+
+  private List<Fix> analyze(Fix fix) {
+    System.out.println("Fix Type: " + fix.location);
+    List<Fix> suggestedFix = new ArrayList<>();
+    Report report = null;
+    for (Explorer explorer : explorers) {
+      if (explorer.isApplicable(fix)) {
+        if (explorer.requiresInjection(fix)) {
+          suggestedFix.add(fix);
+          apply(suggestedFix);
+        }
+        report = explorer.effect(fix);
+        break;
+      }
+    }
+    Preconditions.checkNotNull(report);
+    finishedReports.add(report);
+    return suggestedFix;
   }
 
   public void remove(List<Fix> fixes) {
@@ -115,25 +138,6 @@ public class AutoFixer {
 
   public void apply(List<Fix> fixes) {
     injector.start(new WorkListBuilder(fixes).getWorkLists(), true);
-  }
-
-  private List<Fix> analyze(Fix fix) {
-    System.out.println("Fix Type: " + fix.location);
-    List<Fix> suggestedFix = new ArrayList<>();
-    Report report = null;
-    for (Explorer explorer : explorers) {
-      if (explorer.isApplicable(fix)) {
-        if (explorer.requiresInjection(fix)) {
-          suggestedFix.add(fix);
-          apply(suggestedFix);
-        }
-        report = explorer.effect(fix);
-        break;
-      }
-    }
-    Preconditions.checkNotNull(report);
-    finishedReports.add(report);
-    return suggestedFix;
   }
 
   @SuppressWarnings("ALL")

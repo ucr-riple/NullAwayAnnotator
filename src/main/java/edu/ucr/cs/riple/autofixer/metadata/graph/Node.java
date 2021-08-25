@@ -4,13 +4,10 @@ import edu.ucr.cs.riple.autofixer.metadata.UsageTracker;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class Node {
-  public final Fix fix;
-  public final Set<UsageTracker.Usage> usages;
+public class Node extends AbstractNode<Node> {
   public final Set<String> classes;
   public int referred;
   public int effect;
@@ -18,15 +15,9 @@ public class Node {
   public boolean isDangling;
 
   public Node(Fix fix) {
-    this.fix = fix;
-    isDangling = false;
-    this.usages = new HashSet<>();
+    super(fix);
+    this.isDangling = false;
     this.classes = new HashSet<>();
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(fix.index, fix.className, fix.method);
   }
 
   public void updateUsages(Set<UsageTracker.Usage> usages) {

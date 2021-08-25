@@ -15,16 +15,17 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class AdvancedExplorer extends BasicExplorer {
 
-  final FixGraph fixGraph;
+  final FixGraph<Node> fixGraph;
   protected UsageTracker tracker;
 
   public AdvancedExplorer(AutoFixer autoFixer, Bank bank) {
     super(autoFixer, bank);
-    fixGraph = new FixGraph();
+    fixGraph = new FixGraph<>(Node::new);
     try {
       try (BufferedReader br = new BufferedReader(new FileReader(Writer.SUGGEST_FIX))) {
         String line;
@@ -47,10 +48,10 @@ public abstract class AdvancedExplorer extends BasicExplorer {
   protected abstract void init();
 
   protected void explore() {
-    HashMap<Integer, List<Node>> groups = fixGraph.getGroups();
+    HashMap<Integer, Set<Node>> groups = fixGraph.getGroups();
     System.out.println("Building for: " + groups.size() + " number of times");
     int i = 1;
-    for (List<Node> nodes : groups.values()) {
+    for (Set<Node> nodes : groups.values()) {
       System.out.println("Building: (Iteration " + i++ + " out of: " + groups.size() + ")");
       List<Fix> fixes = nodes.stream().map(node -> node.fix).collect(Collectors.toList());
       autoFixer.apply(fixes);

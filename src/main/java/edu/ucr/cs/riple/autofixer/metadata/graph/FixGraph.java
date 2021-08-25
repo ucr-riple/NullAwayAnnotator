@@ -5,50 +5,47 @@ import edu.ucr.cs.riple.injector.Fix;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
-public class FixGraph {
-  public final HashMap<Integer, List<Node>> nodes;
+public class FixGraph<T extends AbstractNode<T>> {
+  public final HashMap<Integer, Set<T>> nodes;
 
-  private HashMap<Integer, List<Node>> groups;
+  private HashMap<Integer, Set<T>> groups;
+  private final Factory<T> factory;
 
-  public FixGraph() {
+  public FixGraph(Factory<T> factory) {
     nodes = new HashMap<>();
+    this.factory = factory;
   }
 
-  private boolean fixMatcher(Fix fix, Fix other) {
-    return fix.className.equals(other.className)
-        && fix.method.equals(other.method)
-        && fix.index.equals(other.index)
-        && fix.param.equals(other.param);
-  }
-
-  public Node findOrCreate(Fix fix) {
+  public T findOrCreate(Fix fix) {
     int hash = Objects.hash(fix.index, fix.method, fix.className);
     if (nodes.containsKey(hash)) {
-      for (Node candidate : nodes.get(hash)) {
-        if (fixMatcher(candidate.fix, fix)) {
+      for (T candidate : nodes.get(hash)) {
+        if (candidate.areSameNode(fix)) {
           return candidate;
         }
       }
-      Node newNode = new Node(fix);
+      T newNode = factory.build(fix);
       nodes.get(hash).add(newNode);
       return newNode;
     }
-    Node newNode = new Node(fix);
-    List<Node> newList = new ArrayList<>();
-    newList.add(newNode);
-    nodes.put(hash, newList);
+    T newNode = factory.build(fix);
+    Set<T> newSet = new HashSet<>();
+    newSet.add(newNode);
+    nodes.put(hash, newSet);
     return newNode;
   }
 
-  public Node find(Fix fix) {
+  public T find(Fix fix) {
     int hash = Objects.hash(fix.index, fix.method, fix.className);
     if (nodes.containsKey(hash)) {
-      for (Node candidate : nodes.get(hash)) {
-        if (fixMatcher(candidate.fix, fix)) {
+      for (T candidate : nodes.get(hash)) {
+        if (candidate.areSameNode(fix)) {
           return candidate;
         }
       }
@@ -57,12 +54,12 @@ public class FixGraph {
   }
 
   public void updateUsages(UsageTracker tracker) {
-    List<Node> allNodes = new ArrayList<>();
-    for (List<Node> nodesSet : nodes.values()) {
+    List<AbstractNode<T>> allNodes = new ArrayList<>();
+    for (Set<T> nodesSet : nodes.values()) {
       allNodes.addAll(nodesSet);
     }
     for (int i = 0; i < allNodes.size(); i++) {
-      Node node = allNodes.get(i);
+      AbstractNode<T> node = allNodes.get(i);
       node.id = i;
       node.updateUsages(tracker.getUsage(node.fix));
     }
@@ -71,8 +68,8 @@ public class FixGraph {
   @SuppressWarnings("All")
   public void findGroups() {
     groups = new HashMap<>();
-    List<Node> allNodes = new ArrayList<>();
-    for (List<Node> nodesSet : nodes.values()) {
+    List<T> allNodes = new ArrayList<>();
+    for (Set<T> nodesSet : nodes.values()) {
       allNodes.addAll(nodesSet);
     }
     int size = allNodes.size();
@@ -80,8 +77,8 @@ public class FixGraph {
     for (int i = 0; i < size; ++i) {
       adj[i] = new LinkedList<>();
     }
-    for (Node node : allNodes) {
-      for (Node other : allNodes) {
+    for (AbstractNode<T> node : allNodes) {
+      for (AbstractNode<T> other : allNodes) {
         if (node.equals(other)) {
           continue;
         }
@@ -93,7 +90,7 @@ public class FixGraph {
     colorGraph(adj, allNodes, size);
   }
 
-  private void colorGraph(LinkedList<Integer>[] adj, List<Node> allNodes, int v) {
+  private void colorGraph(LinkedList<Integer>[] adj, List<T> allNodes, int v) {
     int[] result = new int[v];
     Arrays.fill(result, -1);
     result[0] = 0;
@@ -114,7 +111,7 @@ public class FixGraph {
     }
     for (int i = 0; i < result.length; i++) {
       if (!groups.containsKey(result[i])) {
-        ArrayList<Node> newList = new ArrayList<>();
+        Set<T> newList = new HashSet<>();
         newList.add(allNodes.get(i));
         groups.put(result[i], newList);
       } else {
@@ -124,7 +121,7 @@ public class FixGraph {
     System.out.println("FOUND: " + groups.size() + " number of groups");
   }
 
-  public HashMap<Integer, List<Node>> getGroups() {
+  public HashMap<Integer, Set<T>> getGroups() {
     return groups;
   }
 }

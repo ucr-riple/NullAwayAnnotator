@@ -5,12 +5,15 @@ import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.autofixer.metadata.CallUsageTracker;
 import edu.ucr.cs.riple.autofixer.metadata.FieldUsageTracker;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class DeepExplorer extends BasicExplorer {
 
   private final CallUsageTracker callUsageTracker;
   private final FieldUsageTracker fieldUsageTracker;
+  private Set<Report> reports;
 
   public DeepExplorer(AutoFixer autoFixer, Bank bank) {
     super(autoFixer, bank);
@@ -18,5 +21,10 @@ public class DeepExplorer extends BasicExplorer {
     this.fieldUsageTracker = autoFixer.fieldUsageTracker;
   }
 
-  public void setup(List<Report> reports) {}
+  public void start(List<Report> reports, int depth) {
+    if (depth == 0) {
+      return;
+    }
+    this.reports = new HashSet<>(reports);
+  }
 }
