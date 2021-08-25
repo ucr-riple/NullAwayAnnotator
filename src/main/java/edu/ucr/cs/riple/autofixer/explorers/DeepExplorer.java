@@ -5,27 +5,18 @@ import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.autofixer.metadata.CallUsageTracker;
 import edu.ucr.cs.riple.autofixer.metadata.FieldUsageTracker;
-import edu.ucr.cs.riple.injector.Fix;
+import java.util.List;
 
-public class DeepExplorer extends AdvancedExplorer {
+public class DeepExplorer extends BasicExplorer {
 
-  private CallUsageTracker callUsageTracker;
-  private FieldUsageTracker fieldUsageTracker;
+  private final CallUsageTracker callUsageTracker;
+  private final FieldUsageTracker fieldUsageTracker;
 
   public DeepExplorer(AutoFixer autoFixer, Bank bank) {
     super(autoFixer, bank);
+    this.callUsageTracker = autoFixer.callUsageTracker;
+    this.fieldUsageTracker = autoFixer.fieldUsageTracker;
   }
 
-  @Override
-  protected void init() {
-    callUsageTracker = autoFixer.callUsageTracker;
-    fieldUsageTracker = autoFixer.fieldUsageTracker;
-    fixGraph.updateUsages(autoFixer.callUsageTracker);
-    fixGraph.updateUsages(autoFixer.fieldUsageTracker);
-  }
-
-  @Override
-  protected Report effectByScope(Fix fix) {
-    return null;
-  }
+  public void setup(List<Report> reports) {}
 }

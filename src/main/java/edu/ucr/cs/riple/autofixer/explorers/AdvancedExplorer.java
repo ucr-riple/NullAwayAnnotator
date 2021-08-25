@@ -5,8 +5,9 @@ import com.uber.nullaway.autofix.Writer;
 import edu.ucr.cs.riple.autofixer.AutoFixer;
 import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
-import edu.ucr.cs.riple.autofixer.metadata.FixGraph;
 import edu.ucr.cs.riple.autofixer.metadata.UsageTracker;
+import edu.ucr.cs.riple.autofixer.metadata.graph.FixGraph;
+import edu.ucr.cs.riple.autofixer.metadata.graph.Node;
 import edu.ucr.cs.riple.injector.Fix;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -31,7 +32,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
         while ((line = br.readLine()) != null) {
           Fix fix = Fix.fromCSVLine(line, delimiter);
           if (isApplicable(fix)) {
-            FixGraph.Node node = fixGraph.findOrCreate(fix);
+            Node node = fixGraph.findOrCreate(fix);
             node.referred++;
           }
         }
@@ -46,10 +47,10 @@ public abstract class AdvancedExplorer extends BasicExplorer {
   protected abstract void init();
 
   protected void explore() {
-    HashMap<Integer, List<FixGraph.Node>> groups = fixGraph.getGroups();
+    HashMap<Integer, List<Node>> groups = fixGraph.getGroups();
     System.out.println("Building for: " + groups.size() + " number of times");
     int i = 1;
-    for (List<FixGraph.Node> nodes : groups.values()) {
+    for (List<Node> nodes : groups.values()) {
       System.out.println("Building: (Iteration " + i++ + " out of: " + groups.size() + ")");
       List<Fix> fixes = nodes.stream().map(node -> node.fix).collect(Collectors.toList());
       autoFixer.apply(fixes);
@@ -60,7 +61,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
               .setWorkList(Collections.singleton("*"));
       autoFixer.buildProject(writer);
       bank.saveState(true, true);
-      for (FixGraph.Node node : nodes) {
+      for (Node node : nodes) {
         int totalEffect = 0;
         if (node.isDangling) {
           for (String clazz : node.classes) {
@@ -82,7 +83,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
   }
 
   protected Report predict(Fix fix) {
-    FixGraph.Node node = fixGraph.find(fix);
+    Node node = fixGraph.find(fix);
     System.out.print(
         "Trying to predict: "
             + fix.className

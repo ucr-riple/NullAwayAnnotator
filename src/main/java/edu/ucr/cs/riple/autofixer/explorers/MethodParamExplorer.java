@@ -4,9 +4,9 @@ import com.uber.nullaway.autofix.AutoFixConfig;
 import edu.ucr.cs.riple.autofixer.AutoFixer;
 import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
-import edu.ucr.cs.riple.autofixer.metadata.FixGraph;
 import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
 import edu.ucr.cs.riple.autofixer.metadata.MethodNode;
+import edu.ucr.cs.riple.autofixer.metadata.graph.Node;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,15 +29,15 @@ public class MethodParamExplorer extends AdvancedExplorer {
   protected void explore() {
     int maxsize = MethodInheritanceTree.maxParamSize();
     System.out.println("Max size for method parameter list is: " + maxsize);
-    List<FixGraph.Node> allNodes = new ArrayList<>();
-    for (List<FixGraph.Node> subList : fixGraph.nodes.values()) {
+    List<Node> allNodes = new ArrayList<>();
+    for (List<Node> subList : fixGraph.nodes.values()) {
       allNodes.addAll(subList);
     }
     for (int i = 0; i < maxsize; i++) {
       System.out.println(
           "Analyzing params at index: (" + (i + 1) + " out of " + maxsize + ") for all methods...");
       int finalI1 = i;
-      List<FixGraph.Node> subList =
+      List<Node> subList =
           allNodes
               .stream()
               .filter(node -> node.fix.index.equals(finalI1 + ""))
@@ -53,7 +53,7 @@ public class MethodParamExplorer extends AdvancedExplorer {
               .setMethodParamTest(true, (long) i);
       autoFixer.buildProject(config);
       bank.saveState(false, true);
-      for (FixGraph.Node node : subList) {
+      for (Node node : subList) {
         int localEffect = bank.compareByMethod(node.fix.className, node.fix.method, false);
         node.effect = localEffect + calculateInheritanceViolationError(node, i);
       }
@@ -63,7 +63,7 @@ public class MethodParamExplorer extends AdvancedExplorer {
 
   @Override
   protected Report predict(Fix fix) {
-    FixGraph.Node node = fixGraph.find(fix);
+    Node node = fixGraph.find(fix);
     System.out.print(
         "Trying to predict: "
             + fix.className
@@ -95,7 +95,7 @@ public class MethodParamExplorer extends AdvancedExplorer {
     return fixGraph.find(fix) == null;
   }
 
-  private int calculateInheritanceViolationError(FixGraph.Node node, int index) {
+  private int calculateInheritanceViolationError(Node node, int index) {
     int effect = 0;
     Fix fix = node.fix;
     boolean[] thisMethodFlag = mit.findNode(fix.method, fix.className).annotFlags;
