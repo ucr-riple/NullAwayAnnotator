@@ -38,6 +38,9 @@ public class Utility {
     for (Report report : finishedReports) {
       JSONObject reportJson = report.fix.getJson();
       reportJson.put("jump", report.effectiveNess);
+      JSONArray followUps = new JSONArray();
+      followUps.addAll(report.chain);
+      reportJson.put("followups", followUps);
       reportsJson.add(reportJson);
     }
     reportsJson.sort(
