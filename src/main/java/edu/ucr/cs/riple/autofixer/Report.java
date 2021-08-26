@@ -21,10 +21,6 @@ public class Report {
     return new Report(fix, 0);
   }
 
-  public void setTriggered(Set<Fix> triggered) {
-    this.triggered = triggered;
-  }
-
   public void setChain(Set<Fix> chain) {
     this.chain = chain;
   }
