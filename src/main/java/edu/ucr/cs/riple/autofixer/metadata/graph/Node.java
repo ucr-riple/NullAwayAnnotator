@@ -6,7 +6,7 @@ import edu.ucr.cs.riple.autofixer.metadata.UsageTracker;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.List;
 
-public class Node extends AbstractNode<Node> {
+public class Node extends AbstractNode {
   public int referred;
 
   public Node(Fix fix) {

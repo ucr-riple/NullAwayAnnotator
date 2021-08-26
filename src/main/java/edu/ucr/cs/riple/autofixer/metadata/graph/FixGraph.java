@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-public class FixGraph<T extends AbstractNode<T>> {
+public class FixGraph<T extends AbstractNode> {
   public final HashMap<Integer, Set<T>> nodes;
 
   private HashMap<Integer, Set<T>> groups;
@@ -71,12 +71,12 @@ public class FixGraph<T extends AbstractNode<T>> {
   }
 
   public void updateUsages(UsageTracker tracker) {
-    List<AbstractNode<T>> allNodes = new ArrayList<>();
+    List<AbstractNode> allNodes = new ArrayList<>();
     for (Set<T> nodesSet : nodes.values()) {
       allNodes.addAll(nodesSet);
     }
     for (int i = 0; i < allNodes.size(); i++) {
-      AbstractNode<T> node = allNodes.get(i);
+      AbstractNode node = allNodes.get(i);
       node.id = i;
       node.updateUsages(tracker);
     }

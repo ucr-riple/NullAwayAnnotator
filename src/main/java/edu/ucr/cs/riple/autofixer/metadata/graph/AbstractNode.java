@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public abstract class AbstractNode<T extends AbstractNode<T>> {
+public abstract class AbstractNode {
 
   public final Fix fix;
   public final Set<UsageTracker.Usage> usages;
@@ -23,7 +23,7 @@ public abstract class AbstractNode<T extends AbstractNode<T>> {
 
   public abstract void updateUsages(UsageTracker tracker);
 
-  public boolean hasConflictInUsage(T other) {
+  public boolean hasConflictInUsage(AbstractNode other) {
     return !Collections.disjoint(other.usages, this.usages);
   }
 

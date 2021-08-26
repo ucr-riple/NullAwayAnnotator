@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public class SuperNode extends AbstractNode<SuperNode> {
+public class SuperNode extends AbstractNode {
 
   public final Set<Node> followUps;
   public Report report;
@@ -30,9 +30,7 @@ public class SuperNode extends AbstractNode<SuperNode> {
     if (this == o) return true;
     if (!(o instanceof SuperNode)) return false;
     SuperNode superNode = (SuperNode) o;
-    return followUps.equals(superNode.followUps)
-        && report.equals(superNode.report)
-        && root.equals(superNode.root);
+    return root.equals(superNode.root);
   }
 
   @Override
