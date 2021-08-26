@@ -69,25 +69,16 @@ public abstract class AdvancedExplorer extends BasicExplorer {
       fixIndex.index();
       for (Node node : nodes) {
         int totalEffect = 0;
-        if (node.isDangling) {
-          for (String clazz : node.classes) {
-            totalEffect += bank.compareByClass(clazz, false);
+        for (UsageTracker.Usage usage : node.usages) {
+          if (usage.method.equals("null")) {
+            totalEffect += bank.compareByClass(usage.clazz, false);
             if (AutoFixer.DEPTH > 0) {
-              node.updateTriggered(fixIndex.getByClass(clazz));
+              node.updateTriggered(fixIndex.getByClass(usage.clazz));
             }
-          }
-        } else {
-          for (UsageTracker.Usage usage : node.usages) {
-            if (usage.method.equals("null")) {
-              totalEffect += bank.compareByClass(usage.clazz, false);
-              if (AutoFixer.DEPTH > 0) {
-                node.updateTriggered(fixIndex.getByClass(usage.clazz));
-              }
-            } else {
-              totalEffect += bank.compareByMethod(usage.clazz, usage.method, false);
-              if (AutoFixer.DEPTH > 0) {
-                node.updateTriggered(fixIndex.getByMethod(usage.clazz, usage.method));
-              }
+          } else {
+            totalEffect += bank.compareByMethod(usage.clazz, usage.method, false);
+            if (AutoFixer.DEPTH > 0) {
+              node.updateTriggered(fixIndex.getByMethod(usage.clazz, usage.method));
             }
           }
         }

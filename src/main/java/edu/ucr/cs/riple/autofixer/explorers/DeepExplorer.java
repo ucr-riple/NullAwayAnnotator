@@ -51,6 +51,6 @@ public class DeepExplorer extends BasicExplorer {
   }
 
   private void explore() {
-      fixGraph.updateUsages(tracker);
+    fixGraph.updateUsages(tracker);
   }
 }
