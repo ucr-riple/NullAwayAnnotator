@@ -1,5 +1,6 @@
 package edu.ucr.cs.riple.autofixer.metadata.graph;
 
+import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.metadata.UsageTracker;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.HashSet;
@@ -9,6 +10,7 @@ public class SuperNode extends AbstractNode<SuperNode> {
 
   public final Set<Node> followUps;
   private final Node root;
+  public Report report;
 
   public SuperNode(Fix fix) {
     super(fix);

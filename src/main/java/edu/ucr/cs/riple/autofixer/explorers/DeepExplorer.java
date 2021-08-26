@@ -30,6 +30,7 @@ public class DeepExplorer extends BasicExplorer {
           SuperNode node = fixGraph.findOrCreate(fix);
           node.effect = report.effectiveNess;
           node.updateUsages(tracker);
+          node.report = report;
         });
   }
 
