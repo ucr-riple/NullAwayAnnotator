@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 public class Node extends AbstractNode<Node> {
   public final Set<String> classes;
   public int referred;
-  public int effect;
   public int id;
   public boolean isDangling;
 
@@ -20,7 +19,8 @@ public class Node extends AbstractNode<Node> {
     this.classes = new HashSet<>();
   }
 
-  public void updateUsages(Set<UsageTracker.Usage> usages) {
+  public void updateUsages(UsageTracker tracker) {
+    Set<UsageTracker.Usage> usages = tracker.getUsage(this.fix);
     this.usages.addAll(usages);
     this.classes.addAll(usages.stream().map(usage -> usage.clazz).collect(Collectors.toSet()));
     for (UsageTracker.Usage usage : usages) {

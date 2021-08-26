@@ -61,7 +61,7 @@ public class FixGraph<T extends AbstractNode<T>> {
     for (int i = 0; i < allNodes.size(); i++) {
       AbstractNode<T> node = allNodes.get(i);
       node.id = i;
-      node.updateUsages(tracker.getUsage(node.fix));
+      node.updateUsages(tracker);
     }
   }
 

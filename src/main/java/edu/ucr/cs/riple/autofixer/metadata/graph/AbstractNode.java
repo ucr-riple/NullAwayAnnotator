@@ -2,25 +2,23 @@ package edu.ucr.cs.riple.autofixer.metadata.graph;
 
 import edu.ucr.cs.riple.autofixer.metadata.UsageTracker;
 import edu.ucr.cs.riple.injector.Fix;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
 public abstract class AbstractNode<T extends AbstractNode<T>> {
 
-  public final Set<UsageTracker.Usage> usages;
   public final Fix fix;
+  public final Set<UsageTracker.Usage> usages;
   public int id;
-  public final HashMap<Integer, Set<T>> nodes;
+  public int effect;
 
   protected AbstractNode(Fix fix) {
     this.usages = new HashSet<>();
     this.fix = fix;
-    nodes = new HashMap<>();
   }
 
-  public abstract void updateUsages(Set<UsageTracker.Usage> usages);
+  public abstract void updateUsages(UsageTracker tracker);
 
   public abstract boolean hasConflictInUsage(T node);
 
