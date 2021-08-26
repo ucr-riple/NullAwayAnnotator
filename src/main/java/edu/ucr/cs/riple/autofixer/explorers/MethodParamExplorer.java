@@ -6,7 +6,6 @@ import edu.ucr.cs.riple.autofixer.FixIndex;
 import edu.ucr.cs.riple.autofixer.FixType;
 import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
-import edu.ucr.cs.riple.autofixer.errors.Index;
 import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
 import edu.ucr.cs.riple.autofixer.metadata.MethodNode;
 import edu.ucr.cs.riple.autofixer.metadata.graph.Node;
@@ -61,7 +60,7 @@ public class MethodParamExplorer extends AdvancedExplorer {
       for (Node node : subList) {
         int localEffect = bank.compareByMethod(node.fix.className, node.fix.method, false);
         node.effect = localEffect + calculateInheritanceViolationError(node, i);
-        if(AutoFixer.DEPTH > 0){
+        if (AutoFixer.DEPTH > 0) {
           node.updateTriggered(fixIndex.getByMethod(node.fix.className, node.fix.method));
         }
       }

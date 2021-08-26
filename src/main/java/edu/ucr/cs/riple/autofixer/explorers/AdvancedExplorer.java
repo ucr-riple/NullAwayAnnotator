@@ -72,7 +72,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
         if (node.isDangling) {
           for (String clazz : node.classes) {
             totalEffect += bank.compareByClass(clazz, false);
-            if(AutoFixer.DEPTH > 0){
+            if (AutoFixer.DEPTH > 0) {
               node.updateTriggered(fixIndex.getByClass(clazz));
             }
           }
@@ -80,12 +80,12 @@ public abstract class AdvancedExplorer extends BasicExplorer {
           for (UsageTracker.Usage usage : node.usages) {
             if (usage.method == null || usage.method.equals("null")) {
               totalEffect += bank.compareByClass(usage.clazz, false);
-              if(AutoFixer.DEPTH > 0){
+              if (AutoFixer.DEPTH > 0) {
                 node.updateTriggered(fixIndex.getByClass(usage.clazz));
               }
             } else {
               totalEffect += bank.compareByMethod(usage.clazz, usage.method, false);
-              if(AutoFixer.DEPTH > 0){
+              if (AutoFixer.DEPTH > 0) {
                 node.updateTriggered(fixIndex.getByMethod(usage.clazz, usage.method));
               }
             }

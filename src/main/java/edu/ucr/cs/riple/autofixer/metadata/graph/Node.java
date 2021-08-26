@@ -1,5 +1,7 @@
 package edu.ucr.cs.riple.autofixer.metadata.graph;
 
+import static edu.ucr.cs.riple.autofixer.util.Utility.isEqual;
+
 import edu.ucr.cs.riple.autofixer.metadata.UsageTracker;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.Collections;
@@ -7,7 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import static edu.ucr.cs.riple.autofixer.util.Utility.isEqual;
 
 public class Node extends AbstractNode<Node> {
   public final Set<String> classes;
@@ -35,11 +36,11 @@ public class Node extends AbstractNode<Node> {
     }
   }
 
-  public void updateTriggered(List<Fix> fixes){
+  public void updateTriggered(List<Fix> fixes) {
     this.triggered.addAll(fixes);
-    for(Fix fix: fixes){
-      for (Fix other: this.triggered){
-        if(isEqual(fix, other)){
+    for (Fix fix : fixes) {
+      for (Fix other : this.triggered) {
+        if (isEqual(fix, other)) {
           other.referred++;
           break;
         }

@@ -1,8 +1,9 @@
 package edu.ucr.cs.riple.autofixer.metadata.graph;
 
+import static edu.ucr.cs.riple.autofixer.util.Utility.isEqual;
+
 import edu.ucr.cs.riple.autofixer.metadata.UsageTracker;
 import edu.ucr.cs.riple.injector.Fix;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,7 +12,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import static edu.ucr.cs.riple.autofixer.util.Utility.isEqual;
 
 public class FixGraph<T extends AbstractNode<T>> {
   public final HashMap<Integer, Set<T>> nodes;
@@ -28,7 +28,7 @@ public class FixGraph<T extends AbstractNode<T>> {
     int hash = Objects.hash(fix.index, fix.method, fix.className);
     if (nodes.containsKey(hash)) {
       for (T candidate : nodes.get(hash)) {
-        if (isEqual(candidate.fix , fix)) {
+        if (isEqual(candidate.fix, fix)) {
           return candidate;
         }
       }
@@ -47,7 +47,7 @@ public class FixGraph<T extends AbstractNode<T>> {
     int hash = Objects.hash(fix.index, fix.method, fix.className);
     if (nodes.containsKey(hash)) {
       for (T candidate : nodes.get(hash)) {
-        if (isEqual(candidate.fix , fix)){
+        if (isEqual(candidate.fix, fix)) {
           return candidate;
         }
       }
@@ -61,7 +61,7 @@ public class FixGraph<T extends AbstractNode<T>> {
     T toRemove = null;
     if (nodes.containsKey(hash)) {
       for (T candidate : nodes.get(hash)) {
-        if (isEqual(candidate.fix , fix)) {
+        if (isEqual(candidate.fix, fix)) {
           toRemove = candidate;
           break;
         }
