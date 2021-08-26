@@ -29,6 +29,10 @@ public abstract class AbstractNode {
 
   @Override
   public int hashCode() {
+    return getHash(fix);
+  }
+
+  public static int getHash(Fix fix) {
     return Objects.hash(fix.index, fix.className, fix.method);
   }
 }

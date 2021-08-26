@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 public class FixGraph<T extends AbstractNode> {
@@ -25,7 +24,7 @@ public class FixGraph<T extends AbstractNode> {
   }
 
   public T findOrCreate(Fix fix) {
-    int hash = Objects.hash(fix.index, fix.method, fix.className);
+    int hash = AbstractNode.getHash(fix);
     if (nodes.containsKey(hash)) {
       for (T candidate : nodes.get(hash)) {
         if (isEqual(candidate.fix, fix)) {
@@ -44,7 +43,7 @@ public class FixGraph<T extends AbstractNode> {
   }
 
   public T find(Fix fix) {
-    int hash = Objects.hash(fix.index, fix.method, fix.className);
+    int hash = AbstractNode.getHash(fix);
     if (nodes.containsKey(hash)) {
       for (T candidate : nodes.get(hash)) {
         if (isEqual(candidate.fix, fix)) {
@@ -57,7 +56,7 @@ public class FixGraph<T extends AbstractNode> {
 
   @SuppressWarnings("ALL")
   public void remove(Fix fix) {
-    int hash = Objects.hash(fix.index, fix.method, fix.className);
+    int hash = AbstractNode.getHash(fix);
     T toRemove = null;
     if (nodes.containsKey(hash)) {
       for (T candidate : nodes.get(hash)) {
