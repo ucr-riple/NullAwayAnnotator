@@ -18,6 +18,9 @@ public class FieldUsageTracker extends AbstractRelation<TrackerNode> implements 
 
   @Override
   public Set<String> getUsers(Fix fix) {
+    if (!fix.location.equals("CLASS_FIELD")) {
+      return null;
+    }
     List<TrackerNode> nodes =
         findAllNodes(
             candidate ->
@@ -36,6 +39,9 @@ public class FieldUsageTracker extends AbstractRelation<TrackerNode> implements 
 
   @Override
   public Set<Usage> getUsage(Fix fix) {
+    if (!fix.location.equals("CLASS_FIELD")) {
+      return null;
+    }
     List<TrackerNode> nodes =
         findAllNodes(
             candidate ->

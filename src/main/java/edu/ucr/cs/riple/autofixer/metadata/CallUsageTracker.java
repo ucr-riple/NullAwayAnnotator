@@ -18,6 +18,9 @@ public class CallUsageTracker extends AbstractRelation<TrackerNode> implements U
 
   @Override
   public Set<String> getUsers(Fix fix) {
+    if (!fix.location.equals("METHOD_RETURN")) {
+      return null;
+    }
     List<TrackerNode> nodes =
         findAllNodes(
             candidate ->
@@ -33,6 +36,9 @@ public class CallUsageTracker extends AbstractRelation<TrackerNode> implements U
 
   @Override
   public Set<Usage> getUsage(Fix fix) {
+    if (!fix.location.equals("METHOD_RETURN")) {
+      return null;
+    }
     List<TrackerNode> nodes =
         findAllNodes(
             candidate ->
