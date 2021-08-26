@@ -1,6 +1,7 @@
 package edu.ucr.cs.riple.autofixer.explorers;
 
 import edu.ucr.cs.riple.autofixer.AutoFixer;
+import edu.ucr.cs.riple.autofixer.FixType;
 import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.injector.Fix;
@@ -8,7 +9,7 @@ import edu.ucr.cs.riple.injector.Fix;
 public class ClassFieldExplorer extends AdvancedExplorer {
 
   public ClassFieldExplorer(AutoFixer autoFixer, Bank bank) {
-    super(autoFixer, bank);
+    super(autoFixer, bank, FixType.CLASS_FIELD);
   }
 
   @Override
@@ -26,7 +27,7 @@ public class ClassFieldExplorer extends AdvancedExplorer {
 
   @Override
   public boolean isApplicable(Fix fix) {
-    return fix.location.equals("CLASS_FIELD");
+    return fix.location.equals(fixType.name);
   }
 
   @Override

@@ -1,14 +1,17 @@
 package edu.ucr.cs.riple.autofixer.metadata;
 
+import edu.ucr.cs.riple.autofixer.FixType;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CallUsageTracker extends AbstractRelation<TrackerNode> implements UsageTracker {
+  private final FixType fixType;
 
   public CallUsageTracker(String filePath) {
     super(filePath);
+    this.fixType = FixType.METHOD_RETURN;
   }
 
   @Override
@@ -18,7 +21,7 @@ public class CallUsageTracker extends AbstractRelation<TrackerNode> implements U
 
   @Override
   public Set<String> getUsers(Fix fix) {
-    if (!fix.location.equals("METHOD_RETURN")) {
+    if (!fix.location.equals(fixType.name)) {
       return null;
     }
     List<TrackerNode> nodes =
@@ -36,7 +39,7 @@ public class CallUsageTracker extends AbstractRelation<TrackerNode> implements U
 
   @Override
   public Set<Usage> getUsage(Fix fix) {
-    if (!fix.location.equals("METHOD_RETURN")) {
+    if (!fix.location.equals(fixType.name)) {
       return null;
     }
     List<TrackerNode> nodes =

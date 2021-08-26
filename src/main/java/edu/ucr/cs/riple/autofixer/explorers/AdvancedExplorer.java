@@ -3,6 +3,7 @@ package edu.ucr.cs.riple.autofixer.explorers;
 import com.uber.nullaway.autofix.AutoFixConfig;
 import com.uber.nullaway.autofix.Writer;
 import edu.ucr.cs.riple.autofixer.AutoFixer;
+import edu.ucr.cs.riple.autofixer.FixType;
 import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.autofixer.metadata.UsageTracker;
@@ -22,9 +23,11 @@ public abstract class AdvancedExplorer extends BasicExplorer {
 
   final FixGraph<Node> fixGraph;
   protected UsageTracker tracker;
+  protected final FixType fixType;
 
-  public AdvancedExplorer(AutoFixer autoFixer, Bank bank) {
+  public AdvancedExplorer(AutoFixer autoFixer, Bank bank, FixType fixType) {
     super(autoFixer, bank);
+    this.fixType = fixType;
     fixGraph = new FixGraph<>(Node::new);
     try {
       try (BufferedReader br = new BufferedReader(new FileReader(Writer.SUGGEST_FIX))) {

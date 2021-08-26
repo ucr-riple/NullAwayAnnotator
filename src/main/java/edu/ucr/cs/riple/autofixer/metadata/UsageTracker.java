@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Set;
 
 public interface UsageTracker {
+
   class Usage {
     public final String method;
     public final String clazz;

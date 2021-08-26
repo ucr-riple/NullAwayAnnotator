@@ -1,6 +1,7 @@
 package edu.ucr.cs.riple.autofixer.explorers;
 
 import edu.ucr.cs.riple.autofixer.AutoFixer;
+import edu.ucr.cs.riple.autofixer.FixType;
 import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.injector.Fix;
@@ -8,7 +9,7 @@ import edu.ucr.cs.riple.injector.Fix;
 public class MethodReturnExplorer extends AdvancedExplorer {
 
   public MethodReturnExplorer(AutoFixer autoFixer, Bank bank) {
-    super(autoFixer, bank);
+    super(autoFixer, bank, FixType.METHOD_RETURN);
   }
 
   @Override
@@ -26,7 +27,7 @@ public class MethodReturnExplorer extends AdvancedExplorer {
 
   @Override
   public boolean isApplicable(Fix fix) {
-    return fix.location.equals("METHOD_RETURN");
+    return fix.location.equals(FixType.METHOD_RETURN.name);
   }
 
   @Override

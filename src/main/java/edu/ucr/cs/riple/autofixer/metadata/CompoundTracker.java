@@ -1,5 +1,6 @@
 package edu.ucr.cs.riple.autofixer.metadata;
 
+import edu.ucr.cs.riple.autofixer.FixType;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,7 +19,7 @@ public class CompoundTracker implements UsageTracker {
         new UsageTracker() {
           @Override
           public Set<String> getUsers(Fix fix) {
-            if (!fix.location.equals("METHOD_PARAM")) {
+            if (!fix.location.equals(FixType.METHOD_PARAM.name)) {
               return null;
             }
             return Collections.singleton(fix.className);
@@ -26,7 +27,7 @@ public class CompoundTracker implements UsageTracker {
 
           @Override
           public Set<Usage> getUsage(Fix fix) {
-            if (!fix.location.equals("METHOD_PARAM")) {
+            if (!fix.location.equals(FixType.METHOD_PARAM.name)) {
               return null;
             }
             return Collections.singleton(new Usage(fix.method, fix.className));
@@ -42,7 +43,7 @@ public class CompoundTracker implements UsageTracker {
         return ans;
       }
     }
-    throw new UnsupportedOperationException("Usage cannot be null at this point." + fix);
+    throw new IllegalStateException("Usage cannot be null at this point." + fix);
   }
 
   @Override
@@ -53,6 +54,6 @@ public class CompoundTracker implements UsageTracker {
         return ans;
       }
     }
-    throw new UnsupportedOperationException("Usage cannot be null at this point." + fix);
+    throw new IllegalStateException("Usage cannot be null at this point." + fix);
   }
 }

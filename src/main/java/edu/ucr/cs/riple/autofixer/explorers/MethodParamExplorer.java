@@ -2,6 +2,7 @@ package edu.ucr.cs.riple.autofixer.explorers;
 
 import com.uber.nullaway.autofix.AutoFixConfig;
 import edu.ucr.cs.riple.autofixer.AutoFixer;
+import edu.ucr.cs.riple.autofixer.FixType;
 import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
@@ -18,7 +19,7 @@ public class MethodParamExplorer extends AdvancedExplorer {
   private MethodInheritanceTree mit;
 
   public MethodParamExplorer(AutoFixer autoFixer, Bank bank) {
-    super(autoFixer, bank);
+    super(autoFixer, bank, FixType.METHOD_PARAM);
   }
 
   @Override
@@ -88,7 +89,7 @@ public class MethodParamExplorer extends AdvancedExplorer {
 
   @Override
   public boolean isApplicable(Fix fix) {
-    return fix.location.equals("METHOD_PARAM");
+    return fix.location.equals(fixType.name);
   }
 
   @Override
