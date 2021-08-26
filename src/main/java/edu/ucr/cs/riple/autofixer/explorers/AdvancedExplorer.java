@@ -78,7 +78,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
           }
         } else {
           for (UsageTracker.Usage usage : node.usages) {
-            if (usage.method == null || usage.method.equals("null")) {
+            if (usage.method.equals("null")) {
               totalEffect += bank.compareByClass(usage.clazz, false);
               if (AutoFixer.DEPTH > 0) {
                 node.updateTriggered(fixIndex.getByClass(usage.clazz));

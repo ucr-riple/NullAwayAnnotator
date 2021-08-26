@@ -11,8 +11,8 @@ public interface UsageTracker {
     public final String clazz;
 
     public Usage(String method, String clazz) {
-      this.method = method;
-      this.clazz = clazz;
+      this.method = method == null ? "null": method;
+      this.clazz = clazz == null ? "null" : clazz;
     }
 
     @Override
