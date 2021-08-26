@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public class AbstractNode<T extends AbstractNode<T>> {
+public abstract class AbstractNode<T extends AbstractNode<T>> {
 
   public final Set<UsageTracker.Usage> usages;
   public final Fix fix;
@@ -20,13 +20,9 @@ public class AbstractNode<T extends AbstractNode<T>> {
     nodes = new HashMap<>();
   }
 
-  public void updateUsages(Set<UsageTracker.Usage> usages) {
-    throw new UnsupportedOperationException("Cannot Instantiate this class directly");
-  }
+  public abstract void updateUsages(Set<UsageTracker.Usage> usages);
 
-  public boolean hasConflictInUsage(AbstractNode<T> node) {
-    throw new UnsupportedOperationException("Cannot Instantiate this class directly");
-  }
+  public abstract boolean hasConflictInUsage(T node);
 
   public boolean areSameNode(Fix other) {
     return this.fix.className.equals(other.className)

@@ -77,8 +77,8 @@ public class FixGraph<T extends AbstractNode<T>> {
     for (int i = 0; i < size; ++i) {
       adj[i] = new LinkedList<>();
     }
-    for (AbstractNode<T> node : allNodes) {
-      for (AbstractNode<T> other : allNodes) {
+    for (T node : allNodes) {
+      for (T other : allNodes) {
         if (node.equals(other)) {
           continue;
         }
