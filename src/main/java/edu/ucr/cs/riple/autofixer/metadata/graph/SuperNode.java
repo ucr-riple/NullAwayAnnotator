@@ -4,6 +4,7 @@ import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.metadata.UsageTracker;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class SuperNode extends AbstractNode<SuperNode> {
@@ -22,5 +23,25 @@ public class SuperNode extends AbstractNode<SuperNode> {
   @Override
   public void updateUsages(UsageTracker tracker) {
     followUps.forEach(node -> usages.addAll(tracker.getUsage(node.fix)));
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof SuperNode)) return false;
+    SuperNode superNode = (SuperNode) o;
+    return followUps.equals(superNode.followUps)
+        && report.equals(superNode.report)
+        && root.equals(superNode.root);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), followUps, report, root);
+  }
+
+  @Override
+  public String toString() {
+    return "SuperNode{" + "followUps=" + followUps + ", report=" + report + ", root=" + root + '}';
   }
 }
