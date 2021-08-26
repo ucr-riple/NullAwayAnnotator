@@ -49,7 +49,7 @@ public class FixIndex {
     if (ans == null) {
       return Collections.emptyList();
     }
-    return ans.stream().filter(error -> error.className.equals(clazz)).collect(Collectors.toList());
+    return ans.stream().filter(fix -> fix.className.equals(clazz)).collect(Collectors.toList());
   }
 
   public List<Fix> getByMethod(String clazz, String method) {
@@ -58,7 +58,7 @@ public class FixIndex {
       return Collections.emptyList();
     }
     return ans.stream()
-        .filter(error -> error.className.equals(clazz) && error.method.equals(method))
+        .filter(fix -> fix.className.equals(clazz) && fix.method.equals(method))
         .collect(Collectors.toList());
   }
 }
