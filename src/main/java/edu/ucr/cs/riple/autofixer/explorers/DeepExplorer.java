@@ -1,6 +1,7 @@
 package edu.ucr.cs.riple.autofixer.explorers;
 
 import edu.ucr.cs.riple.autofixer.AutoFixer;
+import edu.ucr.cs.riple.autofixer.FixIndex;
 import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.autofixer.metadata.CompoundTracker;
@@ -17,8 +18,8 @@ public class DeepExplorer extends BasicExplorer {
   private final FixGraph<SuperNode> fixGraph;
   private Set<Report> reports;
 
-  public DeepExplorer(AutoFixer autoFixer, Bank bank) {
-    super(autoFixer, bank);
+  public DeepExplorer(AutoFixer autoFixer, Bank bank, FixIndex fixIndex) {
+    super(autoFixer, bank, fixIndex);
     this.tracker = new CompoundTracker(autoFixer.fieldUsageTracker, autoFixer.callUsageTracker);
     this.fixGraph = new FixGraph<>(SuperNode::new);
   }
@@ -34,15 +35,15 @@ public class DeepExplorer extends BasicExplorer {
         });
   }
 
-  public void start(List<Report> reports, int depth) {
-    if (depth == 0) {
+  public void start(List<Report> reports) {
+    if (AutoFixer.DEPTH == 0) {
       return;
     }
     this.reports =
         reports.stream().filter(report -> report.effectiveNess > 0).collect(Collectors.toSet());
     init();
     int currentDepth = 0;
-    while (fixGraph.nodes.size() > 0 || currentDepth < depth) {
+    while (fixGraph.nodes.size() > 0 || currentDepth < AutoFixer.DEPTH) {
       explore();
     }
   }

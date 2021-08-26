@@ -22,13 +22,6 @@ public abstract class AbstractNode<T extends AbstractNode<T>> {
 
   public abstract boolean hasConflictInUsage(T other);
 
-  public boolean areSameNode(Fix other) {
-    return this.fix.className.equals(other.className)
-        && this.fix.method.equals(other.method)
-        && this.fix.index.equals(other.index)
-        && this.fix.param.equals(other.param);
-  }
-
   @Override
   public int hashCode() {
     return Objects.hash(fix.index, fix.className, fix.method);

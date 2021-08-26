@@ -104,4 +104,11 @@ public class Utility {
     return Booleans.toArray(
         Arrays.stream(content.split(",")).map(Boolean::parseBoolean).collect(Collectors.toList()));
   }
+
+  public static boolean isEqual(Fix fix, Fix other) {
+    return fix.className.equals(other.className)
+        && fix.method.equals(other.method)
+        && fix.index.equals(other.index)
+        && fix.param.equals(other.param);
+  }
 }

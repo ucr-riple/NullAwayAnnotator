@@ -2,9 +2,11 @@ package edu.ucr.cs.riple.autofixer.explorers;
 
 import com.uber.nullaway.autofix.AutoFixConfig;
 import edu.ucr.cs.riple.autofixer.AutoFixer;
+import edu.ucr.cs.riple.autofixer.FixIndex;
 import edu.ucr.cs.riple.autofixer.FixType;
 import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
+import edu.ucr.cs.riple.autofixer.errors.Index;
 import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
 import edu.ucr.cs.riple.autofixer.metadata.MethodNode;
 import edu.ucr.cs.riple.autofixer.metadata.graph.Node;
@@ -18,8 +20,8 @@ public class MethodParamExplorer extends AdvancedExplorer {
 
   private MethodInheritanceTree mit;
 
-  public MethodParamExplorer(AutoFixer autoFixer, Bank bank) {
-    super(autoFixer, bank, FixType.METHOD_PARAM);
+  public MethodParamExplorer(AutoFixer autoFixer, Bank bank, FixIndex fixIndex) {
+    super(autoFixer, bank, fixIndex, FixType.METHOD_PARAM);
   }
 
   @Override
@@ -55,9 +57,13 @@ public class MethodParamExplorer extends AdvancedExplorer {
               .setMethodParamTest(true, (long) i);
       autoFixer.buildProject(config);
       bank.saveState(false, true);
+      fixIndex.index();
       for (Node node : subList) {
         int localEffect = bank.compareByMethod(node.fix.className, node.fix.method, false);
         node.effect = localEffect + calculateInheritanceViolationError(node, i);
+        if(AutoFixer.DEPTH > 0){
+          node.updateTriggered(fixIndex.getByMethod(node.fix.className, node.fix.method));
+        }
       }
     }
     System.out.println("Captured all methods behavior against nullability of parameter.");

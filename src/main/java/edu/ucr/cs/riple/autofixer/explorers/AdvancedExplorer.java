@@ -3,6 +3,7 @@ package edu.ucr.cs.riple.autofixer.explorers;
 import com.uber.nullaway.autofix.AutoFixConfig;
 import com.uber.nullaway.autofix.Writer;
 import edu.ucr.cs.riple.autofixer.AutoFixer;
+import edu.ucr.cs.riple.autofixer.FixIndex;
 import edu.ucr.cs.riple.autofixer.FixType;
 import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
@@ -25,8 +26,8 @@ public abstract class AdvancedExplorer extends BasicExplorer {
   protected UsageTracker tracker;
   protected final FixType fixType;
 
-  public AdvancedExplorer(AutoFixer autoFixer, Bank bank, FixType fixType) {
-    super(autoFixer, bank);
+  public AdvancedExplorer(AutoFixer autoFixer, Bank bank, FixIndex fixIndex, FixType fixType) {
+    super(autoFixer, bank, fixIndex);
     this.fixType = fixType;
     fixGraph = new FixGraph<>(Node::new);
     try {
@@ -65,18 +66,28 @@ public abstract class AdvancedExplorer extends BasicExplorer {
               .setWorkList(Collections.singleton("*"));
       autoFixer.buildProject(writer);
       bank.saveState(true, true);
+      fixIndex.index();
       for (Node node : nodes) {
         int totalEffect = 0;
         if (node.isDangling) {
           for (String clazz : node.classes) {
             totalEffect += bank.compareByClass(clazz, false);
+            if(AutoFixer.DEPTH > 0){
+              node.updateTriggered(fixIndex.getByClass(clazz));
+            }
           }
         } else {
           for (UsageTracker.Usage usage : node.usages) {
             if (usage.method == null || usage.method.equals("null")) {
               totalEffect += bank.compareByClass(usage.clazz, false);
+              if(AutoFixer.DEPTH > 0){
+                node.updateTriggered(fixIndex.getByClass(usage.clazz));
+              }
             } else {
               totalEffect += bank.compareByMethod(usage.clazz, usage.method, false);
+              if(AutoFixer.DEPTH > 0){
+                node.updateTriggered(fixIndex.getByMethod(usage.clazz, usage.method));
+              }
             }
           }
         }

@@ -3,6 +3,7 @@ package edu.ucr.cs.riple.autofixer.explorers;
 import com.uber.nullaway.autofix.AutoFixConfig;
 import com.uber.nullaway.autofix.Writer;
 import edu.ucr.cs.riple.autofixer.AutoFixer;
+import edu.ucr.cs.riple.autofixer.FixIndex;
 import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.injector.Fix;
@@ -15,10 +16,12 @@ public abstract class Explorer {
 
   protected final AutoFixer autoFixer;
   protected final Bank bank;
+  protected final FixIndex fixIndex;
 
-  public Explorer(AutoFixer autoFixer, Bank bank) {
+  public Explorer(AutoFixer autoFixer, Bank bank, FixIndex fixIndex) {
     this.autoFixer = autoFixer;
     this.bank = bank;
+    this.fixIndex = fixIndex;
   }
 
   public Report effect(Fix fix) {

@@ -4,11 +4,14 @@ import edu.ucr.cs.riple.autofixer.metadata.UsageTracker;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import static edu.ucr.cs.riple.autofixer.util.Utility.isEqual;
 
 public class Node extends AbstractNode<Node> {
   public final Set<String> classes;
+  public final Set<Fix> triggered;
   public int referred;
   public int id;
   public boolean isDangling;
@@ -17,6 +20,7 @@ public class Node extends AbstractNode<Node> {
     super(fix);
     this.isDangling = false;
     this.classes = new HashSet<>();
+    this.triggered = new HashSet<>();
   }
 
   public void updateUsages(UsageTracker tracker) {
@@ -27,6 +31,18 @@ public class Node extends AbstractNode<Node> {
       if (usage.method == null || usage.method.equals("null")) {
         isDangling = true;
         break;
+      }
+    }
+  }
+
+  public void updateTriggered(List<Fix> fixes){
+    this.triggered.addAll(fixes);
+    for(Fix fix: fixes){
+      for (Fix other: this.triggered){
+        if(isEqual(fix, other)){
+          other.referred++;
+          break;
+        }
       }
     }
   }

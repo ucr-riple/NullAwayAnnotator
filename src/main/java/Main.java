@@ -33,8 +33,8 @@ public class Main {
     boolean optimized = args.length == 5 && Boolean.getBoolean(args[4]);
     String dir = args[1];
     String runCommand = args[2];
-    int depth = Integer.parseInt(args[3]);
-    autoFixer.start(runCommand, dir, optimized, depth);
+    AutoFixer.DEPTH = Integer.parseInt(args[3]);
+    autoFixer.start(runCommand, dir, optimized);
   }
 
   private static void apply(String[] args) {

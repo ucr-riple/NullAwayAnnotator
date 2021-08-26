@@ -43,6 +43,7 @@ public class AutoFixer {
   public CallUsageTracker callUsageTracker;
   public FieldUsageTracker fieldUsageTracker;
   public MethodInheritanceTree methodInheritanceTree;
+  public static int DEPTH;
 
   private void init(String buildCommand) {
     this.buildCommand = buildCommand;
@@ -65,14 +66,15 @@ public class AutoFixer {
     this.fieldUsageTracker = new FieldUsageTracker(out_dir + "/field_graph.csv");
     this.explorers = new ArrayList<>();
     Bank bank = new Bank();
-    this.deepExplorer = new DeepExplorer(this, bank);
-    explorers.add(new MethodParamExplorer(this, bank));
-    explorers.add(new ClassFieldExplorer(this, bank));
-    explorers.add(new MethodReturnExplorer(this, bank));
-    explorers.add(new BasicExplorer(this, bank));
+    FixIndex fixIndex = new FixIndex();
+    this.deepExplorer = new DeepExplorer(this, bank, fixIndex);
+    explorers.add(new MethodParamExplorer(this, bank, fixIndex));
+    explorers.add(new ClassFieldExplorer(this, bank, fixIndex));
+    explorers.add(new MethodReturnExplorer(this, bank, fixIndex));
+    explorers.add(new BasicExplorer(this, bank, fixIndex));
   }
 
-  public void start(String buildCommand, String out_dir, boolean optimized, int depth) {
+  public void start(String buildCommand, String out_dir, boolean optimized) {
     System.out.println("AutoFixer Started...");
     this.out_dir = out_dir;
     init(buildCommand);
@@ -89,7 +91,7 @@ public class AutoFixer {
           remove(appliedFixes);
         }
       }
-      deepExplorer.start(finishedReports, depth);
+      deepExplorer.start(finishedReports);
     } catch (Exception e) {
       e.printStackTrace();
     }
