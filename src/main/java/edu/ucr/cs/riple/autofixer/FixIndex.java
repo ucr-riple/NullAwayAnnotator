@@ -23,7 +23,7 @@ public class FixIndex {
   }
 
   public void index() {
-    try (BufferedReader br = new BufferedReader(new FileReader(Writer.ERROR))) {
+    try (BufferedReader br = new BufferedReader(new FileReader(Writer.SUGGEST_FIX))) {
       String line;
       String delimiter = Writer.getDelimiterRegex();
       br.readLine();
