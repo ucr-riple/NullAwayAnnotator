@@ -53,6 +53,21 @@ public class FixGraph<T extends AbstractNode<T>> {
     return null;
   }
 
+  @SuppressWarnings("ALL")
+  public void remove(Fix fix) {
+    int hash = Objects.hash(fix.index, fix.method, fix.className);
+    T toRemove = null;
+    if (nodes.containsKey(hash)) {
+      for (T candidate : nodes.get(hash)) {
+        if (candidate.areSameNode(fix)) {
+          toRemove = candidate;
+          break;
+        }
+      }
+    }
+    nodes.remove(toRemove);
+  }
+
   public void updateUsages(UsageTracker tracker) {
     List<AbstractNode<T>> allNodes = new ArrayList<>();
     for (Set<T> nodesSet : nodes.values()) {

@@ -20,7 +20,7 @@ public abstract class AbstractNode<T extends AbstractNode<T>> {
 
   public abstract void updateUsages(UsageTracker tracker);
 
-  public abstract boolean hasConflictInUsage(T node);
+  public abstract boolean hasConflictInUsage(T other);
 
   public boolean areSameNode(Fix other) {
     return this.fix.className.equals(other.className)

@@ -31,11 +31,11 @@ public class Node extends AbstractNode<Node> {
     }
   }
 
-  public boolean hasConflictInUsage(Node node) {
-    if (node.isDangling || this.isDangling) {
-      return !Collections.disjoint(node.classes, this.classes);
+  public boolean hasConflictInUsage(Node other) {
+    if (other.isDangling || this.isDangling) {
+      return !Collections.disjoint(other.classes, this.classes);
     }
-    return !Collections.disjoint(node.usages, this.usages);
+    return !Collections.disjoint(other.usages, this.usages);
   }
 
   @Override

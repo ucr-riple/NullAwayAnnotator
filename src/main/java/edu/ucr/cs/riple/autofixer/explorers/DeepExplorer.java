@@ -40,5 +40,11 @@ public class DeepExplorer extends BasicExplorer {
     this.reports =
         reports.stream().filter(report -> report.effectiveNess > 0).collect(Collectors.toSet());
     init();
+    int currentDepth = 0;
+    while (fixGraph.nodes.size() > 0 || currentDepth < depth) {
+      explore();
+    }
   }
+
+  private void explore() {}
 }
