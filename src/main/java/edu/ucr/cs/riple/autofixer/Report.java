@@ -9,6 +9,7 @@ public class Report {
   public int effectiveNess;
   public Fix fix;
   public Set<Fix> chain;
+  public Set<Fix> triggered;
 
   public Report(Fix fix, int effectiveNess) {
     this.effectiveNess = effectiveNess;
@@ -18,6 +19,10 @@ public class Report {
 
   public static Report empty(Fix fix) {
     return new Report(fix, 0);
+  }
+
+  public void setTriggered(Set<Fix> triggered) {
+    this.triggered = triggered;
   }
 
   public void setChain(Set<Fix> chain) {

@@ -84,7 +84,9 @@ public class MethodParamExplorer extends AdvancedExplorer {
       return null;
     }
     System.out.println("Predicted...");
-    return new Report(fix, node.effect - node.referred);
+    Report report = new Report(fix, node.effect - node.referred);
+    report.triggered = node.triggered;
+    return report;
   }
 
   @Override

@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 public class Node extends AbstractNode<Node> {
   public final Set<String> classes;
-  public final Set<Fix> triggered;
   public int referred;
   public int id;
   public boolean isDangling;
@@ -21,7 +20,6 @@ public class Node extends AbstractNode<Node> {
     super(fix);
     this.isDangling = false;
     this.classes = new HashSet<>();
-    this.triggered = new HashSet<>();
   }
 
   public void updateUsages(UsageTracker tracker) {

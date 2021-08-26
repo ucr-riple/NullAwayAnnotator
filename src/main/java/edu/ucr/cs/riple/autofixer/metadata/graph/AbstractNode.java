@@ -10,12 +10,14 @@ public abstract class AbstractNode<T extends AbstractNode<T>> {
 
   public final Fix fix;
   public final Set<UsageTracker.Usage> usages;
+  public Set<Fix> triggered;
   public int id;
   public int effect;
 
   protected AbstractNode(Fix fix) {
     this.usages = new HashSet<>();
     this.fix = fix;
+    this.triggered = new HashSet<>();
   }
 
   public abstract void updateUsages(UsageTracker tracker);

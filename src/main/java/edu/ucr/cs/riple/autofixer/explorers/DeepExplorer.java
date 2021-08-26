@@ -32,6 +32,7 @@ public class DeepExplorer extends BasicExplorer {
           node.effect = report.effectiveNess;
           node.updateUsages(tracker);
           node.report = report;
+          node.triggered = report.triggered;
         });
   }
 
