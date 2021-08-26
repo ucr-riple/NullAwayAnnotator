@@ -21,18 +21,6 @@ public class SuperNode extends AbstractNode<SuperNode> {
 
   @Override
   public void updateUsages(UsageTracker tracker) {
-    followUps.forEach(node -> node.updateUsages(tracker));
-  }
-
-  @Override
-  public boolean hasConflictInUsage(SuperNode other) {
-    for (Node node : followUps) {
-      for (Node otherNode : other.followUps) {
-        if (node.hasConflictInUsage(otherNode)) {
-          return true;
-        }
-      }
-    }
-    return false;
+    followUps.forEach(node -> usages.addAll(tracker.getUsage(node.fix)));
   }
 }

@@ -2,6 +2,7 @@ package edu.ucr.cs.riple.autofixer.metadata.graph;
 
 import edu.ucr.cs.riple.autofixer.metadata.UsageTracker;
 import edu.ucr.cs.riple.injector.Fix;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -22,7 +23,9 @@ public abstract class AbstractNode<T extends AbstractNode<T>> {
 
   public abstract void updateUsages(UsageTracker tracker);
 
-  public abstract boolean hasConflictInUsage(T other);
+  public boolean hasConflictInUsage(T other) {
+    return !Collections.disjoint(other.usages, this.usages);
+  }
 
   @Override
   public int hashCode() {
