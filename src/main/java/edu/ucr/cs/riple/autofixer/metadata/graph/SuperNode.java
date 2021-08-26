@@ -9,8 +9,8 @@ import java.util.Set;
 public class SuperNode extends AbstractNode<SuperNode> {
 
   public final Set<Node> followUps;
-  private final Node root;
   public Report report;
+  private final Node root;
 
   public SuperNode(Fix fix) {
     super(fix);
@@ -21,9 +21,7 @@ public class SuperNode extends AbstractNode<SuperNode> {
 
   @Override
   public void updateUsages(UsageTracker tracker) {
-    for (Node node : followUps) {
-      node.updateUsages(tracker);
-    }
+    followUps.forEach(node -> node.updateUsages(tracker));
   }
 
   @Override
