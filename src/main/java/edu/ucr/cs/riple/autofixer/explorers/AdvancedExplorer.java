@@ -62,7 +62,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
       AutoFixConfig.AutoFixConfigWriter writer =
           new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, true)
-              .setSuggest(true, false)
+              .setSuggest(true, AutoFixer.DEPTH > 0)
               .setWorkList(Collections.singleton("*"));
       autoFixer.buildProject(writer);
       bank.saveState(true, true);
@@ -70,16 +70,9 @@ public abstract class AdvancedExplorer extends BasicExplorer {
       for (Node node : nodes) {
         int totalEffect = 0;
         for (UsageTracker.Usage usage : node.usages) {
-          if (usage.method.equals("null")) {
-            totalEffect += bank.compareByClass(usage.clazz, false);
-            if (AutoFixer.DEPTH > 0) {
-              node.updateTriggered(fixIndex.getByClass(usage.clazz));
-            }
-          } else {
-            totalEffect += bank.compareByMethod(usage.clazz, usage.method, false);
-            if (AutoFixer.DEPTH > 0) {
-              node.updateTriggered(fixIndex.getByMethod(usage.clazz, usage.method));
-            }
+          totalEffect += bank.compareByMethod(usage.clazz, usage.method, false);
+          if (AutoFixer.DEPTH > 0) {
+            node.updateTriggered(fixIndex.getByMethod(usage.clazz, usage.method));
           }
         }
         node.effect = totalEffect;
