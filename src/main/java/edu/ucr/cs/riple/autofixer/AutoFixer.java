@@ -114,6 +114,9 @@ public class AutoFixer {
   }
 
   public void apply(List<Fix> fixes) {
+    if (fixes == null || fixes.size() == 0) {
+      return;
+    }
     injector.start(new WorkListBuilder(fixes).getWorkLists(), true);
   }
 
