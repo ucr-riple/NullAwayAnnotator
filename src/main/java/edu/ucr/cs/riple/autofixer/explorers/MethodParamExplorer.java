@@ -1,111 +1,88 @@
 package edu.ucr.cs.riple.autofixer.explorers;
 
-import edu.ucr.cs.riple.autofixer.Diagnose;
-import edu.ucr.cs.riple.autofixer.DiagnoseReport;
+import com.uber.nullaway.autofix.AutoFixConfig;
+import edu.ucr.cs.riple.autofixer.AutoFixer;
+import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
+import edu.ucr.cs.riple.autofixer.metadata.FixGraph;
 import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
 import edu.ucr.cs.riple.autofixer.metadata.MethodNode;
-import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
-import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import edu.ucr.cs.riple.injector.Fix;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class MethodParamExplorer extends Explorer {
+public class MethodParamExplorer extends AdvancedExplorer {
 
-  MethodInheritanceTree mit;
+  private MethodInheritanceTree mit;
 
-  public MethodParamExplorer(Diagnose diagnose, Bank bank) {
-    super(diagnose, bank);
-    mit = diagnose.methodInheritanceTree;
-    makeAllNodes();
-    measureNullSafetyAllMethods(diagnose, bank);
+  public MethodParamExplorer(AutoFixer autoFixer, Bank bank) {
+    super(autoFixer, bank);
   }
 
-  private void makeAllNodes() {
-    try {
-      try (BufferedReader br = new BufferedReader(new FileReader(Writer.SUGGEST_FIX))) {
-        String line;
-        String delimiter = Writer.getDelimiterRegex();
-        while ((line = br.readLine()) != null) {
-          String[] infos = line.split(delimiter);
-          if (!infos[0].equals("METHOD_PARAM")) {
-            continue;
-          }
-          String clazz = infos[2];
-          String method = infos[3];
-          int index = Integer.parseInt(infos[5]);
-          Node node = Node.findOrCreate(index, method, clazz);
-          node.referred++;
-        }
-      }
-    } catch (IOException e) {
-      System.err.println("Exception happened in initializing MethodParamExplorer...");
-    }
+  @Override
+  protected void init() {
+    mit = autoFixer.methodInheritanceTree;
   }
 
-  private void measureNullSafetyAllMethods(Diagnose diagnose, Bank bank) {
+  @Override
+  protected void explore() {
     int maxsize = MethodInheritanceTree.maxParamSize();
     System.out.println("Max size for method parameter list is: " + maxsize);
+    List<FixGraph.Node> allNodes = new ArrayList<>();
+    for (List<FixGraph.Node> subList : fixGraph.nodes.values()) {
+      allNodes.addAll(subList);
+    }
     for (int i = 0; i < maxsize; i++) {
-      System.out.println("Analyzing params at index: " + i + " for all methods...");
+      System.out.println(
+          "Analyzing params at index: (" + (i + 1) + " out of " + maxsize + ") for all methods...");
+      int finalI1 = i;
+      List<FixGraph.Node> subList =
+          allNodes
+              .stream()
+              .filter(node -> node.fix.index.equals(finalI1 + ""))
+              .collect(Collectors.toList());
+      if (subList.size() == 0) {
+        System.out.println("No fix at this index, skipping...");
+        continue;
+      }
       AutoFixConfig.AutoFixConfigWriter config =
           new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, true)
-              .setSuggest(true)
-              .setMethodParamTest(true, i);
-      diagnose.buildProject(config);
+              .setSuggest(true, false)
+              .setMethodParamTest(true, (long) i);
+      autoFixer.buildProject(config);
       bank.saveState(false, true);
-      for (List<Node> list : Node.nodes.values()) {
-        int finalI = i;
-        for (Node node :
-            list.stream().filter(node -> node.index == finalI).collect(Collectors.toList())) {
-          int localEffect = bank.compareByMethod(node.clazz, node.method, false);
-          node.effect = localEffect + calculateInheritanceViolationError(node, i);
-        }
+      for (FixGraph.Node node : subList) {
+        int localEffect = bank.compareByMethod(node.fix.className, node.fix.method, false);
+        node.effect = localEffect + calculateInheritanceViolationError(node, i);
       }
     }
     System.out.println("Captured all methods behavior against nullability of parameter.");
   }
 
-  private int calculateInheritanceViolationError(Node node, int index) {
-    int effect = 0;
-    boolean[] thisMethodFlag = mit.findNode(node.method, node.clazz).annotFlags;
-    if (index >= thisMethodFlag.length) {
-      return 0;
+  @Override
+  protected Report predict(Fix fix) {
+    FixGraph.Node node = fixGraph.find(fix);
+    System.out.print(
+        "Trying to predict: "
+            + fix.className
+            + " "
+            + fix.method
+            + " "
+            + fix.param
+            + " METHOD_PARAM: ");
+    if (node == null) {
+      System.out.println("Not found...");
+      return null;
     }
-    for (MethodNode subMethod : mit.getSubMethods(node.method, node.clazz, false)) {
-      if (!thisMethodFlag[index]) {
-        if (!subMethod.annotFlags[index]) {
-          effect++;
-        }
-      }
-    }
-    List<MethodNode> superMethods = mit.getSuperMethods(node.method, node.clazz, false);
-    if (superMethods.size() != 0) {
-      MethodNode superMethod = superMethods.get(0);
-      if (!thisMethodFlag[index]) {
-        if (superMethod.annotFlags[index]) {
-          effect--;
-        }
-      }
-    }
-    return effect;
+    System.out.println("Predicted...");
+    return new Report(fix, node.effect - node.referred);
   }
 
   @Override
-  public DiagnoseReport effect(Fix fix) {
-    Node node = Node.find(Integer.parseInt(fix.index), fix.method, fix.className);
-    if (node != null) {
-      return new DiagnoseReport(fix, node.effect - node.referred);
-    }
-    return super.effect(fix);
+  protected Report effectByScope(Fix fix) {
+    return effectByScope(fix, null);
   }
 
   @Override
@@ -115,87 +92,32 @@ public class MethodParamExplorer extends Explorer {
 
   @Override
   public boolean requiresInjection(Fix fix) {
-    return false;
-  }
-}
-
-class Node {
-  final int index;
-  final String method;
-  final String clazz;
-  int referred;
-  int effect;
-  static HashMap<Integer, List<Node>> nodes = new HashMap<>();
-
-  private Node(int index, String method, String clazz) {
-    this.index = index;
-    this.method = method;
-    this.clazz = clazz;
+    return fixGraph.find(fix) == null;
   }
 
-  public static Node findOrCreate(int index, String method, String clazz) {
-    int hash = Objects.hash(index, method, clazz);
-    if (nodes.containsKey(hash)) {
-      for (Node candidate : nodes.get(hash)) {
-        if (candidate.method.equals(method)
-            && candidate.clazz.equals(clazz)
-            && candidate.index == index) {
-          return candidate;
-        }
-      }
-      Node newNode = new Node(index, method, clazz);
-      nodes.get(hash).add(newNode);
-      return newNode;
+  private int calculateInheritanceViolationError(FixGraph.Node node, int index) {
+    int effect = 0;
+    Fix fix = node.fix;
+    boolean[] thisMethodFlag = mit.findNode(fix.method, fix.className).annotFlags;
+    if (index >= thisMethodFlag.length) {
+      return 0;
     }
-    Node newNode = new Node(index, method, clazz);
-    List<Node> newList = new ArrayList<>();
-    newList.add(newNode);
-    nodes.put(hash, newList);
-    return newNode;
-  }
-
-  public static Node find(int index, String method, String clazz) {
-    int hash = Objects.hash(index, method, clazz);
-    if (nodes.containsKey(hash)) {
-      for (Node candidate : nodes.get(hash)) {
-        if (candidate.method.equals(method)
-            && candidate.clazz.equals(clazz)
-            && candidate.index == index) {
-          return candidate;
+    for (MethodNode subMethod : mit.getSubMethods(fix.method, fix.className, false)) {
+      if (!thisMethodFlag[index]) {
+        if (!subMethod.annotFlags[index]) {
+          effect++;
         }
       }
     }
-    return null;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Node)) return false;
-    Node node = (Node) o;
-    return index == node.index && method.equals(node.method) && clazz.equals(node.clazz);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(index, method, clazz);
-  }
-
-  @Override
-  public String toString() {
-    return "Node{"
-        + "index="
-        + index
-        + ", method='"
-        + method
-        + '\''
-        + ", clazz='"
-        + clazz
-        + '\''
-        + ", referred="
-        + referred
-        + ", effect="
-        + effect
-        + '}';
+    List<MethodNode> superMethods = mit.getSuperMethods(fix.method, fix.className, false);
+    if (superMethods.size() != 0) {
+      MethodNode superMethod = superMethods.get(0);
+      if (!thisMethodFlag[index]) {
+        if (superMethod.annotFlags[index]) {
+          effect--;
+        }
+      }
+    }
+    return effect;
   }
 }

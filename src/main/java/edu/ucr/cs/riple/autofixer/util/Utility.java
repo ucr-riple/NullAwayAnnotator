@@ -1,8 +1,8 @@
 package edu.ucr.cs.riple.autofixer.util;
 
 import com.google.common.primitives.Booleans;
-import edu.ucr.cs.riple.autofixer.DiagnoseReport;
-import edu.ucr.cs.riple.autofixer.nullaway.Writer;
+import com.uber.nullaway.autofix.Writer;
+import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.injector.Fix;
 import java.io.BufferedReader;
 import java.io.FileWriter;
@@ -32,10 +32,10 @@ public class Utility {
   }
 
   @SuppressWarnings("ALL")
-  public static void writeReports(List<DiagnoseReport> finishedReports) {
+  public static void writeReports(List<Report> finishedReports) {
     JSONObject result = new JSONObject();
     JSONArray reportsJson = new JSONArray();
-    for (DiagnoseReport report : finishedReports) {
+    for (Report report : finishedReports) {
       JSONObject reportJson = report.fix.getJson();
       reportJson.put("jump", report.effectiveNess);
       reportsJson.add(reportJson);
@@ -58,7 +58,7 @@ public class Utility {
       writer.write(result.toJSONString().replace("\\/", "/").replace("\\\\\\", "\\"));
       writer.flush();
     } catch (IOException e) {
-      throw new RuntimeException("Could not create the diagnose report json file");
+      throw new RuntimeException("Could not create the autoFixer report json file");
     }
   }
 
@@ -89,7 +89,7 @@ public class Utility {
     }
   }
 
-  public static boolean[] convertStringToArray(String content) {
+  public static boolean[] convertStringToBooleanArray(String content) {
     if (content == null) {
       return new boolean[0];
     }

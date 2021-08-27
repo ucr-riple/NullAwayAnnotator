@@ -1,23 +1,27 @@
 package edu.ucr.cs.riple.autofixer.explorers;
 
-import edu.ucr.cs.riple.autofixer.Diagnose;
-import edu.ucr.cs.riple.autofixer.DiagnoseReport;
+import edu.ucr.cs.riple.autofixer.AutoFixer;
+import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
-import edu.ucr.cs.riple.autofixer.metadata.FieldGraph;
 import edu.ucr.cs.riple.injector.Fix;
 
-public class ClassFieldExplorer extends Explorer {
+public class ClassFieldExplorer extends AdvancedExplorer {
 
-  private final FieldGraph fieldGraph;
-
-  public ClassFieldExplorer(Diagnose diagnose, Bank bank) {
-    super(diagnose, bank);
-    this.fieldGraph = diagnose.fieldGraph;
+  public ClassFieldExplorer(AutoFixer autoFixer, Bank bank) {
+    super(autoFixer, bank);
   }
 
   @Override
-  public DiagnoseReport effect(Fix fix) {
-    return effectByScope(fix, fieldGraph.getUserClassOfField(fix.param, fix.className));
+  protected void init() {
+    this.tracker = autoFixer.fieldUsageTracker;
+    System.out.println("Trying to find groups for Class Field fixes");
+    fixGraph.updateUsages(tracker);
+    fixGraph.findGroups();
+  }
+
+  @Override
+  protected Report effectByScope(Fix fix) {
+    return super.effectByScope(fix, tracker.getUsers(fix));
   }
 
   @Override

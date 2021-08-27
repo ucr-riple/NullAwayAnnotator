@@ -1,6 +1,6 @@
 package edu.ucr.cs.riple.autofixer.metadata;
 
-import edu.ucr.cs.riple.autofixer.nullaway.Writer;
+import com.uber.nullaway.autofix.Writer;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -35,7 +35,10 @@ public abstract class AbstractRelation<T> {
       T node = addNodeByLine(line.split(delimiter));
       Integer hash = node.hashCode();
       if (idHash.containsKey(hash)) {
-        idHash.get(hash).add(node);
+        List<T> localList = idHash.get(hash);
+        if (!localList.contains(node)) {
+          localList.add(node);
+        }
       } else {
         List<T> singleHash = new ArrayList<>();
         singleHash.add(node);
@@ -48,7 +51,7 @@ public abstract class AbstractRelation<T> {
 
   protected abstract T addNodeByLine(String[] values);
 
-  interface Comparator<T> {
+  public interface Comparator<T> {
     boolean matches(T candidate);
   }
 

@@ -1,25 +1,27 @@
 package edu.ucr.cs.riple.autofixer.explorers;
 
-import edu.ucr.cs.riple.autofixer.Diagnose;
-import edu.ucr.cs.riple.autofixer.DiagnoseReport;
+import edu.ucr.cs.riple.autofixer.AutoFixer;
+import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
-import edu.ucr.cs.riple.autofixer.metadata.CallGraph;
 import edu.ucr.cs.riple.injector.Fix;
-import java.util.List;
 
-public class MethodReturnExplorer extends Explorer {
+public class MethodReturnExplorer extends AdvancedExplorer {
 
-  CallGraph callGraph;
-
-  public MethodReturnExplorer(Diagnose diagnose, Bank bank) {
-    super(diagnose, bank);
-    callGraph = diagnose.callGraph;
+  public MethodReturnExplorer(AutoFixer autoFixer, Bank bank) {
+    super(autoFixer, bank);
   }
 
   @Override
-  public DiagnoseReport effect(Fix fix) {
-    List<String> users = callGraph.getUserClassesOfMethod(fix.method, fix.className);
-    return effectByScope(fix, users);
+  protected void init() {
+    tracker = autoFixer.callUsageTracker;
+    System.out.println("Trying to find groups for Method Return fixes");
+    fixGraph.updateUsages(tracker);
+    fixGraph.findGroups();
+  }
+
+  @Override
+  protected Report effectByScope(Fix fix) {
+    return super.effectByScope(fix, tracker.getUsers(fix));
   }
 
   @Override

@@ -3,16 +3,16 @@ package edu.ucr.cs.riple.autofixer;
 import static edu.ucr.cs.riple.autofixer.util.Utility.*;
 
 import com.google.common.base.Preconditions;
+import com.uber.nullaway.autofix.AutoFixConfig;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.autofixer.explorers.BasicExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.ClassFieldExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.Explorer;
 import edu.ucr.cs.riple.autofixer.explorers.MethodParamExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.MethodReturnExplorer;
-import edu.ucr.cs.riple.autofixer.metadata.CallGraph;
-import edu.ucr.cs.riple.autofixer.metadata.FieldGraph;
+import edu.ucr.cs.riple.autofixer.metadata.CallUsageTracker;
+import edu.ucr.cs.riple.autofixer.metadata.FieldUsageTracker;
 import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
-import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkList;
@@ -23,29 +23,29 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-public class Diagnose {
+public class AutoFixer {
 
   private String out_dir;
   private String buildCommand;
   private String fixPath;
   private String diagnosePath;
   private Injector injector;
-  private List<DiagnoseReport> finishedReports;
+  private List<Report> finishedReports;
   private List<Explorer> explorers;
 
-  public CallGraph callGraph;
-  public FieldGraph fieldGraph;
+  public CallUsageTracker callUsageTracker;
+  public FieldUsageTracker fieldUsageTracker;
   public MethodInheritanceTree methodInheritanceTree;
 
   public void start(String buildCommand, String out_dir, boolean optimized) {
-    System.out.println("Diagnose Started...");
+    System.out.println("AutoFixer Started...");
     this.out_dir = out_dir;
     init(buildCommand);
-    injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
     System.out.println("Starting preparation");
     prepare(out_dir, optimized);
     List<WorkList> workListLists = new WorkListBuilder(diagnosePath).getWorkLists();
@@ -77,12 +77,13 @@ public class Diagnose {
             .setMakeFieldGraph(true)
             .setOptimized(true)
             .setMethodInheritanceTree(true)
-            .setSuggest(true)
-            .setWorkList(new String[] {"*"});
+            .setSuggest(true, false)
+            .setWorkList(Collections.singleton("*"));
     buildProject(config);
+    this.injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
     this.methodInheritanceTree = new MethodInheritanceTree(out_dir + "/method_info.csv");
-    this.callGraph = new CallGraph(out_dir + "/call_graph.csv");
-    this.fieldGraph = new FieldGraph(out_dir + "/field_graph.csv");
+    this.callUsageTracker = new CallUsageTracker(out_dir + "/call_graph.csv");
+    this.fieldUsageTracker = new FieldUsageTracker(out_dir + "/field_graph.csv");
     this.explorers = new ArrayList<>();
     Bank bank = new Bank();
     explorers.add(new MethodParamExplorer(this, bank));
@@ -91,36 +92,47 @@ public class Diagnose {
     explorers.add(new BasicExplorer(this, bank));
   }
 
-  private void remove(List<Fix> fixes) {
-    if (fixes.size() == 0) {
+  public void remove(List<Fix> fixes) {
+    if (fixes == null || fixes.size() == 0) {
       return;
     }
-    List<Fix> toRemove = new ArrayList<>();
-    for (Fix fix : fixes) {
-      Fix removeFix =
-          new Fix(
-              fix.annotation, fix.method, fix.param, fix.location, fix.className, fix.uri, "false");
-      toRemove.add(removeFix);
-    }
-    injector.start(Collections.singletonList(new WorkList(toRemove)), false);
+    List<Fix> toRemove =
+        fixes
+            .stream()
+            .map(
+                fix ->
+                    new Fix(
+                        fix.annotation,
+                        fix.method,
+                        fix.param,
+                        fix.location,
+                        fix.className,
+                        fix.uri,
+                        "false"))
+            .collect(Collectors.toList());
+    apply(toRemove);
+  }
+
+  public void apply(List<Fix> fixes) {
+    injector.start(new WorkListBuilder(fixes).getWorkLists(), true);
   }
 
   private List<Fix> analyze(Fix fix) {
     System.out.println("Fix Type: " + fix.location);
     List<Fix> suggestedFix = new ArrayList<>();
-    DiagnoseReport diagnoseReport = null;
+    Report report = null;
     for (Explorer explorer : explorers) {
       if (explorer.isApplicable(fix)) {
         if (explorer.requiresInjection(fix)) {
           suggestedFix.add(fix);
-          injector.start(Collections.singletonList(new WorkList(suggestedFix)), true);
+          apply(suggestedFix);
         }
-        diagnoseReport = explorer.effect(fix);
+        report = explorer.effect(fix);
         break;
       }
     }
-    Preconditions.checkNotNull(diagnoseReport);
-    finishedReports.add(diagnoseReport);
+    Preconditions.checkNotNull(report);
+    finishedReports.add(report);
     return suggestedFix;
   }
 
@@ -135,8 +147,8 @@ public class Diagnose {
               .setMakeFieldGraph(false)
               .setOptimized(false)
               .setMethodInheritanceTree(false)
-              .setSuggest(true)
-              .setWorkList(new String[] {"*"});
+              .setSuggest(true, false)
+              .setWorkList(Collections.singleton("*"));
       buildProject(config);
       if (!new File(fixPath).exists()) {
         JSONObject toDiagnose = new JSONObject();
