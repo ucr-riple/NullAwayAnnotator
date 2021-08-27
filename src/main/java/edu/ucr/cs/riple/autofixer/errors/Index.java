@@ -1,6 +1,6 @@
 package edu.ucr.cs.riple.autofixer.errors;
 
-import com.uber.nullaway.autofix.Writer;
+import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -18,7 +18,7 @@ public class Index {
 
   public enum Type {
     BY_METHOD,
-    BY_CLASS;
+    BY_CLASS
   }
 
   Type type;

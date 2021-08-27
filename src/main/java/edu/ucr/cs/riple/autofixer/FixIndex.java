@@ -1,6 +1,6 @@
 package edu.ucr.cs.riple.autofixer;
 
-import com.uber.nullaway.autofix.Writer;
+import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import edu.ucr.cs.riple.injector.Fix;
 import java.io.BufferedReader;
 import java.io.FileReader;

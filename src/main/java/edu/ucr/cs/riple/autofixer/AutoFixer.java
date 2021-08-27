@@ -3,7 +3,6 @@ package edu.ucr.cs.riple.autofixer;
 import static edu.ucr.cs.riple.autofixer.util.Utility.*;
 
 import com.google.common.base.Preconditions;
-import com.uber.nullaway.autofix.AutoFixConfig;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.autofixer.explorers.BasicExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.ClassFieldExplorer;
@@ -14,6 +13,7 @@ import edu.ucr.cs.riple.autofixer.explorers.MethodReturnExplorer;
 import edu.ucr.cs.riple.autofixer.metadata.CallUsageTracker;
 import edu.ucr.cs.riple.autofixer.metadata.FieldUsageTracker;
 import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
+import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkList;

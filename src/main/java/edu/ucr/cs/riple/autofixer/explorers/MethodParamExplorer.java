@@ -1,6 +1,5 @@
 package edu.ucr.cs.riple.autofixer.explorers;
 
-import com.uber.nullaway.autofix.AutoFixConfig;
 import edu.ucr.cs.riple.autofixer.AutoFixer;
 import edu.ucr.cs.riple.autofixer.FixIndex;
 import edu.ucr.cs.riple.autofixer.FixType;
@@ -9,6 +8,7 @@ import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
 import edu.ucr.cs.riple.autofixer.metadata.MethodNode;
 import edu.ucr.cs.riple.autofixer.metadata.graph.Node;
+import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.ArrayList;
 import java.util.List;
