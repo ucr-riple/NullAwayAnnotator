@@ -140,4 +140,15 @@ public class FixGraph<T extends AbstractNode> {
   public HashMap<Integer, Set<T>> getGroups() {
     return groups;
   }
+
+  public List<T> getAllNodes() {
+    List<T> ans = new ArrayList<>();
+    nodes.values().forEach(ans::addAll);
+    return ans;
+  }
+
+  public void clear() {
+    nodes.clear();
+    groups.clear();
+  }
 }

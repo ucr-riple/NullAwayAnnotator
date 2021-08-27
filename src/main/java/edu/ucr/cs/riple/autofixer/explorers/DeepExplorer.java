@@ -12,6 +12,7 @@ import edu.ucr.cs.riple.autofixer.metadata.graph.Node;
 import edu.ucr.cs.riple.autofixer.metadata.graph.SuperNode;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -21,7 +22,6 @@ public class DeepExplorer extends BasicExplorer {
 
   private final CompoundTracker tracker;
   private final FixGraph<SuperNode> fixGraph;
-  private Set<Report> reports;
 
   public DeepExplorer(AutoFixer autoFixer, Bank bank, FixIndex fixIndex) {
     super(autoFixer, bank, fixIndex);
@@ -29,8 +29,11 @@ public class DeepExplorer extends BasicExplorer {
     this.fixGraph = new FixGraph<>(SuperNode::new);
   }
 
-  private void init() {
-    this.reports.forEach(
+  private void init(List<Report> reports) {
+    fixGraph.clear();
+    Set<Report> filteredReports =
+        reports.stream().filter(report -> report.effectiveNess > 0).collect(Collectors.toSet());
+    filteredReports.forEach(
         report -> {
           Fix fix = report.fix;
           SuperNode node = fixGraph.findOrCreate(fix);
@@ -45,14 +48,19 @@ public class DeepExplorer extends BasicExplorer {
     if (AutoFixer.DEPTH == 0) {
       return;
     }
-    this.reports =
-        reports.stream().filter(report -> report.effectiveNess > 0).collect(Collectors.toSet());
-    init();
-    int currentDepth = 0;
-    while (fixGraph.nodes.size() > 0 && currentDepth < AutoFixer.DEPTH) {
+    System.out.println("Analysing for " + AutoFixer.DEPTH + " number of levels");
+    for (int i = 0; i < AutoFixer.DEPTH; i++) {
+      System.out.println("Analyzing at level " + i);
+      init(reports);
       explore();
-      currentDepth++;
-
+      List<SuperNode> nodes = fixGraph.getAllNodes();
+      nodes.forEach(
+          superNode -> {
+            Report report = superNode.report;
+            report.effectiveNess = superNode.followUps.stream().mapToInt(node -> node.effect).sum();
+            report.chain =
+                superNode.followUps.stream().map(node -> node.fix).collect(Collectors.toSet());
+          });
     }
   }
 
@@ -67,9 +75,12 @@ public class DeepExplorer extends BasicExplorer {
       group.forEach(SuperNode::mergeTriggered);
       group.forEach(e -> fixes.addAll(e.getFixChain()));
       autoFixer.apply(fixes);
-      bank.saveState(true, true);
+      bank.saveState(false, true);
       AutoFixConfig.AutoFixConfigWriter config =
-          new AutoFixConfig.AutoFixConfigWriter().setLogError(true, true).setSuggest(true, true);
+          new AutoFixConfig.AutoFixConfigWriter()
+              .setLogError(true, true)
+              .setSuggest(true, true)
+              .setWorkList(Collections.singleton("*"));
       autoFixer.buildProject(config);
       fixIndex.index();
       group.forEach(

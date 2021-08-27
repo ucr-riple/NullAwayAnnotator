@@ -65,7 +65,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
               .setSuggest(true, AutoFixer.DEPTH > 0)
               .setWorkList(Collections.singleton("*"));
       autoFixer.buildProject(writer);
-      bank.saveState(true, true);
+      bank.saveState(false, true);
       fixIndex.index();
       for (Node node : nodes) {
         int totalEffect = 0;

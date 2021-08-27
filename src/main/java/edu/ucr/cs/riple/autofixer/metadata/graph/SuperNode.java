@@ -6,7 +6,6 @@ import edu.ucr.cs.riple.injector.Fix;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class SuperNode extends AbstractNode {
