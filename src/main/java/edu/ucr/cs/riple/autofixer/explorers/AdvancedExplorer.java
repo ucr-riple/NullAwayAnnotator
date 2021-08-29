@@ -1,12 +1,12 @@
 package edu.ucr.cs.riple.autofixer.explorers;
 
-import com.uber.nullaway.autofix.AutoFixConfig;
-import com.uber.nullaway.autofix.Writer;
 import edu.ucr.cs.riple.autofixer.AutoFixer;
 import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.autofixer.metadata.FixGraph;
 import edu.ucr.cs.riple.autofixer.metadata.UsageTracker;
+import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
+import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import edu.ucr.cs.riple.injector.Fix;
 import java.io.BufferedReader;
 import java.io.FileReader;
