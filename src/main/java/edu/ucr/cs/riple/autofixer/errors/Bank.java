@@ -1,7 +1,7 @@
 package edu.ucr.cs.riple.autofixer.errors;
 
 import com.google.common.base.Preconditions;
-import com.uber.nullaway.autofix.Writer;
+import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
