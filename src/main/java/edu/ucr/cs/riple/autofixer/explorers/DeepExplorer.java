@@ -30,7 +30,7 @@ public class DeepExplorer extends BasicExplorer {
   }
 
   private void init(List<Report> reports) {
-    fixGraph.clear();
+    this.fixGraph.clear();
     Set<Report> filteredReports =
         reports.stream().filter(report -> report.effectiveNess > 0).collect(Collectors.toSet());
     filteredReports.forEach(

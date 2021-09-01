@@ -20,6 +20,7 @@ public class FixGraph<T extends AbstractNode> {
 
   public FixGraph(Factory<T> factory) {
     nodes = new HashMap<>();
+    groups = new HashMap<>();
     this.factory = factory;
   }
 
@@ -83,7 +84,7 @@ public class FixGraph<T extends AbstractNode> {
 
   @SuppressWarnings("All")
   public void findGroups() {
-    groups = new HashMap<>();
+    this.groups.clear();
     List<T> allNodes = new ArrayList<>();
     for (Set<T> nodesSet : nodes.values()) {
       allNodes.addAll(nodesSet);
