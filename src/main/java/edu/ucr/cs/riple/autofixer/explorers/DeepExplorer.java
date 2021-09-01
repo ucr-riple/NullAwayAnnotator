@@ -33,6 +33,7 @@ public class DeepExplorer extends BasicExplorer {
     this.fixGraph.clear();
     Set<Report> filteredReports =
         reports.stream().filter(report -> report.effectiveNess > 0).collect(Collectors.toSet());
+    System.out.println("Number of unfinished reports with effectiveness greater than zero: " +filteredReports.size());
     filteredReports.forEach(
         report -> {
           Fix fix = report.fix;
