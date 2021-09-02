@@ -25,15 +25,16 @@ public class Main {
     AutoFixer autoFixer = new AutoFixer();
     System.out.println("Number of received arguments: " + args.length);
     System.out.println("Actual Arguments: " + Arrays.toString(args));
-    if (!(args.length == 4 || args.length == 5)) {
+    if (!(args.length == 5 || args.length == 6)) {
       throw new RuntimeException(
-          "AutoFixer needs two/three arguments: 1. command to execute NullAway, "
-              + "2. output directory, 3. optimized [optional]");
+          "AutoFixer needs 5/6 arguments: 1. command to execute NullAway, "
+              + "2. output directory, 3. AutoFixer Depth level, 4. Nullable Annotation, 5. optimized [optional]");
     }
-    boolean optimized = args.length == 5 && Boolean.getBoolean(args[4]);
+    boolean optimized = args.length == 6 && Boolean.getBoolean(args[5]);
     String dir = args[1];
     String runCommand = args[2];
     AutoFixer.DEPTH = Integer.parseInt(args[3]);
+    AutoFixer.NULLABLE_ANNOT = args[4];
     autoFixer.start(runCommand, dir, optimized);
   }
 

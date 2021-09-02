@@ -63,6 +63,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
           new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, true)
               .setSuggest(true, AutoFixer.DEPTH > 0)
+              .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
               .setWorkList(Collections.singleton("*"));
       autoFixer.buildProject(writer);
       bank.saveState(false, true);

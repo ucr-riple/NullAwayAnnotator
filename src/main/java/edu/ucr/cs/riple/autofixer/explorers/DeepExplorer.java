@@ -87,6 +87,7 @@ public class DeepExplorer extends BasicExplorer {
           new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, true)
               .setSuggest(true, true)
+              .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
               .setWorkList(Collections.singleton("*"));
       autoFixer.buildProject(config);
       bank.saveState(false, true);

@@ -53,6 +53,7 @@ public class MethodParamExplorer extends AdvancedExplorer {
           new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, true)
               .setSuggest(true, false)
+              .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
               .setMethodParamTest(true, (long) i);
       autoFixer.buildProject(config);
       bank.saveState(false, true);

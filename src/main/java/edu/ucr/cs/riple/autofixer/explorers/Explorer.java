@@ -33,6 +33,7 @@ public abstract class Explorer {
             .setOptimized(false)
             .setMethodInheritanceTree(false)
             .setSuggest(true, false)
+            .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
             .setWorkList(Collections.singleton("*"));
     autoFixer.buildProject(config);
     if (new File(Writer.ERROR).exists()) {
@@ -54,6 +55,7 @@ public abstract class Explorer {
             .setOptimized(false)
             .setMethodInheritanceTree(false)
             .setSuggest(true, false)
+            .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
             .setWorkList(workSet);
     autoFixer.buildProject(config);
     if (new File(Writer.ERROR).exists()) {

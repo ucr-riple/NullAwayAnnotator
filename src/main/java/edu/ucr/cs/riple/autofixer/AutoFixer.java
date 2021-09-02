@@ -32,6 +32,9 @@ import org.json.simple.parser.JSONParser;
 
 public class AutoFixer {
 
+  public static String NULLABLE_ANNOT;
+  public static int DEPTH;
+
   private String out_dir;
   private String buildCommand;
   private String fixPath;
@@ -44,7 +47,6 @@ public class AutoFixer {
   public CallUsageTracker callUsageTracker;
   public FieldUsageTracker fieldUsageTracker;
   public MethodInheritanceTree methodInheritanceTree;
-  public static int DEPTH;
 
   private void init(String buildCommand) {
     this.buildCommand = buildCommand;
@@ -59,6 +61,7 @@ public class AutoFixer {
             .setOptimized(true)
             .setMethodInheritanceTree(true)
             .setSuggest(true, false)
+            .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
             .setWorkList(Collections.singleton("*"));
     buildProject(config);
     this.injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
@@ -158,6 +161,7 @@ public class AutoFixer {
               .setOptimized(false)
               .setMethodInheritanceTree(false)
               .setSuggest(true, false)
+              .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
               .setWorkList(Collections.singleton("*"));
       buildProject(config);
       if (!new File(fixPath).exists()) {
