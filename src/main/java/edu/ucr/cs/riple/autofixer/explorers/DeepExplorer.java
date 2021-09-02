@@ -33,7 +33,9 @@ public class DeepExplorer extends BasicExplorer {
     this.fixGraph.clear();
     Set<Report> filteredReports =
         reports.stream().filter(report -> report.effectiveNess > 0).collect(Collectors.toSet());
-    System.out.println("Number of unfinished reports with effectiveness greater than zero: " +filteredReports.size());
+    System.out.println(
+        "Number of unfinished reports with effectiveness greater than zero: "
+            + filteredReports.size());
     filteredReports.forEach(
         report -> {
           Fix fix = report.fix;
@@ -49,7 +51,8 @@ public class DeepExplorer extends BasicExplorer {
     if (AutoFixer.DEPTH == 0) {
       return;
     }
-    System.out.println("Analysing for " + AutoFixer.DEPTH + " number of levels");
+    System.out.println(
+        "Deep explorer is active...\nAnalysing for " + AutoFixer.DEPTH + " number of levels");
     for (int i = 0; i < AutoFixer.DEPTH; i++) {
       System.out.println("Analyzing at level " + i);
       init(reports);
@@ -62,10 +65,14 @@ public class DeepExplorer extends BasicExplorer {
             report.chain =
                 superNode.followUps.stream().map(node -> node.fix).collect(Collectors.toSet());
           });
+      System.out.println(reports.size());
     }
   }
 
   private void explore() {
+    if (fixGraph.nodes.size() == 0) {
+      return;
+    }
     fixGraph.findGroups();
     HashMap<Integer, Set<SuperNode>> groups = fixGraph.getGroups();
     System.out.println("Building for: " + groups.size() + " number of times");
@@ -76,13 +83,13 @@ public class DeepExplorer extends BasicExplorer {
       group.forEach(SuperNode::mergeTriggered);
       group.forEach(e -> fixes.addAll(e.getFixChain()));
       autoFixer.apply(fixes);
-      bank.saveState(false, true);
       AutoFixConfig.AutoFixConfigWriter config =
           new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, true)
               .setSuggest(true, true)
               .setWorkList(Collections.singleton("*"));
       autoFixer.buildProject(config);
+      bank.saveState(false, true);
       fixIndex.index();
       group.forEach(
           superNode -> {

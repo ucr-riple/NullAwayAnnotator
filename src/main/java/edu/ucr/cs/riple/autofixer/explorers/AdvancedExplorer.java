@@ -56,7 +56,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
     System.out.println("Building for: " + groups.size() + " number of times");
     int i = 1;
     for (Set<Node> nodes : groups.values()) {
-      System.out.println("Building: (Iteration " + i++ + " out of: " + groups.size() + ")");
+      System.out.println("Building: (Iteration " + i++ + " out of " + groups.size() + ")");
       List<Fix> fixes = nodes.stream().map(node -> node.fix).collect(Collectors.toList());
       autoFixer.apply(fixes);
       AutoFixConfig.AutoFixConfigWriter writer =
