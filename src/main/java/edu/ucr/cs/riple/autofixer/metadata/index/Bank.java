@@ -1,4 +1,4 @@
-package edu.ucr.cs.riple.autofixer.index;
+package edu.ucr.cs.riple.autofixer.metadata.index;
 
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.autofixer.nullaway.Writer;

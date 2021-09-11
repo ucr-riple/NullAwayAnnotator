@@ -1,4 +1,4 @@
-package edu.ucr.cs.riple.autofixer.index;
+package edu.ucr.cs.riple.autofixer.metadata.index;
 
 import edu.ucr.cs.riple.injector.Fix;
 
