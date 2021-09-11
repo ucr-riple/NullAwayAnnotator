@@ -20,8 +20,8 @@ public class MethodParamExplorer extends AdvancedExplorer {
 
   private MethodInheritanceTree mit;
 
-  public MethodParamExplorer(AutoFixer autoFixer, Bank<Error> bank, Bank<FixEntity> fixIndex) {
-    super(autoFixer, bank, fixIndex, FixType.METHOD_PARAM);
+  public MethodParamExplorer(AutoFixer autoFixer, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
+    super(autoFixer, errorBank, fixBank, FixType.METHOD_PARAM);
   }
 
   @Override
@@ -57,10 +57,10 @@ public class MethodParamExplorer extends AdvancedExplorer {
               .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
               .setMethodParamTest(true, (long) i);
       autoFixer.buildProject(config);
-      bank.saveState(false, true);
+      errorBank.saveState(false, true);
       //      fixIndex.index();
       for (Node node : subList) {
-        int localEffect = bank.compareByMethod(node.fix.className, node.fix.method, false);
+        int localEffect = errorBank.compareByMethod(node.fix.className, node.fix.method, false);
         node.effect = localEffect + calculateInheritanceViolationError(node, i);
         if (AutoFixer.DEPTH > 0) {
           //          node.updateTriggered(fixIndex.getByMethod(node.fix.className,

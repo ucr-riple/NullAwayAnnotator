@@ -10,8 +10,8 @@ import edu.ucr.cs.riple.injector.Fix;
 
 public class ClassFieldExplorer extends AdvancedExplorer {
 
-  public ClassFieldExplorer(AutoFixer autoFixer, Bank<Error> bank, Bank<FixEntity> fixIndex) {
-    super(autoFixer, bank, fixIndex, FixType.CLASS_FIELD);
+  public ClassFieldExplorer(AutoFixer autoFixer, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
+    super(autoFixer, errorBank, fixBank, FixType.CLASS_FIELD);
   }
 
   @Override

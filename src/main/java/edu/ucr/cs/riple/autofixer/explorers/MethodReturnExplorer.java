@@ -10,8 +10,8 @@ import edu.ucr.cs.riple.injector.Fix;
 
 public class MethodReturnExplorer extends AdvancedExplorer {
 
-  public MethodReturnExplorer(AutoFixer autoFixer, Bank<Error> bank, Bank<FixEntity> fixIndex) {
-    super(autoFixer, bank, fixIndex, FixType.METHOD_RETURN);
+  public MethodReturnExplorer(AutoFixer autoFixer, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
+    super(autoFixer, errorBank, fixBank, FixType.METHOD_RETURN);
   }
 
   @Override

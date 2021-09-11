@@ -28,8 +28,8 @@ public abstract class AdvancedExplorer extends BasicExplorer {
   protected final FixType fixType;
 
   public AdvancedExplorer(
-      AutoFixer autoFixer, Bank<Error> bank, Bank<FixEntity> fixIndex, FixType fixType) {
-    super(autoFixer, bank, fixIndex);
+      AutoFixer autoFixer, Bank<Error> errorBank, Bank<FixEntity> fixBank, FixType fixType) {
+    super(autoFixer, errorBank, fixBank);
     this.fixType = fixType;
     fixGraph = new FixGraph<>(Node::new);
     try {
@@ -68,12 +68,12 @@ public abstract class AdvancedExplorer extends BasicExplorer {
               .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
               .setWorkList(Collections.singleton("*"));
       autoFixer.buildProject(writer);
-      bank.saveState(false, true);
+      errorBank.saveState(false, true);
       //      fixIndex.index();
       for (Node node : nodes) {
         int totalEffect = 0;
         for (UsageTracker.Usage usage : node.usages) {
-          totalEffect += bank.compareByMethod(usage.clazz, usage.method, false);
+          totalEffect += errorBank.compareByMethod(usage.clazz, usage.method, false);
           if (AutoFixer.DEPTH > 0) {
             //            node.updateTriggered(fixIndex.getByMethod(usage.clazz, usage.method));
           }

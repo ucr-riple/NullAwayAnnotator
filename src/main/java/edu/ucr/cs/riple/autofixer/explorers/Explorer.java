@@ -16,13 +16,13 @@ import java.util.Set;
 public abstract class Explorer {
 
   protected final AutoFixer autoFixer;
-  protected final Bank<Error> bank;
-  protected final Bank<FixEntity> fixIndex;
+  protected final Bank<Error> errorBank;
+  protected final Bank<FixEntity> fixBank;
 
-  public Explorer(AutoFixer autoFixer, Bank<Error> bank, Bank<FixEntity> fixIndex) {
+  public Explorer(AutoFixer autoFixer, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
     this.autoFixer = autoFixer;
-    this.bank = bank;
-    this.fixIndex = fixIndex;
+    this.errorBank = errorBank;
+    this.fixBank = fixBank;
   }
 
   public Report effect(Fix fix) {
@@ -38,7 +38,7 @@ public abstract class Explorer {
             .setWorkList(Collections.singleton("*"));
     autoFixer.buildProject(config);
     if (new File(Writer.ERROR).exists()) {
-      return new Report(fix, bank.compare());
+      return new Report(fix, errorBank.compare());
     }
     return Report.empty(fix);
   }
@@ -61,12 +61,12 @@ public abstract class Explorer {
     autoFixer.buildProject(config);
     if (new File(Writer.ERROR).exists()) {
       int totalEffect = 0;
-      totalEffect += bank.compareByClass(fix.className, true);
+      totalEffect += errorBank.compareByClass(fix.className, true);
       for (String clazz : workSet) {
         if (clazz.equals(fix.className)) {
           continue;
         }
-        totalEffect += bank.compareByClass(clazz, false);
+        totalEffect += errorBank.compareByClass(clazz, false);
       }
       return new Report(fix, totalEffect);
     }

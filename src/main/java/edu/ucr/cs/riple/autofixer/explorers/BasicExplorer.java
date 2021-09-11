@@ -8,8 +8,8 @@ import edu.ucr.cs.riple.injector.Fix;
 
 public class BasicExplorer extends Explorer {
 
-  public BasicExplorer(AutoFixer autoFixer, Bank<Error> bank, Bank<FixEntity> fixIndex) {
-    super(autoFixer, bank, fixIndex);
+  public BasicExplorer(AutoFixer autoFixer, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
+    super(autoFixer, errorBank, fixBank);
   }
 
   @Override

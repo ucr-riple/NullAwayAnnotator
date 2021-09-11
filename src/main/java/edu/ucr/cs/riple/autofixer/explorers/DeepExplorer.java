@@ -24,8 +24,8 @@ public class DeepExplorer extends BasicExplorer {
   private final CompoundTracker tracker;
   private final FixGraph<SuperNode> fixGraph;
 
-  public DeepExplorer(AutoFixer autoFixer, Bank<Error> bank, Bank<FixEntity> fixIndex) {
-    super(autoFixer, bank, fixIndex);
+  public DeepExplorer(AutoFixer autoFixer, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
+    super(autoFixer, errorBank, fixBank);
     this.tracker = new CompoundTracker(autoFixer.fieldUsageTracker, autoFixer.callUsageTracker);
     this.fixGraph = new FixGraph<>(SuperNode::new);
   }
@@ -91,14 +91,14 @@ public class DeepExplorer extends BasicExplorer {
               .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
               .setWorkList(Collections.singleton("*"));
       autoFixer.buildProject(config);
-      bank.saveState(false, true);
+      errorBank.saveState(false, true);
       //      fixIndex.index();
       group.forEach(
           superNode -> {
             for (Node node : superNode.followUps) {
               int totalEffect = 0;
               for (UsageTracker.Usage usage : node.usages) {
-                totalEffect += bank.compareByMethod(usage.clazz, usage.method, false);
+                totalEffect += errorBank.compareByMethod(usage.clazz, usage.method, false);
                 //                node.updateTriggered(fixIndex.getByMethod(usage.clazz,
                 // usage.method));
               }
