@@ -1,10 +1,11 @@
 package edu.ucr.cs.riple.autofixer.explorers;
 
 import edu.ucr.cs.riple.autofixer.AutoFixer;
-import edu.ucr.cs.riple.autofixer.FixIndex;
 import edu.ucr.cs.riple.autofixer.FixType;
 import edu.ucr.cs.riple.autofixer.Report;
-import edu.ucr.cs.riple.autofixer.errors.Bank;
+import edu.ucr.cs.riple.autofixer.index.Bank;
+import edu.ucr.cs.riple.autofixer.index.Error;
+import edu.ucr.cs.riple.autofixer.index.FixEntity;
 import edu.ucr.cs.riple.autofixer.metadata.UsageTracker;
 import edu.ucr.cs.riple.autofixer.metadata.graph.FixGraph;
 import edu.ucr.cs.riple.autofixer.metadata.graph.Node;
@@ -26,7 +27,8 @@ public abstract class AdvancedExplorer extends BasicExplorer {
   protected UsageTracker tracker;
   protected final FixType fixType;
 
-  public AdvancedExplorer(AutoFixer autoFixer, Bank bank, FixIndex fixIndex, FixType fixType) {
+  public AdvancedExplorer(
+      AutoFixer autoFixer, Bank<Error> bank, Bank<FixEntity> fixIndex, FixType fixType) {
     super(autoFixer, bank, fixIndex);
     this.fixType = fixType;
     fixGraph = new FixGraph<>(Node::new);
@@ -67,13 +69,13 @@ public abstract class AdvancedExplorer extends BasicExplorer {
               .setWorkList(Collections.singleton("*"));
       autoFixer.buildProject(writer);
       bank.saveState(false, true);
-      fixIndex.index();
+      //      fixIndex.index();
       for (Node node : nodes) {
         int totalEffect = 0;
         for (UsageTracker.Usage usage : node.usages) {
           totalEffect += bank.compareByMethod(usage.clazz, usage.method, false);
           if (AutoFixer.DEPTH > 0) {
-            node.updateTriggered(fixIndex.getByMethod(usage.clazz, usage.method));
+            //            node.updateTriggered(fixIndex.getByMethod(usage.clazz, usage.method));
           }
         }
         node.effect = totalEffect;

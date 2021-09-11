@@ -1,10 +1,12 @@
-package edu.ucr.cs.riple.autofixer.errors;
+package edu.ucr.cs.riple.autofixer.index;
 
-public class Error {
+public class Error extends Hashable {
   public final String messageType;
   public final String message;
-  public final String clazz;
-  public final String method;
+
+  public Error(String[] infos) {
+    this(infos[0], infos[1], infos[2], infos[3]);
+  }
 
   public Error(String messageType, String message, String clazz, String method) {
     this.messageType = messageType;

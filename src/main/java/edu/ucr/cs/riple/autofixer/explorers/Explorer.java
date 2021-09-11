@@ -1,9 +1,10 @@
 package edu.ucr.cs.riple.autofixer.explorers;
 
 import edu.ucr.cs.riple.autofixer.AutoFixer;
-import edu.ucr.cs.riple.autofixer.FixIndex;
 import edu.ucr.cs.riple.autofixer.Report;
-import edu.ucr.cs.riple.autofixer.errors.Bank;
+import edu.ucr.cs.riple.autofixer.index.Bank;
+import edu.ucr.cs.riple.autofixer.index.Error;
+import edu.ucr.cs.riple.autofixer.index.FixEntity;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import edu.ucr.cs.riple.injector.Fix;
@@ -15,10 +16,10 @@ import java.util.Set;
 public abstract class Explorer {
 
   protected final AutoFixer autoFixer;
-  protected final Bank bank;
-  protected final FixIndex fixIndex;
+  protected final Bank<Error> bank;
+  protected final Bank<FixEntity> fixIndex;
 
-  public Explorer(AutoFixer autoFixer, Bank bank, FixIndex fixIndex) {
+  public Explorer(AutoFixer autoFixer, Bank<Error> bank, Bank<FixEntity> fixIndex) {
     this.autoFixer = autoFixer;
     this.bank = bank;
     this.fixIndex = fixIndex;

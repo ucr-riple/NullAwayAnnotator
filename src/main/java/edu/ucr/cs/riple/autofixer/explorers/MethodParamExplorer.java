@@ -1,10 +1,11 @@
 package edu.ucr.cs.riple.autofixer.explorers;
 
 import edu.ucr.cs.riple.autofixer.AutoFixer;
-import edu.ucr.cs.riple.autofixer.FixIndex;
 import edu.ucr.cs.riple.autofixer.FixType;
 import edu.ucr.cs.riple.autofixer.Report;
-import edu.ucr.cs.riple.autofixer.errors.Bank;
+import edu.ucr.cs.riple.autofixer.index.Bank;
+import edu.ucr.cs.riple.autofixer.index.Error;
+import edu.ucr.cs.riple.autofixer.index.FixEntity;
 import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
 import edu.ucr.cs.riple.autofixer.metadata.MethodNode;
 import edu.ucr.cs.riple.autofixer.metadata.graph.Node;
@@ -19,7 +20,7 @@ public class MethodParamExplorer extends AdvancedExplorer {
 
   private MethodInheritanceTree mit;
 
-  public MethodParamExplorer(AutoFixer autoFixer, Bank bank, FixIndex fixIndex) {
+  public MethodParamExplorer(AutoFixer autoFixer, Bank<Error> bank, Bank<FixEntity> fixIndex) {
     super(autoFixer, bank, fixIndex, FixType.METHOD_PARAM);
   }
 
@@ -57,12 +58,13 @@ public class MethodParamExplorer extends AdvancedExplorer {
               .setMethodParamTest(true, (long) i);
       autoFixer.buildProject(config);
       bank.saveState(false, true);
-      fixIndex.index();
+      //      fixIndex.index();
       for (Node node : subList) {
         int localEffect = bank.compareByMethod(node.fix.className, node.fix.method, false);
         node.effect = localEffect + calculateInheritanceViolationError(node, i);
         if (AutoFixer.DEPTH > 0) {
-          node.updateTriggered(fixIndex.getByMethod(node.fix.className, node.fix.method));
+          //          node.updateTriggered(fixIndex.getByMethod(node.fix.className,
+          // node.fix.method));
         }
       }
     }

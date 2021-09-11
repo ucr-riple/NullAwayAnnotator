@@ -1,15 +1,16 @@
 package edu.ucr.cs.riple.autofixer.explorers;
 
 import edu.ucr.cs.riple.autofixer.AutoFixer;
-import edu.ucr.cs.riple.autofixer.FixIndex;
 import edu.ucr.cs.riple.autofixer.FixType;
 import edu.ucr.cs.riple.autofixer.Report;
-import edu.ucr.cs.riple.autofixer.errors.Bank;
+import edu.ucr.cs.riple.autofixer.index.Bank;
+import edu.ucr.cs.riple.autofixer.index.Error;
+import edu.ucr.cs.riple.autofixer.index.FixEntity;
 import edu.ucr.cs.riple.injector.Fix;
 
 public class MethodReturnExplorer extends AdvancedExplorer {
 
-  public MethodReturnExplorer(AutoFixer autoFixer, Bank bank, FixIndex fixIndex) {
+  public MethodReturnExplorer(AutoFixer autoFixer, Bank<Error> bank, Bank<FixEntity> fixIndex) {
     super(autoFixer, bank, fixIndex, FixType.METHOD_RETURN);
   }
 

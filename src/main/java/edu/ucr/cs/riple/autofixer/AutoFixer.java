@@ -3,13 +3,15 @@ package edu.ucr.cs.riple.autofixer;
 import static edu.ucr.cs.riple.autofixer.util.Utility.*;
 
 import com.google.common.base.Preconditions;
-import edu.ucr.cs.riple.autofixer.errors.Bank;
 import edu.ucr.cs.riple.autofixer.explorers.BasicExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.ClassFieldExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.DeepExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.Explorer;
 import edu.ucr.cs.riple.autofixer.explorers.MethodParamExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.MethodReturnExplorer;
+import edu.ucr.cs.riple.autofixer.index.Bank;
+import edu.ucr.cs.riple.autofixer.index.Error;
+import edu.ucr.cs.riple.autofixer.index.FixEntity;
 import edu.ucr.cs.riple.autofixer.metadata.CallUsageTracker;
 import edu.ucr.cs.riple.autofixer.metadata.FieldUsageTracker;
 import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
@@ -69,13 +71,13 @@ public class AutoFixer {
     this.callUsageTracker = new CallUsageTracker(Writer.CALL_GRAPH);
     this.fieldUsageTracker = new FieldUsageTracker(Writer.FIELD_GRAPH);
     this.explorers = new ArrayList<>();
-    Bank bank = new Bank();
-    FixIndex fixIndex = new FixIndex();
-    this.deepExplorer = new DeepExplorer(this, bank, fixIndex);
-    explorers.add(new MethodParamExplorer(this, bank, fixIndex));
-    explorers.add(new ClassFieldExplorer(this, bank, fixIndex));
-    explorers.add(new MethodReturnExplorer(this, bank, fixIndex));
-    explorers.add(new BasicExplorer(this, bank, fixIndex));
+    Bank<Error> errorBank = new Bank<>(Writer.ERROR, Error::new);
+    Bank<FixEntity> fixIndex = new Bank<>(Writer.SUGGEST_FIX, FixEntity::new);
+    this.deepExplorer = new DeepExplorer(this, errorBank, fixIndex);
+    explorers.add(new MethodParamExplorer(this, errorBank, fixIndex));
+    explorers.add(new ClassFieldExplorer(this, errorBank, fixIndex));
+    explorers.add(new MethodReturnExplorer(this, errorBank, fixIndex));
+    explorers.add(new BasicExplorer(this, errorBank, fixIndex));
   }
 
   public void start(String buildCommand, String out_dir, boolean optimized) {

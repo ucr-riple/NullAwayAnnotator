@@ -1,9 +1,10 @@
 package edu.ucr.cs.riple.autofixer.explorers;
 
 import edu.ucr.cs.riple.autofixer.AutoFixer;
-import edu.ucr.cs.riple.autofixer.FixIndex;
 import edu.ucr.cs.riple.autofixer.Report;
-import edu.ucr.cs.riple.autofixer.errors.Bank;
+import edu.ucr.cs.riple.autofixer.index.Bank;
+import edu.ucr.cs.riple.autofixer.index.Error;
+import edu.ucr.cs.riple.autofixer.index.FixEntity;
 import edu.ucr.cs.riple.autofixer.metadata.CompoundTracker;
 import edu.ucr.cs.riple.autofixer.metadata.UsageTracker;
 import edu.ucr.cs.riple.autofixer.metadata.graph.FixGraph;
@@ -23,7 +24,7 @@ public class DeepExplorer extends BasicExplorer {
   private final CompoundTracker tracker;
   private final FixGraph<SuperNode> fixGraph;
 
-  public DeepExplorer(AutoFixer autoFixer, Bank bank, FixIndex fixIndex) {
+  public DeepExplorer(AutoFixer autoFixer, Bank<Error> bank, Bank<FixEntity> fixIndex) {
     super(autoFixer, bank, fixIndex);
     this.tracker = new CompoundTracker(autoFixer.fieldUsageTracker, autoFixer.callUsageTracker);
     this.fixGraph = new FixGraph<>(SuperNode::new);
@@ -91,14 +92,15 @@ public class DeepExplorer extends BasicExplorer {
               .setWorkList(Collections.singleton("*"));
       autoFixer.buildProject(config);
       bank.saveState(false, true);
-      fixIndex.index();
+      //      fixIndex.index();
       group.forEach(
           superNode -> {
             for (Node node : superNode.followUps) {
               int totalEffect = 0;
               for (UsageTracker.Usage usage : node.usages) {
                 totalEffect += bank.compareByMethod(usage.clazz, usage.method, false);
-                node.updateTriggered(fixIndex.getByMethod(usage.clazz, usage.method));
+                //                node.updateTriggered(fixIndex.getByMethod(usage.clazz,
+                // usage.method));
               }
               node.effect = totalEffect;
             }

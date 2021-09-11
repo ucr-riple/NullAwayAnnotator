@@ -1,4 +1,4 @@
-package edu.ucr.cs.riple.autofixer.errors;
+package edu.ucr.cs.riple.autofixer.index;
 
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.autofixer.nullaway.Writer;
@@ -7,16 +7,20 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 
-public class Bank {
+public class Bank<T extends Hashable> {
 
-  public final Index rootInClass;
-  public final Index rootInMethod;
-  private Index currentInMethod;
-  private Index currentInClass;
+  public final Index<T> rootInClass;
+  public final Index<T> rootInMethod;
+  private Index<T> currentInMethod;
+  private Index<T> currentInClass;
+  private final Factory<T> factory;
+  private final String path;
 
-  public Bank() {
-    rootInClass = new Index(Index.Type.BY_CLASS);
-    rootInMethod = new Index(Index.Type.BY_METHOD);
+  public Bank(String path, Factory<T> factory) {
+    this.factory = factory;
+    this.path = path;
+    rootInClass = new Index<>(path, Index.Type.BY_CLASS, factory);
+    rootInMethod = new Index<>(path, Index.Type.BY_METHOD, factory);
     rootInMethod.index();
     rootInClass.index();
     Preconditions.checkArgument(rootInClass.total == rootInMethod.total);
@@ -24,11 +28,11 @@ public class Bank {
 
   public void saveState(boolean saveClass, boolean saveMethod) {
     if (saveClass) {
-      currentInClass = new Index(Index.Type.BY_CLASS);
+      currentInClass = new Index<>(this.path, Index.Type.BY_CLASS, factory);
       currentInClass.index();
     }
     if (saveMethod) {
-      currentInMethod = new Index(Index.Type.BY_METHOD);
+      currentInMethod = new Index<>(this.path, Index.Type.BY_METHOD, factory);
       currentInMethod.index();
     }
   }
@@ -37,18 +41,18 @@ public class Bank {
     if (fresh) {
       saveState(true, false);
     }
-    List<Error> currentErrors = currentInClass.getByClass(className);
-    List<Error> previousErrors = rootInClass.getByClass(className);
-    return currentErrors.size() - previousErrors.size();
+    List<T> currentItems = currentInClass.getByClass(className);
+    List<T> previousItems = rootInClass.getByClass(className);
+    return currentItems.size() - previousItems.size();
   }
 
   public int compareByMethod(String className, String methodName, boolean fresh) {
     if (fresh) {
       saveState(false, true);
     }
-    List<Error> currentErrors = currentInMethod.getByMethod(className, methodName);
-    List<Error> previousErrors = rootInMethod.getByMethod(className, methodName);
-    return currentErrors.size() - previousErrors.size();
+    List<T> currentItems = currentInMethod.getByMethod(className, methodName);
+    List<T> previousItems = rootInMethod.getByMethod(className, methodName);
+    return currentItems.size() - previousItems.size();
   }
 
   public int compare() {
