@@ -92,15 +92,21 @@ public class DeepExplorer extends BasicExplorer {
               .setWorkList(Collections.singleton("*"));
       autoFixer.buildProject(config);
       errorBank.saveState(false, true);
-      //      fixIndex.index();
+      fixBank.saveState(false, true);
       group.forEach(
           superNode -> {
             for (Node node : superNode.followUps) {
               int totalEffect = 0;
               for (UsageTracker.Usage usage : node.usages) {
                 totalEffect += errorBank.compareByMethodSize(usage.clazz, usage.method, false);
-                //                node.updateTriggered(fixIndex.getByMethod(usage.clazz,
-                // usage.method));
+                if (AutoFixer.DEPTH > 0) {
+                  node.updateTriggered(
+                      fixBank
+                          .compareByMethod(node.fix.className, node.fix.method, false)
+                          .stream()
+                          .map(fixEntity -> fixEntity.fix)
+                          .collect(Collectors.toList()));
+                }
               }
               node.effect = totalEffect;
             }

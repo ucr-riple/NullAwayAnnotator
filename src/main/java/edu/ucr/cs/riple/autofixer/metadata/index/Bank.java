@@ -38,18 +38,14 @@ public class Bank<T extends Hashable> {
   }
 
   public int compareByClassSize(String className, boolean fresh) {
-    if (fresh) {
-      saveState(true, false);
-    }
+    saveState(fresh, false);
     List<T> currentItems = currentInClass.getByClass(className);
     List<T> previousItems = rootInClass.getByClass(className);
     return currentItems.size() - previousItems.size();
   }
 
   public int compareByMethodSize(String className, String methodName, boolean fresh) {
-    if (fresh) {
-      saveState(false, true);
-    }
+    saveState(false, fresh);
     List<T> currentItems = currentInMethod.getByMethod(className, methodName);
     List<T> previousItems = rootInMethod.getByMethod(className, methodName);
     return currentItems.size() - previousItems.size();
@@ -69,7 +65,11 @@ public class Bank<T extends Hashable> {
     return lines - rootInClass.total;
   }
 
-  public List<T> compareByMethod(String className, String method) {
-    return null;
+  public List<T> compareByMethod(String className, String method, boolean fresh) {
+    saveState(false, fresh);
+    List<T> currentItems = currentInMethod.getByMethod(className, method);
+    List<T> previousItems = rootInMethod.getByMethod(className, method);
+    currentItems.removeAll(previousItems);
+    return currentItems;
   }
 }

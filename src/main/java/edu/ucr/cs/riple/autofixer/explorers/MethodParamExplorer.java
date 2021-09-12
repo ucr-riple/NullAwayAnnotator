@@ -65,7 +65,7 @@ public class MethodParamExplorer extends AdvancedExplorer {
         if (AutoFixer.DEPTH > 0) {
           node.updateTriggered(
               fixBank
-                  .compareByMethod(node.fix.className, node.fix.method)
+                  .compareByMethod(node.fix.className, node.fix.method, false)
                   .stream()
                   .map(fixEntity -> fixEntity.fix)
                   .collect(Collectors.toList()));

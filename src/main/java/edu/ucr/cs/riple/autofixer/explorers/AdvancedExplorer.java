@@ -69,13 +69,18 @@ public abstract class AdvancedExplorer extends BasicExplorer {
               .setWorkList(Collections.singleton("*"));
       autoFixer.buildProject(writer);
       errorBank.saveState(false, true);
-      //      fixIndex.index();
+      fixBank.saveState(false, true);
       for (Node node : nodes) {
         int totalEffect = 0;
         for (UsageTracker.Usage usage : node.usages) {
           totalEffect += errorBank.compareByMethodSize(usage.clazz, usage.method, false);
           if (AutoFixer.DEPTH > 0) {
-            //            node.updateTriggered(fixIndex.getByMethod(usage.clazz, usage.method));
+            node.updateTriggered(
+                fixBank
+                    .compareByMethod(node.fix.className, node.fix.method, false)
+                    .stream()
+                    .map(fixEntity -> fixEntity.fix)
+                    .collect(Collectors.toList()));
           }
         }
         node.effect = totalEffect;
