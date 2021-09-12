@@ -66,7 +66,6 @@ public class DeepExplorer extends BasicExplorer {
             report.chain =
                 superNode.followUps.stream().map(node -> node.fix).collect(Collectors.toSet());
           });
-      System.out.println(reports.size());
     }
   }
 
