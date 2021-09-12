@@ -98,7 +98,7 @@ public class DeepExplorer extends BasicExplorer {
             for (Node node : superNode.followUps) {
               int totalEffect = 0;
               for (UsageTracker.Usage usage : node.usages) {
-                totalEffect += errorBank.compareByMethod(usage.clazz, usage.method, false);
+                totalEffect += errorBank.compareByMethodSize(usage.clazz, usage.method, false);
                 //                node.updateTriggered(fixIndex.getByMethod(usage.clazz,
                 // usage.method));
               }

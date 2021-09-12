@@ -37,7 +37,7 @@ public class Bank<T extends Hashable> {
     }
   }
 
-  public int compareByClass(String className, boolean fresh) {
+  public int compareByClassSize(String className, boolean fresh) {
     if (fresh) {
       saveState(true, false);
     }
@@ -46,7 +46,7 @@ public class Bank<T extends Hashable> {
     return currentItems.size() - previousItems.size();
   }
 
-  public int compareByMethod(String className, String methodName, boolean fresh) {
+  public int compareByMethodSize(String className, String methodName, boolean fresh) {
     if (fresh) {
       saveState(false, true);
     }
@@ -55,7 +55,7 @@ public class Bank<T extends Hashable> {
     return currentItems.size() - previousItems.size();
   }
 
-  public int compare() {
+  public int compareBySize() {
     BufferedReader reader;
     int lines = 0;
     try {
@@ -67,5 +67,9 @@ public class Bank<T extends Hashable> {
       e.printStackTrace();
     }
     return lines - rootInClass.total;
+  }
+
+  public List<T> compareByMethod(String className, String method) {
+    return null;
   }
 }

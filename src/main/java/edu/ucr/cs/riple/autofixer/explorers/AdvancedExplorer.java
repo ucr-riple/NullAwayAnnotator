@@ -73,7 +73,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
       for (Node node : nodes) {
         int totalEffect = 0;
         for (UsageTracker.Usage usage : node.usages) {
-          totalEffect += errorBank.compareByMethod(usage.clazz, usage.method, false);
+          totalEffect += errorBank.compareByMethodSize(usage.clazz, usage.method, false);
           if (AutoFixer.DEPTH > 0) {
             //            node.updateTriggered(fixIndex.getByMethod(usage.clazz, usage.method));
           }

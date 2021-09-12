@@ -58,13 +58,17 @@ public class MethodParamExplorer extends AdvancedExplorer {
               .setMethodParamTest(true, (long) i);
       autoFixer.buildProject(config);
       errorBank.saveState(false, true);
-      //      fixIndex.index();
+      fixBank.saveState(false, true);
       for (Node node : subList) {
-        int localEffect = errorBank.compareByMethod(node.fix.className, node.fix.method, false);
+        int localEffect = errorBank.compareByMethodSize(node.fix.className, node.fix.method, false);
         node.effect = localEffect + calculateInheritanceViolationError(node, i);
         if (AutoFixer.DEPTH > 0) {
-          //          node.updateTriggered(fixIndex.getByMethod(node.fix.className,
-          // node.fix.method));
+          node.updateTriggered(
+              fixBank
+                  .compareByMethod(node.fix.className, node.fix.method)
+                  .stream()
+                  .map(fixEntity -> fixEntity.fix)
+                  .collect(Collectors.toList()));
         }
       }
     }
