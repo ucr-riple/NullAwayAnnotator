@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class Bank<T extends Hashable> {
 
@@ -69,7 +70,7 @@ public class Bank<T extends Hashable> {
     saveState(false, fresh);
     List<T> currentItems = currentInMethod.getByMethod(className, method);
     List<T> previousItems = rootInMethod.getByMethod(className, method);
-    currentItems.removeAll(previousItems);
+    previousItems.forEach(currentItems::remove);
     return currentItems;
   }
 }
