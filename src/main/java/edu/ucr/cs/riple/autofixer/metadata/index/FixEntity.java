@@ -8,7 +8,21 @@ public class FixEntity extends Hashable {
 
   public FixEntity(String[] infos) {
     fix = Fix.fromArrayInfo(infos);
-    this.clazz = fix.className;
-    this.method = fix.method;
+    this.clazz = infos[11];
+    this.method = infos[12];
+  }
+
+  @Override
+  public String toString() {
+    return "FixEntity{"
+        + "fix="
+        + fix
+        + ", clazz='"
+        + clazz
+        + '\''
+        + ", method='"
+        + method
+        + '\''
+        + '}';
   }
 }

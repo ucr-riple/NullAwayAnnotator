@@ -15,7 +15,7 @@ import java.util.Set;
 public class FixGraph<T extends AbstractNode> {
   public final HashMap<Integer, Set<T>> nodes;
 
-  private HashMap<Integer, Set<T>> groups;
+  private final HashMap<Integer, Set<T>> groups;
   private final Factory<T> factory;
 
   public FixGraph(Factory<T> factory) {

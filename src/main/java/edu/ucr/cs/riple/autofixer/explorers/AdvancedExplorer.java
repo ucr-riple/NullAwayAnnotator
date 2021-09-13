@@ -39,8 +39,10 @@ public abstract class AdvancedExplorer extends BasicExplorer {
             node.referred++;
           }
         });
-    init();
-    explore();
+    if (fixGraph.nodes.size() > 0) {
+      init();
+      explore();
+    }
   }
 
   protected abstract void init();
