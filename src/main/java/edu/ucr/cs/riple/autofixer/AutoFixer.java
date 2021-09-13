@@ -76,10 +76,10 @@ public class AutoFixer {
     Bank<Error> errorBank = new Bank<>(Writer.ERROR, Error::new);
     Bank<FixEntity> fixIndex = new Bank<>(Writer.SUGGEST_FIX, FixEntity::new);
     this.deepExplorer = new DeepExplorer(this, errorBank, fixIndex);
-    explorers.add(new MethodParamExplorer(this, allFixes, errorBank, fixIndex));
-    explorers.add(new ClassFieldExplorer(this, allFixes, errorBank, fixIndex));
-    explorers.add(new MethodReturnExplorer(this, allFixes, errorBank, fixIndex));
-    explorers.add(new BasicExplorer(this, errorBank, fixIndex));
+    this.explorers.add(new MethodParamExplorer(this, allFixes, errorBank, fixIndex));
+    this.explorers.add(new ClassFieldExplorer(this, allFixes, errorBank, fixIndex));
+    this.explorers.add(new MethodReturnExplorer(this, allFixes, errorBank, fixIndex));
+    this.explorers.add(new BasicExplorer(this, errorBank, fixIndex));
   }
 
   public void start(String buildCommand, String out_dir, boolean optimized) {
