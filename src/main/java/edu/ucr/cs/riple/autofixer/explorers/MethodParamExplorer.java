@@ -20,8 +20,9 @@ public class MethodParamExplorer extends AdvancedExplorer {
 
   private MethodInheritanceTree mit;
 
-  public MethodParamExplorer(AutoFixer autoFixer, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
-    super(autoFixer, errorBank, fixBank, FixType.METHOD_PARAM);
+  public MethodParamExplorer(
+      AutoFixer autoFixer, List<Fix> fixes, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
+    super(autoFixer, fixes, errorBank, fixBank, FixType.METHOD_PARAM);
   }
 
   @Override

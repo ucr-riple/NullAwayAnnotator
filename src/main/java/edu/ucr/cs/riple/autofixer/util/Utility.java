@@ -5,12 +5,14 @@ import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import edu.ucr.cs.riple.injector.Fix;
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -103,6 +105,22 @@ public class Utility {
     content = content.replaceAll("\\s", "");
     return Booleans.toArray(
         Arrays.stream(content.split(",")).map(Boolean::parseBoolean).collect(Collectors.toList()));
+  }
+
+  public static List<Fix> readAllFixes() {
+    List<Fix> fixes = new ArrayList<>();
+    try {
+      try (BufferedReader br = new BufferedReader(new FileReader(Writer.SUGGEST_FIX))) {
+        String line;
+        String delimiter = Writer.getDelimiterRegex();
+        while ((line = br.readLine()) != null) {
+          fixes.add(Fix.fromCSVLine(line, delimiter));
+        }
+      }
+    } catch (IOException e) {
+      System.err.println("Exception happened in initializing MethodParamExplorer...");
+    }
+    return fixes;
   }
 
   public static boolean isEqual(Fix fix, Fix other) {

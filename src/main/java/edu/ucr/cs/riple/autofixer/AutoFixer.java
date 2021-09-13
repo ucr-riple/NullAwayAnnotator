@@ -17,6 +17,7 @@ import edu.ucr.cs.riple.autofixer.metadata.index.Error;
 import edu.ucr.cs.riple.autofixer.metadata.index.FixEntity;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.autofixer.nullaway.Writer;
+import edu.ucr.cs.riple.autofixer.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkList;
@@ -66,6 +67,7 @@ public class AutoFixer {
             .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
             .setWorkList(Collections.singleton("*"));
     buildProject(config);
+    List<Fix> allFixes = Utility.readAllFixes();
     this.injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
     this.methodInheritanceTree = new MethodInheritanceTree(Writer.METHOD_INFO);
     this.callUsageTracker = new CallUsageTracker(Writer.CALL_GRAPH);
@@ -74,9 +76,9 @@ public class AutoFixer {
     Bank<Error> errorBank = new Bank<>(Writer.ERROR, Error::new);
     Bank<FixEntity> fixIndex = new Bank<>(Writer.SUGGEST_FIX, FixEntity::new);
     this.deepExplorer = new DeepExplorer(this, errorBank, fixIndex);
-    explorers.add(new MethodParamExplorer(this, errorBank, fixIndex));
-    explorers.add(new ClassFieldExplorer(this, errorBank, fixIndex));
-    explorers.add(new MethodReturnExplorer(this, errorBank, fixIndex));
+    explorers.add(new MethodParamExplorer(this, allFixes, errorBank, fixIndex));
+    explorers.add(new ClassFieldExplorer(this, allFixes, errorBank, fixIndex));
+    explorers.add(new MethodReturnExplorer(this, allFixes, errorBank, fixIndex));
     explorers.add(new BasicExplorer(this, errorBank, fixIndex));
   }
 

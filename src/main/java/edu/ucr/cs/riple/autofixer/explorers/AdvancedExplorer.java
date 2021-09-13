@@ -10,11 +10,7 @@ import edu.ucr.cs.riple.autofixer.metadata.index.Bank;
 import edu.ucr.cs.riple.autofixer.metadata.index.Error;
 import edu.ucr.cs.riple.autofixer.metadata.index.FixEntity;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
-import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import edu.ucr.cs.riple.injector.Fix;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -28,25 +24,21 @@ public abstract class AdvancedExplorer extends BasicExplorer {
   protected final FixType fixType;
 
   public AdvancedExplorer(
-      AutoFixer autoFixer, Bank<Error> errorBank, Bank<FixEntity> fixBank, FixType fixType) {
+      AutoFixer autoFixer,
+      List<Fix> fixes,
+      Bank<Error> errorBank,
+      Bank<FixEntity> fixBank,
+      FixType fixType) {
     super(autoFixer, errorBank, fixBank);
     this.fixType = fixType;
     fixGraph = new FixGraph<>(Node::new);
-    try {
-      try (BufferedReader br = new BufferedReader(new FileReader(Writer.SUGGEST_FIX))) {
-        String line;
-        String delimiter = Writer.getDelimiterRegex();
-        while ((line = br.readLine()) != null) {
-          Fix fix = Fix.fromCSVLine(line, delimiter);
+    fixes.forEach(
+        fix -> {
           if (isApplicable(fix)) {
             Node node = fixGraph.findOrCreate(fix);
             node.referred++;
           }
-        }
-      }
-    } catch (IOException e) {
-      System.err.println("Exception happened in initializing MethodParamExplorer...");
-    }
+        });
     init();
     explore();
   }

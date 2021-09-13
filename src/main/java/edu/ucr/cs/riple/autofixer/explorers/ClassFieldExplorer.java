@@ -7,11 +7,13 @@ import edu.ucr.cs.riple.autofixer.metadata.index.Bank;
 import edu.ucr.cs.riple.autofixer.metadata.index.Error;
 import edu.ucr.cs.riple.autofixer.metadata.index.FixEntity;
 import edu.ucr.cs.riple.injector.Fix;
+import java.util.List;
 
 public class ClassFieldExplorer extends AdvancedExplorer {
 
-  public ClassFieldExplorer(AutoFixer autoFixer, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
-    super(autoFixer, errorBank, fixBank, FixType.CLASS_FIELD);
+  public ClassFieldExplorer(
+      AutoFixer autoFixer, List<Fix> fixes, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
+    super(autoFixer, fixes, errorBank, fixBank, FixType.CLASS_FIELD);
   }
 
   @Override
