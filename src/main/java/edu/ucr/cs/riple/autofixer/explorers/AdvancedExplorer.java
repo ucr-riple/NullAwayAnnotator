@@ -31,7 +31,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
       FixType fixType) {
     super(autoFixer, errorBank, fixBank);
     this.fixType = fixType;
-    fixGraph = new FixGraph<>(Node::new);
+    this.fixGraph = new FixGraph<>(Node::new);
     fixes.forEach(
         fix -> {
           if (isApplicable(fix)) {
@@ -63,7 +63,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
               .setWorkList(Collections.singleton("*"));
       autoFixer.buildProject(writer);
       errorBank.saveState(false, true);
-      fixBank.saveState(false, true);
+      fixBank.saveState(true, true);
       for (Node node : nodes) {
         int totalEffect = 0;
         for (UsageTracker.Usage usage : node.usages) {
@@ -71,7 +71,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
           if (AutoFixer.DEPTH > 0) {
             node.updateTriggered(
                 fixBank
-                    .compareByMethod(node.fix.className, node.fix.method, false)
+                    .compareByMethod(usage.clazz, usage.method, false)
                     .stream()
                     .map(fixEntity -> fixEntity.fix)
                     .collect(Collectors.toList()));

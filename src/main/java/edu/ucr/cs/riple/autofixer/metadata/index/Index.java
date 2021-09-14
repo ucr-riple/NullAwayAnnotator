@@ -34,6 +34,7 @@ public class Index<T extends Hashable> {
   }
 
   public void index() {
+    items.clear();
     try (BufferedReader br = new BufferedReader(new FileReader(this.path))) {
       String line;
       String delimiter = Writer.getDelimiterRegex();
