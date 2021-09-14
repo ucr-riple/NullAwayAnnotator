@@ -23,7 +23,11 @@ public class SuperNode extends AbstractNode {
 
   @Override
   public void updateUsages(UsageTracker tracker) {
-    followUps.forEach(node -> usages.addAll(tracker.getUsage(node.fix)));
+    followUps.forEach(
+        node -> {
+          node.updateUsages(tracker);
+          usages.addAll(tracker.getUsage(node.fix));
+        });
   }
 
   @Override

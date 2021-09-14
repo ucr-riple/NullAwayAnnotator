@@ -42,9 +42,11 @@ public class DeepExplorer extends BasicExplorer {
           Fix fix = report.fix;
           SuperNode node = fixGraph.findOrCreate(fix);
           node.effect = report.effectiveNess;
-          node.updateUsages(tracker);
           node.report = report;
           node.triggered = report.triggered;
+          node.followUps.addAll(report.chain.stream().map(Node::new).collect(Collectors.toSet()));
+          node.mergeTriggered();
+          node.updateUsages(tracker);
         });
   }
 

@@ -55,8 +55,7 @@ public class Index<T extends Hashable> {
           items.put(hash, newList);
         }
       }
-    } catch (FileNotFoundException e) {
-      System.out.println("No output (error/fix) at this point");
+    } catch (FileNotFoundException ignored) {
     } catch (IOException e) {
       e.printStackTrace();
     }

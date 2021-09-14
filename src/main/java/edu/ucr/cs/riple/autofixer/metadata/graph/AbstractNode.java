@@ -19,6 +19,7 @@ public abstract class AbstractNode {
     this.usages = new HashSet<>();
     this.fix = fix;
     this.triggered = new HashSet<>();
+    this.effect = 0;
   }
 
   public abstract void updateUsages(UsageTracker tracker);
