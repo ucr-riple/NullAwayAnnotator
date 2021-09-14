@@ -12,17 +12,17 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Index<T extends Hashable> {
-  public HashMap<Integer, List<T>> items;
+
+  private final HashMap<Integer, List<T>> items;
   private final Factory<T> factory;
   private final String path;
+  private final Index.Type type;
   public int total;
 
   public enum Type {
     BY_METHOD,
     BY_CLASS
   }
-
-  Index.Type type;
 
   public Index(String path, Index.Type type, Factory<T> factory) {
     this.type = type;
