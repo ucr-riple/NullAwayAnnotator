@@ -1,4 +1,4 @@
-package edu.ucr.cs.riple.autofixer.metadata;
+package edu.ucr.cs.riple.autofixer.metadata.method;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,6 +1,6 @@
 package edu.ucr.cs.riple.autofixer.metadata.graph;
 
-import edu.ucr.cs.riple.autofixer.metadata.UsageTracker;
+import edu.ucr.cs.riple.autofixer.metadata.trackers.UsageTracker;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.Collections;
 import java.util.HashSet;

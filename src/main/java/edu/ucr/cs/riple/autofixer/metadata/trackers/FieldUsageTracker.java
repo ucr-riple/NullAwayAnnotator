@@ -1,17 +1,19 @@
-package edu.ucr.cs.riple.autofixer.metadata;
+package edu.ucr.cs.riple.autofixer.metadata.trackers;
 
 import edu.ucr.cs.riple.autofixer.FixType;
+import edu.ucr.cs.riple.autofixer.metadata.AbstractRelation;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class CallUsageTracker extends AbstractRelation<TrackerNode> implements UsageTracker {
+public class FieldUsageTracker extends AbstractRelation<TrackerNode> implements UsageTracker {
+
   private final FixType fixType;
 
-  public CallUsageTracker(String filePath) {
+  public FieldUsageTracker(String filePath) {
     super(filePath);
-    this.fixType = FixType.METHOD_RETURN;
+    this.fixType = FixType.CLASS_FIELD;
   }
 
   @Override
@@ -28,12 +30,15 @@ public class CallUsageTracker extends AbstractRelation<TrackerNode> implements U
         findAllNodes(
             candidate ->
                 candidate.calleeClass.equals(fix.className)
-                    && candidate.calleeMember.equals(fix.method),
-            fix.method,
+                    && candidate.calleeMember.equals(fix.param),
+            fix.param,
             fix.className);
+    if (nodes == null) {
+      return null;
+    }
     return nodes
         .stream()
-        .map(callGraphNode -> callGraphNode.callerClass)
+        .map(fieldGraphNode -> fieldGraphNode.callerClass)
         .collect(Collectors.toSet());
   }
 
@@ -46,15 +51,15 @@ public class CallUsageTracker extends AbstractRelation<TrackerNode> implements U
         findAllNodes(
             candidate ->
                 candidate.calleeClass.equals(fix.className)
-                    && candidate.calleeMember.equals(fix.method),
-            fix.method,
+                    && candidate.calleeMember.equals(fix.param),
+            fix.param,
             fix.className);
     Set<Usage> ans =
         nodes
             .stream()
-            .map(callUsageNode -> new Usage(callUsageNode.callerMethod, callUsageNode.callerClass))
+            .map(fieldNode -> new Usage(fieldNode.callerMethod, fieldNode.callerClass))
             .collect(Collectors.toSet());
-    ans.add(new Usage(fix.method, fix.className));
+    ans.add(new Usage("null", fix.className));
     return ans;
   }
 }

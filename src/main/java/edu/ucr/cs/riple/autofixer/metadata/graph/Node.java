@@ -2,7 +2,7 @@ package edu.ucr.cs.riple.autofixer.metadata.graph;
 
 import static edu.ucr.cs.riple.autofixer.util.Utility.isEqual;
 
-import edu.ucr.cs.riple.autofixer.metadata.UsageTracker;
+import edu.ucr.cs.riple.autofixer.metadata.trackers.UsageTracker;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.List;
 
