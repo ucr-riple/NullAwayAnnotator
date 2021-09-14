@@ -2,6 +2,7 @@ package edu.ucr.cs.riple.autofixer.metadata.index;
 
 import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -54,6 +55,8 @@ public class Index<T extends Hashable> {
           items.put(hash, newList);
         }
       }
+    } catch (FileNotFoundException e) {
+      System.out.println("No output (error/fix) at this point");
     } catch (IOException e) {
       e.printStackTrace();
     }
