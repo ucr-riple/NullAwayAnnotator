@@ -103,7 +103,7 @@ public class DeepExplorer extends BasicExplorer {
                 if (AutoFixer.DEPTH > 0) {
                   node.updateTriggered(
                       fixBank
-                          .compareByMethod(node.fix.className, node.fix.method, false)
+                          .compareByMethod(usage.clazz, usage.method, false)
                           .stream()
                           .map(fixEntity -> fixEntity.fix)
                           .collect(Collectors.toList()));
