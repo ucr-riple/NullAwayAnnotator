@@ -109,7 +109,7 @@ public class DeepExplorer extends BasicExplorer {
                           .collect(Collectors.toList()));
                 }
               }
-              node.effect = totalEffect;
+              node.setEffect(totalEffect);
             }
           });
       autoFixer.remove(fixes);

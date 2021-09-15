@@ -77,7 +77,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
                     .collect(Collectors.toList()));
           }
         }
-        node.effect = totalEffect;
+        node.setEffect(totalEffect);
       }
       autoFixer.remove(fixes);
     }

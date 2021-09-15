@@ -2,6 +2,7 @@ package edu.ucr.cs.riple.autofixer.metadata.graph;
 
 import static edu.ucr.cs.riple.autofixer.util.Utility.isEqual;
 
+import edu.ucr.cs.riple.autofixer.FixType;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.UsageTracker;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.List;
@@ -26,6 +27,14 @@ public class Node extends AbstractNode {
           break;
         }
       }
+    }
+  }
+
+  public void setEffect(int localEffect) {
+    if (fix.location.equals(FixType.METHOD_PARAM.name)) {
+      this.effect = localEffect - this.referred;
+    } else {
+      this.effect = localEffect;
     }
   }
 
