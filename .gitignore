@@ -18,3 +18,5 @@ gradle-app.setting
 
 /venv/
 /data
+
+/src/main/java/Debugger.java
