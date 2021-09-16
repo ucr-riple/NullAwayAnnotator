@@ -9,8 +9,8 @@ import java.util.List;
 
 public class Bank<T extends Hashable> {
 
-  public final Index<T> rootInClass;
-  public final Index<T> rootInMethod;
+  private Index<T> rootInClass;
+  private Index<T> rootInMethod;
   private Index<T> currentInMethod;
   private Index<T> currentInClass;
   private final Factory<T> factory;
@@ -19,6 +19,14 @@ public class Bank<T extends Hashable> {
   public Bank(String path, Factory<T> factory) {
     this.factory = factory;
     this.path = path;
+    rootInClass = new Index<>(path, Index.Type.BY_CLASS, factory);
+    rootInMethod = new Index<>(path, Index.Type.BY_METHOD, factory);
+    rootInMethod.index();
+    rootInClass.index();
+    Preconditions.checkArgument(rootInClass.total == rootInMethod.total);
+  }
+
+  public void reset() {
     rootInClass = new Index<>(path, Index.Type.BY_CLASS, factory);
     rootInMethod = new Index<>(path, Index.Type.BY_METHOD, factory);
     rootInMethod.index();
