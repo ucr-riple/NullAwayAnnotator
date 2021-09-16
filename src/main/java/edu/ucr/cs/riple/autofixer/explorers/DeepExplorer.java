@@ -44,7 +44,7 @@ public class DeepExplorer extends BasicExplorer {
           SuperNode node = fixGraph.findOrCreate(fix);
           node.effect = report.effectiveNess;
           node.report = report;
-          node.triggered = report.triggered;
+          node.triggered = report.followups;
           node.followUps.addAll(report.chain.stream().map(Node::new).collect(Collectors.toSet()));
           node.mergeTriggered();
           node.updateUsages(tracker);
@@ -110,8 +110,10 @@ public class DeepExplorer extends BasicExplorer {
                           .collect(Collectors.toList()));
                 }
               }
-              if(node.fix.location.equals(FixType.METHOD_PARAM.name)){
-                  totalEffect += MethodParamExplorer.calculateInheritanceViolationError(autoFixer.methodInheritanceTree, node, Integer.parseInt(node.fix.index));
+              if (node.fix.location.equals(FixType.METHOD_PARAM.name)) {
+                totalEffect +=
+                    MethodParamExplorer.calculateInheritanceViolationError(
+                        autoFixer.methodInheritanceTree, node, Integer.parseInt(node.fix.index));
               }
               node.setEffect(totalEffect);
             }

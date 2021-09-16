@@ -91,7 +91,8 @@ public class MethodParamExplorer extends AdvancedExplorer {
     return fixGraph.find(fix) == null;
   }
 
-  public static int calculateInheritanceViolationError(MethodInheritanceTree mit, Node node, int index){
+  public static int calculateInheritanceViolationError(
+      MethodInheritanceTree mit, Node node, int index) {
     int effect = 0;
     Fix fix = node.fix;
     boolean[] thisMethodFlag = mit.findNode(fix.method, fix.className).annotFlags;

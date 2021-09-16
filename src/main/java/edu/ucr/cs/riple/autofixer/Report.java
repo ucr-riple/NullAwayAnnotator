@@ -9,7 +9,7 @@ public class Report {
   public int effectiveNess;
   public Fix fix;
   public Set<Fix> chain;
-  public Set<Fix> triggered;
+  public Set<Fix> followups;
 
   public Report(Fix fix, int effectiveNess) {
     this.effectiveNess = effectiveNess;

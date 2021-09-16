@@ -22,8 +22,8 @@ public abstract class AbstractNode {
     this.effect = 0;
   }
 
-  //todo: remove this method, for debugging only
-  public String displayFix(){
+  // todo: remove this method, for debugging only
+  public String displayFix() {
     return "Fix: " + fix.location + " " + fix.className + " " + fix.method + " " + fix.param;
   }
 
