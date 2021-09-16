@@ -8,20 +8,20 @@ public class Report {
 
   public int effectiveNess;
   public Fix fix;
-  public Set<Fix> chain;
   public Set<Fix> followups;
+  public Set<Fix> triggered;
 
   public Report(Fix fix, int effectiveNess) {
     this.effectiveNess = effectiveNess;
     this.fix = fix;
-    this.chain = new HashSet<>();
+    this.followups = new HashSet<>();
   }
 
   public static Report empty(Fix fix) {
     return new Report(fix, 0);
   }
 
-  public void setChain(Set<Fix> chain) {
-    this.chain = chain;
+  public void setFollowups(Set<Fix> followups) {
+    this.followups = followups;
   }
 }

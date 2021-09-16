@@ -101,7 +101,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
     }
     System.out.println("Predicted...");
     Report report = new Report(fix, node.effect);
-    report.followups = node.triggered;
+    report.triggered = node.triggered;
     return report;
   }
 

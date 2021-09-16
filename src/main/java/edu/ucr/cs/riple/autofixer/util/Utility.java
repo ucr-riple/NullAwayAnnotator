@@ -41,9 +41,9 @@ public class Utility {
       JSONObject reportJson = report.fix.getJson();
       reportJson.put("jump", report.effectiveNess);
       JSONArray followUps = new JSONArray();
-      report.chain.remove(report.fix);
+      report.followups.remove(report.fix);
       followUps.addAll(
-          report.chain.stream().map(fix -> fix.getJson()).collect(Collectors.toList()));
+          report.followups.stream().map(fix -> fix.getJson()).collect(Collectors.toList()));
       reportJson.put("followups", followUps);
       reportsJson.add(reportJson);
     }

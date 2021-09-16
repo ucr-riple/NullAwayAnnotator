@@ -44,8 +44,8 @@ public class DeepExplorer extends BasicExplorer {
           SuperNode node = fixGraph.findOrCreate(fix);
           node.effect = report.effectiveNess;
           node.report = report;
-          node.triggered = report.followups;
-          node.followUps.addAll(report.chain.stream().map(Node::new).collect(Collectors.toSet()));
+          node.triggered = report.triggered;
+          node.followUps.addAll(report.followups.stream().map(Node::new).collect(Collectors.toSet()));
           node.mergeTriggered();
           node.updateUsages(tracker);
         });
@@ -66,7 +66,7 @@ public class DeepExplorer extends BasicExplorer {
           superNode -> {
             Report report = superNode.report;
             report.effectiveNess = superNode.followUps.stream().mapToInt(node -> node.effect).sum();
-            report.chain =
+            report.followups =
                 superNode.followUps.stream().map(node -> node.fix).collect(Collectors.toSet());
           });
     }
