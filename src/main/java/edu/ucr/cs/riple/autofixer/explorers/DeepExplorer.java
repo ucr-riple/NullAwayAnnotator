@@ -1,6 +1,7 @@
 package edu.ucr.cs.riple.autofixer.explorers;
 
 import edu.ucr.cs.riple.autofixer.AutoFixer;
+import edu.ucr.cs.riple.autofixer.FixType;
 import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.metadata.graph.FixGraph;
 import edu.ucr.cs.riple.autofixer.metadata.graph.Node;
@@ -108,6 +109,9 @@ public class DeepExplorer extends BasicExplorer {
                           .map(fixEntity -> fixEntity.fix)
                           .collect(Collectors.toList()));
                 }
+              }
+              if(node.fix.location.equals(FixType.METHOD_PARAM.name)){
+                  totalEffect += MethodParamExplorer.calculateInheritanceViolationError(autoFixer.methodInheritanceTree, node, Integer.parseInt(node.fix.index));
               }
               node.setEffect(totalEffect);
             }

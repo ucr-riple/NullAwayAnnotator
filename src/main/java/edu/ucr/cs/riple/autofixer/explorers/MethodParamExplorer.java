@@ -62,7 +62,7 @@ public class MethodParamExplorer extends AdvancedExplorer {
       fixBank.saveState(false, true);
       for (Node node : subList) {
         int localEffect = errorBank.compareByMethodSize(node.fix.className, node.fix.method, false);
-        node.effect = localEffect + calculateInheritanceViolationError(node, i);
+        node.effect = localEffect + calculateInheritanceViolationError(this.mit, node, i);
         if (AutoFixer.DEPTH > 0) {
           node.updateTriggered(
               fixBank
@@ -91,7 +91,7 @@ public class MethodParamExplorer extends AdvancedExplorer {
     return fixGraph.find(fix) == null;
   }
 
-  private int calculateInheritanceViolationError(Node node, int index) {
+  public static int calculateInheritanceViolationError(MethodInheritanceTree mit, Node node, int index){
     int effect = 0;
     Fix fix = node.fix;
     boolean[] thisMethodFlag = mit.findNode(fix.method, fix.className).annotFlags;
