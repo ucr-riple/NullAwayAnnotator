@@ -2,9 +2,11 @@ package edu.ucr.cs.riple.autofixer.metadata.graph;
 
 import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.UsageTracker;
+import edu.ucr.cs.riple.autofixer.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,7 +20,8 @@ public class SuperNode extends AbstractNode {
     super(fix);
     followUps = new HashSet<>();
     root = new Node(fix);
-    followUps.add(root);
+    root.referred++;
+    this.followUps.add(root);
   }
 
   @Override
@@ -53,7 +56,22 @@ public class SuperNode extends AbstractNode {
   }
 
   public void mergeTriggered() {
-    this.followUps.addAll(triggered.stream().map(Node::new).collect(Collectors.toSet()));
+    this.addFollowUps(this.triggered);
     this.triggered.clear();
+  }
+
+  public void addFollowUps(Set<Fix> fixes) {
+    fixes.forEach(
+        fix -> {
+          Optional<Node> optionalNode =
+              followUps.stream().filter(node -> Utility.isEqual(fix, node.fix)).findAny();
+          if (optionalNode.isPresent()) {
+            optionalNode.get().referred++;
+          } else {
+            Node node = new Node(fix);
+            node.referred++;
+            followUps.add(node);
+          }
+        });
   }
 }

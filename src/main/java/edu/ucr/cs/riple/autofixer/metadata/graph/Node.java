@@ -31,7 +31,7 @@ public class Node extends AbstractNode {
   }
 
   // We need to subtract referred in METHOD_PARAM since all errors are happening
-  // inside the method boundary and all referred are outside at call site
+  // inside the method boundary and all referred sites are outside at call sites
   public void setEffect(int localEffect) {
     if (fix.location.equals(FixType.METHOD_PARAM.name)) {
       this.effect = localEffect - this.referred;
