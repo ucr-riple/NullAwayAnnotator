@@ -45,21 +45,36 @@ public class Bank<T extends Hashable> {
     }
   }
 
-  public int compareByClassSize(String className, boolean fresh) {
+  private Result<T> compareByList(List<T> previousItems, List<T> currentItems) {
+    int effect = currentItems.size() - previousItems.size();
+    previousItems.forEach(currentItems::remove);
+    return new Result<>(effect, currentItems);
+  }
+
+  public Result<T> compareByClass(String className, boolean fresh) {
     saveState(fresh, false);
-    List<T> currentItems = currentInClass.getByClass(className);
-    List<T> previousItems = rootInClass.getByClass(className);
-    return currentItems.size() - previousItems.size();
+    return compareByList(rootInClass.getByClass(className), currentInClass.getByClass(className));
   }
 
-  public int compareByMethodSize(String className, String methodName, boolean fresh) {
+  public Result<T> compareByClass(List<T> initial, String className, boolean fresh) {
+    saveState(fresh, false);
+    return compareByList(initial, currentInClass.getByClass(className));
+  }
+
+  public Result<T> compareByMethod(String className, String methodName, boolean fresh) {
     saveState(false, fresh);
-    List<T> currentItems = currentInMethod.getByMethod(className, methodName);
-    List<T> previousItems = rootInMethod.getByMethod(className, methodName);
-    return currentItems.size() - previousItems.size();
+    return compareByList(
+        rootInMethod.getByMethod(className, methodName),
+        currentInMethod.getByMethod(className, methodName));
   }
 
-  public int compareBySize() {
+  public Result<T> compareByMethod(
+      List<T> initial, String className, String methodName, boolean fresh) {
+    saveState(false, fresh);
+    return compareByList(initial, currentInMethod.getByMethod(className, methodName));
+  }
+
+  public int compare() {
     BufferedReader reader;
     int lines = 0;
     try {
@@ -71,13 +86,5 @@ public class Bank<T extends Hashable> {
       e.printStackTrace();
     }
     return lines - rootInClass.total;
-  }
-
-  public List<T> compareByMethod(String className, String method, boolean fresh) {
-    saveState(false, fresh);
-    List<T> currentItems = currentInMethod.getByMethod(className, method);
-    List<T> previousItems = rootInMethod.getByMethod(className, method);
-    previousItems.forEach(currentItems::remove);
-    return currentItems;
   }
 }

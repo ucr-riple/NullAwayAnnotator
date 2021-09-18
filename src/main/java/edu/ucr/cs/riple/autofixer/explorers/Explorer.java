@@ -38,7 +38,7 @@ public abstract class Explorer {
             .setWorkList(Collections.singleton("*"));
     autoFixer.buildProject(config);
     if (new File(Writer.ERROR).exists()) {
-      return new Report(fix, errorBank.compareBySize());
+      return new Report(fix, errorBank.compare());
     }
     return Report.empty(fix);
   }
@@ -61,12 +61,12 @@ public abstract class Explorer {
     autoFixer.buildProject(config);
     if (new File(Writer.ERROR).exists()) {
       int totalEffect = 0;
-      totalEffect += errorBank.compareByClassSize(fix.className, true);
+      totalEffect += errorBank.compareByClass(fix.className, true).effect;
       for (String clazz : workSet) {
         if (clazz.equals(fix.className)) {
           continue;
         }
-        totalEffect += errorBank.compareByClassSize(clazz, false);
+        totalEffect += errorBank.compareByClass(clazz, false).effect;
       }
       return new Report(fix, totalEffect);
     }

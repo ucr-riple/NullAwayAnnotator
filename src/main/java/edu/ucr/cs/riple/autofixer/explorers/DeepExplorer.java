@@ -45,6 +45,7 @@ public class DeepExplorer extends BasicExplorer {
           node.effect = report.effectiveNess;
           node.report = report;
           node.triggered = report.triggered;
+          node.newErrors = report.newErrors;
           node.addFollowUps(report.followups);
           node.mergeTriggered();
           node.updateUsages(tracker);
@@ -100,15 +101,16 @@ public class DeepExplorer extends BasicExplorer {
             for (Node node : superNode.followUps) {
               int totalEffect = 0;
               for (UsageTracker.Usage usage : node.usages) {
-                totalEffect += errorBank.compareByMethodSize(usage.clazz, usage.method, false);
-                if (AutoFixer.DEPTH > 0) {
-                  node.updateTriggered(
-                      fixBank
-                          .compareByMethod(usage.clazz, usage.method, false)
-                          .stream()
-                          .map(fixEntity -> fixEntity.fix)
-                          .collect(Collectors.toList()));
-                }
+                totalEffect +=
+                    errorBank.compareByMethod(node.newErrors, usage.clazz, usage.method, false)
+                        .effect;
+                node.updateTriggered(
+                    fixBank
+                        .compareByMethod(usage.clazz, usage.method, false)
+                        .dif
+                        .stream()
+                        .map(fixEntity -> fixEntity.fix)
+                        .collect(Collectors.toList()));
               }
               if (node.fix.location.equals(FixType.METHOD_PARAM.name)) {
                 totalEffect +=
