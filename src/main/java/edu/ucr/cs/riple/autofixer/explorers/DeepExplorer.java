@@ -9,6 +9,7 @@ import edu.ucr.cs.riple.autofixer.metadata.graph.SuperNode;
 import edu.ucr.cs.riple.autofixer.metadata.index.Bank;
 import edu.ucr.cs.riple.autofixer.metadata.index.Error;
 import edu.ucr.cs.riple.autofixer.metadata.index.FixEntity;
+import edu.ucr.cs.riple.autofixer.metadata.index.Result;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.UsageTracker;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
@@ -101,9 +102,9 @@ public class DeepExplorer extends BasicExplorer {
             for (Node node : superNode.followUps) {
               int totalEffect = 0;
               for (UsageTracker.Usage usage : node.usages) {
-                totalEffect +=
-                    errorBank.compareByMethod(node.newErrors, usage.clazz, usage.method, false)
-                        .effect;
+                  Result<Error> result = errorBank.compareByMethod(superNode.newErrors, usage.clazz, usage.method, false);
+                totalEffect += result.effect;
+                node.newErrors.addAll(result.dif);
                 node.updateTriggered(
                     fixBank
                         .compareByMethod(usage.clazz, usage.method, false)

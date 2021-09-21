@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Bank<T extends Hashable> {
 
@@ -58,6 +59,7 @@ public class Bank<T extends Hashable> {
 
   public Result<T> compareByClass(List<T> initial, String className, boolean fresh) {
     saveState(fresh, false);
+    initial = initial.stream().filter(t -> t.clazz.equals(className)).collect(Collectors.toList());
     return compareByList(initial, currentInClass.getByClass(className));
   }
 
@@ -71,6 +73,7 @@ public class Bank<T extends Hashable> {
   public Result<T> compareByMethod(
       List<T> initial, String className, String methodName, boolean fresh) {
     saveState(false, fresh);
+    initial = initial.stream().filter(t -> t.clazz.equals(className) && t.method.equals(methodName)).collect(Collectors.toList());
     return compareByList(initial, currentInMethod.getByMethod(className, methodName));
   }
 
