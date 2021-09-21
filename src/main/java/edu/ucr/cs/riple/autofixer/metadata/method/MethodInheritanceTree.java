@@ -1,5 +1,6 @@
-package edu.ucr.cs.riple.autofixer.metadata;
+package edu.ucr.cs.riple.autofixer.metadata.method;
 
+import edu.ucr.cs.riple.autofixer.metadata.AbstractRelation;
 import edu.ucr.cs.riple.autofixer.util.Utility;
 import java.util.ArrayList;
 import java.util.HashMap;

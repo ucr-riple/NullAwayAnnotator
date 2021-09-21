@@ -219,6 +219,10 @@ public class AutoFixConfig {
       if (!suggest) {
         throw new RuntimeException("SUGGEST must be activated");
       }
+      return this;
+    }
+
+    public AutoFixConfigWriter setAnnots(String NULLABLE, String NONNULL) {
       this.NULLABLE = NULLABLE;
       this.NONNULL = NONNULL;
       return this;

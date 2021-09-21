@@ -2,7 +2,9 @@ package edu.ucr.cs.riple.autofixer.explorers;
 
 import edu.ucr.cs.riple.autofixer.AutoFixer;
 import edu.ucr.cs.riple.autofixer.Report;
-import edu.ucr.cs.riple.autofixer.errors.Bank;
+import edu.ucr.cs.riple.autofixer.metadata.index.Bank;
+import edu.ucr.cs.riple.autofixer.metadata.index.Error;
+import edu.ucr.cs.riple.autofixer.metadata.index.FixEntity;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import edu.ucr.cs.riple.injector.Fix;
@@ -14,11 +16,13 @@ import java.util.Set;
 public abstract class Explorer {
 
   protected final AutoFixer autoFixer;
-  protected final Bank bank;
+  protected final Bank<Error> errorBank;
+  protected final Bank<FixEntity> fixBank;
 
-  public Explorer(AutoFixer autoFixer, Bank bank) {
+  public Explorer(AutoFixer autoFixer, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
     this.autoFixer = autoFixer;
-    this.bank = bank;
+    this.errorBank = errorBank;
+    this.fixBank = fixBank;
   }
 
   public Report effect(Fix fix) {
@@ -30,10 +34,11 @@ public abstract class Explorer {
             .setOptimized(false)
             .setMethodInheritanceTree(false)
             .setSuggest(true, false)
+            .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
             .setWorkList(Collections.singleton("*"));
     autoFixer.buildProject(config);
     if (new File(Writer.ERROR).exists()) {
-      return new Report(fix, bank.compare());
+      return new Report(fix, errorBank.compare());
     }
     return Report.empty(fix);
   }
@@ -51,16 +56,17 @@ public abstract class Explorer {
             .setOptimized(false)
             .setMethodInheritanceTree(false)
             .setSuggest(true, false)
+            .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
             .setWorkList(workSet);
     autoFixer.buildProject(config);
     if (new File(Writer.ERROR).exists()) {
       int totalEffect = 0;
-      totalEffect += bank.compareByClass(fix.className, true);
+      totalEffect += errorBank.compareByClass(fix.className, true).effect;
       for (String clazz : workSet) {
         if (clazz.equals(fix.className)) {
           continue;
         }
-        totalEffect += bank.compareByClass(clazz, false);
+        totalEffect += errorBank.compareByClass(clazz, false).effect;
       }
       return new Report(fix, totalEffect);
     }

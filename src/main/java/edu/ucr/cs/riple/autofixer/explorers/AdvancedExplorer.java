@@ -1,88 +1,95 @@
 package edu.ucr.cs.riple.autofixer.explorers;
 
 import edu.ucr.cs.riple.autofixer.AutoFixer;
+import edu.ucr.cs.riple.autofixer.FixType;
 import edu.ucr.cs.riple.autofixer.Report;
-import edu.ucr.cs.riple.autofixer.errors.Bank;
-import edu.ucr.cs.riple.autofixer.metadata.FixGraph;
-import edu.ucr.cs.riple.autofixer.metadata.UsageTracker;
+import edu.ucr.cs.riple.autofixer.metadata.graph.FixGraph;
+import edu.ucr.cs.riple.autofixer.metadata.graph.Node;
+import edu.ucr.cs.riple.autofixer.metadata.index.Bank;
+import edu.ucr.cs.riple.autofixer.metadata.index.Error;
+import edu.ucr.cs.riple.autofixer.metadata.index.FixEntity;
+import edu.ucr.cs.riple.autofixer.metadata.index.Result;
+import edu.ucr.cs.riple.autofixer.metadata.trackers.Usage;
+import edu.ucr.cs.riple.autofixer.metadata.trackers.UsageTracker;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
-import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import edu.ucr.cs.riple.injector.Fix;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class AdvancedExplorer extends BasicExplorer {
 
-  final FixGraph fixGraph;
+  final FixGraph<Node> fixGraph;
   protected UsageTracker tracker;
+  protected final FixType fixType;
 
-  public AdvancedExplorer(AutoFixer autoFixer, Bank bank) {
-    super(autoFixer, bank);
-    fixGraph = new FixGraph();
-    try {
-      try (BufferedReader br = new BufferedReader(new FileReader(Writer.SUGGEST_FIX))) {
-        String line;
-        String delimiter = Writer.getDelimiterRegex();
-        while ((line = br.readLine()) != null) {
-          Fix fix = Fix.fromCSVLine(line, delimiter);
+  public AdvancedExplorer(
+      AutoFixer autoFixer,
+      List<Fix> fixes,
+      Bank<Error> errorBank,
+      Bank<FixEntity> fixBank,
+      FixType fixType) {
+    super(autoFixer, errorBank, fixBank);
+    this.fixType = fixType;
+    this.fixGraph = new FixGraph<>(Node::new);
+    fixes.forEach(
+        fix -> {
           if (isApplicable(fix)) {
-            FixGraph.Node node = fixGraph.findOrCreate(fix);
+            Node node = fixGraph.findOrCreate(fix);
             node.referred++;
           }
-        }
-      }
-    } catch (IOException e) {
-      System.err.println("Exception happened in initializing MethodParamExplorer...");
+        });
+    if (fixGraph.nodes.size() > 0) {
+      init();
+      explore();
     }
-    init();
-    explore();
   }
 
   protected abstract void init();
 
   protected void explore() {
-    HashMap<Integer, List<FixGraph.Node>> groups = fixGraph.getGroups();
+    HashMap<Integer, Set<Node>> groups = fixGraph.getGroups();
     System.out.println("Building for: " + groups.size() + " number of times");
     int i = 1;
-    for (List<FixGraph.Node> nodes : groups.values()) {
-      System.out.println("Building: (Iteration " + i++ + " out of: " + groups.size() + ")");
+    for (Set<Node> nodes : groups.values()) {
+      System.out.println("Building: (Iteration " + i++ + " out of " + groups.size() + ")");
       List<Fix> fixes = nodes.stream().map(node -> node.fix).collect(Collectors.toList());
       autoFixer.apply(fixes);
       AutoFixConfig.AutoFixConfigWriter writer =
           new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, true)
-              .setSuggest(true, false)
+              .setSuggest(true, AutoFixer.DEPTH > 0)
+              .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
               .setWorkList(Collections.singleton("*"));
       autoFixer.buildProject(writer);
-      bank.saveState(true, true);
-      for (FixGraph.Node node : nodes) {
+      errorBank.saveState(false, true);
+      fixBank.saveState(true, true);
+      for (Node node : nodes) {
         int totalEffect = 0;
-        if (node.isDangling) {
-          for (String clazz : node.classes) {
-            totalEffect += bank.compareByClass(clazz, false);
-          }
-        } else {
-          for (UsageTracker.Usage usage : node.usages) {
-            if (usage.method == null || usage.method.equals("null")) {
-              totalEffect += bank.compareByClass(usage.clazz, false);
-            } else {
-              totalEffect += bank.compareByMethod(usage.clazz, usage.method, false);
-            }
+        for (Usage usage : node.usages) {
+          Result<Error> result = errorBank.compareByMethod(usage.clazz, usage.method, false);
+          totalEffect += result.effect;
+          node.newErrors.addAll(result.dif);
+          if (AutoFixer.DEPTH > 0) {
+            node.updateTriggered(
+                fixBank
+                    .compareByMethod(usage.clazz, usage.method, false)
+                    .dif
+                    .stream()
+                    .map(fixEntity -> fixEntity.fix)
+                    .collect(Collectors.toList()));
           }
         }
-        node.effect = totalEffect;
+        node.setEffect(totalEffect);
       }
       autoFixer.remove(fixes);
     }
   }
 
   protected Report predict(Fix fix) {
-    FixGraph.Node node = fixGraph.find(fix);
+    Node node = fixGraph.find(fix);
     System.out.print(
         "Trying to predict: "
             + fix.className
@@ -98,7 +105,10 @@ public abstract class AdvancedExplorer extends BasicExplorer {
       return null;
     }
     System.out.println("Predicted...");
-    return new Report(fix, node.effect);
+    Report report = new Report(fix, node.effect);
+    report.triggered = node.triggered;
+    report.newErrors = node.newErrors;
+    return report;
   }
 
   protected abstract Report effectByScope(Fix fix);
@@ -110,5 +120,10 @@ public abstract class AdvancedExplorer extends BasicExplorer {
       return report;
     }
     return effectByScope(fix);
+  }
+
+  @Override
+  public boolean requiresInjection(Fix fix) {
+    return fixGraph.find(fix) == null;
   }
 }

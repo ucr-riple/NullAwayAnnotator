@@ -1,23 +1,29 @@
 package edu.ucr.cs.riple.autofixer.explorers;
 
 import edu.ucr.cs.riple.autofixer.AutoFixer;
+import edu.ucr.cs.riple.autofixer.FixType;
 import edu.ucr.cs.riple.autofixer.Report;
-import edu.ucr.cs.riple.autofixer.errors.Bank;
-import edu.ucr.cs.riple.autofixer.metadata.FixGraph;
-import edu.ucr.cs.riple.autofixer.metadata.MethodInheritanceTree;
-import edu.ucr.cs.riple.autofixer.metadata.MethodNode;
+import edu.ucr.cs.riple.autofixer.metadata.graph.Node;
+import edu.ucr.cs.riple.autofixer.metadata.index.Bank;
+import edu.ucr.cs.riple.autofixer.metadata.index.Error;
+import edu.ucr.cs.riple.autofixer.metadata.index.FixEntity;
+import edu.ucr.cs.riple.autofixer.metadata.index.Result;
+import edu.ucr.cs.riple.autofixer.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
+import edu.ucr.cs.riple.autofixer.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MethodParamExplorer extends AdvancedExplorer {
 
   private MethodInheritanceTree mit;
 
-  public MethodParamExplorer(AutoFixer autoFixer, Bank bank) {
-    super(autoFixer, bank);
+  public MethodParamExplorer(
+      AutoFixer autoFixer, List<Fix> fixes, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
+    super(autoFixer, fixes, errorBank, fixBank, FixType.METHOD_PARAM);
   }
 
   @Override
@@ -29,15 +35,15 @@ public class MethodParamExplorer extends AdvancedExplorer {
   protected void explore() {
     int maxsize = MethodInheritanceTree.maxParamSize();
     System.out.println("Max size for method parameter list is: " + maxsize);
-    List<FixGraph.Node> allNodes = new ArrayList<>();
-    for (List<FixGraph.Node> subList : fixGraph.nodes.values()) {
+    List<Node> allNodes = new ArrayList<>();
+    for (Set<Node> subList : fixGraph.nodes.values()) {
       allNodes.addAll(subList);
     }
     for (int i = 0; i < maxsize; i++) {
       System.out.println(
           "Analyzing params at index: (" + (i + 1) + " out of " + maxsize + ") for all methods...");
       int finalI1 = i;
-      List<FixGraph.Node> subList =
+      List<Node> subList =
           allNodes
               .stream()
               .filter(node -> node.fix.index.equals(finalI1 + ""))
@@ -50,34 +56,29 @@ public class MethodParamExplorer extends AdvancedExplorer {
           new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, true)
               .setSuggest(true, false)
+              .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
               .setMethodParamTest(true, (long) i);
       autoFixer.buildProject(config);
-      bank.saveState(false, true);
-      for (FixGraph.Node node : subList) {
-        int localEffect = bank.compareByMethod(node.fix.className, node.fix.method, false);
-        node.effect = localEffect + calculateInheritanceViolationError(node, i);
+      errorBank.saveState(false, true);
+      fixBank.saveState(false, true);
+      for (Node node : subList) {
+        Result<Error> result =
+            errorBank.compareByMethod(node.fix.className, node.fix.method, false);
+        node.newErrors.addAll(result.dif);
+        node.setEffect(
+            result.effect + Utility.calculateInheritanceViolationError(this.mit, node.fix));
+        if (AutoFixer.DEPTH > 0) {
+          node.updateTriggered(
+              fixBank
+                  .compareByMethod(node.fix.className, node.fix.method, false)
+                  .dif
+                  .stream()
+                  .map(fixEntity -> fixEntity.fix)
+                  .collect(Collectors.toList()));
+        }
       }
     }
     System.out.println("Captured all methods behavior against nullability of parameter.");
-  }
-
-  @Override
-  protected Report predict(Fix fix) {
-    FixGraph.Node node = fixGraph.find(fix);
-    System.out.print(
-        "Trying to predict: "
-            + fix.className
-            + " "
-            + fix.method
-            + " "
-            + fix.param
-            + " METHOD_PARAM: ");
-    if (node == null) {
-      System.out.println("Not found...");
-      return null;
-    }
-    System.out.println("Predicted...");
-    return new Report(fix, node.effect - node.referred);
   }
 
   @Override
@@ -87,37 +88,6 @@ public class MethodParamExplorer extends AdvancedExplorer {
 
   @Override
   public boolean isApplicable(Fix fix) {
-    return fix.location.equals("METHOD_PARAM");
-  }
-
-  @Override
-  public boolean requiresInjection(Fix fix) {
-    return fixGraph.find(fix) == null;
-  }
-
-  private int calculateInheritanceViolationError(FixGraph.Node node, int index) {
-    int effect = 0;
-    Fix fix = node.fix;
-    boolean[] thisMethodFlag = mit.findNode(fix.method, fix.className).annotFlags;
-    if (index >= thisMethodFlag.length) {
-      return 0;
-    }
-    for (MethodNode subMethod : mit.getSubMethods(fix.method, fix.className, false)) {
-      if (!thisMethodFlag[index]) {
-        if (!subMethod.annotFlags[index]) {
-          effect++;
-        }
-      }
-    }
-    List<MethodNode> superMethods = mit.getSuperMethods(fix.method, fix.className, false);
-    if (superMethods.size() != 0) {
-      MethodNode superMethod = superMethods.get(0);
-      if (!thisMethodFlag[index]) {
-        if (superMethod.annotFlags[index]) {
-          effect--;
-        }
-      }
-    }
-    return effect;
+    return fix.location.equals(fixType.name);
   }
 }
