@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 public class Utility {
 
@@ -160,5 +161,27 @@ public class Utility {
       }
     }
     return effect;
+  }
+
+  public static void removeCachedFixes(List<Fix> fixes, String out_dir) {
+    if (!Files.exists(Paths.get(out_dir + "/reports.json"))) {
+      return;
+    }
+    try {
+      System.out.println("Reading cached fixes reports");
+      JSONObject cachedObjects =
+              (JSONObject) new JSONParser().parse(new FileReader(out_dir + "/reports.json"));
+      JSONArray cachedJson = (JSONArray) cachedObjects.get("fixes");
+      List<Report> cached = new ArrayList<>();
+      for (Object o : cachedJson) {
+        JSONObject reportJson = (JSONObject) o;
+        int effect = Integer.parseInt(reportJson.get("effect").toString());
+        if(effect < 1){
+          cached.add(new Report(Fix.createFromJson(reportJson), effect));
+        }
+      }
+      fixes.removeAll(cached.stream().map(report -> report.fix).collect(Collectors.toList()));
+    } catch (Exception ignored) { }
+    System.out.println("Processing cache fixes finished.");
   }
 }
