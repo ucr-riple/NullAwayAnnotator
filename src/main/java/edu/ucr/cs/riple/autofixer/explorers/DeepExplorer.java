@@ -1,10 +1,8 @@
 package edu.ucr.cs.riple.autofixer.explorers;
 
 import edu.ucr.cs.riple.autofixer.AutoFixer;
-import edu.ucr.cs.riple.autofixer.FixType;
 import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.metadata.graph.FixGraph;
-import edu.ucr.cs.riple.autofixer.metadata.graph.Node;
 import edu.ucr.cs.riple.autofixer.metadata.graph.SuperNode;
 import edu.ucr.cs.riple.autofixer.metadata.index.Bank;
 import edu.ucr.cs.riple.autofixer.metadata.index.Error;
@@ -67,9 +65,8 @@ public class DeepExplorer extends BasicExplorer {
       nodes.forEach(
           superNode -> {
             Report report = superNode.report;
-            report.effectiveNess = superNode.followUps.stream().mapToInt(node -> node.effect).sum();
-            report.followups =
-                superNode.followUps.stream().map(node -> node.fix).collect(Collectors.toSet());
+            report.effectiveNess = superNode.effect;
+            report.followups = superNode.followUps;
           });
     }
   }
@@ -99,27 +96,21 @@ public class DeepExplorer extends BasicExplorer {
       fixBank.saveState(false, true);
       group.forEach(
           superNode -> {
-            for (Node node : superNode.followUps) {
-              int totalEffect = 0;
-              for (UsageTracker.Usage usage : node.usages) {
-                  Result<Error> result = errorBank.compareByMethod(superNode.newErrors, usage.clazz, usage.method, false);
-                totalEffect += result.effect;
-                node.newErrors.addAll(result.dif);
-                node.updateTriggered(
-                    fixBank
-                        .compareByMethod(usage.clazz, usage.method, false)
-                        .dif
-                        .stream()
-                        .map(fixEntity -> fixEntity.fix)
-                        .collect(Collectors.toList()));
-              }
-              if (node.fix.location.equals(FixType.METHOD_PARAM.name)) {
-                totalEffect +=
-                    MethodParamExplorer.calculateInheritanceViolationError(
-                        autoFixer.methodInheritanceTree, node, Integer.parseInt(node.fix.index));
-              }
-              node.setEffect(totalEffect);
+            int totalEffect = 0;
+            for (UsageTracker.Usage usage : superNode.usages) {
+              Result<Error> result =
+                  errorBank.compareByMethod(superNode.newErrors, usage.clazz, usage.method, false);
+              totalEffect += result.effect;
+              superNode.newErrors.addAll(result.dif);
+              superNode.updateTriggered(
+                  fixBank
+                      .compareByMethod(usage.clazz, usage.method, false)
+                      .dif
+                      .stream()
+                      .map(fixEntity -> fixEntity.fix)
+                      .collect(Collectors.toList()));
             }
+            superNode.setEffect(totalEffect, autoFixer.methodInheritanceTree);
           });
       autoFixer.remove(fixes);
     }

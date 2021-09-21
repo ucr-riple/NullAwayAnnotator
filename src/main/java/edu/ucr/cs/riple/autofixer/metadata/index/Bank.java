@@ -73,7 +73,11 @@ public class Bank<T extends Hashable> {
   public Result<T> compareByMethod(
       List<T> initial, String className, String methodName, boolean fresh) {
     saveState(false, fresh);
-    initial = initial.stream().filter(t -> t.clazz.equals(className) && t.method.equals(methodName)).collect(Collectors.toList());
+    initial =
+        initial
+            .stream()
+            .filter(t -> t.clazz.equals(className) && t.method.equals(methodName))
+            .collect(Collectors.toList());
     return compareByList(initial, currentInMethod.getByMethod(className, methodName));
   }
 

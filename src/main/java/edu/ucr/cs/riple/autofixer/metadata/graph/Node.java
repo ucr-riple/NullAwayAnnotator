@@ -1,11 +1,8 @@
 package edu.ucr.cs.riple.autofixer.metadata.graph;
 
-import static edu.ucr.cs.riple.autofixer.util.Utility.isEqual;
-
 import edu.ucr.cs.riple.autofixer.FixType;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.UsageTracker;
 import edu.ucr.cs.riple.injector.Fix;
-import java.util.List;
 
 public class Node extends AbstractNode {
   public int referred;
@@ -16,18 +13,6 @@ public class Node extends AbstractNode {
 
   public void updateUsages(UsageTracker tracker) {
     this.usages.addAll(tracker.getUsage(this.fix));
-  }
-
-  public void updateTriggered(List<Fix> fixes) {
-    this.triggered.addAll(fixes);
-    for (Fix fix : fixes) {
-      for (Fix other : this.triggered) {
-        if (isEqual(fix, other)) {
-          other.referred++;
-          break;
-        }
-      }
-    }
   }
 
   // We need to subtract referred in METHOD_PARAM since all errors are happening

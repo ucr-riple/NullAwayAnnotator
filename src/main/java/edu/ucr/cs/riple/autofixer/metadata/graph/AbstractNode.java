@@ -1,5 +1,7 @@
 package edu.ucr.cs.riple.autofixer.metadata.graph;
 
+import static edu.ucr.cs.riple.autofixer.util.Utility.isEqual;
+
 import edu.ucr.cs.riple.autofixer.metadata.index.Error;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.UsageTracker;
 import edu.ucr.cs.riple.injector.Fix;
@@ -31,6 +33,18 @@ public abstract class AbstractNode {
 
   public boolean hasConflictInUsage(AbstractNode other) {
     return !Collections.disjoint(other.usages, this.usages);
+  }
+
+  public void updateTriggered(List<Fix> fixes) {
+    this.triggered.addAll(fixes);
+    for (Fix fix : fixes) {
+      for (Fix other : this.triggered) {
+        if (isEqual(fix, other)) {
+          other.referred++;
+          break;
+        }
+      }
+    }
   }
 
   @Override

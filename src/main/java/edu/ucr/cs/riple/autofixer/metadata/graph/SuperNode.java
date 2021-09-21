@@ -1,18 +1,18 @@
 package edu.ucr.cs.riple.autofixer.metadata.graph;
 
+import edu.ucr.cs.riple.autofixer.FixType;
 import edu.ucr.cs.riple.autofixer.Report;
+import edu.ucr.cs.riple.autofixer.explorers.MethodParamExplorer;
+import edu.ucr.cs.riple.autofixer.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.UsageTracker;
-import edu.ucr.cs.riple.autofixer.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.HashSet;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class SuperNode extends AbstractNode {
 
-  public final Set<Node> followUps;
+  public final Set<Fix> followUps;
   public Report report;
   private final Node root;
 
@@ -21,16 +21,25 @@ public class SuperNode extends AbstractNode {
     followUps = new HashSet<>();
     root = new Node(fix);
     root.referred++;
-    this.followUps.add(root);
+    this.followUps.add(root.fix);
   }
 
   @Override
   public void updateUsages(UsageTracker tracker) {
+    this.usages.clear();
+    followUps.forEach(fix -> usages.addAll(tracker.getUsage(fix)));
+  }
+
+  public void setEffect(int effect, MethodInheritanceTree tree) {
+    final int[] total = {effect};
     followUps.forEach(
-        node -> {
-          node.updateUsages(tracker);
-          usages.addAll(tracker.getUsage(node.fix));
+        fix -> {
+          if (fix.location.equals(FixType.METHOD_PARAM.name)) {
+            total[0] += MethodParamExplorer.calculateInheritanceViolationError(tree, fix);
+            total[0] -= fix.referred;
+          }
         });
+    this.effect = total[0];
   }
 
   @Override
@@ -52,7 +61,7 @@ public class SuperNode extends AbstractNode {
   }
 
   public Set<Fix> getFixChain() {
-    return followUps.stream().map(node -> node.fix).collect(Collectors.toSet());
+    return followUps;
   }
 
   public void mergeTriggered() {
@@ -61,17 +70,6 @@ public class SuperNode extends AbstractNode {
   }
 
   public void addFollowUps(Set<Fix> fixes) {
-    fixes.forEach(
-        fix -> {
-          Optional<Node> optionalNode =
-              followUps.stream().filter(node -> Utility.isEqual(fix, node.fix)).findAny();
-          if (optionalNode.isPresent()) {
-            optionalNode.get().referred++;
-          } else {
-            Node node = new Node(fix);
-            node.referred++;
-            followUps.add(node);
-          }
-        });
+    followUps.addAll(fixes);
   }
 }
