@@ -33,9 +33,4 @@ public class MethodReturnExplorer extends AdvancedExplorer {
   public boolean isApplicable(Fix fix) {
     return fix.location.equals(FixType.METHOD_RETURN.name);
   }
-
-  @Override
-  public boolean requiresInjection(Fix fix) {
-    return true;
-  }
 }

@@ -121,4 +121,9 @@ public abstract class AdvancedExplorer extends BasicExplorer {
     }
     return effectByScope(fix);
   }
+
+  @Override
+  public boolean requiresInjection(Fix fix) {
+    return fixGraph.find(fix) == null;
+  }
 }

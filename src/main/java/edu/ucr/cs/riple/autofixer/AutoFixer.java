@@ -113,6 +113,7 @@ public class AutoFixer {
     for (Explorer explorer : explorers) {
       if (explorer.isApplicable(fix)) {
         if (explorer.requiresInjection(fix)) {
+          System.out.println("Fix requires injection");
           suggestedFix.add(fix);
           apply(suggestedFix);
         }

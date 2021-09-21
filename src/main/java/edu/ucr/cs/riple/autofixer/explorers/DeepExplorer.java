@@ -7,7 +7,6 @@ import edu.ucr.cs.riple.autofixer.metadata.graph.SuperNode;
 import edu.ucr.cs.riple.autofixer.metadata.index.Bank;
 import edu.ucr.cs.riple.autofixer.metadata.index.Error;
 import edu.ucr.cs.riple.autofixer.metadata.index.FixEntity;
-import edu.ucr.cs.riple.autofixer.metadata.index.Result;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.Usage;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;

@@ -33,9 +33,4 @@ public class ClassFieldExplorer extends AdvancedExplorer {
   public boolean isApplicable(Fix fix) {
     return fix.location.equals(fixType.name);
   }
-
-  @Override
-  public boolean requiresInjection(Fix fix) {
-    return true;
-  }
 }
