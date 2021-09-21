@@ -2,9 +2,9 @@ package edu.ucr.cs.riple.autofixer.metadata.graph;
 
 import edu.ucr.cs.riple.autofixer.FixType;
 import edu.ucr.cs.riple.autofixer.Report;
-import edu.ucr.cs.riple.autofixer.explorers.MethodParamExplorer;
 import edu.ucr.cs.riple.autofixer.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.UsageTracker;
+import edu.ucr.cs.riple.autofixer.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.HashSet;
 import java.util.Objects;
@@ -35,7 +35,7 @@ public class SuperNode extends AbstractNode {
     followUps.forEach(
         fix -> {
           if (fix.location.equals(FixType.METHOD_PARAM.name)) {
-            total[0] += MethodParamExplorer.calculateInheritanceViolationError(tree, fix);
+            total[0] += Utility.calculateInheritanceViolationError(tree, fix);
             total[0] -= fix.referred;
           }
         });

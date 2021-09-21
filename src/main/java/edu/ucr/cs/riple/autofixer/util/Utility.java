@@ -2,6 +2,8 @@ package edu.ucr.cs.riple.autofixer.util;
 
 import com.google.common.primitives.Booleans;
 import edu.ucr.cs.riple.autofixer.Report;
+import edu.ucr.cs.riple.autofixer.metadata.method.MethodInheritanceTree;
+import edu.ucr.cs.riple.autofixer.metadata.method.MethodNode;
 import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import edu.ucr.cs.riple.injector.Fix;
 import java.io.BufferedReader;
@@ -130,5 +132,31 @@ public class Utility {
         && fix.method.equals(other.method)
         && fix.index.equals(other.index)
         && fix.param.equals(other.param);
+  }
+
+  public static int calculateInheritanceViolationError(MethodInheritanceTree mit, Fix fix) {
+    int index = Integer.parseInt(fix.index);
+    int effect = 0;
+    boolean[] thisMethodFlag = mit.findNode(fix.method, fix.className).annotFlags;
+    if (index >= thisMethodFlag.length) {
+      return 0;
+    }
+    for (MethodNode subMethod : mit.getSubMethods(fix.method, fix.className, false)) {
+      if (!thisMethodFlag[index]) {
+        if (!subMethod.annotFlags[index]) {
+          effect++;
+        }
+      }
+    }
+    List<MethodNode> superMethods = mit.getSuperMethods(fix.method, fix.className, false);
+    if (superMethods.size() != 0) {
+      MethodNode superMethod = superMethods.get(0);
+      if (!thisMethodFlag[index]) {
+        if (superMethod.annotFlags[index]) {
+          effect--;
+        }
+      }
+    }
+    return effect;
   }
 }

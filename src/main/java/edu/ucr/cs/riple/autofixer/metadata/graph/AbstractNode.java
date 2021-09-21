@@ -3,6 +3,7 @@ package edu.ucr.cs.riple.autofixer.metadata.graph;
 import static edu.ucr.cs.riple.autofixer.util.Utility.isEqual;
 
 import edu.ucr.cs.riple.autofixer.metadata.index.Error;
+import edu.ucr.cs.riple.autofixer.metadata.trackers.Usage;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.UsageTracker;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import java.util.Set;
 public abstract class AbstractNode {
 
   public final Fix fix;
-  public final Set<UsageTracker.Usage> usages;
+  public final Set<Usage> usages;
   public Set<Fix> triggered;
   public List<Error> newErrors;
   public int id;

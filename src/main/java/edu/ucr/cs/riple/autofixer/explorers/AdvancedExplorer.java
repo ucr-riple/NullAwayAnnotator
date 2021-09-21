@@ -9,6 +9,7 @@ import edu.ucr.cs.riple.autofixer.metadata.index.Bank;
 import edu.ucr.cs.riple.autofixer.metadata.index.Error;
 import edu.ucr.cs.riple.autofixer.metadata.index.FixEntity;
 import edu.ucr.cs.riple.autofixer.metadata.index.Result;
+import edu.ucr.cs.riple.autofixer.metadata.trackers.Usage;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.UsageTracker;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.injector.Fix;
@@ -67,7 +68,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
       fixBank.saveState(true, true);
       for (Node node : nodes) {
         int totalEffect = 0;
-        for (UsageTracker.Usage usage : node.usages) {
+        for (Usage usage : node.usages) {
           Result<Error> result = errorBank.compareByMethod(usage.clazz, usage.method, false);
           totalEffect += result.effect;
           node.newErrors.addAll(result.dif);

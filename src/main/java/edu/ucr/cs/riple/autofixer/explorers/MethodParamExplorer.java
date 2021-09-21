@@ -9,8 +9,8 @@ import edu.ucr.cs.riple.autofixer.metadata.index.Error;
 import edu.ucr.cs.riple.autofixer.metadata.index.FixEntity;
 import edu.ucr.cs.riple.autofixer.metadata.index.Result;
 import edu.ucr.cs.riple.autofixer.metadata.method.MethodInheritanceTree;
-import edu.ucr.cs.riple.autofixer.metadata.method.MethodNode;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
+import edu.ucr.cs.riple.autofixer.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +65,8 @@ public class MethodParamExplorer extends AdvancedExplorer {
         Result<Error> result =
             errorBank.compareByMethod(node.fix.className, node.fix.method, false);
         node.newErrors.addAll(result.dif);
-        node.setEffect(result.effect + calculateInheritanceViolationError(this.mit, node.fix));
+        node.setEffect(
+            result.effect + Utility.calculateInheritanceViolationError(this.mit, node.fix));
         if (AutoFixer.DEPTH > 0) {
           node.updateTriggered(
               fixBank
@@ -93,31 +94,5 @@ public class MethodParamExplorer extends AdvancedExplorer {
   @Override
   public boolean requiresInjection(Fix fix) {
     return fixGraph.find(fix) == null;
-  }
-
-  public static int calculateInheritanceViolationError(MethodInheritanceTree mit, Fix fix) {
-    int index = Integer.parseInt(fix.index);
-    int effect = 0;
-    boolean[] thisMethodFlag = mit.findNode(fix.method, fix.className).annotFlags;
-    if (index >= thisMethodFlag.length) {
-      return 0;
-    }
-    for (MethodNode subMethod : mit.getSubMethods(fix.method, fix.className, false)) {
-      if (!thisMethodFlag[index]) {
-        if (!subMethod.annotFlags[index]) {
-          effect++;
-        }
-      }
-    }
-    List<MethodNode> superMethods = mit.getSuperMethods(fix.method, fix.className, false);
-    if (superMethods.size() != 0) {
-      MethodNode superMethod = superMethods.get(0);
-      if (!thisMethodFlag[index]) {
-        if (superMethod.annotFlags[index]) {
-          effect--;
-        }
-      }
-    }
-    return effect;
   }
 }

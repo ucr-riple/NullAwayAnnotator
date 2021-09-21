@@ -9,7 +9,7 @@ import edu.ucr.cs.riple.autofixer.metadata.index.Error;
 import edu.ucr.cs.riple.autofixer.metadata.index.FixEntity;
 import edu.ucr.cs.riple.autofixer.metadata.index.Result;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.CompoundTracker;
-import edu.ucr.cs.riple.autofixer.metadata.trackers.UsageTracker;
+import edu.ucr.cs.riple.autofixer.metadata.trackers.Usage;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.ArrayList;
@@ -97,7 +97,7 @@ public class DeepExplorer extends BasicExplorer {
       group.forEach(
           superNode -> {
             int totalEffect = 0;
-            for (UsageTracker.Usage usage : superNode.usages) {
+            for (Usage usage : superNode.usages) {
               Result<Error> result =
                   errorBank.compareByMethod(superNode.newErrors, usage.clazz, usage.method, false);
               totalEffect += result.effect;
