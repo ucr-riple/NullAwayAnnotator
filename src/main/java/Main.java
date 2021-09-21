@@ -49,7 +49,7 @@ public class Main {
     Injector injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
     System.out.println("built.");
     System.out.println("Injecting...");
-    injector.start(new WorkListBuilder(args[1]).getWorkLists());
+    injector.start(new WorkListBuilder(args[1], true).getWorkLists());
     System.out.println("Finished");
   }
 }
