@@ -6,12 +6,11 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Bank<T extends Hashable> {
 
-  private Index<T> rootInClass;
-  private Index<T> rootInMethod;
+  private final Index<T> rootInClass;
+  private final Index<T> rootInMethod;
   private Index<T> currentInMethod;
   private Index<T> currentInClass;
   private final Factory<T> factory;
@@ -20,14 +19,6 @@ public class Bank<T extends Hashable> {
   public Bank(String path, Factory<T> factory) {
     this.factory = factory;
     this.path = path;
-    rootInClass = new Index<>(path, Index.Type.BY_CLASS, factory);
-    rootInMethod = new Index<>(path, Index.Type.BY_METHOD, factory);
-    rootInMethod.index();
-    rootInClass.index();
-    Preconditions.checkArgument(rootInClass.total == rootInMethod.total);
-  }
-
-  public void reset() {
     rootInClass = new Index<>(path, Index.Type.BY_CLASS, factory);
     rootInMethod = new Index<>(path, Index.Type.BY_METHOD, factory);
     rootInMethod.index();
@@ -57,28 +48,11 @@ public class Bank<T extends Hashable> {
     return compareByList(rootInClass.getByClass(className), currentInClass.getByClass(className));
   }
 
-  public Result<T> compareByClass(List<T> initial, String className, boolean fresh) {
-    saveState(fresh, false);
-    initial = initial.stream().filter(t -> t.clazz.equals(className)).collect(Collectors.toList());
-    return compareByList(initial, currentInClass.getByClass(className));
-  }
-
   public Result<T> compareByMethod(String className, String methodName, boolean fresh) {
     saveState(false, fresh);
     return compareByList(
         rootInMethod.getByMethod(className, methodName),
         currentInMethod.getByMethod(className, methodName));
-  }
-
-  public Result<T> compareByMethod(
-      List<T> initial, String className, String methodName, boolean fresh) {
-    saveState(false, fresh);
-    initial =
-        initial
-            .stream()
-            .filter(t -> t.clazz.equals(className) && t.method.equals(methodName))
-            .collect(Collectors.toList());
-    return compareByList(initial, currentInMethod.getByMethod(className, methodName));
   }
 
   public int compare() {

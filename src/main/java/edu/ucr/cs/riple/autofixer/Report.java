@@ -23,8 +23,4 @@ public class Report {
   public static Report empty(Fix fix) {
     return new Report(fix, 0);
   }
-
-  public void setFollowups(Set<Fix> followups) {
-    this.followups = followups;
-  }
 }
