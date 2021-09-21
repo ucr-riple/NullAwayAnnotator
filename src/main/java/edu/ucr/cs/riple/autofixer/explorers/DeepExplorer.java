@@ -98,10 +98,7 @@ public class DeepExplorer extends BasicExplorer {
           superNode -> {
             int totalEffect = 0;
             for (Usage usage : superNode.usages) {
-              Result<Error> result =
-                  errorBank.compareByMethod(superNode.newErrors, usage.clazz, usage.method, false);
-              totalEffect += result.effect;
-              superNode.newErrors.addAll(result.dif);
+              totalEffect += errorBank.compareByMethod(usage.clazz, usage.method, false).effect;
               superNode.updateTriggered(
                   fixBank
                       .compareByMethod(usage.clazz, usage.method, false)

@@ -63,7 +63,7 @@ public class AutoFixer {
             .setMakeFieldGraph(true)
             .setOptimized(true)
             .setMethodInheritanceTree(true)
-            .setSuggest(true, false)
+            .setSuggest(true, true)
             .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
             .setWorkList(Collections.singleton("*"));
     buildProject(config);
