@@ -158,6 +158,7 @@ public class Utility {
 
   public static void removeCachedFixes(List<Fix> fixes, String out_dir) {
     if (!Files.exists(Paths.get(out_dir + "/reports.json"))) {
+      System.out.println("Found no report at: " + out_dir + "/reports.json");
       return;
     }
     try {
@@ -166,18 +167,19 @@ public class Utility {
           (JSONObject) new JSONParser().parse(new FileReader(out_dir + "/reports.json"));
       JSONArray cachedJson = (JSONArray) cachedObjects.get("reports");
       System.out.println("Found " + cachedJson.size() + " number of reports");
-      List<Report> cached = new ArrayList<>();
+      List<Fix> cached = new ArrayList<>();
       for (Object o : cachedJson) {
         JSONObject reportJson = (JSONObject) o;
-        int effect = Integer.parseInt(reportJson.get("jump").toString());
-        if (effect > 2) {
-          cached.add(new Report(Fix.createFromJson(reportJson), effect));
+        if(Integer.parseInt(reportJson.get("jump").toString()) > 0){
+          cached.add(Fix.createFromJson(reportJson));
         }
       }
-      System.out.println("Cached items size: " + cached.size());
-      fixes.removeAll(cached.stream().map(report -> report.fix).collect(Collectors.toList()));
-    } catch (Exception ignored) {
+      System.out.println("Cached items size: " + cached.size() + " total fix size: " + fixes.size());
+      fixes.removeAll(cached);
+    } catch (Exception exception) {
+      System.out.println("EXCEPTION: " + exception);
+
     }
-    System.out.println("Processing cache fixes finished.");
+    System.out.println("Processing cache fixes finished. Reduced down to: " + fixes.size());
   }
 }

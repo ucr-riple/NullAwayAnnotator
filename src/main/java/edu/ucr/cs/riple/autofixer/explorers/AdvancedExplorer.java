@@ -90,21 +90,9 @@ public abstract class AdvancedExplorer extends BasicExplorer {
 
   protected Report predict(Fix fix) {
     Node node = fixGraph.find(fix);
-    System.out.print(
-        "Trying to predict: "
-            + fix.className
-            + " "
-            + fix.method
-            + " "
-            + fix.param
-            + " "
-            + fix.location
-            + ": ");
     if (node == null) {
-      System.out.println("Not found...");
       return null;
     }
-    System.out.println("Predicted...");
     Report report = new Report(fix, node.effect);
     report.triggered = node.triggered;
     report.newErrors = node.newErrors;

@@ -41,7 +41,7 @@ public class AutoFixer {
   public FieldUsageTracker fieldUsageTracker;
   public MethodInheritanceTree methodInheritanceTree;
 
-  private List<Fix> init(String buildCommand) {
+  private List<Fix> init(String buildCommand, boolean useCache) {
     this.buildCommand = buildCommand;
     this.finishedReports = new ArrayList<>();
     AutoFixConfig.AutoFixConfigWriter config =
@@ -54,7 +54,12 @@ public class AutoFixer {
             .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
             .setWorkList(Collections.singleton("*"));
     buildProject(config);
-    List<Fix> allFixes = Collections.unmodifiableList(Utility.readAllFixes());
+    List<Fix> allFixes = Utility.readAllFixes();
+    if (useCache) {
+      System.out.println("Removing cached fixes");
+      Utility.removeCachedFixes(allFixes, out_dir);
+    }
+    allFixes = Collections.unmodifiableList(allFixes);
     this.injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
     this.methodInheritanceTree = new MethodInheritanceTree(Writer.METHOD_INFO);
     this.callUsageTracker = new CallUsageTracker(Writer.CALL_GRAPH);
@@ -71,12 +76,9 @@ public class AutoFixer {
   }
 
   public void start(String buildCommand, String out_dir, boolean useCache) {
-    System.out.println("AutoFixer Started...");
+    System.out.println("AutoFixer Started...............................");
     this.out_dir = out_dir;
-    List<Fix> fixes = init(buildCommand);
-    if (useCache) {
-      Utility.removeCachedFixes(fixes, out_dir);
-    }
+    List<Fix> fixes = init(buildCommand, useCache);
     List<WorkList> workListLists = new WorkListBuilder(fixes).getWorkLists();
     try {
       for (WorkList workList : workListLists) {

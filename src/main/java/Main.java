@@ -30,12 +30,11 @@ public class Main {
           "AutoFixer needs 5/6 arguments: 1. command to execute NullAway, "
               + "2. output directory, 3. AutoFixer Depth level, 4. Nullable Annotation, 5. optimized [optional]");
     }
-    boolean optimized = args.length == 6 && Boolean.getBoolean(args[5]);
     String dir = args[1];
     String runCommand = args[2];
     AutoFixer.DEPTH = Integer.parseInt(args[3]);
     AutoFixer.NULLABLE_ANNOT = args[4];
-    autoFixer.start(runCommand, dir, optimized);
+    autoFixer.start(runCommand, dir, true);
   }
 
   private static void apply(String[] args) {
