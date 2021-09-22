@@ -1,6 +1,5 @@
 package edu.ucr.cs.riple.autofixer.metadata.graph;
 
-import static edu.ucr.cs.riple.autofixer.util.Utility.isEqual;
 
 import edu.ucr.cs.riple.autofixer.metadata.trackers.UsageTracker;
 import edu.ucr.cs.riple.injector.Fix;
@@ -28,7 +27,7 @@ public class FixGraph<T extends AbstractNode> {
     int hash = AbstractNode.getHash(fix);
     if (nodes.containsKey(hash)) {
       for (T candidate : nodes.get(hash)) {
-        if (isEqual(candidate.fix, fix)) {
+        if (candidate.fix.equals(fix)) {
           return candidate;
         }
       }
@@ -47,7 +46,7 @@ public class FixGraph<T extends AbstractNode> {
     int hash = AbstractNode.getHash(fix);
     if (nodes.containsKey(hash)) {
       for (T candidate : nodes.get(hash)) {
-        if (isEqual(candidate.fix, fix)) {
+        if (candidate.fix.equals(fix)) {
           return candidate;
         }
       }
@@ -61,7 +60,7 @@ public class FixGraph<T extends AbstractNode> {
     T toRemove = null;
     if (nodes.containsKey(hash)) {
       for (T candidate : nodes.get(hash)) {
-        if (isEqual(candidate.fix, fix)) {
+        if (candidate.fix.equals(fix)) {
           toRemove = candidate;
           break;
         }

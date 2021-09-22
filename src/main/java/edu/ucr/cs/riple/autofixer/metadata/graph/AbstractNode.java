@@ -1,6 +1,5 @@
 package edu.ucr.cs.riple.autofixer.metadata.graph;
 
-import static edu.ucr.cs.riple.autofixer.util.Utility.isEqual;
 
 import edu.ucr.cs.riple.autofixer.metadata.index.Error;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.Usage;
@@ -40,7 +39,7 @@ public abstract class AbstractNode {
     this.triggered.addAll(fixes);
     for (Fix fix : fixes) {
       for (Fix other : this.triggered) {
-        if (isEqual(fix, other)) {
+        if (fix.equals(other)) {
           other.referred++;
           break;
         }
