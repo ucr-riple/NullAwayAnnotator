@@ -130,13 +130,6 @@ public class Utility {
     return fixes;
   }
 
-  public static boolean isEqual(Fix fix, Fix other) {
-    return fix.className.equals(other.className)
-        && fix.method.equals(other.method)
-        && fix.index.equals(other.index)
-        && fix.param.equals(other.param);
-  }
-
   public static int calculateInheritanceViolationError(MethodInheritanceTree mit, Fix fix) {
     int index = Integer.parseInt(fix.index);
     int effect = 0;
@@ -171,15 +164,17 @@ public class Utility {
       System.out.println("Reading cached fixes reports");
       JSONObject cachedObjects =
           (JSONObject) new JSONParser().parse(new FileReader(out_dir + "/reports.json"));
-      JSONArray cachedJson = (JSONArray) cachedObjects.get("fixes");
+      JSONArray cachedJson = (JSONArray) cachedObjects.get("reports");
+      System.out.println("Found " + cachedJson.size() + " number of reports");
       List<Report> cached = new ArrayList<>();
       for (Object o : cachedJson) {
         JSONObject reportJson = (JSONObject) o;
-        int effect = Integer.parseInt(reportJson.get("effect").toString());
-        if (effect < 1) {
+        int effect = Integer.parseInt(reportJson.get("jump").toString());
+        if (effect > 2) {
           cached.add(new Report(Fix.createFromJson(reportJson), effect));
         }
       }
+      System.out.println("Cached items size: " + cached.size());
       fixes.removeAll(cached.stream().map(report -> report.fix).collect(Collectors.toList()));
     } catch (Exception ignored) {
     }
