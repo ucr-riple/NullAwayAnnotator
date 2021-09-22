@@ -170,15 +170,15 @@ public class Utility {
       List<Fix> cached = new ArrayList<>();
       for (Object o : cachedJson) {
         JSONObject reportJson = (JSONObject) o;
-        if(Integer.parseInt(reportJson.get("jump").toString()) > 0){
+        if (Integer.parseInt(reportJson.get("jump").toString()) > 0) {
           cached.add(Fix.createFromJson(reportJson));
         }
       }
-      System.out.println("Cached items size: " + cached.size() + " total fix size: " + fixes.size());
+      System.out.println(
+          "Cached items size: " + cached.size() + " total fix size: " + fixes.size());
       fixes.removeAll(cached);
     } catch (Exception exception) {
       System.out.println("EXCEPTION: " + exception);
-
     }
     System.out.println("Processing cache fixes finished. Reduced down to: " + fixes.size());
   }

@@ -22,6 +22,7 @@ public class AutoFixConfig {
   public final boolean SUGGEST_ENABLED;
   public final boolean SUGGEST_DEEP;
   public final boolean PARAM_TEST_ENABLED;
+  public final boolean INHERITANCE_CHECK_DISABLED;
   public final boolean LOG_ERROR_ENABLED;
   public final boolean LOG_ERROR_DEEP;
   public final boolean OPTIMIZED;
@@ -39,6 +40,7 @@ public class AutoFixConfig {
     OPTIMIZED = false;
     MAKE_CALL_GRAPH_ENABLED = false;
     MAKE_FIELD_GRAPH_ENABLED = false;
+    INHERITANCE_CHECK_DISABLED = false;
     ANNOTATION_FACTORY = new AnnotationFactory();
     WORK_LIST = Collections.singleton("*");
     PARAM_INDEX = Integer.MAX_VALUE;
@@ -82,6 +84,9 @@ public class AutoFixConfig {
             && autofixEnabled;
     LOG_ERROR_DEEP =
         getValueFromKey(jsonObject, "LOG_ERROR:DEEP", Boolean.class).orElse(false)
+            && autofixEnabled;
+    INHERITANCE_CHECK_DISABLED =
+        getValueFromKey(jsonObject, "INHERITANCE_CHECK_DISABLED", Boolean.class).orElse(false)
             && autofixEnabled;
     OPTIMIZED =
         getValueFromKey(jsonObject, "OPTIMIZED", Boolean.class).orElse(false) && autofixEnabled;
@@ -147,6 +152,7 @@ public class AutoFixConfig {
     private boolean LOG_ERROR_ENABLED;
     private boolean LOG_ERROR_DEEP;
     private boolean OPTIMIZED;
+    private boolean INHERITANCE_CHECK_DISABLED;
     private Long PARAM_INDEX;
     private String NULLABLE;
     private String NONNULL;
@@ -162,6 +168,7 @@ public class AutoFixConfig {
       LOG_ERROR_DEEP = false;
       OPTIMIZED = false;
       MAKE_FIELD_GRAPH_ENABLED = false;
+      INHERITANCE_CHECK_DISABLED = false;
       NULLABLE = "javax.annotation.Nullable";
       NONNULL = "javax.annotation.Nonnull";
       WORK_LIST = Collections.singleton("*");
@@ -190,6 +197,7 @@ public class AutoFixConfig {
       logError.put("ACTIVE", LOG_ERROR_ENABLED);
       logError.put("DEEP", LOG_ERROR_DEEP);
       res.put("LOG_ERROR", logError);
+      res.put("INHERITANCE_CHECK_DISABLED", INHERITANCE_CHECK_DISABLED);
       JSONObject paramTest = new JSONObject();
       paramTest.put("ACTIVE", PARAM_TEST_ENABLED);
       paramTest.put("INDEX", PARAM_INDEX);
@@ -225,6 +233,11 @@ public class AutoFixConfig {
     public AutoFixConfigWriter setAnnots(String NULLABLE, String NONNULL) {
       this.NULLABLE = NULLABLE;
       this.NONNULL = NONNULL;
+      return this;
+    }
+
+    public AutoFixConfigWriter setInheritanceCheckDisabled(boolean isDisable) {
+      INHERITANCE_CHECK_DISABLED = isDisable;
       return this;
     }
 

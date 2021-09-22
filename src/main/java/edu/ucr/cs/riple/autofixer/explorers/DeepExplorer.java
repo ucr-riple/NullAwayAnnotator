@@ -89,6 +89,7 @@ public class DeepExplorer extends BasicExplorer {
               .setLogError(true, true)
               .setSuggest(true, true)
               .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
+              .setInheritanceCheckDisabled(true)
               .setWorkList(Collections.singleton("*"));
       autoFixer.buildProject(config);
       errorBank.saveState(false, true);
