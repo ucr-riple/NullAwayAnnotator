@@ -69,24 +69,15 @@ public class FixGraph<T extends AbstractNode> {
   }
 
   public void updateUsages(UsageTracker tracker) {
-    List<AbstractNode> allNodes = new ArrayList<>();
-    for (Set<T> nodesSet : nodes.values()) {
-      allNodes.addAll(nodesSet);
-    }
-    for (int i = 0; i < allNodes.size(); i++) {
-      AbstractNode node = allNodes.get(i);
-      node.id = i;
-      node.updateUsages(tracker);
-    }
+    getAllNodes().forEach(t -> t.updateUsages(tracker));
   }
 
   @SuppressWarnings("All")
   public void findGroups() {
     this.groups.clear();
-    List<T> allNodes = new ArrayList<>();
-    for (Set<T> nodesSet : nodes.values()) {
-      allNodes.addAll(nodesSet);
-    }
+    List<T> allNodes = getAllNodes();
+    final int[] id = {0};
+    allNodes.forEach(node -> node.id = id[0]++);
     int size = allNodes.size();
     LinkedList<Integer>[] adj = new LinkedList[size];
     for (int i = 0; i < size; ++i) {

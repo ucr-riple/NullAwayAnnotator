@@ -45,7 +45,7 @@ public class Utility {
       JSONObject reportJson = report.fix.getJson();
       reportJson.put("jump", report.effectiveNess);
       JSONArray followUps = new JSONArray();
-      if (report.effectiveNess < 0) {
+      if (report.effectiveNess < 1) {
         report.followups.remove(report.fix);
         followUps.addAll(
             report.followups.stream().map(fix -> fix.getJson()).collect(Collectors.toList()));
