@@ -121,6 +121,7 @@ public class Utility {
       try (BufferedReader br = new BufferedReader(new FileReader(Writer.SUGGEST_FIX))) {
         String line;
         String delimiter = Writer.getDelimiterRegex();
+        br.readLine();
         while ((line = br.readLine()) != null) {
           Fix fix = Fix.fromCSVLine(line, delimiter);
           Optional<Fix> existing = fixes.stream().filter(other -> other.equals(fix)).findAny();

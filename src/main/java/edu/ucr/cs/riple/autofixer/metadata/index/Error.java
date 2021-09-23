@@ -1,5 +1,7 @@
 package edu.ucr.cs.riple.autofixer.metadata.index;
 
+// todo we have to store more information fot dif to work in bank
+
 public class Error extends Hashable {
   public final String messageType;
   public final String message;

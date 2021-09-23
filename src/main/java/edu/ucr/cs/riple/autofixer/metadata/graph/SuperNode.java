@@ -20,7 +20,6 @@ public class SuperNode extends AbstractNode {
     super(fix);
     followUps = new HashSet<>();
     root = new Node(fix);
-    root.referred++;
     this.followUps.add(root.fix);
   }
 

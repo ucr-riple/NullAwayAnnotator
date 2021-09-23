@@ -36,8 +36,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
     fixes.forEach(
         fix -> {
           if (isApplicable(fix)) {
-            Node node = fixGraph.findOrCreate(fix);
-            node.referred++;
+            fixGraph.findOrCreate(fix);
           }
         });
     if (fixGraph.nodes.size() > 0) {

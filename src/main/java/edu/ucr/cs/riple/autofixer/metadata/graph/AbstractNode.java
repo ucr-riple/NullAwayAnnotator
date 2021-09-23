@@ -48,7 +48,7 @@ public abstract class AbstractNode {
   }
 
   public static int getHash(Fix fix) {
-    return Objects.hash(fix.index, fix.className, fix.method);
+    return Objects.hash(fix.param, fix.index, fix.className, fix.method);
   }
 
   @Override

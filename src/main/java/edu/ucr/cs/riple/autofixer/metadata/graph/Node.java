@@ -5,7 +5,6 @@ import edu.ucr.cs.riple.autofixer.metadata.trackers.UsageTracker;
 import edu.ucr.cs.riple.injector.Fix;
 
 public class Node extends AbstractNode {
-  public int referred;
 
   public Node(Fix fix) {
     super(fix);
@@ -19,7 +18,7 @@ public class Node extends AbstractNode {
   // inside the method boundary and all referred sites are outside (at call sites)
   public void setEffect(int localEffect) {
     if (fix.location.equals(FixType.METHOD_PARAM.name)) {
-      this.effect = localEffect - this.referred;
+      this.effect = localEffect - this.fix.referred;
     } else {
       this.effect = localEffect;
     }
@@ -42,7 +41,7 @@ public class Node extends AbstractNode {
         + ", effect="
         + effect
         + ", referred="
-        + referred
+        + fix.referred
         + '}';
   }
 }
