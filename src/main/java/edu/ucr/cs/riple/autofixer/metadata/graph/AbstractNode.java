@@ -54,4 +54,12 @@ public abstract class AbstractNode {
   public static int getHash(Fix fix) {
     return Objects.hash(fix.index, fix.className, fix.method);
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof AbstractNode)) return false;
+    AbstractNode node = (AbstractNode) o;
+    return fix.equals(node.fix);
+  }
 }

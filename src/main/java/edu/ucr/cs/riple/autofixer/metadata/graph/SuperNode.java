@@ -44,14 +44,6 @@ public class SuperNode extends AbstractNode {
   }
 
   @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof SuperNode)) return false;
-    SuperNode superNode = (SuperNode) o;
-    return root.equals(superNode.root);
-  }
-
-  @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), followUps, report, root);
   }
