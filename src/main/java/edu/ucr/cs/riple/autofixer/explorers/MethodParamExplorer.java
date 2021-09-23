@@ -10,7 +10,6 @@ import edu.ucr.cs.riple.autofixer.metadata.index.FixEntity;
 import edu.ucr.cs.riple.autofixer.metadata.index.Result;
 import edu.ucr.cs.riple.autofixer.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
-import edu.ucr.cs.riple.autofixer.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,17 +18,13 @@ import java.util.stream.Collectors;
 
 public class MethodParamExplorer extends AdvancedExplorer {
 
-  private MethodInheritanceTree mit;
-
   public MethodParamExplorer(
       AutoFixer autoFixer, List<Fix> fixes, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
     super(autoFixer, fixes, errorBank, fixBank, FixType.METHOD_PARAM);
   }
 
   @Override
-  protected void init() {
-    mit = autoFixer.methodInheritanceTree;
-  }
+  protected void init() {}
 
   @Override
   protected void explore() {
@@ -64,8 +59,7 @@ public class MethodParamExplorer extends AdvancedExplorer {
       for (Node node : subList) {
         Result<Error> result =
             errorBank.compareByMethod(node.fix.className, node.fix.method, false);
-        node.setEffect(
-            result.effect + Utility.calculateInheritanceViolationError(this.mit, node.fix));
+        node.setEffect(result.effect, autoFixer.methodInheritanceTree);
         if (AutoFixer.DEPTH > 0) {
           node.updateTriggered(
               fixBank

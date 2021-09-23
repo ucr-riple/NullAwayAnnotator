@@ -1,5 +1,6 @@
 package edu.ucr.cs.riple.autofixer.metadata.graph;
 
+import edu.ucr.cs.riple.autofixer.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.Usage;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.UsageTracker;
 import edu.ucr.cs.riple.injector.Fix;
@@ -29,6 +30,8 @@ public abstract class AbstractNode {
   public boolean hasConflictInUsage(AbstractNode other) {
     return !Collections.disjoint(other.usages, this.usages);
   }
+
+  public abstract void setEffect(int localEffect, MethodInheritanceTree tree);
 
   public void updateTriggered(List<Fix> fixes) {
     this.triggered.addAll(fixes);

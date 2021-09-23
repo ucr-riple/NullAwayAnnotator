@@ -31,6 +31,7 @@ public class SuperNode extends AbstractNode {
 
   // Here we do not need to subtract referred for method params since we are observing
   // call sites too.
+  @Override
   public void setEffect(int effect, MethodInheritanceTree tree) {
     final int[] total = {effect};
     followUps.forEach(

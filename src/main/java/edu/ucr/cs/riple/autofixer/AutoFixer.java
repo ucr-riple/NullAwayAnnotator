@@ -42,6 +42,7 @@ public class AutoFixer {
   public MethodInheritanceTree methodInheritanceTree;
 
   private List<Fix> init(String buildCommand, boolean useCache) {
+    System.out.println("Initializing");
     this.buildCommand = buildCommand;
     this.finishedReports = new ArrayList<>();
     AutoFixConfig.AutoFixConfigWriter config =
@@ -76,7 +77,7 @@ public class AutoFixer {
   }
 
   public void start(String buildCommand, String out_dir, boolean useCache) {
-    System.out.println("AutoFixer Started...............................");
+    System.out.println("AutoFixer Started.");
     this.out_dir = out_dir;
     List<Fix> fixes = init(buildCommand, useCache);
     List<WorkList> workListLists = new WorkListBuilder(fixes).getWorkLists();
@@ -126,7 +127,6 @@ public class AutoFixer {
   }
 
   private List<Fix> analyze(Fix fix) {
-    System.out.println("Fix Type: " + fix.location);
     List<Fix> suggestedFix = new ArrayList<>();
     Report report = null;
     for (Explorer explorer : explorers) {
