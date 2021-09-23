@@ -58,11 +58,7 @@ public class SuperNode extends AbstractNode {
   }
 
   public void mergeTriggered() {
-    this.addFollowUps(this.triggered);
+    this.followUps.addAll(this.triggered);
     this.triggered.clear();
-  }
-
-  public void addFollowUps(Set<Fix> fixes) {
-    followUps.addAll(fixes);
   }
 }

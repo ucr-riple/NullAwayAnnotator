@@ -17,6 +17,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -121,6 +122,14 @@ public class Utility {
         String line;
         String delimiter = Writer.getDelimiterRegex();
         while ((line = br.readLine()) != null) {
+          Fix fix = Fix.fromCSVLine(line, delimiter);
+          Optional<Fix> existing = fixes.stream().filter(other -> other.equals(fix)).findAny();
+          if (existing.isPresent()) {
+            existing.get().referred++;
+          } else {
+            fix.referred = 1;
+            fixes.add(fix);
+          }
           fixes.add(Fix.fromCSVLine(line, delimiter));
         }
       }

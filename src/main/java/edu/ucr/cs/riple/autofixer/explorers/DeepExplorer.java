@@ -43,7 +43,7 @@ public class DeepExplorer extends BasicExplorer {
           node.effect = report.effectiveNess;
           node.report = report;
           node.triggered = report.triggered;
-          node.addFollowUps(report.followups);
+          node.followUps.addAll(report.followups);
           node.mergeTriggered();
           node.updateUsages(tracker);
         });
@@ -80,8 +80,7 @@ public class DeepExplorer extends BasicExplorer {
     for (Set<SuperNode> group : groups.values()) {
       System.out.println("Building: (Iteration " + i++ + " out of: " + groups.size() + ")");
       List<Fix> fixes = new ArrayList<>();
-      group.forEach(SuperNode::mergeTriggered);
-      group.forEach(e -> fixes.addAll(e.getFixChain()));
+      group.forEach(superNode -> fixes.addAll(superNode.getFixChain()));
       autoFixer.apply(fixes);
       AutoFixConfig.AutoFixConfigWriter config =
           new AutoFixConfig.AutoFixConfigWriter()
