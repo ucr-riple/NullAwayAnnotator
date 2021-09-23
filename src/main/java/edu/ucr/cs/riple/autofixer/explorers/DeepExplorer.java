@@ -43,7 +43,6 @@ public class DeepExplorer extends BasicExplorer {
           node.effect = report.effectiveNess;
           node.report = report;
           node.triggered = report.triggered;
-          node.newErrors = report.newErrors;
           node.addFollowUps(report.followups);
           node.mergeTriggered();
           node.updateUsages(tracker);

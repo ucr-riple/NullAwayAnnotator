@@ -64,7 +64,6 @@ public class MethodParamExplorer extends AdvancedExplorer {
       for (Node node : subList) {
         Result<Error> result =
             errorBank.compareByMethod(node.fix.className, node.fix.method, false);
-        node.newErrors.addAll(result.dif);
         node.setEffect(
             result.effect + Utility.calculateInheritanceViolationError(this.mit, node.fix));
         if (AutoFixer.DEPTH > 0) {
