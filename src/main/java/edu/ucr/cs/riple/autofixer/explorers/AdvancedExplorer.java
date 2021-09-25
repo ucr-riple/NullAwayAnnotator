@@ -60,13 +60,13 @@ public abstract class AdvancedExplorer extends BasicExplorer {
       pb.setExtraMessage("Applying fixes");
       autoFixer.apply(fixes);
       pb.setExtraMessage("Building");
-      AutoFixConfig.AutoFixConfigWriter writer =
+      AutoFixConfig.AutoFixConfigWriter config =
           new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, true)
               .setSuggest(true, AutoFixer.DEPTH > 0)
               .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
               .setWorkList(Collections.singleton("*"));
-      autoFixer.buildProject(writer);
+      autoFixer.buildProject(config);
       pb.setExtraMessage("Saving state");
       errorBank.saveState(false, true);
       fixBank.saveState(true, true);

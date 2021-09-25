@@ -41,6 +41,29 @@ public class AutoFixer {
   public FieldUsageTracker fieldUsageTracker;
   public MethodInheritanceTree methodInheritanceTree;
 
+  private static final Log log = new Log();
+
+  public static class Log {
+    int total;
+    int requested;
+    long normal;
+    long deep;
+
+    @Override
+    public String toString() {
+      return "Log{"
+          + "total="
+          + total
+          + ", requested="
+          + requested
+          + ", normal="
+          + normal
+          + ", deep="
+          + deep
+          + '}';
+    }
+  }
+
   private List<Fix> init(String buildCommand, boolean useCache) {
     System.out.println("Initializing");
     this.buildCommand = buildCommand;
@@ -54,13 +77,14 @@ public class AutoFixer {
             .setSuggest(true, true)
             .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
             .setWorkList(Collections.singleton("*"));
-    buildProject(config);
+    buildProject(config, false);
     List<Fix> allFixes = Utility.readAllFixes();
     if (useCache) {
       System.out.println("Removing cached fixes");
       Utility.removeCachedFixes(allFixes, out_dir);
     }
     allFixes = Collections.unmodifiableList(allFixes);
+    log.total = allFixes.size();
     this.injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
     this.methodInheritanceTree = new MethodInheritanceTree(Writer.METHOD_INFO);
     this.callUsageTracker = new CallUsageTracker(Writer.CALL_GRAPH);
@@ -82,6 +106,7 @@ public class AutoFixer {
     List<Fix> fixes = init(buildCommand, useCache);
     List<WorkList> workListLists = new WorkListBuilder(fixes).getWorkLists();
     try {
+      log.normal = System.currentTimeMillis();
       for (WorkList workList : workListLists) {
         for (Fix fix : workList.getFixes()) {
           if (finishedReports.stream().anyMatch(diagnoseReport -> diagnoseReport.fix.equals(fix))) {
@@ -91,11 +116,15 @@ public class AutoFixer {
           remove(appliedFixes);
         }
       }
+      log.normal = System.currentTimeMillis() - log.normal;
+      log.deep = System.currentTimeMillis();
       deepExplorer.start(finishedReports);
+      log.deep = System.currentTimeMillis() - log.deep;
     } catch (Exception e) {
       e.printStackTrace();
     }
     Utility.writeReports(finishedReports);
+    Utility.writeLog(log);
   }
 
   public void remove(List<Fix> fixes) {
@@ -144,12 +173,19 @@ public class AutoFixer {
     return suggestedFix;
   }
 
-  public void buildProject(AutoFixConfig.AutoFixConfigWriter writer) {
+  public void buildProject(AutoFixConfig.AutoFixConfigWriter writer, boolean count) {
+    if (count) {
+      log.requested++;
+    }
     writer.write(out_dir + "/explorer.config");
     try {
       Utility.executeCommand(buildCommand);
     } catch (Exception e) {
       throw new RuntimeException("Could not run command: " + buildCommand);
     }
+  }
+
+  public void buildProject(AutoFixConfig.AutoFixConfigWriter writer) {
+    buildProject(writer, true);
   }
 }

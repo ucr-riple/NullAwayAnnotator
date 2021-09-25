@@ -114,6 +114,6 @@ public class DeepExplorer extends BasicExplorer {
           });
       autoFixer.remove(fixes);
     }
-    pb.step();
+    pb.close();
   }
 }

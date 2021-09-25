@@ -1,12 +1,14 @@
 package edu.ucr.cs.riple.autofixer.util;
 
 import com.google.common.primitives.Booleans;
+import edu.ucr.cs.riple.autofixer.AutoFixer;
 import edu.ucr.cs.riple.autofixer.Report;
 import edu.ucr.cs.riple.autofixer.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.autofixer.metadata.method.MethodNode;
 import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import edu.ucr.cs.riple.injector.Fix;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -241,5 +243,17 @@ public class Utility {
         ChronoUnit.SECONDS,
         0L,
         Duration.ZERO);
+  }
+
+  public static void writeLog(AutoFixer.Log log) {
+    String path = "/tmp/NullAwayFix/log.txt";
+    try {
+      FileWriter fw = new FileWriter(path, true);
+      BufferedWriter bw = new BufferedWriter(fw);
+      bw.write(log.toString());
+      bw.newLine();
+      bw.close();
+    } catch (Exception ignored) {
+    }
   }
 }
