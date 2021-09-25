@@ -15,11 +15,15 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import me.tongfei.progressbar.ProgressBar;
+import me.tongfei.progressbar.ProgressBarStyle;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -221,5 +225,21 @@ public class Utility {
       throw new RuntimeException("Error in parsing object: " + e);
     }
     return fixes;
+  }
+
+  public static ProgressBar createProgressBar(String taskName, int steps) {
+    return new ProgressBar(
+        taskName,
+        steps,
+        1000,
+        System.out,
+        ProgressBarStyle.ASCII,
+        "",
+        1,
+        false,
+        null,
+        ChronoUnit.SECONDS,
+        0L,
+        Duration.ZERO);
   }
 }

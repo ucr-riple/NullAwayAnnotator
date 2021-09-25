@@ -123,7 +123,7 @@ public class AutoFixer {
     if (fixes == null || fixes.size() == 0) {
       return;
     }
-    injector.start(new WorkListBuilder(fixes).getWorkLists(), true);
+    injector.start(new WorkListBuilder(fixes).getWorkLists(), false);
   }
 
   private List<Fix> analyze(Fix fix) {

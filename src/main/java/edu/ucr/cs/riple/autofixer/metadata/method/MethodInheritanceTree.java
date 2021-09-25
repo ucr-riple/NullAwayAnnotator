@@ -3,6 +3,7 @@ package edu.ucr.cs.riple.autofixer.metadata.method;
 import edu.ucr.cs.riple.autofixer.metadata.AbstractRelation;
 import edu.ucr.cs.riple.autofixer.util.Utility;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -11,10 +12,23 @@ import java.util.Set;
 public class MethodInheritanceTree extends AbstractRelation<MethodNode> {
 
   HashMap<Integer, MethodNode> nodes;
+  private static final MethodNode top;
   private static int maxsize = 0;
+
+  static {
+    top = new MethodNode();
+    top.method = "null";
+    top.clazz = "null";
+    top.children = Collections.emptyList();
+    top.id = -1;
+    top.annotFlags = new boolean[] {};
+    top.parent = -1;
+    top.uri = "null";
+  }
 
   public MethodInheritanceTree(String filePath) {
     super(filePath);
+    nodes.put(-1, top);
   }
 
   @Override

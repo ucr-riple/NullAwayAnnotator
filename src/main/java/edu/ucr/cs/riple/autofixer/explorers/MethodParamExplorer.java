@@ -10,11 +10,11 @@ import edu.ucr.cs.riple.autofixer.metadata.index.FixEntity;
 import edu.ucr.cs.riple.autofixer.metadata.index.Result;
 import edu.ucr.cs.riple.autofixer.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
+import edu.ucr.cs.riple.autofixer.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
+import me.tongfei.progressbar.ProgressBar;
 
 public class MethodParamExplorer extends AdvancedExplorer {
 
@@ -30,12 +30,11 @@ public class MethodParamExplorer extends AdvancedExplorer {
   protected void explore() {
     int maxsize = MethodInheritanceTree.maxParamSize();
     System.out.println("Max size for method parameter list is: " + maxsize);
-    List<Node> allNodes = new ArrayList<>();
-    for (Set<Node> subList : fixGraph.nodes.values()) {
-      allNodes.addAll(subList);
-    }
+    List<Node> allNodes = fixGraph.getAllNodes();
+    ProgressBar pb = Utility.createProgressBar("Exploring Method Params: ", maxsize);
     for (int i = 0; i < maxsize; i++) {
-      System.out.println(
+      pb.step();
+      pb.setExtraMessage(
           "Analyzing params at index: (" + (i + 1) + " out of " + maxsize + ") for all methods...");
       int finalI1 = i;
       List<Node> subList =
@@ -44,9 +43,10 @@ public class MethodParamExplorer extends AdvancedExplorer {
               .filter(node -> node.fix.index.equals(finalI1 + ""))
               .collect(Collectors.toList());
       if (subList.size() == 0) {
-        System.out.println("No fix at this index, skipping...");
+        pb.setExtraMessage("No fix at this index, skipping.");
         continue;
       }
+      pb.setExtraMessage("Building.");
       AutoFixConfig.AutoFixConfigWriter config =
           new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, true)
@@ -56,7 +56,9 @@ public class MethodParamExplorer extends AdvancedExplorer {
       autoFixer.buildProject(config);
       errorBank.saveState(false, true);
       fixBank.saveState(false, true);
+      int index = 0;
       for (Node node : subList) {
+        pb.setExtraMessage("processing node: " + index + " / " + subList.size());
         Result<Error> result =
             errorBank.compareByMethod(node.fix.className, node.fix.method, false);
         node.setEffect(result.effect, autoFixer.methodInheritanceTree);
@@ -71,6 +73,7 @@ public class MethodParamExplorer extends AdvancedExplorer {
         }
       }
     }
+    pb.close();
     System.out.println("Captured all methods behavior against nullability of parameter.");
   }
 

@@ -47,7 +47,7 @@ public class Main {
     System.out.println("built.");
     List<Fix> fixes = Utility.readFixesJson(args[1]);
     System.out.println("Injecting...");
-    injector.start(new WorkListBuilder(fixes).getWorkLists());
+    injector.start(new WorkListBuilder(fixes).getWorkLists(), true);
     System.out.println("Finished");
   }
 }

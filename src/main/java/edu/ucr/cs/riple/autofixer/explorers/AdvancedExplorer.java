@@ -11,12 +11,14 @@ import edu.ucr.cs.riple.autofixer.metadata.index.FixEntity;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.Usage;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.UsageTracker;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
+import edu.ucr.cs.riple.autofixer.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import me.tongfei.progressbar.ProgressBar;
 
 public abstract class AdvancedExplorer extends BasicExplorer {
 
@@ -50,11 +52,14 @@ public abstract class AdvancedExplorer extends BasicExplorer {
   protected void explore() {
     HashMap<Integer, Set<Node>> groups = fixGraph.getGroups();
     System.out.println("Building for: " + groups.size() + " number of times");
-    int i = 1;
+    ProgressBar pb = Utility.createProgressBar("Exploring " + fixType.name, groups.values().size());
     for (Set<Node> nodes : groups.values()) {
-      System.out.println("Building: (Iteration " + i++ + " out of " + groups.size() + ")");
+      pb.step();
+      pb.setExtraMessage("Gathering fixes");
       List<Fix> fixes = nodes.stream().map(node -> node.fix).collect(Collectors.toList());
+      pb.setExtraMessage("Applying fixes");
       autoFixer.apply(fixes);
+      pb.setExtraMessage("Building");
       AutoFixConfig.AutoFixConfigWriter writer =
           new AutoFixConfig.AutoFixConfigWriter()
               .setLogError(true, true)
@@ -62,9 +67,12 @@ public abstract class AdvancedExplorer extends BasicExplorer {
               .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
               .setWorkList(Collections.singleton("*"));
       autoFixer.buildProject(writer);
+      pb.setExtraMessage("Saving state");
       errorBank.saveState(false, true);
       fixBank.saveState(true, true);
+      int index = 0;
       for (Node node : nodes) {
+        pb.setExtraMessage("Node number: " + (index++) + " / " + nodes.size());
         int totalEffect = 0;
         for (Usage usage : node.usages) {
           totalEffect += errorBank.compareByMethod(usage.clazz, usage.method, false).effect;
@@ -82,6 +90,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
       }
       autoFixer.remove(fixes);
     }
+    pb.close();
   }
 
   protected Report predict(Fix fix) {
