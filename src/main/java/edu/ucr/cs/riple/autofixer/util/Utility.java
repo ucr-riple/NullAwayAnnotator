@@ -7,6 +7,7 @@ import edu.ucr.cs.riple.autofixer.metadata.method.MethodNode;
 import edu.ucr.cs.riple.autofixer.nullaway.Writer;
 import edu.ucr.cs.riple.injector.Fix;
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class Utility {
 
@@ -191,5 +193,31 @@ public class Utility {
       System.out.println("EXCEPTION: " + exception);
     }
     System.out.println("Processing cache fixes finished. Reduced down to: " + fixes.size());
+  }
+
+  public static List<Fix> readFixesJson(String filePath) {
+    List<Fix> fixes = new ArrayList<>();
+    try {
+      BufferedReader bufferedReader =
+          Files.newBufferedReader(Paths.get(filePath), Charset.defaultCharset());
+      JSONObject obj = (JSONObject) new JSONParser().parse(bufferedReader);
+      JSONArray fixesJson = (JSONArray) obj.get("fixes");
+      bufferedReader.close();
+      for (Object o : fixesJson) {
+        JSONObject fixJson = (JSONObject) o;
+        fixes.add(Fix.createFromJson(fixJson));
+        JSONArray followUps = (JSONArray) fixJson.get("followups");
+        for (Object followup : followUps) {
+          fixes.add(Fix.createFromJson((JSONObject) followup));
+        }
+      }
+    } catch (FileNotFoundException ex) {
+      throw new RuntimeException("Unable to open file: " + filePath);
+    } catch (IOException ex) {
+      throw new RuntimeException("Error reading file: " + filePath);
+    } catch (ParseException e) {
+      throw new RuntimeException("Error in parsing object: " + e);
+    }
+    return fixes;
   }
 }
