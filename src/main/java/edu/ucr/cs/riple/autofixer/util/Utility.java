@@ -206,9 +206,11 @@ public class Utility {
       for (Object o : fixesJson) {
         JSONObject fixJson = (JSONObject) o;
         fixes.add(Fix.createFromJson(fixJson));
-        JSONArray followUps = (JSONArray) fixJson.get("followups");
-        for (Object followup : followUps) {
-          fixes.add(Fix.createFromJson((JSONObject) followup));
+        if (fixJson.containsKey("followups")) {
+          JSONArray followUps = (JSONArray) fixJson.get("followups");
+          for (Object followup : followUps) {
+            fixes.add(Fix.createFromJson((JSONObject) followup));
+          }
         }
       }
     } catch (FileNotFoundException ex) {

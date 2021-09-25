@@ -65,7 +65,7 @@ public class MethodInheritanceTree extends AbstractRelation<MethodNode> {
     }
     while (node != null) {
       MethodNode parent = nodes.get(node.parent);
-      if (parent != null) {
+      if (parent != null && parent.method != null && !parent.method.equals("null")) {
         ans.add(parent);
         if (!deep) {
           break;
