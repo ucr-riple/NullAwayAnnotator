@@ -58,7 +58,7 @@ public class DeepExplorer extends BasicExplorer {
     System.out.println(
         "Deep explorer is active...\nAnalysing for " + AutoFixer.DEPTH + " number of levels");
     for (int i = 0; i < AutoFixer.DEPTH; i++) {
-      System.out.println("Analyzing at level " + i);
+      System.out.println("Analyzing at level " + (i + 1));
       init(reports);
       explore();
       List<SuperNode> nodes = fixGraph.getAllNodes();
