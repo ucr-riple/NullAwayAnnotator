@@ -46,21 +46,12 @@ public class AutoFixer {
   public static class Log {
     int total;
     int requested;
-    long normal;
+    long time;
     long deep;
 
     @Override
     public String toString() {
-      return "Log{"
-          + "total="
-          + total
-          + ", requested="
-          + requested
-          + ", normal="
-          + normal
-          + ", deep="
-          + deep
-          + '}';
+      return "total=" + total + ", requested=" + requested + ", time=" + time + ", deep=" + deep;
     }
   }
 
@@ -101,12 +92,12 @@ public class AutoFixer {
   }
 
   public void start(String buildCommand, String out_dir, boolean useCache) {
+    log.time = System.currentTimeMillis();
     System.out.println("AutoFixer Started.");
     this.out_dir = out_dir;
     List<Fix> fixes = init(buildCommand, useCache);
     List<WorkList> workListLists = new WorkListBuilder(fixes).getWorkLists();
     try {
-      log.normal = System.currentTimeMillis();
       for (WorkList workList : workListLists) {
         for (Fix fix : workList.getFixes()) {
           if (finishedReports.stream().anyMatch(diagnoseReport -> diagnoseReport.fix.equals(fix))) {
@@ -116,13 +107,13 @@ public class AutoFixer {
           remove(appliedFixes);
         }
       }
-      log.normal = System.currentTimeMillis() - log.normal;
       log.deep = System.currentTimeMillis();
       deepExplorer.start(finishedReports);
       log.deep = System.currentTimeMillis() - log.deep;
     } catch (Exception e) {
       e.printStackTrace();
     }
+    log.time = System.currentTimeMillis() - log.time;
     Utility.writeReports(finishedReports);
     Utility.writeLog(log);
   }
