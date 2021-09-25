@@ -10,6 +10,7 @@ import edu.ucr.cs.riple.autofixer.metadata.index.FixEntity;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.Usage;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
+import edu.ucr.cs.riple.autofixer.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import me.tongfei.progressbar.ProgressBar;
 
 public class DeepExplorer extends BasicExplorer {
 
@@ -76,11 +78,12 @@ public class DeepExplorer extends BasicExplorer {
     fixGraph.findGroups();
     HashMap<Integer, Set<SuperNode>> groups = fixGraph.getGroups();
     System.out.println("Building for: " + groups.size() + " number of times");
-    int i = 1;
+    ProgressBar pb = Utility.createProgressBar("Deep analysis", groups.size());
     for (Set<SuperNode> group : groups.values()) {
-      System.out.println("Building: (Iteration " + i++ + " out of: " + groups.size() + ")");
+      pb.step();
       List<Fix> fixes = new ArrayList<>();
       group.forEach(superNode -> fixes.addAll(superNode.getFixChain()));
+      pb.setExtraMessage("Applying fixes");
       autoFixer.apply(fixes);
       AutoFixConfig.AutoFixConfigWriter config =
           new AutoFixConfig.AutoFixConfigWriter()
@@ -89,7 +92,9 @@ public class DeepExplorer extends BasicExplorer {
               .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
               .setInheritanceCheckDisabled(true)
               .setWorkList(Collections.singleton("*"));
+      pb.setExtraMessage("Building");
       autoFixer.buildProject(config);
+      pb.setExtraMessage("Saving state");
       errorBank.saveState(false, true);
       fixBank.saveState(false, true);
       group.forEach(
@@ -109,5 +114,6 @@ public class DeepExplorer extends BasicExplorer {
           });
       autoFixer.remove(fixes);
     }
+    pb.step();
   }
 }
