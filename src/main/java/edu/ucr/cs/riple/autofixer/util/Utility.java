@@ -150,11 +150,15 @@ public class Utility {
 
   public static int calculateInheritanceViolationError(MethodInheritanceTree mit, Fix fix) {
     int index = Integer.parseInt(fix.index);
-    int effect = 0;
-    boolean[] thisMethodFlag = mit.findNode(fix.method, fix.className).annotFlags;
+    MethodNode methodNode = mit.findNode(fix.method, fix.className);
+    if (methodNode == null) {
+      return 0;
+    }
+    boolean[] thisMethodFlag = methodNode.annotFlags;
     if (index >= thisMethodFlag.length) {
       return 0;
     }
+    int effect = 0;
     for (MethodNode subMethod : mit.getSubMethods(fix.method, fix.className, false)) {
       if (!thisMethodFlag[index]) {
         if (!subMethod.annotFlags[index]) {
