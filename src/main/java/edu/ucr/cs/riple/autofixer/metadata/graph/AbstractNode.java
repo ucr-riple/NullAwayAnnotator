@@ -17,6 +17,7 @@ public abstract class AbstractNode {
   public Set<Fix> triggered;
   public int id;
   public int effect;
+  public boolean changed;
 
   protected AbstractNode(Fix fix) {
     this.usages = new HashSet<>();
@@ -34,7 +35,9 @@ public abstract class AbstractNode {
   public abstract void setEffect(int localEffect, MethodInheritanceTree tree);
 
   public void updateTriggered(List<Fix> fixes) {
+    int sizeBefore = this.triggered.size();
     this.triggered.addAll(fixes);
+    int sizeAfter = this.triggered.size();
     for (Fix fix : fixes) {
       for (Fix other : this.triggered) {
         if (fix.equals(other)) {
@@ -43,6 +46,7 @@ public abstract class AbstractNode {
         }
       }
     }
+    changed = sizeAfter != sizeBefore;
   }
 
   @Override

@@ -34,7 +34,10 @@ public class DeepExplorer extends BasicExplorer {
   private void init(List<Report> reports) {
     this.fixGraph.clear();
     Set<Report> filteredReports =
-        reports.stream().filter(report -> report.effectiveNess > 0).collect(Collectors.toSet());
+        reports
+            .stream()
+            .filter(report -> (report.effectiveNess > 0 && !report.finished))
+            .collect(Collectors.toSet());
     System.out.println(
         "Number of unfinished reports with effectiveness greater than zero: "
             + filteredReports.size());
@@ -48,11 +51,13 @@ public class DeepExplorer extends BasicExplorer {
           node.followUps.addAll(report.followups);
           node.mergeTriggered();
           node.updateUsages(tracker);
+          node.changed = false;
         });
   }
 
   public void start(List<Report> reports) {
     if (AutoFixer.DEPTH == 0) {
+      reports.forEach(report -> report.finished = true);
       return;
     }
     System.out.println(
@@ -67,6 +72,7 @@ public class DeepExplorer extends BasicExplorer {
             Report report = superNode.report;
             report.effectiveNess = superNode.effect;
             report.followups = superNode.followUps;
+            report.finished = !superNode.changed;
           });
     }
   }
