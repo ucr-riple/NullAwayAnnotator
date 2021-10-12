@@ -141,3 +141,4 @@ level 4 is the sweet spot for having the best performance. Please look at the ch
 
 ## Artifact Evaluation
 
+Due to complexity of making test cases (inputs are project modules :D ). I provided a [docker](https://github.com/nimakarimipour/DiagnoserDocker) script and the [repo](https://github.com/nimakarimipour/Docker_AE_NA) for artifact evaluation of this project where docker works with
