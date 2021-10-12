@@ -65,6 +65,49 @@ public class Test {
 }
 ```
 
+```AutoFixer``` propagate effect of a change through the entire module inject several annotations to fully resolve one specific warning.
+In the example below, making ```foo```, ```@Nullable``` requires two more ```@Nullable``` and ```AutoFixer``` automatically takes care of that.
+
+```java
+public class Test{
+    Object foo; //warning: "nullableFoo" is not initialized
+
+    public Object run(){
+        bar(foo); // if foo was @Nullable, we would have seen the warning: passing nullable to nonnull param
+        return foo; // if foo was @Nullable, we would have seen the warning: returning nullable from non-null method
+    }
+    
+    public void bar(Object foo){
+        if(foo != null){
+            String name = foo.toString(); 
+        }
+    }
+}
+```
+
+However, ```AutoFixer``` automatically follows the chain of warnings and find the best solution using it's ```deep search``` technique.
+And produces the code below in one run:
+
+```java
+import javax.annotation.Nullable;
+
+public class Test {
+    @Nullable
+    Object foo; //warning: resolved
+
+    @Nullable
+    public Object run() {
+        bar(foo); //warning: resolved
+        return foo; //warning: resolved
+    }
+
+    public void bar(@Nullable Object foo) {
+        if (foo != null) {
+            String name = foo.toString();
+        }
+    }
+}
+```
 
 ## Installation
 
