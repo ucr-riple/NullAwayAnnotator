@@ -124,7 +124,6 @@ public class FixGraph<T extends AbstractNode> {
         groups.get(result[i]).add(allNodes.get(i));
       }
     }
-    System.out.println("FOUND: " + groups.size() + " number of groups");
   }
 
   public HashMap<Integer, Set<T>> getGroups() {

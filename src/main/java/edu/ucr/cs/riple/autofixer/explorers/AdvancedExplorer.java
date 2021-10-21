@@ -51,7 +51,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
 
   protected void explore() {
     HashMap<Integer, Set<Node>> groups = fixGraph.getGroups();
-    System.out.println("Building for: " + groups.size() + " number of times");
+    System.out.println("Scheduling for: " + groups.size() + " builds");
     ProgressBar pb = Utility.createProgressBar("Exploring " + fixType.name, groups.values().size());
     for (Set<Node> nodes : groups.values()) {
       pb.step();

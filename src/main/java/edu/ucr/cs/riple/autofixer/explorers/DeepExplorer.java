@@ -61,7 +61,7 @@ public class DeepExplorer extends BasicExplorer {
       return;
     }
     System.out.println(
-        "Deep explorer is active...\nAnalysing for " + AutoFixer.DEPTH + " number of levels");
+        "Deep explorer is active...\nMax Depth level: " + AutoFixer.DEPTH);
     for (int i = 0; i < AutoFixer.DEPTH; i++) {
       System.out.println("Analyzing at level " + (i + 1));
       init(reports);
@@ -83,7 +83,7 @@ public class DeepExplorer extends BasicExplorer {
     }
     fixGraph.findGroups();
     HashMap<Integer, Set<SuperNode>> groups = fixGraph.getGroups();
-    System.out.println("Building for: " + groups.size() + " number of times");
+    System.out.println("Scheduling for: " + groups.size() + " builds");
     ProgressBar pb = Utility.createProgressBar("Deep analysis", groups.size());
     for (Set<SuperNode> group : groups.values()) {
       pb.step();
