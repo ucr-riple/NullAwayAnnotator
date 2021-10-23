@@ -1,5 +1,6 @@
 package edu.ucr.cs.riple.autofixer.metadata.graph;
 
+import edu.ucr.cs.riple.autofixer.metadata.index.Error;
 import edu.ucr.cs.riple.autofixer.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.Usage;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.UsageTracker;
@@ -18,12 +19,14 @@ public abstract class AbstractNode {
   public int id;
   public int effect;
   public boolean changed;
+  public boolean finished;
 
   protected AbstractNode(Fix fix) {
     this.usages = new HashSet<>();
     this.fix = fix;
     this.triggered = new HashSet<>();
     this.effect = 0;
+    this.finished = false;
   }
 
   public abstract void updateUsages(UsageTracker tracker);
@@ -47,6 +50,13 @@ public abstract class AbstractNode {
       }
     }
     changed = sizeAfter != sizeBefore;
+  }
+
+  public void analyzeStatus(List<Error> newErrors) {
+    if (this.finished) {
+      return;
+    }
+    this.finished = newErrors.stream().noneMatch(error -> error.covered);
   }
 
   @Override

@@ -8,6 +8,7 @@ import edu.ucr.cs.riple.autofixer.metadata.graph.Node;
 import edu.ucr.cs.riple.autofixer.metadata.index.Bank;
 import edu.ucr.cs.riple.autofixer.metadata.index.Error;
 import edu.ucr.cs.riple.autofixer.metadata.index.FixEntity;
+import edu.ucr.cs.riple.autofixer.metadata.index.Result;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.Usage;
 import edu.ucr.cs.riple.autofixer.metadata.trackers.UsageTracker;
 import edu.ucr.cs.riple.autofixer.nullaway.AutoFixConfig;
@@ -75,7 +76,10 @@ public abstract class AdvancedExplorer extends BasicExplorer {
         pb.setExtraMessage("Node number: " + (index++) + " / " + nodes.size());
         int totalEffect = 0;
         for (Usage usage : node.usages) {
-          totalEffect += errorBank.compareByMethod(usage.clazz, usage.method, false).effect;
+          Result<Error> errorComparison =
+              errorBank.compareByMethod(usage.clazz, usage.method, false);
+          node.analyzeStatus(errorComparison.dif);
+          totalEffect += errorComparison.size;
           if (AutoFixer.DEPTH > 0) {
             node.updateTriggered(
                 fixBank
@@ -100,6 +104,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
     }
     Report report = new Report(fix, node.effect);
     report.triggered = node.triggered;
+    report.finished = node.finished;
     return report;
   }
 

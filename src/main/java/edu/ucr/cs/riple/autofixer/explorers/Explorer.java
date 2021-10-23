@@ -61,12 +61,12 @@ public abstract class Explorer {
     autoFixer.buildProject(config);
     if (new File(Writer.ERROR).exists()) {
       int totalEffect = 0;
-      totalEffect += errorBank.compareByClass(fix.className, true).effect;
+      totalEffect += errorBank.compareByClass(fix.className, true).size;
       for (String clazz : workSet) {
         if (clazz.equals(fix.className)) {
           continue;
         }
-        totalEffect += errorBank.compareByClass(clazz, false).effect;
+        totalEffect += errorBank.compareByClass(clazz, false).size;
       }
       return new Report(fix, totalEffect);
     }

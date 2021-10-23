@@ -60,8 +60,7 @@ public class DeepExplorer extends BasicExplorer {
       reports.forEach(report -> report.finished = true);
       return;
     }
-    System.out.println(
-        "Deep explorer is active...\nMax Depth level: " + AutoFixer.DEPTH);
+    System.out.println("Deep explorer is active...\nMax Depth level: " + AutoFixer.DEPTH);
     for (int i = 0; i < AutoFixer.DEPTH; i++) {
       System.out.println("Analyzing at level " + (i + 1));
       init(reports);
@@ -107,7 +106,7 @@ public class DeepExplorer extends BasicExplorer {
           superNode -> {
             int totalEffect = 0;
             for (Usage usage : superNode.usages) {
-              totalEffect += errorBank.compareByMethod(usage.clazz, usage.method, false).effect;
+              totalEffect += errorBank.compareByMethod(usage.clazz, usage.method, false).size;
               superNode.updateTriggered(
                   fixBank
                       .compareByMethod(usage.clazz, usage.method, false)

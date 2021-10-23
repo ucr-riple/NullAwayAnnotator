@@ -4,11 +4,11 @@ import java.util.List;
 
 public class Result<T> {
 
-  public final int effect;
+  public final int size;
   public final List<T> dif;
 
-  public Result(int effect, List<T> dif) {
-    this.effect = effect;
+  public Result(int size, List<T> dif) {
+    this.size = size;
     this.dif = dif;
   }
 }

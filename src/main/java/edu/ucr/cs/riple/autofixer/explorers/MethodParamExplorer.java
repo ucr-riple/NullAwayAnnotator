@@ -59,9 +59,10 @@ public class MethodParamExplorer extends AdvancedExplorer {
       int index = 0;
       for (Node node : subList) {
         pb.setExtraMessage("processing node: " + index + " / " + subList.size());
-        Result<Error> result =
+        Result<Error> errorComparison =
             errorBank.compareByMethod(node.fix.className, node.fix.method, false);
-        node.setEffect(result.effect, autoFixer.methodInheritanceTree);
+        node.setEffect(errorComparison.size, autoFixer.methodInheritanceTree);
+        node.analyzeStatus(errorComparison.dif);
         if (AutoFixer.DEPTH > 0) {
           node.updateTriggered(
               fixBank

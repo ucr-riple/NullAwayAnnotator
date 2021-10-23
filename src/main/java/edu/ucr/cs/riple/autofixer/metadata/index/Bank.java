@@ -38,9 +38,9 @@ public class Bank<T extends Hashable> {
   }
 
   private Result<T> compareByList(List<T> previousItems, List<T> currentItems) {
-    int effect = currentItems.size() - previousItems.size();
+    int size = currentItems.size() - previousItems.size();
     previousItems.forEach(currentItems::remove);
-    return new Result<>(effect, currentItems);
+    return new Result<>(size, currentItems);
   }
 
   public Result<T> compareByClass(String className, boolean fresh) {
