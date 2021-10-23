@@ -13,12 +13,17 @@ import java.util.Set;
 
 public abstract class AbstractNode {
 
+  /** Fix to process */
   public final Fix fix;
+
   public final Set<Usage> usages;
   public Set<Fix> triggered;
   public int id;
+  /** Effect of applying containing fix */
   public int effect;
+  /** if <code>true</code>, set of triggered has been updated */
   public boolean changed;
+  /** if <code>true</code>, no new triggered error is addressable by a fix */
   public boolean finished;
 
   protected AbstractNode(Fix fix) {

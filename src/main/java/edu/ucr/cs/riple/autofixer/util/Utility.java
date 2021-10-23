@@ -46,12 +46,13 @@ public class Utility {
   }
 
   @SuppressWarnings("ALL")
-  public static void writeReports(List<Report> finishedReports) {
+  public static void writeReports(List<Report> reports) {
     JSONObject result = new JSONObject();
     JSONArray reportsJson = new JSONArray();
-    for (Report report : finishedReports) {
+    for (Report report : reports) {
       JSONObject reportJson = report.fix.getJson();
       reportJson.put("jump", report.effectiveNess);
+      reportJson.put("finished", report.finished);
       JSONArray followUps = new JSONArray();
       if (report.effectiveNess < 1) {
         report.followups.remove(report.fix);
