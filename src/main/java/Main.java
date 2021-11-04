@@ -3,8 +3,6 @@ import edu.ucr.cs.riple.autofixer.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkListBuilder;
-
-import java.util.Arrays;
 import java.util.List;
 
 public class Main {
@@ -47,7 +45,8 @@ public class Main {
     }
     boolean keepStyle = Boolean.parseBoolean(args[2]);
     System.out.println("Building Injector...");
-    Injector injector = Injector.builder().setMode(Injector.MODE.BATCH).keepStyle(keepStyle).build();
+    Injector injector =
+        Injector.builder().setMode(Injector.MODE.BATCH).keepStyle(keepStyle).build();
     System.out.println("built.");
     List<Fix> fixes = Utility.readFixesJson(args[1]);
     System.out.println("Injecting...");
