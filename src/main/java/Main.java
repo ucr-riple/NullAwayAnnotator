@@ -3,6 +3,8 @@ import edu.ucr.cs.riple.autofixer.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkListBuilder;
+
+import java.util.Arrays;
 import java.util.List;
 
 public class Main {
@@ -25,25 +27,27 @@ public class Main {
 
   private static void diagnose(String[] args) {
     AutoFixer autoFixer = new AutoFixer();
-    if (!(args.length == 5 || args.length == 6)) {
+    if (args.length != 6) {
       throw new RuntimeException(
-          "AutoFixer needs 5/6 arguments: 1. command to execute NullAway, "
-              + "2. output directory, 3. AutoFixer Depth level, 4. Nullable Annotation, 5. optimized [optional]");
+          "AutoFixer:diagnose needs 5 arguments: 1. command to execute NullAway, "
+              + "2. output directory, 3. AutoFixer Depth level, 4. Nullable Annotation, 5. style");
     }
     String dir = args[1];
     String runCommand = args[2];
     AutoFixer.DEPTH = Integer.parseInt(args[3]);
     AutoFixer.NULLABLE_ANNOT = args[4];
+    AutoFixer.KEEP_STYLE = Boolean.parseBoolean(args[5]);
     autoFixer.start(runCommand, dir, true);
   }
 
   private static void apply(String[] args) {
-    if (args.length != 2) {
+    if (args.length != 3) {
       throw new RuntimeException(
-          "AutoFixer needs exactly one arguments: 1. path to the suggested fix file");
+          "AutoFixer:apply needs two arguments: 1. path to the suggested fix file, 2. code style preservation flag");
     }
+    boolean keepStyle = Boolean.parseBoolean(args[2]);
     System.out.println("Building Injector...");
-    Injector injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
+    Injector injector = Injector.builder().setMode(Injector.MODE.BATCH).keepStyle(keepStyle).build();
     System.out.println("built.");
     List<Fix> fixes = Utility.readFixesJson(args[1]);
     System.out.println("Injecting...");

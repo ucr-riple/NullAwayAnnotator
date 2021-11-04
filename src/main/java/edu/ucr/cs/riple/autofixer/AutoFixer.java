@@ -29,6 +29,7 @@ public class AutoFixer {
 
   public static String NULLABLE_ANNOT;
   public static int DEPTH;
+  public static boolean KEEP_STYLE;
 
   private String out_dir;
   private String buildCommand;
@@ -76,7 +77,7 @@ public class AutoFixer {
     }
     allFixes = Collections.unmodifiableList(allFixes);
     log.total = allFixes.size();
-    this.injector = Injector.builder().setMode(Injector.MODE.BATCH).build();
+    this.injector = Injector.builder().setMode(Injector.MODE.BATCH).keepStyle(KEEP_STYLE).build();
     this.methodInheritanceTree = new MethodInheritanceTree(Writer.METHOD_INFO);
     this.callUsageTracker = new CallUsageTracker(Writer.CALL_GRAPH);
     this.fieldUsageTracker = new FieldUsageTracker(Writer.FIELD_GRAPH);
