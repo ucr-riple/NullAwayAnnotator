@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.autofixer.explorers.BasicExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.ClassFieldExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.DeepExplorer;
+import edu.ucr.cs.riple.autofixer.explorers.DummyExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.Explorer;
 import edu.ucr.cs.riple.autofixer.explorers.MethodParamExplorer;
 import edu.ucr.cs.riple.autofixer.explorers.MethodReturnExplorer;
@@ -82,13 +83,17 @@ public class AutoFixer {
     this.callUsageTracker = new CallUsageTracker(Writer.CALL_GRAPH);
     this.fieldUsageTracker = new FieldUsageTracker(Writer.FIELD_GRAPH);
     this.explorers = new ArrayList<>();
-    Bank<Error> errorBank = new Bank<>(Writer.ERROR, Error::new);
-    Bank<FixEntity> fixBank = new Bank<>(Writer.SUGGEST_FIX, FixEntity::new);
-    this.deepExplorer = new DeepExplorer(this, errorBank, fixBank);
-    this.explorers.add(new MethodParamExplorer(this, allFixes, errorBank, fixBank));
-    this.explorers.add(new ClassFieldExplorer(this, allFixes, errorBank, fixBank));
-    this.explorers.add(new MethodReturnExplorer(this, allFixes, errorBank, fixBank));
-    this.explorers.add(new BasicExplorer(this, errorBank, fixBank));
+    this.deepExplorer = new DeepExplorer(this, null, null);
+    if(DEPTH < 0){
+      this.explorers.add(new DummyExplorer(this, null, null));
+    }else{
+      Bank<Error> errorBank = new Bank<>(Writer.ERROR, Error::new);
+      Bank<FixEntity> fixBank = new Bank<>(Writer.SUGGEST_FIX, FixEntity::new);
+      this.explorers.add(new MethodParamExplorer(this, allFixes, errorBank, fixBank));
+      this.explorers.add(new ClassFieldExplorer(this, allFixes, errorBank, fixBank));
+      this.explorers.add(new MethodReturnExplorer(this, allFixes, errorBank, fixBank));
+      this.explorers.add(new BasicExplorer(this, errorBank, fixBank));
+    }
     return allFixes;
   }
 
