@@ -9,7 +9,7 @@ compileJava {
 }
 
 group 'edu.ucr.cs.riple'
-version '1.1git-LOCAL'
+version '1.2-LOCAL'
 
 
 repositories {
