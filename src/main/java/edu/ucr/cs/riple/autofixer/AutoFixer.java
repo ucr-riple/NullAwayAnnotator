@@ -85,7 +85,7 @@ public class AutoFixer {
     Bank<Error> errorBank = new Bank<>(Writer.ERROR, Error::new);
     Bank<FixEntity> fixBank = new Bank<>(Writer.SUGGEST_FIX, FixEntity::new);
     this.explorers = new ArrayList<>();
-    this.deepExplorer = new DeepExplorer(this, errorBank, null);
+    this.deepExplorer = new DeepExplorer(this, errorBank, fixBank);
     if(DEPTH < 0){
       this.explorers.add(new DummyExplorer(this, null, null));
     }else{
