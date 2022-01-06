@@ -100,6 +100,7 @@ public class DeepExplorer extends BasicExplorer {
       pb.setExtraMessage("Building");
       autoFixer.buildProject(config);
       pb.setExtraMessage("Saving state");
+      System.out.println(errorBank);
       errorBank.saveState(false, true);
       fixBank.saveState(false, true);
       group.forEach(
