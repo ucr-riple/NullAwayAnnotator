@@ -23,8 +23,8 @@ dependencies {
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
-    implementation "edu.ucr.cs.riple:injector:1.0-SNAPSHOT"
-    testImplementation "edu.ucr.cs.riple:injector:1.0-SNAPSHOT"
+    implementation "edu.ucr.cs.riple:injector:1.1.1-LOCAL"
+    testImplementation "edu.ucr.cs.riple:injector:1.1.1-LOCAL"
 
     implementation group: 'com.google.guava', name: 'guava', version: 'r05'
 
@@ -60,7 +60,7 @@ fatJar.doLast{
 }
 
 fatJar.doLast{
-    def oldName = 'NullAwayAutoFixer-1.0-SNAPSHOT.jar'
+    def oldName = 'NullAwayAutoFixer-1.1.1-LOCAL.jar'
     def newName = 'NullAwayAutoFixer.jar'
     def oldPath = "$project.buildDir/libs/"+oldName
     def newPath = "$project.buildDir/libs/"+newName

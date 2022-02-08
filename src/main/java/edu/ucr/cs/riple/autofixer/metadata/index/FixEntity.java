@@ -9,8 +9,8 @@ public class FixEntity extends Hashable {
 
   public FixEntity(String[] infos) {
     fix = Fix.fromArrayInfo(infos);
-    this.clazz = infos[11];
-    this.method = infos[12];
+    this.clazz = infos[9];
+    this.method = infos[10];
   }
 
   @Override
