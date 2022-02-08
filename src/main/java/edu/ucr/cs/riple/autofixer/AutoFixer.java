@@ -82,13 +82,13 @@ public class AutoFixer {
     this.methodInheritanceTree = new MethodInheritanceTree(Writer.METHOD_INFO);
     this.callUsageTracker = new CallUsageTracker(Writer.CALL_GRAPH);
     this.fieldUsageTracker = new FieldUsageTracker(Writer.FIELD_GRAPH);
+    Bank<Error> errorBank = new Bank<>(Writer.ERROR, Error::new);
+    Bank<FixEntity> fixBank = new Bank<>(Writer.SUGGEST_FIX, FixEntity::new);
     this.explorers = new ArrayList<>();
-    this.deepExplorer = new DeepExplorer(this, null, null);
+    this.deepExplorer = new DeepExplorer(this, errorBank, fixBank);
     if(DEPTH < 0){
       this.explorers.add(new DummyExplorer(this, null, null));
     }else{
-      Bank<Error> errorBank = new Bank<>(Writer.ERROR, Error::new);
-      Bank<FixEntity> fixBank = new Bank<>(Writer.SUGGEST_FIX, FixEntity::new);
       this.explorers.add(new MethodParamExplorer(this, allFixes, errorBank, fixBank));
       this.explorers.add(new ClassFieldExplorer(this, allFixes, errorBank, fixBank));
       this.explorers.add(new MethodReturnExplorer(this, allFixes, errorBank, fixBank));
