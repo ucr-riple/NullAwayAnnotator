@@ -1,4 +1,4 @@
-# NullAwayInference
+# NullAwayAnnotator
 ```NullAwayInference``` is a tool that can automatically infer types in source code and injects the 
 corresponding annotations to pass [NullAway](https://github.com/uber/NullAway).
 
