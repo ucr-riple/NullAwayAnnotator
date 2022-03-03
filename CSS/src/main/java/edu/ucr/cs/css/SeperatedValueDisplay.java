@@ -1,4 +1,4 @@
-package edu.ucr.cs.riple.css;
+package edu.ucr.cs.css;
 
 public interface SeperatedValueDisplay {
   String display(String delimiter);

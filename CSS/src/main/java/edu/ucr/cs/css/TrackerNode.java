@@ -1,4 +1,4 @@
-package edu.ucr.cs.riple.css;
+package edu.ucr.cs.css;
 
 import com.google.errorprone.util.ASTHelpers;
 import com.sun.source.tree.ClassTree;

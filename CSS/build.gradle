@@ -6,33 +6,15 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:4.1.1'
-        classpath 'com.vanniktech:gradle-maven-publish-plugin:0.14.2'
     }
 }
 
-
 plugins {
-    id "net.ltgt.errorprone"
+    id "net.ltgt.errorprone" version "2.0.1" apply false
 }
 
 dependencies {
-    errorprone deps.build.errorProneCore
-    errorproneJavac deps.build.errorProneJavac
-
     compileOnly deps.apt.autoServiceAnnot
     annotationProcessor deps.apt.autoService
     compileOnly deps.build.errorProneCheckApi
 }
-
-test {
-    useJUnitPlatform()
-}
-
-apply from: "../gradle/dependencies.gradle"
-
-googleJavaFormat {
-    toolVersion = "1.6"
-    // don't enforce formatting for generated Java code under buildSrc
-    exclude 'buildSrc/build/**/*.java'
-}
-

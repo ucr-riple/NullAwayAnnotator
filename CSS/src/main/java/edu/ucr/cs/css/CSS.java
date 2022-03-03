@@ -1,4 +1,4 @@
-package edu.ucr.cs.riple.css;
+package edu.ucr.cs.css;
 
 import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
 
@@ -26,7 +26,7 @@ public class CSS extends BugChecker
     implements BugChecker.MethodInvocationTreeMatcher,
         BugChecker.AssignmentTreeMatcher,
         BugChecker.MemberSelectTreeMatcher {
-
+  
   private final Config config;
 
   public CSS() {
