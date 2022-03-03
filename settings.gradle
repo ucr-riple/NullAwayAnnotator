@@ -1,2 +1,4 @@
-rootProject.name = 'NullAwayAutoFixer'
+rootProject.name = 'NullAwayAnnotator'
+include 'Core'
+include 'CSS'
 

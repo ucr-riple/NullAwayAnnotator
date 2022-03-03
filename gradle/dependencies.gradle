@@ -1,0 +1,38 @@
+
+// The oldest version of Error Prone that we support running on
+def oldestErrorProneApi = "2.4.0"
+
+
+def versions = [
+        asm                    : "7.1",
+        checkerFramework       : "3.21.0",
+        // The version of Error Prone used to check NullAway's code
+        errorProne             : "2.0.1",
+        // The version of Error Prone that NullAway is compiled and tested against
+        errorProneApi          : project.hasProperty("epApiVersion") ? epApiVersion : oldestErrorProneApi,
+        autoService            : "1.0-rc7",
+]
+
+def apt = [
+        autoService      : "com.google.auto.service:auto-service:${versions.autoService}",
+        autoServiceAnnot : "com.google.auto.service:auto-service-annotations:${versions.autoService}",
+]
+
+def build = [
+        errorProneCheckApi      : "com.google.errorprone:error_prone_check_api:${versions.errorProneApi}",
+        errorProneCore          : "com.google.errorprone:error_prone_core:${versions.errorProne}",
+        errorProneCoreForApi    : "com.google.errorprone:error_prone_core:${versions.errorProneApi}",
+        errorProneJavac         : "com.google.errorprone:javac:9+181-r4173-1",
+        errorProneTestHelpers   : "com.google.errorprone:error_prone_test_helpers:${versions.errorProneApi}",
+]
+
+def test = [
+        junit4                  : "junit:junit:4.12",
+]
+
+ext.deps = [
+        "apt": apt,
+        "build": build,
+        "test": test,
+        "versions": versions
+]

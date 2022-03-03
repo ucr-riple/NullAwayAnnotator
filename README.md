@@ -134,7 +134,7 @@ Or, please use the repo [Diagnoser](https://github.com/nimakarimipour/Diagnoser)
 To run `NullAwayAnnotator` please use the repo [Diagnoser](https://github.com/nimakarimipour/Diagnoser) which has python scripts which automates setup and running `NullAwayAnnotator` on target module. ```Diagnoser``` uses a jar file where all required dependencies are included and does not need any installation.
 
 Regarding `NullAwayAnnotator Depth level`, the number of remaining warnings will reduce as the depth increases. However, in our experiments, 
-level 4 is the sweet spot for having the best performance. Please look at the chart below, running the autofixer from level 0 to 10 over 20 open source projects. As you can see, on level 4 we reach the optimal solution.
+level 4 is the sweet spot for having the best performance. Please look at the chart below, running the core from level 0 to 10 over 20 open source projects. As you can see, on level 4 we reach the optimal solution.
 
 ![image info](./pics/depth.png)
 
