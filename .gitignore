@@ -1,7 +1,21 @@
 .gradle
 /build/
 /.idea/
-
+*.iml
+.gradle
+local.properties
+.idea/workspace.xml
+.idea/libraries
+.idea/tasks.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
+.DS_Store
+build
+captures
+.idea/caches/build_file_checksums.ser
+.idea/caches/gradle_models.ser
+.externalNativeBuild
 # Ignore Gradle GUI config
 gradle-app.setting
 
