@@ -2,14 +2,7 @@
 /build/
 /.idea/
 *.iml
-.gradle
 local.properties
-.idea/workspace.xml
-.idea/libraries
-.idea/tasks.xml
-.idea/misc.xml
-.idea/modules.xml
-.idea/vcs.xml
 .DS_Store
 build
 captures
@@ -27,8 +20,6 @@ gradle-app.setting
 
 # # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
 # gradle/wrapper/gradle-wrapper.properties
-
-.DS_Store
 
 /venv/
 /data
