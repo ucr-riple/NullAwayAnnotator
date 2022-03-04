@@ -1,9 +1,13 @@
 allprojects {
-    group 'edu.ucr.cs.riple'
+    group 'edu.ucr.cs.riple.nullawayannotator'
     version '1.1.1-LOCAL'
+
 }
 
 subprojects {
+    apply plugin: "java"
+    apply plugin: 'eclipse'
+    apply plugin: 'idea'
 
     repositories {
         mavenLocal()
@@ -11,7 +15,6 @@ subprojects {
         google()
     }
 
-    apply plugin: "java"
     apply from: "../gradle/dependencies.gradle"
 
     dependencies {

@@ -13,6 +13,8 @@ plugins {
     id "net.ltgt.errorprone" version "2.0.1" apply false
 }
 
+apply plugin: 'maven'
+
 dependencies {
     compileOnly deps.apt.autoServiceAnnot
     annotationProcessor deps.apt.autoService
