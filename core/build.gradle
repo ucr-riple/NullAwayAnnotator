@@ -10,7 +10,7 @@ dependencies {
     testImplementation "edu.ucr.cs.riple:injector:1.1.1-LOCAL"
 
     implementation group: 'com.google.guava', name: 'guava', version: 'r05'
-    
+
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
     testImplementation 'com.googlecode.json-simple:json-simple:1.1.1'
 
@@ -35,16 +35,8 @@ task fatJar(type: Jar) {
 }
 
 fatJar.doLast{
-    def name = 'NullAwayAutoFixer.jar'
-    def path = "$project.buildDir/libs/"+name
-    if ( file(path).exists() ) {
-        file(path).delete()
-    }
-}
-
-fatJar.doLast{
-    def oldName = 'NullAwayAutoFixer-1.1.1-LOCAL.jar'
-    def newName = 'NullAwayAutoFixer.jar'
+    def oldName = 'core-1.1.1-LOCAL.jar'
+    def newName = 'core.jar'
     def oldPath = "$project.buildDir/libs/"+oldName
     def newPath = "$project.buildDir/libs/"+newName
     file( oldPath ).renameTo( file( newPath ) )

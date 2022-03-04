@@ -1,4 +1,4 @@
 rootProject.name = 'NullAwayAnnotator'
-include 'Core'
-include 'CSS'
+include 'core'
+include 'css'
 
