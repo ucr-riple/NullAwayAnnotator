@@ -6,9 +6,7 @@ def oldestErrorProneApi = "2.4.0"
 def versions = [
         asm                    : "7.1",
         checkerFramework       : "3.21.0",
-        // The version of Error Prone used to check NullAway's code
         errorProne             : "2.0.1",
-        // The version of Error Prone that NullAway is compiled and tested against
         errorProneApi          : project.hasProperty("epApiVersion") ? epApiVersion : oldestErrorProneApi,
         autoService            : "1.0-rc7",
 ]

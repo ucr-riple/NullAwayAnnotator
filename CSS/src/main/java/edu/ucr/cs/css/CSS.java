@@ -17,16 +17,16 @@ import javax.lang.model.element.ElementKind;
 
 @AutoService(BugChecker.class)
 @BugPattern(
-    name = "NullAway",
-    altNames = {"CheckNullabilityTypes"},
-    summary = "Nullability type error.",
+    name = "CSS",
+    altNames = {"TypeBasedStructureSerializer"},
+    summary = "Serialized type based call/field graph.",
     tags = BugPattern.StandardTags.LIKELY_ERROR,
     severity = WARNING)
 public class CSS extends BugChecker
     implements BugChecker.MethodInvocationTreeMatcher,
         BugChecker.AssignmentTreeMatcher,
         BugChecker.MemberSelectTreeMatcher {
-  
+
   private final Config config;
 
   public CSS() {
