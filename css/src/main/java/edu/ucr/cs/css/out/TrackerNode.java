@@ -1,4 +1,4 @@
-package edu.ucr.cs.css;
+package edu.ucr.cs.css.out;
 
 import com.google.errorprone.util.ASTHelpers;
 import com.sun.source.tree.ClassTree;
@@ -6,7 +6,7 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.util.TreePath;
 import com.sun.tools.javac.code.Symbol;
 
-public class TrackerNode implements SeperatedValueDisplay {
+public class TrackerNode {
   private final Symbol member;
   private final Symbol.ClassSymbol callerClass;
   private final Symbol.MethodSymbol callerMethod;
@@ -20,26 +20,26 @@ public class TrackerNode implements SeperatedValueDisplay {
   }
 
   @Override
-  public String display(String delimiter) {
+  public String toString() {
     if (callerClass == null) {
       return null;
     }
     return callerClass
-        + delimiter
-        + ((callerMethod == null) ? "null" : callerMethod)
-        + delimiter
-        + member
-        + delimiter
-        + ASTHelpers.enclosingClass(member);
+            + "\t"
+            + ((callerMethod == null) ? "null" : callerMethod)
+            + "\t"
+            + member
+            + "\t"
+            + ASTHelpers.enclosingClass(member);
   }
 
-  public static String header(String delimiter) {
+  public static String header() {
     return "CALLER_CLASS"
-        + delimiter
+        + '\t'
         + "CALLER_METHOD"
-        + delimiter
+        + '\t'
         + "MEMBER"
-        + delimiter
+        + '\t'
         + "CALLEE_CLASS";
   }
 }

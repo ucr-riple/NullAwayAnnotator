@@ -13,6 +13,8 @@ import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.tools.javac.code.Symbol;
+import edu.ucr.cs.css.out.TrackerNode;
+
 import javax.lang.model.element.ElementKind;
 
 @AutoService(BugChecker.class)
@@ -47,7 +49,7 @@ public class CSS extends BugChecker
     }
     Symbol expressionSym = ASTHelpers.getSymbol(tree.getExpression());
     if (expressionSym != null && expressionSym.getKind() == ElementKind.FIELD) {
-      config.WRITER.saveFieldTrackerNode(tree.getExpression(), state);
+      config.serializer.serializeFieldGraphNode(new TrackerNode(ASTHelpers.getSymbol(tree), state.getPath()));
     }
     return Description.NO_MATCH;
   }
@@ -59,7 +61,7 @@ public class CSS extends BugChecker
     }
     Symbol symbol = ASTHelpers.getSymbol(tree);
     if (symbol != null && symbol.getKind().equals(ElementKind.FIELD)) {
-      config.WRITER.saveFieldTrackerNode(tree, state);
+      config.serializer.serializeFieldGraphNode(new TrackerNode(ASTHelpers.getSymbol(tree), state.getPath()));
     }
     return Description.NO_MATCH;
   }
@@ -67,7 +69,7 @@ public class CSS extends BugChecker
   @Override
   public Description matchMethodInvocation(MethodInvocationTree tree, VisitorState state) {
     if (config.methodTrackerIsActive) {
-      config.WRITER.saveMethodTrackerNode(tree.getMethodSelect(), state);
+      config.serializer.serializeCallGraphNode(new TrackerNode(ASTHelpers.getSymbol(tree), state.getPath()));
     }
     return Description.NO_MATCH;
   }
