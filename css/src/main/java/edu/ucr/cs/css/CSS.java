@@ -1,6 +1,6 @@
 package edu.ucr.cs.css;
 
-import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
+import static com.google.errorprone.BugPattern.SeverityLevel.SUGGESTION;
 
 import com.google.auto.service.AutoService;
 import com.google.errorprone.BugPattern;
@@ -20,8 +20,8 @@ import javax.lang.model.element.ElementKind;
     name = "CSS",
     altNames = {"TypeBasedStructureSerializer"},
     summary = "Serialized type based call/field graph.",
-    tags = BugPattern.StandardTags.LIKELY_ERROR,
-    severity = WARNING)
+    tags = BugPattern.StandardTags.STYLE,
+    severity = SUGGESTION)
 public class CSS extends BugChecker
     implements BugChecker.MethodInvocationTreeMatcher,
         BugChecker.AssignmentTreeMatcher,
@@ -39,19 +39,26 @@ public class CSS extends BugChecker
 
   @Override
   public Description matchAssignment(AssignmentTree tree, VisitorState state) {
-    if (config.fieldTrackerIsActive) {
-      Symbol expressionSym = ASTHelpers.getSymbol(tree.getExpression());
-      if (expressionSym != null && expressionSym.getKind() == ElementKind.FIELD) {
-        config.WRITER.saveFieldTrackerNode(tree.getExpression(), state);
-      }
+    if (!config.fieldTrackerIsActive) {
+      return Description.NO_MATCH;
+    }
+    if (tree == null) {
+      return Description.NO_MATCH;
+    }
+    Symbol expressionSym = ASTHelpers.getSymbol(tree.getExpression());
+    if (expressionSym != null && expressionSym.getKind() == ElementKind.FIELD) {
+      config.WRITER.saveFieldTrackerNode(tree.getExpression(), state);
     }
     return Description.NO_MATCH;
   }
 
   @Override
   public Description matchMemberSelect(MemberSelectTree tree, VisitorState state) {
+    if(!config.fieldTrackerIsActive){
+      return Description.NO_MATCH;
+    }
     Symbol symbol = ASTHelpers.getSymbol(tree);
-    if (config.fieldTrackerIsActive && symbol.getKind().equals(ElementKind.FIELD)) {
+    if (symbol != null && symbol.getKind().equals(ElementKind.FIELD)) {
       config.WRITER.saveFieldTrackerNode(tree, state);
     }
     return Description.NO_MATCH;
