@@ -30,7 +30,7 @@ public class TrackerNode {
             + "\t"
             + member
             + "\t"
-            + ASTHelpers.enclosingClass(member);
+            + ((member.enclClass() == null) ? "null" : member.enclClass());
   }
 
   public static String header() {

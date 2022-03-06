@@ -61,7 +61,7 @@ public class CSS extends BugChecker
     }
     Symbol symbol = ASTHelpers.getSymbol(tree);
     if (symbol != null && symbol.getKind().equals(ElementKind.FIELD)) {
-      config.serializer.serializeFieldGraphNode(new TrackerNode(ASTHelpers.getSymbol(tree), state.getPath()));
+      config.serializer.serializeFieldGraphNode(new TrackerNode(symbol, state.getPath()));
     }
     return Description.NO_MATCH;
   }
