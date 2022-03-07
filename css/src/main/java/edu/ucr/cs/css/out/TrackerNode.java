@@ -24,13 +24,14 @@ public class TrackerNode {
     if (callerClass == null) {
       return null;
     }
+    Symbol enclosingClass = member.enclClass();
     return callerClass
             + "\t"
             + ((callerMethod == null) ? "null" : callerMethod)
             + "\t"
             + member
             + "\t"
-            + ((member.enclClass() == null) ? "null" : member.enclClass());
+            + ((enclosingClass == null) ? "null" : enclosingClass);
   }
 
   public static String header() {

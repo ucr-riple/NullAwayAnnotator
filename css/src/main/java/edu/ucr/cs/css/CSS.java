@@ -12,10 +12,14 @@ import com.google.errorprone.util.ASTHelpers;
 import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
+import com.sun.source.tree.MethodTree;
 import com.sun.tools.javac.code.Symbol;
+import edu.ucr.cs.css.out.MethodInfo;
 import edu.ucr.cs.css.out.TrackerNode;
 
 import javax.lang.model.element.ElementKind;
+import java.util.ArrayList;
+import java.util.List;
 
 @AutoService(BugChecker.class)
 @BugPattern(
@@ -27,7 +31,8 @@ import javax.lang.model.element.ElementKind;
 public class CSS extends BugChecker
     implements BugChecker.MethodInvocationTreeMatcher,
         BugChecker.AssignmentTreeMatcher,
-        BugChecker.MemberSelectTreeMatcher {
+        BugChecker.MemberSelectTreeMatcher,
+        BugChecker.MethodTreeMatcher{
 
   private final Config config;
 
@@ -72,5 +77,23 @@ public class CSS extends BugChecker
       config.serializer.serializeCallGraphNode(new TrackerNode(ASTHelpers.getSymbol(tree), state.getPath()));
     }
     return Description.NO_MATCH;
+  }
+
+  @Override
+  public Description matchMethod(MethodTree tree, VisitorState state) {
+    Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(tree);
+    String method = methodSymbol.toString();
+    String clazz = ASTHelpers.enclosingClass(methodSymbol).toString();
+    MethodInfo methodInfo = MethodInfo.findOrCreate(method, clazz);
+//    methodInfo.setUri(c);
+    methodInfo.setParent(methodSymbol, state);
+    methodInfo.setParamNumber(methodSymbol.getParameters().size());
+    List<Boolean> paramAnnotations = new ArrayList<>();
+    for (int i = 0; i < methodSymbol.getParameters().size(); i++) {
+      paramAnnotations.add(SymbolUtil.paramHasNullableAnnotation(methodSymbol, i, config));
+    }
+    methodInfo.setParamAnnotations(paramAnnotations);
+    config.serializer.serializeMethodInfo(methodInfo);
+    return null;
   }
 }

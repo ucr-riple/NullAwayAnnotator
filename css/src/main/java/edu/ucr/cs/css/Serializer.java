@@ -56,7 +56,7 @@ public class Serializer {
   /**
    * Appends the string representation of the {@link TrackerNode} corresponding to a call graph.
    *
-   * @param callGraphNode SuggestedFixInfo object.
+   * @param callGraphNode TrackerNode instance.
    */
   public void serializeCallGraphNode(TrackerNode callGraphNode) {
     appendToFile(callGraphNode.toString(), callGraph);
@@ -65,16 +65,16 @@ public class Serializer {
   /**
    * Appends the string representation of the {@link TrackerNode} corresponding to a field graph.
    *
-   * @param fieldGraphNode SuggestedFixInfo object.
+   * @param fieldGraphNode TrackerNode instance.
    */
   public void serializeFieldGraphNode(TrackerNode fieldGraphNode) {
     appendToFile(fieldGraphNode.toString(), fieldGraph);
   }
 
   /**
-   * Appends the string representation of the {@link TrackerNode} corresponding to a field graph.
+   * Appends the string representation of the {@link MethodInfo} corresponding to a method.
    *
-   * @param methodInfo SuggestedFixInfo object.
+   * @param methodInfo MethodInfo instance.
    */
   public void serializeMethodInfo(MethodInfo methodInfo) {
     appendToFile(methodInfo.toString(), this.methodInfo);
