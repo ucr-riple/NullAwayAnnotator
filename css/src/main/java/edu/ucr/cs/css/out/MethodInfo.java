@@ -73,15 +73,18 @@ public class MethodInfo {
 
     @Override
     public String toString() {
+        if(methodSymbol == null){
+            return null;
+        }
         return id
                 + "\t"
-                + ((enclosingClass != null) ? enclosingClass : "null")
+                + (enclosingClass != null ? enclosingClass : "null")
                 + "\t"
-                +  ((methodSymbol != null) ? methodSymbol : "null")
+                + methodSymbol
                 + "\t"
                 + parent
                 + "\t"
-                + ((methodSymbol != null) ? methodSymbol.getParameters().size() : "0")
+                + methodSymbol.getParameters().size()
                 + "\t"
                 + Arrays.toString(annotFlags);
     }
