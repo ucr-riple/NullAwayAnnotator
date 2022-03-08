@@ -6,14 +6,14 @@ import time
 import tools
 import xmltodict
 
-# if not (len(sys.argv) in [2, 3]):
-#     raise ValueError("Needs one argument to run: diagnose/apply/pre/loop/clean")
+if not (len(sys.argv) in [2, 3]):
+    raise ValueError("Needs one argument to run: diagnose/apply/pre/loop/clean")
 
 data = json.load(open('config.json'))
-# if int(len(sys.argv)) == 2:
-#     data = json.load(open('config.json'))
-# else:
-#     data = json.load(open(sys.argv[2]))
+if int(len(sys.argv)) == 2:
+    data = json.load(open('config.json'))
+else:
+    data = json.load(open(sys.argv[2]))
 
 if 'REPO_ROOT_PATH' not in data:
     # By default, the path to the repo root (where the build command must be run) and the
@@ -64,7 +64,7 @@ def clean(full=True):
     delete(out_dir + "/init_methods.json")
     delete(out_dir + "/method_info.csv")
     delete(out_dir + "/errors.csv")
-    if (full):
+    if full:
         delete(out_dir + "/reports.json")
         delete(out_dir + "/log.txt")
     uprint("Finished.")
@@ -190,10 +190,8 @@ def loop():
     clean(full=False)
 
 
-# command = sys.argv[1]
+command = sys.argv[1]
 prepare()
-pre()
-exit()
 if command == "pre":
     pre()
 elif command == "diagnose":
@@ -228,4 +226,3 @@ elif command == "reset":
 
 else:
     raise ValueError("Unknown command.")
-
