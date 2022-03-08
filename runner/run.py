@@ -138,7 +138,7 @@ def pre():
     with open(out_dir + "/init_methods.json", 'w') as outfile:
         json.dump(init_methods, outfile)
     uprint("Passing to injector to annotate...")
-    os.system("cd jars && java -jar NullAwayAutoFixer.jar apply {}/init_methods.json {}".format(out_dir, format_style))
+    os.system("cd jars && java -jar core.jar apply {}/init_methods.json {}".format(out_dir, format_style))
     uprint("Finshed.")
 
 
@@ -154,7 +154,7 @@ def diagnose():
         'BUILD_COMMAND'] + '"'
     uprint("Detected build command: " + build_command)
     uprint("Starting AutoFixer...")
-    command = "cd jars && java -jar NullAwayAutoFixer.jar diagnose {} {} {} {} {}".format(out_dir, build_command, str(data['DEPTH']), data['ANNOTATION']['NULLABLE'], format_style)
+    command = "cd jars && java -jar core.jar diagnose {} {} {} {} {}".format(out_dir, build_command, str(data['DEPTH']), data['ANNOTATION']['NULLABLE'], format_style)
     print(command)
     os.system(command)
     uprint("Finsihed.")
@@ -170,7 +170,7 @@ def apply():
     with open(out_dir + "/cleaned.json", 'w') as outfile:
         json.dump(cleaned, outfile)
     uprint("Applying fixes at location: " + out_dir + "/cleaned.json")
-    os.system("cd jars && java -jar NullAwayAutoFixer.jar apply {}/cleaned.json {}".format(out_dir, format_style))
+    os.system("cd jars && java -jar core.jar apply {}/cleaned.json {}".format(out_dir, format_style))
 
 
 def loop():
