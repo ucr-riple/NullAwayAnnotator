@@ -1,0 +1,11 @@
+{
+    "PROJECT_PATH": "/Users/nima/Developer/NullAwayFixer/Scripts/Diagnoser/tests",
+    "BUILD_COMMAND": "./gradlew :units:whiteline:build -x test",
+    "ANNOTATION": {
+        "INITIALIZE": "tests.Initializer",
+        "NONNULL": "javax.annotation.NonNull",
+        "NULLABLE": "javax.annotation.Nullable"
+    },
+    "FORMAT": true,
+    "DEPTH": 4
+}
