@@ -3,12 +3,11 @@ import sys
 import json
 import shutil
 import time
+import tools
 import xmltodict
 
-
 if not (len(sys.argv) in [2, 3]):
-    raise ValueError(
-        "Needs one argument to run: diagnose/apply/pre/loop/clean")
+    raise ValueError("Needs one argument to run: diagnose/apply/pre/loop/clean")
 
 data = None
 if int(len(sys.argv)) == 2:
@@ -21,15 +20,13 @@ if 'REPO_ROOT_PATH' not in data:
     # path to the project source is the same. This works for most gradle projects.
     data['REPO_ROOT_PATH'] = data['PROJECT_PATH']
 
-build_command = "cd {} && {} && cd {}".format(data['REPO_ROOT_PATH'],
-                                              data['BUILD_COMMAND'],
-                                              data['PROJECT_PATH'])
+build_command = "cd {} && {} && cd {}".format(data['REPO_ROOT_PATH'], data['BUILD_COMMAND'], data['PROJECT_PATH'])
 out_dir = "/tmp/NullAwayFix"
 delimiter = "\t"
 format_style = str(data['FORMAT']).lower()
 format_style = "false" if format_style not in ["true", "false"] else format_style
 
-EXPLORER_CONFIG = json.load(open('template.xml'))
+EXPLORER_CONFIG = xmltodict.parse(open('template.xml').read())
 
 
 def load_csv_to_dict(path):
@@ -44,11 +41,6 @@ def load_csv_to_dict(path):
             item[keys[i]] = infos[i]
         ans.append(item)
     return ans
-
-
-def make_explorer_config(config):
-    with open('/tmp/NullAwayFix/explorer.config', 'w') as outfile:
-        json.dump(config, outfile)
 
 
 def delete(file):
@@ -93,23 +85,14 @@ def pre():
     delete(out_dir + "/init_methods.json")
     uprint("Building project...\n" + build_command)
     new_config = EXPLORER_CONFIG.copy()
-    new_config['SUGGEST']['ACTIVE'] = True
-    new_config['MAKE_METHOD_INHERITANCE_TREE'] = True
-    new_config['MAKE_CALL_GRAPH'] = True
-    new_config['MAKE_FIELD_GRAPH'] = True
-    new_config['LOG_ERROR']['ACTIVE'] = True
-    new_config['LOG_ERROR']['DEEP'] = True
-    new_config['ANNOTATION']['NULLABLE'] = data['ANNOTATION']['NULLABLE']
-    new_config['ANNOTATION']['NONNULL'] = data['ANNOTATION']['NONNULL']
-    make_explorer_config(new_config)
+    new_config['serialization']['annotation']['nullable'] = data['ANNOTATION']['NULLABLE']
+    new_config['serialization']['annotation']['nonnull'] = data['ANNOTATION']['NONNULL']
+    tools.write_dict_config_in_xml(new_config, '/tmp/NullAwayFix/config.xml')
     os.system(build_command + " > /dev/null 2>&1")
     uprint("Analyzing suggested fixes...")
     fixes = load_csv_to_dict(out_dir + "/fixes.csv")
     uprint("Detecting uninitialized class fields...")
-    field_no_inits = [
-        x for x in fixes
-        if (x['reason'] == 'FIELD_NO_INIT' and x['location'] == 'CLASS_FIELD')
-    ]
+    field_no_inits = [x for x in fixes if (x['reason'] == 'FIELD_NO_INIT' and x['location'] == 'CLASS_FIELD')]
     uprint("Found " + str(len(field_no_inits)) + " fields.")
     uprint("Analyzing method infos...")
     methods = load_csv_to_dict(method_path)
@@ -120,8 +103,7 @@ def pre():
         max = 0
         for method in methods:
             if (method['class'] == field['class']):
-                if (field['param'] in method['fields']
-                        and len(method['fields']) > max):
+                if (field['param'] in method['fields'] and len(method['fields']) > max):
                     candidate_method = method.copy()
                     max = len(method['fields'])
         if (candidate_method != None):
@@ -143,14 +125,10 @@ def pre():
 
 def diagnose():
     new_config = EXPLORER_CONFIG.copy()
-    new_config['SUGGEST']['ACTIVE'] = True
-    new_config['LOG_ERROR']['ACTIVE'] = True
-    new_config['LOG_ERROR']['DEEP'] = True
-    new_config['ANNOTATION']['NULLABLE'] = data['ANNOTATION']['NULLABLE']
-    new_config['ANNOTATION']['NONNULL'] = data['ANNOTATION']['NONNULL']
-    make_explorer_config(new_config)
-    build_command = '"cd ' + data['REPO_ROOT_PATH'] + " && " + data[
-        'BUILD_COMMAND'] + '"'
+    new_config['serialization']['annotation']['nullable'] = data['ANNOTATION']['NULLABLE']
+    new_config['serialization']['annotation']['nonnull'] = data['ANNOTATION']['NONNULL']
+    tools.write_dict_config_in_xml(new_config, '/tmp/NullAwayFix/config.xml')
+    build_command = '"cd ' + data['REPO_ROOT_PATH'] + " && " + data['BUILD_COMMAND'] + '"'
     uprint("Detected build command: " + build_command)
     uprint("Starting AutoFixer...")
     command = "cd jars && java -jar core.jar diagnose {} {} {} {} {}".format(out_dir, build_command, str(data['DEPTH']),
@@ -235,3 +213,4 @@ elif command == "reset":
 
 else:
     raise ValueError("Unknown command.")
+

@@ -1,12 +1,10 @@
 <serialization>
-    <suggest activation="true" enclosing="true"/>
-    <output>
-           "outputdir"
-    </output>
+    <suggest active="true" enclosing="true" />
+    <fieldInitInfo active="false" />
+    <paramTest active="false" index="10000" />
     <annotation>
-        <nullable>javax.annotation.Nullable</nullable>
-        <nonnull>javax.annotation.Nonnull</nonnull>
+        <nullable>androidx.annotation.Nullable</nullable>
+        <nonnull>androidx.annotation.Nonnull</nonnull>
     </annotation>
-    <paramTest activation="true" index="0"/>
-    <fieldInitInfo activation="true" />
+    <path>/tmp/NullAwayFix</path>
 </serialization>
