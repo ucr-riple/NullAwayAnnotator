@@ -26,21 +26,15 @@ public class TrackerNode {
     }
     Symbol enclosingClass = member.enclClass();
     return callerClass
-            + "\t"
-            + ((callerMethod == null) ? "null" : callerMethod)
-            + "\t"
-            + member
-            + "\t"
-            + ((enclosingClass == null) ? "null" : enclosingClass);
+        + "\t"
+        + ((callerMethod == null) ? "null" : callerMethod)
+        + "\t"
+        + member
+        + "\t"
+        + ((enclosingClass == null) ? "null" : enclosingClass);
   }
 
   public static String header() {
-    return "CALLER_CLASS"
-        + '\t'
-        + "CALLER_METHOD"
-        + '\t'
-        + "MEMBER"
-        + '\t'
-        + "CALLEE_CLASS";
+    return "CALLER_CLASS" + '\t' + "CALLER_METHOD" + '\t' + "MEMBER" + '\t' + "CALLEE_CLASS";
   }
 }

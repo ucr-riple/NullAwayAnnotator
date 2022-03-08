@@ -1,7 +1,7 @@
 package edu.ucr.cs.riple.core.util;
 
-import edu.ucr.cs.riple.core.AutoFixer;
 import com.google.common.primitives.Booleans;
+import edu.ucr.cs.riple.core.AutoFixer;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;

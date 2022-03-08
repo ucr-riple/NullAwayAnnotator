@@ -19,7 +19,7 @@ import me.tongfei.progressbar.ProgressBar;
 public class MethodParamExplorer extends AdvancedExplorer {
 
   public MethodParamExplorer(
-          AutoFixer autoFixer, List<Fix> fixes, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
+      AutoFixer autoFixer, List<Fix> fixes, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
     super(autoFixer, fixes, errorBank, fixBank, FixType.METHOD_PARAM);
   }
 

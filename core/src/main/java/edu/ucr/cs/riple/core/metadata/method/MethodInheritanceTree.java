@@ -2,7 +2,6 @@ package edu.ucr.cs.riple.core.metadata.method;
 
 import edu.ucr.cs.riple.core.metadata.AbstractRelation;
 import edu.ucr.cs.riple.core.util.Utility;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;

@@ -1,6 +1,5 @@
 package edu.ucr.cs.riple.core.metadata;
 
-import edu.ucr.cs.riple.core.nullaway.Writer;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -30,9 +29,8 @@ public abstract class AbstractRelation<T> {
     reader = new BufferedReader(new FileReader(filePath));
     String line = reader.readLine();
     if (line != null) line = reader.readLine();
-    String delimiter = Writer.getDelimiterRegex();
     while (line != null) {
-      T node = addNodeByLine(line.split(delimiter));
+      T node = addNodeByLine(line.split("\t"));
       Integer hash = node.hashCode();
       if (idHash.containsKey(hash)) {
         List<T> localList = idHash.get(hash);

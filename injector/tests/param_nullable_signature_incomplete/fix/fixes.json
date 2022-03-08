@@ -1,0 +1,1 @@
+{"fixes":[{"annotation":"javax.annotation.Nullable","compulsory":null,"method":"test(Object)","param":"flag","index":null,"location":"METHOD_PARAM","class":"com.uber.Super","pkg":"com.uber","inject":"true","uri":"/Users/nima/Developer/NullAwayFixer/NullAwayAnnotator/injector/tests/param_nullable_signature_incomplete/src/Super.java"}]}

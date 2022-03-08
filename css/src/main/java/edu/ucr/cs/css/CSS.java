@@ -16,10 +16,9 @@ import com.sun.source.tree.MethodTree;
 import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.css.out.MethodInfo;
 import edu.ucr.cs.css.out.TrackerNode;
-
-import javax.lang.model.element.ElementKind;
 import java.util.ArrayList;
 import java.util.List;
+import javax.lang.model.element.ElementKind;
 
 @AutoService(BugChecker.class)
 @BugPattern(
@@ -32,7 +31,7 @@ public class CSS extends BugChecker
     implements BugChecker.MethodInvocationTreeMatcher,
         BugChecker.AssignmentTreeMatcher,
         BugChecker.MemberSelectTreeMatcher,
-        BugChecker.MethodTreeMatcher{
+        BugChecker.MethodTreeMatcher {
 
   private final Config config;
 
@@ -67,7 +66,7 @@ public class CSS extends BugChecker
 
   @Override
   public Description matchMemberSelect(MemberSelectTree tree, VisitorState state) {
-    if(!config.fieldTrackerIsActive){
+    if (!config.fieldTrackerIsActive) {
       return Description.NO_MATCH;
     }
     Symbol symbol = ASTHelpers.getSymbol(tree);
@@ -80,16 +79,17 @@ public class CSS extends BugChecker
 
   @Override
   public Description matchMethodInvocation(MethodInvocationTree tree, VisitorState state) {
-    if(!config.callTrackerIsActive){
+    if (!config.callTrackerIsActive) {
       return Description.NO_MATCH;
     }
-    config.serializer.serializeCallGraphNode(new TrackerNode(ASTHelpers.getSymbol(tree), state.getPath()));
+    config.serializer.serializeCallGraphNode(
+        new TrackerNode(ASTHelpers.getSymbol(tree), state.getPath()));
     return Description.NO_MATCH;
   }
 
   @Override
   public Description matchMethod(MethodTree tree, VisitorState state) {
-    if(!config.methodTrackerIsActive){
+    if (!config.methodTrackerIsActive) {
       return Description.NO_MATCH;
     }
     Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(tree);

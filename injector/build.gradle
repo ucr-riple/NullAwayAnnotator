@@ -1,0 +1,21 @@
+plugins {
+    id 'maven'
+    id 'com.github.sherter.google-java-format' version '0.8'
+}
+
+dependencies {
+    implementation group: 'com.github.javaparser', name:'javaparser-core', version:"${deps.versions.javaparser}"
+    testImplementation group: 'com.github.javaparser', name:'javaparser-core', version:"${deps.versions.javaparser}"
+
+    implementation group: 'com.googlecode.json-simple', name:'json-simple', version:"${deps.versions.json}"
+    testImplementation group: 'com.googlecode.json-simple', name:'json-simple', version:"${deps.versions.json}"
+
+    implementation group: 'me.tongfei', name: 'progressbar', version: '0.9.2'
+}
+
+compileJava.mustRunAfter verifyGoogleJavaFormat
+
+googleJavaFormat {
+    // don't enforce formatting for generated Java code under buildSrc
+    exclude 'tests/**/*.java'
+}

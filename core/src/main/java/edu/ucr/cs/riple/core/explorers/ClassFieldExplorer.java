@@ -12,7 +12,7 @@ import java.util.List;
 public class ClassFieldExplorer extends AdvancedExplorer {
 
   public ClassFieldExplorer(
-          AutoFixer autoFixer, List<Fix> fixes, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
+      AutoFixer autoFixer, List<Fix> fixes, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
     super(autoFixer, fixes, errorBank, fixBank, FixType.CLASS_FIELD);
   }
 

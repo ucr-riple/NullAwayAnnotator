@@ -2,9 +2,9 @@ package edu.ucr.cs.riple.core.metadata.graph;
 
 import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.trackers.UsageTracker;
+import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.HashSet;
 import java.util.Objects;
