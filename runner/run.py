@@ -133,7 +133,7 @@ def pre():
         json.dump(init_methods, outfile)
     uprint("Passing to injector to annotate...")
     os.system("cd jars && java -jar core.jar apply {}/init_methods.json {}".format(out_dir, format_style))
-    uprint("Finshed.")
+    uprint("Finished.")
 
 
 def diagnose():
