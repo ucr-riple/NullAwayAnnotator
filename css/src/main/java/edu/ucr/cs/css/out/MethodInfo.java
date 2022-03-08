@@ -1,7 +1,6 @@
 package edu.ucr.cs.css.out;
 
 import com.google.errorprone.VisitorState;
-import com.google.errorprone.util.ASTHelpers;
 import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.css.SymbolUtil;
 
@@ -23,15 +22,16 @@ public class MethodInfo {
 
     private static int LAST_ID = 0;
     static final Set<MethodInfo> discovered = new HashSet<>();
-    private static final MethodInfo top = new MethodInfo(null, null);
+    private static final MethodInfo top = new MethodInfo(null);
 
-    private MethodInfo(Symbol.MethodSymbol method, Symbol.ClassSymbol enclosingClass) {
+    private MethodInfo(Symbol.MethodSymbol method) {
         this.id = LAST_ID++;
         this.methodSymbol = method;
-        this.enclosingClass = enclosingClass;
+        this.enclosingClass = (method != null) ? method.enclClass() : null;
     }
 
-    public static MethodInfo findOrCreate(Symbol.MethodSymbol method, Symbol.ClassSymbol clazz) {
+    public static MethodInfo findOrCreate(Symbol.MethodSymbol method) {
+        Symbol.ClassSymbol clazz = method.enclClass();
         Optional<MethodInfo> optionalMethodInfo =
                 discovered
                         .stream()
@@ -41,7 +41,7 @@ public class MethodInfo {
         if (optionalMethodInfo.isPresent()) {
             return optionalMethodInfo.get();
         }
-        MethodInfo methodInfo = new MethodInfo(method, clazz);
+        MethodInfo methodInfo = new MethodInfo(method);
         discovered.add(methodInfo);
         return methodInfo;
     }
@@ -66,8 +66,7 @@ public class MethodInfo {
             this.parent = top.id;
             return;
         }
-        Symbol.ClassSymbol enclosingClass = ASTHelpers.enclosingClass(superMethod);
-        MethodInfo superMethodInfo = findOrCreate(superMethod, enclosingClass);
+        MethodInfo superMethodInfo = findOrCreate(superMethod);
         this.parent = superMethodInfo.id;
     }
 

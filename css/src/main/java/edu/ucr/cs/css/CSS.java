@@ -89,7 +89,7 @@ public class CSS extends BugChecker
   @Override
   public Description matchMethod(MethodTree tree, VisitorState state) {
     Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(tree);
-    MethodInfo methodInfo = MethodInfo.findOrCreate(methodSymbol, ASTHelpers.enclosingClass(methodSymbol));
+    MethodInfo methodInfo = MethodInfo.findOrCreate(methodSymbol);
     methodInfo.findParent(state);
     List<Boolean> paramAnnotations = new ArrayList<>();
     for (int i = 0; i < methodSymbol.getParameters().size(); i++) {
