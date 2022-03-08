@@ -1,0 +1,12 @@
+<serialization>
+    <suggest activation="true" enclosing="true"/>
+    <output>
+           "outputdir"
+    </output>
+    <annotation>
+        <nullable>javax.annotation.Nullable</nullable>
+        <nonnull>javax.annotation.Nonnull</nonnull>
+    </annotation>
+    <paramTest activation="true" index="0"/>
+    <fieldInitInfo activation="true" />
+</serialization>

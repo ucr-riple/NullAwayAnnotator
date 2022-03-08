@@ -1,17 +1,17 @@
-VERSION = "1.1.1-LOCAL"
-
 import os
 import sys
 import json
 import shutil
 import time
+import xmltodict
 
-if (not (len(sys.argv) in [2, 3])):
+
+if not (len(sys.argv) in [2, 3]):
     raise ValueError(
         "Needs one argument to run: diagnose/apply/pre/loop/clean")
 
 data = None
-if (len(sys.argv) == 2):
+if int(len(sys.argv)) == 2:
     data = json.load(open('config.json'))
 else:
     data = json.load(open(sys.argv[2]))
@@ -25,12 +25,11 @@ build_command = "cd {} && {} && cd {}".format(data['REPO_ROOT_PATH'],
                                               data['BUILD_COMMAND'],
                                               data['PROJECT_PATH'])
 out_dir = "/tmp/NullAwayFix"
-delimiter = "$*$"
+delimiter = "\t"
 format_style = str(data['FORMAT']).lower()
 format_style = "false" if format_style not in ["true", "false"] else format_style
-print(format_style)
 
-EXPLORER_CONFIG = json.load(open('template.config'))
+EXPLORER_CONFIG = json.load(open('template.xml'))
 
 
 def load_csv_to_dict(path):
@@ -133,7 +132,7 @@ def pre():
             candidate_method['param'] = ""
             candidate_method['reason'] = "Initializer"
             candidate_method['pkg'] = ""
-            if (candidate_method not in init_methods['fixes']):
+            if candidate_method not in init_methods['fixes']:
                 init_methods['fixes'].append(candidate_method)
     with open(out_dir + "/init_methods.json", 'w') as outfile:
         json.dump(init_methods, outfile)
@@ -154,7 +153,9 @@ def diagnose():
         'BUILD_COMMAND'] + '"'
     uprint("Detected build command: " + build_command)
     uprint("Starting AutoFixer...")
-    command = "cd jars && java -jar core.jar diagnose {} {} {} {} {}".format(out_dir, build_command, str(data['DEPTH']), data['ANNOTATION']['NULLABLE'], format_style)
+    command = "cd jars && java -jar core.jar diagnose {} {} {} {} {}".format(out_dir, build_command, str(data['DEPTH']),
+                                                                             data['ANNOTATION']['NULLABLE'],
+                                                                             format_style)
     print(command)
     os.system(command)
     uprint("Finsihed.")
@@ -177,14 +178,14 @@ def loop():
     uprint("Executing loop command")
     delete(out_dir + "/log.txt")
     finished = False
-    while (not finished):
+    while not finished:
         finished = True
         diagnose()
         uprint("Diagnsoe task finished, applying effective fixes...")
         apply()
         uprint("Applied.")
         new_reports = json.load(open(out_dir + "/diagnose_report.json"))
-        if (len(new_reports['reports']) == 0):
+        if len(new_reports['reports']) == 0:
             uprint("No changes, shutting down.")
             break
         old_reports = json.load(open(out_dir + "/reports.json"))
@@ -200,13 +201,13 @@ def loop():
 
 command = sys.argv[1]
 prepare()
-if (command == "pre"):
+if command == "pre":
     pre()
-elif (command == "diagnose"):
+elif command == "diagnose":
     diagnose()
-elif (command == "apply"):
+elif command == "apply":
     apply()
-elif (command == "loop"):
+elif command == "loop":
     clean()
     pre()
     reports = open(out_dir + "/reports.json", "w")
@@ -217,15 +218,15 @@ elif (command == "loop"):
     loop()
     end = time.time()
     print("Elapsed time in seconds: " + str(end - start))
-elif (command == "clean"):
+elif command == "clean":
     clean()
     delete_folder = input("Delete " + out_dir + " directory too ? (y/n)\n")
-    if (delete_folder.lower() in ["yes", "y"]):
+    if delete_folder.lower() in ["yes", "y"]:
         try:
             shutil.rmtree(out_dir)
         except:
             uprint("Failed to remove directory: " + out_dir)
-elif (command == "reset"):
+elif command == "reset":
     clean()
     try:
         shutil.rmtree(out_dir)

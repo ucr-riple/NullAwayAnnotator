@@ -1,1 +1,11 @@
-{"PROJECT_PATH": "/Users/nima/Developer/NullAwayFixer/Projects/MPAndroidChart", "BUILD_COMMAND": "./gradlew build -x test", "ANNOTATION": {"INITIALIZE": "com.github.mikephil.charting.Initializer", "NONNULL": "", "NULLABLE": "androidx.annotation.Nullable"}, "FORMAT": false, "DEPTH": 4}
+{
+  "PROJECT_PATH": "/Users/nima/Developer/NullAwayFixer/Projects/MPAndroidChart",
+  "BUILD_COMMAND": "./gradlew build -x test",
+  "ANNOTATION": {
+    "INITIALIZE": "com.github.mikephil.charting.Initializer",
+    "NONNULL": "",
+    "NULLABLE": "androidx.annotation.Nullable"
+  },
+  "FORMAT": false,
+  "DEPTH": 4
+}
