@@ -80,14 +80,18 @@ public class CSS extends BugChecker
 
   @Override
   public Description matchMethodInvocation(MethodInvocationTree tree, VisitorState state) {
-    if (config.methodTrackerIsActive) {
-      config.serializer.serializeCallGraphNode(new TrackerNode(ASTHelpers.getSymbol(tree), state.getPath()));
+    if(!config.callTrackerIsActive){
+      return Description.NO_MATCH;
     }
+    config.serializer.serializeCallGraphNode(new TrackerNode(ASTHelpers.getSymbol(tree), state.getPath()));
     return Description.NO_MATCH;
   }
 
   @Override
   public Description matchMethod(MethodTree tree, VisitorState state) {
+    if(!config.methodTrackerIsActive){
+      return Description.NO_MATCH;
+    }
     Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(tree);
     MethodInfo methodInfo = MethodInfo.findOrCreate(methodSymbol);
     methodInfo.findParent(state);
@@ -97,6 +101,6 @@ public class CSS extends BugChecker
     }
     methodInfo.setParamAnnotations(paramAnnotations);
     config.serializer.serializeMethodInfo(methodInfo);
-    return null;
+    return Description.NO_MATCH;
   }
 }

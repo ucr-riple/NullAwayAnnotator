@@ -39,17 +39,17 @@ import java.nio.file.Paths;
  */
 public class Serializer {
   /** Path to write field graph. */
-  private final Path fieldGraph;
+  private final Path fieldGraphPath;
   /** Path to write method call graph. */
-  private final Path callGraph;
+  private final Path callGraphPath;
   /** Path to write method info metadata. */
-  private final Path methodInfo;
+  private final Path methodInfoPath;
 
   public Serializer(Config config) {
     String outputDirectory = config.outputDirectory;
-    this.fieldGraph = Paths.get(outputDirectory, "field_graph.tsv");
-    this.callGraph = Paths.get(outputDirectory, "call_graph.tsv");
-    this.methodInfo = Paths.get(outputDirectory, "method_info.tsv");
+    this.fieldGraphPath = Paths.get(outputDirectory, "field_graph.tsv");
+    this.callGraphPath = Paths.get(outputDirectory, "call_graph.tsv");
+    this.methodInfoPath = Paths.get(outputDirectory, "method_info.tsv");
     initializeOutputFiles(config);
   }
 
@@ -59,7 +59,7 @@ public class Serializer {
    * @param callGraphNode TrackerNode instance.
    */
   public void serializeCallGraphNode(TrackerNode callGraphNode) {
-    appendToFile(callGraphNode.toString(), callGraph);
+    appendToFile(callGraphNode.toString(), this.callGraphPath);
   }
 
   /**
@@ -68,7 +68,7 @@ public class Serializer {
    * @param fieldGraphNode TrackerNode instance.
    */
   public void serializeFieldGraphNode(TrackerNode fieldGraphNode) {
-    appendToFile(fieldGraphNode.toString(), fieldGraph);
+    appendToFile(fieldGraphNode.toString(), this.fieldGraphPath);
   }
 
   /**
@@ -77,7 +77,7 @@ public class Serializer {
    * @param methodInfo MethodInfo instance.
    */
   public void serializeMethodInfo(MethodInfo methodInfo) {
-    appendToFile(methodInfo.toString(), this.methodInfo);
+    appendToFile(methodInfo.toString(), this.methodInfoPath);
   }
 
   /** Cleared the content of the file if exists and writes the header in the first line. */
@@ -101,13 +101,13 @@ public class Serializer {
     try {
       Files.createDirectories(Paths.get(config.outputDirectory));
       if (config.callTrackerIsActive) {
-        initializeFile(callGraph, TrackerNode.header());
+        initializeFile(callGraphPath, TrackerNode.header());
       }
       if (config.fieldTrackerIsActive) {
-        initializeFile(fieldGraph, TrackerNode.header());
+        initializeFile(fieldGraphPath, TrackerNode.header());
       }
       if (config.methodTrackerIsActive) {
-        initializeFile(methodInfo, MethodInfo.header());
+        initializeFile(methodInfoPath, MethodInfo.header());
       }
     } catch (IOException e) {
       throw new RuntimeException("Could not finish resetting serializer", e);
