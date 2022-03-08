@@ -1,11 +1,12 @@
 import xml.etree.cElementTree as ET
 
-def write_dict_config_in_xml(config):
+
+def write_dict_config_in_xml(config, path):
     root = ET.Element("serialization")
 
     # Suggest
-    suggest = ET.SubElement(root, "suggest", activation=config['serialization']['suggest']['@activation'],
-                            enclosing=config['serialization']['suggest']['@enclosing'])
+    ET.SubElement(root, "suggest", activation=config['serialization']['suggest']['@activation'],
+                  enclosing=config['serialization']['suggest']['@enclosing'])
 
     # Output path
     ET.SubElement(root, "output").text = config['serialization']['output']
@@ -23,4 +24,4 @@ def write_dict_config_in_xml(config):
     ET.SubElement(root, "fieldInitInfo", activation=config['serialization']['fieldInitInfo']['@activation'])
 
     tree = ET.ElementTree(root)
-    tree.write("filename.xml")
+    tree.write(path)
