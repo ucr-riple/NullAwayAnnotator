@@ -10,6 +10,7 @@ import com.google.errorprone.bugpatterns.BugChecker;
 import com.google.errorprone.matchers.Description;
 import com.google.errorprone.util.ASTHelpers;
 import com.sun.source.tree.AssignmentTree;
+import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.MethodTree;
@@ -20,7 +21,6 @@ import edu.ucr.cs.css.out.TrackerNode;
 import javax.lang.model.element.ElementKind;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 @AutoService(BugChecker.class)
 @BugPattern(
@@ -53,10 +53,17 @@ public class CSS extends BugChecker
     if (tree == null) {
       return Description.NO_MATCH;
     }
+
     Symbol expressionSym = ASTHelpers.getSymbol(tree.getExpression());
     if (expressionSym != null && expressionSym.getKind() == ElementKind.FIELD) {
-      config.serializer.serializeFieldGraphNode(new TrackerNode(ASTHelpers.getSymbol(tree), state.getPath()));
+      config.serializer.serializeFieldGraphNode(new TrackerNode(expressionSym, state.getPath()));
     }
+
+    Symbol assigned = ASTHelpers.getSymbol(tree.getVariable());
+    if (assigned == null || assigned.getKind() != ElementKind.FIELD) {
+      return Description.NO_MATCH;
+    }
+    config.serializer.serializeFieldGraphNode(new TrackerNode(assigned, state.getPath()));
     return Description.NO_MATCH;
   }
 
@@ -66,7 +73,13 @@ public class CSS extends BugChecker
       return Description.NO_MATCH;
     }
     Symbol symbol = ASTHelpers.getSymbol(tree);
-    if (symbol != null && symbol.getKind().equals(ElementKind.FIELD)) {
+    // some checks for cases where we know it is not
+    // a null dereference
+    if (symbol == null || symbol.getSimpleName().toString().equals("class") || symbol.isEnum()) {
+      return Description.NO_MATCH;
+    }
+
+    if (symbol.getKind().equals(ElementKind.FIELD)) {
       config.serializer.serializeFieldGraphNode(new TrackerNode(symbol, state.getPath()));
     }
     return Description.NO_MATCH;
