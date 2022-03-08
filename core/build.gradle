@@ -9,13 +9,12 @@ compileJava {
 
 dependencies {
 
-    implementation "edu.ucr.cs.riple:injector:1.1.1-LOCAL"
-    testImplementation "edu.ucr.cs.riple:injector:1.1.1-LOCAL"
+    implementation project(':injector')
 
     implementation group: 'com.google.guava', name: 'guava', version: 'r05'
 
-    implementation 'com.googlecode.json-simple:json-simple:1.1.1'
-    testImplementation 'com.googlecode.json-simple:json-simple:1.1.1'
+    implementation group: 'com.googlecode.json-simple', name:'json-simple', version:"${deps.versions.json}"
+    testImplementation group: 'com.googlecode.json-simple', name:'json-simple', version:"${deps.versions.json}"
 
     implementation group: 'me.tongfei', name: 'progressbar', version: '0.9.2'
 }
