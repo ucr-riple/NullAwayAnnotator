@@ -2,12 +2,9 @@ package edu.ucr.cs.css.out;
 
 import com.google.errorprone.VisitorState;
 import com.google.errorprone.util.ASTHelpers;
-import com.sun.source.tree.CompilationUnitTree;
 import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.css.SymbolUtil;
 
-import javax.lang.model.element.Element;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -17,31 +14,29 @@ import java.util.Optional;
 import java.util.Set;
 
 public class MethodInfo {
+    final Symbol.MethodSymbol methodSymbol;
+    final Symbol.ClassSymbol enclosingClass;
     final int id;
-    final String method;
-    final String clazz;
-    String uri;
-    String[] nonnullFields = {};
+
     Boolean[] annotFlags;
-    int paramNumber = 0;
     int parent = -1;
 
     private static int LAST_ID = 0;
     static final Set<MethodInfo> discovered = new HashSet<>();
-    private static final MethodInfo top = new MethodInfo("null", "null");
+    private static final MethodInfo top = new MethodInfo(null, null);
 
-    private MethodInfo(String method, String clazz) {
+    private MethodInfo(Symbol.MethodSymbol method, Symbol.ClassSymbol enclosingClass) {
         this.id = LAST_ID++;
-        this.method = method;
-        this.clazz = clazz;
+        this.methodSymbol = method;
+        this.enclosingClass = enclosingClass;
     }
 
-    public static MethodInfo findOrCreate(String method, String clazz) {
+    public static MethodInfo findOrCreate(Symbol.MethodSymbol method, Symbol.ClassSymbol clazz) {
         Optional<MethodInfo> optionalMethodInfo =
                 discovered
                         .stream()
                         .filter(
-                                methodInfo -> methodInfo.method.equals(method) && methodInfo.clazz.equals(clazz))
+                                methodInfo -> methodInfo.methodSymbol.equals(method) && methodInfo.enclosingClass.equals(clazz))
                         .findAny();
         if (optionalMethodInfo.isPresent()) {
             return optionalMethodInfo.get();
@@ -56,26 +51,15 @@ public class MethodInfo {
         if (this == o) return true;
         if (!(o instanceof MethodInfo)) return false;
         MethodInfo that = (MethodInfo) o;
-        return method.equals(that.method) && clazz.equals(that.clazz);
+        return methodSymbol.equals(that.methodSymbol) && enclosingClass.equals(that.enclosingClass);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(method, clazz);
+        return Objects.hash(methodSymbol, enclosingClass);
     }
 
-    public void setNonnullFieldsElements(Set<Element> nonnullFieldsAtExit) {
-        if (nonnullFieldsAtExit == null) {
-            nonnullFieldsAtExit = Collections.emptySet();
-        }
-        List<String> fields = new ArrayList<>();
-        for (Element element : nonnullFieldsAtExit) {
-            fields.add(element.getSimpleName().toString());
-        }
-        this.nonnullFields = fields.toArray(new String[0]);
-    }
-
-    public void setParent(Symbol.MethodSymbol methodSymbol, VisitorState state) {
+    public void setParent(VisitorState state) {
         Symbol.MethodSymbol superMethod =
                 SymbolUtil.getClosestOverriddenMethod(methodSymbol, state.getTypes());
         if (superMethod == null || superMethod.toString().equals("null")) {
@@ -83,37 +67,27 @@ public class MethodInfo {
             return;
         }
         Symbol.ClassSymbol enclosingClass = ASTHelpers.enclosingClass(superMethod);
-        MethodInfo superMethodInfo = findOrCreate(superMethod.toString(), enclosingClass.toString());
+        MethodInfo superMethodInfo = findOrCreate(superMethod, enclosingClass);
         this.parent = superMethodInfo.id;
-    }
-
-    public void setUri(CompilationUnitTree c) {
-        this.uri = c.getSourceFile().toUri().toASCIIString();
     }
 
     @Override
     public String toString() {
         return id
                 + "\t"
-                + clazz
+                + ((enclosingClass != null) ? enclosingClass : "null")
                 + "\t"
-                + method
+                +  ((methodSymbol != null) ? methodSymbol : "null")
                 + "\t"
                 + parent
                 + "\t"
-                + uri
-                + "\t"
-                + paramNumber
+                + ((methodSymbol != null) ? methodSymbol.getParameters().size() : "0")
                 + "\t"
                 + Arrays.toString(annotFlags);
     }
 
     public static String header() {
-        return "id" + "\t" + "class" + "\t" + "method" + "\t" + "parent" + "\t" + "uri" + "\t" + "size" + "\t" + "flags";
-    }
-
-    public void setParamNumber(int size) {
-        this.paramNumber = size;
+        return "id" + "\t" + "class" + "\t" + "method" + "\t" + "parent" + "\t" + "size" + "\t" + "flags";
     }
 
     public void setParamAnnotations(List<Boolean> annotFlags) {

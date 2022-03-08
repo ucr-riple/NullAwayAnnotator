@@ -20,6 +20,7 @@ import edu.ucr.cs.css.out.TrackerNode;
 import javax.lang.model.element.ElementKind;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 @AutoService(BugChecker.class)
 @BugPattern(
@@ -82,12 +83,8 @@ public class CSS extends BugChecker
   @Override
   public Description matchMethod(MethodTree tree, VisitorState state) {
     Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(tree);
-    String method = methodSymbol.toString();
-    String clazz = ASTHelpers.enclosingClass(methodSymbol).toString();
-    MethodInfo methodInfo = MethodInfo.findOrCreate(method, clazz);
-//    methodInfo.setUri(c);
-    methodInfo.setParent(methodSymbol, state);
-    methodInfo.setParamNumber(methodSymbol.getParameters().size());
+    MethodInfo methodInfo = MethodInfo.findOrCreate(methodSymbol, ASTHelpers.enclosingClass(methodSymbol));
+    methodInfo.setParent(state);
     List<Boolean> paramAnnotations = new ArrayList<>();
     for (int i = 0; i < methodSymbol.getParameters().size(); i++) {
       paramAnnotations.add(SymbolUtil.paramHasNullableAnnotation(methodSymbol, i, config));
