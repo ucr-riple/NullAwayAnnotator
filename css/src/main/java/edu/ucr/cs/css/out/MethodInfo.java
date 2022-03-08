@@ -59,7 +59,7 @@ public class MethodInfo {
         return Objects.hash(methodSymbol, enclosingClass);
     }
 
-    public void setParent(VisitorState state) {
+    public void findParent(VisitorState state) {
         Symbol.MethodSymbol superMethod =
                 SymbolUtil.getClosestOverriddenMethod(methodSymbol, state.getTypes());
         if (superMethod == null || superMethod.toString().equals("null")) {
