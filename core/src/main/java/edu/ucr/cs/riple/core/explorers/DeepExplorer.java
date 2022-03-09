@@ -55,12 +55,12 @@ public class DeepExplorer extends BasicExplorer {
   }
 
   public void start(List<Report> reports) {
-    if (annotator.DEPTH == 0) {
+    if (annotator.depth == 0) {
       reports.forEach(report -> report.finished = true);
       return;
     }
-    System.out.println("Deep explorer is active...\nMax Depth level: " + annotator.DEPTH);
-    for (int i = 0; i < annotator.DEPTH; i++) {
+    System.out.println("Deep explorer is active...\nMax Depth level: " + annotator.depth);
+    for (int i = 0; i < annotator.depth; i++) {
       System.out.println("Analyzing at level " + (i + 1));
       init(reports);
       explore();

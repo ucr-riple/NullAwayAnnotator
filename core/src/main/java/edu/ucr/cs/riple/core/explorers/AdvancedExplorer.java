@@ -62,7 +62,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
       pb.setExtraMessage("Building");
       FixSerializationConfig.Builder config =
           new FixSerializationConfig.Builder()
-              .setSuggest(true, annotator.DEPTH > 0)
+              .setSuggest(true, annotator.depth > 0)
               .setAnnotations(annotator.nullableAnnot, "UNKNOWN")
               .setOutputDirectory(annotator.dir.toString());
       annotator.buildProject(config);
@@ -78,7 +78,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
               errorBank.compareByMethod(usage.clazz, usage.method, false);
           node.analyzeStatus(errorComparison.dif);
           totalEffect += errorComparison.size;
-          if (annotator.DEPTH > 0) {
+          if (annotator.depth > 0) {
             node.updateTriggered(
                 fixBank
                     .compareByMethod(usage.clazz, usage.method, false)

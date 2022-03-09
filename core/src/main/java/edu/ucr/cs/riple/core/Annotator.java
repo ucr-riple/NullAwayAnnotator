@@ -34,8 +34,8 @@ public class Annotator {
   public Path dir;
 
   public String nullableAnnot;
-  public int DEPTH;
-  public boolean KEEP_STYLE;
+  public int depth;
+  public boolean lexicalPreservationEnabled;
 
   private String buildCommand;
   private Injector injector;
@@ -78,7 +78,7 @@ public class Annotator {
     }
     allFixes = Collections.unmodifiableList(allFixes);
     log.total = allFixes.size();
-    this.injector = Injector.builder().setMode(Injector.MODE.BATCH).keepStyle(KEEP_STYLE).build();
+    this.injector = Injector.builder().setMode(Injector.MODE.BATCH).keepStyle(lexicalPreservationEnabled).build();
     this.methodInheritanceTree =
         new MethodInheritanceTree(dir.resolve(Serializer.METHOD_INFO_NAME));
     this.callUsageTracker = new CallUsageTracker(dir.resolve(Serializer.CALL_GRAPH_NAME));
@@ -87,7 +87,7 @@ public class Annotator {
     Bank<FixEntity> fixBank = new Bank<>(fixPath, FixEntity::new);
     this.explorers = new ArrayList<>();
     this.deepExplorer = new DeepExplorer(this, errorBank, fixBank);
-    if (DEPTH < 0) {
+    if (depth < 0) {
       this.explorers.add(new DummyExplorer(this, null, null));
     } else {
       this.explorers.add(new MethodParamExplorer(this, allFixes, errorBank, fixBank));

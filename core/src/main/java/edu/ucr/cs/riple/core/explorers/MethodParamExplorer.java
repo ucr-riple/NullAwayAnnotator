@@ -64,7 +64,7 @@ public class MethodParamExplorer extends AdvancedExplorer {
             errorBank.compareByMethod(node.fix.className, node.fix.method, false);
         node.setEffect(errorComparison.size, annotator.methodInheritanceTree);
         node.analyzeStatus(errorComparison.dif);
-        if (annotator.DEPTH > 0) {
+        if (annotator.depth > 0) {
           node.updateTriggered(
               fixBank
                   .compareByMethod(node.fix.className, node.fix.method, false)

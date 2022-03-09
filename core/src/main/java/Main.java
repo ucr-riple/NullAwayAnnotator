@@ -34,9 +34,9 @@ public class Main {
     }
     Path dir = Paths.get(args[1]);
     String runCommand = args[2];
-    annotator.DEPTH = Integer.parseInt(args[3]);
+    annotator.depth = Integer.parseInt(args[3]);
     annotator.nullableAnnot = args[4];
-    annotator.KEEP_STYLE = Boolean.parseBoolean(args[5]);
+    annotator.lexicalPreservationEnabled = Boolean.parseBoolean(args[5]);
     annotator.start(runCommand, dir, true);
   }
 
