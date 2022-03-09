@@ -1,9 +1,9 @@
 package edu.ucr.cs.riple.core;
 
 public enum FixType {
-  METHOD_PARAM("METHOD_PARAM"),
-  CLASS_FIELD("CLASS_FIELD"),
-  METHOD_RETURN("METHOD_RETURN");
+  METHOD_PARAM("PARAMETER"),
+  CLASS_FIELD("FIELD"),
+  METHOD_RETURN("METHOD");
 
   public final String name;
 
