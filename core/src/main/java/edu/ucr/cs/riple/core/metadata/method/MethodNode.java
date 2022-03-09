@@ -14,6 +14,25 @@ public class MethodNode {
   public int size;
   public boolean[] annotFlags;
 
+  public MethodNode(
+      int id,
+      String clazz,
+      String method,
+      List<Integer> children,
+      boolean[] annotFlags,
+      int parent,
+      String uri) {
+    this.id = id;
+    this.clazz = clazz;
+    this.method = method;
+    this.children = children;
+    this.annotFlags = annotFlags;
+    this.parent = parent;
+    this.uri = uri;
+  }
+
+  public MethodNode() {}
+
   void fillInformation(
       Integer id,
       String clazz,

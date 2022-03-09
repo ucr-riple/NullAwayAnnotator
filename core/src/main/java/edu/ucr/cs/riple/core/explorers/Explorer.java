@@ -1,24 +1,23 @@
 package edu.ucr.cs.riple.core.explorers;
 
 import com.uber.nullaway.fixserialization.FixSerializationConfig;
-import edu.ucr.cs.riple.core.AutoFixer;
+import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.FixEntity;
 import edu.ucr.cs.riple.injector.Fix;
-import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
 public abstract class Explorer {
 
-  protected final AutoFixer autoFixer;
+  protected final Annotator annotator;
   protected final Bank<Error> errorBank;
   protected final Bank<FixEntity> fixBank;
 
-  public Explorer(AutoFixer autoFixer, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
-    this.autoFixer = autoFixer;
+  public Explorer(Annotator annotator, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
+    this.annotator = annotator;
     this.errorBank = errorBank;
     this.fixBank = fixBank;
   }
@@ -27,9 +26,9 @@ public abstract class Explorer {
     FixSerializationConfig.Builder config =
         new FixSerializationConfig.Builder()
             .setSuggest(true, false)
-            .setAnnotations(AutoFixer.NULLABLE_ANNOT, "UNKNOWN");
-    autoFixer.buildProject(config);
-    if (new File(AutoFixer.ERROR_NAME).exists()) {
+            .setAnnotations(annotator.nullableAnnot, "UNKNOWN");
+    annotator.buildProject(config);
+    if (annotator.errorPath.toFile().exists()) {
       return new Report(fix, errorBank.compare());
     }
     return Report.empty(fix);
@@ -43,9 +42,9 @@ public abstract class Explorer {
     FixSerializationConfig.Builder config =
         new FixSerializationConfig.Builder()
             .setSuggest(true, false)
-            .setAnnotations(AutoFixer.NULLABLE_ANNOT, "UNKNOWN");
-    autoFixer.buildProject(config);
-    if (new File(AutoFixer.ERROR_NAME).exists()) {
+            .setAnnotations(annotator.nullableAnnot, "UNKNOWN");
+    annotator.buildProject(config);
+    if (annotator.errorPath.toFile().exists()) {
       int totalEffect = 0;
       totalEffect += errorBank.compareByClass(fix.className, true).size;
       for (String clazz : workSet) {

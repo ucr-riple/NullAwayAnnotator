@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,7 +16,7 @@ public class Index<T extends Hashable> {
 
   private final HashMap<Integer, List<T>> items;
   private final Factory<T> factory;
-  private final String path;
+  private final Path path;
   private final Index.Type type;
   public int total;
 
@@ -24,7 +25,7 @@ public class Index<T extends Hashable> {
     BY_CLASS
   }
 
-  public Index(String path, Index.Type type, Factory<T> factory) {
+  public Index(Path path, Index.Type type, Factory<T> factory) {
     this.type = type;
     this.path = path;
     this.items = new HashMap<>();
@@ -34,7 +35,7 @@ public class Index<T extends Hashable> {
 
   public void index() {
     items.clear();
-    try (BufferedReader br = new BufferedReader(new FileReader(this.path))) {
+    try (BufferedReader br = new BufferedReader(new FileReader(this.path.toFile()))) {
       String line;
       br.readLine();
       while ((line = br.readLine()) != null) {

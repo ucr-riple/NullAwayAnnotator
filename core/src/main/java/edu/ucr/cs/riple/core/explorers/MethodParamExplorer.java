@@ -1,7 +1,7 @@
 package edu.ucr.cs.riple.core.explorers;
 
 import com.uber.nullaway.fixserialization.FixSerializationConfig;
-import edu.ucr.cs.riple.core.AutoFixer;
+import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
@@ -19,8 +19,8 @@ import me.tongfei.progressbar.ProgressBar;
 public class MethodParamExplorer extends AdvancedExplorer {
 
   public MethodParamExplorer(
-      AutoFixer autoFixer, List<Fix> fixes, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
-    super(autoFixer, fixes, errorBank, fixBank, FixType.METHOD_PARAM);
+      Annotator annotator, List<Fix> fixes, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
+    super(annotator, fixes, errorBank, fixBank, FixType.METHOD_PARAM);
   }
 
   @Override
@@ -50,9 +50,9 @@ public class MethodParamExplorer extends AdvancedExplorer {
       FixSerializationConfig.Builder config =
           new FixSerializationConfig.Builder()
               .setSuggest(true, false)
-              .setAnnotations(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
+              .setAnnotations(annotator.nullableAnnot, "UNKNOWN")
               .setParamProtectionTest(true, i);
-      autoFixer.buildProject(config);
+      annotator.buildProject(config);
       errorBank.saveState(false, true);
       fixBank.saveState(false, true);
       int index = 0;
@@ -60,9 +60,9 @@ public class MethodParamExplorer extends AdvancedExplorer {
         pb.setExtraMessage("processing node: " + index + " / " + subList.size());
         Result<Error> errorComparison =
             errorBank.compareByMethod(node.fix.className, node.fix.method, false);
-        node.setEffect(errorComparison.size, autoFixer.methodInheritanceTree);
+        node.setEffect(errorComparison.size, annotator.methodInheritanceTree);
         node.analyzeStatus(errorComparison.dif);
-        if (AutoFixer.DEPTH > 0) {
+        if (annotator.DEPTH > 0) {
           node.updateTriggered(
               fixBank
                   .compareByMethod(node.fix.className, node.fix.method, false)

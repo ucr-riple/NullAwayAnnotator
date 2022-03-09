@@ -21,21 +21,22 @@ import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkList;
 import edu.ucr.cs.riple.injector.WorkListBuilder;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class AutoFixer {
+public class Annotator {
 
-  public static final String FIXES_NAME = "fixes.tsv";
-  public static final String ERROR_NAME = "errors.tsv";
+  public Path fixPath;
+  public Path errorPath;
+  public Path dir;
 
-  public static String NULLABLE_ANNOT;
-  public static int DEPTH;
-  public static boolean KEEP_STYLE;
+  public String nullableAnnot;
+  public int DEPTH;
+  public boolean KEEP_STYLE;
 
-  private String out_dir;
   private String buildCommand;
   private Injector injector;
   private List<Report> finishedReports;
@@ -67,12 +68,12 @@ public class AutoFixer {
     FixSerializationConfig.Builder builder =
         new FixSerializationConfig.Builder()
             .setSuggest(true, true)
-            .setAnnotations(AutoFixer.NULLABLE_ANNOT, "UNKNOWN");
+            .setAnnotations(nullableAnnot, "UNKNOWN");
     buildProject(builder, false);
-    List<Fix> allFixes = Utility.readAllFixes();
+    List<Fix> allFixes = Utility.readAllFixes(fixPath);
     if (useCache) {
       System.out.println("Removing cached fixes");
-      Utility.removeCachedFixes(allFixes, out_dir);
+      Utility.removeCachedFixes(allFixes, dir);
     }
     allFixes = Collections.unmodifiableList(allFixes);
     log.total = allFixes.size();
@@ -80,8 +81,8 @@ public class AutoFixer {
     this.methodInheritanceTree = new MethodInheritanceTree(Serializer.METHOD_INFO_NAME);
     this.callUsageTracker = new CallUsageTracker(Serializer.CALL_GRAPH_NAME);
     this.fieldUsageTracker = new FieldUsageTracker(Serializer.FIELD_GRAPH_NAME);
-    Bank<Error> errorBank = new Bank<>(ERROR_NAME, Error::new);
-    Bank<FixEntity> fixBank = new Bank<>(FIXES_NAME, FixEntity::new);
+    Bank<Error> errorBank = new Bank<>(errorPath, Error::new);
+    Bank<FixEntity> fixBank = new Bank<>(fixPath, FixEntity::new);
     this.explorers = new ArrayList<>();
     this.deepExplorer = new DeepExplorer(this, errorBank, fixBank);
     if (DEPTH < 0) {
@@ -95,10 +96,12 @@ public class AutoFixer {
     return allFixes;
   }
 
-  public void start(String buildCommand, String out_dir, boolean useCache) {
+  public void start(String buildCommand, Path dir, boolean useCache) {
     log.time = System.currentTimeMillis();
-    System.out.println("AutoFixer Started.");
-    this.out_dir = out_dir;
+    System.out.println("Annotator Started.");
+    this.dir = dir;
+    this.fixPath = dir.resolve("fixes.tsv");
+    this.errorPath = dir.resolve("errors.tsv");
     List<Fix> fixes = init(buildCommand, useCache);
     List<WorkList> workListLists = new WorkListBuilder(fixes).getWorkLists();
     try {
@@ -172,7 +175,7 @@ public class AutoFixer {
     if (count) {
       log.requested++;
     }
-    writer.writeAsXML(out_dir + "/explorer.config");
+    writer.writeAsXML(dir + "/explorer.config");
     try {
       Utility.executeCommand(buildCommand);
     } catch (Exception e) {

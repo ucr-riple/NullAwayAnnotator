@@ -1,7 +1,7 @@
 package edu.ucr.cs.riple.core.util;
 
 import com.google.common.primitives.Booleans;
-import edu.ucr.cs.riple.core.AutoFixer;
+import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -79,7 +80,7 @@ public class Utility {
       writer.write(result.toJSONString().replace("\\/", "/").replace("\\\\\\", "\\"));
       writer.flush();
     } catch (IOException e) {
-      throw new RuntimeException("Could not create the autoFixer report json file");
+      throw new RuntimeException("Could not create the Annotator report json file");
     }
   }
 
@@ -123,10 +124,10 @@ public class Utility {
         Arrays.stream(content.split(",")).map(Boolean::parseBoolean).collect(Collectors.toList()));
   }
 
-  public static List<Fix> readAllFixes() {
+  public static List<Fix> readAllFixes(Path path) {
     List<Fix> fixes = new ArrayList<>();
     try {
-      try (BufferedReader br = new BufferedReader(new FileReader(AutoFixer.FIXES_NAME))) {
+      try (BufferedReader br = new BufferedReader(new FileReader(path.toFile()))) {
         String line;
         br.readLine();
         while ((line = br.readLine()) != null) {
@@ -177,15 +178,15 @@ public class Utility {
     return effect;
   }
 
-  public static void removeCachedFixes(List<Fix> fixes, String out_dir) {
-    if (!Files.exists(Paths.get(out_dir + "/reports.json"))) {
-      System.out.println("Found no report at: " + out_dir + "/reports.json");
+  public static void removeCachedFixes(List<Fix> fixes, Path outDir) {
+    if (!Files.exists(outDir.resolve("/reports.json"))) {
+      System.out.println("Found no report at: " + outDir + "/reports.json");
       return;
     }
     try {
       System.out.println("Reading cached fixes reports");
       JSONObject cachedObjects =
-          (JSONObject) new JSONParser().parse(new FileReader(out_dir + "/reports.json"));
+          (JSONObject) new JSONParser().parse(new FileReader(outDir + "/reports.json"));
       JSONArray cachedJson = (JSONArray) cachedObjects.get("reports");
       System.out.println("Found " + cachedJson.size() + " number of reports");
       List<Fix> cached = new ArrayList<>();
@@ -248,7 +249,7 @@ public class Utility {
         Duration.ZERO);
   }
 
-  public static void writeLog(AutoFixer.Log log) {
+  public static void writeLog(Annotator.Log log) {
     String path = "/tmp/NullAwayFix/log.txt";
     try {
       FileWriter fw = new FileWriter(path, true);

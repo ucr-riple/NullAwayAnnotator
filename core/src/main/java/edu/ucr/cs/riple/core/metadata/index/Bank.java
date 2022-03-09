@@ -1,10 +1,10 @@
 package edu.ucr.cs.riple.core.metadata.index;
 
 import com.google.common.base.Preconditions;
-import edu.ucr.cs.riple.core.AutoFixer;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 public class Bank<T extends Hashable> {
@@ -14,9 +14,9 @@ public class Bank<T extends Hashable> {
   private Index<T> currentInMethod;
   private Index<T> currentInClass;
   private final Factory<T> factory;
-  private final String path;
+  private final Path path;
 
-  public Bank(String path, Factory<T> factory) {
+  public Bank(Path path, Factory<T> factory) {
     this.factory = factory;
     this.path = path;
     rootInClass = new Index<>(path, Index.Type.BY_CLASS, factory);
@@ -59,7 +59,7 @@ public class Bank<T extends Hashable> {
     BufferedReader reader;
     int lines = 0;
     try {
-      reader = new BufferedReader(new FileReader(AutoFixer.ERROR_NAME));
+      reader = new BufferedReader(new FileReader(path.toFile()));
       reader.readLine();
       while (reader.readLine() != null) lines++;
       reader.close();

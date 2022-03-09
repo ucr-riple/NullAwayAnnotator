@@ -1,7 +1,7 @@
 package edu.ucr.cs.riple.core.explorers;
 
 import com.uber.nullaway.fixserialization.FixSerializationConfig;
-import edu.ucr.cs.riple.core.AutoFixer;
+import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.graph.FixGraph;
 import edu.ucr.cs.riple.core.metadata.graph.SuperNode;
@@ -24,9 +24,9 @@ public class DeepExplorer extends BasicExplorer {
   private final CompoundTracker tracker;
   private final FixGraph<SuperNode> fixGraph;
 
-  public DeepExplorer(AutoFixer autoFixer, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
-    super(autoFixer, errorBank, fixBank);
-    this.tracker = new CompoundTracker(autoFixer.fieldUsageTracker, autoFixer.callUsageTracker);
+  public DeepExplorer(Annotator annotator, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
+    super(annotator, errorBank, fixBank);
+    this.tracker = new CompoundTracker(annotator.fieldUsageTracker, annotator.callUsageTracker);
     this.fixGraph = new FixGraph<>(SuperNode::new);
   }
 
@@ -55,12 +55,12 @@ public class DeepExplorer extends BasicExplorer {
   }
 
   public void start(List<Report> reports) {
-    if (AutoFixer.DEPTH == 0) {
+    if (annotator.DEPTH == 0) {
       reports.forEach(report -> report.finished = true);
       return;
     }
-    System.out.println("Deep explorer is active...\nMax Depth level: " + AutoFixer.DEPTH);
-    for (int i = 0; i < AutoFixer.DEPTH; i++) {
+    System.out.println("Deep explorer is active...\nMax Depth level: " + annotator.DEPTH);
+    for (int i = 0; i < annotator.DEPTH; i++) {
       System.out.println("Analyzing at level " + (i + 1));
       init(reports);
       explore();
@@ -88,13 +88,13 @@ public class DeepExplorer extends BasicExplorer {
       List<Fix> fixes = new ArrayList<>();
       group.forEach(superNode -> fixes.addAll(superNode.getFixChain()));
       pb.setExtraMessage("Applying fixes");
-      autoFixer.apply(fixes);
+      annotator.apply(fixes);
       FixSerializationConfig.Builder config =
           new FixSerializationConfig.Builder()
               .setSuggest(true, true)
-              .setAnnotations(AutoFixer.NULLABLE_ANNOT, "UNKNOWN");
+              .setAnnotations(annotator.nullableAnnot, "UNKNOWN");
       pb.setExtraMessage("Building");
-      autoFixer.buildProject(config);
+      annotator.buildProject(config);
       pb.setExtraMessage("Saving state");
       errorBank.saveState(false, true);
       fixBank.saveState(false, true);
@@ -111,9 +111,9 @@ public class DeepExplorer extends BasicExplorer {
                       .map(fixEntity -> fixEntity.fix)
                       .collect(Collectors.toList()));
             }
-            superNode.setEffect(totalEffect, autoFixer.methodInheritanceTree);
+            superNode.setEffect(totalEffect, annotator.methodInheritanceTree);
           });
-      autoFixer.remove(fixes);
+      annotator.remove(fixes);
     }
     pb.close();
   }

@@ -1,7 +1,7 @@
 package edu.ucr.cs.riple.core.explorers;
 
 import com.uber.nullaway.fixserialization.FixSerializationConfig;
-import edu.ucr.cs.riple.core.AutoFixer;
+import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.graph.FixGraph;
@@ -27,12 +27,12 @@ public abstract class AdvancedExplorer extends BasicExplorer {
   protected final FixType fixType;
 
   public AdvancedExplorer(
-      AutoFixer autoFixer,
+      Annotator annotator,
       List<Fix> fixes,
       Bank<Error> errorBank,
       Bank<FixEntity> fixBank,
       FixType fixType) {
-    super(autoFixer, errorBank, fixBank);
+    super(annotator, errorBank, fixBank);
     this.fixType = fixType;
     this.fixGraph = new FixGraph<>(Node::new);
     fixes.forEach(
@@ -58,13 +58,13 @@ public abstract class AdvancedExplorer extends BasicExplorer {
       pb.setExtraMessage("Gathering fixes");
       List<Fix> fixes = nodes.stream().map(node -> node.fix).collect(Collectors.toList());
       pb.setExtraMessage("Applying fixes");
-      autoFixer.apply(fixes);
+      annotator.apply(fixes);
       pb.setExtraMessage("Building");
       FixSerializationConfig.Builder config =
           new FixSerializationConfig.Builder()
-              .setSuggest(true, AutoFixer.DEPTH > 0)
-              .setAnnotations(AutoFixer.NULLABLE_ANNOT, "UNKNOWN");
-      autoFixer.buildProject(config);
+              .setSuggest(true, annotator.DEPTH > 0)
+              .setAnnotations(annotator.nullableAnnot, "UNKNOWN");
+      annotator.buildProject(config);
       pb.setExtraMessage("Saving state");
       errorBank.saveState(false, true);
       fixBank.saveState(true, true);
@@ -77,7 +77,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
               errorBank.compareByMethod(usage.clazz, usage.method, false);
           node.analyzeStatus(errorComparison.dif);
           totalEffect += errorComparison.size;
-          if (AutoFixer.DEPTH > 0) {
+          if (annotator.DEPTH > 0) {
             node.updateTriggered(
                 fixBank
                     .compareByMethod(usage.clazz, usage.method, false)
@@ -87,9 +87,9 @@ public abstract class AdvancedExplorer extends BasicExplorer {
                     .collect(Collectors.toList()));
           }
         }
-        node.setEffect(totalEffect, autoFixer.methodInheritanceTree);
+        node.setEffect(totalEffect, annotator.methodInheritanceTree);
       }
-      autoFixer.remove(fixes);
+      annotator.remove(fixes);
     }
     pb.close();
   }

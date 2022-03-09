@@ -15,7 +15,6 @@ public class Fix {
   public final String className;
   public final String inject;
   public String uri;
-  public String compulsory;
   public String index;
   public String pkg;
   public int referred;
@@ -29,8 +28,7 @@ public class Fix {
     URI("uri"),
     INJECT("inject"),
     ANNOTATION("annotation"),
-    INDEX("index"),
-    COMPULSORY("compulsory");
+    INDEX("index");
     public final String label;
 
     KEYS(String label) {
@@ -92,9 +90,6 @@ public class Fix {
     if (fixJson.get(KEYS.INDEX.label) != null) {
       fix.index = fixJson.get(KEYS.INDEX.label).toString();
     }
-    if (fixJson.get(KEYS.COMPULSORY.label) != null) {
-      fix.compulsory = fixJson.get(KEYS.COMPULSORY.label).toString();
-    }
     return fix;
   }
 
@@ -127,9 +122,6 @@ public class Fix {
         + ", \n\tindex='"
         + index
         + '\''
-        + ", \n\tcompulsory='"
-        + compulsory
-        + '\''
         + "\n  }\n";
   }
 
@@ -150,8 +142,7 @@ public class Fix {
         && Objects.equals(pkg, fix.pkg)
         && Objects.equals(inject, fix.inject)
         && Objects.equals(uri, fix.uri)
-        && Objects.equals(index, fix.index)
-        && Objects.equals(compulsory, fix.compulsory);
+        && Objects.equals(index, fix.index);
   }
 
   @Override
@@ -168,8 +159,7 @@ public class Fix {
 
   @Override
   public int hashCode() {
-    return Objects.hash(
-        annotation, method, param, location, className, pkg, inject, uri, compulsory, index);
+    return Objects.hash(annotation, method, param, location, className, pkg, inject, uri, index);
   }
 
   public JSONObject getJson() {
@@ -182,7 +172,6 @@ public class Fix {
     res.put(KEYS.ANNOTATION.label, annotation);
     res.put(KEYS.INJECT.label, inject);
     res.put(KEYS.URI.label, uri);
-    res.put(KEYS.COMPULSORY.label, compulsory);
     res.put(KEYS.INDEX.label, index);
     return res;
   }
@@ -190,7 +179,6 @@ public class Fix {
   public Fix duplicate() {
     Fix fix = new Fix(annotation, method, param, location, className, uri, inject);
     fix.index = index;
-    fix.compulsory = compulsory;
     fix.pkg = pkg;
     return fix;
   }
@@ -200,9 +188,8 @@ public class Fix {
   }
 
   public static Fix fromArrayInfo(String[] infos) {
-    Fix fix = new Fix(infos[8], infos[3], infos[4], infos[0], infos[2], infos[6], infos[10]);
+    Fix fix = new Fix(infos[7], infos[2], infos[3], infos[0], infos[1], infos[5], "true");
     fix.pkg = infos[1];
-    fix.compulsory = infos[9];
     fix.index = infos[5];
     return fix;
   }

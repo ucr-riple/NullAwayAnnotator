@@ -12,22 +12,12 @@ import java.util.Set;
 public class MethodInheritanceTree extends AbstractRelation<MethodNode> {
 
   HashMap<Integer, MethodNode> nodes;
-  private static final MethodNode top;
   private static int maxsize = 0;
-
-  static {
-    top = new MethodNode();
-    top.method = "null";
-    top.clazz = "null";
-    top.children = Collections.emptyList();
-    top.id = -1;
-    top.annotFlags = new boolean[] {};
-    top.parent = -1;
-    top.uri = "null";
-  }
 
   public MethodInheritanceTree(String filePath) {
     super(filePath);
+    final MethodNode top =
+        new MethodNode(-1, "null", "null", Collections.emptyList(), new boolean[] {}, -1, "null");
     nodes.put(-1, top);
   }
 

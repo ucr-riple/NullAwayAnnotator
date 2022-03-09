@@ -1,6 +1,6 @@
 package edu.ucr.cs.riple.core.explorers;
 
-import edu.ucr.cs.riple.core.AutoFixer;
+import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -10,8 +10,8 @@ import java.util.Set;
 
 public class DummyExplorer extends Explorer {
 
-  public DummyExplorer(AutoFixer autoFixer, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
-    super(autoFixer, errorBank, fixBank);
+  public DummyExplorer(Annotator annotator, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
+    super(annotator, errorBank, fixBank);
   }
 
   @Override
