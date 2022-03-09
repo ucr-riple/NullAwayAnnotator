@@ -2,6 +2,8 @@ package edu.ucr.cs.riple.core.metadata.method;
 
 import edu.ucr.cs.riple.core.metadata.AbstractRelation;
 import edu.ucr.cs.riple.core.util.Utility;
+
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,8 +16,8 @@ public class MethodInheritanceTree extends AbstractRelation<MethodNode> {
   HashMap<Integer, MethodNode> nodes;
   private static int maxsize = 0;
 
-  public MethodInheritanceTree(String filePath) {
-    super(filePath);
+  public MethodInheritanceTree(Path path) {
+    super(path);
     final MethodNode top =
         new MethodNode(-1, "null", "null", Collections.emptyList(), new boolean[] {}, -1, "null");
     nodes.put(-1, top);
@@ -38,7 +40,7 @@ public class MethodInheritanceTree extends AbstractRelation<MethodNode> {
       nodes.put(id, node);
     }
     Integer parentId = Integer.parseInt(values[3]);
-    int size = Integer.parseInt(values[6]);
+    int size = Integer.parseInt(values[4]);
     if (size > maxsize) {
       maxsize = size;
     }
@@ -46,10 +48,9 @@ public class MethodInheritanceTree extends AbstractRelation<MethodNode> {
         id,
         values[1],
         values[2],
-        values[5],
         parentId,
         size,
-        Utility.convertStringToBooleanArray(values[7]));
+        Utility.convertStringToBooleanArray(values[5]));
     if (parentId != -1) {
       MethodNode parent = nodes.get(parentId);
       if (parent == null) {

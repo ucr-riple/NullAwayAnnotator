@@ -3,6 +3,8 @@ package edu.ucr.cs.riple.core.metadata.trackers;
 import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.metadata.AbstractRelation;
 import edu.ucr.cs.riple.injector.Fix;
+
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -11,8 +13,8 @@ public class FieldUsageTracker extends AbstractRelation<TrackerNode> implements 
 
   private final FixType fixType;
 
-  public FieldUsageTracker(String filePath) {
-    super(filePath);
+  public FieldUsageTracker(Path path) {
+    super(path);
     this.fixType = FixType.CLASS_FIELD;
   }
 

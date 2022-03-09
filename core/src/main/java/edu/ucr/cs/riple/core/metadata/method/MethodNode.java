@@ -10,7 +10,6 @@ public class MethodNode {
   public Integer id;
   public String method;
   public String clazz;
-  public String uri;
   public int size;
   public boolean[] annotFlags;
 
@@ -28,7 +27,6 @@ public class MethodNode {
     this.children = children;
     this.annotFlags = annotFlags;
     this.parent = parent;
-    this.uri = uri;
   }
 
   public MethodNode() {}
@@ -37,7 +35,6 @@ public class MethodNode {
       Integer id,
       String clazz,
       String method,
-      String uri,
       Integer parent,
       int size,
       boolean[] annotFlags) {
@@ -45,7 +42,6 @@ public class MethodNode {
     this.id = id;
     this.method = method;
     this.clazz = clazz;
-    this.uri = uri;
     this.size = size;
     this.annotFlags = annotFlags;
   }
@@ -72,9 +68,6 @@ public class MethodNode {
         + ", clazz='"
         + clazz
         + '\''
-        + ", uri='"
-        + uri
-        + '\''
         + ", size="
         + size
         + '}';
@@ -89,8 +82,7 @@ public class MethodNode {
         && Objects.equals(parent, that.parent)
         && Objects.equals(id, that.id)
         && Objects.equals(method, that.method)
-        && Objects.equals(clazz, that.clazz)
-        && Objects.equals(uri, that.uri);
+        && Objects.equals(clazz, that.clazz);
   }
 
   @Override

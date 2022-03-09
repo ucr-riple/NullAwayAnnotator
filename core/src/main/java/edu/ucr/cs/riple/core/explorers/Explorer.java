@@ -26,7 +26,9 @@ public abstract class Explorer {
     FixSerializationConfig.Builder config =
         new FixSerializationConfig.Builder()
             .setSuggest(true, false)
-            .setAnnotations(annotator.nullableAnnot, "UNKNOWN");
+            .setAnnotations(annotator.nullableAnnot, "UNKNOWN")
+            .setOutputDirectory(annotator.dir.toString());
+    ;
     annotator.buildProject(config);
     if (annotator.errorPath.toFile().exists()) {
       return new Report(fix, errorBank.compare());
@@ -42,7 +44,9 @@ public abstract class Explorer {
     FixSerializationConfig.Builder config =
         new FixSerializationConfig.Builder()
             .setSuggest(true, false)
-            .setAnnotations(annotator.nullableAnnot, "UNKNOWN");
+            .setAnnotations(annotator.nullableAnnot, "UNKNOWN")
+            .setOutputDirectory(annotator.dir.toString());
+    ;
     annotator.buildProject(config);
     if (annotator.errorPath.toFile().exists()) {
       int totalEffect = 0;

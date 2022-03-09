@@ -3,6 +3,7 @@ package edu.ucr.cs.riple.core.metadata;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,12 +12,12 @@ import java.util.List;
 public abstract class AbstractRelation<T> {
   HashMap<Integer, List<T>> idHash;
 
-  public AbstractRelation(String filePath) {
+  public AbstractRelation(Path path) {
     setup();
     try {
-      fillNodes(filePath);
+      fillNodes(path);
     } catch (IOException e) {
-      System.out.println("Not found: " + filePath);
+      System.out.println("Not found: " + path);
     }
   }
 
@@ -24,9 +25,9 @@ public abstract class AbstractRelation<T> {
     idHash = new HashMap<>();
   }
 
-  protected void fillNodes(String filePath) throws IOException {
+  protected void fillNodes(Path path) throws IOException {
     BufferedReader reader;
-    reader = new BufferedReader(new FileReader(filePath));
+    reader = new BufferedReader(new FileReader(path.toFile()));
     String line = reader.readLine();
     if (line != null) line = reader.readLine();
     while (line != null) {

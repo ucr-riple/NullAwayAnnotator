@@ -63,7 +63,8 @@ public abstract class AdvancedExplorer extends BasicExplorer {
       FixSerializationConfig.Builder config =
           new FixSerializationConfig.Builder()
               .setSuggest(true, annotator.DEPTH > 0)
-              .setAnnotations(annotator.nullableAnnot, "UNKNOWN");
+              .setAnnotations(annotator.nullableAnnot, "UNKNOWN")
+              .setOutputDirectory(annotator.dir.toString());
       annotator.buildProject(config);
       pb.setExtraMessage("Saving state");
       errorBank.saveState(false, true);

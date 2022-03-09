@@ -93,38 +93,6 @@ public class Fix {
     return fix;
   }
 
-  public String display() {
-    return "\n  {"
-        + "\n\tannotation='"
-        + annotation
-        + '\''
-        + ", \n\tmethod='"
-        + method
-        + '\''
-        + ", \n\tparam='"
-        + param
-        + '\''
-        + ", \n\tlocation='"
-        + location
-        + '\''
-        + ", \n\tclassName='"
-        + className
-        + '\''
-        + ", \n\tpkg='"
-        + pkg
-        + '\''
-        + ", \n\tinject='"
-        + inject
-        + '\''
-        + ", \n\turi='"
-        + uri
-        + '\''
-        + ", \n\tindex='"
-        + index
-        + '\''
-        + "\n  }\n";
-  }
-
   @Override
   public String toString() {
     return location + " " + className + " " + method + " " + param;
@@ -159,7 +127,7 @@ public class Fix {
 
   @Override
   public int hashCode() {
-    return Objects.hash(annotation, method, param, location, className, pkg, inject, uri, index);
+    return Objects.hash(annotation, method, param, location, className);
   }
 
   public JSONObject getJson() {
@@ -189,8 +157,8 @@ public class Fix {
 
   public static Fix fromArrayInfo(String[] infos) {
     Fix fix = new Fix(infos[7], infos[2], infos[3], infos[0], infos[1], infos[5], "true");
-    fix.pkg = infos[1];
-    fix.index = infos[5];
+    fix.pkg = fix.className.substring(0, fix.className.lastIndexOf("."));
+    fix.index = infos[4];
     return fix;
   }
 }

@@ -139,7 +139,6 @@ public class Utility {
             fix.referred = 1;
             fixes.add(fix);
           }
-          fixes.add(Fix.fromCSVLine(line, "\t"));
         }
       }
     } catch (IOException e) {

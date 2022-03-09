@@ -5,18 +5,16 @@ package edu.ucr.cs.riple.core.metadata.index;
 public class Error extends Hashable {
   public final String messageType;
   public final String message;
-  public final boolean covered;
 
   public Error(String[] infos) {
-    this(infos[0], infos[1], infos[2], infos[3], Boolean.parseBoolean(infos[4]));
+    this(infos[0], infos[1], infos[2], infos[3]);
   }
 
-  public Error(String messageType, String message, String clazz, String method, boolean covered) {
+  public Error(String messageType, String message, String clazz, String method) {
     this.messageType = messageType;
     this.message = message;
     this.method = method;
     this.clazz = clazz;
-    this.covered = covered;
   }
 
   @Override

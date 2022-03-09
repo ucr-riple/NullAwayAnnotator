@@ -1,11 +1,11 @@
 package edu.ucr.cs.riple.core.metadata.index;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -38,7 +38,11 @@ public class Index<T extends Hashable> {
     try (BufferedReader br = new BufferedReader(new FileReader(this.path.toFile()))) {
       String line;
       br.readLine();
+      int i = 0;
       while ((line = br.readLine()) != null) {
+        if(line.split("\t").length == 2){
+          line = line.trim() + br.readLine().trim();
+        }
         T item = factory.build(line.split("\t"));
         total++;
         int hash;
@@ -55,7 +59,6 @@ public class Index<T extends Hashable> {
           items.put(hash, newList);
         }
       }
-    } catch (FileNotFoundException ignored) {
     } catch (IOException e) {
       e.printStackTrace();
     }

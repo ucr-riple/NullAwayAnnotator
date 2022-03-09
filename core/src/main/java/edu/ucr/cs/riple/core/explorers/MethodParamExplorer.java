@@ -51,7 +51,9 @@ public class MethodParamExplorer extends AdvancedExplorer {
           new FixSerializationConfig.Builder()
               .setSuggest(true, false)
               .setAnnotations(annotator.nullableAnnot, "UNKNOWN")
-              .setParamProtectionTest(true, i);
+              .setParamProtectionTest(true, i)
+              .setOutputDirectory(annotator.dir.toString());
+      ;
       annotator.buildProject(config);
       errorBank.saveState(false, true);
       fixBank.saveState(false, true);

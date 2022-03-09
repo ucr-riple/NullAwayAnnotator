@@ -68,7 +68,8 @@ public class Annotator {
     FixSerializationConfig.Builder builder =
         new FixSerializationConfig.Builder()
             .setSuggest(true, true)
-            .setAnnotations(nullableAnnot, "UNKNOWN");
+            .setAnnotations(nullableAnnot, "UNKNOWN")
+            .setOutputDirectory(this.dir.toString());
     buildProject(builder, false);
     List<Fix> allFixes = Utility.readAllFixes(fixPath);
     if (useCache) {
@@ -78,9 +79,9 @@ public class Annotator {
     allFixes = Collections.unmodifiableList(allFixes);
     log.total = allFixes.size();
     this.injector = Injector.builder().setMode(Injector.MODE.BATCH).keepStyle(KEEP_STYLE).build();
-    this.methodInheritanceTree = new MethodInheritanceTree(Serializer.METHOD_INFO_NAME);
-    this.callUsageTracker = new CallUsageTracker(Serializer.CALL_GRAPH_NAME);
-    this.fieldUsageTracker = new FieldUsageTracker(Serializer.FIELD_GRAPH_NAME);
+    this.methodInheritanceTree = new MethodInheritanceTree(dir.resolve(Serializer.METHOD_INFO_NAME));
+    this.callUsageTracker = new CallUsageTracker(dir.resolve(Serializer.CALL_GRAPH_NAME));
+    this.fieldUsageTracker = new FieldUsageTracker(dir.resolve(Serializer.FIELD_GRAPH_NAME));
     Bank<Error> errorBank = new Bank<>(errorPath, Error::new);
     Bank<FixEntity> fixBank = new Bank<>(fixPath, FixEntity::new);
     this.explorers = new ArrayList<>();

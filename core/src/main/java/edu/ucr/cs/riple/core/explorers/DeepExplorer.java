@@ -92,7 +92,8 @@ public class DeepExplorer extends BasicExplorer {
       FixSerializationConfig.Builder config =
           new FixSerializationConfig.Builder()
               .setSuggest(true, true)
-              .setAnnotations(annotator.nullableAnnot, "UNKNOWN");
+              .setAnnotations(annotator.nullableAnnot, "UNKNOWN")
+              .setOutputDirectory(annotator.dir.toString());
       pb.setExtraMessage("Building");
       annotator.buildProject(config);
       pb.setExtraMessage("Saving state");
