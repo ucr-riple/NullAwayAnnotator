@@ -1,5 +1,6 @@
 package edu.ucr.cs.riple.core.explorers;
 
+import com.uber.nullaway.fixserialization.FixSerializationConfig;
 import edu.ucr.cs.riple.core.AutoFixer;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.graph.FixGraph;
@@ -9,11 +10,9 @@ import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.FixEntity;
 import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.Usage;
-import edu.ucr.cs.riple.core.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -90,13 +89,10 @@ public class DeepExplorer extends BasicExplorer {
       group.forEach(superNode -> fixes.addAll(superNode.getFixChain()));
       pb.setExtraMessage("Applying fixes");
       autoFixer.apply(fixes);
-      AutoFixConfig.AutoFixConfigWriter config =
-          new AutoFixConfig.AutoFixConfigWriter()
-              .setLogError(true, true)
+      FixSerializationConfig.Builder config =
+          new FixSerializationConfig.Builder()
               .setSuggest(true, true)
-              .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
-              .setInheritanceCheckDisabled(true)
-              .setWorkList(Collections.singleton("*"));
+              .setAnnotations(AutoFixer.NULLABLE_ANNOT, "UNKNOWN");
       pb.setExtraMessage("Building");
       autoFixer.buildProject(config);
       pb.setExtraMessage("Saving state");

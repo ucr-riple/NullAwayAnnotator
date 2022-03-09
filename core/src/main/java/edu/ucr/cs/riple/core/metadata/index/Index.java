@@ -1,6 +1,5 @@
 package edu.ucr.cs.riple.core.metadata.index;
 
-import edu.ucr.cs.riple.core.nullaway.Writer;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -37,10 +36,9 @@ public class Index<T extends Hashable> {
     items.clear();
     try (BufferedReader br = new BufferedReader(new FileReader(this.path))) {
       String line;
-      String delimiter = Writer.getDelimiterRegex();
       br.readLine();
       while ((line = br.readLine()) != null) {
-        T item = factory.build(line.split(delimiter));
+        T item = factory.build(line.split("\t"));
         total++;
         int hash;
         if (type.equals(Index.Type.BY_CLASS)) {

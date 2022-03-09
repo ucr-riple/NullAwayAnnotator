@@ -1,7 +1,7 @@
 package edu.ucr.cs.riple.core.metadata.index;
 
 import com.google.common.base.Preconditions;
-import edu.ucr.cs.riple.core.nullaway.Writer;
+import edu.ucr.cs.riple.core.AutoFixer;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -59,7 +59,7 @@ public class Bank<T extends Hashable> {
     BufferedReader reader;
     int lines = 0;
     try {
-      reader = new BufferedReader(new FileReader(Writer.ERROR));
+      reader = new BufferedReader(new FileReader(AutoFixer.ERROR_NAME));
       reader.readLine();
       while (reader.readLine() != null) lines++;
       reader.close();

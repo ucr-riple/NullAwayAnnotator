@@ -1,5 +1,6 @@
 package edu.ucr.cs.riple.core.explorers;
 
+import com.uber.nullaway.fixserialization.FixSerializationConfig;
 import edu.ucr.cs.riple.core.AutoFixer;
 import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.Report;
@@ -9,7 +10,6 @@ import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.FixEntity;
 import edu.ucr.cs.riple.core.metadata.index.Result;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
-import edu.ucr.cs.riple.core.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.List;
@@ -47,12 +47,11 @@ public class MethodParamExplorer extends AdvancedExplorer {
         continue;
       }
       pb.setExtraMessage("Building.");
-      AutoFixConfig.AutoFixConfigWriter config =
-          new AutoFixConfig.AutoFixConfigWriter()
-              .setLogError(true, true)
+      FixSerializationConfig.Builder config =
+          new FixSerializationConfig.Builder()
               .setSuggest(true, false)
-              .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
-              .setMethodParamTest(true, (long) i);
+              .setAnnotations(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
+              .setParamProtectionTest(true, i);
       autoFixer.buildProject(config);
       errorBank.saveState(false, true);
       fixBank.saveState(false, true);

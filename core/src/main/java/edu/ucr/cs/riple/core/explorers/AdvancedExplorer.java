@@ -1,5 +1,6 @@
 package edu.ucr.cs.riple.core.explorers;
 
+import com.uber.nullaway.fixserialization.FixSerializationConfig;
 import edu.ucr.cs.riple.core.AutoFixer;
 import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.Report;
@@ -11,10 +12,8 @@ import edu.ucr.cs.riple.core.metadata.index.FixEntity;
 import edu.ucr.cs.riple.core.metadata.index.Result;
 import edu.ucr.cs.riple.core.metadata.trackers.Usage;
 import edu.ucr.cs.riple.core.metadata.trackers.UsageTracker;
-import edu.ucr.cs.riple.core.nullaway.AutoFixConfig;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -61,12 +60,10 @@ public abstract class AdvancedExplorer extends BasicExplorer {
       pb.setExtraMessage("Applying fixes");
       autoFixer.apply(fixes);
       pb.setExtraMessage("Building");
-      AutoFixConfig.AutoFixConfigWriter config =
-          new AutoFixConfig.AutoFixConfigWriter()
-              .setLogError(true, true)
+      FixSerializationConfig.Builder config =
+          new FixSerializationConfig.Builder()
               .setSuggest(true, AutoFixer.DEPTH > 0)
-              .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
-              .setWorkList(Collections.singleton("*"));
+              .setAnnotations(AutoFixer.NULLABLE_ANNOT, "UNKNOWN");
       autoFixer.buildProject(config);
       pb.setExtraMessage("Saving state");
       errorBank.saveState(false, true);

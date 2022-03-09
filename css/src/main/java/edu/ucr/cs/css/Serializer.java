@@ -44,11 +44,15 @@ public class Serializer {
   /** Path to write method info metadata. */
   private final Path methodInfoPath;
 
+  public static final String FIELD_GRAPH_NAME = "field_graph.tsv";
+  public static final String CALL_GRAPH_NAME = "call_graph.tsv";
+  public static final String METHOD_INFO_NAME = "method_info.tsv";
+
   public Serializer(Config config) {
     String outputDirectory = config.outputDirectory;
-    this.fieldGraphPath = Paths.get(outputDirectory, "field_graph.tsv");
-    this.callGraphPath = Paths.get(outputDirectory, "call_graph.tsv");
-    this.methodInfoPath = Paths.get(outputDirectory, "method_info.tsv");
+    this.fieldGraphPath = Paths.get(outputDirectory, FIELD_GRAPH_NAME);
+    this.callGraphPath = Paths.get(outputDirectory, CALL_GRAPH_NAME);
+    this.methodInfoPath = Paths.get(outputDirectory, METHOD_INFO_NAME);
     initializeOutputFiles(config);
   }
 

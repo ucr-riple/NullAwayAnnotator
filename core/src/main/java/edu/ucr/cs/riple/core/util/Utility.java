@@ -5,7 +5,6 @@ import edu.ucr.cs.riple.core.AutoFixer;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
-import edu.ucr.cs.riple.core.nullaway.Writer;
 import edu.ucr.cs.riple.injector.Fix;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -94,7 +93,7 @@ public class Utility {
       String line = reader.readLine();
       if (line != null) line = reader.readLine();
       while (line != null) {
-        Fix fix = Fix.fromCSVLine(line, Writer.getDelimiterRegex());
+        Fix fix = Fix.fromCSVLine(line, "\t");
         fixes.add(fix.getJson());
         line = reader.readLine();
       }
@@ -127,12 +126,11 @@ public class Utility {
   public static List<Fix> readAllFixes() {
     List<Fix> fixes = new ArrayList<>();
     try {
-      try (BufferedReader br = new BufferedReader(new FileReader(Writer.SUGGEST_FIX))) {
+      try (BufferedReader br = new BufferedReader(new FileReader(AutoFixer.FIXES_NAME))) {
         String line;
-        String delimiter = Writer.getDelimiterRegex();
         br.readLine();
         while ((line = br.readLine()) != null) {
-          Fix fix = Fix.fromCSVLine(line, delimiter);
+          Fix fix = Fix.fromCSVLine(line, "\t");
           Optional<Fix> existing = fixes.stream().filter(other -> other.equals(fix)).findAny();
           if (existing.isPresent()) {
             existing.get().referred++;
@@ -140,7 +138,7 @@ public class Utility {
             fix.referred = 1;
             fixes.add(fix);
           }
-          fixes.add(Fix.fromCSVLine(line, delimiter));
+          fixes.add(Fix.fromCSVLine(line, "\t"));
         }
       }
     } catch (IOException e) {

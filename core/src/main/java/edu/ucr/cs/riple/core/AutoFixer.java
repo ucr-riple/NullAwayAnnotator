@@ -1,6 +1,8 @@
 package edu.ucr.cs.riple.core;
 
 import com.google.common.base.Preconditions;
+import com.uber.nullaway.fixserialization.FixSerializationConfig;
+import edu.ucr.cs.css.Serializer;
 import edu.ucr.cs.riple.core.explorers.BasicExplorer;
 import edu.ucr.cs.riple.core.explorers.ClassFieldExplorer;
 import edu.ucr.cs.riple.core.explorers.DeepExplorer;
@@ -14,8 +16,6 @@ import edu.ucr.cs.riple.core.metadata.index.FixEntity;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.trackers.CallUsageTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.FieldUsageTracker;
-import edu.ucr.cs.riple.core.nullaway.AutoFixConfig;
-import edu.ucr.cs.riple.core.nullaway.Writer;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
@@ -27,6 +27,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class AutoFixer {
+
+  public static final String FIXES_NAME = "fixes.tsv";
+  public static final String ERROR_NAME = "errors.tsv";
 
   public static String NULLABLE_ANNOT;
   public static int DEPTH;
@@ -61,16 +64,11 @@ public class AutoFixer {
     System.out.println("Initializing");
     this.buildCommand = buildCommand;
     this.finishedReports = new ArrayList<>();
-    AutoFixConfig.AutoFixConfigWriter config =
-        new AutoFixConfig.AutoFixConfigWriter()
-            .setLogError(true, true)
-            .setMakeCallGraph(true)
-            .setMakeFieldGraph(true)
-            .setMethodInheritanceTree(true)
+    FixSerializationConfig.Builder builder =
+        new FixSerializationConfig.Builder()
             .setSuggest(true, true)
-            .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
-            .setWorkList(Collections.singleton("*"));
-    buildProject(config, false);
+            .setAnnotations(AutoFixer.NULLABLE_ANNOT, "UNKNOWN");
+    buildProject(builder, false);
     List<Fix> allFixes = Utility.readAllFixes();
     if (useCache) {
       System.out.println("Removing cached fixes");
@@ -79,11 +77,11 @@ public class AutoFixer {
     allFixes = Collections.unmodifiableList(allFixes);
     log.total = allFixes.size();
     this.injector = Injector.builder().setMode(Injector.MODE.BATCH).keepStyle(KEEP_STYLE).build();
-    this.methodInheritanceTree = new MethodInheritanceTree(Writer.METHOD_INFO);
-    this.callUsageTracker = new CallUsageTracker(Writer.CALL_GRAPH);
-    this.fieldUsageTracker = new FieldUsageTracker(Writer.FIELD_GRAPH);
-    Bank<Error> errorBank = new Bank<>(Writer.ERROR, Error::new);
-    Bank<FixEntity> fixBank = new Bank<>(Writer.SUGGEST_FIX, FixEntity::new);
+    this.methodInheritanceTree = new MethodInheritanceTree(Serializer.METHOD_INFO_NAME);
+    this.callUsageTracker = new CallUsageTracker(Serializer.CALL_GRAPH_NAME);
+    this.fieldUsageTracker = new FieldUsageTracker(Serializer.FIELD_GRAPH_NAME);
+    Bank<Error> errorBank = new Bank<>(ERROR_NAME, Error::new);
+    Bank<FixEntity> fixBank = new Bank<>(FIXES_NAME, FixEntity::new);
     this.explorers = new ArrayList<>();
     this.deepExplorer = new DeepExplorer(this, errorBank, fixBank);
     if (DEPTH < 0) {
@@ -170,11 +168,11 @@ public class AutoFixer {
     return suggestedFix;
   }
 
-  public void buildProject(AutoFixConfig.AutoFixConfigWriter writer, boolean count) {
+  public void buildProject(FixSerializationConfig.Builder writer, boolean count) {
     if (count) {
       log.requested++;
     }
-    writer.write(out_dir + "/explorer.config");
+    writer.writeAsXML(out_dir + "/explorer.config");
     try {
       Utility.executeCommand(buildCommand);
     } catch (Exception e) {
@@ -182,7 +180,7 @@ public class AutoFixer {
     }
   }
 
-  public void buildProject(AutoFixConfig.AutoFixConfigWriter writer) {
+  public void buildProject(FixSerializationConfig.Builder writer) {
     buildProject(writer, true);
   }
 }

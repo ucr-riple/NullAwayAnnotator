@@ -10,7 +10,8 @@ def versions = [
         errorProneApi          : project.hasProperty("epApiVersion") ? epApiVersion : oldestErrorProneApi,
         autoService            : "1.0-rc7",
         javaparser             : "3.24.0",
-        json                   : "1.1.1"
+        json                   : "1.1.1",
+        nullaway               : "0.9.6-SNAPSHOT"
 ]
 
 def apt = [

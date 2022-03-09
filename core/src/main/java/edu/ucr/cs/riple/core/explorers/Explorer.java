@@ -1,15 +1,13 @@
 package edu.ucr.cs.riple.core.explorers;
 
+import com.uber.nullaway.fixserialization.FixSerializationConfig;
 import edu.ucr.cs.riple.core.AutoFixer;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.FixEntity;
-import edu.ucr.cs.riple.core.nullaway.AutoFixConfig;
-import edu.ucr.cs.riple.core.nullaway.Writer;
 import edu.ucr.cs.riple.injector.Fix;
 import java.io.File;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,18 +24,12 @@ public abstract class Explorer {
   }
 
   public Report effect(Fix fix) {
-    AutoFixConfig.AutoFixConfigWriter config =
-        new AutoFixConfig.AutoFixConfigWriter()
-            .setLogError(true, false)
-            .setMakeCallGraph(false)
-            .setMakeFieldGraph(false)
-            .setOptimized(false)
-            .setMethodInheritanceTree(false)
+    FixSerializationConfig.Builder config =
+        new FixSerializationConfig.Builder()
             .setSuggest(true, false)
-            .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
-            .setWorkList(Collections.singleton("*"));
+            .setAnnotations(AutoFixer.NULLABLE_ANNOT, "UNKNOWN");
     autoFixer.buildProject(config);
-    if (new File(Writer.ERROR).exists()) {
+    if (new File(AutoFixer.ERROR_NAME).exists()) {
       return new Report(fix, errorBank.compare());
     }
     return Report.empty(fix);
@@ -48,18 +40,12 @@ public abstract class Explorer {
       workSet = new HashSet<>();
     }
     workSet.add(fix.className);
-    AutoFixConfig.AutoFixConfigWriter config =
-        new AutoFixConfig.AutoFixConfigWriter()
-            .setLogError(true, true)
-            .setMakeCallGraph(false)
-            .setMakeFieldGraph(false)
-            .setOptimized(false)
-            .setMethodInheritanceTree(false)
+    FixSerializationConfig.Builder config =
+        new FixSerializationConfig.Builder()
             .setSuggest(true, false)
-            .setAnnots(AutoFixer.NULLABLE_ANNOT, "UNKNOWN")
-            .setWorkList(workSet);
+            .setAnnotations(AutoFixer.NULLABLE_ANNOT, "UNKNOWN");
     autoFixer.buildProject(config);
-    if (new File(Writer.ERROR).exists()) {
+    if (new File(AutoFixer.ERROR_NAME).exists()) {
       int totalEffect = 0;
       totalEffect += errorBank.compareByClass(fix.className, true).size;
       for (String clazz : workSet) {
