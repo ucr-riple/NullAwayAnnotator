@@ -32,12 +32,7 @@ public class MethodNode {
   public MethodNode() {}
 
   void fillInformation(
-      Integer id,
-      String clazz,
-      String method,
-      Integer parent,
-      int size,
-      boolean[] annotFlags) {
+      Integer id, String clazz, String method, Integer parent, int size, boolean[] annotFlags) {
     this.parent = parent;
     this.id = id;
     this.method = method;

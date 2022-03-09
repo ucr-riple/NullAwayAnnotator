@@ -5,7 +5,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +39,7 @@ public class Index<T extends Hashable> {
       br.readLine();
       int i = 0;
       while ((line = br.readLine()) != null) {
-        if(line.split("\t").length == 2){
+        if (line.split("\t").length == 2) {
           line = line.trim() + br.readLine().trim();
         }
         T item = factory.build(line.split("\t"));

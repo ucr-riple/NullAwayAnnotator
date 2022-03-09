@@ -2,7 +2,6 @@ package edu.ucr.cs.riple.core.metadata.method;
 
 import edu.ucr.cs.riple.core.metadata.AbstractRelation;
 import edu.ucr.cs.riple.core.util.Utility;
-
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,12 +44,7 @@ public class MethodInheritanceTree extends AbstractRelation<MethodNode> {
       maxsize = size;
     }
     node.fillInformation(
-        id,
-        values[1],
-        values[2],
-        parentId,
-        size,
-        Utility.convertStringToBooleanArray(values[5]));
+        id, values[1], values[2], parentId, size, Utility.convertStringToBooleanArray(values[5]));
     if (parentId != -1) {
       MethodNode parent = nodes.get(parentId);
       if (parent == null) {

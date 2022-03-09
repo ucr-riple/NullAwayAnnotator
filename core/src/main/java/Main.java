@@ -9,18 +9,20 @@ import java.util.List;
 
 public class Main {
   public static void main(String[] args) {
-    run();
-  }
-
-  private static void run() {
-    Annotator annotator = new Annotator();
-    Path dir = Paths.get("/tmp/NullAwayFix");
-    String runCommand =
-        "cd /Users/nima/Developer/NullAwayFixer/Projects/libgdx && ./gradlew :gdx:build -x test";
-    annotator.DEPTH = 4;
-    annotator.nullableAnnot = "javax.annotation.Nullable";
-    annotator.KEEP_STYLE = false;
-    annotator.start(runCommand, dir, true);
+    if (args.length == 0) {
+      throw new RuntimeException("command not specified");
+    }
+    String command = args[0];
+    switch (command) {
+      case "apply":
+        apply(args);
+        break;
+      case "diagnose":
+        diagnose(args);
+        break;
+      default:
+        throw new RuntimeException("Unknown command: " + command);
+    }
   }
 
   private static void diagnose(String[] args) {

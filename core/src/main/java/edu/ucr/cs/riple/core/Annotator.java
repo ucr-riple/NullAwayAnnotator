@@ -79,7 +79,8 @@ public class Annotator {
     allFixes = Collections.unmodifiableList(allFixes);
     log.total = allFixes.size();
     this.injector = Injector.builder().setMode(Injector.MODE.BATCH).keepStyle(KEEP_STYLE).build();
-    this.methodInheritanceTree = new MethodInheritanceTree(dir.resolve(Serializer.METHOD_INFO_NAME));
+    this.methodInheritanceTree =
+        new MethodInheritanceTree(dir.resolve(Serializer.METHOD_INFO_NAME));
     this.callUsageTracker = new CallUsageTracker(dir.resolve(Serializer.CALL_GRAPH_NAME));
     this.fieldUsageTracker = new FieldUsageTracker(dir.resolve(Serializer.FIELD_GRAPH_NAME));
     Bank<Error> errorBank = new Bank<>(errorPath, Error::new);
