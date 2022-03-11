@@ -75,7 +75,7 @@ def prepare():
         json.dump(failed, outfile)
 
 
-def pre():
+def preprocess():
     uprint("Started preprocessing task...")
     method_path = out_dir + "/field_init.tsv"
     delete(method_path)
@@ -118,12 +118,11 @@ def pre():
                     max_size = len(method['fields'])
         if candidate_method is not None:
             del candidate_method['fields']
-            candidate_method['location'] = "METHOD_RETURN"
+            candidate_method['location'] = "METHOD"
             candidate_method['inject'] = True
             candidate_method['annotation'] = data['ANNOTATION']['INITIALIZE']
             candidate_method['param'] = ""
             candidate_method['reason'] = "Initializer"
-            candidate_method['pkg'] = ""
             if candidate_method not in init_methods['fixes']:
                 init_methods['fixes'].append(candidate_method)
     with open(out_dir + "/init_methods.json", 'w') as outfile:
@@ -133,7 +132,7 @@ def pre():
     uprint("Finished.")
 
 
-def diagnose():
+def explore():
     new_config = EXPLORER_CONFIG.copy()
     new_config['serialization']['annotation']['nullable'] = data['ANNOTATION']['NULLABLE']
     new_config['serialization']['annotation']['nonnull'] = data['ANNOTATION']['NONNULL']
@@ -162,13 +161,13 @@ def apply():
     os.system("cd jars && java -jar core.jar apply {}/cleaned.json {}".format(out_dir, format_style))
 
 
-def loop():
+def run():
     uprint("Executing loop command")
     delete(out_dir + "/log.txt")
     finished = False
     while not finished:
         finished = True
-        diagnose()
+        explore()
         uprint("Diagnose task finished, applying effective fixes...")
         apply()
         uprint("Applied.")
@@ -189,21 +188,22 @@ def loop():
 
 command = sys.argv[1]
 prepare()
-if command == "pre":
-    pre()
-elif command == "diagnose":
-    diagnose()
+if command == "preprocess":
+    preprocess()
+elif command == "explore":
+    explore()
 elif command == "apply":
     apply()
-elif command == "loop":
+elif command == "run":
     clean()
-    pre()
+    preprocess()
+    exit()
     reports = open(out_dir + "/reports.json", "w")
     empty = {"reports": []}
     json.dump(empty, reports)
     reports.close()
     start = time.time()
-    loop()
+    run()
     end = time.time()
     print("Elapsed time in seconds: " + str(end - start))
 elif command == "clean":
@@ -214,12 +214,5 @@ elif command == "clean":
             shutil.rmtree(out_dir)
         except:
             uprint("Failed to remove directory: " + out_dir)
-elif command == "reset":
-    clean()
-    try:
-        shutil.rmtree(out_dir)
-    except:
-        uprint("Failed to remove directory: " + out_dir)
-
 else:
-    raise ValueError("Unknown command.")
+    raise ValueError("Unknown command. should be one of ['preprocess', 'explore', 'apply', 'run', 'clean']")
