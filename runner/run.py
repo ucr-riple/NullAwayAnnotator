@@ -31,8 +31,8 @@ EXPLORER_CONFIG = xmltodict.parse(open('template.xml').read())
 
 def load_csv_to_dict(path):
     ans = []
-    csvFile = open(path, 'r')
-    lines = csvFile.readlines()
+    csv_file = open(path, 'r')
+    lines = csv_file.readlines()
     keys = lines[0].strip().split(delimiter)
     for line in lines[1:]:
         item = {}
@@ -113,12 +113,12 @@ def pre():
     uprint("Selecting appropriate method for each class field...")
     for field in field_no_inits:
         candidate_method = None
-        max = 0
+        max_size = 0
         for method in methods:
             if method['class'] == field['class']:
-                if field['param'] in method['fields'] and len(method['fields']) > max:
+                if field['param'] in method['fields'] and len(method['fields']) > max_size:
                     candidate_method = method.copy()
-                    max = len(method['fields'])
+                    max_size = len(method['fields'])
         if candidate_method is not None:
             del candidate_method['fields']
             candidate_method['location'] = "METHOD_RETURN"
@@ -149,7 +149,7 @@ def diagnose():
                                                                              format_style)
     print(command)
     os.system(command)
-    uprint("Finsihed.")
+    uprint("Finished.")
 
 
 def apply():
@@ -172,7 +172,7 @@ def loop():
     while not finished:
         finished = True
         diagnose()
-        uprint("Diagnsoe task finished, applying effective fixes...")
+        uprint("Diagnose task finished, applying effective fixes...")
         apply()
         uprint("Applied.")
         new_reports = json.load(open(out_dir + "/diagnose_report.json"))
