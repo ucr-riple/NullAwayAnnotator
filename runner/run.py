@@ -24,8 +24,10 @@ import sys
 import json
 import shutil
 import time
-import tools
 import xmltodict
+import tools
+from tools import delete
+from tools import uprint
 
 if not (len(sys.argv) in [2, 3]):
     raise ValueError("Needs one argument to run: diagnose/apply/pre/loop/clean")
@@ -48,32 +50,6 @@ format_style = str(data['FORMAT']).lower()
 format_style = "false" if format_style not in ["true", "false"] else format_style
 
 EXPLORER_CONFIG = xmltodict.parse(open('template.xml').read())
-
-
-def load_csv_to_dict(path):
-    ans = []
-    csv_file = open(path, 'r')
-    lines = csv_file.readlines()
-    keys = lines[0].strip().split(delimiter)
-    for line in lines[1:]:
-        item = {}
-        infos = line.strip().split(delimiter)
-        for i in range(0, len(keys)):
-            item[keys[i]] = infos[i]
-        ans.append(item)
-    return ans
-
-
-def delete(file):
-    try:
-        os.remove(file)
-    except OSError:
-        pass
-
-
-def uprint(message):
-    print(message, flush=True)
-    sys.stdout.flush()
 
 
 def clean(full=True):
@@ -112,12 +88,12 @@ def pre():
     tools.write_dict_config_in_xml(new_config, '/tmp/NullAwayFix/config.xml')
     os.system(build_command + " > /dev/null 2>&1")
     uprint("Analyzing suggested fixes...")
-    fixes = load_csv_to_dict(out_dir + "/fixes.tsv")
+    fixes = tools.load_tsv_to_dict(out_dir + "/fixes.tsv")
     uprint("Detecting uninitialized class fields...")
     field_no_inits = [x for x in fixes if (x['reason'] == 'FIELD_NO_INIT' and x['location'] == 'FIELD')]
     uprint("Found " + str(len(field_no_inits)) + " fields.")
     uprint("Analyzing method infos...")
-    raw_methods = load_csv_to_dict(method_path)
+    raw_methods = tools.load_tsv_to_dict(method_path)
     init_methods = {"fixes": []}
     methods = []
     for method in raw_methods:
