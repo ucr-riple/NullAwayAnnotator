@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2022 University of California, Riverside.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 package edu.ucr.cs.riple.injector;
 
 import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
@@ -61,7 +83,7 @@ public class BasicTest {
                     "javax.annotation.Nullable",
                     "test(boolean)",
                     "",
-                    "METHOD_RETURN",
+                    "METHOD",
                     "com.uber.Super",
                     "Super.java",
                     "true"),
@@ -69,7 +91,7 @@ public class BasicTest {
                     "javax.annotation.Nullable",
                     "test(boolean)",
                     "",
-                    "METHOD_RETURN",
+                    "METHOD",
                     "com.uber.Superb",
                     "com/Superb.java",
                     "true"));
@@ -113,7 +135,7 @@ public class BasicTest {
                     "javax.annotation.Nullable",
                     "run()",
                     "",
-                    "METHOD_RETURN",
+                    "METHOD",
                     "com.uber.Main.Test",
                     "Main.java",
                     "true"));
@@ -163,7 +185,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "bar(java.lang.Object)",
                 "",
-                "METHOD_RETURN",
+                "METHOD",
                 "com.uber.Super.SuperInner",
                 "Super.java",
                 "true"))
@@ -216,7 +238,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "test(Object, String, String)",
                 "",
-                "METHOD_RETURN",
+                "METHOD",
                 "com.uber.Super",
                 "Super.java",
                 "true"),
@@ -224,7 +246,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "test(Object, Object, String)",
                 "name",
-                "METHOD_PARAM",
+                "PARAMETER",
                 "com.uber.Super",
                 "Super.java",
                 "true"))
@@ -288,7 +310,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "getPredNodeNumbers(T)",
                 "",
-                "METHOD_RETURN",
+                "METHOD",
                 "com.uber.Super",
                 "Super.java",
                 "true"),
@@ -296,7 +318,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "computeResult(com.ibm.wala.ipa.slicer.Statement,java.util.Map<com.ibm.wala.ipa.callgraph.propagation.PointerKey,com.ibm.wala.util.intset.MutableIntSet>,com.ibm.wala.dataflow.graph.BitVectorSolver<? extends com.ibm.wala.ssa.ISSABasicBlock>,com.ibm.wala.util.intset.OrdinalSetMapping<com.ibm.wala.ipa.slicer.Statement>,com.ibm.wala.ipa.callgraph.CGNode,com.ibm.wala.ipa.modref.ExtendedHeapModel,com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis<T>,java.util.Map<com.ibm.wala.ipa.callgraph.CGNode,com.ibm.wala.util.intset.OrdinalSet<com.ibm.wala.ipa.callgraph.propagation.PointerKey>>,com.ibm.wala.ssa.analysis.ExplodedControlFlowGraph,java.util.Map<java.lang.Integer,com.ibm.wala.ipa.slicer.NormalStatement>)",
                 "",
-                "METHOD_RETURN",
+                "METHOD",
                 "com.uber.Super",
                 "Super.java",
                 "true"))
@@ -333,7 +355,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "getTargetForCall(com.ibm.wala.ipa.callgraph.CGNode[],com.ibm.wala.classLoader.CallSiteReference[][][],com.ibm.wala.classLoader.IClass,com.ibm.wala.ipa.callgraph.propagation.InstanceKey[][])",
                 "",
-                "METHOD_RETURN",
+                "METHOD",
                 "com.uber.Super",
                 "Super.java",
                 "true"))
@@ -368,7 +390,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "<T>getReader(com.ibm.wala.shrikeCT.ClassReader.AttrIterator,java.lang.String,com.ibm.wala.classLoader.ShrikeClass.GetReader<T>)",
                 "",
-                "METHOD_RETURN",
+                "METHOD",
                 "com.uber.Super",
                 "Super.java",
                 "true"))
@@ -411,7 +433,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "get(com.ibm.wala.ipa.callgraph.ContextKey)",
                 "",
-                "METHOD_RETURN",
+                "METHOD",
                 "com.uber.MethodDispatchContext",
                 "TargetMethodContextSelector.java",
                 "true"))
@@ -445,7 +467,7 @@ public class BasicTest {
                 "javax.annotation.Initializer",
                 "format(java.lang.String,java.lang.Object...)",
                 "",
-                "METHOD_RETURN",
+                "METHOD",
                 "com.uber.Main",
                 "Main.java",
                 "true"))
@@ -479,7 +501,7 @@ public class BasicTest {
                 "javax.annotation.Initializer",
                 "Main(java.lang.String,java.lang.Object...)",
                 "",
-                "METHOD_RETURN",
+                "METHOD",
                 "com.uber.Main",
                 "Main.java",
                 "true"))
@@ -521,7 +543,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "test(java.lang.Object)",
                 "flag",
-                "METHOD_PARAM",
+                "PARAMETER",
                 "com.uber.Super",
                 "Super.java",
                 "true"))
@@ -563,7 +585,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "test(Object)",
                 "flag",
-                "METHOD_PARAM",
+                "PARAMETER",
                 "com.uber.Super",
                 "Super.java",
                 "true"))
@@ -612,7 +634,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "InvokeInstruction(int,int,int[],int,com.ibm.wala.classLoader.CallSiteReference,com.ibm.wala.shrikeCT.BootstrapMethodsReader.BootstrapMethod)",
                 "bootstrap",
-                "METHOD_PARAM",
+                "PARAMETER",
                 "com.uber.SSAInstructionFactory",
                 "SSAInstructionFactory.java",
                 "true"))
@@ -657,7 +679,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "computeMod(com.ibm.wala.ipa.callgraph.CallGraph,com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis<T>,com.ibm.wala.ipa.slicer.HeapExclusions)",
                 "heapExclude",
-                "METHOD_PARAM",
+                "PARAMETER",
                 "com.uber.ModRef",
                 "ModRef.java",
                 "true"))
@@ -722,7 +744,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "ModRef(com.ibm.wala.classLoader.IMethod,com.ibm.wala.ipa.callgraph.Context,com.ibm.wala.cfg.AbstractCFG<?,?>,com.ibm.wala.ssa.SSAInstruction[],com.ibm.wala.ssa.SSAOptions,java.util.Map<java.lang.Integer,com.ibm.wala.ssa.ConstantValue>)",
                 "constants",
-                "METHOD_PARAM",
+                "PARAMETER",
                 "com.uber.ModRef",
                 "ModRef.java",
                 "true"))
@@ -761,7 +783,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "WeakKeyReference(@org.checkerframework.checker.nullness.qual.Nullable K,java.lang.ref.ReferenceQueue<K>)",
                 "queue",
-                "METHOD_PARAM",
+                "PARAMETER",
                 "com.uber.WeakKeyReference",
                 "WeakKeyReference.java",
                 "true"))
@@ -799,7 +821,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "",
                 "h",
-                "CLASS_FIELD",
+                "FIELD",
                 "com.uber.Super",
                 "Super.java",
                 "true"))
@@ -807,8 +829,8 @@ public class BasicTest {
   }
 
   @Test
-  public void empty_method_param_pick() {
-    String rootName = "empty_method_param_pick";
+  public void empty_PARAMETER_pick() {
+    String rootName = "empty_PARAMETER_pick";
 
     new InjectorTestHelper()
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
@@ -846,7 +868,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "test()",
                 "",
-                "METHOD_RETURN",
+                "METHOD",
                 "com.uber.Super",
                 "Super.java",
                 "true"))
@@ -862,7 +884,7 @@ public class BasicTest {
             "javax.annotation.Nullable",
             "test()",
             "",
-            "METHOD_RETURN",
+            "METHOD",
             "com.uber.Super",
             "Super.java",
             "true");
@@ -932,7 +954,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "test()",
                 "",
-                "METHOD_RETURN",
+                "METHOD",
                 "com.uber.Super",
                 "Super.java",
                 "true"))
@@ -1101,7 +1123,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "test()",
                 "",
-                "METHOD_RETURN",
+                "METHOD",
                 "com.uber.Super",
                 "Super.java",
                 "true"))
@@ -1147,7 +1169,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "test()",
                 "",
-                "METHOD_RETURN",
+                "METHOD",
                 "com.uber.Super",
                 "Super.java",
                 "true"))
@@ -1180,7 +1202,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "test(@javax.annotation.Nullable java.lang.Object)",
                 "",
-                "METHOD_RETURN",
+                "METHOD",
                 "com.uber.Super",
                 "Super.java",
                 "true"))
@@ -1213,7 +1235,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "test(@javax.annotation.Nullable java.lang.Object)",
                 "",
-                "METHOD_RETURN",
+                "METHOD",
                 "com.uber.Super",
                 "Super.java",
                 "false"))
@@ -1246,7 +1268,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "test(@javax.annotation.Nullable java.lang.Object)",
                 "o",
-                "METHOD_PARAM",
+                "PARAMETER",
                 "com.uber.Super",
                 "Super.java",
                 "false"))
@@ -1279,7 +1301,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "test(@javax.annotation.Nullable java.lang.Object)",
                 "o",
-                "METHOD_PARAM",
+                "PARAMETER",
                 "com.uber.Super",
                 "Super.java",
                 "false"))
@@ -1314,7 +1336,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "",
                 "f",
-                "CLASS_FIELD",
+                "FIELD",
                 "com.uber.Super",
                 "Super.java",
                 "false"))
@@ -1351,7 +1373,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "",
                 "allTest",
-                "CLASS_FIELD",
+                "FIELD",
                 "com.uber.B",
                 "B.java",
                 "true"),
@@ -1359,7 +1381,7 @@ public class BasicTest {
                 "javax.annotation.Nullable",
                 "",
                 "allTest",
-                "CLASS_FIELD",
+                "FIELD",
                 "com.uber.A",
                 "A.java",
                 "true"))

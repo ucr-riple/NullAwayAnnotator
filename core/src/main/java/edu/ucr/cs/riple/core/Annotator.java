@@ -1,21 +1,43 @@
+/*
+ * Copyright (c) 2022 University of California, Riverside.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 package edu.ucr.cs.riple.core;
 
 import com.google.common.base.Preconditions;
 import com.uber.nullaway.fixserialization.FixSerializationConfig;
 import edu.ucr.cs.css.Serializer;
 import edu.ucr.cs.riple.core.explorers.BasicExplorer;
-import edu.ucr.cs.riple.core.explorers.ClassFieldExplorer;
 import edu.ucr.cs.riple.core.explorers.DeepExplorer;
 import edu.ucr.cs.riple.core.explorers.DummyExplorer;
 import edu.ucr.cs.riple.core.explorers.Explorer;
-import edu.ucr.cs.riple.core.explorers.MethodParamExplorer;
-import edu.ucr.cs.riple.core.explorers.MethodReturnExplorer;
+import edu.ucr.cs.riple.core.explorers.FieldExplorer;
+import edu.ucr.cs.riple.core.explorers.MethodExplorer;
+import edu.ucr.cs.riple.core.explorers.ParameterExplorer;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.FixEntity;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
-import edu.ucr.cs.riple.core.metadata.trackers.CallUsageTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.FieldUsageTracker;
+import edu.ucr.cs.riple.core.metadata.trackers.MethodUsageTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
@@ -43,7 +65,7 @@ public class Annotator {
   private List<Explorer> explorers;
   private DeepExplorer deepExplorer;
 
-  public CallUsageTracker callUsageTracker;
+  public MethodUsageTracker methodUsageTracker;
   public FieldUsageTracker fieldUsageTracker;
   public MethodInheritanceTree methodInheritanceTree;
 
@@ -85,7 +107,7 @@ public class Annotator {
             .build();
     this.methodInheritanceTree =
         new MethodInheritanceTree(dir.resolve(Serializer.METHOD_INFO_NAME));
-    this.callUsageTracker = new CallUsageTracker(dir.resolve(Serializer.CALL_GRAPH_NAME));
+    this.methodUsageTracker = new MethodUsageTracker(dir.resolve(Serializer.CALL_GRAPH_NAME));
     this.fieldUsageTracker = new FieldUsageTracker(dir.resolve(Serializer.FIELD_GRAPH_NAME));
     Bank<Error> errorBank = new Bank<>(errorPath, Error::new);
     Bank<FixEntity> fixBank = new Bank<>(fixPath, FixEntity::new);
@@ -94,9 +116,9 @@ public class Annotator {
     if (depth < 0) {
       this.explorers.add(new DummyExplorer(this, null, null));
     } else {
-      this.explorers.add(new MethodParamExplorer(this, allFixes, errorBank, fixBank));
-      this.explorers.add(new ClassFieldExplorer(this, allFixes, errorBank, fixBank));
-      this.explorers.add(new MethodReturnExplorer(this, allFixes, errorBank, fixBank));
+      this.explorers.add(new ParameterExplorer(this, allFixes, errorBank, fixBank));
+      this.explorers.add(new FieldExplorer(this, allFixes, errorBank, fixBank));
+      this.explorers.add(new MethodExplorer(this, allFixes, errorBank, fixBank));
       this.explorers.add(new BasicExplorer(this, errorBank, fixBank));
     }
     return allFixes;

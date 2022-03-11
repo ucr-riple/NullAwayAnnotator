@@ -20,59 +20,39 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.injector;
+package edu.ucr.cs.riple.core.explorers;
 
+import edu.ucr.cs.riple.core.Annotator;
+import edu.ucr.cs.riple.core.FixType;
+import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.metadata.index.Bank;
+import edu.ucr.cs.riple.core.metadata.index.Error;
+import edu.ucr.cs.riple.core.metadata.index.FixEntity;
+import edu.ucr.cs.riple.injector.Fix;
 import java.util.List;
 
-public class Injector {
-  public final MODE mode;
-  public final boolean KEEP;
-  public static boolean LOG;
+public class MethodExplorer extends AdvancedExplorer {
 
-  public enum MODE {
-    BATCH,
-    TEST
+  public MethodExplorer(
+      Annotator annotator, List<Fix> fixes, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
+    super(annotator, fixes, errorBank, fixBank, FixType.METHOD);
   }
 
-  public Injector(MODE mode, boolean keepStyle) {
-    this.mode = mode;
-    this.KEEP = keepStyle;
+  @Override
+  protected void init() {
+    tracker = annotator.methodUsageTracker;
+    System.out.println("Trying to find groups for Method Return fixes");
+    fixGraph.updateUsages(tracker);
+    fixGraph.findGroups();
   }
 
-  public static InjectorBuilder builder() {
-    return new InjectorBuilder();
+  @Override
+  protected Report effectByScope(Fix fix) {
+    return super.effectByScope(fix, tracker.getUsers(fix));
   }
 
-  public Report start(List<WorkList> workLists, boolean log) {
-    LOG = log;
-    Report report = new Report();
-    for (WorkList workList : workLists) {
-      report.totalNumberOfDistinctFixes += workList.getFixes().size();
-    }
-    report.processed = new InjectorMachine(workLists, mode, KEEP).start();
-    return report;
-  }
-
-  public Report start(List<WorkList> workLists) {
-    return start(workLists, false);
-  }
-
-  public static class InjectorBuilder {
-    private MODE mode = MODE.BATCH;
-    private boolean keepStyle = false;
-
-    public InjectorBuilder setMode(MODE mode) {
-      this.mode = mode;
-      return this;
-    }
-
-    public InjectorBuilder keepStyle(boolean keep) {
-      this.keepStyle = keep;
-      return this;
-    }
-
-    public Injector build() {
-      return new Injector(mode, keepStyle);
-    }
+  @Override
+  public boolean isApplicable(Fix fix) {
+    return fix.location.equals(FixType.METHOD.name);
   }
 }
