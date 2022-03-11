@@ -106,33 +106,6 @@ public class Utility {
     }
   }
 
-  @SuppressWarnings("ALL")
-  public static void convertCSVToJSON(String csvPath, String jsonPath) {
-    JSONArray fixes = new JSONArray();
-    BufferedReader reader;
-    FileWriter writer;
-    try {
-      reader = Files.newBufferedReader(Paths.get(csvPath), Charset.defaultCharset());
-      String line = reader.readLine();
-      if (line != null) line = reader.readLine();
-      while (line != null) {
-        Fix fix = Fix.fromCSVLine(line, "\t");
-        fixes.add(fix.getJson());
-        line = reader.readLine();
-      }
-      reader.close();
-      JSONObject res = new JSONObject();
-      JSONArray fixesArray = new JSONArray();
-      fixesArray.addAll(fixes);
-      res.put("fixes", fixesArray);
-      writer = new FileWriter(jsonPath);
-      writer.write(res.toJSONString().replace("\\/", "/").replace("\\\\\\", "\\"));
-      writer.flush();
-    } catch (IOException e) {
-      System.err.println("Error happened in converting csv to json!");
-    }
-  }
-
   public static boolean[] convertStringToBooleanArray(String content) {
     if (content == null) {
       return new boolean[0];

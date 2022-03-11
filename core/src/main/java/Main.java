@@ -39,19 +39,19 @@ public class Main {
       case "apply":
         apply(args);
         break;
-      case "diagnose":
-        diagnose(args);
+      case "explore":
+        explore(args);
         break;
       default:
         throw new RuntimeException("Unknown command: " + command);
     }
   }
 
-  private static void diagnose(String[] args) {
+  private static void explore(String[] args) {
     Annotator annotator = new Annotator();
     if (args.length != 6) {
       throw new RuntimeException(
-          "Annotator:diagnose needs 5 arguments: 1. command to execute NullAway, "
+          "Annotator:explore needs 5 arguments: 1. command to execute NullAway, "
               + "2. output directory, 3. Annotator Depth level, 4. Nullable Annotation, 5. style");
     }
     Path dir = Paths.get(args[1]);
