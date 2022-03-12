@@ -29,11 +29,11 @@ import xmltodict
 import tools
 from tools import delete
 from tools import uprint
+from os.path import join
 
 if not (len(sys.argv) in [2, 3]):
     raise ValueError("Needs one argument to run: diagnose/apply/pre/loop/clean")
 
-data = json.load(open('config.json'))
 if int(len(sys.argv)) == 2:
     data = json.load(open('config.json'))
 else:
@@ -45,26 +45,23 @@ if 'REPO_ROOT_PATH' not in data:
     data['REPO_ROOT_PATH'] = data['PROJECT_PATH']
 
 build_command = "cd {} && {} && cd {}".format(data['REPO_ROOT_PATH'], data['BUILD_COMMAND'], data['PROJECT_PATH'])
-out_dir = "/tmp/NullAwayFix"
-delimiter = "\t"
+out_dir = data['OUTPUT_DIR']
 format_style = str(data['FORMAT']).lower()
 format_style = "false" if format_style not in ["true", "false"] else format_style
-
-EXPLORER_CONFIG = xmltodict.parse(open('template.xml').read())
 
 
 def clean(full=True):
     uprint("Cleaning...")
-    delete(out_dir + "/diagnose_report.json")
-    delete(out_dir + "/fixes.csv")
-    delete(out_dir + "/diagnose.json")
-    delete(out_dir + "/cleaned.json")
-    delete(out_dir + "/init_methods.json")
-    delete(out_dir + "/method_info.csv")
-    delete(out_dir + "/errors.csv")
+    delete(join(out_dir, "diagnose_report.json"))
+    delete(join(out_dir, "fixes.tsv"))
+    delete(join(out_dir, "diagnose.json"))
+    delete(join(out_dir, "cleaned.json"))
+    delete(join(out_dir, "init_methods.json"))
+    delete(join(out_dir, "method_info.tsv"))
+    delete(join(out_dir, "errors.tsv"))
     if full:
-        delete(out_dir + "/reports.json")
-        delete(out_dir + "/log.txt")
+        delete(join(out_dir, "reports.json"))
+        delete(join(out_dir, "log.txt"))
     uprint("Finished.")
 
 
@@ -72,22 +69,26 @@ def prepare():
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
     failed = {"fixes": []}
-    with open(out_dir + "/failed.json", 'w') as outfile:
+    with open(join(out_dir, "failed.json"), 'w') as outfile:
         json.dump(failed, outfile)
+
+
+def build_project(init_active="true"):
+    uprint("Building project...")
+    new_config = xmltodict.parse(open('template.xml').read()).copy()
+    new_config['serialization']['annotation']['nullable'] = data['ANNOTATION']['NULLABLE']
+    new_config['serialization']['annotation']['nonnull'] = data['ANNOTATION']['NONNULL']
+    new_config['serialization']['fieldInitInfo']['@active'] = init_active
+    tools.write_dict_config_in_xml(new_config, data['NULLAWAY_CONFIG_PATH'])
+    os.system(build_command + " > /dev/null 2>&1")
 
 
 def preprocess():
     uprint("Started preprocessing task...")
-    method_path = out_dir + "/field_init.tsv"
+    method_path = join(out_dir, "field_init.tsv")
     delete(method_path)
-    delete(out_dir + "/init_methods.json")
-    uprint("Building project...\n" + build_command)
-    new_config = EXPLORER_CONFIG.copy()
-    new_config['serialization']['annotation']['nullable'] = data['ANNOTATION']['NULLABLE']
-    new_config['serialization']['annotation']['nonnull'] = data['ANNOTATION']['NONNULL']
-    new_config['serialization']['fieldInitInfo']['@active'] = "true"
-    tools.write_dict_config_in_xml(new_config, '/tmp/NullAwayFix/config.xml')
-    os.system(build_command + " > /dev/null 2>&1")
+    delete(join(out_dir, "init_methods.json"))
+    build_project()
     uprint("Analyzing suggested fixes...")
     fixes = tools.load_tsv_to_dict(out_dir + "/fixes.tsv")
     uprint("Detecting uninitialized class fields...")
@@ -126,7 +127,7 @@ def preprocess():
             candidate_method['reason'] = "Initializer"
             if candidate_method not in init_methods['fixes']:
                 init_methods['fixes'].append(candidate_method)
-    with open(out_dir + "/init_methods.json", 'w') as outfile:
+    with open(join(out_dir, "init_methods.json"), 'w') as outfile:
         json.dump(init_methods, outfile)
     uprint("Passing to injector to annotate...")
     os.system("cd jars && java -jar core.jar apply {}/init_methods.json {}".format(out_dir, format_style))
@@ -134,13 +135,7 @@ def preprocess():
 
 
 def explore():
-    new_config = EXPLORER_CONFIG.copy()
-    new_config['serialization']['annotation']['nullable'] = data['ANNOTATION']['NULLABLE']
-    new_config['serialization']['annotation']['nonnull'] = data['ANNOTATION']['NONNULL']
-    tools.write_dict_config_in_xml(new_config, '/tmp/NullAwayFix/config.xml')
-    build_command = '"cd ' + data['REPO_ROOT_PATH'] + " && " + data['BUILD_COMMAND'] + '"'
-    uprint("Detected build command: " + build_command)
-    uprint("Starting AutoFixer...")
+    uprint("Starting Exploration Phase...")
     command = "cd jars && java -jar core.jar diagnose {} {} {} {} {}".format(out_dir, build_command, str(data['DEPTH']),
                                                                              data['ANNOTATION']['NULLABLE'],
                                                                              format_style)
@@ -150,21 +145,21 @@ def explore():
 
 
 def apply():
-    delete(out_dir + "/cleaned.json")
-    report_file = open(out_dir + "/diagnose_report.json")
+    delete(join(out_dir, "cleaned.json"))
+    report_file = open(join(out_dir, "diagnose_report.json"))
     reports = json.load(report_file)
     cleaned = {}
     uprint("Selecting effective fixes...")
     cleaned['fixes'] = [fix for fix in reports['reports'] if fix['jump'] < 1]
-    with open(out_dir + "/cleaned.json", 'w') as outfile:
+    with open(join(out_dir, "cleaned.json"), 'w') as outfile:
         json.dump(cleaned, outfile)
-    uprint("Applying fixes at location: " + out_dir + "/cleaned.json")
-    os.system("cd jars && java -jar core.jar apply {}/cleaned.json {}".format(out_dir, format_style))
+    uprint("Applying fixes at location: " + str(join(out_dir, "cleaned.json")))
+    os.system("cd jars && java -jar core.jar apply {} {}".format(join(out_dir, "cleaned.json"), format_style))
 
 
 def run():
     uprint("Executing loop command")
-    delete(out_dir + "/log.txt")
+    delete(join(out_dir, "log.txt"))
     finished = False
     while not finished:
         finished = True
@@ -172,16 +167,16 @@ def run():
         uprint("Diagnose task finished, applying effective fixes...")
         apply()
         uprint("Applied.")
-        new_reports = json.load(open(out_dir + "/diagnose_report.json"))
+        new_reports = json.load(open(join(out_dir, "diagnose_report.json")))
         if len(new_reports['reports']) == 0:
             uprint("No changes, shutting down.")
             break
-        old_reports = json.load(open(out_dir + "/reports.json"))
+        old_reports = json.load(open(join(out_dir, "reports.json")))
         for report in new_reports['reports']:
             if report not in old_reports['reports']:
                 finished = False
                 old_reports['reports'].append(report)
-        with open(out_dir + "/reports.json", 'w') as outfile:
+        with open(join(out_dir, "reports.json"), 'w') as outfile:
             json.dump(old_reports, outfile)
             outfile.close()
     clean(full=False)
@@ -199,7 +194,7 @@ elif command == "run":
     clean()
     preprocess()
     exit()
-    reports = open(out_dir + "/reports.json", "w")
+    reports = open(join(out_dir, "reports.json"), "w")
     empty = {"reports": []}
     json.dump(empty, reports)
     reports.close()

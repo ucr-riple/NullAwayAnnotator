@@ -7,5 +7,7 @@
     "NULLABLE": "javax.annotation.Nullable"
   },
   "FORMAT": false,
+  "OUTPUT_DIR": "/tmp/NullAwayFix",
+  "NULLAWAY_CONFIG_PATH": "/tmp/NullAwayFix/config.xml",
   "DEPTH": 4
 }
