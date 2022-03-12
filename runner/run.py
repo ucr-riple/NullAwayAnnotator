@@ -89,12 +89,10 @@ def preprocess():
     delete(method_path)
     delete(join(out_dir, "init_methods.json"))
     build_project()
-    uprint("Analyzing suggested fixes...")
     fixes = tools.load_tsv_to_dict(out_dir + "/fixes.tsv")
     uprint("Detecting uninitialized class fields...")
     field_no_inits = [x for x in fixes if (x['reason'] == 'FIELD_NO_INIT' and x['location'] == 'FIELD')]
-    uprint("Found " + str(len(field_no_inits)) + " fields.")
-    uprint("Analyzing method infos...")
+    uprint("Detecting initializers...")
     raw_methods = tools.load_tsv_to_dict(method_path)
     init_methods = {"fixes": []}
     methods = []
@@ -109,7 +107,6 @@ def preprocess():
             seen = method
             methods.append(seen)
         seen['fields'].append(method['field'])
-    uprint("Selecting appropriate method for each class field...")
     for field in field_no_inits:
         candidate_method = None
         max_size = 0
@@ -129,9 +126,9 @@ def preprocess():
                 init_methods['fixes'].append(candidate_method)
     with open(join(out_dir, "init_methods.json"), 'w') as outfile:
         json.dump(init_methods, outfile)
-    uprint("Passing to injector to annotate...")
+    uprint("Annotating as {}".format(data['ANNOTATION']['INITIALIZE']))
     os.system("cd jars && java -jar core.jar apply {}/init_methods.json {}".format(out_dir, format_style))
-    uprint("Finished.")
+    uprint("Done.")
 
 
 def explore():
