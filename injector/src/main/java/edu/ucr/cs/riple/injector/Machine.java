@@ -34,40 +34,35 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.printer.DefaultPrettyPrinter;
 import com.github.javaparser.printer.configuration.DefaultPrinterConfiguration;
-import com.github.javaparser.printer.configuration.PrinterConfiguration;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import me.tongfei.progressbar.ProgressBar;
-import me.tongfei.progressbar.ProgressBarStyle;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
-public class InjectorMachine {
+public class Machine {
 
-  List<WorkList> workLists;
-  Injector.MODE mode;
-  boolean keep;
-  int processed = 0;
-  int total = 0;
-  final DefaultPrettyPrinter printer;
+  private final List<WorkList> workLists;
+  private final Injector.MODE mode;
+  private final DefaultPrettyPrinter printer;
+  private final boolean keep;
+  private final int total;
+  private int processed = 0;
 
-  public InjectorMachine(List<WorkList> workLists, Injector.MODE mode, boolean keep) {
+  public Machine(List<WorkList> workLists, Injector.MODE mode, boolean keep) {
     this.workLists = workLists;
     this.mode = mode;
     this.keep = keep;
-    workLists.forEach(workList -> total += workList.getFixes().size());
-    PrinterConfiguration configuration = new DefaultPrinterConfiguration();
-    printer = new DefaultPrettyPrinter(configuration);
+    this.printer = new DefaultPrettyPrinter(new DefaultPrinterConfiguration());
+    AtomicInteger sum = new AtomicInteger();
+    workLists.forEach(workList -> sum.addAndGet(workList.getFixes().size()));
+    this.total = sum.get();
   }
 
   private void overWriteToFile(CompilationUnit changed, String uri) {
@@ -88,7 +83,7 @@ public class InjectorMachine {
   }
 
   public Integer start() {
-    ProgressBar pb = createProgressBar("Injector", total);
+    ProgressBar pb = Helper.createProgressBar("Injector", total);
     for (WorkList workList : workLists) {
       CompilationUnit tree;
       try {
@@ -102,15 +97,10 @@ public class InjectorMachine {
           if (Injector.LOG) {
             pb.step();
           }
-          boolean success = applyFix(tree, fix);
-          if (success) {
+          if (applyFix(tree, fix)) {
             processed++;
-          } else {
-            logFailed(fix);
           }
-        } catch (Exception ignored) {
-          logFailed(fix);
-        }
+        } catch (Exception ignored) { }
       }
       overWriteToFile(tree, workList.getUri());
     }
@@ -233,42 +223,5 @@ public class InjectorMachine {
                 }));
 
     return success[0];
-  }
-
-  public ProgressBar createProgressBar(String task, int steps) {
-    return new ProgressBar(
-        task,
-        steps,
-        1000,
-        System.out,
-        ProgressBarStyle.ASCII,
-        "",
-        1,
-        false,
-        null,
-        ChronoUnit.SECONDS,
-        0L,
-        Duration.ZERO);
-  }
-
-  @SuppressWarnings("ALL")
-  private void logFailed(Fix fix) {
-    final String path = "/tmp/NullAwayFix/failed.json";
-    JSONObject json = null;
-    try {
-      json = (JSONObject) new JSONParser().parse(new FileReader(path));
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    assert json != null;
-    JSONArray all = (JSONArray) json.get("fixes");
-    all.add(fix.getJson());
-    JSONObject toWrite = new JSONObject();
-    toWrite.put("fixes", all);
-    try {
-      Files.write(Paths.get(path), toWrite.toJSONString().getBytes());
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
   }
 }

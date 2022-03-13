@@ -49,7 +49,7 @@ public class Injector {
     for (WorkList workList : workLists) {
       report.totalNumberOfDistinctFixes += workList.getFixes().size();
     }
-    report.processed = new InjectorMachine(workLists, mode, KEEP).start();
+    report.processed = new Machine(workLists, mode, KEEP).start();
     return report;
   }
 

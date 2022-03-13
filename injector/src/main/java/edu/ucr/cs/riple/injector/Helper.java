@@ -28,6 +28,11 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
+import me.tongfei.progressbar.ProgressBar;
+import me.tongfei.progressbar.ProgressBarStyle;
+
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -211,5 +216,22 @@ public class Helper {
     }
     if (signature.length() > 0 && generic_level == 0) ans.add(tmp.toString());
     return ans;
+  }
+
+
+  public static ProgressBar createProgressBar(String task, int steps) {
+    return new ProgressBar(
+            task,
+            steps,
+            1000,
+            System.out,
+            ProgressBarStyle.ASCII,
+            "",
+            1,
+            false,
+            null,
+            ChronoUnit.SECONDS,
+            0L,
+            Duration.ZERO);
   }
 }
