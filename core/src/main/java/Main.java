@@ -70,13 +70,9 @@ public class Main {
           "Annotator:apply needs two arguments: 1. path to the suggested fix file, 2. code style preservation flag");
     }
     boolean keepStyle = Boolean.parseBoolean(args[2]);
-    System.out.println("Building Injector...");
     Injector injector =
         Injector.builder().setMode(Injector.MODE.BATCH).keepStyle(keepStyle).build();
-    System.out.println("built.");
     List<Fix> fixes = Utility.readFixesJson(args[1]);
-    System.out.println("Injecting...");
     injector.start(new WorkListBuilder(fixes).getWorkLists(), true);
-    System.out.println("Finished");
   }
 }
