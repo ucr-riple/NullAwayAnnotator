@@ -62,7 +62,6 @@ def clean(full=True):
     if full:
         delete(join(out_dir, "reports.json"))
         delete(join(out_dir, "log.txt"))
-    uprint("Finished.")
 
 
 def prepare():
@@ -81,6 +80,10 @@ def build_project(init_active="true"):
     new_config['serialization']['fieldInitInfo']['@active'] = init_active
     tools.write_dict_config_in_xml(new_config, data['NULLAWAY_CONFIG_PATH'])
     os.system(build_command + " > /dev/null 2>&1")
+
+
+def apply_fixes_at(path):
+    tools.run_jar("apply", path, format_style)
 
 
 def preprocess():
@@ -124,24 +127,20 @@ def preprocess():
             candidate_method['reason'] = "Initializer"
             if candidate_method not in init_methods['fixes']:
                 init_methods['fixes'].append(candidate_method)
-    with open(join(out_dir, "init_methods.json"), 'w') as outfile:
-        json.dump(init_methods, outfile)
     uprint("Annotating as {}".format(data['ANNOTATION']['INITIALIZE']))
-    os.system("cd jars && java -jar core.jar apply {}/init_methods.json {}".format(out_dir, format_style))
-    uprint("Done.")
+    init_methods_path = join(out_dir, "init_methods.json")
+    with open(init_methods_path, 'w') as outfile:
+        json.dump(init_methods, outfile)
+    apply_fixes_at(init_methods_path)
 
 
 def explore():
     uprint("Starting Exploration Phase...")
-    command = "cd jars && java -jar core.jar diagnose {} {} {} {} {}".format(out_dir, build_command, str(data['DEPTH']),
-                                                                             data['ANNOTATION']['NULLABLE'],
-                                                                             format_style)
-    print(command)
-    os.system(command)
+    tools.run_jar("explore", out_dir, build_command, data['DEPTH'], data['ANNOTATION']['NULLABLE'], format_style)
     uprint("Finished.")
 
 
-def apply():
+def apply_effective_fixes():
     delete(join(out_dir, "cleaned.json"))
     report_file = open(join(out_dir, "diagnose_report.json"))
     reports = json.load(report_file)
@@ -150,8 +149,7 @@ def apply():
     cleaned['fixes'] = [fix for fix in reports['reports'] if fix['jump'] < 1]
     with open(join(out_dir, "cleaned.json"), 'w') as outfile:
         json.dump(cleaned, outfile)
-    uprint("Applying fixes at location: " + str(join(out_dir, "cleaned.json")))
-    os.system("cd jars && java -jar core.jar apply {} {}".format(join(out_dir, "cleaned.json"), format_style))
+    apply_fixes_at(join(out_dir, "cleaned.json"))
 
 
 def run():
@@ -162,7 +160,7 @@ def run():
         finished = True
         explore()
         uprint("Diagnose task finished, applying effective fixes...")
-        apply()
+        apply_effective_fixes()
         uprint("Applied.")
         new_reports = json.load(open(join(out_dir, "diagnose_report.json")))
         if len(new_reports['reports']) == 0:
@@ -186,11 +184,10 @@ if command == "preprocess":
 elif command == "explore":
     explore()
 elif command == "apply":
-    apply()
+    apply_effective_fixes()
 elif command == "run":
     clean()
     preprocess()
-    exit()
     reports = open(join(out_dir, "reports.json"), "w")
     empty = {"reports": []}
     json.dump(empty, reports)

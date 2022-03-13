@@ -219,12 +219,12 @@ public class Utility {
           }
         }
       }
-    } catch (FileNotFoundException ex) {
-      throw new RuntimeException("Unable to open file: " + filePath);
-    } catch (IOException ex) {
-      throw new RuntimeException("Error reading file: " + filePath);
+    } catch (FileNotFoundException e) {
+      throw new RuntimeException("Unable to open file: " + filePath, e);
+    } catch (IOException e) {
+      throw new RuntimeException("Error reading file: " + filePath, e);
     } catch (ParseException e) {
-      throw new RuntimeException("Error in parsing object: " + e);
+      throw new RuntimeException("Error in parsing object", e);
     }
     return fixes;
   }

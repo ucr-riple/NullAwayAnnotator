@@ -75,3 +75,11 @@ def write_dict_config_in_xml(config, path):
 
     tree = ET.ElementTree(root)
     tree.write(path, xml_declaration=True, encoding='utf-8')
+
+
+def run_jar(command, *args):
+    arguments = ""
+    for arg in args:
+        arguments += str(arg) + " "
+    os.system("cd jars && java -jar core.jar {} {}".format(command, arguments.strip()))
+
