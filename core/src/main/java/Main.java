@@ -29,6 +29,7 @@ import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkListBuilder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 
 public class Main {
@@ -54,7 +55,7 @@ public class Main {
     if (args.length != 6) {
       throw new RuntimeException(
           "Annotator:explore needs 5 arguments: 1. command to execute NullAway, "
-              + "2. output directory, 3. Annotator Depth level, 4. Nullable Annotation, 5. style");
+              + "2. output directory, 3. Annotator Depth level, 4. Nullable Annotation, 5. style but received: " + Arrays.toString(args));
     }
     Path dir = Paths.get(args[1]);
     String runCommand = args[2];

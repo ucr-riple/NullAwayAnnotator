@@ -32,7 +32,6 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * Serializer class where all generated files in Fix Serialization package is created through APIs
@@ -51,10 +50,10 @@ public class Serializer {
   public static final String METHOD_INFO_NAME = "method_info.tsv";
 
   public Serializer(Config config) {
-    String outputDirectory = config.outputDirectory;
-    this.fieldGraphPath = Paths.get(outputDirectory, FIELD_GRAPH_NAME);
-    this.callGraphPath = Paths.get(outputDirectory, CALL_GRAPH_NAME);
-    this.methodInfoPath = Paths.get(outputDirectory, METHOD_INFO_NAME);
+    Path outputDirectory = config.outputDirectory;
+    this.fieldGraphPath = outputDirectory.resolve(FIELD_GRAPH_NAME);
+    this.callGraphPath = outputDirectory.resolve(CALL_GRAPH_NAME);
+    this.methodInfoPath = outputDirectory.resolve(METHOD_INFO_NAME);
     initializeOutputFiles(config);
   }
 
@@ -104,7 +103,7 @@ public class Serializer {
   /** Initializes every file which will be re-generated in the new run of NullAway. */
   private void initializeOutputFiles(Config config) {
     try {
-      Files.createDirectories(Paths.get(config.outputDirectory));
+      Files.createDirectories(config.outputDirectory);
       if (config.callTrackerIsActive) {
         initializeFile(callGraphPath, TrackerNode.header());
       }

@@ -24,21 +24,29 @@
 
 package edu.ucr.cs.css;
 
+import com.google.common.base.Preconditions;
 import com.google.errorprone.ErrorProneFlags;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class Config {
 
-  public final String outputDirectory;
+  public final Path outputDirectory;
   public final boolean methodTrackerIsActive;
   public final boolean fieldTrackerIsActive;
   public final boolean callTrackerIsActive;
   public final Serializer serializer;
 
-  static final String EP_FL_NAMESPACE = "NullAway";
-  static final String FL_FIELD = EP_FL_NAMESPACE + ":ActivateFieldTracker";
-  static final String FL_METHOD = EP_FL_NAMESPACE + ":ActivateMethodTracker";
-  static final String FL_CALL = EP_FL_NAMESPACE + ":ActivateCallTracker";
-  static final String FL_OUTPUT_DIR = EP_FL_NAMESPACE + ":OutputDirectory";
+  static final String EP_FL_NAMESPACE = "CSS";
+  static final String FL_OUTPUT_DIR = EP_FL_NAMESPACE + ":ConfigPath";
 
   static final String DEFAULT_PATH = "/tmp/NullAwayFix";
 
@@ -46,15 +54,37 @@ public class Config {
     methodTrackerIsActive = true;
     fieldTrackerIsActive = true;
     callTrackerIsActive = true;
-    outputDirectory = DEFAULT_PATH;
+    outputDirectory = Paths.get(DEFAULT_PATH);
     serializer = new Serializer(this);
   }
 
   public Config(ErrorProneFlags flags) {
-    fieldTrackerIsActive = flags.getBoolean(FL_FIELD).orElse(true);
-    methodTrackerIsActive = flags.getBoolean(FL_METHOD).orElse(true);
-    callTrackerIsActive = flags.getBoolean(FL_CALL).orElse(true);
-    outputDirectory = flags.get(FL_OUTPUT_DIR).orElse(DEFAULT_PATH);
+    String configFilePath = flags.get(FL_OUTPUT_DIR).orElse(DEFAULT_PATH);
+    Preconditions.checkNotNull(configFilePath);
+    Document document;
+    try {
+      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      DocumentBuilder builder = factory.newDocumentBuilder();
+      document = builder.parse(Files.newInputStream(Paths.get(configFilePath)));
+      document.normalize();
+    } catch (IOException | SAXException | ParserConfigurationException e) {
+      throw new RuntimeException("Error in reading/parsing config at path: " + configFilePath, e);
+    }
+    this.outputDirectory =
+            Paths.get(XMLUtil.getValueFromTag(document, "/css/path", String.class).orElse(DEFAULT_PATH));
+    Preconditions.checkNotNull(
+            this.outputDirectory, "Error in CSS Config: Output path cannot be null");
+    methodTrackerIsActive =
+            XMLUtil.getValueFromAttribute(document, "/css/method", "active", Boolean.class)
+                    .orElse(false);
+    fieldTrackerIsActive =
+            XMLUtil.getValueFromAttribute(
+                            document, "/css/field", "enclosing", Boolean.class)
+                    .orElse(false);
+    callTrackerIsActive =
+            XMLUtil.getValueFromAttribute(
+                            document, "/css/call", "enclosing", Boolean.class)
+                    .orElse(false);
     serializer = new Serializer(this);
   }
 }

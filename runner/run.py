@@ -136,7 +136,7 @@ def preprocess():
 
 def explore():
     uprint("Starting Exploration Phase...")
-    tools.run_jar("explore", out_dir, build_command, data['DEPTH'], data['ANNOTATION']['NULLABLE'], format_style)
+    tools.run_jar("explore", out_dir, "'{}'".format(build_command), data['DEPTH'], data['ANNOTATION']['NULLABLE'], format_style)
     uprint("Finished.")
 
 
