@@ -163,7 +163,7 @@ def run():
     while not finished:
         finished = True
         explore()
-        uprint("Diagnose task finished, applying effective fixes...")
+        uprint("Explore task finished, applying effective fixes...")
         apply_effective_fixes()
         uprint("Applied.")
         new_reports = json.load(open(join(out_dir, "diagnose_report.json")))
