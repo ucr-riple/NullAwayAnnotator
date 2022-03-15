@@ -46,6 +46,7 @@ if 'REPO_ROOT_PATH' not in data:
 
 build_command = "cd {} && {} && cd {}".format(data['REPO_ROOT_PATH'], data['BUILD_COMMAND'], data['PROJECT_PATH'])
 out_dir = data['OUTPUT_DIR']
+nullaway_config_path = data['NULLAWAY_CONFIG_PATH']
 format_style = str(data['FORMAT']).lower()
 format_style = "false" if format_style not in ["true", "false"] else format_style
 
@@ -78,7 +79,7 @@ def build_project(init_active="true"):
     new_config['serialization']['annotation']['nullable'] = data['ANNOTATION']['NULLABLE']
     new_config['serialization']['annotation']['nonnull'] = data['ANNOTATION']['NONNULL']
     new_config['serialization']['fieldInitInfo']['@active'] = init_active
-    tools.write_dict_config_in_xml(new_config, data['NULLAWAY_CONFIG_PATH'])
+    tools.write_dict_config_in_xml(new_config, nullaway_config_path)
     os.system(build_command + " > /dev/null 2>&1")
 
 
@@ -136,7 +137,7 @@ def preprocess():
 
 def explore():
     uprint("Starting Exploration Phase...")
-    tools.run_jar("explore", out_dir, "'{}'".format(build_command), data['DEPTH'], data['ANNOTATION']['NULLABLE'], format_style)
+    tools.run_jar("explore", nullaway_config_path, "'{}'".format(build_command), data['DEPTH'], data['ANNOTATION']['NULLABLE'], format_style)
     uprint("Finished.")
 
 

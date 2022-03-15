@@ -58,12 +58,12 @@ public class Main {
               + "2. output directory, 3. Annotator Depth level, 4. Nullable Annotation, 5. style but received: "
               + Arrays.toString(args));
     }
-    Path dir = Paths.get(args[1]);
+    Path configPath = Paths.get(args[1]);
     String runCommand = args[2];
     annotator.depth = Integer.parseInt(args[3]);
     annotator.nullableAnnot = args[4];
     annotator.lexicalPreservationEnabled = Boolean.parseBoolean(args[5]);
-    annotator.start(runCommand, dir, true);
+    annotator.start(runCommand, configPath, true);
   }
 
   private static void apply(String[] args) {
