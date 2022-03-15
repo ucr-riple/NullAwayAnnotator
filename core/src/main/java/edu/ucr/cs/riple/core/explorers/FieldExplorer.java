@@ -43,7 +43,6 @@ public class FieldExplorer extends AdvancedExplorer {
   @Override
   protected void init() {
     this.tracker = annotator.fieldUsageTracker;
-    System.out.println("Trying to find groups for Class Field fixes");
     fixGraph.updateUsages(tracker);
     fixGraph.findGroups();
   }

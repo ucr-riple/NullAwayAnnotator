@@ -9,5 +9,6 @@
   "FORMAT": false,
   "OUTPUT_DIR": "/tmp/NullAwayFix",
   "NULLAWAY_CONFIG_PATH": "/tmp/NullAwayFix/config.xml",
+  "CSS_CONFIG_PATH": "/tmp/NullAwayFix/css.xml",
   "DEPTH": 4
 }

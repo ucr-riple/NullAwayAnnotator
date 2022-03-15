@@ -47,6 +47,7 @@ if 'REPO_ROOT_PATH' not in data:
 build_command = "cd {} && {} && cd {}".format(data['REPO_ROOT_PATH'], data['BUILD_COMMAND'], data['PROJECT_PATH'])
 out_dir = data['OUTPUT_DIR']
 nullaway_config_path = data['NULLAWAY_CONFIG_PATH']
+css_config_path = data['CSS_CONFIG_PATH']
 format_style = str(data['FORMAT']).lower()
 format_style = "false" if format_style not in ["true", "false"] else format_style
 
@@ -79,7 +80,7 @@ def build_project(init_active="true"):
     new_config['serialization']['annotation']['nullable'] = data['ANNOTATION']['NULLABLE']
     new_config['serialization']['annotation']['nonnull'] = data['ANNOTATION']['NONNULL']
     new_config['serialization']['fieldInitInfo']['@active'] = init_active
-    tools.write_dict_config_in_xml(new_config, nullaway_config_path)
+    tools.write_nullaway_config_in_xml(new_config, nullaway_config_path)
     os.system(build_command + " > /dev/null 2>&1")
 
 
@@ -88,6 +89,7 @@ def apply_fixes_at(path):
 
 
 def preprocess():
+    tools.write_css_config_in_xml(True, out_dir, css_config_path)
     uprint("Started preprocessing task...")
     method_path = join(out_dir, "field_init.tsv")
     delete(method_path)
@@ -136,6 +138,7 @@ def preprocess():
 
 
 def explore():
+    tools.write_css_config_in_xml(False, out_dir, css_config_path)
     uprint("Starting Exploration Phase...")
     tools.run_jar("explore", nullaway_config_path, "'{}'".format(build_command), data['DEPTH'], data['ANNOTATION']['NULLABLE'], format_style)
     uprint("Finished.")

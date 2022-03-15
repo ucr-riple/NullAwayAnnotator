@@ -152,7 +152,7 @@ public class Annotator {
         }
       }
       log.deep = System.currentTimeMillis();
-      deepExplorer.start(finishedReports);
+      this.deepExplorer.start(finishedReports);
       log.deep = System.currentTimeMillis() - log.deep;
     } catch (Exception e) {
       e.printStackTrace();

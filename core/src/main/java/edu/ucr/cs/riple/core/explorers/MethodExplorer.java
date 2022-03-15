@@ -43,7 +43,6 @@ public class MethodExplorer extends AdvancedExplorer {
   @Override
   protected void init() {
     tracker = annotator.methodUsageTracker;
-    System.out.println("Trying to find groups for Method Return fixes");
     fixGraph.updateUsages(tracker);
     fixGraph.findGroups();
   }

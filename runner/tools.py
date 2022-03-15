@@ -51,7 +51,7 @@ def load_tsv_to_dict(path):
     return ans
 
 
-def write_dict_config_in_xml(config, path):
+def write_nullaway_config_in_xml(config, path):
     root = ET.Element("serialization")
 
     # Suggest
@@ -73,6 +73,17 @@ def write_dict_config_in_xml(config, path):
     # Field Init Info
     ET.SubElement(root, "fieldInitInfo", active=config['serialization']['fieldInitInfo']['@active'])
 
+    tree = ET.ElementTree(root)
+    tree.write(path, xml_declaration=True, encoding='utf-8')
+
+
+def write_css_config_in_xml(activation, output_dir, path):
+    activation = str(activation).lower()
+    root = ET.Element("css")
+    ET.SubElement(root, "method", active=activation)
+    ET.SubElement(root, "field", active=activation)
+    ET.SubElement(root, "call", active=activation)
+    ET.SubElement(root, "path").text = output_dir
     tree = ET.ElementTree(root)
     tree.write(path, xml_declaration=True, encoding='utf-8')
 

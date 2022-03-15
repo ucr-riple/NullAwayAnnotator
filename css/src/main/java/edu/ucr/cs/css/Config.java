@@ -50,11 +50,11 @@ public class Config {
   static final String DEFAULT_PATH = "/tmp/NullAwayFix";
 
   public Config() {
-    methodTrackerIsActive = true;
-    fieldTrackerIsActive = true;
-    callTrackerIsActive = true;
-    outputDirectory = Paths.get(DEFAULT_PATH);
-    serializer = new Serializer(this);
+    this.methodTrackerIsActive = true;
+    this.fieldTrackerIsActive = true;
+    this.callTrackerIsActive = true;
+    this.outputDirectory = Paths.get(DEFAULT_PATH);
+    this.serializer = new Serializer(this);
   }
 
   public Config(ErrorProneFlags flags) {
@@ -74,15 +74,15 @@ public class Config {
             XMLUtil.getValueFromTag(document, "/css/path", String.class).orElse(DEFAULT_PATH));
     Preconditions.checkNotNull(
         this.outputDirectory, "Error in CSS Config: Output path cannot be null");
-    methodTrackerIsActive =
+    this.methodTrackerIsActive =
         XMLUtil.getValueFromAttribute(document, "/css/method", "active", Boolean.class)
             .orElse(false);
-    fieldTrackerIsActive =
-        XMLUtil.getValueFromAttribute(document, "/css/field", "enclosing", Boolean.class)
+    this.fieldTrackerIsActive =
+        XMLUtil.getValueFromAttribute(document, "/css/field", "active", Boolean.class)
             .orElse(false);
-    callTrackerIsActive =
-        XMLUtil.getValueFromAttribute(document, "/css/call", "enclosing", Boolean.class)
+    this.callTrackerIsActive =
+        XMLUtil.getValueFromAttribute(document, "/css/call", "active", Boolean.class)
             .orElse(false);
-    serializer = new Serializer(this);
+    this.serializer = new Serializer(this);
   }
 }
