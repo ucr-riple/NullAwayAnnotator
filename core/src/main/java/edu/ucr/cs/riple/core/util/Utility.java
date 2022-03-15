@@ -198,7 +198,7 @@ public class Utility {
     } catch (Exception exception) {
       throw new RuntimeException("Exception happened in removing cached fixes", exception);
     }
-    System.out.println("Processing cache fixes finished. Reduced down to: " + fixes.size());
+    System.out.println("Processing cached fixes finished. Reduced down to: " + fixes.size());
   }
 
   public static List<Fix> readFixesJson(Path filePath) {
