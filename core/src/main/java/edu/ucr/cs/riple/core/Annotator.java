@@ -139,12 +139,15 @@ public class Annotator {
     this.fixPath = this.dir.resolve("fixes.tsv");
     this.errorPath = this.dir.resolve("errors.tsv");
     List<Fix> fixes = init(buildCommand, useCache);
-    fixes.forEach(fix -> {
-      if (finishedReports.stream().noneMatch(diagnoseReport -> diagnoseReport.fix.equals(fix))) {
-        List<Fix> appliedFixes = analyze(fix);
-        remove(appliedFixes);
-      }
-    });
+    fixes.forEach(
+        fix -> {
+          if (finishedReports
+              .stream()
+              .noneMatch(diagnoseReport -> diagnoseReport.fix.equals(fix))) {
+            List<Fix> appliedFixes = analyze(fix);
+            remove(appliedFixes);
+          }
+        });
     log.deep = System.currentTimeMillis();
     this.deepExplorer.start(finishedReports);
     log.deep = System.currentTimeMillis() - log.deep;

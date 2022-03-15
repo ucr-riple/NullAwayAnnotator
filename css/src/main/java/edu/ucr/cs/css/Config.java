@@ -81,8 +81,7 @@ public class Config {
         XMLUtil.getValueFromAttribute(document, "/css/field", "active", Boolean.class)
             .orElse(false);
     this.callTrackerIsActive =
-        XMLUtil.getValueFromAttribute(document, "/css/call", "active", Boolean.class)
-            .orElse(false);
+        XMLUtil.getValueFromAttribute(document, "/css/call", "active", Boolean.class).orElse(false);
     this.serializer = new Serializer(this);
   }
 }
