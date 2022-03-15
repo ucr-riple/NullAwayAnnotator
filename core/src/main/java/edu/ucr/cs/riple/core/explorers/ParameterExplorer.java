@@ -73,11 +73,10 @@ public class ParameterExplorer extends AdvancedExplorer {
       pb.setExtraMessage("Building.");
       FixSerializationConfig.Builder config =
           new FixSerializationConfig.Builder()
-              .setSuggest(true, false)
+              .setSuggest(true, true)
               .setAnnotations(annotator.nullableAnnot, "UNKNOWN")
               .setParamProtectionTest(true, i)
               .setOutputDirectory(annotator.dir.toString());
-      ;
       annotator.buildProject(config);
       errorBank.saveState(false, true);
       fixBank.saveState(false, true);

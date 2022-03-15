@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.core;
 import com.google.common.base.Preconditions;
 import com.uber.nullaway.fixserialization.FixSerializationConfig;
 import edu.ucr.cs.css.Serializer;
+import edu.ucr.cs.css.XMLUtil;
 import edu.ucr.cs.riple.core.explorers.BasicExplorer;
 import edu.ucr.cs.riple.core.explorers.DeepExplorer;
 import edu.ucr.cs.riple.core.explorers.DummyExplorer;
@@ -46,10 +47,10 @@ import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkList;
 import edu.ucr.cs.riple.injector.WorkListBuilder;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Annotator {
@@ -57,6 +58,7 @@ public class Annotator {
   public Path fixPath;
   public Path errorPath;
   public Path dir;
+  public Path nullAwayConfigPath;
 
   public String nullableAnnot;
   public int depth;
@@ -72,7 +74,7 @@ public class Annotator {
   public FieldUsageTracker fieldUsageTracker;
   public MethodInheritanceTree methodInheritanceTree;
 
-  private static final Log log = new Log();
+  public static final Log log = new Log();
 
   public static class Log {
     int total;
@@ -114,7 +116,6 @@ public class Annotator {
     this.fieldUsageTracker = new FieldUsageTracker(dir.resolve(Serializer.FIELD_GRAPH_NAME));
     Bank<Error> errorBank = new Bank<>(errorPath, Error::new);
     Bank<FixEntity> fixBank = new Bank<>(fixPath, FixEntity::new);
-    List<FixEntity> greater = fixBank.getAllEntities().stream().filter(fixEntity -> fixEntity.fix.referred > 0).collect(Collectors.toList());
     this.explorers = new ArrayList<>();
     this.deepExplorer = new DeepExplorer(this, errorBank, fixBank);
     if (depth < 0) {
@@ -128,12 +129,16 @@ public class Annotator {
     return allFixes;
   }
 
-  public void start(String buildCommand, Path dir, boolean useCache) {
+  public void start(String buildCommand, Path configPath, boolean useCache) {
     log.time = System.currentTimeMillis();
     System.out.println("Annotator Started.");
-    this.dir = dir;
-    this.fixPath = dir.resolve("fixes.tsv");
-    this.errorPath = dir.resolve("errors.tsv");
+    this.nullAwayConfigPath = configPath;
+    this.dir =
+        Paths.get(
+            XMLUtil.getValueFromTag(configPath, "/serialization/path", String.class)
+                .orElse("/tmp/NullAwayFix"));
+    this.fixPath = this.dir.resolve("fixes.tsv");
+    this.errorPath = this.dir.resolve("errors.tsv");
     List<Fix> fixes = init(buildCommand, useCache);
     List<WorkList> workListLists = new WorkListBuilder(fixes).getWorkLists();
     try {
@@ -154,7 +159,7 @@ public class Annotator {
     }
     log.time = System.currentTimeMillis() - log.time;
     Utility.writeReports(finishedReports);
-    Utility.writeLog(log);
+    Utility.writeLog(this);
   }
 
   public void remove(List<Fix> fixes) {
@@ -207,7 +212,7 @@ public class Annotator {
     if (count) {
       log.requested++;
     }
-    writer.writeAsXML(dir + "/explorer.config");
+    writer.writeAsXML(nullAwayConfigPath.toString());
     try {
       Utility.executeCommand(buildCommand);
     } catch (Exception e) {

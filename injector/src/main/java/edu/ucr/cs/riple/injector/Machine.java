@@ -43,7 +43,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import me.tongfei.progressbar.ProgressBar;
 
 public class Machine {
@@ -100,7 +99,8 @@ public class Machine {
           if (applyFix(tree, fix)) {
             processed++;
           }
-        } catch (Exception ignored) { }
+        } catch (Exception ignored) {
+        }
       }
       overWriteToFile(tree, workList.getUri());
     }

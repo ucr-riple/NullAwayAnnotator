@@ -33,7 +33,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class Index<T extends Hashable> {
@@ -106,7 +105,7 @@ public class Index<T extends Hashable> {
         .collect(Collectors.toList());
   }
 
-  public List<T> getAllEntities(){
+  public List<T> getAllEntities() {
     List<T> ans = new ArrayList<>();
     items.forEach((integer, ts) -> ans.addAll(ts));
     return ans;

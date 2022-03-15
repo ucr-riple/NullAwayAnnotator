@@ -26,16 +26,15 @@ package edu.ucr.cs.css;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.ErrorProneFlags;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 public class Config {
 
@@ -71,20 +70,19 @@ public class Config {
       throw new RuntimeException("Error in reading/parsing config at path: " + configFilePath, e);
     }
     this.outputDirectory =
-            Paths.get(XMLUtil.getValueFromTag(document, "/css/path", String.class).orElse(DEFAULT_PATH));
+        Paths.get(
+            XMLUtil.getValueFromTag(document, "/css/path", String.class).orElse(DEFAULT_PATH));
     Preconditions.checkNotNull(
-            this.outputDirectory, "Error in CSS Config: Output path cannot be null");
+        this.outputDirectory, "Error in CSS Config: Output path cannot be null");
     methodTrackerIsActive =
-            XMLUtil.getValueFromAttribute(document, "/css/method", "active", Boolean.class)
-                    .orElse(false);
+        XMLUtil.getValueFromAttribute(document, "/css/method", "active", Boolean.class)
+            .orElse(false);
     fieldTrackerIsActive =
-            XMLUtil.getValueFromAttribute(
-                            document, "/css/field", "enclosing", Boolean.class)
-                    .orElse(false);
+        XMLUtil.getValueFromAttribute(document, "/css/field", "enclosing", Boolean.class)
+            .orElse(false);
     callTrackerIsActive =
-            XMLUtil.getValueFromAttribute(
-                            document, "/css/call", "enclosing", Boolean.class)
-                    .orElse(false);
+        XMLUtil.getValueFromAttribute(document, "/css/call", "enclosing", Boolean.class)
+            .orElse(false);
     serializer = new Serializer(this);
   }
 }

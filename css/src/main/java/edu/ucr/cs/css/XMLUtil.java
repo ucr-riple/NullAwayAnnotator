@@ -6,14 +6,20 @@
 
 package edu.ucr.cs.css;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 /** Helper for class for parsing/writing xml files. */
 public class XMLUtil {
@@ -68,12 +74,36 @@ public class XMLUtil {
     return new DefaultXMLValueProvider<>(null, klass);
   }
 
+  /**
+   * Helper method for reading value of a node located at /key_1/key_2/.../key_n (in the form of
+   * {@code Xpath} query) from a {@link Document}.
+   *
+   * @param path Path to the XML file.
+   * @param key Key to locate the value, can be nested in the form of {@code Xpath} query (e.g.
+   *     /key1/key2/.../key_n).
+   * @param klass Class type of the value in doc.
+   * @return The value in the specified keychain cast to the class type given in parameter.
+   */
+  public static <T> DefaultXMLValueProvider<T> getValueFromTag(
+      Path path, String key, Class<T> klass) {
+    Document document;
+    try {
+      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      DocumentBuilder builder = factory.newDocumentBuilder();
+      document = builder.parse(Files.newInputStream(path));
+      document.normalize();
+    } catch (IOException | SAXException | ParserConfigurationException e) {
+      throw new RuntimeException("Error in reading/parsing config at path: " + path, e);
+    }
+    return getValueFromTag(document, key, klass);
+  }
+
   /** Helper class for setting default values when the key is not found. */
-  static class DefaultXMLValueProvider<T> {
+  public static class DefaultXMLValueProvider<T> {
     final Object value;
     final Class<T> klass;
 
-    DefaultXMLValueProvider(Object value, Class<T> klass) {
+    public DefaultXMLValueProvider(Object value, Class<T> klass) {
       this.klass = klass;
       if (value == null) {
         this.value = null;
@@ -98,7 +128,7 @@ public class XMLUtil {
       }
     }
 
-    T orElse(T other) {
+    public T orElse(T other) {
       return value == null ? other : klass.cast(this.value);
     }
   }

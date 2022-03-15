@@ -34,27 +34,20 @@ import java.util.List;
 
 public class Main {
   public static void main(String[] args) {
-//    if (args.length == 0) {
-//      throw new RuntimeException("command not specified");
-//    }
-//    String command = args[0];
-//    switch (command) {
-//      case "apply":
-//        apply(args);
-//        break;
-//      case "explore":
-//        explore(args);
-//        break;
-//      default:
-//        throw new RuntimeException("Unknown command: " + command);
-//    }
-    Annotator annotator = new Annotator();
-    Path dir = Paths.get("/tmp/NullAwayFix");
-    String runCommand = "cd /Users/nima/Developer/NullAwayFixer/Projects/MPAndroidChart && ./gradlew build -x test";
-    annotator.depth = 4;
-    annotator.nullableAnnot = "androidx.annotation.Nullable";
-    annotator.lexicalPreservationEnabled = false;
-    annotator.start(runCommand, dir, true);
+    if (args.length == 0) {
+      throw new RuntimeException("command not specified");
+    }
+    String command = args[0];
+    switch (command) {
+      case "apply":
+        apply(args);
+        break;
+      case "explore":
+        explore(args);
+        break;
+      default:
+        throw new RuntimeException("Unknown command: " + command);
+    }
   }
 
   private static void explore(String[] args) {
@@ -62,7 +55,8 @@ public class Main {
     if (args.length != 6) {
       throw new RuntimeException(
           "Annotator:explore needs 5 arguments: 1. command to execute NullAway, "
-              + "2. output directory, 3. Annotator Depth level, 4. Nullable Annotation, 5. style but received: " + Arrays.toString(args));
+              + "2. output directory, 3. Annotator Depth level, 4. Nullable Annotation, 5. style but received: "
+              + Arrays.toString(args));
     }
     Path dir = Paths.get(args[1]);
     String runCommand = args[2];
@@ -80,7 +74,7 @@ public class Main {
     boolean keepStyle = Boolean.parseBoolean(args[2]);
     Injector injector =
         Injector.builder().setMode(Injector.MODE.BATCH).keepStyle(keepStyle).build();
-    List<Fix> fixes = Utility.readFixesJson(args[1]);
+    List<Fix> fixes = Utility.readFixesJson(Paths.get(args[1]));
     injector.start(new WorkListBuilder(fixes).getWorkLists(), true);
   }
 }

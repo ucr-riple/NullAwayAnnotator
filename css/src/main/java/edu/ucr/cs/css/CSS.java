@@ -33,16 +33,31 @@ import com.google.errorprone.VisitorState;
 import com.google.errorprone.bugpatterns.BugChecker;
 import com.google.errorprone.matchers.Description;
 import com.google.errorprone.util.ASTHelpers;
+import com.sun.source.tree.ArrayAccessTree;
 import com.sun.source.tree.AssignmentTree;
+import com.sun.source.tree.BinaryTree;
+import com.sun.source.tree.CompoundAssignmentTree;
+import com.sun.source.tree.ConditionalExpressionTree;
+import com.sun.source.tree.EnhancedForLoopTree;
+import com.sun.source.tree.ForLoopTree;
+import com.sun.source.tree.IdentifierTree;
+import com.sun.source.tree.IfTree;
+import com.sun.source.tree.LambdaExpressionTree;
 import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.ReturnTree;
+import com.sun.source.tree.SwitchTree;
+import com.sun.source.tree.UnaryTree;
+import com.sun.source.tree.VariableTree;
+import com.sun.source.tree.WhileLoopTree;
 import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.css.out.MethodInfo;
 import edu.ucr.cs.css.out.TrackerNode;
 import java.util.ArrayList;
 import java.util.List;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.type.TypeKind;
 
 @AutoService(BugChecker.class)
 @BugPattern(
@@ -55,7 +70,21 @@ public class CSS extends BugChecker
     implements BugChecker.MethodInvocationTreeMatcher,
         BugChecker.AssignmentTreeMatcher,
         BugChecker.MemberSelectTreeMatcher,
-        BugChecker.MethodTreeMatcher {
+        BugChecker.ArrayAccessTreeMatcher,
+        BugChecker.ReturnTreeMatcher,
+        BugChecker.MethodTreeMatcher,
+        BugChecker.VariableTreeMatcher,
+        BugChecker.BinaryTreeMatcher,
+        BugChecker.UnaryTreeMatcher,
+        BugChecker.ConditionalExpressionTreeMatcher,
+        BugChecker.IfTreeMatcher,
+        BugChecker.WhileLoopTreeMatcher,
+        BugChecker.ForLoopTreeMatcher,
+        BugChecker.EnhancedForLoopTreeMatcher,
+        BugChecker.LambdaExpressionTreeMatcher,
+        BugChecker.IdentifierTreeMatcher,
+        BugChecker.CompoundAssignmentTreeMatcher,
+        BugChecker.SwitchTreeMatcher {
 
   private final Config config;
 
@@ -75,16 +104,8 @@ public class CSS extends BugChecker
     if (tree == null) {
       return Description.NO_MATCH;
     }
-
-    Symbol expressionSym = ASTHelpers.getSymbol(tree.getExpression());
-    if (expressionSym != null && expressionSym.getKind() == ElementKind.FIELD) {
-      config.serializer.serializeFieldGraphNode(new TrackerNode(expressionSym, state.getPath()));
-    }
-
-    Symbol assigned = ASTHelpers.getSymbol(tree.getVariable());
-    if (assigned != null && assigned.getKind() == ElementKind.FIELD) {
-      config.serializer.serializeFieldGraphNode(new TrackerNode(assigned, state.getPath()));
-    }
+    serializeField(ASTHelpers.getSymbol(tree.getExpression()), state);
+    serializeField(ASTHelpers.getSymbol(tree.getVariable()), state);
     return Description.NO_MATCH;
   }
 
@@ -93,11 +114,7 @@ public class CSS extends BugChecker
     if (!config.fieldTrackerIsActive) {
       return Description.NO_MATCH;
     }
-    Symbol symbol = ASTHelpers.getSymbol(tree);
-
-    if (symbol != null && symbol.getKind() == ElementKind.FIELD) {
-      config.serializer.serializeFieldGraphNode(new TrackerNode(symbol, state.getPath()));
-    }
+    serializeField(ASTHelpers.getSymbol(tree), state);
     return Description.NO_MATCH;
   }
 
@@ -126,5 +143,149 @@ public class CSS extends BugChecker
     methodInfo.setParamAnnotations(paramAnnotations);
     config.serializer.serializeMethodInfo(methodInfo);
     return Description.NO_MATCH;
+  }
+
+  @Override
+  public Description matchReturn(ReturnTree tree, VisitorState state) {
+    if (!config.fieldTrackerIsActive) {
+      return Description.NO_MATCH;
+    }
+    serializeField(ASTHelpers.getSymbol(tree.getExpression()), state);
+    return Description.NO_MATCH;
+  }
+
+  @Override
+  public Description matchSwitch(SwitchTree tree, VisitorState state) {
+    if (!config.fieldTrackerIsActive) {
+      return Description.NO_MATCH;
+    }
+    serializeField(ASTHelpers.getSymbol(tree.getExpression()), state);
+    return Description.NO_MATCH;
+  }
+
+  @Override
+  public Description matchVariable(VariableTree tree, VisitorState state) {
+    if (!config.fieldTrackerIsActive) {
+      return Description.NO_MATCH;
+    }
+    serializeField(ASTHelpers.getSymbol(tree), state);
+    serializeField(ASTHelpers.getSymbol(tree.getInitializer()), state);
+    return Description.NO_MATCH;
+  }
+
+  @Override
+  public Description matchEnhancedForLoop(EnhancedForLoopTree tree, VisitorState state) {
+    if (!config.fieldTrackerIsActive) {
+      return Description.NO_MATCH;
+    }
+    serializeField(ASTHelpers.getSymbol(tree), state);
+    serializeField(ASTHelpers.getSymbol(tree.getExpression()), state);
+    return Description.NO_MATCH;
+  }
+
+  @Override
+  public Description matchArrayAccess(ArrayAccessTree tree, VisitorState state) {
+    if (!config.fieldTrackerIsActive) {
+      return Description.NO_MATCH;
+    }
+    serializeField(ASTHelpers.getSymbol(tree), state);
+    serializeField(ASTHelpers.getSymbol(tree.getExpression()), state);
+    return Description.NO_MATCH;
+  }
+
+  @Override
+  public Description matchBinary(BinaryTree tree, VisitorState state) {
+    if (!config.fieldTrackerIsActive) {
+      return Description.NO_MATCH;
+    }
+    serializeField(ASTHelpers.getSymbol(tree), state);
+    serializeField(ASTHelpers.getSymbol(tree.getLeftOperand()), state);
+    serializeField(ASTHelpers.getSymbol(tree.getRightOperand()), state);
+    return Description.NO_MATCH;
+  }
+
+  @Override
+  public Description matchCompoundAssignment(CompoundAssignmentTree tree, VisitorState state) {
+    if (!config.fieldTrackerIsActive) {
+      return Description.NO_MATCH;
+    }
+    serializeField(ASTHelpers.getSymbol(tree.getVariable()), state);
+    serializeField(ASTHelpers.getSymbol(tree.getExpression()), state);
+    return Description.NO_MATCH;
+  }
+
+  @Override
+  public Description matchConditionalExpression(
+      ConditionalExpressionTree tree, VisitorState state) {
+    if (!config.fieldTrackerIsActive) {
+      return Description.NO_MATCH;
+    }
+    serializeField(ASTHelpers.getSymbol(tree.getCondition()), state);
+    return Description.NO_MATCH;
+  }
+
+  @Override
+  public Description matchForLoop(ForLoopTree tree, VisitorState state) {
+    if (!config.fieldTrackerIsActive) {
+      return Description.NO_MATCH;
+    }
+    serializeField(ASTHelpers.getSymbol(tree.getCondition()), state);
+    return Description.NO_MATCH;
+  }
+
+  @Override
+  public Description matchIdentifier(IdentifierTree tree, VisitorState state) {
+    if (!config.fieldTrackerIsActive) {
+      return Description.NO_MATCH;
+    }
+    serializeField(ASTHelpers.getSymbol(tree), state);
+    return Description.NO_MATCH;
+  }
+
+  @Override
+  public Description matchIf(IfTree tree, VisitorState state) {
+    if (!config.fieldTrackerIsActive) {
+      return Description.NO_MATCH;
+    }
+    serializeField(ASTHelpers.getSymbol(tree.getCondition()), state);
+    return Description.NO_MATCH;
+  }
+
+  @Override
+  public Description matchLambdaExpression(LambdaExpressionTree tree, VisitorState state) {
+    if (!config.fieldTrackerIsActive) {
+      return Description.NO_MATCH;
+    }
+    Symbol.MethodSymbol funcInterfaceMethod =
+        SymbolUtil.getFunctionalInterfaceMethod(tree, state.getTypes());
+    if (tree.getBodyKind() == LambdaExpressionTree.BodyKind.EXPRESSION
+        && funcInterfaceMethod.getReturnType().getKind() != TypeKind.VOID) {
+      serializeField(ASTHelpers.getSymbol(tree.getBody()), state);
+    }
+    return Description.NO_MATCH;
+  }
+
+  @Override
+  public Description matchUnary(UnaryTree tree, VisitorState state) {
+    if (!config.fieldTrackerIsActive) {
+      return Description.NO_MATCH;
+    }
+    serializeField(ASTHelpers.getSymbol(tree.getExpression()), state);
+    return Description.NO_MATCH;
+  }
+
+  @Override
+  public Description matchWhileLoop(WhileLoopTree tree, VisitorState state) {
+    if (!config.fieldTrackerIsActive) {
+      return Description.NO_MATCH;
+    }
+    serializeField(ASTHelpers.getSymbol(tree.getCondition()), state);
+    return Description.NO_MATCH;
+  }
+
+  private void serializeField(Symbol symbol, VisitorState state) {
+    if (symbol != null && symbol.getKind() == ElementKind.FIELD) {
+      config.serializer.serializeFieldGraphNode(new TrackerNode(symbol, state.getPath()));
+    }
   }
 }

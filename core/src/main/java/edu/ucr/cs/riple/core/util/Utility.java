@@ -40,7 +40,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -175,14 +174,15 @@ public class Utility {
   }
 
   public static void removeCachedFixes(List<Fix> fixes, Path outDir) {
-    if (!Files.exists(outDir.resolve("/reports.json"))) {
-      System.out.println("Found no report at: " + outDir + "/reports.json");
+    if (!Files.exists(outDir.resolve("reports.json"))) {
+      System.out.println("Found no report at: " + outDir.resolve("reports.json"));
       return;
     }
     try {
       System.out.println("Reading cached fixes reports");
       JSONObject cachedObjects =
-          (JSONObject) new JSONParser().parse(new FileReader(outDir + "/reports.json"));
+          (JSONObject)
+              new JSONParser().parse(new FileReader(outDir.resolve("reports.json").toFile()));
       JSONArray cachedJson = (JSONArray) cachedObjects.get("reports");
       System.out.println("Found " + cachedJson.size() + " number of reports");
       List<Fix> cached = new ArrayList<>();
@@ -201,11 +201,10 @@ public class Utility {
     System.out.println("Processing cache fixes finished. Reduced down to: " + fixes.size());
   }
 
-  public static List<Fix> readFixesJson(String filePath) {
+  public static List<Fix> readFixesJson(Path filePath) {
     List<Fix> fixes = new ArrayList<>();
     try {
-      BufferedReader bufferedReader =
-          Files.newBufferedReader(Paths.get(filePath), Charset.defaultCharset());
+      BufferedReader bufferedReader = Files.newBufferedReader(filePath, Charset.defaultCharset());
       JSONObject obj = (JSONObject) new JSONParser().parse(bufferedReader);
       JSONArray fixesJson = (JSONArray) obj.get("fixes");
       bufferedReader.close();
@@ -245,12 +244,11 @@ public class Utility {
         Duration.ZERO);
   }
 
-  public static void writeLog(Annotator.Log log) {
-    String path = "/tmp/NullAwayFix/log.txt";
+  public static void writeLog(Annotator annotator) {
     try {
-      FileWriter fw = new FileWriter(path, true);
+      FileWriter fw = new FileWriter(annotator.dir.resolve("log.txt").toFile(), true);
       BufferedWriter bw = new BufferedWriter(fw);
-      bw.write(log.toString());
+      bw.write(Annotator.log.toString());
       bw.newLine();
       bw.close();
     } catch (Exception ignored) {
