@@ -34,20 +34,27 @@ import java.util.List;
 
 public class Main {
   public static void main(String[] args) {
-    if (args.length == 0) {
-      throw new RuntimeException("command not specified");
-    }
-    String command = args[0];
-    switch (command) {
-      case "apply":
-        apply(args);
-        break;
-      case "explore":
-        explore(args);
-        break;
-      default:
-        throw new RuntimeException("Unknown command: " + command);
-    }
+//    if (args.length == 0) {
+//      throw new RuntimeException("command not specified");
+//    }
+//    String command = args[0];
+//    switch (command) {
+//      case "apply":
+//        apply(args);
+//        break;
+//      case "explore":
+//        explore(args);
+//        break;
+//      default:
+//        throw new RuntimeException("Unknown command: " + command);
+//    }
+    Annotator annotator = new Annotator();
+    Path dir = Paths.get("/tmp/NullAwayFix");
+    String runCommand = "cd /Users/nima/Developer/NullAwayFixer/Projects/MPAndroidChart && ./gradlew build -x test";
+    annotator.depth = 4;
+    annotator.nullableAnnot = "androidx.annotation.Nullable";
+    annotator.lexicalPreservationEnabled = false;
+    annotator.start(runCommand, dir, true);
   }
 
   private static void explore(String[] args) {

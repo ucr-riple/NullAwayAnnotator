@@ -92,4 +92,8 @@ public class Bank<T extends Hashable> {
     }
     return lines - rootInClass.total;
   }
+
+  public List<T> getAllEntities(){
+    return rootInClass.getAllEntities();
+  }
 }
