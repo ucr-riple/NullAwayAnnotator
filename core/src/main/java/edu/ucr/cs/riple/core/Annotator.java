@@ -158,7 +158,7 @@ public class Annotator {
       e.printStackTrace();
     }
     log.time = System.currentTimeMillis() - log.time;
-    Utility.writeReports(finishedReports);
+    Utility.writeReports(dir, finishedReports);
     Utility.writeLog(this);
   }
 

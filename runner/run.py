@@ -150,7 +150,7 @@ def apply_effective_fixes():
     reports = json.load(report_file)
     cleaned = {}
     uprint("Selecting effective fixes...")
-    cleaned['fixes'] = [fix for fix in reports['reports'] if fix['jump'] < 1]
+    cleaned['fixes'] = [fix for fix in reports['reports'] if fix['effect'] < 1]
     with open(join(out_dir, "cleaned.json"), 'w') as outfile:
         json.dump(cleaned, outfile)
     apply_fixes_at(join(out_dir, "cleaned.json"))

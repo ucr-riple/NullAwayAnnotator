@@ -69,12 +69,12 @@ public class Utility {
   }
 
   @SuppressWarnings("ALL")
-  public static void writeReports(List<Report> reports) {
+  public static void writeReports(Path dir, List<Report> reports) {
     JSONObject result = new JSONObject();
     JSONArray reportsJson = new JSONArray();
     for (Report report : reports) {
       JSONObject reportJson = report.fix.getJson();
-      reportJson.put("jump", report.effectiveNess);
+      reportJson.put("effect", report.effectiveNess);
       reportJson.put("finished", report.finished);
       JSONArray followUps = new JSONArray();
       if (report.effectiveNess < 1) {
@@ -87,8 +87,8 @@ public class Utility {
     }
     reportsJson.sort(
         (o1, o2) -> {
-          Integer first = (Integer) ((JSONObject) o1).get("jump");
-          Integer second = (Integer) ((JSONObject) o2).get("jump");
+          Integer first = (Integer) ((JSONObject) o1).get("effect");
+          Integer second = (Integer) ((JSONObject) o2).get("effect");
           if (first.equals(second)) {
             return 0;
           }
@@ -99,7 +99,7 @@ public class Utility {
         });
     result.put("reports", reportsJson);
     try {
-      FileWriter writer = new FileWriter("/tmp/NullAwayFix/diagnose_report.json");
+      FileWriter writer = new FileWriter(dir.resolve("diagnose_report.json").toFile());
       writer.write(result.toJSONString().replace("\\/", "/").replace("\\\\\\", "\\"));
       writer.flush();
     } catch (IOException e) {
