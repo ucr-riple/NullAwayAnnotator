@@ -50,9 +50,9 @@ public class Config {
   static final String DEFAULT_PATH = "/tmp/NullAwayFix";
 
   public Config() {
-    this.methodTrackerIsActive = true;
-    this.fieldTrackerIsActive = true;
-    this.callTrackerIsActive = true;
+    this.methodTrackerIsActive = false;
+    this.fieldTrackerIsActive = false;
+    this.callTrackerIsActive = false;
     this.outputDirectory = Paths.get(DEFAULT_PATH);
     this.serializer = new Serializer(this);
   }
