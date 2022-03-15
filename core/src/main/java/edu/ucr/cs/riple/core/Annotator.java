@@ -44,7 +44,6 @@ import edu.ucr.cs.riple.core.metadata.trackers.MethodUsageTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
-import edu.ucr.cs.riple.injector.WorkList;
 import edu.ucr.cs.riple.injector.WorkListBuilder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -140,23 +139,15 @@ public class Annotator {
     this.fixPath = this.dir.resolve("fixes.tsv");
     this.errorPath = this.dir.resolve("errors.tsv");
     List<Fix> fixes = init(buildCommand, useCache);
-    List<WorkList> workListLists = new WorkListBuilder(fixes).getWorkLists();
-    try {
-      for (WorkList workList : workListLists) {
-        for (Fix fix : workList.getFixes()) {
-          if (finishedReports.stream().anyMatch(diagnoseReport -> diagnoseReport.fix.equals(fix))) {
-            continue;
-          }
-          List<Fix> appliedFixes = analyze(fix);
-          remove(appliedFixes);
-        }
+    fixes.forEach(fix -> {
+      if (finishedReports.stream().noneMatch(diagnoseReport -> diagnoseReport.fix.equals(fix))) {
+        List<Fix> appliedFixes = analyze(fix);
+        remove(appliedFixes);
       }
-      log.deep = System.currentTimeMillis();
-      this.deepExplorer.start(finishedReports);
-      log.deep = System.currentTimeMillis() - log.deep;
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    });
+    log.deep = System.currentTimeMillis();
+    this.deepExplorer.start(finishedReports);
+    log.deep = System.currentTimeMillis() - log.deep;
     log.time = System.currentTimeMillis() - log.time;
     Utility.writeReports(dir, finishedReports);
     Utility.writeLog(this);
