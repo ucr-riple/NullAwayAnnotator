@@ -31,6 +31,7 @@ import edu.ucr.cs.riple.core.metadata.trackers.UsageTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -56,12 +57,12 @@ public class SuperNode extends AbstractNode {
   // Here we do not need to subtract referred for method params since we are observing
   // call sites too.
   @Override
-  public void setEffect(int effect, MethodInheritanceTree tree) {
+  public void setEffect(int effect, MethodInheritanceTree tree, List<Fix> fixes) {
     final int[] total = {effect};
     followUps.forEach(
         fix -> {
           if (fix.location.equals(FixType.PARAMETER.name)) {
-            total[0] += Utility.calculateInheritanceViolationError(tree, fix);
+            total[0] += Utility.calculateParamInheritanceViolationError(tree, fix);
           }
         });
     this.effect = total[0];

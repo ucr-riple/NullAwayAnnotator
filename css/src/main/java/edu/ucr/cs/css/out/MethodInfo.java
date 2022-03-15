@@ -27,6 +27,7 @@ package edu.ucr.cs.css.out;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.VisitorState;
 import com.sun.tools.javac.code.Symbol;
+import edu.ucr.cs.css.Config;
 import edu.ucr.cs.css.SymbolUtil;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,6 +43,7 @@ public class MethodInfo {
   final int id;
 
   private Boolean[] annotFlags;
+  private boolean hasNullableAnnotation;
   private int parent = -1;
   private static int LAST_ID = 0;
   private static final Set<MethodInfo> discovered = new HashSet<>();
@@ -101,12 +103,25 @@ public class MethodInfo {
         + "\t"
         + symbol.getParameters().size()
         + "\t"
-        + Arrays.toString(annotFlags);
+        + Arrays.toString(annotFlags)
+        + "\t"
+        + this.hasNullableAnnotation;
   }
 
   public static String header() {
-    return "id" + "\t" + "class" + "\t" + "method" + "\t" + "parent" + "\t" + "size" + "\t"
-        + "flags";
+    return "id"
+        + "\t"
+        + "class"
+        + "\t"
+        + "method"
+        + "\t"
+        + "parent"
+        + "\t"
+        + "size"
+        + "\t"
+        + "flags"
+        + "\t"
+        + "nullable";
   }
 
   public void setParamAnnotations(List<Boolean> annotFlags) {
@@ -115,5 +130,9 @@ public class MethodInfo {
     }
     this.annotFlags = new Boolean[annotFlags.size()];
     this.annotFlags = annotFlags.toArray(this.annotFlags);
+  }
+
+  public void setAnnotation(Config config) {
+    this.hasNullableAnnotation = SymbolUtil.hasNullableAnnotation(this.symbol, config);
   }
 }

@@ -33,6 +33,7 @@ import com.sun.source.tree.MemberReferenceTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.source.util.TreePath;
+import com.sun.tools.javac.code.Attribute;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.TargetType;
 import com.sun.tools.javac.code.Type;
@@ -76,6 +77,17 @@ public class SymbolUtil {
       }
     }
     return null;
+  }
+
+  /**
+   * Does the symbol have a {@code @Nullable} declaration or type-use annotation?
+   *
+   * <p>NOTE: this method does not work for checking all annotations of parameters of methods from
+   * class files. For that case, use {@link #paramHasNullableAnnotation(Symbol.MethodSymbol, int,
+   * Config)}
+   */
+  public static boolean hasNullableAnnotation(Symbol symbol, Config config) {
+    return hasNullableAnnotation(SymbolUtil.getAllAnnotations(symbol), config);
   }
 
   public static boolean hasNullableAnnotation(
@@ -161,6 +173,28 @@ public class SymbolUtil {
       curPath = parent;
     }
     return null;
+  }
+
+  /**
+   * NOTE: this method does not work for getting all annotations of parameters of methods from class
+   * files. For that case, use {@link #getAllAnnotationsForParameter(Symbol.MethodSymbol, int)}
+   *
+   * @param symbol the symbol
+   * @return all annotations on the symbol and on the type of the symbol
+   */
+  public static Stream<? extends AnnotationMirror> getAllAnnotations(Symbol symbol) {
+    // for methods, we care about annotations on the return type, not on the method type itself
+    Stream<? extends AnnotationMirror> typeUseAnnotations = getTypeUseAnnotations(symbol);
+    return Stream.concat(symbol.getAnnotationMirrors().stream(), typeUseAnnotations);
+  }
+
+  private static Stream<? extends AnnotationMirror> getTypeUseAnnotations(Symbol symbol) {
+    Stream<Attribute.TypeCompound> rawTypeAttributes = symbol.getRawTypeAttributes().stream();
+    if (symbol instanceof Symbol.MethodSymbol) {
+      // for methods, we want the type-use annotations on the return type
+      return rawTypeAttributes.filter((t) -> t.position.type.equals(TargetType.METHOD_RETURN));
+    }
+    return rawTypeAttributes;
   }
 
   /**

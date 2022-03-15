@@ -42,7 +42,7 @@ public class MethodInheritanceTree extends AbstractRelation<MethodNode> {
   public MethodInheritanceTree(Path path) {
     super(path);
     final MethodNode top =
-        new MethodNode(-1, "null", "null", Collections.emptyList(), new boolean[] {}, -1, "null");
+        new MethodNode(-1, "null", "null", Collections.emptyList(), new boolean[] {}, -1, false);
     nodes.put(-1, top);
   }
 
@@ -68,7 +68,13 @@ public class MethodInheritanceTree extends AbstractRelation<MethodNode> {
       maxsize = size;
     }
     node.fillInformation(
-        id, values[1], values[2], parentId, size, Utility.convertStringToBooleanArray(values[5]));
+        id,
+        values[1],
+        values[2],
+        parentId,
+        size,
+        Utility.convertStringToBooleanArray(values[5]),
+        Boolean.getBoolean(values[6]));
     if (parentId != -1) {
       MethodNode parent = nodes.get(parentId);
       if (parent == null) {
@@ -78,6 +84,14 @@ public class MethodInheritanceTree extends AbstractRelation<MethodNode> {
       parent.addChild(id);
     }
     return node;
+  }
+
+  public MethodNode getClosestSuperMethod(String method, String clazz) {
+    MethodNode node = findNode(method, clazz);
+    if (node == null) {
+      return null;
+    }
+    return nodes.get(node.parent);
   }
 
   public List<MethodNode> getSuperMethods(String method, String clazz, boolean deep) {

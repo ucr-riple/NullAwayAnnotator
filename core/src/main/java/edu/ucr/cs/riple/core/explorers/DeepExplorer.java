@@ -136,7 +136,7 @@ public class DeepExplorer extends BasicExplorer {
                       .map(fixEntity -> fixEntity.fix)
                       .collect(Collectors.toList()));
             }
-            superNode.setEffect(totalEffect, annotator.methodInheritanceTree);
+            superNode.setEffect(totalEffect, annotator.methodInheritanceTree, fixes);
           });
       annotator.remove(fixes);
     }

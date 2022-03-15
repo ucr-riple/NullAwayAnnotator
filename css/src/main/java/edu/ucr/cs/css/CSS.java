@@ -136,6 +136,7 @@ public class CSS extends BugChecker
     Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(tree);
     MethodInfo methodInfo = MethodInfo.findOrCreate(methodSymbol);
     methodInfo.findParent(state);
+    methodInfo.setAnnotation(config);
     List<Boolean> paramAnnotations = new ArrayList<>();
     for (int i = 0; i < methodSymbol.getParameters().size(); i++) {
       paramAnnotations.add(SymbolUtil.paramHasNullableAnnotation(methodSymbol, i, config));

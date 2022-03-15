@@ -65,7 +65,8 @@ public abstract class AbstractNode {
     return !Collections.disjoint(other.usages, this.usages);
   }
 
-  public abstract void setEffect(int localEffect, MethodInheritanceTree tree);
+  public abstract void setEffect(
+      int localEffect, MethodInheritanceTree tree, List<Fix> fixesInjectedInOneRound);
 
   public void updateTriggered(List<Fix> fixes) {
     int sizeBefore = this.triggered.size();

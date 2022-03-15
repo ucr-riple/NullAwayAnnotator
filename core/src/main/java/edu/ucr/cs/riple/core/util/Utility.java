@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.util;
 
 import com.google.common.primitives.Booleans;
 import edu.ucr.cs.riple.core.Annotator;
+import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
@@ -143,36 +144,6 @@ public class Utility {
     return fixes;
   }
 
-  public static int calculateInheritanceViolationError(MethodInheritanceTree mit, Fix fix) {
-    int index = Integer.parseInt(fix.index);
-    MethodNode methodNode = mit.findNode(fix.method, fix.className);
-    if (methodNode == null) {
-      return 0;
-    }
-    boolean[] thisMethodFlag = methodNode.annotFlags;
-    if (index >= thisMethodFlag.length) {
-      return 0;
-    }
-    int effect = 0;
-    for (MethodNode subMethod : mit.getSubMethods(fix.method, fix.className, false)) {
-      if (!thisMethodFlag[index]) {
-        if (!subMethod.annotFlags[index]) {
-          effect++;
-        }
-      }
-    }
-    List<MethodNode> superMethods = mit.getSuperMethods(fix.method, fix.className, false);
-    if (superMethods.size() != 0) {
-      MethodNode superMethod = superMethods.get(0);
-      if (!thisMethodFlag[index]) {
-        if (superMethod.annotFlags[index]) {
-          effect--;
-        }
-      }
-    }
-    return effect;
-  }
-
   public static void removeCachedFixes(List<Fix> fixes, Path outDir) {
     if (!Files.exists(outDir.resolve("reports.json"))) {
       System.out.println("Found no report at: " + outDir.resolve("reports.json"));
@@ -253,5 +224,56 @@ public class Utility {
       bw.close();
     } catch (Exception ignored) {
     }
+  }
+
+  public static int calculateMethodInheritanceViolationError(
+      MethodInheritanceTree tree, Fix fix, List<Fix> fixesInOneRound) {
+    MethodNode superMethod = tree.getClosestSuperMethod(fix.method, fix.className);
+    if (superMethod == null) {
+      return 0;
+    }
+    if (superMethod.hasNullableAnnotation) {
+      return 0;
+    }
+    if (fixesInOneRound
+        .stream()
+        .anyMatch(
+            fix1 ->
+                fix1.method.equals(superMethod.method)
+                    && fix1.className.equals(superMethod.clazz)
+                    && fix1.location.equals(FixType.METHOD.name))) {
+      return 1;
+    }
+    return 0;
+  }
+
+  public static int calculateParamInheritanceViolationError(MethodInheritanceTree mit, Fix fix) {
+    int index = Integer.parseInt(fix.index);
+    MethodNode methodNode = mit.findNode(fix.method, fix.className);
+    if (methodNode == null) {
+      return 0;
+    }
+    boolean[] thisMethodFlag = methodNode.annotFlags;
+    if (index >= thisMethodFlag.length) {
+      return 0;
+    }
+    int effect = 0;
+    for (MethodNode subMethod : mit.getSubMethods(fix.method, fix.className, false)) {
+      if (!thisMethodFlag[index]) {
+        if (!subMethod.annotFlags[index]) {
+          effect++;
+        }
+      }
+    }
+    List<MethodNode> superMethods = mit.getSuperMethods(fix.method, fix.className, false);
+    if (superMethods.size() != 0) {
+      MethodNode superMethod = superMethods.get(0);
+      if (!thisMethodFlag[index]) {
+        if (superMethod.annotFlags[index]) {
+          effect--;
+        }
+      }
+    }
+    return effect;
   }
 }

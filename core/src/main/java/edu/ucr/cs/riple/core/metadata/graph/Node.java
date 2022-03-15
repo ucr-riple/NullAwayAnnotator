@@ -29,6 +29,7 @@ import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.trackers.UsageTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
+import java.util.List;
 
 public class Node extends AbstractNode {
 
@@ -43,13 +44,20 @@ public class Node extends AbstractNode {
   // We need to subtract referred in METHOD_PARAM since all errors are happening
   // inside the method boundary and all referred sites are outside (at call sites)
   @Override
-  public void setEffect(int localEffect, MethodInheritanceTree tree) {
+  public void setEffect(int localEffect, MethodInheritanceTree tree, List<Fix> fixesInOneRound) {
     if (fix.location.equals(FixType.PARAMETER.name)) {
       this.effect =
           localEffect
               - this.fix.referred
-              + Utility.calculateInheritanceViolationError(tree, this.fix);
-    } else {
+              + Utility.calculateParamInheritanceViolationError(tree, this.fix);
+    }
+    if (fix.location.equals(FixType.METHOD.name)) {
+      this.effect =
+          localEffect
+              + Utility.calculateMethodInheritanceViolationError(tree, this.fix, fixesInOneRound);
+    }
+
+    if (fix.location.equals(FixType.FIELD.name)) {
       this.effect = localEffect;
     }
   }

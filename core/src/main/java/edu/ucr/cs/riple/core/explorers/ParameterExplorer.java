@@ -85,7 +85,7 @@ public class ParameterExplorer extends AdvancedExplorer {
         pb.setExtraMessage("processing node: " + index + " / " + subList.size());
         Result<Error> errorComparison =
             errorBank.compareByMethod(node.fix.className, node.fix.method, false);
-        node.setEffect(errorComparison.size, annotator.methodInheritanceTree);
+        node.setEffect(errorComparison.size, annotator.methodInheritanceTree, null);
         node.analyzeStatus(errorComparison.dif);
         if (annotator.depth > 0) {
           node.updateTriggered(

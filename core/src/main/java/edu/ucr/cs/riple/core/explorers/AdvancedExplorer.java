@@ -112,7 +112,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
                     .collect(Collectors.toList()));
           }
         }
-        node.setEffect(totalEffect, annotator.methodInheritanceTree);
+        node.setEffect(totalEffect, annotator.methodInheritanceTree, fixes);
       }
       annotator.remove(fixes);
     }
