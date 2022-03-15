@@ -122,12 +122,12 @@ def preprocess():
             del candidate_method['fields']
             candidate_method['location'] = "METHOD"
             candidate_method['inject'] = True
-            candidate_method['annotation'] = data['ANNOTATION']['INITIALIZE']
+            candidate_method['annotation'] = data['ANNOTATION']['INITIALIZER']
             candidate_method['param'] = ""
             candidate_method['reason'] = "Initializer"
             if candidate_method not in init_methods['fixes']:
                 init_methods['fixes'].append(candidate_method)
-    uprint("Annotating as {}".format(data['ANNOTATION']['INITIALIZE']))
+    uprint("Annotating as {}".format(data['ANNOTATION']['INITIALIZER']))
     init_methods_path = join(out_dir, "init_methods.json")
     with open(init_methods_path, 'w') as outfile:
         json.dump(init_methods, outfile)
