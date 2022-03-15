@@ -138,7 +138,7 @@ Please find a sample `fixes.json` below:
 
 After the diagnose task is finished, `diagnose_report.json` will be created which holds the information regarding the effectiveness of each fix written in `fixes.json`. Please find a sample below:
 
-Here `jump` refers to the difference in number of errors.
+Here `effect` refers to the difference in number of errors.
 ```json
 {
     "reports": [
@@ -153,7 +153,7 @@ Here `jump` refers to the difference in number of errors.
             "inject": "true",
             "uri": "file:AbsolutePathTo/CustomGestureDetector.java",
             "errors": [],
-            "jump": -3
+            "effect": -3
         }
     ]
 }
