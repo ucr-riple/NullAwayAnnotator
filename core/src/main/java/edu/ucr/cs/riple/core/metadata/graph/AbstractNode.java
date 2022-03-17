@@ -80,7 +80,7 @@ public abstract class AbstractNode {
         }
       }
     }
-    changed = sizeAfter != sizeBefore;
+    changed = (changed || (sizeAfter != sizeBefore));
   }
 
   public void analyzeStatus(List<Error> newErrors) {

@@ -94,6 +94,7 @@ public class DeepExplorer extends BasicExplorer {
             Report report = superNode.report;
             report.effectiveNess = superNode.effect;
             report.followups = superNode.followUps;
+            report.triggered = superNode.triggered;
             report.finished = !superNode.changed;
           });
     }
@@ -107,25 +108,24 @@ public class DeepExplorer extends BasicExplorer {
     HashMap<Integer, Set<SuperNode>> groups = fixGraph.getGroups();
     System.out.println("Scheduling for: " + groups.size() + " builds");
     ProgressBar pb = Utility.createProgressBar("Deep analysis", groups.size());
+    pb.setExtraMessage("Building");
     for (Set<SuperNode> group : groups.values()) {
       pb.step();
       List<Fix> fixes = new ArrayList<>();
       group.forEach(superNode -> fixes.addAll(superNode.getFixChain()));
-      pb.setExtraMessage("Applying fixes");
       annotator.apply(fixes);
       FixSerializationConfig.Builder config =
           new FixSerializationConfig.Builder()
               .setSuggest(true, true)
               .setAnnotations(annotator.nullableAnnot, "UNKNOWN")
               .setOutputDirectory(annotator.dir.toString());
-      pb.setExtraMessage("Building");
       annotator.buildProject(config);
-      pb.setExtraMessage("Saving state");
       errorBank.saveState(false, true);
       fixBank.saveState(false, true);
       group.forEach(
           superNode -> {
             int totalEffect = 0;
+            superNode.updateUsages(tracker);
             for (Region region : superNode.regions) {
               totalEffect += errorBank.compareByMethod(region.clazz, region.method, false).size;
               superNode.updateTriggered(

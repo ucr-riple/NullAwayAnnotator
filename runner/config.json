@@ -1,6 +1,6 @@
 {
-  "PROJECT_PATH": "/Users/nima/Developer/NullAwayFixer/Projects/libgdx",
-  "BUILD_COMMAND": "./gradlew :gdx:build -x test",
+  "PROJECT_PATH": "/Users/nima/Desktop/checks/Test",
+  "BUILD_COMMAND": "./gradlew build -x test",
   "ANNOTATION": {
     "INITIALIZER": "com.badlogic.gdx.Initializer",
     "NONNULL": "javax.annotation.Nonnull",
