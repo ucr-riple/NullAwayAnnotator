@@ -34,18 +34,27 @@ public class TrackerNode {
   private final Symbol member;
   private final Symbol.ClassSymbol callerClass;
   private final Symbol.MethodSymbol callerMethod;
+  private final boolean force;
 
-  public TrackerNode(Symbol member, TreePath path) {
+  public TrackerNode(Symbol member, TreePath path, boolean force) {
     ClassTree callerClass = ASTHelpers.findEnclosingNode(path, ClassTree.class);
     MethodTree callerMethod = ASTHelpers.findEnclosingNode(path, MethodTree.class);
     this.member = member;
     this.callerClass = (callerClass != null) ? ASTHelpers.getSymbol(callerClass) : null;
     this.callerMethod = (callerMethod != null) ? ASTHelpers.getSymbol(callerMethod) : null;
+    this.force = force;
+  }
+
+  public TrackerNode(Symbol member, TreePath path) {
+    this(member, path, false);
   }
 
   @Override
   public String toString() {
     if (callerClass == null) {
+      return null;
+    }
+    if (!force && callerMethod == null) {
       return null;
     }
     Symbol enclosingClass = member.enclClass();

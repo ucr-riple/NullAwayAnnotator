@@ -27,7 +27,7 @@ package edu.ucr.cs.riple.core.metadata.graph;
 import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
-import edu.ucr.cs.riple.core.metadata.trackers.UsageTracker;
+import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.HashSet;
@@ -49,9 +49,9 @@ public class SuperNode extends AbstractNode {
   }
 
   @Override
-  public void updateUsages(UsageTracker tracker) {
-    this.usages.clear();
-    followUps.forEach(fix -> usages.addAll(tracker.getUsage(fix)));
+  public void updateUsages(RegionTracker tracker) {
+    this.regions.clear();
+    followUps.forEach(fix -> regions.addAll(tracker.getRegions(fix)));
   }
 
   // Here we do not need to subtract referred for method params since we are observing

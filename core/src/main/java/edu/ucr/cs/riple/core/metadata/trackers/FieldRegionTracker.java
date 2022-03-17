@@ -28,15 +28,14 @@ import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.metadata.AbstractRelation;
 import edu.ucr.cs.riple.injector.Fix;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class FieldUsageTracker extends AbstractRelation<TrackerNode> implements UsageTracker {
+public class FieldRegionTracker extends AbstractRelation<TrackerNode> implements RegionTracker {
 
   private final FixType fixType;
 
-  public FieldUsageTracker(Path path) {
+  public FieldRegionTracker(Path path) {
     super(path);
     this.fixType = FixType.FIELD;
   }
@@ -47,44 +46,18 @@ public class FieldUsageTracker extends AbstractRelation<TrackerNode> implements 
   }
 
   @Override
-  public Set<String> getUsers(Fix fix) {
+  public Set<Region> getRegions(Fix fix) {
     if (!fix.location.equals(fixType.name)) {
       return null;
     }
-    List<TrackerNode> nodes =
-        findAllNodes(
+    return findAllNodes(
             candidate ->
                 candidate.calleeClass.equals(fix.className)
                     && candidate.calleeMember.equals(fix.param),
             fix.param,
-            fix.className);
-    if (nodes == null) {
-      return null;
-    }
-    return nodes
+            fix.className)
         .stream()
-        .map(fieldGraphNode -> fieldGraphNode.callerClass)
+        .map(node -> new Region(node.callerMethod, node.callerClass))
         .collect(Collectors.toSet());
-  }
-
-  @Override
-  public Set<Usage> getUsage(Fix fix) {
-    if (!fix.location.equals(fixType.name)) {
-      return null;
-    }
-    List<TrackerNode> nodes =
-        findAllNodes(
-            candidate ->
-                candidate.calleeClass.equals(fix.className)
-                    && candidate.calleeMember.equals(fix.param),
-            fix.param,
-            fix.className);
-    Set<Usage> ans =
-        nodes
-            .stream()
-            .map(fieldNode -> new Usage(fieldNode.callerMethod, fieldNode.callerClass))
-            .collect(Collectors.toSet());
-    ans.add(new Usage("null", fix.className));
-    return ans;
   }
 }

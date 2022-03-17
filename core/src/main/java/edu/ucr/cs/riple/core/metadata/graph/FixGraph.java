@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core.metadata.graph;
 
-import edu.ucr.cs.riple.core.metadata.trackers.UsageTracker;
+import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -92,7 +92,7 @@ public class FixGraph<T extends AbstractNode> {
     nodes.remove(toRemove);
   }
 
-  public void updateUsages(UsageTracker tracker) {
+  public void updateUsages(RegionTracker tracker) {
     getAllNodes().forEach(t -> t.updateUsages(tracker));
   }
 

@@ -27,8 +27,8 @@ package edu.ucr.cs.riple.core.metadata.graph;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
-import edu.ucr.cs.riple.core.metadata.trackers.Usage;
-import edu.ucr.cs.riple.core.metadata.trackers.UsageTracker;
+import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.Collections;
 import java.util.HashSet;
@@ -41,7 +41,7 @@ public abstract class AbstractNode {
   /** Fix to process */
   public final Fix fix;
 
-  public final Set<Usage> usages;
+  public final Set<Region> regions;
   public Set<Fix> triggered;
   public int id;
   /** Effect of applying containing fix */
@@ -52,17 +52,17 @@ public abstract class AbstractNode {
   public boolean finished;
 
   protected AbstractNode(Fix fix) {
-    this.usages = new HashSet<>();
+    this.regions = new HashSet<>();
     this.fix = fix;
     this.triggered = new HashSet<>();
     this.effect = 0;
     this.finished = false;
   }
 
-  public abstract void updateUsages(UsageTracker tracker);
+  public abstract void updateUsages(RegionTracker tracker);
 
   public boolean hasConflictInUsage(AbstractNode other) {
-    return !Collections.disjoint(other.usages, this.usages);
+    return !Collections.disjoint(other.regions, this.regions);
   }
 
   public abstract void setEffect(

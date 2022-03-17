@@ -34,8 +34,8 @@ import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.FixEntity;
 import edu.ucr.cs.riple.core.metadata.index.Result;
-import edu.ucr.cs.riple.core.metadata.trackers.Usage;
-import edu.ucr.cs.riple.core.metadata.trackers.UsageTracker;
+import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.HashMap;
@@ -47,7 +47,7 @@ import me.tongfei.progressbar.ProgressBar;
 public abstract class AdvancedExplorer extends BasicExplorer {
 
   final FixGraph<Node> fixGraph;
-  protected UsageTracker tracker;
+  protected RegionTracker tracker;
   protected final FixType fixType;
 
   public AdvancedExplorer(
@@ -97,15 +97,15 @@ public abstract class AdvancedExplorer extends BasicExplorer {
       for (Node node : nodes) {
         pb.setExtraMessage("Node number: " + (index++) + " / " + nodes.size());
         int totalEffect = 0;
-        for (Usage usage : node.usages) {
+        for (Region region : node.regions) {
           Result<Error> errorComparison =
-              errorBank.compareByMethod(usage.clazz, usage.method, false);
+              errorBank.compareByMethod(region.clazz, region.method, false);
           node.analyzeStatus(errorComparison.dif);
           totalEffect += errorComparison.size;
           if (annotator.depth > 0) {
             node.updateTriggered(
                 fixBank
-                    .compareByMethod(usage.clazz, usage.method, false)
+                    .compareByMethod(region.clazz, region.method, false)
                     .dif
                     .stream()
                     .map(fixEntity -> fixEntity.fix)
@@ -130,15 +130,13 @@ public abstract class AdvancedExplorer extends BasicExplorer {
     return report;
   }
 
-  protected abstract Report effectByScope(Fix fix);
-
   @Override
   public Report effect(Fix fix) {
     Report report = predict(fix);
     if (report != null) {
       return report;
     }
-    return effectByScope(fix);
+    return super.effect(fix);
   }
 
   @Override

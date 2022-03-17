@@ -24,12 +24,32 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
-import edu.ucr.cs.riple.injector.Fix;
-import java.util.Set;
+import java.util.Objects;
 
-public interface UsageTracker {
+public class Region {
+  public final String method;
+  public final String clazz;
 
-  Set<String> getUsers(Fix fix);
+  public Region(String method, String clazz) {
+    this.method = method == null ? "null" : method;
+    this.clazz = clazz == null ? "null" : clazz;
+  }
 
-  Set<Usage> getUsage(Fix fix);
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Region)) return false;
+    Region region = (Region) o;
+    return Objects.equals(method, region.method) && Objects.equals(clazz, region.clazz);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(method, clazz);
+  }
+
+  @Override
+  public String toString() {
+    return "Region{" + "method='" + method + '\'' + ", clazz='" + clazz + '\'' + '}';
+  }
 }

@@ -31,8 +31,6 @@ import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.FixEntity;
 import edu.ucr.cs.riple.injector.Fix;
-import java.util.HashSet;
-import java.util.Set;
 
 public abstract class Explorer {
 
@@ -56,32 +54,6 @@ public abstract class Explorer {
     annotator.buildProject(config);
     if (annotator.errorPath.toFile().exists()) {
       return new Report(fix, errorBank.compare());
-    }
-    return Report.empty(fix);
-  }
-
-  public Report effectByScope(Fix fix, Set<String> workSet) {
-    if (workSet == null) {
-      workSet = new HashSet<>();
-    }
-    workSet.add(fix.className);
-    FixSerializationConfig.Builder config =
-        new FixSerializationConfig.Builder()
-            .setSuggest(true, false)
-            .setAnnotations(annotator.nullableAnnot, "UNKNOWN")
-            .setOutputDirectory(annotator.dir.toString());
-    ;
-    annotator.buildProject(config);
-    if (annotator.errorPath.toFile().exists()) {
-      int totalEffect = 0;
-      totalEffect += errorBank.compareByClass(fix.className, true).size;
-      for (String clazz : workSet) {
-        if (clazz.equals(fix.className)) {
-          continue;
-        }
-        totalEffect += errorBank.compareByClass(clazz, false).size;
-      }
-      return new Report(fix, totalEffect);
     }
     return Report.empty(fix);
   }

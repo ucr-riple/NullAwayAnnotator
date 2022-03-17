@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.core.metadata.graph;
 
 import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
-import edu.ucr.cs.riple.core.metadata.trackers.UsageTracker;
+import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.List;
@@ -37,8 +37,8 @@ public class Node extends AbstractNode {
     super(fix);
   }
 
-  public void updateUsages(UsageTracker tracker) {
-    this.usages.addAll(tracker.getUsage(this.fix));
+  public void updateUsages(RegionTracker tracker) {
+    this.regions.addAll(tracker.getRegions(this.fix));
   }
 
   // We need to subtract referred in METHOD_PARAM since all errors are happening
@@ -54,11 +54,12 @@ public class Node extends AbstractNode {
     if (fix.location.equals(FixType.METHOD.name)) {
       this.effect =
           localEffect
-              + Utility.calculateMethodInheritanceViolationError(tree, this.fix, fixesInOneRound);
+              + Utility.calculateMethodInheritanceViolationError(tree, this.fix, fixesInOneRound)
+              - 1;
     }
 
     if (fix.location.equals(FixType.FIELD.name)) {
-      this.effect = localEffect;
+      this.effect = localEffect - 1;
     }
   }
 

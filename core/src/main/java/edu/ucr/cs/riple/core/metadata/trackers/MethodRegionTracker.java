@@ -28,14 +28,14 @@ import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.metadata.AbstractRelation;
 import edu.ucr.cs.riple.injector.Fix;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class MethodUsageTracker extends AbstractRelation<TrackerNode> implements UsageTracker {
+public class MethodRegionTracker extends AbstractRelation<TrackerNode> implements RegionTracker {
+
   private final FixType fixType;
 
-  public MethodUsageTracker(Path path) {
+  public MethodRegionTracker(Path path) {
     super(path);
     this.fixType = FixType.METHOD;
   }
@@ -46,41 +46,18 @@ public class MethodUsageTracker extends AbstractRelation<TrackerNode> implements
   }
 
   @Override
-  public Set<String> getUsers(Fix fix) {
+  public Set<Region> getRegions(Fix fix) {
     if (!fix.location.equals(fixType.name)) {
       return null;
     }
-    List<TrackerNode> nodes =
-        findAllNodes(
+    return findAllNodes(
             candidate ->
                 candidate.calleeClass.equals(fix.className)
                     && candidate.calleeMember.equals(fix.method),
             fix.method,
-            fix.className);
-    return nodes
+            fix.className)
         .stream()
-        .map(callGraphNode -> callGraphNode.callerClass)
+        .map(node -> new Region(node.callerMethod, node.callerClass))
         .collect(Collectors.toSet());
-  }
-
-  @Override
-  public Set<Usage> getUsage(Fix fix) {
-    if (!fix.location.equals(fixType.name)) {
-      return null;
-    }
-    List<TrackerNode> nodes =
-        findAllNodes(
-            candidate ->
-                candidate.calleeClass.equals(fix.className)
-                    && candidate.calleeMember.equals(fix.method),
-            fix.method,
-            fix.className);
-    Set<Usage> ans =
-        nodes
-            .stream()
-            .map(callUsageNode -> new Usage(callUsageNode.callerMethod, callUsageNode.callerClass))
-            .collect(Collectors.toSet());
-    ans.add(new Usage(fix.method, fix.className));
-    return ans;
   }
 }

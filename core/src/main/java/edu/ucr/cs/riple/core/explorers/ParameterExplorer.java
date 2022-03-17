@@ -27,7 +27,6 @@ package edu.ucr.cs.riple.core.explorers;
 import com.uber.nullaway.fixserialization.FixSerializationConfig;
 import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.FixType;
-import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -99,12 +98,7 @@ public class ParameterExplorer extends AdvancedExplorer {
       }
     }
     pb.close();
-    System.out.println("Captured all methods behavior against nullability of parameter.");
-  }
-
-  @Override
-  protected Report effectByScope(Fix fix) {
-    return effectByScope(fix, null);
+    System.out.println("Captured all methods behavior against nullability of parameters.");
   }
 
   @Override

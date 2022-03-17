@@ -31,54 +31,32 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-public class CompoundTracker implements UsageTracker {
+public class CompoundTracker implements RegionTracker {
 
-  private final List<UsageTracker> trackers;
+  private final List<RegionTracker> trackers;
 
   public CompoundTracker(
-      FieldUsageTracker fieldUsageTracker, MethodUsageTracker methodUsageTracker) {
+      FieldRegionTracker fieldRegionTracker, MethodRegionTracker methodRegionTracker) {
     this.trackers = new ArrayList<>();
-    this.trackers.add(fieldUsageTracker);
-    this.trackers.add(methodUsageTracker);
+    this.trackers.add(fieldRegionTracker);
+    this.trackers.add(methodRegionTracker);
     this.trackers.add(
-        new UsageTracker() {
-          @Override
-          public Set<String> getUsers(Fix fix) {
-            if (!fix.location.equals(FixType.PARAMETER.name)) {
-              return null;
-            }
-            return Collections.singleton(fix.className);
+        fix -> {
+          if (!fix.location.equals(FixType.PARAMETER.name)) {
+            return null;
           }
-
-          @Override
-          public Set<Usage> getUsage(Fix fix) {
-            if (!fix.location.equals(FixType.PARAMETER.name)) {
-              return null;
-            }
-            return Collections.singleton(new Usage(fix.method, fix.className));
-          }
+          return Collections.singleton(new Region(fix.method, fix.className));
         });
   }
 
   @Override
-  public Set<String> getUsers(Fix fix) {
-    for (UsageTracker tracker : this.trackers) {
-      Set<String> ans = tracker.getUsers(fix);
+  public Set<Region> getRegions(Fix fix) {
+    for (RegionTracker tracker : this.trackers) {
+      Set<Region> ans = tracker.getRegions(fix);
       if (ans != null) {
         return ans;
       }
     }
-    throw new IllegalStateException("Usage cannot be null at this point." + fix);
-  }
-
-  @Override
-  public Set<Usage> getUsage(Fix fix) {
-    for (UsageTracker tracker : this.trackers) {
-      Set<Usage> ans = tracker.getUsage(fix);
-      if (ans != null) {
-        return ans;
-      }
-    }
-    throw new IllegalStateException("Usage cannot be null at this point." + fix);
+    throw new IllegalStateException("Region cannot be null at this point." + fix);
   }
 }

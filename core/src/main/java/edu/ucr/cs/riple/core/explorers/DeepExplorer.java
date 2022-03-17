@@ -33,7 +33,7 @@ import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.FixEntity;
 import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
-import edu.ucr.cs.riple.core.metadata.trackers.Usage;
+import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.ArrayList;
@@ -50,7 +50,7 @@ public class DeepExplorer extends BasicExplorer {
 
   public DeepExplorer(Annotator annotator, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
     super(annotator, errorBank, fixBank);
-    this.tracker = new CompoundTracker(annotator.fieldUsageTracker, annotator.methodUsageTracker);
+    this.tracker = new CompoundTracker(annotator.fieldRegionTracker, annotator.methodRegionTracker);
     this.fixGraph = new FixGraph<>(SuperNode::new);
   }
 
@@ -126,11 +126,11 @@ public class DeepExplorer extends BasicExplorer {
       group.forEach(
           superNode -> {
             int totalEffect = 0;
-            for (Usage usage : superNode.usages) {
-              totalEffect += errorBank.compareByMethod(usage.clazz, usage.method, false).size;
+            for (Region region : superNode.regions) {
+              totalEffect += errorBank.compareByMethod(region.clazz, region.method, false).size;
               superNode.updateTriggered(
                   fixBank
-                      .compareByMethod(usage.clazz, usage.method, false)
+                      .compareByMethod(region.clazz, region.method, false)
                       .dif
                       .stream()
                       .map(fixEntity -> fixEntity.fix)

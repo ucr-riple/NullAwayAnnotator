@@ -26,7 +26,6 @@ package edu.ucr.cs.riple.core.explorers;
 
 import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.FixType;
-import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.FixEntity;
@@ -42,14 +41,9 @@ public class FieldExplorer extends AdvancedExplorer {
 
   @Override
   protected void init() {
-    this.tracker = annotator.fieldUsageTracker;
+    this.tracker = annotator.fieldRegionTracker;
     fixGraph.updateUsages(tracker);
     fixGraph.findGroups();
-  }
-
-  @Override
-  protected Report effectByScope(Fix fix) {
-    return super.effectByScope(fix, tracker.getUsers(fix));
   }
 
   @Override
