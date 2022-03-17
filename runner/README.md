@@ -87,7 +87,7 @@ Below is the description of each setting:
 
 Before running, please make sure that all the changes in the `Requirements for the Target Project` section has been applied to the target project.
 
-The script is written in `python3` in the file `run.py`. It needs the `core.jar` file to execute at the relative path: `./jars/core.jar` just like the structure in this repo. To recreate/update the `core.jar` please run `python3 updatejar.py`
+The script is written in `python3` in the file `run.py`. It requires the `core.jar` the relative path: `./jars/core.jar` to execute. To recreate/update the `core.jar` please run `python3 updatejar.py`
 
 To run the script a `command` must be passed to the script. A `command` must be one of the followings:
 1. `explore`: It will make `diagnose_report.json` file which is the result of analyizing all fixes comming from `NullAway`
