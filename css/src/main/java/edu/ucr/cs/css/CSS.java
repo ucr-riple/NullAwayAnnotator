@@ -70,15 +70,6 @@ public class CSS extends BugChecker
   }
 
   @Override
-  public Description matchMemberSelect(MemberSelectTree tree, VisitorState state) {
-    if (!config.fieldTrackerIsActive) {
-      return Description.NO_MATCH;
-    }
-    serializeField(ASTHelpers.getSymbol(tree), state, false);
-    return Description.NO_MATCH;
-  }
-
-  @Override
   public Description matchMethodInvocation(MethodInvocationTree tree, VisitorState state) {
     if (!config.callTrackerIsActive) {
       return Description.NO_MATCH;
@@ -117,6 +108,15 @@ public class CSS extends BugChecker
 
   @Override
   public Description matchIdentifier(IdentifierTree tree, VisitorState state) {
+    if (!config.fieldTrackerIsActive) {
+      return Description.NO_MATCH;
+    }
+    serializeField(ASTHelpers.getSymbol(tree), state, false);
+    return Description.NO_MATCH;
+  }
+
+  @Override
+  public Description matchMemberSelect(MemberSelectTree tree, VisitorState state) {
     if (!config.fieldTrackerIsActive) {
       return Description.NO_MATCH;
     }
