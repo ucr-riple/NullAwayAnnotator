@@ -46,7 +46,7 @@ After that the original version of the `NullAway` is replaced by the customized 
 ```
 
 Please find a sample project setup below:
-```java
+```groovy
 dependencies {
     //Here we pass the customized verion of NullAway
     annotationProcessor "edu.ucr.cs.riple:nullaway:0.7.12-SNAPSHOT"
@@ -103,7 +103,7 @@ To run the script a `command` must be passed to the script. A `command` must be 
 4. `clean`: It will clean all genereted files.
 5. `loop`: It will run `diagnose`/`apply` in iterations, until no further new fix is suggested.
 
-```python
+```cmd
 python3 run.py pre
 python3 run.py diagnose
 python3 run.py apply
@@ -131,7 +131,7 @@ Please find a sample `fixes.json` below:
             "pkg": "com.github",
             "uri": "file:AbsolutePathTo/CustomGestureDetector.java",
             "inject": "true"
-        },
+        }
     ]
 }
 ```
@@ -158,3 +158,26 @@ Here `effect` refers to the difference in number of errors.
     ]
 }
 ```
+
+
+## Command Line Arguments
+
+`Annotator` needs 5 arguments:
+```txt
+1. command to execute NullAway: (example: ./grawdlew build)
+2. output directory: (default: /tmp/NullAwayFix/)
+3. Annotator Depth level: (default: 0, depth of search in search space)
+4. Nullable Annotation: (fully qualified name of the annotation)
+5. optimized: (flag to run optimized version)
+```
+To run `Annotator` please use the repo [Diagnoser](https://github.com/nimakarimipour/Diagnoser) which has python scripts which automates setup and running `Annotator` on target module. ```Diagnoser``` uses a jar file where all required dependencies are included and does not need any installation.
+
+Regarding `Annotator Depth level`, the number of remaining warnings will reduce as the depth increases. However, in our experiments,
+level 4 is the sweet spot for having the best performance. Please look at the chart below, running the core from level 0 to 10 over 20 open source projects. As you can see, on level 4 we reach the optimal solution.
+
+![image info](./pics/depth.png)
+
+
+## Artifact Evaluation
+
+Due to complexity of making test cases (inputs are project modules :D ). I provided a [docker](https://github.com/nimakarimipour/DiagnoserDocker) script and the [repo](https://github.com/nimakarimipour/Docker_AE_NA) for artifact evaluation of this project where docker works with
