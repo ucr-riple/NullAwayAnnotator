@@ -50,7 +50,6 @@ public abstract class Explorer {
             .setSuggest(true, false)
             .setAnnotations(annotator.nullableAnnot, "UNKNOWN")
             .setOutputDirectory(annotator.dir.toString());
-    ;
     annotator.buildProject(config);
     if (annotator.errorPath.toFile().exists()) {
       return new Report(fix, errorBank.compare());

@@ -52,8 +52,8 @@ public class ParameterExplorer extends AdvancedExplorer {
   @Override
   protected void explore() {
     int maxsize = MethodInheritanceTree.maxParamSize();
-    System.out.println("Max size for method parameter list is: " + maxsize);
     List<Node> allNodes = fixGraph.getAllNodes();
+    System.out.println("Scheduled for: " + maxsize + " builds for: " + allNodes.size() + " fixes");
     ProgressBar pb = Utility.createProgressBar("Exploring Method Params: ", maxsize);
     for (int i = 0; i < maxsize; i++) {
       pb.step();
@@ -66,10 +66,8 @@ public class ParameterExplorer extends AdvancedExplorer {
               .filter(node -> node.fix.index.equals(finalI1 + ""))
               .collect(Collectors.toList());
       if (subList.size() == 0) {
-        pb.setExtraMessage("No fix at this index, skipping.");
         continue;
       }
-      pb.setExtraMessage("Building.");
       FixSerializationConfig.Builder config =
           new FixSerializationConfig.Builder()
               .setSuggest(true, true)
@@ -79,9 +77,7 @@ public class ParameterExplorer extends AdvancedExplorer {
       annotator.buildProject(config);
       errorBank.saveState(false, true);
       fixBank.saveState(false, true);
-      int index = 0;
       for (Node node : subList) {
-        pb.setExtraMessage("processing node: " + index + " / " + subList.size());
         Result<Error> errorComparison =
             errorBank.compareByMethod(node.fix.className, node.fix.method, false);
         node.setEffect(errorComparison.size, annotator.methodInheritanceTree, null);

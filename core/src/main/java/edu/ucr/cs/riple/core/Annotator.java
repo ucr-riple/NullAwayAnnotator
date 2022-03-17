@@ -88,7 +88,7 @@ public class Annotator {
   }
 
   private List<Fix> init(String buildCommand, boolean useCache) {
-    System.out.println("Initializing");
+    System.out.println("Initializing Explorers.");
     this.buildCommand = buildCommand;
     this.finishedReports = new ArrayList<>();
     FixSerializationConfig.Builder builder =
@@ -99,7 +99,6 @@ public class Annotator {
     buildProject(builder, false);
     List<Fix> allFixes = Utility.readAllFixes(fixPath);
     if (useCache) {
-      System.out.println("Removing cached fixes");
       Utility.removeCachedFixes(allFixes, dir);
     }
     allFixes = Collections.unmodifiableList(allFixes);
@@ -144,8 +143,8 @@ public class Annotator {
           if (finishedReports
               .stream()
               .noneMatch(diagnoseReport -> diagnoseReport.fix.equals(fix))) {
-            List<Fix> appliedFixes = analyze(fix);
-            remove(appliedFixes);
+            analyze(fix);
+            remove(Collections.singletonList(fix));
           }
         });
     log.deep = System.currentTimeMillis();
@@ -184,14 +183,12 @@ public class Annotator {
     injector.start(new WorkListBuilder(fixes).getWorkLists(), false);
   }
 
-  private List<Fix> analyze(Fix fix) {
-    List<Fix> suggestedFix = new ArrayList<>();
+  private void analyze(Fix fix) {
     Report report = null;
     for (Explorer explorer : explorers) {
       if (explorer.isApplicable(fix)) {
         if (explorer.requiresInjection(fix)) {
-          suggestedFix.add(fix);
-          apply(suggestedFix);
+          apply(Collections.singletonList(fix));
         }
         report = explorer.effect(fix);
         break;
@@ -199,7 +196,6 @@ public class Annotator {
     }
     Preconditions.checkNotNull(report);
     finishedReports.add(report);
-    return suggestedFix;
   }
 
   public void buildProject(FixSerializationConfig.Builder writer, boolean count) {

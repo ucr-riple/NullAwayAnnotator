@@ -41,7 +41,7 @@ public abstract class AbstractRelation<T> {
     try {
       fillNodes(path);
     } catch (IOException e) {
-      System.out.println("Not found: " + path);
+      throw new RuntimeException("Did not found file at" + path, e);
     }
   }
 

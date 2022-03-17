@@ -75,13 +75,11 @@ public abstract class AdvancedExplorer extends BasicExplorer {
 
   protected void explore() {
     HashMap<Integer, Set<Node>> groups = fixGraph.getGroups();
-    System.out.println("Scheduling for: " + groups.size() + " builds");
+    System.out.println("Scheduled for: " + groups.size() + " builds for: " + fixGraph.getAllNodes().size() + " fixes");
     ProgressBar pb = Utility.createProgressBar("Exploring " + fixType.name, groups.values().size());
     for (Set<Node> nodes : groups.values()) {
       pb.step();
-      pb.setExtraMessage("Gathering fixes");
       List<Fix> fixes = nodes.stream().map(node -> node.fix).collect(Collectors.toList());
-      pb.setExtraMessage("Applying fixes");
       annotator.apply(fixes);
       pb.setExtraMessage("Building");
       FixSerializationConfig.Builder config =
@@ -90,12 +88,9 @@ public abstract class AdvancedExplorer extends BasicExplorer {
               .setAnnotations(annotator.nullableAnnot, "UNKNOWN")
               .setOutputDirectory(annotator.dir.toString());
       annotator.buildProject(config);
-      pb.setExtraMessage("Saving state");
       errorBank.saveState(false, true);
       fixBank.saveState(true, true);
-      int index = 0;
       for (Node node : nodes) {
-        pb.setExtraMessage("Node number: " + (index++) + " / " + nodes.size());
         int totalEffect = 0;
         for (Region region : node.regions) {
           Result<Error> errorComparison =

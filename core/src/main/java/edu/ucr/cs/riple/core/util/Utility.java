@@ -65,7 +65,7 @@ public class Utility {
       while ((reader.readLine()) != null) {}
       p.waitFor();
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new RuntimeException("Exception happened in executing command: " + command, e);
     }
   }
 
@@ -88,9 +88,9 @@ public class Utility {
     }
     reportsJson.sort(
         (o1, o2) -> {
-          Integer first = (Integer) ((JSONObject) o1).get("effect");
-          Integer second = (Integer) ((JSONObject) o2).get("effect");
-          if (first.equals(second)) {
+          int first = (Integer) ((JSONObject) o1).get("effect");
+          int second = (Integer) ((JSONObject) o2).get("effect");
+          if (first == second) {
             return 0;
           }
           if (first < second) {
@@ -104,7 +104,7 @@ public class Utility {
       writer.write(result.toJSONString().replace("\\/", "/").replace("\\\\\\", "\\"));
       writer.flush();
     } catch (IOException e) {
-      throw new RuntimeException("Could not create the Annotator report json file");
+      throw new RuntimeException("Could not create the Annotator report json file: " + dir.resolve("diagnose_report.json"), e);
     }
   }
 
@@ -139,23 +139,20 @@ public class Utility {
         }
       }
     } catch (IOException e) {
-      System.err.println("Exception happened in initializing MethodParamExplorer...");
+      throw new RuntimeException("Exception happened in reading fixes at: " + path, e);
     }
     return fixes;
   }
 
   public static void removeCachedFixes(List<Fix> fixes, Path outDir) {
     if (!Files.exists(outDir.resolve("reports.json"))) {
-      System.out.println("Found no report at: " + outDir.resolve("reports.json"));
       return;
     }
     try {
-      System.out.println("Reading cached fixes reports");
       JSONObject cachedObjects =
           (JSONObject)
               new JSONParser().parse(new FileReader(outDir.resolve("reports.json").toFile()));
       JSONArray cachedJson = (JSONArray) cachedObjects.get("reports");
-      System.out.println("Found " + cachedJson.size() + " number of reports");
       List<Fix> cached = new ArrayList<>();
       for (Object o : cachedJson) {
         JSONObject reportJson = (JSONObject) o;
@@ -163,13 +160,13 @@ public class Utility {
           cached.add(Fix.createFromJson(reportJson));
         }
       }
-      System.out.println(
+      System.out.print(
           "Cached items size: " + cached.size() + " total fix size: " + fixes.size());
       fixes.removeAll(cached);
     } catch (Exception exception) {
       throw new RuntimeException("Exception happened in removing cached fixes", exception);
     }
-    System.out.println("Processing cached fixes finished. Reduced down to: " + fixes.size());
+    System.out.println(". Reduced down to: " + fixes.size());
   }
 
   public static List<Fix> readFixesJson(Path filePath) {
