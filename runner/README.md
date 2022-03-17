@@ -79,8 +79,8 @@ Below is the description of each setting:
 5. `NULLABLE`: Fully qualified name of the `Nullable` annotation.
 6. `FORMAT`: If set to `true` the formate of the code will be preserved at the end of execution.
 7. `OUTPUT_DIR`: Directory where the serialized output of NullAway should be written.
-8. `NULLAWAY_CONFIG_PATH`: `path_to_config.xml` given to project in time of preparing the process.
-9. `CSS_CONFIG_PATH`: `path_to_css.xml` given to project in time of preparing the process. 
+8. `NULLAWAY_CONFIG_PATH`: `path_to_config.xml` given to project in time of preparing the project (previous section).
+9. `CSS_CONFIG_PATH`: `path_to_css.xml` given to project in time of preparing the process (previous section).
 10. `DEPTH`: The depth of deep analysis.
 
 ### Running the script
