@@ -77,10 +77,6 @@ public class Node extends AbstractNode {
         + "]"
         + ", id="
         + id
-        + ", effect="
-        + effect
-        + ", referred="
-        + fix.referred
         + '}';
   }
 }

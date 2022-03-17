@@ -1,4 +1,6 @@
 /*
+ * Methods in this class are copied from NullAway from Uber Inc.
+ *
  * MIT License
  *
  * Copyright (c) 2020 Nima Karimipour
@@ -24,21 +26,11 @@
 
 package edu.ucr.cs.css;
 
-import com.google.common.base.Preconditions;
-import com.sun.source.tree.BlockTree;
-import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.ExpressionTree;
-import com.sun.source.tree.LambdaExpressionTree;
-import com.sun.source.tree.MemberReferenceTree;
-import com.sun.source.tree.MethodTree;
-import com.sun.source.tree.VariableTree;
-import com.sun.source.util.TreePath;
 import com.sun.tools.javac.code.Attribute;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.TargetType;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.Types;
-import com.sun.tools.javac.tree.JCTree;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.lang.model.element.AnnotationMirror;
@@ -144,38 +136,6 @@ public class SymbolUtil {
   }
 
   /**
-   * find the enclosing method, lambda expression or initializer block for the leaf of some tree
-   * path
-   *
-   * @param path the tree path
-   * @return the closest enclosing method / lambda
-   */
-  @Nullable
-  public static TreePath findEnclosingMethodOrLambdaOrInitializer(TreePath path) {
-    TreePath curPath = path.getParentPath();
-    while (curPath != null) {
-      if (curPath.getLeaf() instanceof MethodTree
-          || curPath.getLeaf() instanceof LambdaExpressionTree) {
-        return curPath;
-      }
-      TreePath parent = curPath.getParentPath();
-      if (parent != null && parent.getLeaf() instanceof ClassTree) {
-        if (curPath.getLeaf() instanceof BlockTree) {
-          // found initializer block
-          return curPath;
-        }
-        if (curPath.getLeaf() instanceof VariableTree
-            && ((VariableTree) curPath.getLeaf()).getInitializer() != null) {
-          // found field with an inline initializer
-          return curPath;
-        }
-      }
-      curPath = parent;
-    }
-    return null;
-  }
-
-  /**
    * NOTE: this method does not work for getting all annotations of parameters of methods from class
    * files. For that case, use {@link #getAllAnnotationsForParameter(Symbol.MethodSymbol, int)}
    *
@@ -195,18 +155,5 @@ public class SymbolUtil {
       return rawTypeAttributes.filter((t) -> t.position.type.equals(TargetType.METHOD_RETURN));
     }
     return rawTypeAttributes;
-  }
-
-  /**
-   * finds the corresponding functional interface method for a lambda expression or method reference
-   *
-   * @param tree the lambda expression or method reference
-   * @return the functional interface method
-   */
-  public static Symbol.MethodSymbol getFunctionalInterfaceMethod(ExpressionTree tree, Types types) {
-    Preconditions.checkArgument(
-        (tree instanceof LambdaExpressionTree) || (tree instanceof MemberReferenceTree));
-    Type funcInterfaceType = ((JCTree.JCFunctionalExpression) tree).type;
-    return (Symbol.MethodSymbol) types.findDescriptorSymbol(funcInterfaceType.tsym);
   }
 }

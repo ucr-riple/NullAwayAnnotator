@@ -46,4 +46,9 @@ public class Report {
   public static Report empty(Fix fix) {
     return new Report(fix, 0);
   }
+
+  @Override
+  public String toString() {
+    return "effectiveNess=" + effectiveNess + ", fix=" + fix + ", finished=" + finished + '}';
+  }
 }

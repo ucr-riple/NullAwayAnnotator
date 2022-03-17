@@ -42,8 +42,7 @@ public class Error extends Hashable {
 
   @Override
   public String toString() {
-    return "Error{"
-        + "messageType='"
+    return "messageType='"
         + messageType
         + '\''
         + ", message='"
@@ -53,8 +52,6 @@ public class Error extends Hashable {
         + clazz
         + '\''
         + ", method='"
-        + method
-        + '\''
-        + '}';
+        + method;
   }
 }

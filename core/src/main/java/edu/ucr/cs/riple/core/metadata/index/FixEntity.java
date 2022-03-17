@@ -52,15 +52,6 @@ public class FixEntity extends Hashable {
 
   @Override
   public String toString() {
-    return "FixEntity{"
-        + "fix="
-        + fix
-        + ", clazz='"
-        + clazz
-        + '\''
-        + ", method='"
-        + method
-        + '\''
-        + '}';
+    return "fix=" + fix + ", clazz='" + clazz + '\'' + ", method='" + method;
   }
 }

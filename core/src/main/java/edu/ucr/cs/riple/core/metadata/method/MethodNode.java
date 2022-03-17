@@ -83,22 +83,7 @@ public class MethodNode {
 
   @Override
   public String toString() {
-    return "MethodNode{"
-        + "children="
-        + children
-        + ", parent="
-        + parent
-        + ", id="
-        + id
-        + ", method='"
-        + method
-        + '\''
-        + ", clazz='"
-        + clazz
-        + '\''
-        + ", size="
-        + size
-        + '}';
+    return "parent=" + parent + ", id=" + id + ", method='" + method + '\'' + ", clazz='" + clazz;
   }
 
   @Override

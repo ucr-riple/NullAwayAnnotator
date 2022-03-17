@@ -43,8 +43,8 @@ public class SuperNode extends AbstractNode {
 
   public SuperNode(Fix fix) {
     super(fix);
-    followUps = new HashSet<>();
-    root = new Node(fix);
+    this.followUps = new HashSet<>();
+    this.root = new Node(fix);
     this.followUps.add(root.fix);
   }
 
@@ -75,7 +75,7 @@ public class SuperNode extends AbstractNode {
 
   @Override
   public String toString() {
-    return "SuperNode{" + "followUps=" + followUps + ", report=" + report + ", root=" + root + '}';
+    return "report=" + report + ", root=" + root + '}';
   }
 
   public Set<Fix> getFixChain() {

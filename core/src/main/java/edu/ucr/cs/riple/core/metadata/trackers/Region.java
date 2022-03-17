@@ -50,6 +50,6 @@ public class Region {
 
   @Override
   public String toString() {
-    return "Region{" + "method='" + method + '\'' + ", clazz='" + clazz + '\'' + '}';
+    return "method='" + method + '\'' + ", clazz='" + clazz;
   }
 }
