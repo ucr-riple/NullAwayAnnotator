@@ -1,48 +1,25 @@
-# Diagnoser
-Script to run [AutoFixer](https://github.com/nimakarimipour/NullAwayAutoFixer).
-
-## Dependencies
----
-### Overview
-`Autofixer` depends on two projects shown below:
-1. [Injector](https://github.com/nimakarimipour/Injector): Used to inject suggested annotations to source code. It receives a path to `json` file where all the suggested fixes are written as an argument. The default location is `/tmp/NullAwayFix/fixes.json`
-2. [Customized NullAway](https://github.com/nimakarimipour/NullAway): A special version of `NullAway` with suggested fixes capability. It needs to be on `autofix` branch to have all the fix suggestions features available.
+## Runner
+Script to run [Annotator](../README.md).
 
 ### Installation
-`AutoFixer` is provided via a `jar` file where all dependenceis related to `Injector` are already handled. 
-To install the customized version of `NullAway` in `maven local` repository, please follow the instructions below:
-```
-git clone https://github.com/nimakarimipour/NullAway
-cd NullAway
-git checkout autofixer
-./gradlew Install
-```
-Or simply run the `dependecies.sh` script provided.
+All dependencies are provided via a `jar` file located in `jars` directory. 
+To re-create/update the jar file, run `python3 updatejar.py`
 
-The customized version of `NullAway` will be installed at the following location in maven local repository:
-```
-edu.ucr.cs.riple:nullaway:0.7.12-SNAPSHOT
-```
+### Requirements for the Target Project
 
-### Build Jar
-The jar file in `jars` directory can be rebuilt by the following commands:
+Below are the instructions to prepare the target project:
 
-```
-git clone git@github.com:nimakarimipour/Injector.git
-cd Injector
-./gradlew install
-cd ..
-git clone git@github.com:nimakarimipour/NullAwayAutoFixer.git
-cd NullAwayAutoFixer
-./gradlew fatJar
-```
+#### Dependencies
+1. `NullAway` checker must be activated with version >= `0.9.6`
+2. `CSS` checker must be activated located [here](../css/README.md).
 
-## Requirements for Target Project
----
-The only requirement for a target project to run autofixer on is that it needs to work with the [customized](https://github.com/nimakarimipour/NullAway) version of `NullAway` mentioned in `Dependencies/Installation` rather than the original version.
-After that the original version of the `NullAway` is replaced by the customized version, the following flag must be sent to `NullAway` to activate the autofix features.
+#### Error Prone Flags
 ```
--XepOpt:NullAway:AutoFix=true
+"-Xep:NullAway:ERROR", // to activate NullAway
+"-XepOpt:NullAway:SerializeFixMetadata=true",
+"-XepOpt:NullAway:FixSerializationConfigPath=path_to_config.xml",
+"-Xep:CSS:ERROR", // to activate CSS
+"-XepOpt:CSS:ConfigPath=path_to_css.xml",
 ```
 
 Please find a sample project setup below:
