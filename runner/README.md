@@ -22,7 +22,7 @@ Below are the instructions to prepare the target project:
 "-XepOpt:CSS:ConfigPath=path_to_css.xml",
 ```
 
-`path_to_config.xml` and `path_to_css.xml` are config files which are not necessary to create at the time of preparing the project. 
+`path_to_config.xml` and `path_to_css.xml` are config files which **are not necessary** to create at the time of preparing the project. 
 These two files will be created by the script and enables the communication between the script and the analysis.
 
 Please find a sample project setup below:
