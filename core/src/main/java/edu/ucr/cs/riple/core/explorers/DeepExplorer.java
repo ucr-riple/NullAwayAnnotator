@@ -68,7 +68,6 @@ public class DeepExplorer extends BasicExplorer {
         report -> {
           Fix fix = report.fix;
           SuperNode node = fixGraph.findOrCreate(fix);
-          node.effect = report.effectiveNess;
           node.report = report;
           node.triggered = report.triggered;
           node.followUps.addAll(report.followups);
@@ -125,7 +124,6 @@ public class DeepExplorer extends BasicExplorer {
       group.forEach(
           superNode -> {
             int totalEffect = 0;
-            superNode.updateUsages(tracker);
             for (Region region : superNode.regions) {
               totalEffect += errorBank.compareByMethod(region.clazz, region.method, false).size;
               superNode.updateTriggered(
