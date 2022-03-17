@@ -1,10 +1,10 @@
 {
-  "PROJECT_PATH": "/Users/nima/Developer/NullAwayFixer/Projects/MPAndroidChart",
-  "BUILD_COMMAND": "./gradlew build -x test",
+  "PROJECT_PATH": "/Users/nima/Developer/NullAwayFixer/Projects/libgdx",
+  "BUILD_COMMAND": "./gradlew :gdx:build -x test",
   "ANNOTATION": {
-    "INITIALIZER": "com.github.mikephil.charting.Initializer",
+    "INITIALIZER": "com.badlogic.gdx.Initializer",
     "NONNULL": "javax.annotation.Nonnull",
-    "NULLABLE": "androidx.annotation.Nullable"
+    "NULLABLE": "javax.annotation.Nullable"
   },
   "FORMAT": false,
   "OUTPUT_DIR": "/tmp/NullAwayFix",

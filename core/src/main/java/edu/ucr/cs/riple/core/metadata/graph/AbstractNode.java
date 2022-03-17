@@ -96,11 +96,13 @@ public abstract class AbstractNode {
             "METHOD_NO_INIT",
             "FIELD_NO_INIT",
             "ASSIGN_FIELD_NULLABLE",
-            "ASSIGN_FIELD_NULLABLE",
+            "NONNULL_FIELD_READ_BEFORE_INIT",
             "RETURN_NULLABLE",
             "WRONG_OVERRIDE_RETURN",
             "ASSIGN_FIELD_NULLABLE",
-            "PASS_NULLABLE");
+            "WRONG_OVERRIDE_RETURN",
+            "PASS_NULLABLE",
+            "RETURN_NULLABLE,");
     if (fixableTypes.contains(error.messageType)) {
       return true;
     }
