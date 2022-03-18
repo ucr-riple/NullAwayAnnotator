@@ -111,9 +111,10 @@ public class Test {
 
 ## Installation
 
-```Annotator``` requires subproject below to be installed in the ```local maven``` repository.
-* [CSS](css/README.md): To install it, run `./gradlew install`
-* [Core](core/README.md): Jar file of this module should be located at `runner/jars`, to create the jar file run: `./gradlew fatjar`
+```Annotator``` requires [CSS](css/README.md) module to be installed in the ```local maven``` repository.
+To install it, run `./gradlew install`
+
+Jar file of [Core](core/README.md) module should be located at `runner/jars`, to create the jar file run: `./gradlew fatjar`
 
 A script is provided which executes all installations tasks above. 
 It installs `CSS` checker in `maven local` and creates the jar file of `core` and moves it to the correct path. To run it, execute the command below:
