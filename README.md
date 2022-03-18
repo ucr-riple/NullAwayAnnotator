@@ -1,4 +1,4 @@
-# NullAwayAnnotator
+## NullAwayAnnotator
 ```NullAwayAnnotator``` or simply (Annotator) is a tool that can automatically infer types in source code and injects the 
 corresponding annotations to pass [NullAway](https://github.com/uber/NullAway) checks.
 
@@ -6,7 +6,7 @@ corresponding annotations to pass [NullAway](https://github.com/uber/NullAway) c
 it is capable of reducing the number of warnings reported by ```NullAway``` down to 30%. Annotations are directly injected to the source code, 
 and it preserves the code style.
 
-# Code Example
+## Code Example
 
 In the code below, ```NullAway``` will generate three warnings
 
