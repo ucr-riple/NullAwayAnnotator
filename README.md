@@ -119,7 +119,7 @@ Please follow the steps below:
 * Jar file of [Core](core/README.md) module should be located at `runner/jars`.
     * To create the jar file run: `./gradlew fatjar`
 
-A script is provided which executes all installations tasks above. 
+A script is provided which executes all installation tasks above. 
 It installs `CSS` checker in `maven local` and creates the jar file of `core` module and moves it to the correct path. To run it, execute the command below:
 
 `cd runner/ && python3 updatejar.py`
