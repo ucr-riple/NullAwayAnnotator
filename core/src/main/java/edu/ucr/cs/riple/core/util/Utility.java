@@ -104,7 +104,9 @@ public class Utility {
       writer.write(result.toJSONString().replace("\\/", "/").replace("\\\\\\", "\\"));
       writer.flush();
     } catch (IOException e) {
-      throw new RuntimeException("Could not create the Annotator report json file: " + dir.resolve("diagnose_report.json"), e);
+      throw new RuntimeException(
+          "Could not create the Annotator report json file: " + dir.resolve("diagnose_report.json"),
+          e);
     }
   }
 
@@ -160,8 +162,7 @@ public class Utility {
           cached.add(Fix.createFromJson(reportJson));
         }
       }
-      System.out.print(
-          "Cached items size: " + cached.size() + " total fix size: " + fixes.size());
+      System.out.print("Cached items size: " + cached.size() + " total fix size: " + fixes.size());
       fixes.removeAll(cached);
     } catch (Exception exception) {
       throw new RuntimeException("Exception happened in removing cached fixes", exception);
