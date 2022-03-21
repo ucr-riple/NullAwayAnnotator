@@ -61,10 +61,22 @@ public class Index<T extends Hashable> {
     try (BufferedReader br = new BufferedReader(new FileReader(this.path.toFile()))) {
       String line;
       br.readLine();
-      int i = 0;
       while ((line = br.readLine()) != null) {
-        if (line.split("\t").length == 2) {
-          line = line.trim() + br.readLine().trim();
+        if (line.contains("'")) {
+          while (true) {
+            if (line.endsWith("null") || line.endsWith(")")) {
+              int begin = line.indexOf("'");
+              int end = line.lastIndexOf("'");
+              line =
+                  line.substring(0, begin)
+                      + line.substring(begin, end).replaceAll("\t", "")
+                      + line.substring(end);
+              if (line.split("\t").length == 4) {
+                break;
+              }
+            }
+            line = line.trim() + br.readLine().trim();
+          }
         }
         T item = factory.build(line.split("\t"));
         total++;
