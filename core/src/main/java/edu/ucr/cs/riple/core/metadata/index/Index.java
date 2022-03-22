@@ -59,26 +59,37 @@ public class Index<T extends Hashable> {
   public void index() {
     items.clear();
     try (BufferedReader br = new BufferedReader(new FileReader(this.path.toFile()))) {
-      String line;
+      String entry = "";
+      String nextLine;
       br.readLine();
-      while ((line = br.readLine()) != null) {
-        if (line.contains("'")) {
-          while (true) {
-            if (line.endsWith("null") || line.endsWith(")")) {
-              int begin = line.indexOf("'");
-              int end = line.lastIndexOf("'");
-              line =
-                  line.substring(0, begin)
-                      + line.substring(begin, end).replaceAll("\t", "")
-                      + line.substring(end);
-              if (line.split("\t").length == 4) {
-                break;
-              }
-            }
-            line = line.trim() + br.readLine().trim();
-          }
+      while ((nextLine = br.readLine()) != null) {
+        if (entry == "" || nextLine.startsWith(" ") || nextLine.startsWith("\t")) {
+          entry += nextLine;
+          continue;
         }
-        T item = factory.build(line.split("\t"));
+        // At this point, entry contains a full TSV entry, potentially multi-line as long
+        // as each line break in an item is followed by a whitespace or tab character
+        String[] allParts = entry.split("\t");
+        String[] tsvValues;
+        if (entry.contains("\n")) {
+          tsvValues = new String[4];
+          tsvValues[0] = allParts[0];
+          tsvValues[4] = allParts[allParts.length-1];
+          tsvValues[3] = allParts[allParts.length-2];
+          tsvValues[2] = "";
+          for (int i = 1; i < allParts.length-3; ++i) {
+            tsvValues[2] += allParts[i] + "\t";
+          }
+          tsvValues[2] += allParts[allParts.length-3];
+        } else {
+          tsvValues = allParts;
+        }
+        T item;
+        try {
+          item = factory.build(tsvValues);
+        } catch(ArrayIndexOutOfBoundsException e) {
+          throw new java.lang.Error(String.format("Failed to parse entry '%s' on file %s", entry, path.toString()), e);
+        }
         total++;
         int hash;
         if (type.equals(Index.Type.BY_CLASS)) {
@@ -93,6 +104,7 @@ public class Index<T extends Hashable> {
           newList.add(item);
           items.put(hash, newList);
         }
+        entry = nextLine; // For next iteration
       }
     } catch (IOException e) {
       e.printStackTrace();
