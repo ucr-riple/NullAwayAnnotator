@@ -23,6 +23,9 @@
  */
 package edu.ucr.cs.riple.core.metadata.index;
 
+import com.google.common.collect.ImmutableSet;
+import java.util.Set;
+
 public class Error extends Hashable {
   public final String messageType;
   public final String message;
@@ -51,5 +54,21 @@ public class Error extends Hashable {
         + '\''
         + ", method='"
         + method;
+  }
+
+  public boolean isFixable() {
+    final Set<String> fixableTypes =
+        ImmutableSet.of(
+            "METHOD_NO_INIT",
+            "FIELD_NO_INIT",
+            "ASSIGN_FIELD_NULLABLE",
+            "NONNULL_FIELD_READ_BEFORE_INIT",
+            "RETURN_NULLABLE",
+            "WRONG_OVERRIDE_RETURN",
+            "ASSIGN_FIELD_NULLABLE",
+            "WRONG_OVERRIDE_RETURN",
+            "PASS_NULLABLE",
+            "RETURN_NULLABLE,");
+    return fixableTypes.contains(this.messageType);
   }
 }

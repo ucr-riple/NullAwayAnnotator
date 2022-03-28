@@ -144,7 +144,6 @@ public class Annotator {
               .stream()
               .noneMatch(diagnoseReport -> diagnoseReport.fix.equals(fix))) {
             analyze(fix);
-            remove(Collections.singletonList(fix));
           }
         });
     log.deep = System.currentTimeMillis();
@@ -185,14 +184,19 @@ public class Annotator {
 
   private void analyze(Fix fix) {
     Report report = null;
+    boolean appliedFix = false;
     for (Explorer explorer : explorers) {
       if (explorer.isApplicable(fix)) {
         if (explorer.requiresInjection(fix)) {
           apply(Collections.singletonList(fix));
+          appliedFix = true;
         }
         report = explorer.effect(fix);
         break;
       }
+    }
+    if (appliedFix) {
+      remove(Collections.singletonList(fix));
     }
     Preconditions.checkNotNull(report);
     finishedReports.add(report);

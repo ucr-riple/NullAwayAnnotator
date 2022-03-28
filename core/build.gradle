@@ -65,7 +65,7 @@ task fatJar(type: Jar) {
 }
 
 fatJar.doLast{
-    def oldName = 'core-1.2.1-LOCAL.jar'
+    def oldName = 'core-1.2.2-LOCAL.jar'
     def newName = 'core.jar'
     def oldPath = "$project.buildDir/libs/"+oldName
     def newPath = "$project.buildDir/libs/"+newName

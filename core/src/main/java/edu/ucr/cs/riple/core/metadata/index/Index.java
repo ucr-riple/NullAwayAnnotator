@@ -74,21 +74,22 @@ public class Index<T extends Hashable> {
         if (entry.contains("\n")) {
           tsvValues = new String[4];
           tsvValues[0] = allParts[0];
-          tsvValues[4] = allParts[allParts.length-1];
-          tsvValues[3] = allParts[allParts.length-2];
+          tsvValues[4] = allParts[allParts.length - 1];
+          tsvValues[3] = allParts[allParts.length - 2];
           tsvValues[2] = "";
-          for (int i = 1; i < allParts.length-3; ++i) {
+          for (int i = 1; i < allParts.length - 3; ++i) {
             tsvValues[2] += allParts[i] + "\t";
           }
-          tsvValues[2] += allParts[allParts.length-3];
+          tsvValues[2] += allParts[allParts.length - 3];
         } else {
           tsvValues = allParts;
         }
         T item;
         try {
           item = factory.build(tsvValues);
-        } catch(ArrayIndexOutOfBoundsException e) {
-          throw new java.lang.Error(String.format("Failed to parse entry '%s' on file %s", entry, path.toString()), e);
+        } catch (ArrayIndexOutOfBoundsException e) {
+          throw new java.lang.Error(
+              String.format("Failed to parse entry '%s' on file %s", entry, path), e);
         }
         total++;
         int hash;

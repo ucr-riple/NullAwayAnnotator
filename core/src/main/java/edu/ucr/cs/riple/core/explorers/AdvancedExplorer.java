@@ -38,6 +38,7 @@ import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -97,10 +98,11 @@ public abstract class AdvancedExplorer extends BasicExplorer {
       fixBank.saveState(true, true);
       for (Node node : nodes) {
         int totalEffect = 0;
+        List<Error> newErrors = new ArrayList<>();
         for (Region region : node.regions) {
           Result<Error> errorComparison =
               errorBank.compareByMethod(region.clazz, region.method, false);
-          node.analyzeStatus(errorComparison.dif);
+          newErrors.addAll(errorComparison.dif);
           totalEffect += errorComparison.size;
           if (annotator.depth > 0) {
             node.updateTriggered(
@@ -112,6 +114,7 @@ public abstract class AdvancedExplorer extends BasicExplorer {
                     .collect(Collectors.toList()));
           }
         }
+        node.analyzeStatus(newErrors);
         node.setEffect(totalEffect, annotator.methodInheritanceTree, fixes);
       }
       annotator.remove(fixes);

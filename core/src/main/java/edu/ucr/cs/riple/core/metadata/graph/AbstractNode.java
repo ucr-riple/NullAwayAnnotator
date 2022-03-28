@@ -24,7 +24,6 @@
 
 package edu.ucr.cs.riple.core.metadata.graph;
 
-import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
@@ -84,32 +83,7 @@ public abstract class AbstractNode {
   }
 
   public void analyzeStatus(List<Error> newErrors) {
-    if (this.finished) {
-      return;
-    }
-    this.finished = newErrors.stream().noneMatch(this::isFixableError);
-  }
-
-  private boolean isFixableError(Error error) {
-    final Set<String> fixableTypes =
-        ImmutableSet.of(
-            "METHOD_NO_INIT",
-            "FIELD_NO_INIT",
-            "ASSIGN_FIELD_NULLABLE",
-            "NONNULL_FIELD_READ_BEFORE_INIT",
-            "RETURN_NULLABLE",
-            "WRONG_OVERRIDE_RETURN",
-            "ASSIGN_FIELD_NULLABLE",
-            "WRONG_OVERRIDE_RETURN",
-            "PASS_NULLABLE",
-            "RETURN_NULLABLE,");
-    if (fixableTypes.contains(error.messageType)) {
-      return true;
-    }
-    final String unfixableWrongOverrideParamMessage =
-        "unbound instance method reference cannot be used, as first parameter of functional interface method";
-    return error.messageType.equals("WRONG_OVERRIDE_PARAM")
-        && !error.message.contains(unfixableWrongOverrideParamMessage);
+    this.finished = newErrors.stream().noneMatch(Error::isFixable);
   }
 
   @Override

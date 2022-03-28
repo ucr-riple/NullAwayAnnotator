@@ -54,16 +54,13 @@ public class DeepExplorer extends BasicExplorer {
     this.fixGraph = new FixGraph<>(SuperNode::new);
   }
 
-  private void init(List<Report> reports) {
+  private boolean init(List<Report> reports) {
     this.fixGraph.clear();
     Set<Report> filteredReports =
         reports
             .stream()
             .filter(report -> (report.effectiveNess > 0 && !report.finished))
             .collect(Collectors.toSet());
-    System.out.println(
-        "Number of unfinished reports with effectiveness greater than zero: "
-            + filteredReports.size());
     filteredReports.forEach(
         report -> {
           Fix fix = report.fix;
@@ -75,6 +72,7 @@ public class DeepExplorer extends BasicExplorer {
           node.updateUsages(tracker);
           node.changed = false;
         });
+    return filteredReports.size() > 0;
   }
 
   public void start(List<Report> reports) {
@@ -84,8 +82,10 @@ public class DeepExplorer extends BasicExplorer {
     }
     System.out.println("Deep explorer is active...\nMax Depth level: " + annotator.depth);
     for (int i = 0; i < annotator.depth; i++) {
-      System.out.println("Analyzing at level " + (i + 1));
-      init(reports);
+      System.out.print("Analyzing at level " + (i + 1) + ", ");
+      if (!init(reports)) {
+        break;
+      }
       explore();
       List<SuperNode> nodes = fixGraph.getAllNodes();
       nodes.forEach(
@@ -105,7 +105,12 @@ public class DeepExplorer extends BasicExplorer {
     }
     fixGraph.findGroups();
     HashMap<Integer, Set<SuperNode>> groups = fixGraph.getGroups();
-    System.out.println("Scheduling for: " + groups.size() + " builds");
+    System.out.println(
+        "Scheduling for: "
+            + groups.size()
+            + " builds for: "
+            + fixGraph.getAllNodes().size()
+            + " reports");
     ProgressBar pb = Utility.createProgressBar("Deep analysis", groups.size());
     pb.setExtraMessage("Building");
     for (Set<SuperNode> group : groups.values()) {

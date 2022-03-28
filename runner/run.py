@@ -156,7 +156,7 @@ def apply_effective_fixes():
 
 
 def run():
-    uprint("Executing loop command")
+    uprint("Executing run command")
     delete(join(out_dir, "log.txt"))
     finished = False
     while not finished:

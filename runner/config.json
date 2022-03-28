@@ -1,5 +1,5 @@
 {
-  "PROJECT_PATH": "/home/nima/Developer/AutoFixer/Evaluation/Projects/libgdx",
+  "PROJECT_PATH": "/Users/nima/Developer/NullAwayFixer/Projects/libgdx",
   "BUILD_COMMAND": "./gradlew :gdx:build -x test",
   "ANNOTATION": {
     "INITIALIZER": "com.badlogic.gdx.Initializer",
@@ -10,5 +10,5 @@
   "OUTPUT_DIR": "/tmp/NullAwayFix",
   "NULLAWAY_CONFIG_PATH": "/tmp/NullAwayFix/config.xml",
   "CSS_CONFIG_PATH": "/tmp/NullAwayFix/css.xml",
-  "DEPTH": 10
+  "DEPTH": 4
 }
