@@ -24,9 +24,11 @@
 
 package edu.ucr.cs.riple.core.metadata.index;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,13 +60,18 @@ public class Index<T extends Hashable> {
 
   public void index() {
     items.clear();
-    try (BufferedReader br = new BufferedReader(new FileReader(this.path.toFile()))) {
+    try (BufferedReader br = Files.newBufferedReader(this.path, UTF_8)) {
       String entry = "";
-      String nextLine;
-      br.readLine();
-      while ((nextLine = br.readLine()) != null) {
-        if (entry == "" || nextLine.startsWith(" ") || nextLine.startsWith("\t")) {
-          entry += nextLine;
+      br.readLine(); // consume headers
+      while (entry != null) {
+        String nextLine = br.readLine();
+        if (entry.equals("")) {
+          entry = nextLine;
+          continue;
+        } else if (nextLine == null) {
+          // End of file: this finalizes entry, but it still needs processing
+        } else if (nextLine.startsWith(" ") || nextLine.startsWith("\t") || nextLine.equals("")) {
+          entry += "\n" + nextLine;
           continue;
         }
         // At this point, entry contains a full TSV entry, potentially multi-line as long
@@ -74,9 +81,9 @@ public class Index<T extends Hashable> {
         if (entry.contains("\n")) {
           tsvValues = new String[4];
           tsvValues[0] = allParts[0];
-          tsvValues[4] = allParts[allParts.length - 1];
-          tsvValues[3] = allParts[allParts.length - 2];
-          tsvValues[2] = "";
+          tsvValues[3] = allParts[allParts.length - 1];
+          tsvValues[2] = allParts[allParts.length - 2];
+          tsvValues[1] = "";
           for (int i = 1; i < allParts.length - 3; ++i) {
             tsvValues[2] += allParts[i] + "\t";
           }
