@@ -95,6 +95,8 @@ def preprocess():
     delete(method_path)
     delete(join(out_dir, "init_methods.json"))
     build_project()
+    if data['DEPTH'] < 0:
+        return
     fixes = tools.load_tsv_to_dict(out_dir + "/fixes.tsv")
     uprint("Detecting uninitialized class fields...")
     field_no_inits = [x for x in fixes if (x['reason'] == 'FIELD_NO_INIT' and x['location'] == 'FIELD')]
