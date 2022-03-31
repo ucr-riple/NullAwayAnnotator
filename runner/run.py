@@ -95,7 +95,7 @@ def preprocess():
     delete(method_path)
     delete(join(out_dir, "init_methods.json"))
     build_project()
-    if data['DEPTH'] < 0:
+    if data['DEPTH'] < 0 or (not data['OPTIMIZED']):
         return
     fixes = tools.load_tsv_to_dict(out_dir + "/fixes.tsv")
     uprint("Detecting uninitialized class fields...")
@@ -142,7 +142,7 @@ def preprocess():
 def explore():
     tools.write_css_config_in_xml(False, out_dir, css_config_path)
     uprint("Starting Exploration Phase...")
-    tools.run_jar("explore", nullaway_config_path, "'{}'".format(build_command), data['DEPTH'], data['ANNOTATION']['NULLABLE'], format_style)
+    tools.run_jar("explore", nullaway_config_path, "'{}'".format(build_command), data['DEPTH'], data['ANNOTATION']['NULLABLE'], format_style, data['OPTIMIZED'])
 
 
 def apply_effective_fixes():

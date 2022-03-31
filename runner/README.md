@@ -68,6 +68,7 @@ Configurations are written inside the `config.json` file. Please find a sample b
   "OUTPUT_DIR": "/tmp/NullAwayFix",
   "NULLAWAY_CONFIG_PATH": "/tmp/NullAwayFix/config.xml",
   "CSS_CONFIG_PATH": "/tmp/NullAwayFix/css.xml",
+  "OPTIMIZED": true,
   "DEPTH": 10
 }
 ```
@@ -81,7 +82,8 @@ Below is the description of each setting:
 7. `OUTPUT_DIR`: Directory where the serialized output of NullAway should be written.
 8. `NULLAWAY_CONFIG_PATH`: `path_to_config.xml` given to project in time of preparing the project (previous section).
 9. `CSS_CONFIG_PATH`: `path_to_css.xml` given to project in time of preparing the process (previous section).
-10. `DEPTH`: The depth of deep analysis.
+10. `OPTIMIZED`: Enables the optimization technique.
+11. `DEPTH`: The depth of the analysis.
 
 ### Running the script
 

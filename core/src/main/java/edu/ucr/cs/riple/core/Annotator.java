@@ -87,7 +87,7 @@ public class Annotator {
     }
   }
 
-  private List<Fix> init(String buildCommand, boolean useCache) {
+  private List<Fix> init(String buildCommand, boolean useCache, boolean optimized) {
     System.out.println("Initializing Explorers.");
     this.buildCommand = buildCommand;
     this.finishedReports = new ArrayList<>();
@@ -119,15 +119,17 @@ public class Annotator {
     if (depth < 0) {
       this.explorers.add(new DummyExplorer(this, null, null));
     } else {
-      this.explorers.add(new ParameterExplorer(this, allFixes, errorBank, fixBank));
-      this.explorers.add(new FieldExplorer(this, allFixes, errorBank, fixBank));
-      this.explorers.add(new MethodExplorer(this, allFixes, errorBank, fixBank));
+      if(optimized){
+        this.explorers.add(new ParameterExplorer(this, allFixes, errorBank, fixBank));
+        this.explorers.add(new FieldExplorer(this, allFixes, errorBank, fixBank));
+        this.explorers.add(new MethodExplorer(this, allFixes, errorBank, fixBank));
+      }
       this.explorers.add(new BasicExplorer(this, errorBank, fixBank));
     }
     return allFixes;
   }
 
-  public void start(String buildCommand, Path configPath, boolean useCache) {
+  public void start(String buildCommand, Path configPath, boolean useCache, boolean optimized) {
     log.time = System.currentTimeMillis();
     System.out.println("Annotator Started.");
     this.nullAwayConfigPath = configPath;
@@ -137,7 +139,7 @@ public class Annotator {
                 .orElse("/tmp/NullAwayFix"));
     this.fixPath = this.dir.resolve("fixes.tsv");
     this.errorPath = this.dir.resolve("errors.tsv");
-    List<Fix> fixes = init(buildCommand, useCache);
+    List<Fix> fixes = init(buildCommand, useCache, optimized);
     fixes.forEach(
         fix -> {
           if (finishedReports
