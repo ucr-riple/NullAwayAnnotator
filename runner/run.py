@@ -97,33 +97,44 @@ def preprocess():
     build_project()
     if data['DEPTH'] < 0 or (not data['OPTIMIZED']):
         return
+
     fixes = tools.load_tsv_to_dict(out_dir + "/fixes.tsv")
     uprint("Detecting uninitialized class fields...")
-    field_no_inits = [x for x in fixes if (x['reason'] == 'FIELD_NO_INIT' and x['location'] == 'FIELD')]
+    fields = [x for x in fixes if (x['reason'] == 'FIELD_NO_INIT' and x['location'] == 'FIELD')]
+
     uprint("Detecting initializers...")
     raw_methods = tools.load_tsv_to_dict(method_path)
-    init_methods = {"fixes": []}
+
     methods = []
     for method in raw_methods:
         seen = None
         for discovered in methods:
-            if discovered['method'] == method['method'] and discovered['class'] == method['method']:
+            if discovered['method'] == method['method'] and discovered['class'] == method['class']:
                 seen = discovered
                 break
         if seen is None:
             method['fields'] = []
+            method['score'] = 0
             seen = method
             methods.append(seen)
-        seen['fields'].append(method['field'])
-    for field in field_no_inits:
+        if method['field'] not in seen['fields']:
+            seen['fields'].append(method['field'])
+
+    for field in fields:
+        for method in methods:
+            if method['class'] == field['class'] and field['param'] in method['fields']:
+                method['score'] += 1
+
+    init_methods = {"fixes": []}
+    for field in fields:
+        max_score = -1
         candidate_method = None
-        max_size = 0
         for method in methods:
             if method['class'] == field['class']:
-                if field['param'] in method['fields'] and len(method['fields']) > max_size:
+                if field['param'] in method['fields'] and method['score'] > max_score:
                     candidate_method = method.copy()
-                    max_size = len(method['fields'])
-        if candidate_method is not None:
+                    max_score = method['score']
+        if (candidate_method is not None) and candidate_method['score'] > 1:
             del candidate_method['fields']
             candidate_method['location'] = "METHOD"
             candidate_method['inject'] = True
@@ -132,6 +143,7 @@ def preprocess():
             candidate_method['reason'] = "Initializer"
             if candidate_method not in init_methods['fixes']:
                 init_methods['fixes'].append(candidate_method)
+
     uprint("Annotating as {}".format(data['ANNOTATION']['INITIALIZER']))
     init_methods_path = join(out_dir, "init_methods.json")
     with open(init_methods_path, 'w') as outfile:
