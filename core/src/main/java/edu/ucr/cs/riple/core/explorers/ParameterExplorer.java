@@ -84,17 +84,15 @@ public class ParameterExplorer extends AdvancedExplorer {
             errorBank.compareByMethod(node.fix.className, node.fix.method, false);
         node.setEffect(errorComparison.size, annotator.methodInheritanceTree, null);
         node.analyzeStatus(errorComparison.dif);
-        if (annotator.depth > 0) {
-          List<Fix> triggered = new ArrayList<>(generateSubMethodParameterInheritanceFixes(node));
-          triggered.addAll(
-              fixBank
-                  .compareByMethod(node.fix.className, node.fix.method, false)
-                  .dif
-                  .stream()
-                  .map(fixEntity -> fixEntity.fix)
-                  .collect(Collectors.toList()));
-          node.updateTriggered(triggered);
-        }
+        List<Fix> triggered = new ArrayList<>(generateSubMethodParameterInheritanceFixes(node));
+        triggered.addAll(
+            fixBank
+                .compareByMethod(node.fix.className, node.fix.method, false)
+                .dif
+                .stream()
+                .map(fixEntity -> fixEntity.fix)
+                .collect(Collectors.toList()));
+        node.updateTriggered(triggered);
       }
     }
     pb.close();

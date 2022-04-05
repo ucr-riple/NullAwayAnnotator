@@ -58,7 +58,7 @@ public class Main {
     annotator.depth = 4;
     annotator.nullableAnnot = "javax.annotation.Nullable";
     annotator.lexicalPreservationEnabled = false;
-    annotator.start(runCommand, configPath, true, Boolean.parseBoolean(args[5]));
+    annotator.start(runCommand, configPath, true, true);
   }
 
   private static void explore(String[] args) {
