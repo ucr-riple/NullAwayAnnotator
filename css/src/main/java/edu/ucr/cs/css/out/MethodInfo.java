@@ -24,12 +24,13 @@
 
 package edu.ucr.cs.css.out;
 
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.VisitorState;
+import com.sun.source.tree.VariableTree;
 import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.css.Config;
 import edu.ucr.cs.css.SymbolUtil;
-
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,6 +39,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class MethodInfo {
   public final Symbol.MethodSymbol symbol;
@@ -45,6 +47,7 @@ public class MethodInfo {
   final int id;
 
   private Boolean[] annotFlags;
+  private String[] parameterNames;
   private boolean hasNullableAnnotation;
   private int parent = -1;
   private static int LAST_ID = 0;
@@ -108,9 +111,11 @@ public class MethodInfo {
         + "\t"
         + Arrays.toString(annotFlags)
         + "\t"
-        + this.hasNullableAnnotation
+        + hasNullableAnnotation
         + "\t"
-        + this.uri.getPath();
+        + Arrays.toString(parameterNames)
+        + "\t"
+        + uri.getPath();
   }
 
   public static String header() {
@@ -127,6 +132,8 @@ public class MethodInfo {
         + "flags"
         + "\t"
         + "nullable"
+        + "\t"
+        + "parameters"
         + "\t"
         + "uri";
   }
@@ -145,5 +152,22 @@ public class MethodInfo {
 
   public void setURI(URI toUri) {
     this.uri = toUri;
+  }
+
+  public void setParameterNames(List<? extends VariableTree> parameters) {
+    this.parameterNames =
+        parameters
+            .stream()
+            .map(
+                new Function<VariableTree, String>() {
+                  @Override
+                  public @Nullable String apply(@Nullable VariableTree variableTree) {
+                    if (variableTree == null) {
+                      return null;
+                    }
+                    return variableTree.getName().toString();
+                  }
+                })
+            .toArray(String[]::new);
   }
 }

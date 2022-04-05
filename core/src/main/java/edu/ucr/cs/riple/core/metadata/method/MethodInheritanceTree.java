@@ -42,7 +42,16 @@ public class MethodInheritanceTree extends AbstractRelation<MethodNode> {
   public MethodInheritanceTree(Path path) {
     super(path);
     final MethodNode top =
-        new MethodNode(-1, "null", "null", Collections.emptyList(), new boolean[] {}, -1, false);
+        new MethodNode(
+            -1,
+            "null",
+            "null",
+            Collections.emptyList(),
+            new boolean[] {},
+            -1,
+            false,
+            new String[] {},
+            "null");
     nodes.put(-1, top);
   }
 
@@ -74,7 +83,9 @@ public class MethodInheritanceTree extends AbstractRelation<MethodNode> {
         parentId,
         size,
         Utility.convertStringToBooleanArray(values[5]),
-        Boolean.getBoolean(values[6]));
+        Boolean.getBoolean(values[6]),
+        Utility.convertStringToStringArray(values[7]),
+        values[8]);
     if (parentId != -1) {
       MethodNode parent = nodes.get(parentId);
       if (parent == null) {
