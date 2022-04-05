@@ -174,6 +174,7 @@ def run():
     delete(join(out_dir, "log.txt"))
     finished = False
     while not finished:
+        preprocess()
         finished = True
         explore()
         uprint("Explore task finished, applying effective fixes...")
@@ -203,7 +204,6 @@ elif command == "apply":
     apply_effective_fixes()
 elif command == "run":
     clean()
-    preprocess()
     reports = open(join(out_dir, "reports.json"), "w")
     empty = {"reports": []}
     json.dump(empty, reports)
