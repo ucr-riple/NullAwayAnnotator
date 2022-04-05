@@ -29,7 +29,6 @@ import com.google.errorprone.VisitorState;
 import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.css.Config;
 import edu.ucr.cs.css.SymbolUtil;
-
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;

@@ -53,7 +53,8 @@ public class Main {
   public static void main(String[] args) {
     Annotator annotator = new Annotator();
     Path configPath = Paths.get("/tmp/NullAwayFix/config.xml");
-    String runCommand = "cd /Users/nima/Developer/NullAwayFixer/testannotator && ./gradlew compileJava";
+    String runCommand =
+        "cd /Users/nima/Developer/NullAwayFixer/testannotator && ./gradlew compileJava";
     annotator.depth = 4;
     annotator.nullableAnnot = "javax.annotation.Nullable";
     annotator.lexicalPreservationEnabled = false;

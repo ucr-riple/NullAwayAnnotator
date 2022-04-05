@@ -119,7 +119,7 @@ public class Annotator {
     if (depth < 0) {
       this.explorers.add(new DummyExplorer(this, null, null));
     } else {
-      if(optimized){
+      if (optimized) {
         this.explorers.add(new ParameterExplorer(this, allFixes, errorBank, fixBank));
         this.explorers.add(new FieldExplorer(this, allFixes, errorBank, fixBank));
         this.explorers.add(new MethodExplorer(this, allFixes, errorBank, fixBank));

@@ -36,7 +36,6 @@ import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -103,26 +102,29 @@ public class ParameterExplorer extends AdvancedExplorer {
   }
 
   /**
-   * Generates suggested fixes due to making a parameter {@code Nullable} for all overriding methods.
+   * Generates suggested fixes due to making a parameter {@code Nullable} for all overriding
+   * methods.
+   *
    * @param node Node containing the fix.
    * @return List of Fixes
    */
-  private List<Fix> generateSubMethodParameterInheritanceFixes(Node node){
-    List<MethodNode> overridingMethods = annotator.methodInheritanceTree.getSubMethods(node.fix.method, node.fix.className, false);
+  private List<Fix> generateSubMethodParameterInheritanceFixes(Node node) {
+    List<MethodNode> overridingMethods =
+        annotator.methodInheritanceTree.getSubMethods(node.fix.method, node.fix.className, false);
     int index = Integer.parseInt(node.fix.index);
     Fix rootFix = node.fix;
     List<Fix> ans = new ArrayList<>();
-    overridingMethods.stream().forEach(new Consumer<MethodNode>() {
-      @Override
-      public void accept(MethodNode methodNode) {
-        if(index < methodNode.annotFlags.length && !methodNode.annotFlags[index]){
-          Fix fix = rootFix.duplicate();
-          // make fix here...
-//          fix.
-//          ans.add()
-        }
-      }
-    });
+    overridingMethods
+        .stream()
+        .forEach(
+            new Consumer<MethodNode>() {
+              @Override
+              public void accept(MethodNode methodNode) {
+                if (index < methodNode.annotFlags.length && !methodNode.annotFlags[index]) {
+                  ans.add(new Fix(rootFix.annotation, rootFix.method, ));
+                }
+              }
+            });
   }
 
   @Override
