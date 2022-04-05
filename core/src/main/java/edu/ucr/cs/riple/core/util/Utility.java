@@ -123,6 +123,18 @@ public class Utility {
         Arrays.stream(content.split(",")).map(Boolean::parseBoolean).collect(Collectors.toList()));
   }
 
+  public static String[] convertStringToStringArray(String content) {
+    if (content == null) {
+      return new String[0];
+    }
+    content = content.substring(1, content.length() - 1);
+    if (content.length() == 0) {
+      return new String[0];
+    }
+    content = content.replaceAll("\\s", "");
+    return Arrays.stream(content.split(",")).toArray(String[]::new);
+  }
+
   public static List<Fix> readAllFixes(Path path) {
     List<Fix> fixes = new ArrayList<>();
     try {

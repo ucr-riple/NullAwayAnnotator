@@ -38,7 +38,6 @@ import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import me.tongfei.progressbar.ProgressBar;
 
@@ -86,14 +85,15 @@ public class ParameterExplorer extends AdvancedExplorer {
         node.setEffect(errorComparison.size, annotator.methodInheritanceTree, null);
         node.analyzeStatus(errorComparison.dif);
         if (annotator.depth > 0) {
-          List<Fix> triggered = new ArrayList<>();
-          node.updateTriggered(
+          List<Fix> triggered = new ArrayList<>(generateSubMethodParameterInheritanceFixes(node));
+          triggered.addAll(
               fixBank
                   .compareByMethod(node.fix.className, node.fix.method, false)
                   .dif
                   .stream()
                   .map(fixEntity -> fixEntity.fix)
                   .collect(Collectors.toList()));
+          node.updateTriggered(triggered);
         }
       }
     }
@@ -114,17 +114,21 @@ public class ParameterExplorer extends AdvancedExplorer {
     int index = Integer.parseInt(node.fix.index);
     Fix rootFix = node.fix;
     List<Fix> ans = new ArrayList<>();
-    overridingMethods
-        .stream()
-        .forEach(
-            new Consumer<MethodNode>() {
-              @Override
-              public void accept(MethodNode methodNode) {
-                if (index < methodNode.annotFlags.length && !methodNode.annotFlags[index]) {
-                  ans.add(new Fix(rootFix.annotation, rootFix.method, ));
-                }
-              }
-            });
+    overridingMethods.forEach(
+        methodNode -> {
+          if (index < methodNode.annotFlags.length && !methodNode.annotFlags[index]) {
+            ans.add(
+                new Fix(
+                    rootFix.annotation,
+                    rootFix.method,
+                    methodNode.parameterNames[index],
+                    FixType.PARAMETER.name,
+                    methodNode.clazz,
+                    methodNode.uri,
+                    "true"));
+          }
+        });
+    return ans;
   }
 
   @Override

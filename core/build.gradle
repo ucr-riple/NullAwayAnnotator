@@ -71,3 +71,5 @@ fatJar.doLast{
     def newPath = "$project.buildDir/libs/"+newName
     file( oldPath ).renameTo( file( newPath ) )
 }
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11

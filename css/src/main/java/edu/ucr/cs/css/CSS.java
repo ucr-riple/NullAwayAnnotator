@@ -94,6 +94,7 @@ public class CSS extends BugChecker
     }
     methodInfo.setParamAnnotations(paramAnnotations);
     methodInfo.setURI(state.getPath().getCompilationUnit().getSourceFile().toUri());
+    methodInfo.setParameterNames(tree.getParameters());
     config.serializer.serializeMethodInfo(methodInfo);
     return Description.NO_MATCH;
   }
