@@ -33,21 +33,31 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Main {
+  //  public static void main(String[] args) {
+  //    if (args.length == 0) {
+  //      throw new RuntimeException("command not specified");
+  //    }
+  //    String command = args[0];
+  //    switch (command) {
+  //      case "apply":
+  //        apply(args);
+  //        break;
+  //      case "explore":
+  //        explore(args);
+  //        break;
+  //      default:
+  //        throw new RuntimeException("Unknown command: " + command);
+  //    }
+  //  }
+
   public static void main(String[] args) {
-    if (args.length == 0) {
-      throw new RuntimeException("command not specified");
-    }
-    String command = args[0];
-    switch (command) {
-      case "apply":
-        apply(args);
-        break;
-      case "explore":
-        explore(args);
-        break;
-      default:
-        throw new RuntimeException("Unknown command: " + command);
-    }
+    Annotator annotator = new Annotator();
+    Path configPath = Paths.get("/tmp/NullAwayFix/config.xml");
+    String runCommand = "cd /Users/nima/Developer/NullAwayFixer/testannotator && ./gradlew compileJava";
+    annotator.depth = 4;
+    annotator.nullableAnnot = "javax.annotation.Nullable";
+    annotator.lexicalPreservationEnabled = false;
+    annotator.start(runCommand, configPath, true, Boolean.parseBoolean(args[5]));
   }
 
   private static void explore(String[] args) {
