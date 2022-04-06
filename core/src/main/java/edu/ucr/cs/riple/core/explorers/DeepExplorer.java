@@ -32,6 +32,7 @@ import edu.ucr.cs.riple.core.metadata.graph.SuperNode;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.FixEntity;
+import edu.ucr.cs.riple.core.metadata.index.Result;
 import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -134,7 +135,8 @@ public class DeepExplorer extends BasicExplorer {
                   new ArrayList<>(
                       superNode.generateSubMethodParameterInheritanceFixes(
                           annotator.methodInheritanceTree));
-              totalEffect += errorBank.compareByMethod(region.clazz, region.method, false).size;
+              Result<Error> res = errorBank.compareByMethod(region.clazz, region.method, false);
+              totalEffect += res.size;
               triggered.addAll(
                   fixBank
                       .compareByMethod(region.clazz, region.method, false)

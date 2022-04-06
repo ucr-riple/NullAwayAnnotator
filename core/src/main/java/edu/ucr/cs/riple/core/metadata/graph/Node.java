@@ -29,6 +29,7 @@ import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
+import java.util.Collections;
 import java.util.List;
 
 public class Node extends AbstractNode {
@@ -49,7 +50,8 @@ public class Node extends AbstractNode {
       this.effect =
           localEffect
               - this.fix.referred
-              + Utility.calculateParamInheritanceViolationError(tree, this.fix);
+              + Utility.calculateParamInheritanceViolationError(
+                  tree, this.fix, Collections.emptyList());
     }
     if (fix.location.equals(FixType.METHOD.name)) {
       this.effect =

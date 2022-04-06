@@ -63,7 +63,7 @@ public class SuperNode extends AbstractNode {
     followUps.forEach(
         fix -> {
           if (fix.location.equals(FixType.PARAMETER.name)) {
-            total[0] += Utility.calculateParamInheritanceViolationError(tree, fix);
+            total[0] += Utility.calculateParamInheritanceViolationError(tree, fix, fixes);
           }
         });
     this.effect = total[0];
