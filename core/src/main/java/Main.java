@@ -33,32 +33,22 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Main {
-  //  public static void main(String[] args) {
-  //    if (args.length == 0) {
-  //      throw new RuntimeException("command not specified");
-  //    }
-  //    String command = args[0];
-  //    switch (command) {
-  //      case "apply":
-  //        apply(args);
-  //        break;
-  //      case "explore":
-  //        explore(args);
-  //        break;
-  //      default:
-  //        throw new RuntimeException("Unknown command: " + command);
-  //    }
-  //  }
 
   public static void main(String[] args) {
-    Annotator annotator = new Annotator();
-    Path configPath = Paths.get("/tmp/NullAwayFix/config.xml");
-    String runCommand =
-        "cd /Users/nima/Developer/NullAwayFixer/testannotator && ./gradlew compileJava";
-    annotator.depth = 10;
-    annotator.nullableAnnot = "javax.annotation.Nullable";
-    annotator.lexicalPreservationEnabled = false;
-    annotator.start(runCommand, configPath, true, true);
+    if (args.length == 0) {
+      throw new RuntimeException("command not specified");
+    }
+    String command = args[0];
+    switch (command) {
+      case "apply":
+        apply(args);
+        break;
+      case "explore":
+        explore(args);
+        break;
+      default:
+        throw new RuntimeException("Unknown command: " + command);
+    }
   }
 
   private static void explore(String[] args) {
@@ -74,7 +64,7 @@ public class Main {
     annotator.depth = Integer.parseInt(args[3]);
     annotator.nullableAnnot = args[4];
     annotator.lexicalPreservationEnabled = Boolean.parseBoolean(args[5]);
-    annotator.start(runCommand, configPath, true, Boolean.parseBoolean(args[5]));
+    annotator.start(runCommand, configPath, true, Boolean.parseBoolean(args[6]));
   }
 
   private static void apply(String[] args) {

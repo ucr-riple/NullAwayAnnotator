@@ -142,8 +142,9 @@ public class DeepExplorer extends BasicExplorer {
                       .map(fixEntity -> fixEntity.fix)
                       .collect(Collectors.toList()));
             }
-            localTriggered.addAll(superNode.generateSubMethodParameterInheritanceFixes(
-                            annotator.methodInheritanceTree));
+            localTriggered.addAll(
+                superNode.generateSubMethodParameterInheritanceFixes(
+                    annotator.methodInheritanceTree, fixes));
             superNode.updateTriggered(localTriggered);
             superNode.setEffect(totalEffect, annotator.methodInheritanceTree, fixes);
           });

@@ -145,5 +145,6 @@ public abstract class AbstractNode {
    * @param mit Method Inheritance Tree.
    * @return List of Fixes
    */
-  public abstract List<Fix> generateSubMethodParameterInheritanceFixes(MethodInheritanceTree mit);
+  public abstract List<Fix> generateSubMethodParameterInheritanceFixes(
+      MethodInheritanceTree mit, List<Fix> fixesInOneRound);
 }

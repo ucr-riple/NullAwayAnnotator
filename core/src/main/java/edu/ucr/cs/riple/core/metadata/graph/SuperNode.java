@@ -28,7 +28,6 @@ import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
-import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -60,12 +59,6 @@ public class SuperNode extends AbstractNode {
   @Override
   public void setEffect(int effect, MethodInheritanceTree tree, List<Fix> fixes) {
     final int[] total = {effect};
-    followUps.forEach(
-        fix -> {
-          if (fix.location.equals(FixType.PARAMETER.name)) {
-            total[0] += Utility.calculateParamInheritanceViolationError(tree, fix, fixes);
-          }
-        });
     this.effect = total[0];
   }
 
@@ -75,7 +68,8 @@ public class SuperNode extends AbstractNode {
   }
 
   @Override
-  public List<Fix> generateSubMethodParameterInheritanceFixes(MethodInheritanceTree mit) {
+  public List<Fix> generateSubMethodParameterInheritanceFixes(
+      MethodInheritanceTree mit, List<Fix> fixesInOneRound) {
     List<Fix> ans = new ArrayList<>();
     followUps.forEach(
         fix -> {
@@ -83,6 +77,7 @@ public class SuperNode extends AbstractNode {
             ans.addAll(generateSubMethodParameterInheritanceFixesByFix(fix, mit));
           }
         });
+    ans.removeAll(fixesInOneRound);
     return ans;
   }
 

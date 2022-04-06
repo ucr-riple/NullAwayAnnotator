@@ -258,7 +258,7 @@ public class Utility {
   }
 
   public static boolean correspondingFixExists(
-          String clazz, String method, String param, String location, List<Fix> fixes) {
+      String clazz, String method, String param, String location, List<Fix> fixes) {
     return fixes
         .stream()
         .anyMatch(
@@ -288,7 +288,8 @@ public class Utility {
                 subMethod.clazz,
                 subMethod.method,
                 subMethod.parameterNames[index],
-                FixType.PARAMETER.name, fixesInOneRound)) {
+                FixType.PARAMETER.name,
+                fixesInOneRound)) {
           effect++;
         }
       }

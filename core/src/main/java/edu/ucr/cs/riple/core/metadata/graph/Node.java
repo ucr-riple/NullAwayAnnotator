@@ -72,7 +72,9 @@ public class Node extends AbstractNode {
    * @param mit Method Inheritance Tree.
    * @return List of Fixes
    */
-  public List<Fix> generateSubMethodParameterInheritanceFixes(MethodInheritanceTree mit) {
+  @Override
+  public List<Fix> generateSubMethodParameterInheritanceFixes(
+      MethodInheritanceTree mit, List<Fix> fixesInOneRound) {
     return generateSubMethodParameterInheritanceFixesByFix(fix, mit);
   }
 

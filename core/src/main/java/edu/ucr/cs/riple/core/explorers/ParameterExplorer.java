@@ -36,6 +36,7 @@ import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import me.tongfei.progressbar.ProgressBar;
@@ -85,7 +86,8 @@ public class ParameterExplorer extends AdvancedExplorer {
         node.analyzeStatus(errorComparison.dif);
         List<Fix> triggered =
             new ArrayList<>(
-                node.generateSubMethodParameterInheritanceFixes(annotator.methodInheritanceTree));
+                node.generateSubMethodParameterInheritanceFixes(
+                    annotator.methodInheritanceTree, Collections.emptyList()));
         triggered.addAll(
             fixBank
                 .compareByMethod(node.fix.className, node.fix.method, false)
