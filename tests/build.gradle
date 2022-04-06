@@ -46,19 +46,24 @@ allprojects {
     }
 
     dependencies {
+        annotationProcessor "com.uber.nullaway:nullaway:0.9.6"
+        annotationProcessor "edu.ucr.cs.riple.nullawayannotator:css:1.2.3-LOCAL"
+
         compileOnly "com.google.code.findbugs:jsr305:3.0.2"
-        annotationProcessor "edu.ucr.cs.riple:nullaway:0.7.12-SNAPSHOT"
         errorprone 'com.google.errorprone:error_prone_core:2.10.0'
         errorproneJavac "com.google.errorprone:javac:9+181-r4173-1"
     }
 
     tasks.withType(JavaCompile) {
-        if (!name.toLowerCase().contains("test")) {
+        if (!name.toLowerCase().contains("tests")) {
             options.errorprone.errorproneArgs += ["-XepDisableAllChecks",
-                                                  "-Xep:NullAway:ERROR",
+                                                  "-Xep:NullAway:OFF",
                                                   "-XepOpt:NullAway:AnnotatedPackages=tests",
-                                                  "-XepOpt:NullAway:AutoFix=true",
-                                                  "-XepOpt:NullAway:AutoFixOutPutDirectory=/tmp/NullAwayFix",
+                                                  "-XepOpt:NullAway:SerializeFixMetadata=true",
+                                                  "-XepOpt:NullAway:FixSerializationConfigPath=/tmp/NullAwayFix/config.xml",
+                                                  "-XepOpt:NullAway:CustomNullableAnnotation=com.badlogic.gdx.utils.Null",
+                                                  "-Xep:CSS:ERROR",
+                                                  "-XepOpt:CSS:ConfigPath=/tmp/NullAwayFix/css.xml",
                                                   "-XepDisableAllWarnings"]
             options.compilerArgs << "-Xmaxerrs" << "100000"
         }
