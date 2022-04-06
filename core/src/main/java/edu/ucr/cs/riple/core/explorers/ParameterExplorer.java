@@ -33,7 +33,6 @@ import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.FixEntity;
 import edu.ucr.cs.riple.core.metadata.index.Result;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
-import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.ArrayList;
@@ -84,7 +83,9 @@ public class ParameterExplorer extends AdvancedExplorer {
             errorBank.compareByMethod(node.fix.className, node.fix.method, false);
         node.setEffect(errorComparison.size, annotator.methodInheritanceTree, null);
         node.analyzeStatus(errorComparison.dif);
-        List<Fix> triggered = new ArrayList<>(generateSubMethodParameterInheritanceFixes(node));
+        List<Fix> triggered =
+            new ArrayList<>(
+                node.generateSubMethodParameterInheritanceFixes(annotator.methodInheritanceTree));
         triggered.addAll(
             fixBank
                 .compareByMethod(node.fix.className, node.fix.method, false)
@@ -97,36 +98,6 @@ public class ParameterExplorer extends AdvancedExplorer {
     }
     pb.close();
     System.out.println("Captured all methods behavior against nullability of parameters.");
-  }
-
-  /**
-   * Generates suggested fixes due to making a parameter {@code Nullable} for all overriding
-   * methods.
-   *
-   * @param node Node containing the fix.
-   * @return List of Fixes
-   */
-  private List<Fix> generateSubMethodParameterInheritanceFixes(Node node) {
-    List<MethodNode> overridingMethods =
-        annotator.methodInheritanceTree.getSubMethods(node.fix.method, node.fix.className, false);
-    int index = Integer.parseInt(node.fix.index);
-    Fix rootFix = node.fix;
-    List<Fix> ans = new ArrayList<>();
-    overridingMethods.forEach(
-        methodNode -> {
-          if (index < methodNode.annotFlags.length && !methodNode.annotFlags[index]) {
-            ans.add(
-                new Fix(
-                    rootFix.annotation,
-                    rootFix.method,
-                    methodNode.parameterNames[index],
-                    FixType.PARAMETER.name,
-                    methodNode.clazz,
-                    methodNode.uri,
-                    "true"));
-          }
-        });
-    return ans;
   }
 
   @Override

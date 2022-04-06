@@ -104,13 +104,13 @@ public abstract class AdvancedExplorer extends BasicExplorer {
               errorBank.compareByMethod(region.clazz, region.method, false);
           newErrors.addAll(errorComparison.dif);
           totalEffect += errorComparison.size;
-            node.updateTriggered(
-                fixBank
-                    .compareByMethod(region.clazz, region.method, false)
-                    .dif
-                    .stream()
-                    .map(fixEntity -> fixEntity.fix)
-                    .collect(Collectors.toList()));
+          node.updateTriggered(
+              fixBank
+                  .compareByMethod(region.clazz, region.method, false)
+                  .dif
+                  .stream()
+                  .map(fixEntity -> fixEntity.fix)
+                  .collect(Collectors.toList()));
         }
         node.analyzeStatus(newErrors);
         node.setEffect(totalEffect, annotator.methodInheritanceTree, fixes);

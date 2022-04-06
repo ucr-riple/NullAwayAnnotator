@@ -24,11 +24,14 @@
 
 package edu.ucr.cs.riple.core.metadata.graph;
 
+import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
+import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.injector.Fix;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -102,4 +105,43 @@ public abstract class AbstractNode {
     AbstractNode node = (AbstractNode) o;
     return fix.equals(node.fix);
   }
+
+  /**
+   * Generates suggested fixes due to making a parameter {@code Nullable} for all overriding *
+   * methods.
+   *
+   * @param fix Fix containing the fix parameter nullable suggestion fix.
+   * @param mit Method Inheritance Tree.
+   * @return List of Fixes
+   */
+  protected static List<Fix> generateSubMethodParameterInheritanceFixesByFix(
+      Fix fix, MethodInheritanceTree mit) {
+    List<MethodNode> overridingMethods = mit.getSubMethods(fix.method, fix.className, false);
+    int index = Integer.parseInt(fix.index);
+    List<Fix> ans = new ArrayList<>();
+    overridingMethods.forEach(
+        methodNode -> {
+          if (index < methodNode.annotFlags.length && !methodNode.annotFlags[index]) {
+            ans.add(
+                new Fix(
+                    fix.annotation,
+                    fix.method,
+                    methodNode.parameterNames[index],
+                    FixType.PARAMETER.name,
+                    methodNode.clazz,
+                    methodNode.uri,
+                    "true"));
+          }
+        });
+    return ans;
+  }
+
+  /**
+   * Generates suggested fixes due to making a parameter {@code Nullable} for all overriding
+   * methods.
+   *
+   * @param mit Method Inheritance Tree.
+   * @return List of Fixes
+   */
+  public abstract List<Fix> generateSubMethodParameterInheritanceFixes(MethodInheritanceTree mit);
 }

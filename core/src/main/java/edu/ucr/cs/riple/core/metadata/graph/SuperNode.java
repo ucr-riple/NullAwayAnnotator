@@ -30,6 +30,7 @@ import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -71,6 +72,18 @@ public class SuperNode extends AbstractNode {
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), followUps, report, root);
+  }
+
+  @Override
+  public List<Fix> generateSubMethodParameterInheritanceFixes(MethodInheritanceTree mit) {
+    List<Fix> ans = new ArrayList<>();
+    followUps.forEach(
+        fix -> {
+          if (fix.location.equals(FixType.PARAMETER.name)) {
+            ans.addAll(generateSubMethodParameterInheritanceFixesByFix(fix, mit));
+          }
+        });
+    return ans;
   }
 
   @Override

@@ -130,14 +130,19 @@ public class DeepExplorer extends BasicExplorer {
           superNode -> {
             int totalEffect = 0;
             for (Region region : superNode.regions) {
+              List<Fix> triggered =
+                  new ArrayList<>(
+                      superNode.generateSubMethodParameterInheritanceFixes(
+                          annotator.methodInheritanceTree));
               totalEffect += errorBank.compareByMethod(region.clazz, region.method, false).size;
-              superNode.updateTriggered(
+              triggered.addAll(
                   fixBank
                       .compareByMethod(region.clazz, region.method, false)
                       .dif
                       .stream()
                       .map(fixEntity -> fixEntity.fix)
                       .collect(Collectors.toList()));
+              superNode.updateTriggered(triggered);
             }
             superNode.setEffect(totalEffect, annotator.methodInheritanceTree, fixes);
           });

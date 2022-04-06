@@ -63,6 +63,17 @@ public class Node extends AbstractNode {
     }
   }
 
+  /**
+   * Generates suggested fixes due to making a parameter {@code Nullable} for all overriding
+   * methods.
+   *
+   * @param mit Method Inheritance Tree.
+   * @return List of Fixes
+   */
+  public List<Fix> generateSubMethodParameterInheritanceFixes(MethodInheritanceTree mit) {
+    return generateSubMethodParameterInheritanceFixesByFix(fix, mit);
+  }
+
   @Override
   public String toString() {
     return "Node{"
