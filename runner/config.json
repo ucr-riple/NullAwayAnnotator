@@ -1,6 +1,6 @@
 {
   "PROJECT_PATH": "/Users/nima/Developer/NullAwayFixer/Projects/libgdx",
-  "BUILD_COMMAND": "./gradlew gdx:compileJava",
+  "BUILD_COMMAND": "./gradlew :gdx:compileJava",
   "ANNOTATION": {
     "INITIALIZER": "com.badlogic.gdx.Initializer",
     "NONNULL": "javax.annotation.Nonnull",

@@ -58,17 +58,14 @@ public class DeepExplorer extends BasicExplorer {
   private boolean init(List<Report> reports) {
     this.fixGraph.clear();
     Set<Report> filteredReports =
-        reports
-            .stream()
-            .filter(report -> (report.effectiveNess > 0 && !report.finished))
-            .collect(Collectors.toSet());
+        reports.stream().filter(report -> !report.finished).collect(Collectors.toSet());
     filteredReports.forEach(
         report -> {
           Fix fix = report.fix;
           SuperNode node = fixGraph.findOrCreate(fix);
           node.report = report;
           node.triggered = report.triggered;
-          node.followUps.addAll(report.followups);
+          node.tree.addAll(report.followups);
           node.mergeTriggered();
           node.updateUsages(tracker);
           node.changed = false;
@@ -93,7 +90,7 @@ public class DeepExplorer extends BasicExplorer {
           superNode -> {
             Report report = superNode.report;
             report.effectiveNess = superNode.effect;
-            report.followups = superNode.followUps;
+            report.followups = superNode.tree;
             report.triggered = superNode.triggered;
             report.finished = !superNode.changed;
           });

@@ -37,40 +37,41 @@ import java.util.Set;
 
 public class SuperNode extends AbstractNode {
 
-  public final Set<Fix> followUps;
+  public final Set<Fix> tree;
   public Report report;
   private final Node root;
 
   public SuperNode(Fix fix) {
     super(fix);
-    this.followUps = new HashSet<>();
+    this.tree = new HashSet<>();
     this.root = new Node(fix);
-    this.followUps.add(root.fix);
+    this.tree.add(root.fix);
   }
 
   @Override
   public void updateUsages(RegionTracker tracker) {
     this.regions.clear();
-    followUps.forEach(fix -> regions.addAll(tracker.getRegions(fix)));
+    tree.forEach(fix -> regions.addAll(tracker.getRegions(fix)));
   }
 
   // Here we do not need to subtract referred for method params since we are observing
   // call sites too.
   @Override
   public void setEffect(int effect, MethodInheritanceTree tree, List<Fix> fixes) {
-    this.effect = effect;
+    this.effect =
+        root.fix.location.equals(FixType.PARAMETER.name) ? effect - root.fix.referred : effect;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), followUps, report, root);
+    return Objects.hash(super.hashCode(), tree, report, root);
   }
 
   @Override
   public List<Fix> generateSubMethodParameterInheritanceFixes(
       MethodInheritanceTree mit, List<Fix> fixesInOneRound) {
     List<Fix> ans = new ArrayList<>();
-    followUps.forEach(
+    tree.forEach(
         fix -> {
           if (fix.location.equals(FixType.PARAMETER.name)) {
             ans.addAll(generateSubMethodParameterInheritanceFixesByFix(fix, mit));
@@ -86,11 +87,11 @@ public class SuperNode extends AbstractNode {
   }
 
   public Set<Fix> getFixChain() {
-    return followUps;
+    return tree;
   }
 
   public void mergeTriggered() {
-    this.followUps.addAll(this.triggered);
+    this.tree.addAll(this.triggered);
     this.triggered.clear();
   }
 }
