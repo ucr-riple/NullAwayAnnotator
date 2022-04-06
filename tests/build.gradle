@@ -57,7 +57,7 @@ allprojects {
     tasks.withType(JavaCompile) {
         if (!name.toLowerCase().contains("tests")) {
             options.errorprone.errorproneArgs += ["-XepDisableAllChecks",
-                                                  "-Xep:NullAway:OFF",
+                                                  "-Xep:NullAway:ERROR",
                                                   "-XepOpt:NullAway:AnnotatedPackages=tests",
                                                   "-XepOpt:NullAway:SerializeFixMetadata=true",
                                                   "-XepOpt:NullAway:FixSerializationConfigPath=/tmp/NullAwayFix/config.xml",

@@ -29,10 +29,4 @@ include 'injector'
 include 'tests'
 
 include 'tests:units'
-include 'tests:units:deep'
-include 'tests:units:dupimports'
-include 'tests:units:initializer'
-include 'tests:units:interface'
-include 'tests:units:sample'
-include 'tests:units:whiteline'
 
