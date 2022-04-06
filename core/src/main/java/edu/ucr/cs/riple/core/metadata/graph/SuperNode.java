@@ -58,8 +58,7 @@ public class SuperNode extends AbstractNode {
   // call sites too.
   @Override
   public void setEffect(int effect, MethodInheritanceTree tree, List<Fix> fixes) {
-    final int[] total = {effect};
-    this.effect = total[0];
+    this.effect = effect;
   }
 
   @Override

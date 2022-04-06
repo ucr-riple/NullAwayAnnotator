@@ -59,7 +59,6 @@ public class Node extends AbstractNode {
               + Utility.calculateMethodInheritanceViolationError(tree, this.fix, fixesInOneRound)
               - 1;
     }
-
     if (fix.location.equals(FixType.FIELD.name)) {
       this.effect = localEffect - 1;
     }
