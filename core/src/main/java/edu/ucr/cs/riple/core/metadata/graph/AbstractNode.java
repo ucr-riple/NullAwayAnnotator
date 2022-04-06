@@ -122,15 +122,15 @@ public abstract class AbstractNode {
     overridingMethods.forEach(
         methodNode -> {
           if (index < methodNode.annotFlags.length && !methodNode.annotFlags[index]) {
-            ans.add(
-                new Fix(
-                    fix.annotation,
+            Fix newFix = new Fix(fix.annotation,
                     fix.method,
                     methodNode.parameterNames[index],
                     FixType.PARAMETER.name,
                     methodNode.clazz,
                     methodNode.uri,
-                    "true"));
+                    "true");
+            newFix.index = String.valueOf(index);
+            ans.add(newFix);
           }
         });
     return ans;
