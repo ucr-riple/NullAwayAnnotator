@@ -78,7 +78,7 @@ Below is the description of each setting:
 3. `INITIALIZER`: Fully qualified name of the `Initializer` annotation to inject on detected initializer methods.
 4. `NONNULL`: Fully qualified name of the `Nonnull` annotation.
 5. `NULLABLE`: Fully qualified name of the `Nullable` annotation.
-6. `FORMAT`: If set to `true` the formate of the code will be preserved at the end of execution.
+6. `FORMAT`: If set to `true` the format of the code will be preserved at the end of execution.
 7. `OUTPUT_DIR`: Directory where the serialized output of NullAway should be written.
 8. `NULLAWAY_CONFIG_PATH`: `path_to_config.xml` given to project in time of preparing the project (previous section).
 9. `CSS_CONFIG_PATH`: `path_to_css.xml` given to project in time of preparing the process (previous section).
@@ -92,10 +92,10 @@ Before running, please make sure that all the changes in the `Requirements for t
 The script is written in `python3` in the file `run.py`. It requires the `core.jar` the relative path: `./jars/core.jar` to execute. To recreate/update the `core.jar` please run `python3 updatejar.py`
 
 To run the script a `command` must be passed to the script. A `command` must be one of the followings:
-1. `explore`: It will make `diagnose_report.json` file which is the result of analyizing all fixes comming from `NullAway`
+1. `explore`: It will make `diagnose_report.json` file which is the result of analyzing all fixes coming from `NullAway`
 2. `preprocess`: It will perform a preprocessing phase which adds `@Initialize` annotation to all initializer methods detected by `NullAway`.
 3. `apply`: It will apply all the effective fixes reported in `diagnose_report.json` which reduces the number or errors.
-4. `clean`: It will clean all genereted files.
+4. `clean`: It will clean all generated files.
 5. `run`: First it runs `preprocess`, and then it will run `explore`/`apply` in iterations, until no further new fix is suggested.
 
 ```cmd

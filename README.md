@@ -126,4 +126,4 @@ It installs `CSS` checker in `maven local` and creates the jar file of `core` mo
 
 ## Running Annotator
 
-After following the installation instruction above, please read the instruction [here](runner/README.md) to run tha annotator.
+After following the installation instruction above, please read the instruction [here](runner/README.md) to run the annotator.
