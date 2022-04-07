@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class SuperNode extends AbstractNode {
 
@@ -64,8 +65,18 @@ public class SuperNode extends AbstractNode {
   // Here we do not need to subtract referred for method params since we are observing
   // call sites too.
   @Override
-  public void setEffect(int effect, MethodInheritanceTree tree, List<Fix> fixes) {
-    this.effect = effect;
+  public void setEffect(int effect, MethodInheritanceTree mit, List<Fix> fixes) {
+    Set<Region> subMethodRegions =
+            tree.stream()
+                    .filter(fix -> fix.location.equals(FixType.PARAMETER.name))
+                    .flatMap(
+                            fix ->
+                                    mit.getSubMethods(fix.method, fix.className, false)
+                                            .stream()
+                                            .map(methodNode -> new Region(methodNode.method, methodNode.clazz)))
+                    .filter(region -> !regions.contains(region))
+                    .collect(Collectors.toSet());
+    this.effect = effect + subMethodRegions.size();
   }
 
   @Override
