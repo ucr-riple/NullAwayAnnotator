@@ -34,32 +34,21 @@ import java.util.List;
 
 public class Main {
 
-  //  public static void main(String[] args) {
-  //    if (args.length == 0) {
-  //      throw new RuntimeException("command not specified");
-  //    }
-  //    String command = args[0];
-  //    switch (command) {
-  //      case "apply":
-  //        apply(args);
-  //        break;
-  //      case "explore":
-  //        explore(args);
-  //        break;
-  //      default:
-  //        throw new RuntimeException("Unknown command: " + command);
-  //    }
-  //  }
-
   public static void main(String[] args) {
-    Annotator annotator = new Annotator();
-    Path nullawayConfigPath = Paths.get("/tmp/NullAwayFix/config.xml");
-    String runCommand =
-        "cd /Users/nima/Developer/NullAwayFixer/testannotator && ./gradlew compileJava";
-    annotator.depth = 5;
-    annotator.nullableAnnot = "javax.annotation.Nullable";
-    annotator.lexicalPreservationEnabled = false;
-    annotator.start(runCommand, nullawayConfigPath, false, true);
+    if (args.length == 0) {
+      throw new RuntimeException("command not specified");
+    }
+    String command = args[0];
+    switch (command) {
+      case "apply":
+        apply(args);
+        break;
+      case "explore":
+        explore(args);
+        break;
+      default:
+        throw new RuntimeException("Unknown command: " + command);
+    }
   }
 
   private static void explore(String[] args) {
