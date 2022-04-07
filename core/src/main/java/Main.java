@@ -64,7 +64,12 @@ public class Main {
     annotator.depth = Integer.parseInt(args[3]);
     annotator.nullableAnnot = args[4];
     annotator.lexicalPreservationEnabled = Boolean.parseBoolean(args[5]);
-    annotator.start(runCommand, nullawayConfigPath, Boolean.parseBoolean(args[8]), Boolean.parseBoolean(args[6]), Boolean.parseBoolean(args[7]));
+    annotator.start(
+        runCommand,
+        nullawayConfigPath,
+        Boolean.parseBoolean(args[6]),
+        Boolean.parseBoolean(args[7]),
+        Boolean.parseBoolean(args[8]));
   }
 
   private static void apply(String[] args) {

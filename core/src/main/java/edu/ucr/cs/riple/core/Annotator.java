@@ -129,7 +129,11 @@ public class Annotator {
   }
 
   public void start(
-      String buildCommand, Path nullawayConfigPath, boolean useCache, boolean optimized, boolean bailout) {
+      String buildCommand,
+      Path nullawayConfigPath,
+      boolean useCache,
+      boolean optimized,
+      boolean bailout) {
     log.time = System.currentTimeMillis();
     System.out.println("Annotator Started.");
     this.nullAwayConfigPath = nullawayConfigPath;
