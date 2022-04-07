@@ -55,7 +55,7 @@ public abstract class AbstractNode {
   /** if <code>true</code>, no new triggered error is addressable by a fix */
   public boolean finished;
 
-  /** Regions where error reported **/
+  /** Regions where error reported * */
   protected Set<Region> rootSource;
 
   protected AbstractNode(Fix fix) {
@@ -66,8 +66,9 @@ public abstract class AbstractNode {
     this.finished = false;
   }
 
-  public void setRootSource(Bank<FixEntity> fixBank){
-    this.rootSource = fixBank.getAllSources(
+  public void setRootSource(Bank<FixEntity> fixBank) {
+    this.rootSource =
+        fixBank.getAllSources(
             o -> {
               if (o.fix.equals(this.fix)) {
                 return 0;

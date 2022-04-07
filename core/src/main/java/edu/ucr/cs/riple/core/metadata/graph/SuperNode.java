@@ -62,15 +62,15 @@ public class SuperNode extends AbstractNode {
   @Override
   public void setEffect(int effect, MethodInheritanceTree mit, List<Fix> fixes) {
     Set<Region> subMethodRegions =
-            tree.stream()
-                    .filter(fix -> fix.location.equals(FixType.PARAMETER.name))
-                    .flatMap(
-                            fix ->
-                                    mit.getSubMethods(fix.method, fix.className, false)
-                                            .stream()
-                                            .map(methodNode -> new Region(methodNode.method, methodNode.clazz)))
-                    .filter(region -> !regions.contains(region))
-                    .collect(Collectors.toSet());
+        tree.stream()
+            .filter(fix -> fix.location.equals(FixType.PARAMETER.name))
+            .flatMap(
+                fix ->
+                    mit.getSubMethods(fix.method, fix.className, false)
+                        .stream()
+                        .map(methodNode -> new Region(methodNode.method, methodNode.clazz)))
+            .filter(region -> !regions.contains(region))
+            .collect(Collectors.toSet());
     this.effect = effect + subMethodRegions.size();
   }
 
