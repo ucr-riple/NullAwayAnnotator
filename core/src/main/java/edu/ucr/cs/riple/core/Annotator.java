@@ -129,7 +129,7 @@ public class Annotator {
   }
 
   public void start(
-      String buildCommand, Path nullawayConfigPath, boolean useCache, boolean optimized) {
+      String buildCommand, Path nullawayConfigPath, boolean useCache, boolean optimized, boolean bailout) {
     log.time = System.currentTimeMillis();
     System.out.println("Annotator Started.");
     this.nullAwayConfigPath = nullawayConfigPath;
@@ -150,7 +150,7 @@ public class Annotator {
         });
     log.deep = System.currentTimeMillis();
     if (optimized) {
-      this.deepExplorer.start(finishedReports);
+      this.deepExplorer.start(bailout, finishedReports);
     }
     log.deep = System.currentTimeMillis() - log.deep;
     log.time = System.currentTimeMillis() - log.time;

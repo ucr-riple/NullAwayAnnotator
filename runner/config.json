@@ -1,6 +1,6 @@
 {
-  "PROJECT_PATH": "/Users/nima/Developer/NullAwayFixer/testannotator",
-  "BUILD_COMMAND": "./gradlew compileJava",
+  "PROJECT_PATH": "/Users/nima/Developer/NullAwayFixer/Projects/libgdx",
+  "BUILD_COMMAND": "./gradlew :gdx:compileJava",
   "ANNOTATION": {
     "INITIALIZER": "com.badlogic.gdx.Initializer",
     "NONNULL": "javax.annotation.Nonnull",
@@ -11,5 +11,7 @@
   "NULLAWAY_CONFIG_PATH": "/tmp/NullAwayFix/config.xml",
   "CSS_CONFIG_PATH": "/tmp/NullAwayFix/css.xml",
   "OPTIMIZED": true,
+  "CACHE": true,
+  "BAILOUT": true,
   "DEPTH": 5
 }

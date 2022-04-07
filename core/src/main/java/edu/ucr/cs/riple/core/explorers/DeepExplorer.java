@@ -55,10 +55,13 @@ public class DeepExplorer extends BasicExplorer {
     this.fixGraph = new FixGraph<>(SuperNode::new);
   }
 
-  private boolean init(List<Report> reports) {
+  private boolean init(List<Report> reports, boolean bailout) {
     this.fixGraph.clear();
     Set<Report> filteredReports =
-        reports.stream().filter(report -> !report.finished).collect(Collectors.toSet());
+        reports
+            .stream()
+            .filter(report -> (!bailout || report.effectiveNess > 0) && !report.finished)
+            .collect(Collectors.toSet());
     filteredReports.forEach(
         report -> {
           Fix fix = report.fix;
@@ -81,7 +84,7 @@ public class DeepExplorer extends BasicExplorer {
     return filteredReports.size() > 0;
   }
 
-  public void start(List<Report> reports) {
+  public void start(boolean bailout, List<Report> reports) {
     if (annotator.depth == 0) {
       reports.forEach(report -> report.finished = true);
       return;
@@ -89,7 +92,7 @@ public class DeepExplorer extends BasicExplorer {
     System.out.println("Deep explorer is active...\nMax Depth level: " + annotator.depth);
     for (int i = 0; i < annotator.depth; i++) {
       System.out.print("Analyzing at level " + (i + 1) + ", ");
-      if (!init(reports)) {
+      if (!init(reports, bailout)) {
         break;
       }
       explore();
