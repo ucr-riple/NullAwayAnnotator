@@ -25,11 +25,13 @@
 package edu.ucr.cs.riple.core.metadata.index;
 
 import com.google.common.base.Preconditions;
+import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 
 public class Bank<T extends Hashable> {
 
@@ -93,7 +95,7 @@ public class Bank<T extends Hashable> {
     return lines - rootInClass.total;
   }
 
-  public List<T> getAllEntities() {
-    return rootInClass.getAllEntities();
+  public Set<Region> getAllSources(Comparable<T> c) {
+    return rootInClass.getAllSources(c);
   }
 }

@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.metadata.index;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -35,6 +36,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Index<T extends Hashable> {
@@ -141,5 +143,13 @@ public class Index<T extends Hashable> {
     List<T> ans = new ArrayList<>();
     items.forEach((integer, ts) -> ans.addAll(ts));
     return ans;
+  }
+
+  public Set<Region> getAllSources(Comparable<T> comparable) {
+    return getAllEntities()
+        .stream()
+        .filter(t -> comparable.compareTo(t) == 0)
+        .map(t -> new Region(t.method, t.clazz))
+        .collect(Collectors.toSet());
   }
 }

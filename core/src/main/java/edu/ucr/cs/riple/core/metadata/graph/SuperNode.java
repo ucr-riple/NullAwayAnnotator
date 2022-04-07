@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.core.metadata.graph;
 import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
+import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ public class SuperNode extends AbstractNode {
   public final Set<Fix> tree;
   public Report report;
   private final Node root;
+  private Set<Region> rootSource;
 
   public SuperNode(Fix fix) {
     super(fix);
@@ -48,9 +50,14 @@ public class SuperNode extends AbstractNode {
     this.tree.add(root.fix);
   }
 
+  public void setRootSource(Set<Region> rootSource) {
+    this.rootSource = rootSource;
+  }
+
   @Override
   public void updateUsages(RegionTracker tracker) {
     this.regions.clear();
+    this.regions.addAll(this.rootSource);
     tree.forEach(fix -> regions.addAll(tracker.getRegions(fix)));
   }
 
@@ -58,8 +65,7 @@ public class SuperNode extends AbstractNode {
   // call sites too.
   @Override
   public void setEffect(int effect, MethodInheritanceTree tree, List<Fix> fixes) {
-    this.effect =
-        root.fix.location.equals(FixType.PARAMETER.name) ? effect - root.fix.referred : effect;
+    this.effect = effect;
   }
 
   @Override

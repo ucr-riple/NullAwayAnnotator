@@ -63,6 +63,14 @@ public class DeepExplorer extends BasicExplorer {
         report -> {
           Fix fix = report.fix;
           SuperNode node = fixGraph.findOrCreate(fix);
+          node.setRootSource(
+              fixBank.getAllSources(
+                  o -> {
+                    if (o.fix.equals(fix)) {
+                      return 0;
+                    }
+                    return -10;
+                  }));
           node.report = report;
           node.triggered = report.triggered;
           node.tree.addAll(report.followups);
