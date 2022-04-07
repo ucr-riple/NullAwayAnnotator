@@ -42,6 +42,7 @@ public class MethodExplorer extends AdvancedExplorer {
   @Override
   protected void init() {
     tracker = annotator.methodRegionTracker;
+    fixGraph.getAllNodes().forEach(node -> node.setRootSource(fixBank));
     fixGraph.updateUsages(tracker);
     fixGraph.findGroups();
   }

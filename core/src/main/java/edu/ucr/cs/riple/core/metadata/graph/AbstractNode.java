@@ -25,7 +25,9 @@
 package edu.ucr.cs.riple.core.metadata.graph;
 
 import edu.ucr.cs.riple.core.FixType;
+import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
+import edu.ucr.cs.riple.core.metadata.index.FixEntity;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
@@ -53,12 +55,25 @@ public abstract class AbstractNode {
   /** if <code>true</code>, no new triggered error is addressable by a fix */
   public boolean finished;
 
+  /** Regions where error reported **/
+  protected Set<Region> rootSource;
+
   protected AbstractNode(Fix fix) {
     this.regions = new HashSet<>();
     this.fix = fix;
     this.triggered = new HashSet<>();
     this.effect = 0;
     this.finished = false;
+  }
+
+  public void setRootSource(Bank<FixEntity> fixBank){
+    this.rootSource = fixBank.getAllSources(
+            o -> {
+              if (o.fix.equals(this.fix)) {
+                return 0;
+              }
+              return -10;
+            });
   }
 
   public abstract void updateUsages(RegionTracker tracker);

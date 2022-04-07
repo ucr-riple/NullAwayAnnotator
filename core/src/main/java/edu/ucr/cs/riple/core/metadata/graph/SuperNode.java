@@ -42,17 +42,12 @@ public class SuperNode extends AbstractNode {
   public final Set<Fix> tree;
   public Report report;
   private final Node root;
-  private Set<Region> rootSource;
 
   public SuperNode(Fix fix) {
     super(fix);
     this.tree = new HashSet<>();
     this.root = new Node(fix);
     this.tree.add(root.fix);
-  }
-
-  public void setRootSource(Set<Region> rootSource) {
-    this.rootSource = rootSource;
   }
 
   @Override

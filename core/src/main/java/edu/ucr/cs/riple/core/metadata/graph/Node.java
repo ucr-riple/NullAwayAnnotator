@@ -39,13 +39,14 @@ public class Node extends AbstractNode {
   }
 
   public void updateUsages(RegionTracker tracker) {
+    this.regions.addAll(this.rootSource);
     this.regions.addAll(tracker.getRegions(this.fix));
   }
 
-  // We need to subtract referred in METHOD_PARAM since all errors are happening
-  // inside the method boundary and all referred sites are outside (at call sites)
   @Override
   public void setEffect(int localEffect, MethodInheritanceTree tree, List<Fix> fixesInOneRound) {
+    // Need to subtract referred in PARAMETER since all errors are happening
+    // inside the method boundary and all referred sites are outside (at call sites)
     if (fix.location.equals(FixType.PARAMETER.name)) {
       this.effect =
           localEffect
@@ -56,11 +57,10 @@ public class Node extends AbstractNode {
     if (fix.location.equals(FixType.METHOD.name)) {
       this.effect =
           localEffect
-              + Utility.calculateMethodInheritanceViolationError(tree, this.fix, fixesInOneRound)
-              - 1;
+              + Utility.calculateMethodInheritanceViolationError(tree, this.fix, fixesInOneRound);
     }
     if (fix.location.equals(FixType.FIELD.name)) {
-      this.effect = localEffect - 1;
+      this.effect = localEffect;
     }
   }
 

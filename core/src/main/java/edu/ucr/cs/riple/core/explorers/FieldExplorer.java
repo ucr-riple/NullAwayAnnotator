@@ -42,6 +42,7 @@ public class FieldExplorer extends AdvancedExplorer {
   @Override
   protected void init() {
     this.tracker = annotator.fieldRegionTracker;
+    fixGraph.getAllNodes().forEach(node -> node.setRootSource(fixBank));
     fixGraph.updateUsages(tracker);
     fixGraph.findGroups();
   }
