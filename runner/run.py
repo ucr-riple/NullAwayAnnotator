@@ -155,7 +155,7 @@ def explore():
     tools.write_css_config_in_xml(False, out_dir, css_config_path)
     uprint("Starting Exploration Phase...")
     tools.run_jar("explore", nullaway_config_path, "'{}'".format(build_command), data['DEPTH'],
-                  data['ANNOTATION']['NULLABLE'], format_style, data['CACHE'], data['OPTIMIZED'], data['BAILOUT'])
+                  data['ANNOTATION']['NULLABLE'], format_style, data['CACHE'], data['OPTIMIZED'], data['BAILOUT'], data['CHAIN'])
 
 
 def apply_effective_fixes():

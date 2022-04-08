@@ -133,7 +133,8 @@ public class Annotator {
       Path nullawayConfigPath,
       boolean useCache,
       boolean optimized,
-      boolean bailout) {
+      boolean bailout,
+      boolean chain) {
     log.time = System.currentTimeMillis();
     System.out.println("Annotator Started.");
     this.nullAwayConfigPath = nullawayConfigPath;
@@ -158,7 +159,7 @@ public class Annotator {
     }
     log.deep = System.currentTimeMillis() - log.deep;
     log.time = System.currentTimeMillis() - log.time;
-    Utility.writeReports(dir, finishedReports);
+    Utility.writeReports(dir, finishedReports, chain);
     Utility.writeLog(this);
   }
 

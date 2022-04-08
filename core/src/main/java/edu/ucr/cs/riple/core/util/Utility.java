@@ -70,7 +70,7 @@ public class Utility {
   }
 
   @SuppressWarnings("ALL")
-  public static void writeReports(Path dir, List<Report> reports) {
+  public static void writeReports(Path dir, List<Report> reports, boolean chain) {
     JSONObject result = new JSONObject();
     JSONArray reportsJson = new JSONArray();
     for (Report report : reports) {
@@ -78,7 +78,7 @@ public class Utility {
       reportJson.put("effect", report.effectiveNess);
       reportJson.put("finished", report.finished);
       JSONArray followUps = new JSONArray();
-      if (report.effectiveNess < 1) {
+      if (chain && report.effectiveNess < 1) {
         report.followups.remove(report.fix);
         followUps.addAll(
             report.followups.stream().map(fix -> fix.getJson()).collect(Collectors.toList()));

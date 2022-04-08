@@ -52,10 +52,10 @@ public class Main {
   }
 
   private static void explore(String[] args) {
-    if (args.length != 9) {
+    if (args.length != 10) {
       throw new RuntimeException(
-          "Annotator: explore needs 6 arguments: 1. command to execute NullAway, "
-              + "2. output directory, 3. Annotator Depth level, 4. Nullable Annotation, 5. style 6. optimization flag, 7. Bail Out, 8. Cache. But received: "
+          "Annotator: explore needs 9 arguments: 1. command to execute NullAway, "
+              + "2. output directory, 3. Annotator Depth level, 4. Nullable Annotation, 5. style 6. optimization flag, 7. Bail Out, 8. Cache, 9. Chain But received: "
               + Arrays.toString(args));
     }
     Annotator annotator = new Annotator();
@@ -69,7 +69,8 @@ public class Main {
         nullawayConfigPath,
         Boolean.parseBoolean(args[6]),
         Boolean.parseBoolean(args[7]),
-        Boolean.parseBoolean(args[8]));
+        Boolean.parseBoolean(args[8]),
+        Boolean.parseBoolean(args[9]));
   }
 
   private static void apply(String[] args) {
