@@ -22,7 +22,7 @@
 
 allprojects {
     group 'edu.ucr.cs.riple.nullawayannotator'
-    version '1.2.3-LOCAL'
+    version '1.2.4-LOCAL'
 }
 
 subprojects {
