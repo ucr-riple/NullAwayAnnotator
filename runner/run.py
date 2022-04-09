@@ -125,7 +125,7 @@ def preprocess():
             if method['class'] == field['class'] and field['param'] in method['fields']:
                 method['score'] += 1
 
-    init_methods = {"fixes": []}
+    to_apply = []
     for field in fields:
         max_score = -1
         candidate_method = None
@@ -141,8 +141,20 @@ def preprocess():
             candidate_method['annotation'] = data['ANNOTATION']['INITIALIZER']
             candidate_method['param'] = ""
             candidate_method['reason'] = "Initializer"
-            if candidate_method not in init_methods['fixes']:
-                init_methods['fixes'].append(candidate_method)
+            candidate_method['score'] = max_score
+            if candidate_method not in to_apply:
+                to_apply.append(candidate_method)
+
+    finalized = {}
+    for i in to_apply:
+        if i['class'] in finalized.keys() and finalized[i['class']]['score'] < i['score']:
+            finalized[i['class']] = i
+            finalized[i['class']]['score'] = i['score']
+        elif i['class'] not in finalized.keys():
+            finalized[i['class']] = i
+            finalized[i['class']]['score'] = i['score']
+
+    init_methods = {"fixes": list(finalized.values())}
 
     uprint("Annotating as {}".format(data['ANNOTATION']['INITIALIZER']))
     init_methods_path = join(out_dir, "init_methods.json")
@@ -155,7 +167,8 @@ def explore():
     tools.write_css_config_in_xml(False, out_dir, css_config_path)
     uprint("Starting Exploration Phase...")
     tools.run_jar("explore", nullaway_config_path, "'{}'".format(build_command), data['DEPTH'],
-                  data['ANNOTATION']['NULLABLE'], format_style, data['CACHE'], data['OPTIMIZED'], data['BAILOUT'], data['CHAIN'])
+                  data['ANNOTATION']['NULLABLE'], format_style, data['CACHE'], data['OPTIMIZED'], data['BAILOUT'],
+                  data['CHAIN'])
 
 
 def apply_effective_fixes():

@@ -76,14 +76,24 @@ public class Annotator {
   public static final Log log = new Log();
 
   public static class Log {
-    int total;
+    public int total;
     int requested;
     long time;
     long deep;
+    long buildTime = 0;
 
     @Override
     public String toString() {
-      return "total=" + total + ", requested=" + requested + ", time=" + time + ", deep=" + deep;
+      return "total="
+          + total
+          + ", requested="
+          + requested
+          + ", time="
+          + time
+          + ", deep="
+          + deep
+          + ", buildTime="
+          + buildTime;
     }
   }
 
@@ -155,7 +165,7 @@ public class Annotator {
         });
     log.deep = System.currentTimeMillis();
     if (optimized) {
-      this.deepExplorer.start(bailout, finishedReports);
+      this.deepExplorer.start(bailout, finishedReports, log);
     }
     log.deep = System.currentTimeMillis() - log.deep;
     log.time = System.currentTimeMillis() - log.time;
@@ -217,7 +227,9 @@ public class Annotator {
     }
     writer.writeAsXML(nullAwayConfigPath.toString());
     try {
+      long start = System.currentTimeMillis();
       Utility.executeCommand(buildCommand);
+      log.buildTime += System.currentTimeMillis() - start;
     } catch (Exception e) {
       throw new RuntimeException("Could not run command: " + buildCommand);
     }

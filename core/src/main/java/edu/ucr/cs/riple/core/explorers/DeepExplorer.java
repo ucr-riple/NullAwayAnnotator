@@ -77,7 +77,7 @@ public class DeepExplorer extends BasicExplorer {
     return filteredReports.size() > 0;
   }
 
-  public void start(boolean bailout, List<Report> reports) {
+  public void start(boolean bailout, List<Report> reports, Annotator.Log log) {
     if (annotator.depth == 0) {
       reports.forEach(report -> report.finished = true);
       return;
@@ -88,7 +88,7 @@ public class DeepExplorer extends BasicExplorer {
       if (!init(reports, bailout)) {
         break;
       }
-      explore();
+      explore(log);
       List<SuperNode> nodes = fixGraph.getAllNodes();
       nodes.forEach(
           superNode -> {
@@ -101,7 +101,7 @@ public class DeepExplorer extends BasicExplorer {
     }
   }
 
-  private void explore() {
+  private void explore(Annotator.Log log) {
     if (fixGraph.nodes.size() == 0) {
       return;
     }
@@ -119,6 +119,7 @@ public class DeepExplorer extends BasicExplorer {
       pb.step();
       List<Fix> fixes = new ArrayList<>();
       group.forEach(superNode -> fixes.addAll(superNode.getFixChain()));
+      log.total += fixes.size();
       annotator.apply(fixes);
       FixSerializationConfig.Builder config =
           new FixSerializationConfig.Builder()
