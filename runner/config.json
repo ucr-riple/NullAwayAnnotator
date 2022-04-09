@@ -10,9 +10,9 @@
   "OUTPUT_DIR": "/tmp/NullAwayFix",
   "NULLAWAY_CONFIG_PATH": "/tmp/NullAwayFix/config.xml",
   "CSS_CONFIG_PATH": "/tmp/NullAwayFix/css.xml",
-  "CHAIN": true,
+  "CHAIN": false,
   "OPTIMIZED": true,
   "CACHE": true,
   "BAILOUT": true,
-  "DEPTH": 5
+  "DEPTH": 8
 }
