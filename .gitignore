@@ -26,3 +26,5 @@ gradle-app.setting
 /venv/
 /data
 /CSS/build/
+
+/runner/jars/core.jar
