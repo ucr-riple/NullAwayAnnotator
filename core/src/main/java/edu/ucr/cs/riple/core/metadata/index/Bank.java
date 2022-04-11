@@ -95,6 +95,12 @@ public class Bank<T extends Hashable> {
     return lines - rootInClass.total;
   }
 
+  public Result<T> compareFull(){
+    Index<T> latest = new Index<>(path, Index.Type.BY_CLASS, factory);
+    latest.index();
+    return compareByList(rootInClass.getAllEntities(), latest.getAllEntities());
+  }
+
   public Set<Region> getAllSources(Comparable<T> c) {
     return rootInClass.getAllSources(c);
   }

@@ -41,6 +41,7 @@ public class Report {
     this.fix = fix;
     this.followups = new HashSet<>();
     this.finished = false;
+    this.triggered = new HashSet<>();
   }
 
   public static Report empty(Fix fix) {

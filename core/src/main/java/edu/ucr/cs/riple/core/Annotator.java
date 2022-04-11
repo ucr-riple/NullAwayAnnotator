@@ -133,9 +133,9 @@ public class Annotator {
       this.explorers.add(new ParameterExplorer(this, allFixes, errorBank, fixBank));
       this.explorers.add(new FieldExplorer(this, allFixes, errorBank, fixBank));
       this.explorers.add(new MethodExplorer(this, allFixes, errorBank, fixBank));
-      this.deepExplorer = new DeepExplorer(this, errorBank, fixBank);
     }
     this.explorers.add(new BasicExplorer(this, errorBank, fixBank));
+    this.deepExplorer = new DeepExplorer(this, errorBank, fixBank);
     return allFixes;
   }
 
@@ -165,8 +165,8 @@ public class Annotator {
           }
         });
     log.deep = System.currentTimeMillis();
-    if (optimized && depth > -1) {
-      this.deepExplorer.start(bailout, finishedReports, log);
+    if (depth > -1) {
+      this.deepExplorer.start(bailout, optimized, finishedReports, log);
     }
     log.deep = System.currentTimeMillis() - log.deep;
     log.time = System.currentTimeMillis() - log.time;
