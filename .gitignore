@@ -28,3 +28,4 @@ gradle-app.setting
 /CSS/build/
 
 /runner/jars/core.jar
+**/__pycache__/
