@@ -98,7 +98,7 @@ public class Annotator {
   }
 
   private List<Fix> init(String buildCommand, boolean useCache, boolean optimized) {
-    System.out.println("Initializing Explorers.");
+    System.out.println("Making the first build.");
     this.buildCommand = buildCommand;
     this.finishedReports = new ArrayList<>();
     FixSerializationConfig.Builder builder =
@@ -128,7 +128,8 @@ public class Annotator {
     if (depth < 0) {
       this.explorers.add(new DummyExplorer(this, null, null));
     }
-    if (optimized) {
+    if (optimized && depth > -1) {
+      System.out.println("Initializing Explorers.");
       this.explorers.add(new ParameterExplorer(this, allFixes, errorBank, fixBank));
       this.explorers.add(new FieldExplorer(this, allFixes, errorBank, fixBank));
       this.explorers.add(new MethodExplorer(this, allFixes, errorBank, fixBank));
@@ -164,7 +165,7 @@ public class Annotator {
           }
         });
     log.deep = System.currentTimeMillis();
-    if (optimized) {
+    if (optimized && depth > -1) {
       this.deepExplorer.start(bailout, finishedReports, log);
     }
     log.deep = System.currentTimeMillis() - log.deep;

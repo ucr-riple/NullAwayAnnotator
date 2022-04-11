@@ -78,7 +78,7 @@ public class DeepExplorer extends BasicExplorer {
   }
 
   public void start(boolean bailout, List<Report> reports, Annotator.Log log) {
-    if (annotator.depth == 0) {
+    if (annotator.depth <= 0) {
       reports.forEach(report -> report.finished = true);
       return;
     }
