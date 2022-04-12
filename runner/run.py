@@ -80,6 +80,7 @@ def build_project(init_active="true"):
     new_config['serialization']['annotation']['nullable'] = data['ANNOTATION']['NULLABLE']
     new_config['serialization']['annotation']['nonnull'] = data['ANNOTATION']['NONNULL']
     new_config['serialization']['fieldInitInfo']['@active'] = init_active
+    new_config['serialization']['path'] = out_dir
     tools.write_nullaway_config_in_xml(new_config, nullaway_config_path)
     os.system(build_command + " > /dev/null 2>&1")
 
