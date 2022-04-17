@@ -62,18 +62,18 @@ public class DeepExplorer extends BasicExplorer {
             .stream()
             .filter(report -> (!bailout || report.effectiveNess > 0) && !report.finished)
             .collect(Collectors.toSet());
-        filteredReports.forEach(
-                report -> {
-                    Fix fix = report.fix;
-                    SuperNode node = fixGraph.findOrCreate(fix);
-                    node.setRootSource(fixBank);
-                    node.report = report;
-                    node.triggered = report.triggered;
-                    node.tree.addAll(report.followups);
-                    node.mergeTriggered();
-                    node.updateUsages(tracker);
-                    node.changed = false;
-                });
+    filteredReports.forEach(
+        report -> {
+          Fix fix = report.fix;
+          SuperNode node = fixGraph.findOrCreate(fix);
+          node.setRootSource(fixBank);
+          node.report = report;
+          node.triggered = report.triggered;
+          node.tree.addAll(report.followups);
+          node.mergeTriggered();
+          node.updateUsages(tracker);
+          node.changed = false;
+        });
 
     return filteredReports.size() > 0;
   }
@@ -106,9 +106,9 @@ public class DeepExplorer extends BasicExplorer {
     if (fixGraph.nodes.size() == 0) {
       return;
     }
-    if (!optimized){
-        exploreNonOptimized();
-        return;
+    if (!optimized) {
+      exploreNonOptimized();
+      return;
     }
     fixGraph.findGroups();
     HashMap<Integer, Set<SuperNode>> groups = fixGraph.getGroups();
@@ -160,36 +160,34 @@ public class DeepExplorer extends BasicExplorer {
     pb.close();
   }
 
-    private void exploreNonOptimized() {
-        List<SuperNode> nodes = fixGraph.getAllNodes();
-        System.out.println(
-                "Scheduling for: "
-                        + nodes.size()
-                        + " builds for: "
-                        + nodes.size()
-                        + " reports");
-        for (SuperNode node: nodes){
-            ProgressBar pb = Utility.createProgressBar("Deep analysis", 1);
-            pb.setExtraMessage("Building");
-            List<Fix> fixes = new ArrayList<>(node.getFixChain());
-            annotator.apply(fixes);
-            FixSerializationConfig.Builder config =
-                    new FixSerializationConfig.Builder()
-                            .setSuggest(true, true)
-                            .setAnnotations(annotator.nullableAnnot, "UNKNOWN")
-                            .setOutputDirectory(annotator.dir.toString());
-            annotator.buildProject(config);
-            errorBank.saveState(false, true);
-            fixBank.saveState(false, true);
-            int totalEffect = errorBank.compare();
-            List<Fix> localTriggered = fixBank
-                    .compareFull()
-                    .dif
-                    .stream()
-                    .map(fixEntity -> fixEntity.fix).collect(Collectors.toList());
-            node.updateTriggered(localTriggered);
-            node.setEffect(totalEffect, annotator.methodInheritanceTree, null);
-            annotator.remove(fixes);
-        }
+  private void exploreNonOptimized() {
+    List<SuperNode> nodes = fixGraph.getAllNodes();
+    System.out.println(
+        "Scheduling for: " + nodes.size() + " builds for: " + nodes.size() + " reports");
+    for (SuperNode node : nodes) {
+      ProgressBar pb = Utility.createProgressBar("Deep analysis", 1);
+      pb.setExtraMessage("Building");
+      List<Fix> fixes = new ArrayList<>(node.getFixChain());
+      annotator.apply(fixes);
+      FixSerializationConfig.Builder config =
+          new FixSerializationConfig.Builder()
+              .setSuggest(true, true)
+              .setAnnotations(annotator.nullableAnnot, "UNKNOWN")
+              .setOutputDirectory(annotator.dir.toString());
+      annotator.buildProject(config);
+      errorBank.saveState(false, true);
+      fixBank.saveState(false, true);
+      int totalEffect = errorBank.compare();
+      List<Fix> localTriggered =
+          fixBank
+              .compareFull()
+              .dif
+              .stream()
+              .map(fixEntity -> fixEntity.fix)
+              .collect(Collectors.toList());
+      node.updateTriggered(localTriggered);
+      node.setEffect(totalEffect, annotator.methodInheritanceTree, null);
+      annotator.remove(fixes);
     }
+  }
 }
