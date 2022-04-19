@@ -22,7 +22,9 @@
  * THE SOFTWARE.
  */
 
+import edu.ucr.cs.css.XMLUtil;
 import edu.ucr.cs.riple.core.Annotator;
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
@@ -58,19 +60,24 @@ public class Main {
               + "2. output directory, 3. Annotator Depth level, 4. Nullable Annotation, 5. style 6. optimization flag, 7. Bail Out, 8. Cache, 9. Chain But received: "
               + Arrays.toString(args));
     }
+    Config config = new Config();
     Annotator annotator = new Annotator();
-    Path nullawayConfigPath = Paths.get(args[1]);
+    Path nullAwayConfigPath = Paths.get(args[1]);
     String runCommand = args[2];
-    annotator.depth = Integer.parseInt(args[3]);
-    annotator.nullableAnnot = args[4];
-    annotator.lexicalPreservationEnabled = Boolean.parseBoolean(args[5]);
-    annotator.start(
-        runCommand,
-        nullawayConfigPath,
-        Boolean.parseBoolean(args[6]),
-        Boolean.parseBoolean(args[7]),
-        Boolean.parseBoolean(args[8]),
-        Boolean.parseBoolean(args[9]));
+    config.depth = Integer.parseInt(args[3]);
+    config.nullableAnnot = args[4];
+    config.lexicalPreservationEnabled = Boolean.parseBoolean(args[5]);
+    config.useCache = Boolean.parseBoolean(args[6]);
+    config.buildCommand = runCommand;
+    config.nullAwayConfigPath = nullAwayConfigPath;
+    config.optimized = Boolean.parseBoolean(args[7]);
+    config.bailout = Boolean.parseBoolean(args[8]);
+    config.chain = Boolean.parseBoolean(args[9]);
+    config.dir =
+        Paths.get(
+            XMLUtil.getValueFromTag(config.nullAwayConfigPath, "/serialization/path", String.class)
+                .orElse("/tmp/NullAwayFix"));
+    annotator.start(config);
   }
 
   private static void apply(String[] args) {

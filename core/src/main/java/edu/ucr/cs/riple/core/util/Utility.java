@@ -24,8 +24,10 @@
 
 package edu.ucr.cs.riple.core.util;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Booleans;
 import edu.ucr.cs.riple.core.Annotator;
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
@@ -45,8 +47,10 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import me.tongfei.progressbar.ProgressBar;
 import me.tongfei.progressbar.ProgressBarStyle;
@@ -70,18 +74,19 @@ public class Utility {
   }
 
   @SuppressWarnings("ALL")
-  public static void writeReports(Path dir, List<Report> reports, boolean chain) {
+  public static void writeReports(Config config, ImmutableSet<Report> reports) {
+    Path reportsPath = config.dir.resolve("diagnose_report.json");
     JSONObject result = new JSONObject();
     JSONArray reportsJson = new JSONArray();
     for (Report report : reports) {
-      JSONObject reportJson = report.fix.getJson();
+      JSONObject reportJson = report.root.getJson();
       reportJson.put("effect", report.effectiveNess);
       reportJson.put("finished", report.finished);
       JSONArray followUps = new JSONArray();
-      if (chain && report.effectiveNess < 1) {
-        report.followups.remove(report.fix);
+      if (config.chain && report.effectiveNess < 1) {
+        report.tree.remove(report.root);
         followUps.addAll(
-            report.followups.stream().map(fix -> fix.getJson()).collect(Collectors.toList()));
+            report.tree.stream().map(fix -> fix.getJson()).collect(Collectors.toList()));
       }
       reportJson.put("followups", followUps);
       reportsJson.add(reportJson);
@@ -100,13 +105,12 @@ public class Utility {
         });
     result.put("reports", reportsJson);
     try {
-      FileWriter writer = new FileWriter(dir.resolve("diagnose_report.json").toFile());
+      FileWriter writer = new FileWriter(reportsPath.toFile());
       writer.write(result.toJSONString().replace("\\/", "/").replace("\\\\\\", "\\"));
       writer.flush();
     } catch (IOException e) {
       throw new RuntimeException(
-          "Could not create the Annotator report json file: " + dir.resolve("diagnose_report.json"),
-          e);
+          "Could not create the Annotator report json file: " + reportsPath, e);
     }
   }
 
@@ -135,8 +139,8 @@ public class Utility {
     return Arrays.stream(content.split(",")).toArray(String[]::new);
   }
 
-  public static List<Fix> readAllFixes(Path path) {
-    List<Fix> fixes = new ArrayList<>();
+  public static ImmutableSet<Fix> readAllFixes(Path path) {
+    Set<Fix> fixes = new HashSet<>();
     try {
       try (BufferedReader br = new BufferedReader(new FileReader(path.toFile()))) {
         String line;
@@ -155,17 +159,17 @@ public class Utility {
     } catch (IOException e) {
       throw new RuntimeException("Exception happened in reading fixes at: " + path, e);
     }
-    return fixes;
+    return ImmutableSet.copyOf(fixes);
   }
 
-  public static void removeCachedFixes(List<Fix> fixes, Path outDir) {
-    if (!Files.exists(outDir.resolve("reports.json"))) {
+  public static void removeCachedFixes(ImmutableSet<Fix> fixes, Config config) {
+    Path reportsPath = config.dir.resolve("reports.json");
+    if (!Files.exists(reportsPath)) {
       return;
     }
     try {
       JSONObject cachedObjects =
-          (JSONObject)
-              new JSONParser().parse(new FileReader(outDir.resolve("reports.json").toFile()));
+          (JSONObject) new JSONParser().parse(new FileReader(reportsPath.toFile()));
       JSONArray cachedJson = (JSONArray) cachedObjects.get("reports");
       List<Fix> cached = new ArrayList<>();
       for (Object o : cachedJson) {
@@ -225,9 +229,9 @@ public class Utility {
         Duration.ZERO);
   }
 
-  public static void writeLog(Annotator annotator) {
+  public static void writeLog(Config config) {
     try {
-      FileWriter fw = new FileWriter(annotator.dir.resolve("log.txt").toFile(), true);
+      FileWriter fw = new FileWriter(config.dir.resolve("log.txt").toFile(), true);
       BufferedWriter bw = new BufferedWriter(fw);
       bw.write(Annotator.log.toString());
       bw.newLine();

@@ -1,1 +1,1 @@
-{"fixes":[{"annotation":"javax.annotation.Nullable","method":"test()","param":"","index":null,"location":"METHOD","class":"com.uber.Super","pkg":"com.uber","inject":"true","uri":"/Users/nima/Developer/NullAwayFixer/NullAwayAnnotator/injector/tests/save_imports_asterisk/src/Super.java"}]}
+{"fixes":[{"annotation":"javax.annotation.Nullable","method":"test()","param":"","index":null,"location":"METHOD","class":"com.uber.Super","pkg":"com.uber","inject":"true","uri":"/home/nima/Developer/AutoFixer/NullAwayAnnotator/injector/tests/save_imports_asterisk/src/Super.java"}]}

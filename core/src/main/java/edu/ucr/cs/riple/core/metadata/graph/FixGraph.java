@@ -24,19 +24,18 @@
 
 package edu.ucr.cs.riple.core.metadata.graph;
 
-import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.injector.Fix;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-public class FixGraph<T extends AbstractNode> {
+public class FixGraph<T extends Node> {
   public final HashMap<Integer, Set<T>> nodes;
-
   private final HashMap<Integer, Set<T>> groups;
   private final Factory<T> factory;
 
@@ -47,10 +46,10 @@ public class FixGraph<T extends AbstractNode> {
   }
 
   public T findOrCreate(Fix fix) {
-    int hash = AbstractNode.getHash(fix);
+    int hash = Node.getHash(fix);
     if (nodes.containsKey(hash)) {
       for (T candidate : nodes.get(hash)) {
-        if (candidate.fix.equals(fix)) {
+        if (candidate.root.equals(fix)) {
           return candidate;
         }
       }
@@ -65,25 +64,13 @@ public class FixGraph<T extends AbstractNode> {
     return newNode;
   }
 
-  public T find(Fix fix) {
-    int hash = AbstractNode.getHash(fix);
-    if (nodes.containsKey(hash)) {
-      for (T candidate : nodes.get(hash)) {
-        if (candidate.fix.equals(fix)) {
-          return candidate;
-        }
-      }
-    }
-    return null;
-  }
-
   @SuppressWarnings("ALL")
   public void remove(Fix fix) {
-    int hash = AbstractNode.getHash(fix);
+    int hash = Node.getHash(fix);
     T toRemove = null;
     if (nodes.containsKey(hash)) {
       for (T candidate : nodes.get(hash)) {
-        if (candidate.fix.equals(fix)) {
+        if (candidate.root.equals(fix)) {
           toRemove = candidate;
           break;
         }
@@ -92,16 +79,15 @@ public class FixGraph<T extends AbstractNode> {
     nodes.remove(toRemove);
   }
 
-  public void updateUsages(RegionTracker tracker) {
-    getAllNodes().forEach(t -> t.updateUsages(tracker));
-  }
-
-  @SuppressWarnings("All")
-  public void findGroups() {
+  public void findGroups(boolean optimized) {
     this.groups.clear();
     List<T> allNodes = getAllNodes();
     final int[] id = {0};
     allNodes.forEach(node -> node.id = id[0]++);
+    if (!optimized) {
+      allNodes.forEach(t -> groups.put(t.id, Collections.singleton(t)));
+      return;
+    }
     int size = allNodes.size();
     LinkedList<Integer>[] adj = new LinkedList[size];
     for (int i = 0; i < size; ++i) {

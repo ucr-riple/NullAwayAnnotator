@@ -24,8 +24,10 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
+import edu.ucr.cs.css.Serializer;
 import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.injector.Fix;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,11 +37,10 @@ public class CompoundTracker implements RegionTracker {
 
   private final List<RegionTracker> trackers;
 
-  public CompoundTracker(
-      FieldRegionTracker fieldRegionTracker, MethodRegionTracker methodRegionTracker) {
+  public CompoundTracker(Path dir) {
     this.trackers = new ArrayList<>();
-    this.trackers.add(fieldRegionTracker);
-    this.trackers.add(methodRegionTracker);
+    this.trackers.add(new FieldRegionTracker(dir.resolve(Serializer.FIELD_GRAPH_NAME)));
+    this.trackers.add(new MethodRegionTracker(dir.resolve(Serializer.CALL_GRAPH_NAME)));
     this.trackers.add(
         fix -> {
           if (!fix.location.equals(FixType.PARAMETER.name)) {

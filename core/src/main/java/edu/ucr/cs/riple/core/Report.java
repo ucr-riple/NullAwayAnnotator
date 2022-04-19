@@ -31,15 +31,15 @@ import java.util.Set;
 public class Report {
 
   public int effectiveNess;
-  public Fix fix;
-  public Set<Fix> followups;
+  public Fix root;
+  public Set<Fix> tree;
   public Set<Fix> triggered;
   public boolean finished;
 
-  public Report(Fix fix, int effectiveNess) {
+  public Report(Fix root, int effectiveNess) {
     this.effectiveNess = effectiveNess;
-    this.fix = fix;
-    this.followups = new HashSet<>();
+    this.root = root;
+    this.tree = new HashSet<>();
     this.finished = false;
     this.triggered = new HashSet<>();
   }
@@ -50,6 +50,6 @@ public class Report {
 
   @Override
   public String toString() {
-    return "effectiveNess=" + effectiveNess + ", fix=" + fix + ", finished=" + finished + '}';
+    return "effectiveNess=" + effectiveNess + ", fix=" + root + ", finished=" + finished + '}';
   }
 }

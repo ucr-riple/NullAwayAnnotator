@@ -34,7 +34,8 @@ def versions = [
         autoService            : "1.0-rc7",
         javaparser             : "3.24.0",
         json                   : "1.1.1",
-        nullaway               : "0.9.6"
+        nullaway               : "0.9.6",
+        guava                  : "31.0.1-jre"
 ]
 
 def apt = [

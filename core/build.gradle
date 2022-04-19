@@ -36,7 +36,7 @@ dependencies {
     implementation project(':injector')
     implementation project(':css')
 
-    implementation group: 'com.google.guava', name: 'guava', version: 'r05'
+    implementation group: 'com.google.guava', name: 'guava', version:"${deps.versions.guava}"
 
     implementation group: 'com.googlecode.json-simple', name:'json-simple', version:"${deps.versions.json}"
     testImplementation group: 'com.googlecode.json-simple', name:'json-simple', version:"${deps.versions.json}"

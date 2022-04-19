@@ -52,7 +52,7 @@ At this moment, the target project is ready for the Annotator to process.
 
 We need to inform the script about `path_to_config.xml` and `path_to_css.xml` (number 8 and 9 in the next section), please read the section below.
 
-### Script Config
+### Script edu.ucr.cs.riple.core.Config
 
 Configurations are written inside the `config.json` file. Please find a sample below:
 ```json

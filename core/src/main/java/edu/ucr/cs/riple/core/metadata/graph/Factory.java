@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.core.metadata.graph;
 
 import edu.ucr.cs.riple.injector.Fix;
 
-public interface Factory<T extends AbstractNode> {
+public interface Factory<T extends Node> {
 
   T build(Fix fix);
 }
