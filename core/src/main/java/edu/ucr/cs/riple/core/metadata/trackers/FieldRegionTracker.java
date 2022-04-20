@@ -25,13 +25,13 @@
 package edu.ucr.cs.riple.core.metadata.trackers;
 
 import edu.ucr.cs.riple.core.FixType;
-import edu.ucr.cs.riple.core.metadata.AbstractRelation;
+import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class FieldRegionTracker extends AbstractRelation<TrackerNode> implements RegionTracker {
+public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
 
   private final FixType fixType;
 

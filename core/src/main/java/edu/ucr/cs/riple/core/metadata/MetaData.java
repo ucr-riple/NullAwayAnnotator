@@ -33,10 +33,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-public abstract class AbstractRelation<T> {
+public abstract class MetaData<T> {
   HashMap<Integer, List<T>> idHash;
 
-  public AbstractRelation(Path path) {
+  public MetaData(Path path) {
     setup();
     try {
       fillNodes(path);

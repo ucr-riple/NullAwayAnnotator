@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core.metadata.method;
 
-import edu.ucr.cs.riple.core.metadata.AbstractRelation;
+import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class MethodInheritanceTree extends AbstractRelation<MethodNode> {
+public class MethodInheritanceTree extends MetaData<MethodNode> {
 
   HashMap<Integer, MethodNode> nodes;
   private static int maxsize = 0;
