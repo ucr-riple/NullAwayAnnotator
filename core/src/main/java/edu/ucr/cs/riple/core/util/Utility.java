@@ -30,6 +30,7 @@ import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.injector.Location;
@@ -88,7 +89,7 @@ public class Utility {
         followUps.addAll(
             report.tree.stream().map(fix -> fix.getJson()).collect(Collectors.toList()));
       }
-      reportJson.put("followups", followUps);
+      reportJson.put("tree", followUps);
       reportsJson.add(reportJson);
     }
     reportsJson.sort(
@@ -139,15 +140,15 @@ public class Utility {
     return Arrays.stream(content.split(",")).toArray(String[]::new);
   }
 
-  public static ImmutableSet<Location> readAllFixes(Path path) {
-    Set<Location> fixes = new HashSet<>();
+  public static ImmutableSet<Fix> readAllFixes(Path path) {
+    Set<Fix> fixes = new HashSet<>();
     try {
       try (BufferedReader br = new BufferedReader(new FileReader(path.toFile()))) {
         String line;
         br.readLine();
         while ((line = br.readLine()) != null) {
-          Location fix = Location.fromCSVLine(line, "\t");
-          Optional<Location> existing = fixes.stream().filter(other -> other.equals(fix)).findAny();
+          Fix fix = new Fix(line.split("\t"));
+          Optional<Fix> existing = fixes.stream().filter(other -> other.equals(fix)).findAny();
           if (existing.isPresent()) {
             existing.get().referred++;
           } else {
@@ -162,7 +163,7 @@ public class Utility {
     return ImmutableSet.copyOf(fixes);
   }
 
-  public static void removeCachedFixes(ImmutableSet<Location> fixes, Config config) {
+  public static void removeCachedFixes(ImmutableSet<Fix> fixes, Config config) {
     Path reportsPath = config.dir.resolve("reports.json");
     if (!Files.exists(reportsPath)) {
       return;
@@ -197,8 +198,8 @@ public class Utility {
       for (Object o : fixesJson) {
         JSONObject fixJson = (JSONObject) o;
         fixes.add(Location.createFromJson(fixJson));
-        if (fixJson.containsKey("followups")) {
-          JSONArray followUps = (JSONArray) fixJson.get("followups");
+        if (fixJson.containsKey("tree")) {
+          JSONArray followUps = (JSONArray) fixJson.get("tree");
           for (Object followup : followUps) {
             fixes.add(Location.createFromJson((JSONObject) followup));
           }
@@ -256,26 +257,26 @@ public class Utility {
             fix1 ->
                 fix1.method.equals(superMethod.method)
                     && fix1.clazz.equals(superMethod.clazz)
-                    && fix1.location.equals(FixType.METHOD.name))) {
+                    && fix1.kind.equals(FixType.METHOD.name))) {
       return 1;
     }
     return 0;
   }
 
   public static boolean correspondingFixExists(
-      String clazz, String method, String param, String location, List<Location> fixes) {
+      String clazz, String method, String param, String location, List<Fix> fixes) {
     return fixes
         .stream()
         .anyMatch(
             fix ->
-                fix.location.equals(location)
+                fix.kind.equals(location)
                     && fix.clazz.equals(clazz)
                     && fix.method.equals(method)
                     && fix.variable.equals(param));
   }
 
   public static int calculateParamInheritanceViolationError(
-      MethodInheritanceTree mit, Location fix, List<Location> fixesInOneRound) {
+      MethodInheritanceTree mit, Location fix, List<Fix> fixesInOneRound) {
     int index = Integer.parseInt(fix.index);
     MethodNode methodNode = mit.findNode(fix.method, fix.clazz);
     if (methodNode == null) {

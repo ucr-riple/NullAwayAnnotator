@@ -29,7 +29,7 @@ import com.uber.nullaway.fixserialization.FixSerializationConfig;
 import edu.ucr.cs.css.Serializer;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.FixEntity;
+import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -38,6 +38,7 @@ import edu.ucr.cs.riple.injector.Location;
 import edu.ucr.cs.riple.injector.WorkListBuilder;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Annotator {
@@ -77,11 +78,11 @@ public class Annotator {
             .setOutputDirectory(config.dir.toString());
     buildProject(builder, false);
     Path fixesPath = config.dir.resolve("fixes.path");
-    ImmutableSet<Location> allLocations = Utility.readAllFixes(fixesPath);
+    ImmutableSet<Fix> allFixes = Utility.readAllFixes(fixesPath);
     if (config.useCache) {
-      Utility.removeCachedFixes(allLocations, config);
+      Utility.removeCachedFixes(allFixes, config);
     }
-    log.total = allLocations.size();
+    log.total = allFixes.size();
     this.injector =
         Injector.builder()
             .setMode(Injector.MODE.BATCH)
@@ -90,10 +91,10 @@ public class Annotator {
     MethodInheritanceTree methodInheritanceTree =
         new MethodInheritanceTree(config.dir.resolve(Serializer.METHOD_INFO_NAME));
     Bank<Error> errorBank = new Bank<>(config.dir.resolve("errors.tsv"), Error::new);
-    Bank<FixEntity> fixBank = new Bank<>(fixesPath, FixEntity::new);
+    Bank<Fix> fixBank = new Bank<>(fixesPath, Fix::new);
     CompoundTracker tracker = new CompoundTracker(config.dir);
     this.explorer =
-        new Explorer(this, allLocations, errorBank, fixBank, tracker, methodInheritanceTree);
+        new Explorer(this, allFixes, errorBank, fixBank, tracker, methodInheritanceTree);
   }
 
   public void start(Config config) {
@@ -107,11 +108,11 @@ public class Annotator {
     Utility.writeLog(config);
   }
 
-  public void remove(List<Location> fixes) {
+  public void remove(List<Fix> fixes) {
     if (fixes == null || fixes.size() == 0) {
       return;
     }
-    List<Location> toRemove =
+    Set<Location> toRemove =
         fixes
             .stream()
             .map(
@@ -120,19 +121,20 @@ public class Annotator {
                         fix.annotation,
                         fix.method,
                         fix.variable,
-                        fix.location,
+                        fix.kind,
                         fix.clazz,
                         fix.uri,
                         "false"))
-            .collect(Collectors.toList());
-    apply(toRemove);
+            .collect(Collectors.toSet());
+    injector.start(new WorkListBuilder(toRemove).getWorkLists(), false);
   }
 
-  public void apply(List<Location> fixes) {
+  public void apply(List<Fix> fixes) {
     if (fixes == null || fixes.size() == 0) {
       return;
     }
-    injector.start(new WorkListBuilder(fixes).getWorkLists(), false);
+    Set<Location> toApply = fixes.stream().map(fix -> fix.location).collect(Collectors.toSet());
+    injector.start(new WorkListBuilder(toApply).getWorkLists(), false);
   }
 
   public void buildProject(FixSerializationConfig.Builder writer, boolean count) {

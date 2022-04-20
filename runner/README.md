@@ -96,7 +96,7 @@ To run the script a `command` must be passed to the script. A `command` must be 
 2. `preprocess`: It will perform a preprocessing phase which adds `@Initialize` annotation to all initializer methods detected by `NullAway`.
 3. `apply`: It will apply all the effective fixes reported in `diagnose_report.json` which reduces the number or errors.
 4. `clean`: It will clean all generated files.
-5. `run`: First it runs `preprocess`, and then it will run `explore`/`apply` in iterations, until no further new location is suggested.
+5. `run`: First it runs `preprocess`, and then it will run `explore`/`apply` in iterations, until no further new fix is suggested.
 
 ```cmd
 python3 run.py preprocess

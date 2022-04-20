@@ -118,7 +118,7 @@ public class Machine {
     if (clazz == null) {
       return false;
     }
-    switch (location.location) {
+    switch (location.kind) {
       case "FIELD":
         success = applyClassField(clazz, location);
         break;

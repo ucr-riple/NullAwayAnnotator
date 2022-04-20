@@ -22,10 +22,7 @@
 
 package edu.ucr.cs.riple.injector;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 @SuppressWarnings("unchecked")
@@ -33,18 +30,17 @@ public class Location {
   public final String annotation;
   public final String method;
   public final String variable;
-  public final String location;
+  public final String kind;
   public final String clazz;
   public final String inject;
   public String uri;
   public String index;
   public String pkg;
-  public int referred;
 
   public enum KEYS {
     PARAM("param"),
     METHOD("method"),
-    LOCATION("location"),
+    LOCATION("kind"),
     CLASS("class"),
     PKG("pkg"),
     URI("uri"),
@@ -67,29 +63,18 @@ public class Location {
       String annotation,
       String method,
       String variable,
-      String location,
+      String kind,
       String clazz,
       String uri,
       String inject) {
     this.annotation = annotation;
     this.method = method;
     this.variable = variable;
-    this.location = location;
+    this.kind = kind;
     this.clazz = clazz;
     this.uri = uri;
     this.inject = inject;
     this.pkg = this.clazz.contains(".") ? this.clazz.substring(0, this.clazz.lastIndexOf(".")) : "";
-  }
-
-  public static List<Location> createFromJson(JSONObject locationJson, boolean deep) {
-    List<Location> ans = new ArrayList<>();
-    Location l = createFromJson(locationJson);
-    ans.add(l);
-    if (deep && locationJson.containsKey("tree")) {
-      JSONArray followups = (JSONArray) locationJson.get("tree");
-      followups.forEach(o -> ans.add(createFromJson((JSONObject) o)));
-    }
-    return ans;
   }
 
   public static Location createFromJson(JSONObject locationJson) {
@@ -114,7 +99,7 @@ public class Location {
 
   @Override
   public String toString() {
-    return location + " " + clazz + " " + method + " " + variable;
+    return kind + " " + clazz + " " + method + " " + variable;
   }
 
   @Override
@@ -125,13 +110,13 @@ public class Location {
     return Objects.equals(annotation, other.annotation)
         && Objects.equals(method, other.method)
         && Objects.equals(variable, other.variable)
-        && Objects.equals(location, other.location)
+        && Objects.equals(kind, other.kind)
         && Objects.equals(clazz, other.clazz);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(annotation, method, variable, location, clazz);
+    return Objects.hash(annotation, method, variable, kind, clazz);
   }
 
   public JSONObject getJson() {
@@ -139,7 +124,7 @@ public class Location {
     res.put(KEYS.CLASS.label, clazz);
     res.put(KEYS.METHOD.label, method);
     res.put(KEYS.PARAM.label, variable);
-    res.put(KEYS.LOCATION.label, location);
+    res.put(KEYS.LOCATION.label, kind);
     res.put(KEYS.PKG.label, pkg);
     res.put(KEYS.ANNOTATION.label, annotation);
     res.put(KEYS.INJECT.label, inject);
@@ -149,15 +134,10 @@ public class Location {
   }
 
   public Location duplicate() {
-    Location location =
-        new Location(annotation, method, variable, this.location, clazz, uri, inject);
+    Location location = new Location(annotation, method, variable, kind, clazz, uri, inject);
     location.index = index;
     location.pkg = pkg;
     return location;
-  }
-
-  public static Location fromCSVLine(String line, String delimiter) {
-    return fromArrayInfo(line.split(delimiter));
   }
 
   public static Location fromArrayInfo(String[] infos) {

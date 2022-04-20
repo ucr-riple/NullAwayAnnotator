@@ -37,8 +37,8 @@ public class Error extends Hashable {
   public Error(String messageType, String message, String clazz, String method) {
     this.messageType = messageType;
     this.message = message;
-    this.method = method;
-    this.clazz = clazz;
+    this.encMethod = method;
+    this.encClass = clazz;
   }
 
   @Override
@@ -50,10 +50,10 @@ public class Error extends Hashable {
         + message
         + '\''
         + ", clazz='"
-        + clazz
+        + encClass
         + '\''
         + ", method='"
-        + method;
+        + encMethod;
   }
 
   public boolean isFixable() {

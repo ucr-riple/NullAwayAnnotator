@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core.metadata.graph;
 
-import edu.ucr.cs.riple.injector.Location;
+import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,7 +45,7 @@ public class FixGraph<T extends Node> {
     this.factory = factory;
   }
 
-  public T findOrCreate(Location fix) {
+  public T findOrCreate(Fix fix) {
     int hash = Node.getHash(fix);
     if (nodes.containsKey(hash)) {
       for (T candidate : nodes.get(hash)) {
@@ -65,7 +65,7 @@ public class FixGraph<T extends Node> {
   }
 
   @SuppressWarnings("ALL")
-  public void remove(Location fix) {
+  public void remove(Fix fix) {
     int hash = Node.getHash(fix);
     T toRemove = null;
     if (nodes.containsKey(hash)) {

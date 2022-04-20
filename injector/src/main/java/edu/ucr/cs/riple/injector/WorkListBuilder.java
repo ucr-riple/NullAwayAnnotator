@@ -30,6 +30,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -38,7 +39,7 @@ import org.json.simple.parser.ParseException;
 
 public class WorkListBuilder {
   private String filePath;
-  private List<Location> locations;
+  private Collection<Location> locations;
 
   public WorkListBuilder(String filePath) {
     this.filePath = filePath;
@@ -65,7 +66,7 @@ public class WorkListBuilder {
     }
   }
 
-  public WorkListBuilder(List<Location> locations) {
+  public WorkListBuilder(Collection<Location> locations) {
     if (locations == null) {
       throw new RuntimeException("location array cannot be null");
     }

@@ -6,13 +6,12 @@ import edu.ucr.cs.riple.core.metadata.graph.FixGraph;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.FixEntity;
+import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.Result;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
-import edu.ucr.cs.riple.injector.Location;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,16 +25,16 @@ public class Explorer {
   protected final RegionTracker tracker;
   protected final Annotator annotator;
   protected final Bank<Error> errorBank;
-  protected final Bank<FixEntity> fixBank;
+  protected final Bank<Fix> fixBank;
   protected final MethodInheritanceTree methodInheritanceTree;
   protected final ImmutableSet<Report> reports;
   private final Config config;
 
   public Explorer(
       Annotator annotator,
-      ImmutableSet<Location> fixes,
+      ImmutableSet<Fix> fixes,
       Bank<Error> errorBank,
-      Bank<FixEntity> fixBank,
+      Bank<Fix> fixBank,
       RegionTracker tracker,
       MethodInheritanceTree methodInheritanceTree) {
     this.tracker = tracker;
@@ -58,7 +57,7 @@ public class Explorer {
             .collect(Collectors.toSet());
     filteredReports.forEach(
         report -> {
-          Location root = report.root;
+          Fix root = report.root;
           Node node = fixGraph.findOrCreate(root);
           node.setRootSource(fixBank);
           node.report = report;
@@ -107,7 +106,7 @@ public class Explorer {
     ProgressBar pb = Utility.createProgressBar("Analysing", groups.size());
     for (Set<Node> group : groups.values()) {
       pb.step();
-      List<Location> fixes = new ArrayList<>();
+      List<Fix> fixes = new ArrayList<>();
       group.forEach(superNode -> fixes.addAll(superNode.getTree()));
       annotator.apply(fixes);
       FixSerializationConfig.Builder nullAwayConfig =
@@ -121,18 +120,13 @@ public class Explorer {
       group.forEach(
           node -> {
             int totalEffect = 0;
-            List<Location> localTriggered = new ArrayList<>();
+            List<Fix> localTriggered = new ArrayList<>();
             for (Region region : node.regions) {
               Result<Error> res = errorBank.compareByMethod(region.clazz, region.method, false);
               totalEffect += res.size;
               node.analyzeStatus(res.dif);
               localTriggered.addAll(
-                  fixBank
-                      .compareByMethod(region.clazz, region.method, false)
-                      .dif
-                      .stream()
-                      .map(fixEntity -> fixEntity.location)
-                      .collect(Collectors.toList()));
+                  new ArrayList<>(fixBank.compareByMethod(region.clazz, region.method, false).dif));
             }
             localTriggered.addAll(
                 node.generateSubMethodParameterInheritanceFixes(methodInheritanceTree, fixes));

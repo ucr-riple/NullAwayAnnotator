@@ -103,9 +103,9 @@ public class Index<T extends Hashable> {
         total++;
         int hash;
         if (type.equals(Index.Type.BY_CLASS)) {
-          hash = Objects.hash(item.clazz);
+          hash = Objects.hash(item.encClass);
         } else {
-          hash = Objects.hash(item.clazz, item.method);
+          hash = Objects.hash(item.encClass, item.encMethod);
         }
         if (items.containsKey(hash)) {
           items.get(hash).add(item);
@@ -126,7 +126,7 @@ public class Index<T extends Hashable> {
     if (ans == null) {
       return Collections.emptyList();
     }
-    return ans.stream().filter(item -> item.clazz.equals(clazz)).collect(Collectors.toList());
+    return ans.stream().filter(item -> item.encClass.equals(clazz)).collect(Collectors.toList());
   }
 
   public List<T> getByMethod(String clazz, String method) {
@@ -135,7 +135,7 @@ public class Index<T extends Hashable> {
       return Collections.emptyList();
     }
     return ans.stream()
-        .filter(item -> item.clazz.equals(clazz) && item.method.equals(method))
+        .filter(item -> item.encClass.equals(clazz) && item.encMethod.equals(method))
         .collect(Collectors.toList());
   }
 
@@ -149,7 +149,7 @@ public class Index<T extends Hashable> {
     return getAllEntities()
         .stream()
         .filter(t -> comparable.compareTo(t) == 0)
-        .map(t -> new Region(t.method, t.clazz))
+        .map(t -> new Region(t.encMethod, t.encClass))
         .collect(Collectors.toSet());
   }
 }

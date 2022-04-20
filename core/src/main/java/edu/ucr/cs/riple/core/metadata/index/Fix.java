@@ -26,23 +26,44 @@ package edu.ucr.cs.riple.core.metadata.index;
 
 import edu.ucr.cs.riple.injector.Location;
 import java.util.Objects;
+import org.json.simple.JSONObject;
 
-public class FixEntity extends Hashable {
+public class Fix extends Hashable {
 
   public final Location location;
+  public final String clazz;
+  public final String method;
+  public final String kind;
+  public final String variable;
+  public final String uri;
+  public final String index;
+  public final String annotation;
+  public int referred;
 
-  public FixEntity(String[] infos) {
-    location = Location.fromArrayInfo(infos);
-    this.clazz = infos[8];
-    this.method = infos[9];
+  public Fix(Location location, String encClass, String endMethod) {
+    this.location = location;
+    this.annotation = location.annotation;
+    this.uri = location.uri;
+    this.clazz = location.clazz;
+    this.method = location.method;
+    this.variable = location.variable;
+    this.kind = location.kind;
+    this.index = location.index;
+    this.encClass = encClass;
+    this.encMethod = endMethod;
+    this.referred = 0;
+  }
+
+  public Fix(String[] infos) {
+    this(Location.fromArrayInfo(infos), infos[8], infos[9]);
   }
 
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof FixEntity)) return false;
-    FixEntity fixEntity = (FixEntity) o;
-    return location.equals(fixEntity.location);
+    if (!(o instanceof Fix)) return false;
+    Fix fix = (Fix) o;
+    return location.equals(fix.location);
   }
 
   @Override
@@ -50,8 +71,7 @@ public class FixEntity extends Hashable {
     return Objects.hash(location);
   }
 
-  @Override
-  public String toString() {
-    return "location=" + location + ", clazz='" + clazz + '\'' + ", method='" + method;
+  public JSONObject getJson() {
+    return location.getJson();
   }
 }

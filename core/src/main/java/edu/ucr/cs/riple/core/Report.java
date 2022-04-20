@@ -24,28 +24,24 @@
 
 package edu.ucr.cs.riple.core;
 
-import edu.ucr.cs.riple.injector.Location;
+import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.util.HashSet;
 import java.util.Set;
 
 public class Report {
 
   public int effectiveNess;
-  public Location root;
-  public Set<Location> tree;
-  public Set<Location> triggered;
+  public Fix root;
+  public Set<Fix> tree;
+  public Set<Fix> triggered;
   public boolean finished;
 
-  public Report(Location root, int effectiveNess) {
+  public Report(Fix root, int effectiveNess) {
     this.effectiveNess = effectiveNess;
     this.root = root;
     this.tree = new HashSet<>();
     this.finished = false;
     this.triggered = new HashSet<>();
-  }
-
-  public static Report empty(Location fix) {
-    return new Report(fix, 0);
   }
 
   @Override
