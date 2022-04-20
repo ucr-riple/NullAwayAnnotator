@@ -32,7 +32,7 @@ import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
-import edu.ucr.cs.riple.injector.Fix;
+import edu.ucr.cs.riple.injector.Location;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
@@ -139,15 +139,15 @@ public class Utility {
     return Arrays.stream(content.split(",")).toArray(String[]::new);
   }
 
-  public static ImmutableSet<Fix> readAllFixes(Path path) {
-    Set<Fix> fixes = new HashSet<>();
+  public static ImmutableSet<Location> readAllFixes(Path path) {
+    Set<Location> fixes = new HashSet<>();
     try {
       try (BufferedReader br = new BufferedReader(new FileReader(path.toFile()))) {
         String line;
         br.readLine();
         while ((line = br.readLine()) != null) {
-          Fix fix = Fix.fromCSVLine(line, "\t");
-          Optional<Fix> existing = fixes.stream().filter(other -> other.equals(fix)).findAny();
+          Location fix = Location.fromCSVLine(line, "\t");
+          Optional<Location> existing = fixes.stream().filter(other -> other.equals(fix)).findAny();
           if (existing.isPresent()) {
             existing.get().referred++;
           } else {
@@ -162,7 +162,7 @@ public class Utility {
     return ImmutableSet.copyOf(fixes);
   }
 
-  public static void removeCachedFixes(ImmutableSet<Fix> fixes, Config config) {
+  public static void removeCachedFixes(ImmutableSet<Location> fixes, Config config) {
     Path reportsPath = config.dir.resolve("reports.json");
     if (!Files.exists(reportsPath)) {
       return;
@@ -171,14 +171,15 @@ public class Utility {
       JSONObject cachedObjects =
           (JSONObject) new JSONParser().parse(new FileReader(reportsPath.toFile()));
       JSONArray cachedJson = (JSONArray) cachedObjects.get("reports");
-      List<Fix> cached = new ArrayList<>();
+      List<Location> cached = new ArrayList<>();
       for (Object o : cachedJson) {
         JSONObject reportJson = (JSONObject) o;
         if (Integer.parseInt(reportJson.get("effect").toString()) > 0) {
-          cached.add(Fix.createFromJson(reportJson));
+          cached.add(Location.createFromJson(reportJson));
         }
       }
-      System.out.print("Cached items size: " + cached.size() + " total fix size: " + fixes.size());
+      System.out.print(
+          "Cached items size: " + cached.size() + " total location size: " + fixes.size());
       fixes.removeAll(cached);
     } catch (Exception exception) {
       throw new RuntimeException("Exception happened in removing cached fixes", exception);
@@ -186,8 +187,8 @@ public class Utility {
     System.out.println(". Reduced down to: " + fixes.size());
   }
 
-  public static List<Fix> readFixesJson(Path filePath) {
-    List<Fix> fixes = new ArrayList<>();
+  public static List<Location> readFixesJson(Path filePath) {
+    List<Location> fixes = new ArrayList<>();
     try {
       BufferedReader bufferedReader = Files.newBufferedReader(filePath, Charset.defaultCharset());
       JSONObject obj = (JSONObject) new JSONParser().parse(bufferedReader);
@@ -195,11 +196,11 @@ public class Utility {
       bufferedReader.close();
       for (Object o : fixesJson) {
         JSONObject fixJson = (JSONObject) o;
-        fixes.add(Fix.createFromJson(fixJson));
+        fixes.add(Location.createFromJson(fixJson));
         if (fixJson.containsKey("followups")) {
           JSONArray followUps = (JSONArray) fixJson.get("followups");
           for (Object followup : followUps) {
-            fixes.add(Fix.createFromJson((JSONObject) followup));
+            fixes.add(Location.createFromJson((JSONObject) followup));
           }
         }
       }
@@ -241,8 +242,8 @@ public class Utility {
   }
 
   public static int calculateMethodInheritanceViolationError(
-      MethodInheritanceTree tree, Fix fix, List<Fix> fixesInOneRound) {
-    MethodNode superMethod = tree.getClosestSuperMethod(fix.method, fix.className);
+      MethodInheritanceTree tree, Location fix, List<Location> fixesInOneRound) {
+    MethodNode superMethod = tree.getClosestSuperMethod(fix.method, fix.clazz);
     if (superMethod == null) {
       return 0;
     }
@@ -254,7 +255,7 @@ public class Utility {
         .anyMatch(
             fix1 ->
                 fix1.method.equals(superMethod.method)
-                    && fix1.className.equals(superMethod.clazz)
+                    && fix1.clazz.equals(superMethod.clazz)
                     && fix1.location.equals(FixType.METHOD.name))) {
       return 1;
     }
@@ -262,21 +263,21 @@ public class Utility {
   }
 
   public static boolean correspondingFixExists(
-      String clazz, String method, String param, String location, List<Fix> fixes) {
+      String clazz, String method, String param, String location, List<Location> fixes) {
     return fixes
         .stream()
         .anyMatch(
             fix ->
                 fix.location.equals(location)
-                    && fix.className.equals(clazz)
+                    && fix.clazz.equals(clazz)
                     && fix.method.equals(method)
-                    && fix.param.equals(param));
+                    && fix.variable.equals(param));
   }
 
   public static int calculateParamInheritanceViolationError(
-      MethodInheritanceTree mit, Fix fix, List<Fix> fixesInOneRound) {
+      MethodInheritanceTree mit, Location fix, List<Location> fixesInOneRound) {
     int index = Integer.parseInt(fix.index);
-    MethodNode methodNode = mit.findNode(fix.method, fix.className);
+    MethodNode methodNode = mit.findNode(fix.method, fix.clazz);
     if (methodNode == null) {
       return 0;
     }
@@ -285,7 +286,7 @@ public class Utility {
       return 0;
     }
     int effect = 0;
-    for (MethodNode subMethod : mit.getSubMethods(fix.method, fix.className, false)) {
+    for (MethodNode subMethod : mit.getSubMethods(fix.method, fix.clazz, false)) {
       if (!thisMethodFlag[index]) {
         if (!subMethod.annotFlags[index]
             && !correspondingFixExists(
@@ -298,7 +299,7 @@ public class Utility {
         }
       }
     }
-    List<MethodNode> superMethods = mit.getSuperMethods(fix.method, fix.className, false);
+    List<MethodNode> superMethods = mit.getSuperMethods(fix.method, fix.clazz, false);
     if (superMethods == null || superMethods.size() == 0) {
       return effect;
     }

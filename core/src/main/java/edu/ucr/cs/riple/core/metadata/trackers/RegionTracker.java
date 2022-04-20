@@ -24,10 +24,10 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
-import edu.ucr.cs.riple.injector.Fix;
+import edu.ucr.cs.riple.injector.Location;
 import java.util.Set;
 
 public interface RegionTracker {
 
-  Set<Region> getRegions(Fix fix);
+  Set<Region> getRegions(Location fix);
 }

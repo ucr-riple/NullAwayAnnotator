@@ -26,8 +26,8 @@ package edu.ucr.cs.riple.injector.tools;
 
 import static org.junit.Assert.fail;
 
-import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
+import edu.ucr.cs.riple.injector.Location;
 import edu.ucr.cs.riple.injector.Report;
 import edu.ucr.cs.riple.injector.WorkListBuilder;
 import java.io.FileNotFoundException;
@@ -48,11 +48,11 @@ import org.json.simple.JSONObject;
 public class InjectorTestHelper {
 
   private final Map<String, String> fileMap;
-  private final ArrayList<Fix> fixes;
+  private final ArrayList<Location> locations;
   private String rootPath;
 
   public InjectorTestHelper() {
-    fixes = new ArrayList<>();
+    locations = new ArrayList<>();
     fileMap = new HashMap<>();
   }
 
@@ -63,9 +63,9 @@ public class InjectorTestHelper {
     return new InjectorTestHelperOutput(this, fileMap, inputFile);
   }
 
-  public InjectorTestHelper addFixes(Fix... fixes) {
-    for (Fix f : fixes) f.uri = rootPath.concat("/src/").concat(f.uri);
-    this.fixes.addAll(Arrays.asList(fixes));
+  public InjectorTestHelper addLocations(Location... locations) {
+    for (Location l : locations) l.uri = rootPath.concat("/src/").concat(l.uri);
+    this.locations.addAll(Arrays.asList(locations));
     return this;
   }
 
@@ -77,9 +77,9 @@ public class InjectorTestHelper {
 
   public void start(boolean keepStyle) {
     Injector injector = Injector.builder().setMode(Injector.MODE.TEST).keepStyle(keepStyle).build();
-    writeFixes();
+    writeLocations();
     Report report =
-        injector.start(new WorkListBuilder(rootPath + "/fix/fixes.json").getWorkLists());
+        injector.start(new WorkListBuilder(rootPath + "/location/locations.json").getWorkLists());
     System.out.println("Report: " + report);
     for (String key : fileMap.keySet()) {
       String srcFile = readFileToString(key);
@@ -95,18 +95,18 @@ public class InjectorTestHelper {
     start(false);
   }
 
-  private void writeFixes() {
+  private void writeLocations() {
     JSONArray array = new JSONArray();
-    for (Fix fix : fixes) {
-      array.add(fix.getJson());
+    for (Location location : locations) {
+      array.add(location.getJson());
     }
     JSONObject obj = new JSONObject();
-    obj.put("fixes", array);
-    writeToFile("fix/fixes.json", obj.toJSONString());
+    obj.put("locations", array);
+    writeToFile("location/locations.json", obj.toJSONString());
   }
 
   private void makeDirectories() {
-    String[] names = {"src", "out", "expected", "fix"};
+    String[] names = {"src", "out", "expected", "location"};
     for (String name : names) {
       String pathToDirectory = rootPath + "/" + name;
       try {

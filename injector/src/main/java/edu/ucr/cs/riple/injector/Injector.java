@@ -47,7 +47,7 @@ public class Injector {
     LOG = log;
     Report report = new Report();
     for (WorkList workList : workLists) {
-      report.totalNumberOfDistinctFixes += workList.getFixes().size();
+      report.totalNumberOfDistinctLocations += workList.getLocations().size();
     }
     report.processed = new Machine(workLists, mode, KEEP).start();
     return report;

@@ -24,9 +24,9 @@
 
 package edu.ucr.cs.riple.core.metadata.graph;
 
-import edu.ucr.cs.riple.injector.Fix;
+import edu.ucr.cs.riple.injector.Location;
 
 public interface Factory<T extends Node> {
 
-  T build(Fix fix);
+  T build(Location location);
 }

@@ -26,8 +26,8 @@ import edu.ucr.cs.css.XMLUtil;
 import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.util.Utility;
-import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
+import edu.ucr.cs.riple.injector.Location;
 import edu.ucr.cs.riple.injector.WorkListBuilder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -83,12 +83,12 @@ public class Main {
   private static void apply(String[] args) {
     if (args.length != 3) {
       throw new RuntimeException(
-          "Annotator:apply needs two arguments: 1. path to the suggested fix file, 2. code style preservation flag");
+          "Annotator:apply needs two arguments: 1. path to the suggested location file, 2. code style preservation flag");
     }
     boolean keepStyle = Boolean.parseBoolean(args[2]);
     Injector injector =
         Injector.builder().setMode(Injector.MODE.BATCH).keepStyle(keepStyle).build();
-    List<Fix> fixes = Utility.readFixesJson(Paths.get(args[1]));
+    List<Location> fixes = Utility.readFixesJson(Paths.get(args[1]));
     injector.start(new WorkListBuilder(fixes).getWorkLists(), true);
   }
 }

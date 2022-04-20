@@ -1,0 +1,1 @@
+{"locations":[{"annotation":"javax.annotation.Initializer","method":"Main(java.lang.String,java.lang.Object...)","param":"","index":null,"location":"METHOD","class":"com.uber.Main","pkg":"com.uber","inject":"true","uri":"/Users/nima/Developer/NullAwayFixer/NullAwayAnnotator/injector/tests/initializer_constructor/src/Main.java"}]}

@@ -80,8 +80,8 @@ public class BasicTest {
                 "       return new Object();",
                 "   }",
                 "}")
-            .addFixes(
-                new Fix(
+            .addLocations(
+                new Location(
                     "javax.annotation.Nullable",
                     "test(boolean)",
                     "",
@@ -89,7 +89,7 @@ public class BasicTest {
                     "com.uber.Super",
                     "Super.java",
                     "true"),
-                new Fix(
+                new Location(
                     "javax.annotation.Nullable",
                     "test(boolean)",
                     "",
@@ -132,8 +132,8 @@ public class BasicTest {
                 "     }",
                 "   }",
                 "}")
-            .addFixes(
-                new Fix(
+            .addLocations(
+                new Location(
                     "javax.annotation.Nullable",
                     "run()",
                     "",
@@ -182,8 +182,8 @@ public class BasicTest {
             "       }",
             "   }",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Nullable",
                 "bar(java.lang.Object)",
                 "",
@@ -235,8 +235,8 @@ public class BasicTest {
             "       else return new Object();",
             "   }",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Nullable",
                 "test(Object, String, String)",
                 "",
@@ -244,7 +244,7 @@ public class BasicTest {
                 "com.uber.Super",
                 "Super.java",
                 "true"),
-            new Fix(
+            new Location(
                 "javax.annotation.Nullable",
                 "test(Object, Object, String)",
                 "name",
@@ -307,8 +307,8 @@ public class BasicTest {
             "     return null;",
             "   }",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Nullable",
                 "getPredNodeNumbers(T)",
                 "",
@@ -316,7 +316,7 @@ public class BasicTest {
                 "com.uber.Super",
                 "Super.java",
                 "true"),
-            new Fix(
+            new Location(
                 "javax.annotation.Nullable",
                 "computeResult(com.ibm.wala.ipa.slicer.Statement,java.util.Map<com.ibm.wala.ipa.callgraph.propagation.PointerKey,com.ibm.wala.util.intset.MutableIntSet>,com.ibm.wala.dataflow.graph.BitVectorSolver<? extends com.ibm.wala.ssa.ISSABasicBlock>,com.ibm.wala.util.intset.OrdinalSetMapping<com.ibm.wala.ipa.slicer.Statement>,com.ibm.wala.ipa.callgraph.CGNode,com.ibm.wala.ipa.modref.ExtendedHeapModel,com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis<T>,java.util.Map<com.ibm.wala.ipa.callgraph.CGNode,com.ibm.wala.util.intset.OrdinalSet<com.ibm.wala.ipa.callgraph.propagation.PointerKey>>,com.ibm.wala.ssa.analysis.ExplodedControlFlowGraph,java.util.Map<java.lang.Integer,com.ibm.wala.ipa.slicer.NormalStatement>)",
                 "",
@@ -352,8 +352,8 @@ public class BasicTest {
             "     return null;",
             "   }",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Nullable",
                 "getTargetForCall(com.ibm.wala.ipa.callgraph.CGNode[],com.ibm.wala.classLoader.CallSiteReference[][][],com.ibm.wala.classLoader.IClass,com.ibm.wala.ipa.callgraph.propagation.InstanceKey[][])",
                 "",
@@ -387,8 +387,8 @@ public class BasicTest {
             "     return null;",
             "   }",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Nullable",
                 "<T>getReader(com.ibm.wala.shrikeCT.ClassReader.AttrIterator,java.lang.String,com.ibm.wala.classLoader.ShrikeClass.GetReader<T>)",
                 "",
@@ -430,8 +430,8 @@ public class BasicTest {
             "     }",
             "   }",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Nullable",
                 "get(com.ibm.wala.ipa.callgraph.ContextKey)",
                 "",
@@ -464,8 +464,8 @@ public class BasicTest {
             "   public void format(String type,Object... objs) {",
             "   }",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Initializer",
                 "format(java.lang.String,java.lang.Object...)",
                 "",
@@ -498,8 +498,8 @@ public class BasicTest {
             "   public Main(String type, Object... objs) {",
             "   }",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Initializer",
                 "Main(java.lang.String,java.lang.Object...)",
                 "",
@@ -540,8 +540,8 @@ public class BasicTest {
             "       else return new Object();",
             "   }",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Nullable",
                 "test(java.lang.Object)",
                 "flag",
@@ -582,8 +582,8 @@ public class BasicTest {
             "       else return new Object();",
             "   }",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Nullable",
                 "test(Object)",
                 "flag",
@@ -631,8 +631,8 @@ public class BasicTest {
             "SSAAbstractInvokeInstruction InvokeInstruction(",
             "   int index, int[] params, int exception, CallSiteReference site, BootstrapMethod bootstrap);",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Nullable",
                 "InvokeInstruction(int,int,int[],int,com.ibm.wala.classLoader.CallSiteReference,com.ibm.wala.shrikeCT.BootstrapMethodsReader.BootstrapMethod)",
                 "bootstrap",
@@ -676,8 +676,8 @@ public class BasicTest {
             "     return CallGraphTransitiveClosure.transitiveClosure(cg, scan);",
             "   }",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Nullable",
                 "computeMod(com.ibm.wala.ipa.callgraph.CallGraph,com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis<T>,com.ibm.wala.ipa.slicer.HeapExclusions)",
                 "heapExclude",
@@ -741,8 +741,8 @@ public class BasicTest {
             "         setupLocationMap();",
             "    }",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Nullable",
                 "ModRef(com.ibm.wala.classLoader.IMethod,com.ibm.wala.ipa.callgraph.Context,com.ibm.wala.cfg.AbstractCFG<?,?>,com.ibm.wala.ssa.SSAInstruction[],com.ibm.wala.ssa.SSAOptions,java.util.Map<java.lang.Integer,com.ibm.wala.ssa.ConstantValue>)",
                 "constants",
@@ -780,8 +780,8 @@ public class BasicTest {
             "     hashCode = System.identityHashCode(key);",
             "   }",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Nullable",
                 "WeakKeyReference(@org.checkerframework.checker.nullness.qual.Nullable K,java.lang.ref.ReferenceQueue<K>)",
                 "queue",
@@ -818,8 +818,8 @@ public class BasicTest {
             "      h = f;",
             "   }",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Nullable",
                 "",
                 "h",
@@ -865,8 +865,8 @@ public class BasicTest {
             "       }",
             "   }",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Nullable",
                 "test()",
                 "",
@@ -881,8 +881,8 @@ public class BasicTest {
   public void skip_duplicate_annotation() {
     String rootName = "skip_duplicate_annotation";
 
-    Fix fix =
-        new Fix(
+    Location location =
+        new Location(
             "javax.annotation.Nullable",
             "test()",
             "",
@@ -911,7 +911,7 @@ public class BasicTest {
             "       return new Object();",
             "   }",
             "}")
-        .addFixes(fix, fix.duplicate(), fix.duplicate())
+        .addLocations(location, location.duplicate(), location.duplicate())
         .start();
   }
 
@@ -951,8 +951,8 @@ public class BasicTest {
             "       return new Object();",
             "   }",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Nullable",
                 "test()",
                 "",
@@ -1120,8 +1120,8 @@ public class BasicTest {
             "       return new Object();",
             "   }",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Nullable",
                 "test()",
                 "",
@@ -1166,8 +1166,8 @@ public class BasicTest {
             "   class Foo{ }",
             "   class Bar{ }",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Nullable",
                 "test()",
                 "",
@@ -1199,8 +1199,8 @@ public class BasicTest {
             "   @Nullable Object test(@javax.annotation.Nullable Object o) {",
             "   }",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Nullable",
                 "test(@javax.annotation.Nullable java.lang.Object)",
                 "",
@@ -1232,8 +1232,8 @@ public class BasicTest {
             "   Object test(@javax.annotation.Nullable Object o) {",
             "   }",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Nullable",
                 "test(@javax.annotation.Nullable java.lang.Object)",
                 "",
@@ -1265,8 +1265,8 @@ public class BasicTest {
             "   @Nullable Object test(Object o) {",
             "   }",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Nullable",
                 "test(@javax.annotation.Nullable java.lang.Object)",
                 "o",
@@ -1298,8 +1298,8 @@ public class BasicTest {
             "   @Nullable Object test(Object o) {",
             "   }",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Nullable",
                 "test(@javax.annotation.Nullable java.lang.Object)",
                 "o",
@@ -1333,8 +1333,8 @@ public class BasicTest {
             "   @Nullable Object test(@javax.annotation.Nullable Object o) {",
             "   }",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Nullable",
                 "",
                 "f",
@@ -1370,8 +1370,8 @@ public class BasicTest {
             "   @Nullable",
             "   private Object allTest[];",
             "}")
-        .addFixes(
-            new Fix(
+        .addLocations(
+            new Location(
                 "javax.annotation.Nullable",
                 "",
                 "allTest",
@@ -1379,7 +1379,7 @@ public class BasicTest {
                 "com.uber.B",
                 "B.java",
                 "true"),
-            new Fix(
+            new Location(
                 "javax.annotation.Nullable",
                 "",
                 "allTest",

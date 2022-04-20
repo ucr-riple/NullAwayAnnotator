@@ -29,12 +29,12 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 @SuppressWarnings("unchecked")
-public class Fix {
+public class Location {
   public final String annotation;
   public final String method;
-  public final String param;
+  public final String variable;
   public final String location;
-  public final String className;
+  public final String clazz;
   public final String inject;
   public String uri;
   public String index;
@@ -63,85 +63,82 @@ public class Fix {
     }
   }
 
-  public Fix(
+  public Location(
       String annotation,
       String method,
-      String param,
+      String variable,
       String location,
-      String className,
+      String clazz,
       String uri,
       String inject) {
     this.annotation = annotation;
     this.method = method;
-    this.param = param;
+    this.variable = variable;
     this.location = location;
-    this.className = className;
+    this.clazz = clazz;
     this.uri = uri;
     this.inject = inject;
-    this.pkg =
-        this.className.contains(".")
-            ? this.className.substring(0, this.className.lastIndexOf("."))
-            : "";
+    this.pkg = this.clazz.contains(".") ? this.clazz.substring(0, this.clazz.lastIndexOf(".")) : "";
   }
 
-  public static List<Fix> createFromJson(JSONObject fixJson, boolean deep) {
-    List<Fix> ans = new ArrayList<>();
-    Fix fix = createFromJson(fixJson);
-    ans.add(fix);
-    if (deep && fixJson.containsKey("followups")) {
-      JSONArray followups = (JSONArray) fixJson.get("followups");
+  public static List<Location> createFromJson(JSONObject locationJson, boolean deep) {
+    List<Location> ans = new ArrayList<>();
+    Location l = createFromJson(locationJson);
+    ans.add(l);
+    if (deep && locationJson.containsKey("tree")) {
+      JSONArray followups = (JSONArray) locationJson.get("tree");
       followups.forEach(o -> ans.add(createFromJson((JSONObject) o)));
     }
     return ans;
   }
 
-  public static Fix createFromJson(JSONObject fixJson) {
-    String uri = fixJson.get(KEYS.URI.label).toString();
+  public static Location createFromJson(JSONObject locationJson) {
+    String uri = locationJson.get(KEYS.URI.label).toString();
     String file = "file:/";
     if (uri.contains(file)) uri = uri.substring(uri.indexOf(file) + file.length());
-    String clazz = fixJson.get(KEYS.CLASS.label).toString();
-    Fix fix =
-        new Fix(
-            fixJson.get(KEYS.ANNOTATION.label).toString(),
-            fixJson.get(KEYS.METHOD.label).toString(),
-            fixJson.get(KEYS.PARAM.label).toString(),
-            fixJson.get(KEYS.LOCATION.label).toString(),
+    String clazz = locationJson.get(KEYS.CLASS.label).toString();
+    Location location =
+        new Location(
+            locationJson.get(KEYS.ANNOTATION.label).toString(),
+            locationJson.get(KEYS.METHOD.label).toString(),
+            locationJson.get(KEYS.PARAM.label).toString(),
+            locationJson.get(KEYS.LOCATION.label).toString(),
             clazz,
             uri,
-            fixJson.get(KEYS.INJECT.label).toString());
-    if (fixJson.get(KEYS.INDEX.label) != null) {
-      fix.index = fixJson.get(KEYS.INDEX.label).toString();
+            locationJson.get(KEYS.INJECT.label).toString());
+    if (locationJson.get(KEYS.INDEX.label) != null) {
+      location.index = locationJson.get(KEYS.INDEX.label).toString();
     }
-    return fix;
+    return location;
   }
 
   @Override
   public String toString() {
-    return location + " " + className + " " + method + " " + param;
+    return location + " " + clazz + " " + method + " " + variable;
   }
 
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof Fix)) return false;
-    Fix fix = (Fix) o;
-    return Objects.equals(annotation, fix.annotation)
-        && Objects.equals(method, fix.method)
-        && Objects.equals(param, fix.param)
-        && Objects.equals(location, fix.location)
-        && Objects.equals(className, fix.className);
+    if (!(o instanceof Location)) return false;
+    Location other = (Location) o;
+    return Objects.equals(annotation, other.annotation)
+        && Objects.equals(method, other.method)
+        && Objects.equals(variable, other.variable)
+        && Objects.equals(location, other.location)
+        && Objects.equals(clazz, other.clazz);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(annotation, method, param, location, className);
+    return Objects.hash(annotation, method, variable, location, clazz);
   }
 
   public JSONObject getJson() {
     JSONObject res = new JSONObject();
-    res.put(KEYS.CLASS.label, className);
+    res.put(KEYS.CLASS.label, clazz);
     res.put(KEYS.METHOD.label, method);
-    res.put(KEYS.PARAM.label, param);
+    res.put(KEYS.PARAM.label, variable);
     res.put(KEYS.LOCATION.label, location);
     res.put(KEYS.PKG.label, pkg);
     res.put(KEYS.ANNOTATION.label, annotation);
@@ -151,21 +148,23 @@ public class Fix {
     return res;
   }
 
-  public Fix duplicate() {
-    Fix fix = new Fix(annotation, method, param, location, className, uri, inject);
-    fix.index = index;
-    fix.pkg = pkg;
-    return fix;
+  public Location duplicate() {
+    Location location =
+        new Location(annotation, method, variable, this.location, clazz, uri, inject);
+    location.index = index;
+    location.pkg = pkg;
+    return location;
   }
 
-  public static Fix fromCSVLine(String line, String delimiter) {
+  public static Location fromCSVLine(String line, String delimiter) {
     return fromArrayInfo(line.split(delimiter));
   }
 
-  public static Fix fromArrayInfo(String[] infos) {
-    Fix fix = new Fix(infos[7], infos[2], infos[3], infos[0], infos[1], infos[5], "true");
-    fix.pkg = fix.className.substring(0, fix.className.lastIndexOf("."));
-    fix.index = infos[4];
-    return fix;
+  public static Location fromArrayInfo(String[] infos) {
+    Location location =
+        new Location(infos[7], infos[2], infos[3], infos[0], infos[1], infos[5], "true");
+    location.pkg = location.clazz.substring(0, location.clazz.lastIndexOf("."));
+    location.index = infos[4];
+    return location;
   }
 }

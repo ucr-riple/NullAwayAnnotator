@@ -55,22 +55,4 @@ public class TrackerNode {
   public int hashCode() {
     return Objects.hash(calleeMember, calleeClass);
   }
-
-  @Override
-  public String toString() {
-    return "CallNode{"
-        + "callerClass='"
-        + callerClass
-        + '\''
-        + ", callerMethod='"
-        + callerMethod
-        + '\''
-        + ", calleeMember='"
-        + calleeMember
-        + '\''
-        + ", calleeClass='"
-        + calleeClass
-        + '\''
-        + '}';
-  }
 }

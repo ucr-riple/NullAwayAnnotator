@@ -24,15 +24,15 @@
 
 package edu.ucr.cs.riple.core.metadata.index;
 
-import edu.ucr.cs.riple.injector.Fix;
+import edu.ucr.cs.riple.injector.Location;
 import java.util.Objects;
 
 public class FixEntity extends Hashable {
 
-  public final Fix fix;
+  public final Location location;
 
   public FixEntity(String[] infos) {
-    fix = Fix.fromArrayInfo(infos);
+    location = Location.fromArrayInfo(infos);
     this.clazz = infos[8];
     this.method = infos[9];
   }
@@ -42,16 +42,16 @@ public class FixEntity extends Hashable {
     if (this == o) return true;
     if (!(o instanceof FixEntity)) return false;
     FixEntity fixEntity = (FixEntity) o;
-    return fix.equals(fixEntity.fix);
+    return location.equals(fixEntity.location);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(fix);
+    return Objects.hash(location);
   }
 
   @Override
   public String toString() {
-    return "fix=" + fix + ", clazz='" + clazz + '\'' + ", method='" + method;
+    return "location=" + location + ", clazz='" + clazz + '\'' + ", method='" + method;
   }
 }

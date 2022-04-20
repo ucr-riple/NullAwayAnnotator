@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.core.metadata.trackers;
 
 import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.metadata.AbstractRelation;
-import edu.ucr.cs.riple.injector.Fix;
+import edu.ucr.cs.riple.injector.Location;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -46,16 +46,16 @@ public class FieldRegionTracker extends AbstractRelation<TrackerNode> implements
   }
 
   @Override
-  public Set<Region> getRegions(Fix fix) {
-    if (!fix.location.equals(fixType.name)) {
+  public Set<Region> getRegions(Location location) {
+    if (!location.location.equals(fixType.name)) {
       return null;
     }
     return findAllNodes(
             candidate ->
-                candidate.calleeClass.equals(fix.className)
-                    && candidate.calleeMember.equals(fix.param),
-            fix.param,
-            fix.className)
+                candidate.calleeClass.equals(location.clazz)
+                    && candidate.calleeMember.equals(location.variable),
+            location.variable,
+            location.clazz)
         .stream()
         .map(node -> new Region(node.callerMethod, node.callerClass))
         .collect(Collectors.toSet());

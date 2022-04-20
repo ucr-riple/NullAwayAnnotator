@@ -33,8 +33,8 @@ import edu.ucr.cs.riple.core.metadata.index.FixEntity;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.core.util.Utility;
-import edu.ucr.cs.riple.injector.Fix;
 import edu.ucr.cs.riple.injector.Injector;
+import edu.ucr.cs.riple.injector.Location;
 import edu.ucr.cs.riple.injector.WorkListBuilder;
 import java.nio.file.Path;
 import java.util.List;
@@ -77,11 +77,11 @@ public class Annotator {
             .setOutputDirectory(config.dir.toString());
     buildProject(builder, false);
     Path fixesPath = config.dir.resolve("fixes.path");
-    ImmutableSet<Fix> allFixes = Utility.readAllFixes(fixesPath);
+    ImmutableSet<Location> allLocations = Utility.readAllFixes(fixesPath);
     if (config.useCache) {
-      Utility.removeCachedFixes(allFixes, config);
+      Utility.removeCachedFixes(allLocations, config);
     }
-    log.total = allFixes.size();
+    log.total = allLocations.size();
     this.injector =
         Injector.builder()
             .setMode(Injector.MODE.BATCH)
@@ -93,7 +93,7 @@ public class Annotator {
     Bank<FixEntity> fixBank = new Bank<>(fixesPath, FixEntity::new);
     CompoundTracker tracker = new CompoundTracker(config.dir);
     this.explorer =
-        new Explorer(this, allFixes, errorBank, fixBank, tracker, methodInheritanceTree);
+        new Explorer(this, allLocations, errorBank, fixBank, tracker, methodInheritanceTree);
   }
 
   public void start(Config config) {
@@ -107,28 +107,28 @@ public class Annotator {
     Utility.writeLog(config);
   }
 
-  public void remove(List<Fix> fixes) {
+  public void remove(List<Location> fixes) {
     if (fixes == null || fixes.size() == 0) {
       return;
     }
-    List<Fix> toRemove =
+    List<Location> toRemove =
         fixes
             .stream()
             .map(
                 fix ->
-                    new Fix(
+                    new Location(
                         fix.annotation,
                         fix.method,
-                        fix.param,
+                        fix.variable,
                         fix.location,
-                        fix.className,
+                        fix.clazz,
                         fix.uri,
                         "false"))
             .collect(Collectors.toList());
     apply(toRemove);
   }
 
-  public void apply(List<Fix> fixes) {
+  public void apply(List<Location> fixes) {
     if (fixes == null || fixes.size() == 0) {
       return;
     }

@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.core.metadata.trackers;
 
 import edu.ucr.cs.css.Serializer;
 import edu.ucr.cs.riple.core.FixType;
-import edu.ucr.cs.riple.injector.Fix;
+import edu.ucr.cs.riple.injector.Location;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,18 +46,18 @@ public class CompoundTracker implements RegionTracker {
           if (!fix.location.equals(FixType.PARAMETER.name)) {
             return null;
           }
-          return Collections.singleton(new Region(fix.method, fix.className));
+          return Collections.singleton(new Region(fix.method, fix.clazz));
         });
   }
 
   @Override
-  public Set<Region> getRegions(Fix fix) {
+  public Set<Region> getRegions(Location location) {
     for (RegionTracker tracker : this.trackers) {
-      Set<Region> ans = tracker.getRegions(fix);
+      Set<Region> ans = tracker.getRegions(location);
       if (ans != null) {
         return ans;
       }
     }
-    throw new IllegalStateException("Region cannot be null at this point." + fix);
+    throw new IllegalStateException("Region cannot be null at this point." + location);
   }
 }

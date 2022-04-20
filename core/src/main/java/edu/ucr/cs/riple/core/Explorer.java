@@ -12,7 +12,7 @@ import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
-import edu.ucr.cs.riple.injector.Fix;
+import edu.ucr.cs.riple.injector.Location;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +33,7 @@ public class Explorer {
 
   public Explorer(
       Annotator annotator,
-      ImmutableSet<Fix> fixes,
+      ImmutableSet<Location> fixes,
       Bank<Error> errorBank,
       Bank<FixEntity> fixBank,
       RegionTracker tracker,
@@ -58,7 +58,7 @@ public class Explorer {
             .collect(Collectors.toSet());
     filteredReports.forEach(
         report -> {
-          Fix root = report.root;
+          Location root = report.root;
           Node node = fixGraph.findOrCreate(root);
           node.setRootSource(fixBank);
           node.report = report;
@@ -107,7 +107,7 @@ public class Explorer {
     ProgressBar pb = Utility.createProgressBar("Analysing", groups.size());
     for (Set<Node> group : groups.values()) {
       pb.step();
-      List<Fix> fixes = new ArrayList<>();
+      List<Location> fixes = new ArrayList<>();
       group.forEach(superNode -> fixes.addAll(superNode.getTree()));
       annotator.apply(fixes);
       FixSerializationConfig.Builder nullAwayConfig =
@@ -121,7 +121,7 @@ public class Explorer {
       group.forEach(
           node -> {
             int totalEffect = 0;
-            List<Fix> localTriggered = new ArrayList<>();
+            List<Location> localTriggered = new ArrayList<>();
             for (Region region : node.regions) {
               Result<Error> res = errorBank.compareByMethod(region.clazz, region.method, false);
               totalEffect += res.size;
@@ -131,7 +131,7 @@ public class Explorer {
                       .compareByMethod(region.clazz, region.method, false)
                       .dif
                       .stream()
-                      .map(fixEntity -> fixEntity.fix)
+                      .map(fixEntity -> fixEntity.location)
                       .collect(Collectors.toList()));
             }
             localTriggered.addAll(

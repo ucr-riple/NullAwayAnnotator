@@ -60,7 +60,7 @@ public class Machine {
     this.keep = keep;
     this.printer = new DefaultPrettyPrinter(new DefaultPrinterConfiguration());
     AtomicInteger sum = new AtomicInteger();
-    workLists.forEach(workList -> sum.addAndGet(workList.getFixes().size()));
+    workLists.forEach(workList -> sum.addAndGet(workList.getLocations().size()));
     this.total = sum.get();
   }
 
@@ -91,12 +91,12 @@ public class Machine {
       } catch (FileNotFoundException exception) {
         continue;
       }
-      for (Fix fix : workList.getFixes()) {
+      for (Location location : workList.getLocations()) {
         try {
           if (Injector.LOG) {
             pb.step();
           }
-          if (applyFix(tree, fix)) {
+          if (applyAtLocation(tree, location)) {
             processed++;
           }
         } catch (Exception ignored) {
@@ -111,28 +111,28 @@ public class Machine {
     return processed;
   }
 
-  private boolean applyFix(CompilationUnit tree, Fix fix) {
+  private boolean applyAtLocation(CompilationUnit tree, Location location) {
     boolean success = false;
     TypeDeclaration<?> clazz =
-        Helper.getClassOrInterfaceOrEnumDeclaration(tree, fix.pkg, fix.className);
+        Helper.getClassOrInterfaceOrEnumDeclaration(tree, location.pkg, location.clazz);
     if (clazz == null) {
       return false;
     }
-    switch (fix.location) {
+    switch (location.location) {
       case "FIELD":
-        success = applyClassField(clazz, fix);
+        success = applyClassField(clazz, location);
         break;
       case "METHOD":
-        success = applyMethodReturn(clazz, fix);
+        success = applyMethodReturn(clazz, location);
         break;
       case "PARAMETER":
-        success = applyMethodParam(clazz, fix);
+        success = applyMethodParam(clazz, location);
         break;
     }
     if (success) {
-      if (Helper.getPackageName(fix.annotation) != null) {
+      if (Helper.getPackageName(location.annotation) != null) {
         ImportDeclaration importDeclaration =
-            StaticJavaParser.parseImport("import " + fix.annotation + ";");
+            StaticJavaParser.parseImport("import " + location.annotation + ";");
         if (!tree.getImports().contains(importDeclaration)) {
           tree.getImports().addFirst(importDeclaration);
         }
@@ -165,19 +165,20 @@ public class Machine {
     }
   }
 
-  private boolean applyMethodParam(TypeDeclaration<?> clazz, Fix fix) {
+  private boolean applyMethodParam(TypeDeclaration<?> clazz, Location location) {
     final boolean[] success = {false};
     NodeList<BodyDeclaration<?>> members = clazz.getMembers();
     members.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifCallableDeclaration(
                 callableDeclaration -> {
-                  if (Helper.matchesCallableSignature(callableDeclaration, fix.method)) {
+                  if (Helper.matchesCallableSignature(callableDeclaration, location.method)) {
                     for (Object p : callableDeclaration.getParameters()) {
                       if (p instanceof Parameter) {
                         Parameter param = (Parameter) p;
-                        if (param.getName().toString().equals(fix.param)) {
-                          applyAnnotation(param, fix.annotation, Boolean.parseBoolean(fix.inject));
+                        if (param.getName().toString().equals(location.variable)) {
+                          applyAnnotation(
+                              param, location.annotation, Boolean.parseBoolean(location.inject));
                           success[0] = true;
                         }
                       }
@@ -187,23 +188,25 @@ public class Machine {
     return success[0];
   }
 
-  private boolean applyMethodReturn(TypeDeclaration<?> clazz, Fix fix) {
+  private boolean applyMethodReturn(TypeDeclaration<?> clazz, Location location) {
     NodeList<BodyDeclaration<?>> members = clazz.getMembers();
     final boolean[] success = {false};
     members.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifCallableDeclaration(
                 callableDeclaration -> {
-                  if (Helper.matchesCallableSignature(callableDeclaration, fix.method)) {
+                  if (Helper.matchesCallableSignature(callableDeclaration, location.method)) {
                     applyAnnotation(
-                        callableDeclaration, fix.annotation, Boolean.parseBoolean(fix.inject));
+                        callableDeclaration,
+                        location.annotation,
+                        Boolean.parseBoolean(location.inject));
                     success[0] = true;
                   }
                 }));
     return success[0];
   }
 
-  private boolean applyClassField(TypeDeclaration<?> clazz, Fix fix) {
+  private boolean applyClassField(TypeDeclaration<?> clazz, Location location) {
     final boolean[] success = {false};
     NodeList<BodyDeclaration<?>> members = clazz.getMembers();
     members.forEach(
@@ -213,9 +216,11 @@ public class Machine {
                   NodeList<VariableDeclarator> vars =
                       fieldDeclaration.asFieldDeclaration().getVariables();
                   for (VariableDeclarator v : vars) {
-                    if (v.getName().toString().equals(fix.param)) {
+                    if (v.getName().toString().equals(location.variable)) {
                       applyAnnotation(
-                          fieldDeclaration, fix.annotation, Boolean.parseBoolean(fix.inject));
+                          fieldDeclaration,
+                          location.annotation,
+                          Boolean.parseBoolean(location.inject));
                       success[0] = true;
                       break;
                     }

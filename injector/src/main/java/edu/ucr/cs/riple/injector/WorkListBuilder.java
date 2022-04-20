@@ -38,23 +38,23 @@ import org.json.simple.parser.ParseException;
 
 public class WorkListBuilder {
   private String filePath;
-  private List<Fix> fixes;
+  private List<Location> locations;
 
   public WorkListBuilder(String filePath) {
     this.filePath = filePath;
-    readFixes();
+    readLocations();
   }
 
-  private void readFixes() {
+  private void readLocations() {
     try {
       BufferedReader bufferedReader =
           Files.newBufferedReader(Paths.get(filePath), Charset.defaultCharset());
       JSONObject obj = (JSONObject) new JSONParser().parse(bufferedReader);
-      JSONArray fixesJson = (JSONArray) obj.get("fixes");
+      JSONArray locationsJson = (JSONArray) obj.get("locations");
       bufferedReader.close();
-      fixes = new ArrayList<>();
-      for (Object o : fixesJson) {
-        fixes.add(Fix.createFromJson((JSONObject) o));
+      locations = new ArrayList<>();
+      for (Object o : locationsJson) {
+        locations.add(Location.createFromJson((JSONObject) o));
       }
     } catch (FileNotFoundException ex) {
       throw new RuntimeException("Unable to open file: " + this.filePath);
@@ -65,29 +65,29 @@ public class WorkListBuilder {
     }
   }
 
-  public WorkListBuilder(List<Fix> fixes) {
-    if (fixes == null) {
-      throw new RuntimeException("fix array cannot be null");
+  public WorkListBuilder(List<Location> locations) {
+    if (locations == null) {
+      throw new RuntimeException("location array cannot be null");
     }
-    this.fixes = fixes;
+    this.locations = locations;
   }
 
   public List<WorkList> getWorkLists() {
     ArrayList<String> uris = new ArrayList<>();
     ArrayList<WorkList> workLists = new ArrayList<>();
-    for (Fix fix : this.fixes) {
-      if (!new File(fix.uri).exists() && fix.uri.startsWith("file:")) {
-        fix.uri = fix.uri.substring("file:".length());
+    for (Location location : this.locations) {
+      if (!new File(location.uri).exists() && location.uri.startsWith("file:")) {
+        location.uri = location.uri.substring("file:".length());
       }
-      if (!uris.contains(fix.uri)) {
-        uris.add(fix.uri);
-        WorkList workList = new WorkList(fix.uri);
+      if (!uris.contains(location.uri)) {
+        uris.add(location.uri);
+        WorkList workList = new WorkList(location.uri);
         workLists.add(workList);
-        workList.addFix(fix);
+        workList.addLocation(location);
       } else {
         for (WorkList workList : workLists) {
-          if (workList.getUri().equals(fix.uri)) {
-            workList.addFix(fix);
+          if (workList.getUri().equals(location.uri)) {
+            workList.addLocation(location);
             break;
           }
         }
