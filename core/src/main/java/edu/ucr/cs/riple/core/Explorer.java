@@ -2,6 +2,7 @@ package edu.ucr.cs.riple.core;
 
 import com.google.common.collect.ImmutableSet;
 import com.uber.nullaway.fixserialization.FixSerializationConfig;
+import edu.ucr.cs.css.Serializer;
 import edu.ucr.cs.riple.core.metadata.graph.FixGraph;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
@@ -9,6 +10,7 @@ import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.Result;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
+import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -21,31 +23,26 @@ import me.tongfei.progressbar.ProgressBar;
 
 public class Explorer {
 
-  protected final FixGraph<Node> fixGraph;
-  protected final RegionTracker tracker;
-  protected final Annotator annotator;
-  protected final Bank<Error> errorBank;
-  protected final Bank<Fix> fixBank;
-  protected final MethodInheritanceTree methodInheritanceTree;
-  protected final ImmutableSet<Report> reports;
+  private final FixGraph<Node> fixGraph;
+  private final RegionTracker tracker;
+  private final Annotator annotator;
+  private final Bank<Error> errorBank;
+  private final Bank<Fix> fixBank;
+  private final MethodInheritanceTree methodInheritanceTree;
+  private final ImmutableSet<Report> reports;
   private final Config config;
 
-  public Explorer(
-      Annotator annotator,
-      ImmutableSet<Fix> fixes,
-      Bank<Error> errorBank,
-      Bank<Fix> fixBank,
-      RegionTracker tracker,
-      MethodInheritanceTree methodInheritanceTree) {
-    this.tracker = tracker;
+  public Explorer(Annotator annotator, ImmutableSet<Fix> fixes, Config config) {
+    this.tracker = new CompoundTracker(config.dir);
     this.annotator = annotator;
-    this.errorBank = errorBank;
-    this.fixBank = fixBank;
+    this.errorBank = new Bank<>(config.dir.resolve("errors.tsv"), Error::new);
+    this.fixBank = new Bank<>(config.dir.resolve("fixes.path"), Fix::new);
     this.fixGraph = new FixGraph<>(Node::new);
-    this.methodInheritanceTree = methodInheritanceTree;
+    this.methodInheritanceTree =
+        new MethodInheritanceTree(config.dir.resolve(Serializer.METHOD_INFO_NAME));
     this.reports =
         fixes.stream().map(fix -> new Report(fix, -1)).collect(ImmutableSet.toImmutableSet());
-    this.config = annotator.config;
+    this.config = config;
   }
 
   private boolean init() {
@@ -64,7 +61,7 @@ public class Explorer {
           node.triggered = report.triggered;
           node.tree.addAll(report.tree);
           node.mergeTriggered();
-          node.updateUsages(tracker);
+          node.updateRegions(tracker);
           node.changed = false;
         });
     return filteredReports.size() > 0;
@@ -124,7 +121,6 @@ public class Explorer {
             for (Region region : node.regions) {
               Result<Error> res = errorBank.compareByMethod(region.clazz, region.method, false);
               totalEffect += res.size;
-              node.analyzeStatus(res.dif);
               localTriggered.addAll(
                   new ArrayList<>(fixBank.compareByMethod(region.clazz, region.method, false).dif));
             }

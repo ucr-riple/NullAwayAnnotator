@@ -98,7 +98,7 @@ public class FixGraph<T extends Node> {
         if (node.equals(other)) {
           continue;
         }
-        if (node.hasConflictInUsage(other)) {
+        if (node.hasConflictInRegions(other)) {
           adj[node.id].add(other.id);
         }
       }

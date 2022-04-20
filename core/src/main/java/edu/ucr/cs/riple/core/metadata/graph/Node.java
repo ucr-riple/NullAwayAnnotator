@@ -4,7 +4,6 @@ import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
-import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
@@ -21,8 +20,11 @@ import java.util.stream.Collectors;
 
 public class Node {
 
-  /** Location to process */
+  /** Fix to process */
   public final Fix root;
+
+  /** Tree of all fixes connecting to root. */
+  public final Set<Fix> tree;
 
   public final Set<Region> regions;
 
@@ -36,15 +38,10 @@ public class Node {
   /** if <code>true</code>, set of triggered has been updated */
   public boolean changed;
 
-  /** if <code>true</code>, no new triggered error is addressable by a location */
-  public boolean finished;
+  public Report report;
 
   /** Regions where error reported * */
-  protected Set<Region> rootSource;
-
-  public final Set<Fix> tree;
-
-  public Report report;
+  private Set<Region> rootSource;
 
   public Node(Fix root) {
     this.regions = new HashSet<>();
@@ -52,7 +49,6 @@ public class Node {
     this.triggered = new HashSet<>();
     this.effect = 0;
     this.tree = Sets.newHashSet(root);
-    this.finished = false;
   }
 
   public void setRootSource(Bank<Fix> fixBank) {
@@ -66,13 +62,13 @@ public class Node {
             });
   }
 
-  public void updateUsages(RegionTracker tracker) {
+  public void updateRegions(RegionTracker tracker) {
     this.regions.clear();
     this.regions.addAll(this.rootSource);
     tree.forEach(fix -> regions.addAll(tracker.getRegions(fix)));
   }
 
-  public boolean hasConflictInUsage(Node other) {
+  public boolean hasConflictInRegions(Node other) {
     return !Collections.disjoint(other.regions, this.regions);
   }
 
@@ -105,10 +101,6 @@ public class Node {
     changed = (changed || (sizeAfter != sizeBefore));
   }
 
-  public void analyzeStatus(List<Error> newErrors) {
-    this.finished = newErrors.stream().noneMatch(Error::isFixable);
-  }
-
   @Override
   public int hashCode() {
     return getHash(root);
@@ -124,39 +116,6 @@ public class Node {
     if (!(o instanceof Node)) return false;
     Node node = (Node) o;
     return root.equals(node.root);
-  }
-
-  /**
-   * Generates suggested fixes due to making a parameter {@code Nullable} for all overriding *
-   * methods.
-   *
-   * @param fix Location containing the location parameter nullable suggestion location.
-   * @param mit Method Inheritance Tree.
-   * @return List of Fixes
-   */
-  protected static List<Fix> generateSubMethodParameterInheritanceFixesByFix(
-      Fix fix, MethodInheritanceTree mit) {
-    List<MethodNode> overridingMethods = mit.getSubMethods(fix.method, fix.clazz, false);
-    int index = Integer.parseInt(fix.index);
-    List<Fix> ans = new ArrayList<>();
-    overridingMethods.forEach(
-        methodNode -> {
-          if (index < methodNode.annotFlags.length && !methodNode.annotFlags[index]) {
-            Location location =
-                new Location(
-                    fix.annotation,
-                    fix.method,
-                    methodNode.parameterNames[index],
-                    FixType.PARAMETER.name,
-                    methodNode.clazz,
-                    methodNode.uri,
-                    "true");
-            location.index = String.valueOf(index);
-            Fix newFix = new Fix(location, methodNode.clazz, methodNode.method);
-            ans.add(newFix);
-          }
-        });
-    return ans;
   }
 
   /**
@@ -186,5 +145,38 @@ public class Node {
 
   public Set<Fix> getTree() {
     return tree;
+  }
+
+  /**
+   * Generates suggested fixes due to making a parameter {@code Nullable} for all overriding *
+   * methods.
+   *
+   * @param fix Location containing the location parameter nullable suggestion location.
+   * @param mit Method Inheritance Tree.
+   * @return List of Fixes
+   */
+  private static List<Fix> generateSubMethodParameterInheritanceFixesByFix(
+      Fix fix, MethodInheritanceTree mit) {
+    List<MethodNode> overridingMethods = mit.getSubMethods(fix.method, fix.clazz, false);
+    int index = Integer.parseInt(fix.index);
+    List<Fix> ans = new ArrayList<>();
+    overridingMethods.forEach(
+        methodNode -> {
+          if (index < methodNode.annotFlags.length && !methodNode.annotFlags[index]) {
+            Location location =
+                new Location(
+                    fix.annotation,
+                    fix.method,
+                    methodNode.parameterNames[index],
+                    FixType.PARAMETER.name,
+                    methodNode.clazz,
+                    methodNode.uri,
+                    "true");
+            location.index = String.valueOf(index);
+            Fix newFix = new Fix(location, methodNode.clazz, methodNode.method);
+            ans.add(newFix);
+          }
+        });
+    return ans;
   }
 }

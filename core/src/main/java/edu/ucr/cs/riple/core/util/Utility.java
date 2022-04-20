@@ -26,7 +26,6 @@ package edu.ucr.cs.riple.core.util;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Booleans;
-import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.Report;
@@ -35,7 +34,6 @@ import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.injector.Location;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -140,10 +138,11 @@ public class Utility {
     return Arrays.stream(content.split(",")).toArray(String[]::new);
   }
 
-  public static ImmutableSet<Fix> readAllFixes(Path path) {
+  public static ImmutableSet<Fix> readAllFixes(Config config) {
+    Path fixesPath = config.dir.resolve("");
     Set<Fix> fixes = new HashSet<>();
     try {
-      try (BufferedReader br = new BufferedReader(new FileReader(path.toFile()))) {
+      try (BufferedReader br = new BufferedReader(new FileReader(fixesPath.toFile()))) {
         String line;
         br.readLine();
         while ((line = br.readLine()) != null) {
@@ -158,8 +157,9 @@ public class Utility {
         }
       }
     } catch (IOException e) {
-      throw new RuntimeException("Exception happened in reading fixes at: " + path, e);
+      throw new RuntimeException("Exception happened in reading fixes at: " + fixesPath, e);
     }
+    //    if (useCache) {}
     return ImmutableSet.copyOf(fixes);
   }
 
@@ -229,17 +229,6 @@ public class Utility {
         ChronoUnit.SECONDS,
         0L,
         Duration.ZERO);
-  }
-
-  public static void writeLog(Config config) {
-    try {
-      FileWriter fw = new FileWriter(config.dir.resolve("log.txt").toFile(), true);
-      BufferedWriter bw = new BufferedWriter(fw);
-      bw.write(Annotator.log.toString());
-      bw.newLine();
-      bw.close();
-    } catch (Exception ignored) {
-    }
   }
 
   public static int calculateMethodInheritanceViolationError(

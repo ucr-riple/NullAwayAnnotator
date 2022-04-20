@@ -26,86 +26,48 @@ package edu.ucr.cs.riple.core;
 
 import com.google.common.collect.ImmutableSet;
 import com.uber.nullaway.fixserialization.FixSerializationConfig;
-import edu.ucr.cs.css.Serializer;
-import edu.ucr.cs.riple.core.metadata.index.Bank;
-import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
-import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.Location;
 import edu.ucr.cs.riple.injector.WorkListBuilder;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Annotator {
-  private Injector injector;
-  private Explorer explorer;
-  public static final Log log = new Log();
-  public Config config;
+  private final Injector injector;
+  private final Config config;
 
-  public static class Log {
-    public int total;
-    int requested;
-    long time;
-    long deep;
-    long buildTime = 0;
-
-    @Override
-    public String toString() {
-      return "total="
-          + total
-          + ", requested="
-          + requested
-          + ", time="
-          + time
-          + ", deep="
-          + deep
-          + ", buildTime="
-          + buildTime;
-    }
-  }
-
-  private void init(Config config) {
-    System.out.println("Making the first build.");
-    FixSerializationConfig.Builder builder =
-        new FixSerializationConfig.Builder()
-            .setSuggest(true, true)
-            .setAnnotations(config.nullableAnnot, "UNKNOWN")
-            .setOutputDirectory(config.dir.toString());
-    buildProject(builder, false);
-    Path fixesPath = config.dir.resolve("fixes.path");
-    ImmutableSet<Fix> allFixes = Utility.readAllFixes(fixesPath);
-    if (config.useCache) {
-      Utility.removeCachedFixes(allFixes, config);
-    }
-    log.total = allFixes.size();
+  public Annotator(Config config) {
+    this.config = config;
     this.injector =
         Injector.builder()
             .setMode(Injector.MODE.BATCH)
             .keepStyle(config.lexicalPreservationEnabled)
             .build();
-    MethodInheritanceTree methodInheritanceTree =
-        new MethodInheritanceTree(config.dir.resolve(Serializer.METHOD_INFO_NAME));
-    Bank<Error> errorBank = new Bank<>(config.dir.resolve("errors.tsv"), Error::new);
-    Bank<Fix> fixBank = new Bank<>(fixesPath, Fix::new);
-    CompoundTracker tracker = new CompoundTracker(config.dir);
-    this.explorer =
-        new Explorer(this, allFixes, errorBank, fixBank, tracker, methodInheritanceTree);
   }
 
-  public void start(Config config) {
-    log.time = System.currentTimeMillis();
+  public void start() {
     System.out.println("Annotator Started.");
-    init(config);
+    preprocess();
+    explore();
+  }
+
+  private void preprocess() {}
+
+  private void explore() {
+    System.out.println("Making the first build.");
+    FixSerializationConfig.Builder nullAwayConfig =
+        new FixSerializationConfig.Builder()
+            .setSuggest(true, true)
+            .setAnnotations(config.nullableAnnot, "UNKNOWN")
+            .setOutputDirectory(config.dir.toString());
+    buildProject(nullAwayConfig);
+    ImmutableSet<Fix> allFixes = Utility.readAllFixes(config);
+    Explorer explorer = new Explorer(this, allFixes, config);
     ImmutableSet<Report> reports = explorer.explore();
-    log.deep = System.currentTimeMillis() - log.deep;
-    log.time = System.currentTimeMillis() - log.time;
     Utility.writeReports(config, reports);
-    Utility.writeLog(config);
   }
 
   public void remove(List<Fix> fixes) {
@@ -137,21 +99,12 @@ public class Annotator {
     injector.start(new WorkListBuilder(toApply).getWorkLists(), false);
   }
 
-  public void buildProject(FixSerializationConfig.Builder writer, boolean count) {
-    if (count) {
-      log.requested++;
-    }
+  public void buildProject(FixSerializationConfig.Builder writer) {
     writer.writeAsXML(config.nullAwayConfigPath.toString());
     try {
-      long start = System.currentTimeMillis();
       Utility.executeCommand(config.buildCommand);
-      log.buildTime += System.currentTimeMillis() - start;
     } catch (Exception e) {
       throw new RuntimeException("Could not run command: " + config.buildCommand);
     }
-  }
-
-  public void buildProject(FixSerializationConfig.Builder writer) {
-    buildProject(writer, true);
   }
 }

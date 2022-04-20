@@ -36,7 +36,7 @@ public class Main {
               + Arrays.toString(args));
     }
     Config config = new Config(args[1]);
-    Annotator annotator = new Annotator();
-    annotator.start(config);
+    Annotator annotator = new Annotator(config);
+    annotator.start();
   }
 }

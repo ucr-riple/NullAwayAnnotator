@@ -26,9 +26,6 @@ package edu.ucr.cs.riple.core.metadata.index;
 
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
@@ -79,26 +76,6 @@ public class Bank<T extends Hashable> {
     return compareByList(
         rootInMethod.getByMethod(className, methodName),
         currentInMethod.getByMethod(className, methodName));
-  }
-
-  public int compare() {
-    BufferedReader reader;
-    int lines = 0;
-    try {
-      reader = new BufferedReader(new FileReader(path.toFile()));
-      reader.readLine();
-      while (reader.readLine() != null) lines++;
-      reader.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return lines - rootInClass.total;
-  }
-
-  public Result<T> compareFull() {
-    Index<T> latest = new Index<>(path, Index.Type.BY_CLASS, factory);
-    latest.index();
-    return compareByList(rootInClass.getAllEntities(), latest.getAllEntities());
   }
 
   public Set<Region> getAllSources(Comparable<T> c) {
