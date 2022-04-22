@@ -126,7 +126,7 @@ public class Node {
    * @return List of Fixes
    */
   public List<Fix> generateSubMethodParameterInheritanceFixes(
-      MethodInheritanceTree mit, List<Fix> fixesInOneRound) {
+      MethodInheritanceTree mit, Set<Fix> fixesInOneRound) {
     List<Fix> ans = new ArrayList<>();
     tree.forEach(
         fix -> {
@@ -173,7 +173,8 @@ public class Node {
                     methodNode.uri,
                     "true");
             location.index = String.valueOf(index);
-            Fix newFix = new Fix(location, methodNode.clazz, methodNode.method);
+            Fix newFix =
+                new Fix(location, "WRONG_OVERRIDE_PARAM", methodNode.clazz, methodNode.method);
             ans.add(newFix);
           }
         });

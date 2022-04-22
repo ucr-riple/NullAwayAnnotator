@@ -1,8 +1,6 @@
 package edu.ucr.cs.riple.core;
 
 import com.google.common.collect.ImmutableSet;
-import com.uber.nullaway.fixserialization.FixSerializationConfig;
-import edu.ucr.cs.css.Serializer;
 import edu.ucr.cs.riple.core.metadata.graph.FixGraph;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
@@ -10,12 +8,12 @@ import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.Result;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
-import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,21 +23,27 @@ public class Explorer {
 
   private final FixGraph<Node> fixGraph;
   private final RegionTracker tracker;
-  private final Annotator annotator;
+  private final AnnotationInjector injector;
   private final Bank<Error> errorBank;
   private final Bank<Fix> fixBank;
   private final MethodInheritanceTree methodInheritanceTree;
   private final ImmutableSet<Report> reports;
   private final Config config;
 
-  public Explorer(Annotator annotator, ImmutableSet<Fix> fixes, Config config) {
-    this.tracker = new CompoundTracker(config.dir);
-    this.annotator = annotator;
-    this.errorBank = new Bank<>(config.dir.resolve("errors.tsv"), Error::new);
-    this.fixBank = new Bank<>(config.dir.resolve("fixes.path"), Fix::new);
+  public Explorer(
+      AnnotationInjector injector,
+      Bank<Error> errorBank,
+      Bank<Fix> fixBank,
+      RegionTracker tracker,
+      MethodInheritanceTree methodInheritanceTree,
+      ImmutableSet<Fix> fixes,
+      Config config) {
+    this.tracker = tracker;
+    this.injector = injector;
+    this.fixBank = fixBank;
+    this.errorBank = errorBank;
+    this.methodInheritanceTree = methodInheritanceTree;
     this.fixGraph = new FixGraph<>(Node::new);
-    this.methodInheritanceTree =
-        new MethodInheritanceTree(config.dir.resolve(Serializer.METHOD_INFO_NAME));
     this.reports =
         fixes.stream().map(fix -> new Report(fix, -1)).collect(ImmutableSet.toImmutableSet());
     this.config = config;
@@ -103,15 +107,10 @@ public class Explorer {
     ProgressBar pb = Utility.createProgressBar("Analysing", groups.size());
     for (Set<Node> group : groups.values()) {
       pb.step();
-      List<Fix> fixes = new ArrayList<>();
+      Set<Fix> fixes = new HashSet<>();
       group.forEach(superNode -> fixes.addAll(superNode.getTree()));
-      annotator.apply(fixes);
-      FixSerializationConfig.Builder nullAwayConfig =
-          new FixSerializationConfig.Builder()
-              .setSuggest(true, true)
-              .setAnnotations(config.nullableAnnot, "UNKNOWN")
-              .setOutputDirectory(config.dir.toString());
-      annotator.buildProject(nullAwayConfig);
+      injector.inject(fixes);
+      Utility.buildProject(config);
       errorBank.saveState(false, true);
       fixBank.saveState(false, true);
       group.forEach(
@@ -129,7 +128,7 @@ public class Explorer {
             node.updateTriggered(localTriggered);
             node.setEffect(totalEffect, methodInheritanceTree);
           });
-      annotator.remove(fixes);
+      injector.remove(fixes);
     }
     pb.close();
   }

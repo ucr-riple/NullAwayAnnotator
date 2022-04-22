@@ -38,9 +38,10 @@ public class Fix extends Hashable {
   public final String uri;
   public final String index;
   public final String annotation;
+  public final String reason;
   public int referred;
 
-  public Fix(Location location, String encClass, String endMethod) {
+  public Fix(Location location, String reason, String encClass, String endMethod) {
     this.location = location;
     this.annotation = location.annotation;
     this.uri = location.uri;
@@ -51,11 +52,12 @@ public class Fix extends Hashable {
     this.index = location.index;
     this.encClass = encClass;
     this.encMethod = endMethod;
+    this.reason = reason;
     this.referred = 0;
   }
 
   public Fix(String[] infos) {
-    this(Location.fromArrayInfo(infos), infos[8], infos[9]);
+    this(Location.fromArrayInfo(infos, infos[7]), infos[6], infos[8], infos[9]);
   }
 
   @Override

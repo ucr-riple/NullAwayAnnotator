@@ -140,9 +140,9 @@ public class Location {
     return location;
   }
 
-  public static Location fromArrayInfo(String[] infos) {
+  public static Location fromArrayInfo(String[] infos, String annotation) {
     Location location =
-        new Location(infos[7], infos[2], infos[3], infos[0], infos[1], infos[5], "true");
+        new Location(annotation, infos[2], infos[3], infos[0], infos[1], infos[5], "true");
     location.pkg = location.clazz.substring(0, location.clazz.lastIndexOf("."));
     location.index = infos[4];
     return location;

@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.util;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Booleans;
+import com.uber.nullaway.fixserialization.FixSerializationConfig;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.Report;
@@ -51,12 +52,22 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import me.tongfei.progressbar.ProgressBar;
 import me.tongfei.progressbar.ProgressBarStyle;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class Utility {
 
@@ -138,7 +149,7 @@ public class Utility {
     return Arrays.stream(content.split(",")).toArray(String[]::new);
   }
 
-  public static ImmutableSet<Fix> readAllFixes(Config config) {
+  public static Set<Fix> readFixesFromOutputDirectory(Config config) {
     Path fixesPath = config.dir.resolve("");
     Set<Fix> fixes = new HashSet<>();
     try {
@@ -159,8 +170,67 @@ public class Utility {
     } catch (IOException e) {
       throw new RuntimeException("Exception happened in reading fixes at: " + fixesPath, e);
     }
-    //    if (useCache) {}
-    return ImmutableSet.copyOf(fixes);
+    return fixes;
+  }
+
+  public static void activateCSSChecker(Config config, boolean activation) {
+    DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+    try {
+      DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+      Document doc = docBuilder.newDocument();
+
+      // Root
+      Element rootElement = doc.createElement("css");
+      doc.appendChild(rootElement);
+
+      // Method
+      Element methodElement = doc.createElement("method");
+      methodElement.setAttribute("active", String.valueOf(activation));
+      rootElement.appendChild(methodElement);
+
+      // Field
+      Element fieldElement = doc.createElement("field");
+      fieldElement.setAttribute("active", String.valueOf(activation));
+      rootElement.appendChild(fieldElement);
+
+      // Call
+      Element callElement = doc.createElement("call");
+      callElement.setAttribute("active", String.valueOf(activation));
+      rootElement.appendChild(callElement);
+
+      // Output dir
+      Element outputDir = doc.createElement("path");
+      outputDir.setTextContent(config.dir.toString());
+      rootElement.appendChild(outputDir);
+
+      // Writings
+      TransformerFactory transformerFactory = TransformerFactory.newInstance();
+      Transformer transformer = transformerFactory.newTransformer();
+      DOMSource source = new DOMSource(doc);
+      StreamResult result = new StreamResult(config.cssConfigPath.toFile());
+      transformer.transform(source, result);
+    } catch (ParserConfigurationException | TransformerException e) {
+      throw new RuntimeException("Error happened in writing config.", e);
+    }
+  }
+
+  public static void buildProject(Config config) {
+    buildProject(config, false);
+  }
+
+  public static void buildProject(Config config, boolean initSerializationEnabled) {
+    FixSerializationConfig.Builder nullAwayConfig =
+        new FixSerializationConfig.Builder()
+            .setSuggest(true, true)
+            .setAnnotations(config.nullableAnnot, "UNKNOWN")
+            .setOutputDirectory(config.dir.toString())
+            .setFieldInitInfo(initSerializationEnabled);
+    nullAwayConfig.writeAsXML(config.nullAwayConfigPath.toString());
+    try {
+      Utility.executeCommand(config.buildCommand);
+    } catch (Exception e) {
+      throw new RuntimeException("Could not run command: " + config.buildCommand);
+    }
   }
 
   public static void removeCachedFixes(ImmutableSet<Fix> fixes, Config config) {

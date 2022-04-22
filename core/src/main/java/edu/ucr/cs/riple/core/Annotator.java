@@ -25,27 +25,28 @@
 package edu.ucr.cs.riple.core;
 
 import com.google.common.collect.ImmutableSet;
-import com.uber.nullaway.fixserialization.FixSerializationConfig;
+import edu.ucr.cs.css.Serializer;
+import edu.ucr.cs.riple.core.metadata.index.Bank;
+import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
+import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
+import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
-import edu.ucr.cs.riple.injector.Injector;
-import edu.ucr.cs.riple.injector.Location;
-import edu.ucr.cs.riple.injector.WorkListBuilder;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Annotator {
-  private final Injector injector;
+
+  private final AnnotationInjector injector;
   private final Config config;
+  private final Set<Report> reports;
 
   public Annotator(Config config) {
     this.config = config;
-    this.injector =
-        Injector.builder()
-            .setMode(Injector.MODE.BATCH)
-            .keepStyle(config.lexicalPreservationEnabled)
-            .build();
+    this.reports = new HashSet<>();
+    this.injector = new AnnotationInjector(config);
   }
 
   public void start() {
@@ -54,57 +55,35 @@ public class Annotator {
     explore();
   }
 
-  private void preprocess() {}
+  private void preprocess() {
+    System.out.println("Preprocessing...");
+    Utility.activateCSSChecker(config, true);
+    this.reports.clear();
+    System.out.println("Making the first build.");
+    Utility.buildProject(config, true);
+    Set<Fix> uninitializedFields =
+        Utility.readFixesFromOutputDirectory(config)
+            .stream()
+            .filter(
+                fix ->
+                    fix.reason.equals("FIELD_NO_INIT")
+                        && fix.location.kind.equals(FixType.FIELD.name))
+            .collect(Collectors.toSet());
+  }
 
   private void explore() {
     System.out.println("Making the first build.");
-    FixSerializationConfig.Builder nullAwayConfig =
-        new FixSerializationConfig.Builder()
-            .setSuggest(true, true)
-            .setAnnotations(config.nullableAnnot, "UNKNOWN")
-            .setOutputDirectory(config.dir.toString());
-    buildProject(nullAwayConfig);
-    ImmutableSet<Fix> allFixes = Utility.readAllFixes(config);
-    Explorer explorer = new Explorer(this, allFixes, config);
+    Utility.buildProject(config);
+    ImmutableSet<Fix> fixes = ImmutableSet.copyOf(Utility.readFixesFromOutputDirectory(config));
+    Utility.activateCSSChecker(config, false);
+    Bank<Error> errorBank = new Bank<>(config.dir.resolve("errors.tsv"), Error::new);
+    Bank<Fix> fixBank = new Bank<>(config.dir.resolve("fixes.path"), Fix::new);
+    RegionTracker tracker = new CompoundTracker(config.dir);
+    MethodInheritanceTree tree =
+        new MethodInheritanceTree(config.dir.resolve(Serializer.METHOD_INFO_NAME));
+    Explorer explorer = new Explorer(injector, errorBank, fixBank, tracker, tree, fixes, config);
+    Utility.activateCSSChecker(config, true);
     ImmutableSet<Report> reports = explorer.explore();
     Utility.writeReports(config, reports);
-  }
-
-  public void remove(List<Fix> fixes) {
-    if (fixes == null || fixes.size() == 0) {
-      return;
-    }
-    Set<Location> toRemove =
-        fixes
-            .stream()
-            .map(
-                fix ->
-                    new Location(
-                        fix.annotation,
-                        fix.method,
-                        fix.variable,
-                        fix.kind,
-                        fix.clazz,
-                        fix.uri,
-                        "false"))
-            .collect(Collectors.toSet());
-    injector.start(new WorkListBuilder(toRemove).getWorkLists(), false);
-  }
-
-  public void apply(List<Fix> fixes) {
-    if (fixes == null || fixes.size() == 0) {
-      return;
-    }
-    Set<Location> toApply = fixes.stream().map(fix -> fix.location).collect(Collectors.toSet());
-    injector.start(new WorkListBuilder(toApply).getWorkLists(), false);
-  }
-
-  public void buildProject(FixSerializationConfig.Builder writer) {
-    writer.writeAsXML(config.nullAwayConfigPath.toString());
-    try {
-      Utility.executeCommand(config.buildCommand);
-    } catch (Exception e) {
-      throw new RuntimeException("Could not run command: " + config.buildCommand);
-    }
   }
 }
