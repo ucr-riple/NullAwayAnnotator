@@ -54,7 +54,10 @@ public class Explorer {
     Set<Report> filteredReports =
         this.reports
             .stream()
-            .filter(report -> (!config.bailout || report.effectiveNess > 0) && !report.finished)
+            .filter(
+                report ->
+                    ((!config.bailout || report.effectiveNess > 0) && !report.finished)
+                        || !report.processed)
             .collect(Collectors.toSet());
     filteredReports.forEach(
         report -> {
@@ -87,6 +90,7 @@ public class Explorer {
             report.tree = node.tree;
             report.triggered = node.triggered;
             report.finished = !node.changed;
+            report.processed = true;
           });
     }
     return reports;

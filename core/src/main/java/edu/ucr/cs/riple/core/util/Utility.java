@@ -35,17 +35,13 @@ import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.injector.Location;
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -64,8 +60,6 @@ import me.tongfei.progressbar.ProgressBar;
 import me.tongfei.progressbar.ProgressBarStyle;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -85,7 +79,7 @@ public class Utility {
 
   @SuppressWarnings("ALL")
   public static void writeReports(Config config, ImmutableSet<Report> reports) {
-    Path reportsPath = config.dir.resolve("diagnose_report.json");
+    Path reportsPath = config.dir.resolve("reports.json");
     JSONObject result = new JSONObject();
     JSONArray reportsJson = new JSONArray();
     for (Report report : reports) {
@@ -150,7 +144,7 @@ public class Utility {
   }
 
   public static Set<Fix> readFixesFromOutputDirectory(Config config) {
-    Path fixesPath = config.dir.resolve("");
+    Path fixesPath = config.dir.resolve("fixes.tsv");
     Set<Fix> fixes = new HashSet<>();
     try {
       try (BufferedReader br = new BufferedReader(new FileReader(fixesPath.toFile()))) {
@@ -161,6 +155,7 @@ public class Utility {
           Optional<Fix> existing = fixes.stream().filter(other -> other.equals(fix)).findAny();
           if (existing.isPresent()) {
             existing.get().referred++;
+            existing.get().reasons.addAll(fix.reasons);
           } else {
             fix.referred = 1;
             fixes.add(fix);
@@ -173,7 +168,7 @@ public class Utility {
     return fixes;
   }
 
-  public static void activateCSSChecker(Config config, boolean activation) {
+  public static void setCSSCheckerActivation(Config config, boolean activation) {
     DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
     try {
       DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -231,58 +226,6 @@ public class Utility {
     } catch (Exception e) {
       throw new RuntimeException("Could not run command: " + config.buildCommand);
     }
-  }
-
-  public static void removeCachedFixes(ImmutableSet<Fix> fixes, Config config) {
-    Path reportsPath = config.dir.resolve("reports.json");
-    if (!Files.exists(reportsPath)) {
-      return;
-    }
-    try {
-      JSONObject cachedObjects =
-          (JSONObject) new JSONParser().parse(new FileReader(reportsPath.toFile()));
-      JSONArray cachedJson = (JSONArray) cachedObjects.get("reports");
-      List<Location> cached = new ArrayList<>();
-      for (Object o : cachedJson) {
-        JSONObject reportJson = (JSONObject) o;
-        if (Integer.parseInt(reportJson.get("effect").toString()) > 0) {
-          cached.add(Location.createFromJson(reportJson));
-        }
-      }
-      System.out.print(
-          "Cached items size: " + cached.size() + " total location size: " + fixes.size());
-      fixes.removeAll(cached);
-    } catch (Exception exception) {
-      throw new RuntimeException("Exception happened in removing cached fixes", exception);
-    }
-    System.out.println(". Reduced down to: " + fixes.size());
-  }
-
-  public static List<Location> readFixesJson(Path filePath) {
-    List<Location> fixes = new ArrayList<>();
-    try {
-      BufferedReader bufferedReader = Files.newBufferedReader(filePath, Charset.defaultCharset());
-      JSONObject obj = (JSONObject) new JSONParser().parse(bufferedReader);
-      JSONArray fixesJson = (JSONArray) obj.get("fixes");
-      bufferedReader.close();
-      for (Object o : fixesJson) {
-        JSONObject fixJson = (JSONObject) o;
-        fixes.add(Location.createFromJson(fixJson));
-        if (fixJson.containsKey("tree")) {
-          JSONArray followUps = (JSONArray) fixJson.get("tree");
-          for (Object followup : followUps) {
-            fixes.add(Location.createFromJson((JSONObject) followup));
-          }
-        }
-      }
-    } catch (FileNotFoundException e) {
-      throw new RuntimeException("Unable to open file: " + filePath, e);
-    } catch (IOException e) {
-      throw new RuntimeException("Error reading file: " + filePath, e);
-    } catch (ParseException e) {
-      throw new RuntimeException("Error in parsing object", e);
-    }
-    return fixes;
   }
 
   public static ProgressBar createProgressBar(String taskName, int steps) {

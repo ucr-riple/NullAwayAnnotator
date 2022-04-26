@@ -27,12 +27,12 @@ import org.json.simple.JSONObject;
 
 @SuppressWarnings("unchecked")
 public class Location {
-  public final String annotation;
   public final String method;
   public final String variable;
   public final String kind;
   public final String clazz;
   public final String inject;
+  public String annotation;
   public String uri;
   public String index;
   public String pkg;

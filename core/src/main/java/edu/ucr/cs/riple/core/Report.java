@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core;
 
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class Report {
@@ -36,16 +37,27 @@ public class Report {
   public Set<Fix> triggered;
   public boolean finished;
 
+  public boolean processed;
+
   public Report(Fix root, int effectiveNess) {
     this.effectiveNess = effectiveNess;
     this.root = root;
     this.tree = new HashSet<>();
     this.finished = false;
     this.triggered = new HashSet<>();
+    this.processed = false;
   }
 
   @Override
-  public String toString() {
-    return "effectiveNess=" + effectiveNess + ", location=" + root + ", finished=" + finished + '}';
+  public boolean equals(Object other) {
+    if (this == other) return true;
+    if (!(other instanceof Report)) return false;
+    Report report = (Report) other;
+    return root.equals(report.root);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(root);
   }
 }

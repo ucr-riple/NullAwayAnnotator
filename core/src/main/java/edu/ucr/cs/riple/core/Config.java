@@ -22,6 +22,8 @@ public class Config {
   public final Path cssConfigPath;
   public final String buildCommand;
   public final String nullableAnnot;
+  public final String initializerAnnot;
+  public final String nonnullAnnot;
   public final int depth;
 
   public Config(String configPath) {
@@ -35,7 +37,7 @@ public class Config {
     } catch (Exception e) {
       throw new RuntimeException("Error in reading/parsing config at path: " + configPath, e);
     }
-    this.depth = getValueFromKey(jsonObject, "DEPTH", Integer.class).orElse(1);
+    this.depth = getValueFromKey(jsonObject, "DEPTH", Long.class).orElse((long) 1).intValue();
     this.chain = getValueFromKey(jsonObject, "CHAIN", Boolean.class).orElse(false);
     this.useCache = getValueFromKey(jsonObject, "CACHE", Boolean.class).orElse(true);
     this.lexicalPreservationEnabled =
@@ -44,6 +46,12 @@ public class Config {
     this.bailout = getValueFromKey(jsonObject, "BAILOUT", Boolean.class).orElse(true);
     this.nullableAnnot =
         getValueFromKey(jsonObject, "ANNOTATION:NULLABLE", String.class)
+            .orElse("javax.annotation.Nullable");
+    this.nonnullAnnot =
+        getValueFromKey(jsonObject, "ANNOTATION:NONNULL", String.class)
+            .orElse("javax.annotation.Nullable");
+    this.initializerAnnot =
+        getValueFromKey(jsonObject, "ANNOTATION:INITIALIZER", String.class)
             .orElse("javax.annotation.Nullable");
     this.nullAwayConfigPath =
         Paths.get(
@@ -61,7 +69,7 @@ public class Config {
     Preconditions.checkNotNull(projectPath, "Project cannot be null");
     String command = getValueFromKey(jsonObject, "BUILD_COMMAND", String.class).orElse(null);
     Preconditions.checkNotNull(command, "Command to run NullAway cannot be null");
-    this.buildCommand = "cd " + this.projectPath + " " + command;
+    this.buildCommand = "cd " + this.projectPath + " && " + command;
   }
 
   static class OrElse<T> {

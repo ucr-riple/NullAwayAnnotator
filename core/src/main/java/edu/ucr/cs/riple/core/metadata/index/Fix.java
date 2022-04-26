@@ -24,8 +24,10 @@
 
 package edu.ucr.cs.riple.core.metadata.index;
 
+import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.injector.Location;
 import java.util.Objects;
+import java.util.Set;
 import org.json.simple.JSONObject;
 
 public class Fix extends Hashable {
@@ -38,7 +40,7 @@ public class Fix extends Hashable {
   public final String uri;
   public final String index;
   public final String annotation;
-  public final String reason;
+  public final Set<String> reasons;
   public int referred;
 
   public Fix(Location location, String reason, String encClass, String endMethod) {
@@ -52,7 +54,7 @@ public class Fix extends Hashable {
     this.index = location.index;
     this.encClass = encClass;
     this.encMethod = endMethod;
-    this.reason = reason;
+    this.reasons = Sets.newHashSet(reason);
     this.referred = 0;
   }
 
