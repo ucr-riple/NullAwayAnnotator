@@ -6,17 +6,17 @@ import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
-import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.injector.Location;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Node {
 
@@ -72,7 +72,11 @@ public class Node {
     return !Collections.disjoint(other.regions, this.regions);
   }
 
-  public void setEffect(int effect, MethodInheritanceTree mit) {
+  public void updateStatus(
+      int effect, Set<Fix> fixesInOneRound, List<Fix> triggered, MethodInheritanceTree mit) {
+    triggered.addAll(generateSubMethodParameterInheritanceFixes(mit, fixesInOneRound));
+    triggered.addAll(generateSuperMethodInheritanceFixes(mit, fixesInOneRound));
+    updateTriggered(triggered);
     Set<Region> subMethodRegions =
         tree.stream()
             .filter(fix -> fix.kind.equals(FixType.PARAMETER.name))
@@ -80,25 +84,112 @@ public class Node {
                 fix ->
                     mit.getSubMethods(fix.method, fix.clazz, false)
                         .stream()
+                        .filter(methodNode -> !methodNode.annotFlags[Integer.parseInt(fix.index)])
                         .map(methodNode -> new Region(methodNode.method, methodNode.clazz)))
             .filter(region -> !regions.contains(region))
             .collect(Collectors.toSet());
-    this.effect = effect + subMethodRegions.size();
+    Set<Region> superMethodRegions =
+        tree.stream()
+            .filter(fix -> fix.kind.equals(FixType.METHOD.name))
+            .map(fix -> mit.getClosestSuperMethod(fix.method, fix.clazz))
+            .filter(Objects::nonNull)
+            .filter(methodNode -> !methodNode.hasNullableAnnotation)
+            .map(methodNode -> new Region(methodNode.method, methodNode.clazz))
+            .filter(region -> !regions.contains(region))
+            .collect(Collectors.toSet());
+    this.effect = effect + subMethodRegions.size() + superMethodRegions.size();
   }
 
-  public void updateTriggered(List<Fix> fixes) {
+  private void updateTriggered(List<Fix> fixes) {
     int sizeBefore = this.triggered.size();
     this.triggered.addAll(fixes);
     int sizeAfter = this.triggered.size();
-    for (Fix fix : fixes) {
-      for (Fix other : this.triggered) {
-        if (fix.equals(other)) {
-          other.referred++;
-          break;
-        }
-      }
-    }
     changed = (changed || (sizeAfter != sizeBefore));
+  }
+
+  /**
+   * Generates suggested fixes due to making a parameter {@code Nullable} for all overriding
+   * methods.
+   *
+   * @param mit Method Inheritance Tree.
+   * @return List of Fixes
+   */
+  private List<Fix> generateSubMethodParameterInheritanceFixes(
+      MethodInheritanceTree mit, Set<Fix> fixesInOneRound) {
+    return tree.stream()
+        .filter(fix -> fix.kind.equals(FixType.PARAMETER.name))
+        .flatMap(
+            (Function<Fix, Stream<Fix>>)
+                fix -> {
+                  int index = Integer.parseInt(fix.index);
+                  return mit.getSubMethods(fix.method, fix.clazz, false)
+                      .stream()
+                      .filter(
+                          methodNode ->
+                              (index < methodNode.annotFlags.length
+                                  && !methodNode.annotFlags[index]))
+                      .map(
+                          node -> {
+                            Location location =
+                                new Location(
+                                    fix.annotation,
+                                    fix.method,
+                                    node.parameterNames[index],
+                                    FixType.PARAMETER.name,
+                                    node.clazz,
+                                    node.uri,
+                                    "true");
+                            location.index = String.valueOf(index);
+                            return new Fix(
+                                location, "WRONG_OVERRIDE_PARAM", node.clazz, node.method);
+                          });
+                })
+        .filter(fix -> !fixesInOneRound.contains(fix))
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Generates suggested fixes due to making a method {@code Nullable} for all overridden methods.
+   *
+   * @param mit Method Inheritance Tree.
+   * @return List of Fixes
+   */
+  private List<Fix> generateSuperMethodInheritanceFixes(
+      MethodInheritanceTree mit, Set<Fix> fixesInOneRound) {
+    final String annot = root.annotation;
+    return tree.stream()
+        .map(fix -> mit.getClosestSuperMethod(fix.method, fix.clazz))
+        .filter(
+            node ->
+                node != null
+                    && !node.hasNullableAnnotation
+                    && fixesInOneRound
+                        .stream()
+                        .anyMatch(
+                            fix ->
+                                fix.kind.equals(FixType.METHOD.name)
+                                    && fix.clazz.equals(node.clazz)
+                                    && fix.method.equals(node.method)))
+        .map(
+            node ->
+                new Fix(
+                    new Location(
+                        annot,
+                        node.method,
+                        "null",
+                        FixType.METHOD.name,
+                        node.clazz,
+                        node.uri,
+                        "true"),
+                    "WRONG_OVERRIDE_RETURN",
+                    "null",
+                    "null"))
+        .collect(Collectors.toList());
+  }
+
+  public void mergeTriggered() {
+    this.tree.addAll(this.triggered);
+    this.triggered.clear();
   }
 
   @Override
@@ -116,68 +207,5 @@ public class Node {
     if (!(o instanceof Node)) return false;
     Node node = (Node) o;
     return root.equals(node.root);
-  }
-
-  /**
-   * Generates suggested fixes due to making a parameter {@code Nullable} for all overriding
-   * methods.
-   *
-   * @param mit Method Inheritance Tree.
-   * @return List of Fixes
-   */
-  public List<Fix> generateSubMethodParameterInheritanceFixes(
-      MethodInheritanceTree mit, Set<Fix> fixesInOneRound) {
-    List<Fix> ans = new ArrayList<>();
-    tree.forEach(
-        fix -> {
-          if (fix.kind.equals(FixType.PARAMETER.name)) {
-            ans.addAll(generateSubMethodParameterInheritanceFixesByFix(fix, mit));
-          }
-        });
-    ans.removeAll(fixesInOneRound);
-    return ans;
-  }
-
-  public void mergeTriggered() {
-    this.tree.addAll(this.triggered);
-    this.triggered.clear();
-  }
-
-  public Set<Fix> getTree() {
-    return tree;
-  }
-
-  /**
-   * Generates suggested fixes due to making a parameter {@code Nullable} for all overriding *
-   * methods.
-   *
-   * @param fix Location containing the location parameter nullable suggestion location.
-   * @param mit Method Inheritance Tree.
-   * @return List of Fixes
-   */
-  private static List<Fix> generateSubMethodParameterInheritanceFixesByFix(
-      Fix fix, MethodInheritanceTree mit) {
-    List<MethodNode> overridingMethods = mit.getSubMethods(fix.method, fix.clazz, false);
-    int index = Integer.parseInt(fix.index);
-    List<Fix> ans = new ArrayList<>();
-    overridingMethods.forEach(
-        methodNode -> {
-          if (index < methodNode.annotFlags.length && !methodNode.annotFlags[index]) {
-            Location location =
-                new Location(
-                    fix.annotation,
-                    fix.method,
-                    methodNode.parameterNames[index],
-                    FixType.PARAMETER.name,
-                    methodNode.clazz,
-                    methodNode.uri,
-                    "true");
-            location.index = String.valueOf(index);
-            Fix newFix =
-                new Fix(location, "WRONG_OVERRIDE_PARAM", methodNode.clazz, methodNode.method);
-            ans.add(newFix);
-          }
-        });
-    return ans;
   }
 }

@@ -112,7 +112,7 @@ public class Explorer {
     for (Set<Node> group : groups.values()) {
       pb.step();
       Set<Fix> fixes = new HashSet<>();
-      group.forEach(superNode -> fixes.addAll(superNode.getTree()));
+      group.forEach(superNode -> fixes.addAll(superNode.tree));
       injector.inject(fixes);
       Utility.buildProject(config);
       errorBank.saveState(false, true);
@@ -127,10 +127,7 @@ public class Explorer {
               localTriggered.addAll(
                   new ArrayList<>(fixBank.compareByMethod(region.clazz, region.method, false).dif));
             }
-            localTriggered.addAll(
-                node.generateSubMethodParameterInheritanceFixes(methodInheritanceTree, fixes));
-            node.updateTriggered(localTriggered);
-            node.setEffect(totalEffect, methodInheritanceTree);
+            node.updateStatus(totalEffect, fixes, localTriggered, methodInheritanceTree);
           });
       injector.remove(fixes);
     }

@@ -28,12 +28,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Booleans;
 import com.uber.nullaway.fixserialization.FixSerializationConfig;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
-import edu.ucr.cs.riple.core.metadata.method.MethodNode;
-import edu.ucr.cs.riple.injector.Location;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -44,7 +40,6 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -154,10 +149,8 @@ public class Utility {
           Fix fix = new Fix(line.split("\t"));
           Optional<Fix> existing = fixes.stream().filter(other -> other.equals(fix)).findAny();
           if (existing.isPresent()) {
-            existing.get().referred++;
             existing.get().reasons.addAll(fix.reasons);
           } else {
-            fix.referred = 1;
             fixes.add(fix);
           }
         }
@@ -242,76 +235,5 @@ public class Utility {
         ChronoUnit.SECONDS,
         0L,
         Duration.ZERO);
-  }
-
-  public static int calculateMethodInheritanceViolationError(
-      MethodInheritanceTree tree, Location fix, List<Location> fixesInOneRound) {
-    MethodNode superMethod = tree.getClosestSuperMethod(fix.method, fix.clazz);
-    if (superMethod == null) {
-      return 0;
-    }
-    if (superMethod.hasNullableAnnotation) {
-      return 0;
-    }
-    if (fixesInOneRound
-        .stream()
-        .anyMatch(
-            fix1 ->
-                fix1.method.equals(superMethod.method)
-                    && fix1.clazz.equals(superMethod.clazz)
-                    && fix1.kind.equals(FixType.METHOD.name))) {
-      return 1;
-    }
-    return 0;
-  }
-
-  public static boolean correspondingFixExists(
-      String clazz, String method, String param, String location, List<Fix> fixes) {
-    return fixes
-        .stream()
-        .anyMatch(
-            fix ->
-                fix.kind.equals(location)
-                    && fix.clazz.equals(clazz)
-                    && fix.method.equals(method)
-                    && fix.variable.equals(param));
-  }
-
-  public static int calculateParamInheritanceViolationError(
-      MethodInheritanceTree mit, Location fix, List<Fix> fixesInOneRound) {
-    int index = Integer.parseInt(fix.index);
-    MethodNode methodNode = mit.findNode(fix.method, fix.clazz);
-    if (methodNode == null) {
-      return 0;
-    }
-    boolean[] thisMethodFlag = methodNode.annotFlags;
-    if (index >= thisMethodFlag.length) {
-      return 0;
-    }
-    int effect = 0;
-    for (MethodNode subMethod : mit.getSubMethods(fix.method, fix.clazz, false)) {
-      if (!thisMethodFlag[index]) {
-        if (!subMethod.annotFlags[index]
-            && !correspondingFixExists(
-                subMethod.clazz,
-                subMethod.method,
-                subMethod.parameterNames[index],
-                FixType.PARAMETER.name,
-                fixesInOneRound)) {
-          effect++;
-        }
-      }
-    }
-    List<MethodNode> superMethods = mit.getSuperMethods(fix.method, fix.clazz, false);
-    if (superMethods == null || superMethods.size() == 0) {
-      return effect;
-    }
-    MethodNode superMethod = superMethods.get(0);
-    if (superMethod != null && !thisMethodFlag[index]) {
-      if (superMethod.annotFlags[index]) {
-        effect--;
-      }
-    }
-    return effect;
   }
 }
