@@ -26,6 +26,9 @@ package edu.ucr.cs.riple.core;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.css.Serializer;
+import edu.ucr.cs.riple.core.explorers.BasicExplorer;
+import edu.ucr.cs.riple.core.explorers.Explorer;
+import edu.ucr.cs.riple.core.explorers.OptimizedExplorer;
 import edu.ucr.cs.riple.core.metadata.field.FieldInitializationAnalysis;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -104,13 +107,16 @@ public class Annotator {
       Bank<Fix> fixBank = new Bank<>(config.dir.resolve("fixes.tsv"), Fix::new);
       MethodInheritanceTree tree =
           new MethodInheritanceTree(config.dir.resolve(Serializer.METHOD_INFO_NAME));
-      Explorer explorer = new Explorer(injector, errorBank, fixBank, tracker, tree, fixes, config);
+      Explorer explorer =
+          config.optimized
+              ? new OptimizedExplorer(injector, errorBank, fixBank, tracker, tree, fixes, config)
+              : new BasicExplorer(injector, errorBank, fixBank, fixes, config);
       ImmutableSet<Report> latestReports = explorer.explore();
       int sizeBefore = reports.size();
       latestReports.forEach(
           report -> {
             reports.putIfAbsent(report.root, report);
-            reports.get(report.root).effectiveNess = report.effectiveNess;
+            reports.get(report.root).effect = report.effect;
             reports.get(report.root).finished = report.finished;
             reports.get(report.root).tree = report.tree;
             reports.get(report.root).triggered = report.triggered;
@@ -118,7 +124,7 @@ public class Annotator {
       injector.inject(
           latestReports
               .stream()
-              .filter(report -> report.effectiveNess < 1)
+              .filter(report -> report.effect < 1)
               .flatMap(report -> config.chain ? report.tree.stream() : Stream.of(report.root))
               .collect(Collectors.toSet()));
       if (sizeBefore == this.reports.size()) {

@@ -27,7 +27,6 @@ package edu.ucr.cs.riple.core.metadata.graph;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -79,15 +78,11 @@ public class FixGraph<T extends Node> {
     nodes.remove(toRemove);
   }
 
-  public void findGroups(boolean optimized) {
+  public void findGroups() {
     this.groups.clear();
     List<T> allNodes = getAllNodes();
     final int[] id = {0};
     allNodes.forEach(node -> node.id = id[0]++);
-    if (!optimized) {
-      allNodes.forEach(t -> groups.put(t.id, Collections.singleton(t)));
-      return;
-    }
     int size = allNodes.size();
     LinkedList<Integer>[] adj = new LinkedList[size];
     for (int i = 0; i < size; ++i) {

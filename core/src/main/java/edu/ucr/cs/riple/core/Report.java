@@ -31,7 +31,7 @@ import java.util.Set;
 
 public class Report {
 
-  public int effectiveNess;
+  public int effect;
   public Fix root;
   public Set<Fix> tree;
   public Set<Fix> triggered;
@@ -39,8 +39,8 @@ public class Report {
 
   public boolean processed;
 
-  public Report(Fix root, int effectiveNess) {
-    this.effectiveNess = effectiveNess;
+  public Report(Fix root, int effect) {
+    this.effect = effect;
     this.root = root;
     this.tree = new HashSet<>();
     this.finished = false;

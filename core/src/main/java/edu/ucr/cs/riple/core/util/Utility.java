@@ -79,10 +79,10 @@ public class Utility {
     JSONArray reportsJson = new JSONArray();
     for (Report report : reports) {
       JSONObject reportJson = report.root.getJson();
-      reportJson.put("effect", report.effectiveNess);
+      reportJson.put("effect", report.effect);
       reportJson.put("finished", report.finished);
       JSONArray followUps = new JSONArray();
-      if (config.chain && report.effectiveNess < 1) {
+      if (config.chain && report.effect < 1) {
         report.tree.remove(report.root);
         followUps.addAll(
             report.tree.stream().map(fix -> fix.getJson()).collect(Collectors.toList()));

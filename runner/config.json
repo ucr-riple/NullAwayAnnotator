@@ -1,10 +1,10 @@
 {
-  "PROJECT_PATH": "/Users/nima/Developer/NullAwayFixer/testannotator",
-  "BUILD_COMMAND": "./gradlew :compileJava",
+  "PROJECT_PATH": "/Users/nima/Developer/NullAwayFixer/Projects/MPAndroidChart",
+  "BUILD_COMMAND": "./gradlew :MPChartLib:compileDebugJavaWithJavac",
   "ANNOTATION": {
-    "INITIALIZER": "Initializer",
+    "INITIALIZER": "com.github.mikephil.charting.Initializer",
     "NONNULL": "javax.annotation.Nonnull",
-    "NULLABLE": "javax.annotation.Nullable"
+    "NULLABLE": "androidx.annotation.Nullable"
   },
   "FORMAT": false,
   "OUTPUT_DIR": "/tmp/NullAwayFix",
@@ -13,6 +13,6 @@
   "CHAIN": true,
   "OPTIMIZED": true,
   "CACHE": true,
-  "BAILOUT": false,
+  "BAILOUT": true,
   "DEPTH": 1
 }

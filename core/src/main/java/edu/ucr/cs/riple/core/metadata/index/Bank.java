@@ -66,16 +66,15 @@ public class Bank<T extends Hashable> {
     return new Result<>(size, currentItems);
   }
 
-  public Result<T> compareByClass(String className, boolean fresh) {
-    saveState(fresh, false);
-    return compareByList(rootInClass.getByClass(className), currentInClass.getByClass(className));
-  }
-
   public Result<T> compareByMethod(String className, String methodName, boolean fresh) {
     saveState(false, fresh);
     return compareByList(
         rootInMethod.getByMethod(className, methodName),
         currentInMethod.getByMethod(className, methodName));
+  }
+
+  public Result<T> compare() {
+    return compareByList(rootInMethod.getAllEntities(), currentInMethod.getAllEntities());
   }
 
   public Set<Region> getAllSources(Comparable<T> c) {
