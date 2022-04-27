@@ -30,7 +30,9 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
             findAllNodes(
                     candidate ->
                         candidate.field.equals(fix.variable)
-                            && candidate.initializerLocation.clazz.equals(fix.clazz))
+                            && candidate.initializerLocation.clazz.equals(fix.clazz),
+                    fix.clazz,
+                    fix.variable)
                 .forEach(
                     node -> {
                       Class clazz =

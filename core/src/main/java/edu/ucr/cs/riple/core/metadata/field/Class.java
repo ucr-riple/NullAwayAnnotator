@@ -46,7 +46,7 @@ public class Class {
     } else {
       Method method = new Method(fieldInitializationNode.initializerLocation.method);
       method.fields.add(fieldInitializationNode.field);
-      this.methods.add(new Method(fieldInitializationNode.initializerLocation.method));
+      this.methods.add(method);
     }
   }
 

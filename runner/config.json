@@ -1,8 +1,8 @@
 {
-  "BUILD_COMMAND": "cd /Users/nima/Developer/NullAwayFixer/Projects/MPAndroidChart && ./gradlew :MPChartLib:compileDebugJavaWithJavac",
+  "BUILD_COMMAND": "cd /Users/nima/Developer/NullAwayFixer/Projects/libgdx && ./gradlew :gdx:compileJava",
   "ANNOTATION": {
-    "INITIALIZER": "com.github.mikephil.charting.Initializer",
-    "NULLABLE": "androidx.annotation.Nullable"
+    "INITIALIZER": "com.badlogic.gdx.Initializer",
+    "NULLABLE": "javax.annotation.Nullable"
   },
   "FORMAT": false,
   "OUTPUT_DIR": "/tmp/NullAwayFix",
