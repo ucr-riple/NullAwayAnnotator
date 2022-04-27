@@ -24,13 +24,11 @@
 
 import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Config;
-import java.util.Arrays;
 
 public class Main {
 
   public static void main(String[] args) {
     Config config;
-    System.out.println(args.length + " " + Arrays.toString(args));
     if (args.length == 2 && args[0].equals("--path")) {
       config = new Config(args[1]);
     } else {

@@ -69,9 +69,6 @@ public class OptimizedExplorer extends Explorer {
 
   @Override
   protected void executeNextCycle() {
-    if (fixGraph.nodes.size() == 0) {
-      return;
-    }
     fixGraph.findGroups();
     HashMap<Integer, Set<Node>> groups = fixGraph.getGroups();
     System.out.println(

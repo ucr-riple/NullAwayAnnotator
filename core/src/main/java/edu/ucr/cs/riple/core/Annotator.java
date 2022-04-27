@@ -128,6 +128,7 @@ public class Annotator {
               .flatMap(report -> config.chain ? report.tree.stream() : Stream.of(report.root))
               .collect(Collectors.toSet()));
       if (sizeBefore == this.reports.size()) {
+        System.out.println("\nFinished annotating.");
         Utility.writeReports(
             config, reports.values().stream().collect(ImmutableSet.toImmutableSet()));
         return;

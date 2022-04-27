@@ -1,5 +1,5 @@
 {
-  "BUILD_COMMAND": "/Users/nima/Developer/NullAwayFixer/Projects/MPAndroidChart && ./gradlew :MPChartLib:compileDebugJavaWithJavac",
+  "BUILD_COMMAND": "cd /Users/nima/Developer/NullAwayFixer/Projects/MPAndroidChart && ./gradlew :MPChartLib:compileDebugJavaWithJavac",
   "ANNOTATION": {
     "INITIALIZER": "com.github.mikephil.charting.Initializer",
     "NULLABLE": "androidx.annotation.Nullable"
