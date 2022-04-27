@@ -16,7 +16,6 @@ import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -84,8 +83,8 @@ public class OptimizedExplorer extends Explorer {
     ProgressBar pb = Utility.createProgressBar("Analysing", groups.size());
     for (Set<Node> group : groups.values()) {
       pb.step();
-      Set<Fix> fixes = new HashSet<>();
-      group.forEach(superNode -> fixes.addAll(superNode.tree));
+      Set<Fix> fixes =
+          group.stream().flatMap(node -> node.tree.stream()).collect(Collectors.toSet());
       injector.inject(fixes);
       Utility.buildProject(config);
       errorBank.saveState(false, true);

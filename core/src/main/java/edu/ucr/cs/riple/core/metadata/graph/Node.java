@@ -75,7 +75,6 @@ public class Node {
   public void updateStatus(
       int effect, Set<Fix> fixesInOneRound, List<Fix> triggered, MethodInheritanceTree mit) {
     triggered.addAll(generateSubMethodParameterInheritanceFixes(mit, fixesInOneRound));
-    triggered.addAll(generateSuperMethodInheritanceFixes(mit, fixesInOneRound));
     updateTriggered(triggered);
     Set<Region> subMethodRegions =
         tree.stream()
@@ -88,16 +87,33 @@ public class Node {
                         .map(methodNode -> new Region(methodNode.method, methodNode.clazz)))
             .filter(region -> !regions.contains(region))
             .collect(Collectors.toSet());
-    Set<Region> superMethodRegions =
-        tree.stream()
-            .filter(fix -> fix.kind.equals(FixType.METHOD.name))
-            .map(fix -> mit.getClosestSuperMethod(fix.method, fix.clazz))
-            .filter(Objects::nonNull)
-            .filter(methodNode -> !methodNode.hasNullableAnnotation)
-            .map(methodNode -> new Region(methodNode.method, methodNode.clazz))
-            .filter(region -> !regions.contains(region))
-            .collect(Collectors.toSet());
-    this.effect = effect + subMethodRegions.size() + superMethodRegions.size();
+    final int[] numberOfSuperMethodsAnnotatedOutsideTree = {0};
+    this.tree
+        .stream()
+        .filter(fix -> fix.kind.equals(FixType.METHOD.name))
+        .map(fix -> mit.getClosestSuperMethod(fix.method, fix.clazz))
+        .filter(node -> node != null && !node.hasNullableAnnotation)
+        .forEach(
+            node -> {
+              if (tree.stream()
+                  .anyMatch(
+                      fix ->
+                          fix.kind.equals(FixType.METHOD.name)
+                              && fix.method.equals(node.method)
+                              && fix.clazz.equals(node.clazz))) {
+                return;
+              }
+              if (fixesInOneRound
+                  .stream()
+                  .anyMatch(
+                      fix ->
+                          fix.kind.equals(FixType.METHOD.name)
+                              && fix.method.equals(node.method)
+                              && fix.clazz.equals(node.clazz))) {
+                numberOfSuperMethodsAnnotatedOutsideTree[0]++;
+              }
+            });
+    this.effect = effect + subMethodRegions.size() + numberOfSuperMethodsAnnotatedOutsideTree[0];
   }
 
   private void updateTriggered(List<Fix> fixes) {
@@ -145,45 +161,6 @@ public class Node {
                           });
                 })
         .filter(fix -> !fixesInOneRound.contains(fix))
-        .collect(Collectors.toList());
-  }
-
-  /**
-   * Generates suggested fixes due to making a method {@code Nullable} for all overridden methods.
-   *
-   * @param mit Method Inheritance Tree.
-   * @return List of Fixes
-   */
-  private List<Fix> generateSuperMethodInheritanceFixes(
-      MethodInheritanceTree mit, Set<Fix> fixesInOneRound) {
-    final String annot = root.annotation;
-    return tree.stream()
-        .map(fix -> mit.getClosestSuperMethod(fix.method, fix.clazz))
-        .filter(
-            node ->
-                node != null
-                    && !node.hasNullableAnnotation
-                    && fixesInOneRound
-                        .stream()
-                        .anyMatch(
-                            fix ->
-                                fix.kind.equals(FixType.METHOD.name)
-                                    && fix.clazz.equals(node.clazz)
-                                    && fix.method.equals(node.method)))
-        .map(
-            node ->
-                new Fix(
-                    new Location(
-                        annot,
-                        node.method,
-                        "null",
-                        FixType.METHOD.name,
-                        node.clazz,
-                        node.uri,
-                        "true"),
-                    "WRONG_OVERRIDE_RETURN",
-                    "null",
-                    "null"))
         .collect(Collectors.toList());
   }
 
