@@ -35,7 +35,8 @@ def versions = [
         javaparser             : "3.24.0",
         json                   : "1.1.1",
         nullaway               : "0.9.6",
-        guava                  : "31.0.1-jre"
+        guava                  : "31.0.1-jre",
+        cli                    : "1.5.0"
 ]
 
 def apt = [

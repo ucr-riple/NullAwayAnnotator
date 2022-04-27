@@ -1,1 +1,1 @@
-cd jars && java -jar core.jar config.json
+cd jars && java -jar core.jar --path config.json

@@ -24,19 +24,18 @@
 
 import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Config;
+import java.util.Arrays;
 
 public class Main {
 
   public static void main(String[] args) {
-    //    if (args.length != 2) {
-    //      throw new RuntimeException(
-    //          "Annotator needs 1 arguments: path to config."
-    //              + " But received: "
-    //              + Arrays.toString(args));
-    //    }
-    //    Config config = new Config(args[1]);
-    Config config =
-        new Config("/Users/nima/Developer/NullAwayFixer/NullAwayAnnotator/runner/config.json");
+    Config config;
+    System.out.println(args.length + " " + Arrays.toString(args));
+    if (args.length == 2 && args[0].equals("--path")) {
+      config = new Config(args[1]);
+    } else {
+      config = new Config(args);
+    }
     Annotator annotator = new Annotator(config);
     annotator.start();
   }

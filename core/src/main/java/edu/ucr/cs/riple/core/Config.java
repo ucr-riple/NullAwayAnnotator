@@ -7,6 +7,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -16,16 +23,151 @@ public class Config {
   public final boolean lexicalPreservationEnabled;
   public final boolean chain;
   public final boolean useCache;
-  public final Path projectPath;
   public final Path dir;
   public final Path nullAwayConfigPath;
   public final Path cssConfigPath;
   public final String buildCommand;
   public final String nullableAnnot;
   public final String initializerAnnot;
-  public final String nonnullAnnot;
   public final int depth;
 
+  /**
+   * Builds config from command line arguments.
+   *
+   * @param args arguments.
+   */
+  public Config(String[] args) {
+
+    Options options = new Options();
+
+    // Build
+    Option buildCommandOption =
+        new Option("b", "command", true, "Build Command to Run the NullAway");
+    buildCommandOption.setRequired(true);
+    options.addOption(buildCommandOption);
+
+    // Nullable Annotation
+    Option nullableOption =
+        new Option("n", "nullable", true, "Fully Qualified name of the Nullable annotation");
+    nullableOption.setRequired(false);
+    options.addOption(nullableOption);
+
+    // Initializer Annotation
+    Option initializerOption =
+        new Option("i", "initializer", true, "Fully Qualified name of the Nullable annotation");
+    initializerOption.setRequired(true);
+    options.addOption(initializerOption);
+
+    // Format
+    Option formatOption =
+        new Option("f", "format", true, "Preserves format of the code if set to true");
+    formatOption.setRequired(false);
+    options.addOption(formatOption);
+
+    // Bailout
+    Option bailoutOption =
+        new Option(
+            "b",
+            "bailout",
+            true,
+            "Annotator will bailout from the search path as soon as effectiveness hits zero or less");
+    bailoutOption.setRequired(false);
+    options.addOption(bailoutOption);
+
+    // Depth
+    Option depthOption = new Option("d", "depth", true, "Depth of the analysis");
+    depthOption.setRequired(false);
+    options.addOption(depthOption);
+
+    // Cache
+    Option cacheOption = new Option("c", "cache", true, "Use cache");
+    cacheOption.setRequired(false);
+    options.addOption(cacheOption);
+
+    // Chain
+    Option chainOption =
+        new Option("ch", "chain", true, "Inject the complete tree of fix associated to the fix");
+    chainOption.setRequired(false);
+    options.addOption(chainOption);
+
+    // Optimized
+    Option optimizedOption = new Option("o", "optimized", true, "Activates optimizations");
+    optimizedOption.setRequired(false);
+    options.addOption(optimizedOption);
+
+    // Dir
+    Option dirOption = new Option("d", "dir", true, "Directory of output files");
+    dirOption.setRequired(true);
+    options.addOption(dirOption);
+
+    // NullAway Config Path
+    Option nullAwayConfigPathOption =
+        new Option("nc", "nullawayconfig", true, "Path to NullAway Config");
+    nullAwayConfigPathOption.setRequired(true);
+    options.addOption(nullAwayConfigPathOption);
+
+    // CSS Config Path
+    Option cssConfigPathOption = new Option("cc", "cssConfigPath", true, "Path to CSS Config");
+    cssConfigPathOption.setRequired(true);
+    options.addOption(cssConfigPathOption);
+
+    HelpFormatter formatter = new HelpFormatter();
+    CommandLineParser parser = new DefaultParser();
+    CommandLine cmd = null;
+    try {
+      cmd = parser.parse(options, args);
+    } catch (ParseException e) {
+      System.out.println(e.getMessage());
+      formatter.printHelp("User Profile Info", options);
+      System.exit(1);
+    }
+    Preconditions.checkNotNull(cmd, "Error parsing cmd, cmd cannot bu null");
+    this.buildCommand = cmd.getOptionValue(buildCommandOption.getLongOpt());
+    this.nullableAnnot =
+        cmd.hasOption(nullableOption.getLongOpt())
+            ? cmd.getOptionValue(nullableOption.getLongOpt())
+            : "javax.annotation.Nullable";
+    this.initializerAnnot = cmd.getOptionValue(initializerOption.getLongOpt());
+    this.depth =
+        Integer.parseInt(
+            cmd.hasOption(depthOption.getLongOpt())
+                ? cmd.getOptionValue(depthOption.getLongOpt())
+                : "5");
+    this.dir = Paths.get(cmd.getOptionValue(dirOption.getLongOpt()));
+    this.nullAwayConfigPath = Paths.get(cmd.getOptionValue(nullAwayConfigPathOption.getLongOpt()));
+    this.cssConfigPath = Paths.get(cmd.getOptionValue(cssConfigPathOption.getLongOpt()));
+    this.lexicalPreservationEnabled =
+        Boolean.parseBoolean(
+            cmd.hasOption(formatOption.getLongOpt())
+                ? cmd.getOptionValue(formatOption.getLongOpt())
+                : "false");
+    this.chain =
+        Boolean.parseBoolean(
+            cmd.hasOption(chainOption.getLongOpt())
+                ? cmd.getOptionValue(chainOption.getLongOpt())
+                : "false");
+    this.bailout =
+        Boolean.parseBoolean(
+            cmd.hasOption(bailoutOption.getLongOpt())
+                ? cmd.getOptionValue(bailoutOption.getLongOpt())
+                : "true");
+    this.useCache =
+        Boolean.parseBoolean(
+            cmd.hasOption(cacheOption.getLongOpt())
+                ? cmd.getOptionValue(cacheOption.getLongOpt())
+                : "true");
+    this.optimized =
+        Boolean.parseBoolean(
+            cmd.hasOption(optimizedOption.getLongOpt())
+                ? cmd.getOptionValue(optimizedOption.getLongOpt())
+                : "true");
+  }
+
+  /**
+   * Builds config from json config file.
+   *
+   * @param configPath path to config file.
+   */
   public Config(String configPath) {
     Preconditions.checkNotNull(configPath);
     JSONObject jsonObject;
@@ -47,9 +189,6 @@ public class Config {
     this.nullableAnnot =
         getValueFromKey(jsonObject, "ANNOTATION:NULLABLE", String.class)
             .orElse("javax.annotation.Nullable");
-    this.nonnullAnnot =
-        getValueFromKey(jsonObject, "ANNOTATION:NONNULL", String.class)
-            .orElse("javax.annotation.Nullable");
     this.initializerAnnot =
         getValueFromKey(jsonObject, "ANNOTATION:INITIALIZER", String.class)
             .orElse("javax.annotation.Nullable");
@@ -64,12 +203,7 @@ public class Config {
     this.dir =
         Paths.get(
             getValueFromKey(jsonObject, "OUTPUT_DIR", String.class).orElse("/tmp/NullAwayFix"));
-    this.projectPath =
-        Paths.get(getValueFromKey(jsonObject, "PROJECT_PATH", String.class).orElse(null));
-    Preconditions.checkNotNull(projectPath, "Project cannot be null");
-    String command = getValueFromKey(jsonObject, "BUILD_COMMAND", String.class).orElse(null);
-    Preconditions.checkNotNull(command, "Command to run NullAway cannot be null");
-    this.buildCommand = "cd " + this.projectPath + " && " + command;
+    this.buildCommand = getValueFromKey(jsonObject, "BUILD_COMMAND", String.class).orElse(null);
   }
 
   static class OrElse<T> {
