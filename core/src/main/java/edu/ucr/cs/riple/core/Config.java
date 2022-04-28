@@ -40,11 +40,27 @@ public class Config {
 
     Options options = new Options();
 
+    // Help
+    Option helpOption = new Option("h", "help", false, "Shows all flags");
+    helpOption.setRequired(true);
+    options.addOption(helpOption);
+
     // Build
     Option buildCommandOption =
-        new Option("b", "command", true, "Build Command to Run the NullAway");
+        new Option(
+            "bc",
+            "build-command",
+            true,
+            "Command to Run NullAway on the target project, this command must include changing directory from root to the target project");
     buildCommandOption.setRequired(true);
     options.addOption(buildCommandOption);
+
+    // Config Path
+    Option configPath =
+        new Option(
+            "p", "path", true, "Path to config file containing all flags values in json format");
+    configPath.setRequired(true);
+    options.addOption(configPath);
 
     // Nullable Annotation
     Option nullableOption =
@@ -67,7 +83,7 @@ public class Config {
     // Bailout
     Option bailoutOption =
         new Option(
-            "b",
+            "db",
             "disable-bailout",
             false,
             "Disables bailout, Annotator will not bailout from the search tree as soon as its effectiveness hits zero or less and completely traverses the tree until no new fix is suggested");
@@ -86,12 +102,14 @@ public class Config {
 
     // Chain
     Option chainOption =
-        new Option("ch", "chain", false, "Injects the complete tree of fixes associated to the fix");
+        new Option(
+            "ch", "chain", false, "Injects the complete tree of fixes associated to the fix");
     chainOption.setRequired(false);
     options.addOption(chainOption);
 
     // Optimized
-    Option optimizedOption = new Option("do", "disable-optimized", false, "Disables optimizations");
+    Option optimizedOption =
+        new Option("do", "disable-optimization", false, "Disables optimizations");
     optimizedOption.setRequired(false);
     options.addOption(optimizedOption);
 
@@ -102,32 +120,32 @@ public class Config {
 
     // NullAway Config Path
     Option nullAwayConfigPathOption =
-        new Option("ncp", "nullawayconfig", true, "Path to the NullAway Config");
+        new Option("ncp", "nullaway-config-path", true, "Path to the NullAway Config");
     nullAwayConfigPathOption.setRequired(true);
     options.addOption(nullAwayConfigPathOption);
 
     // CSS Config Path
-    Option cssConfigPathOption = new Option("ccp", "cssConfigPath", true, "Path to the CSS Config");
+    Option cssConfigPathOption =
+        new Option("ccp", "css-config-path", true, "Path to the CSS Config");
     cssConfigPathOption.setRequired(true);
     options.addOption(cssConfigPathOption);
 
     HelpFormatter formatter = new HelpFormatter();
-
-    if (args.length == 1 && args[0].equals("--help")) {
-      formatter.printHelp("Annotator config Flags", options);
-      System.exit(1);
-    }
-
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd = null;
+
+    if (args.length == 1 && (args[0].equals("-h") || args[0].equals("--help"))) {
+      showHelpAndQuit(formatter, options);
+    }
+
     try {
       cmd = parser.parse(options, args);
     } catch (ParseException e) {
       System.out.println(e.getMessage());
-      formatter.printHelp("Annotator config Flags", options);
-      System.exit(1);
+      showHelpAndQuit(formatter, options);
     }
     Preconditions.checkNotNull(cmd, "Error parsing cmd, cmd cannot bu null");
+
     this.buildCommand = cmd.getOptionValue(buildCommandOption.getLongOpt());
     this.nullableAnnot =
         cmd.hasOption(nullableOption.getLongOpt())
@@ -190,6 +208,11 @@ public class Config {
         Paths.get(
             getValueFromKey(jsonObject, "OUTPUT_DIR", String.class).orElse("/tmp/NullAwayFix"));
     this.buildCommand = getValueFromKey(jsonObject, "BUILD_COMMAND", String.class).orElse(null);
+  }
+
+  private static void showHelpAndQuit(HelpFormatter formatter, Options options) {
+    formatter.printHelp("Annotator config Flags", options);
+    System.exit(1);
   }
 
   static class OrElse<T> {
