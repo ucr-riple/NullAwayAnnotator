@@ -78,9 +78,12 @@ public abstract class MetaData<T> {
     boolean matches(T candidate);
   }
 
-  protected T findNode(Comparator<T> c, String... arguments) {
+  protected T findNode(Comparator<T> c, String... keys) {
+    if (keys.length == 0) {
+      throw new RuntimeException("findNode needs keys to compute the hash and cannot be empty");
+    }
     T node = null;
-    int hash = Arrays.hashCode(arguments);
+    int hash = Arrays.hashCode(keys);
     List<T> candidateIds = idHash.get(hash);
     if (candidateIds == null) {
       return null;
@@ -95,6 +98,9 @@ public abstract class MetaData<T> {
   }
 
   protected List<T> findAllNodes(Comparator<T> c, String... keys) {
+    if (keys.length == 0) {
+      throw new RuntimeException("findAllNodes needs keys to compute the hash and cannot be empty");
+    }
     List<T> nodes = new ArrayList<>();
     List<T> candidateIds = idHash.get(Arrays.hashCode(keys));
     if (candidateIds == null) {

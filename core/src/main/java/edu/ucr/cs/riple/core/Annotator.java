@@ -56,7 +56,6 @@ public class Annotator {
   }
 
   public void start() {
-    System.out.println("Annotator Started.");
     preprocess();
     explore();
   }
@@ -65,7 +64,7 @@ public class Annotator {
     System.out.println("Preprocessing...");
     Utility.setCSSCheckerActivation(config, false);
     this.reports.clear();
-    System.out.println("Making the first build.");
+    System.out.println("Making the first build...");
     Utility.buildProject(config, true);
     Set<Fix> uninitializedFields =
         Utility.readFixesFromOutputDirectory(config)

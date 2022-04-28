@@ -64,38 +64,12 @@ public class Index<T extends Hashable> {
     items.clear();
     try (BufferedReader br = Files.newBufferedReader(this.path, UTF_8)) {
       String entry = "";
-      br.readLine(); // consume headers
-      while (entry != null) {
-        String nextLine = br.readLine();
-        if (entry.equals("")) {
-          entry = nextLine;
-          continue;
-        } else if (nextLine == null) {
-          // End of file: this finalizes entry, but it still needs processing
-        } else if (nextLine.startsWith(" ") || nextLine.startsWith("\t") || nextLine.equals("")) {
-          entry += "\n" + nextLine;
-          continue;
-        }
-        // At this point, entry contains a full TSV entry, potentially multi-line as long
-        // as each line break in an item is followed by a whitespace or tab character
-        String[] allParts = entry.split("\t");
-        String[] tsvValues;
-        if (entry.contains("\n")) {
-          tsvValues = new String[4];
-          tsvValues[0] = allParts[0];
-          tsvValues[3] = allParts[allParts.length - 1];
-          tsvValues[2] = allParts[allParts.length - 2];
-          tsvValues[1] = "";
-          for (int i = 1; i < allParts.length - 3; ++i) {
-            tsvValues[2] += allParts[i] + "\t";
-          }
-          tsvValues[2] += allParts[allParts.length - 3];
-        } else {
-          tsvValues = allParts;
-        }
+      String line = br.readLine();
+      if (line != null) line = br.readLine();
+      while (line != null) {
         T item;
         try {
-          item = factory.build(tsvValues);
+          item = factory.build(line.split("\t"));
         } catch (ArrayIndexOutOfBoundsException e) {
           throw new java.lang.Error(
               String.format("Failed to parse entry '%s' on file %s", entry, path), e);
@@ -114,7 +88,7 @@ public class Index<T extends Hashable> {
           newList.add(item);
           items.put(hash, newList);
         }
-        entry = nextLine; // For next iteration
+        line = br.readLine(); // For next iteration
       }
     } catch (IOException e) {
       e.printStackTrace();

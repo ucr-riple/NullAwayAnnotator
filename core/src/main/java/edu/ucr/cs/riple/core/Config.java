@@ -54,13 +54,13 @@ public class Config {
 
     // Initializer Annotation
     Option initializerOption =
-        new Option("i", "initializer", true, "Fully Qualified name of the Nullable annotation");
+        new Option("i", "initializer", true, "Fully Qualified name of the Initializer annotation");
     initializerOption.setRequired(true);
     options.addOption(initializerOption);
 
     // Format
     Option formatOption =
-        new Option("f", "format", true, "Preserves format of the code if set to true");
+        new Option("pf", "preserve-format", false, "Activates lexical preservation");
     formatOption.setRequired(false);
     options.addOption(formatOption);
 
@@ -68,9 +68,9 @@ public class Config {
     Option bailoutOption =
         new Option(
             "b",
-            "bailout",
-            true,
-            "Annotator will bailout from the search path as soon as effectiveness hits zero or less");
+            "disable-bailout",
+            false,
+            "Disables bailout, Annotator will not bailout from the search tree as soon as its effectiveness hits zero or less and completely traverses the tree until no new fix is suggested");
     bailoutOption.setRequired(false);
     options.addOption(bailoutOption);
 
@@ -80,45 +80,51 @@ public class Config {
     options.addOption(depthOption);
 
     // Cache
-    Option cacheOption = new Option("c", "cache", true, "Use cache");
+    Option cacheOption = new Option("dc", "disable-cache", false, "Disables cache usage");
     cacheOption.setRequired(false);
     options.addOption(cacheOption);
 
     // Chain
     Option chainOption =
-        new Option("ch", "chain", true, "Inject the complete tree of fix associated to the fix");
+        new Option("ch", "chain", false, "Injects the complete tree of fixes associated to the fix");
     chainOption.setRequired(false);
     options.addOption(chainOption);
 
     // Optimized
-    Option optimizedOption = new Option("o", "optimized", true, "Activates optimizations");
+    Option optimizedOption = new Option("do", "disable-optimized", false, "Disables optimizations");
     optimizedOption.setRequired(false);
     options.addOption(optimizedOption);
 
     // Dir
-    Option dirOption = new Option("d", "dir", true, "Directory of output files");
+    Option dirOption = new Option("d", "dir", true, "Directory of the output files");
     dirOption.setRequired(true);
     options.addOption(dirOption);
 
     // NullAway Config Path
     Option nullAwayConfigPathOption =
-        new Option("nc", "nullawayconfig", true, "Path to NullAway Config");
+        new Option("ncp", "nullawayconfig", true, "Path to the NullAway Config");
     nullAwayConfigPathOption.setRequired(true);
     options.addOption(nullAwayConfigPathOption);
 
     // CSS Config Path
-    Option cssConfigPathOption = new Option("cc", "cssConfigPath", true, "Path to CSS Config");
+    Option cssConfigPathOption = new Option("ccp", "cssConfigPath", true, "Path to the CSS Config");
     cssConfigPathOption.setRequired(true);
     options.addOption(cssConfigPathOption);
 
     HelpFormatter formatter = new HelpFormatter();
+
+    if (args.length == 1 && args[0].equals("--help")) {
+      formatter.printHelp("Annotator config Flags", options);
+      System.exit(1);
+    }
+
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd = null;
     try {
       cmd = parser.parse(options, args);
     } catch (ParseException e) {
       System.out.println(e.getMessage());
-      formatter.printHelp("User Profile Info", options);
+      formatter.printHelp("Annotator config Flags", options);
       System.exit(1);
     }
     Preconditions.checkNotNull(cmd, "Error parsing cmd, cmd cannot bu null");
@@ -136,31 +142,11 @@ public class Config {
     this.dir = Paths.get(cmd.getOptionValue(dirOption.getLongOpt()));
     this.nullAwayConfigPath = Paths.get(cmd.getOptionValue(nullAwayConfigPathOption.getLongOpt()));
     this.cssConfigPath = Paths.get(cmd.getOptionValue(cssConfigPathOption.getLongOpt()));
-    this.lexicalPreservationEnabled =
-        Boolean.parseBoolean(
-            cmd.hasOption(formatOption.getLongOpt())
-                ? cmd.getOptionValue(formatOption.getLongOpt())
-                : "false");
-    this.chain =
-        Boolean.parseBoolean(
-            cmd.hasOption(chainOption.getLongOpt())
-                ? cmd.getOptionValue(chainOption.getLongOpt())
-                : "false");
-    this.bailout =
-        Boolean.parseBoolean(
-            cmd.hasOption(bailoutOption.getLongOpt())
-                ? cmd.getOptionValue(bailoutOption.getLongOpt())
-                : "true");
-    this.useCache =
-        Boolean.parseBoolean(
-            cmd.hasOption(cacheOption.getLongOpt())
-                ? cmd.getOptionValue(cacheOption.getLongOpt())
-                : "true");
-    this.optimized =
-        Boolean.parseBoolean(
-            cmd.hasOption(optimizedOption.getLongOpt())
-                ? cmd.getOptionValue(optimizedOption.getLongOpt())
-                : "true");
+    this.lexicalPreservationEnabled = cmd.hasOption(formatOption.getLongOpt());
+    this.chain = cmd.hasOption(chainOption.getLongOpt());
+    this.bailout = !cmd.hasOption(bailoutOption.getLongOpt());
+    this.useCache = !cmd.hasOption(cacheOption.getLongOpt());
+    this.optimized = !cmd.hasOption(optimizedOption.getLongOpt());
   }
 
   /**
