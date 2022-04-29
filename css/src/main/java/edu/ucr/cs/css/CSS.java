@@ -75,7 +75,7 @@ public class CSS extends BugChecker
       return Description.NO_MATCH;
     }
     config.serializer.serializeCallGraphNode(
-        new TrackerNode(ASTHelpers.getSymbol(tree), state.getPath()));
+        new TrackerNode(ASTHelpers.getSymbol(tree), state.getPath(), true));
     return Description.NO_MATCH;
   }
 

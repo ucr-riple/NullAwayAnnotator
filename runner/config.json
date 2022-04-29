@@ -1,5 +1,5 @@
 {
-  "BUILD_COMMAND": "cd /home/nima/Developer/AutoFixer/Evaluation/Projects/libgdx && ./gradlew :gdx:compileJava",
+  "BUILD_COMMAND": "cd /Users/nima/Developer/NullAwayFixer/Projects/libgdx && ./gradlew :gdx:compileJava",
   "ANNOTATION": {
     "INITIALIZER": "com.badlogic.gdx.Initializer",
     "NULLABLE": "javax.annotation.Nullable"
@@ -12,5 +12,5 @@
   "OPTIMIZED": true,
   "CACHE": true,
   "BAILOUT": true,
-  "DEPTH": 8
+  "DEPTH": 1
 }
