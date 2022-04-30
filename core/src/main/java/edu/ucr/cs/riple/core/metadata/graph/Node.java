@@ -66,6 +66,9 @@ public class Node {
     this.regions.clear();
     this.regions.addAll(this.rootSource);
     tree.forEach(fix -> regions.addAll(tracker.getRegions(fix)));
+    tree.stream()
+        .filter(fix -> fix.kind.equals(FixType.PARAMETER.name) && fix.isModifyingConstructor())
+        .forEach(fix -> regions.add(new Region("null", fix.clazz)));
   }
 
   public boolean hasConflictInRegions(Node other) {

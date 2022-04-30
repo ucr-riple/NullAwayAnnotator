@@ -38,7 +38,7 @@ public class Location {
   public String pkg;
 
   public enum KEYS {
-    PARAM("param"),
+    VARIABLE("variable"),
     METHOD("method"),
     LOCATION("kind"),
     CLASS("class"),
@@ -86,7 +86,7 @@ public class Location {
         new Location(
             locationJson.get(KEYS.ANNOTATION.label).toString(),
             locationJson.get(KEYS.METHOD.label).toString(),
-            locationJson.get(KEYS.PARAM.label).toString(),
+            locationJson.get(KEYS.VARIABLE.label).toString(),
             locationJson.get(KEYS.LOCATION.label).toString(),
             clazz,
             uri,
@@ -123,7 +123,7 @@ public class Location {
     JSONObject res = new JSONObject();
     res.put(KEYS.CLASS.label, clazz);
     res.put(KEYS.METHOD.label, method);
-    res.put(KEYS.PARAM.label, variable);
+    res.put(KEYS.VARIABLE.label, variable);
     res.put(KEYS.LOCATION.label, kind);
     res.put(KEYS.PKG.label, pkg);
     res.put(KEYS.ANNOTATION.label, annotation);

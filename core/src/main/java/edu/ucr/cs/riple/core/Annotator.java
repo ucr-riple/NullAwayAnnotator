@@ -132,9 +132,6 @@ public class Annotator {
             config, reports.values().stream().collect(ImmutableSet.toImmutableSet()));
         return;
       }
-      Utility.writeReports(
-              config, reports.values().stream().collect(ImmutableSet.toImmutableSet()));
-      return;
     }
   }
 }

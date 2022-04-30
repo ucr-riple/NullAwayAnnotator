@@ -76,4 +76,11 @@ public class Fix extends Hashable {
   public JSONObject getJson() {
     return location.getJson();
   }
+
+  public boolean isModifyingConstructor() {
+    String methodName = method.substring(0, method.indexOf("("));
+    int lastIndex = clazz.lastIndexOf(".");
+    String className = lastIndex < 0 ? clazz : clazz.substring(lastIndex + 1);
+    return methodName.equals(className);
+  }
 }
