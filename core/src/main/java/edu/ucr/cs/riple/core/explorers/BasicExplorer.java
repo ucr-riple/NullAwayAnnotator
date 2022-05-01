@@ -3,14 +3,13 @@ package edu.ucr.cs.riple.core.explorers;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.AnnotationInjector;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.Result;
 import edu.ucr.cs.riple.core.util.Utility;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.Set;
 import me.tongfei.progressbar.ProgressBar;
 
 public class BasicExplorer extends Explorer {
@@ -25,32 +24,23 @@ public class BasicExplorer extends Explorer {
   }
 
   @Override
-  protected boolean initializeReports() {
-    return true;
-  }
-
-  @Override
-  protected void finalizeReports() {}
-
-  @Override
   protected void executeNextCycle() {
     System.out.println(
-        "Scheduling for: "
-            + this.reports.size()
-            + " builds for: "
-            + this.reports.size()
-            + " reports");
-    ProgressBar pb = Utility.createProgressBar("Analysing", this.reports.size());
-    for (Report report : this.reports) {
+        "Scheduling for: " + reports.size() + " builds for: " + reports.size() + " reports");
+    ProgressBar pb = Utility.createProgressBar("Analysing", reports.size());
+    for (Node node : fixGraph.getAllNodes()) {
       pb.step();
-      injector.inject(Collections.singleton(report.root));
+      Set<Fix> fixes = node.tree;
+      injector.inject(fixes);
       Utility.buildProject(config);
       errorBank.saveState(false, true);
       fixBank.saveState(false, true);
+      int totalEffect = 0;
       Result<Error> res = errorBank.compare();
-      report.effect = res.size;
-      report.triggered = new HashSet<>(fixBank.compare().dif);
-      injector.remove(Collections.singleton(report.root));
+      totalEffect += res.size;
+      node.effect = totalEffect;
+      node.updateTriggered(fixBank.compare().dif);
+      injector.remove(fixes);
     }
     pb.close();
   }

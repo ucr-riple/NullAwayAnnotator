@@ -3,8 +3,6 @@ package edu.ucr.cs.riple.core.explorers;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.AnnotationInjector;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.metadata.graph.FixGraph;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -22,8 +20,6 @@ import java.util.stream.Collectors;
 import me.tongfei.progressbar.ProgressBar;
 
 public class OptimizedExplorer extends Explorer {
-
-  private final FixGraph<Node> fixGraph;
   private final RegionTracker tracker;
   private final MethodInheritanceTree methodInheritanceTree;
 
@@ -38,33 +34,13 @@ public class OptimizedExplorer extends Explorer {
     super(injector, errorBank, fixBank, fixes, config);
     this.tracker = tracker;
     this.methodInheritanceTree = methodInheritanceTree;
-    this.fixGraph = new FixGraph<>(Node::new);
   }
 
   @Override
   protected boolean initializeReports() {
-    this.fixGraph.clear();
-    return this.reports
-            .stream()
-            .filter(
-                report ->
-                    ((!config.bailout || report.effect > 0) && !report.finished)
-                        || !report.processed)
-            .peek(
-                report -> {
-                  Fix root = report.root;
-                  Node node = fixGraph.findOrCreate(root);
-                  node.setRootSource(fixBank);
-                  node.report = report;
-                  node.triggered = report.triggered;
-                  node.tree.addAll(report.tree);
-                  node.mergeTriggered();
-                  node.updateRegions(tracker);
-                  node.changed = false;
-                })
-            .collect(Collectors.toSet())
-            .size()
-        > 0;
+    boolean ans = super.initializeReports();
+    this.fixGraph.getAllNodes().forEach(node -> node.updateRegions(tracker));
+    return ans;
   }
 
   @Override
@@ -101,19 +77,5 @@ public class OptimizedExplorer extends Explorer {
       injector.remove(fixes);
     }
     pb.close();
-  }
-
-  @Override
-  protected void finalizeReports() {
-    List<Node> nodes = fixGraph.getAllNodes();
-    nodes.forEach(
-        node -> {
-          Report report = node.report;
-          report.effect = node.effect;
-          report.tree = node.tree;
-          report.triggered = node.triggered;
-          report.finished = !node.changed;
-          report.processed = true;
-        });
   }
 }

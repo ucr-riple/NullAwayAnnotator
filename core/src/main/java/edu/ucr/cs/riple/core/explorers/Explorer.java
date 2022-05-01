@@ -4,9 +4,13 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.AnnotationInjector;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.metadata.graph.FixGraph;
+import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class Explorer {
   protected final AnnotationInjector injector;
@@ -14,6 +18,8 @@ public abstract class Explorer {
   protected final Bank<Fix> fixBank;
   protected final ImmutableSet<Report> reports;
   protected final Config config;
+
+  protected final FixGraph<Node> fixGraph;
 
   public Explorer(
       AnnotationInjector injector,
@@ -27,11 +33,45 @@ public abstract class Explorer {
     this.reports =
         fixes.stream().map(fix -> new Report(fix, -1)).collect(ImmutableSet.toImmutableSet());
     this.config = config;
+    this.fixGraph = new FixGraph<>(Node::new);
   }
 
-  protected abstract boolean initializeReports();
+  protected boolean initializeReports() {
+    this.fixGraph.clear();
+    return this.reports
+            .stream()
+            .filter(
+                report ->
+                    ((!config.bailout || report.effect > 0) && !report.finished)
+                        || !report.processed)
+            .peek(
+                report -> {
+                  Fix root = report.root;
+                  Node node = fixGraph.findOrCreate(root);
+                  node.setRootSource(fixBank);
+                  node.report = report;
+                  node.triggered = report.triggered;
+                  node.tree.addAll(report.tree);
+                  node.mergeTriggered();
+                  node.changed = false;
+                })
+            .collect(Collectors.toSet())
+            .size()
+        > 0;
+  }
 
-  protected abstract void finalizeReports();
+  protected void finalizeReports() {
+    List<Node> nodes = fixGraph.getAllNodes();
+    nodes.forEach(
+        node -> {
+          Report report = node.report;
+          report.effect = node.effect;
+          report.tree = node.tree;
+          report.triggered = node.triggered;
+          report.finished = !node.changed;
+          report.processed = true;
+        });
+  }
 
   protected abstract void executeNextCycle();
 

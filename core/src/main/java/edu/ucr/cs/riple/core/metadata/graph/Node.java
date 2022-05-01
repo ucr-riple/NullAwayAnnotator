@@ -108,7 +108,7 @@ public class Node {
     this.effect = effect + numberOfSuperMethodsAnnotatedOutsideTree[0];
   }
 
-  private void updateTriggered(List<Fix> fixes) {
+  public void updateTriggered(List<Fix> fixes) {
     int sizeBefore = this.triggered.size();
     this.triggered.addAll(fixes);
     int sizeAfter = this.triggered.size();
