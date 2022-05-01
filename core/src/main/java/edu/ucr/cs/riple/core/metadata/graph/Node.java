@@ -79,17 +79,6 @@ public class Node {
       int effect, Set<Fix> fixesInOneRound, List<Fix> triggered, MethodInheritanceTree mit) {
     triggered.addAll(generateSubMethodParameterInheritanceFixes(mit, fixesInOneRound));
     updateTriggered(triggered);
-    Set<Region> subMethodRegions =
-        tree.stream()
-            .filter(fix -> fix.kind.equals(FixType.PARAMETER.name))
-            .flatMap(
-                fix ->
-                    mit.getSubMethods(fix.method, fix.clazz, false)
-                        .stream()
-                        .filter(methodNode -> !methodNode.annotFlags[Integer.parseInt(fix.index)])
-                        .map(methodNode -> new Region(methodNode.method, methodNode.clazz)))
-            .filter(region -> !regions.contains(region))
-            .collect(Collectors.toSet());
     final int[] numberOfSuperMethodsAnnotatedOutsideTree = {0};
     this.tree
         .stream()
@@ -116,7 +105,7 @@ public class Node {
                 numberOfSuperMethodsAnnotatedOutsideTree[0]++;
               }
             });
-    this.effect = effect + subMethodRegions.size() + numberOfSuperMethodsAnnotatedOutsideTree[0];
+    this.effect = effect + numberOfSuperMethodsAnnotatedOutsideTree[0];
   }
 
   private void updateTriggered(List<Fix> fixes) {

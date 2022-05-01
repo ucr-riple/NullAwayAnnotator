@@ -89,7 +89,6 @@ public class Annotator {
   private void explore() {
     Utility.setCSSCheckerActivation(config, true);
     Utility.buildProject(config);
-    RegionTracker tracker = new CompoundTracker(config.dir);
     Utility.setCSSCheckerActivation(config, false);
     while (true) {
       Utility.buildProject(config);
@@ -106,6 +105,7 @@ public class Annotator {
       Bank<Fix> fixBank = new Bank<>(config.dir.resolve("fixes.tsv"), Fix::new);
       MethodInheritanceTree tree =
           new MethodInheritanceTree(config.dir.resolve(Serializer.METHOD_INFO_NAME));
+      RegionTracker tracker = new CompoundTracker(config.dir, tree);
       Explorer explorer =
           config.optimized
               ? new OptimizedExplorer(injector, errorBank, fixBank, tracker, tree, fixes, config)
