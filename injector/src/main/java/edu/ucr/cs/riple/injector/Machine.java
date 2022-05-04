@@ -113,8 +113,7 @@ public class Machine {
 
   private boolean applyFix(CompilationUnit tree, Fix fix) {
     boolean success = false;
-    TypeDeclaration<?> clazz =
-        Helper.getClassOrInterfaceOrEnumDeclaration(tree, fix.pkg, fix.className);
+    TypeDeclaration<?> clazz = Helper.getClassOrInterfaceOrEnumDeclaration(tree, fix.className);
     if (clazz == null) {
       return false;
     }

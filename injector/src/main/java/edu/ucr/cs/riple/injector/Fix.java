@@ -38,15 +38,13 @@ public class Fix {
   public final String inject;
   public String uri;
   public String index;
-  public String pkg;
   public int referred;
 
   public enum KEYS {
-    PARAM("param"),
+    PARAM("variable"),
     METHOD("method"),
     LOCATION("location"),
     CLASS("class"),
-    PKG("pkg"),
     URI("uri"),
     INJECT("inject"),
     ANNOTATION("annotation"),
@@ -78,10 +76,6 @@ public class Fix {
     this.className = className;
     this.uri = uri;
     this.inject = inject;
-    this.pkg =
-        this.className.contains(".")
-            ? this.className.substring(0, this.className.lastIndexOf("."))
-            : "";
   }
 
   public static List<Fix> createFromJson(JSONObject fixJson, boolean deep) {
@@ -143,7 +137,6 @@ public class Fix {
     res.put(KEYS.METHOD.label, method);
     res.put(KEYS.PARAM.label, param);
     res.put(KEYS.LOCATION.label, location);
-    res.put(KEYS.PKG.label, pkg);
     res.put(KEYS.ANNOTATION.label, annotation);
     res.put(KEYS.INJECT.label, inject);
     res.put(KEYS.URI.label, uri);
@@ -154,7 +147,6 @@ public class Fix {
   public Fix duplicate() {
     Fix fix = new Fix(annotation, method, param, location, className, uri, inject);
     fix.index = index;
-    fix.pkg = pkg;
     return fix;
   }
 
@@ -164,7 +156,6 @@ public class Fix {
 
   public static Fix fromArrayInfo(String[] infos) {
     Fix fix = new Fix(infos[7], infos[2], infos[3], infos[0], infos[1], infos[5], "true");
-    fix.pkg = fix.className.substring(0, fix.className.lastIndexOf("."));
     fix.index = infos[4];
     return fix;
   }

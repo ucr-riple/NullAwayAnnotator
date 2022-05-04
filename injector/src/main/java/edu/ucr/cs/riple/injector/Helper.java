@@ -23,17 +23,27 @@
 package edu.ucr.cs.riple.injector;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.PackageDeclaration;
+import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.CallableDeclaration;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.EnumDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.stmt.Statement;
+import com.google.common.base.Preconditions;
+import edu.ucr.cs.riple.injector.ast.AnonymousClass;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import me.tongfei.progressbar.ProgressBar;
 import me.tongfei.progressbar.ProgressBarStyle;
 
@@ -61,10 +71,14 @@ public class Helper {
 
   public static boolean matchesCallableSignature(
       CallableDeclaration<?> callableDec, String signature) {
-    if (!callableDec.getName().toString().equals(extractCallableName(signature))) return false;
+    if (!callableDec.getName().toString().equals(extractCallableName(signature))) {
+      return false;
+    }
     List<String> paramsTypesInSignature = extractParamTypesOfCallableInString(signature);
     List<String> paramTypes = extractParamTypesOfCallableInString(callableDec);
-    if (paramTypes.size() != paramsTypesInSignature.size()) return false;
+    if (paramTypes.size() != paramsTypesInSignature.size()) {
+      return false;
+    }
     for (String i : paramsTypesInSignature) {
       String found = null;
       String last_i = simpleName(i);
@@ -72,7 +86,9 @@ public class Helper {
         String last_j = simpleName(j);
         if (j.equals(i) || last_i.equals(last_j)) found = j;
       }
-      if (found == null) return false;
+      if (found == null) {
+        return false;
+      }
       paramTypes.remove(found);
     }
     return true;
@@ -94,48 +110,166 @@ public class Helper {
   }
 
   public static TypeDeclaration<?> getClassOrInterfaceOrEnumDeclaration(
-      CompilationUnit cu, String pkg, String name) {
-    String classSimpleName = simpleName(name);
-    if (pkg.equals(getPackageName(name))) {
-      Optional<ClassOrInterfaceDeclaration> optional = cu.getClassByName(classSimpleName);
-      if (!optional.isPresent()) {
-        optional = cu.getInterfaceByName(classSimpleName);
-        if (optional.isPresent()) {
-          return optional.get();
-        }
-        Optional<EnumDeclaration> optionalEnumDeclaration = cu.getEnumByName(classSimpleName);
-        if (optionalEnumDeclaration.isPresent()) {
-          return optionalEnumDeclaration.get();
-        }
+      CompilationUnit cu, String flatName) {
+    String packageName;
+    Optional<PackageDeclaration> packageDeclaration = cu.getPackageDeclaration();
+    if (packageDeclaration.isPresent()) {
+      packageName = packageDeclaration.get().getNameAsString();
+    } else {
+      packageName = "";
+    }
+    Preconditions.checkArgument(
+        flatName.startsWith(packageName),
+        "Package name of compilation unit is incompatible with class name: "
+            + packageName
+            + " : "
+            + flatName);
+    String flatNameExcludingPackageName =
+        packageName.equals("") ? flatName : flatName.substring(packageName.length() + 1);
+    List<String> keys = findKeysInClassFlatName(flatNameExcludingPackageName);
+    TypeDeclaration<?> cursor = findTopLevelTypeDeclarationOnNode(cu, keys.get(0), 0);
+    keys.remove(0);
+    for (String key : keys) {
+      key = key.startsWith("$") ? key.substring(1) : key;
+      String indexString = extractIntegerFromBeginningOfStringInString(key);
+      String actualName = key.substring(indexString.length());
+      int index = indexString.equals("") ? 0 : Integer.parseInt(indexString) - 1;
+      Preconditions.checkNotNull(cursor);
+      if (key.matches("\\d+")) {
+        cursor = findAnonymousClassOnTypeDeclaration(cursor, index);
+      } else {
+        cursor = findTopLevelTypeDeclarationOnNode(cursor, actualName, index);
       }
     }
-    try {
-      List<ClassOrInterfaceDeclaration> options =
-          cu.getLocalDeclarationFromClassname(classSimpleName);
-      for (ClassOrInterfaceDeclaration candidate : options) {
-        if (candidate.getName().toString().equals(classSimpleName)) {
-          return candidate;
-        }
+    return cursor;
+  }
+
+  /**
+   * Extract the integer at the start of string (e.g. 129uid -> 129).
+   *
+   * @param key string containing the integer.
+   * @return the integer at the start of the key, empty if no digit found at the beginning (e.g.
+   *     u129 -> empty)
+   */
+  public static String extractIntegerFromBeginningOfStringInString(String key) {
+    int index = 0;
+    while (index < key.length()) {
+      char c = key.charAt(index);
+      if (!Character.isDigit(c)) {
+        break;
       }
-    } catch (NoSuchElementException ignored) {
+      index++;
     }
-    List<ClassOrInterfaceDeclaration> candidates =
-        cu.findAll(
-            ClassOrInterfaceDeclaration.class,
-            classOrInterfaceDeclaration ->
-                classOrInterfaceDeclaration.getName().toString().equals(classSimpleName));
-    if (candidates.size() > 0) {
-      return candidates.get(0);
+    return key.substring(0, index);
+  }
+
+  /**
+   * Finds the top level class declaration on Node including local class declarations in method
+   * bodies.
+   *
+   * @param node Node to perform the search on
+   * @param actualName Actual name of the class excluding the index (e.g. $1Helper -> Helper)
+   * @param index Index of the candidates (e.g. $1Helper -> 0)
+   * @return The target class
+   */
+  private static TypeDeclaration<?> findTopLevelTypeDeclarationOnNode(
+      Node node, String actualName, int index) {
+    List<TypeDeclaration<?>> candidates =
+        node.getChildNodes()
+            .stream()
+            .flatMap(
+                child -> {
+                  if (child instanceof MethodDeclaration) {
+                    MethodDeclaration method = ((MethodDeclaration) child);
+                    if (method.getBody().isPresent()) {
+                      return method
+                          .getBody()
+                          .get()
+                          .getStatements()
+                          .stream()
+                          .filter(Statement::isLocalClassDeclarationStmt)
+                          .map(
+                              statement ->
+                                  statement.asLocalClassDeclarationStmt().getClassDeclaration());
+                    }
+                  }
+                  return Stream.of(child);
+                })
+            .filter(
+                candidate ->
+                    TypeDeclaration.class.isAssignableFrom(candidate.getClass())
+                        && ((TypeDeclaration<?>) candidate).getNameAsString().equals(actualName))
+            .map((Function<Node, TypeDeclaration<?>>) child -> (TypeDeclaration<?>) child)
+            .collect(Collectors.toList());
+    Preconditions.checkArgument(
+        index < candidates.size(),
+        "Could not find class at index: "
+            + index
+            + " with name "
+            + actualName
+            + " On node:\n"
+            + node);
+    return candidates.get(index);
+  }
+
+  /**
+   * Finds the Anonymous class defined on a type declaration.
+   *
+   * @param cursor type declaration containing the Anonymous class.
+   * @param index index of the target Anonymous class on cursor.
+   * @return the Anonymous class tree.
+   */
+  private static TypeDeclaration<?> findAnonymousClassOnTypeDeclaration(Node cursor, int index) {
+    List<AnonymousClass> anonymousClasses =
+        cursor
+            .findAll(ObjectCreationExpr.class)
+            .stream()
+            .map(
+                objectCreationExpr -> {
+                  Optional<NodeList<BodyDeclaration<?>>> optionalBodyDeclaration =
+                      objectCreationExpr.getAnonymousClassBody();
+                  return optionalBodyDeclaration
+                      .map(
+                          declarations ->
+                              new AnonymousClass(String.valueOf(index + 1), declarations))
+                      .orElse(null);
+                })
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+    Preconditions.checkArgument(
+        index < anonymousClasses.size(), "Did not found the anonymous class at index: " + index);
+    return anonymousClasses.get(index);
+  }
+
+  /**
+   * Gets the keys comprising a flat name (e.g. A.B$1C.D$1 will be a list of [A, B, $1C, D, $1]
+   *
+   * @param flatName Flat name compiled by javac
+   * @return List of keys in flat name
+   */
+  public static List<String> findKeysInClassFlatName(String flatName) {
+    int index = 0;
+    List<String> ans = new ArrayList<>();
+    StringBuilder temp = new StringBuilder();
+    while (index < flatName.length()) {
+      char current = flatName.charAt(index);
+      if (current == '.') {
+        ans.add(temp.toString());
+        temp = new StringBuilder();
+        index++;
+        continue;
+      }
+      if (current == '$') {
+        ans.add(temp.toString());
+        temp = new StringBuilder("$");
+        index++;
+        continue;
+      }
+      temp.append(current);
+      index++;
     }
-    List<EnumDeclaration> enumCandidates =
-        cu.findAll(
-            EnumDeclaration.class,
-            classOrInterfaceDeclaration ->
-                classOrInterfaceDeclaration.getName().toString().equals(classSimpleName));
-    if (enumCandidates.size() > 0) {
-      return enumCandidates.get(0);
-    }
-    return null;
+    ans.add(temp.toString());
+    return ans;
   }
 
   public static String simpleName(String name) {
