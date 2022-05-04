@@ -2,33 +2,40 @@ package edu.ucr.cs.riple.injector.ast;
 
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.SimpleName;
-import com.github.javaparser.ast.visitor.GenericVisitor;
-import com.github.javaparser.ast.visitor.VoidVisitor;
-import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
+import java.util.stream.Collectors;
 
-public class AnonymousClass extends TypeDeclaration<AnonymousClass> {
+public class AnonymousClass extends ClassOrInterfaceDeclaration {
 
-  public AnonymousClass(String simpleName, NodeList<BodyDeclaration<?>> members) {
-    super(new NodeList<>(), new NodeList<>(), new SimpleName(simpleName), members);
+  final NodeList<BodyDeclaration<?>> actualMembers;
+
+  private static NodeList<BodyDeclaration<?>> cloneNodeList(NodeList<BodyDeclaration<?>> list) {
+    return new NodeList<>(list.stream().map(BodyDeclaration::clone).collect(Collectors.toList()));
   }
 
-  @Override
-  public ResolvedReferenceTypeDeclaration resolve() {
-    throw new IllegalStateException(
-        "edu.ucr.cs.riple.injector.ast.AnonymousClass does not currently support resolve()");
+  public AnonymousClass(String simpleName, NodeList<BodyDeclaration<?>> actualMembers) {
+    this(simpleName, cloneNodeList(actualMembers), actualMembers);
   }
 
-  @Override
-  public <R, A> R accept(GenericVisitor<R, A> v, A arg) {
-    throw new IllegalStateException(
-        "edu.ucr.cs.riple.injector.ast.AnonymousClass does not currently support accept(GenericVisitor<R, A> v, A arg)");
+  public AnonymousClass(
+      String simpleName,
+      NodeList<BodyDeclaration<?>> copied,
+      NodeList<BodyDeclaration<?>> actualMembers) {
+    super(
+        null,
+        new NodeList<>(),
+        new NodeList<>(),
+        false,
+        new SimpleName(simpleName),
+        new NodeList<>(),
+        new NodeList<>(),
+        new NodeList<>(),
+        copied);
+    this.actualMembers = actualMembers;
   }
 
-  @Override
-  public <A> void accept(VoidVisitor<A> v, A arg) {
-    throw new IllegalStateException(
-        "edu.ucr.cs.riple.injector.ast.AnonymousClass does not currently support accept(GenericVisitor<R, A> v, A arg)");
+  public NodeList<BodyDeclaration<?>> getActualMembers() {
+    return actualMembers;
   }
 }

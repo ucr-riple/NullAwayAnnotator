@@ -77,4 +77,24 @@ public class ClassSearchTest {
                 "true"))
         .start(true);
   }
+
+  @Test
+  public void class_search_anonymous_2() {
+    String rootName = "class_search_anonymous_2";
+
+    new InjectorTestHelper()
+        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+        .addInputSourceFile("Main.java", "ClassSearch.java")
+        .expectOutputFile("Main.java", "class_search_anonymous_2_expected.java")
+        .addFixes(
+            new Fix(
+                "javax.annotation.Nullable",
+                "compare()",
+                "",
+                "METHOD",
+                "injector.Main$1$2$1Helper$1",
+                "Main.java",
+                "true"))
+        .start(true);
+  }
 }

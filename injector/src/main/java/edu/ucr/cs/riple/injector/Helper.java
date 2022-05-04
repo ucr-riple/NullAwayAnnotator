@@ -28,6 +28,8 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.CallableDeclaration;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
@@ -39,7 +41,6 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -220,25 +221,35 @@ public class Helper {
    * @return the Anonymous class tree.
    */
   private static TypeDeclaration<?> findAnonymousClassOnTypeDeclaration(Node cursor, int index) {
-    List<AnonymousClass> anonymousClasses =
-        cursor
-            .findAll(ObjectCreationExpr.class)
-            .stream()
-            .map(
-                objectCreationExpr -> {
-                  Optional<NodeList<BodyDeclaration<?>>> optionalBodyDeclaration =
-                      objectCreationExpr.getAnonymousClassBody();
-                  return optionalBodyDeclaration
-                      .map(
-                          declarations ->
-                              new AnonymousClass(String.valueOf(index + 1), declarations))
-                      .orElse(null);
-                })
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+    List<AnonymousClass> anonymousClasses = new ArrayList<>();
+    final int[] i = {1};
+    cursor.walk(
+        Node.TreeTraversal.BREADTHFIRST,
+        node -> {
+          if (node instanceof ObjectCreationExpr && isInScopeOf(cursor, node)) {
+            Optional<NodeList<BodyDeclaration<?>>> anonymousBody =
+                ((ObjectCreationExpr) node).getAnonymousClassBody();
+            anonymousBody.ifPresent(
+                declarations ->
+                    anonymousClasses.add(new AnonymousClass(String.valueOf(i[0]++), declarations)));
+          }
+        });
     Preconditions.checkArgument(
         index < anonymousClasses.size(), "Did not found the anonymous class at index: " + index);
     return anonymousClasses.get(index);
+  }
+
+  public static boolean isInScopeOf(Node parent, Node child) {
+    Node current = child;
+    while (current != null && !current.equals(parent)) {
+      current = current.getParentNode().orElse(null);
+      if (current instanceof ObjectCreationExpr
+          || current instanceof ClassOrInterfaceDeclaration
+          || current instanceof EnumDeclaration) {
+        return current.equals(parent);
+      }
+    }
+    return current != null;
   }
 
   /**

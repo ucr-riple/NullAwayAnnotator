@@ -35,6 +35,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.printer.DefaultPrettyPrinter;
 import com.github.javaparser.printer.configuration.DefaultPrinterConfiguration;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
+import edu.ucr.cs.riple.injector.ast.AnonymousClass;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -99,7 +100,8 @@ public class Machine {
           if (applyFix(tree, fix)) {
             processed++;
           }
-        } catch (Exception ignored) {
+        } catch (Exception ex) {
+          System.out.println(ex);
         }
       }
       overWriteToFile(tree, workList.getUri());
@@ -164,9 +166,15 @@ public class Machine {
     }
   }
 
+  private static NodeList<BodyDeclaration<?>> getActualMembers(TypeDeclaration<?> clazz) {
+    return clazz instanceof AnonymousClass
+        ? ((AnonymousClass) clazz).getActualMembers()
+        : clazz.getMembers();
+  }
+
   private boolean applyMethodParam(TypeDeclaration<?> clazz, Fix fix) {
     final boolean[] success = {false};
-    NodeList<BodyDeclaration<?>> members = clazz.getMembers();
+    NodeList<BodyDeclaration<?>> members = getActualMembers(clazz);
     members.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifCallableDeclaration(
@@ -187,7 +195,7 @@ public class Machine {
   }
 
   private boolean applyMethodReturn(TypeDeclaration<?> clazz, Fix fix) {
-    NodeList<BodyDeclaration<?>> members = clazz.getMembers();
+    NodeList<BodyDeclaration<?>> members = getActualMembers(clazz);
     final boolean[] success = {false};
     members.forEach(
         bodyDeclaration ->
@@ -204,7 +212,7 @@ public class Machine {
 
   private boolean applyClassField(TypeDeclaration<?> clazz, Fix fix) {
     final boolean[] success = {false};
-    NodeList<BodyDeclaration<?>> members = clazz.getMembers();
+    NodeList<BodyDeclaration<?>> members = getActualMembers(clazz);
     members.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifFieldDeclaration(
