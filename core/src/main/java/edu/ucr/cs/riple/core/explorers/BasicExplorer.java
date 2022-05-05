@@ -26,7 +26,7 @@ public class BasicExplorer extends Explorer {
   @Override
   protected void executeNextCycle() {
     System.out.println(
-        "Scheduling for: " + reports.size() + " builds for: " + reports.size() + " reports");
+        "Scheduling for: " + reports.size() + " builds for: " + reports.size() + " fixes");
     ProgressBar pb = Utility.createProgressBar("Analysing", reports.size());
     for (Node node : fixGraph.getAllNodes()) {
       pb.step();

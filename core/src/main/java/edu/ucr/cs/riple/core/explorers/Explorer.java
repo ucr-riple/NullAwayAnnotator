@@ -80,7 +80,7 @@ public abstract class Explorer {
     for (int i = 0; i < config.depth; i++) {
       System.out.print("Analyzing at level " + (i + 1) + ", ");
       if (!initializeReports()) {
-        System.out.println("\nAnalysis finished at this iteration.");
+        System.out.println("Analysis finished at this iteration.");
         break;
       }
       executeNextCycle();

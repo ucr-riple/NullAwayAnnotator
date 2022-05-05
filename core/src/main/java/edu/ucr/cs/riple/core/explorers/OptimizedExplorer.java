@@ -52,7 +52,7 @@ public class OptimizedExplorer extends Explorer {
             + groups.size()
             + " builds for: "
             + fixGraph.getAllNodes().size()
-            + " reports");
+            + " fixes");
     ProgressBar pb = Utility.createProgressBar("Analysing", groups.size());
     for (Set<Node> group : groups.values()) {
       pb.step();
