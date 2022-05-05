@@ -101,7 +101,7 @@ public class MethodInfo {
     Preconditions.checkArgument(symbol != null, "Should not be null at this point.");
     return id
         + "\t"
-        + (clazz != null ? clazz : "null")
+        + (clazz != null ? clazz.flatName() : "null")
         + "\t"
         + symbol
         + "\t"
