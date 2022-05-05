@@ -117,14 +117,15 @@ public class Machine {
   private void logFailed(Fix fix) {
     FileWriter fw;
     try {
+      if(!Injector.logPath.toFile().exists()){
+        Injector.logPath.toFile().createNewFile();
+      }
       fw = new FileWriter(Injector.logPath.toFile(), true);
       BufferedWriter bw = new BufferedWriter(fw);
       bw.write(fix.toString());
       bw.newLine();
       bw.close();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    } catch (Exception ignored) {}
   }
 
   private boolean applyFix(CompilationUnit tree, Fix fix) {
