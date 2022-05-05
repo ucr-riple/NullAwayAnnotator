@@ -1,5 +1,6 @@
 package injector;
 
+
 import javax.annotation.Nullable;
 
 public class Main {
@@ -67,7 +68,7 @@ public class Main {
                         class Helper { // injector.Main$1$2$1$2Helper
                           Object f7;
                           final Comp c = new Comp() { // injector.Main$1$2$1$2Helper$1
-                                Object f8;
+                                @Nullable Object f8;
 
                                 @Override
                                 public Object compare() {
@@ -128,7 +129,6 @@ public class Main {
       class InnerHelper { // injector.Main$1Helper$InnerHelper
         Object f15;
 
-        @Nullable
         public Object foo() {
           return null;
         }

@@ -100,8 +100,7 @@ public class Machine {
           if (applyFix(tree, fix)) {
             processed++;
           }
-        } catch (Exception ex) {
-          System.out.println(ex);
+        } catch (Exception ignored) {
         }
       }
       overWriteToFile(tree, workList.getUri());
