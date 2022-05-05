@@ -28,14 +28,12 @@ import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.printer.DefaultPrettyPrinter;
 import com.github.javaparser.printer.configuration.DefaultPrinterConfiguration;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
-import edu.ucr.cs.riple.injector.ast.AnonymousClass;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -164,12 +162,6 @@ public class Machine {
             return thisAnnotName.equals(annotName) || thisAnnotName.equals(annotSimpleName);
           });
     }
-  }
-
-  private static NodeList<BodyDeclaration<?>> getActualMembers(TypeDeclaration<?> clazz) {
-    return clazz instanceof AnonymousClass
-        ? ((AnonymousClass) clazz).getActualMembers()
-        : clazz.getMembers();
   }
 
   private boolean applyMethodParam(NodeList<BodyDeclaration<?>> members, Fix fix) {

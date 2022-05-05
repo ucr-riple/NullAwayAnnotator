@@ -65,7 +65,7 @@ public class Main {
 
                       public void anotherHelper() {
                         class Helper { // injector.Main$1$2$1$2Helper
-                          Object f7;
+                          @Nullable Object f7;
                           final Comp c = new Comp() { // injector.Main$1$2$1$2Helper$1
                                 Object f8;
 
@@ -186,7 +186,6 @@ public class Main {
 }
 
 class Outer { // injector.Outer
-  @Nullable
   public Object foo() {
     return null;
   }
