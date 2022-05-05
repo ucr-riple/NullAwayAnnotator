@@ -132,12 +132,24 @@ public class Machine {
       if (Helper.getPackageName(location.annotation) != null) {
         ImportDeclaration importDeclaration =
             StaticJavaParser.parseImport("import " + location.annotation + ";");
-        if (!tree.getImports().contains(importDeclaration)) {
+        if (treeRequiresImportDeclaration(tree, importDeclaration, location.annotation)) {
           tree.getImports().addFirst(importDeclaration);
         }
       }
     }
     return success;
+  }
+
+  private boolean treeRequiresImportDeclaration(
+      CompilationUnit tree, ImportDeclaration importDeclaration, String annotation) {
+    if (tree.getImports().contains(importDeclaration)) {
+      return false;
+    }
+    return tree.getImports()
+        .stream()
+        .noneMatch(
+            impDecl ->
+                Helper.simpleName(impDecl.getNameAsString()).equals(Helper.simpleName(annotation)));
   }
 
   private static void applyAnnotation(

@@ -1,5 +1,4 @@
 package com.uber;
-
 import javax.annotation.Nullable;
 import static com.ibm.wala.types.A;
 import static com.ibm.wala.types.B;
@@ -41,65 +40,36 @@ import com.ibm.wala.util.Y;
 import com.ibm.wala.util.Z;
 import com.ibm.wala.util.AA;
 import com.ibm.wala.util.AB;
-
 public class Super {
-
-    A a = new A();
-
-    B b = new B();
-
-    C c = new C();
-
-    D d = new D();
-
-    E e = new E();
-
-    F f = new F();
-
-    G g = new G();
-
-    H h = new H();
-
-    I i = new I();
-
-    J j = new J();
-
-    K k = new K();
-
-    L l = new L();
-
-    M m = new M();
-
-    N n = new N();
-
-    P p = new P();
-
-    Q q = new Q();
-
-    R r = new R();
-
-    S s = new S();
-
-    T t = new T();
-
-    U u = new U();
-
-    V v = new V();
-
-    W w = new W();
-
-    X x = new X();
-
-    Y y = new Y();
-
-    Z z = new Z();
-
-    AA aa = new AA();
-
-    AB ab = new AB();
-
-    @Nullable
-    Object test() {
-        return new Object();
-    }
+   A a = new A();
+   B b = new B();
+   C c = new C();
+   D d = new D();
+   E e = new E();
+   F f = new F();
+   G g = new G();
+   H h = new H();
+   I i = new I();
+   J j = new J();
+   K k = new K();
+   L l = new L();
+   M m = new M();
+   N n = new N();
+   P p = new P();
+   Q q = new Q();
+   R r = new R();
+   S s = new S();
+   T t = new T();
+   U u = new U();
+   V v = new V();
+   W w = new W();
+   X x = new X();
+   Y y = new Y();
+   Z z = new Z();
+   AA aa = new AA();
+   AB ab = new AB();
+   @Nullable
+   Object test() {
+       return new Object();
+   }
 }
