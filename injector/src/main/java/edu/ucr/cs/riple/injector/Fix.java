@@ -41,7 +41,7 @@ public class Fix {
   public int referred;
 
   public enum KEYS {
-    PARAM("variable"),
+    PARAM("param"),
     METHOD("method"),
     LOCATION("location"),
     CLASS("class"),
