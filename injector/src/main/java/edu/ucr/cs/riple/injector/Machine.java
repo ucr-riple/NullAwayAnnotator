@@ -34,6 +34,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.printer.DefaultPrettyPrinter;
 import com.github.javaparser.printer.configuration.DefaultPrinterConfiguration;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -97,8 +98,11 @@ public class Machine {
           }
           if (applyFix(tree, fix)) {
             processed++;
+          } else {
+            logFailed(fix);
           }
         } catch (Exception ignored) {
+          logFailed(fix);
         }
       }
       overWriteToFile(tree, workList.getUri());
@@ -108,6 +112,19 @@ public class Machine {
     }
     pb.close();
     return processed;
+  }
+
+  private void logFailed(Fix fix) {
+    FileWriter fw;
+    try {
+      fw = new FileWriter(Injector.logPath.toFile(), true);
+      BufferedWriter bw = new BufferedWriter(fw);
+      bw.write(fix.toString());
+      bw.newLine();
+      bw.close();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private boolean applyFix(CompilationUnit tree, Fix fix) {
@@ -129,15 +146,25 @@ public class Machine {
         break;
     }
     if (success) {
-      if (Helper.getPackageName(fix.annotation) != null) {
-        ImportDeclaration importDeclaration =
-            StaticJavaParser.parseImport("import " + fix.annotation + ";");
-        if (!tree.getImports().contains(importDeclaration)) {
-          tree.getImports().addFirst(importDeclaration);
-        }
+      ImportDeclaration importDeclaration =
+          StaticJavaParser.parseImport("import " + fix.annotation + ";");
+      if (treeNeedsImport(tree, fix.annotation, importDeclaration)) {
+        tree.getImports().addFirst(importDeclaration);
       }
     }
     return success;
+  }
+
+  private boolean treeNeedsImport(
+      CompilationUnit tree, String annotation, ImportDeclaration importDeclaration) {
+    if (tree.getImports().contains(importDeclaration)) {
+      return false;
+    }
+    return tree.getImports()
+        .stream()
+        .noneMatch(
+            importDeclaration1 ->
+                importDeclaration1.getNameAsString().endsWith(Helper.simpleName(annotation)));
   }
 
   private static void applyAnnotation(

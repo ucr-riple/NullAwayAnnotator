@@ -199,7 +199,8 @@ public class Annotator {
     if (fixes == null || fixes.size() == 0) {
       return;
     }
-    injector.start(new WorkListBuilder(fixes).getWorkLists(), false);
+    injector.start(
+        new WorkListBuilder(fixes).getWorkLists(), false, dir.resolve("injector_log.json"));
   }
 
   private void analyze(Fix fix) {

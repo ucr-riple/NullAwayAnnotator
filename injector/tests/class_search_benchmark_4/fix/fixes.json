@@ -1,1 +1,1 @@
-{"fixes":[{"annotation":"javax.annotation.Nullable","method":"compare()","variable":"null","index":null,"location":"METHOD","class":"injector.Main$1$1","inject":"true","uri":"/Users/nima/Developer/NullAwayFixer/NullAwayAnnotator/injector/tests/class_search_benchmark_4/src/Main.java"}]}
+{"fixes":[{"annotation":"javax.annotation.Nullable","method":"compare()","param":"null","index":null,"location":"METHOD","class":"injector.Main$1$1","inject":"true","uri":"/Users/nima/Developer/NullAwayFixer/NullAwayAnnotator/injector/tests/class_search_benchmark_4/src/Main.java"}]}

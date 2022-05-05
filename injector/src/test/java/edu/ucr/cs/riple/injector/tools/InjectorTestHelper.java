@@ -90,7 +90,7 @@ public class InjectorTestHelper {
   public void start(boolean keepStyle) {
     Injector injector = Injector.builder().setMode(Injector.MODE.TEST).keepStyle(keepStyle).build();
     writeFixes();
-    injector.start(new WorkListBuilder(rootPath + "/fix/fixes.json").getWorkLists());
+    injector.start(new WorkListBuilder(rootPath + "/fix/fixes.json").getWorkLists(), null);
     for (String key : fileMap.keySet()) {
       String srcFile = readFileToString(key);
       String trimmedSrc = srcFile.replaceAll(" ", "").replaceAll("\n", "").replaceAll("\t", "");

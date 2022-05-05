@@ -142,7 +142,6 @@ public class BasicTest {
                     "Main.java",
                     "true"));
     injectorTestHelper.start();
-    injectorTestHelper = null;
   }
 
   @Test
@@ -1382,5 +1381,49 @@ public class BasicTest {
                 "A.java",
                 "true"))
         .start(true);
+  }
+
+  @Test
+  public void custom_nullable_already_exists() {
+    String rootName = "custom_nullable_already_exists";
+
+    injectorTestHelper =
+        new InjectorTestHelper()
+            .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+            .addInput(
+                "Main.java",
+                "package com.uber;",
+                "import custom.Nullable;",
+                "public class Main {",
+                "   public enum Test{",
+                "     CLASSIC;",
+                "     public Object run(){",
+                "       return null;",
+                "     }",
+                "   }",
+                "}")
+            .expectOutput(
+                "Main.java",
+                "package com.uber;",
+                "import custom.Nullable;",
+                "public class Main {",
+                "   public enum Test{",
+                "     CLASSIC;",
+                "     @Nullable",
+                "     public Object run(){",
+                "       return null;",
+                "     }",
+                "   }",
+                "}")
+            .addFixes(
+                new Fix(
+                    "javax.annotation.Nullable",
+                    "run()",
+                    "",
+                    "METHOD",
+                    "com.uber.Main$Test",
+                    "Main.java",
+                    "true"));
+    injectorTestHelper.start();
   }
 }

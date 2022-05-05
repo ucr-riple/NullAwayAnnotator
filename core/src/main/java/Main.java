@@ -82,6 +82,7 @@ public class Main {
     Injector injector =
         Injector.builder().setMode(Injector.MODE.BATCH).keepStyle(keepStyle).build();
     List<Fix> fixes = Utility.readFixesJson(Paths.get(args[1]));
-    injector.start(new WorkListBuilder(fixes).getWorkLists(), true);
+    Path logPath = Paths.get(args[1]).getParent().resolve("injector_log.tsv");
+    injector.start(new WorkListBuilder(fixes).getWorkLists(), logPath);
   }
 }

@@ -22,12 +22,15 @@
 
 package edu.ucr.cs.riple.injector;
 
+import java.nio.file.Path;
 import java.util.List;
 
 public class Injector {
   public final MODE mode;
   public final boolean KEEP;
   public static boolean LOG;
+
+  public static Path logPath;
 
   public enum MODE {
     BATCH,
@@ -43,8 +46,9 @@ public class Injector {
     return new InjectorBuilder();
   }
 
-  public Report start(List<WorkList> workLists, boolean log) {
+  public Report start(List<WorkList> workLists, boolean log, Path path) {
     LOG = log;
+    logPath = path;
     Report report = new Report();
     for (WorkList workList : workLists) {
       report.totalNumberOfDistinctFixes += workList.getFixes().size();
@@ -53,8 +57,8 @@ public class Injector {
     return report;
   }
 
-  public Report start(List<WorkList> workLists) {
-    return start(workLists, false);
+  public Report start(List<WorkList> workLists, Path logPath) {
+    return start(workLists, false, logPath);
   }
 
   public static class InjectorBuilder {

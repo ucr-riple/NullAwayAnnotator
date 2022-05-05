@@ -111,7 +111,7 @@ public class Fix {
 
   @Override
   public String toString() {
-    return location + " " + className + " " + method + " " + variable;
+    return location + " " + className + " " + method + " " + variable + " " + uri;
   }
 
   @Override
