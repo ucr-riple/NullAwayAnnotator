@@ -28,7 +28,6 @@ import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
@@ -96,7 +95,7 @@ public class Machine {
           if (Injector.LOG) {
             pb.step();
           }
-          if (applyAtLocation(tree, location)) {
+          if (applyLocationChange(tree, location)) {
             processed++;
           }
         } catch (Exception ignored) {
@@ -111,10 +110,10 @@ public class Machine {
     return processed;
   }
 
-  private boolean applyAtLocation(CompilationUnit tree, Location location) {
+  private boolean applyLocationChange(CompilationUnit tree, Location location) {
     boolean success = false;
-    TypeDeclaration<?> clazz =
-        Helper.getClassOrInterfaceOrEnumDeclaration(tree, location.pkg, location.clazz);
+    NodeList<BodyDeclaration<?>> clazz =
+        Helper.getClassOrInterfaceOrEnumDeclarationMembersByFlatName(tree, location.clazz);
     if (clazz == null) {
       return false;
     }
@@ -165,9 +164,8 @@ public class Machine {
     }
   }
 
-  private boolean applyMethodParam(TypeDeclaration<?> clazz, Location location) {
+  private boolean applyMethodParam(NodeList<BodyDeclaration<?>> members, Location location) {
     final boolean[] success = {false};
-    NodeList<BodyDeclaration<?>> members = clazz.getMembers();
     members.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifCallableDeclaration(
@@ -188,8 +186,7 @@ public class Machine {
     return success[0];
   }
 
-  private boolean applyMethodReturn(TypeDeclaration<?> clazz, Location location) {
-    NodeList<BodyDeclaration<?>> members = clazz.getMembers();
+  private boolean applyMethodReturn(NodeList<BodyDeclaration<?>> members, Location location) {
     final boolean[] success = {false};
     members.forEach(
         bodyDeclaration ->
@@ -206,9 +203,8 @@ public class Machine {
     return success[0];
   }
 
-  private boolean applyClassField(TypeDeclaration<?> clazz, Location location) {
+  private boolean applyClassField(NodeList<BodyDeclaration<?>> members, Location location) {
     final boolean[] success = {false};
-    NodeList<BodyDeclaration<?>> members = clazz.getMembers();
     members.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifFieldDeclaration(

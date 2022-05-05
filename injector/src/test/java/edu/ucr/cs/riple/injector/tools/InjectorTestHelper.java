@@ -28,9 +28,10 @@ import static org.junit.Assert.fail;
 
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.Location;
-import edu.ucr.cs.riple.injector.Report;
 import edu.ucr.cs.riple.injector.WorkListBuilder;
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.Charset;
@@ -39,7 +40,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -57,14 +60,23 @@ public class InjectorTestHelper {
   }
 
   public InjectorTestHelperOutput addInput(String path, String... input) {
-    if (rootPath == null || rootPath.equals(""))
+    if (rootPath == null || rootPath.equals("")) {
       throw new RuntimeException("Root path must be set before calling addInput");
-    String inputFile = writeToFile("src/" + path, input);
-    return new InjectorTestHelperOutput(this, fileMap, inputFile);
+    }
+    String pathToInputFile = writeToFile("src/" + path, input);
+    return new InjectorTestHelperOutput(this, fileMap, pathToInputFile);
+  }
+
+  public InjectorTestHelperOutput addInputSourceFile(String path, String inputFilePath) {
+    if (rootPath == null || rootPath.equals("")) {
+      throw new RuntimeException("Root path must be set before calling addInput");
+    }
+    String pathToInputFile = writeToFile("src/" + path, readLinesOfFile(inputFilePath));
+    return new InjectorTestHelperOutput(this, fileMap, pathToInputFile);
   }
 
   public InjectorTestHelper addLocations(Location... locations) {
-    for (Location l : locations) l.uri = rootPath.concat("/src/").concat(l.uri);
+    for (Location f : locations) f.uri = rootPath.concat("/src/").concat(f.uri);
     this.locations.addAll(Arrays.asList(locations));
     return this;
   }
@@ -78,16 +90,17 @@ public class InjectorTestHelper {
   public void start(boolean keepStyle) {
     Injector injector = Injector.builder().setMode(Injector.MODE.TEST).keepStyle(keepStyle).build();
     writeLocations();
-    Report report =
-        injector.start(new WorkListBuilder(rootPath + "/location/locations.json").getWorkLists());
-    System.out.println("Report: " + report);
+    injector.start(new WorkListBuilder(rootPath + "/location/locations.json").getWorkLists());
     for (String key : fileMap.keySet()) {
       String srcFile = readFileToString(key);
-      String trimmedSrc = srcFile.replace(" ", "").replace("\n", "");
+      String trimmedSrc = srcFile.replaceAll(" ", "").replaceAll("\n", "").replaceAll("\t", "");
       String destFile = readFileToString(fileMap.get(key));
-      String trimmedDest = destFile.replace(" ", "").replace("\n", "");
-      if (!trimmedSrc.equals(trimmedDest))
+      String trimmedDest = destFile.replaceAll(" ", "").replaceAll("\n", "").replaceAll("\t", "");
+      if (!trimmedSrc.equals(trimmedDest)) {
+        System.out.println("FOUND   : " + trimmedSrc);
+        System.out.println("EXPECTED: " + trimmedDest);
         fail("\nExpected:\n" + destFile + "\n\nBut found:\n" + srcFile + "\n");
+      }
     }
   }
 
@@ -97,12 +110,32 @@ public class InjectorTestHelper {
 
   private void writeLocations() {
     JSONArray array = new JSONArray();
-    for (Location location : locations) {
-      array.add(location.getJson());
+    for (Location locations : locations) {
+      array.add(locations.getJson());
     }
     JSONObject obj = new JSONObject();
     obj.put("locations", array);
     writeToFile("location/locations.json", obj.toJSONString());
+  }
+
+  private String[] readLinesOfFile(String path) {
+    BufferedReader reader;
+    List<String> lines = new ArrayList<>();
+    try {
+      reader =
+          new BufferedReader(
+              new FileReader(
+                  Objects.requireNonNull(getClass().getClassLoader().getResource(path)).getFile()));
+      String line = reader.readLine();
+      while (line != null) {
+        lines.add(line);
+        line = reader.readLine();
+      }
+      reader.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return lines.toArray(new String[0]);
   }
 
   private void makeDirectories() {
@@ -147,9 +180,9 @@ public class InjectorTestHelper {
       stream.forEach(s -> contentBuilder.append(s).append("\n"));
       return contentBuilder.toString();
     } catch (FileNotFoundException ex) {
-      throw new RuntimeException("Unable to open file: " + path);
+      throw new RuntimeException("Unable to open file: " + path, ex);
     } catch (IOException ex) {
-      throw new RuntimeException("Error reading file: " + path);
+      throw new RuntimeException("Error reading file: " + path, ex);
     }
   }
 
@@ -168,6 +201,12 @@ public class InjectorTestHelper {
 
     public InjectorTestHelper expectOutput(String path, String... input) {
       String output = writeToFile("expected/" + path, input);
+      map.put(inputFile.replace("src", "out"), output);
+      return injectorTestHelper;
+    }
+
+    public InjectorTestHelper expectOutputFile(String path, String pathToOutputFile) {
+      String output = writeToFile("expected/" + path, readLinesOfFile(pathToOutputFile));
       map.put(inputFile.replace("src", "out"), output);
       return injectorTestHelper;
     }

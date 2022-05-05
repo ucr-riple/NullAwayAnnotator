@@ -1,1 +1,0 @@
-{"fixes":[{"annotation":"javax.annotation.Initializer","method":"format(java.lang.String,java.lang.Object...)","param":"","index":null,"location":"METHOD","class":"com.uber.Main","pkg":"com.uber","inject":"true","uri":"/home/nima/Developer/AutoFixer/NullAwayAnnotator/injector/tests/return_nullable_dot_array/src/Main.java"}]}

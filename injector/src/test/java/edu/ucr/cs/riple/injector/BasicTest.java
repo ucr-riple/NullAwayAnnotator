@@ -138,7 +138,7 @@ public class BasicTest {
                     "run()",
                     "",
                     "METHOD",
-                    "com.uber.Main.Test",
+                    "com.uber.Main$Test",
                     "Main.java",
                     "true"));
     injectorTestHelper.start();
@@ -188,8 +188,46 @@ public class BasicTest {
                 "bar(java.lang.Object)",
                 "",
                 "METHOD",
-                "com.uber.Super.SuperInner",
+                "com.uber.Super$SuperInner",
                 "Super.java",
+                "true"))
+        .start();
+  }
+
+  @Test
+  public void return_nullable_class_decl_in_method() {
+    String rootName = "return_nullable_class_decl_in_method";
+    new InjectorTestHelper()
+        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+        .addInput(
+            "Main.java",
+            "package com.uber;",
+            "public class Main {",
+            "   void run() {",
+            "       class Helper {",
+            "         public Object run() { return null; }",
+            "       }",
+            "   }",
+            "}")
+        .expectOutput(
+            "Main.java",
+            "package com.uber;",
+            "import javax.annotation.Nullable;",
+            "public class Main {",
+            "   void run() {",
+            "       class Helper {",
+            "         @Nullable public Object run() { return null; }",
+            "       }",
+            "   }",
+            "}")
+        .addLocations(
+            new Location(
+                "javax.annotation.Nullable",
+                "run()",
+                "null",
+                "METHOD",
+                "com.uber.Main$1Helper",
+                "Main.java",
                 "true"))
         .start();
   }
@@ -400,49 +438,6 @@ public class BasicTest {
   }
 
   @Test
-  public void return_nullable_class_declaration_in_method_body() {
-    String rootName = "return_nullable_class_declaration_in_method_body";
-
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
-        .addInput(
-            "TargetMethodContextSelector.java",
-            "package com.uber;",
-            "public class TargetMethodContextSelector implements ContextSelector {",
-            "   @Override",
-            "   public Context getCalleeTarget() {",
-            "     class MethodDispatchContext implements Context {",
-            "        @Override",
-            "        public ContextItem get(ContextKey name) { }",
-            "     }",
-            "   }",
-            "}")
-        .expectOutput(
-            "TargetMethodContextSelector.java",
-            "package com.uber;",
-            "import javax.annotation.Nullable;",
-            "public class TargetMethodContextSelector implements ContextSelector {",
-            "   @Override",
-            "   public Context getCalleeTarget() {",
-            "     class MethodDispatchContext implements Context {",
-            "        @Override @Nullable",
-            "         public ContextItem get(ContextKey name) { }",
-            "     }",
-            "   }",
-            "}")
-        .addLocations(
-            new Location(
-                "javax.annotation.Nullable",
-                "get(com.ibm.wala.ipa.callgraph.ContextKey)",
-                "",
-                "METHOD",
-                "com.uber.MethodDispatchContext",
-                "TargetMethodContextSelector.java",
-                "true"))
-        .start();
-  }
-
-  @Test
   public void return_nullable_dot_array() {
     String rootName = "return_nullable_dot_array";
 
@@ -611,7 +606,6 @@ public class BasicTest {
             "   int exception,",
             "   CallSiteReference site,",
             "   BootstrapMethod bootstrap);",
-            "",
             "SSAAbstractInvokeInstruction InvokeInstruction(",
             "   int index, int[] params, int exception, CallSiteReference site, BootstrapMethod bootstrap);",
             "}")
@@ -881,7 +875,7 @@ public class BasicTest {
   public void skip_duplicate_annotation() {
     String rootName = "skip_duplicate_annotation";
 
-    Location location =
+    Location Location =
         new Location(
             "javax.annotation.Nullable",
             "test()",
@@ -911,7 +905,7 @@ public class BasicTest {
             "       return new Object();",
             "   }",
             "}")
-        .addLocations(location, location.duplicate(), location.duplicate())
+        .addLocations(Location, Location.duplicate(), Location.duplicate())
         .start();
   }
 

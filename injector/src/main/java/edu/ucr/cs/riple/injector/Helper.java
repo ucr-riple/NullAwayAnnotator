@@ -23,17 +23,24 @@
 package edu.ucr.cs.riple.injector;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.PackageDeclaration;
+import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.google.common.base.Preconditions;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.function.Predicate;
 import me.tongfei.progressbar.ProgressBar;
 import me.tongfei.progressbar.ProgressBarStyle;
 
@@ -61,10 +68,14 @@ public class Helper {
 
   public static boolean matchesCallableSignature(
       CallableDeclaration<?> callableDec, String signature) {
-    if (!callableDec.getName().toString().equals(extractCallableName(signature))) return false;
+    if (!callableDec.getName().toString().equals(extractCallableName(signature))) {
+      return false;
+    }
     List<String> paramsTypesInSignature = extractParamTypesOfCallableInString(signature);
     List<String> paramTypes = extractParamTypesOfCallableInString(callableDec);
-    if (paramTypes.size() != paramsTypesInSignature.size()) return false;
+    if (paramTypes.size() != paramsTypesInSignature.size()) {
+      return false;
+    }
     for (String i : paramsTypesInSignature) {
       String found = null;
       String last_i = simpleName(i);
@@ -72,7 +83,9 @@ public class Helper {
         String last_j = simpleName(j);
         if (j.equals(i) || last_i.equals(last_j)) found = j;
       }
-      if (found == null) return false;
+      if (found == null) {
+        return false;
+      }
       paramTypes.remove(found);
     }
     return true;
@@ -93,49 +106,165 @@ public class Helper {
     return paramTypes;
   }
 
-  public static TypeDeclaration<?> getClassOrInterfaceOrEnumDeclaration(
-      CompilationUnit cu, String pkg, String name) {
-    String classSimpleName = simpleName(name);
-    if (pkg.equals(getPackageName(name))) {
-      Optional<ClassOrInterfaceDeclaration> optional = cu.getClassByName(classSimpleName);
-      if (!optional.isPresent()) {
-        optional = cu.getInterfaceByName(classSimpleName);
-        if (optional.isPresent()) {
-          return optional.get();
-        }
-        Optional<EnumDeclaration> optionalEnumDeclaration = cu.getEnumByName(classSimpleName);
-        if (optionalEnumDeclaration.isPresent()) {
-          return optionalEnumDeclaration.get();
-        }
+  private static void walk(Node cursor, List<Node> candidates, Predicate<Node> predicate) {
+    cursor.walk(
+        Node.TreeTraversal.DIRECT_CHILDREN,
+        node -> {
+          if (!isTopLevelDeclaration(node)) {
+            walk(node, candidates, predicate);
+          }
+          if (predicate.test(node)) {
+            candidates.add(node);
+          }
+        });
+  }
+
+  private static TypeDeclaration<?> findTopLevelClassDeclarationOnCompilationUnit(
+      CompilationUnit tree, String name) {
+    Optional<EnumDeclaration> enumDeclaration = tree.getEnumByName(name);
+    if (enumDeclaration.isPresent()) {
+      return enumDeclaration.get();
+    }
+    Optional<ClassOrInterfaceDeclaration> interfaceDeclaration = tree.getInterfaceByName(name);
+    return interfaceDeclaration.orElseGet(() -> tree.getClassByName(name).orElse(null));
+  }
+
+  public static Node findTopLevelDirectInnerClass(Node cursor, String name) {
+    List<Node> nodes = new ArrayList<>();
+    cursor.walk(
+        Node.TreeTraversal.DIRECT_CHILDREN,
+        node -> {
+          if (isDeclarationWithName(node, name)) {
+            nodes.add(node);
+          }
+        });
+    Preconditions.checkArgument(
+        nodes.size() > 0, "Could not find inner class " + name + " on:\n" + cursor);
+    return nodes.get(0);
+  }
+
+  private static Node findTopLevelInnerClass(Node cursor, String name, int index) {
+    final List<Node> candidates = new ArrayList<>();
+    walk(
+        cursor,
+        candidates,
+        node -> {
+          Optional<Node> parent = node.getParentNode();
+          if (!parent.isPresent()) {
+            return false;
+          }
+          if (parent.get().equals(cursor)) {
+            return false;
+          }
+          return isDeclarationWithName(node, name);
+        });
+    return candidates.get(index);
+  }
+
+  private static boolean isTopLevelDeclaration(Node node) {
+    return node instanceof ClassOrInterfaceDeclaration
+        || node instanceof EnumDeclaration
+        || (node instanceof ObjectCreationExpr
+            && ((ObjectCreationExpr) node).getAnonymousClassBody().isPresent());
+  }
+
+  private static boolean isDeclarationWithName(Node node, String name) {
+    if (node instanceof ClassOrInterfaceDeclaration) {
+      if (((ClassOrInterfaceDeclaration) node).getNameAsString().equals(name)) {
+        return true;
       }
     }
-    try {
-      List<ClassOrInterfaceDeclaration> options =
-          cu.getLocalDeclarationFromClassname(classSimpleName);
-      for (ClassOrInterfaceDeclaration candidate : options) {
-        if (candidate.getName().toString().equals(classSimpleName)) {
-          return candidate;
-        }
-      }
-    } catch (NoSuchElementException ignored) {
+    if (node instanceof EnumDeclaration) {
+      return ((EnumDeclaration) node).getNameAsString().equals(name);
     }
-    List<ClassOrInterfaceDeclaration> candidates =
-        cu.findAll(
-            ClassOrInterfaceDeclaration.class,
-            classOrInterfaceDeclaration ->
-                classOrInterfaceDeclaration.getName().toString().equals(classSimpleName));
-    if (candidates.size() > 0) {
-      return candidates.get(0);
+    return false;
+  }
+
+  private static Node findTopLevelAnonymousClass(Node cursor, int index) {
+    final List<Node> candidates = new ArrayList<>();
+    walk(
+        cursor,
+        candidates,
+        node -> {
+          if (node instanceof ObjectCreationExpr) {
+            return ((ObjectCreationExpr) node).getAnonymousClassBody().isPresent();
+          }
+          return false;
+        });
+    return candidates.get(index);
+  }
+
+  private static NodeList<BodyDeclaration<?>> getMembersOfNode(Node node) {
+    if (node == null) {
+      return null;
     }
-    List<EnumDeclaration> enumCandidates =
-        cu.findAll(
-            EnumDeclaration.class,
-            classOrInterfaceDeclaration ->
-                classOrInterfaceDeclaration.getName().toString().equals(classSimpleName));
-    if (enumCandidates.size() > 0) {
-      return enumCandidates.get(0);
+    if (node instanceof EnumDeclaration) {
+      return ((EnumDeclaration) node).getMembers();
+    }
+    if (node instanceof ClassOrInterfaceDeclaration) {
+      return ((ClassOrInterfaceDeclaration) node).getMembers();
+    }
+    if (node instanceof ObjectCreationExpr) {
+      ObjectCreationExpr objExp = (ObjectCreationExpr) node;
+      return objExp.getAnonymousClassBody().orElse(null);
     }
     return null;
+  }
+
+  public static NodeList<BodyDeclaration<?>> getClassOrInterfaceOrEnumDeclarationMembersByFlatName(
+      CompilationUnit cu, String flatName) {
+    String packageName;
+    Optional<PackageDeclaration> packageDeclaration = cu.getPackageDeclaration();
+    if (packageDeclaration.isPresent()) {
+      packageName = packageDeclaration.get().getNameAsString();
+    } else {
+      packageName = "";
+    }
+    Preconditions.checkArgument(
+        flatName.startsWith(packageName),
+        "Package name of compilation unit is incompatible with class name: "
+            + packageName
+            + " : "
+            + flatName);
+    String flatNameExcludingPackageName =
+        packageName.equals("") ? flatName : flatName.substring(packageName.length() + 1);
+    List<String> keys = new ArrayList<>(Arrays.asList(flatNameExcludingPackageName.split("\\$")));
+    Node cursor = findTopLevelClassDeclarationOnCompilationUnit(cu, keys.get(0));
+    keys.remove(0);
+    for (String key : keys) {
+      String indexString = extractIntegerFromBeginningOfStringInString(key);
+      String actualName = key.substring(indexString.length());
+      int index = indexString.equals("") ? 0 : Integer.parseInt(indexString) - 1;
+      Preconditions.checkNotNull(cursor);
+      if (key.matches("\\d+")) {
+        cursor = findTopLevelAnonymousClass(cursor, index);
+      } else {
+        cursor =
+            indexString.equals("")
+                ? findTopLevelDirectInnerClass(cursor, actualName)
+                : findTopLevelInnerClass(cursor, actualName, index);
+      }
+    }
+    return getMembersOfNode(cursor);
+  }
+
+  /**
+   * Extract the integer at the start of string (e.g. 129uid -> 129).
+   *
+   * @param key string containing the integer.
+   * @return the integer at the start of the key, empty if no digit found at the beginning (e.g.
+   *     u129 -> empty)
+   */
+  public static String extractIntegerFromBeginningOfStringInString(String key) {
+    int index = 0;
+    while (index < key.length()) {
+      char c = key.charAt(index);
+      if (!Character.isDigit(c)) {
+        break;
+      }
+      index++;
+    }
+    return key.substring(0, index);
   }
 
   public static String simpleName(String name) {
