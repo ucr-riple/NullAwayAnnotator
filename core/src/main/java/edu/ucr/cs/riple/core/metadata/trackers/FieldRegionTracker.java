@@ -53,8 +53,8 @@ public class FieldRegionTracker extends AbstractRelation<TrackerNode> implements
     return findAllNodes(
             candidate ->
                 candidate.calleeClass.equals(fix.className)
-                    && candidate.calleeMember.equals(fix.param),
-            fix.param,
+                    && candidate.calleeMember.equals(fix.variable),
+            fix.variable,
             fix.className)
         .stream()
         .map(node -> new Region(node.callerMethod, node.callerClass))

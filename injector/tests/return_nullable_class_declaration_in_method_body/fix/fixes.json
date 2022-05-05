@@ -1,1 +1,0 @@
-{"fixes":[{"annotation":"javax.annotation.Nullable","method":"get(com.ibm.wala.ipa.callgraph.ContextKey)","variable":"","index":null,"location":"METHOD","class":"com.uber.MethodDispatchContext","inject":"true","uri":"/Users/nima/Developer/NullAwayFixer/NullAwayAnnotator/injector/tests/return_nullable_class_declaration_in_method_body/src/TargetMethodContextSelector.java"}]}

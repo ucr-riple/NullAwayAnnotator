@@ -7,7 +7,6 @@ SSAAbstractInvokeInstruction InvokeInstruction(
    int exception,
    CallSiteReference site,
    BootstrapMethod bootstrap);
-
 SSAAbstractInvokeInstruction InvokeInstruction(
    int index, int[] params, int exception, CallSiteReference site, BootstrapMethod bootstrap);
 }

@@ -138,7 +138,7 @@ public class BasicTest {
                     "run()",
                     "",
                     "METHOD",
-                    "com.uber.Main$1Test",
+                    "com.uber.Main$Test",
                     "Main.java",
                     "true"));
     injectorTestHelper.start();
@@ -188,7 +188,7 @@ public class BasicTest {
                 "bar(java.lang.Object)",
                 "",
                 "METHOD",
-                "com.uber.Super$1SuperInner",
+                "com.uber.Super$SuperInner",
                 "Super.java",
                 "true"))
         .start();
@@ -606,7 +606,6 @@ public class BasicTest {
             "   int exception,",
             "   CallSiteReference site,",
             "   BootstrapMethod bootstrap);",
-            "",
             "SSAAbstractInvokeInstruction InvokeInstruction(",
             "   int index, int[] params, int exception, CallSiteReference site, BootstrapMethod bootstrap);",
             "}")

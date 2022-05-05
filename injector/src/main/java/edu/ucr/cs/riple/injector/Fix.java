@@ -32,7 +32,7 @@ import org.json.simple.JSONObject;
 public class Fix {
   public final String annotation;
   public final String method;
-  public final String param;
+  public final String variable;
   public final String location;
   public final String className;
   public final String inject;
@@ -64,14 +64,14 @@ public class Fix {
   public Fix(
       String annotation,
       String method,
-      String param,
+      String variable,
       String location,
       String className,
       String uri,
       String inject) {
     this.annotation = annotation;
     this.method = method;
-    this.param = param;
+    this.variable = variable;
     this.location = location;
     this.className = className;
     this.uri = uri;
@@ -111,7 +111,7 @@ public class Fix {
 
   @Override
   public String toString() {
-    return location + " " + className + " " + method + " " + param;
+    return location + " " + className + " " + method + " " + variable;
   }
 
   @Override
@@ -121,21 +121,21 @@ public class Fix {
     Fix fix = (Fix) o;
     return Objects.equals(annotation, fix.annotation)
         && Objects.equals(method, fix.method)
-        && Objects.equals(param, fix.param)
+        && Objects.equals(variable, fix.variable)
         && Objects.equals(location, fix.location)
         && Objects.equals(className, fix.className);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(annotation, method, param, location, className);
+    return Objects.hash(annotation, method, variable, location, className);
   }
 
   public JSONObject getJson() {
     JSONObject res = new JSONObject();
     res.put(KEYS.CLASS.label, className);
     res.put(KEYS.METHOD.label, method);
-    res.put(KEYS.PARAM.label, param);
+    res.put(KEYS.PARAM.label, variable);
     res.put(KEYS.LOCATION.label, location);
     res.put(KEYS.ANNOTATION.label, annotation);
     res.put(KEYS.INJECT.label, inject);
@@ -145,7 +145,7 @@ public class Fix {
   }
 
   public Fix duplicate() {
-    Fix fix = new Fix(annotation, method, param, location, className, uri, inject);
+    Fix fix = new Fix(annotation, method, variable, location, className, uri, inject);
     fix.index = index;
     return fix;
   }

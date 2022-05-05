@@ -85,7 +85,7 @@ public class Node extends AbstractNode {
         + " "
         + fix.className
         + " "
-        + fix.param
+        + fix.variable
         + " "
         + fix.location
         + "]"

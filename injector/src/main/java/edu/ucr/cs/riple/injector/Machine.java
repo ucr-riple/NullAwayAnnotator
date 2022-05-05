@@ -115,7 +115,8 @@ public class Machine {
 
   private boolean applyFix(CompilationUnit tree, Fix fix) {
     boolean success = false;
-    TypeDeclaration<?> clazz = Helper.getClassOrInterfaceOrEnumDeclaration(tree, fix.className);
+    NodeList<BodyDeclaration<?>> clazz =
+        Helper.getClassOrInterfaceOrEnumDeclarationMembersByFlatName(tree, fix.className);
     if (clazz == null) {
       return false;
     }
@@ -172,9 +173,8 @@ public class Machine {
         : clazz.getMembers();
   }
 
-  private boolean applyMethodParam(TypeDeclaration<?> clazz, Fix fix) {
+  private boolean applyMethodParam(NodeList<BodyDeclaration<?>> members, Fix fix) {
     final boolean[] success = {false};
-    NodeList<BodyDeclaration<?>> members = getActualMembers(clazz);
     members.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifCallableDeclaration(
@@ -183,7 +183,7 @@ public class Machine {
                     for (Object p : callableDeclaration.getParameters()) {
                       if (p instanceof Parameter) {
                         Parameter param = (Parameter) p;
-                        if (param.getName().toString().equals(fix.param)) {
+                        if (param.getName().toString().equals(fix.variable)) {
                           applyAnnotation(param, fix.annotation, Boolean.parseBoolean(fix.inject));
                           success[0] = true;
                         }
@@ -194,8 +194,7 @@ public class Machine {
     return success[0];
   }
 
-  private boolean applyMethodReturn(TypeDeclaration<?> clazz, Fix fix) {
-    NodeList<BodyDeclaration<?>> members = getActualMembers(clazz);
+  private boolean applyMethodReturn(NodeList<BodyDeclaration<?>> members, Fix fix) {
     final boolean[] success = {false};
     members.forEach(
         bodyDeclaration ->
@@ -210,9 +209,8 @@ public class Machine {
     return success[0];
   }
 
-  private boolean applyClassField(TypeDeclaration<?> clazz, Fix fix) {
+  private boolean applyClassField(NodeList<BodyDeclaration<?>> members, Fix fix) {
     final boolean[] success = {false};
-    NodeList<BodyDeclaration<?>> members = getActualMembers(clazz);
     members.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifFieldDeclaration(
@@ -220,7 +218,7 @@ public class Machine {
                   NodeList<VariableDeclarator> vars =
                       fieldDeclaration.asFieldDeclaration().getVariables();
                   for (VariableDeclarator v : vars) {
-                    if (v.getName().toString().equals(fix.param)) {
+                    if (v.getName().toString().equals(fix.variable)) {
                       applyAnnotation(
                           fieldDeclaration, fix.annotation, Boolean.parseBoolean(fix.inject));
                       success[0] = true;

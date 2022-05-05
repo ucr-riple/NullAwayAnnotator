@@ -30,21 +30,17 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
-import com.github.javaparser.ast.stmt.Statement;
 import com.google.common.base.Preconditions;
-import edu.ucr.cs.riple.injector.ast.AnonymousClass;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.function.Predicate;
 import me.tongfei.progressbar.ProgressBar;
 import me.tongfei.progressbar.ProgressBarStyle;
 
@@ -110,7 +106,112 @@ public class Helper {
     return paramTypes;
   }
 
-  public static TypeDeclaration<?> getClassOrInterfaceOrEnumDeclaration(
+  private static void walk(Node cursor, List<Node> candidates, Predicate<Node> predicate) {
+    cursor.walk(
+        Node.TreeTraversal.DIRECT_CHILDREN,
+        node -> {
+          if (!isTopLevelDeclaration(node)) {
+            walk(node, candidates, predicate);
+          }
+          if (predicate.test(node)) {
+            candidates.add(node);
+          }
+        });
+  }
+
+  private static TypeDeclaration<?> findTopLevelClassDeclarationOnCompilationUnit(
+      CompilationUnit tree, String name) {
+    Optional<EnumDeclaration> enumDeclaration = tree.getEnumByName(name);
+    if (enumDeclaration.isPresent()) {
+      return enumDeclaration.get();
+    }
+    Optional<ClassOrInterfaceDeclaration> interfaceDeclaration = tree.getInterfaceByName(name);
+    return interfaceDeclaration.orElseGet(() -> tree.getClassByName(name).orElse(null));
+  }
+
+  public static Node findTopLevelDirectInnerClass(Node cursor, String name) {
+    List<Node> nodes = new ArrayList<>();
+    cursor.walk(
+        Node.TreeTraversal.DIRECT_CHILDREN,
+        node -> {
+          if (isDeclarationWithName(node, name)) {
+            nodes.add(node);
+          }
+        });
+    Preconditions.checkArgument(
+        nodes.size() > 0, "Could not find inner class " + name + " on:\n" + cursor);
+    return nodes.get(0);
+  }
+
+  private static Node findTopLevelInnerClass(Node cursor, String name, int index) {
+    final List<Node> candidates = new ArrayList<>();
+    walk(
+        cursor,
+        candidates,
+        node -> {
+          Optional<Node> parent = node.getParentNode();
+          if (!parent.isPresent()) {
+            return false;
+          }
+          if (parent.get().equals(cursor)) {
+            return false;
+          }
+          return isDeclarationWithName(node, name);
+        });
+    return candidates.get(index);
+  }
+
+  private static boolean isTopLevelDeclaration(Node node) {
+    return node instanceof ClassOrInterfaceDeclaration
+        || node instanceof EnumDeclaration
+        || (node instanceof ObjectCreationExpr
+            && ((ObjectCreationExpr) node).getAnonymousClassBody().isPresent());
+  }
+
+  private static boolean isDeclarationWithName(Node node, String name) {
+    if (node instanceof ClassOrInterfaceDeclaration) {
+      if (((ClassOrInterfaceDeclaration) node).getNameAsString().equals(name)) {
+        return true;
+      }
+    }
+    if (node instanceof EnumDeclaration) {
+      return ((EnumDeclaration) node).getNameAsString().equals(name);
+    }
+    return false;
+  }
+
+  private static Node findTopLevelAnonymousClass(Node cursor, int index) {
+    final List<Node> candidates = new ArrayList<>();
+    walk(
+        cursor,
+        candidates,
+        node -> {
+          if (node instanceof ObjectCreationExpr) {
+            return ((ObjectCreationExpr) node).getAnonymousClassBody().isPresent();
+          }
+          return false;
+        });
+    return candidates.get(index);
+  }
+
+  private static NodeList<BodyDeclaration<?>> getMembersOfNode(Node node) {
+    if (node == null) {
+      return null;
+    }
+    if (node instanceof EnumDeclaration) {
+      return ((EnumDeclaration) node).getMembers();
+    }
+    if (node instanceof ClassOrInterfaceDeclaration) {
+      return ((ClassOrInterfaceDeclaration) node).getMembers();
+    }
+    if (node instanceof ObjectCreationExpr) {
+      ObjectCreationExpr objExp = (ObjectCreationExpr) node;
+      return objExp.getAnonymousClassBody().orElse(null);
+    }
+    return null;
+  }
+
+  public static NodeList<BodyDeclaration<?>> getClassOrInterfaceOrEnumDeclarationMembersByFlatName(
       CompilationUnit cu, String flatName) {
     String packageName;
     Optional<PackageDeclaration> packageDeclaration = cu.getPackageDeclaration();
@@ -127,22 +228,24 @@ public class Helper {
             + flatName);
     String flatNameExcludingPackageName =
         packageName.equals("") ? flatName : flatName.substring(packageName.length() + 1);
-    List<String> keys = findKeysInClassFlatName(flatNameExcludingPackageName);
-    TypeDeclaration<?> cursor = findTopLevelTypeDeclarationOnNode(cu, keys.get(0), 0);
+    List<String> keys = new ArrayList<>(Arrays.asList(flatNameExcludingPackageName.split("\\$")));
+    Node cursor = findTopLevelClassDeclarationOnCompilationUnit(cu, keys.get(0));
     keys.remove(0);
     for (String key : keys) {
-      key = key.startsWith("$") ? key.substring(1) : key;
       String indexString = extractIntegerFromBeginningOfStringInString(key);
       String actualName = key.substring(indexString.length());
       int index = indexString.equals("") ? 0 : Integer.parseInt(indexString) - 1;
       Preconditions.checkNotNull(cursor);
       if (key.matches("\\d+")) {
-        cursor = findAnonymousClassOnTypeDeclaration(cursor, index);
+        cursor = findTopLevelAnonymousClass(cursor, index);
       } else {
-        cursor = findTopLevelTypeDeclarationOnNode(cursor, actualName, index);
+        cursor =
+            indexString.equals("")
+                ? findTopLevelDirectInnerClass(cursor, actualName)
+                : findTopLevelInnerClass(cursor, actualName, index);
       }
     }
-    return cursor;
+    return getMembersOfNode(cursor);
   }
 
   /**
@@ -162,125 +265,6 @@ public class Helper {
       index++;
     }
     return key.substring(0, index);
-  }
-
-  /**
-   * Finds the top level class declaration on Node including local class declarations in method
-   * bodies.
-   *
-   * @param node Node to perform the search on
-   * @param actualName Actual name of the class excluding the index (e.g. $1Helper -> Helper)
-   * @param index Index of the candidates (e.g. $1Helper -> 0)
-   * @return The target class
-   */
-  private static TypeDeclaration<?> findTopLevelTypeDeclarationOnNode(
-      Node node, String actualName, int index) {
-    List<TypeDeclaration<?>> candidates =
-        node.getChildNodes()
-            .stream()
-            .flatMap(
-                child -> {
-                  if (child instanceof MethodDeclaration) {
-                    MethodDeclaration method = ((MethodDeclaration) child);
-                    if (method.getBody().isPresent()) {
-                      return method
-                          .getBody()
-                          .get()
-                          .getStatements()
-                          .stream()
-                          .filter(Statement::isLocalClassDeclarationStmt)
-                          .map(
-                              statement ->
-                                  statement.asLocalClassDeclarationStmt().getClassDeclaration());
-                    }
-                  }
-                  return Stream.of(child);
-                })
-            .filter(
-                candidate ->
-                    TypeDeclaration.class.isAssignableFrom(candidate.getClass())
-                        && ((TypeDeclaration<?>) candidate).getNameAsString().equals(actualName))
-            .map((Function<Node, TypeDeclaration<?>>) child -> (TypeDeclaration<?>) child)
-            .collect(Collectors.toList());
-    Preconditions.checkArgument(
-        index < candidates.size(),
-        "Could not find class at index: "
-            + index
-            + " with name "
-            + actualName
-            + " On node:\n"
-            + node);
-    return candidates.get(index);
-  }
-
-  /**
-   * Finds the Anonymous class defined on a type declaration.
-   *
-   * @param cursor type declaration containing the Anonymous class.
-   * @param index index of the target Anonymous class on cursor.
-   * @return the Anonymous class tree.
-   */
-  private static TypeDeclaration<?> findAnonymousClassOnTypeDeclaration(Node cursor, int index) {
-    List<AnonymousClass> anonymousClasses = new ArrayList<>();
-    final int[] i = {1};
-    cursor.walk(
-        Node.TreeTraversal.BREADTHFIRST,
-        node -> {
-          if (node instanceof ObjectCreationExpr && isInScopeOf(cursor, node)) {
-            Optional<NodeList<BodyDeclaration<?>>> anonymousBody =
-                ((ObjectCreationExpr) node).getAnonymousClassBody();
-            anonymousBody.ifPresent(
-                declarations ->
-                    anonymousClasses.add(new AnonymousClass(String.valueOf(i[0]++), declarations)));
-          }
-        });
-    Preconditions.checkArgument(
-        index < anonymousClasses.size(), "Did not found the anonymous class at index: " + index);
-    return anonymousClasses.get(index);
-  }
-
-  public static boolean isInScopeOf(Node parent, Node child) {
-    Node current = child;
-    while (current != null && !current.equals(parent)) {
-      current = current.getParentNode().orElse(null);
-      if (current instanceof ObjectCreationExpr
-          || current instanceof ClassOrInterfaceDeclaration
-          || current instanceof EnumDeclaration) {
-        return current.equals(parent);
-      }
-    }
-    return current != null;
-  }
-
-  /**
-   * Gets the keys comprising a flat name (e.g. A.B$1C.D$1 will be a list of [A, B, $1C, D, $1]
-   *
-   * @param flatName Flat name compiled by javac
-   * @return List of keys in flat name
-   */
-  public static List<String> findKeysInClassFlatName(String flatName) {
-    int index = 0;
-    List<String> ans = new ArrayList<>();
-    StringBuilder temp = new StringBuilder();
-    while (index < flatName.length()) {
-      char current = flatName.charAt(index);
-      if (current == '.') {
-        ans.add(temp.toString());
-        temp = new StringBuilder();
-        index++;
-        continue;
-      }
-      if (current == '$') {
-        ans.add(temp.toString());
-        temp = new StringBuilder("$");
-        index++;
-        continue;
-      }
-      temp.append(current);
-      index++;
-    }
-    ans.add(temp.toString());
-    return ans;
   }
 
   public static String simpleName(String name) {

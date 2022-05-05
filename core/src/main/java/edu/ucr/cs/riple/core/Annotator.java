@@ -186,7 +186,7 @@ public class Annotator {
                     new Fix(
                         fix.annotation,
                         fix.method,
-                        fix.param,
+                        fix.variable,
                         fix.location,
                         fix.className,
                         fix.uri,

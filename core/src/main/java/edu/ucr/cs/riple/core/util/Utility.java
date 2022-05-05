@@ -266,7 +266,7 @@ public class Utility {
                 fix.location.equals(location)
                     && fix.className.equals(clazz)
                     && fix.method.equals(method)
-                    && fix.param.equals(param));
+                    && fix.variable.equals(param));
   }
 
   public static int calculateParamInheritanceViolationError(

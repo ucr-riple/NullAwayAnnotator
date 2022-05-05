@@ -1,1 +1,0 @@
-{"fixes":[{"annotation":"javax.annotation.Nullable","method":"compare()","variable":"","index":null,"location":"METHOD","class":"injector.Main$1$2","inject":"true","uri":"/Users/nima/Developer/NullAwayFixer/NullAwayAnnotator/injector/tests/return_nullable_class_declaration_anonymous_3/src/Main.java"}]}
