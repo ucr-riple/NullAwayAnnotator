@@ -61,13 +61,34 @@ cd jars && java -jar core.jar
 ### Command Line Arguments
 
 In order to run `Annotator` on target project `P`, arguments below must be passed to `Annotator`:
-1. `-bc,--build-command`: Command to run `NullAway` on target `P`. Please note that this command should be executable from any directory (e.g. `cd /Absolute /Path /To /P && ./build`).
-2. `-ccp,--css-config-path`: Path to the `CSS` Config (value used in previous section (`path_to_css_config.xml`)).
-3. `-ncp,--nullaway-config-path`: Path to the `NullAway` Config (value used in previous section (`path_to_nullaway_config.xml`)).
-4. `-i,--initializer`: Fully qualified name of the `@Initializer` annotation.
-5. `-d,--dir`: Directory where all outputs of `CSS|NullAway` are serialized.
+1. `-bc,--build-command <arg>`: Command to run `NullAway` on target `P`. Please note that this command should be executable from any directory (e.g. `cd /Absolute /Path /To /P && ./build`).
+2. `-ccp,--css-config-path <arg>`: Path to the `CSS` Config (value used in previous section (`path_to_css_config.xml`)).
+3. `-ncp,--nullaway-config-path <arg>`: Path to the `NullAway` Config (value used in previous section (`path_to_nullaway_config.xml`)).
+4. `-i,--initializer <arg>`: Fully qualified name of the `@Initializer` annotation.
+5. `-d,--dir <arg>`: Directory where all outputs of `CSS|NullAway` are serialized.
 
+By default, `Annotator` has the configuration below:
+1. Lexical Preservation is enabled.
+2. When a tree of fixes is marked as useful, it only injects the root fix.
+3. Annotator will bailout from the search tree as soon as its effectiveness hits zero or less.
+4. Performs search to depth level `5`.
+5. Uses `javax.annotation.Nullable` as `@Nullable` annotation.
+6. Caches iterations results and uses them in the next cycles.
+7. Uses optimization techniques to parallelize search.
 
+Here are __optional__ arguments which can alter default configurations above:
+1. `-dlp,--disable-lexical-preservation`: Disables Lexical Preservation.
+2. `-ch,--chain`: Injects the complete tree of fixes associated to the fix.
+3. `-db,--disable-bailout`: Annotator will not bailout from the search tree as soon as its effectiveness hits zero or less and completely traverses the tree until no new fix is suggested.
+4. `-depth,--depth <arg>`: Sets the depth of the analysis search.
+5. `-n,--nullable <arg>`: Sets custom `@Nullable` annotation.
+6. `-dc,--disable-cache`: Disables cache usage.
+7. `-do,--disable-optimization`: Disables optimizations.
+
+#### Example
+```shell
+cd jars && java -jar core.jar -bc 
+```
 
 ### Script Config
 
@@ -143,7 +164,7 @@ Below is the list of all command line flags
  -ncp,--nullaway-config-path <arg>   Path to the NullAway Config
  -p,--path <arg>                     Path to config file containing all
                                      flags values in json format
- -dpf,--disable-preserve-format               disable lexical preservation
+ -dlp,--disable-lexical-preservation disable lexical preservation
 ```
 ```cmd
 python3 run.py preprocess

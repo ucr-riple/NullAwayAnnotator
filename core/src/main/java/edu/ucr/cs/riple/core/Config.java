@@ -91,7 +91,7 @@ public class Config {
     options.addOption(bailoutOption);
 
     // Depth
-    Option depthOption = new Option("d", "depth", true, "Depth of the analysis");
+    Option depthOption = new Option("depth", "depth", true, "Depth of the analysis");
     depthOption.setRequired(false);
     options.addOption(depthOption);
 
