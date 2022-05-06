@@ -116,17 +116,18 @@ See the format of the config file below with sample values:
 }
 ```
 Below is the description of each setting:
-2. `BUILD_COMMAND`: The command to execute `NullAway` for the project. (This command must include changing directory to target project from root) 
-3. `INITIALIZER`: Fully qualified name of the `Initializer` annotation to inject on detected initializer methods.
-4. `NULLABLE`: Fully qualified name of the `Nullable` annotation.
-5. `FORMAT`: If set to `true`, activates lexical preservation.
-6. `OUTPUT_DIR`: Directory where the serialized output of NullAway should be written.
-7. `NULLAWAY_CONFIG_PATH`: `path_to_config.xml` given to project in time of preparing the project (previous section).
-8. `CSS_CONFIG_PATH`: `path_to_css.xml` given to project in time of preparing the process (previous section).
-9. `OPTIMIZED`: Enables the optimization technique.
-10. `CACHE`: if set to `true`, cache usage will be enabled.
-11. `BAILOUT`: if set to `true`, Annotator will bailout from the search tree as soon as its effectiveness hits zero or less, otherwise it will completely travers the tree until no new fix is suggested
-12. `DEPTH`: The depth of the analysis.
+
+1. `BUILD_COMMAND`: The command to execute `NullAway` for the project. (This command must include changing directory to target project from root) 
+2. `INITIALIZER`: Fully qualified name of the `Initializer` annotation to inject on detected initializer methods.
+3. `NULLABLE`: Fully qualified name of the `Nullable` annotation.
+4. `FORMAT`: If set to `true`, activates lexical preservation.
+5. `OUTPUT_DIR`: Directory where the serialized output of NullAway should be written.
+6. `NULLAWAY_CONFIG_PATH`: `path_to_config.xml` given to project in time of preparing the project (previous section).
+7. `CSS_CONFIG_PATH`: `path_to_css.xml` given to project in time of preparing the process (previous section).
+8. `OPTIMIZED`: Enables the optimization technique.
+9. `CACHE`: if set to `true`, cache usage will be enabled.
+10. `BAILOUT`: if set to `true`, Annotator will bailout from the search tree as soon as its effectiveness hits zero or less, otherwise it will completely travers the tree until no new fix is suggested
+11. `DEPTH`: The depth of the analysis.
 
 Pass the path to the config file above with `-p,--path` argument to `core.jar` and no other flag is required.
 
