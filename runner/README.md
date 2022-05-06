@@ -104,7 +104,7 @@ See the format of the config file below with sample values:
     "INITIALIZER": "foo.bar.Initializer",
     "NULLABLE": "javax.annotation.Nullable"
   },
-  "FORMAT": false,
+  "LEXICAL_PRESERVATION": false,
   "OUTPUT_DIR": "/tmp/NullAwayFix",
   "NULLAWAY_CONFIG_PATH": "/tmp/NullAwayFix/config.xml",
   "CSS_CONFIG_PATH": "/tmp/NullAwayFix/css.xml",
@@ -120,7 +120,7 @@ Below is the description of each setting:
 1. `BUILD_COMMAND`: The command to execute `NullAway` for the project. (This command must include changing directory to target project from root) 
 2. `INITIALIZER`: Fully qualified name of the `Initializer` annotation to inject on detected initializer methods.
 3. `NULLABLE`: Fully qualified name of the `Nullable` annotation.
-4. `FORMAT`: If set to `true`, activates lexical preservation.
+4. `LEXICAL_PRESERVATION`: If set to `true`, activates lexical preservation.
 5. `OUTPUT_DIR`: Directory where the serialized output of NullAway should be written.
 6. `NULLAWAY_CONFIG_PATH`: `path_to_config.xml` given to project in time of preparing the project (previous section).
 7. `CSS_CONFIG_PATH`: `path_to_css.xml` given to project in time of preparing the process (previous section).

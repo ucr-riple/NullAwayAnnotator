@@ -187,7 +187,7 @@ public class Config {
     this.chain = getValueFromKey(jsonObject, "CHAIN", Boolean.class).orElse(false);
     this.useCache = getValueFromKey(jsonObject, "CACHE", Boolean.class).orElse(true);
     this.lexicalPreservationDisabled =
-        getValueFromKey(jsonObject, "FORMAT", Boolean.class).orElse(false);
+        getValueFromKey(jsonObject, "LEXICAL_PRESERVATION", Boolean.class).orElse(false);
     this.optimized = getValueFromKey(jsonObject, "OPTIMIZED", Boolean.class).orElse(true);
     this.bailout = getValueFromKey(jsonObject, "BAILOUT", Boolean.class).orElse(true);
     this.nullableAnnot =
