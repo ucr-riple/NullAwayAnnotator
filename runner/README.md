@@ -11,7 +11,7 @@ Below are the instructions to prepare the target project:
 
 #### Dependencies
 1. `NullAway` checker must be activated with version >= `0.9.7`
-2. `CSS` checker must be activated with version >= `1.2.5-LOCAL`, see more about `CSS` [here](../css/README.md).
+2. `CSS` checker must be activated with version >= `1.2.6-LOCAL`, see more about `CSS` [here](../css/README.md).
 
 #### Error Prone Flags
 ```
@@ -60,7 +60,7 @@ cd jars && java -jar core.jar
 `Annotator` requires certain flag values to be able to run successfully. We can pass these values via command line arguments or config files, we will describe each approach in next sections.
 #### Use Command Line Arguments
 
-In order to run `Annotator` on target project `P`, arguments below must be passed to `Annotator`:
+In order to run `Annotator` on target project `P`, arguments below **must** be passed to `Annotator`:
 1. `-bc,--build-command <arg>`: Command to run `NullAway` on target `P` enclosed in **""**. Please note that this command should be executable from any directory (e.g. `"cd /Absolute /Path /To /P && ./build"`).
 2. `-ccp,--css-config-path <arg>`: Path to the `CSS` Config (value used in previous section (`path_to_css_config.xml`)).
 3. `-ncp,--nullaway-config-path <arg>`: Path to the `NullAway` Config (value used in previous section (`path_to_nullaway_config.xml`)).
