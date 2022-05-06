@@ -142,7 +142,7 @@ cd jars && java -jar core.jar --path config.json
 `start.sh` script is provided, you can run `Annotator` and simply pass desired arguments to `start.sh`.
 #### Example
 ```shell
-./start.sh --path /Users/nima/Developer/NullAwayFixer/NullAwayAnnotator/runner/config.json
+./start.sh --path config.json
 
 or
 
