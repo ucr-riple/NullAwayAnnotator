@@ -111,7 +111,7 @@ public class Test {
 
 ## Installation
 
-Please follow the steps below:
+Follow the steps below:
 
 * [CSS](css/README.md) module should be installed in the ```local maven``` repository.
     * To install it, run `./gradlew install`
@@ -122,8 +122,8 @@ Please follow the steps below:
 A script is provided which executes all installation tasks above. 
 It installs `CSS` checker in `maven local` and creates the jar file of `core` module and moves it to the correct path. To run it, execute the command below:
 
-`cd runner/ && python3 updatejar.py`
+`cd runner/ && ./update.sh`
 
 ## Running Annotator
 
-After following the installation instruction above, please read the instruction [here](runner/README.md) to run the annotator.
+After following the installation instruction above, read the instruction [here](runner/README.md) to run the annotator.

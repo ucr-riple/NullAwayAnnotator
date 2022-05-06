@@ -20,7 +20,7 @@ import org.json.simple.parser.JSONParser;
 public class Config {
   public final boolean bailout;
   public final boolean optimized;
-  public final boolean lexicalPreservationEnabled;
+  public final boolean lexicalPreservationDisabled;
   public final boolean chain;
   public final boolean useCache;
   public final Path dir;
@@ -42,7 +42,7 @@ public class Config {
 
     // Help
     Option helpOption = new Option("h", "help", false, "Shows all flags");
-    helpOption.setRequired(true);
+    helpOption.setRequired(false);
     options.addOption(helpOption);
 
     // Build
@@ -59,7 +59,7 @@ public class Config {
     Option configPath =
         new Option(
             "p", "path", true, "Path to config file containing all flags values in json format");
-    configPath.setRequired(true);
+    configPath.setRequired(false);
     options.addOption(configPath);
 
     // Nullable Annotation
@@ -76,7 +76,7 @@ public class Config {
 
     // Format
     Option formatOption =
-        new Option("pf", "preserve-format", false, "Activates lexical preservation");
+        new Option("dlp", "disable-lexical-preservation", false, "Disables lexical preservation");
     formatOption.setRequired(false);
     options.addOption(formatOption);
 
@@ -160,7 +160,7 @@ public class Config {
     this.dir = Paths.get(cmd.getOptionValue(dirOption.getLongOpt()));
     this.nullAwayConfigPath = Paths.get(cmd.getOptionValue(nullAwayConfigPathOption.getLongOpt()));
     this.cssConfigPath = Paths.get(cmd.getOptionValue(cssConfigPathOption.getLongOpt()));
-    this.lexicalPreservationEnabled = cmd.hasOption(formatOption.getLongOpt());
+    this.lexicalPreservationDisabled = cmd.hasOption(formatOption.getLongOpt());
     this.chain = cmd.hasOption(chainOption.getLongOpt());
     this.bailout = !cmd.hasOption(bailoutOption.getLongOpt());
     this.useCache = !cmd.hasOption(cacheOption.getLongOpt());
@@ -186,7 +186,7 @@ public class Config {
     this.depth = getValueFromKey(jsonObject, "DEPTH", Long.class).orElse((long) 1).intValue();
     this.chain = getValueFromKey(jsonObject, "CHAIN", Boolean.class).orElse(false);
     this.useCache = getValueFromKey(jsonObject, "CACHE", Boolean.class).orElse(true);
-    this.lexicalPreservationEnabled =
+    this.lexicalPreservationDisabled =
         getValueFromKey(jsonObject, "FORMAT", Boolean.class).orElse(false);
     this.optimized = getValueFromKey(jsonObject, "OPTIMIZED", Boolean.class).orElse(true);
     this.bailout = getValueFromKey(jsonObject, "BAILOUT", Boolean.class).orElse(true);

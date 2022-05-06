@@ -14,7 +14,7 @@ public class AnnotationInjector {
     this.injector =
         Injector.builder()
             .setMode(Injector.MODE.BATCH)
-            .keepStyle(config.lexicalPreservationEnabled)
+            .keepStyle(!config.lexicalPreservationDisabled)
             .build();
   }
 
