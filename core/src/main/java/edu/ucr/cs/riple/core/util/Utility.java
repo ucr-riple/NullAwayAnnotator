@@ -246,33 +246,18 @@ public class Utility {
         Duration.ZERO);
   }
 
-  public static void removeCompoundFieldDeclarations(
-      Set<Fix> remainingFixes, FieldDeclarationAnalysis fieldDeclarationAnalysis) {
+  public static void removeCompoundFieldDeclarations(Set<Fix> remainingFixes, FieldDeclarationAnalysis fieldDeclarationAnalysis) {
     List<Fix> toRemove = new ArrayList<>();
-    remainingFixes
-        .stream()
-        .filter(fix -> fix.kind.equals(FixType.FIELD.name))
-        .forEach(
-            fix -> {
-              if (toRemove.contains(fix)) {
-                return;
-              }
-              Set<String> otherFields =
-                  fieldDeclarationAnalysis.getOtherFieldDeclarationsOnField(
-                      fix.clazz, fix.variable);
-              otherFields.remove(fix.variable);
-              if (otherFields.size() > 1) {
-                toRemove.addAll(
-                    remainingFixes
-                        .stream()
-                        .filter(
-                            otherFix ->
-                                otherFix.clazz.equals(fix.clazz)
-                                    && otherFields.contains(otherFix.variable)
-                                    && otherFix.kind.equals(FixType.FIELD.name))
-                        .collect(Collectors.toSet()));
-              }
-            });
+    remainingFixes.stream().filter(fix -> fix.kind.equals(FixType.FIELD.name)).forEach(fix -> {
+      if(toRemove.contains(fix)){
+        return;
+      }
+      Set<String> otherFields = fieldDeclarationAnalysis.getOtherFieldDeclarationsOnField(fix.clazz, fix.variable);
+      otherFields.remove(fix.variable);
+      if(otherFields.size() > 1){
+        toRemove.addAll(remainingFixes.stream().filter(otherFix -> otherFix.clazz.equals(fix.clazz) && otherFields.contains(otherFix.variable) && otherFix.kind.equals(FixType.FIELD.name)).collect(Collectors.toSet()));
+      }
+    });
     toRemove.forEach(remainingFixes::remove);
   }
 }

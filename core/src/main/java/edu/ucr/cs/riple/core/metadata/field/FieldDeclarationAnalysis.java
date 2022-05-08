@@ -30,6 +30,9 @@ public class FieldDeclarationAnalysis extends MetaData<Set<FieldDeclarationInfo>
       tree = StaticJavaParser.parse(new File(path));
       NodeList<BodyDeclaration<?>> members =
           Helper.getClassOrInterfaceOrEnumDeclarationMembersByFlatName(tree, clazz);
+      if (members == null) {
+        return null;
+      }
       members.forEach(
           bodyDeclaration ->
               bodyDeclaration.ifFieldDeclaration(
@@ -51,12 +54,18 @@ public class FieldDeclarationAnalysis extends MetaData<Set<FieldDeclarationInfo>
   }
 
   public Set<String> getOtherFieldDeclarationsOnField(String clazz, String field) {
-    Optional<FieldDeclarationInfo> info =
+    Set<FieldDeclarationInfo> candidates =
         findNode(
-                candidate ->
-                    candidate
-                        .stream()
-                        .anyMatch(fieldDeclarationInfo -> fieldDeclarationInfo.clazz.equals(clazz)))
+            candidate ->
+                candidate
+                    .stream()
+                    .anyMatch(fieldDeclarationInfo -> fieldDeclarationInfo.clazz.equals(clazz)),
+            clazz);
+    if (candidates == null) {
+      return new HashSet<>();
+    }
+    Optional<FieldDeclarationInfo> info =
+        candidates
             .stream()
             .filter(fieldDeclarationInfo -> fieldDeclarationInfo.containsField(field))
             .findFirst();
