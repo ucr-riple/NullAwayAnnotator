@@ -29,6 +29,7 @@ import edu.ucr.cs.css.Serializer;
 import edu.ucr.cs.riple.core.explorers.BasicExplorer;
 import edu.ucr.cs.riple.core.explorers.Explorer;
 import edu.ucr.cs.riple.core.explorers.OptimizedExplorer;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.field.FieldInitializationAnalysis;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -100,12 +101,15 @@ public class Annotator {
                 .filter(fix -> !reports.containsKey(fix))
                 .collect(Collectors.toSet());
       }
+      FieldDeclarationAnalysis fieldDeclarationAnalysis =
+          new FieldDeclarationAnalysis(config.dir.resolve("class_info.tsv"));
+      Utility.removeCompoundFieldDeclarations(remainingFixes, fieldDeclarationAnalysis);
       ImmutableSet<Fix> fixes = ImmutableSet.copyOf(remainingFixes);
       Bank<Error> errorBank = new Bank<>(config.dir.resolve("errors.tsv"), Error::new);
       Bank<Fix> fixBank = new Bank<>(config.dir.resolve("fixes.tsv"), Fix::new);
       MethodInheritanceTree tree =
-          new MethodInheritanceTree(config.dir.resolve(Serializer.METHOD_INFO_NAME));
-      RegionTracker tracker = new CompoundTracker(config.dir, tree);
+          new MethodInheritanceTree(config.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
+      RegionTracker tracker = new CompoundTracker(config.dir, tree, fieldDeclarationAnalysis);
       Explorer explorer =
           config.optimized
               ? new OptimizedExplorer(injector, errorBank, fixBank, tracker, tree, fixes, config)

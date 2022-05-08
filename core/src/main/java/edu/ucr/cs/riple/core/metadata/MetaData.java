@@ -56,16 +56,18 @@ public abstract class MetaData<T> {
     if (line != null) line = reader.readLine();
     while (line != null) {
       T node = addNodeByLine(line.split("\t"));
-      Integer hash = node.hashCode();
-      if (idHash.containsKey(hash)) {
-        List<T> localList = idHash.get(hash);
-        if (!localList.contains(node)) {
-          localList.add(node);
+      if (node != null) {
+        Integer hash = node.hashCode();
+        if (idHash.containsKey(hash)) {
+          List<T> localList = idHash.get(hash);
+          if (!localList.contains(node)) {
+            localList.add(node);
+          }
+        } else {
+          List<T> singleHash = new ArrayList<>();
+          singleHash.add(node);
+          idHash.put(hash, singleHash);
         }
-      } else {
-        List<T> singleHash = new ArrayList<>();
-        singleHash.add(node);
-        idHash.put(hash, singleHash);
       }
       line = reader.readLine();
     }

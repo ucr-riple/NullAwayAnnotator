@@ -41,6 +41,9 @@ dependencies {
     implementation group: 'com.uber.nullaway', name: 'nullaway', version:"${deps.versions.nullaway}"
     testImplementation group: 'com.uber.nullaway', name: 'nullaway', version:"${deps.versions.nullaway}"
 
+    implementation group: 'com.github.javaparser', name:'javaparser-core', version:"${deps.versions.javaparser}"
+    testImplementation group: 'com.github.javaparser', name:'javaparser-core', version:"${deps.versions.javaparser}"
+
     implementation group: 'commons-cli', name: 'commons-cli', version: "${deps.versions.cli}"
     testImplementation group: 'commons-cli', name: 'commons-cli', version: "${deps.versions.cli}"
 }

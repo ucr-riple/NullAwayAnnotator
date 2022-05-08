@@ -33,12 +33,14 @@ import com.google.errorprone.VisitorState;
 import com.google.errorprone.bugpatterns.BugChecker;
 import com.google.errorprone.matchers.Description;
 import com.google.errorprone.util.ASTHelpers;
+import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.tools.javac.code.Symbol;
+import edu.ucr.cs.css.out.ClassInfo;
 import edu.ucr.cs.css.out.MethodInfo;
 import edu.ucr.cs.css.out.TrackerNode;
 import java.util.ArrayList;
@@ -57,7 +59,8 @@ public class CSS extends BugChecker
         BugChecker.MemberSelectTreeMatcher,
         BugChecker.MethodTreeMatcher,
         BugChecker.IdentifierTreeMatcher,
-        BugChecker.VariableTreeMatcher {
+        BugChecker.VariableTreeMatcher,
+        BugChecker.ClassTreeMatcher {
 
   private final Config config;
 
@@ -67,6 +70,17 @@ public class CSS extends BugChecker
 
   public CSS(ErrorProneFlags flags) {
     this.config = new Config(flags);
+  }
+
+  @Override
+  public Description matchClass(ClassTree classTree, VisitorState visitorState) {
+    if (!config.classTrackerIsActive) {
+      return Description.NO_MATCH;
+    }
+    config.serializer.serializeClassInfo(
+        new ClassInfo(
+            ASTHelpers.getSymbol(classTree), visitorState.getPath().getCompilationUnit()));
+    return Description.NO_MATCH;
   }
 
   @Override

@@ -28,7 +28,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Booleans;
 import com.uber.nullaway.fixserialization.FixSerializationConfig;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -38,8 +40,10 @@ import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -186,6 +190,11 @@ public class Utility {
       callElement.setAttribute("active", String.valueOf(activation));
       rootElement.appendChild(callElement);
 
+      // File
+      Element classElement = doc.createElement("class");
+      classElement.setAttribute("active", String.valueOf(activation));
+      rootElement.appendChild(classElement);
+
       // Output dir
       Element outputDir = doc.createElement("path");
       outputDir.setTextContent(config.dir.toString());
@@ -235,5 +244,35 @@ public class Utility {
         ChronoUnit.SECONDS,
         0L,
         Duration.ZERO);
+  }
+
+  public static void removeCompoundFieldDeclarations(
+      Set<Fix> remainingFixes, FieldDeclarationAnalysis fieldDeclarationAnalysis) {
+    List<Fix> toRemove = new ArrayList<>();
+    remainingFixes
+        .stream()
+        .filter(fix -> fix.kind.equals(FixType.FIELD.name))
+        .forEach(
+            fix -> {
+              if (toRemove.contains(fix)) {
+                return;
+              }
+              Set<String> otherFields =
+                  fieldDeclarationAnalysis.getOtherFieldDeclarationsOnField(
+                      fix.clazz, fix.variable);
+              otherFields.remove(fix.variable);
+              if (otherFields.size() > 1) {
+                toRemove.addAll(
+                    remainingFixes
+                        .stream()
+                        .filter(
+                            otherFix ->
+                                otherFix.clazz.equals(fix.clazz)
+                                    && otherFields.contains(otherFix.variable)
+                                    && otherFix.kind.equals(FixType.FIELD.name))
+                        .collect(Collectors.toSet()));
+              }
+            });
+    toRemove.forEach(remainingFixes::remove);
   }
 }

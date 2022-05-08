@@ -107,11 +107,11 @@ public class Location {
     if (this == o) return true;
     if (!(o instanceof Location)) return false;
     Location other = (Location) o;
-    return Objects.equals(annotation, other.annotation)
+    return Objects.equals(clazz, other.clazz)
         && Objects.equals(method, other.method)
         && Objects.equals(variable, other.variable)
         && Objects.equals(kind, other.kind)
-        && Objects.equals(clazz, other.clazz);
+        && Objects.equals(annotation, other.annotation);
   }
 
   @Override

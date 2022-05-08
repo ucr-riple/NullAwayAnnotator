@@ -4,7 +4,7 @@
     "INITIALIZER": "com.badlogic.gdx.Initializer",
     "NULLABLE": "javax.annotation.Nullable"
   },
-  "FORMAT": false,
+  "LEXICAL_PRESERVATION": true,
   "OUTPUT_DIR": "/tmp/NullAwayFix",
   "NULLAWAY_CONFIG_PATH": "/tmp/NullAwayFix/config.xml",
   "CSS_CONFIG_PATH": "/tmp/NullAwayFix/css.xml",
@@ -12,5 +12,5 @@
   "OPTIMIZED": true,
   "CACHE": true,
   "BAILOUT": true,
-  "DEPTH": 1
+  "DEPTH": 5
 }

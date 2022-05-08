@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.css;
 
+import edu.ucr.cs.css.out.ClassInfo;
 import edu.ucr.cs.css.out.MethodInfo;
 import edu.ucr.cs.css.out.TrackerNode;
 import java.io.FileOutputStream;
@@ -45,15 +46,19 @@ public class Serializer {
   /** Path to write method info metadata. */
   private final Path methodInfoPath;
 
-  public static final String FIELD_GRAPH_NAME = "field_graph.tsv";
-  public static final String CALL_GRAPH_NAME = "call_graph.tsv";
-  public static final String METHOD_INFO_NAME = "method_info.tsv";
+  private final Path classInfoPath;
+
+  public static final String FIELD_GRAPH_FILE_NAME = "field_graph.tsv";
+  public static final String CALL_GRAPH_FILE_NAME = "call_graph.tsv";
+  public static final String METHOD_INFO_FILE_NAME = "method_info.tsv";
+  public static final String CLASS_INFO_FILE_NAME = "class_info.tsv";
 
   public Serializer(Config config) {
     Path outputDirectory = config.outputDirectory;
-    this.fieldGraphPath = outputDirectory.resolve(FIELD_GRAPH_NAME);
-    this.callGraphPath = outputDirectory.resolve(CALL_GRAPH_NAME);
-    this.methodInfoPath = outputDirectory.resolve(METHOD_INFO_NAME);
+    this.fieldGraphPath = outputDirectory.resolve(FIELD_GRAPH_FILE_NAME);
+    this.callGraphPath = outputDirectory.resolve(CALL_GRAPH_FILE_NAME);
+    this.methodInfoPath = outputDirectory.resolve(METHOD_INFO_FILE_NAME);
+    this.classInfoPath = outputDirectory.resolve(CLASS_INFO_FILE_NAME);
     initializeOutputFiles(config);
   }
 
@@ -73,6 +78,16 @@ public class Serializer {
    */
   public void serializeFieldGraphNode(TrackerNode fieldGraphNode) {
     appendToFile(fieldGraphNode.toString(), this.fieldGraphPath);
+  }
+
+  /**
+   * Appends the string representation of the {@link ClassInfo} corresponding to a compilation unit
+   * tree.
+   *
+   * @param classInfo ClassInfo instance.
+   */
+  public void serializeClassInfo(ClassInfo classInfo) {
+    appendToFile(classInfo.toString(), this.classInfoPath);
   }
 
   /**
@@ -112,6 +127,9 @@ public class Serializer {
       }
       if (config.methodTrackerIsActive) {
         initializeFile(methodInfoPath, MethodInfo.header());
+      }
+      if (config.classTrackerIsActive) {
+        initializeFile(classInfoPath, ClassInfo.header());
       }
     } catch (IOException e) {
       throw new RuntimeException("Could not finish resetting serializer", e);
