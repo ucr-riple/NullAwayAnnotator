@@ -58,7 +58,10 @@ public class Annotator {
 
   public void start() {
     preprocess();
+    config.log.startTimer();
     explore();
+    config.log.stopTimerAndCapture();
+    Utility.writeLog(config);
   }
 
   private void preprocess() {

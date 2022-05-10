@@ -1,6 +1,7 @@
 package edu.ucr.cs.riple.core;
 
 import com.google.common.base.Preconditions;
+import edu.ucr.cs.riple.core.log.Log;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,6 +30,8 @@ public class Config {
   public final String buildCommand;
   public final String nullableAnnot;
   public final String initializerAnnot;
+
+  public final Log log;
   public final int depth;
 
   /**
@@ -165,6 +168,8 @@ public class Config {
     this.bailout = !cmd.hasOption(bailoutOption.getLongOpt());
     this.useCache = !cmd.hasOption(cacheOption.getLongOpt());
     this.optimized = !cmd.hasOption(optimizedOption.getLongOpt());
+    this.log = new Log();
+    log.reset();
   }
 
   /**
@@ -187,7 +192,7 @@ public class Config {
     this.chain = getValueFromKey(jsonObject, "CHAIN", Boolean.class).orElse(false);
     this.useCache = getValueFromKey(jsonObject, "CACHE", Boolean.class).orElse(true);
     this.lexicalPreservationDisabled =
-        getValueFromKey(jsonObject, "LEXICAL_PRESERVATION", Boolean.class).orElse(false);
+        !getValueFromKey(jsonObject, "LEXICAL_PRESERVATION", Boolean.class).orElse(false);
     this.optimized = getValueFromKey(jsonObject, "OPTIMIZED", Boolean.class).orElse(true);
     this.bailout = getValueFromKey(jsonObject, "BAILOUT", Boolean.class).orElse(true);
     this.nullableAnnot =
@@ -208,6 +213,8 @@ public class Config {
         Paths.get(
             getValueFromKey(jsonObject, "OUTPUT_DIR", String.class).orElse("/tmp/NullAwayFix"));
     this.buildCommand = getValueFromKey(jsonObject, "BUILD_COMMAND", String.class).orElse(null);
+    this.log = new Log();
+    log.reset();
   }
 
   private static void showHelpAndQuit(HelpFormatter formatter, Options options) {

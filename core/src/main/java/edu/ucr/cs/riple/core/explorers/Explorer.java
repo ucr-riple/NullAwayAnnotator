@@ -78,6 +78,7 @@ public abstract class Explorer {
     for (int i = 0; i < config.depth; i++) {
       System.out.print("Analyzing at level " + (i + 1) + ", ");
       initializeFixGraph();
+      config.log.updateNodeNumber(fixGraph.getAllNodes().size());
       if (fixGraph.isEmpty()) {
         System.out.println("Analysis finished at this iteration.");
         break;

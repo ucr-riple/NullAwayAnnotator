@@ -2,25 +2,52 @@ package edu.ucr.cs.riple.core.log;
 
 public class Log {
 
-  int total;
+  int node;
   int requested;
   long time;
-  long deep;
   long buildTime = 0;
 
-  static final Log instance = new Log();
+  private long timer;
+
+  public void reset() {
+    this.node = 0;
+    this.requested = 0;
+    this.time = 0;
+    this.buildTime = 0;
+    this.timer = 0;
+  }
 
   @Override
   public String toString() {
-    return "total="
-        + total
-        + ", requested="
+    return "Total number of nodes="
+        + node
+        + "\nTotal number of Requested builds="
         + requested
-        + ", time="
+        + "\nTotal time="
         + time
-        + ", deep="
-        + deep
-        + ", buildTime="
+        + "\nTotal time spent on builds="
         + buildTime;
+  }
+
+  public void startTimer() {
+    this.timer = System.currentTimeMillis();
+  }
+
+  public void stopTimerAndCapture() {
+    this.time += System.currentTimeMillis() - this.timer;
+    this.timer = 0;
+  }
+
+  public void stopTimerAndCaptureBuildTime() {
+    this.buildTime += System.currentTimeMillis() - this.timer;
+    this.timer = 0;
+  }
+
+  public void incrementBuildRequest() {
+    this.requested += 1;
+  }
+
+  public void updateNodeNumber(int number) {
+    this.node += number;
   }
 }

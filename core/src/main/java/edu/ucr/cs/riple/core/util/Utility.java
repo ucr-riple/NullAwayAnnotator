@@ -33,10 +33,14 @@ import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -212,7 +216,10 @@ public class Utility {
   }
 
   public static void buildProject(Config config) {
+    config.log.startTimer();
     buildProject(config, false);
+    config.log.stopTimerAndCaptureBuildTime();
+    config.log.incrementBuildRequest();
   }
 
   public static void buildProject(Config config, boolean initSerializationEnabled) {
@@ -275,5 +282,18 @@ public class Utility {
               otherFields.add(fix.variable);
             });
     toRemove.forEach(remainingFixes::remove);
+  }
+
+  public static void writeLog(Config config) {
+    File file = config.dir.resolve("log.txt").toFile();
+    try (FileOutputStream fos = new FileOutputStream(file)) {
+      BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+      bw.write(config.log.toString());
+      bw.newLine();
+      bw.close();
+    } catch (Exception ignored) {
+      System.err.println("Could not write log to: " + file.getAbsolutePath());
+      System.err.println("Writing here: " + config.log);
+    }
   }
 }
