@@ -23,6 +23,8 @@
  */
 package edu.ucr.cs.riple.core.metadata.index;
 
+import java.util.Objects;
+
 public class Error extends Hashable {
   public final String messageType;
   public final String message;
@@ -36,5 +38,18 @@ public class Error extends Hashable {
     this.message = message;
     this.encMethod = method;
     this.encClass = clazz;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Error)) return false;
+    Error error = (Error) o;
+    return messageType.equals(error.messageType);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(messageType);
   }
 }

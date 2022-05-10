@@ -40,11 +40,13 @@ public class CompoundTracker implements RegionTracker {
   public CompoundTracker(
       Path dir, MethodInheritanceTree tree, FieldDeclarationAnalysis fieldDeclarationAnalysis) {
     this.trackers = new ArrayList<>();
+    MethodRegionTracker methodRegionTracker =
+        new MethodRegionTracker(dir.resolve(Serializer.CALL_GRAPH_FILE_NAME));
     this.trackers.add(
         new FieldRegionTracker(
             dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME), fieldDeclarationAnalysis));
-    this.trackers.add(new MethodRegionTracker(dir.resolve(Serializer.CALL_GRAPH_FILE_NAME)));
-    this.trackers.add(new ParameterRegionTracker(tree));
+    this.trackers.add(methodRegionTracker);
+    this.trackers.add(new ParameterRegionTracker(tree, methodRegionTracker));
   }
 
   @Override

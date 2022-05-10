@@ -9,9 +9,12 @@ import java.util.stream.Collectors;
 public class ParameterRegionTracker implements RegionTracker {
 
   private final MethodInheritanceTree tree;
+  private final MethodRegionTracker methodRegionTracker;
 
-  public ParameterRegionTracker(MethodInheritanceTree tree) {
+  public ParameterRegionTracker(
+      MethodInheritanceTree tree, MethodRegionTracker methodRegionTracker) {
     this.tree = tree;
+    this.methodRegionTracker = methodRegionTracker;
   }
 
   @Override
@@ -25,6 +28,7 @@ public class ParameterRegionTracker implements RegionTracker {
             .map(node -> new Region(node.method, node.clazz))
             .collect(Collectors.toSet());
     regions.add(new Region(fix.method, fix.clazz));
+    regions.addAll(methodRegionTracker.getCallersOfMethod(fix.clazz, fix.method));
     return regions;
   }
 }

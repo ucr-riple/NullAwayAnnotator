@@ -50,12 +50,15 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
     if (!fix.kind.equals(fixType.name)) {
       return null;
     }
+    return getCallersOfMethod(fix.clazz, fix.method);
+  }
+
+  public Set<Region> getCallersOfMethod(String clazz, String method) {
     return findAllNodes(
             candidate ->
-                candidate.calleeClass.equals(fix.clazz)
-                    && candidate.calleeMember.equals(fix.method),
-            fix.method,
-            fix.clazz)
+                candidate.calleeClass.equals(clazz) && candidate.calleeMember.equals(method),
+            method,
+            clazz)
         .stream()
         .map(node -> new Region(node.callerMethod, node.callerClass))
         .collect(Collectors.toSet());
