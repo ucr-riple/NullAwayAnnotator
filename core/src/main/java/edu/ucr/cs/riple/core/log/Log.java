@@ -6,14 +6,12 @@ public class Log {
   int requested;
   long time;
   long buildTime = 0;
-  private long timer;
 
   public void reset() {
     this.node = 0;
     this.requested = 0;
     this.time = 0;
     this.buildTime = 0;
-    this.timer = 0;
   }
 
   @Override
@@ -28,18 +26,16 @@ public class Log {
         + buildTime;
   }
 
-  public void startTimer() {
-    this.timer = System.currentTimeMillis();
+  public long startTimer() {
+    return System.currentTimeMillis();
   }
 
-  public void stopTimerAndCapture() {
-    this.time += System.currentTimeMillis() - this.timer;
-    this.timer = 0;
+  public void stopTimerAndCapture(long timer) {
+    this.time += System.currentTimeMillis() - timer;
   }
 
-  public void stopTimerAndCaptureBuildTime() {
-    this.buildTime += System.currentTimeMillis() - this.timer;
-    this.timer = 0;
+  public void stopTimerAndCaptureBuildTime(long timer) {
+    this.buildTime += System.currentTimeMillis() - timer;
   }
 
   public void incrementBuildRequest() {

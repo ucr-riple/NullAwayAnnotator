@@ -64,7 +64,6 @@ public class Node {
                 return fix.clazz.equals(root.clazz)
                     && fix.uri.equals(root.uri)
                     && fieldGroup.contains(fix.variable);
-
               } else {
                 return fix.equals(root);
               }

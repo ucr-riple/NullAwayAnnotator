@@ -216,9 +216,9 @@ public class Utility {
   }
 
   public static void buildProject(Config config) {
-    config.log.startTimer();
+    long timer = config.log.startTimer();
     buildProject(config, false);
-    config.log.stopTimerAndCaptureBuildTime();
+    config.log.stopTimerAndCaptureBuildTime(timer);
     config.log.incrementBuildRequest();
   }
 
