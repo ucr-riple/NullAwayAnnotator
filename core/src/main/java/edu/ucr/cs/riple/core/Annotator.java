@@ -103,7 +103,7 @@ public class Annotator {
       }
       FieldDeclarationAnalysis fieldDeclarationAnalysis =
           new FieldDeclarationAnalysis(config.dir.resolve("class_info.tsv"));
-      Utility.removeCompoundFieldDeclarations(remainingFixes, fieldDeclarationAnalysis, reports);
+      Utility.removeCompoundFieldDeclarations(remainingFixes, fieldDeclarationAnalysis);
       ImmutableSet<Fix> fixes = ImmutableSet.copyOf(remainingFixes);
       Bank<Error> errorBank = new Bank<>(config.dir.resolve("errors.tsv"), Error::new);
       Bank<Fix> fixBank = new Bank<>(config.dir.resolve("fixes.tsv"), Fix::new);

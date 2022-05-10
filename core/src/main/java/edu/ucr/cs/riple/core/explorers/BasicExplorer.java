@@ -41,7 +41,7 @@ public class BasicExplorer extends Explorer {
       Result<Error> res = errorBank.compare();
       totalEffect += res.size;
       node.effect = totalEffect;
-      node.updateTriggered(fixBank.compare().dif);
+      node.updateTriggered(fixBank.compare().dif, fieldDeclarationAnalysis);
       injector.remove(fixes);
     }
     pb.close();

@@ -31,9 +31,9 @@ public class OptimizedExplorer extends Explorer {
       RegionTracker tracker,
       MethodInheritanceTree methodInheritanceTree,
       ImmutableSet<Fix> fixes,
-      FieldDeclarationAnalysis analysis,
+      FieldDeclarationAnalysis fieldDeclarationAnalysis,
       Config config) {
-    super(injector, errorBank, fixBank, fixes, analysis, config);
+    super(injector, errorBank, fixBank, fixes, fieldDeclarationAnalysis, config);
     this.tracker = tracker;
     this.methodInheritanceTree = methodInheritanceTree;
   }
@@ -73,7 +73,12 @@ public class OptimizedExplorer extends Explorer {
               localTriggered.addAll(
                   new ArrayList<>(fixBank.compareByMethod(region.clazz, region.method, false).dif));
             }
-            node.updateStatus(totalEffect, fixes, localTriggered, methodInheritanceTree);
+            node.updateStatus(
+                totalEffect,
+                fixes,
+                localTriggered,
+                methodInheritanceTree,
+                fieldDeclarationAnalysis);
           });
       injector.remove(fixes);
     }

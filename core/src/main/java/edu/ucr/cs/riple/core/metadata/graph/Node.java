@@ -85,9 +85,13 @@ public class Node {
   }
 
   public void updateStatus(
-      int effect, Set<Fix> fixesInOneRound, List<Fix> triggered, MethodInheritanceTree mit) {
+      int effect,
+      Set<Fix> fixesInOneRound,
+      List<Fix> triggered,
+      MethodInheritanceTree mit,
+      FieldDeclarationAnalysis fieldDeclarationAnalysis) {
     triggered.addAll(generateSubMethodParameterInheritanceFixes(mit, fixesInOneRound));
-    updateTriggered(triggered);
+    this.updateTriggered(triggered, fieldDeclarationAnalysis);
     final int[] numberOfSuperMethodsAnnotatedOutsideTree = {0};
     this.tree
         .stream()
@@ -117,11 +121,39 @@ public class Node {
     this.effect = effect + numberOfSuperMethodsAnnotatedOutsideTree[0];
   }
 
-  public void updateTriggered(List<Fix> fixes) {
+  public void updateTriggered(List<Fix> fixes, FieldDeclarationAnalysis analysis) {
     int sizeBefore = this.triggered.size();
-    this.triggered.addAll(fixes);
+    this.triggered.addAll(
+        fixes
+            .stream()
+            .filter(fix -> !treeContainsFix(triggered.stream(), fix, analysis))
+            .collect(Collectors.toSet()));
     int sizeAfter = this.triggered.size();
     changed = (changed || (sizeAfter != sizeBefore));
+  }
+
+  /**
+   * Checks for fixes targeting inline multiple field declarations and returns true, if the fix in
+   * tree is already targeting that statement.
+   *
+   * @param stream tree of fixes.
+   * @param target target fix.
+   * @param analysis field declaration analysis.
+   * @return returns true, if the fix is targeting an element which is already covered in tree.
+   */
+  private boolean treeContainsFix(
+      Stream<Fix> stream, Fix target, FieldDeclarationAnalysis analysis) {
+    if (target.kind.equals(FixType.FIELD.name)) {
+      Set<String> group =
+          analysis.getInLineMultipleFieldDeclarationsOnField(target.clazz, target.variable);
+      return stream.anyMatch(
+          t ->
+              t.kind.equals(FixType.FIELD.name)
+                  && t.clazz.equals(target.clazz)
+                  && group.contains(t.variable));
+    } else {
+      return false;
+    }
   }
 
   /**

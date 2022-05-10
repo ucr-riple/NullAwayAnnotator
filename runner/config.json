@@ -12,5 +12,5 @@
   "OPTIMIZED": true,
   "CACHE": true,
   "BAILOUT": true,
-  "DEPTH": 1
+  "DEPTH": 5
 }

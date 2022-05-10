@@ -42,7 +42,6 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -248,9 +247,7 @@ public class Utility {
   }
 
   public static void removeCompoundFieldDeclarations(
-      Set<Fix> remainingFixes,
-      FieldDeclarationAnalysis fieldDeclarationAnalysis,
-      HashMap<Fix, Report> reports) {
+      Set<Fix> remainingFixes, FieldDeclarationAnalysis fieldDeclarationAnalysis) {
     List<Fix> toRemove = new ArrayList<>();
     remainingFixes
         .stream()
@@ -263,17 +260,6 @@ public class Utility {
               Set<String> otherFields =
                   fieldDeclarationAnalysis.getInLineMultipleFieldDeclarationsOnField(
                       fix.clazz, fix.variable);
-              if (reports
-                  .values()
-                  .stream()
-                  .anyMatch(
-                      report ->
-                          report.root.kind.equals(FixType.FIELD.name)
-                              && report.root.clazz.equals(fix.clazz)
-                              && otherFields.contains(fix.variable))) {
-                toRemove.add(fix);
-                return;
-              }
               otherFields.remove(fix.variable);
               if (otherFields.size() > 0) {
                 toRemove.addAll(
