@@ -29,7 +29,6 @@ import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 

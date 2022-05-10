@@ -12,7 +12,6 @@ import edu.ucr.cs.riple.injector.Helper;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -58,7 +57,7 @@ public class FieldDeclarationAnalysis extends MetaData<FieldDeclarationInfo> {
   public Set<String> getInLineMultipleFieldDeclarationsOnField(String clazz, String field) {
     FieldDeclarationInfo candidate = findNode(node -> node.clazz.equals(clazz), clazz);
     if (candidate == null) {
-      return new HashSet<>();
+      return Sets.newHashSet(field);
     }
     Optional<Set<String>> inLineGroupFieldDeclaration =
         candidate.fields.stream().filter(group -> group.contains(field)).findFirst();
