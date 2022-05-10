@@ -5,6 +5,8 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
+import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.injector.Helper;
 import java.io.File;
@@ -13,19 +15,19 @@ import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-public class FieldDeclarationAnalysis extends MetaData<Set<FieldDeclarationInfo>> {
+public class FieldDeclarationAnalysis extends MetaData<FieldDeclarationInfo> {
 
   public FieldDeclarationAnalysis(Path path) {
     super(path);
   }
 
   @Override
-  protected Set<FieldDeclarationInfo> addNodeByLine(String[] values) {
+  protected FieldDeclarationInfo addNodeByLine(String[] values) {
     String clazz = values[0];
     String path = values[1];
     CompilationUnit tree;
-    Set<FieldDeclarationInfo> ans = new HashSet<>();
     try {
       tree = StaticJavaParser.parse(new File(path));
       NodeList<BodyDeclaration<?>> members =
@@ -33,6 +35,7 @@ public class FieldDeclarationAnalysis extends MetaData<Set<FieldDeclarationInfo>
       if (members == null) {
         return null;
       }
+      FieldDeclarationInfo info = new FieldDeclarationInfo(clazz);
       members.forEach(
           bodyDeclaration ->
               bodyDeclaration.ifFieldDeclaration(
@@ -40,35 +43,25 @@ public class FieldDeclarationAnalysis extends MetaData<Set<FieldDeclarationInfo>
                     NodeList<VariableDeclarator> vars =
                         fieldDeclaration.asFieldDeclaration().getVariables();
                     if (vars.size() > 1) {
-                      FieldDeclarationInfo info = new FieldDeclarationInfo(clazz);
-                      vars.forEach(
-                          variableDeclarator ->
-                              info.fields.add(variableDeclarator.getNameAsString()));
-                      ans.add(info);
+                      info.addNewSetOfFieldDeclarations(
+                          vars.stream()
+                              .map(NodeWithSimpleName::getNameAsString)
+                              .collect(Collectors.toSet()));
                     }
                   }));
-      return ans.size() == 0 ? null : ans;
+      return info.size() == 0 ? null : info;
     } catch (FileNotFoundException e) {
       return null;
     }
   }
 
-  public Set<String> getGroupFieldDeclarationsOnField(String clazz, String field) {
-    Set<FieldDeclarationInfo> candidates =
-        findNode(
-            candidate ->
-                candidate
-                    .stream()
-                    .anyMatch(fieldDeclarationInfo -> fieldDeclarationInfo.clazz.equals(clazz)),
-            clazz);
-    if (candidates == null) {
+  public Set<String> getInLineMultipleFieldDeclarationsOnField(String clazz, String field) {
+    FieldDeclarationInfo candidate = findNode(node -> node.clazz.equals(clazz), clazz);
+    if (candidate == null) {
       return new HashSet<>();
     }
-    Optional<FieldDeclarationInfo> info =
-        candidates
-            .stream()
-            .filter(fieldDeclarationInfo -> fieldDeclarationInfo.containsField(field))
-            .findFirst();
-    return info.map(fieldDeclarationInfo -> fieldDeclarationInfo.fields).orElse(new HashSet<>());
+    Optional<Set<String>> inLineGroupFieldDeclaration =
+        candidate.fields.stream().filter(group -> group.contains(field)).findFirst();
+    return inLineGroupFieldDeclaration.orElse(Sets.newHashSet(field));
   }
 }

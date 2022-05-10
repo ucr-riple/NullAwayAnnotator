@@ -261,7 +261,7 @@ public class Utility {
                 return;
               }
               Set<String> otherFields =
-                  fieldDeclarationAnalysis.getGroupFieldDeclarationsOnField(
+                  fieldDeclarationAnalysis.getInLineMultipleFieldDeclarationsOnField(
                       fix.clazz, fix.variable);
               if (reports
                   .values()

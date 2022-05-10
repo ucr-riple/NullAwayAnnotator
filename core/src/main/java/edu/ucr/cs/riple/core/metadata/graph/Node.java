@@ -53,20 +53,17 @@ public class Node {
   }
 
   public void setRootSource(Bank<Fix> fixBank, FieldDeclarationAnalysis analysis) {
-    Set<String> others =
+    Set<String> fieldGroup =
         root.kind.equals(FixType.FIELD.name)
-            ? analysis.getGroupFieldDeclarationsOnField(root.clazz, root.variable)
-            : new HashSet<>();
-    if(root.kind.equals(FixType.FIELD.name)){
-      others.add(root.variable);
-    }
+            ? analysis.getInLineMultipleFieldDeclarationsOnField(root.clazz, root.variable)
+            : Collections.emptySet();
     this.rootSource =
         fixBank.getRegionsForFixes(
             fix -> {
               if (fix.kind.equals(FixType.FIELD.name)) {
                 return fix.clazz.equals(root.clazz)
                     && fix.uri.equals(root.uri)
-                    && others.contains(fix.variable);
+                    && fieldGroup.contains(fix.variable);
 
               } else {
                 return fix.equals(root);
