@@ -6,7 +6,6 @@ public class Log {
   int requested;
   long time;
   long buildTime = 0;
-
   private long timer;
 
   public void reset() {
