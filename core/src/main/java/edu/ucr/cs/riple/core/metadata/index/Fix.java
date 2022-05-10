@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.metadata.index;
 
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.injector.Location;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import org.json.simple.JSONObject;
@@ -53,7 +54,7 @@ public class Fix extends Hashable {
     this.index = location.index;
     this.encClass = encClass;
     this.encMethod = endMethod;
-    this.reasons = Sets.newHashSet(reason);
+    this.reasons = reason != null ? Sets.newHashSet(reason) : new HashSet<>();
   }
 
   public Fix(String[] infos) {

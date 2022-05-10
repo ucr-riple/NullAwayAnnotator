@@ -53,7 +53,7 @@ public class FieldDeclarationAnalysis extends MetaData<Set<FieldDeclarationInfo>
     }
   }
 
-  public Set<String> getOtherFieldDeclarationsOnField(String clazz, String field) {
+  public Set<String> getGroupFieldDeclarationsOnField(String clazz, String field) {
     Set<FieldDeclarationInfo> candidates =
         findNode(
             candidate ->

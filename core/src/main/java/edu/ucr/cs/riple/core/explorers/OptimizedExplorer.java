@@ -3,6 +3,7 @@ package edu.ucr.cs.riple.core.explorers;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.AnnotationInjector;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -30,17 +31,17 @@ public class OptimizedExplorer extends Explorer {
       RegionTracker tracker,
       MethodInheritanceTree methodInheritanceTree,
       ImmutableSet<Fix> fixes,
+      FieldDeclarationAnalysis analysis,
       Config config) {
-    super(injector, errorBank, fixBank, fixes, config);
+    super(injector, errorBank, fixBank, fixes, analysis, config);
     this.tracker = tracker;
     this.methodInheritanceTree = methodInheritanceTree;
   }
 
   @Override
-  protected boolean initializeReports() {
-    boolean ans = super.initializeReports();
+  protected void initializeFixGraph() {
+    super.initializeFixGraph();
     this.fixGraph.getAllNodes().forEach(node -> node.updateRegions(tracker));
-    return ans;
   }
 
   @Override
@@ -53,7 +54,7 @@ public class OptimizedExplorer extends Explorer {
             + " builds for: "
             + fixGraph.getAllNodes().size()
             + " fixes");
-    ProgressBar pb = Utility.createProgressBar("Analysing", groups.size());
+    ProgressBar pb = Utility.createProgressBar("Processing", groups.size());
     for (Set<Node> group : groups.values()) {
       pb.step();
       Set<Fix> fixes =

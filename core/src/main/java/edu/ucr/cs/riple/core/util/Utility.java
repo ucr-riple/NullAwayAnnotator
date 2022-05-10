@@ -42,6 +42,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -246,18 +247,47 @@ public class Utility {
         Duration.ZERO);
   }
 
-  public static void removeCompoundFieldDeclarations(Set<Fix> remainingFixes, FieldDeclarationAnalysis fieldDeclarationAnalysis) {
+  public static void removeCompoundFieldDeclarations(
+      Set<Fix> remainingFixes,
+      FieldDeclarationAnalysis fieldDeclarationAnalysis,
+      HashMap<Fix, Report> reports) {
     List<Fix> toRemove = new ArrayList<>();
-    remainingFixes.stream().filter(fix -> fix.kind.equals(FixType.FIELD.name)).forEach(fix -> {
-      if(toRemove.contains(fix)){
-        return;
-      }
-      Set<String> otherFields = fieldDeclarationAnalysis.getOtherFieldDeclarationsOnField(fix.clazz, fix.variable);
-      otherFields.remove(fix.variable);
-      if(otherFields.size() > 1){
-        toRemove.addAll(remainingFixes.stream().filter(otherFix -> otherFix.clazz.equals(fix.clazz) && otherFields.contains(otherFix.variable) && otherFix.kind.equals(FixType.FIELD.name)).collect(Collectors.toSet()));
-      }
-    });
+    remainingFixes
+        .stream()
+        .filter(fix -> fix.kind.equals(FixType.FIELD.name))
+        .forEach(
+            fix -> {
+              if (toRemove.contains(fix)) {
+                return;
+              }
+              Set<String> otherFields =
+                  fieldDeclarationAnalysis.getGroupFieldDeclarationsOnField(
+                      fix.clazz, fix.variable);
+              if (reports
+                  .values()
+                  .stream()
+                  .anyMatch(
+                      report ->
+                          report.root.kind.equals(FixType.FIELD.name)
+                              && report.root.clazz.equals(fix.clazz)
+                              && otherFields.contains(fix.variable))) {
+                toRemove.add(fix);
+                return;
+              }
+              otherFields.remove(fix.variable);
+              if (otherFields.size() > 0) {
+                toRemove.addAll(
+                    remainingFixes
+                        .stream()
+                        .filter(
+                            otherFix ->
+                                otherFix.clazz.equals(fix.clazz)
+                                    && otherFields.contains(otherFix.variable)
+                                    && otherFix.kind.equals(FixType.FIELD.name))
+                        .collect(Collectors.toSet()));
+              }
+              otherFields.add(fix.variable);
+            });
     toRemove.forEach(remainingFixes::remove);
   }
 }

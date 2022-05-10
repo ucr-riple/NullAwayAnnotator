@@ -103,7 +103,7 @@ public class Annotator {
       }
       FieldDeclarationAnalysis fieldDeclarationAnalysis =
           new FieldDeclarationAnalysis(config.dir.resolve("class_info.tsv"));
-      Utility.removeCompoundFieldDeclarations(remainingFixes, fieldDeclarationAnalysis);
+      Utility.removeCompoundFieldDeclarations(remainingFixes, fieldDeclarationAnalysis, reports);
       ImmutableSet<Fix> fixes = ImmutableSet.copyOf(remainingFixes);
       Bank<Error> errorBank = new Bank<>(config.dir.resolve("errors.tsv"), Error::new);
       Bank<Fix> fixBank = new Bank<>(config.dir.resolve("fixes.tsv"), Fix::new);
@@ -112,8 +112,17 @@ public class Annotator {
       RegionTracker tracker = new CompoundTracker(config.dir, tree, fieldDeclarationAnalysis);
       Explorer explorer =
           config.optimized
-              ? new OptimizedExplorer(injector, errorBank, fixBank, tracker, tree, fixes, config)
-              : new BasicExplorer(injector, errorBank, fixBank, fixes, config);
+              ? new OptimizedExplorer(
+                  injector,
+                  errorBank,
+                  fixBank,
+                  tracker,
+                  tree,
+                  fixes,
+                  fieldDeclarationAnalysis,
+                  config)
+              : new BasicExplorer(
+                  injector, errorBank, fixBank, fixes, fieldDeclarationAnalysis, config);
       ImmutableSet<Report> latestReports = explorer.explore();
       int sizeBefore = reports.size();
       latestReports.forEach(

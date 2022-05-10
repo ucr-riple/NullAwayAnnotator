@@ -145,4 +145,8 @@ public class FixGraph<T extends Node> {
     nodes.clear();
     groups.clear();
   }
+
+  public boolean isEmpty() {
+    return nodes.isEmpty();
+  }
 }

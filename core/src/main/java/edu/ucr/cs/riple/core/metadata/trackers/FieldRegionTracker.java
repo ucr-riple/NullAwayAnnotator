@@ -29,6 +29,7 @@ import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -53,17 +54,17 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
     if (!fix.kind.equals(fixType.name)) {
       return null;
     }
-    Set<String> others = analysis.getOtherFieldDeclarationsOnField(fix.clazz, fix.variable);
-    others.add(fix.variable);
-    return others
+    Set<String> others = analysis.getGroupFieldDeclarationsOnField(fix.clazz, fix.variable);
+    Set<String> group = others.size() == 0 ? Collections.singleton(fix.variable) : others;
+    return group
         .stream()
         .flatMap(
             s ->
                 findAllNodes(
                         candidate ->
                             candidate.calleeClass.equals(fix.clazz)
-                                && candidate.calleeMember.equals(fix.variable),
-                        fix.variable,
+                                && candidate.calleeMember.equals(s),
+                        s,
                         fix.clazz)
                     .stream()
                     .map(node -> new Region(node.callerMethod, node.callerClass)))

@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.metadata.index;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import java.nio.file.Path;
 import java.util.List;
@@ -77,7 +78,7 @@ public class Bank<T extends Hashable> {
     return compareByList(rootInMethod.getAllEntities(), currentInMethod.getAllEntities());
   }
 
-  public Set<Region> getAllSources(Comparable<T> c) {
-    return rootInClass.getAllSources(c);
+  public Set<Region> getRegionsForFixes(Predicate<T> c) {
+    return rootInClass.getRegionsForFixes(c);
   }
 }

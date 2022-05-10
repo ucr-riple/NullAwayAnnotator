@@ -3,6 +3,7 @@ package edu.ucr.cs.riple.core.explorers;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.AnnotationInjector;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -19,15 +20,16 @@ public class BasicExplorer extends Explorer {
       Bank<Error> errorBank,
       Bank<Fix> fixBank,
       ImmutableSet<Fix> fixes,
+      FieldDeclarationAnalysis analysis,
       Config config) {
-    super(injector, errorBank, fixBank, fixes, config);
+    super(injector, errorBank, fixBank, fixes, analysis, config);
   }
 
   @Override
   protected void executeNextCycle() {
     System.out.println(
         "Scheduling for: " + reports.size() + " builds for: " + reports.size() + " fixes");
-    ProgressBar pb = Utility.createProgressBar("Analysing", reports.size());
+    ProgressBar pb = Utility.createProgressBar("Processing", reports.size());
     for (Node node : fixGraph.getAllNodes()) {
       pb.step();
       Set<Fix> fixes = node.tree;

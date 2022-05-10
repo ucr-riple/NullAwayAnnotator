@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Index<T extends Hashable> {
@@ -119,10 +120,10 @@ public class Index<T extends Hashable> {
     return ans;
   }
 
-  public Set<Region> getAllSources(Comparable<T> comparable) {
+  public Set<Region> getRegionsForFixes(Predicate<T> comparable) {
     return getAllEntities()
         .stream()
-        .filter(t -> comparable.compareTo(t) == 0)
+        .filter(comparable)
         .map(t -> new Region(t.encMethod, t.encClass))
         .collect(Collectors.toSet());
   }

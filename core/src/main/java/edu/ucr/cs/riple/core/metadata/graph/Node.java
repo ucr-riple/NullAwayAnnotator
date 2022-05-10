@@ -3,6 +3,7 @@ package edu.ucr.cs.riple.core.metadata.graph;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
@@ -40,7 +41,7 @@ public class Node {
 
   public Report report;
 
-  /** Regions where error reported * */
+  /** Regions where original errors reported, all are for root node */
   private Set<Region> rootSource;
 
   public Node(Fix root) {
@@ -51,14 +52,25 @@ public class Node {
     this.tree = Sets.newHashSet(root);
   }
 
-  public void setRootSource(Bank<Fix> fixBank) {
+  public void setRootSource(Bank<Fix> fixBank, FieldDeclarationAnalysis analysis) {
+    Set<String> others =
+        root.kind.equals(FixType.FIELD.name)
+            ? analysis.getGroupFieldDeclarationsOnField(root.clazz, root.variable)
+            : new HashSet<>();
+    if(root.kind.equals(FixType.FIELD.name)){
+      others.add(root.variable);
+    }
     this.rootSource =
-        fixBank.getAllSources(
-            o -> {
-              if (o.equals(this.root)) {
-                return 0;
+        fixBank.getRegionsForFixes(
+            fix -> {
+              if (fix.kind.equals(FixType.FIELD.name)) {
+                return fix.clazz.equals(root.clazz)
+                    && fix.uri.equals(root.uri)
+                    && others.contains(fix.variable);
+
+              } else {
+                return fix.equals(root);
               }
-              return -10;
             });
   }
 
