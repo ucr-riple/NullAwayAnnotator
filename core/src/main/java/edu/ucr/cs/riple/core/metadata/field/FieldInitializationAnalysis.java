@@ -2,7 +2,7 @@ package edu.ucr.cs.riple.core.metadata.field;
 
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.injector.Location;
+import edu.ucr.cs.riple.injector.Change;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +21,7 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
     return new FieldInitializationNode(Location.fromArrayInfo(values, "null"), values[6]);
   }
 
-  public Set<Location> findInitializers(Set<Fix> uninitializedFields) {
+  public Set<Change> findInitializers(Set<Fix> uninitializedFields) {
     // Set does not have a get() method, instead we use map here which can find the element
     // efficiently.
     Map<String, Class> classes = new HashMap<>();

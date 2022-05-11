@@ -90,12 +90,12 @@ public class Machine {
       } catch (FileNotFoundException exception) {
         continue;
       }
-      for (Location location : workList.getLocations()) {
+      for (Change location : workList.getLocations()) {
         try {
           if (Injector.LOG) {
             pb.step();
           }
-          if (applyLocationChange(tree, location)) {
+          if (applyChange(tree, location)) {
             processed++;
           }
         } catch (Exception ignored) {
@@ -110,29 +110,29 @@ public class Machine {
     return processed;
   }
 
-  private boolean applyLocationChange(CompilationUnit tree, Location location) {
+  private boolean applyChange(CompilationUnit tree, Change change) {
     boolean success = false;
     NodeList<BodyDeclaration<?>> clazz =
-        Helper.getClassOrInterfaceOrEnumDeclarationMembersByFlatName(tree, location.clazz);
+        Helper.getClassOrInterfaceOrEnumDeclarationMembersByFlatName(tree, change.clazz);
     if (clazz == null) {
       return false;
     }
-    switch (location.kind) {
+    switch (change.kind) {
       case "FIELD":
-        success = applyClassField(clazz, location);
+        success = applyClassField(clazz, change);
         break;
       case "METHOD":
-        success = applyMethodReturn(clazz, location);
+        success = applyMethodReturn(clazz, change);
         break;
       case "PARAMETER":
-        success = applyMethodParam(clazz, location);
+        success = applyMethodParam(clazz, change);
         break;
     }
     if (success) {
-      if (Helper.getPackageName(location.annotation) != null) {
+      if (Helper.getPackageName(change.annotation) != null) {
         ImportDeclaration importDeclaration =
-            StaticJavaParser.parseImport("import " + location.annotation + ";");
-        if (treeRequiresImportDeclaration(tree, importDeclaration, location.annotation)) {
+            StaticJavaParser.parseImport("import " + change.annotation + ";");
+        if (treeRequiresImportDeclaration(tree, importDeclaration, change.annotation)) {
           tree.getImports().addFirst(importDeclaration);
         }
       }
@@ -176,7 +176,7 @@ public class Machine {
     }
   }
 
-  private boolean applyMethodParam(NodeList<BodyDeclaration<?>> members, Location location) {
+  private boolean applyMethodParam(NodeList<BodyDeclaration<?>> members, Change location) {
     final boolean[] success = {false};
     members.forEach(
         bodyDeclaration ->
@@ -198,7 +198,7 @@ public class Machine {
     return success[0];
   }
 
-  private boolean applyMethodReturn(NodeList<BodyDeclaration<?>> members, Location location) {
+  private boolean applyMethodReturn(NodeList<BodyDeclaration<?>> members, Change location) {
     final boolean[] success = {false};
     members.forEach(
         bodyDeclaration ->
@@ -215,7 +215,7 @@ public class Machine {
     return success[0];
   }
 
-  private boolean applyClassField(NodeList<BodyDeclaration<?>> members, Location location) {
+  private boolean applyClassField(NodeList<BodyDeclaration<?>> members, Change location) {
     final boolean[] success = {false};
     members.forEach(
         bodyDeclaration ->

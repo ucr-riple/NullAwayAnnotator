@@ -26,8 +26,8 @@ package edu.ucr.cs.riple.injector.tools;
 
 import static org.junit.Assert.fail;
 
+import edu.ucr.cs.riple.injector.Change;
 import edu.ucr.cs.riple.injector.Injector;
-import edu.ucr.cs.riple.injector.Location;
 import edu.ucr.cs.riple.injector.WorkListBuilder;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -51,7 +51,7 @@ import org.json.simple.JSONObject;
 public class InjectorTestHelper {
 
   private final Map<String, String> fileMap;
-  private final ArrayList<Location> locations;
+  private final ArrayList<Change> locations;
   private String rootPath;
 
   public InjectorTestHelper() {
@@ -75,8 +75,8 @@ public class InjectorTestHelper {
     return new InjectorTestHelperOutput(this, fileMap, pathToInputFile);
   }
 
-  public InjectorTestHelper addLocations(Location... locations) {
-    for (Location f : locations) f.uri = rootPath.concat("/src/").concat(f.uri);
+  public InjectorTestHelper addLocations(Change... locations) {
+    for (Change f : locations) f.uri = rootPath.concat("/src/").concat(f.uri);
     this.locations.addAll(Arrays.asList(locations));
     return this;
   }
@@ -110,7 +110,7 @@ public class InjectorTestHelper {
 
   private void writeLocations() {
     JSONArray array = new JSONArray();
-    for (Location locations : locations) {
+    for (Change locations : locations) {
       array.add(locations.getJson());
     }
     JSONObject obj = new JSONObject();

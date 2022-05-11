@@ -27,25 +27,25 @@ import java.util.List;
 
 public class WorkList {
   private final String uri;
-  private final List<Location> locations;
+  private final List<Change> locations;
 
   public WorkList(String uri) {
     this.uri = uri;
     this.locations = new ArrayList<>();
   }
 
-  public WorkList(List<Location> locations) {
+  public WorkList(List<Change> locations) {
     this.locations = locations;
     assert locations.size() > 0;
     uri = locations.get(0).uri;
   }
 
-  public void addLocation(Location newLocation) {
-    for (Location location : locations) if (location.equals(newLocation)) return;
+  public void addLocation(Change newLocation) {
+    for (Change location : locations) if (location.equals(newLocation)) return;
     locations.add(newLocation);
   }
 
-  public List<Location> getLocations() {
+  public List<Change> getLocations() {
     return locations;
   }
 
@@ -54,7 +54,7 @@ public class WorkList {
   }
 
   public void addContainingAnnotationsToList(List<String> annotsList) {
-    for (Location location : locations)
+    for (Change location : locations)
       if (!annotsList.contains(location.annotation)) annotsList.add(location.annotation);
   }
 

@@ -1,6 +1,7 @@
 package edu.ucr.cs.riple.core.metadata.field;
 
-import edu.ucr.cs.riple.injector.Location;
+import edu.ucr.cs.riple.injector.location.Location;
+
 import java.util.Objects;
 
 public class FieldInitializationNode {

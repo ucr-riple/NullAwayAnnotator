@@ -50,7 +50,7 @@ public class MethodInjectionTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "test(boolean)",
                 "",
@@ -58,7 +58,7 @@ public class MethodInjectionTest {
                 "com.uber.Super",
                 "Super.java",
                 "true"),
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "test(boolean)",
                 "",
@@ -99,7 +99,7 @@ public class MethodInjectionTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "run()",
                 "",
@@ -148,7 +148,7 @@ public class MethodInjectionTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "bar(java.lang.Object)",
                 "",
@@ -186,7 +186,7 @@ public class MethodInjectionTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "run()",
                 "null",
@@ -239,7 +239,7 @@ public class MethodInjectionTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "test(Object, String, String)",
                 "",
@@ -247,7 +247,7 @@ public class MethodInjectionTest {
                 "com.uber.Super",
                 "Super.java",
                 "true"),
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "test(Object, Object, String)",
                 "name",
@@ -311,7 +311,7 @@ public class MethodInjectionTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "getPredNodeNumbers(T)",
                 "",
@@ -319,7 +319,7 @@ public class MethodInjectionTest {
                 "com.uber.Super",
                 "Super.java",
                 "true"),
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "computeResult(com.ibm.wala.ipa.slicer.Statement,java.util.Map<com.ibm.wala.ipa.callgraph.propagation.PointerKey,com.ibm.wala.util.intset.MutableIntSet>,com.ibm.wala.dataflow.graph.BitVectorSolver<? extends com.ibm.wala.ssa.ISSABasicBlock>,com.ibm.wala.util.intset.OrdinalSetMapping<com.ibm.wala.ipa.slicer.Statement>,com.ibm.wala.ipa.callgraph.CGNode,com.ibm.wala.ipa.modref.ExtendedHeapModel,com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis<T>,java.util.Map<com.ibm.wala.ipa.callgraph.CGNode,com.ibm.wala.util.intset.OrdinalSet<com.ibm.wala.ipa.callgraph.propagation.PointerKey>>,com.ibm.wala.ssa.analysis.ExplodedControlFlowGraph,java.util.Map<java.lang.Integer,com.ibm.wala.ipa.slicer.NormalStatement>)",
                 "",
@@ -356,7 +356,7 @@ public class MethodInjectionTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "getTargetForCall(com.ibm.wala.ipa.callgraph.CGNode[],com.ibm.wala.classLoader.CallSiteReference[][][],com.ibm.wala.classLoader.IClass,com.ibm.wala.ipa.callgraph.propagation.InstanceKey[][])",
                 "",
@@ -391,7 +391,7 @@ public class MethodInjectionTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "<T>getReader(com.ibm.wala.shrikeCT.ClassReader.AttrIterator,java.lang.String,com.ibm.wala.classLoader.ShrikeClass.GetReader<T>)",
                 "",
@@ -425,7 +425,7 @@ public class MethodInjectionTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Initializer",
                 "format(java.lang.String,java.lang.Object...)",
                 "",

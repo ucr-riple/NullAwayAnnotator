@@ -30,7 +30,7 @@ public class RemovalTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "test(@javax.annotation.Nullable java.lang.Object)",
                 "",
@@ -63,7 +63,7 @@ public class RemovalTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "test(@javax.annotation.Nullable java.lang.Object)",
                 "o",
@@ -96,7 +96,7 @@ public class RemovalTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "test(@javax.annotation.Nullable java.lang.Object)",
                 "o",
@@ -131,7 +131,7 @@ public class RemovalTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "",
                 "f",

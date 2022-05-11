@@ -47,7 +47,7 @@ public class ClassSearchTest {
                 "   }",
                 "}")
             .addLocations(
-                new Location(
+                new Change(
                     "javax.annotation.Nullable",
                     "get()",
                     "",
@@ -101,7 +101,7 @@ public class ClassSearchTest {
                 "   }",
                 "}")
             .addLocations(
-                new Location(
+                new Change(
                     "javax.annotation.Nullable",
                     "get()",
                     "",
@@ -121,7 +121,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "simple.java")
         .expectOutputFile("Main.java", "simple_expected_1.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "null",
                 "f1",
@@ -141,7 +141,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "simple.java")
         .expectOutputFile("Main.java", "simple_expected_2.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "null",
                 "f0",
@@ -161,7 +161,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "simple.java")
         .expectOutputFile("Main.java", "simple_expected_3.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "null",
                 "f2",
@@ -181,7 +181,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_1.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "get()",
                 "",
@@ -201,7 +201,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_2.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "bar()",
                 "",
@@ -221,7 +221,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_3.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "null",
                 "f1",
@@ -241,7 +241,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_4.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "compare()",
                 "null",
@@ -261,7 +261,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_5.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "null",
                 "f3",
@@ -281,7 +281,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_6.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "null",
                 "f4",
@@ -301,7 +301,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_7.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "null",
                 "f5",
@@ -321,7 +321,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_8.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "null",
                 "f6",
@@ -341,7 +341,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_9.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "null",
                 "f7",
@@ -361,7 +361,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_10.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "null",
                 "f8",
@@ -381,7 +381,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_11.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "null",
                 "f9",
@@ -401,7 +401,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_12.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "null",
                 "f10",
@@ -421,7 +421,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_13.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "null",
                 "f11",
@@ -441,7 +441,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_14.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "null",
                 "f12",
@@ -461,7 +461,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_15.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "null",
                 "f13",
@@ -481,7 +481,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_16.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "null",
                 "f14",
@@ -501,7 +501,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_17.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "foo()",
                 "",
@@ -521,7 +521,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_18.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "null",
                 "f16",
@@ -541,7 +541,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_19.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "null",
                 "f17",
@@ -561,7 +561,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_20.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "null",
                 "f18",
@@ -581,7 +581,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_21.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "null",
                 "f19",
@@ -601,7 +601,7 @@ public class ClassSearchTest {
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_22.java")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "foo()",
                 "null",

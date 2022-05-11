@@ -38,7 +38,7 @@ public class ParameterInjectionTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "test(java.lang.Object)",
                 "flag",
@@ -80,7 +80,7 @@ public class ParameterInjectionTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "test(Object)",
                 "flag",
@@ -128,7 +128,7 @@ public class ParameterInjectionTest {
             "   int index, int[] params, int exception, CallSiteReference site, BootstrapMethod bootstrap);",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "InvokeInstruction(int,int,int[],int,com.ibm.wala.classLoader.CallSiteReference,com.ibm.wala.shrikeCT.BootstrapMethodsReader.BootstrapMethod)",
                 "bootstrap",
@@ -173,7 +173,7 @@ public class ParameterInjectionTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "computeMod(com.ibm.wala.ipa.callgraph.CallGraph,com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis<T>,com.ibm.wala.ipa.slicer.HeapExclusions)",
                 "heapExclude",
@@ -238,7 +238,7 @@ public class ParameterInjectionTest {
             "    }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "ModRef(com.ibm.wala.classLoader.IMethod,com.ibm.wala.ipa.callgraph.Context,com.ibm.wala.cfg.AbstractCFG<?,?>,com.ibm.wala.ssa.SSAInstruction[],com.ibm.wala.ssa.SSAOptions,java.util.Map<java.lang.Integer,com.ibm.wala.ssa.ConstantValue>)",
                 "constants",
@@ -277,7 +277,7 @@ public class ParameterInjectionTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "WeakKeyReference(@org.checkerframework.checker.nullness.qual.Nullable K,java.lang.ref.ReferenceQueue<K>)",
                 "queue",

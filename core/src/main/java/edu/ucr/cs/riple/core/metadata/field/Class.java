@@ -1,7 +1,7 @@
 package edu.ucr.cs.riple.core.metadata.field;
 
 import edu.ucr.cs.riple.core.FixType;
-import edu.ucr.cs.riple.injector.Location;
+import edu.ucr.cs.riple.injector.Change;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -38,8 +38,7 @@ public class Class {
         this.methods
             .stream()
             .filter(
-                method ->
-                    method.signature.equals(fieldInitializationNode.initializerLocation.method))
+                method -> method.signature.equals(fieldInitializationNode.initializerLocation.method))
             .findAny();
     if (optionalMethod.isPresent()) {
       optionalMethod.get().fields.add(fieldInitializationNode.field);
@@ -50,7 +49,7 @@ public class Class {
     }
   }
 
-  public Location findInitializer() {
+  public Change findInitializer() {
     Method maxMethod = null;
     int maxScore = 1;
     for (Method m : this.methods) {
@@ -61,7 +60,7 @@ public class Class {
     }
     return maxMethod == null
         ? null
-        : new Location(
+        : new Change(
             "null", maxMethod.signature, "null", FixType.METHOD.name, this.clazz, this.uri, "true");
   }
 }

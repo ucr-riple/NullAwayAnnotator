@@ -34,7 +34,7 @@ public class FieldInjectionTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "",
                 "h",

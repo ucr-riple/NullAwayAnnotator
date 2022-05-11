@@ -60,7 +60,7 @@ public class FieldDeclarationAnalysis extends MetaData<FieldDeclarationInfo> {
   public Set<String> getInLineMultipleFieldDeclarationsOnField(Fix fix) {
     String clazz = fix.clazz;
     String field = fix.variable;
-    if (!fix.location.kind.equals(FixType.FIELD.name)) {
+    if (!fix.change.kind.equals(FixType.FIELD.name)) {
       return new HashSet<>();
     }
     FieldDeclarationInfo candidate = findNode(node -> node.clazz.equals(clazz), clazz);

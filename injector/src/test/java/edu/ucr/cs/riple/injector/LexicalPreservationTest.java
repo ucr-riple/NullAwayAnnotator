@@ -44,7 +44,7 @@ public class LexicalPreservationTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "test()",
                 "",
@@ -213,7 +213,7 @@ public class LexicalPreservationTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "test()",
                 "",
@@ -259,7 +259,7 @@ public class LexicalPreservationTest {
             "   class Bar{ }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "test()",
                 "",
@@ -296,7 +296,7 @@ public class LexicalPreservationTest {
             "   private Object allTest[];",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "",
                 "allTest",
@@ -304,7 +304,7 @@ public class LexicalPreservationTest {
                 "com.uber.B",
                 "B.java",
                 "true"),
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "",
                 "allTest",

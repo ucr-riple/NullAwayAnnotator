@@ -9,7 +9,7 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
-import edu.ucr.cs.riple.injector.Location;
+import edu.ucr.cs.riple.injector.Change;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -33,7 +33,7 @@ public class Node {
 
   public int id;
 
-  /** Effect of applying containing location */
+  /** Effect of applying containing change */
   public int effect;
 
   /** if <code>true</code>, set of triggered has been updated */
@@ -178,8 +178,8 @@ public class Node {
                                   && !methodNode.annotFlags[index]))
                       .map(
                           node -> {
-                            Location location =
-                                new Location(
+                            Change change =
+                                new Change(
                                     fix.annotation,
                                     fix.method,
                                     node.parameterNames[index],
@@ -187,9 +187,8 @@ public class Node {
                                     node.clazz,
                                     node.uri,
                                     "true");
-                            location.index = String.valueOf(index);
-                            return new Fix(
-                                location, "WRONG_OVERRIDE_PARAM", node.clazz, node.method);
+                            change.index = String.valueOf(index);
+                            return new Fix(change, "WRONG_OVERRIDE_PARAM", node.clazz, node.method);
                           });
                 })
         .filter(fix -> !fixesInOneRound.contains(fix))

@@ -1,8 +1,8 @@
 package edu.ucr.cs.riple.core;
 
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.injector.Change;
 import edu.ucr.cs.riple.injector.Injector;
-import edu.ucr.cs.riple.injector.Location;
 import edu.ucr.cs.riple.injector.WorkListBuilder;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,12 +22,12 @@ public class AnnotationInjector {
     if (fixes == null || fixes.size() == 0) {
       return;
     }
-    Set<Location> toRemove =
+    Set<Change> toRemove =
         fixes
             .stream()
             .map(
                 fix ->
-                    new Location(
+                    new Change(
                         fix.annotation,
                         fix.method,
                         fix.variable,
@@ -43,7 +43,7 @@ public class AnnotationInjector {
     if (fixes == null || fixes.size() == 0) {
       return;
     }
-    Set<Location> toApply = fixes.stream().map(fix -> fix.location).collect(Collectors.toSet());
+    Set<Change> toApply = fixes.stream().map(fix -> fix.change).collect(Collectors.toSet());
     injector.start(new WorkListBuilder(toApply).getWorkLists(), false);
   }
 }

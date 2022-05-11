@@ -30,7 +30,7 @@ public class MethodSearchTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Initializer",
                 "Main(java.lang.String,java.lang.Object...)",
                 "",
@@ -77,7 +77,7 @@ public class MethodSearchTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "test()",
                 "",

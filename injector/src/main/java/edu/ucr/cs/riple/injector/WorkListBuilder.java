@@ -39,7 +39,7 @@ import org.json.simple.parser.ParseException;
 
 public class WorkListBuilder {
   private String filePath;
-  private Collection<Location> locations;
+  private Collection<Change> locations;
 
   public WorkListBuilder(String filePath) {
     this.filePath = filePath;
@@ -55,7 +55,7 @@ public class WorkListBuilder {
       bufferedReader.close();
       locations = new ArrayList<>();
       for (Object o : locationsJson) {
-        locations.add(Location.createFromJson((JSONObject) o));
+        locations.add(Change.createFromJson((JSONObject) o));
       }
     } catch (FileNotFoundException ex) {
       throw new RuntimeException("Unable to open file: " + this.filePath);
@@ -66,7 +66,7 @@ public class WorkListBuilder {
     }
   }
 
-  public WorkListBuilder(Collection<Location> locations) {
+  public WorkListBuilder(Collection<Change> locations) {
     if (locations == null) {
       throw new RuntimeException("location array cannot be null");
     }
@@ -76,7 +76,7 @@ public class WorkListBuilder {
   public List<WorkList> getWorkLists() {
     ArrayList<String> uris = new ArrayList<>();
     ArrayList<WorkList> workLists = new ArrayList<>();
-    for (Location location : this.locations) {
+    for (Change location : this.locations) {
       if (!new File(location.uri).exists() && location.uri.startsWith("file:")) {
         location.uri = location.uri.substring("file:".length());
       }

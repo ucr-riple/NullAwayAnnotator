@@ -77,7 +77,7 @@ public class Annotator {
             .filter(
                 fix ->
                     fix.reasons.contains("FIELD_NO_INIT")
-                        && fix.location.kind.equals(FixType.FIELD.name))
+                        && fix.change.kind.equals(FixType.FIELD.name))
             .collect(Collectors.toSet());
     FieldInitializationAnalysis analysis =
         new FieldInitializationAnalysis(config.dir.resolve("field_init.tsv"));

@@ -25,7 +25,7 @@
 package edu.ucr.cs.riple.core.metadata.index;
 
 import com.google.common.collect.Sets;
-import edu.ucr.cs.riple.injector.Location;
+import edu.ucr.cs.riple.injector.Change;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -33,7 +33,7 @@ import org.json.simple.JSONObject;
 
 public class Fix extends Hashable {
 
-  public final Location location;
+  public final Change change;
   public final String clazz;
   public final String method;
   public final String kind;
@@ -44,15 +44,15 @@ public class Fix extends Hashable {
   public final Set<String> reasons;
   public final Set<Fix> aliases;
 
-  public Fix(Location location, String reason, String encClass, String endMethod) {
-    this.location = location;
-    this.annotation = location.annotation;
-    this.uri = location.uri;
-    this.clazz = location.clazz;
-    this.method = location.method;
-    this.variable = location.variable;
-    this.kind = location.kind;
-    this.index = location.index;
+  public Fix(Change change, String reason, String encClass, String endMethod) {
+    this.change = change;
+    this.annotation = change.annotation;
+    this.uri = change.uri;
+    this.clazz = change.clazz;
+    this.method = change.method;
+    this.variable = change.variable;
+    this.kind = change.kind;
+    this.index = change.index;
     this.encClass = encClass;
     this.encMethod = endMethod;
     this.reasons = reason != null ? Sets.newHashSet(reason) : new HashSet<>();
@@ -60,7 +60,7 @@ public class Fix extends Hashable {
   }
 
   public Fix(String[] infos) {
-    this(Location.fromArrayInfo(infos, infos[7]), infos[6], infos[8], infos[9]);
+    this(Change.fromArrayInfo(infos, infos[7]), infos[6], infos[8], infos[9]);
   }
 
   @Override
@@ -68,16 +68,16 @@ public class Fix extends Hashable {
     if (this == o) return true;
     if (!(o instanceof Fix)) return false;
     Fix fix = (Fix) o;
-    return location.equals(fix.location);
+    return change.equals(fix.change);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(location);
+    return Objects.hash(change);
   }
 
   public JSONObject getJson() {
-    return location.getJson();
+    return change.getJson();
   }
 
   public boolean isModifyingConstructor() {

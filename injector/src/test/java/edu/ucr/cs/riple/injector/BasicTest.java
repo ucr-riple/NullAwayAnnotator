@@ -36,8 +36,8 @@ public class BasicTest {
   public void skip_duplicate_annotation() {
     String rootName = "skip_duplicate_annotation";
 
-    Location Location =
-        new Location(
+    Change Change =
+        new Change(
             "javax.annotation.Nullable",
             "test()",
             "",
@@ -66,7 +66,7 @@ public class BasicTest {
             "       return new Object();",
             "   }",
             "}")
-        .addLocations(Location, Location.duplicate(), Location.duplicate())
+        .addLocations(Change, Change.duplicate(), Change.duplicate())
         .start();
   }
 
@@ -92,7 +92,7 @@ public class BasicTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "test(@javax.annotation.Nullable java.lang.Object)",
                 "",
@@ -135,7 +135,7 @@ public class BasicTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "run()",
                 "",
@@ -179,7 +179,7 @@ public class BasicTest {
             "   }",
             "}")
         .addLocations(
-            new Location(
+            new Change(
                 "javax.annotation.Nullable",
                 "run()",
                 "",
