@@ -53,7 +53,7 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
     if (!fix.kind.equals(fixType.name)) {
       return null;
     }
-    Set<String> group = analysis.getInLineMultipleFieldDeclarationsOnField(fix.clazz, fix.variable);
+    Set<String> group = analysis.getInLineMultipleFieldDeclarationsOnField(fix);
     return group
         .stream()
         .flatMap(

@@ -48,6 +48,7 @@ public class OptimizedExplorer extends Explorer {
   protected void executeNextCycle() {
     fixGraph.findGroups();
     HashMap<Integer, Set<Node>> groups = fixGraph.getGroups();
+
     System.out.println(
         "Scheduling for: "
             + groups.size()

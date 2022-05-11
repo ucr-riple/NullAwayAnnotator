@@ -55,7 +55,7 @@ public class Node {
   public void setRootSource(Bank<Fix> fixBank, FieldDeclarationAnalysis analysis) {
     Set<String> fieldGroup =
         root.kind.equals(FixType.FIELD.name)
-            ? analysis.getInLineMultipleFieldDeclarationsOnField(root.clazz, root.variable)
+            ? analysis.getInLineMultipleFieldDeclarationsOnField(root)
             : Collections.emptySet();
     this.rootSource =
         fixBank.getRegionsForFixes(
@@ -90,7 +90,7 @@ public class Node {
       MethodInheritanceTree mit,
       FieldDeclarationAnalysis fieldDeclarationAnalysis) {
     triggered.addAll(generateSubMethodParameterInheritanceFixes(mit, fixesInOneRound));
-    this.updateTriggered(triggered, fieldDeclarationAnalysis);
+    updateTriggered(triggered, fieldDeclarationAnalysis);
     final int[] numberOfSuperMethodsAnnotatedOutsideTree = {0};
     this.tree
         .stream()
@@ -125,7 +125,7 @@ public class Node {
     this.triggered.addAll(
         fixes
             .stream()
-            .filter(fix -> !treeContainsFix(triggered.stream(), fix, analysis))
+            .filter(fix -> !fixTargetsSameElement(triggered, fix, analysis))
             .collect(Collectors.toSet()));
     int sizeAfter = this.triggered.size();
     changed = (changed || (sizeAfter != sizeBefore));
@@ -135,21 +135,21 @@ public class Node {
    * Checks for fixes targeting inline multiple field declarations and returns true, if the fix in
    * tree is already targeting that statement.
    *
-   * @param stream tree of fixes.
+   * @param set set of fixes.
    * @param target target fix.
    * @param analysis field declaration analysis.
    * @return returns true, if the fix is targeting an element which is already covered in tree.
    */
-  private boolean treeContainsFix(
-      Stream<Fix> stream, Fix target, FieldDeclarationAnalysis analysis) {
+  private boolean fixTargetsSameElement(
+      Set<Fix> set, Fix target, FieldDeclarationAnalysis analysis) {
     if (target.kind.equals(FixType.FIELD.name)) {
-      Set<String> group =
-          analysis.getInLineMultipleFieldDeclarationsOnField(target.clazz, target.variable);
-      return stream.anyMatch(
-          t ->
-              t.kind.equals(FixType.FIELD.name)
-                  && t.clazz.equals(target.clazz)
-                  && group.contains(t.variable));
+      Set<String> group = analysis.getInLineMultipleFieldDeclarationsOnField(target);
+      return set.stream()
+          .anyMatch(
+              observed ->
+                  observed.kind.equals(FixType.FIELD.name)
+                      && observed.clazz.equals(target.clazz)
+                      && group.contains(observed.variable));
     } else {
       return false;
     }

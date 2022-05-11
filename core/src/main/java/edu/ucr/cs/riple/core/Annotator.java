@@ -40,6 +40,7 @@ import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -98,10 +99,21 @@ public class Annotator {
       Utility.buildProject(config);
       Set<Fix> remainingFixes = Utility.readFixesFromOutputDirectory(config);
       if (config.useCache) {
+        Set<Fix> allDiscoveredFixes =
+            reports
+                .values()
+                .stream()
+                .flatMap(
+                    (Function<Report, Stream<Fix>>)
+                        report ->
+                            report.root.aliases.size() == 0
+                                ? Stream.of(report.root)
+                                : report.root.aliases.stream())
+                .collect(Collectors.toSet());
         remainingFixes =
             remainingFixes
                 .stream()
-                .filter(fix -> !reports.containsKey(fix))
+                .filter(fix -> !allDiscoveredFixes.contains(fix))
                 .collect(Collectors.toSet());
       }
       FieldDeclarationAnalysis fieldDeclarationAnalysis =

@@ -42,6 +42,7 @@ public class Fix extends Hashable {
   public final String index;
   public final String annotation;
   public final Set<String> reasons;
+  public final Set<Fix> aliases;
 
   public Fix(Location location, String reason, String encClass, String endMethod) {
     this.location = location;
@@ -55,6 +56,7 @@ public class Fix extends Hashable {
     this.encClass = encClass;
     this.encMethod = endMethod;
     this.reasons = reason != null ? Sets.newHashSet(reason) : new HashSet<>();
+    this.aliases = new HashSet<>();
   }
 
   public Fix(String[] infos) {

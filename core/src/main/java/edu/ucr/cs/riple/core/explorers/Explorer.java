@@ -10,7 +10,6 @@ import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import java.util.List;
 
 public abstract class Explorer {
   protected final AnnotationInjector injector;
@@ -59,16 +58,17 @@ public abstract class Explorer {
   }
 
   protected void finalizeReports() {
-    List<Node> nodes = fixGraph.getAllNodes();
-    nodes.forEach(
-        node -> {
-          Report report = node.report;
-          report.effect = node.effect;
-          report.tree = node.tree;
-          report.triggered = node.triggered;
-          report.finished = !node.changed;
-          report.processed = true;
-        });
+    fixGraph
+        .getAllNodes()
+        .forEach(
+            node -> {
+              Report report = node.report;
+              report.effect = node.effect;
+              report.tree = node.tree;
+              report.triggered = node.triggered;
+              report.finished = !node.changed;
+              report.processed = true;
+            });
   }
 
   protected abstract void executeNextCycle();

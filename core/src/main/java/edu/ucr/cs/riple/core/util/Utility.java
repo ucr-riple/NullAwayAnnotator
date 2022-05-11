@@ -44,10 +44,8 @@ import java.io.OutputStreamWriter;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -255,7 +253,7 @@ public class Utility {
 
   public static void removeCompoundFieldDeclarations(
       Set<Fix> remainingFixes, FieldDeclarationAnalysis fieldDeclarationAnalysis) {
-    List<Fix> toRemove = new ArrayList<>();
+    Set<Fix> toRemove = new HashSet<>();
     remainingFixes
         .stream()
         .filter(fix -> fix.kind.equals(FixType.FIELD.name))
@@ -265,18 +263,22 @@ public class Utility {
                 return;
               }
               Set<String> otherFields =
-                  fieldDeclarationAnalysis.getInLineMultipleFieldDeclarationsOnField(
-                      fix.clazz, fix.variable);
+                  fieldDeclarationAnalysis.getInLineMultipleFieldDeclarationsOnField(fix);
               otherFields.remove(fix.variable);
               if (otherFields.size() > 0) {
                 toRemove.addAll(
                     remainingFixes
                         .stream()
                         .filter(
-                            otherFix ->
-                                otherFix.clazz.equals(fix.clazz)
-                                    && otherFields.contains(otherFix.variable)
-                                    && otherFix.kind.equals(FixType.FIELD.name))
+                            otherFix -> {
+                              if (otherFix.clazz.equals(fix.clazz)
+                                  && otherFields.contains(otherFix.variable)
+                                  && otherFix.kind.equals(FixType.FIELD.name)) {
+                                fix.aliases.add(otherFix);
+                                return true;
+                              }
+                              return false;
+                            })
                         .collect(Collectors.toSet()));
               }
               otherFields.add(fix.variable);
