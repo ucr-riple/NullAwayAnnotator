@@ -18,11 +18,11 @@ public class FieldInitializationNode {
     if (this == o) return true;
     if (!(o instanceof FieldInitializationNode)) return false;
     FieldInitializationNode that = (FieldInitializationNode) o;
-    return initializerLocation.equals(that.initializerLocation) && field.equals(that.field);
+    return initializerLocation.equals(that.initializerLocation);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(initializerLocation.clazz, field);
+    return Objects.hash(initializerLocation.clazz);
   }
 }

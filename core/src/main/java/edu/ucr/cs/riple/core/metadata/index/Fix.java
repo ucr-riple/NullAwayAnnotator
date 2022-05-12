@@ -40,16 +40,12 @@ import org.json.simple.JSONObject;
 public class Fix extends Hashable {
 
   public final Change change;
-  public final LocationType type;
-  public final String uri;
   public final String annotation;
   public final Set<String> reasons;
 
   public Fix(Change change, String reason, String encClass, String endMethod) {
     this.change = change;
     this.annotation = change.annotation;
-    this.uri = change.location.uri;
-    this.type = change.location.type;
     this.encClass = encClass;
     this.encMethod = endMethod;
     this.reasons = reason != null ? Sets.newHashSet(reason) : new HashSet<>();
@@ -59,11 +55,10 @@ public class Fix extends Hashable {
     return infos -> {
       Location location = Location.createLocationFromArrayInfo(infos);
       location.ifField(
-          onField -> {
+          field -> {
             Set<String> variables =
-                analysis.getInLineMultipleFieldDeclarationsOnField(
-                    onField.clazz, onField.variables);
-            onField.variables.addAll(variables);
+                analysis.getInLineMultipleFieldDeclarationsOnField(field.clazz, field.variables);
+            field.variables.addAll(variables);
           });
       return new Fix(new Change(location, infos[7], true), infos[6], infos[8], infos[9]);
     };

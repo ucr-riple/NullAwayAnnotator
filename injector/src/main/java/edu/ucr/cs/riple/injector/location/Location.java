@@ -30,9 +30,9 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.injector.Helper;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Objects;
 import java.util.function.Consumer;
 import org.json.simple.JSONObject;
@@ -71,7 +71,7 @@ public abstract class Location {
     String clazz = infos[1];
     switch (type) {
       case FIELD:
-        return new OnField(uri, clazz, Collections.singleton(infos[3]));
+        return new OnField(uri, clazz, Sets.newHashSet(infos[3]));
       case METHOD:
         return new OnMethod(uri, clazz, infos[2]);
       case PARAMETER:
@@ -179,6 +179,6 @@ public abstract class Location {
 
   @Override
   public int hashCode() {
-    return Objects.hash(type, clazz, uri);
+    return Objects.hash(type, uri, clazz);
   }
 }

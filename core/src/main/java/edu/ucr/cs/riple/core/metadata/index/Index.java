@@ -64,17 +64,10 @@ public class Index<T extends Hashable> {
   public void index() {
     items.clear();
     try (BufferedReader br = Files.newBufferedReader(this.path, UTF_8)) {
-      String entry = "";
       String line = br.readLine();
       if (line != null) line = br.readLine();
       while (line != null) {
-        T item;
-        try {
-          item = factory.build(line.split("\t"));
-        } catch (ArrayIndexOutOfBoundsException e) {
-          throw new java.lang.Error(
-              String.format("Failed to parse entry '%s' on file %s", entry, path), e);
-        }
+        T item = factory.build(line.split("\t"));
         total++;
         int hash;
         if (type.equals(Index.Type.BY_CLASS)) {
@@ -89,7 +82,7 @@ public class Index<T extends Hashable> {
           newList.add(item);
           items.put(hash, newList);
         }
-        line = br.readLine(); // For next iteration
+        line = br.readLine();
       }
     } catch (IOException e) {
       e.printStackTrace();
