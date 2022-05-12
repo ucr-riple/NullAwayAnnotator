@@ -25,7 +25,9 @@
 package edu.ucr.cs.riple.core.metadata.index;
 
 import com.google.common.collect.Sets;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.injector.Change;
+import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.LocationType;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -53,9 +55,18 @@ public class Fix extends Hashable {
     this.reasons = reason != null ? Sets.newHashSet(reason) : new HashSet<>();
   }
 
-  public Fix(String[] infos) {
-    throw new RuntimeException("Not Completed");
-    // this(Change.fromArrayInfo(infos, infos[7]), infos[6], infos[8], infos[9]);
+  public static Factory<Fix> factory(FieldDeclarationAnalysis analysis) {
+    return infos -> {
+      Location location = Location.createLocationFromArrayInfo(infos);
+      location.ifField(
+          onField -> {
+            Set<String> variables =
+                analysis.getInLineMultipleFieldDeclarationsOnField(
+                    onField.clazz, onField.variables);
+            onField.variables.addAll(variables);
+          });
+      return new Fix(new Change(location, infos[7], true), infos[6], infos[8], infos[9]);
+    };
   }
 
   public boolean isOnMethod() {

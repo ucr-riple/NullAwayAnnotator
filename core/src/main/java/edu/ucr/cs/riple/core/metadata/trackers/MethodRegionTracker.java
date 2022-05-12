@@ -55,7 +55,6 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
     return findAllNodes(
             candidate ->
                 candidate.calleeClass.equals(clazz) && candidate.calleeMember.equals(method),
-            method,
             clazz)
         .stream()
         .map(node -> new Region(node.callerMethod, node.callerClass))

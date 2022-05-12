@@ -51,6 +51,8 @@ public class Annotator {
   // Set does not have get method, here we use map which retrieves elements efficiently.
   private final HashMap<Fix, Report> reports;
 
+  private FieldDeclarationAnalysis fieldDeclarationAnalysis;
+
   public Annotator(Config config) {
     this.config = config;
     this.reports = new HashMap<>();
@@ -67,12 +69,13 @@ public class Annotator {
 
   private void preprocess() {
     System.out.println("Preprocessing...");
-    Utility.setCSSCheckerActivation(config, false);
+    Utility.setCSSCheckerActivation(config, true);
     this.reports.clear();
     System.out.println("Making the first build...");
     Utility.buildProject(config, true);
+    fieldDeclarationAnalysis = new FieldDeclarationAnalysis(config.dir.resolve("class_info.tsv"));
     Set<Fix> uninitializedFields =
-        Utility.readFixesFromOutputDirectory(config)
+        Utility.readFixesFromOutputDirectory(config, Fix.factory(fieldDeclarationAnalysis))
             .stream()
             .filter(fix -> fix.reasons.contains("FIELD_NO_INIT") && fix.isOnField())
             .collect(Collectors.toSet());
@@ -93,7 +96,8 @@ public class Annotator {
     Utility.setCSSCheckerActivation(config, false);
     while (true) {
       Utility.buildProject(config);
-      Set<Fix> remainingFixes = Utility.readFixesFromOutputDirectory(config);
+      Set<Fix> remainingFixes =
+          Utility.readFixesFromOutputDirectory(config, Fix.factory(fieldDeclarationAnalysis));
       if (config.useCache) {
         remainingFixes =
             remainingFixes
@@ -101,11 +105,10 @@ public class Annotator {
                 .filter(fix -> !reports.containsKey(fix))
                 .collect(Collectors.toSet());
       }
-      FieldDeclarationAnalysis fieldDeclarationAnalysis =
-          new FieldDeclarationAnalysis(config.dir.resolve("class_info.tsv"));
       ImmutableSet<Fix> fixes = ImmutableSet.copyOf(remainingFixes);
       Bank<Error> errorBank = new Bank<>(config.dir.resolve("errors.tsv"), Error::new);
-      Bank<Fix> fixBank = new Bank<>(config.dir.resolve("fixes.tsv"), Fix::new);
+      Bank<Fix> fixBank =
+          new Bank<>(config.dir.resolve("fixes.tsv"), Fix.factory(fieldDeclarationAnalysis));
       MethodInheritanceTree tree =
           new MethodInheritanceTree(config.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
       RegionTracker tracker = new CompoundTracker(config.dir, tree);

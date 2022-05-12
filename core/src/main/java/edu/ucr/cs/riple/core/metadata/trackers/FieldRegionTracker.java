@@ -26,8 +26,10 @@ package edu.ucr.cs.riple.core.metadata.trackers;
 
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.injector.location.OnField;
 import java.nio.file.Path;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
 
@@ -45,6 +47,14 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
     if (!fix.isOnField()) {
       return null;
     }
-    throw new RuntimeException("Not implemented");
+    OnField field = fix.toField();
+    return findAllNodes(
+            candidate ->
+                candidate.calleeClass.equals(field.clazz)
+                    && field.variables.contains(candidate.calleeMember),
+            field.clazz)
+        .stream()
+        .map(trackerNode -> new Region(trackerNode.callerMethod, trackerNode.callerClass))
+        .collect(Collectors.toSet());
   }
 }

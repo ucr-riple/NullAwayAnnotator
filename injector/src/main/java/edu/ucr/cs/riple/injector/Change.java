@@ -67,16 +67,4 @@ public class Change {
   public Change duplicate() {
     return new Change(location.duplicate(), annotation, inject);
   }
-
-  /**
-   * Creates a Change instance from array of info, this array info is typically coming from a line
-   * in a TSV file with the format: (location class method param index uri annotation inject)
-   *
-   * @param infos array of info (a line from TSV file).
-   * @return a Change instance corresponding values in infos.
-   */
-  public static Change fromArrayInfo(String[] infos) {
-    Location location = Location.createLocationFromArrayInfo(infos);
-    return new Change(location, infos[6], Boolean.parseBoolean(infos[7]));
-  }
 }

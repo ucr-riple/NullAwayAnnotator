@@ -53,6 +53,6 @@ public class TrackerNode {
 
   @Override
   public int hashCode() {
-    return Objects.hash(calleeMember, calleeClass);
+    return Objects.hash(calleeClass);
   }
 }

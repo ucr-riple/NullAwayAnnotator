@@ -29,6 +29,7 @@ import com.google.common.primitives.Booleans;
 import com.uber.nullaway.fixserialization.FixSerializationConfig;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.metadata.index.Factory;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -142,7 +143,7 @@ public class Utility {
     return Arrays.stream(content.split(",")).toArray(String[]::new);
   }
 
-  public static Set<Fix> readFixesFromOutputDirectory(Config config) {
+  public static Set<Fix> readFixesFromOutputDirectory(Config config, Factory<Fix> factory) {
     Path fixesPath = config.dir.resolve("fixes.tsv");
     Set<Fix> fixes = new HashSet<>();
     try {
@@ -150,7 +151,7 @@ public class Utility {
         String line;
         br.readLine();
         while ((line = br.readLine()) != null) {
-          Fix fix = new Fix(line.split("\t"));
+          Fix fix = factory.build(line.split("\t"));
           Optional<Fix> existing = fixes.stream().filter(other -> other.equals(fix)).findAny();
           if (existing.isPresent()) {
             existing.get().reasons.addAll(fix.reasons);
