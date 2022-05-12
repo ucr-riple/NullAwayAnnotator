@@ -1,6 +1,10 @@
 package edu.ucr.cs.riple.injector;
 
+import edu.ucr.cs.riple.injector.location.Field;
+import edu.ucr.cs.riple.injector.location.Method;
+import edu.ucr.cs.riple.injector.location.Parameter;
 import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
+import java.util.Collections;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -31,13 +35,12 @@ public class RemovalTest {
             "}")
         .addChanges(
             new Change(
+                new Method(
+                    "Super.java",
+                    "com.uber.Super",
+                    "test(@javax.annotation.Nullable java.lang.Object)"),
                 "javax.annotation.Nullable",
-                "test(@javax.annotation.Nullable java.lang.Object)",
-                "",
-                "METHOD",
-                "com.uber.Super",
-                "Super.java",
-                "false"))
+                false))
         .start();
   }
 
@@ -64,13 +67,14 @@ public class RemovalTest {
             "}")
         .addChanges(
             new Change(
+                new Parameter(
+                    "Super.java",
+                    "com.uber.Super",
+                    "test(@javax.annotation.Nullable java.lang.Object)",
+                    "o",
+                    0),
                 "javax.annotation.Nullable",
-                "test(@javax.annotation.Nullable java.lang.Object)",
-                "o",
-                "PARAMETER",
-                "com.uber.Super",
-                "Super.java",
-                "false"))
+                false))
         .start();
   }
 
@@ -97,13 +101,14 @@ public class RemovalTest {
             "}")
         .addChanges(
             new Change(
+                new Parameter(
+                    "Super.java",
+                    "com.uber.Super",
+                    "test(@javax.annotation.Nullable java.lang.Object)",
+                    "o",
+                    0),
                 "javax.annotation.Nullable",
-                "test(@javax.annotation.Nullable java.lang.Object)",
-                "o",
-                "PARAMETER",
-                "com.uber.Super",
-                "Super.java",
-                "false"))
+                false))
         .start();
   }
 
@@ -132,13 +137,9 @@ public class RemovalTest {
             "}")
         .addChanges(
             new Change(
+                new Field("Super.java", "com.uber.Super", Collections.singleton("f")),
                 "javax.annotation.Nullable",
-                "",
-                "f",
-                "FIELD",
-                "com.uber.Super",
-                "Super.java",
-                "false"))
+                false))
         .start();
   }
 }

@@ -1,5 +1,7 @@
 package edu.ucr.cs.riple.injector;
 
+import edu.ucr.cs.riple.injector.location.Method;
+import edu.ucr.cs.riple.injector.location.Parameter;
 import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,21 +53,13 @@ public class MethodInjectionTest {
             "}")
         .addChanges(
             new Change(
+                new Method("Super.java", "com.uber.Super", "test(boolean)"),
                 "javax.annotation.Nullable",
-                "test(boolean)",
-                "",
-                "METHOD",
-                "com.uber.Super",
-                "Super.java",
-                "true"),
+                true),
             new Change(
+                new Method("com/Superb.java", "com.uber.Superb", "test(boolean)"),
                 "javax.annotation.Nullable",
-                "test(boolean)",
-                "",
-                "METHOD",
-                "com.uber.Superb",
-                "com/Superb.java",
-                "true"))
+                true))
         .start();
   }
 
@@ -100,13 +94,9 @@ public class MethodInjectionTest {
             "}")
         .addChanges(
             new Change(
+                new Method("Main.java", "com.uber.Main$Test", "run()"),
                 "javax.annotation.Nullable",
-                "run()",
-                "",
-                "METHOD",
-                "com.uber.Main$Test",
-                "Main.java",
-                "true"))
+                true))
         .start();
   }
 
@@ -149,13 +139,9 @@ public class MethodInjectionTest {
             "}")
         .addChanges(
             new Change(
+                new Method("Super.java", "com.uber.Super$SuperInner", "bar(java.lang.Object)"),
                 "javax.annotation.Nullable",
-                "bar(java.lang.Object)",
-                "",
-                "METHOD",
-                "com.uber.Super$SuperInner",
-                "Super.java",
-                "true"))
+                true))
         .start();
   }
 
@@ -187,13 +173,9 @@ public class MethodInjectionTest {
             "}")
         .addChanges(
             new Change(
+                new Method("Main.java", "com.uber.Main$1Helper", "run()"),
                 "javax.annotation.Nullable",
-                "run()",
-                "null",
-                "METHOD",
-                "com.uber.Main$1Helper",
-                "Main.java",
-                "true"))
+                true))
         .start();
   }
 
@@ -240,21 +222,14 @@ public class MethodInjectionTest {
             "}")
         .addChanges(
             new Change(
+                new Method("Super.java", "com.uber.Super", "test(Object, String, String)"),
                 "javax.annotation.Nullable",
-                "test(Object, String, String)",
-                "",
-                "METHOD",
-                "com.uber.Super",
-                "Super.java",
-                "true"),
+                true),
             new Change(
+                new Parameter(
+                    "Super.java", "com.uber.Super", "test(Object, Object, String)", "name", 1),
                 "javax.annotation.Nullable",
-                "test(Object, Object, String)",
-                "name",
-                "PARAMETER",
-                "com.uber.Super",
-                "Super.java",
-                "true"))
+                true))
         .start();
   }
 
@@ -312,21 +287,16 @@ public class MethodInjectionTest {
             "}")
         .addChanges(
             new Change(
+                new Method("Super.java", "com.uber.Super", "getPredNodeNumbers(T)"),
                 "javax.annotation.Nullable",
-                "getPredNodeNumbers(T)",
-                "",
-                "METHOD",
-                "com.uber.Super",
-                "Super.java",
-                "true"),
+                true),
             new Change(
+                new Method(
+                    "Super.java",
+                    "com.uber.Super",
+                    "computeResult(com.ibm.wala.ipa.slicer.Statement,java.util.Map<com.ibm.wala.ipa.callgraph.propagation.PointerKey,com.ibm.wala.util.intset.MutableIntSet>,com.ibm.wala.dataflow.graph.BitVectorSolver<? extends com.ibm.wala.ssa.ISSABasicBlock>,com.ibm.wala.util.intset.OrdinalSetMapping<com.ibm.wala.ipa.slicer.Statement>,com.ibm.wala.ipa.callgraph.CGNode,com.ibm.wala.ipa.modref.ExtendedHeapModel,com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis<T>,java.util.Map<com.ibm.wala.ipa.callgraph.CGNode,com.ibm.wala.util.intset.OrdinalSet<com.ibm.wala.ipa.callgraph.propagation.PointerKey>>,com.ibm.wala.ssa.analysis.ExplodedControlFlowGraph,java.util.Map<java.lang.Integer,com.ibm.wala.ipa.slicer.NormalStatement>)"),
                 "javax.annotation.Nullable",
-                "computeResult(com.ibm.wala.ipa.slicer.Statement,java.util.Map<com.ibm.wala.ipa.callgraph.propagation.PointerKey,com.ibm.wala.util.intset.MutableIntSet>,com.ibm.wala.dataflow.graph.BitVectorSolver<? extends com.ibm.wala.ssa.ISSABasicBlock>,com.ibm.wala.util.intset.OrdinalSetMapping<com.ibm.wala.ipa.slicer.Statement>,com.ibm.wala.ipa.callgraph.CGNode,com.ibm.wala.ipa.modref.ExtendedHeapModel,com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis<T>,java.util.Map<com.ibm.wala.ipa.callgraph.CGNode,com.ibm.wala.util.intset.OrdinalSet<com.ibm.wala.ipa.callgraph.propagation.PointerKey>>,com.ibm.wala.ssa.analysis.ExplodedControlFlowGraph,java.util.Map<java.lang.Integer,com.ibm.wala.ipa.slicer.NormalStatement>)",
-                "",
-                "METHOD",
-                "com.uber.Super",
-                "Super.java",
-                "true"))
+                true))
         .start();
   }
 
@@ -357,13 +327,12 @@ public class MethodInjectionTest {
             "}")
         .addChanges(
             new Change(
+                new Method(
+                    "Super.java",
+                    "com.uber.Super",
+                    "getTargetForCall(com.ibm.wala.ipa.callgraph.CGNode[],com.ibm.wala.classLoader.CallSiteReference[][][],com.ibm.wala.classLoader.IClass,com.ibm.wala.ipa.callgraph.propagation.InstanceKey[][])"),
                 "javax.annotation.Nullable",
-                "getTargetForCall(com.ibm.wala.ipa.callgraph.CGNode[],com.ibm.wala.classLoader.CallSiteReference[][][],com.ibm.wala.classLoader.IClass,com.ibm.wala.ipa.callgraph.propagation.InstanceKey[][])",
-                "",
-                "METHOD",
-                "com.uber.Super",
-                "Super.java",
-                "true"))
+                true))
         .start(true);
   }
 
@@ -392,13 +361,12 @@ public class MethodInjectionTest {
             "}")
         .addChanges(
             new Change(
+                new Method(
+                    "Super.java",
+                    "com.uber.Super",
+                    "<T>getReader(com.ibm.wala.shrikeCT.ClassReader.AttrIterator,java.lang.String,com.ibm.wala.classLoader.ShrikeClass.GetReader<T>)"),
                 "javax.annotation.Nullable",
-                "<T>getReader(com.ibm.wala.shrikeCT.ClassReader.AttrIterator,java.lang.String,com.ibm.wala.classLoader.ShrikeClass.GetReader<T>)",
-                "",
-                "METHOD",
-                "com.uber.Super",
-                "Super.java",
-                "true"))
+                true))
         .start();
   }
 
@@ -426,13 +394,10 @@ public class MethodInjectionTest {
             "}")
         .addChanges(
             new Change(
+                new Method(
+                    "Main.java", "com.uber.Main", "format(java.lang.String,java.lang.Object...)"),
                 "javax.annotation.Initializer",
-                "format(java.lang.String,java.lang.Object...)",
-                "",
-                "METHOD",
-                "com.uber.Main",
-                "Main.java",
-                "true"))
+                true))
         .start();
   }
 }

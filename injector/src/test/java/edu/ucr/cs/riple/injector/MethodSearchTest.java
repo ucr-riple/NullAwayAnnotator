@@ -1,5 +1,6 @@
 package edu.ucr.cs.riple.injector;
 
+import edu.ucr.cs.riple.injector.location.Method;
 import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,13 +32,10 @@ public class MethodSearchTest {
             "}")
         .addChanges(
             new Change(
+                new Method(
+                    "Main.java", "com.uber.Main", "Main(java.lang.String,java.lang.Object...)"),
                 "javax.annotation.Initializer",
-                "Main(java.lang.String,java.lang.Object...)",
-                "",
-                "METHOD",
-                "com.uber.Main",
-                "Main.java",
-                "true"))
+                true))
         .start();
   }
 
@@ -78,13 +76,9 @@ public class MethodSearchTest {
             "}")
         .addChanges(
             new Change(
+                new Method("Super.java", "com.uber.Super", "test()"),
                 "javax.annotation.Nullable",
-                "test()",
-                "",
-                "METHOD",
-                "com.uber.Super",
-                "Super.java",
-                "true"))
+                true))
         .start();
   }
 }

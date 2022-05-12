@@ -1,6 +1,8 @@
 package edu.ucr.cs.riple.injector;
 
+import edu.ucr.cs.riple.injector.location.Field;
 import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
+import java.util.Collections;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -35,13 +37,9 @@ public class FieldInjectionTest {
             "}")
         .addChanges(
             new Change(
+                new Field("Super.java", "com.uber.Super", Collections.singleton("h")),
                 "javax.annotation.Nullable",
-                "",
-                "h",
-                "FIELD",
-                "com.uber.Super",
-                "Super.java",
-                "true"))
+                true))
         .start();
   }
 }

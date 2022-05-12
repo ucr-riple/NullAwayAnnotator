@@ -1,6 +1,9 @@
 package edu.ucr.cs.riple.injector;
 
+import edu.ucr.cs.riple.injector.location.Field;
+import edu.ucr.cs.riple.injector.location.Method;
 import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
+import java.util.Collections;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -45,13 +48,9 @@ public class LexicalPreservationTest {
             "}")
         .addChanges(
             new Change(
+                new Method("Super.java", "com.uber.Super", "test()"),
                 "javax.annotation.Nullable",
-                "test()",
-                "",
-                "METHOD",
-                "com.uber.Super",
-                "Super.java",
-                "true"))
+                true))
         .start(true);
   }
 
@@ -214,13 +213,9 @@ public class LexicalPreservationTest {
             "}")
         .addChanges(
             new Change(
+                new Method("Super.java", "com.uber.Super", "test()"),
                 "javax.annotation.Nullable",
-                "test()",
-                "",
-                "METHOD",
-                "com.uber.Super",
-                "Super.java",
-                "true"))
+                true))
         .start(true);
   }
 
@@ -260,13 +255,9 @@ public class LexicalPreservationTest {
             "}")
         .addChanges(
             new Change(
+                new Method("Super.java", "com.uber.Super", "test()"),
                 "javax.annotation.Nullable",
-                "test()",
-                "",
-                "METHOD",
-                "com.uber.Super",
-                "Super.java",
-                "true"))
+                true))
         .start(true);
   }
 
@@ -297,21 +288,13 @@ public class LexicalPreservationTest {
             "}")
         .addChanges(
             new Change(
+                new Field("B.java", "com.uber.B", Collections.singleton("allTest")),
                 "javax.annotation.Nullable",
-                "",
-                "allTest",
-                "FIELD",
-                "com.uber.B",
-                "B.java",
-                "true"),
+                true),
             new Change(
+                new Field("A.java", "com.uber.A", Collections.singleton("allTest")),
                 "javax.annotation.Nullable",
-                "",
-                "allTest",
-                "FIELD",
-                "com.uber.A",
-                "A.java",
-                "true"))
+                true))
         .start(true);
   }
 }
