@@ -38,7 +38,8 @@ public class Class {
         this.methods
             .stream()
             .filter(
-                method -> method.signature.equals(fieldInitializationNode.initializerLocation.method))
+                method ->
+                    method.signature.equals(fieldInitializationNode.initializerLocation.method))
             .findAny();
     if (optionalMethod.isPresent()) {
       optionalMethod.get().fields.add(fieldInitializationNode.field);

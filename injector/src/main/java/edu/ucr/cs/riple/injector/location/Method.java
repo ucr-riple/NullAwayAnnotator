@@ -9,7 +9,7 @@ public class Method extends Location {
   final String method;
 
   public Method(String clazz, String uri, String method) {
-    super("METHOD", clazz, uri);
+    super(LocationType.METHOD, clazz, uri);
     this.method = method;
   }
 

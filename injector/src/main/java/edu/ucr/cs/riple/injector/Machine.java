@@ -27,10 +27,6 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.AnnotationExpr;
-import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.printer.DefaultPrettyPrinter;
 import com.github.javaparser.printer.configuration.DefaultPrinterConfiguration;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
@@ -59,7 +55,7 @@ public class Machine {
     this.keep = keep;
     this.printer = new DefaultPrettyPrinter(new DefaultPrinterConfiguration());
     AtomicInteger sum = new AtomicInteger();
-    workLists.forEach(workList -> sum.addAndGet(workList.getLocations().size()));
+    workLists.forEach(workList -> sum.addAndGet(workList.getChanges().size()));
     this.total = sum.get();
   }
 
@@ -90,7 +86,7 @@ public class Machine {
       } catch (FileNotFoundException exception) {
         continue;
       }
-      for (Change location : workList.getLocations()) {
+      for (Change location : workList.getChanges()) {
         try {
           if (Injector.LOG) {
             pb.step();
@@ -112,6 +108,7 @@ public class Machine {
 
   private boolean applyChange(CompilationUnit tree, Change change) {
     boolean success = false;
+
     NodeList<BodyDeclaration<?>> clazz =
         Helper.getClassOrInterfaceOrEnumDeclarationMembersByFlatName(tree, change.clazz);
     if (clazz == null) {
@@ -150,91 +147,5 @@ public class Machine {
         .noneMatch(
             impDecl ->
                 Helper.simpleName(impDecl.getNameAsString()).equals(Helper.simpleName(annotation)));
-  }
-
-  private static void applyAnnotation(
-      NodeWithAnnotations<?> node, String annotName, boolean inject) {
-    final String annotSimpleName = Helper.simpleName(annotName);
-    NodeList<AnnotationExpr> annots = node.getAnnotations();
-    boolean exists =
-        annots
-            .stream()
-            .anyMatch(
-                annot -> {
-                  String thisAnnotName = annot.getNameAsString();
-                  return thisAnnotName.equals(annotName) || thisAnnotName.equals(annotSimpleName);
-                });
-    if (inject && !exists) {
-      node.addMarkerAnnotation(annotSimpleName);
-    }
-    if (!inject) {
-      annots.removeIf(
-          annot -> {
-            String thisAnnotName = annot.getNameAsString();
-            return thisAnnotName.equals(annotName) || thisAnnotName.equals(annotSimpleName);
-          });
-    }
-  }
-
-  private boolean applyMethodParam(NodeList<BodyDeclaration<?>> members, Change location) {
-    final boolean[] success = {false};
-    members.forEach(
-        bodyDeclaration ->
-            bodyDeclaration.ifCallableDeclaration(
-                callableDeclaration -> {
-                  if (Helper.matchesCallableSignature(callableDeclaration, location.method)) {
-                    for (Object p : callableDeclaration.getParameters()) {
-                      if (p instanceof Parameter) {
-                        Parameter param = (Parameter) p;
-                        if (param.getName().toString().equals(location.variable)) {
-                          applyAnnotation(
-                              param, location.annotation, Boolean.parseBoolean(location.inject));
-                          success[0] = true;
-                        }
-                      }
-                    }
-                  }
-                }));
-    return success[0];
-  }
-
-  private boolean applyMethodReturn(NodeList<BodyDeclaration<?>> members, Change location) {
-    final boolean[] success = {false};
-    members.forEach(
-        bodyDeclaration ->
-            bodyDeclaration.ifCallableDeclaration(
-                callableDeclaration -> {
-                  if (Helper.matchesCallableSignature(callableDeclaration, location.method)) {
-                    applyAnnotation(
-                        callableDeclaration,
-                        location.annotation,
-                        Boolean.parseBoolean(location.inject));
-                    success[0] = true;
-                  }
-                }));
-    return success[0];
-  }
-
-  private boolean applyClassField(NodeList<BodyDeclaration<?>> members, Change location) {
-    final boolean[] success = {false};
-    members.forEach(
-        bodyDeclaration ->
-            bodyDeclaration.ifFieldDeclaration(
-                fieldDeclaration -> {
-                  NodeList<VariableDeclarator> vars =
-                      fieldDeclaration.asFieldDeclaration().getVariables();
-                  for (VariableDeclarator v : vars) {
-                    if (v.getName().toString().equals(location.variable)) {
-                      applyAnnotation(
-                          fieldDeclaration,
-                          location.annotation,
-                          Boolean.parseBoolean(location.inject));
-                      success[0] = true;
-                      break;
-                    }
-                  }
-                }));
-
-    return success[0];
   }
 }

@@ -3,7 +3,6 @@ package edu.ucr.cs.riple.injector.location;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
-
 import java.util.HashSet;
 import java.util.Set;
 import org.json.simple.JSONArray;
@@ -13,7 +12,7 @@ public class Field extends Location {
   final Set<String> variables;
 
   public Field(String clazz, String uri, Set<String> variables) {
-    super("FIELD", clazz, uri);
+    super(LocationType.FIELD, clazz, uri);
     this.variables = variables;
   }
 

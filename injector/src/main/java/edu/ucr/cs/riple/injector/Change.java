@@ -22,9 +22,8 @@
 
 package edu.ucr.cs.riple.injector;
 
-import java.util.Objects;
-
 import edu.ucr.cs.riple.injector.location.Location;
+import java.util.Objects;
 import org.json.simple.JSONObject;
 
 @SuppressWarnings("unchecked")
@@ -33,33 +32,15 @@ public class Change {
   public final String annotation;
   public final boolean inject;
 
-  public Change(
-      Location location,
-      String annotation,
-      boolean inject) {
+  public Change(Location location, String annotation, boolean inject) {
     this.annotation = annotation;
     this.location = location;
     this.inject = inject;
   }
 
-  public static Change createFromJson(JSONObject locationJson) {
-    String uri = locationJson.get(Location.KEYS.URI).toString();
-    String file = "file:/";
-    if (uri.contains(file)) uri = uri.substring(uri.indexOf(file) + file.length());
-    String clazz = locationJson.get(Location.KEYS.CLASS).toString();
-    Change location =
-        new Change(
-            locationJson.get(Location.KEYS.ANNOTATION).toString(),
-            locationJson.get(Location.KEYS.METHOD).toString(),
-            locationJson.get(Location.KEYS.VARIABLES).toString(),
-            locationJson.get(KEYS.LOCATION.label).toString(),
-            clazz,
-            uri,
-            locationJson.get(KEYS.INJECT.label).toString());
-    if (locationJson.get(KEYS.INDEX.label) != null) {
-      location.index = locationJson.get(KEYS.INDEX.label).toString();
-    }
-    return location;
+  public static Change fromValuesInString(String[] split) {
+    // location	class	method	param	index	uri
+    return null;
   }
 
   @Override
@@ -67,8 +48,7 @@ public class Change {
     if (this == o) return true;
     if (!(o instanceof Change)) return false;
     Change other = (Change) o;
-    return Objects.equals(location, other.location)
-        && Objects.equals(annotation, other.annotation);
+    return Objects.equals(location, other.location) && Objects.equals(annotation, other.annotation);
   }
 
   @Override
@@ -85,13 +65,18 @@ public class Change {
   }
 
   public Change duplicate() {
-    return new Change(location.duplicate(), annotation,, inject);
+    return new Change(location.duplicate(), annotation, inject);
   }
 
-  public static Change fromArrayInfo(String[] infos, String annotation) {
-    Change location =
-        new Change(annotation, infos[2], infos[3], infos[0], infos[1], infos[5], "true");
-    location.index = infos[4];
-    return location;
+  /**
+   * Creates a Change instance from array of info, this array info is typically coming from a line
+   * in a TSV file with the format: (location class method param index uri annotation inject)
+   *
+   * @param infos array of info (a line from TSV file).
+   * @return a Change instance corresponding values in infos.
+   */
+  public static Change fromArrayInfo(String[] infos) {
+    Location location = Location.createLocationFromArrayInfo(infos);
+    return new Change(location, infos[6], Boolean.parseBoolean(infos[7]));
   }
 }

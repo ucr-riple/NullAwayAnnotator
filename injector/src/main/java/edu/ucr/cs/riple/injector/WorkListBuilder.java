@@ -24,7 +24,6 @@ package edu.ucr.cs.riple.injector;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -32,63 +31,50 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 public class WorkListBuilder {
-  private String filePath;
-  private Collection<Change> locations;
+  private final Collection<Change> changes;
 
   public WorkListBuilder(String filePath) {
-    this.filePath = filePath;
-    readLocations();
-  }
-
-  private void readLocations() {
+    changes = new ArrayList<>();
+    BufferedReader reader;
     try {
-      BufferedReader bufferedReader =
-          Files.newBufferedReader(Paths.get(filePath), Charset.defaultCharset());
-      JSONObject obj = (JSONObject) new JSONParser().parse(bufferedReader);
-      JSONArray locationsJson = (JSONArray) obj.get("locations");
-      bufferedReader.close();
-      locations = new ArrayList<>();
-      for (Object o : locationsJson) {
-        locations.add(Change.createFromJson((JSONObject) o));
+      reader = Files.newBufferedReader(Paths.get(filePath), Charset.defaultCharset());
+      String line = reader.readLine();
+      while (line != null) {
+        Change output = Change.fromArrayInfo(line.split("\\t"));
+        changes.add(output);
+        line = reader.readLine();
       }
-    } catch (FileNotFoundException ex) {
-      throw new RuntimeException("Unable to open file: " + this.filePath);
-    } catch (IOException ex) {
-      throw new RuntimeException("Error reading file: " + this.filePath);
-    } catch (ParseException e) {
-      throw new RuntimeException("Error in parsing object: " + e);
+      reader.close();
+    } catch (IOException e) {
+      throw new RuntimeException("Error happened in reading the outputs.", e);
     }
   }
 
-  public WorkListBuilder(Collection<Change> locations) {
-    if (locations == null) {
+  public WorkListBuilder(Collection<Change> changes) {
+    if (changes == null) {
       throw new RuntimeException("location array cannot be null");
     }
-    this.locations = locations;
+    this.changes = changes;
   }
 
   public List<WorkList> getWorkLists() {
     ArrayList<String> uris = new ArrayList<>();
     ArrayList<WorkList> workLists = new ArrayList<>();
-    for (Change location : this.locations) {
-      if (!new File(location.uri).exists() && location.uri.startsWith("file:")) {
-        location.uri = location.uri.substring("file:".length());
+    for (Change change : this.changes) {
+      if (!new File(change.location.uri).exists() && change.location.uri.startsWith("file:")) {
+        change.location.uri = change.location.uri.substring("file:".length());
       }
-      if (!uris.contains(location.uri)) {
-        uris.add(location.uri);
-        WorkList workList = new WorkList(location.uri);
+      if (!uris.contains(change.location.uri)) {
+        uris.add(change.location.uri);
+        WorkList workList = new WorkList(change.location.uri);
         workLists.add(workList);
-        workList.addLocation(location);
+        workList.addLocation(change);
       } else {
         for (WorkList workList : workLists) {
-          if (workList.getUri().equals(location.uri)) {
-            workList.addLocation(location);
+          if (workList.getUri().equals(change.location.uri)) {
+            workList.addLocation(change);
             break;
           }
         }

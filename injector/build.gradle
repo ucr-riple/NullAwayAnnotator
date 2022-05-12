@@ -28,8 +28,8 @@ plugins {
 }
 
 dependencies {
-    implementation group: 'com.google.guava', name: 'guava', version: 'r05'
-    testImplementation group: 'com.google.guava', name: 'guava', version: 'r05'
+    implementation group: 'com.google.guava', name: 'guava', version:"${deps.versions.guava}"
+    testImplementation group: 'com.google.guava', name: 'guava', version:"${deps.versions.guava}"
 
     implementation group: 'com.github.javaparser', name:'javaparser-core', version:"${deps.versions.javaparser}"
     testImplementation group: 'com.github.javaparser', name:'javaparser-core', version:"${deps.versions.javaparser}"

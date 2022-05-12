@@ -3,6 +3,7 @@ package edu.ucr.cs.riple.core.metadata.field;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.Change;
+import edu.ucr.cs.riple.injector.location.Location;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;

@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,7 +53,7 @@ public class InjectorTestHelper {
 
   private final Map<String, String> fileMap;
   private final ArrayList<Change> locations;
-  private String rootPath;
+  private Path rootPath;
 
   public InjectorTestHelper() {
     locations = new ArrayList<>();
@@ -60,7 +61,7 @@ public class InjectorTestHelper {
   }
 
   public InjectorTestHelperOutput addInput(String path, String... input) {
-    if (rootPath == null || rootPath.equals("")) {
+    if (rootPath == null) {
       throw new RuntimeException("Root path must be set before calling addInput");
     }
     String pathToInputFile = writeToFile("src/" + path, input);
@@ -68,7 +69,7 @@ public class InjectorTestHelper {
   }
 
   public InjectorTestHelperOutput addInputSourceFile(String path, String inputFilePath) {
-    if (rootPath == null || rootPath.equals("")) {
+    if (rootPath == null) {
       throw new RuntimeException("Root path must be set before calling addInput");
     }
     String pathToInputFile = writeToFile("src/" + path, readLinesOfFile(inputFilePath));
@@ -76,13 +77,13 @@ public class InjectorTestHelper {
   }
 
   public InjectorTestHelper addLocations(Change... locations) {
-    for (Change f : locations) f.uri = rootPath.concat("/src/").concat(f.uri);
+    for (Change f : locations) f.uri = rootPath.resolve("/src/").resolve(f.uri);
     this.locations.addAll(Arrays.asList(locations));
     return this;
   }
 
   public InjectorTestHelper setRootPath(String path) {
-    this.rootPath = path;
+    this.rootPath = Paths.get(path);
     makeDirectories();
     return this;
   }

@@ -5,16 +5,19 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.injector.Helper;
+import java.util.Arrays;
+import java.util.Collections;
 import org.json.simple.JSONObject;
 
 public abstract class Location {
-  public final String kind;
+  public final LocationType type;
   public final String clazz;
-  public final String uri;
+  public String uri;
 
-  public Location(String kind, String clazz, String uri) {
-    this.kind = kind;
+  public Location(LocationType type, String clazz, String uri) {
+    this.type = type;
     this.clazz = clazz;
     this.uri = uri;
   }
@@ -47,7 +50,7 @@ public abstract class Location {
   public JSONObject getJson() {
     JSONObject res = new JSONObject();
     res.put(KEYS.CLASS, clazz);
-    res.put(KEYS.KIND, kind);
+    res.put(KEYS.KIND, type);
     res.put(KEYS.URI, uri);
     fillJsonInformation(res);
     return res;
@@ -81,4 +84,23 @@ public abstract class Location {
 
   protected abstract boolean applyToMember(
       NodeList<BodyDeclaration<?>> clazz, String annotation, boolean inject);
+
+  public static Location createLocationFromArrayInfo(String[] infos) {
+    Preconditions.checkArgument(
+        infos.length >= 6,
+        "Expected at least 6 arguments to create a Location instance but found: "
+            + Arrays.toString(infos));
+    LocationType type = LocationType.getType(infos[0]);
+    String uri = infos[5];
+    String clazz = infos[1];
+    switch (type) {
+      case FIELD:
+        return new Field(clazz, uri, Collections.singleton(infos[3]));
+      case METHOD:
+        return new Method(clazz, uri, infos[2]);
+      case PARAMETER:
+        return new Parameter(clazz, uri, infos[2], infos[3], Integer.parseInt(infos[4]));
+    }
+    throw new RuntimeException("Cannot reach this statement, infos: " + Arrays.toString(infos));
+  }
 }
