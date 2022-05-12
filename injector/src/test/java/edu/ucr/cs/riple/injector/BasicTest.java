@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.injector;
 
+import edu.ucr.cs.riple.injector.location.Method;
 import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,17 +36,11 @@ public class BasicTest {
   @Test
   public void skip_duplicate_annotation() {
     String rootName = "skip_duplicate_annotation";
-
     Change Change =
         new Change(
+            new Method("Super.java", "com.uber.Super", "test()"),
             "javax.annotation.Nullable",
-            "test()",
-            "",
-            "METHOD",
-            "com.uber.Super",
-            "Super.java",
-            "true");
-
+            true);
     new InjectorTestHelper()
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInput(
@@ -93,13 +88,12 @@ public class BasicTest {
             "}")
         .addChanges(
             new Change(
+                new Method(
+                    "Super.java",
+                    "com.uber.Super",
+                    "test(@javax.annotation.Nullable java.lang.Object)"),
                 "javax.annotation.Nullable",
-                "test(@javax.annotation.Nullable java.lang.Object)",
-                "",
-                "METHOD",
-                "com.uber.Super",
-                "Super.java",
-                "true"))
+                true))
         .start();
   }
 
@@ -136,13 +130,9 @@ public class BasicTest {
             "}")
         .addChanges(
             new Change(
+                new Method("Main.java", "com.uber.Main$Test", "run()"),
                 "javax.annotation.Nullable",
-                "run()",
-                "",
-                "METHOD",
-                "com.uber.Main$Test",
-                "Main.java",
-                "true"))
+                true))
         .start();
   }
 
@@ -180,13 +170,9 @@ public class BasicTest {
             "}")
         .addChanges(
             new Change(
+                new Method("Main.java", "com.uber.Main$Test", "run()"),
                 "javax.annotation.Nullable",
-                "run()",
-                "",
-                "METHOD",
-                "com.uber.Main$Test",
-                "Main.java",
-                "true"))
+                true))
         .start();
   }
 }

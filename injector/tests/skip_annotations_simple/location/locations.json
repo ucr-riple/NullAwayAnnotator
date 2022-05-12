@@ -1,1 +1,0 @@
-{"locations":[{"annotation":"javax.annotation.Nullable","method":"test(@javax.annotation.Nullable java.lang.Object)","kind":"METHOD","variable":"","index":null,"class":"com.uber.Super","pkg":"com.uber","inject":"true","uri":"/Users/nima/Developer/NullAwayFixer/NullAwayAnnotator/injector/tests/skip_annotations_simple/src/Super.java"}]}

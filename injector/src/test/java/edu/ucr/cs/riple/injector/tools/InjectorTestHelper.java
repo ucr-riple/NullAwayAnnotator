@@ -81,7 +81,7 @@ public class InjectorTestHelper {
             change ->
                 change.location.uri =
                     rootPath
-                        .resolve("/src/")
+                        .resolve("src")
                         .resolve(change.location.uri)
                         .toAbsolutePath()
                         .toString());
@@ -136,7 +136,7 @@ public class InjectorTestHelper {
   }
 
   private void makeDirectories() {
-    String[] names = {"src", "out", "expected", "location"};
+    String[] names = {"src", "out", "expected"};
     for (String name : names) {
       String pathToDirectory = rootPath + "/" + name;
       try {

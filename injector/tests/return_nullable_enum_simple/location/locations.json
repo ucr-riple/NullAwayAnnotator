@@ -1,1 +1,0 @@
-{"locations":[{"annotation":"javax.annotation.Nullable","method":"run()","kind":"METHOD","variable":"","index":null,"class":"com.uber.Main$Test","pkg":"com.uber","inject":"true","uri":"/Users/nima/Developer/NullAwayFixer/NullAwayAnnotator/injector/tests/return_nullable_enum_simple/src/Main.java"}]}
