@@ -7,14 +7,11 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.google.common.collect.Sets;
-import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.metadata.MetaData;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.Helper;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -57,12 +54,7 @@ public class FieldDeclarationAnalysis extends MetaData<FieldDeclarationInfo> {
     }
   }
 
-  public Set<String> getInLineMultipleFieldDeclarationsOnField(Fix fix) {
-    String clazz = fix.clazz;
-    String field = fix.variable;
-    if (!fix.change.kind.equals(FixType.FIELD.name)) {
-      return new HashSet<>();
-    }
+  public Set<String> getInLineMultipleFieldDeclarationsOnField(String clazz, String field) {
     FieldDeclarationInfo candidate = findNode(node -> node.clazz.equals(clazz), clazz);
     if (candidate == null) {
       return Sets.newHashSet(field);

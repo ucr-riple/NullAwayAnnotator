@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.AnnotationInjector;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.graph.FixGraph;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
@@ -18,14 +17,12 @@ public abstract class Explorer {
   protected final ImmutableSet<Report> reports;
   protected final Config config;
   protected final FixGraph<Node> fixGraph;
-  protected final FieldDeclarationAnalysis fieldDeclarationAnalysis;
 
   public Explorer(
       AnnotationInjector injector,
       Bank<Error> errorBank,
       Bank<Fix> fixBank,
       ImmutableSet<Fix> fixes,
-      FieldDeclarationAnalysis analysis,
       Config config) {
     this.injector = injector;
     this.errorBank = errorBank;
@@ -34,7 +31,6 @@ public abstract class Explorer {
         fixes.stream().map(fix -> new Report(fix, -1)).collect(ImmutableSet.toImmutableSet());
     this.config = config;
     this.fixGraph = new FixGraph<>(Node::new);
-    this.fieldDeclarationAnalysis = analysis;
   }
 
   protected void initializeFixGraph() {
@@ -48,7 +44,7 @@ public abstract class Explorer {
             report -> {
               Fix root = report.root;
               Node node = fixGraph.findOrCreate(root);
-              node.setRootSource(fixBank, fieldDeclarationAnalysis);
+              node.setRootSource(fixBank);
               node.report = report;
               node.triggered = report.triggered;
               node.tree.addAll(report.tree);

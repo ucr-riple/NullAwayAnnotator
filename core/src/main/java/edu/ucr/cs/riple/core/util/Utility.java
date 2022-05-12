@@ -28,9 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Booleans;
 import com.uber.nullaway.fixserialization.FixSerializationConfig;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -249,41 +247,6 @@ public class Utility {
         ChronoUnit.SECONDS,
         0L,
         Duration.ZERO);
-  }
-
-  public static void removeCompoundFieldDeclarations(
-      Set<Fix> remainingFixes, FieldDeclarationAnalysis fieldDeclarationAnalysis) {
-    Set<Fix> toRemove = new HashSet<>();
-    remainingFixes
-        .stream()
-        .filter(fix -> fix.kind.equals(FixType.FIELD.name))
-        .forEach(
-            fix -> {
-              if (toRemove.contains(fix)) {
-                return;
-              }
-              Set<String> otherFields =
-                  fieldDeclarationAnalysis.getInLineMultipleFieldDeclarationsOnField(fix);
-              otherFields.remove(fix.variable);
-              if (otherFields.size() > 0) {
-                toRemove.addAll(
-                    remainingFixes
-                        .stream()
-                        .filter(
-                            otherFix -> {
-                              if (otherFix.clazz.equals(fix.clazz)
-                                  && otherFields.contains(otherFix.variable)
-                                  && otherFix.kind.equals(FixType.FIELD.name)) {
-                                fix.aliases.add(otherFix);
-                                return true;
-                              }
-                              return false;
-                            })
-                        .collect(Collectors.toSet()));
-              }
-              otherFields.add(fix.variable);
-            });
-    toRemove.forEach(remainingFixes::remove);
   }
 
   public static void writeLog(Config config) {

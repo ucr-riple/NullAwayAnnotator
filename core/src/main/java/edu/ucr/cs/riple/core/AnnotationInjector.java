@@ -18,32 +18,29 @@ public class AnnotationInjector {
             .build();
   }
 
-  public void remove(Set<Fix> fixes) {
+  public void removeFixes(Set<Fix> fixes) {
     if (fixes == null || fixes.size() == 0) {
       return;
     }
     Set<Change> toRemove =
         fixes
             .stream()
-            .map(
-                fix ->
-                    new Change(
-                        fix.annotation,
-                        fix.method,
-                        fix.variable,
-                        fix.kind,
-                        fix.clazz,
-                        fix.uri,
-                        "false"))
+            .map(fix -> new Change(fix.change.location, fix.annotation, false))
             .collect(Collectors.toSet());
     injector.start(new WorkListBuilder(toRemove).getWorkLists(), false);
   }
 
-  public void inject(Set<Fix> fixes) {
+  public void injectFixes(Set<Fix> fixes) {
     if (fixes == null || fixes.size() == 0) {
       return;
     }
-    Set<Change> toApply = fixes.stream().map(fix -> fix.change).collect(Collectors.toSet());
-    injector.start(new WorkListBuilder(toApply).getWorkLists(), false);
+    injectChanges(fixes.stream().map(fix -> fix.change).collect(Collectors.toSet()));
+  }
+
+  public void injectChanges(Set<Change> changes) {
+    if (changes == null || changes.size() == 0) {
+      return;
+    }
+    injector.start(new WorkListBuilder(changes).getWorkLists(), false);
   }
 }

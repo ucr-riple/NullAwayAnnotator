@@ -26,6 +26,10 @@ package edu.ucr.cs.riple.core.metadata.index;
 
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.injector.Change;
+import edu.ucr.cs.riple.injector.location.LocationType;
+import edu.ucr.cs.riple.injector.location.OnField;
+import edu.ucr.cs.riple.injector.location.OnMethod;
+import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -34,33 +38,48 @@ import org.json.simple.JSONObject;
 public class Fix extends Hashable {
 
   public final Change change;
-  public final String clazz;
-  public final String method;
-  public final String kind;
-  public final String variable;
+  public final LocationType type;
   public final String uri;
-  public final String index;
   public final String annotation;
   public final Set<String> reasons;
-  public final Set<Fix> aliases;
 
   public Fix(Change change, String reason, String encClass, String endMethod) {
     this.change = change;
     this.annotation = change.annotation;
-    this.uri = change.uri;
-    this.clazz = change.clazz;
-    this.method = change.method;
-    this.variable = change.variable;
-    this.kind = change.kind;
-    this.index = change.index;
+    this.uri = change.location.uri;
+    this.type = change.location.type;
     this.encClass = encClass;
     this.encMethod = endMethod;
     this.reasons = reason != null ? Sets.newHashSet(reason) : new HashSet<>();
-    this.aliases = new HashSet<>();
   }
 
   public Fix(String[] infos) {
-    this(Change.fromArrayInfo(infos, infos[7]), infos[6], infos[8], infos[9]);
+    throw new RuntimeException("Not Completed");
+    // this(Change.fromArrayInfo(infos, infos[7]), infos[6], infos[8], infos[9]);
+  }
+
+  public boolean isOnMethod() {
+    return change.location.type.equals(LocationType.METHOD);
+  }
+
+  public OnMethod toMethod() {
+    return change.location.toMethod();
+  }
+
+  public boolean isOnParameter() {
+    return change.location.type.equals(LocationType.PARAMETER);
+  }
+
+  public OnParameter toParameter() {
+    return change.location.toParameter();
+  }
+
+  public boolean isOnField() {
+    return change.location.type.equals(LocationType.FIELD);
+  }
+
+  public OnField toField() {
+    return change.location.toField();
   }
 
   @Override
@@ -81,9 +100,13 @@ public class Fix extends Hashable {
   }
 
   public boolean isModifyingConstructor() {
-    String methodName = method.substring(0, method.indexOf("("));
-    int lastIndex = clazz.lastIndexOf(".");
-    String className = lastIndex < 0 ? clazz : clazz.substring(lastIndex + 1);
+    if (!isOnMethod()) {
+      return false;
+    }
+    OnMethod m = toMethod();
+    String methodName = m.method.substring(0, m.method.indexOf("("));
+    int lastIndex = m.clazz.lastIndexOf(".");
+    String className = lastIndex < 0 ? m.clazz : m.clazz.substring(lastIndex + 1);
     return methodName.equals(className);
   }
 }

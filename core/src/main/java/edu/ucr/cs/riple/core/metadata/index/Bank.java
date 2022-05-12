@@ -25,11 +25,11 @@
 package edu.ucr.cs.riple.core.metadata.index;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 public class Bank<T extends Hashable> {
 

@@ -1,8 +1,8 @@
 package edu.ucr.cs.riple.injector;
 
-import edu.ucr.cs.riple.injector.location.Field;
-import edu.ucr.cs.riple.injector.location.Method;
-import edu.ucr.cs.riple.injector.location.Parameter;
+import edu.ucr.cs.riple.injector.location.OnField;
+import edu.ucr.cs.riple.injector.location.OnMethod;
+import edu.ucr.cs.riple.injector.location.OnParameter;
 import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
 import java.util.Collections;
 import org.junit.Test;
@@ -35,7 +35,7 @@ public class RemovalTest {
             "}")
         .addChanges(
             new Change(
-                new Method(
+                new OnMethod(
                     "Super.java",
                     "com.uber.Super",
                     "test(@javax.annotation.Nullable java.lang.Object)"),
@@ -67,7 +67,7 @@ public class RemovalTest {
             "}")
         .addChanges(
             new Change(
-                new Parameter(
+                new OnParameter(
                     "Super.java",
                     "com.uber.Super",
                     "test(@javax.annotation.Nullable java.lang.Object)",
@@ -101,7 +101,7 @@ public class RemovalTest {
             "}")
         .addChanges(
             new Change(
-                new Parameter(
+                new OnParameter(
                     "Super.java",
                     "com.uber.Super",
                     "test(@javax.annotation.Nullable java.lang.Object)",
@@ -137,7 +137,7 @@ public class RemovalTest {
             "}")
         .addChanges(
             new Change(
-                new Field("Super.java", "com.uber.Super", Collections.singleton("f")),
+                new OnField("Super.java", "com.uber.Super", Collections.singleton("f")),
                 "javax.annotation.Nullable",
                 false))
         .start();

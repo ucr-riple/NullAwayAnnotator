@@ -1,7 +1,7 @@
 package edu.ucr.cs.riple.injector;
 
-import edu.ucr.cs.riple.injector.location.Field;
-import edu.ucr.cs.riple.injector.location.Method;
+import edu.ucr.cs.riple.injector.location.OnField;
+import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
 import java.util.Collections;
 import org.junit.Test;
@@ -48,7 +48,7 @@ public class LexicalPreservationTest {
             "}")
         .addChanges(
             new Change(
-                new Method("Super.java", "com.uber.Super", "test()"),
+                new OnMethod("Super.java", "com.uber.Super", "test()"),
                 "javax.annotation.Nullable",
                 true))
         .start(true);
@@ -213,7 +213,7 @@ public class LexicalPreservationTest {
             "}")
         .addChanges(
             new Change(
-                new Method("Super.java", "com.uber.Super", "test()"),
+                new OnMethod("Super.java", "com.uber.Super", "test()"),
                 "javax.annotation.Nullable",
                 true))
         .start(true);
@@ -255,7 +255,7 @@ public class LexicalPreservationTest {
             "}")
         .addChanges(
             new Change(
-                new Method("Super.java", "com.uber.Super", "test()"),
+                new OnMethod("Super.java", "com.uber.Super", "test()"),
                 "javax.annotation.Nullable",
                 true))
         .start(true);
@@ -288,11 +288,11 @@ public class LexicalPreservationTest {
             "}")
         .addChanges(
             new Change(
-                new Field("B.java", "com.uber.B", Collections.singleton("allTest")),
+                new OnField("B.java", "com.uber.B", Collections.singleton("allTest")),
                 "javax.annotation.Nullable",
                 true),
             new Change(
-                new Field("A.java", "com.uber.A", Collections.singleton("allTest")),
+                new OnField("A.java", "com.uber.A", Collections.singleton("allTest")),
                 "javax.annotation.Nullable",
                 true))
         .start(true);

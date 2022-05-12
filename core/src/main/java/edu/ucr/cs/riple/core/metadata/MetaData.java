@@ -99,7 +99,7 @@ public abstract class MetaData<T> {
     return node;
   }
 
-  protected List<T> findAllNodes(Comparator<T> c, String... keys) {
+  protected List<T> findAllNodes(Comparator<T> c, Object... keys) {
     if (keys.length == 0) {
       throw new RuntimeException("findAllNodes needs keys to compute the hash and cannot be empty");
     }

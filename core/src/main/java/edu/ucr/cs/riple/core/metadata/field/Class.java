@@ -1,7 +1,6 @@
 package edu.ucr.cs.riple.core.metadata.field;
 
-import edu.ucr.cs.riple.core.FixType;
-import edu.ucr.cs.riple.injector.Change;
+import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -50,7 +49,7 @@ public class Class {
     }
   }
 
-  public Change findInitializer() {
+  public OnMethod findInitializer() {
     Method maxMethod = null;
     int maxScore = 1;
     for (Method m : this.methods) {
@@ -59,9 +58,6 @@ public class Class {
         maxMethod = m;
       }
     }
-    return maxMethod == null
-        ? null
-        : new Change(
-            "null", maxMethod.signature, "null", FixType.METHOD.name, this.clazz, this.uri, "true");
+    return maxMethod == null ? null : new OnMethod(uri, clazz, maxMethod.signature);
   }
 }

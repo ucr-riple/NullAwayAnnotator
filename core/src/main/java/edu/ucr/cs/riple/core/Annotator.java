@@ -38,9 +38,9 @@ import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
+import edu.ucr.cs.riple.injector.Change;
 import java.util.HashMap;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -74,21 +74,17 @@ public class Annotator {
     Set<Fix> uninitializedFields =
         Utility.readFixesFromOutputDirectory(config)
             .stream()
-            .filter(
-                fix ->
-                    fix.reasons.contains("FIELD_NO_INIT")
-                        && fix.change.kind.equals(FixType.FIELD.name))
+            .filter(fix -> fix.reasons.contains("FIELD_NO_INIT") && fix.isOnField())
             .collect(Collectors.toSet());
     FieldInitializationAnalysis analysis =
         new FieldInitializationAnalysis(config.dir.resolve("field_init.tsv"));
-    Set<Fix> initializers =
+    Set<Change> initializers =
         analysis
             .findInitializers(uninitializedFields)
             .stream()
-            .peek(location -> location.annotation = config.initializerAnnot)
-            .map(location -> new Fix(location, "null", "null", "null"))
+            .map(onMethod -> new Change(onMethod, config.initializerAnnot, true))
             .collect(Collectors.toSet());
-    this.injector.inject(initializers);
+    this.injector.injectChanges(initializers);
   }
 
   private void explore() {
@@ -99,45 +95,24 @@ public class Annotator {
       Utility.buildProject(config);
       Set<Fix> remainingFixes = Utility.readFixesFromOutputDirectory(config);
       if (config.useCache) {
-        Set<Fix> allDiscoveredFixes =
-            reports
-                .values()
-                .stream()
-                .flatMap(
-                    (Function<Report, Stream<Fix>>)
-                        report ->
-                            report.root.aliases.size() == 0
-                                ? Stream.of(report.root)
-                                : report.root.aliases.stream())
-                .collect(Collectors.toSet());
         remainingFixes =
             remainingFixes
                 .stream()
-                .filter(fix -> !allDiscoveredFixes.contains(fix))
+                .filter(fix -> !reports.containsKey(fix))
                 .collect(Collectors.toSet());
       }
       FieldDeclarationAnalysis fieldDeclarationAnalysis =
           new FieldDeclarationAnalysis(config.dir.resolve("class_info.tsv"));
-      Utility.removeCompoundFieldDeclarations(remainingFixes, fieldDeclarationAnalysis);
       ImmutableSet<Fix> fixes = ImmutableSet.copyOf(remainingFixes);
       Bank<Error> errorBank = new Bank<>(config.dir.resolve("errors.tsv"), Error::new);
       Bank<Fix> fixBank = new Bank<>(config.dir.resolve("fixes.tsv"), Fix::new);
       MethodInheritanceTree tree =
           new MethodInheritanceTree(config.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
-      RegionTracker tracker = new CompoundTracker(config.dir, tree, fieldDeclarationAnalysis);
+      RegionTracker tracker = new CompoundTracker(config.dir, tree);
       Explorer explorer =
           config.optimized
-              ? new OptimizedExplorer(
-                  injector,
-                  errorBank,
-                  fixBank,
-                  tracker,
-                  tree,
-                  fixes,
-                  fieldDeclarationAnalysis,
-                  config)
-              : new BasicExplorer(
-                  injector, errorBank, fixBank, fixes, fieldDeclarationAnalysis, config);
+              ? new OptimizedExplorer(injector, errorBank, fixBank, tracker, tree, fixes, config)
+              : new BasicExplorer(injector, errorBank, fixBank, fixes, config);
       ImmutableSet<Report> latestReports = explorer.explore();
       int sizeBefore = reports.size();
       latestReports.forEach(
@@ -148,7 +123,7 @@ public class Annotator {
             reports.get(report.root).tree = report.tree;
             reports.get(report.root).triggered = report.triggered;
           });
-      injector.inject(
+      injector.injectFixes(
           latestReports
               .stream()
               .filter(report -> report.effect < 1)

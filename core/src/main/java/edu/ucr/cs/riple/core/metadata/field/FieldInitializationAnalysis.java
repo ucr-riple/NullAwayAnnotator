@@ -2,8 +2,9 @@ package edu.ucr.cs.riple.core.metadata.field;
 
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.injector.Change;
 import edu.ucr.cs.riple.injector.location.Location;
+import edu.ucr.cs.riple.injector.location.OnField;
+import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,28 +20,33 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
 
   @Override
   protected FieldInitializationNode addNodeByLine(String[] values) {
-    return new FieldInitializationNode(Location.fromArrayInfo(values, "null"), values[6]);
+    Location location = Location.createLocationFromArrayInfo(values);
+    return location.isOnMethod()
+        ? new FieldInitializationNode(location.toMethod(), values[6])
+        : null;
   }
 
-  public Set<Change> findInitializers(Set<Fix> uninitializedFields) {
+  public Set<OnMethod> findInitializers(Set<Fix> uninitializedFields) {
     // Set does not have a get() method, instead we use map here which can find the element
     // efficiently.
     Map<String, Class> classes = new HashMap<>();
     uninitializedFields.forEach(
-        fix ->
-            findAllNodes(
-                    candidate ->
-                        candidate.field.equals(fix.variable)
-                            && candidate.initializerLocation.clazz.equals(fix.clazz),
-                    fix.clazz,
-                    fix.variable)
-                .forEach(
-                    node -> {
-                      Class clazz =
-                          new Class(node.initializerLocation.clazz, node.initializerLocation.uri);
-                      classes.putIfAbsent(clazz.clazz, clazz);
-                      classes.get(clazz.clazz).accept(node);
-                    }));
+        fix -> {
+          OnField onField = fix.change.location.toField();
+          findAllNodes(
+                  candidate ->
+                      onField.variables.contains(candidate.field)
+                          && candidate.initializerLocation.clazz.equals(onField.clazz),
+                  onField.clazz,
+                  onField.variables)
+              .forEach(
+                  node -> {
+                    Class clazz =
+                        new Class(node.initializerLocation.clazz, node.initializerLocation.uri);
+                    classes.putIfAbsent(clazz.clazz, clazz);
+                    classes.get(clazz.clazz).accept(node);
+                  });
+        });
     return classes
         .values()
         .stream()

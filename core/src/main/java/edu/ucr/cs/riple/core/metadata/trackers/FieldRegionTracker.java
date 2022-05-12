@@ -24,23 +24,15 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
-import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.metadata.MetaData;
-import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.nio.file.Path;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
 
-  private final FixType fixType;
-  private final FieldDeclarationAnalysis analysis;
-
-  public FieldRegionTracker(Path path, FieldDeclarationAnalysis fieldDeclarationAnalysis) {
+  public FieldRegionTracker(Path path) {
     super(path);
-    this.fixType = FixType.FIELD;
-    this.analysis = fieldDeclarationAnalysis;
   }
 
   @Override
@@ -50,22 +42,9 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
 
   @Override
   public Set<Region> getRegions(Fix fix) {
-    if (!fix.kind.equals(fixType.name)) {
+    if (!fix.isOnField()) {
       return null;
     }
-    Set<String> group = analysis.getInLineMultipleFieldDeclarationsOnField(fix);
-    return group
-        .stream()
-        .flatMap(
-            s ->
-                findAllNodes(
-                        candidate ->
-                            candidate.calleeClass.equals(fix.clazz)
-                                && candidate.calleeMember.equals(s),
-                        s,
-                        fix.clazz)
-                    .stream()
-                    .map(node -> new Region(node.callerMethod, node.callerClass)))
-        .collect(Collectors.toSet());
+    throw new RuntimeException("Not implemented");
   }
 }

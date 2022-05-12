@@ -3,7 +3,6 @@ package edu.ucr.cs.riple.core.explorers;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.AnnotationInjector;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -31,9 +30,8 @@ public class OptimizedExplorer extends Explorer {
       RegionTracker tracker,
       MethodInheritanceTree methodInheritanceTree,
       ImmutableSet<Fix> fixes,
-      FieldDeclarationAnalysis fieldDeclarationAnalysis,
       Config config) {
-    super(injector, errorBank, fixBank, fixes, fieldDeclarationAnalysis, config);
+    super(injector, errorBank, fixBank, fixes, config);
     this.tracker = tracker;
     this.methodInheritanceTree = methodInheritanceTree;
   }
@@ -60,7 +58,7 @@ public class OptimizedExplorer extends Explorer {
       pb.step();
       Set<Fix> fixes =
           group.stream().flatMap(node -> node.tree.stream()).collect(Collectors.toSet());
-      injector.inject(fixes);
+      injector.injectFixes(fixes);
       Utility.buildProject(config);
       errorBank.saveState(false, true);
       fixBank.saveState(false, true);
@@ -74,14 +72,9 @@ public class OptimizedExplorer extends Explorer {
               localTriggered.addAll(
                   new ArrayList<>(fixBank.compareByMethod(region.clazz, region.method, false).dif));
             }
-            node.updateStatus(
-                totalEffect,
-                fixes,
-                localTriggered,
-                methodInheritanceTree,
-                fieldDeclarationAnalysis);
+            node.updateStatus(totalEffect, fixes, localTriggered, methodInheritanceTree);
           });
-      injector.remove(fixes);
+      injector.removeFixes(fixes);
     }
     pb.close();
   }

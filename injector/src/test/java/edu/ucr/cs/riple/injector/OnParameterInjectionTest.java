@@ -1,13 +1,13 @@
 package edu.ucr.cs.riple.injector;
 
-import edu.ucr.cs.riple.injector.location.Parameter;
+import edu.ucr.cs.riple.injector.location.OnParameter;
 import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class ParameterInjectionTest {
+public class OnParameterInjectionTest {
   @Test
   public void parameter_nullable_simple() {
     String rootName = "parameter_nullable_simple";
@@ -40,7 +40,8 @@ public class ParameterInjectionTest {
             "}")
         .addChanges(
             new Change(
-                new Parameter("Super.java", "com.uber.Super", "test(java.lang.Object)", "flag", 0),
+                new OnParameter(
+                    "Super.java", "com.uber.Super", "test(java.lang.Object)", "flag", 0),
                 "javax.annotation.Nullable",
                 true))
         .start();
@@ -78,7 +79,7 @@ public class ParameterInjectionTest {
             "}")
         .addChanges(
             new Change(
-                new Parameter("Super.java", "com.uber.Super", "test(Object)", "flag", 1),
+                new OnParameter("Super.java", "com.uber.Super", "test(Object)", "flag", 1),
                 "javax.annotation.Nullable",
                 true))
         .start();
@@ -122,7 +123,7 @@ public class ParameterInjectionTest {
             "}")
         .addChanges(
             new Change(
-                new Parameter(
+                new OnParameter(
                     "SSAInstructionFactory.java",
                     "com.uber.SSAInstructionFactory",
                     "InvokeInstruction(int,int,int[],int,com.ibm.wala.classLoader.CallSiteReference,com.ibm.wala.shrikeCT.BootstrapMethodsReader.BootstrapMethod)",
@@ -168,7 +169,7 @@ public class ParameterInjectionTest {
             "}")
         .addChanges(
             new Change(
-                new Parameter(
+                new OnParameter(
                     "ModRef.java",
                     "com.uber.ModRef",
                     "computeMod(com.ibm.wala.ipa.callgraph.CallGraph,com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis<T>,com.ibm.wala.ipa.slicer.HeapExclusions)",
@@ -234,7 +235,7 @@ public class ParameterInjectionTest {
             "}")
         .addChanges(
             new Change(
-                new Parameter(
+                new OnParameter(
                     "ModRef.java",
                     "com.uber.ModRef",
                     "ModRef(com.ibm.wala.classLoader.IMethod,com.ibm.wala.ipa.callgraph.Context,com.ibm.wala.cfg.AbstractCFG<?,?>,com.ibm.wala.ssa.SSAInstruction[],com.ibm.wala.ssa.SSAOptions,java.util.Map<java.lang.Integer,com.ibm.wala.ssa.ConstantValue>)",
@@ -274,7 +275,7 @@ public class ParameterInjectionTest {
             "}")
         .addChanges(
             new Change(
-                new Parameter(
+                new OnParameter(
                     "WeakKeyReference.java",
                     "com.uber.WeakKeyReference",
                     "WeakKeyReference(@org.checkerframework.checker.nullness.qual.Nullable K,java.lang.ref.ReferenceQueue<K>)",

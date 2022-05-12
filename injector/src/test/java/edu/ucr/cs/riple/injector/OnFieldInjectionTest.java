@@ -1,6 +1,6 @@
 package edu.ucr.cs.riple.injector;
 
-import edu.ucr.cs.riple.injector.location.Field;
+import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
 import java.util.Collections;
 import org.junit.Test;
@@ -8,7 +8,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class FieldInjectionTest {
+public class OnFieldInjectionTest {
   @Test
   public void field_nullable_simple() {
     String rootName = "field_nullable_simple";
@@ -37,7 +37,7 @@ public class FieldInjectionTest {
             "}")
         .addChanges(
             new Change(
-                new Field("Super.java", "com.uber.Super", Collections.singleton("h")),
+                new OnField("Super.java", "com.uber.Super", Collections.singleton("h")),
                 "javax.annotation.Nullable",
                 true))
         .start();

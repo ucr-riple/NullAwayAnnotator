@@ -45,7 +45,7 @@ import javax.annotation.Nullable;
 public class Test {
     Object bar = new Object();
     @Nullable Object nullableFoo; // resolved by Annotator
-    Object nonnullFoo; //warning: "nonnullFoo" is not initialized (Annotator will not make it Nullable since the usage of this field demonstrates the programmer assumed it is @Nonnull).
+    Object nonnullFoo; //warning: "nonnullFoo" is not initialized (Annotator will not make it Nullable since the usage of this onField demonstrates the programmer assumed it is @Nonnull).
 
     public @Nullable Object run(boolean check) {
         if (check) {

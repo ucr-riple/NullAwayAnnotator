@@ -1,13 +1,13 @@
 package edu.ucr.cs.riple.injector;
 
-import edu.ucr.cs.riple.injector.location.Method;
+import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class MethodSearchTest {
+public class OnMethodSearchTest {
   @Test
   public void initializer_constructor() {
     String rootName = "initializer_constructor";
@@ -32,7 +32,7 @@ public class MethodSearchTest {
             "}")
         .addChanges(
             new Change(
-                new Method(
+                new OnMethod(
                     "Main.java", "com.uber.Main", "Main(java.lang.String,java.lang.Object...)"),
                 "javax.annotation.Initializer",
                 true))
@@ -76,7 +76,7 @@ public class MethodSearchTest {
             "}")
         .addChanges(
             new Change(
-                new Method("Super.java", "com.uber.Super", "test()"),
+                new OnMethod("Super.java", "com.uber.Super", "test()"),
                 "javax.annotation.Nullable",
                 true))
         .start();

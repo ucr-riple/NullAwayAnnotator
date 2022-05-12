@@ -3,7 +3,6 @@ package edu.ucr.cs.riple.core.explorers;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.AnnotationInjector;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -20,9 +19,8 @@ public class BasicExplorer extends Explorer {
       Bank<Error> errorBank,
       Bank<Fix> fixBank,
       ImmutableSet<Fix> fixes,
-      FieldDeclarationAnalysis analysis,
       Config config) {
-    super(injector, errorBank, fixBank, fixes, analysis, config);
+    super(injector, errorBank, fixBank, fixes, config);
   }
 
   @Override
@@ -33,7 +31,7 @@ public class BasicExplorer extends Explorer {
     for (Node node : fixGraph.getAllNodes()) {
       pb.step();
       Set<Fix> fixes = node.tree;
-      injector.inject(fixes);
+      injector.injectFixes(fixes);
       Utility.buildProject(config);
       errorBank.saveState(false, true);
       fixBank.saveState(false, true);
@@ -41,8 +39,8 @@ public class BasicExplorer extends Explorer {
       Result<Error> res = errorBank.compare();
       totalEffect += res.size;
       node.effect = totalEffect;
-      node.updateTriggered(fixBank.compare().dif, fieldDeclarationAnalysis);
-      injector.remove(fixes);
+      node.updateTriggered(fixBank.compare().dif);
+      injector.removeFixes(fixes);
     }
     pb.close();
   }

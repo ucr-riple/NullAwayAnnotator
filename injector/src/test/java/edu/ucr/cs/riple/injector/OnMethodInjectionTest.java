@@ -1,14 +1,14 @@
 package edu.ucr.cs.riple.injector;
 
-import edu.ucr.cs.riple.injector.location.Method;
-import edu.ucr.cs.riple.injector.location.Parameter;
+import edu.ucr.cs.riple.injector.location.OnMethod;
+import edu.ucr.cs.riple.injector.location.OnParameter;
 import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class MethodInjectionTest {
+public class OnMethodInjectionTest {
 
   @Test
   public void method_nullable_simple() {
@@ -53,11 +53,11 @@ public class MethodInjectionTest {
             "}")
         .addChanges(
             new Change(
-                new Method("Super.java", "com.uber.Super", "test(boolean)"),
+                new OnMethod("Super.java", "com.uber.Super", "test(boolean)"),
                 "javax.annotation.Nullable",
                 true),
             new Change(
-                new Method("com/Superb.java", "com.uber.Superb", "test(boolean)"),
+                new OnMethod("com/Superb.java", "com.uber.Superb", "test(boolean)"),
                 "javax.annotation.Nullable",
                 true))
         .start();
@@ -94,7 +94,7 @@ public class MethodInjectionTest {
             "}")
         .addChanges(
             new Change(
-                new Method("Main.java", "com.uber.Main$Test", "run()"),
+                new OnMethod("Main.java", "com.uber.Main$Test", "run()"),
                 "javax.annotation.Nullable",
                 true))
         .start();
@@ -139,7 +139,7 @@ public class MethodInjectionTest {
             "}")
         .addChanges(
             new Change(
-                new Method("Super.java", "com.uber.Super$SuperInner", "bar(java.lang.Object)"),
+                new OnMethod("Super.java", "com.uber.Super$SuperInner", "bar(java.lang.Object)"),
                 "javax.annotation.Nullable",
                 true))
         .start();
@@ -173,7 +173,7 @@ public class MethodInjectionTest {
             "}")
         .addChanges(
             new Change(
-                new Method("Main.java", "com.uber.Main$1Helper", "run()"),
+                new OnMethod("Main.java", "com.uber.Main$1Helper", "run()"),
                 "javax.annotation.Nullable",
                 true))
         .start();
@@ -222,11 +222,11 @@ public class MethodInjectionTest {
             "}")
         .addChanges(
             new Change(
-                new Method("Super.java", "com.uber.Super", "test(Object, String, String)"),
+                new OnMethod("Super.java", "com.uber.Super", "test(Object, String, String)"),
                 "javax.annotation.Nullable",
                 true),
             new Change(
-                new Parameter(
+                new OnParameter(
                     "Super.java", "com.uber.Super", "test(Object, Object, String)", "name", 1),
                 "javax.annotation.Nullable",
                 true))
@@ -287,11 +287,11 @@ public class MethodInjectionTest {
             "}")
         .addChanges(
             new Change(
-                new Method("Super.java", "com.uber.Super", "getPredNodeNumbers(T)"),
+                new OnMethod("Super.java", "com.uber.Super", "getPredNodeNumbers(T)"),
                 "javax.annotation.Nullable",
                 true),
             new Change(
-                new Method(
+                new OnMethod(
                     "Super.java",
                     "com.uber.Super",
                     "computeResult(com.ibm.wala.ipa.slicer.Statement,java.util.Map<com.ibm.wala.ipa.callgraph.propagation.PointerKey,com.ibm.wala.util.intset.MutableIntSet>,com.ibm.wala.dataflow.graph.BitVectorSolver<? extends com.ibm.wala.ssa.ISSABasicBlock>,com.ibm.wala.util.intset.OrdinalSetMapping<com.ibm.wala.ipa.slicer.Statement>,com.ibm.wala.ipa.callgraph.CGNode,com.ibm.wala.ipa.modref.ExtendedHeapModel,com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis<T>,java.util.Map<com.ibm.wala.ipa.callgraph.CGNode,com.ibm.wala.util.intset.OrdinalSet<com.ibm.wala.ipa.callgraph.propagation.PointerKey>>,com.ibm.wala.ssa.analysis.ExplodedControlFlowGraph,java.util.Map<java.lang.Integer,com.ibm.wala.ipa.slicer.NormalStatement>)"),
@@ -327,7 +327,7 @@ public class MethodInjectionTest {
             "}")
         .addChanges(
             new Change(
-                new Method(
+                new OnMethod(
                     "Super.java",
                     "com.uber.Super",
                     "getTargetForCall(com.ibm.wala.ipa.callgraph.CGNode[],com.ibm.wala.classLoader.CallSiteReference[][][],com.ibm.wala.classLoader.IClass,com.ibm.wala.ipa.callgraph.propagation.InstanceKey[][])"),
@@ -361,7 +361,7 @@ public class MethodInjectionTest {
             "}")
         .addChanges(
             new Change(
-                new Method(
+                new OnMethod(
                     "Super.java",
                     "com.uber.Super",
                     "<T>getReader(com.ibm.wala.shrikeCT.ClassReader.AttrIterator,java.lang.String,com.ibm.wala.classLoader.ShrikeClass.GetReader<T>)"),
@@ -394,7 +394,7 @@ public class MethodInjectionTest {
             "}")
         .addChanges(
             new Change(
-                new Method(
+                new OnMethod(
                     "Main.java", "com.uber.Main", "format(java.lang.String,java.lang.Object...)"),
                 "javax.annotation.Initializer",
                 true))

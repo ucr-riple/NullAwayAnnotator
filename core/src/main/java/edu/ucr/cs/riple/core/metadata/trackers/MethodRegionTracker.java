@@ -24,20 +24,17 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
-import edu.ucr.cs.riple.core.FixType;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MethodRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
 
-  private final FixType fixType;
-
   public MethodRegionTracker(Path path) {
     super(path);
-    this.fixType = FixType.METHOD;
   }
 
   @Override
@@ -47,10 +44,11 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
 
   @Override
   public Set<Region> getRegions(Fix fix) {
-    if (!fix.kind.equals(fixType.name)) {
+    if (!fix.isOnMethod()) {
       return null;
     }
-    return getCallersOfMethod(fix.clazz, fix.method);
+    OnMethod onMethod = fix.toMethod();
+    return getCallersOfMethod(onMethod.clazz, onMethod.method);
   }
 
   public Set<Region> getCallersOfMethod(String clazz, String method) {

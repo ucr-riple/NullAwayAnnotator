@@ -3,19 +3,21 @@ package edu.ucr.cs.riple.injector.location;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import edu.ucr.cs.riple.injector.Helper;
+import java.util.Objects;
+import java.util.function.Consumer;
 import org.json.simple.JSONObject;
 
-public class Method extends Location {
-  final String method;
+public class OnMethod extends Location {
+  public final String method;
 
-  public Method(String uri, String clazz, String method) {
+  public OnMethod(String uri, String clazz, String method) {
     super(LocationType.METHOD, uri, clazz);
     this.method = method;
   }
 
   @Override
   public Location duplicate() {
-    return new Method(clazz, uri, method);
+    return new OnMethod(clazz, uri, method);
   }
 
   @SuppressWarnings("unchecked")
@@ -38,5 +40,28 @@ public class Method extends Location {
                   }
                 }));
     return success[0];
+  }
+
+  @Override
+  public void ifMethod(Consumer<OnMethod> consumer) {
+    consumer.accept(this);
+  }
+
+  @Override
+  public boolean isOnMethod() {
+    return true;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof OnMethod)) return false;
+    OnMethod other = (OnMethod) o;
+    return super.equals(other) && method.equals(other.method);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(method);
   }
 }
