@@ -1,10 +1,14 @@
 package edu.ucr.cs.riple.injector;
 
+import edu.ucr.cs.riple.injector.location.Field;
+import edu.ucr.cs.riple.injector.location.Method;
 import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+import java.util.Collections;
 
 @RunWith(JUnit4.class)
 public class ClassSearchTest {
@@ -47,14 +51,8 @@ public class ClassSearchTest {
                 "   }",
                 "}")
             .addChanges(
-                new Change(
-                    "javax.annotation.Nullable",
-                    "get()",
-                    "",
-                    "METHOD",
-                    "com.test.Main$1Bar",
-                    "Main.java",
-                    "true"));
+                new Change(new Method( "Main.java","com.test.Main$1Bar","get()"),
+                    "javax.annotation.Nullable", true));
     injectorTestHelper.start();
   }
 
@@ -100,15 +98,9 @@ public class ClassSearchTest {
                 "     }",
                 "   }",
                 "}")
-            .addChanges(
-                new Change(
-                    "javax.annotation.Nullable",
-                    "get()",
-                    "",
-                    "METHOD",
-                    "com.test.Main$1Bar$1Helper",
-                    "Main.java",
-                    "true"));
+                .addChanges(
+                        new Change(new Method( "Main.java", "com.test.Main$1Bar$1Helper","get()"),
+                                "javax.annotation.Nullable", true));
     injectorTestHelper.start();
   }
 
@@ -120,15 +112,9 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "simple.java")
         .expectOutputFile("Main.java", "simple_expected_1.java")
-        .addChanges(
-            new Change(
-                "javax.annotation.Nullable",
-                "null",
-                "f1",
-                "FIELD",
-                "injector.Main$1Helper",
-                "Main.java",
-                "true"))
+            .addChanges(
+                    new Change(new Field( "Main.java", "injector.Main$1Helper", Collections.singleton("f1")),
+                            "javax.annotation.Nullable", true))
         .start(true);
   }
 
@@ -140,15 +126,9 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "simple.java")
         .expectOutputFile("Main.java", "simple_expected_2.java")
-        .addChanges(
-            new Change(
-                "javax.annotation.Nullable",
-                "null",
-                "f0",
-                "FIELD",
-                "injector.Main$Helper",
-                "Main.java",
-                "true"))
+            .addChanges(
+                    new Change(new Field( "Main.java", "injector.Main$Helper", Collections.singleton("f0")),
+                            "javax.annotation.Nullable", true))
         .start(true);
   }
 
@@ -160,15 +140,9 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "simple.java")
         .expectOutputFile("Main.java", "simple_expected_3.java")
-        .addChanges(
-            new Change(
-                "javax.annotation.Nullable",
-                "null",
-                "f2",
-                "FIELD",
-                "injector.Main$2Helper",
-                "Main.java",
-                "true"))
+            .addChanges(
+                    new Change(new Field( "Main.java", "injector.Main$2Helper", Collections.singleton("f2")),
+                            "javax.annotation.Nullable", true))
         .start(true);
   }
 
@@ -180,15 +154,9 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_1.java")
-        .addChanges(
-            new Change(
-                "javax.annotation.Nullable",
-                "get()",
-                "",
-                "METHOD",
-                "injector.Main$Type",
-                "Main.java",
-                "true"))
+            .addChanges(
+                    new Change(new Method( "Main.java", "injector.Main$Type","get()"),
+                            "javax.annotation.Nullable", true))
         .start(true);
   }
 
@@ -200,15 +168,9 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_2.java")
-        .addChanges(
-            new Change(
-                "javax.annotation.Nullable",
-                "bar()",
-                "",
-                "METHOD",
-                "injector.Main$Inner",
-                "Main.java",
-                "true"))
+            .addChanges(
+                    new Change(new Method( "Main.java", "injector.Main$Inner","bar()"),
+                            "javax.annotation.Nullable", true))
         .start(true);
   }
 
@@ -220,15 +182,9 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_3.java")
-        .addChanges(
-            new Change(
-                "javax.annotation.Nullable",
-                "null",
-                "f1",
-                "FIELD",
-                "injector.Main$1",
-                "Main.java",
-                "true"))
+            .addChanges(
+                    new Change(new Field( "Main.java", "injector.Main$1", Collections.singleton("f1")),
+                            "javax.annotation.Nullable", true))
         .start(true);
   }
 
@@ -240,15 +196,9 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_4.java")
-        .addChanges(
-            new Change(
-                "javax.annotation.Nullable",
-                "compare()",
-                "null",
-                "METHOD",
-                "injector.Main$1$1",
-                "Main.java",
-                "true"))
+            .addChanges(
+                    new Change(new Method( "Main.java",  "injector.Main$1$1","compare()"),
+                            "javax.annotation.Nullable", true))
         .start(true);
   }
 
@@ -260,15 +210,9 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_5.java")
-        .addChanges(
-            new Change(
-                "javax.annotation.Nullable",
-                "null",
-                "f3",
-                "FIELD",
-                "injector.Main$1$2",
-                "Main.java",
-                "true"))
+            .addChanges(
+                    new Change(new Field( "Main.java", "injector.Main$1$2", Collections.singleton("f3")),
+                            "javax.annotation.Nullable", true))
         .start(true);
   }
 
@@ -280,15 +224,9 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_6.java")
-        .addChanges(
-            new Change(
-                "javax.annotation.Nullable",
-                "null",
-                "f4",
-                "FIELD",
-                "injector.Main$1$2$1",
-                "Main.java",
-                "true"))
+            .addChanges(
+                    new Change(new Field( "Main.java", "injector.Main$1$2$1", Collections.singleton("f4")),
+                            "javax.annotation.Nullable", true))
         .start(true);
   }
 
@@ -300,15 +238,9 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_7.java")
-        .addChanges(
-            new Change(
-                "javax.annotation.Nullable",
-                "null",
-                "f5",
-                "FIELD",
-                "injector.Main$1$2$1$1Helper",
-                "Main.java",
-                "true"))
+            .addChanges(
+                    new Change(new Field( "Main.java", "injector.Main$1$2$1$1Helper", Collections.singleton("f5")),
+                            "javax.annotation.Nullable", true))
         .start(true);
   }
 
@@ -320,15 +252,9 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_8.java")
-        .addChanges(
-            new Change(
-                "javax.annotation.Nullable",
-                "null",
-                "f6",
-                "FIELD",
-                "injector.Main$1$2$1$1Helper$1",
-                "Main.java",
-                "true"))
+            .addChanges(
+                    new Change(new Field( "Main.java", "injector.Main$1$2$1$1Helper$1", Collections.singleton("f6")),
+                            "javax.annotation.Nullable", true))
         .start(true);
   }
 
@@ -340,15 +266,9 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_9.java")
-        .addChanges(
-            new Change(
-                "javax.annotation.Nullable",
-                "null",
-                "f7",
-                "FIELD",
-                "injector.Main$1$2$1$2Helper",
-                "Main.java",
-                "true"))
+            .addChanges(
+                    new Change(new Field( "Main.java", "injector.Main$1$2$1$2Helper", Collections.singleton("f7")),
+                            "javax.annotation.Nullable", true))
         .start(true);
   }
 
@@ -360,15 +280,9 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_10.java")
-        .addChanges(
-            new Change(
-                "javax.annotation.Nullable",
-                "null",
-                "f8",
-                "FIELD",
-                "injector.Main$1$2$1$2Helper$1",
-                "Main.java",
-                "true"))
+            .addChanges(
+                    new Change(new Field( "Main.java", "injector.Main$1$2$1$2Helper$1", Collections.singleton("f8")),
+                            "javax.annotation.Nullable", true))
         .start(true);
   }
 
