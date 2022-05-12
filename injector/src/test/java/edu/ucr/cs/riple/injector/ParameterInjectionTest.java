@@ -1,5 +1,6 @@
 package edu.ucr.cs.riple.injector;
 
+import edu.ucr.cs.riple.injector.location.Parameter;
 import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,15 +38,11 @@ public class ParameterInjectionTest {
             "       else return new Object();",
             "   }",
             "}")
-        .addLocations(
+        .addChanges(
             new Change(
+                new Parameter("Super.java", "com.uber.Super", "test(java.lang.Object)", "flag", 0),
                 "javax.annotation.Nullable",
-                "test(java.lang.Object)",
-                "flag",
-                "PARAMETER",
-                "com.uber.Super",
-                "Super.java",
-                "true"))
+                true))
         .start();
   }
 
@@ -79,15 +76,11 @@ public class ParameterInjectionTest {
             "       else return new Object();",
             "   }",
             "}")
-        .addLocations(
+        .addChanges(
             new Change(
+                new Parameter("Super.java", "com.uber.Super", "test(Object)", "flag", 1),
                 "javax.annotation.Nullable",
-                "test(Object)",
-                "flag",
-                "PARAMETER",
-                "com.uber.Super",
-                "Super.java",
-                "true"))
+                true))
         .start();
   }
 
@@ -127,15 +120,16 @@ public class ParameterInjectionTest {
             "SSAAbstractInvokeInstruction InvokeInstruction(",
             "   int index, int[] params, int exception, CallSiteReference site, BootstrapMethod bootstrap);",
             "}")
-        .addLocations(
+        .addChanges(
             new Change(
+                new Parameter(
+                    "SSAInstructionFactory.java",
+                    "com.uber.SSAInstructionFactory",
+                    "InvokeInstruction(int,int,int[],int,com.ibm.wala.classLoader.CallSiteReference,com.ibm.wala.shrikeCT.BootstrapMethodsReader.BootstrapMethod)",
+                    "bootstrap",
+                    5),
                 "javax.annotation.Nullable",
-                "InvokeInstruction(int,int,int[],int,com.ibm.wala.classLoader.CallSiteReference,com.ibm.wala.shrikeCT.BootstrapMethodsReader.BootstrapMethod)",
-                "bootstrap",
-                "PARAMETER",
-                "com.uber.SSAInstructionFactory",
-                "SSAInstructionFactory.java",
-                "true"))
+                true))
         .start();
   }
 
@@ -172,15 +166,16 @@ public class ParameterInjectionTest {
             "     return CallGraphTransitiveClosure.transitiveClosure(cg, scan);",
             "   }",
             "}")
-        .addLocations(
+        .addChanges(
             new Change(
+                new Parameter(
+                    "ModRef.java",
+                    "com.uber.ModRef",
+                    "computeMod(com.ibm.wala.ipa.callgraph.CallGraph,com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis<T>,com.ibm.wala.ipa.slicer.HeapExclusions)",
+                    "heapExclude",
+                    2),
                 "javax.annotation.Nullable",
-                "computeMod(com.ibm.wala.ipa.callgraph.CallGraph,com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis<T>,com.ibm.wala.ipa.slicer.HeapExclusions)",
-                "heapExclude",
-                "PARAMETER",
-                "com.uber.ModRef",
-                "ModRef.java",
-                "true"))
+                true))
         .start();
   }
 
@@ -237,15 +232,16 @@ public class ParameterInjectionTest {
             "         setupLocationMap();",
             "    }",
             "}")
-        .addLocations(
+        .addChanges(
             new Change(
+                new Parameter(
+                    "ModRef.java",
+                    "com.uber.ModRef",
+                    "ModRef(com.ibm.wala.classLoader.IMethod,com.ibm.wala.ipa.callgraph.Context,com.ibm.wala.cfg.AbstractCFG<?,?>,com.ibm.wala.ssa.SSAInstruction[],com.ibm.wala.ssa.SSAOptions,java.util.Map<java.lang.Integer,com.ibm.wala.ssa.ConstantValue>)",
+                    "constants",
+                    5),
                 "javax.annotation.Nullable",
-                "ModRef(com.ibm.wala.classLoader.IMethod,com.ibm.wala.ipa.callgraph.Context,com.ibm.wala.cfg.AbstractCFG<?,?>,com.ibm.wala.ssa.SSAInstruction[],com.ibm.wala.ssa.SSAOptions,java.util.Map<java.lang.Integer,com.ibm.wala.ssa.ConstantValue>)",
-                "constants",
-                "PARAMETER",
-                "com.uber.ModRef",
-                "ModRef.java",
-                "true"))
+                true))
         .start();
   }
 
@@ -276,15 +272,16 @@ public class ParameterInjectionTest {
             "     hashCode = System.identityHashCode(key);",
             "   }",
             "}")
-        .addLocations(
+        .addChanges(
             new Change(
+                new Parameter(
+                    "WeakKeyReference.java",
+                    "com.uber.WeakKeyReference",
+                    "WeakKeyReference(@org.checkerframework.checker.nullness.qual.Nullable K,java.lang.ref.ReferenceQueue<K>)",
+                    "queue",
+                    1),
                 "javax.annotation.Nullable",
-                "WeakKeyReference(@org.checkerframework.checker.nullness.qual.Nullable K,java.lang.ref.ReferenceQueue<K>)",
-                "queue",
-                "PARAMETER",
-                "com.uber.WeakKeyReference",
-                "WeakKeyReference.java",
-                "true"))
+                true))
         .start();
   }
 }

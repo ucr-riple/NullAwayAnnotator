@@ -10,8 +10,8 @@ public class Parameter extends Location {
   final String parameter;
   final int index;
 
-  public Parameter(String clazz, String uri, String method, String parameter, int index) {
-    super(LocationType.PARAMETER, clazz, uri);
+  public Parameter(String uri, String clazz, String method, String parameter, int index) {
+    super(LocationType.PARAMETER, uri, clazz);
     this.method = method;
     this.parameter = parameter;
     this.index = index;

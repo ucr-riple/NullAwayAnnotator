@@ -29,7 +29,7 @@ public class MethodSearchTest {
             "   public Main(String type, Object... objs) {",
             "   }",
             "}")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Initializer",
                 "Main(java.lang.String,java.lang.Object...)",
@@ -76,7 +76,7 @@ public class MethodSearchTest {
             "       }",
             "   }",
             "}")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "test()",

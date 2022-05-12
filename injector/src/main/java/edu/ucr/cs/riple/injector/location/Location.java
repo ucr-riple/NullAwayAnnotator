@@ -16,7 +16,7 @@ public abstract class Location {
   public final String clazz;
   public String uri;
 
-  public Location(LocationType type, String clazz, String uri) {
+  public Location(LocationType type, String uri, String clazz) {
     this.type = type;
     this.clazz = clazz;
     this.uri = uri;
@@ -95,11 +95,11 @@ public abstract class Location {
     String clazz = infos[1];
     switch (type) {
       case FIELD:
-        return new Field(clazz, uri, Collections.singleton(infos[3]));
+        return new Field(uri, clazz, Collections.singleton(infos[3]));
       case METHOD:
-        return new Method(clazz, uri, infos[2]);
+        return new Method(uri, clazz, infos[2]);
       case PARAMETER:
-        return new Parameter(clazz, uri, infos[2], infos[3], Integer.parseInt(infos[4]));
+        return new Parameter(uri, clazz, infos[2], infos[3], Integer.parseInt(infos[4]));
     }
     throw new RuntimeException("Cannot reach this statement, infos: " + Arrays.toString(infos));
   }

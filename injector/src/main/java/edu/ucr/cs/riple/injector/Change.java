@@ -22,6 +22,7 @@
 
 package edu.ucr.cs.riple.injector;
 
+import com.github.javaparser.ast.CompilationUnit;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Objects;
 import org.json.simple.JSONObject;
@@ -38,9 +39,8 @@ public class Change {
     this.inject = inject;
   }
 
-  public static Change fromValuesInString(String[] split) {
-    // location	class	method	param	index	uri
-    return null;
+  public boolean apply(CompilationUnit tree) {
+    return this.location.apply(tree, annotation, inject);
   }
 
   @Override

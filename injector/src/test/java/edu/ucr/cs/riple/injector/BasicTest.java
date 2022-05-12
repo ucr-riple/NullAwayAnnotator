@@ -66,7 +66,7 @@ public class BasicTest {
             "       return new Object();",
             "   }",
             "}")
-        .addLocations(Change, Change.duplicate(), Change.duplicate())
+        .addChanges(Change, Change.duplicate(), Change.duplicate())
         .start();
   }
 
@@ -91,7 +91,7 @@ public class BasicTest {
             "   @Nullable Object test(@javax.annotation.Nullable Object o) {",
             "   }",
             "}")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "test(@javax.annotation.Nullable java.lang.Object)",
@@ -134,7 +134,7 @@ public class BasicTest {
             "     }",
             "   }",
             "}")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "run()",
@@ -178,7 +178,7 @@ public class BasicTest {
             "     }",
             "   }",
             "}")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "run()",

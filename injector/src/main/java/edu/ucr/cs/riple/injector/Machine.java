@@ -25,8 +25,6 @@ package edu.ucr.cs.riple.injector;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
-import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.printer.DefaultPrettyPrinter;
 import com.github.javaparser.printer.configuration.DefaultPrinterConfiguration;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
@@ -107,24 +105,7 @@ public class Machine {
   }
 
   private boolean applyChange(CompilationUnit tree, Change change) {
-    boolean success = false;
-
-    NodeList<BodyDeclaration<?>> clazz =
-        Helper.getClassOrInterfaceOrEnumDeclarationMembersByFlatName(tree, change.clazz);
-    if (clazz == null) {
-      return false;
-    }
-    switch (change.kind) {
-      case "FIELD":
-        success = applyClassField(clazz, change);
-        break;
-      case "METHOD":
-        success = applyMethodReturn(clazz, change);
-        break;
-      case "PARAMETER":
-        success = applyMethodParam(clazz, change);
-        break;
-    }
+    boolean success = change.apply(tree);
     if (success) {
       if (Helper.getPackageName(change.annotation) != null) {
         ImportDeclaration importDeclaration =

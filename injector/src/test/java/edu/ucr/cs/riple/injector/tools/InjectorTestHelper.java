@@ -45,18 +45,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 @SuppressWarnings("unchecked")
 public class InjectorTestHelper {
 
   private final Map<String, String> fileMap;
-  private final ArrayList<Change> locations;
+  private final ArrayList<Change> changes;
   private Path rootPath;
 
   public InjectorTestHelper() {
-    locations = new ArrayList<>();
+    changes = new ArrayList<>();
     fileMap = new HashMap<>();
   }
 
@@ -76,9 +74,18 @@ public class InjectorTestHelper {
     return new InjectorTestHelperOutput(this, fileMap, pathToInputFile);
   }
 
-  public InjectorTestHelper addLocations(Change... locations) {
-    for (Change f : locations) f.uri = rootPath.resolve("/src/").resolve(f.uri);
-    this.locations.addAll(Arrays.asList(locations));
+  public InjectorTestHelper addChanges(Change... changes) {
+    Arrays.stream(changes)
+        .sequential()
+        .forEach(
+            change ->
+                change.location.uri =
+                    rootPath
+                        .resolve("/src/")
+                        .resolve(change.location.uri)
+                        .toAbsolutePath()
+                        .toString());
+    this.changes.addAll(Arrays.asList(changes));
     return this;
   }
 
@@ -90,8 +97,7 @@ public class InjectorTestHelper {
 
   public void start(boolean keepStyle) {
     Injector injector = Injector.builder().setMode(Injector.MODE.TEST).keepStyle(keepStyle).build();
-    writeLocations();
-    injector.start(new WorkListBuilder(rootPath + "/location/locations.json").getWorkLists());
+    injector.start(new WorkListBuilder(changes).getWorkLists(), keepStyle);
     for (String key : fileMap.keySet()) {
       String srcFile = readFileToString(key);
       String trimmedSrc = srcFile.replaceAll(" ", "").replaceAll("\n", "").replaceAll("\t", "");
@@ -107,16 +113,6 @@ public class InjectorTestHelper {
 
   public void start() {
     start(false);
-  }
-
-  private void writeLocations() {
-    JSONArray array = new JSONArray();
-    for (Change locations : locations) {
-      array.add(locations.getJson());
-    }
-    JSONObject obj = new JSONObject();
-    obj.put("locations", array);
-    writeToFile("location/locations.json", obj.toJSONString());
   }
 
   private String[] readLinesOfFile(String path) {
@@ -153,13 +149,15 @@ public class InjectorTestHelper {
 
   String writeToFile(String relativePath, String[] input) {
     StringBuilder toWrite = new StringBuilder();
-    for (String s : input) toWrite.append(s).append("\n");
+    for (String s : input) {
+      toWrite.append(s).append("\n");
+    }
     return writeToFile(relativePath, toWrite.toString());
   }
 
   String writeToFile(String relativePath, String input) {
     input = input.replace("\\", "");
-    relativePath = rootPath.concat("/").concat(relativePath);
+    relativePath = rootPath.resolve(relativePath).toAbsolutePath().toString();
     String pathToFileDirectory = relativePath.substring(0, relativePath.lastIndexOf("/"));
     try {
       Files.createDirectories(Paths.get(pathToFileDirectory + "/"));
@@ -170,14 +168,13 @@ public class InjectorTestHelper {
         return relativePath;
       }
     } catch (IOException e) {
-      throw new RuntimeException("Something terrible happened.");
+      throw new RuntimeException("Something terrible happened.", e);
     }
   }
 
   private String readFileToString(String path) {
     StringBuilder contentBuilder = new StringBuilder();
-    try {
-      Stream<String> stream = Files.lines(Paths.get(path), Charset.defaultCharset());
+    try (Stream<String> stream = Files.lines(Paths.get(path), Charset.defaultCharset())) {
       stream.forEach(s -> contentBuilder.append(s).append("\n"));
       return contentBuilder.toString();
     } catch (FileNotFoundException ex) {

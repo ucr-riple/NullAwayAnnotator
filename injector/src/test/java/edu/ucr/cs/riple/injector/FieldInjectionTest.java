@@ -33,7 +33,7 @@ public class FieldInjectionTest {
             "      h = f;",
             "   }",
             "}")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "",

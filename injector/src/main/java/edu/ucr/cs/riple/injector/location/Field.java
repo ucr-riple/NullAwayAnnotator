@@ -11,8 +11,8 @@ import org.json.simple.JSONObject;
 public class Field extends Location {
   final Set<String> variables;
 
-  public Field(String clazz, String uri, Set<String> variables) {
-    super(LocationType.FIELD, clazz, uri);
+  public Field(String uri, String clazz, Set<String> variables) {
+    super(LocationType.FIELD, uri, clazz);
     this.variables = variables;
   }
 

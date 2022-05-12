@@ -49,7 +49,7 @@ public class MethodInjectionTest {
             "       return new Object();",
             "   }",
             "}")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "test(boolean)",
@@ -98,7 +98,7 @@ public class MethodInjectionTest {
             "     }",
             "   }",
             "}")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "run()",
@@ -147,7 +147,7 @@ public class MethodInjectionTest {
             "       }",
             "   }",
             "}")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "bar(java.lang.Object)",
@@ -185,7 +185,7 @@ public class MethodInjectionTest {
             "       }",
             "   }",
             "}")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "run()",
@@ -238,7 +238,7 @@ public class MethodInjectionTest {
             "       else return new Object();",
             "   }",
             "}")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "test(Object, String, String)",
@@ -310,7 +310,7 @@ public class MethodInjectionTest {
             "     return null;",
             "   }",
             "}")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "getPredNodeNumbers(T)",
@@ -355,7 +355,7 @@ public class MethodInjectionTest {
             "     return null;",
             "   }",
             "}")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "getTargetForCall(com.ibm.wala.ipa.callgraph.CGNode[],com.ibm.wala.classLoader.CallSiteReference[][][],com.ibm.wala.classLoader.IClass,com.ibm.wala.ipa.callgraph.propagation.InstanceKey[][])",
@@ -390,7 +390,7 @@ public class MethodInjectionTest {
             "     return null;",
             "   }",
             "}")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "<T>getReader(com.ibm.wala.shrikeCT.ClassReader.AttrIterator,java.lang.String,com.ibm.wala.classLoader.ShrikeClass.GetReader<T>)",
@@ -424,7 +424,7 @@ public class MethodInjectionTest {
             "   public void format(String type,Object... objs) {",
             "   }",
             "}")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Initializer",
                 "format(java.lang.String,java.lang.Object...)",

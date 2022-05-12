@@ -8,8 +8,8 @@ import org.json.simple.JSONObject;
 public class Method extends Location {
   final String method;
 
-  public Method(String clazz, String uri, String method) {
-    super(LocationType.METHOD, clazz, uri);
+  public Method(String uri, String clazz, String method) {
+    super(LocationType.METHOD, uri, clazz);
     this.method = method;
   }
 

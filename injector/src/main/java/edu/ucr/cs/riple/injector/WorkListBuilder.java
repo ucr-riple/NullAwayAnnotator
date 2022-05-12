@@ -22,35 +22,13 @@
 
 package edu.ucr.cs.riple.injector;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public class WorkListBuilder {
   private final Collection<Change> changes;
-
-  public WorkListBuilder(String filePath) {
-    changes = new ArrayList<>();
-    BufferedReader reader;
-    try {
-      reader = Files.newBufferedReader(Paths.get(filePath), Charset.defaultCharset());
-      String line = reader.readLine();
-      while (line != null) {
-        Change output = Change.fromArrayInfo(line.split("\\t"));
-        changes.add(output);
-        line = reader.readLine();
-      }
-      reader.close();
-    } catch (IOException e) {
-      throw new RuntimeException("Error happened in reading the outputs.", e);
-    }
-  }
 
   public WorkListBuilder(Collection<Change> changes) {
     if (changes == null) {

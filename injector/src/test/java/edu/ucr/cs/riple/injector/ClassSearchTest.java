@@ -46,7 +46,7 @@ public class ClassSearchTest {
                 "     }",
                 "   }",
                 "}")
-            .addLocations(
+            .addChanges(
                 new Change(
                     "javax.annotation.Nullable",
                     "get()",
@@ -100,7 +100,7 @@ public class ClassSearchTest {
                 "     }",
                 "   }",
                 "}")
-            .addLocations(
+            .addChanges(
                 new Change(
                     "javax.annotation.Nullable",
                     "get()",
@@ -120,7 +120,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "simple.java")
         .expectOutputFile("Main.java", "simple_expected_1.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "null",
@@ -140,7 +140,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "simple.java")
         .expectOutputFile("Main.java", "simple_expected_2.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "null",
@@ -160,7 +160,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "simple.java")
         .expectOutputFile("Main.java", "simple_expected_3.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "null",
@@ -180,7 +180,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_1.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "get()",
@@ -200,7 +200,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_2.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "bar()",
@@ -220,7 +220,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_3.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "null",
@@ -240,7 +240,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_4.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "compare()",
@@ -260,7 +260,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_5.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "null",
@@ -280,7 +280,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_6.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "null",
@@ -300,7 +300,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_7.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "null",
@@ -320,7 +320,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_8.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "null",
@@ -340,7 +340,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_9.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "null",
@@ -360,7 +360,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_10.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "null",
@@ -380,7 +380,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_11.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "null",
@@ -400,7 +400,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_12.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "null",
@@ -420,7 +420,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_13.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "null",
@@ -440,7 +440,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_14.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "null",
@@ -460,7 +460,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_15.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "null",
@@ -480,7 +480,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_16.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "null",
@@ -500,7 +500,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_17.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "foo()",
@@ -520,7 +520,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_18.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "null",
@@ -540,7 +540,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_19.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "null",
@@ -560,7 +560,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_20.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "null",
@@ -580,7 +580,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_21.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "null",
@@ -600,7 +600,7 @@ public class ClassSearchTest {
         .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("Main.java", "benchmark_expected_22.java")
-        .addLocations(
+        .addChanges(
             new Change(
                 "javax.annotation.Nullable",
                 "foo()",
