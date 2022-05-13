@@ -18,7 +18,7 @@ public class FieldInitializationNode {
     if (this == o) return true;
     if (!(o instanceof FieldInitializationNode)) return false;
     FieldInitializationNode that = (FieldInitializationNode) o;
-    return initializerLocation.equals(that.initializerLocation);
+    return initializerLocation.equals(that.initializerLocation) && this.field.equals(that.field);
   }
 
   @Override

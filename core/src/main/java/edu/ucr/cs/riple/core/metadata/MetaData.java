@@ -30,8 +30,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public abstract class MetaData<T> {
   HashMap<Integer, List<T>> idHash;
@@ -99,20 +102,14 @@ public abstract class MetaData<T> {
     return node;
   }
 
-  protected List<T> findAllNodes(Comparator<T> c, Object... keys) {
+  protected List<T> findAllNodes(Predicate<T> c, Object... keys) {
     if (keys.length == 0) {
       throw new RuntimeException("findAllNodes needs keys to compute the hash and cannot be empty");
     }
-    List<T> nodes = new ArrayList<>();
     List<T> candidateIds = idHash.get(Arrays.hashCode(keys));
     if (candidateIds == null) {
-      return nodes;
+      return Collections.emptyList();
     }
-    for (T candidate : candidateIds) {
-      if (c.matches(candidate)) {
-        nodes.add(candidate);
-      }
-    }
-    return nodes;
+    return candidateIds.stream().filter(c).collect(Collectors.toList());
   }
 }

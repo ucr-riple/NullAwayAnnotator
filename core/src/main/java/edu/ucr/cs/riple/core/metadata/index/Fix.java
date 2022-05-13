@@ -54,12 +54,14 @@ public class Fix extends Hashable {
   public static Factory<Fix> factory(FieldDeclarationAnalysis analysis) {
     return infos -> {
       Location location = Location.createLocationFromArrayInfo(infos);
-      location.ifField(
-          field -> {
-            Set<String> variables =
-                analysis.getInLineMultipleFieldDeclarationsOnField(field.clazz, field.variables);
-            field.variables.addAll(variables);
-          });
+      if (analysis != null) {
+        location.ifField(
+            field -> {
+              Set<String> variables =
+                  analysis.getInLineMultipleFieldDeclarationsOnField(field.clazz, field.variables);
+              field.variables.addAll(variables);
+            });
+      }
       return new Fix(new Change(location, infos[7], true), infos[6], infos[8], infos[9]);
     };
   }

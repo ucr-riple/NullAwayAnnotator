@@ -100,7 +100,7 @@ public abstract class Location {
   public JSONObject getJson() {
     JSONObject res = new JSONObject();
     res.put(KEYS.CLASS, clazz);
-    res.put(KEYS.KIND, type);
+    res.put(KEYS.KIND, type.toString());
     res.put(KEYS.URI, uri);
     fillJsonInformation(res);
     return res;

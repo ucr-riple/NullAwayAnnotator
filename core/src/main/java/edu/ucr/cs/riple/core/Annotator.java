@@ -51,8 +51,6 @@ public class Annotator {
   // Set does not have get method, here we use map which retrieves elements efficiently.
   private final HashMap<Fix, Report> reports;
 
-  private FieldDeclarationAnalysis fieldDeclarationAnalysis;
-
   public Annotator(Config config) {
     this.config = config;
     this.reports = new HashMap<>();
@@ -73,9 +71,8 @@ public class Annotator {
     this.reports.clear();
     System.out.println("Making the first build...");
     Utility.buildProject(config, true);
-    fieldDeclarationAnalysis = new FieldDeclarationAnalysis(config.dir.resolve("class_info.tsv"));
     Set<Fix> uninitializedFields =
-        Utility.readFixesFromOutputDirectory(config, Fix.factory(fieldDeclarationAnalysis))
+        Utility.readFixesFromOutputDirectory(config, Fix.factory(null))
             .stream()
             .filter(fix -> fix.reasons.contains("FIELD_NO_INIT") && fix.isOnField())
             .collect(Collectors.toSet());
@@ -94,6 +91,8 @@ public class Annotator {
     Utility.setCSSCheckerActivation(config, true);
     Utility.buildProject(config);
     Utility.setCSSCheckerActivation(config, false);
+    FieldDeclarationAnalysis fieldDeclarationAnalysis =
+        new FieldDeclarationAnalysis(config.dir.resolve("class_info.tsv"));
     while (true) {
       Utility.buildProject(config);
       Set<Fix> remainingFixes =
@@ -138,6 +137,9 @@ public class Annotator {
             config, reports.values().stream().collect(ImmutableSet.toImmutableSet()));
         return;
       }
+      Utility.writeReports(
+          config, reports.values().stream().collect(ImmutableSet.toImmutableSet()));
+      return;
     }
   }
 }
