@@ -24,16 +24,21 @@
 
 package edu.ucr.cs.riple.core.tools;
 
+import static org.junit.Assert.fail;
+
 import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class CoreTestHelper {
 
@@ -45,16 +50,16 @@ public class CoreTestHelper {
 
   public CoreTestHelper(Path projectPath, Path outDirPath) {
     this.projectPath = projectPath;
+    this.outDirPath = outDirPath;
+    this.expectedReports = new HashSet<>();
+    this.fileMap = new HashMap<>();
     this.srcSet =
-        projectPath
+        this.projectPath
             .resolve("src")
             .resolve("main")
             .resolve("java")
             .resolve("annotator")
             .resolve("test");
-    this.outDirPath = outDirPath;
-    this.expectedReports = new HashSet<>();
-    this.fileMap = new HashMap<>();
   }
 
   public CoreTestHelper addInputLines(String path, String... input) {
@@ -81,8 +86,39 @@ public class CoreTestHelper {
     Config config = new Config(configPath.toString());
     Annotator annotator = new Annotator(config);
     annotator.start();
-    Collection<Report> actualReports = annotator.reports.values();
-    assert actualReports.equals(expectedReports);
+    compare(annotator.reports.values());
+  }
+
+  private void compare(Collection<Report> actualOutput) {
+    List<Report> notFound = new ArrayList<>();
+    for (Report report : expectedReports) {
+      if (!actualOutput.contains(report)) {
+        notFound.add(report);
+      } else {
+        actualOutput.remove(report);
+      }
+    }
+    if (notFound.size() == 0 && actualOutput.size() == 0) {
+      return;
+    }
+    StringBuilder errorMessage = new StringBuilder();
+    if (notFound.size() != 0) {
+      errorMessage
+          .append(notFound.size())
+          .append(" expected outputs were NOT found:")
+          .append("\n")
+          .append(notFound.stream().map(Report::toString).collect(Collectors.toList()))
+          .append("\n");
+    }
+    if (actualOutput.size() != 0) {
+      errorMessage
+          .append(actualOutput.size())
+          .append(" unexpected outputs were found:")
+          .append("\n")
+          .append(actualOutput.stream().map(Report::toString).collect(Collectors.toList()))
+          .append("\n");
+    }
+    fail(errorMessage.toString());
   }
 
   private void makeAnnotatorConfigFile(Path path) {
