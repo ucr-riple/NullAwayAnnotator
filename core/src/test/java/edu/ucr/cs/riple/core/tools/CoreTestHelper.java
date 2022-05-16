@@ -24,37 +24,36 @@
 
 package edu.ucr.cs.riple.core.tools;
 
-import com.uber.nullaway.NullAway;
 import edu.ucr.cs.riple.core.Report;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Stream;
 
 public class CoreTestHelper {
 
   private final List<Report> reports;
-  private final Path rootPath;
-  private final Map<String, String[]> fileMap;
-  private final int depth;
+  private final Path projectPath;
 
-  public CoreTestHelper(Path path, int depth) {
-    this.rootPath = path;
+  private final Path srcSet;
+  private final Path outDirPath;
+  private final Map<String, String[]> fileMap;
+  private int depth;
+
+  public CoreTestHelper(Path projectPath, Path outDirPath) {
+    this.projectPath = projectPath;
+    this.srcSet =
+        projectPath
+            .resolve("src")
+            .resolve("main")
+            .resolve("java")
+            .resolve("annotator")
+            .resolve("test");
+    this.outDirPath = outDirPath;
     this.reports = new ArrayList<>();
     this.fileMap = new HashMap<>();
-    this.depth = depth;
     System.out.println("Working Directory = " + System.getProperty("user.dir"));
   }
 
@@ -67,7 +66,7 @@ public class CoreTestHelper {
   }
 
   public CoreTestHelper addInputSourceFile(String path, String inputFilePath) {
-    String[] lines = readLinesOfFileFromResources(inputFilePath);
+    String[] lines = Utility.readLinesOfFileFromResource(inputFilePath);
     return addInputLines(path, lines);
   }
 
@@ -77,79 +76,17 @@ public class CoreTestHelper {
   }
 
   public void start() {
-    Path outputPath = rootPath.resolve("fixes.tsv");
-    try {
-      Files.deleteIfExists(outputPath);
-    } catch (IOException ignored) {
-      throw new RuntimeException("Failed to delete older file at: " + outputPath);
-    }
+    createFiles();
   }
 
-  private String[] readLinesOfFileFromResources(String path) {
-    BufferedReader reader;
-    List<String> lines = new ArrayList<>();
-    try {
-      reader =
-          new BufferedReader(
-              new FileReader(
-                  Objects.requireNonNull(getClass().getClassLoader().getResource(path)).getFile()));
-      String line = reader.readLine();
-      while (line != null) {
-        lines.add(line);
-        line = reader.readLine();
-      }
-      reader.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return lines.toArray(new String[0]);
-  }
-
-  private void makeDirectories() {
-    String[] names = {"src"};
-    for (String name : names) {
-      String pathToDirectory = rootPath + "/" + name;
-      try {
-        Files.createDirectories(Paths.get(pathToDirectory + "/"));
-      } catch (IOException e) {
-        throw new RuntimeException("Could not create the directories for name: " + name);
-      }
-    }
-  }
-
-  void writeToFile(String relativePath, String[] input) {
-    StringBuilder toWrite = new StringBuilder();
-    for (String s : input) {
-      toWrite.append(s).append("\n");
-    }
-    writeToFile(relativePath, toWrite.toString());
-  }
-
-  void writeToFile(String relativePath, String input) {
-    input = input.replace("\\", "");
-    relativePath = rootPath.resolve(relativePath).toAbsolutePath().toString();
-    String pathToFileDirectory = relativePath.substring(0, relativePath.lastIndexOf("/"));
-    try {
-      Files.createDirectories(Paths.get(pathToFileDirectory + "/"));
-      try (Writer writer =
-          Files.newBufferedWriter(Paths.get(relativePath), Charset.defaultCharset())) {
-        writer.write(input);
-        writer.flush();
-      }
-    } catch (IOException e) {
-      throw new RuntimeException("Something terrible happened.", e);
-    }
-  }
-
-  private String readFileToString(String path) {
-    StringBuilder contentBuilder = new StringBuilder();
-    try (Stream<String> stream = Files.lines(Paths.get(path), Charset.defaultCharset())) {
-      stream.forEach(s -> contentBuilder.append(s).append("\n"));
-      return contentBuilder.toString();
-    } catch (FileNotFoundException ex) {
-      throw new RuntimeException("Unable to open file: " + path, ex);
-    } catch (IOException ex) {
-      throw new RuntimeException("Error reading file: " + path, ex);
-    }
+  private void createFiles() {
+    fileMap.forEach(
+        (key, value) -> {
+          StringBuilder toWrite = new StringBuilder();
+          for (String s : value) {
+            toWrite.append(s).append("\n");
+          }
+          Utility.writeToFile(srcSet.resolve(key), toWrite.toString());
+        });
   }
 }

@@ -26,6 +26,8 @@ package edu.ucr.cs.riple.core;
 
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.log.Log;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -279,6 +281,58 @@ public class Config {
           : new OrElse<>(null, klass);
     } catch (Exception e) {
       return new OrElse<>(null, klass);
+    }
+  }
+
+  static class Builder {
+
+    String buildCommand;
+    String initializerAnnotation;
+    String nullableAnnotation;
+    String outputDir;
+    String nullAwayConfigPath;
+    String cssConfigPath;
+    boolean chain = false;
+    boolean optimized = true;
+    boolean cache = true;
+    boolean bailout = true;
+    boolean lexicalPreservationActivation = true;
+    int depth = 1;
+
+    public void write(Path path) {
+      Preconditions.checkNotNull(
+          buildCommand, "Build command must be initialized to construct the config.");
+      Preconditions.checkNotNull(
+          initializerAnnotation,
+          "Initializer Annotation must be initialized to construct the config.");
+      Preconditions.checkNotNull(
+          outputDir, "Output Directory must be initialized to construct the config.");
+      Preconditions.checkNotNull(
+          nullAwayConfigPath, "NulLAway Config Path must be initialized to construct the config.");
+      Preconditions.checkNotNull(
+          cssConfigPath, "CSS Config Path must be initialized to construct the config.");
+      Preconditions.checkNotNull(
+          nullableAnnotation, "Nullable Annotation must be initialized to construct the config.");
+      JSONObject json = new JSONObject();
+      json.put("BUILD_COMMAND", buildCommand);
+      JSONObject annotation = new JSONObject();
+      annotation.put("INITIALIZER", initializerAnnotation);
+      annotation.put("NULLABLE", nullableAnnotation);
+      json.put("ANNOTATION", annotation);
+      json.put("LEXICAL_PRESERVATION", lexicalPreservationActivation);
+      json.put("OUTPUT_DIR", outputDir);
+      json.put("NULLAWAY_CONFIG_PATH", nullAwayConfigPath);
+      json.put("CSS_CONFIG_PATH", cssConfigPath);
+      json.put("CHAIN", chain);
+      json.put("OPTIMIZED", optimized);
+      json.put("CACHE", cache);
+      json.put("BAILOUT", bailout);
+      json.put("DEPTH", depth);
+      try (FileWriter file = new FileWriter(path.toFile())) {
+        file.write(json.toJSONString());
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     }
   }
 }

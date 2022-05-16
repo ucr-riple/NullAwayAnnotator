@@ -22,5 +22,10 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'unittest'
+package annotator.test;
 
+/**
+ * The intention of this class it to just have a non-empty class in this structure, it is not part
+ * of any test.
+ */
+public class Holder {}
