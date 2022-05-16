@@ -284,20 +284,20 @@ public class Config {
     }
   }
 
-  static class Builder {
+  public static class Builder {
 
-    String buildCommand;
-    String initializerAnnotation;
-    String nullableAnnotation;
-    String outputDir;
-    String nullAwayConfigPath;
-    String cssConfigPath;
-    boolean chain = false;
-    boolean optimized = true;
-    boolean cache = true;
-    boolean bailout = true;
-    boolean lexicalPreservationActivation = true;
-    int depth = 1;
+    public String buildCommand;
+    public String initializerAnnotation;
+    public String nullableAnnotation;
+    public String outputDir;
+    public String nullAwayConfigPath;
+    public String cssConfigPath;
+    public boolean chain = false;
+    public boolean optimized = true;
+    public boolean cache = true;
+    public boolean bailout = true;
+    public boolean lexicalPreservationActivation = true;
+    public int depth = 1;
 
     public void write(Path path) {
       Preconditions.checkNotNull(

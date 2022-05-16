@@ -24,6 +24,8 @@
 
 package edu.ucr.cs.riple.core.tools;
 
+import edu.ucr.cs.riple.core.Annotator;
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -34,7 +36,8 @@ import java.util.Map;
 
 public class CoreTestHelper {
 
-  private final List<Report> reports;
+  private final List<Report> expectedReports;
+  private final List<Report> actualReports;
   private final Path projectPath;
 
   private final Path srcSet;
@@ -52,9 +55,9 @@ public class CoreTestHelper {
             .resolve("annotator")
             .resolve("test");
     this.outDirPath = outDirPath;
-    this.reports = new ArrayList<>();
+    this.expectedReports = new ArrayList<>();
     this.fileMap = new HashMap<>();
-    System.out.println("Working Directory = " + System.getProperty("user.dir"));
+    this.actualReports = new ArrayList<>();
   }
 
   public CoreTestHelper addInputLines(String path, String... input) {
@@ -66,17 +69,37 @@ public class CoreTestHelper {
   }
 
   public CoreTestHelper addInputSourceFile(String path, String inputFilePath) {
-    String[] lines = Utility.readLinesOfFileFromResource(inputFilePath);
-    return addInputLines(path, lines);
+    return addInputLines(path, Utility.readLinesOfFileFromResource(inputFilePath));
   }
 
   public CoreTestHelper addExpectedReports(Report... reports) {
-    this.reports.addAll(Arrays.asList(reports));
+    this.expectedReports.addAll(Arrays.asList(reports));
     return this;
   }
 
   public void start() {
+    Path configPath = outDirPath.resolve("config.json");
     createFiles();
+    makeAnnotatorConfigFile(configPath);
+    Config config = new Config(configPath.toString());
+    Annotator annotator = new Annotator(config);
+    annotator.start();
+    readActualReports();
+  }
+
+  private void readActualReports() {}
+
+  private void makeAnnotatorConfigFile(Path path) {
+    Config.Builder builder = new Config.Builder();
+    builder.buildCommand =
+        Utility.changeDirCommand(projectPath.toString()) + " && ./gradlew compileJava";
+    builder.cssConfigPath = Utility.changeDirCommand(outDirPath.resolve("css.xml").toString());
+    builder.nullAwayConfigPath =
+        Utility.changeDirCommand(outDirPath.resolve("config.xml").toString());
+    builder.nullableAnnotation = "javax.annotation.Nullable";
+    builder.initializerAnnotation = "annotator.test.Initializer";
+    builder.outputDir = outDirPath.toString();
+    builder.write(path);
   }
 
   private void createFiles() {
