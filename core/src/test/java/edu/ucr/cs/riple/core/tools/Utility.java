@@ -97,18 +97,6 @@ public class Utility {
     }
   }
 
-  private String readFileToString(String path) {
-    StringBuilder contentBuilder = new StringBuilder();
-    try (Stream<String> stream = Files.lines(Paths.get(path), Charset.defaultCharset())) {
-      stream.forEach(s -> contentBuilder.append(s).append("\n"));
-      return contentBuilder.toString();
-    } catch (FileNotFoundException ex) {
-      throw new RuntimeException("Unable to open file: " + path, ex);
-    } catch (IOException ex) {
-      throw new RuntimeException("Error reading file: " + path, ex);
-    }
-  }
-
   public static ProcessBuilder createProcessInstance() {
     ProcessBuilder pb = new ProcessBuilder();
     String os = System.getProperty("os.name").toLowerCase();
