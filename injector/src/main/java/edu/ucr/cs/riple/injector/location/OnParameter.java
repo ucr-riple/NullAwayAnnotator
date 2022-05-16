@@ -103,4 +103,18 @@ public class OnParameter extends Location {
   public int hashCode() {
     return Objects.hash(super.hashCode(), method, parameter);
   }
+
+  @Override
+  public String toString() {
+    return "OnParameter{"
+        + "method='"
+        + method
+        + '\''
+        + ", parameter='"
+        + parameter
+        + '\''
+        + ", index="
+        + index
+        + '}';
+  }
 }

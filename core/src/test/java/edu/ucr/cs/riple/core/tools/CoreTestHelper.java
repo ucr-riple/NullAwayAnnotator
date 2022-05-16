@@ -53,20 +53,14 @@ public class CoreTestHelper {
     this.outDirPath = outDirPath;
     this.expectedReports = new HashSet<>();
     this.fileMap = new HashMap<>();
-    this.srcSet =
-        this.projectPath
-            .resolve("src")
-            .resolve("main")
-            .resolve("java")
-            .resolve("annotator")
-            .resolve("test");
+    this.srcSet = this.projectPath.resolve("src").resolve("main").resolve("java").resolve("test");
   }
 
-  public CoreTestHelper addInputLines(String path, String... input) {
+  public CoreTestHelper addInputLines(String path, String... lines) {
     if (fileMap.containsKey(path)) {
       throw new IllegalArgumentException("File at path: " + path + " already exists.");
     }
-    fileMap.put(path, input);
+    fileMap.put(path, lines);
     return this;
   }
 
@@ -92,7 +86,7 @@ public class CoreTestHelper {
   private void compare(Collection<Report> actualOutput) {
     List<Report> notFound = new ArrayList<>();
     for (Report report : expectedReports) {
-      if (!actualOutput.contains(report)) {
+      if (actualOutput.stream().noneMatch(r -> r.equals(report) && r.effect == report.effect)) {
         notFound.add(report);
       } else {
         actualOutput.remove(report);
@@ -125,9 +119,8 @@ public class CoreTestHelper {
     Config.Builder builder = new Config.Builder();
     builder.buildCommand =
         Utility.changeDirCommand(projectPath.toString()) + " && ./gradlew compileJava";
-    builder.cssConfigPath = Utility.changeDirCommand(outDirPath.resolve("css.xml").toString());
-    builder.nullAwayConfigPath =
-        Utility.changeDirCommand(outDirPath.resolve("config.xml").toString());
+    builder.cssConfigPath = outDirPath.resolve("css.xml").toString();
+    builder.nullAwayConfigPath = outDirPath.resolve("config.xml").toString();
     builder.nullableAnnotation = "javax.annotation.Nullable";
     builder.initializerAnnotation = "annotator.test.Initializer";
     builder.outputDir = outDirPath.toString();

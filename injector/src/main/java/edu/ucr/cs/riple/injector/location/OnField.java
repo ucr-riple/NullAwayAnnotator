@@ -100,4 +100,9 @@ public class OnField extends Location {
   public int hashCode() {
     return Objects.hash(super.hashCode(), variables);
   }
+
+  @Override
+  public String toString() {
+    return "OnField{" + "variables=" + variables + ", clazz='" + clazz + '\'' + '}';
+  }
 }

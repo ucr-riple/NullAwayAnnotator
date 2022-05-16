@@ -25,10 +25,13 @@
 package edu.ucr.cs.riple.core;
 
 import edu.ucr.cs.riple.core.tools.CoreTestHelper;
+import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.core.tools.Utility;
+import edu.ucr.cs.riple.injector.location.OnField;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -41,11 +44,12 @@ public class BasicTest {
 
   @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-  private Path projectPath = Paths.get("/tmp/NullAwayFix").resolve("unittest");
-  private Path outDirPath = Paths.get("/tmp/NullAwayFix").resolve("unittest");
+  private Path projectPath;
+  private final Path outDirPath = Paths.get("/tmp/NullAwayFix");
 
   @Before
   public void setup() {
+    projectPath = outDirPath.resolve("unittest");
     Path pathToUnitTestDir = Utility.getPathOfResource("unittest");
     Utility.copyDirectory(pathToUnitTestDir, projectPath);
     ProcessBuilder processBuilder = Utility.createProcessInstance();
@@ -54,12 +58,17 @@ public class BasicTest {
     try {
       processBuilder.start().waitFor();
     } catch (IOException | InterruptedException e) {
-      e.printStackTrace();
+      throw new RuntimeException("Preparation for test failed", e);
     }
   }
 
   @Test
   public void field_test() {
     CoreTestHelper coreTestHelper = new CoreTestHelper(projectPath, outDirPath);
+    coreTestHelper
+        .addInputLines("Main.java", "package test;", "public class Main {", "Object field;", "}")
+        .addExpectedReports(
+            new TReport(new OnField("Main.java", "test.Main", Collections.singleton("field")), -1))
+        .start();
   }
 }

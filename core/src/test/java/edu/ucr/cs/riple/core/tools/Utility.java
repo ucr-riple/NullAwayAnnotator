@@ -25,7 +25,6 @@
 package edu.ucr.cs.riple.core.tools;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Writer;

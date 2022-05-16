@@ -60,4 +60,9 @@ public class Report {
   public int hashCode() {
     return Objects.hash(root);
   }
+
+  @Override
+  public String toString() {
+    return "Report{" + "effect=" + effect + ", root=" + root + '}';
+  }
 }

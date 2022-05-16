@@ -117,4 +117,9 @@ public class Fix extends Hashable {
     String className = lastIndex < 0 ? m.clazz : m.clazz.substring(lastIndex + 1);
     return methodName.equals(className);
   }
+
+  @Override
+  public String toString() {
+    return "Fix{" + "change=" + change + '}';
+  }
 }
