@@ -28,22 +28,20 @@ import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class CoreTestHelper {
 
-  private final List<Report> expectedReports;
-  private final List<Report> actualReports;
+  private final Set<Report> expectedReports;
   private final Path projectPath;
-
   private final Path srcSet;
   private final Path outDirPath;
   private final Map<String, String[]> fileMap;
-  private int depth;
 
   public CoreTestHelper(Path projectPath, Path outDirPath) {
     this.projectPath = projectPath;
@@ -55,9 +53,8 @@ public class CoreTestHelper {
             .resolve("annotator")
             .resolve("test");
     this.outDirPath = outDirPath;
-    this.expectedReports = new ArrayList<>();
+    this.expectedReports = new HashSet<>();
     this.fileMap = new HashMap<>();
-    this.actualReports = new ArrayList<>();
   }
 
   public CoreTestHelper addInputLines(String path, String... input) {
@@ -84,10 +81,9 @@ public class CoreTestHelper {
     Config config = new Config(configPath.toString());
     Annotator annotator = new Annotator(config);
     annotator.start();
-    readActualReports();
+    Collection<Report> actualReports = annotator.reports.values();
+    assert actualReports.equals(expectedReports);
   }
-
-  private void readActualReports() {}
 
   private void makeAnnotatorConfigFile(Path path) {
     Config.Builder builder = new Config.Builder();
