@@ -58,9 +58,9 @@ tasks.withType(JavaCompile) {
                                               "-Xep:NullAway:ERROR",
                                               "-XepOpt:NullAway:AnnotatedPackages=test",
                                               "-XepOpt:NullAway:SerializeFixMetadata=true",
-                                              "-XepOpt:NullAway:FixSerializationConfigPath=/tmp/NullAwayFix/config.xml",
+                                              "-XepOpt:NullAway:FixSerializationConfigPath=",
                                               "-Xep:CSS:ERROR",
-                                              "-XepOpt:CSS:ConfigPath=/tmp/NullAwayFix/css.xml",
+                                              "-XepOpt:CSS:ConfigPath=",
                                               "-XepDisableAllWarnings"]
         options.compilerArgs << "-Xmaxerrs" << "100000"
     }

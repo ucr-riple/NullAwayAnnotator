@@ -47,6 +47,8 @@ dependencies {
 
     implementation group: 'commons-cli', name: 'commons-cli', version: "${deps.versions.cli}"
     testImplementation group: 'commons-cli', name: 'commons-cli', version: "${deps.versions.cli}"
+
+    testCompile group: 'commons-io', name: 'commons-io', version: "${deps.versions.commonsio}"
 }
 
 configurations.implementation.canBeResolved = true
