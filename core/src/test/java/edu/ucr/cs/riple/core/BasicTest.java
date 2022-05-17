@@ -29,6 +29,7 @@ import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.core.tools.Utility;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
+import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -100,6 +101,50 @@ public class BasicTest {
             "   }",
             "}")
         .addExpectedReports(new TReport(new OnMethod("Main.java", "test.Main", "run()"), -1))
+        .start();
+  }
+
+  @Test
+  public void param() {
+    CoreTestHelper coreTestHelper = new CoreTestHelper(projectPath, outDirPath);
+    coreTestHelper
+        .addInputLines(
+            "Main.java",
+            "package test;",
+            "public class Main {",
+            "   Object run(Object o) {",
+            "     return o;",
+            "   }",
+            "   void pass() {",
+            "     run(null);",
+            "   }",
+            "}")
+        .addExpectedReports(
+            new TReport(
+                new OnParameter("Main.java", "test.Main", "run(java.lang.Object)", "o", 0), 0))
+        .start();
+  }
+
+  @Test
+  public void param_complete() {
+    CoreTestHelper coreTestHelper = new CoreTestHelper(projectPath, outDirPath);
+    coreTestHelper
+        .addInputLines(
+            "Main.java",
+            "package test;",
+            "public class Main {",
+            "   Object run(Object o) {",
+            "     return o;",
+            "   }",
+            "   void pass() {",
+            "     run(null);",
+            "   }",
+            "}")
+        .requestCompleteLoop()
+        .addExpectedReports(
+            new TReport(
+                new OnParameter("Main.java", "test.Main", "run(java.lang.Object)", "o", 0), 0),
+            new TReport(new OnMethod("Main.java", "test.Main", "run(java.lang.Object)"), -1))
         .start();
   }
 }

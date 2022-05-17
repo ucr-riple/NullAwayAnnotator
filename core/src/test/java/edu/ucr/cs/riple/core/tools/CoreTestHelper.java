@@ -51,6 +51,8 @@ public class CoreTestHelper {
   private final Map<String, String[]> fileMap;
 
   private BiPredicate<Report, Report> predicate;
+  private int depth = 1;
+  private boolean requestCompleteLoop = false;
 
   public CoreTestHelper(Path projectPath, Path outDirPath) {
     this.projectPath = projectPath;
@@ -79,6 +81,16 @@ public class CoreTestHelper {
 
   public CoreTestHelper addExpectedReports(Report... reports) {
     this.expectedReports.addAll(Arrays.asList(reports));
+    return this;
+  }
+
+  public CoreTestHelper toDepth(int depth) {
+    this.depth = depth;
+    return this;
+  }
+
+  public CoreTestHelper requestCompleteLoop() {
+    this.requestCompleteLoop = true;
     return this;
   }
 
@@ -145,6 +157,8 @@ public class CoreTestHelper {
     builder.nullableAnnotation = "javax.annotation.Nullable";
     builder.initializerAnnotation = "annotator.test.Initializer";
     builder.outputDir = outDirPath.toString();
+    builder.depth = depth;
+    builder.outerLoopActivation = requestCompleteLoop;
     builder.write(path);
   }
 

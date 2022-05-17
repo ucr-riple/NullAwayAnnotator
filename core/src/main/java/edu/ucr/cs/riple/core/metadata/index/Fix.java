@@ -120,6 +120,6 @@ public class Fix extends Hashable {
 
   @Override
   public String toString() {
-    return "Fix{" + "change=" + change + '}';
+    return change.toString();
   }
 }

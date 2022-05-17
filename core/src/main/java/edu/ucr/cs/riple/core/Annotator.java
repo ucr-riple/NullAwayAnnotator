@@ -137,6 +137,9 @@ public class Annotator {
             config, reports.values().stream().collect(ImmutableSet.toImmutableSet()));
         return;
       }
+      if (config.disableOuterLoop) {
+        return;
+      }
     }
   }
 }
