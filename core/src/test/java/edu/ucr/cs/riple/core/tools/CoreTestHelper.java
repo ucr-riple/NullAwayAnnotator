@@ -29,6 +29,7 @@ import static org.junit.Assert.fail;
 import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.injector.location.Location;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -84,12 +85,23 @@ public class CoreTestHelper {
   }
 
   private void compare(Collection<Report> actualOutput) {
+    final String uri = "unittest/src/main/java/test/";
+    actualOutput.forEach(
+        report -> {
+          Location location = report.root.change.location;
+          location.uri = location.uri.substring(location.uri.indexOf(uri) + uri.length());
+        });
     List<Report> notFound = new ArrayList<>();
-    for (Report report : expectedReports) {
-      if (actualOutput.stream().noneMatch(r -> r.equals(report) && r.effect == report.effect)) {
-        notFound.add(report);
+    for (Report expected : expectedReports) {
+      if (actualOutput
+          .stream()
+          .noneMatch(
+              actual ->
+                  actual.root.change.location.equals(expected.root.change.location)
+                      && actual.effect == expected.effect)) {
+        notFound.add(expected);
       } else {
-        actualOutput.remove(report);
+        actualOutput.remove(expected);
       }
     }
     if (notFound.size() == 0 && actualOutput.size() == 0) {
