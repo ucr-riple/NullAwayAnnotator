@@ -29,6 +29,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -48,8 +49,9 @@ public class Utility {
             Path destination = Paths.get(destDir, source.toString().substring(srcDir.length()));
             try {
               Files.copy(source, destination);
+            } catch (FileAlreadyExistsException ignored) {
             } catch (IOException e) {
-              e.printStackTrace();
+              throw new RuntimeException("Failed to copy " + srcDir + " into: " + destDir, e);
             }
           });
     } catch (IOException e) {

@@ -84,7 +84,7 @@ public class CoreTestHelper {
     if (!dir.toFile().isDirectory()) {
       throw new IllegalArgumentException("inputDirectoryPath should lead to a directory");
     }
-    Utility.copyDirectory(dir, srcSet.resolve(path));
+    Utility.copyDirectory(dir, srcSet.getParent().resolve(path));
     return this;
   }
 

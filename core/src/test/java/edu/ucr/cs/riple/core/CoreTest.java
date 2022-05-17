@@ -103,7 +103,7 @@ public class CoreTest extends BaseCoreTest {
   @Test
   public void inner_class() {
     coreTestHelper
-        .addInputDirectory(".", "innerclass")
+        .addInputDirectory("test", "innerclass")
         .addExpectedReports(
             new TReport(new OnMethod("Main.java", "test.Main$1", "bar(java.lang.Object)"), 0),
             new TReport(new OnMethod("Main.java", "test.Main$1Child", "exec()"), 0),
