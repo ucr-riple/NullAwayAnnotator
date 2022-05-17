@@ -1,5 +1,6 @@
 package com.uber;
-import custom.Nullable;
+import javax.annotation.Nullable;
+import custom.aNullable;
 public class Main {
    public enum Test{
      CLASSIC;
