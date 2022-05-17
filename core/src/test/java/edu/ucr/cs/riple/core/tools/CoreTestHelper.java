@@ -79,6 +79,15 @@ public class CoreTestHelper {
     return addInputLines(path, Utility.readLinesOfFileFromResource(inputFilePath));
   }
 
+  public CoreTestHelper addInputDirectory(String path, String inputDirectoryPath) {
+    Path dir = Utility.getPathOfResource(inputDirectoryPath);
+    if (!dir.toFile().isDirectory()) {
+      throw new IllegalArgumentException("inputDirectoryPath should lead to a directory");
+    }
+    Utility.copyDirectory(dir, srcSet.resolve(path));
+    return this;
+  }
+
   public CoreTestHelper addExpectedReports(Report... reports) {
     this.expectedReports.addAll(Arrays.asList(reports));
     return this;
