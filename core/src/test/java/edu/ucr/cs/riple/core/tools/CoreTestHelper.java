@@ -39,6 +39,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
 public class CoreTestHelper {
@@ -48,6 +49,8 @@ public class CoreTestHelper {
   private final Path srcSet;
   private final Path outDirPath;
   private final Map<String, String[]> fileMap;
+
+  private BiPredicate<Report, Report> predicate;
 
   public CoreTestHelper(Path projectPath, Path outDirPath) {
     this.projectPath = projectPath;
@@ -65,6 +68,11 @@ public class CoreTestHelper {
     return this;
   }
 
+  public CoreTestHelper setPredicate(BiPredicate<Report, Report> predicate) {
+    this.predicate = predicate;
+    return this;
+  }
+
   public CoreTestHelper addInputSourceFile(String path, String inputFilePath) {
     return addInputLines(path, Utility.readLinesOfFileFromResource(inputFilePath));
   }
@@ -75,6 +83,12 @@ public class CoreTestHelper {
   }
 
   public void start() {
+    if (predicate == null) {
+      predicate =
+          (report, other) ->
+              report.root.change.location.equals(other.root.change.location)
+                  && report.effect == other.effect;
+    }
     Path configPath = outDirPath.resolve("config.json");
     createFiles();
     makeAnnotatorConfigFile(configPath);
@@ -93,12 +107,7 @@ public class CoreTestHelper {
         });
     List<Report> notFound = new ArrayList<>();
     for (Report expected : expectedReports) {
-      if (actualOutput
-          .stream()
-          .noneMatch(
-              actual ->
-                  actual.root.change.location.equals(expected.root.change.location)
-                      && actual.effect == expected.effect)) {
+      if (actualOutput.stream().noneMatch(report -> predicate.test(report, expected))) {
         notFound.add(expected);
       } else {
         actualOutput.remove(expected);
