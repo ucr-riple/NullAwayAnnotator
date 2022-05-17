@@ -95,7 +95,6 @@ public class RemovalTest {
                     "Super.java",
                     "com.uber.Super",
                     "test(@javax.annotation.Nullable java.lang.Object)",
-                    "o",
                     0),
                 "javax.annotation.Nullable",
                 false))
@@ -129,7 +128,6 @@ public class RemovalTest {
                     "Super.java",
                     "com.uber.Super",
                     "test(@javax.annotation.Nullable java.lang.Object)",
-                    "o",
                     0),
                 "javax.annotation.Nullable",
                 false))

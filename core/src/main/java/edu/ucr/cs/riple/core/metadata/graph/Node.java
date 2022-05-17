@@ -159,8 +159,7 @@ public class Node {
                       node -> {
                         Change change =
                             new Change(
-                                new OnParameter(
-                                    node.uri, node.clazz, p.method, p.parameter, p.index),
+                                new OnParameter(node.uri, node.clazz, p.method, p.index),
                                 fix.annotation,
                                 true);
                         return new Fix(change, "WRONG_OVERRIDE_PARAM", node.clazz, node.method);

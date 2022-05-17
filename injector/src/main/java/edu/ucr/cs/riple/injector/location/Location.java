@@ -75,7 +75,7 @@ public abstract class Location {
       case METHOD:
         return new OnMethod(uri, clazz, infos[2]);
       case PARAMETER:
-        return new OnParameter(uri, clazz, infos[2], infos[3], Integer.parseInt(infos[4]));
+        return new OnParameter(uri, clazz, infos[2], Integer.parseInt(infos[4]));
     }
     throw new RuntimeException("Cannot reach this statement, infos: " + Arrays.toString(infos));
   }

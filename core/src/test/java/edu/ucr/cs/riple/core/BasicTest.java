@@ -120,8 +120,7 @@ public class BasicTest {
             "   }",
             "}")
         .addExpectedReports(
-            new TReport(
-                new OnParameter("Main.java", "test.Main", "run(java.lang.Object)", "o", 0), 0))
+            new TReport(new OnParameter("Main.java", "test.Main", "run(java.lang.Object)", 0), 0))
         .start();
   }
 
@@ -142,8 +141,7 @@ public class BasicTest {
             "}")
         .requestCompleteLoop()
         .addExpectedReports(
-            new TReport(
-                new OnParameter("Main.java", "test.Main", "run(java.lang.Object)", "o", 0), 0),
+            new TReport(new OnParameter("Main.java", "test.Main", "run(java.lang.Object)", 0), 0),
             new TReport(new OnMethod("Main.java", "test.Main", "run(java.lang.Object)"), -1))
         .start();
   }
