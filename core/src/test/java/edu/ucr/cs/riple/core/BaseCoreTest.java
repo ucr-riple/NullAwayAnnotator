@@ -49,15 +49,14 @@ public abstract class BaseCoreTest {
   @Before
   public void setup() {
     outDirPath = Paths.get(temporaryFolder.getRoot().getAbsolutePath());
-    outDirPath = Paths.get("/tmp/NullAwayFix");
     projectPath = outDirPath.resolve("unittest");
     Path pathToUnitTestDir = Utility.getPathOfResource("unittest");
-    Utility.copyDirectory(pathToUnitTestDir, projectPath);
-    ProcessBuilder processBuilder = Utility.createProcessInstance();
-    processBuilder.directory(projectPath.toFile());
-    processBuilder.command("gradle", "wrapper", "--gradle-version", "6.1");
-    File buildFile = projectPath.resolve("build.gradle").toFile();
     try {
+      FileUtils.copyDirectory(pathToUnitTestDir.toFile(), projectPath.toFile());
+      ProcessBuilder processBuilder = Utility.createProcessInstance();
+      processBuilder.directory(projectPath.toFile());
+      processBuilder.command("gradle", "wrapper", "--gradle-version", "6.1");
+      File buildFile = projectPath.resolve("build.gradle").toFile();
       String buildContent = FileUtils.readFileToString(buildFile, Charset.defaultCharset());
       buildContent =
           buildContent.replace(

@@ -30,6 +30,8 @@ import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.injector.location.Location;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +43,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
+import org.apache.commons.io.FileUtils;
 
 public class CoreTestHelper {
 
@@ -75,16 +78,20 @@ public class CoreTestHelper {
     return this;
   }
 
-  public CoreTestHelper addInputSourceFile(String path, String inputFilePath) {
-    return addInputLines(path, Utility.readLinesOfFileFromResource(inputFilePath));
+  public CoreTestHelper addInputSourceFile(String path, String inputFilePath) throws IOException {
+    return addInputLines(
+        path,
+        FileUtils.readFileToString(
+            Utility.getPathOfResource(inputFilePath).toFile(), Charset.defaultCharset()));
   }
 
   public CoreTestHelper addInputDirectory(String path, String inputDirectoryPath) {
     Path dir = Utility.getPathOfResource(inputDirectoryPath);
-    if (!dir.toFile().isDirectory()) {
-      throw new IllegalArgumentException("inputDirectoryPath should lead to a directory");
+    try {
+      FileUtils.copyDirectory(dir.toFile(), srcSet.getParent().resolve(path).toFile());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
-    Utility.copyDirectory(dir, srcSet.getParent().resolve(path));
     return this;
   }
 
@@ -174,11 +181,11 @@ public class CoreTestHelper {
   private void createFiles() {
     fileMap.forEach(
         (key, value) -> {
-          StringBuilder toWrite = new StringBuilder();
-          for (String s : value) {
-            toWrite.append(s).append("\n");
+          try {
+            FileUtils.writeLines(srcSet.resolve(key).toFile(), Arrays.asList(value));
+          } catch (IOException e) {
+            throw new RuntimeException("Failed to write line at: " + key, e);
           }
-          Utility.writeToFile(srcSet.resolve(key), toWrite.toString());
         });
   }
 }
