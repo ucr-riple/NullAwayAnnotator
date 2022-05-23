@@ -49,9 +49,11 @@ public abstract class BaseCoreTest {
   @Before
   public void setup() {
     outDirPath = Paths.get(temporaryFolder.getRoot().getAbsolutePath());
+    outDirPath = Paths.get("/tmp/NullAwayFix");
     projectPath = outDirPath.resolve("unittest");
     Path pathToUnitTestDir = Utility.getPathOfResource("unittest");
     try {
+      FileUtils.deleteDirectory(projectPath.toFile());
       FileUtils.copyDirectory(pathToUnitTestDir.toFile(), projectPath.toFile());
       ProcessBuilder processBuilder = Utility.createProcessInstance();
       processBuilder.directory(projectPath.toFile());

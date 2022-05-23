@@ -24,40 +24,13 @@
 
 package edu.ucr.cs.riple.core.tools;
 
-import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.Change;
 import edu.ucr.cs.riple.injector.location.Location;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
-/** Wrapper class for {@link Report} with default values, used to create tests. */
-public class TReport extends Report {
-  public TReport(Location root, int effect) {
-    this(root, effect, "", "");
-  }
+/** Wrapper class for {@link Change} with default values, used to create tests. */
+public class TChange extends Change {
 
-  public TReport(Location root, int effect, String encClass, String encMethod) {
-    super(
-        new Fix(new Change(root, "javax.annotation.Nullable", true), null, encClass, encMethod),
-        effect);
-  }
-
-  public TReport(
-      Location root,
-      int effect,
-      @Nullable Set<Location> addToTree,
-      @Nullable Set<Location> triggered) {
-    this(root, effect);
-    if (triggered != null) {
-      this.triggered =
-          triggered.stream().map((Function<Location, Fix>) TFix::new).collect(Collectors.toSet());
-    }
-    if (addToTree != null) {
-      this.tree.addAll(
-          addToTree.stream().map((Function<Location, Fix>) TFix::new).collect(Collectors.toSet()));
-    }
+  public TChange(Location location) {
+    super(location, "javax.annotation.Nullable", true);
   }
 }

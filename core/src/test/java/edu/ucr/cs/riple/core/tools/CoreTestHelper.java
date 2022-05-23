@@ -78,11 +78,15 @@ public class CoreTestHelper {
     return this;
   }
 
-  public CoreTestHelper addInputSourceFile(String path, String inputFilePath) throws IOException {
-    return addInputLines(
-        path,
-        FileUtils.readFileToString(
-            Utility.getPathOfResource(inputFilePath).toFile(), Charset.defaultCharset()));
+  public CoreTestHelper addInputSourceFile(String path, String inputFilePath) {
+    try {
+      return addInputLines(
+          path,
+          FileUtils.readFileToString(
+              Utility.getPathOfResource(inputFilePath).toFile(), Charset.defaultCharset()));
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to add source input", e);
+    }
   }
 
   public CoreTestHelper addInputDirectory(String path, String inputDirectoryPath) {
@@ -126,13 +130,32 @@ public class CoreTestHelper {
     compare(annotator.reports.values());
   }
 
-  private void compare(Collection<Report> actualOutput) {
-    final String uri = "unittest/src/main/java/test/";
-    actualOutput.forEach(
-        report -> {
-          Location location = report.root.change.location;
-          location.uri = location.uri.substring(location.uri.indexOf(uri) + uri.length());
+  private void updateUrisForReport(Report report) {
+    final String testDirectoryPrefix = "unittest/src/main/java/test/";
+    Location location = report.root.change.location;
+    location.uri =
+        location.uri.substring(
+            location.uri.indexOf(testDirectoryPrefix) + testDirectoryPrefix.length());
+    report.triggered.forEach(
+        fix -> {
+          Location l = fix.change.location;
+          if (l.uri.contains(testDirectoryPrefix)) {
+            l.uri =
+                l.uri.substring(l.uri.indexOf(testDirectoryPrefix) + testDirectoryPrefix.length());
+          }
         });
+    report.tree.forEach(
+        fix -> {
+          Location l = fix.change.location;
+          if (l.uri.contains(testDirectoryPrefix)) {
+            l.uri =
+                l.uri.substring(l.uri.indexOf(testDirectoryPrefix) + testDirectoryPrefix.length());
+          }
+        });
+  }
+
+  private void compare(Collection<Report> actualOutput) {
+    actualOutput.forEach(this::updateUrisForReport);
     List<Report> notFound = new ArrayList<>();
     for (Report expected : expectedReports) {
       if (actualOutput.stream().noneMatch(report -> predicate.test(report, expected))) {
@@ -174,6 +197,7 @@ public class CoreTestHelper {
     builder.initializerAnnotation = "annotator.test.Initializer";
     builder.outputDir = outDirPath.toString();
     builder.depth = depth;
+    builder.chain = true;
     builder.outerLoopActivation = requestCompleteLoop;
     builder.write(path);
   }
