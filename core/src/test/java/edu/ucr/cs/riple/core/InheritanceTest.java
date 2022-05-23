@@ -24,9 +24,12 @@
 
 package edu.ucr.cs.riple.core;
 
+import static java.util.Collections.singleton;
+
+import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.injector.location.OnField;
-import java.util.Collections;
+import edu.ucr.cs.riple.injector.location.OnParameter;
 import org.junit.Test;
 
 public class InheritanceTest extends BaseCoreTest {
@@ -38,12 +41,35 @@ public class InheritanceTest extends BaseCoreTest {
         .requestCompleteLoop()
         .setPredicate(Report::deepEquals)
         .addExpectedReports(
+            new TReport(new OnField("A.java", "test.A", singleton("arg3")), -1),
+            new TReport(new OnField("A.java", "test.A", singleton("arg2")), -1),
+            new TReport(new OnField("B.java", "test.B", singleton("body")), -1),
             new TReport(
-                new OnField("A.java", "test.A$Builder", Collections.singleton("arg2")),
+                new OnField("A.java", "test.A$Builder", singleton("arg2")),
                 0,
                 null,
-                Collections.singleton(
-                    new OnField("A.java", "test.A", Collections.singleton("arg2")))))
+                singleton(new OnField("A.java", "test.A", singleton("arg2")))),
+            new TReport(
+                new OnField("B.java", "test.B$Builder", singleton("body")),
+                0,
+                null,
+                singleton(new OnField("B.java", "test.B", singleton("body")))),
+            new TReport(
+                new OnField("A.java", "test.A$Builder", singleton("arg3")),
+                0,
+                null,
+                singleton(new OnField("A.java", "test.A", singleton("arg3")))),
+            new TReport(
+                new OnParameter("A.java", "test.A$Builder", "setArg2(test.Y)", 0),
+                -1,
+                Sets.newHashSet(
+                    new OnParameter("C.java", "test.C$Builder", "setArg2(test.Y)", 0),
+                    new OnParameter("B.java", "test.B$Builder", "setArg2(test.Y)", 0),
+                    new OnParameter("E.java", "test.E$Builder", "setArg2(test.Y)", 0),
+                    new OnParameter("D.java", "test.D$Builder", "setArg2(test.Y)", 0),
+                    new OnField("A.java", "test.A$Builder", singleton("arg2")),
+                    new OnField("A.java", "test.A", singleton("arg2"))),
+                null))
         .toDepth(5)
         .start();
   }
