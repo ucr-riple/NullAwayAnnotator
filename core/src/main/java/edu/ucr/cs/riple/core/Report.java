@@ -48,7 +48,6 @@ public class Report {
     this.finished = false;
     this.triggered = new HashSet<>();
     this.processed = false;
-    this.tree.add(root);
   }
 
   @Override
@@ -77,18 +76,20 @@ public class Report {
     if (this.effect != other.effect) {
       return false;
     }
-    if (!this.tree
-        .stream()
-        .map(fix -> fix.change.location)
-        .collect(Collectors.toSet())
-        .equals(other.tree.stream().map(fix -> fix.change.location).collect(Collectors.toSet()))) {
+
+    Set<Location> thisTree =
+        this.tree.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
+    Set<Location> otherTree =
+        other.tree.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
+
+    if (!thisTree.equals(otherTree)) {
       return false;
     }
-    Set<Location> thisTree =
+    Set<Location> thisTriggered =
         this.triggered.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
-    Set<Location> otherTree =
+    Set<Location> otherTriggered =
         other.triggered.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
-    if (!otherTree.equals(thisTree)) {
+    if (!otherTriggered.equals(thisTriggered)) {
       return false;
     }
     if (!this.triggered

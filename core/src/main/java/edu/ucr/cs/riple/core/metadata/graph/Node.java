@@ -31,15 +31,12 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
-import edu.ucr.cs.riple.injector.Change;
 import edu.ucr.cs.riple.injector.location.OnMethod;
-import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class Node {
 
@@ -93,7 +90,6 @@ public class Node {
 
   public void updateStatus(
       int effect, Set<Fix> fixesInOneRound, List<Fix> triggered, MethodInheritanceTree mit) {
-    triggered.addAll(generateSubMethodParameterInheritanceFixes(mit, fixesInOneRound));
     updateTriggered(triggered);
     final int[] numberOfSuperMethodsAnnotatedOutsideTree = {0};
     this.tree
@@ -133,40 +129,6 @@ public class Node {
     this.triggered.addAll(fixes);
     int sizeAfter = this.triggered.size();
     changed = (changed || (sizeAfter != sizeBefore));
-  }
-
-  /**
-   * Generates suggested fixes due to making a parameter {@code Nullable} for all overriding
-   * methods.
-   *
-   * @param mit OnMethod Inheritance Tree.
-   * @return List of Fixes
-   */
-  private List<Fix> generateSubMethodParameterInheritanceFixes(
-      MethodInheritanceTree mit, Set<Fix> fixesInOneRound) {
-    return tree.stream()
-        .filter(Fix::isOnParameter)
-        .flatMap(
-            fix -> {
-              OnParameter p = fix.toParameter();
-              return mit.getSubMethods(p.method, p.clazz, false)
-                  .stream()
-                  .filter(
-                      methodNode ->
-                          (p.index < methodNode.annotFlags.length
-                              && !methodNode.annotFlags[p.index]))
-                  .map(
-                      node -> {
-                        Change change =
-                            new Change(
-                                new OnParameter(node.uri, node.clazz, p.method, p.index),
-                                fix.annotation,
-                                true);
-                        return new Fix(change, "WRONG_OVERRIDE_PARAM", node.clazz, node.method);
-                      });
-            })
-        .filter(fix -> !fixesInOneRound.contains(fix))
-        .collect(Collectors.toList());
   }
 
   public void mergeTriggered() {
