@@ -103,6 +103,15 @@ public class OnParameter extends Location {
 
   @Override
   public String toString() {
-    return "OnParameter{" + "method='" + method + '\'' + ", index=" + index + '}';
+    return "OnParameter{"
+        + "class='"
+        + clazz
+        + '\''
+        + "method='"
+        + method
+        + '\''
+        + ", index="
+        + index
+        + '}';
   }
 }
