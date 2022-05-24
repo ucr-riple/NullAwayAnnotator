@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -62,13 +63,11 @@ public class Machine {
       uri = uri.replace("src", "out");
     }
     String pathToFileDirectory = uri.substring(0, uri.lastIndexOf("/"));
-    try {
+    try(Writer writer = new FileWriter(uri)) {
       Files.createDirectories(Paths.get(pathToFileDirectory + "/"));
-      FileWriter writer = new FileWriter(uri);
       String toWrite = keep ? LexicalPreservingPrinter.print(changed) : printer.print(changed);
       writer.write(toWrite);
       writer.flush();
-      writer.close();
     } catch (IOException e) {
       throw new RuntimeException("Something terrible happened.");
     }
