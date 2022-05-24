@@ -109,9 +109,9 @@ public abstract class Location {
   protected static void applyAnnotation(
       NodeWithAnnotations<?> node, String annotName, boolean inject) {
     final String annotSimpleName = Helper.simpleName(annotName);
-    NodeList<AnnotationExpr> annots = node.getAnnotations();
+    NodeList<AnnotationExpr> annotations = node.getAnnotations();
     boolean exists =
-        annots
+        annotations
             .stream()
             .anyMatch(
                 annot -> {
@@ -122,7 +122,7 @@ public abstract class Location {
       node.addMarkerAnnotation(annotSimpleName);
     }
     if (!inject) {
-      annots.removeIf(
+      annotations.removeIf(
           annot -> {
             String thisAnnotName = annot.getNameAsString();
             return thisAnnotName.equals(annotName) || thisAnnotName.equals(annotSimpleName);
@@ -174,11 +174,11 @@ public abstract class Location {
     if (this == o) return true;
     if (!(o instanceof Location)) return false;
     Location other = (Location) o;
-    return type == other.type && clazz.equals(other.clazz) && uri.equals(other.uri);
+    return type == other.type && clazz.equals(other.clazz);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(type, uri, clazz);
+    return Objects.hash(type, clazz);
   }
 }
