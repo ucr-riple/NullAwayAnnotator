@@ -95,4 +95,32 @@ public class InheritanceTest extends BaseCoreTest {
                 null))
         .start();
   }
+
+  @Test
+  public void method_track() {
+    coreTestHelper
+        .addInputDirectory("test", "methodtrack")
+        .setPredicate(Report::testEquals)
+        .disableBailOut()
+        .toDepth(10)
+        .addExpectedReports(
+            new TReport(
+                new OnParameter("B.java", "test.B", "helper(java.lang.Object)", 0),
+                -1,
+                Sets.newHashSet(
+                    new OnParameter("B.java", "test.B", "run(java.lang.Object)", 0),
+                    new OnMethod("B.java", "test.B", "run(java.lang.Object)"),
+                    new OnParameter("A.java", "test.A", "run(java.lang.Object)", 0),
+                    new OnMethod("A.java", "test.A", "run(java.lang.Object)"),
+                    new OnField("A.java", "test.A", singleton("foo")),
+                    new OnMethod("Root.java", "test.Root", "run(java.lang.Object)"),
+                    new OnParameter("C.java", "test.C", "run(java.lang.Object)", 0),
+                    new OnMethod("C.java", "test.C", "run(java.lang.Object)"),
+                    new OnParameter("D.java", "test.D", "run(java.lang.Object)", 0),
+                    new OnMethod("D.java", "test.D", "run(java.lang.Object)"),
+                    new OnParameter("E.java", "test.E", "run(java.lang.Object)", 0),
+                    new OnMethod("E.java", "test.E", "run(java.lang.Object)")),
+                null))
+        .start();
+  }
 }

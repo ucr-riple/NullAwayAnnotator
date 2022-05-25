@@ -22,6 +22,6 @@
  * THE SOFTWARE.
  */
 
-package annotator.test;
+package test;
 
 public @interface Initializer {}

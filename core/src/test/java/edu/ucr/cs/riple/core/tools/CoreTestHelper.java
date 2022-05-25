@@ -29,8 +29,10 @@ import static org.junit.Assert.fail;
 import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.injector.Helper;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,6 +44,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 
 public class CoreTestHelper {
@@ -129,11 +132,28 @@ public class CoreTestHelper {
     }
     Path configPath = outDirPath.resolve("config.json");
     createFiles();
+    checkSourcePackages();
     makeAnnotatorConfigFile(configPath);
     Config config = new Config(configPath.toString());
     Annotator annotator = new Annotator(config);
     annotator.start();
     compare(annotator.reports.values());
+  }
+
+  /** Checks if all src inputs are subpackages of test package. */
+  private void checkSourcePackages() {
+    try (Stream<Path> walk = Files.walk(srcSet)) {
+      walk.filter(path -> path.toFile().isFile() && path.toFile().getName().endsWith(".java"))
+          .forEach(
+              path -> {
+                if (!Helper.srcIsUnderClassClassPath(path, "test")) {
+                  throw new IllegalArgumentException(
+                      "Src file at path must have package declaration starting with test: " + path);
+                }
+              });
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   private void compare(Collection<Report> actualOutput) {
