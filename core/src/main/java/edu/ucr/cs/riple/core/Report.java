@@ -59,14 +59,14 @@ public class Report {
   }
 
   /**
-   * Mainly used for tests, what we care in tests, is that if a fix has the correct effectiveness
-   * with all the corresponding fixes to reach that effectiveness, therefore only the locations are
-   * compared in trees.
+   * Mainly used for unit tests, what we care in tests, is that if a fix has the correct
+   * effectiveness with all the corresponding fixes to reach that effectiveness, therefore only the
+   * locations are compared in trees.
    *
    * @param other Other report, mainly coming from tests.
    * @return true, if two reports are equal (same effectiveness and all locations)
    */
-  public boolean deepEquals(Report other) {
+  public boolean testEquals(Report other) {
     if (this == other) {
       return true;
     }
@@ -76,12 +76,12 @@ public class Report {
     if (this.effect != other.effect) {
       return false;
     }
-
+    this.tree.add(this.root);
+    other.tree.add(other.root);
     Set<Location> thisTree =
         this.tree.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
     Set<Location> otherTree =
         other.tree.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
-
     if (!thisTree.equals(otherTree)) {
       return false;
     }
@@ -89,18 +89,7 @@ public class Report {
         this.triggered.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
     Set<Location> otherTriggered =
         other.triggered.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
-    if (!otherTriggered.equals(thisTriggered)) {
-      return false;
-    }
-    if (!this.triggered
-        .stream()
-        .map(fix -> fix.change.location)
-        .collect(Collectors.toSet())
-        .equals(
-            other.triggered.stream().map(fix -> fix.change.location).collect(Collectors.toSet()))) {
-      return false;
-    }
-    return true;
+    return otherTriggered.equals(thisTriggered);
   }
 
   @Override

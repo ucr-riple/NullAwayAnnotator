@@ -107,6 +107,7 @@ public class CoreTest extends BaseCoreTest {
         .addExpectedReports(
             new TReport(new OnMethod("Main.java", "test.Main$1", "bar(java.lang.Object)"), 0),
             new TReport(new OnMethod("Main.java", "test.Main$1Child", "exec()"), 0),
+            new TReport(new OnMethod("Main.java", "test.Main$1Child$1Bar", "returnsNull()"), -1),
             new TReport(new OnField("Main.java", "test.Main$1", Collections.singleton("f")), -1))
         .start();
   }

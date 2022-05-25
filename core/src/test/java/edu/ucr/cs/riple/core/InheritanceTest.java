@@ -39,7 +39,7 @@ public class InheritanceTest extends BaseCoreTest {
     coreTestHelper
         .addInputDirectory("test", "builder")
         .requestCompleteLoop()
-        .setPredicate(Report::deepEquals)
+        .setPredicate(Report::testEquals)
         .addExpectedReports(
             new TReport(new OnField("A.java", "test.A", singleton("arg3")), -1),
             new TReport(new OnField("A.java", "test.A", singleton("arg2")), -1),

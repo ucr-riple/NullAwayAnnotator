@@ -29,7 +29,6 @@ import static org.junit.Assert.fail;
 import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.injector.location.Location;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
@@ -130,32 +129,7 @@ public class CoreTestHelper {
     compare(annotator.reports.values());
   }
 
-  private void updateUrisForReport(Report report) {
-    final String testDirectoryPrefix = "unittest/src/main/java/test/";
-    Location location = report.root.change.location;
-    location.uri =
-        location.uri.substring(
-            location.uri.indexOf(testDirectoryPrefix) + testDirectoryPrefix.length());
-    report.triggered.forEach(
-        fix -> {
-          Location l = fix.change.location;
-          if (l.uri.contains(testDirectoryPrefix)) {
-            l.uri =
-                l.uri.substring(l.uri.indexOf(testDirectoryPrefix) + testDirectoryPrefix.length());
-          }
-        });
-    report.tree.forEach(
-        fix -> {
-          Location l = fix.change.location;
-          if (l.uri.contains(testDirectoryPrefix)) {
-            l.uri =
-                l.uri.substring(l.uri.indexOf(testDirectoryPrefix) + testDirectoryPrefix.length());
-          }
-        });
-  }
-
   private void compare(Collection<Report> actualOutput) {
-    actualOutput.forEach(this::updateUrisForReport);
     List<Report> notFound = new ArrayList<>();
     for (Report expected : expectedReports) {
       if (actualOutput.stream().noneMatch(report -> predicate.test(report, expected))) {
