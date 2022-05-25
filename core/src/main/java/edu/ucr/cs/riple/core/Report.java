@@ -99,6 +99,13 @@ public class Report {
 
   @Override
   public String toString() {
-    return "Report{" + "effect=" + effect + ", root=" + root + "}\n";
+    return "Report{"
+        + "effect="
+        + effect
+        + ", root="
+        + root
+        + ", root="
+        + tree.stream().map(fix -> fix.change.location).collect(Collectors.toSet())
+        + "}\n";
   }
 }

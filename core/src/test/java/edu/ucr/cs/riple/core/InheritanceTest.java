@@ -29,6 +29,7 @@ import static java.util.Collections.singleton;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.injector.location.OnField;
+import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import org.junit.Test;
 
@@ -71,6 +72,27 @@ public class InheritanceTest extends BaseCoreTest {
                     new OnField("A.java", "test.A", singleton("arg2"))),
                 null))
         .toDepth(5)
+        .start();
+  }
+
+  @Test
+  public void parameter_track() {
+    coreTestHelper
+        .addInputDirectory("test", "parametertrack")
+        .setPredicate(Report::testEquals)
+        .disableBailOut()
+        .toDepth(10)
+        .addExpectedReports(
+            new TReport(
+                new OnParameter("Base.java", "test.Base", "run(java.lang.Object)", 0),
+                0,
+                Sets.newHashSet(
+                    new OnMethod("Base.java", "test.Base", "run(java.lang.Object)"),
+                    new OnField("Base.java", "test.Base", singleton("field")),
+                    new OnParameter("Child.java", "test.Child", "run(java.lang.Object)", 0),
+                    new OnParameter(
+                        "GrandChild.java", "test.GrandChild", "run(java.lang.Object)", 0)),
+                null))
         .start();
   }
 }
