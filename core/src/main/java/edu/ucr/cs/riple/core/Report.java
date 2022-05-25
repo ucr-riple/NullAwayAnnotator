@@ -104,7 +104,7 @@ public class Report {
         + effect
         + ", root="
         + root
-        + ", root="
+        + ", tree="
         + tree.stream().map(fix -> fix.change.location).collect(Collectors.toSet())
         + "}\n";
   }

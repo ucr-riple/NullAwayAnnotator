@@ -24,11 +24,13 @@
 
 package edu.ucr.cs.riple.core;
 
+import static java.util.Collections.singleton;
+
+import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
-import java.util.Collections;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -41,7 +43,7 @@ public class CoreTest extends BaseCoreTest {
     coreTestHelper
         .addInputLines("Main.java", "package test;", "public class Main {", "Object field;", "}")
         .addExpectedReports(
-            new TReport(new OnField("Main.java", "test.Main", Collections.singleton("field")), -1))
+            new TReport(new OnField("Main.java", "test.Main", singleton("field")), -1))
         .start();
   }
 
@@ -115,7 +117,7 @@ public class CoreTest extends BaseCoreTest {
             "}")
         .toDepth(1)
         .addExpectedReports(
-            new TReport(new OnField("Main.java", "test.Main", Collections.singleton("field")), -1))
+            new TReport(new OnField("Main.java", "test.Main", singleton("field")), -1))
         .start();
   }
 
@@ -127,7 +129,32 @@ public class CoreTest extends BaseCoreTest {
             new TReport(new OnMethod("Main.java", "test.Main$1", "bar(java.lang.Object)"), 0),
             new TReport(new OnMethod("Main.java", "test.Main$1Child", "exec()"), 0),
             new TReport(new OnMethod("Main.java", "test.Main$1Child$1Bar", "returnsNull()"), -1),
-            new TReport(new OnField("Main.java", "test.Main$1", Collections.singleton("f")), -1))
+            new TReport(new OnField("Main.java", "test.Main$1", singleton("f")), -1))
+        .start();
+  }
+
+  @Test
+  public void multiple_return_nullable() {
+    coreTestHelper
+        .toDepth(4)
+        .addExpectedReports(
+            new TReport(
+                new OnParameter("A.java", "test.A", "helper(java.lang.Object)", 0),
+                -5,
+                Sets.newHashSet(
+                    new OnParameter("A.java", "test.A", "foo(java.lang.Object)", 0),
+                    new OnMethod("A.java", "test.A", "foo(java.lang.Object"),
+                    new OnField("A.java", "test.A", singleton("field"))),
+                null),
+            new TReport(
+                new OnParameter("B.java", "test.B", "run(java.lang.Object)", 0),
+                -5,
+                Sets.newHashSet(
+                    new OnMethod("B.java", "test.B", "run(java.lang.Object)"),
+                    new OnField("B.java", "test.B", singleton("field"))),
+                null))
+        .addInputDirectory("test", "multiplereturnnullable")
+        .disableBailOut()
         .start();
   }
 }
