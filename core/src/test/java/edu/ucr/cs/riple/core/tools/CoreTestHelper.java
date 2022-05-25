@@ -148,7 +148,7 @@ public class CoreTestHelper {
               path -> {
                 if (!Helper.srcIsUnderClassClassPath(path, "test")) {
                   throw new IllegalArgumentException(
-                      "Src file at path must have package declaration starting with test: " + path);
+                      "Source files must have package declaration starting with \"test\": " + path);
                 }
               });
     } catch (IOException e) {

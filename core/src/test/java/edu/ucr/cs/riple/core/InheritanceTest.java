@@ -36,6 +36,33 @@ import org.junit.Test;
 public class InheritanceTest extends BaseCoreTest {
 
   @Test
+  public void basic_method() {
+    coreTestHelper
+        .addInputLines(
+            "Base.java",
+            "package test;",
+            "public class Base {",
+            "   public Object foo(){ return null; }",
+            "}")
+        .addInputLines(
+            "Child.java",
+            "package test;",
+            "public class Child extends Base {",
+            "   public Object foo(){ return null; }",
+            "}")
+        .disableBailOut()
+        .toDepth(2)
+        .addExpectedReports(
+            new TReport(
+                new OnMethod("Child.java", "test.Child", "foo()"),
+                -2,
+                Sets.newHashSet(new OnMethod("Base.java", "test.Base", "foo()")),
+                null),
+            new TReport(new OnMethod("Base.java", "test.Base", "foo()"), -1))
+        .start();
+  }
+
+  @Test
   public void builder() {
     coreTestHelper
         .addInputDirectory("test", "builder")

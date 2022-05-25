@@ -137,6 +137,8 @@ public class CoreTest extends BaseCoreTest {
   public void multiple_return_nullable() {
     coreTestHelper
         .toDepth(4)
+        .addInputDirectory("test", "multiplereturnnullable")
+        .disableBailOut()
         .addExpectedReports(
             new TReport(
                 new OnParameter("A.java", "test.A", "helper(java.lang.Object)", 0),
@@ -153,8 +155,17 @@ public class CoreTest extends BaseCoreTest {
                     new OnMethod("B.java", "test.B", "run(java.lang.Object)"),
                     new OnField("B.java", "test.B", singleton("field"))),
                 null))
-        .addInputDirectory("test", "multiplereturnnullable")
-        .disableBailOut()
+        .start();
+  }
+
+  @Test
+  public void multiple_return_nullable_recursive() {
+    coreTestHelper
+        .addInputDirectory("test", "multiplereturnnullablerecursive")
+        .addExpectedReports(
+            new TReport(new OnField("Main.java", "test.Main", singleton("field")), -6),
+            new TReport(new OnMethod("Main.java", "test.Main", "returnNullableRecursive()"), -6),
+            new TReport(new OnMethod("Main.java", "test.Main", "returnNullable()"), -6))
         .start();
   }
 }
