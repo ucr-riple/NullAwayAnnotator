@@ -56,6 +56,8 @@ public class CoreTestHelper {
   private int depth = 1;
   private boolean requestCompleteLoop = false;
 
+  private boolean disableBailout = false;
+
   public CoreTestHelper(Path projectPath, Path outDirPath) {
     this.projectPath = projectPath;
     this.outDirPath = outDirPath;
@@ -86,6 +88,11 @@ public class CoreTestHelper {
     } catch (IOException e) {
       throw new RuntimeException("Failed to add source input", e);
     }
+  }
+
+  public CoreTestHelper disableBailOut() {
+    disableBailout = true;
+    return this;
   }
 
   public CoreTestHelper addInputDirectory(String path, String inputDirectoryPath) {
@@ -171,6 +178,7 @@ public class CoreTestHelper {
     builder.initializerAnnotation = "annotator.test.Initializer";
     builder.outputDir = outDirPath.toString();
     builder.depth = depth;
+    builder.bailout = !disableBailout;
     builder.chain = true;
     builder.outerLoopActivation = requestCompleteLoop;
     builder.write(path);

@@ -31,12 +31,56 @@ import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
+import java.util.Collections;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class DeepTest extends BaseCoreTest {
+
+  @Test
+  public void field_assign_nullable_bailout_enabled() {
+    coreTestHelper
+        .addInputLines(
+            "Main.java",
+            "package test;",
+            "public class Main {",
+            "   Object field;",
+            "   Main() {",
+            "     field = null;",
+            "   }",
+            "   Object getF(){ return field;}",
+            "}")
+        .toDepth(2)
+        .addExpectedReports(
+            new TReport(new OnField("Main.java", "test.Main", Collections.singleton("field")), -1))
+        .start();
+  }
+
+  @Test
+  public void field_assign_nullable_bailout_disabled() {
+    coreTestHelper
+        .addInputLines(
+            "Main.java",
+            "package test;",
+            "public class Main {",
+            "   Object field;",
+            "   Main() {",
+            "     field = null;",
+            "   }",
+            "   Object getF(){ return field;}",
+            "}")
+        .toDepth(2)
+        .disableBailOut()
+        .addExpectedReports(
+            new TReport(
+                new OnField("Main.java", "test.Main", Collections.singleton("field")),
+                -2,
+                null,
+                singleton(new OnMethod("Main.java", "test.Main", "getF()"))))
+        .start();
+  }
 
   @Test
   public void param_pass_test() {

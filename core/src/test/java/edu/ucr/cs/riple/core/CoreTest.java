@@ -101,6 +101,25 @@ public class CoreTest extends BaseCoreTest {
   }
 
   @Test
+  public void field_assign_nullable() {
+    coreTestHelper
+        .addInputLines(
+            "Main.java",
+            "package test;",
+            "public class Main {",
+            "   Object field;",
+            "   Main() {",
+            "     field = null;",
+            "   }",
+            "   Object getF(){ return field; }",
+            "}")
+        .toDepth(1)
+        .addExpectedReports(
+            new TReport(new OnField("Main.java", "test.Main", Collections.singleton("field")), -1))
+        .start();
+  }
+
+  @Test
   public void inner_class() {
     coreTestHelper
         .addInputDirectory("test", "innerclass")
