@@ -107,7 +107,7 @@ public class OnParameter extends Location {
         + "class='"
         + clazz
         + '\''
-        + "method='"
+        + ", method='"
         + method
         + '\''
         + ", index="

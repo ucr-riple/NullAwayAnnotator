@@ -122,6 +122,27 @@ public class CoreTest extends BaseCoreTest {
   }
 
   @Test
+  public void field_assign_nullable_constructor() {
+    coreTestHelper
+        .addInputLines(
+            "Main.java",
+            "package test;",
+            "public class Main {",
+            "   Object field;",
+            "   Main(Object f) {",
+            "     field = f;",
+            "   }",
+            "}",
+            "class C {",
+            "   Main main = new Main(null);",
+            "}")
+        .toDepth(1)
+        .addExpectedReports(
+            new TReport(new OnParameter("Main.java", "test.Main", "Main(java.lang.Object)", 0), 0))
+        .start();
+  }
+
+  @Test
   public void inner_class() {
     coreTestHelper
         .addInputDirectory("test", "innerclass")
