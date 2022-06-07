@@ -106,7 +106,7 @@ public class MethodInheritanceTree extends MetaData<MethodNode> {
     return parent != null ? (nodes.get(parent.id) == null ? null : parent) : null;
   }
 
-  public List<MethodNode> getSubMethods(String method, String clazz, boolean deep) {
+  public List<MethodNode> getSubMethods(String method, String clazz, boolean recursive) {
     List<MethodNode> ans = new ArrayList<>();
     MethodNode node = findNode(method, clazz);
     if (node == null) {
@@ -127,13 +127,25 @@ public class MethodInheritanceTree extends MetaData<MethodNode> {
           }
         }
       }
-      if (!deep) {
+      if (!recursive) {
         break;
       }
       workList.clear();
       workList.addAll(tmp);
     }
     return ans;
+  }
+
+  public MethodNode getSuperMethod(String method, String clazz) {
+    MethodNode node = findNode(method, clazz);
+    if (node == null) {
+      return null;
+    }
+    MethodNode parent = nodes.get(node.parent);
+    if (parent == null || parent.clazz == null || parent.clazz.equals("null")) {
+      return null;
+    }
+    return parent;
   }
 
   public MethodNode findNode(String method, String clazz) {

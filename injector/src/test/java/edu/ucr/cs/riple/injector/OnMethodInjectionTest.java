@@ -250,8 +250,7 @@ public class OnMethodInjectionTest {
                 "javax.annotation.Nullable",
                 true),
             new Change(
-                new OnParameter(
-                    "Super.java", "com.uber.Super", "test(Object, Object, String)", "name", 1),
+                new OnParameter("Super.java", "com.uber.Super", "test(Object, Object, String)", 1),
                 "javax.annotation.Nullable",
                 true))
         .start();

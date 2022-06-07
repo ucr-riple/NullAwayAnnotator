@@ -84,21 +84,21 @@ public class Utility {
     JSONArray reportsJson = new JSONArray();
     for (Report report : reports) {
       JSONObject reportJson = report.root.getJson();
-      reportJson.put("effect", report.effect);
-      reportJson.put("finished", report.finished);
+      reportJson.put("EFFECT", report.effect);
+      reportJson.put("FINISHED", report.finished);
       JSONArray followUps = new JSONArray();
       if (config.chain && report.effect < 1) {
         report.tree.remove(report.root);
         followUps.addAll(
             report.tree.stream().map(fix -> fix.getJson()).collect(Collectors.toList()));
       }
-      reportJson.put("tree", followUps);
+      reportJson.put("TREE", followUps);
       reportsJson.add(reportJson);
     }
     reportsJson.sort(
         (o1, o2) -> {
-          int first = (Integer) ((JSONObject) o1).get("effect");
-          int second = (Integer) ((JSONObject) o2).get("effect");
+          int first = (Integer) ((JSONObject) o1).get("EFFECT");
+          int second = (Integer) ((JSONObject) o2).get("EFFECT");
           if (first == second) {
             return 0;
           }
@@ -107,7 +107,7 @@ public class Utility {
           }
           return -1;
         });
-    result.put("reports", reportsJson);
+    result.put("REPORTS", reportsJson);
     try {
       FileWriter writer = new FileWriter(reportsPath.toFile());
       writer.write(result.toJSONString().replace("\\/", "/").replace("\\\\\\", "\\"));

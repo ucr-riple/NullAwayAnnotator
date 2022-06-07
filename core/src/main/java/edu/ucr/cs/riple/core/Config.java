@@ -26,6 +26,8 @@ package edu.ucr.cs.riple.core;
 
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.log.Log;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,6 +50,8 @@ public class Config {
   public final boolean lexicalPreservationDisabled;
   public final boolean chain;
   public final boolean useCache;
+
+  public final boolean disableOuterLoop;
   public final Path dir;
   public final Path nullAwayConfigPath;
   public final Path cssConfigPath;
@@ -140,6 +144,11 @@ public class Config {
     optimizedOption.setRequired(false);
     options.addOption(optimizedOption);
 
+    // Outer Loop
+    Option outerLoop = new Option("dol", "disable-outer-loop", false, "Disables Outer Loop");
+    outerLoop.setRequired(false);
+    options.addOption(outerLoop);
+
     // Dir
     Option dirOption = new Option("d", "dir", true, "Directory of the output files");
     dirOption.setRequired(true);
@@ -191,6 +200,7 @@ public class Config {
     this.chain = cmd.hasOption(chainOption.getLongOpt());
     this.bailout = !cmd.hasOption(bailoutOption.getLongOpt());
     this.useCache = !cmd.hasOption(cacheOption.getLongOpt());
+    this.disableOuterLoop = !cmd.hasOption(outerLoop.getLongOpt());
     this.optimized = !cmd.hasOption(optimizedOption.getLongOpt());
     this.log = new Log();
     log.reset();
@@ -218,6 +228,7 @@ public class Config {
     this.lexicalPreservationDisabled =
         !getValueFromKey(jsonObject, "LEXICAL_PRESERVATION", Boolean.class).orElse(false);
     this.optimized = getValueFromKey(jsonObject, "OPTIMIZED", Boolean.class).orElse(true);
+    this.disableOuterLoop = !getValueFromKey(jsonObject, "OUTER_LOOP", Boolean.class).orElse(true);
     this.bailout = getValueFromKey(jsonObject, "BAILOUT", Boolean.class).orElse(true);
     this.nullableAnnot =
         getValueFromKey(jsonObject, "ANNOTATION:NULLABLE", String.class)
@@ -279,6 +290,60 @@ public class Config {
           : new OrElse<>(null, klass);
     } catch (Exception e) {
       return new OrElse<>(null, klass);
+    }
+  }
+
+  public static class Builder {
+
+    public String buildCommand;
+    public String initializerAnnotation;
+    public String nullableAnnotation;
+    public String outputDir;
+    public String nullAwayConfigPath;
+    public String cssConfigPath;
+    public boolean chain = false;
+    public boolean optimized = true;
+    public boolean cache = true;
+    public boolean bailout = true;
+    public boolean lexicalPreservationActivation = true;
+    public boolean outerLoopActivation = true;
+    public int depth = 1;
+
+    public void write(Path path) {
+      Preconditions.checkNotNull(
+          buildCommand, "Build command must be initialized to construct the config.");
+      Preconditions.checkNotNull(
+          initializerAnnotation,
+          "Initializer Annotation must be initialized to construct the config.");
+      Preconditions.checkNotNull(
+          outputDir, "Output Directory must be initialized to construct the config.");
+      Preconditions.checkNotNull(
+          nullAwayConfigPath, "NulLAway Config Path must be initialized to construct the config.");
+      Preconditions.checkNotNull(
+          cssConfigPath, "CSS Config Path must be initialized to construct the config.");
+      Preconditions.checkNotNull(
+          nullableAnnotation, "Nullable Annotation must be initialized to construct the config.");
+      JSONObject json = new JSONObject();
+      json.put("BUILD_COMMAND", buildCommand);
+      JSONObject annotation = new JSONObject();
+      annotation.put("INITIALIZER", initializerAnnotation);
+      annotation.put("NULLABLE", nullableAnnotation);
+      json.put("ANNOTATION", annotation);
+      json.put("LEXICAL_PRESERVATION", lexicalPreservationActivation);
+      json.put("OUTER_LOOP", outerLoopActivation);
+      json.put("OUTPUT_DIR", outputDir);
+      json.put("NULLAWAY_CONFIG_PATH", nullAwayConfigPath);
+      json.put("CSS_CONFIG_PATH", cssConfigPath);
+      json.put("CHAIN", chain);
+      json.put("OPTIMIZED", optimized);
+      json.put("CACHE", cache);
+      json.put("BAILOUT", bailout);
+      json.put("DEPTH", depth);
+      try (FileWriter file = new FileWriter(path.toFile())) {
+        file.write(json.toJSONString());
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     }
   }
 }

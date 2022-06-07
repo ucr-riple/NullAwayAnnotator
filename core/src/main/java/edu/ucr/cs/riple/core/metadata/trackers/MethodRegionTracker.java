@@ -26,6 +26,8 @@ package edu.ucr.cs.riple.core.metadata.trackers;
 
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
+import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.nio.file.Path;
 import java.util.Set;
@@ -33,8 +35,11 @@ import java.util.stream.Collectors;
 
 public class MethodRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
 
-  public MethodRegionTracker(Path path) {
+  private final MethodInheritanceTree tree;
+
+  public MethodRegionTracker(Path path, MethodInheritanceTree tree) {
     super(path);
+    this.tree = tree;
   }
 
   @Override
@@ -48,7 +53,12 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
       return null;
     }
     OnMethod onMethod = fix.toMethod();
-    return getCallersOfMethod(onMethod.clazz, onMethod.method);
+    Set<Region> regions = getCallersOfMethod(onMethod.clazz, onMethod.method);
+    MethodNode parent = tree.getSuperMethod(onMethod.method, onMethod.clazz);
+    if (parent != null) {
+      regions.add(new Region(parent.method, parent.clazz));
+    }
+    return regions;
   }
 
   public Set<Region> getCallersOfMethod(String clazz, String method) {

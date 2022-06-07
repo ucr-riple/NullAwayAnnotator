@@ -67,4 +67,9 @@ public class Change {
   public Change duplicate() {
     return new Change(location.duplicate(), annotation, inject);
   }
+
+  @Override
+  public String toString() {
+    return location.toString();
+  }
 }

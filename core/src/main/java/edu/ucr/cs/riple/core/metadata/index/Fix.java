@@ -28,7 +28,6 @@ import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.injector.Change;
 import edu.ucr.cs.riple.injector.location.Location;
-import edu.ucr.cs.riple.injector.location.LocationType;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
@@ -67,7 +66,7 @@ public class Fix extends Hashable {
   }
 
   public boolean isOnMethod() {
-    return change.location.type.equals(LocationType.METHOD);
+    return change.location.isOnMethod();
   }
 
   public OnMethod toMethod() {
@@ -75,7 +74,7 @@ public class Fix extends Hashable {
   }
 
   public boolean isOnParameter() {
-    return change.location.type.equals(LocationType.PARAMETER);
+    return change.location.isOnParameter();
   }
 
   public OnParameter toParameter() {
@@ -83,7 +82,7 @@ public class Fix extends Hashable {
   }
 
   public boolean isOnField() {
-    return change.location.type.equals(LocationType.FIELD);
+    return change.location.isOnField();
   }
 
   public OnField toField() {
@@ -116,5 +115,10 @@ public class Fix extends Hashable {
     int lastIndex = m.clazz.lastIndexOf(".");
     String className = lastIndex < 0 ? m.clazz : m.clazz.substring(lastIndex + 1);
     return methodName.equals(className);
+  }
+
+  @Override
+  public String toString() {
+    return change.toString();
   }
 }

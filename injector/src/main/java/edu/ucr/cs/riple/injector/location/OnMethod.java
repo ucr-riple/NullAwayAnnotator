@@ -88,4 +88,9 @@ public class OnMethod extends Location {
   public int hashCode() {
     return Objects.hash(method);
   }
+
+  @Override
+  public String toString() {
+    return "OnMethod{" + "method='" + method + '\'' + ", clazz='" + clazz + '\'' + '}';
+  }
 }

@@ -75,7 +75,7 @@ public abstract class Location {
       case METHOD:
         return new OnMethod(uri, clazz, infos[2]);
       case PARAMETER:
-        return new OnParameter(uri, clazz, infos[2], infos[3], Integer.parseInt(infos[4]));
+        return new OnParameter(uri, clazz, infos[2], Integer.parseInt(infos[4]));
     }
     throw new RuntimeException("Cannot reach this statement, infos: " + Arrays.toString(infos));
   }
@@ -109,9 +109,9 @@ public abstract class Location {
   protected static void applyAnnotation(
       NodeWithAnnotations<?> node, String annotName, boolean inject) {
     final String annotSimpleName = Helper.simpleName(annotName);
-    NodeList<AnnotationExpr> annots = node.getAnnotations();
+    NodeList<AnnotationExpr> annotations = node.getAnnotations();
     boolean exists =
-        annots
+        annotations
             .stream()
             .anyMatch(
                 annot -> {
@@ -122,7 +122,7 @@ public abstract class Location {
       node.addMarkerAnnotation(annotSimpleName);
     }
     if (!inject) {
-      annots.removeIf(
+      annotations.removeIf(
           annot -> {
             String thisAnnotName = annot.getNameAsString();
             return thisAnnotName.equals(annotName) || thisAnnotName.equals(annotSimpleName);
@@ -174,11 +174,11 @@ public abstract class Location {
     if (this == o) return true;
     if (!(o instanceof Location)) return false;
     Location other = (Location) o;
-    return type == other.type && clazz.equals(other.clazz) && uri.equals(other.uri);
+    return type == other.type && clazz.equals(other.clazz);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(type, uri, clazz);
+    return Objects.hash(type, clazz);
   }
 }

@@ -22,6 +22,7 @@
 
 package edu.ucr.cs.riple.injector;
 
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
@@ -34,6 +35,8 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.google.common.base.Preconditions;
+import java.io.FileNotFoundException;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -360,5 +363,24 @@ public class Helper {
         ChronoUnit.SECONDS,
         0L,
         Duration.ZERO);
+  }
+
+  /**
+   * Used to check if src package declaration is under a specific root.
+   *
+   * @param path Path to src file.
+   * @param rootPackage Root package simple name.
+   * @return true if src has a package declaration and starts with root.
+   */
+  public static boolean srcIsUnderClassClassPath(Path path, String rootPackage) {
+    try {
+      CompilationUnit cu = StaticJavaParser.parse(path.toFile());
+      Optional<PackageDeclaration> packageDeclaration = cu.getPackageDeclaration();
+      return packageDeclaration
+          .map(declaration -> declaration.getNameAsString().startsWith(rootPackage))
+          .orElse(false);
+    } catch (FileNotFoundException e) {
+      throw new IllegalArgumentException("File not found: " + path, e);
+    }
   }
 }

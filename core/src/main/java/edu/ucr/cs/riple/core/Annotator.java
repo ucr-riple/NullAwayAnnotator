@@ -49,7 +49,7 @@ public class Annotator {
   private final AnnotationInjector injector;
   private final Config config;
   // Set does not have get method, here we use map which retrieves elements efficiently.
-  private final HashMap<Fix, Report> reports;
+  public final HashMap<Fix, Report> reports;
 
   public Annotator(Config config) {
     this.config = config;
@@ -137,9 +137,9 @@ public class Annotator {
             config, reports.values().stream().collect(ImmutableSet.toImmutableSet()));
         return;
       }
-      Utility.writeReports(
-          config, reports.values().stream().collect(ImmutableSet.toImmutableSet()));
-      return;
+      if (config.disableOuterLoop) {
+        return;
+      }
     }
   }
 }
