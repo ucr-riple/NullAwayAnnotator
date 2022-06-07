@@ -24,9 +24,9 @@
 
 package edu.ucr.cs.riple.core;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.singleton;
 
-import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -128,9 +128,9 @@ public class CoreTest extends BaseCoreTest {
             "Main.java",
             "package test;",
             "public class Main {",
-            "   Object field;",
+            "   Object f;",
             "   Main(Object f) {",
-            "     field = f;",
+            "     this.f = f;",
             "   }",
             "}",
             "class C {",
@@ -139,6 +139,19 @@ public class CoreTest extends BaseCoreTest {
         .toDepth(1)
         .addExpectedReports(
             new TReport(new OnParameter("Main.java", "test.Main", "Main(java.lang.Object)", 0), 0))
+        .start();
+  }
+
+  @Test
+  public void multiple_field_declaration_test() {
+    coreTestHelper
+        .addInputDirectory("test", "multiplefielddeclration")
+        .disableBailOut()
+        .addExpectedReports(
+            new TReport(
+                new OnField("Main.java", "test.Main", newHashSet("f1", "f2", "f3", "f4")), 9),
+            new TReport(new OnField("Main.java", "test.Main", singleton("f5")), 1))
+        .toDepth(1)
         .start();
   }
 
@@ -164,7 +177,7 @@ public class CoreTest extends BaseCoreTest {
             new TReport(
                 new OnParameter("A.java", "test.A", "helper(java.lang.Object)", 0),
                 -5,
-                Sets.newHashSet(
+                newHashSet(
                     new OnParameter("A.java", "test.A", "foo(java.lang.Object)", 0),
                     new OnMethod("A.java", "test.A", "foo(java.lang.Object"),
                     new OnField("A.java", "test.A", singleton("field"))),
@@ -172,7 +185,7 @@ public class CoreTest extends BaseCoreTest {
             new TReport(
                 new OnParameter("B.java", "test.B", "run(java.lang.Object)", 0),
                 -5,
-                Sets.newHashSet(
+                newHashSet(
                     new OnMethod("B.java", "test.B", "run(java.lang.Object)"),
                     new OnField("B.java", "test.B", singleton("field"))),
                 null))

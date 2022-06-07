@@ -24,9 +24,9 @@
 
 package edu.ucr.cs.riple.core;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.singleton;
 
-import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -92,7 +92,7 @@ public class DeepTest extends BaseCoreTest {
             new TReport(
                 new OnField("Main.java", "test.Main", singleton("f")),
                 -1,
-                Sets.newHashSet(
+                newHashSet(
                     new OnParameter(
                         "Main.java",
                         "test.Main",
@@ -240,7 +240,7 @@ public class DeepTest extends BaseCoreTest {
             new TReport(
                 new OnField("Main.java", "test.Main", singleton("d")),
                 -1,
-                Sets.newHashSet(
+                newHashSet(
                     new OnParameter(
                         "Main.java",
                         "test.Main",
@@ -388,7 +388,7 @@ public class DeepTest extends BaseCoreTest {
             new TReport(
                 new OnField("Main.java", "test.Main", singleton("p")),
                 -1,
-                Sets.newHashSet(
+                newHashSet(
                     new OnParameter(
                         "Main.java",
                         "test.Main",

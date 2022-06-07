@@ -24,9 +24,9 @@
 
 package edu.ucr.cs.riple.core;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.singleton;
 
-import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -56,7 +56,7 @@ public class InheritanceTest extends BaseCoreTest {
             new TReport(
                 new OnMethod("Child.java", "test.Child", "foo()"),
                 -2,
-                Sets.newHashSet(new OnMethod("Base.java", "test.Base", "foo()")),
+                newHashSet(new OnMethod("Base.java", "test.Base", "foo()")),
                 null),
             new TReport(new OnMethod("Base.java", "test.Base", "foo()"), -1))
         .start();
@@ -90,7 +90,7 @@ public class InheritanceTest extends BaseCoreTest {
             new TReport(
                 new OnParameter("A.java", "test.A$Builder", "setArg2(test.Y)", 0),
                 -1,
-                Sets.newHashSet(
+                newHashSet(
                     new OnParameter("C.java", "test.C$Builder", "setArg2(test.Y)", 0),
                     new OnParameter("B.java", "test.B$Builder", "setArg2(test.Y)", 0),
                     new OnParameter("E.java", "test.E$Builder", "setArg2(test.Y)", 0),
@@ -113,7 +113,7 @@ public class InheritanceTest extends BaseCoreTest {
             new TReport(
                 new OnParameter("Base.java", "test.Base", "run(java.lang.Object)", 0),
                 0,
-                Sets.newHashSet(
+                newHashSet(
                     new OnMethod("Base.java", "test.Base", "run(java.lang.Object)"),
                     new OnField("Base.java", "test.Base", singleton("field")),
                     new OnParameter("Child.java", "test.Child", "run(java.lang.Object)", 0),
@@ -134,7 +134,7 @@ public class InheritanceTest extends BaseCoreTest {
             new TReport(
                 new OnParameter("B.java", "test.B", "helper(java.lang.Object)", 0),
                 -1,
-                Sets.newHashSet(
+                newHashSet(
                     new OnParameter("B.java", "test.B", "run(java.lang.Object)", 0),
                     new OnMethod("B.java", "test.B", "run(java.lang.Object)"),
                     new OnParameter("A.java", "test.A", "run(java.lang.Object)", 0),

@@ -195,7 +195,7 @@ public class CoreTestHelper {
     builder.cssConfigPath = outDirPath.resolve("css.xml").toString();
     builder.nullAwayConfigPath = outDirPath.resolve("config.xml").toString();
     builder.nullableAnnotation = "javax.annotation.Nullable";
-    builder.initializerAnnotation = "annotator.test.Initializer";
+    builder.initializerAnnotation = "test.Initializer";
     builder.outputDir = outDirPath.toString();
     builder.depth = depth;
     builder.bailout = !disableBailout;
