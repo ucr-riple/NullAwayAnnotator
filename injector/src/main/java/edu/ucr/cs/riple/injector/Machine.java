@@ -63,7 +63,7 @@ public class Machine {
       uri = uri.replace("src", "out");
     }
     String pathToFileDirectory = uri.substring(0, uri.lastIndexOf("/"));
-    try(Writer writer = new FileWriter(uri)) {
+    try (Writer writer = new FileWriter(uri)) {
       Files.createDirectories(Paths.get(pathToFileDirectory + "/"));
       String toWrite = keep ? LexicalPreservingPrinter.print(changed) : printer.print(changed);
       writer.write(toWrite);
