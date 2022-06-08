@@ -25,24 +25,21 @@
 package edu.ucr.cs.riple.injector;
 
 import edu.ucr.cs.riple.injector.location.OnMethod;
-import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class BasicTest {
+public class BasicTest extends BaseInjectorTest {
 
   @Test
   public void skip_duplicate_annotation() {
-    String rootName = "skip_duplicate_annotation";
     Change Change =
         new Change(
             new OnMethod("Super.java", "com.uber.Super", "test()"),
             "javax.annotation.Nullable",
             true);
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Super.java",
             "package com.uber;",
@@ -67,9 +64,7 @@ public class BasicTest {
 
   @Test
   public void skip_existing_annotations() {
-    String rootName = "skip_existing_annotations";
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Super.java",
             "package com.uber;",
@@ -99,10 +94,7 @@ public class BasicTest {
 
   @Test
   public void custom_nullable_already_exists() {
-    String rootName = "custom_nullable_already_exists";
-
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Main.java",
             "package com.uber;",
@@ -138,10 +130,7 @@ public class BasicTest {
 
   @Test
   public void custom_nullable_already_exists_part2() {
-    String rootName = "custom_nullable_already_exists";
-
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Main.java",
             "package com.uber;",

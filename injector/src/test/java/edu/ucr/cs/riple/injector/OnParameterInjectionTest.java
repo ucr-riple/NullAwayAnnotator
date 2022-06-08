@@ -25,19 +25,15 @@
 package edu.ucr.cs.riple.injector;
 
 import edu.ucr.cs.riple.injector.location.OnParameter;
-import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class OnParameterInjectionTest {
+public class OnParameterInjectionTest extends BaseInjectorTest {
   @Test
   public void parameter_nullable_simple() {
-    String rootName = "parameter_nullable_simple";
-
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Super.java",
             "package com.uber;",
@@ -72,10 +68,7 @@ public class OnParameterInjectionTest {
 
   @Test
   public void parameter_nullable_signature_incomplete() {
-    String rootName = "parameter_nullable_signature_incomplete";
-
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Super.java",
             "package com.uber;",
@@ -110,10 +103,7 @@ public class OnParameterInjectionTest {
 
   @Test
   public void parameter_nullable_interface() {
-    String rootName = "parameter_nullable_interface";
-
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "SSAInstructionFactory.java",
             "package com.uber;",
@@ -158,10 +148,7 @@ public class OnParameterInjectionTest {
 
   @Test
   public void parameter_nullable_generics_simple() {
-    String rootName = "parameter_nullable_generics_simple";
-
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "ModRef.java",
             "package com.uber;",
@@ -203,10 +190,7 @@ public class OnParameterInjectionTest {
 
   @Test
   public void parameter_nullable_generics_multiple() {
-    String rootName = "parameter_nullable_generics_multiple";
-
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "ModRef.java",
             "package com.uber;",
@@ -268,10 +252,7 @@ public class OnParameterInjectionTest {
 
   @Test
   public void parameter_nullable_with_annotation() {
-    String rootName = "parameter_nullable_with_annotation";
-
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "WeakKeyReference.java",
             "package com.uber;",
