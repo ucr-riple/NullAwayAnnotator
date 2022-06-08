@@ -25,20 +25,16 @@
 package edu.ucr.cs.riple.injector;
 
 import edu.ucr.cs.riple.injector.location.OnField;
-import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
 import java.util.Collections;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class OnFieldInjectionTest {
+public class OnFieldInjectionTest extends BaseInjectorTest {
   @Test
   public void field_nullable_simple() {
-    String rootName = "field_nullable_simple";
-
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Super.java",
             "package com.uber;",

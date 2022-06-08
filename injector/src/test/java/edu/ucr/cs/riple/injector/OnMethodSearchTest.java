@@ -25,19 +25,15 @@
 package edu.ucr.cs.riple.injector;
 
 import edu.ucr.cs.riple.injector.location.OnMethod;
-import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class OnMethodSearchTest {
+public class OnMethodSearchTest extends BaseInjectorTest {
   @Test
   public void initializer_constructor() {
-    String rootName = "initializer_constructor";
-
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Main.java",
             "package com.uber;",
@@ -65,10 +61,7 @@ public class OnMethodSearchTest {
 
   @Test
   public void empty_PARAMETER_pick() {
-    String rootName = "empty_PARAMETER_pick";
-
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Super.java",
             "package com.uber;",

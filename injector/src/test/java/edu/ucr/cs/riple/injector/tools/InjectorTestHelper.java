@@ -46,16 +46,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-@SuppressWarnings("unchecked")
 public class InjectorTestHelper {
 
   private final Map<String, String> fileMap;
   private final ArrayList<Change> changes;
   private Path rootPath;
 
-  public InjectorTestHelper() {
-    changes = new ArrayList<>();
-    fileMap = new HashMap<>();
+  public InjectorTestHelper(Path path) {
+    this.rootPath = path;
+    this.changes = new ArrayList<>();
+    this.fileMap = new HashMap<>();
+    makeDirectories();
   }
 
   public InjectorTestHelperOutput addInput(String path, String... input) {
@@ -86,12 +87,6 @@ public class InjectorTestHelper {
                         .toAbsolutePath()
                         .toString());
     this.changes.addAll(Arrays.asList(changes));
-    return this;
-  }
-
-  public InjectorTestHelper setRootPath(String path) {
-    this.rootPath = Paths.get(path);
-    makeDirectories();
     return this;
   }
 
@@ -138,9 +133,9 @@ public class InjectorTestHelper {
   private void makeDirectories() {
     String[] names = {"src", "out", "expected"};
     for (String name : names) {
-      String pathToDirectory = rootPath + "/" + name;
+      Path pathToDirectory = rootPath.resolve(name);
       try {
-        Files.createDirectories(Paths.get(pathToDirectory + "/"));
+        Files.createDirectories(pathToDirectory);
       } catch (IOException e) {
         throw new RuntimeException("Could not create the directories for name: " + name);
       }
