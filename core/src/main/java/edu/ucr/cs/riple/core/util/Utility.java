@@ -26,7 +26,6 @@ package edu.ucr.cs.riple.core.util;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Booleans;
-import com.uber.nullaway.fixserialization.FixSerializationConfig;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Factory;
@@ -164,6 +163,66 @@ public class Utility {
       throw new RuntimeException("Exception happened in reading fixes at: " + fixesPath, e);
     }
     return fixes;
+  }
+
+  /**
+   * Writes the {@link FixSerializationConfig} in {@code XML} format.
+   *
+   * @param config Config file to write.
+   * @param path Path to write the config at.
+   */
+  public static void writeNullAwayConfigInXMLFormat(FixSerializationConfig config, String path) {
+    DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+    try {
+      DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+      Document doc = docBuilder.newDocument();
+
+      // Root
+      Element rootElement = doc.createElement("serialization");
+      doc.appendChild(rootElement);
+
+      // Suggest
+      Element suggestElement = doc.createElement("suggest");
+      suggestElement.setAttribute("active", String.valueOf(config.suggestEnabled));
+      suggestElement.setAttribute("enclosing", String.valueOf(config.suggestEnclosing));
+      rootElement.appendChild(suggestElement);
+
+      // Field Initialization
+      Element fieldInitInfoEnabled = doc.createElement("fieldInitInfo");
+      fieldInitInfoEnabled.setAttribute("active", String.valueOf(config.fieldInitInfoEnabled));
+      rootElement.appendChild(fieldInitInfoEnabled);
+
+      // Method Parameter Protection Test
+      Element paramTestElement = doc.createElement("paramTest");
+      paramTestElement.setAttribute(
+          "active", String.valueOf(config.methodParamProtectionTestEnabled));
+      paramTestElement.setAttribute("index", String.valueOf(config.paramTestIndex));
+      rootElement.appendChild(paramTestElement);
+
+      // Annotations
+      Element annots = doc.createElement("annotation");
+      Element nonnull = doc.createElement("nonnull");
+      nonnull.setTextContent(config.annotationConfig.getNonNull().getFullName());
+      Element nullable = doc.createElement("nullable");
+      nullable.setTextContent(config.annotationConfig.getNullable().getFullName());
+      annots.appendChild(nullable);
+      annots.appendChild(nonnull);
+      rootElement.appendChild(annots);
+
+      // Output dir
+      Element outputDir = doc.createElement("path");
+      outputDir.setTextContent(config.outputDirectory);
+      rootElement.appendChild(outputDir);
+
+      // Writings
+      TransformerFactory transformerFactory = TransformerFactory.newInstance();
+      Transformer transformer = transformerFactory.newTransformer();
+      DOMSource source = new DOMSource(doc);
+      StreamResult result = new StreamResult(new File(path));
+      transformer.transform(source, result);
+    } catch (ParserConfigurationException | TransformerException e) {
+      throw new RuntimeException("Error happened in writing config.", e);
+    }
   }
 
   public static void setCSSCheckerActivation(Config config, boolean activation) {

@@ -27,12 +27,10 @@ def oldestErrorProneApi = "2.4.0"
 
 
 def versions = [
-        asm                    : "7.1",
         errorProneApi          : project.hasProperty("epApiVersion") ? epApiVersion : oldestErrorProneApi,
         autoService            : "1.0-rc7",
         javaparser             : "3.24.0",
         json                   : "1.1.1",
-        nullaway               : "0.9.6",
         guava                  : "31.0.1-jre",
         cli                    : "1.5.0",
         commonsio              : "2.11.0",
@@ -48,12 +46,10 @@ def build = [
         guava                   : "com.google.guava:guava:${versions.guava}",
         json                    : "com.googlecode.json-simple:json-simple:${versions.json}",
         progressbar             : "me.tongfei:progressbar:${versions.progressbar}",
-        nullaway                : "com.uber.nullaway:nullaway:${versions.nullaway}",
         javaparser              : "com.github.javaparser:javaparser-core:${versions.javaparser}",
         commonscli              : "commons-cli:commons-cli:${versions.cli}",
         commonsio               : "commons-io:commons-io:${versions.commonsio}",
         errorProneCheckApi      : "com.google.errorprone:error_prone_check_api:${versions.errorProneApi}",
-        errorProneTestHelpers   : "com.google.errorprone:error_prone_test_helpers:${versions.errorProneApi}",
 ]
 
 def test = [

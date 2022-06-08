@@ -39,9 +39,6 @@ dependencies {
 
     implementation deps.build.progressbar
 
-    implementation deps.build.nullaway
-    testImplementation deps.build.nullaway
-
     implementation deps.build.javaparser
     testImplementation deps.build.javaparser
 
