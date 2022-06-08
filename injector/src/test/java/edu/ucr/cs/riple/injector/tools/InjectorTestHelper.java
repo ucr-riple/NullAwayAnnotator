@@ -37,12 +37,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
-
 import org.apache.commons.io.FileUtils;
 
 public class InjectorTestHelper {
@@ -126,14 +123,16 @@ public class InjectorTestHelper {
   }
 
   private void makeDirectories() {
-    Stream.of("src", "expected").forEach(name -> {
-      Path pathToDirectory = rootPath.resolve(name);
-      try {
-        Files.createDirectories(pathToDirectory);
-      } catch (IOException e) {
-        throw new RuntimeException("Could not create the directories for name: " + name);
-      }
-    });
+    Stream.of("src", "expected")
+        .forEach(
+            name -> {
+              Path pathToDirectory = rootPath.resolve(name);
+              try {
+                Files.createDirectories(pathToDirectory);
+              } catch (IOException e) {
+                throw new RuntimeException("Could not create the directories for name: " + name);
+              }
+            });
   }
 
   void writeToFile(Path path, String[] input) {
