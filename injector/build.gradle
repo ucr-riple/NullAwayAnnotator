@@ -23,7 +23,7 @@
  */
 
 plugins {
-    id 'maven'
+//    id 'maven'
     id 'com.github.sherter.google-java-format' version '0.8'
 }
 
@@ -37,7 +37,7 @@ dependencies {
 
     implementation deps.build.progressbar
 
-    testCompile deps.build.commonsio
+    testImplementation deps.build.commonsio
 }
 
 compileJava.mustRunAfter verifyGoogleJavaFormat

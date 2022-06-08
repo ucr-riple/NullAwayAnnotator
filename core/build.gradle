@@ -35,7 +35,7 @@ dependencies {
     implementation deps.build.progressbar
     implementation deps.build.javaparser
     implementation deps.build.commonscli
-    testCompile deps.build.commonsio
+    testImplementation deps.build.commonsio
 }
 
 configurations.implementation.canBeResolved = true
