@@ -26,19 +26,16 @@ package edu.ucr.cs.riple.injector;
 
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
-import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
 import java.util.Collections;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class LexicalPreservationTest {
+public class LexicalPreservationTest extends BaseInjectorTest {
   @Test
   public void save_imports() {
-    String rootName = "save_imports";
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Super.java",
             "package com.uber;",
@@ -55,7 +52,6 @@ public class LexicalPreservationTest {
             "   }",
             "}")
         .expectOutput(
-            "Super.java",
             "package com.uber;",
             "import javax.annotation.Nullable;",
             "import static com.ibm.wala.types.TypeName.ArrayMask;",
@@ -80,9 +76,7 @@ public class LexicalPreservationTest {
 
   @Test
   public void save_imports_asterisk() {
-    String rootName = "save_imports_asterisk";
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Super.java",
             "package com.uber;",
@@ -159,7 +153,6 @@ public class LexicalPreservationTest {
             "   }",
             "}")
         .expectOutput(
-            "Super.java",
             "package com.uber;",
             "import javax.annotation.Nullable;",
             "import static com.ibm.wala.types.A;",
@@ -245,9 +238,7 @@ public class LexicalPreservationTest {
 
   @Test
   public void remove_redundant_new_keyword() {
-    String rootName = "remove_redundant_new_keyword";
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Super.java",
             "package com.uber;",
@@ -263,7 +254,6 @@ public class LexicalPreservationTest {
             "   class Bar{ }",
             "}")
         .expectOutput(
-            "Super.java",
             "package com.uber;",
             "import javax.annotation.Nullable;",
             "public class Super {",
@@ -287,13 +277,10 @@ public class LexicalPreservationTest {
 
   @Test
   public void simple_array_bracket_preservation() {
-    String rootName = "remove_annot_field";
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "A.java", "package com.uber;", "public class A {", "   private Object[] allTest;", "}")
         .expectOutput(
-            "A.java",
             "package com.uber;",
             "import javax.annotation.Nullable;",
             "public class A {",
@@ -303,7 +290,6 @@ public class LexicalPreservationTest {
         .addInput(
             "B.java", "package com.uber;", "public class B {", "   private Object allTest[];", "}")
         .expectOutput(
-            "B.java",
             "package com.uber;",
             "import javax.annotation.Nullable;",
             "public class B {",

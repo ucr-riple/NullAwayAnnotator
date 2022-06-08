@@ -21,33 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package edu.ucr.cs.riple.core.explorers;
 
-import edu.ucr.cs.riple.core.Annotator;
-import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.metadata.index.Bank;
-import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.FixEntity;
-import edu.ucr.cs.riple.injector.Fix;
+package edu.ucr.cs.css.out;
 
-public class DummyExplorer extends Explorer {
+import com.sun.source.tree.CompilationUnitTree;
+import com.sun.tools.javac.code.Symbol;
 
-  public DummyExplorer(Annotator annotator, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
-    super(annotator, errorBank, fixBank);
+public class ClassInfo {
+  public final Symbol.ClassSymbol clazz;
+  public final String path;
+
+  public ClassInfo(Symbol.ClassSymbol clazz, CompilationUnitTree compilationUnitTree) {
+    this.clazz = clazz;
+    this.path = compilationUnitTree.getSourceFile().toUri().getPath();
+  }
+
+  public static String header() {
+    return "path";
   }
 
   @Override
-  public Report effect(Fix fix) {
-    return new Report(fix, -1);
-  }
+  public String toString() {
 
-  @Override
-  public boolean isApplicable(Fix fix) {
-    return true;
-  }
-
-  @Override
-  public boolean requiresInjection(Fix fix) {
-    return false;
+    return clazz.flatName() + "\t" + path;
   }
 }

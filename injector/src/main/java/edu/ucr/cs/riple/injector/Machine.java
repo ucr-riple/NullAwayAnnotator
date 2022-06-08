@@ -25,21 +25,16 @@ package edu.ucr.cs.riple.injector;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
-import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.AnnotationExpr;
-import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.printer.DefaultPrettyPrinter;
 import com.github.javaparser.printer.configuration.DefaultPrinterConfiguration;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -48,36 +43,29 @@ import me.tongfei.progressbar.ProgressBar;
 public class Machine {
 
   private final List<WorkList> workLists;
-  private final Injector.MODE mode;
   private final DefaultPrettyPrinter printer;
   private final boolean keep;
   private final int total;
   private int processed = 0;
 
-  public Machine(List<WorkList> workLists, Injector.MODE mode, boolean keep) {
+  public Machine(List<WorkList> workLists, boolean keep) {
     this.workLists = workLists;
-    this.mode = mode;
     this.keep = keep;
     this.printer = new DefaultPrettyPrinter(new DefaultPrinterConfiguration());
     AtomicInteger sum = new AtomicInteger();
-    workLists.forEach(workList -> sum.addAndGet(workList.getFixes().size()));
+    workLists.forEach(workList -> sum.addAndGet(workList.getChanges().size()));
     this.total = sum.get();
   }
 
   private void overWriteToFile(CompilationUnit changed, String uri) {
-    if (mode.equals(Injector.MODE.TEST)) {
-      uri = uri.replace("src", "out");
-    }
-    String pathToFileDirectory = uri.substring(0, uri.lastIndexOf("/"));
-    try {
-      Files.createDirectories(Paths.get(pathToFileDirectory + "/"));
-      FileWriter writer = new FileWriter(uri);
+    Path path = Paths.get(uri);
+    try (Writer writer = new FileWriter(path.toFile())) {
+      Files.createDirectories(path.getParent());
       String toWrite = keep ? LexicalPreservingPrinter.print(changed) : printer.print(changed);
       writer.write(toWrite);
       writer.flush();
-      writer.close();
     } catch (IOException e) {
-      throw new RuntimeException("Something terrible happened.");
+      throw new RuntimeException(e);
     }
   }
 
@@ -91,18 +79,15 @@ public class Machine {
       } catch (FileNotFoundException exception) {
         continue;
       }
-      for (Fix fix : workList.getFixes()) {
+      for (Change location : workList.getChanges()) {
         try {
           if (Injector.LOG) {
             pb.step();
           }
-          if (applyFix(tree, fix)) {
+          if (applyChange(tree, location)) {
             processed++;
-          } else {
-            logFailed(fix);
           }
         } catch (Exception ignored) {
-          logFailed(fix);
         }
       }
       overWriteToFile(tree, workList.getUri());
@@ -114,138 +99,29 @@ public class Machine {
     return processed;
   }
 
-  private void logFailed(Fix fix) {
-    FileWriter fw;
-    try {
-      if(!Injector.logPath.toFile().exists()){
-        Injector.logPath.toFile().createNewFile();
-      }
-      fw = new FileWriter(Injector.logPath.toFile(), true);
-      BufferedWriter bw = new BufferedWriter(fw);
-      bw.write(fix.toString());
-      bw.newLine();
-      bw.close();
-    } catch (Exception ignored) {}
-  }
-
-  private boolean applyFix(CompilationUnit tree, Fix fix) {
-    boolean success = false;
-    NodeList<BodyDeclaration<?>> clazz =
-        Helper.getClassOrInterfaceOrEnumDeclarationMembersByFlatName(tree, fix.className);
-    if (clazz == null) {
-      return false;
-    }
-    switch (fix.location) {
-      case "FIELD":
-        success = applyClassField(clazz, fix);
-        break;
-      case "METHOD":
-        success = applyMethodReturn(clazz, fix);
-        break;
-      case "PARAMETER":
-        success = applyMethodParam(clazz, fix);
-        break;
-    }
+  private boolean applyChange(CompilationUnit tree, Change change) {
+    boolean success = change.apply(tree);
     if (success) {
-      ImportDeclaration importDeclaration =
-          StaticJavaParser.parseImport("import " + fix.annotation + ";");
-      if (treeNeedsImport(tree, fix.annotation, importDeclaration)) {
-        tree.getImports().addFirst(importDeclaration);
+      if (Helper.getPackageName(change.annotation) != null) {
+        ImportDeclaration importDeclaration =
+            StaticJavaParser.parseImport("import " + change.annotation + ";");
+        if (treeRequiresImportDeclaration(tree, importDeclaration, change.annotation)) {
+          tree.getImports().addFirst(importDeclaration);
+        }
       }
     }
     return success;
   }
 
-  private boolean treeNeedsImport(
-      CompilationUnit tree, String annotation, ImportDeclaration importDeclaration) {
+  private boolean treeRequiresImportDeclaration(
+      CompilationUnit tree, ImportDeclaration importDeclaration, String annotation) {
     if (tree.getImports().contains(importDeclaration)) {
       return false;
     }
     return tree.getImports()
         .stream()
         .noneMatch(
-            importDeclaration1 ->
-                importDeclaration1.getNameAsString().endsWith(Helper.simpleName(annotation)));
-  }
-
-  private static void applyAnnotation(
-      NodeWithAnnotations<?> node, String annotName, boolean inject) {
-    final String annotSimpleName = Helper.simpleName(annotName);
-    NodeList<AnnotationExpr> annots = node.getAnnotations();
-    boolean exists =
-        annots
-            .stream()
-            .anyMatch(
-                annot -> {
-                  String thisAnnotName = annot.getNameAsString();
-                  return thisAnnotName.equals(annotName) || thisAnnotName.equals(annotSimpleName);
-                });
-    if (inject && !exists) {
-      node.addMarkerAnnotation(annotSimpleName);
-    }
-    if (!inject) {
-      annots.removeIf(
-          annot -> {
-            String thisAnnotName = annot.getNameAsString();
-            return thisAnnotName.equals(annotName) || thisAnnotName.equals(annotSimpleName);
-          });
-    }
-  }
-
-  private boolean applyMethodParam(NodeList<BodyDeclaration<?>> members, Fix fix) {
-    final boolean[] success = {false};
-    members.forEach(
-        bodyDeclaration ->
-            bodyDeclaration.ifCallableDeclaration(
-                callableDeclaration -> {
-                  if (Helper.matchesCallableSignature(callableDeclaration, fix.method)) {
-                    for (Object p : callableDeclaration.getParameters()) {
-                      if (p instanceof Parameter) {
-                        Parameter param = (Parameter) p;
-                        if (param.getName().toString().equals(fix.variable)) {
-                          applyAnnotation(param, fix.annotation, Boolean.parseBoolean(fix.inject));
-                          success[0] = true;
-                        }
-                      }
-                    }
-                  }
-                }));
-    return success[0];
-  }
-
-  private boolean applyMethodReturn(NodeList<BodyDeclaration<?>> members, Fix fix) {
-    final boolean[] success = {false};
-    members.forEach(
-        bodyDeclaration ->
-            bodyDeclaration.ifCallableDeclaration(
-                callableDeclaration -> {
-                  if (Helper.matchesCallableSignature(callableDeclaration, fix.method)) {
-                    applyAnnotation(
-                        callableDeclaration, fix.annotation, Boolean.parseBoolean(fix.inject));
-                    success[0] = true;
-                  }
-                }));
-    return success[0];
-  }
-
-  private boolean applyClassField(NodeList<BodyDeclaration<?>> members, Fix fix) {
-    final boolean[] success = {false};
-    members.forEach(
-        bodyDeclaration ->
-            bodyDeclaration.ifFieldDeclaration(
-                fieldDeclaration -> {
-                  NodeList<VariableDeclarator> vars =
-                      fieldDeclaration.asFieldDeclaration().getVariables();
-                  for (VariableDeclarator v : vars) {
-                    if (v.getName().toString().equals(fix.variable)) {
-                      applyAnnotation(
-                          fieldDeclaration, fix.annotation, Boolean.parseBoolean(fix.inject));
-                      success[0] = true;
-                      break;
-                    }
-                  }
-                }));
-
-    return success[0];
+            impDecl ->
+                Helper.simpleName(impDecl.getNameAsString()).equals(Helper.simpleName(annotation)));
   }
 }

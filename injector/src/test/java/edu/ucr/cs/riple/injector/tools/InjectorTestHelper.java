@@ -24,82 +24,81 @@
 
 package edu.ucr.cs.riple.injector.tools;
 
+import static edu.ucr.cs.riple.injector.tools.Utility.pathOf;
 import static org.junit.Assert.fail;
 
-import edu.ucr.cs.riple.injector.Fix;
+import edu.ucr.cs.riple.injector.Change;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkListBuilder;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Stream;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.apache.commons.io.FileUtils;
 
-@SuppressWarnings("unchecked")
 public class InjectorTestHelper {
+  private final List<Change> changes;
+  private final List<String> files;
+  private final Path rootPath;
 
-  private final Map<String, String> fileMap;
-  private final ArrayList<Fix> fixes;
-  private String rootPath;
-
-  public InjectorTestHelper() {
-    fixes = new ArrayList<>();
-    fileMap = new HashMap<>();
+  public InjectorTestHelper(Path path) {
+    this.rootPath = path;
+    this.changes = new ArrayList<>();
+    this.files = new ArrayList<>();
+    makeDirectories();
   }
 
   public InjectorTestHelperOutput addInput(String path, String... input) {
-    if (rootPath == null || rootPath.equals("")) {
-      throw new RuntimeException("Root path must be set before calling addInput");
-    }
-    String pathToInputFile = writeToFile("src/" + path, input);
-    return new InjectorTestHelperOutput(this, fileMap, pathToInputFile);
+    writeToFile(pathOf(rootPath.resolve("src"), path), input);
+    files.add(path);
+    return new InjectorTestHelperOutput(this, rootPath, path);
   }
 
   public InjectorTestHelperOutput addInputSourceFile(String path, String inputFilePath) {
-    if (rootPath == null || rootPath.equals("")) {
-      throw new RuntimeException("Root path must be set before calling addInput");
-    }
-    String pathToInputFile = writeToFile("src/" + path, readLinesOfFile(inputFilePath));
-    return new InjectorTestHelperOutput(this, fileMap, pathToInputFile);
+    writeToFile(pathOf(rootPath.resolve("src"), path), readLinesOfFileFromResource(inputFilePath));
+    return new InjectorTestHelperOutput(this, rootPath, path);
   }
 
-  public InjectorTestHelper addFixes(Fix... fixes) {
-    for (Fix f : fixes) f.uri = rootPath.concat("/src/").concat(f.uri);
-    this.fixes.addAll(Arrays.asList(fixes));
-    return this;
-  }
-
-  public InjectorTestHelper setRootPath(String path) {
-    this.rootPath = path;
-    makeDirectories();
+  public InjectorTestHelper addChanges(Change... changes) {
+    Arrays.stream(changes)
+        .sequential()
+        .forEach(
+            change ->
+                change.location.uri =
+                    rootPath
+                        .resolve("src")
+                        .resolve(change.location.uri)
+                        .toAbsolutePath()
+                        .toString());
+    this.changes.addAll(Arrays.asList(changes));
     return this;
   }
 
   public void start(boolean keepStyle) {
-    Injector injector = Injector.builder().setMode(Injector.MODE.TEST).keepStyle(keepStyle).build();
-    writeFixes();
-    injector.start(new WorkListBuilder(rootPath + "/fix/fixes.json").getWorkLists(), null);
-    for (String key : fileMap.keySet()) {
-      String srcFile = readFileToString(key);
-      String trimmedSrc = srcFile.replaceAll(" ", "").replaceAll("\n", "").replaceAll("\t", "");
-      String destFile = readFileToString(fileMap.get(key));
-      String trimmedDest = destFile.replaceAll(" ", "").replaceAll("\n", "").replaceAll("\t", "");
-      if (!trimmedSrc.equals(trimmedDest)) {
-        System.out.println("FOUND   : " + trimmedSrc);
-        System.out.println("EXPECTED: " + trimmedDest);
-        fail("\nExpected:\n" + destFile + "\n\nBut found:\n" + srcFile + "\n");
+    Injector injector = Injector.builder().keepStyle(keepStyle).build();
+    injector.start(new WorkListBuilder(changes).getWorkLists(), keepStyle);
+    for (String key : files) {
+      try {
+        String found =
+            FileUtils.readFileToString(
+                pathOf(rootPath.resolve("src"), key).toFile(), Charset.defaultCharset());
+        String trimmedFound = Utility.removeWhiteSpaces(found);
+        String expected =
+            FileUtils.readFileToString(
+                pathOf(rootPath.resolve("expected"), key).toFile(), Charset.defaultCharset());
+        String trimmedExpected = Utility.removeWhiteSpaces(expected);
+        if (!trimmedFound.equals(trimmedExpected)) {
+          System.out.println("FOUND   : " + trimmedFound);
+          System.out.println("EXPECTED: " + trimmedExpected);
+          fail("\nExpected:\n" + expected + "\n\nBut found:\n" + found + "\n");
+        }
+      } catch (IOException e) {
+        throw new RuntimeException(e);
       }
     }
   }
@@ -108,81 +107,38 @@ public class InjectorTestHelper {
     start(false);
   }
 
-  private void writeFixes() {
-    JSONArray array = new JSONArray();
-    for (Fix fix : fixes) {
-      array.add(fix.getJson());
-    }
-    JSONObject obj = new JSONObject();
-    obj.put("fixes", array);
-    writeToFile("fix/fixes.json", obj.toJSONString());
-  }
-
-  private String[] readLinesOfFile(String path) {
-    BufferedReader reader;
-    List<String> lines = new ArrayList<>();
+  private String[] readLinesOfFileFromResource(String path) {
     try {
-      reader =
-          new BufferedReader(
-              new FileReader(
-                  Objects.requireNonNull(getClass().getClassLoader().getResource(path)).getFile()));
-      String line = reader.readLine();
-      while (line != null) {
-        lines.add(line);
-        line = reader.readLine();
-      }
-      reader.close();
+      return FileUtils.readLines(
+              Paths.get(
+                      Objects.requireNonNull(getClass().getClassLoader().getResource(path))
+                          .getFile())
+                  .toFile(),
+              Charset.defaultCharset())
+          .toArray(new String[0]);
     } catch (IOException e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     }
-    return lines.toArray(new String[0]);
   }
 
   private void makeDirectories() {
-    String[] names = {"src", "out", "expected", "fix"};
-    for (String name : names) {
-      String pathToDirectory = rootPath + "/" + name;
+    String[] directories = {"src", "expected"};
+    for (String name : directories) {
+      Path pathToDirectory = rootPath.resolve(name);
       try {
-        Files.createDirectories(Paths.get(pathToDirectory + "/"));
+        Files.createDirectories(pathToDirectory);
       } catch (IOException e) {
         throw new RuntimeException("Could not create the directories for name: " + name);
       }
     }
   }
 
-  String writeToFile(String relativePath, String[] input) {
-    StringBuilder toWrite = new StringBuilder();
-    for (String s : input) toWrite.append(s).append("\n");
-    return writeToFile(relativePath, toWrite.toString());
-  }
-
-  String writeToFile(String relativePath, String input) {
-    input = input.replace("\\", "");
-    relativePath = rootPath.concat("/").concat(relativePath);
-    String pathToFileDirectory = relativePath.substring(0, relativePath.lastIndexOf("/"));
+  void writeToFile(Path path, String[] input) {
     try {
-      Files.createDirectories(Paths.get(pathToFileDirectory + "/"));
-      try (Writer writer =
-          Files.newBufferedWriter(Paths.get(relativePath), Charset.defaultCharset())) {
-        writer.write(input);
-        writer.flush();
-        return relativePath;
-      }
+      Files.createDirectories(path.getParent());
+      FileUtils.writeLines(path.toFile(), Arrays.asList(input));
     } catch (IOException e) {
-      throw new RuntimeException("Something terrible happened.");
-    }
-  }
-
-  private String readFileToString(String path) {
-    StringBuilder contentBuilder = new StringBuilder();
-    try {
-      Stream<String> stream = Files.lines(Paths.get(path), Charset.defaultCharset());
-      stream.forEach(s -> contentBuilder.append(s).append("\n"));
-      return contentBuilder.toString();
-    } catch (FileNotFoundException ex) {
-      throw new RuntimeException("Unable to open file: " + path, ex);
-    } catch (IOException ex) {
-      throw new RuntimeException("Error reading file: " + path, ex);
+      throw new RuntimeException(e);
     }
   }
 
@@ -190,24 +146,24 @@ public class InjectorTestHelper {
 
     private final InjectorTestHelper injectorTestHelper;
     private final String inputFile;
-    private final Map<String, String> map;
+    private final Path root;
 
     InjectorTestHelperOutput(
-        InjectorTestHelper injectorTestHelper, Map<String, String> map, String inputFile) {
-      this.map = map;
-      this.inputFile = inputFile;
+        InjectorTestHelper injectorTestHelper, Path root, String inputFilePath) {
+      this.root = root;
+      this.inputFile = inputFilePath;
       this.injectorTestHelper = injectorTestHelper;
     }
 
-    public InjectorTestHelper expectOutput(String path, String... input) {
-      String output = writeToFile("expected/" + path, input);
-      map.put(inputFile.replace("src", "out"), output);
+    public InjectorTestHelper expectOutput(String... input) {
+      writeToFile(pathOf(root.resolve("expected"), inputFile), input);
       return injectorTestHelper;
     }
 
-    public InjectorTestHelper expectOutputFile(String path, String pathToOutputFile) {
-      String output = writeToFile("expected/" + path, readLinesOfFile(pathToOutputFile));
-      map.put(inputFile.replace("src", "out"), output);
+    public InjectorTestHelper expectOutputFile(String pathToOutputFile) {
+      writeToFile(
+          pathOf(root.resolve("expected"), inputFile),
+          readLinesOfFileFromResource(pathToOutputFile));
       return injectorTestHelper;
     }
   }

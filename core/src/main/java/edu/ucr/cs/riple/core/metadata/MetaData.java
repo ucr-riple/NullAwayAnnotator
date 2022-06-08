@@ -30,13 +30,16 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
-public abstract class AbstractRelation<T> {
+public abstract class MetaData<T> {
   HashMap<Integer, List<T>> idHash;
 
-  public AbstractRelation(Path path) {
+  public MetaData(Path path) {
     setup();
     try {
       fillNodes(path);
@@ -56,16 +59,18 @@ public abstract class AbstractRelation<T> {
     if (line != null) line = reader.readLine();
     while (line != null) {
       T node = addNodeByLine(line.split("\t"));
-      Integer hash = node.hashCode();
-      if (idHash.containsKey(hash)) {
-        List<T> localList = idHash.get(hash);
-        if (!localList.contains(node)) {
-          localList.add(node);
+      if (node != null) {
+        Integer hash = node.hashCode();
+        if (idHash.containsKey(hash)) {
+          List<T> localList = idHash.get(hash);
+          if (!localList.contains(node)) {
+            localList.add(node);
+          }
+        } else {
+          List<T> singleHash = new ArrayList<>();
+          singleHash.add(node);
+          idHash.put(hash, singleHash);
         }
-      } else {
-        List<T> singleHash = new ArrayList<>();
-        singleHash.add(node);
-        idHash.put(hash, singleHash);
       }
       line = reader.readLine();
     }
@@ -78,9 +83,12 @@ public abstract class AbstractRelation<T> {
     boolean matches(T candidate);
   }
 
-  protected T findNode(Comparator<T> c, String... arguments) {
+  protected T findNode(Comparator<T> c, String... keys) {
+    if (keys.length == 0) {
+      throw new RuntimeException("findNode needs keys to compute the hash and cannot be empty");
+    }
     T node = null;
-    int hash = Arrays.hashCode(arguments);
+    int hash = Arrays.hashCode(keys);
     List<T> candidateIds = idHash.get(hash);
     if (candidateIds == null) {
       return null;
@@ -94,17 +102,14 @@ public abstract class AbstractRelation<T> {
     return node;
   }
 
-  protected List<T> findAllNodes(Comparator<T> c, String... keys) {
-    List<T> nodes = new ArrayList<>();
+  protected List<T> findAllNodes(Predicate<T> c, Object... keys) {
+    if (keys.length == 0) {
+      throw new RuntimeException("findAllNodes needs keys to compute the hash and cannot be empty");
+    }
     List<T> candidateIds = idHash.get(Arrays.hashCode(keys));
     if (candidateIds == null) {
-      return nodes;
+      return Collections.emptyList();
     }
-    for (T candidate : candidateIds) {
-      if (c.matches(candidate)) {
-        nodes.add(candidate);
-      }
-    }
-    return nodes;
+    return candidateIds.stream().filter(c).collect(Collectors.toList());
   }
 }

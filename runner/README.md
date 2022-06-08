@@ -1,28 +1,28 @@
 ## Runner
-Script to run [Annotator](../README.md). The script `run.py` can be used to run the `Annotator`, after the below configurations are set.
+This sections describes how to run [Annotator](../README.md) on any project.
 
 ### Installation
-All dependencies are provided via a `jar` file located in `jars` directory. 
-To re-create/update the jar file, run `python3 updatejar.py`
+Annotator is written entirely in Java and delivered via a `jar` file located in `jars` directory. 
+To re-create/update the `jar` file, run `./update.sh`
 
 ### Requirements for the Target Project
 
 Below are the instructions to prepare the target project:
 
 #### Dependencies
-1. `NullAway` checker must be activated with version >= `0.9.6`
-2. `CSS` checker must be activated located [here](../css/README.md).
+1. `NullAway` checker must be activated with version >= `0.9.7`
+2. `CSS` checker must be activated with version >= `1.2.6-LOCAL`, see more about `CSS` [here](../css/README.md).
 
 #### Error Prone Flags
 ```
 "-Xep:NullAway:ERROR", // to activate NullAway
 "-XepOpt:NullAway:SerializeFixMetadata=true",
-"-XepOpt:NullAway:FixSerializationConfigPath=path_to_config.xml",
+"-XepOpt:NullAway:FixSerializationConfigPath=path_to_nullaway_config.xml",
 "-Xep:CSS:ERROR", // to activate CSS
-"-XepOpt:CSS:ConfigPath=path_to_css.xml",
+"-XepOpt:CSS:ConfigPath=path_to_css_config.xml",
 ```
 
-`path_to_config.xml` and `path_to_css.xml` are config files which **are not necessary** to create at the time of preparing the project. 
+`path_to_nullaway_config.xml` and `path_to_css_config.xml` are config files which **are not necessary** to create at the time of preparing the project. 
 These two files will be created by the script and enables the communication between the script and the analysis.
 
 Please find a sample project setup below:
@@ -50,72 +50,138 @@ tasks.withType(JavaCompile) {
 ```
 At this moment, the target project is ready for the Annotator to process. 
 
-We need to inform the script about `path_to_config.xml` and `path_to_css.xml` (number 8 and 9 in the next section), please read the section below.
+We need to inform the `Annotator` about `path_to_nullaway_config.xml` and `path_to_css_config.xml` (number 2 and 3 in the next section), please read the section below.
 
-### Script Config
+### Running Annotator
+`Annotator` is delivered via a `jar` file. To run the `jar` file simply run the command below:
+```shell
+cd jars && java -jar core.jar
+```
+`Annotator` requires certain flag values to be able to run successfully. We can pass these values via command line arguments or config files, we will describe each approach in next sections.
+#### Use Command Line Arguments
 
-Configurations are written inside the `config.json` file. Please find a sample below:
+In order to run `Annotator` on target project `P`, arguments below **must** be passed to `Annotator`:
+1. `-bc,--build-command <arg>`: Command to run `NullAway` on target `P` enclosed in **""**. Please note that this command should be executable from any directory (e.g. `"cd /Absolute /Path /To /P && ./build"`).
+2. `-ccp,--css-config-path <arg>`: Path to the `CSS` Config (value used in previous section (`path_to_css_config.xml`)).
+3. `-ncp,--nullaway-config-path <arg>`: Path to the `NullAway` Config (value used in previous section (`path_to_nullaway_config.xml`)).
+4. `-i,--initializer <arg>`: Fully qualified name of the `@Initializer` annotation.
+5. `-d,--dir <arg>`: Directory where all outputs of `CSS|NullAway` are serialized.
+
+By default, `Annotator` has the configuration below:
+1. Lexical Preservation is enabled.
+2. When a tree of fixes is marked as useful, it only injects the root fix.
+3. Annotator will bailout from the search tree as soon as its effectiveness hits zero or less.
+4. Performs search to depth level `5`.
+5. Uses `javax.annotation.Nullable` as `@Nullable` annotation.
+6. Caches iterations results and uses them in the next cycles.
+7. Uses optimization techniques to parallelize search.
+
+Here are __optional__ arguments which can alter default configurations above:
+1. `-dlp,--disable-lexical-preservation`: Disables Lexical Preservation.
+2. `-ch,--chain`: Injects the complete tree of fixes associated to the fix.
+3. `-db,--disable-bailout`: Annotator will not bailout from the search tree as soon as its effectiveness hits zero or less and completely traverses the tree until no new fix is suggested.
+4. `-depth,--depth <arg>`: Sets the depth of the analysis search.
+5. `-n,--nullable <arg>`: Sets custom `@Nullable` annotation.
+6. `-dc,--disable-cache`: Disables cache usage.
+7. `-do,--disable-optimization`: Disables optimizations.
+
+#### Example
+```shell
+cd jars && java -jar core.jar -bc "cd /Path /To /P && ./gradlew compileJava" -ccp path_to_css_config.xml -ncp path_to_nullaway_config.xml -i com.custom.Initializer -d /tmp --disable-optimization -dlp
+```
+
+The command above will process project `P` in non-optimized mode and disables lexical preservation features.
+
+
+#### Use config file
+
+In this approach we will initialize all flag values in one single file, and pass the path to the `Annotator`.
+See the format of the config file below with sample values:
 ```json
 {
-  "PROJECT_PATH": "/Path/To/Root/Of/Project",
-  "BUILD_COMMAND": "./gradlew build -x test",
+  "BUILD_COMMAND": "cd Absolute/ Path/ to/ Target && Command to run NullAway",
   "ANNOTATION": {
-    "INITIALIZER": "com.uber.Initializer",
-    "NONNULL": "javax.annotation.Nonnull",
+    "INITIALIZER": "foo.bar.Initializer",
     "NULLABLE": "javax.annotation.Nullable"
   },
-  "FORMAT": true,
+  "LEXICAL_PRESERVATION": false,
   "OUTPUT_DIR": "/tmp/NullAwayFix",
   "NULLAWAY_CONFIG_PATH": "/tmp/NullAwayFix/config.xml",
   "CSS_CONFIG_PATH": "/tmp/NullAwayFix/css.xml",
+  "CHAIN": true,
   "OPTIMIZED": true,
-  "DEPTH": 10
+  "CACHE": true,
+  "BAILOUT": true,
+  "DEPTH": 1
 }
 ```
 Below is the description of each setting:
-1. `PROJECT_PATH`: The path to the project directory (if a subproject needs to be analyzied, this path needs to point to the subproject not the root project)
-2. `BUILD_COMMAND`: The command to execute `NullAway` for the project at the path given in `PROJECT_PATH`. The script will use the command, `cd PROJECT_PATH && BUILD_COMMAND` to execute `NullAway`.
-3. `INITIALIZER`: Fully qualified name of the `Initializer` annotation to inject on detected initializer methods.
-4. `NONNULL`: Fully qualified name of the `Nonnull` annotation.
-5. `NULLABLE`: Fully qualified name of the `Nullable` annotation.
-6. `FORMAT`: If set to `true` the format of the code will be preserved at the end of execution.
-7. `OUTPUT_DIR`: Directory where the serialized output of NullAway should be written.
-8. `NULLAWAY_CONFIG_PATH`: `path_to_config.xml` given to project in time of preparing the project (previous section).
-9. `CSS_CONFIG_PATH`: `path_to_css.xml` given to project in time of preparing the process (previous section).
-10. `OPTIMIZED`: Enables the optimization technique.
+
+1. `BUILD_COMMAND`: The command to execute `NullAway` for the project. (This command must include changing directory to target project from root) 
+2. `INITIALIZER`: Fully qualified name of the `Initializer` annotation to inject on detected initializer methods.
+3. `NULLABLE`: Fully qualified name of the `Nullable` annotation.
+4. `LEXICAL_PRESERVATION`: If set to `true`, activates lexical preservation.
+5. `OUTPUT_DIR`: Directory where the serialized output of NullAway should be written.
+6. `NULLAWAY_CONFIG_PATH`: `path_to_config.xml` given to project in time of preparing the project (previous section).
+7. `CSS_CONFIG_PATH`: `path_to_css.xml` given to project in time of preparing the process (previous section).
+8. `OPTIMIZED`: Enables the optimization technique.
+9. `CACHE`: if set to `true`, cache usage will be enabled.
+10. `BAILOUT`: if set to `true`, Annotator will bailout from the search tree as soon as its effectiveness hits zero or less, otherwise it will completely travers the tree until no new fix is suggested
 11. `DEPTH`: The depth of the analysis.
 
-### Running the script
+Pass the path to the config file above with `-p,--path` argument to `core.jar` and no other flag is required.
 
-Before running, please make sure that all the changes in the `Requirements for the Target Project` section has been applied to the target project.
-
-The script is written in `python3` in the file `run.py`. It requires the `core.jar` the relative path: `./jars/core.jar` to execute. To recreate/update the `core.jar` please run `python3 updatejar.py`
-
-To run the script a `command` must be passed to the script. A `command` must be one of the followings:
-1. `explore`: It will make `diagnose_report.json` file which is the result of analyzing all fixes coming from `NullAway`
-2. `preprocess`: It will perform a preprocessing phase which adds `@Initialize` annotation to all initializer methods detected by `NullAway`.
-3. `apply`: It will apply all the effective fixes reported in `diagnose_report.json` which reduces the number or errors.
-4. `clean`: It will clean all generated files.
-5. `run`: First it runs `preprocess`, and then it will run `explore`/`apply` in iterations, until no further new fix is suggested.
-
-```cmd
-python3 run.py preprocess
-python3 run.py explore
-python3 run.py apply
-python3 run.py clean
-python3 run.py run
+#### Example
+```shell
+cd jars && java -jar core.jar --path config.json
 ```
 
-After the instructions above are followed, to annotate the target project, simply run `python3 run.py run`
 
-### Output
+### Helper script
 
-All outputs will be stored at `OUTPUT_DIR` in `config.json` directory. To delete all outputs, Please run `python run.py clean`.
+`start.sh` script is provided, you can run `Annotator` and simply pass desired arguments to `start.sh`.
+#### Example
+```shell
+./start.sh --path config.json
 
+or
+
+./start.sh -bc "cd /Path /To /P && ./gradlew compileJava" -ccp path_to_css_config.xml -ncp path_to_nullaway_config.xml -i com.custom.Initializer -d /tmp --disable-optimization -dlp
+```
+
+To see all flags description simply run `./start.sh --help`
+```cmd
+ -bc,--build-command <arg>             Command to Run NullAway on the
+                                       target project, this command must
+                                       include changing directory from
+                                       root to the target project
+ -ccp,--css-config-path <arg>          Path to the CSS Config
+ -ch,--chain                           Injects the complete tree of fixes
+                                       associated to the fix
+ -d,--dir <arg>                        Directory of the output files
+ -db,--disable-bailout                 Disables bailout, Annotator will
+                                       not bailout from the search tree as
+                                       soon as its effectiveness hits zero
+                                       or less and completely traverses
+                                       the tree until no new fix is
+                                       suggested
+ -dc,--disable-cache                   Disables cache usage
+ -depth,--depth <arg>                  Depth of the analysis
+ -dlp,--disable-lexical-preservation   Disables lexical preservation
+ -do,--disable-optimization            Disables optimizations
+ -h,--help                             Shows all flags
+ -i,--initializer <arg>                Fully Qualified name of the
+                                       Initializer annotation
+ -n,--nullable <arg>                   Fully Qualified name of the
+                                       Nullable annotation
+ -ncp,--nullaway-config-path <arg>     Path to the NullAway Config
+ -p,--path <arg>                       Path to config file containing all
+                                       flags values in json format
+```
 
 ### Annotator Depth Level
 
 Regarding `Annotator Depth level`, the number of remaining warnings will reduce as the depth increases. However, in our experiments,
-level 4 is the sweet spot for having the best performance. Please look at the chart below, running the core from level 0 to 10 over 20 open source projects. As you can see, on level 4 we reach the optimal solution.
+level 5 is the sweet spot for having the best performance. Please look at the chart below, running the core from level 0 to 10 over 20 open source projects. As you can see, on level 4 we reach the optimal solution.
 
 ![image info](./../pics/depth.png)

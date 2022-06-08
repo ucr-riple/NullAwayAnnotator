@@ -92,11 +92,6 @@ public class MethodNode {
   }
 
   @Override
-  public String toString() {
-    return "parent=" + parent + ", id=" + id + ", method='" + method + '\'' + ", clazz='" + clazz;
-  }
-
-  @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof MethodNode)) return false;

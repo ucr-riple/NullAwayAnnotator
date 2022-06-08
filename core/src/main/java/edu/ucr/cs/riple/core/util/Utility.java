@@ -24,36 +24,44 @@
 
 package edu.ucr.cs.riple.core.util;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Booleans;
-import edu.ucr.cs.riple.core.Annotator;
-import edu.ucr.cs.riple.core.FixType;
+import com.uber.nullaway.fixserialization.FixSerializationConfig;
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
-import edu.ucr.cs.riple.core.metadata.method.MethodNode;
-import edu.ucr.cs.riple.injector.Fix;
+import edu.ucr.cs.riple.core.metadata.index.Factory;
+import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
+import java.io.OutputStreamWriter;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import me.tongfei.progressbar.ProgressBar;
 import me.tongfei.progressbar.ProgressBarStyle;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class Utility {
 
@@ -70,26 +78,27 @@ public class Utility {
   }
 
   @SuppressWarnings("ALL")
-  public static void writeReports(Path dir, List<Report> reports, boolean chain) {
+  public static void writeReports(Config config, ImmutableSet<Report> reports) {
+    Path reportsPath = config.dir.resolve("reports.json");
     JSONObject result = new JSONObject();
     JSONArray reportsJson = new JSONArray();
     for (Report report : reports) {
-      JSONObject reportJson = report.fix.getJson();
-      reportJson.put("effect", report.effectiveNess);
-      reportJson.put("finished", report.finished);
+      JSONObject reportJson = report.root.getJson();
+      reportJson.put("EFFECT", report.effect);
+      reportJson.put("FINISHED", report.finished);
       JSONArray followUps = new JSONArray();
-      if (chain && report.effectiveNess < 1) {
-        report.followups.remove(report.fix);
+      if (config.chain && report.effect < 1) {
+        report.tree.remove(report.root);
         followUps.addAll(
-            report.followups.stream().map(fix -> fix.getJson()).collect(Collectors.toList()));
+            report.tree.stream().map(fix -> fix.getJson()).collect(Collectors.toList()));
       }
-      reportJson.put("followups", followUps);
+      reportJson.put("TREE", followUps);
       reportsJson.add(reportJson);
     }
     reportsJson.sort(
         (o1, o2) -> {
-          int first = (Integer) ((JSONObject) o1).get("effect");
-          int second = (Integer) ((JSONObject) o2).get("effect");
+          int first = (Integer) ((JSONObject) o1).get("EFFECT");
+          int second = (Integer) ((JSONObject) o2).get("EFFECT");
           if (first == second) {
             return 0;
           }
@@ -98,15 +107,14 @@ public class Utility {
           }
           return -1;
         });
-    result.put("reports", reportsJson);
+    result.put("REPORTS", reportsJson);
     try {
-      FileWriter writer = new FileWriter(dir.resolve("diagnose_report.json").toFile());
+      FileWriter writer = new FileWriter(reportsPath.toFile());
       writer.write(result.toJSONString().replace("\\/", "/").replace("\\\\\\", "\\"));
       writer.flush();
     } catch (IOException e) {
       throw new RuntimeException(
-          "Could not create the Annotator report json file: " + dir.resolve("diagnose_report.json"),
-          e);
+          "Could not create the Annotator report json file: " + reportsPath, e);
     }
   }
 
@@ -135,78 +143,95 @@ public class Utility {
     return Arrays.stream(content.split(",")).toArray(String[]::new);
   }
 
-  public static List<Fix> readAllFixes(Path path) {
-    List<Fix> fixes = new ArrayList<>();
+  public static Set<Fix> readFixesFromOutputDirectory(Config config, Factory<Fix> factory) {
+    Path fixesPath = config.dir.resolve("fixes.tsv");
+    Set<Fix> fixes = new HashSet<>();
     try {
-      try (BufferedReader br = new BufferedReader(new FileReader(path.toFile()))) {
+      try (BufferedReader br = new BufferedReader(new FileReader(fixesPath.toFile()))) {
         String line;
         br.readLine();
         while ((line = br.readLine()) != null) {
-          Fix fix = Fix.fromCSVLine(line, "\t");
+          Fix fix = factory.build(line.split("\t"));
           Optional<Fix> existing = fixes.stream().filter(other -> other.equals(fix)).findAny();
           if (existing.isPresent()) {
-            existing.get().referred++;
+            existing.get().reasons.addAll(fix.reasons);
           } else {
-            fix.referred = 1;
             fixes.add(fix);
           }
         }
       }
     } catch (IOException e) {
-      throw new RuntimeException("Exception happened in reading fixes at: " + path, e);
+      throw new RuntimeException("Exception happened in reading fixes at: " + fixesPath, e);
     }
     return fixes;
   }
 
-  public static void removeCachedFixes(List<Fix> fixes, Path outDir) {
-    if (!Files.exists(outDir.resolve("reports.json"))) {
-      return;
-    }
+  public static void setCSSCheckerActivation(Config config, boolean activation) {
+    DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
     try {
-      JSONObject cachedObjects =
-          (JSONObject)
-              new JSONParser().parse(new FileReader(outDir.resolve("reports.json").toFile()));
-      JSONArray cachedJson = (JSONArray) cachedObjects.get("reports");
-      List<Fix> cached = new ArrayList<>();
-      for (Object o : cachedJson) {
-        JSONObject reportJson = (JSONObject) o;
-        if (Integer.parseInt(reportJson.get("effect").toString()) > 0) {
-          cached.add(Fix.createFromJson(reportJson));
-        }
-      }
-      System.out.print("Cached items size: " + cached.size() + " total fix size: " + fixes.size());
-      fixes.removeAll(cached);
-    } catch (Exception exception) {
-      throw new RuntimeException("Exception happened in removing cached fixes", exception);
+      DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+      Document doc = docBuilder.newDocument();
+
+      // Root
+      Element rootElement = doc.createElement("css");
+      doc.appendChild(rootElement);
+
+      // Method
+      Element methodElement = doc.createElement("method");
+      methodElement.setAttribute("active", String.valueOf(activation));
+      rootElement.appendChild(methodElement);
+
+      // Field
+      Element fieldElement = doc.createElement("field");
+      fieldElement.setAttribute("active", String.valueOf(activation));
+      rootElement.appendChild(fieldElement);
+
+      // Call
+      Element callElement = doc.createElement("call");
+      callElement.setAttribute("active", String.valueOf(activation));
+      rootElement.appendChild(callElement);
+
+      // File
+      Element classElement = doc.createElement("class");
+      classElement.setAttribute("active", String.valueOf(activation));
+      rootElement.appendChild(classElement);
+
+      // Output dir
+      Element outputDir = doc.createElement("path");
+      outputDir.setTextContent(config.dir.toString());
+      rootElement.appendChild(outputDir);
+
+      // Writings
+      TransformerFactory transformerFactory = TransformerFactory.newInstance();
+      Transformer transformer = transformerFactory.newTransformer();
+      DOMSource source = new DOMSource(doc);
+      StreamResult result = new StreamResult(config.cssConfigPath.toFile());
+      transformer.transform(source, result);
+    } catch (ParserConfigurationException | TransformerException e) {
+      throw new RuntimeException("Error happened in writing config.", e);
     }
-    System.out.println(". Reduced down to: " + fixes.size());
   }
 
-  public static List<Fix> readFixesJson(Path filePath) {
-    List<Fix> fixes = new ArrayList<>();
+  public static void buildProject(Config config) {
+    long timer = config.log.startTimer();
+    buildProject(config, false);
+    config.log.stopTimerAndCaptureBuildTime(timer);
+    config.log.incrementBuildRequest();
+  }
+
+  public static void buildProject(Config config, boolean initSerializationEnabled) {
+    FixSerializationConfig.Builder nullAwayConfig =
+        new FixSerializationConfig.Builder()
+            .setSuggest(true, true)
+            .setAnnotations(config.nullableAnnot, "UNKNOWN")
+            .setOutputDirectory(config.dir.toString())
+            .setFieldInitInfo(initSerializationEnabled);
+    nullAwayConfig.writeAsXML(config.nullAwayConfigPath.toString());
     try {
-      BufferedReader bufferedReader = Files.newBufferedReader(filePath, Charset.defaultCharset());
-      JSONObject obj = (JSONObject) new JSONParser().parse(bufferedReader);
-      JSONArray fixesJson = (JSONArray) obj.get("fixes");
-      bufferedReader.close();
-      for (Object o : fixesJson) {
-        JSONObject fixJson = (JSONObject) o;
-        fixes.add(Fix.createFromJson(fixJson));
-        if (fixJson.containsKey("followups")) {
-          JSONArray followUps = (JSONArray) fixJson.get("followups");
-          for (Object followup : followUps) {
-            fixes.add(Fix.createFromJson((JSONObject) followup));
-          }
-        }
-      }
-    } catch (FileNotFoundException e) {
-      throw new RuntimeException("Unable to open file: " + filePath, e);
-    } catch (IOException e) {
-      throw new RuntimeException("Error reading file: " + filePath, e);
-    } catch (ParseException e) {
-      throw new RuntimeException("Error in parsing object", e);
+      Utility.executeCommand(config.buildCommand);
+    } catch (Exception e) {
+      throw new RuntimeException("Could not run command: " + config.buildCommand);
     }
-    return fixes;
   }
 
   public static ProgressBar createProgressBar(String taskName, int steps) {
@@ -225,85 +250,16 @@ public class Utility {
         Duration.ZERO);
   }
 
-  public static void writeLog(Annotator annotator) {
-    try {
-      FileWriter fw = new FileWriter(annotator.dir.resolve("log.txt").toFile(), true);
-      BufferedWriter bw = new BufferedWriter(fw);
-      bw.write(Annotator.log.toString());
+  public static void writeLog(Config config) {
+    File file = config.dir.resolve("log.txt").toFile();
+    try (FileOutputStream fos = new FileOutputStream(file)) {
+      BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+      bw.write(config.log.toString());
       bw.newLine();
       bw.close();
     } catch (Exception ignored) {
+      System.err.println("Could not write log to: " + file.getAbsolutePath());
+      System.err.println("Writing here: " + config.log);
     }
-  }
-
-  public static int calculateMethodInheritanceViolationError(
-      MethodInheritanceTree tree, Fix fix, List<Fix> fixesInOneRound) {
-    MethodNode superMethod = tree.getClosestSuperMethod(fix.method, fix.className);
-    if (superMethod == null) {
-      return 0;
-    }
-    if (superMethod.hasNullableAnnotation) {
-      return 0;
-    }
-    if (fixesInOneRound
-        .stream()
-        .anyMatch(
-            fix1 ->
-                fix1.method.equals(superMethod.method)
-                    && fix1.className.equals(superMethod.clazz)
-                    && fix1.location.equals(FixType.METHOD.name))) {
-      return 1;
-    }
-    return 0;
-  }
-
-  public static boolean correspondingFixExists(
-      String clazz, String method, String param, String location, List<Fix> fixes) {
-    return fixes
-        .stream()
-        .anyMatch(
-            fix ->
-                fix.location.equals(location)
-                    && fix.className.equals(clazz)
-                    && fix.method.equals(method)
-                    && fix.variable.equals(param));
-  }
-
-  public static int calculateParamInheritanceViolationError(
-      MethodInheritanceTree mit, Fix fix, List<Fix> fixesInOneRound) {
-    int index = Integer.parseInt(fix.index);
-    MethodNode methodNode = mit.findNode(fix.method, fix.className);
-    if (methodNode == null) {
-      return 0;
-    }
-    boolean[] thisMethodFlag = methodNode.annotFlags;
-    if (index >= thisMethodFlag.length) {
-      return 0;
-    }
-    int effect = 0;
-    for (MethodNode subMethod : mit.getSubMethods(fix.method, fix.className, false)) {
-      if (!thisMethodFlag[index]) {
-        if (!subMethod.annotFlags[index]
-            && !correspondingFixExists(
-                subMethod.clazz,
-                subMethod.method,
-                subMethod.parameterNames[index],
-                FixType.PARAMETER.name,
-                fixesInOneRound)) {
-          effect++;
-        }
-      }
-    }
-    List<MethodNode> superMethods = mit.getSuperMethods(fix.method, fix.className, false);
-    if (superMethods == null || superMethods.size() == 0) {
-      return effect;
-    }
-    MethodNode superMethod = superMethods.get(0);
-    if (superMethod != null && !thisMethodFlag[index]) {
-      if (superMethod.annotFlags[index]) {
-        effect--;
-      }
-    }
-    return effect;
   }
 }

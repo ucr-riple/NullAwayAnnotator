@@ -22,72 +22,37 @@
 
 package edu.ucr.cs.riple.injector;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 public class WorkListBuilder {
-  private String filePath;
-  private List<Fix> fixes;
+  private final Collection<Change> changes;
 
-  public WorkListBuilder(String filePath) {
-    this.filePath = filePath;
-    readFixes();
-  }
-
-  private void readFixes() {
-    try {
-      BufferedReader bufferedReader =
-          Files.newBufferedReader(Paths.get(filePath), Charset.defaultCharset());
-      JSONObject obj = (JSONObject) new JSONParser().parse(bufferedReader);
-      JSONArray fixesJson = (JSONArray) obj.get("fixes");
-      bufferedReader.close();
-      fixes = new ArrayList<>();
-      for (Object o : fixesJson) {
-        fixes.add(Fix.createFromJson((JSONObject) o));
-      }
-    } catch (FileNotFoundException ex) {
-      throw new RuntimeException("Unable to open file: " + this.filePath);
-    } catch (IOException ex) {
-      throw new RuntimeException("Error reading file: " + this.filePath);
-    } catch (ParseException e) {
-      throw new RuntimeException("Error in parsing object: " + e);
+  public WorkListBuilder(Collection<Change> changes) {
+    if (changes == null) {
+      throw new RuntimeException("location array cannot be null");
     }
-  }
-
-  public WorkListBuilder(List<Fix> fixes) {
-    if (fixes == null) {
-      throw new RuntimeException("fix array cannot be null");
-    }
-    this.fixes = fixes;
+    this.changes = changes;
   }
 
   public List<WorkList> getWorkLists() {
     ArrayList<String> uris = new ArrayList<>();
     ArrayList<WorkList> workLists = new ArrayList<>();
-    for (Fix fix : this.fixes) {
-      if (!new File(fix.uri).exists() && fix.uri.startsWith("file:")) {
-        fix.uri = fix.uri.substring("file:".length());
+    for (Change change : this.changes) {
+      if (!new File(change.location.uri).exists() && change.location.uri.startsWith("file:")) {
+        change.location.uri = change.location.uri.substring("file:".length());
       }
-      if (!uris.contains(fix.uri)) {
-        uris.add(fix.uri);
-        WorkList workList = new WorkList(fix.uri);
+      if (!uris.contains(change.location.uri)) {
+        uris.add(change.location.uri);
+        WorkList workList = new WorkList(change.location.uri);
         workLists.add(workList);
-        workList.addFix(fix);
+        workList.addLocation(change);
       } else {
         for (WorkList workList : workLists) {
-          if (workList.getUri().equals(fix.uri)) {
-            workList.addFix(fix);
+          if (workList.getUri().equals(change.location.uri)) {
+            workList.addLocation(change);
             break;
           }
         }

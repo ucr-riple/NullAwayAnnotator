@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Index<T extends Hashable> {
@@ -63,49 +64,16 @@ public class Index<T extends Hashable> {
   public void index() {
     items.clear();
     try (BufferedReader br = Files.newBufferedReader(this.path, UTF_8)) {
-      String entry = "";
-      br.readLine(); // consume headers
-      while (entry != null) {
-        String nextLine = br.readLine();
-        if (entry.equals("")) {
-          entry = nextLine;
-          continue;
-        } else if (nextLine == null) {
-          // End of file: this finalizes entry, but it still needs processing
-        } else if (nextLine.startsWith(" ") || nextLine.startsWith("\t") || nextLine.equals("")) {
-          entry += "\n" + nextLine;
-          continue;
-        }
-        // At this point, entry contains a full TSV entry, potentially multi-line as long
-        // as each line break in an item is followed by a whitespace or tab character
-        String[] allParts = entry.split("\t");
-        String[] tsvValues;
-        if (entry.contains("\n")) {
-          tsvValues = new String[4];
-          tsvValues[0] = allParts[0];
-          tsvValues[3] = allParts[allParts.length - 1];
-          tsvValues[2] = allParts[allParts.length - 2];
-          tsvValues[1] = "";
-          for (int i = 1; i < allParts.length - 3; ++i) {
-            tsvValues[2] += allParts[i] + "\t";
-          }
-          tsvValues[2] += allParts[allParts.length - 3];
-        } else {
-          tsvValues = allParts;
-        }
-        T item;
-        try {
-          item = factory.build(tsvValues);
-        } catch (ArrayIndexOutOfBoundsException e) {
-          throw new java.lang.Error(
-              String.format("Failed to parse entry '%s' on file %s", entry, path), e);
-        }
+      String line = br.readLine();
+      if (line != null) line = br.readLine();
+      while (line != null) {
+        T item = factory.build(line.split("\t"));
         total++;
         int hash;
         if (type.equals(Index.Type.BY_CLASS)) {
-          hash = Objects.hash(item.clazz);
+          hash = Objects.hash(item.encClass);
         } else {
-          hash = Objects.hash(item.clazz, item.method);
+          hash = Objects.hash(item.encClass, item.encMethod);
         }
         if (items.containsKey(hash)) {
           items.get(hash).add(item);
@@ -114,7 +82,7 @@ public class Index<T extends Hashable> {
           newList.add(item);
           items.put(hash, newList);
         }
-        entry = nextLine; // For next iteration
+        line = br.readLine();
       }
     } catch (IOException e) {
       e.printStackTrace();
@@ -126,7 +94,7 @@ public class Index<T extends Hashable> {
     if (ans == null) {
       return Collections.emptyList();
     }
-    return ans.stream().filter(item -> item.clazz.equals(clazz)).collect(Collectors.toList());
+    return ans.stream().filter(item -> item.encClass.equals(clazz)).collect(Collectors.toList());
   }
 
   public List<T> getByMethod(String clazz, String method) {
@@ -135,7 +103,7 @@ public class Index<T extends Hashable> {
       return Collections.emptyList();
     }
     return ans.stream()
-        .filter(item -> item.clazz.equals(clazz) && item.method.equals(method))
+        .filter(item -> item.encClass.equals(clazz) && item.encMethod.equals(method))
         .collect(Collectors.toList());
   }
 
@@ -145,11 +113,11 @@ public class Index<T extends Hashable> {
     return ans;
   }
 
-  public Set<Region> getAllSources(Comparable<T> comparable) {
+  public Set<Region> getRegionsForFixes(Predicate<T> comparable) {
     return getAllEntities()
         .stream()
-        .filter(t -> comparable.compareTo(t) == 0)
-        .map(t -> new Region(t.method, t.clazz))
+        .filter(comparable)
+        .map(t -> new Region(t.encMethod, t.encClass))
         .collect(Collectors.toSet());
   }
 }

@@ -22,33 +22,36 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers;
+package edu.ucr.cs.riple.injector.tools;
 
-import edu.ucr.cs.riple.core.Annotator;
-import edu.ucr.cs.riple.core.FixType;
-import edu.ucr.cs.riple.core.metadata.index.Bank;
-import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.FixEntity;
-import edu.ucr.cs.riple.injector.Fix;
-import java.util.List;
+import java.nio.file.Path;
 
-public class FieldExplorer extends AdvancedExplorer {
+public class Utility {
 
-  public FieldExplorer(
-      Annotator annotator, List<Fix> fixes, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
-    super(annotator, fixes, errorBank, fixBank, FixType.FIELD);
+  /**
+   * Creates a path instance starting from root and following all dirs in path. Path arguments
+   * denotes dirs with "/" delimiter. (e.g. root1/root2/...)
+   *
+   * @param root Root Path.
+   * @param path Path of dirs.
+   * @return Path from root following all dirs in path
+   */
+  public static Path pathOf(Path root, String path) {
+    Path ans = root;
+    String[] dirs = path.split("/");
+    for (String dir : dirs) {
+      ans = ans.resolve(dir);
+    }
+    return ans;
   }
 
-  @Override
-  protected void init() {
-    this.tracker = annotator.fieldRegionTracker;
-    fixGraph.getAllNodes().forEach(node -> node.setRootSource(fixBank));
-    fixGraph.updateUsages(tracker);
-    fixGraph.findGroups();
-  }
-
-  @Override
-  public boolean isApplicable(Fix fix) {
-    return fix.location.equals(fixType.name);
+  /**
+   * Removes all white spaces.
+   *
+   * @param content content to remove from.
+   * @return content without any white spaces.
+   */
+  public static String removeWhiteSpaces(String content) {
+    return content.replaceAll(" ", "").replaceAll("\n", "").replaceAll("\t", "");
   }
 }

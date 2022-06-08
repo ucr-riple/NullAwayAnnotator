@@ -22,33 +22,27 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers;
+package edu.ucr.cs.riple.core.tools;
 
-import edu.ucr.cs.riple.core.Annotator;
-import edu.ucr.cs.riple.core.FixType;
-import edu.ucr.cs.riple.core.metadata.index.Bank;
-import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.FixEntity;
-import edu.ucr.cs.riple.injector.Fix;
-import java.util.List;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Objects;
 
-public class MethodExplorer extends AdvancedExplorer {
+public class Utility {
 
-  public MethodExplorer(
-      Annotator annotator, List<Fix> fixes, Bank<Error> errorBank, Bank<FixEntity> fixBank) {
-    super(annotator, fixes, errorBank, fixBank, FixType.METHOD);
+  public static Path getPathOfResource(String relativePath) {
+    return Paths.get(
+        Objects.requireNonNull(Utility.class.getClassLoader().getResource(relativePath)).getFile());
   }
 
-  @Override
-  protected void init() {
-    tracker = annotator.methodRegionTracker;
-    fixGraph.getAllNodes().forEach(node -> node.setRootSource(fixBank));
-    fixGraph.updateUsages(tracker);
-    fixGraph.findGroups();
+  public static String changeDirCommand(String path) {
+    String os = System.getProperty("os.name").toLowerCase();
+    return (os.startsWith("windows") ? "dir" : "cd") + " " + path;
   }
 
-  @Override
-  public boolean isApplicable(Fix fix) {
-    return fix.location.equals(FixType.METHOD.name);
+  public static ProcessBuilder createProcessInstance() {
+    ProcessBuilder pb = new ProcessBuilder();
+    String os = System.getProperty("os.name").toLowerCase();
+    return os.startsWith("windows") ? pb.command("cmd.exe", "/c") : pb.command("bash", "-c");
   }
 }

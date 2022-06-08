@@ -27,20 +27,17 @@ package edu.ucr.cs.riple.injector;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
-import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
 import java.util.Collections;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class RemovalTest {
+public class RemovalTest extends BaseInjectorTest {
 
   @Test
   public void remove_annot_return_nullable() {
-    String rootName = "remove_annot_return_nullable";
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Super.java",
             "package com.uber;",
@@ -50,7 +47,6 @@ public class RemovalTest {
             "   }",
             "}")
         .expectOutput(
-            "Super.java",
             "package com.uber;",
             "import javax.annotation.Nullable;",
             "public class Super {",
@@ -70,9 +66,7 @@ public class RemovalTest {
 
   @Test
   public void remove_annot_param() {
-    String rootName = "remove_annot_param";
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Super.java",
             "package com.uber;",
@@ -82,7 +76,6 @@ public class RemovalTest {
             "   }",
             "}")
         .expectOutput(
-            "Super.java",
             "package com.uber;",
             "import javax.annotation.Nullable;",
             "public class Super {",
@@ -103,9 +96,7 @@ public class RemovalTest {
 
   @Test
   public void remove_annot_param_full_name() {
-    String rootName = "remove_annot_param_full_name";
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Super.java",
             "package com.uber;",
@@ -115,7 +106,6 @@ public class RemovalTest {
             "   }",
             "}")
         .expectOutput(
-            "Super.java",
             "package com.uber;",
             "import javax.annotation.Nullable;",
             "public class Super {",
@@ -136,9 +126,7 @@ public class RemovalTest {
 
   @Test
   public void remove_annot_field() {
-    String rootName = "remove_annot_field";
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Super.java",
             "package com.uber;",
@@ -149,7 +137,6 @@ public class RemovalTest {
             "   }",
             "}")
         .expectOutput(
-            "Super.java",
             "package com.uber;",
             "import javax.annotation.Nullable;",
             "public class Super {",

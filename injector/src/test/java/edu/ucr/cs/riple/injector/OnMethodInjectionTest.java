@@ -26,19 +26,16 @@ package edu.ucr.cs.riple.injector;
 
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
-import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class OnMethodInjectionTest {
+public class OnMethodInjectionTest extends BaseInjectorTest {
 
   @Test
   public void method_nullable_simple() {
-    String rootName = "method_nullable_simple";
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Super.java",
             "package com.uber;",
@@ -48,7 +45,6 @@ public class OnMethodInjectionTest {
             "   }",
             "}")
         .expectOutput(
-            "Super.java",
             "package com.uber;",
             "import javax.annotation.Nullable;",
             "public class Super {",
@@ -58,16 +54,15 @@ public class OnMethodInjectionTest {
             "   }",
             "}")
         .addInput(
-            "com/Superb.java",
-            "package com.uber;",
+            "test/Superb.java",
+            "package com.uber.test;",
             "public class Superb extends Super {",
             "   Object test(boolean flag) {",
             "       return new Object();",
             "   }",
             "}")
         .expectOutput(
-            "com/Superb.java",
-            "package com.uber;",
+            "package com.uber.test;",
             "import javax.annotation.Nullable;",
             "public class Superb extends Super{",
             "   @Nullable",
@@ -81,7 +76,7 @@ public class OnMethodInjectionTest {
                 "javax.annotation.Nullable",
                 true),
             new Change(
-                new OnMethod("com/Superb.java", "com.uber.Superb", "test(boolean)"),
+                new OnMethod("test/Superb.java", "com.uber.test.Superb", "test(boolean)"),
                 "javax.annotation.Nullable",
                 true))
         .start();
@@ -89,9 +84,7 @@ public class OnMethodInjectionTest {
 
   @Test
   public void method_nullable_enum_simple() {
-    String rootName = "method_nullable_enum_simple";
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Main.java",
             "package com.uber;",
@@ -104,7 +97,6 @@ public class OnMethodInjectionTest {
             "   }",
             "}")
         .expectOutput(
-            "Main.java",
             "package com.uber;",
             "import javax.annotation.Nullable;",
             "public class Main {",
@@ -126,10 +118,7 @@ public class OnMethodInjectionTest {
 
   @Test
   public void method_nullable_inner_class() {
-    String rootName = "method_nullable_inner_class";
-
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Super.java",
             "package com.uber;",
@@ -146,7 +135,6 @@ public class OnMethodInjectionTest {
             "   }",
             "}")
         .expectOutput(
-            "Super.java",
             "package com.uber;",
             "import javax.annotation.Nullable;",
             "public class Super {",
@@ -171,9 +159,7 @@ public class OnMethodInjectionTest {
 
   @Test
   public void method_nullable_class_decl_in_method() {
-    String rootName = "method_nullable_class_decl_in_method";
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Main.java",
             "package com.uber;",
@@ -185,7 +171,6 @@ public class OnMethodInjectionTest {
             "   }",
             "}")
         .expectOutput(
-            "Main.java",
             "package com.uber;",
             "import javax.annotation.Nullable;",
             "public class Main {",
@@ -205,10 +190,7 @@ public class OnMethodInjectionTest {
 
   @Test
   public void method_nullable_signature_duplicate_type() {
-    String rootName = "method_nullable_signature_duplicate_type";
-
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Super.java",
             "package com.uber;",
@@ -227,7 +209,6 @@ public class OnMethodInjectionTest {
             "   }",
             "}")
         .expectOutput(
-            "Super.java",
             "package com.uber;",
             "import javax.annotation.Nullable;",
             "public class Super {",
@@ -258,10 +239,7 @@ public class OnMethodInjectionTest {
 
   @Test
   public void method_nullable_single_generic_method_pick() {
-    String rootName = "method_nullable_single_generic_method_pick";
-
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Super.java",
             "package com.uber;",
@@ -285,7 +263,6 @@ public class OnMethodInjectionTest {
             "   }",
             "}")
         .expectOutput(
-            "Super.java",
             "package com.uber;",
             "import javax.annotation.Nullable;",
             "public class Super {",
@@ -325,10 +302,7 @@ public class OnMethodInjectionTest {
 
   @Test
   public void method_nullable_signature_array_brackets() {
-    String rootName = "method_nullable_signature_array_brackets";
-
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Super.java",
             "package com.uber;",
@@ -339,7 +313,6 @@ public class OnMethodInjectionTest {
             "   }",
             "}")
         .expectOutput(
-            "Super.java",
             "package com.uber;",
             "import javax.annotation.Nullable;",
             "public class Super {",
@@ -361,10 +334,7 @@ public class OnMethodInjectionTest {
 
   @Test
   public void method_nullable_signature_generic_method_name() {
-    String rootName = "method_nullable_signature_generic_method_name";
-
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Super.java",
             "package com.uber;",
@@ -374,7 +344,6 @@ public class OnMethodInjectionTest {
             "   }",
             "}")
         .expectOutput(
-            "Super.java",
             "package com.uber;",
             "import javax.annotation.Nullable;",
             "public class Super {",
@@ -395,10 +364,7 @@ public class OnMethodInjectionTest {
 
   @Test
   public void method_nullable_dot_array() {
-    String rootName = "method_nullable_dot_array";
-
-    new InjectorTestHelper()
-        .setRootPath(System.getProperty("user.dir") + "/tests/" + rootName)
+    injectorTestHelper
         .addInput(
             "Main.java",
             "package com.uber;",
@@ -407,7 +373,6 @@ public class OnMethodInjectionTest {
             "   }",
             "}")
         .expectOutput(
-            "Main.java",
             "package com.uber;",
             "import javax.annotation.Initializer;",
             "public class Main {",

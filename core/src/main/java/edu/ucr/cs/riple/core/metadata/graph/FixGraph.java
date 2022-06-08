@@ -24,19 +24,19 @@
 
 package edu.ucr.cs.riple.core.metadata.graph;
 
-import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
-import edu.ucr.cs.riple.injector.Fix;
+import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-public class FixGraph<T extends AbstractNode> {
+public class FixGraph<T extends Node> {
   public final HashMap<Integer, Set<T>> nodes;
-
   private final HashMap<Integer, Set<T>> groups;
   private final Factory<T> factory;
 
@@ -47,10 +47,10 @@ public class FixGraph<T extends AbstractNode> {
   }
 
   public T findOrCreate(Fix fix) {
-    int hash = AbstractNode.getHash(fix);
+    int hash = Node.getHash(fix);
     if (nodes.containsKey(hash)) {
       for (T candidate : nodes.get(hash)) {
-        if (candidate.fix.equals(fix)) {
+        if (candidate.root.equals(fix)) {
           return candidate;
         }
       }
@@ -65,25 +65,13 @@ public class FixGraph<T extends AbstractNode> {
     return newNode;
   }
 
-  public T find(Fix fix) {
-    int hash = AbstractNode.getHash(fix);
-    if (nodes.containsKey(hash)) {
-      for (T candidate : nodes.get(hash)) {
-        if (candidate.fix.equals(fix)) {
-          return candidate;
-        }
-      }
-    }
-    return null;
-  }
-
   @SuppressWarnings("ALL")
   public void remove(Fix fix) {
-    int hash = AbstractNode.getHash(fix);
+    int hash = Node.getHash(fix);
     T toRemove = null;
     if (nodes.containsKey(hash)) {
       for (T candidate : nodes.get(hash)) {
-        if (candidate.fix.equals(fix)) {
+        if (candidate.root.equals(fix)) {
           toRemove = candidate;
           break;
         }
@@ -92,14 +80,9 @@ public class FixGraph<T extends AbstractNode> {
     nodes.remove(toRemove);
   }
 
-  public void updateUsages(RegionTracker tracker) {
-    getAllNodes().forEach(t -> t.updateUsages(tracker));
-  }
-
-  @SuppressWarnings("All")
   public void findGroups() {
     this.groups.clear();
-    List<T> allNodes = getAllNodes();
+    Set<T> allNodes = getAllNodes();
     final int[] id = {0};
     allNodes.forEach(node -> node.id = id[0]++);
     int size = allNodes.size();
@@ -112,7 +95,7 @@ public class FixGraph<T extends AbstractNode> {
         if (node.equals(other)) {
           continue;
         }
-        if (node.hasConflictInUsage(other)) {
+        if (node.hasConflictInRegions(other)) {
           adj[node.id].add(other.id);
         }
       }
@@ -120,7 +103,8 @@ public class FixGraph<T extends AbstractNode> {
     colorGraph(adj, allNodes, size);
   }
 
-  private void colorGraph(LinkedList<Integer>[] adj, List<T> allNodes, int v) {
+  private void colorGraph(LinkedList<Integer>[] adj, Set<T> nodes, int v) {
+    List<T> allNodes = new ArrayList<>(nodes);
     int[] result = new int[v];
     Arrays.fill(result, -1);
     result[0] = 0;
@@ -154,14 +138,16 @@ public class FixGraph<T extends AbstractNode> {
     return groups;
   }
 
-  public List<T> getAllNodes() {
-    List<T> ans = new ArrayList<>();
-    nodes.values().forEach(ans::addAll);
-    return ans;
+  public Set<T> getAllNodes() {
+    return nodes.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
   }
 
   public void clear() {
     nodes.clear();
     groups.clear();
+  }
+
+  public boolean isEmpty() {
+    return nodes.isEmpty();
   }
 }

@@ -24,220 +24,122 @@
 
 package edu.ucr.cs.riple.core;
 
-import com.google.common.base.Preconditions;
-import com.uber.nullaway.fixserialization.FixSerializationConfig;
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.css.Serializer;
-import edu.ucr.cs.css.XMLUtil;
 import edu.ucr.cs.riple.core.explorers.BasicExplorer;
-import edu.ucr.cs.riple.core.explorers.DeepExplorer;
-import edu.ucr.cs.riple.core.explorers.DummyExplorer;
 import edu.ucr.cs.riple.core.explorers.Explorer;
-import edu.ucr.cs.riple.core.explorers.FieldExplorer;
-import edu.ucr.cs.riple.core.explorers.MethodExplorer;
-import edu.ucr.cs.riple.core.explorers.ParameterExplorer;
+import edu.ucr.cs.riple.core.explorers.OptimizedExplorer;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
+import edu.ucr.cs.riple.core.metadata.field.FieldInitializationAnalysis;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.FixEntity;
+import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
-import edu.ucr.cs.riple.core.metadata.trackers.FieldRegionTracker;
-import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
+import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
+import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
-import edu.ucr.cs.riple.injector.Fix;
-import edu.ucr.cs.riple.injector.Injector;
-import edu.ucr.cs.riple.injector.WorkListBuilder;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import edu.ucr.cs.riple.injector.Change;
+import java.util.HashMap;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Annotator {
 
-  public Path fixPath;
-  public Path errorPath;
-  public Path dir;
-  public Path nullAwayConfigPath;
+  private final AnnotationInjector injector;
+  private final Config config;
+  // Set does not have get method, here we use map which retrieves elements efficiently.
+  public final HashMap<Fix, Report> reports;
 
-  public String nullableAnnot;
-  public int depth;
-  public boolean lexicalPreservationEnabled;
-
-  private String buildCommand;
-  private Injector injector;
-  private List<Report> finishedReports;
-  private List<Explorer> explorers;
-  private DeepExplorer deepExplorer;
-
-  public MethodRegionTracker methodRegionTracker;
-  public FieldRegionTracker fieldRegionTracker;
-  public MethodInheritanceTree methodInheritanceTree;
-
-  public static final Log log = new Log();
-
-  public static class Log {
-    public int total;
-    int requested;
-    long time;
-    long deep;
-    long buildTime = 0;
-
-    @Override
-    public String toString() {
-      return "total="
-          + total
-          + ", requested="
-          + requested
-          + ", time="
-          + time
-          + ", deep="
-          + deep
-          + ", buildTime="
-          + buildTime;
-    }
+  public Annotator(Config config) {
+    this.config = config;
+    this.reports = new HashMap<>();
+    this.injector = new AnnotationInjector(config);
   }
 
-  private List<Fix> init(String buildCommand, boolean useCache, boolean optimized) {
-    System.out.println("Making the first build.");
-    this.buildCommand = buildCommand;
-    this.finishedReports = new ArrayList<>();
-    FixSerializationConfig.Builder builder =
-        new FixSerializationConfig.Builder()
-            .setSuggest(true, true)
-            .setAnnotations(nullableAnnot, "UNKNOWN")
-            .setOutputDirectory(this.dir.toString());
-    buildProject(builder, false);
-    List<Fix> allFixes = Utility.readAllFixes(fixPath);
-    if (useCache) {
-      Utility.removeCachedFixes(allFixes, dir);
-    }
-    allFixes = Collections.unmodifiableList(allFixes);
-    log.total = allFixes.size();
-    this.injector =
-        Injector.builder()
-            .setMode(Injector.MODE.BATCH)
-            .keepStyle(lexicalPreservationEnabled)
-            .build();
-    this.methodInheritanceTree =
-        new MethodInheritanceTree(dir.resolve(Serializer.METHOD_INFO_NAME));
-    this.methodRegionTracker = new MethodRegionTracker(dir.resolve(Serializer.CALL_GRAPH_NAME));
-    this.fieldRegionTracker = new FieldRegionTracker(dir.resolve(Serializer.FIELD_GRAPH_NAME));
-    Bank<Error> errorBank = new Bank<>(errorPath, Error::new);
-    Bank<FixEntity> fixBank = new Bank<>(fixPath, FixEntity::new);
-    this.explorers = new ArrayList<>();
-    if (depth < 0) {
-      this.explorers.add(new DummyExplorer(this, null, null));
-    }
-    if (optimized && depth > -1) {
-      System.out.println("Initializing Explorers.");
-      this.explorers.add(new ParameterExplorer(this, allFixes, errorBank, fixBank));
-      this.explorers.add(new FieldExplorer(this, allFixes, errorBank, fixBank));
-      this.explorers.add(new MethodExplorer(this, allFixes, errorBank, fixBank));
-    }
-    this.explorers.add(new BasicExplorer(this, errorBank, fixBank));
-    this.deepExplorer = new DeepExplorer(this, errorBank, fixBank);
-    return allFixes;
+  public void start() {
+    preprocess();
+    long timer = config.log.startTimer();
+    explore();
+    config.log.stopTimerAndCapture(timer);
+    Utility.writeLog(config);
   }
 
-  public void start(
-      String buildCommand,
-      Path nullawayConfigPath,
-      boolean useCache,
-      boolean optimized,
-      boolean bailout,
-      boolean chain) {
-    log.time = System.currentTimeMillis();
-    System.out.println("Annotator Started.");
-    this.nullAwayConfigPath = nullawayConfigPath;
-    this.dir =
-        Paths.get(
-            XMLUtil.getValueFromTag(nullawayConfigPath, "/serialization/path", String.class)
-                .orElse("/tmp/NullAwayFix"));
-    this.fixPath = this.dir.resolve("fixes.tsv");
-    this.errorPath = this.dir.resolve("errors.tsv");
-    List<Fix> fixes = init(buildCommand, useCache, optimized);
-    fixes.forEach(
-        fix -> {
-          if (finishedReports
-              .stream()
-              .noneMatch(diagnoseReport -> diagnoseReport.fix.equals(fix))) {
-            analyze(fix);
-          }
-        });
-    log.deep = System.currentTimeMillis();
-    if (depth > -1) {
-      this.deepExplorer.start(bailout, optimized, finishedReports, log);
-    }
-    log.deep = System.currentTimeMillis() - log.deep;
-    log.time = System.currentTimeMillis() - log.time;
-    Utility.writeReports(dir, finishedReports, chain);
-    Utility.writeLog(this);
-  }
-
-  public void remove(List<Fix> fixes) {
-    if (fixes == null || fixes.size() == 0) {
-      return;
-    }
-    List<Fix> toRemove =
-        fixes
+  private void preprocess() {
+    System.out.println("Preprocessing...");
+    Utility.setCSSCheckerActivation(config, true);
+    this.reports.clear();
+    System.out.println("Making the first build...");
+    Utility.buildProject(config, true);
+    Set<Fix> uninitializedFields =
+        Utility.readFixesFromOutputDirectory(config, Fix.factory(null))
             .stream()
-            .map(
-                fix ->
-                    new Fix(
-                        fix.annotation,
-                        fix.method,
-                        fix.variable,
-                        fix.location,
-                        fix.className,
-                        fix.uri,
-                        "false"))
-            .collect(Collectors.toList());
-    apply(toRemove);
+            .filter(fix -> fix.reasons.contains("FIELD_NO_INIT") && fix.isOnField())
+            .collect(Collectors.toSet());
+    FieldInitializationAnalysis analysis =
+        new FieldInitializationAnalysis(config.dir.resolve("field_init.tsv"));
+    Set<Change> initializers =
+        analysis
+            .findInitializers(uninitializedFields)
+            .stream()
+            .map(onMethod -> new Change(onMethod, config.initializerAnnot, true))
+            .collect(Collectors.toSet());
+    this.injector.injectChanges(initializers);
   }
 
-  public void apply(List<Fix> fixes) {
-    if (fixes == null || fixes.size() == 0) {
-      return;
-    }
-    injector.start(
-        new WorkListBuilder(fixes).getWorkLists(), false, dir.resolve("injector_log.json"));
-  }
-
-  private void analyze(Fix fix) {
-    Report report = null;
-    boolean appliedFix = false;
-    for (Explorer explorer : explorers) {
-      if (explorer.isApplicable(fix)) {
-        if (explorer.requiresInjection(fix)) {
-          apply(Collections.singletonList(fix));
-          appliedFix = true;
-        }
-        report = explorer.effect(fix);
-        break;
+  private void explore() {
+    Utility.setCSSCheckerActivation(config, true);
+    Utility.buildProject(config);
+    Utility.setCSSCheckerActivation(config, false);
+    FieldDeclarationAnalysis fieldDeclarationAnalysis =
+        new FieldDeclarationAnalysis(config.dir.resolve("class_info.tsv"));
+    while (true) {
+      Utility.buildProject(config);
+      Set<Fix> remainingFixes =
+          Utility.readFixesFromOutputDirectory(config, Fix.factory(fieldDeclarationAnalysis));
+      if (config.useCache) {
+        remainingFixes =
+            remainingFixes
+                .stream()
+                .filter(fix -> !reports.containsKey(fix))
+                .collect(Collectors.toSet());
+      }
+      ImmutableSet<Fix> fixes = ImmutableSet.copyOf(remainingFixes);
+      Bank<Error> errorBank = new Bank<>(config.dir.resolve("errors.tsv"), Error::new);
+      Bank<Fix> fixBank =
+          new Bank<>(config.dir.resolve("fixes.tsv"), Fix.factory(fieldDeclarationAnalysis));
+      MethodInheritanceTree tree =
+          new MethodInheritanceTree(config.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
+      RegionTracker tracker = new CompoundTracker(config.dir, tree);
+      Explorer explorer =
+          config.optimized
+              ? new OptimizedExplorer(injector, errorBank, fixBank, tracker, tree, fixes, config)
+              : new BasicExplorer(injector, errorBank, fixBank, fixes, config);
+      ImmutableSet<Report> latestReports = explorer.explore();
+      int sizeBefore = reports.size();
+      latestReports.forEach(
+          report -> {
+            reports.putIfAbsent(report.root, report);
+            reports.get(report.root).effect = report.effect;
+            reports.get(report.root).finished = report.finished;
+            reports.get(report.root).tree = report.tree;
+            reports.get(report.root).triggered = report.triggered;
+          });
+      injector.injectFixes(
+          latestReports
+              .stream()
+              .filter(report -> report.effect < 1)
+              .flatMap(report -> config.chain ? report.tree.stream() : Stream.of(report.root))
+              .collect(Collectors.toSet()));
+      if (sizeBefore == this.reports.size()) {
+        System.out.println("\nFinished annotating.");
+        Utility.writeReports(
+            config, reports.values().stream().collect(ImmutableSet.toImmutableSet()));
+        return;
+      }
+      if (config.disableOuterLoop) {
+        return;
       }
     }
-    if (appliedFix) {
-      remove(Collections.singletonList(fix));
-    }
-    Preconditions.checkNotNull(report);
-    finishedReports.add(report);
-  }
-
-  public void buildProject(FixSerializationConfig.Builder writer, boolean count) {
-    if (count) {
-      log.requested++;
-    }
-    writer.writeAsXML(nullAwayConfigPath.toString());
-    try {
-      long start = System.currentTimeMillis();
-      Utility.executeCommand(buildCommand);
-      log.buildTime += System.currentTimeMillis() - start;
-    } catch (Exception e) {
-      throw new RuntimeException("Could not run command: " + buildCommand);
-    }
-  }
-
-  public void buildProject(FixSerializationConfig.Builder writer) {
-    buildProject(writer, true);
   }
 }

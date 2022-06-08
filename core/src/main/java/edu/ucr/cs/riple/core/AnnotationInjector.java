@@ -35,11 +35,7 @@ public class AnnotationInjector {
   private final Injector injector;
 
   public AnnotationInjector(Config config) {
-    this.injector =
-        Injector.builder()
-            .setMode(Injector.MODE.BATCH)
-            .keepStyle(!config.lexicalPreservationDisabled)
-            .build();
+    this.injector = Injector.builder().keepStyle(!config.lexicalPreservationDisabled).build();
   }
 
   public void removeFixes(Set<Fix> fixes) {

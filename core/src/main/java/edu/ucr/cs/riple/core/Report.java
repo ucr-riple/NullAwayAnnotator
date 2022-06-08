@@ -24,32 +24,88 @@
 
 package edu.ucr.cs.riple.core;
 
-import edu.ucr.cs.riple.injector.Fix;
+import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.injector.location.Location;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Report {
 
-  public int effectiveNess;
-  public Fix fix;
-  public Set<Fix> followups;
+  public int effect;
+  public Fix root;
+  public Set<Fix> tree;
   public Set<Fix> triggered;
   public boolean finished;
 
-  public Report(Fix fix, int effectiveNess) {
-    this.effectiveNess = effectiveNess;
-    this.fix = fix;
-    this.followups = new HashSet<>();
+  public boolean processed;
+
+  public Report(Fix root, int effect) {
+    this.effect = effect;
+    this.root = root;
+    this.tree = new HashSet<>();
     this.finished = false;
     this.triggered = new HashSet<>();
+    this.processed = false;
   }
 
-  public static Report empty(Fix fix) {
-    return new Report(fix, 0);
+  @Override
+  public boolean equals(Object other) {
+    if (this == other) return true;
+    if (!(other instanceof Report)) return false;
+    Report report = (Report) other;
+    return root.equals(report.root);
+  }
+
+  /**
+   * Mainly used for unit tests, what we care in tests, is that if a fix has the correct
+   * effectiveness with all the corresponding fixes to reach that effectiveness, therefore only the
+   * locations are compared in trees.
+   *
+   * @param other Other report, mainly coming from tests.
+   * @return true, if two reports are equal (same effectiveness and all locations)
+   */
+  public boolean testEquals(Report other) {
+    if (this == other) {
+      return true;
+    }
+    if (!this.root.equals(other.root)) {
+      return false;
+    }
+    if (this.effect != other.effect) {
+      return false;
+    }
+    this.tree.add(this.root);
+    other.tree.add(other.root);
+    Set<Location> thisTree =
+        this.tree.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
+    Set<Location> otherTree =
+        other.tree.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
+    if (!thisTree.equals(otherTree)) {
+      return false;
+    }
+    Set<Location> thisTriggered =
+        this.triggered.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
+    Set<Location> otherTriggered =
+        other.triggered.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
+    return otherTriggered.equals(thisTriggered);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(root);
   }
 
   @Override
   public String toString() {
-    return "effectiveNess=" + effectiveNess + ", fix=" + fix + ", finished=" + finished + '}';
+    return "Report{"
+        + "effect="
+        + effect
+        + ", root="
+        + root
+        + ", tree="
+        + tree.stream().map(fix -> fix.change.location).collect(Collectors.toSet())
+        + "}\n";
   }
 }

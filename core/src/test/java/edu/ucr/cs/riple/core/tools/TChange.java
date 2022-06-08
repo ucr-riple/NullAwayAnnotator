@@ -21,16 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package edu.ucr.cs.riple.core;
 
-public enum FixType {
-  PARAMETER("PARAMETER"),
-  FIELD("FIELD"),
-  METHOD("METHOD");
+package edu.ucr.cs.riple.core.tools;
 
-  public final String name;
+import edu.ucr.cs.riple.injector.Change;
+import edu.ucr.cs.riple.injector.location.Location;
 
-  FixType(String name) {
-    this.name = name;
+/** Wrapper class for {@link Change} with default values, used to create tests. */
+public class TChange extends Change {
+
+  public TChange(Location location) {
+    super(location, "javax.annotation.Nullable", true);
   }
 }

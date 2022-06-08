@@ -23,8 +23,7 @@
  */
 package edu.ucr.cs.riple.core.metadata.index;
 
-import com.google.common.collect.ImmutableSet;
-import java.util.Set;
+import java.util.Objects;
 
 public class Error extends Hashable {
   public final String messageType;
@@ -37,38 +36,20 @@ public class Error extends Hashable {
   public Error(String messageType, String message, String clazz, String method) {
     this.messageType = messageType;
     this.message = message;
-    this.method = method;
-    this.clazz = clazz;
+    this.encMethod = method;
+    this.encClass = clazz;
   }
 
   @Override
-  public String toString() {
-    return "messageType='"
-        + messageType
-        + '\''
-        + ", message='"
-        + message
-        + '\''
-        + ", clazz='"
-        + clazz
-        + '\''
-        + ", method='"
-        + method;
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Error)) return false;
+    Error error = (Error) o;
+    return messageType.equals(error.messageType);
   }
 
-  public boolean isFixable() {
-    final Set<String> fixableTypes =
-        ImmutableSet.of(
-            "METHOD_NO_INIT",
-            "FIELD_NO_INIT",
-            "ASSIGN_FIELD_NULLABLE",
-            "NONNULL_FIELD_READ_BEFORE_INIT",
-            "RETURN_NULLABLE",
-            "WRONG_OVERRIDE_RETURN",
-            "ASSIGN_FIELD_NULLABLE",
-            "WRONG_OVERRIDE_RETURN",
-            "PASS_NULLABLE",
-            "RETURN_NULLABLE,");
-    return fixableTypes.contains(this.messageType);
+  @Override
+  public int hashCode() {
+    return Objects.hash(messageType);
   }
 }

@@ -22,9 +22,24 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.index;
+package edu.ucr.cs.riple.injector;
 
-public abstract class Hashable {
-  protected String encClass;
-  protected String encMethod;
+import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
+
+public class BaseInjectorTest {
+
+  @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+  protected InjectorTestHelper injectorTestHelper;
+  protected Path outDirPath;
+
+  @Before
+  public void setup() {
+    outDirPath = Paths.get(temporaryFolder.getRoot().getAbsolutePath());
+    injectorTestHelper = new InjectorTestHelper(outDirPath);
+  }
 }

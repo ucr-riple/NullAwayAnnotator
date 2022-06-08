@@ -22,7 +22,15 @@
 
 allprojects {
     group 'edu.ucr.cs.riple.nullawayannotator'
-    version '1.2.6-SNAPSHOT'
+    version '1.2.5-LOCAL'
+
+    tasks.withType(Test) {
+        maxParallelForks = Runtime.getRuntime().availableProcessors()
+        systemProperties = [
+                'junit.jupiter.execution.parallel.enabled': 'true',
+                'junit.jupiter.execution.parallel.mode.default': 'concurrent'
+        ]
+    }
 }
 
 subprojects {

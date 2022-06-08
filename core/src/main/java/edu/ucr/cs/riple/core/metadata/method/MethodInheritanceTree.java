@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core.metadata.method;
 
-import edu.ucr.cs.riple.core.metadata.AbstractRelation;
+import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class MethodInheritanceTree extends AbstractRelation<MethodNode> {
+public class MethodInheritanceTree extends MetaData<MethodNode> {
 
   HashMap<Integer, MethodNode> nodes;
   private static int maxsize = 0;
@@ -102,29 +102,11 @@ public class MethodInheritanceTree extends AbstractRelation<MethodNode> {
     if (node == null) {
       return null;
     }
-    return nodes.get(node.parent);
+    MethodNode parent = nodes.get(node.parent);
+    return parent != null ? (nodes.get(parent.id) == null ? null : parent) : null;
   }
 
-  public List<MethodNode> getSuperMethods(String method, String clazz, boolean deep) {
-    List<MethodNode> ans = new ArrayList<>();
-    MethodNode node = findNode(method, clazz);
-    if (node == null) {
-      return ans;
-    }
-    while (node != null) {
-      MethodNode parent = nodes.get(node.parent);
-      if (parent != null && parent.method != null && !parent.method.equals("null")) {
-        ans.add(parent);
-        if (!deep) {
-          break;
-        }
-      }
-      node = parent;
-    }
-    return ans;
-  }
-
-  public List<MethodNode> getSubMethods(String method, String clazz, boolean deep) {
+  public List<MethodNode> getSubMethods(String method, String clazz, boolean recursive) {
     List<MethodNode> ans = new ArrayList<>();
     MethodNode node = findNode(method, clazz);
     if (node == null) {
@@ -145,7 +127,7 @@ public class MethodInheritanceTree extends AbstractRelation<MethodNode> {
           }
         }
       }
-      if (!deep) {
+      if (!recursive) {
         break;
       }
       workList.clear();
@@ -154,8 +136,16 @@ public class MethodInheritanceTree extends AbstractRelation<MethodNode> {
     return ans;
   }
 
-  public static int maxParamSize() {
-    return maxsize;
+  public MethodNode getSuperMethod(String method, String clazz) {
+    MethodNode node = findNode(method, clazz);
+    if (node == null) {
+      return null;
+    }
+    MethodNode parent = nodes.get(node.parent);
+    if (parent == null || parent.clazz == null || parent.clazz.equals("null")) {
+      return null;
+    }
+    return parent;
   }
 
   public MethodNode findNode(String method, String clazz) {

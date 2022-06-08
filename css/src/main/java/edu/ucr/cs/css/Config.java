@@ -42,6 +42,8 @@ public class Config {
   public final boolean methodTrackerIsActive;
   public final boolean fieldTrackerIsActive;
   public final boolean callTrackerIsActive;
+
+  public final boolean classTrackerIsActive;
   public final Serializer serializer;
 
   static final String EP_FL_NAMESPACE = "CSS";
@@ -53,6 +55,7 @@ public class Config {
     this.methodTrackerIsActive = false;
     this.fieldTrackerIsActive = false;
     this.callTrackerIsActive = false;
+    this.classTrackerIsActive = false;
     this.outputDirectory = Paths.get(DEFAULT_PATH);
     this.serializer = new Serializer(this);
   }
@@ -82,6 +85,9 @@ public class Config {
             .orElse(false);
     this.callTrackerIsActive =
         XMLUtil.getValueFromAttribute(document, "/css/call", "active", Boolean.class).orElse(false);
+    this.classTrackerIsActive =
+        XMLUtil.getValueFromAttribute(document, "/css/class", "active", Boolean.class)
+            .orElse(false);
     this.serializer = new Serializer(this);
   }
 }

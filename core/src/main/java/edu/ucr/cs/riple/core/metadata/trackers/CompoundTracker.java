@@ -24,10 +24,11 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
-import edu.ucr.cs.riple.core.FixType;
-import edu.ucr.cs.riple.injector.Fix;
+import edu.ucr.cs.css.Serializer;
+import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
+import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -35,28 +36,23 @@ public class CompoundTracker implements RegionTracker {
 
   private final List<RegionTracker> trackers;
 
-  public CompoundTracker(
-      FieldRegionTracker fieldRegionTracker, MethodRegionTracker methodRegionTracker) {
+  public CompoundTracker(Path dir, MethodInheritanceTree tree) {
     this.trackers = new ArrayList<>();
-    this.trackers.add(fieldRegionTracker);
+    MethodRegionTracker methodRegionTracker =
+        new MethodRegionTracker(dir.resolve(Serializer.CALL_GRAPH_FILE_NAME), tree);
+    this.trackers.add(new FieldRegionTracker(dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME)));
     this.trackers.add(methodRegionTracker);
-    this.trackers.add(
-        fix -> {
-          if (!fix.location.equals(FixType.PARAMETER.name)) {
-            return null;
-          }
-          return Collections.singleton(new Region(fix.method, fix.className));
-        });
+    this.trackers.add(new ParameterRegionTracker(tree, methodRegionTracker));
   }
 
   @Override
-  public Set<Region> getRegions(Fix fix) {
+  public Set<Region> getRegions(Fix location) {
     for (RegionTracker tracker : this.trackers) {
-      Set<Region> ans = tracker.getRegions(fix);
+      Set<Region> ans = tracker.getRegions(location);
       if (ans != null) {
         return ans;
       }
     }
-    throw new IllegalStateException("Region cannot be null at this point." + fix);
+    throw new IllegalStateException("Region cannot be null at this point." + location);
   }
 }

@@ -28,8 +28,8 @@ plugins {
 }
 
 dependencies {
-    implementation group: 'com.google.guava', name: 'guava', version: 'r05'
-    testImplementation group: 'com.google.guava', name: 'guava', version: 'r05'
+    implementation group: 'com.google.guava', name: 'guava', version:"${deps.versions.guava}"
+    testImplementation group: 'com.google.guava', name: 'guava', version:"${deps.versions.guava}"
 
     implementation group: 'com.github.javaparser', name:'javaparser-core', version:"${deps.versions.javaparser}"
     testImplementation group: 'com.github.javaparser', name:'javaparser-core', version:"${deps.versions.javaparser}"
@@ -38,6 +38,8 @@ dependencies {
     testImplementation group: 'com.googlecode.json-simple', name:'json-simple', version:"${deps.versions.json}"
 
     implementation group: 'me.tongfei', name: 'progressbar', version: '0.9.2'
+
+    testCompile group: 'commons-io', name: 'commons-io', version: "${deps.versions.commonsio}"
 }
 
 compileJava.mustRunAfter verifyGoogleJavaFormat

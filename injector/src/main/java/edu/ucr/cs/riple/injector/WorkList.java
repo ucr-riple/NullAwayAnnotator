@@ -27,26 +27,20 @@ import java.util.List;
 
 public class WorkList {
   private final String uri;
-  private final List<Fix> fixes;
+  private final List<Change> changes;
 
   public WorkList(String uri) {
     this.uri = uri;
-    this.fixes = new ArrayList<>();
+    this.changes = new ArrayList<>();
   }
 
-  public WorkList(List<Fix> fixes) {
-    this.fixes = fixes;
-    assert fixes.size() > 0;
-    uri = fixes.get(0).uri;
+  public void addLocation(Change newLocation) {
+    for (Change location : changes) if (location.equals(newLocation)) return;
+    changes.add(newLocation);
   }
 
-  public void addFix(Fix newFix) {
-    for (Fix fix : fixes) if (fix.equals(newFix)) return;
-    fixes.add(newFix);
-  }
-
-  public List<Fix> getFixes() {
-    return fixes;
+  public List<Change> getChanges() {
+    return changes;
   }
 
   public String getUri() {
@@ -54,10 +48,11 @@ public class WorkList {
   }
 
   public void addContainingAnnotationsToList(List<String> annotsList) {
-    for (Fix fix : fixes) if (!annotsList.contains(fix.annotation)) annotsList.add(fix.annotation);
+    for (Change location : changes)
+      if (!annotsList.contains(location.annotation)) annotsList.add(location.annotation);
   }
 
   public String className() {
-    return fixes.get(0).className;
+    return changes.get(0).location.clazz;
   }
 }

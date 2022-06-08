@@ -24,20 +24,22 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
-import edu.ucr.cs.riple.core.FixType;
-import edu.ucr.cs.riple.core.metadata.AbstractRelation;
-import edu.ucr.cs.riple.injector.Fix;
+import edu.ucr.cs.riple.core.metadata.MetaData;
+import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
+import edu.ucr.cs.riple.core.metadata.method.MethodNode;
+import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class MethodRegionTracker extends AbstractRelation<TrackerNode> implements RegionTracker {
+public class MethodRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
 
-  private final FixType fixType;
+  private final MethodInheritanceTree tree;
 
-  public MethodRegionTracker(Path path) {
+  public MethodRegionTracker(Path path, MethodInheritanceTree tree) {
     super(path);
-    this.fixType = FixType.METHOD;
+    this.tree = tree;
   }
 
   @Override
@@ -47,15 +49,23 @@ public class MethodRegionTracker extends AbstractRelation<TrackerNode> implement
 
   @Override
   public Set<Region> getRegions(Fix fix) {
-    if (!fix.location.equals(fixType.name)) {
+    if (!fix.isOnMethod()) {
       return null;
     }
+    OnMethod onMethod = fix.toMethod();
+    Set<Region> regions = getCallersOfMethod(onMethod.clazz, onMethod.method);
+    MethodNode parent = tree.getSuperMethod(onMethod.method, onMethod.clazz);
+    if (parent != null) {
+      regions.add(new Region(parent.method, parent.clazz));
+    }
+    return regions;
+  }
+
+  public Set<Region> getCallersOfMethod(String clazz, String method) {
     return findAllNodes(
             candidate ->
-                candidate.calleeClass.equals(fix.className)
-                    && candidate.calleeMember.equals(fix.method),
-            fix.method,
-            fix.className)
+                candidate.calleeClass.equals(clazz) && candidate.calleeMember.equals(method),
+            clazz)
         .stream()
         .map(node -> new Region(node.callerMethod, node.callerClass))
         .collect(Collectors.toSet());
