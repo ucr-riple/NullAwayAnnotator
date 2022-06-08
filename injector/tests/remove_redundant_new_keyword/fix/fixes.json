@@ -1,1 +1,0 @@
-{"fixes":[{"annotation":"javax.annotation.Nullable","method":"test()","param":"","index":null,"location":"METHOD","class":"com.uber.Super","inject":"true","uri":"/Users/nima/Developer/NullAwayFixer/NullAwayAnnotator/injector/tests/remove_redundant_new_keyword/src/Super.java"}]}
