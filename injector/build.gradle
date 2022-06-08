@@ -29,13 +29,11 @@ plugins {
 
 dependencies {
     implementation deps.build.guava
-    testImplementation deps.build.guava
 
     implementation deps.build.javaparser
     testImplementation deps.build.javaparser
 
     implementation deps.build.json
-    testImplementation deps.build.json
 
     implementation deps.build.progressbar
 

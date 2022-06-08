@@ -30,21 +30,11 @@ dependencies {
 
     implementation project(':injector')
     implementation project(':css')
-
     implementation deps.build.guava
-    testImplementation deps.build.guava
-
     implementation deps.build.json
-    testImplementation deps.build.json
-
     implementation deps.build.progressbar
-
     implementation deps.build.javaparser
-    testImplementation deps.build.javaparser
-
     implementation deps.build.commonscli
-    testImplementation deps.build.commonscli
-
     testCompile deps.build.commonsio
 }
 
