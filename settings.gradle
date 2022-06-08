@@ -26,7 +26,4 @@ rootProject.name = 'NullAwayAnnotator'
 include 'core'
 include 'css'
 include 'injector'
-include 'tests'
-
-include 'tests:units'
 
