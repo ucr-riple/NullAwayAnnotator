@@ -31,24 +31,24 @@ dependencies {
     implementation project(':injector')
     implementation project(':css')
 
-    implementation group: 'com.google.guava', name: 'guava', version:"${deps.versions.guava}"
-    testImplementation group: 'com.google.guava', name: 'guava', version:"${deps.versions.guava}"
+    implementation deps.build.guava
+    testImplementation deps.build.guava
 
-    implementation group: 'com.googlecode.json-simple', name:'json-simple', version:"${deps.versions.json}"
-    testImplementation group: 'com.googlecode.json-simple', name:'json-simple', version:"${deps.versions.json}"
+    implementation deps.build.json
+    testImplementation deps.build.json
 
-    implementation group: 'me.tongfei', name: 'progressbar', version: "${deps.versions.progressbar}"
+    implementation deps.build.progressbar
 
-    implementation group: 'com.uber.nullaway', name: 'nullaway', version:"${deps.versions.nullaway}"
-    testImplementation group: 'com.uber.nullaway', name: 'nullaway', version:"${deps.versions.nullaway}"
+    implementation deps.build.nullaway
+    testImplementation deps.build.nullaway
 
-    implementation group: 'com.github.javaparser', name:'javaparser-core', version:"${deps.versions.javaparser}"
-    testImplementation group: 'com.github.javaparser', name:'javaparser-core', version:"${deps.versions.javaparser}"
+    implementation deps.build.javaparser
+    testImplementation deps.build.javaparser
 
-    implementation group: 'commons-cli', name: 'commons-cli', version: "${deps.versions.cli}"
-    testImplementation group: 'commons-cli', name: 'commons-cli', version: "${deps.versions.cli}"
+    implementation deps.build.commonscli
+    testImplementation deps.build.commonscli
 
-    testCompile group: 'commons-io', name: 'commons-io', version: "${deps.versions.commonsio}"
+    testCompile deps.build.commonsio
 }
 
 configurations.implementation.canBeResolved = true
@@ -75,5 +75,3 @@ fatJar.doLast{
     def newPath = "$project.buildDir/libs/"+newName
     file( oldPath ).renameTo( file( newPath ) )
 }
-sourceCompatibility = JavaVersion.VERSION_11
-targetCompatibility = JavaVersion.VERSION_11
