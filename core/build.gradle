@@ -39,7 +39,7 @@ dependencies {
     testImplementation deps.build.commonsio
 }
 
-configurations.implementation.canBeResolved = true
+//configurations.implementation.canBeResolved = true
 
 //create a single Jar with all dependencies
 // task fatJar(type: Jar) {
