@@ -24,7 +24,12 @@
 
 plugins {
     id 'com.github.sherter.google-java-format' version '0.9'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'    
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'application'
+}
+
+application {
+    mainClass = 'Main'
 }
 
 dependencies {
@@ -39,27 +44,3 @@ dependencies {
     testImplementation deps.build.commonsio
 }
 
-//configurations.implementation.canBeResolved = true
-
-//create a single Jar with all dependencies
-// task fatJar(type: Jar) {
-//     zip64 true
-//     manifest {
-//         attributes 'Implementation-Title': 'Gradle Jar File Example',
-//                 'Implementation-Version': version,
-//                 'Main-Class': 'Main'
-//     }
-//     from { configurations.implementation.collect { it.isDirectory() ? it : zipTree(it) } }
-//     with jar
-//     exclude 'META-INF/*.RSA'
-//     exclude 'META-INF/*.SF'
-//     exclude 'META-INF/*.DSA'
-// }
-
-// fatJar.doLast{
-//     def oldName = 'core-1.3.0-SNAPSHOT.jar'
-//     def newName = 'core.jar'
-//     def oldPath = "$project.buildDir/libs/"+oldName
-//     def newPath = "$project.buildDir/libs/"+newName
-//     file( oldPath ).renameTo( file( newPath ) )
-// }
