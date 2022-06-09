@@ -20,10 +20,16 @@
  * THE SOFTWARE.
  */
 
-allprojects {
-    group 'edu.ucr.cs.riple.nullawayannotator'
-    version '1.3.0-SNAPSHOT'
+buildscript {
+    repositories {
+        mavenCentral()
+    }
 
+    dependencies {
+        classpath 'com.vanniktech:gradle-maven-publish-plugin:0.14.2'
+    }
+}
+allprojects {
     tasks.withType(Test) {
         maxParallelForks = Runtime.getRuntime().availableProcessors()
         systemProperties = [

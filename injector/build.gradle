@@ -23,8 +23,7 @@
  */
 
 plugins {
-    id 'maven-publish'
-    id 'com.github.sherter.google-java-format' version '0.8'
+    id 'com.github.sherter.google-java-format' version '0.9'
 }
 
 dependencies {
@@ -46,3 +45,6 @@ googleJavaFormat {
     // don't enforce formatting for generated Java code under buildSrc
     exclude 'tests/**/*.java'
 }
+
+apply plugin: 'com.vanniktech.maven.publish'
+
