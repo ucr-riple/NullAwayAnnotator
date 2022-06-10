@@ -46,9 +46,7 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
                     classes.get(clazz.clazz).accept(node);
                   });
         });
-    return classes
-        .values()
-        .stream()
+    return classes.values().stream()
         .map(Class::findInitializer)
         .filter(Objects::nonNull)
         .collect(Collectors.toSet());

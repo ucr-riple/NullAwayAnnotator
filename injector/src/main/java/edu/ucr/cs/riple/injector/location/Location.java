@@ -111,8 +111,7 @@ public abstract class Location {
     final String annotSimpleName = Helper.simpleName(annotName);
     NodeList<AnnotationExpr> annotations = node.getAnnotations();
     boolean exists =
-        annotations
-            .stream()
+        annotations.stream()
             .anyMatch(
                 annot -> {
                   String thisAnnotName = annot.getNameAsString();

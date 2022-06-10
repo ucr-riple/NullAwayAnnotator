@@ -35,8 +35,7 @@ public abstract class Explorer {
 
   protected void initializeFixGraph() {
     this.fixGraph.clear();
-    this.reports
-        .stream()
+    this.reports.stream()
         .filter(
             report ->
                 ((!config.bailout || report.effect > 0) && !report.finished) || !report.processed)

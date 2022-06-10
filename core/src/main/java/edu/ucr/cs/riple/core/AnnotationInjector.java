@@ -43,8 +43,7 @@ public class AnnotationInjector {
       return;
     }
     Set<Change> toRemove =
-        fixes
-            .stream()
+        fixes.stream()
             .map(fix -> new Change(fix.change.location, fix.annotation, false))
             .collect(Collectors.toSet());
     injector.start(new WorkListBuilder(toRemove).getWorkLists(), false);

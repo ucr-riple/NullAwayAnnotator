@@ -92,8 +92,7 @@ public class Node {
       int effect, Set<Fix> fixesInOneRound, List<Fix> triggered, MethodInheritanceTree mit) {
     updateTriggered(triggered);
     final int[] numberOfSuperMethodsAnnotatedOutsideTree = {0};
-    this.tree
-        .stream()
+    this.tree.stream()
         .filter(Fix::isOnMethod)
         .map(
             fix -> {
@@ -111,8 +110,7 @@ public class Node {
                               && fix.toMethod().clazz.equals(node.clazz))) {
                 return;
               }
-              if (fixesInOneRound
-                  .stream()
+              if (fixesInOneRound.stream()
                   .anyMatch(
                       fix ->
                           fix.isOnMethod()

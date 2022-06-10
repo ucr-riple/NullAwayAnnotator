@@ -34,8 +34,7 @@ public class Class {
 
   public void accept(FieldInitializationNode fieldInitializationNode) {
     Optional<Method> optionalMethod =
-        this.methods
-            .stream()
+        this.methods.stream()
             .filter(
                 method ->
                     method.signature.equals(fieldInitializationNode.initializerLocation.method))

@@ -64,8 +64,7 @@ public class MethodInfo {
   public static MethodInfo findOrCreate(Symbol.MethodSymbol method) {
     Symbol.ClassSymbol clazz = method.enclClass();
     Optional<MethodInfo> optionalMethodInfo =
-        discovered
-            .stream()
+        discovered.stream()
             .filter(
                 methodInfo -> methodInfo.symbol.equals(method) && methodInfo.clazz.equals(clazz))
             .findAny();
@@ -156,8 +155,7 @@ public class MethodInfo {
 
   public void setParameterNames(List<? extends VariableTree> parameters) {
     this.parameterNames =
-        parameters
-            .stream()
+        parameters.stream()
             .map(
                 new Function<VariableTree, String>() {
                   @Override

@@ -114,8 +114,7 @@ public class Index<T extends Hashable> {
   }
 
   public Set<Region> getRegionsForFixes(Predicate<T> comparable) {
-    return getAllEntities()
-        .stream()
+    return getAllEntities().stream()
         .filter(comparable)
         .map(t -> new Region(t.encMethod, t.encClass))
         .collect(Collectors.toSet());

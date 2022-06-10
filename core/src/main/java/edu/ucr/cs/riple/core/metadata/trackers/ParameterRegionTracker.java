@@ -48,8 +48,7 @@ public class ParameterRegionTracker implements RegionTracker {
     }
     OnParameter parameter = fix.toParameter();
     Set<Region> regions =
-        tree.getSubMethods(parameter.method, parameter.clazz, false)
-            .stream()
+        tree.getSubMethods(parameter.method, parameter.clazz, false).stream()
             .map(node -> new Region(node.method, node.clazz))
             .collect(Collectors.toSet());
     regions.add(new Region(parameter.method, parameter.clazz));

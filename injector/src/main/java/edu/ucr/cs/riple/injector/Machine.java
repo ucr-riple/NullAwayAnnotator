@@ -118,8 +118,7 @@ public class Machine {
     if (tree.getImports().contains(importDeclaration)) {
       return false;
     }
-    return tree.getImports()
-        .stream()
+    return tree.getImports().stream()
         .noneMatch(
             impDecl ->
                 Helper.simpleName(impDecl.getNameAsString()).equals(Helper.simpleName(annotation)));

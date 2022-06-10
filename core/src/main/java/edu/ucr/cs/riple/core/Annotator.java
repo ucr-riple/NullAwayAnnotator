@@ -72,16 +72,13 @@ public class Annotator {
     System.out.println("Making the first build...");
     Utility.buildProject(config, true);
     Set<Fix> uninitializedFields =
-        Utility.readFixesFromOutputDirectory(config, Fix.factory(null))
-            .stream()
+        Utility.readFixesFromOutputDirectory(config, Fix.factory(null)).stream()
             .filter(fix -> fix.reasons.contains("FIELD_NO_INIT") && fix.isOnField())
             .collect(Collectors.toSet());
     FieldInitializationAnalysis analysis =
         new FieldInitializationAnalysis(config.dir.resolve("field_init.tsv"));
     Set<Change> initializers =
-        analysis
-            .findInitializers(uninitializedFields)
-            .stream()
+        analysis.findInitializers(uninitializedFields).stream()
             .map(onMethod -> new Change(onMethod, config.initializerAnnot, true))
             .collect(Collectors.toSet());
     this.injector.injectChanges(initializers);
@@ -99,8 +96,7 @@ public class Annotator {
           Utility.readFixesFromOutputDirectory(config, Fix.factory(fieldDeclarationAnalysis));
       if (config.useCache) {
         remainingFixes =
-            remainingFixes
-                .stream()
+            remainingFixes.stream()
                 .filter(fix -> !reports.containsKey(fix))
                 .collect(Collectors.toSet());
       }
@@ -126,8 +122,7 @@ public class Annotator {
             reports.get(report.root).triggered = report.triggered;
           });
       injector.injectFixes(
-          latestReports
-              .stream()
+          latestReports.stream()
               .filter(report -> report.effect < 1)
               .flatMap(report -> config.chain ? report.tree.stream() : Stream.of(report.root))
               .collect(Collectors.toSet()));
