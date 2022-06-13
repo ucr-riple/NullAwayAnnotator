@@ -200,7 +200,7 @@ public class Config {
     this.chain = cmd.hasOption(chainOption.getLongOpt());
     this.bailout = !cmd.hasOption(bailoutOption.getLongOpt());
     this.useCache = !cmd.hasOption(cacheOption.getLongOpt());
-    this.disableOuterLoop = !cmd.hasOption(outerLoop.getLongOpt());
+    this.disableOuterLoop = cmd.hasOption(outerLoop.getLongOpt());
     this.optimized = !cmd.hasOption(optimizedOption.getLongOpt());
     this.log = new Log();
     log.reset();
@@ -228,7 +228,7 @@ public class Config {
     this.lexicalPreservationDisabled =
         !getValueFromKey(jsonObject, "LEXICAL_PRESERVATION", Boolean.class).orElse(false);
     this.optimized = getValueFromKey(jsonObject, "OPTIMIZED", Boolean.class).orElse(true);
-    this.disableOuterLoop = !getValueFromKey(jsonObject, "OUTER_LOOP", Boolean.class).orElse(true);
+    this.disableOuterLoop = !getValueFromKey(jsonObject, "OUTER_LOOP", Boolean.class).orElse(false);
     this.bailout = getValueFromKey(jsonObject, "BAILOUT", Boolean.class).orElse(true);
     this.nullableAnnot =
         getValueFromKey(jsonObject, "ANNOTATION:NULLABLE", String.class)
