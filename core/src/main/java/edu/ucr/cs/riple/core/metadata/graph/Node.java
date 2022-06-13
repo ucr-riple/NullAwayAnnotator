@@ -69,6 +69,7 @@ public class Node {
     this.triggered = new HashSet<>();
     this.effect = 0;
     this.tree = Sets.newHashSet(root);
+    this.changed = false;
   }
 
   public void setRootSource(Bank<Fix> fixBank) {

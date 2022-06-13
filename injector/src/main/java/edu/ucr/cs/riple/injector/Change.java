@@ -53,7 +53,7 @@ public class Change {
 
   @Override
   public int hashCode() {
-    return Objects.hash(annotation, location);
+    return Objects.hash(location, annotation);
   }
 
   public JSONObject getJson() {

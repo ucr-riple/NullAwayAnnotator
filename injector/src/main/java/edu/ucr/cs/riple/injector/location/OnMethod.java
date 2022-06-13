@@ -86,7 +86,7 @@ public class OnMethod extends Location {
 
   @Override
   public int hashCode() {
-    return Objects.hash(method);
+    return Objects.hash(super.hashCode(), method);
   }
 
   @Override

@@ -58,6 +58,11 @@ public class Report {
     return root.equals(report.root);
   }
 
+  @Override
+  public int hashCode() {
+    return Objects.hash(root);
+  }
+
   /**
    * Mainly used for unit tests, what we care in tests, is that if a fix has the correct
    * effectiveness with all the corresponding fixes to reach that effectiveness, therefore only the
@@ -90,11 +95,6 @@ public class Report {
     Set<Location> otherTriggered =
         other.triggered.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
     return otherTriggered.equals(thisTriggered);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(root);
   }
 
   @Override
