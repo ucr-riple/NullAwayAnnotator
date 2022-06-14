@@ -47,6 +47,7 @@ import org.json.simple.parser.JSONParser;
 public class Config {
   public final boolean bailout;
   public final boolean optimized;
+  public final boolean exhaustiveSearch;
   public final boolean lexicalPreservationDisabled;
   public final boolean chain;
   public final boolean useCache;
@@ -143,6 +144,12 @@ public class Config {
     disableOptimizationOption.setRequired(false);
     options.addOption(disableOptimizationOption);
 
+    // Exhaustive
+    Option exhaustiveSearchOption =
+        new Option("exs", "exhaustive-search", false, "Performs Exhaustive Search");
+    exhaustiveSearchOption.setRequired(false);
+    options.addOption(exhaustiveSearchOption);
+
     // Build Output Redirect
     Option redirectBuildOutputToStdErrOption =
         new Option(
@@ -211,6 +218,7 @@ public class Config {
     this.useCache = !cmd.hasOption(disableCacheOption.getLongOpt());
     this.disableOuterLoop = cmd.hasOption(disableOuterLoopOption.getLongOpt());
     this.optimized = !cmd.hasOption(disableOptimizationOption.getLongOpt());
+    this.exhaustiveSearch = cmd.hasOption(exhaustiveSearchOption.getLongOpt());
     this.log = new Log();
     this.log.reset();
   }
@@ -239,6 +247,8 @@ public class Config {
     this.lexicalPreservationDisabled =
         !getValueFromKey(jsonObject, "LEXICAL_PRESERVATION", Boolean.class).orElse(false);
     this.optimized = getValueFromKey(jsonObject, "OPTIMIZED", Boolean.class).orElse(true);
+    this.exhaustiveSearch =
+        getValueFromKey(jsonObject, "EXHAUSTIVE_SEARCH", Boolean.class).orElse(true);
     this.disableOuterLoop = !getValueFromKey(jsonObject, "OUTER_LOOP", Boolean.class).orElse(false);
     this.bailout = getValueFromKey(jsonObject, "BAILOUT", Boolean.class).orElse(true);
     this.nullableAnnot =
@@ -314,6 +324,7 @@ public class Config {
     public String cssConfigPath;
     public boolean chain = false;
     public boolean optimized = true;
+    public boolean exhaustiveSearch = false;
     public boolean cache = true;
     public boolean bailout = true;
     public boolean redirectBuildOutputToStdErr = false;
@@ -351,6 +362,7 @@ public class Config {
       json.put("CACHE", cache);
       json.put("BAILOUT", bailout);
       json.put("DEPTH", depth);
+      json.put("EXHAUSTIVE_SEARCH", exhaustiveSearch);
       json.put("REDIRECT_BUILD_OUTPUT_TO_STDERR", redirectBuildOutputToStdErr);
       try (FileWriter file = new FileWriter(path.toFile())) {
         file.write(json.toJSONString());

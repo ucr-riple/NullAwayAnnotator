@@ -1,3 +1,27 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2020 Nima Karimipour
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 package edu.ucr.cs.riple.core.explorers;
 
 import com.google.common.collect.ImmutableSet;
@@ -36,9 +60,7 @@ public abstract class Explorer {
   protected void initializeFixGraph() {
     this.fixGraph.clear();
     this.reports.stream()
-        .filter(
-            report ->
-                !report.processed || (!report.finished && (!config.bailout || report.effect > 0)))
+        .filter(report -> !report.finished && (!config.bailout || report.effect > 0))
         .forEach(
             report -> {
               Fix root = report.root;
@@ -61,7 +83,6 @@ public abstract class Explorer {
               report.tree = node.tree;
               report.triggered = node.triggered;
               report.finished = !node.changed;
-              report.processed = true;
             });
   }
 

@@ -39,15 +39,12 @@ public class Report {
   public Set<Fix> triggered;
   public boolean finished;
 
-  public boolean processed;
-
   public Report(Fix root, int effect) {
     this.effect = effect;
     this.root = root;
     this.tree = new HashSet<>();
     this.finished = false;
     this.triggered = new HashSet<>();
-    this.processed = false;
   }
 
   @Override

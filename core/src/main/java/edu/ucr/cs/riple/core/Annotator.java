@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.core;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.css.Serializer;
 import edu.ucr.cs.riple.core.explorers.BasicExplorer;
+import edu.ucr.cs.riple.core.explorers.ExhaustiveExplorer;
 import edu.ucr.cs.riple.core.explorers.Explorer;
 import edu.ucr.cs.riple.core.explorers.OptimizedExplorer;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
@@ -108,9 +109,12 @@ public class Annotator {
           new MethodInheritanceTree(config.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
       RegionTracker tracker = new CompoundTracker(config.dir, tree);
       Explorer explorer =
-          config.optimized
-              ? new OptimizedExplorer(injector, errorBank, fixBank, tracker, tree, fixes, config)
-              : new BasicExplorer(injector, errorBank, fixBank, fixes, config);
+          config.exhaustiveSearch
+              ? new ExhaustiveExplorer(injector, errorBank, fixBank, fixes, config)
+              : config.optimized
+                  ? new OptimizedExplorer(
+                      injector, errorBank, fixBank, tracker, tree, fixes, config)
+                  : new BasicExplorer(injector, errorBank, fixBank, fixes, config);
       ImmutableSet<Report> latestReports = explorer.explore();
       int sizeBefore = reports.size();
       latestReports.forEach(
