@@ -41,7 +41,7 @@ public class FieldDeclarationAnalysis extends MetaData<FieldDeclarationInfo> {
               bodyDeclaration.ifFieldDeclaration(
                   fieldDeclaration -> {
                     NodeList<VariableDeclarator> vars =
-                        fieldDeclaration.asFieldDeclaration().getVariables();
+                        fieldDeclaration.getVariables();
                     if (vars.size() > 1) {
                       info.addNewSetOfFieldDeclarations(
                           vars.stream()

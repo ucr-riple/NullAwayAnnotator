@@ -127,7 +127,7 @@ public class Node {
     int sizeBefore = this.triggered.size();
     this.triggered.addAll(fixes);
     int sizeAfter = this.triggered.size();
-    changed = (changed || (sizeAfter != sizeBefore));
+    this.changed = (sizeAfter != sizeBefore);
   }
 
   public void mergeTriggered() {
