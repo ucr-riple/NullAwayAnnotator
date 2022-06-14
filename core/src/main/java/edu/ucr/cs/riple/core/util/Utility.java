@@ -65,11 +65,17 @@ import org.w3c.dom.Element;
 public class Utility {
 
   @SuppressWarnings("StatementWithEmptyBody")
-  public static void executeCommand(String command) {
+  public static void executeCommand(String command, Config config) {
     try {
       Process p = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
       BufferedReader reader = new BufferedReader(new InputStreamReader(p.getErrorStream()));
       while ((reader.readLine()) != null) {}
+      if (config.redirectBuildOutputToStdErr) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+          System.err.println(line);
+        }
+      }
       p.waitFor();
     } catch (Exception e) {
       throw new RuntimeException("Exception happened in executing command: " + command, e);
@@ -287,7 +293,7 @@ public class Utility {
             .setFieldInitInfo(initSerializationEnabled);
     nullAwayConfig.writeAsXML(config.nullAwayConfigPath.toString());
     try {
-      Utility.executeCommand(config.buildCommand);
+      Utility.executeCommand(config.buildCommand, config);
     } catch (Exception e) {
       throw new RuntimeException("Could not run command: " + config.buildCommand);
     }

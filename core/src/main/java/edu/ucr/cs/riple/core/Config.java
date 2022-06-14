@@ -50,7 +50,7 @@ public class Config {
   public final boolean lexicalPreservationDisabled;
   public final boolean chain;
   public final boolean useCache;
-
+  public final boolean redirectBuildOutputToStdErr;
   public final boolean disableOuterLoop;
   public final Path dir;
   public final Path nullAwayConfigPath;
@@ -58,7 +58,6 @@ public class Config {
   public final String buildCommand;
   public final String nullableAnnot;
   public final String initializerAnnot;
-
   public final Log log;
   public final int depth;
 
@@ -144,6 +143,13 @@ public class Config {
     disableOptimizationOption.setRequired(false);
     options.addOption(disableOptimizationOption);
 
+    // Build Output Redirect
+    Option redirectBuildOutputToStdErrOption =
+        new Option(
+            "rboserr", "redirect-build-output-stderr", false, "Redirects Build outputs to STD Err");
+    redirectBuildOutputToStdErrOption.setRequired(false);
+    options.addOption(redirectBuildOutputToStdErrOption);
+
     // Outer Loop
     Option disableOuterLoopOption =
         new Option("dol", "disable-outer-loop", false, "Disables Outer Loop");
@@ -199,6 +205,8 @@ public class Config {
     this.cssConfigPath = Paths.get(cmd.getOptionValue(cssConfigPathOption.getLongOpt()));
     this.lexicalPreservationDisabled = cmd.hasOption(disableLexicalPreservationOption.getLongOpt());
     this.chain = cmd.hasOption(chainOption.getLongOpt());
+    this.redirectBuildOutputToStdErr =
+        cmd.hasOption(redirectBuildOutputToStdErrOption.getLongOpt());
     this.bailout = !cmd.hasOption(disableBailoutOption.getLongOpt());
     this.useCache = !cmd.hasOption(disableCacheOption.getLongOpt());
     this.disableOuterLoop = cmd.hasOption(disableOuterLoopOption.getLongOpt());
@@ -225,6 +233,8 @@ public class Config {
     }
     this.depth = getValueFromKey(jsonObject, "DEPTH", Long.class).orElse((long) 1).intValue();
     this.chain = getValueFromKey(jsonObject, "CHAIN", Boolean.class).orElse(false);
+    this.redirectBuildOutputToStdErr =
+        getValueFromKey(jsonObject, "REDIRECT_BUILD_OUTPUT_TO_STDERR", Boolean.class).orElse(false);
     this.useCache = getValueFromKey(jsonObject, "CACHE", Boolean.class).orElse(true);
     this.lexicalPreservationDisabled =
         !getValueFromKey(jsonObject, "LEXICAL_PRESERVATION", Boolean.class).orElse(false);
@@ -306,6 +316,7 @@ public class Config {
     public boolean optimized = true;
     public boolean cache = true;
     public boolean bailout = true;
+    public boolean redirectBuildOutputToStdErr = false;
     public boolean lexicalPreservationActivation = true;
     public boolean outerLoopActivation = true;
     public int depth = 1;
@@ -340,6 +351,7 @@ public class Config {
       json.put("CACHE", cache);
       json.put("BAILOUT", bailout);
       json.put("DEPTH", depth);
+      json.put("REDIRECT_BUILD_OUTPUT_TO_STDERR", redirectBuildOutputToStdErr);
       try (FileWriter file = new FileWriter(path.toFile())) {
         file.write(json.toJSONString());
       } catch (IOException e) {
