@@ -52,7 +52,7 @@ public abstract class Explorer {
     this.errorBank = errorBank;
     this.fixBank = fixBank;
     this.reports =
-        fixes.stream().map(fix -> new Report(fix, -1)).collect(ImmutableSet.toImmutableSet());
+        fixes.stream().map(fix -> new Report(fix, 1)).collect(ImmutableSet.toImmutableSet());
     this.config = config;
     this.fixGraph = new FixGraph<>(Node::new);
   }
