@@ -69,10 +69,9 @@ public class Utility {
     try {
       Process p = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
       BufferedReader reader = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-      while ((reader.readLine()) != null) {}
-      if (config.redirectBuildOutputToStdErr) {
-        String line;
-        while ((line = reader.readLine()) != null) {
+      String line;
+      while ((line = reader.readLine()) != null) {
+        if (config.redirectBuildOutputToStdErr) {
           System.err.println(line);
         }
       }
