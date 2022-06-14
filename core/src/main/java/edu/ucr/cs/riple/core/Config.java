@@ -106,20 +106,20 @@ public class Config {
     options.addOption(initializerOption);
 
     // Format
-    Option formatOption =
+    Option disableLexicalPreservationOption =
         new Option("dlp", "disable-lexical-preservation", false, "Disables lexical preservation");
-    formatOption.setRequired(false);
-    options.addOption(formatOption);
+    disableLexicalPreservationOption.setRequired(false);
+    options.addOption(disableLexicalPreservationOption);
 
     // Bailout
-    Option bailoutOption =
+    Option disableBailoutOption =
         new Option(
             "db",
             "disable-bailout",
             false,
             "Disables bailout, Annotator will not bailout from the search tree as soon as its effectiveness hits zero or less and completely traverses the tree until no new fix is suggested");
-    bailoutOption.setRequired(false);
-    options.addOption(bailoutOption);
+    disableBailoutOption.setRequired(false);
+    options.addOption(disableBailoutOption);
 
     // Depth
     Option depthOption = new Option("depth", "depth", true, "Depth of the analysis");
@@ -127,9 +127,9 @@ public class Config {
     options.addOption(depthOption);
 
     // Cache
-    Option cacheOption = new Option("dc", "disable-cache", false, "Disables cache usage");
-    cacheOption.setRequired(false);
-    options.addOption(cacheOption);
+    Option disableCacheOption = new Option("dc", "disable-cache", false, "Disables cache usage");
+    disableCacheOption.setRequired(false);
+    options.addOption(disableCacheOption);
 
     // Chain
     Option chainOption =
@@ -139,15 +139,16 @@ public class Config {
     options.addOption(chainOption);
 
     // Optimized
-    Option optimizedOption =
+    Option disableOptimizationOption =
         new Option("do", "disable-optimization", false, "Disables optimizations");
-    optimizedOption.setRequired(false);
-    options.addOption(optimizedOption);
+    disableOptimizationOption.setRequired(false);
+    options.addOption(disableOptimizationOption);
 
     // Outer Loop
-    Option outerLoop = new Option("dol", "disable-outer-loop", false, "Disables Outer Loop");
-    outerLoop.setRequired(false);
-    options.addOption(outerLoop);
+    Option disableOuterLoopOption =
+        new Option("dol", "disable-outer-loop", false, "Disables Outer Loop");
+    disableOuterLoopOption.setRequired(false);
+    options.addOption(disableOuterLoopOption);
 
     // Dir
     Option dirOption = new Option("d", "dir", true, "Directory of the output files");
@@ -196,14 +197,14 @@ public class Config {
     this.dir = Paths.get(cmd.getOptionValue(dirOption.getLongOpt()));
     this.nullAwayConfigPath = Paths.get(cmd.getOptionValue(nullAwayConfigPathOption.getLongOpt()));
     this.cssConfigPath = Paths.get(cmd.getOptionValue(cssConfigPathOption.getLongOpt()));
-    this.lexicalPreservationDisabled = cmd.hasOption(formatOption.getLongOpt());
+    this.lexicalPreservationDisabled = cmd.hasOption(disableLexicalPreservationOption.getLongOpt());
     this.chain = cmd.hasOption(chainOption.getLongOpt());
-    this.bailout = !cmd.hasOption(bailoutOption.getLongOpt());
-    this.useCache = !cmd.hasOption(cacheOption.getLongOpt());
-    this.disableOuterLoop = cmd.hasOption(outerLoop.getLongOpt());
-    this.optimized = !cmd.hasOption(optimizedOption.getLongOpt());
+    this.bailout = !cmd.hasOption(disableBailoutOption.getLongOpt());
+    this.useCache = !cmd.hasOption(disableCacheOption.getLongOpt());
+    this.disableOuterLoop = cmd.hasOption(disableOuterLoopOption.getLongOpt());
+    this.optimized = !cmd.hasOption(disableOptimizationOption.getLongOpt());
     this.log = new Log();
-    log.reset();
+    this.log.reset();
   }
 
   /**

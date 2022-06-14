@@ -38,7 +38,7 @@ public abstract class Explorer {
     this.reports.stream()
         .filter(
             report ->
-                ((!config.bailout || report.effect > 0) && !report.finished) || !report.processed)
+                !report.processed || (!report.finished && (!config.bailout || report.effect > 0)))
         .forEach(
             report -> {
               Fix root = report.root;
@@ -48,7 +48,6 @@ public abstract class Explorer {
               node.triggered = report.triggered;
               node.tree.addAll(report.tree);
               node.mergeTriggered();
-              node.changed = false;
             });
   }
 
