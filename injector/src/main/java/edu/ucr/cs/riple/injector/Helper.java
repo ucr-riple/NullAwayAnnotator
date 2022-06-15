@@ -27,6 +27,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.PackageDeclaration;
+import com.github.javaparser.ast.body.AnnotationDeclaration;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -74,22 +75,36 @@ public class Helper {
     if (!callableDec.getName().toString().equals(extractCallableName(signature))) {
       return false;
     }
-    List<String> paramsTypesInSignature = extractParamTypesOfCallableInString(signature);
-    List<String> paramTypes = extractParamTypesOfCallableInString(callableDec);
-    if (paramTypes.size() != paramsTypesInSignature.size()) {
+    return matchesParameterTypesInCallable(
+        extractParamTypesOfCallableInString(signature),
+        extractParamTypesOfCallableInString(callableDec));
+  }
+
+  public static boolean matchesCallableSignature(String signature, String other) {
+    if (!extractCallableName(signature).equals(extractCallableName(other))) {
       return false;
     }
-    for (String i : paramsTypesInSignature) {
+    return matchesParameterTypesInCallable(
+        extractParamTypesOfCallableInString(signature), extractParamTypesOfCallableInString(other));
+  }
+
+  private static boolean matchesParameterTypesInCallable(List<String> params, List<String> other) {
+    if (params.size() != other.size()) {
+      return false;
+    }
+    for (String i : params) {
       String found = null;
       String last_i = simpleName(i);
-      for (String j : paramTypes) {
+      for (String j : other) {
         String last_j = simpleName(j);
-        if (j.equals(i) || last_i.equals(last_j)) found = j;
+        if (j.equals(i) || last_i.equals(last_j)) {
+          found = j;
+        }
       }
       if (found == null) {
         return false;
       }
-      paramTypes.remove(found);
+      other.remove(found);
     }
     return true;
   }
@@ -127,6 +142,11 @@ public class Helper {
     Optional<EnumDeclaration> enumDeclaration = tree.getEnumByName(name);
     if (enumDeclaration.isPresent()) {
       return enumDeclaration.get();
+    }
+    Optional<AnnotationDeclaration> annotationDeclaration =
+        tree.getAnnotationDeclarationByName(name);
+    if (annotationDeclaration.isPresent()) {
+      return annotationDeclaration.get();
     }
     Optional<ClassOrInterfaceDeclaration> interfaceDeclaration = tree.getInterfaceByName(name);
     return interfaceDeclaration.orElseGet(() -> tree.getClassByName(name).orElse(null));
@@ -167,18 +187,14 @@ public class Helper {
   private static boolean isTopLevelDeclaration(Node node) {
     return node instanceof ClassOrInterfaceDeclaration
         || node instanceof EnumDeclaration
+        || node instanceof AnnotationDeclaration
         || (node instanceof ObjectCreationExpr
             && ((ObjectCreationExpr) node).getAnonymousClassBody().isPresent());
   }
 
   private static boolean isDeclarationWithName(Node node, String name) {
-    if (node instanceof ClassOrInterfaceDeclaration) {
-      if (((ClassOrInterfaceDeclaration) node).getNameAsString().equals(name)) {
-        return true;
-      }
-    }
-    if (node instanceof EnumDeclaration) {
-      return ((EnumDeclaration) node).getNameAsString().equals(name);
+    if (node instanceof TypeDeclaration<?>) {
+      return ((TypeDeclaration<?>) node).getNameAsString().equals(name);
     }
     return false;
   }
@@ -207,9 +223,11 @@ public class Helper {
     if (node instanceof ClassOrInterfaceDeclaration) {
       return ((ClassOrInterfaceDeclaration) node).getMembers();
     }
+    if (node instanceof AnnotationDeclaration) {
+      return ((AnnotationDeclaration) node).getMembers();
+    }
     if (node instanceof ObjectCreationExpr) {
-      ObjectCreationExpr objExp = (ObjectCreationExpr) node;
-      return objExp.getAnonymousClassBody().orElse(null);
+      return ((ObjectCreationExpr) node).getAnonymousClassBody().orElse(null);
     }
     return null;
   }

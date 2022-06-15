@@ -35,6 +35,30 @@ import org.junit.runners.JUnit4;
 public class ClassSearchTest extends BaseInjectorTest {
 
   @Test
+  public void annotation_declaration() {
+    injectorTestHelper
+        .addInput(
+            "Main.java",
+            "package com.test;",
+            "public @interface Main{",
+            "   public String foo();",
+            "}")
+        .expectOutput(
+            "package com.test;",
+            "import javax.annotation.Nullable;",
+            "public @interface Main{",
+            "   @Nullable",
+            "   public String foo();",
+            "}")
+        .addChanges(
+            new Change(
+                new OnMethod("Main.java", "com.test.Main", "foo(java.lang.Object)"),
+                "javax.annotation.Nullable",
+                true))
+        .start();
+  }
+
+  @Test
   public void class_search_declaration_in_method_body_level_1() {
     injectorTestHelper
         .addInput(

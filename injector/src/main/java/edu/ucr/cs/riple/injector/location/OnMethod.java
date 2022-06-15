@@ -63,6 +63,19 @@ public class OnMethod extends Location {
                     success[0] = true;
                   }
                 }));
+    if (!success[0]) {
+      clazz.forEach(
+          bodyDeclaration ->
+              bodyDeclaration.ifAnnotationMemberDeclaration(
+                  annotationMemberDeclaration -> {
+                    if (annotationMemberDeclaration
+                        .getNameAsString()
+                        .equals(Helper.extractCallableName(method))) {
+                      applyAnnotation(annotationMemberDeclaration, annotation, inject);
+                      success[0] = true;
+                    }
+                  }));
+    }
     return success[0];
   }
 
