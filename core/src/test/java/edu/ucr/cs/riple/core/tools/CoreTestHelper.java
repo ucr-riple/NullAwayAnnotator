@@ -201,6 +201,7 @@ public class CoreTestHelper {
     builder.bailout = !disableBailout;
     builder.chain = true;
     builder.outerLoopActivation = requestCompleteLoop;
+    builder.optimized = true;
     builder.write(path);
   }
 

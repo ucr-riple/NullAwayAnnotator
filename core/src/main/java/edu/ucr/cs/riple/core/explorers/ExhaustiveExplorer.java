@@ -30,6 +30,7 @@ import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 
 public class ExhaustiveExplorer extends Explorer {
 
@@ -38,8 +39,9 @@ public class ExhaustiveExplorer extends Explorer {
       Bank<Error> errorBank,
       Bank<Fix> fixBank,
       ImmutableSet<Fix> fixes,
+      MethodInheritanceTree tree,
       Config config) {
-    super(injector, errorBank, fixBank, fixes, config);
+    super(injector, errorBank, fixBank, fixes, tree, config);
   }
 
   @Override

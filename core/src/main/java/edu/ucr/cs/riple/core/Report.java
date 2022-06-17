@@ -96,13 +96,12 @@ public class Report {
 
   @Override
   public String toString() {
-    return "Report{"
-        + "effect="
+    return "Effect="
         + effect
-        + ", root="
+        + ", "
         + root
-        + ", tree="
+        + ", "
         + tree.stream().map(fix -> fix.change.location).collect(Collectors.toSet())
-        + "}\n";
+        + "\n";
   }
 }

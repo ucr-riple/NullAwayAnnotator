@@ -107,13 +107,14 @@ public class Fix extends Hashable {
   }
 
   public boolean isModifyingConstructor() {
-    if (!isOnMethod()) {
+    if (isOnField()) {
       return false;
     }
-    OnMethod m = toMethod();
-    String methodName = m.method.substring(0, m.method.indexOf("("));
-    int lastIndex = m.clazz.lastIndexOf(".");
-    String className = lastIndex < 0 ? m.clazz : m.clazz.substring(lastIndex + 1);
+    String methodSignature = isOnMethod() ? toMethod().method : toParameter().method;
+    String methodName = methodSignature.substring(0, methodSignature.indexOf("("));
+    String clazz = change.location.clazz;
+    int lastIndex = clazz.lastIndexOf(".");
+    String className = lastIndex < 0 ? clazz : clazz.substring(lastIndex + 1);
     return methodName.equals(className);
   }
 

@@ -138,7 +138,7 @@ public class CoreTest extends BaseCoreTest {
             "}")
         .toDepth(1)
         .addExpectedReports(
-            new TReport(new OnParameter("Main.java", "test.Main", "Main(java.lang.Object)", 0), 0))
+            new TReport(new OnParameter("Main.java", "test.Main", "Main(java.lang.Object)", 0), 1))
         .start();
   }
 

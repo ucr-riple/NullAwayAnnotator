@@ -33,6 +33,7 @@ import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 
 public abstract class Explorer {
   protected final AnnotationInjector injector;
@@ -42,15 +43,19 @@ public abstract class Explorer {
   protected final Config config;
   protected final FixGraph<Node> fixGraph;
 
+  protected final MethodInheritanceTree methodInheritanceTree;
+
   public Explorer(
       AnnotationInjector injector,
       Bank<Error> errorBank,
       Bank<Fix> fixBank,
       ImmutableSet<Fix> fixes,
+      MethodInheritanceTree methodInheritanceTree,
       Config config) {
     this.injector = injector;
     this.errorBank = errorBank;
     this.fixBank = fixBank;
+    this.methodInheritanceTree = methodInheritanceTree;
     this.reports =
         fixes.stream().map(fix -> new Report(fix, 1)).collect(ImmutableSet.toImmutableSet());
     this.config = config;

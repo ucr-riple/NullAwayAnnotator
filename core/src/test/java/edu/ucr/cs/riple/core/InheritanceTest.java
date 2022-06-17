@@ -89,7 +89,7 @@ public class InheritanceTest extends BaseCoreTest {
                 singleton(new OnField("A.java", "test.A", singleton("arg3")))),
             new TReport(
                 new OnParameter("A.java", "test.A$Builder", "setArg2(test.Y)", 0),
-                -1,
+                -3,
                 newHashSet(
                     new OnParameter("C.java", "test.C$Builder", "setArg2(test.Y)", 0),
                     new OnParameter("B.java", "test.B$Builder", "setArg2(test.Y)", 0),

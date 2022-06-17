@@ -45,19 +45,17 @@ import me.tongfei.progressbar.ProgressBar;
 
 public class OptimizedExplorer extends Explorer {
   private final RegionTracker tracker;
-  private final MethodInheritanceTree methodInheritanceTree;
 
   public OptimizedExplorer(
       AnnotationInjector injector,
       Bank<Error> errorBank,
       Bank<Fix> fixBank,
       RegionTracker tracker,
-      MethodInheritanceTree methodInheritanceTree,
       ImmutableSet<Fix> fixes,
+      MethodInheritanceTree methodInheritanceTree,
       Config config) {
-    super(injector, errorBank, fixBank, fixes, config);
+    super(injector, errorBank, fixBank, fixes, methodInheritanceTree, config);
     this.tracker = tracker;
-    this.methodInheritanceTree = methodInheritanceTree;
   }
 
   @Override

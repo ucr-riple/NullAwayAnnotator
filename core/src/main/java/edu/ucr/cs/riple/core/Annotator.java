@@ -110,11 +110,11 @@ public class Annotator {
       RegionTracker tracker = new CompoundTracker(config.dir, tree);
       Explorer explorer =
           config.exhaustiveSearch
-              ? new ExhaustiveExplorer(injector, errorBank, fixBank, fixes, config)
+              ? new ExhaustiveExplorer(injector, errorBank, fixBank, fixes, tree, config)
               : config.optimized
                   ? new OptimizedExplorer(
-                      injector, errorBank, fixBank, tracker, tree, fixes, config)
-                  : new BasicExplorer(injector, errorBank, fixBank, fixes, config);
+                      injector, errorBank, fixBank, tracker, fixes, tree, config)
+                  : new BasicExplorer(injector, errorBank, fixBank, fixes, tree, config);
       ImmutableSet<Report> latestReports = explorer.explore();
       int sizeBefore = reports.size();
       latestReports.forEach(
