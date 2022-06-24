@@ -22,7 +22,12 @@
 
 package edu.ucr.cs.riple.core.util;
 
-/** Container object of any {@code @Nonnull} and {@code @Nullable} annotations. */
+/**
+ * IMPORTANT NOTE: THIS CLASS IS COPIED FROM NULLAWAY, WE COPIED THE CLASS CONTENT HERE TO REMOVE
+ * DEPENDENCY TO NULLAWAY.
+ *
+ * <p>Container object of any {@code @Nonnull} and {@code @Nullable} annotations.
+ */
 public class AnnotationConfig {
 
   private Annotation nonNull;

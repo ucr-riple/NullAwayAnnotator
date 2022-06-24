@@ -62,6 +62,7 @@ import org.json.simple.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/** Utility class. */
 public class Utility {
 
   @SuppressWarnings("StatementWithEmptyBody")

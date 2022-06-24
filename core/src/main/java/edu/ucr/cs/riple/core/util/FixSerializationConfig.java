@@ -24,7 +24,12 @@ package edu.ucr.cs.riple.core.util;
 
 import javax.annotation.Nullable;
 
-/** Config class for Fix Serialization package. */
+/**
+ * IMPORTANT NOTE: THIS CLASS IS COPIED FROM NULLAWAY, WE COPIED THE CLASS CONTENT HERE TO REMOVE
+ * DEPENDENCY TO NULLAWAY.
+ *
+ * <p>Config class for Fix Serialization package.
+ */
 public class FixSerializationConfig {
 
   public final boolean suggestEnabled;
