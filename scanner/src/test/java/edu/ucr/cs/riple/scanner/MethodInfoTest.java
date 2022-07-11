@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,28 +22,7 @@
  * THE SOFTWARE.
  */
 
-buildscript {
-    repositories {
-        mavenCentral()
-        google() // For Gradle 4.0+
-    }
+package edu.ucr.cs.riple.scanner;
 
-    dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.1'
-    }
-}
-
-plugins {
-    id "net.ltgt.errorprone" version "2.0.1" apply false
-    id 'com.github.sherter.google-java-format' version '0.9'
-}
-
-apply plugin: 'com.vanniktech.maven.publish'
-
-dependencies {
-    compileOnly deps.apt.autoServiceAnnot
-    annotationProcessor deps.apt.autoService
-    compileOnly deps.build.errorProneCheckApi
-
-    testImplementation deps.test.errorProneTestHelpers
+public class MethodInfoTest {
 }

@@ -4,7 +4,7 @@
  * MODIFIED TO REUSE IN THIS PROJECT.
  */
 
-package edu.ucr.cs.scanner;
+package edu.ucr.cs.riple.scanner;
 
 import java.io.IOException;
 import java.nio.file.Files;

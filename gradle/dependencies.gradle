@@ -55,7 +55,8 @@ def build = [
 
 def test = [
         junitapi                : "org.junit.jupiter:junit-jupiter-api:${versions.junit}",
-        junitengine             : "org.junit.jupiter:junit-jupiter-engine:${versions.junit}"
+        junitengine             : "org.junit.jupiter:junit-jupiter-engine:${versions.junit}",
+        errorProneTestHelpers   : "com.google.errorprone:error_prone_test_helpers:${versions.errorProneApi}",
 ]
 
 ext.deps = [

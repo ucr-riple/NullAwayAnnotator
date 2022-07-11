@@ -22,28 +22,27 @@
  * THE SOFTWARE.
  */
 
-buildscript {
-    repositories {
-        mavenCentral()
-        google() // For Gradle 4.0+
-    }
+package edu.ucr.cs.riple.scanner.out;
 
-    dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.1'
-    }
-}
+import com.sun.source.tree.CompilationUnitTree;
+import com.sun.tools.javac.code.Symbol;
 
-plugins {
-    id "net.ltgt.errorprone" version "2.0.1" apply false
-    id 'com.github.sherter.google-java-format' version '0.9'
-}
+public class ClassInfo {
+  public final Symbol.ClassSymbol clazz;
+  public final String path;
 
-apply plugin: 'com.vanniktech.maven.publish'
+  public ClassInfo(Symbol.ClassSymbol clazz, CompilationUnitTree compilationUnitTree) {
+    this.clazz = clazz;
+    this.path = compilationUnitTree.getSourceFile().toUri().getPath();
+  }
 
-dependencies {
-    compileOnly deps.apt.autoServiceAnnot
-    annotationProcessor deps.apt.autoService
-    compileOnly deps.build.errorProneCheckApi
+  public static String header() {
+    return "path";
+  }
 
-    testImplementation deps.test.errorProneTestHelpers
+  @Override
+  public String toString() {
+
+    return clazz.flatName() + "\t" + path;
+  }
 }
