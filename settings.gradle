@@ -24,6 +24,6 @@
 
 rootProject.name = 'NullAwayAnnotator'
 include 'core'
-include 'css'
+include 'scanner'
 include 'injector'
 
