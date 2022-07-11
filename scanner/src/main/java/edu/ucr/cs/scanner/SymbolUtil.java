@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.css;
+package edu.ucr.cs.scanner;
 
 import com.sun.tools.javac.code.Attribute;
 import com.sun.tools.javac.code.Symbol;
