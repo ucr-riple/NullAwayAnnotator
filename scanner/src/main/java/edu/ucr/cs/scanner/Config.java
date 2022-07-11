@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.css;
+package edu.ucr.cs.scanner;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.ErrorProneFlags;
