@@ -231,14 +231,14 @@ public class Utility {
     }
   }
 
-  public static void setCSSCheckerActivation(Config config, boolean activation) {
+  public static void setScannerCheckerActivation(Config config, boolean activation) {
     DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
     try {
       DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
       Document doc = docBuilder.newDocument();
 
       // Root
-      Element rootElement = doc.createElement("css");
+      Element rootElement = doc.createElement("scanner");
       doc.appendChild(rootElement);
 
       // Method
@@ -270,7 +270,7 @@ public class Utility {
       TransformerFactory transformerFactory = TransformerFactory.newInstance();
       Transformer transformer = transformerFactory.newTransformer();
       DOMSource source = new DOMSource(doc);
-      StreamResult result = new StreamResult(config.cssConfigPath.toFile());
+      StreamResult result = new StreamResult(config.scannerConfigPath.toFile());
       transformer.transform(source, result);
     } catch (ParserConfigurationException | TransformerException e) {
       throw new RuntimeException("Error happened in writing config.", e);

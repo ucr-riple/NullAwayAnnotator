@@ -11,25 +11,25 @@ Below are the instructions to prepare the target project:
 
 #### Dependencies
 1. `NullAway` checker must be activated with version >= `0.9.7`
-2. `CSS` checker must be activated with version >= `1.2.6-LOCAL`, see more about `CSS` [here](../css/README.md).
+2. `Scanner` checker must be activated with version >= `1.2.6-LOCAL`, see more about `Scanner` [here](../scanner/README.md).
 
 #### Error Prone Flags
 ```
 "-Xep:NullAway:ERROR", // to activate NullAway
 "-XepOpt:NullAway:SerializeFixMetadata=true",
 "-XepOpt:NullAway:FixSerializationConfigPath=path_to_nullaway_config.xml",
-"-Xep:CSS:ERROR", // to activate CSS
-"-XepOpt:CSS:ConfigPath=path_to_css_config.xml",
+"-Xep:Scanner:ERROR", // to activate Scanner
+"-XepOpt:Scanner:ConfigPath=path_to_scanner_config.xml",
 ```
 
-`path_to_nullaway_config.xml` and `path_to_css_config.xml` are config files which **are not necessary** to create at the time of preparing the project. 
+`path_to_nullaway_config.xml` and `path_to_scanner_config.xml` are config files which **are not necessary** to create at the time of preparing the project. 
 These two files will be created by the script and enables the communication between the script and the analysis.
 
 Please find a sample project setup below:
 ```groovy
 dependencies {
     annotationProcessor "edu.ucr.cs.riple:nullaway:0.9.6"
-    annotationProcessor "edu.ucr.cs.riple.nullawayannotator:css:1.1.1-LOCAL"
+    annotationProcessor "edu.ucr.cs.riple.nullawayannotator:scanner:1.1.1-LOCAL"
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
     errorprone "com.google.errorprone:error_prone_core:2.3.2"
     errorproneJavac "com.google.errorprone:javac:9+181-r4173-1"
@@ -42,15 +42,15 @@ tasks.withType(JavaCompile) {
                                               "-XepOpt:NullAway:AnnotatedPackages=com.uber",
                                               "-XepOpt:NullAway:SerializeFixMetadata=true",
                                               "-XepOpt:NullAway:FixSerializationConfigPath=/tmp/NullAwayFix/config.xml",
-                                              "-Xep:CSS:ERROR",
-                                              "-XepOpt:CSS:ConfigPath=/tmp/NullAwayFix/css.xml",
+                                              "-Xep:Scanner:ERROR",
+                                              "-XepOpt:Scanner:ConfigPath=/tmp/NullAwayFix/scanner.xml",
         ]
     }
 }
 ```
 At this moment, the target project is ready for the Annotator to process. 
 
-We need to inform the `Annotator` about `path_to_nullaway_config.xml` and `path_to_css_config.xml` (number 2 and 3 in the next section), please read the section below.
+We need to inform the `Annotator` about `path_to_nullaway_config.xml` and `path_to_scanner_config.xml` (number 2 and 3 in the next section), please read the section below.
 
 ### Running Annotator
 `Annotator` is delivered via a `jar` file. To run the `jar` file simply run the command below:
@@ -62,10 +62,10 @@ cd jars && java -jar core.jar
 
 In order to run `Annotator` on target project `P`, arguments below **must** be passed to `Annotator`:
 1. `-bc,--build-command <arg>`: Command to run `NullAway` on target `P` enclosed in **""**. Please note that this command should be executable from any directory (e.g. `"cd /Absolute /Path /To /P && ./build"`).
-2. `-ccp,--css-config-path <arg>`: Path to the `CSS` Config (value used in previous section (`path_to_css_config.xml`)).
+2. `-scp,--scanner-config-path <arg>`: Path to the `Scanner` Config (value used in previous section (`path_to_scanner_config.xml`)).
 3. `-ncp,--nullaway-config-path <arg>`: Path to the `NullAway` Config (value used in previous section (`path_to_nullaway_config.xml`)).
 4. `-i,--initializer <arg>`: Fully qualified name of the `@Initializer` annotation.
-5. `-d,--dir <arg>`: Directory where all outputs of `CSS|NullAway` are serialized.
+5. `-d,--dir <arg>`: Directory where all outputs of `Scanner|NullAway` are serialized.
 
 By default, `Annotator` has the configuration below:
 1. Lexical Preservation is enabled.
@@ -87,7 +87,7 @@ Here are __optional__ arguments which can alter default configurations above:
 
 #### Example
 ```shell
-cd jars && java -jar core.jar -bc "cd /Path /To /P && ./gradlew compileJava" -ccp path_to_css_config.xml -ncp path_to_nullaway_config.xml -i com.custom.Initializer -d /tmp --disable-optimization -dlp
+cd jars && java -jar core.jar -bc "cd /Path /To /P && ./gradlew compileJava" -ccp path_to_scanner_config.xml -ncp path_to_nullaway_config.xml -i com.custom.Initializer -d /tmp --disable-optimization -dlp
 ```
 
 The command above will process project `P` in non-optimized mode and disables lexical preservation features.
@@ -107,7 +107,7 @@ See the format of the config file below with sample values:
   "LEXICAL_PRESERVATION": false,
   "OUTPUT_DIR": "/tmp/NullAwayFix",
   "NULLAWAY_CONFIG_PATH": "/tmp/NullAwayFix/config.xml",
-  "CSS_CONFIG_PATH": "/tmp/NullAwayFix/css.xml",
+  "SCANNER_CONFIG_PATH": "/tmp/NullAwayFix/scanner.xml",
   "CHAIN": true,
   "OPTIMIZED": true,
   "CACHE": true,
@@ -123,7 +123,7 @@ Below is the description of each setting:
 4. `LEXICAL_PRESERVATION`: If set to `true`, activates lexical preservation.
 5. `OUTPUT_DIR`: Directory where the serialized output of NullAway should be written.
 6. `NULLAWAY_CONFIG_PATH`: `path_to_config.xml` given to project in time of preparing the project (previous section).
-7. `CSS_CONFIG_PATH`: `path_to_css.xml` given to project in time of preparing the process (previous section).
+7. `SCANNER_CONFIG_PATH`: `path_to_scanner.xml` given to project in time of preparing the process (previous section).
 8. `OPTIMIZED`: Enables the optimization technique.
 9. `CACHE`: if set to `true`, cache usage will be enabled.
 10. `BAILOUT`: if set to `true`, Annotator will bailout from the search tree as soon as its effectiveness hits zero or less, otherwise it will completely travers the tree until no new fix is suggested
@@ -146,7 +146,7 @@ cd jars && java -jar core.jar --path config.json
 
 or
 
-./start.sh -bc "cd /Path /To /P && ./gradlew compileJava" -ccp path_to_css_config.xml -ncp path_to_nullaway_config.xml -i com.custom.Initializer -d /tmp --disable-optimization -dlp
+./start.sh -bc "cd /Path /To /P && ./gradlew compileJava" -ccp path_to_scanner_config.xml -ncp path_to_nullaway_config.xml -i com.custom.Initializer -d /tmp --disable-optimization -dlp
 ```
 
 To see all flags description simply run `./start.sh --help`
@@ -155,7 +155,7 @@ To see all flags description simply run `./start.sh --help`
                                        target project, this command must
                                        include changing directory from
                                        root to the target project
- -ccp,--css-config-path <arg>          Path to the CSS Config
+ -scp,--scanner-config-path <arg>          Path to the Scanner Config
  -ch,--chain                           Injects the complete tree of fixes
                                        associated to the fix
  -d,--dir <arg>                        Directory of the output files
