@@ -55,7 +55,7 @@ public class Config {
   public final boolean disableOuterLoop;
   public final Path dir;
   public final Path nullAwayConfigPath;
-  public final Path cssConfigPath;
+  public final Path scannerConfigPath;
   public final String buildCommand;
   public final String nullableAnnot;
   public final String initializerAnnot;
@@ -174,11 +174,11 @@ public class Config {
     nullAwayConfigPathOption.setRequired(true);
     options.addOption(nullAwayConfigPathOption);
 
-    // CSS Config Path
-    Option cssConfigPathOption =
-        new Option("ccp", "css-config-path", true, "Path to the CSS Config");
-    cssConfigPathOption.setRequired(true);
-    options.addOption(cssConfigPathOption);
+    // Scanner Config Path
+    Option scannerConfigPathOption =
+        new Option("scp", "scanner-config-path", true, "Path to the Scanner Config");
+    scannerConfigPathOption.setRequired(true);
+    options.addOption(scannerConfigPathOption);
 
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
@@ -209,7 +209,7 @@ public class Config {
                 : "5");
     this.dir = Paths.get(cmd.getOptionValue(dirOption.getLongOpt()));
     this.nullAwayConfigPath = Paths.get(cmd.getOptionValue(nullAwayConfigPathOption.getLongOpt()));
-    this.cssConfigPath = Paths.get(cmd.getOptionValue(cssConfigPathOption.getLongOpt()));
+    this.scannerConfigPath = Paths.get(cmd.getOptionValue(scannerConfigPathOption.getLongOpt()));
     this.lexicalPreservationDisabled = cmd.hasOption(disableLexicalPreservationOption.getLongOpt());
     this.chain = cmd.hasOption(chainOption.getLongOpt());
     this.redirectBuildOutputToStdErr =
@@ -261,10 +261,10 @@ public class Config {
         Paths.get(
             getValueFromKey(jsonObject, "NULLAWAY_CONFIG_PATH", String.class)
                 .orElse("/tmp/NullAwayFix/config.xml"));
-    this.cssConfigPath =
+    this.scannerConfigPath =
         Paths.get(
-            getValueFromKey(jsonObject, "CSS_CONFIG_PATH", String.class)
-                .orElse("/tmp/NullAwayFix/css.xml"));
+            getValueFromKey(jsonObject, "SCANNER_CONFIG_PATH", String.class)
+                .orElse("/tmp/NullAwayFix/scanner.xml"));
     this.dir =
         Paths.get(
             getValueFromKey(jsonObject, "OUTPUT_DIR", String.class).orElse("/tmp/NullAwayFix"));
@@ -321,7 +321,7 @@ public class Config {
     public String nullableAnnotation;
     public String outputDir;
     public String nullAwayConfigPath;
-    public String cssConfigPath;
+    public String scannerConfigPath;
     public boolean chain = false;
     public boolean optimized = true;
     public boolean exhaustiveSearch = false;
@@ -343,7 +343,7 @@ public class Config {
       Preconditions.checkNotNull(
           nullAwayConfigPath, "NulLAway Config Path must be initialized to construct the config.");
       Preconditions.checkNotNull(
-          cssConfigPath, "CSS Config Path must be initialized to construct the config.");
+          scannerConfigPath, "Scanner Config Path must be initialized to construct the config.");
       Preconditions.checkNotNull(
           nullableAnnotation, "Nullable Annotation must be initialized to construct the config.");
       JSONObject json = new JSONObject();
@@ -356,7 +356,7 @@ public class Config {
       json.put("OUTER_LOOP", outerLoopActivation);
       json.put("OUTPUT_DIR", outputDir);
       json.put("NULLAWAY_CONFIG_PATH", nullAwayConfigPath);
-      json.put("CSS_CONFIG_PATH", cssConfigPath);
+      json.put("SCANNER_CONFIG_PATH", scannerConfigPath);
       json.put("CHAIN", chain);
       json.put("OPTIMIZED", optimized);
       json.put("CACHE", cache);

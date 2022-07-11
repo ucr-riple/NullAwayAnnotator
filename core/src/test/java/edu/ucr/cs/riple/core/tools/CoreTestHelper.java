@@ -192,7 +192,7 @@ public class CoreTestHelper {
     Config.Builder builder = new Config.Builder();
     builder.buildCommand =
         Utility.changeDirCommand(projectPath.toString()) + " && ./gradlew compileJava";
-    builder.cssConfigPath = outDirPath.resolve("css.xml").toString();
+    builder.scannerConfigPath = outDirPath.resolve("scanner.xml").toString();
     builder.nullAwayConfigPath = outDirPath.resolve("config.xml").toString();
     builder.nullableAnnotation = "javax.annotation.Nullable";
     builder.initializerAnnotation = "test.Initializer";

@@ -65,7 +65,8 @@ public abstract class BaseCoreTest {
               "-XepOpt:NullAway:FixSerializationConfigPath=" + outDirPath.resolve("config.xml"));
       buildContent =
           buildContent.replace(
-              "-XepOpt:CSS:ConfigPath=", "-XepOpt:CSS:ConfigPath=" + outDirPath.resolve("css.xml"));
+              "-XepOpt:Scanner:ConfigPath=",
+              "-XepOpt:Scanner:ConfigPath=" + outDirPath.resolve("scanner.xml"));
       FileUtils.writeStringToFile(buildFile, buildContent, Charset.defaultCharset());
       processBuilder.start().waitFor();
     } catch (IOException | InterruptedException e) {

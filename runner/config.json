@@ -7,7 +7,7 @@
   "LEXICAL_PRESERVATION": true,
   "OUTPUT_DIR": "/tmp/NullAwayFix",
   "NULLAWAY_CONFIG_PATH": "/tmp/NullAwayFix/config.xml",
-  "CSS_CONFIG_PATH": "/tmp/NullAwayFix/css.xml",
+  "SCANNER_CONFIG_PATH": "/tmp/NullAwayFix/scanner.xml",
   "CHAIN": false,
   "OPTIMIZED": true,
   "CACHE": true,

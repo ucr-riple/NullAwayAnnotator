@@ -113,14 +113,14 @@ public class Test {
 
 Follow the steps below:
 
-* [CSS](css/README.md) module should be installed in the ```local maven``` repository.
+* [Scanner](scanner/README.md) module should be installed in the ```local maven``` repository.
     * To install it, run `./gradlew install`
 
 * Jar file of [Core](core/README.md) module should be located at `runner/jars`.
     * To create the jar file run: `./gradlew fatjar`
 
 A script is provided which executes all installation tasks above. 
-It installs `CSS` checker in `maven local` and creates the jar file of `core` module and moves it to the correct path. To run it, execute the command below:
+It installs `Scanner` checker in `maven local` and creates the jar file of `core` module and moves it to the correct path. To run it, execute the command below:
 
 `cd runner/ && ./update.sh`
 

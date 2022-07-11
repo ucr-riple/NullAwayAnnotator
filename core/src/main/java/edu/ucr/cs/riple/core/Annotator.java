@@ -68,7 +68,7 @@ public class Annotator {
 
   private void preprocess() {
     System.out.println("Preprocessing...");
-    Utility.setCSSCheckerActivation(config, true);
+    Utility.setScannerCheckerActivation(config, true);
     this.reports.clear();
     System.out.println("Making the first build...");
     Utility.buildProject(config, true);
@@ -86,9 +86,9 @@ public class Annotator {
   }
 
   private void explore() {
-    Utility.setCSSCheckerActivation(config, true);
+    Utility.setScannerCheckerActivation(config, true);
     Utility.buildProject(config);
-    Utility.setCSSCheckerActivation(config, false);
+    Utility.setScannerCheckerActivation(config, false);
     FieldDeclarationAnalysis fieldDeclarationAnalysis =
         new FieldDeclarationAnalysis(config.dir.resolve("class_info.tsv"));
     while (true) {

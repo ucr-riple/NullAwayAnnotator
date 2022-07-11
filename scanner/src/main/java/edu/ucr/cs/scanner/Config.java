@@ -46,7 +46,7 @@ public class Config {
   public final boolean classTrackerIsActive;
   public final Serializer serializer;
 
-  static final String EP_FL_NAMESPACE = "CSS";
+  static final String EP_FL_NAMESPACE = "Scanner";
   static final String FL_OUTPUT_DIR = EP_FL_NAMESPACE + ":ConfigPath";
 
   static final String DEFAULT_PATH = "/tmp/NullAwayFix";
@@ -74,19 +74,20 @@ public class Config {
     }
     this.outputDirectory =
         Paths.get(
-            XMLUtil.getValueFromTag(document, "/css/path", String.class).orElse(DEFAULT_PATH));
+            XMLUtil.getValueFromTag(document, "/scanner/path", String.class).orElse(DEFAULT_PATH));
     Preconditions.checkNotNull(
-        this.outputDirectory, "Error in CSS Config: Output path cannot be null");
+        this.outputDirectory, "Error in Scanner Config: Output path cannot be null");
     this.methodTrackerIsActive =
-        XMLUtil.getValueFromAttribute(document, "/css/method", "active", Boolean.class)
+        XMLUtil.getValueFromAttribute(document, "/scanner/method", "active", Boolean.class)
             .orElse(false);
     this.fieldTrackerIsActive =
-        XMLUtil.getValueFromAttribute(document, "/css/field", "active", Boolean.class)
+        XMLUtil.getValueFromAttribute(document, "/scanner/field", "active", Boolean.class)
             .orElse(false);
     this.callTrackerIsActive =
-        XMLUtil.getValueFromAttribute(document, "/css/call", "active", Boolean.class).orElse(false);
+        XMLUtil.getValueFromAttribute(document, "/scanner/call", "active", Boolean.class)
+            .orElse(false);
     this.classTrackerIsActive =
-        XMLUtil.getValueFromAttribute(document, "/css/class", "active", Boolean.class)
+        XMLUtil.getValueFromAttribute(document, "/scanner/class", "active", Boolean.class)
             .orElse(false);
     this.serializer = new Serializer(this);
   }

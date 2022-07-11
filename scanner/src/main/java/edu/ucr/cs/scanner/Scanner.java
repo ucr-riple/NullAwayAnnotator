@@ -49,12 +49,12 @@ import javax.lang.model.element.ElementKind;
 
 @AutoService(BugChecker.class)
 @BugPattern(
-    name = "CSS",
+    name = "Scanner",
     altNames = {"TypeBasedStructureSerializer"},
     summary = "Serialized type based call/field graph.",
     tags = BugPattern.StandardTags.STYLE,
     severity = SUGGESTION)
-public class CSS extends BugChecker
+public class Scanner extends BugChecker
     implements BugChecker.MethodInvocationTreeMatcher,
         BugChecker.MemberSelectTreeMatcher,
         BugChecker.MethodTreeMatcher,
@@ -64,11 +64,11 @@ public class CSS extends BugChecker
 
   private final Config config;
 
-  public CSS() {
+  public Scanner() {
     this.config = new Config();
   }
 
-  public CSS(ErrorProneFlags flags) {
+  public Scanner(ErrorProneFlags flags) {
     this.config = new Config(flags);
   }
 
