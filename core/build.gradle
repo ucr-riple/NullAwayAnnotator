@@ -44,3 +44,10 @@ dependencies {
     testImplementation deps.build.commonsio
 }
 
+task installScanner(type: Exec) {
+
+    executable "sh"
+    args "-c", "./../gradlew :scanner:publishToMavenLocal"
+}
+tasks.test.dependsOn("installScanner")
+
