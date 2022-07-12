@@ -24,8 +24,74 @@
 
 package edu.ucr.cs.riple.scanner;
 
+import com.google.common.base.Preconditions;
+import edu.ucr.cs.riple.scanner.tools.DisplayFactory;
+import edu.ucr.cs.riple.scanner.tools.MethodInfoDisplay;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class MethodInfoTest {}
+public class MethodInfoTest extends ScannerBaseTest<MethodInfoDisplay> {
+
+  private static final DisplayFactory<MethodInfoDisplay> METHOD_DISPLAY_FACTORY =
+      values -> {
+        Preconditions.checkArgument(values.length == 9, "Expected to find 9 values on each line");
+        // Outputs are written in Temp Directory and is not known at compile time, therefore,
+        // relative paths are getting compared.
+        MethodInfoDisplay display =
+            new MethodInfoDisplay(
+                values[0], values[1], values[2], values[3], values[4], values[5], values[6],
+                values[7], values[8]);
+        display.path = display.path.substring(display.path.indexOf("edu/ucr/"));
+        return display;
+      };
+  private static final String HEADER =
+      "id"
+          + "\t"
+          + "class"
+          + "\t"
+          + "method"
+          + "\t"
+          + "parent"
+          + "\t"
+          + "size"
+          + "\t"
+          + "flags"
+          + "\t"
+          + "nullable"
+          + "\t"
+          + "parameters"
+          + "\t"
+          + "uri";
+  private static final String FILE_NAME = "method_info.tsv";
+
+  public MethodInfoTest() {
+    super(METHOD_DISPLAY_FACTORY, HEADER, FILE_NAME);
+  }
+
+  @Test
+  public void BasicTest() {
+    tester
+        .addSourceLines(
+            "edu/ucr/A.java",
+            "package edu.ucr;",
+            "public class A {",
+            "   public Object returnNonNull(){",
+            "      return new Object();",
+            "   }",
+            "}")
+        .setExpectedOutputs(
+            new MethodInfoDisplay(
+                "1",
+                "edu.ucr.A",
+                "returnNonNull()",
+                "0",
+                "0",
+                "[]",
+                "false",
+                "[]",
+                "edu/ucr/A.java"))
+        .doTest();
+  }
+}

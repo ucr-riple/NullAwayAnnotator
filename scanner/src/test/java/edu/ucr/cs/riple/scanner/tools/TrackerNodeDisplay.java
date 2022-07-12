@@ -24,4 +24,52 @@
 
 package edu.ucr.cs.riple.scanner.tools;
 
-public class TrackerNodeDisplay implements Display {}
+import java.util.Objects;
+
+public class TrackerNodeDisplay implements Display {
+
+  public final String callerClass;
+  public final String callerMethod;
+  public final String calleeClass;
+  public final String member;
+
+  public TrackerNodeDisplay(
+      String callerClass, String callerMethod, String calleeClass, String member) {
+    this.callerClass = callerClass;
+    this.callerMethod = callerMethod;
+    this.calleeClass = calleeClass;
+    this.member = member;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    TrackerNodeDisplay that = (TrackerNodeDisplay) o;
+    return callerClass.equals(that.callerClass)
+        && callerMethod.equals(that.callerMethod)
+        && calleeClass.equals(that.calleeClass)
+        && member.equals(that.member);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(callerClass, callerMethod, calleeClass, member);
+  }
+
+  @Override
+  public String toString() {
+    return "callerClass='"
+        + callerClass
+        + '\''
+        + ", callerMethod='"
+        + callerMethod
+        + '\''
+        + ", calleeMethod='"
+        + calleeClass
+        + '\''
+        + ", member='"
+        + member
+        + '\'';
+  }
+}
