@@ -22,11 +22,11 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.scanner;
+package edu.ucr.cs.riple.scanner;
 
-import edu.ucr.cs.scanner.out.ClassInfo;
-import edu.ucr.cs.scanner.out.MethodInfo;
-import edu.ucr.cs.scanner.out.TrackerNode;
+import edu.ucr.cs.riple.scanner.out.ClassInfo;
+import edu.ucr.cs.riple.scanner.out.MethodInfo;
+import edu.ucr.cs.riple.scanner.out.TrackerNode;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -53,7 +53,7 @@ public class Serializer {
   public static final String METHOD_INFO_FILE_NAME = "method_info.tsv";
   public static final String CLASS_INFO_FILE_NAME = "class_info.tsv";
 
-  public Serializer(Config config) {
+  public Serializer(ErrorProneCLIFlagsConfig config) {
     Path outputDirectory = config.outputDirectory;
     this.fieldGraphPath = outputDirectory.resolve(FIELD_GRAPH_FILE_NAME);
     this.callGraphPath = outputDirectory.resolve(CALL_GRAPH_FILE_NAME);
@@ -116,7 +116,7 @@ public class Serializer {
   }
 
   /** Initializes every file which will be re-generated in the new run of NullAway. */
-  private void initializeOutputFiles(Config config) {
+  private void initializeOutputFiles(ErrorProneCLIFlagsConfig config) {
     try {
       Files.createDirectories(config.outputDirectory);
       if (config.callTrackerIsActive) {

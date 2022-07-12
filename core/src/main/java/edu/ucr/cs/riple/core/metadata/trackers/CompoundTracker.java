@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.core.metadata.trackers;
 
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
-import edu.ucr.cs.scanner.Serializer;
+import edu.ucr.cs.riple.scanner.Serializer;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;

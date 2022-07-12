@@ -44,4 +44,6 @@ dependencies {
     compileOnly deps.apt.autoServiceAnnot
     annotationProcessor deps.apt.autoService
     compileOnly deps.build.errorProneCheckApi
+
+    testImplementation deps.test.errorProneTestHelpers
 }

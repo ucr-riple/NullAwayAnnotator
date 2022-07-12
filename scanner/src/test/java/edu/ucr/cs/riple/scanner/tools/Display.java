@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2022 University of California, Riverside.
+ * MIT License
+ *
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,43 +22,7 @@
  * THE SOFTWARE.
  */
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
+package edu.ucr.cs.riple.scanner.tools;
 
-    dependencies {
-        classpath 'com.vanniktech:gradle-maven-publish-plugin:0.14.2'
-    }
-}
-allprojects {
-    group = GROUP
-    version = VERSION_NAME
-    tasks.withType(Test) {
-        maxParallelForks = Runtime.getRuntime().availableProcessors()
-        systemProperties = [
-                'junit.jupiter.execution.parallel.enabled': 'true',
-                'junit.jupiter.execution.parallel.mode.default': 'concurrent'
-        ]
-    }
-}
-
-subprojects {
-    apply plugin: "java"
-
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        google()
-    }
-
-    apply from: "../gradle/dependencies.gradle"
-
-    sourceCompatibility = 1.11
-    targetCompatibility = 1.11
-
-    dependencies {
-        testImplementation deps.test.junitapi
-        testRuntimeOnly deps.test.junitengine
-    }
-}
+/** Marker interface for defining expected output type of {@link SerializationTestHelper}. */
+public interface Display {}

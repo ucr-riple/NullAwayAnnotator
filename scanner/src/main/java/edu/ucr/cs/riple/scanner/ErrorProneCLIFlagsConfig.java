@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.scanner;
+package edu.ucr.cs.riple.scanner;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.ErrorProneFlags;
@@ -36,33 +36,29 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-public class Config {
+public class ErrorProneCLIFlagsConfig implements Config {
 
   public final Path outputDirectory;
   public final boolean methodTrackerIsActive;
   public final boolean fieldTrackerIsActive;
   public final boolean callTrackerIsActive;
-
   public final boolean classTrackerIsActive;
   public final Serializer serializer;
-
   static final String EP_FL_NAMESPACE = "Scanner";
-  static final String FL_OUTPUT_DIR = EP_FL_NAMESPACE + ":ConfigPath";
+  static final String FL_CONFIG_PATH = EP_FL_NAMESPACE + ":ConfigPath";
 
-  static final String DEFAULT_PATH = "/tmp/NullAwayFix";
-
-  public Config() {
+  public ErrorProneCLIFlagsConfig() {
     this.methodTrackerIsActive = false;
     this.fieldTrackerIsActive = false;
     this.callTrackerIsActive = false;
     this.classTrackerIsActive = false;
-    this.outputDirectory = Paths.get(DEFAULT_PATH);
+    this.outputDirectory = null;
     this.serializer = new Serializer(this);
   }
 
-  public Config(ErrorProneFlags flags) {
-    String configFilePath = flags.get(FL_OUTPUT_DIR).orElse(DEFAULT_PATH);
-    Preconditions.checkNotNull(configFilePath);
+  public ErrorProneCLIFlagsConfig(ErrorProneFlags flags) {
+    String configFilePath = flags.get(FL_CONFIG_PATH).orElse(null);
+    Preconditions.checkNotNull(configFilePath, "Config path for Scanner cannot be null.");
     Document document;
     try {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -73,8 +69,7 @@ public class Config {
       throw new RuntimeException("Error in reading/parsing config at path: " + configFilePath, e);
     }
     this.outputDirectory =
-        Paths.get(
-            XMLUtil.getValueFromTag(document, "/scanner/path", String.class).orElse(DEFAULT_PATH));
+        Paths.get(XMLUtil.getValueFromTag(document, "/scanner/path", String.class).orElse(null));
     Preconditions.checkNotNull(
         this.outputDirectory, "Error in Scanner Config: Output path cannot be null");
     this.methodTrackerIsActive =
@@ -90,5 +85,29 @@ public class Config {
         XMLUtil.getValueFromAttribute(document, "/scanner/class", "active", Boolean.class)
             .orElse(false);
     this.serializer = new Serializer(this);
+  }
+
+  public boolean callTrackerIsActive() {
+    return callTrackerIsActive;
+  }
+
+  public boolean fieldTrackerIsActive() {
+    return fieldTrackerIsActive;
+  }
+
+  public boolean methodTrackerIsActive() {
+    return methodTrackerIsActive;
+  }
+
+  public boolean classTrackerIsActive() {
+    return classTrackerIsActive;
+  }
+
+  public Serializer getSerializer() {
+    return serializer;
+  }
+
+  public Path getOutputDirectory() {
+    return outputDirectory;
   }
 }

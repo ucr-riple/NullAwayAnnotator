@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2022 University of California, Riverside.
+ * MIT License
+ *
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,43 +22,35 @@
  * THE SOFTWARE.
  */
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
+package edu.ucr.cs.riple.scanner.tools;
 
-    dependencies {
-        classpath 'com.vanniktech:gradle-maven-publish-plugin:0.14.2'
-    }
-}
-allprojects {
-    group = GROUP
-    version = VERSION_NAME
-    tasks.withType(Test) {
-        maxParallelForks = Runtime.getRuntime().availableProcessors()
-        systemProperties = [
-                'junit.jupiter.execution.parallel.enabled': 'true',
-                'junit.jupiter.execution.parallel.mode.default': 'concurrent'
-        ]
-    }
-}
+import java.util.Objects;
 
-subprojects {
-    apply plugin: "java"
+public class ClassInfoDisplay implements Display {
 
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        google()
-    }
+  public final String clazz;
+  public String path;
 
-    apply from: "../gradle/dependencies.gradle"
+  public ClassInfoDisplay(String clazz, String path) {
+    this.clazz = clazz;
+    this.path = path;
+  }
 
-    sourceCompatibility = 1.11
-    targetCompatibility = 1.11
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    ClassInfoDisplay that = (ClassInfoDisplay) o;
+    return clazz.equals(that.clazz) && path.equals(that.path);
+  }
 
-    dependencies {
-        testImplementation deps.test.junitapi
-        testRuntimeOnly deps.test.junitengine
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hash(clazz, path);
+  }
+
+  @Override
+  public String toString() {
+    return "clazz='" + clazz + '\'' + ", path='" + path + '\'';
+  }
 }

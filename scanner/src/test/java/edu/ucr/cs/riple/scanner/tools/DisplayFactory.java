@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2022 University of California, Riverside.
+ * MIT License
+ *
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,43 +22,19 @@
  * THE SOFTWARE.
  */
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
+package edu.ucr.cs.riple.scanner.tools;
 
-    dependencies {
-        classpath 'com.vanniktech:gradle-maven-publish-plugin:0.14.2'
-    }
-}
-allprojects {
-    group = GROUP
-    version = VERSION_NAME
-    tasks.withType(Test) {
-        maxParallelForks = Runtime.getRuntime().availableProcessors()
-        systemProperties = [
-                'junit.jupiter.execution.parallel.enabled': 'true',
-                'junit.jupiter.execution.parallel.mode.default': 'concurrent'
-        ]
-    }
-}
+/**
+ * Factory class to enable {@link SerializationTestHelper} to create a new instance from values
+ * written in string at each line of output files.
+ */
+public interface DisplayFactory<T extends Display> {
 
-subprojects {
-    apply plugin: "java"
-
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        google()
-    }
-
-    apply from: "../gradle/dependencies.gradle"
-
-    sourceCompatibility = 1.11
-    targetCompatibility = 1.11
-
-    dependencies {
-        testImplementation deps.test.junitapi
-        testRuntimeOnly deps.test.junitengine
-    }
+  /**
+   * Creates an instance of {@code T} from values in string.
+   *
+   * @param values values of instance {@code T} in string.
+   * @return instance of T.
+   */
+  T fromValuesInString(String[] values);
 }

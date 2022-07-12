@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2022 University of California, Riverside.
+ * MIT License
+ *
+ * Copyright (c) 2020 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,43 +22,26 @@
  * THE SOFTWARE.
  */
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
+package edu.ucr.cs.riple.scanner.out;
 
-    dependencies {
-        classpath 'com.vanniktech:gradle-maven-publish-plugin:0.14.2'
-    }
-}
-allprojects {
-    group = GROUP
-    version = VERSION_NAME
-    tasks.withType(Test) {
-        maxParallelForks = Runtime.getRuntime().availableProcessors()
-        systemProperties = [
-                'junit.jupiter.execution.parallel.enabled': 'true',
-                'junit.jupiter.execution.parallel.mode.default': 'concurrent'
-        ]
-    }
-}
+import com.sun.source.tree.CompilationUnitTree;
+import com.sun.tools.javac.code.Symbol;
 
-subprojects {
-    apply plugin: "java"
+public class ClassInfo {
+  public final Symbol.ClassSymbol clazz;
+  public final String path;
 
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        google()
-    }
+  public ClassInfo(Symbol.ClassSymbol clazz, CompilationUnitTree compilationUnitTree) {
+    this.clazz = clazz;
+    this.path = compilationUnitTree.getSourceFile().toUri().getPath();
+  }
 
-    apply from: "../gradle/dependencies.gradle"
+  public static String header() {
+    return "class" + '\t' + "path";
+  }
 
-    sourceCompatibility = 1.11
-    targetCompatibility = 1.11
-
-    dependencies {
-        testImplementation deps.test.junitapi
-        testRuntimeOnly deps.test.junitengine
-    }
+  @Override
+  public String toString() {
+    return clazz.flatName() + "\t" + path;
+  }
 }

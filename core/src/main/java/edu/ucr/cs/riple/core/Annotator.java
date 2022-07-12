@@ -39,7 +39,7 @@ import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Change;
-import edu.ucr.cs.scanner.Serializer;
+import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.stream.Collectors;
