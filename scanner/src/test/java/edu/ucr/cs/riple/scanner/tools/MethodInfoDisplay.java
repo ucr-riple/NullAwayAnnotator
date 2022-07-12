@@ -24,4 +24,4 @@
 
 package edu.ucr.cs.riple.scanner.tools;
 
-public class MethodInfoDisplay {}
+public class MethodInfoDisplay implements Display {}

@@ -24,4 +24,4 @@
 
 package edu.ucr.cs.riple.scanner.tools;
 
-public class TrackerNodeDisplay {}
+public class TrackerNodeDisplay implements Display {}

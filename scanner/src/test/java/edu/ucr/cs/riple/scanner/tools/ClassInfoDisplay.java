@@ -24,4 +24,33 @@
 
 package edu.ucr.cs.riple.scanner.tools;
 
-public class ClassInfoDisplay {}
+import java.util.Objects;
+
+public class ClassInfoDisplay implements Display {
+
+  public final String clazz;
+  public String path;
+
+  public ClassInfoDisplay(String clazz, String path) {
+    this.clazz = clazz;
+    this.path = path;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    ClassInfoDisplay that = (ClassInfoDisplay) o;
+    return clazz.equals(that.clazz) && path.equals(that.path);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(clazz, path);
+  }
+
+  @Override
+  public String toString() {
+    return "clazz='" + clazz + '\'' + ", path='" + path + '\'';
+  }
+}

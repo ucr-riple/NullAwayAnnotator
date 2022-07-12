@@ -24,4 +24,37 @@
 
 package edu.ucr.cs.riple.scanner;
 
-public class ClassInfoTest {}
+import com.google.common.base.Preconditions;
+import edu.ucr.cs.riple.scanner.tools.ClassInfoDisplay;
+import edu.ucr.cs.riple.scanner.tools.DisplayFactory;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+
+@RunWith(JUnit4.class)
+public class ClassInfoTest extends ScannerBaseTest<ClassInfoDisplay> {
+
+  private static final DisplayFactory<ClassInfoDisplay> CLASS_DISPLAY_FACTORY =
+      values -> {
+        Preconditions.checkArgument(values.length == 2, "Expected to find 2 values on each line");
+        // Outputs are written in Temp Directory and is not known at compile time, therefore,
+        // relative paths are getting compared.
+        ClassInfoDisplay display = new ClassInfoDisplay(values[0], values[1]);
+        display.path = display.path.substring(display.path.indexOf("edu/ucr/"));
+        return new ClassInfoDisplay(values[0], values[1].substring(1));
+      };
+  private static final String HEADER = "class\tpath";
+  private static final String FILE_NAME = "class_info.tsv";
+
+  public ClassInfoTest() {
+    super(CLASS_DISPLAY_FACTORY, HEADER, FILE_NAME);
+  }
+
+  @Test
+  public void basicTest() {
+    tester
+        .addSourceLines("edu/ucr/A.java", "package edu.ucr;", "public class A", "{", "}")
+        .setExpectedOutputs(new ClassInfoDisplay("edu.ucr.A", "edu/ucr/A.java"))
+        .doTest();
+  }
+}

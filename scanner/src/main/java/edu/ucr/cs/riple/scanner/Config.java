@@ -33,7 +33,13 @@ import java.nio.file.Paths;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 public class Config {
@@ -42,26 +48,23 @@ public class Config {
   public final boolean methodTrackerIsActive;
   public final boolean fieldTrackerIsActive;
   public final boolean callTrackerIsActive;
-
   public final boolean classTrackerIsActive;
   public final Serializer serializer;
-
   static final String EP_FL_NAMESPACE = "Scanner";
-  static final String FL_OUTPUT_DIR = EP_FL_NAMESPACE + ":ConfigPath";
-
-  static final String DEFAULT_PATH = "/tmp/NullAwayFix";
+  static final String FL_CONFIG_PATH = EP_FL_NAMESPACE + ":ConfigPath";
+  static final String DEFAULT_CONFIG_PATH = "/tmp/NullAwayFix/scanner.xml";
 
   public Config() {
     this.methodTrackerIsActive = false;
     this.fieldTrackerIsActive = false;
     this.callTrackerIsActive = false;
     this.classTrackerIsActive = false;
-    this.outputDirectory = Paths.get(DEFAULT_PATH);
+    this.outputDirectory = null;
     this.serializer = new Serializer(this);
   }
 
   public Config(ErrorProneFlags flags) {
-    String configFilePath = flags.get(FL_OUTPUT_DIR).orElse(DEFAULT_PATH);
+    String configFilePath = flags.get(FL_CONFIG_PATH).orElse(DEFAULT_CONFIG_PATH);
     Preconditions.checkNotNull(configFilePath);
     Document document;
     try {
@@ -73,8 +76,7 @@ public class Config {
       throw new RuntimeException("Error in reading/parsing config at path: " + configFilePath, e);
     }
     this.outputDirectory =
-        Paths.get(
-            XMLUtil.getValueFromTag(document, "/scanner/path", String.class).orElse(DEFAULT_PATH));
+        Paths.get(XMLUtil.getValueFromTag(document, "/scanner/path", String.class).orElse(null));
     Preconditions.checkNotNull(
         this.outputDirectory, "Error in Scanner Config: Output path cannot be null");
     this.methodTrackerIsActive =
@@ -90,5 +92,92 @@ public class Config {
         XMLUtil.getValueFromAttribute(document, "/scanner/class", "active", Boolean.class)
             .orElse(false);
     this.serializer = new Serializer(this);
+  }
+
+  static class Builder {
+    private Path outputDirectory;
+    private boolean methodTrackerIsActive;
+    private boolean fieldTrackerIsActive;
+    private boolean callTrackerIsActive;
+    private boolean classTrackerIsActive;
+
+    public Builder() {
+      this.methodTrackerIsActive = false;
+      this.fieldTrackerIsActive = false;
+      this.callTrackerIsActive = false;
+      this.classTrackerIsActive = false;
+    }
+
+    public Builder setOutput(Path output) {
+      this.outputDirectory = output;
+      return this;
+    }
+
+    public Builder setMethodTrackerActivation(boolean activation) {
+      this.methodTrackerIsActive = activation;
+      return this;
+    }
+
+    public Builder setFieldTrackerActivation(boolean activation) {
+      this.fieldTrackerIsActive = activation;
+      return this;
+    }
+
+    public Builder setCallTrackerActivation(boolean activation) {
+      this.callTrackerIsActive = activation;
+      return this;
+    }
+
+    public Builder setClassTrackerActivation(boolean activation) {
+      this.classTrackerIsActive = activation;
+      return this;
+    }
+
+    public void writeAsXML(Path path) {
+      Preconditions.checkNotNull(this.outputDirectory, "Output directory must be initialized.");
+      DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+      try {
+        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+        Document doc = docBuilder.newDocument();
+
+        // Root
+        Element rootElement = doc.createElement("scanner");
+        doc.appendChild(rootElement);
+
+        // Method
+        Element methodElement = doc.createElement("method");
+        methodElement.setAttribute("active", String.valueOf(methodTrackerIsActive));
+        rootElement.appendChild(methodElement);
+
+        // Field
+        Element fieldElement = doc.createElement("field");
+        fieldElement.setAttribute("active", String.valueOf(fieldTrackerIsActive));
+        rootElement.appendChild(fieldElement);
+
+        // Call
+        Element callElement = doc.createElement("call");
+        callElement.setAttribute("active", String.valueOf(callTrackerIsActive));
+        rootElement.appendChild(callElement);
+
+        // File
+        Element classElement = doc.createElement("class");
+        classElement.setAttribute("active", String.valueOf(classTrackerIsActive));
+        rootElement.appendChild(classElement);
+
+        // Output dir
+        Element outputDir = doc.createElement("path");
+        outputDir.setTextContent(this.outputDirectory.toString());
+        rootElement.appendChild(outputDir);
+
+        // Writings
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        DOMSource source = new DOMSource(doc);
+        StreamResult result = new StreamResult(path.toFile());
+        transformer.transform(source, result);
+      } catch (ParserConfigurationException | TransformerException e) {
+        throw new RuntimeException("Error happened in writing config.", e);
+      }
+    }
   }
 }

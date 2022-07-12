@@ -37,12 +37,11 @@ public class ClassInfo {
   }
 
   public static String header() {
-    return "path";
+    return "class" + '\t' + "path";
   }
 
   @Override
   public String toString() {
-
     return clazz.flatName() + "\t" + path;
   }
 }
