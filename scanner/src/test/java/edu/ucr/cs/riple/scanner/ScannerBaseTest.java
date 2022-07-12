@@ -59,8 +59,8 @@ public abstract class ScannerBaseTest<T extends Display> {
     Path config = root.resolve("scanner.xml");
     try {
       Files.createDirectories(root);
-      Config.Builder builder =
-          new Config.Builder()
+      ErrorProneCLIFlagsConfig.Builder builder =
+          new ErrorProneCLIFlagsConfig.Builder()
               .setCallTrackerActivation(true)
               .setClassTrackerActivation(true)
               .setFieldTrackerActivation(true)

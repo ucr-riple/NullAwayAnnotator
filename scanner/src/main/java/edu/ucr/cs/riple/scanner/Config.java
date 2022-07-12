@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,11 +25,7 @@
 package edu.ucr.cs.riple.scanner;
 
 import com.google.common.base.Preconditions;
-import com.google.errorprone.ErrorProneFlags;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -40,60 +36,22 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
-public class Config {
+public interface Config {
 
-  public final Path outputDirectory;
-  public final boolean methodTrackerIsActive;
-  public final boolean fieldTrackerIsActive;
-  public final boolean callTrackerIsActive;
-  public final boolean classTrackerIsActive;
-  public final Serializer serializer;
-  static final String EP_FL_NAMESPACE = "Scanner";
-  static final String FL_CONFIG_PATH = EP_FL_NAMESPACE + ":ConfigPath";
+  boolean callTrackerIsActive();
 
-  public Config() {
-    this.methodTrackerIsActive = false;
-    this.fieldTrackerIsActive = false;
-    this.callTrackerIsActive = false;
-    this.classTrackerIsActive = false;
-    this.outputDirectory = null;
-    this.serializer = new Serializer(this);
-  }
+  boolean fieldTrackerIsActive();
 
-  public Config(ErrorProneFlags flags) {
-    String configFilePath = flags.get(FL_CONFIG_PATH).orElse(null);
-    Preconditions.checkNotNull(configFilePath, "Config path for Scanner cannot be null.");
-    Document document;
-    try {
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      DocumentBuilder builder = factory.newDocumentBuilder();
-      document = builder.parse(Files.newInputStream(Paths.get(configFilePath)));
-      document.normalize();
-    } catch (IOException | SAXException | ParserConfigurationException e) {
-      throw new RuntimeException("Error in reading/parsing config at path: " + configFilePath, e);
-    }
-    this.outputDirectory =
-        Paths.get(XMLUtil.getValueFromTag(document, "/scanner/path", String.class).orElse(null));
-    Preconditions.checkNotNull(
-        this.outputDirectory, "Error in Scanner Config: Output path cannot be null");
-    this.methodTrackerIsActive =
-        XMLUtil.getValueFromAttribute(document, "/scanner/method", "active", Boolean.class)
-            .orElse(false);
-    this.fieldTrackerIsActive =
-        XMLUtil.getValueFromAttribute(document, "/scanner/field", "active", Boolean.class)
-            .orElse(false);
-    this.callTrackerIsActive =
-        XMLUtil.getValueFromAttribute(document, "/scanner/call", "active", Boolean.class)
-            .orElse(false);
-    this.classTrackerIsActive =
-        XMLUtil.getValueFromAttribute(document, "/scanner/class", "active", Boolean.class)
-            .orElse(false);
-    this.serializer = new Serializer(this);
-  }
+  boolean methodTrackerIsActive();
 
-  static class Builder {
+  boolean classTrackerIsActive();
+
+  Serializer getSerializer();
+
+  Path getOutputDirectory();
+
+  class Builder {
     private Path outputDirectory;
     private boolean methodTrackerIsActive;
     private boolean fieldTrackerIsActive;

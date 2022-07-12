@@ -43,7 +43,6 @@ import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.riple.scanner.out.ClassInfo;
 import edu.ucr.cs.riple.scanner.out.MethodInfo;
 import edu.ucr.cs.riple.scanner.out.TrackerNode;
-
 import java.util.ArrayList;
 import java.util.List;
 import javax.lang.model.element.ElementKind;
@@ -66,37 +65,40 @@ public class Scanner extends BugChecker
   private final Config config;
 
   public Scanner() {
-    this.config = new Config();
+    this.config = new DummyOptionsConfig();
   }
 
   public Scanner(ErrorProneFlags flags) {
-    this.config = new Config(flags);
+    this.config = new ErrorProneCLIFlagsConfig(flags);
   }
 
   @Override
   public Description matchClass(ClassTree classTree, VisitorState visitorState) {
-    if (!config.classTrackerIsActive) {
+    if (!config.classTrackerIsActive()) {
       return Description.NO_MATCH;
     }
-    config.serializer.serializeClassInfo(
-        new ClassInfo(
-            ASTHelpers.getSymbol(classTree), visitorState.getPath().getCompilationUnit()));
+    config
+        .getSerializer()
+        .serializeClassInfo(
+            new ClassInfo(
+                ASTHelpers.getSymbol(classTree), visitorState.getPath().getCompilationUnit()));
     return Description.NO_MATCH;
   }
 
   @Override
   public Description matchMethodInvocation(MethodInvocationTree tree, VisitorState state) {
-    if (!config.callTrackerIsActive) {
+    if (!config.callTrackerIsActive()) {
       return Description.NO_MATCH;
     }
-    config.serializer.serializeCallGraphNode(
-        new TrackerNode(ASTHelpers.getSymbol(tree), state.getPath(), true));
+    config
+        .getSerializer()
+        .serializeCallGraphNode(new TrackerNode(ASTHelpers.getSymbol(tree), state.getPath(), true));
     return Description.NO_MATCH;
   }
 
   @Override
   public Description matchMethod(MethodTree tree, VisitorState state) {
-    if (!config.methodTrackerIsActive) {
+    if (!config.methodTrackerIsActive()) {
       return Description.NO_MATCH;
     }
     Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(tree);
@@ -110,13 +112,13 @@ public class Scanner extends BugChecker
     methodInfo.setParamAnnotations(paramAnnotations);
     methodInfo.setURI(state.getPath().getCompilationUnit().getSourceFile().toUri());
     methodInfo.setParameterNames(tree.getParameters());
-    config.serializer.serializeMethodInfo(methodInfo);
+    config.getSerializer().serializeMethodInfo(methodInfo);
     return Description.NO_MATCH;
   }
 
   @Override
   public Description matchVariable(VariableTree tree, VisitorState state) {
-    if (!config.fieldTrackerIsActive) {
+    if (!config.fieldTrackerIsActive()) {
       return Description.NO_MATCH;
     }
     serializeField(ASTHelpers.getSymbol(tree.getInitializer()), state, true);
@@ -125,7 +127,7 @@ public class Scanner extends BugChecker
 
   @Override
   public Description matchIdentifier(IdentifierTree tree, VisitorState state) {
-    if (!config.fieldTrackerIsActive) {
+    if (!config.fieldTrackerIsActive()) {
       return Description.NO_MATCH;
     }
     serializeField(ASTHelpers.getSymbol(tree), state, false);
@@ -134,7 +136,7 @@ public class Scanner extends BugChecker
 
   @Override
   public Description matchMemberSelect(MemberSelectTree tree, VisitorState state) {
-    if (!config.fieldTrackerIsActive) {
+    if (!config.fieldTrackerIsActive()) {
       return Description.NO_MATCH;
     }
     serializeField(ASTHelpers.getSymbol(tree), state, false);
@@ -143,7 +145,9 @@ public class Scanner extends BugChecker
 
   private void serializeField(Symbol symbol, VisitorState state, boolean force) {
     if (symbol != null && symbol.getKind() == ElementKind.FIELD) {
-      config.serializer.serializeFieldGraphNode(new TrackerNode(symbol, state.getPath(), force));
+      config
+          .getSerializer()
+          .serializeFieldGraphNode(new TrackerNode(symbol, state.getPath(), force));
     }
   }
 }

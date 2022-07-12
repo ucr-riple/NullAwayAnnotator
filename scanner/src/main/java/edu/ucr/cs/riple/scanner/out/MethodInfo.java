@@ -31,7 +31,6 @@ import com.sun.source.tree.VariableTree;
 import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.riple.scanner.Config;
 import edu.ucr.cs.riple.scanner.SymbolUtil;
-
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
