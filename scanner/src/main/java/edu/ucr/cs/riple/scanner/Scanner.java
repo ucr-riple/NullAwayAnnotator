@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.scanner;
+package edu.ucr.cs.riple.scanner;
 
 import static com.google.errorprone.BugPattern.SeverityLevel.SUGGESTION;
 
@@ -40,9 +40,10 @@ import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.tools.javac.code.Symbol;
-import edu.ucr.cs.scanner.out.ClassInfo;
-import edu.ucr.cs.scanner.out.MethodInfo;
-import edu.ucr.cs.scanner.out.TrackerNode;
+import edu.ucr.cs.riple.scanner.out.ClassInfo;
+import edu.ucr.cs.riple.scanner.out.MethodInfo;
+import edu.ucr.cs.riple.scanner.out.TrackerNode;
+
 import java.util.ArrayList;
 import java.util.List;
 import javax.lang.model.element.ElementKind;

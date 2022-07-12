@@ -22,29 +22,29 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.scanner;
+package edu.ucr.cs.riple.scanner;
 
 import com.google.common.base.Preconditions;
-import edu.ucr.cs.scanner.tools.DisplayFactory;
-import edu.ucr.cs.scanner.tools.TrackerNodeDisplay;
+import edu.ucr.cs.riple.scanner.tools.DisplayFactory;
+import edu.ucr.cs.riple.scanner.tools.TrackerNodeDisplay;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class MethodTrackerTest extends ScannerBaseTest<TrackerNodeDisplay> {
+public class FieldTrackerTest extends ScannerBaseTest<TrackerNodeDisplay> {
 
-  private static final DisplayFactory<TrackerNodeDisplay> METHOD_TRACKER_DISPLAY_FACTORY =
+  private static final DisplayFactory<TrackerNodeDisplay> FIELD_TRACKER_DISPLAY_FACTORY =
       values -> {
         Preconditions.checkArgument(values.length == 4, "Expected to find 4 values on each line");
         return new TrackerNodeDisplay(values[0], values[1], values[3], values[2]);
       };
   private static final String HEADER =
       "CALLER_CLASS" + '\t' + "CALLER_METHOD" + '\t' + "MEMBER" + '\t' + "CALLEE_CLASS";
-  private static final String FILE_NAME = "call_graph.tsv";
+  private static final String FILE_NAME = "field_graph.tsv";
 
-  public MethodTrackerTest() {
-    super(METHOD_TRACKER_DISPLAY_FACTORY, HEADER, FILE_NAME);
+  public FieldTrackerTest() {
+    super(FIELD_TRACKER_DISPLAY_FACTORY, HEADER, FILE_NAME);
   }
 
   @Test
@@ -56,13 +56,13 @@ public class MethodTrackerTest extends ScannerBaseTest<TrackerNodeDisplay> {
             "public class A {",
             "   public Object bar(){",
             "      Other o = new Other();",
-            "      return o.foo();",
+            "      return o.foo;",
             "   }",
             "}",
             "class Other {",
-            "   Object foo() { return null; };",
+            "   Object foo;",
             "}")
-        .setExpectedOutputs(new TrackerNodeDisplay("edu.ucr.A", "bar()", "edu.ucr.Other", "foo()"))
+        .setExpectedOutputs(new TrackerNodeDisplay("edu.ucr.A", "bar()", "edu.ucr.Other", "foo"))
         .doTest();
   }
 }

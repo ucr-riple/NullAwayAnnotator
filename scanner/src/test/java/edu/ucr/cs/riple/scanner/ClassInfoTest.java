@@ -22,47 +22,39 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.scanner;
+package edu.ucr.cs.riple.scanner;
 
 import com.google.common.base.Preconditions;
-import edu.ucr.cs.scanner.tools.DisplayFactory;
-import edu.ucr.cs.scanner.tools.TrackerNodeDisplay;
+import edu.ucr.cs.riple.scanner.tools.ClassInfoDisplay;
+import edu.ucr.cs.riple.scanner.tools.DisplayFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class FieldTrackerTest extends ScannerBaseTest<TrackerNodeDisplay> {
+public class ClassInfoTest extends ScannerBaseTest<ClassInfoDisplay> {
 
-  private static final DisplayFactory<TrackerNodeDisplay> FIELD_TRACKER_DISPLAY_FACTORY =
+  private static final DisplayFactory<ClassInfoDisplay> CLASS_DISPLAY_FACTORY =
       values -> {
-        Preconditions.checkArgument(values.length == 4, "Expected to find 4 values on each line");
-        return new TrackerNodeDisplay(values[0], values[1], values[3], values[2]);
+        Preconditions.checkArgument(values.length == 2, "Expected to find 2 values on each line");
+        // Outputs are written in Temp Directory and is not known at compile time, therefore,
+        // relative paths are getting compared.
+        ClassInfoDisplay display = new ClassInfoDisplay(values[0], values[1]);
+        display.path = display.path.substring(display.path.indexOf("edu/ucr/"));
+        return new ClassInfoDisplay(values[0], values[1].substring(1));
       };
-  private static final String HEADER =
-      "CALLER_CLASS" + '\t' + "CALLER_METHOD" + '\t' + "MEMBER" + '\t' + "CALLEE_CLASS";
-  private static final String FILE_NAME = "field_graph.tsv";
+  private static final String HEADER = "class\tpath";
+  private static final String FILE_NAME = "class_info.tsv";
 
-  public FieldTrackerTest() {
-    super(FIELD_TRACKER_DISPLAY_FACTORY, HEADER, FILE_NAME);
+  public ClassInfoTest() {
+    super(CLASS_DISPLAY_FACTORY, HEADER, FILE_NAME);
   }
 
   @Test
   public void BasicTest() {
     tester
-        .addSourceLines(
-            "edu/ucr/A.java",
-            "package edu.ucr;",
-            "public class A {",
-            "   public Object bar(){",
-            "      Other o = new Other();",
-            "      return o.foo;",
-            "   }",
-            "}",
-            "class Other {",
-            "   Object foo;",
-            "}")
-        .setExpectedOutputs(new TrackerNodeDisplay("edu.ucr.A", "bar()", "edu.ucr.Other", "foo"))
+        .addSourceLines("edu/ucr/A.java", "package edu.ucr;", "public class A", "{", "}")
+        .setExpectedOutputs(new ClassInfoDisplay("edu.ucr.A", "edu/ucr/A.java"))
         .doTest();
   }
 }

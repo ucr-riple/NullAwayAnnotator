@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,26 +22,35 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.scanner.out;
+package edu.ucr.cs.riple.scanner.tools;
 
-import com.sun.source.tree.CompilationUnitTree;
-import com.sun.tools.javac.code.Symbol;
+import java.util.Objects;
 
-public class ClassInfo {
-  public final Symbol.ClassSymbol clazz;
-  public final String path;
+public class ClassInfoDisplay implements Display {
 
-  public ClassInfo(Symbol.ClassSymbol clazz, CompilationUnitTree compilationUnitTree) {
+  public final String clazz;
+  public String path;
+
+  public ClassInfoDisplay(String clazz, String path) {
     this.clazz = clazz;
-    this.path = compilationUnitTree.getSourceFile().toUri().getPath();
+    this.path = path;
   }
 
-  public static String header() {
-    return "class" + '\t' + "path";
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    ClassInfoDisplay that = (ClassInfoDisplay) o;
+    return clazz.equals(that.clazz) && path.equals(that.path);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(clazz, path);
   }
 
   @Override
   public String toString() {
-    return clazz.flatName() + "\t" + path;
+    return "clazz='" + clazz + '\'' + ", path='" + path + '\'';
   }
 }

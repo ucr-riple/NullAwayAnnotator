@@ -22,11 +22,11 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.scanner;
+package edu.ucr.cs.riple.scanner;
 
 import com.google.common.base.Preconditions;
-import edu.ucr.cs.scanner.tools.DisplayFactory;
-import edu.ucr.cs.scanner.tools.MethodInfoDisplay;
+import edu.ucr.cs.riple.scanner.tools.DisplayFactory;
+import edu.ucr.cs.riple.scanner.tools.MethodInfoDisplay;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;

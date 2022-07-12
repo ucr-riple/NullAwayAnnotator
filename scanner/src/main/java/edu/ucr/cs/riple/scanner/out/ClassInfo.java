@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Nima Karimipour
+ * Copyright (c) 2020 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,26 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.scanner.tools;
+package edu.ucr.cs.riple.scanner.out;
 
-/** Marker interface for defining expected output type of {@link SerializationTestHelper}. */
-public interface Display {}
+import com.sun.source.tree.CompilationUnitTree;
+import com.sun.tools.javac.code.Symbol;
+
+public class ClassInfo {
+  public final Symbol.ClassSymbol clazz;
+  public final String path;
+
+  public ClassInfo(Symbol.ClassSymbol clazz, CompilationUnitTree compilationUnitTree) {
+    this.clazz = clazz;
+    this.path = compilationUnitTree.getSourceFile().toUri().getPath();
+  }
+
+  public static String header() {
+    return "class" + '\t' + "path";
+  }
+
+  @Override
+  public String toString() {
+    return clazz.flatName() + "\t" + path;
+  }
+}
