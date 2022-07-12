@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.scanner.tools;
+package edu.ucr.cs.scanner.tools;
 
 /**
  * Factory class to enable {@link SerializationTestHelper} to create a new instance from values

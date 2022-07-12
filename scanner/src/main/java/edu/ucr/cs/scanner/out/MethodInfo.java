@@ -22,15 +22,15 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.scanner.out;
+package edu.ucr.cs.scanner.out;
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.VisitorState;
 import com.sun.source.tree.VariableTree;
 import com.sun.tools.javac.code.Symbol;
-import edu.ucr.cs.riple.scanner.Config;
-import edu.ucr.cs.riple.scanner.SymbolUtil;
+import edu.ucr.cs.scanner.Config;
+import edu.ucr.cs.scanner.SymbolUtil;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;

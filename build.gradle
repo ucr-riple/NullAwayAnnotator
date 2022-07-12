@@ -52,6 +52,9 @@ subprojects {
 
     apply from: "../gradle/dependencies.gradle"
 
+    sourceCompatibility = 1.11
+    targetCompatibility = 1.11
+
     dependencies {
         testImplementation deps.test.junitapi
         testRuntimeOnly deps.test.junitengine

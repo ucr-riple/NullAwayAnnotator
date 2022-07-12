@@ -22,11 +22,11 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.scanner;
+package edu.ucr.cs.scanner;
 
-import edu.ucr.cs.riple.scanner.tools.Display;
-import edu.ucr.cs.riple.scanner.tools.DisplayFactory;
-import edu.ucr.cs.riple.scanner.tools.SerializationTestHelper;
+import edu.ucr.cs.scanner.tools.Display;
+import edu.ucr.cs.scanner.tools.DisplayFactory;
+import edu.ucr.cs.scanner.tools.SerializationTestHelper;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;

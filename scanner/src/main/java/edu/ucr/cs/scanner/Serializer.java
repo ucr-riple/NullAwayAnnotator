@@ -22,11 +22,11 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.scanner;
+package edu.ucr.cs.scanner;
 
-import edu.ucr.cs.riple.scanner.out.ClassInfo;
-import edu.ucr.cs.riple.scanner.out.MethodInfo;
-import edu.ucr.cs.riple.scanner.out.TrackerNode;
+import edu.ucr.cs.scanner.out.ClassInfo;
+import edu.ucr.cs.scanner.out.MethodInfo;
+import edu.ucr.cs.scanner.out.TrackerNode;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;

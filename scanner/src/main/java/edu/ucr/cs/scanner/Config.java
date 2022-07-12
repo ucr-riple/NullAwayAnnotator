@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.scanner;
+package edu.ucr.cs.scanner;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.ErrorProneFlags;
@@ -52,7 +52,6 @@ public class Config {
   public final Serializer serializer;
   static final String EP_FL_NAMESPACE = "Scanner";
   static final String FL_CONFIG_PATH = EP_FL_NAMESPACE + ":ConfigPath";
-  static final String DEFAULT_CONFIG_PATH = "/tmp/NullAwayFix/scanner.xml";
 
   public Config() {
     this.methodTrackerIsActive = false;
@@ -64,8 +63,8 @@ public class Config {
   }
 
   public Config(ErrorProneFlags flags) {
-    String configFilePath = flags.get(FL_CONFIG_PATH).orElse(DEFAULT_CONFIG_PATH);
-    Preconditions.checkNotNull(configFilePath);
+    String configFilePath = flags.get(FL_CONFIG_PATH).orElse(null);
+    Preconditions.checkNotNull(configFilePath, "Config path for Scanner cannot be null.");
     Document document;
     try {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

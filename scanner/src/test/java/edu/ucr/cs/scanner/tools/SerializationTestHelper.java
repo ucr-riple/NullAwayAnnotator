@@ -22,14 +22,14 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.scanner.tools;
+package edu.ucr.cs.scanner.tools;
 
 import static org.junit.Assert.fail;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.CompilationTestHelper;
-import edu.ucr.cs.riple.scanner.Scanner;
+import edu.ucr.cs.scanner.Scanner;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
