@@ -38,23 +38,14 @@ public class FixSerializationConfig {
 
   public final boolean fieldInitInfoEnabled;
 
-  public final boolean methodParamProtectionTestEnabled;
-
-  public final int paramTestIndex;
-
   /** The directory where all files generated/read by Fix Serialization package resides. */
   @Nullable public final String outputDirectory;
-
-  public final AnnotationConfig annotationConfig;
 
   /** Default Constructor, all features are disabled with this config. */
   public FixSerializationConfig() {
     suggestEnabled = false;
     suggestEnclosing = false;
     fieldInitInfoEnabled = false;
-    methodParamProtectionTestEnabled = false;
-    paramTestIndex = Integer.MAX_VALUE;
-    annotationConfig = new AnnotationConfig();
     outputDirectory = null;
   }
 
@@ -62,17 +53,11 @@ public class FixSerializationConfig {
       boolean suggestEnabled,
       boolean suggestEnclosing,
       boolean fieldInitInfoEnabled,
-      boolean methodParamProtectionTestEnabled,
-      int paramTestIndex,
-      AnnotationConfig annotationConfig,
       String outputDirectory) {
     this.suggestEnabled = suggestEnabled;
     this.suggestEnclosing = suggestEnclosing;
     this.fieldInitInfoEnabled = fieldInitInfoEnabled;
-    this.methodParamProtectionTestEnabled = methodParamProtectionTestEnabled;
-    this.paramTestIndex = paramTestIndex;
     this.outputDirectory = outputDirectory;
-    this.annotationConfig = annotationConfig;
   }
 
   /** Builder class for Serialization Config */
@@ -81,29 +66,17 @@ public class FixSerializationConfig {
     private boolean suggestEnabled;
     private boolean suggestEnclosing;
     private boolean fieldInitInfo;
-    private boolean methodParamProtectionTestEnabled;
-    private int paramIndex;
-    private String nullable;
-    private String nonnull;
     @Nullable private String outputDir;
 
     public Builder() {
       suggestEnabled = false;
       suggestEnclosing = false;
       fieldInitInfo = false;
-      nullable = "javax.annotation.Nullable";
-      nonnull = "javax.annotation.Nonnull";
     }
 
     public Builder setSuggest(boolean value, boolean withEnclosing) {
       this.suggestEnabled = value;
       this.suggestEnclosing = withEnclosing && suggestEnabled;
-      return this;
-    }
-
-    public Builder setAnnotations(String nullable, String nonnull) {
-      this.nullable = nullable;
-      this.nonnull = nonnull;
       return this;
     }
 
@@ -114,12 +87,6 @@ public class FixSerializationConfig {
 
     public Builder setOutputDirectory(String outputDir) {
       this.outputDir = outputDir;
-      return this;
-    }
-
-    public Builder setParamProtectionTest(boolean value, int index) {
-      this.methodParamProtectionTestEnabled = value;
-      this.paramIndex = index;
       return this;
     }
 
@@ -137,14 +104,7 @@ public class FixSerializationConfig {
       if (outputDir == null) {
         throw new IllegalStateException("did not set mandatory output directory");
       }
-      return new FixSerializationConfig(
-          suggestEnabled,
-          suggestEnclosing,
-          fieldInitInfo,
-          methodParamProtectionTestEnabled,
-          paramIndex,
-          new AnnotationConfig(nullable, nonnull),
-          outputDir);
+      return new FixSerializationConfig(suggestEnabled, suggestEnclosing, fieldInitInfo, outputDir);
     }
   }
 }
