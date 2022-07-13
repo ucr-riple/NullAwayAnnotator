@@ -63,7 +63,8 @@ public class Fix extends Hashable {
               field.variables.addAll(variables);
             });
       }
-      Preconditions.checkArgument(info[7].equals("nullable"), "unsupported annotation: " + info[7]);
+      // TODO: Uncomment preconditions below once NullAway 0.9.9 is released.
+      // Preconditions.checkArgument(info[7].equals("nullable"), "unsupported annotation: " + info[7]);
       return new Fix(new Change(location, config.nullableAnnot, true), info[6], info[8], info[9]);
     };
   }
