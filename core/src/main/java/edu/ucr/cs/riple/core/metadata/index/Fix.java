@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.metadata.index;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
@@ -62,6 +63,7 @@ public class Fix extends Hashable {
               field.variables.addAll(variables);
             });
       }
+      Preconditions.checkArgument(info[7].equals("nullable"), "unsupported annotation: " + info[7]);
       return new Fix(new Change(location, config.nullableAnnot, true), info[6], info[8], info[9]);
     };
   }
