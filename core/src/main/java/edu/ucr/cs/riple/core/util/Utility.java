@@ -65,7 +65,6 @@ import org.w3c.dom.Element;
 /** Utility class. */
 public class Utility {
 
-  @SuppressWarnings("StatementWithEmptyBody")
   public static void executeCommand(String command, Config config) {
     try {
       Process p = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
@@ -198,23 +197,6 @@ public class Utility {
       fieldInitInfoEnabled.setAttribute("active", String.valueOf(config.fieldInitInfoEnabled));
       rootElement.appendChild(fieldInitInfoEnabled);
 
-      // Method Parameter Protection Test
-      Element paramTestElement = doc.createElement("paramTest");
-      paramTestElement.setAttribute(
-          "active", String.valueOf(config.methodParamProtectionTestEnabled));
-      paramTestElement.setAttribute("index", String.valueOf(config.paramTestIndex));
-      rootElement.appendChild(paramTestElement);
-
-      // Annotations
-      Element annots = doc.createElement("annotation");
-      Element nonnull = doc.createElement("nonnull");
-      nonnull.setTextContent(config.annotationConfig.getNonNull().getFullName());
-      Element nullable = doc.createElement("nullable");
-      nullable.setTextContent(config.annotationConfig.getNullable().getFullName());
-      annots.appendChild(nullable);
-      annots.appendChild(nonnull);
-      rootElement.appendChild(annots);
-
       // Output dir
       Element outputDir = doc.createElement("path");
       outputDir.setTextContent(config.outputDirectory);
@@ -288,7 +270,6 @@ public class Utility {
     FixSerializationConfig.Builder nullAwayConfig =
         new FixSerializationConfig.Builder()
             .setSuggest(true, true)
-            .setAnnotations(config.nullableAnnot, "UNKNOWN")
             .setOutputDirectory(config.dir.toString())
             .setFieldInitInfo(initSerializationEnabled);
     nullAwayConfig.writeAsXML(config.nullAwayConfigPath.toString());

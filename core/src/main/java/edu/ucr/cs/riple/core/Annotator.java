@@ -73,7 +73,7 @@ public class Annotator {
     System.out.println("Making the first build...");
     Utility.buildProject(config, true);
     Set<Fix> uninitializedFields =
-        Utility.readFixesFromOutputDirectory(config, Fix.factory(null)).stream()
+        Utility.readFixesFromOutputDirectory(config, Fix.factory(config, null)).stream()
             .filter(fix -> fix.reasons.contains("FIELD_NO_INIT") && fix.isOnField())
             .collect(Collectors.toSet());
     FieldInitializationAnalysis analysis =
@@ -94,7 +94,8 @@ public class Annotator {
     while (true) {
       Utility.buildProject(config);
       Set<Fix> remainingFixes =
-          Utility.readFixesFromOutputDirectory(config, Fix.factory(fieldDeclarationAnalysis));
+          Utility.readFixesFromOutputDirectory(
+              config, Fix.factory(config, fieldDeclarationAnalysis));
       if (config.useCache) {
         remainingFixes =
             remainingFixes.stream()
@@ -104,7 +105,8 @@ public class Annotator {
       ImmutableSet<Fix> fixes = ImmutableSet.copyOf(remainingFixes);
       Bank<Error> errorBank = new Bank<>(config.dir.resolve("errors.tsv"), Error::new);
       Bank<Fix> fixBank =
-          new Bank<>(config.dir.resolve("fixes.tsv"), Fix.factory(fieldDeclarationAnalysis));
+          new Bank<>(
+              config.dir.resolve("fixes.tsv"), Fix.factory(config, fieldDeclarationAnalysis));
       MethodInheritanceTree tree =
           new MethodInheritanceTree(config.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
       RegionTracker tracker = new CompoundTracker(config.dir, tree);

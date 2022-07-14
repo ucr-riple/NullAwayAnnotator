@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.metadata.index;
 
 import com.google.common.collect.Sets;
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.injector.Change;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -50,9 +51,9 @@ public class Fix extends Hashable {
     this.reasons = reason != null ? Sets.newHashSet(reason) : new HashSet<>();
   }
 
-  public static Factory<Fix> factory(FieldDeclarationAnalysis analysis) {
-    return infos -> {
-      Location location = Location.createLocationFromArrayInfo(infos);
+  public static Factory<Fix> factory(Config config, FieldDeclarationAnalysis analysis) {
+    return info -> {
+      Location location = Location.createLocationFromArrayInfo(info);
       if (analysis != null) {
         location.ifField(
             field -> {
@@ -61,7 +62,10 @@ public class Fix extends Hashable {
               field.variables.addAll(variables);
             });
       }
-      return new Fix(new Change(location, infos[7], true), infos[6], infos[8], infos[9]);
+      // TODO: Uncomment preconditions below once NullAway 0.9.9 is released.
+      // Preconditions.checkArgument(info[7].equals("nullable"), "unsupported annotation: " +
+      // info[7]);
+      return new Fix(new Change(location, config.nullableAnnot, true), info[6], info[8], info[9]);
     };
   }
 
