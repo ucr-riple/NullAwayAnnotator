@@ -27,33 +27,37 @@ package edu.ucr.cs.riple.scanner;
 import java.nio.file.Path;
 
 public class DummyOptionsConfig implements Config {
+
+  static final String ERROR_MESSAGE =
+      "Error in configuring Scanner Checker, a path must be passed via Error Prone Flag (-XepOpt:Scanner:ConfigPath) where output directory is in XML format.";
+
   @Override
   public boolean callTrackerIsActive() {
-    throw new IllegalStateException("Error in configuring Scanner Checker.");
+    throw new IllegalStateException(ERROR_MESSAGE);
   }
 
   @Override
   public boolean fieldTrackerIsActive() {
-    throw new IllegalStateException("Error in configuring Scanner Checker.");
+    throw new IllegalStateException(ERROR_MESSAGE);
   }
 
   @Override
   public boolean methodTrackerIsActive() {
-    throw new IllegalStateException("Error in configuring Scanner Checker.");
+    throw new IllegalStateException(ERROR_MESSAGE);
   }
 
   @Override
   public boolean classTrackerIsActive() {
-    throw new IllegalStateException("Error in configuring Scanner Checker.");
+    throw new IllegalStateException(ERROR_MESSAGE);
   }
 
   @Override
   public Serializer getSerializer() {
-    throw new IllegalStateException("Error in configuring Scanner Checker.");
+    throw new IllegalStateException(ERROR_MESSAGE);
   }
 
   @Override
   public Path getOutputDirectory() {
-    throw new IllegalStateException("Error in configuring Scanner Checker.");
+    throw new IllegalStateException(ERROR_MESSAGE);
   }
 }
