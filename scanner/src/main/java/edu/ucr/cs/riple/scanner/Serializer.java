@@ -53,7 +53,6 @@ public class Serializer {
   public static final String METHOD_INFO_FILE_NAME = "method_info.tsv";
   public static final String CLASS_INFO_FILE_NAME = "class_info.tsv";
 
-
   public Serializer(Config config) {
     Path outputDirectory = config.getOutputDirectory();
     this.fieldGraphPath = outputDirectory.resolve(FIELD_GRAPH_FILE_NAME);

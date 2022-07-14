@@ -24,8 +24,8 @@
 
 package edu.ucr.cs.riple.scanner;
 
-import javax.annotation.Nonnull;
 import java.nio.file.Path;
+import javax.annotation.Nonnull;
 
 public class DummyOptionsConfig implements Config {
 
