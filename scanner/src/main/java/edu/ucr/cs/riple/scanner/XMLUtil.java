@@ -9,6 +9,7 @@ package edu.ucr.cs.riple.scanner;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import javax.annotation.Nullable;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -28,14 +29,17 @@ public class XMLUtil {
    * Helper method for reading attributes of node located at /key_1/key_2/.../key_n (in the form of
    * {@code Xpath} query) from a {@link Document}.
    *
-   * @param doc XML object to read values from.
+   * @param doc XML object to read values from, if null passed, the default value will be returned.
    * @param key Key to locate the value, can be nested in the form of {@code Xpath} query (e.g.
    *     /key1/key2:.../key_n).
    * @param klass Class type of the value in doc.
    * @return The value in the specified keychain cast to the class type given in parameter.
    */
   public static <T> DefaultXMLValueProvider<T> getValueFromAttribute(
-      Document doc, String key, String attr, Class<T> klass) {
+      @Nullable Document doc, String key, String attr, Class<T> klass) {
+    if (doc == null) {
+      return new DefaultXMLValueProvider<>(null, klass);
+    }
     try {
       XPath xPath = XPathFactory.newInstance().newXPath();
       Node node = (Node) xPath.compile(key).evaluate(doc, XPathConstants.NODE);
@@ -53,14 +57,17 @@ public class XMLUtil {
    * Helper method for reading value of a node located at /key_1/key_2/.../key_n (in the form of
    * {@code Xpath} query) from a {@link Document}.
    *
-   * @param doc XML object to read values from.
+   * @param doc XML object to read values from, if null passed, the default value will be returned.
    * @param key Key to locate the value, can be nested in the form of {@code Xpath} query (e.g.
    *     /key1/key2/.../key_n).
    * @param klass Class type of the value in doc.
    * @return The value in the specified keychain cast to the class type given in parameter.
    */
   public static <T> DefaultXMLValueProvider<T> getValueFromTag(
-      Document doc, String key, Class<T> klass) {
+      @Nullable Document doc, String key, Class<T> klass) {
+    if (doc == null) {
+      return new DefaultXMLValueProvider<>(null, klass);
+    }
     try {
       XPath xPath = XPathFactory.newInstance().newXPath();
       Node node = (Node) xPath.compile(key).evaluate(doc, XPathConstants.NODE);

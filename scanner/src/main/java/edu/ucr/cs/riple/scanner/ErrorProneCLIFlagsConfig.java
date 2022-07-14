@@ -24,7 +24,6 @@
 
 package edu.ucr.cs.riple.scanner;
 
-import com.google.common.base.Preconditions;
 import com.google.errorprone.ErrorProneFlags;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -58,20 +57,23 @@ public class ErrorProneCLIFlagsConfig implements Config {
 
   public ErrorProneCLIFlagsConfig(ErrorProneFlags flags) {
     String configFilePath = flags.get(FL_CONFIG_PATH).orElse(null);
-    Preconditions.checkNotNull(configFilePath, "Config path for Scanner cannot be null.");
-    Document document;
-    try {
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      DocumentBuilder builder = factory.newDocumentBuilder();
-      document = builder.parse(Files.newInputStream(Paths.get(configFilePath)));
-      document.normalize();
-    } catch (IOException | SAXException | ParserConfigurationException e) {
-      throw new RuntimeException("Error in reading/parsing config at path: " + configFilePath, e);
+    Document document = null;
+    if (configFilePath != null) {
+      try {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        document = builder.parse(Files.newInputStream(Paths.get(configFilePath)));
+        document.normalize();
+      } catch (IOException | SAXException | ParserConfigurationException e) {
+        throw new RuntimeException("Error in reading/parsing config at path: " + configFilePath, e);
+      }
     }
+    String outputDirectoryPathInString =
+        XMLUtil.getValueFromTag(document, "/scanner/path", String.class).orElse(null);
+    // Here we do not throw an exception if outputDirectoryPathInString is null , since this
+    // constructor can still be called when the checker is not activated.
     this.outputDirectory =
-        Paths.get(XMLUtil.getValueFromTag(document, "/scanner/path", String.class).orElse(null));
-    Preconditions.checkNotNull(
-        this.outputDirectory, "Error in Scanner Config: Output path cannot be null");
+        (outputDirectoryPathInString != null) ? Paths.get(outputDirectoryPathInString) : null;
     this.methodTrackerIsActive =
         XMLUtil.getValueFromAttribute(document, "/scanner/method", "active", Boolean.class)
             .orElse(false);
@@ -84,7 +86,7 @@ public class ErrorProneCLIFlagsConfig implements Config {
     this.classTrackerIsActive =
         XMLUtil.getValueFromAttribute(document, "/scanner/class", "active", Boolean.class)
             .orElse(false);
-    this.serializer = new Serializer(this);
+    this.serializer = (this.outputDirectory == null) ? null : new Serializer(this);
   }
 
   public boolean callTrackerIsActive() {
