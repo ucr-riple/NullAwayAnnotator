@@ -60,8 +60,7 @@ public class SerializationTestHelper<T extends Display> {
 
   @SuppressWarnings("ResultOfMethodCallIgnored")
   public SerializationTestHelper<T> addSourceFile(String path) {
-    // This class is inside "tools" directory and tests are written in the parent directory of this
-    // class.
+    // This class is inside "tools" package, which means compilationTestHelper will try to use a corresponding "tools" directory within test/resources/[...]/scanner. We prepend ".." to the path, to escape this non-existent directory.
     path = "../" + path;
     compilationTestHelper.addSourceFile(path);
     return this;
