@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.log.Log;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -32,8 +33,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -41,6 +42,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -59,6 +61,9 @@ public class Config {
   public final String buildCommand;
   public final String nullableAnnot;
   public final String initializerAnnot;
+  public final ImmutableSet<String> downstreamModulesBuildCommands;
+  public final Path nullawayLibraryModelLoaderPath;
+  public final boolean downStreamDependenciesAnalysisActivated;
   public final Log log;
   public final int depth;
 
@@ -180,6 +185,24 @@ public class Config {
     scannerConfigPathOption.setRequired(true);
     options.addOption(scannerConfigPathOption);
 
+    // Down stream analysis
+    Option downstreamDependenciesBuildCommandOption =
+        new Option(
+            "ddbc",
+            "downstream-dependencies-build-command",
+            true,
+            "Set of commands to build downstream dependencies separated by comma");
+    downstreamDependenciesBuildCommandOption.setRequired(false);
+    options.addOption(downstreamDependenciesBuildCommandOption);
+    Option nullawayLibraryModelLoaderPathOption =
+        new Option(
+            "nlmlp",
+            "nullaway-library-model-loader-path",
+            true,
+            "NullAway Library Model loader path");
+    nullawayLibraryModelLoaderPathOption.setRequired(false);
+    options.addOption(nullawayLibraryModelLoaderPathOption);
+
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd = null;
@@ -194,7 +217,13 @@ public class Config {
       System.out.println(e.getMessage());
       showHelpAndQuit(formatter, options);
     }
-    Preconditions.checkNotNull(cmd, "Error parsing cmd, cmd cannot bu null");
+    Preconditions.checkNotNull(cmd, "Something wrong happened.");
+
+    if (cmd.hasOption(downstreamDependenciesBuildCommandOption)
+        != cmd.hasOption(nullawayLibraryModelLoaderPathOption)) {
+      throw new IllegalArgumentException(
+          "To activate downstream dependencies analysis, both --nullaway-library-model-loader-path and --downstream-modules-build-command options must be activated");
+    }
 
     this.buildCommand = cmd.getOptionValue(buildCommandOption.getLongOpt());
     this.nullableAnnot =
@@ -219,6 +248,20 @@ public class Config {
     this.disableOuterLoop = cmd.hasOption(disableOuterLoopOption.getLongOpt());
     this.optimized = !cmd.hasOption(disableOptimizationOption.getLongOpt());
     this.exhaustiveSearch = cmd.hasOption(exhaustiveSearchOption.getLongOpt());
+
+    this.downStreamDependenciesAnalysisActivated =
+        cmd.hasOption(downstreamDependenciesBuildCommandOption);
+    if (this.downStreamDependenciesAnalysisActivated) {
+      this.downstreamModulesBuildCommands =
+          ImmutableSet.copyOf(
+              cmd.getOptionValue(downstreamDependenciesBuildCommandOption).split(","));
+      this.nullawayLibraryModelLoaderPath =
+          Paths.get(cmd.getOptionValue(nullawayLibraryModelLoaderPathOption));
+    } else {
+      this.nullawayLibraryModelLoaderPath = null;
+      this.downstreamModulesBuildCommands = null;
+    }
+
     this.log = new Log();
     this.log.reset();
   }
@@ -265,10 +308,21 @@ public class Config {
         Paths.get(
             getValueFromKey(jsonObject, "SCANNER_CONFIG_PATH", String.class)
                 .orElse("/tmp/NullAwayFix/scanner.xml"));
-    this.dir =
-        Paths.get(
-            getValueFromKey(jsonObject, "OUTPUT_DIR", String.class).orElse("/tmp/NullAwayFix"));
+    this.dir = Paths.get(getValueFromKey(jsonObject, "OUTPUT_DIR", String.class).orElse(null));
     this.buildCommand = getValueFromKey(jsonObject, "BUILD_COMMAND", String.class).orElse(null);
+    this.downstreamModulesBuildCommands =
+        ImmutableSet.copyOf(
+            getArrayValueFromKey(jsonObject, "DOWNSTREAM_ANALYSIS:BUILD_COMMANDS", String.class)
+                .orElse(Collections.emptyList()));
+    String nullawayLibraryModelLoaderPathString =
+        getValueFromKey(
+                jsonObject, "DOWNSTREAM_ANALYSIS:NULLAWAY_LIBRAR_MODEL_LOADER_PATH", String.class)
+            .orElse(null);
+    this.nullawayLibraryModelLoaderPath =
+        nullawayLibraryModelLoaderPathString == null
+            ? null
+            : Paths.get(nullawayLibraryModelLoaderPathString);
+    this.downStreamDependenciesAnalysisActivated = (nullawayLibraryModelLoaderPath != null);
     this.log = new Log();
     log.reset();
   }
@@ -292,6 +346,24 @@ public class Config {
     }
   }
 
+  static class CollectionOrElse<T> {
+    final Collection<?> value;
+    final Class<T> klass;
+
+    CollectionOrElse(Collection<?> value, Class<T> klass) {
+      this.value = value;
+      this.klass = klass;
+    }
+
+    Collection<T> orElse(Collection<T> other) {
+      if (value == null) {
+        return other;
+      } else {
+        return this.value.stream().map(klass::cast).collect(Collectors.toList());
+      }
+    }
+  }
+
   private <T> OrElse<T> getValueFromKey(JSONObject json, String key, Class<T> klass) {
     if (json == null) {
       return new OrElse<>(null, klass);
@@ -311,6 +383,23 @@ public class Config {
           : new OrElse<>(null, klass);
     } catch (Exception e) {
       return new OrElse<>(null, klass);
+    }
+  }
+
+  private <T> CollectionOrElse<T> getArrayValueFromKey(
+      JSONObject json, String key, Class<T> klass) {
+    if (json == null) {
+      return new CollectionOrElse<>(null, klass);
+    }
+    OrElse<T> jsonValue = getValueFromKey(json, key, klass);
+    if (jsonValue.value == null) {
+      return new CollectionOrElse<>(null, klass);
+    } else {
+      if (jsonValue.value instanceof JSONArray) {
+        return new CollectionOrElse<>((JSONArray) jsonValue.value, klass);
+      }
+      throw new IllegalStateException(
+          "Expected type to be json array, found: " + jsonValue.value.getClass());
     }
   }
 
@@ -364,6 +453,7 @@ public class Config {
       json.put("DEPTH", depth);
       json.put("EXHAUSTIVE_SEARCH", exhaustiveSearch);
       json.put("REDIRECT_BUILD_OUTPUT_TO_STDERR", redirectBuildOutputToStdErr);
+      // todo add downstream dependencies here
       try (FileWriter file = new FileWriter(path.toFile())) {
         file.write(json.toJSONString());
       } catch (IOException e) {
