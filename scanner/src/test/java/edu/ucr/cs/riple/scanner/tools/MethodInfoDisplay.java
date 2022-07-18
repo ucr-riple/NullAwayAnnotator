@@ -35,6 +35,7 @@ public class MethodInfoDisplay implements Display {
   public final String size;
   public final String flags;
   public final String hasNullableAnnotation;
+  public final String visibility;
   public final String paramNames;
   public String path;
 
@@ -46,6 +47,7 @@ public class MethodInfoDisplay implements Display {
       String size,
       String flags,
       String hasNullableAnnotation,
+      String visibility,
       String paramNames,
       String path) {
     this.id = id;
@@ -55,6 +57,7 @@ public class MethodInfoDisplay implements Display {
     this.size = size;
     this.flags = flags;
     this.hasNullableAnnotation = hasNullableAnnotation;
+    this.visibility = visibility;
     this.paramNames = paramNames;
     this.path = path;
   }
@@ -71,6 +74,7 @@ public class MethodInfoDisplay implements Display {
         && Objects.equals(size, that.size)
         && Objects.equals(flags, that.flags)
         && Objects.equals(hasNullableAnnotation, that.hasNullableAnnotation)
+        && Objects.equals(visibility, that.visibility)
         && Objects.equals(paramNames, that.paramNames)
         && Objects.equals(path, that.path);
   }
@@ -78,7 +82,16 @@ public class MethodInfoDisplay implements Display {
   @Override
   public int hashCode() {
     return Objects.hash(
-        id, clazz, symbol, parent, size, flags, hasNullableAnnotation, paramNames, path);
+        id,
+        clazz,
+        symbol,
+        parent,
+        size,
+        flags,
+        hasNullableAnnotation,
+        visibility,
+        paramNames,
+        path);
   }
 
   @Override
@@ -103,6 +116,9 @@ public class MethodInfoDisplay implements Display {
         + '\''
         + ", hasNullableAnnotation='"
         + hasNullableAnnotation
+        + '\''
+        + ", visibility='"
+        + visibility
         + '\''
         + ", paramNames='"
         + paramNames

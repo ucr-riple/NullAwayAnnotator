@@ -39,7 +39,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import javax.annotation.Nullable;
+import javax.lang.model.element.Modifier;
 
 public class MethodInfo {
   public final Symbol.MethodSymbol symbol;
@@ -112,6 +113,8 @@ public class MethodInfo {
         + "\t"
         + hasNullableAnnotation
         + "\t"
+        + getVisibilityOfMethod()
+        + "\t"
         + Arrays.toString(parameterNames)
         + "\t"
         + uri.getPath();
@@ -131,6 +134,8 @@ public class MethodInfo {
         + "flags"
         + "\t"
         + "nullable"
+        + "\t"
+        + "visibility"
         + "\t"
         + "parameters"
         + "\t"
@@ -167,5 +172,22 @@ public class MethodInfo {
                   }
                 })
             .toArray(String[]::new);
+  }
+
+  /**
+   * Return string value of visibility
+   *
+   * @return "public" if public, "private" if private and "package" if the method has package
+   *     visibility.
+   */
+  private String getVisibilityOfMethod() {
+    Set<Modifier> modifiers = symbol.getModifiers();
+    if (modifiers.contains(Modifier.PUBLIC)) {
+      return "public";
+    }
+    if (modifiers.contains(Modifier.PRIVATE)) {
+      return "private";
+    }
+    return "package";
   }
 }

@@ -36,13 +36,13 @@ public class MethodInfoTest extends ScannerBaseTest<MethodInfoDisplay> {
 
   private static final DisplayFactory<MethodInfoDisplay> METHOD_DISPLAY_FACTORY =
       values -> {
-        Preconditions.checkArgument(values.length == 9, "Expected to find 9 values on each line");
+        Preconditions.checkArgument(values.length == 10, "Expected to find 9 values on each line");
         // Outputs are written in Temp Directory and is not known at compile time, therefore,
         // relative paths are getting compared.
         MethodInfoDisplay display =
             new MethodInfoDisplay(
                 values[0], values[1], values[2], values[3], values[4], values[5], values[6],
-                values[7], values[8]);
+                values[7], values[8], values[9]);
         display.path = display.path.substring(display.path.indexOf("edu/ucr/"));
         return display;
       };
@@ -60,6 +60,8 @@ public class MethodInfoTest extends ScannerBaseTest<MethodInfoDisplay> {
           + "flags"
           + "\t"
           + "nullable"
+          + "\t"
+          + "visibility"
           + "\t"
           + "parameters"
           + "\t"
@@ -90,6 +92,61 @@ public class MethodInfoTest extends ScannerBaseTest<MethodInfoDisplay> {
                 "0",
                 "[]",
                 "false",
+                "public",
+                "[]",
+                "edu/ucr/A.java"))
+        .doTest();
+  }
+
+  @Test
+  public void visibilityTest() {
+    tester
+        .addSourceLines(
+            "edu/ucr/A.java",
+            "package edu.ucr;",
+            "public class A {",
+            "   public Object publicMethod(){",
+            "      return new Object();",
+            "   }",
+            "   private Object privateMethod(){",
+            "      return new Object();",
+            "   }",
+            "   Object packageMethod(){",
+            "      return new Object();",
+            "   }",
+            "}")
+        .setExpectedOutputs(
+            new MethodInfoDisplay(
+                "1",
+                "edu.ucr.A",
+                "publicMethod()",
+                "0",
+                "0",
+                "[]",
+                "false",
+                "public",
+                "[]",
+                "edu/ucr/A.java"),
+            new MethodInfoDisplay(
+                "2",
+                "edu.ucr.A",
+                "privateMethod()",
+                "0",
+                "0",
+                "[]",
+                "false",
+                "private",
+                "[]",
+                "edu/ucr/A.java"),
+            new MethodInfoDisplay(
+                "3",
+                "edu.ucr.A",
+                "packageMethod()",
+                "0",
+                "0",
+                "[]",
+                "false",
+                "package",
                 "[]",
                 "edu/ucr/A.java"))
         .doTest();
