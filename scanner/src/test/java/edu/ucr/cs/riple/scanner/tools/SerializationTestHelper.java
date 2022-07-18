@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.scanner.tools;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.common.base.Preconditions;
@@ -47,6 +48,8 @@ public class SerializationTestHelper<T extends Display> {
   private DisplayFactory<T> factory;
   private String fileName;
   private String header;
+
+  private Path outputFilePath;
 
   public SerializationTestHelper(Path outputDir) {
     this.outputDir = outputDir;
@@ -96,29 +99,29 @@ public class SerializationTestHelper<T extends Display> {
     return this;
   }
 
-  public void doTest(String expectedErrorMessage) {
+  public void prepareTest() {
     Preconditions.checkNotNull(factory, "Factory cannot be null");
     Preconditions.checkNotNull(fileName, "File name cannot be null");
-    Path outputPath = outputDir.resolve(fileName);
+    outputFilePath = outputDir.resolve(fileName);
     try {
-      Files.deleteIfExists(outputPath);
+      Files.deleteIfExists(outputFilePath);
     } catch (IOException ignored) {
-      throw new RuntimeException("Failed to delete older file at: " + outputPath);
+      throw new RuntimeException("Failed to delete older file at: " + outputFilePath);
     }
-    try {
-      compilationTestHelper.doTest();
-    } catch (Throwable e) {
-      Preconditions.checkNotNull(
-          expectedErrorMessage, "Encountered an unexpected error: " + e.getMessage());
-      assert e.getMessage().contains(expectedErrorMessage);
-      return;
-    }
-    List<T> actualOutputs = readActualOutputs(outputPath);
-    compare(actualOutputs);
+  }
+
+  public void doTest(Class<? extends Exception> exception, String expectedErrorMessage) {
+    String fullExpectedMessage = "Caused by: " + exception.getName() + ": " + expectedErrorMessage;
+    prepareTest();
+    AssertionError ex = assertThrows(AssertionError.class, () -> compilationTestHelper.doTest());
+    assert ex.getMessage().contains(fullExpectedMessage);
   }
 
   public void doTest() {
-    doTest(null);
+    prepareTest();
+    compilationTestHelper.doTest();
+    List<T> actualOutputs = readActualOutputs();
+    compare(actualOutputs);
   }
 
   private void compare(List<T> actualOutput) {
@@ -153,16 +156,16 @@ public class SerializationTestHelper<T extends Display> {
     fail(errorMessage.toString());
   }
 
-  private List<T> readActualOutputs(Path outputPath) {
+  private List<T> readActualOutputs() {
     List<T> outputs = new ArrayList<>();
     BufferedReader reader;
     try {
-      reader = Files.newBufferedReader(outputPath, Charset.defaultCharset());
+      reader = Files.newBufferedReader(outputFilePath, Charset.defaultCharset());
       String actualHeader = reader.readLine();
       if (!header.equals(actualHeader)) {
         fail(
             "Expected header of "
-                + outputPath.getFileName()
+                + outputFilePath.getFileName()
                 + " to be: "
                 + header
                 + "\nBut found: "

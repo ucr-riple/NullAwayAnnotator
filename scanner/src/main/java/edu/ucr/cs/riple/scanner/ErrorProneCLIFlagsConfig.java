@@ -24,7 +24,6 @@
 
 package edu.ucr.cs.riple.scanner;
 
-import com.google.common.base.Preconditions;
 import com.google.errorprone.ErrorProneFlags;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -50,9 +49,10 @@ public class ErrorProneCLIFlagsConfig implements Config {
 
   public ErrorProneCLIFlagsConfig(ErrorProneFlags flags) {
     String configFilePath = flags.get(FL_CONFIG_PATH).orElse(null);
-    Preconditions.checkNotNull(
-        configFilePath,
-        "Error in Scanner Checker configuration, should be set with via error prone flag: (-XepOpt:Scanner:ConfigPath)");
+    if (configFilePath == null) {
+      throw new IllegalStateException(
+          "Error in Scanner Checker configuration, should be set with via error prone flag: (-XepOpt:Scanner:ConfigPath)");
+    }
     Document document;
     try {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -64,9 +64,10 @@ public class ErrorProneCLIFlagsConfig implements Config {
     }
     String outputDirectoryPathInString =
         XMLUtil.getValueFromTag(document, "/scanner/path", String.class).orElse(null);
-    Preconditions.checkNotNull(
-        outputDirectoryPathInString,
-        "Output path cannot be null, should be set it in config file within <path> tag");
+    if (outputDirectoryPathInString == null) {
+      throw new IllegalArgumentException(
+          "Output path cannot be null, should be set it in config file within <path> tag");
+    }
     this.outputDirectory = Paths.get(outputDirectoryPathInString);
     this.methodTrackerIsActive =
         XMLUtil.getValueFromAttribute(document, "/scanner/method", "active", Boolean.class)
