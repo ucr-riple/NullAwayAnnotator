@@ -81,15 +81,7 @@ public class MethodInfoDisplay implements Display {
   @Override
   public int hashCode() {
     return Objects.hash(
-        clazz,
-        symbol,
-        parent,
-        size,
-        flags,
-        hasNullableAnnotation,
-        visibility,
-        paramNames,
-        path);
+        clazz, symbol, parent, size, flags, hasNullableAnnotation, visibility, paramNames, path);
   }
 
   @Override
