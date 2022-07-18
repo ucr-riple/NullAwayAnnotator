@@ -58,6 +58,15 @@ public class SerializationTestHelper<T extends Display> {
     return this;
   }
 
+  @SuppressWarnings("ResultOfMethodCallIgnored")
+  public SerializationTestHelper<T> addSourceFile(String path) {
+    // This class is inside "tools" directory and tests are written in the parent directory of this
+    // class.
+    path = "../" + path;
+    compilationTestHelper.addSourceFile(path);
+    return this;
+  }
+
   @SafeVarargs
   public final SerializationTestHelper<T> setExpectedOutputs(T... outputs) {
     this.expectedOutputs = ImmutableList.copyOf(outputs);
@@ -86,7 +95,7 @@ public class SerializationTestHelper<T extends Display> {
     return this;
   }
 
-  public void doTest() {
+  public void doTest(String expectedErrorMessage) {
     Preconditions.checkNotNull(factory, "Factory cannot be null");
     Preconditions.checkNotNull(fileName, "File name cannot be null");
     Path outputPath = outputDir.resolve(fileName);
@@ -95,9 +104,18 @@ public class SerializationTestHelper<T extends Display> {
     } catch (IOException ignored) {
       throw new RuntimeException("Failed to delete older file at: " + outputPath);
     }
-    compilationTestHelper.doTest();
+    try {
+      compilationTestHelper.doTest();
+    } catch (Throwable e) {
+      assert e.getMessage().contains(expectedErrorMessage);
+      return;
+    }
     List<T> actualOutputs = readActualOutputs(outputPath);
     compare(actualOutputs);
+  }
+
+  public void doTest() {
+    doTest(null);
   }
 
   private void compare(List<T> actualOutput) {
