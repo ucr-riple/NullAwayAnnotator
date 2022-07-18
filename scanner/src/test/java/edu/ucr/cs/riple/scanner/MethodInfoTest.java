@@ -36,7 +36,7 @@ public class MethodInfoTest extends ScannerBaseTest<MethodInfoDisplay> {
 
   private static final DisplayFactory<MethodInfoDisplay> METHOD_DISPLAY_FACTORY =
       values -> {
-        Preconditions.checkArgument(values.length == 10, "Expected to find 9 values on each line");
+        Preconditions.checkArgument(values.length == 10, "Expected to find 10 values on each line");
         // Outputs are written in Temp Directory and is not known at compile time, therefore,
         // relative paths are getting compared.
         MethodInfoDisplay display =
