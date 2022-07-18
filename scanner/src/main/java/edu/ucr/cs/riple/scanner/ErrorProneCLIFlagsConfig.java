@@ -39,12 +39,12 @@ import org.xml.sax.SAXException;
 
 public class ErrorProneCLIFlagsConfig implements Config {
 
-  @Nonnull public final Path outputDirectory;
-  public final boolean methodTrackerIsActive;
-  public final boolean fieldTrackerIsActive;
-  public final boolean callTrackerIsActive;
-  public final boolean classTrackerIsActive;
-  public final Serializer serializer;
+  @Nonnull private final Path outputDirectory;
+  private final boolean methodTrackerIsActive;
+  private final boolean fieldTrackerIsActive;
+  private final boolean callTrackerIsActive;
+  private final boolean classTrackerIsActive;
+  private final Serializer serializer;
   static final String EP_FL_NAMESPACE = "Scanner";
   static final String FL_CONFIG_PATH = EP_FL_NAMESPACE + ":ConfigPath";
 
