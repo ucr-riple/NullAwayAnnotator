@@ -68,6 +68,7 @@ public class ConfigurationTest {
 
   @Test
   public void checkExceptionIsThrownIfConfigPathNotSet() {
+    // -XepOpt:Scanner:ConfigPath is not set should expect an error.
     tester =
         new SerializationTestHelper<>(root)
             .setArgs(
@@ -82,12 +83,14 @@ public class ConfigurationTest {
 
   @Test
   public void checkOutputDirIsNonnull() {
+    // <scanner>...<output> tag is not set and should expect an error.
     Path config = root.resolve("scanner.xml");
     try {
       Files.createDirectories(root);
       Files.createFile(config);
       DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
       try {
+        // Make empty <scanner> tag with no <output> as child.
         DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
         Document doc = docBuilder.newDocument();
         Element rootElement = doc.createElement("scanner");
