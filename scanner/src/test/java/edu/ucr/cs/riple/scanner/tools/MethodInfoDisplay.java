@@ -67,8 +67,7 @@ public class MethodInfoDisplay implements Display {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     MethodInfoDisplay that = (MethodInfoDisplay) o;
-    return Objects.equals(id, that.id)
-        && Objects.equals(clazz, that.clazz)
+    return Objects.equals(clazz, that.clazz)
         && Objects.equals(symbol, that.symbol)
         && Objects.equals(parent, that.parent)
         && Objects.equals(size, that.size)
@@ -82,7 +81,6 @@ public class MethodInfoDisplay implements Display {
   @Override
   public int hashCode() {
     return Objects.hash(
-        id,
         clazz,
         symbol,
         parent,
