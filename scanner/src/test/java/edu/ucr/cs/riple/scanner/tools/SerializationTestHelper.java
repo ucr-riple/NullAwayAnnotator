@@ -107,6 +107,8 @@ public class SerializationTestHelper<T extends Display> {
     try {
       compilationTestHelper.doTest();
     } catch (Throwable e) {
+      Preconditions.checkNotNull(
+          expectedErrorMessage, "Encountered an unexpected error: " + e.getMessage());
       assert e.getMessage().contains(expectedErrorMessage);
       return;
     }
