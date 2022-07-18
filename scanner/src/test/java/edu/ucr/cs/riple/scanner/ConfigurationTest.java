@@ -101,7 +101,7 @@ public class ConfigurationTest {
         StreamResult result = new StreamResult(config.toFile());
         transformer.transform(source, result);
       } catch (ParserConfigurationException | TransformerException e) {
-        throw new RuntimeException("Error happened in writing config.", e);
+        throw new RuntimeException("Error happened while writing config.", e);
       }
     } catch (IOException ex) {
       throw new UncheckedIOException(ex);
