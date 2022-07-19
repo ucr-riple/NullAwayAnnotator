@@ -36,13 +36,13 @@ public class MethodInfoTest extends ScannerBaseTest<MethodInfoDisplay> {
 
   private static final DisplayFactory<MethodInfoDisplay> METHOD_DISPLAY_FACTORY =
       values -> {
-        Preconditions.checkArgument(values.length == 9, "Expected to find 9 values on each line");
+        Preconditions.checkArgument(values.length == 8, "Expected to find 8 values on each line");
         // Outputs are written in Temp Directory and is not known at compile time, therefore,
         // relative paths are getting compared.
         MethodInfoDisplay display =
             new MethodInfoDisplay(
                 values[0], values[1], values[2], values[3], values[4], values[5], values[6],
-                values[7], values[8]);
+                values[7]);
         display.path = display.path.substring(display.path.indexOf("edu/ucr/"));
         return display;
       };
@@ -60,8 +60,6 @@ public class MethodInfoTest extends ScannerBaseTest<MethodInfoDisplay> {
           + "flags"
           + "\t"
           + "nullable"
-          + "\t"
-          + "parameters"
           + "\t"
           + "uri";
   private static final String FILE_NAME = "method_info.tsv";
@@ -83,15 +81,7 @@ public class MethodInfoTest extends ScannerBaseTest<MethodInfoDisplay> {
             "}")
         .setExpectedOutputs(
             new MethodInfoDisplay(
-                "1",
-                "edu.ucr.A",
-                "returnNonNull()",
-                "0",
-                "0",
-                "[]",
-                "false",
-                "[]",
-                "edu/ucr/A.java"))
+                "1", "edu.ucr.A", "returnNonNull()", "0", "0", "[]", "false", "edu/ucr/A.java"))
         .doTest();
   }
 }

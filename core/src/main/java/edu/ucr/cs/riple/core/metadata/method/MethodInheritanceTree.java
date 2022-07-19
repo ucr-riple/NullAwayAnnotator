@@ -43,15 +43,7 @@ public class MethodInheritanceTree extends MetaData<MethodNode> {
     super(path);
     final MethodNode top =
         new MethodNode(
-            -1,
-            "null",
-            "null",
-            Collections.emptyList(),
-            new boolean[] {},
-            -1,
-            false,
-            new String[] {},
-            "null");
+            -1, "null", "null", Collections.emptyList(), new boolean[] {}, -1, false, "null");
     nodes.put(-1, top);
   }
 
@@ -83,9 +75,8 @@ public class MethodInheritanceTree extends MetaData<MethodNode> {
         parentId,
         size,
         Utility.convertStringToBooleanArray(values[5]),
-        Boolean.getBoolean(values[6]),
-        Utility.convertStringToStringArray(values[7]),
-        values[8]);
+        Boolean.parseBoolean(values[6]),
+        values[7]);
     if (parentId != -1) {
       MethodNode parent = nodes.get(parentId);
       if (parent == null) {

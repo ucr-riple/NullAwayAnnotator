@@ -35,9 +35,8 @@ public class MethodNode {
   public String method;
   public String clazz;
   public int size;
-  public boolean[] annotFlags;
+  public boolean[] parameterAnnotationFlags;
   public boolean hasNullableAnnotation;
-  public String[] parameterNames;
   public String uri;
 
   public MethodNode(
@@ -45,19 +44,17 @@ public class MethodNode {
       String clazz,
       String method,
       List<Integer> children,
-      boolean[] annotFlags,
+      boolean[] parameterAnnotationFlags,
       int parent,
       boolean hasNullableAnnotation,
-      String[] parameterNames,
       String uri) {
     this.id = id;
     this.clazz = clazz;
     this.method = method;
     this.children = children;
-    this.annotFlags = annotFlags;
+    this.parameterAnnotationFlags = parameterAnnotationFlags;
     this.parent = parent;
     this.hasNullableAnnotation = hasNullableAnnotation;
-    this.parameterNames = parameterNames;
     this.uri = uri;
   }
 
@@ -71,16 +68,14 @@ public class MethodNode {
       int size,
       boolean[] annotFlags,
       boolean hasNullableAnnotation,
-      String[] parameterNames,
       String uri) {
     this.parent = parent;
     this.id = id;
     this.method = method;
     this.clazz = clazz;
     this.size = size;
-    this.annotFlags = annotFlags;
+    this.parameterAnnotationFlags = annotFlags;
     this.hasNullableAnnotation = hasNullableAnnotation;
-    this.parameterNames = parameterNames;
     this.uri = uri;
   }
 
