@@ -99,25 +99,18 @@ public class MethodInfo {
   @Override
   public String toString() {
     Preconditions.checkArgument(symbol != null, "Should not be null at this point.");
-    return id
-        + "\t"
-        + (clazz != null ? clazz.flatName() : "null")
-        + "\t"
-        + symbol
-        + "\t"
-        + parent
-        + "\t"
-        + symbol.getParameters().size()
-        + "\t"
-        + Arrays.toString(annotFlags)
-        + "\t"
-        + hasNullableAnnotation
-        + "\t"
-        + getVisibilityOfMethod()
-        + "\t"
-        + Arrays.toString(parameterNames)
-        + "\t"
-        + uri.getPath();
+    return String.join(
+        "\t",
+        String.valueOf(id),
+        (clazz != null ? clazz.flatName() : "null"),
+        symbol.toString(),
+        String.valueOf(parent),
+        String.valueOf(symbol.getParameters().size()),
+        Arrays.toString(annotFlags),
+        String.valueOf(hasNullableAnnotation),
+        getVisibilityOfMethod(),
+        Arrays.toString(parameterNames),
+        uri.getPath());
   }
 
   public static String header() {

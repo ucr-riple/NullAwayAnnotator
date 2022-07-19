@@ -58,13 +58,12 @@ public class TrackerNode {
       return null;
     }
     Symbol enclosingClass = member.enclClass();
-    return callerClass.flatName()
-        + "\t"
-        + ((callerMethod == null) ? "null" : callerMethod)
-        + "\t"
-        + member
-        + "\t"
-        + ((enclosingClass == null) ? "null" : enclosingClass.flatName());
+    return String.join(
+        "\t",
+        callerClass.flatName(),
+        ((callerMethod == null) ? "null" : callerMethod.toString()),
+        member.toString(),
+        ((enclosingClass == null) ? "null" : enclosingClass.flatName()));
   }
 
   public static String header() {
