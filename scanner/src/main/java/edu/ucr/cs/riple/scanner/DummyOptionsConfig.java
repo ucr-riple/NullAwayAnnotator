@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.scanner;
 
 import java.nio.file.Path;
+import javax.annotation.Nonnull;
 
 public class DummyOptionsConfig implements Config {
 
@@ -56,6 +57,7 @@ public class DummyOptionsConfig implements Config {
     throw new IllegalStateException(ERROR_MESSAGE);
   }
 
+  @Nonnull
   @Override
   public Path getOutputDirectory() {
     throw new IllegalStateException(ERROR_MESSAGE);

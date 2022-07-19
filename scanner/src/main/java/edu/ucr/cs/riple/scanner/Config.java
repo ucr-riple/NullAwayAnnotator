@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.scanner;
 
 import com.google.common.base.Preconditions;
 import java.nio.file.Path;
+import javax.annotation.Nonnull;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -49,6 +50,7 @@ public interface Config {
 
   Serializer getSerializer();
 
+  @Nonnull
   Path getOutputDirectory();
 
   class Builder {

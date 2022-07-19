@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import javax.lang.model.element.Modifier;
 
 public class MethodInfo {
   public final Symbol.MethodSymbol symbol;
@@ -94,21 +95,18 @@ public class MethodInfo {
   @Override
   public String toString() {
     Preconditions.checkArgument(symbol != null, "Should not be null at this point.");
-    return id
-        + "\t"
-        + (clazz != null ? clazz.flatName() : "null")
-        + "\t"
-        + symbol
-        + "\t"
-        + parent
-        + "\t"
-        + symbol.getParameters().size()
-        + "\t"
-        + Arrays.toString(annotFlags)
-        + "\t"
-        + hasNullableAnnotation
-        + "\t"
-        + uri.getPath();
+    return String.join(
+        "\t",
+        String.valueOf(id),
+        (clazz != null ? clazz.flatName() : "null"),
+        symbol.toString(),
+        String.valueOf(parent),
+        String.valueOf(symbol.getParameters().size()),
+        Arrays.toString(annotFlags),
+        String.valueOf(hasNullableAnnotation),
+        getVisibilityOfMethod(),
+        String.valueOf(!symbol.getReturnType().isPrimitiveOrVoid()),
+        uri.getPath());
   }
 
   public static String header() {
@@ -125,6 +123,10 @@ public class MethodInfo {
         + "flags"
         + "\t"
         + "nullable"
+        + "\t"
+        + "visibility"
+        + "\t"
+        + "non-primitive-return"
         + "\t"
         + "uri";
   }
@@ -143,5 +145,25 @@ public class MethodInfo {
 
   public void setURI(URI toUri) {
     this.uri = toUri;
+  }
+
+  /**
+   * Return string value of visibility
+   *
+   * @return "public" if public, "private" if private, "protected" if protected and "package" if the
+   *     method has package visibility.
+   */
+  private String getVisibilityOfMethod() {
+    Set<Modifier> modifiers = symbol.getModifiers();
+    if (modifiers.contains(Modifier.PUBLIC)) {
+      return "public";
+    }
+    if (modifiers.contains(Modifier.PRIVATE)) {
+      return "private";
+    }
+    if (modifiers.contains(Modifier.PROTECTED)) {
+      return "protected";
+    }
+    return "package";
   }
 }

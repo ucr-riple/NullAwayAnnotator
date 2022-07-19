@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.scanner.tools;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.common.base.Preconditions;
@@ -48,55 +49,132 @@ public class SerializationTestHelper<T extends Display> {
   private String fileName;
   private String header;
 
+  private Path outputFilePath;
+
   public SerializationTestHelper(Path outputDir) {
     this.outputDir = outputDir;
   }
 
+  /**
+   * Adds source code to the list of inputs. This method is part of the builder pattern.
+   *
+   * @param path Relative path to src directory where the given source code should exist.
+   * @param lines Lines of source code.
+   * @return Receiver of the call.
+   */
   @SuppressWarnings("ResultOfMethodCallIgnored")
   public SerializationTestHelper<T> addSourceLines(String path, String... lines) {
     compilationTestHelper.addSourceLines(path, lines);
     return this;
   }
 
+  /**
+   * Adds source code to the list of inputs. This method is part of the builder pattern.
+   *
+   * @param path Path to resource.
+   * @return Receiver of the call.
+   */
+  @SuppressWarnings("ResultOfMethodCallIgnored")
+  public SerializationTestHelper<T> addSourceFile(String path) {
+    // This class is inside "tools" package, which means compilationTestHelper will try to use a
+    // corresponding "tools" directory within test/resources/[...]/scanner. We prepend ".." to the
+    // path, to escape this non-existent directory.
+    path = "../" + path;
+    compilationTestHelper.addSourceFile(path);
+    return this;
+  }
+
+  /**
+   * Sets the expected output. Any unseen / unexpected output will result to a failure in the test.
+   * This method is part of the builder pattern.
+   *
+   * @param outputs Expected output.
+   * @return Receiver of the call.
+   */
   @SafeVarargs
   public final SerializationTestHelper<T> setExpectedOutputs(T... outputs) {
     this.expectedOutputs = ImmutableList.copyOf(outputs);
     return this;
   }
 
+  /**
+   * If called, no output should be expected while running the test. This method is part of the
+   * builder pattern.
+   *
+   * @return Receiver of the call.
+   */
   public SerializationTestHelper<T> expectNoOutput() {
     this.expectedOutputs = ImmutableList.of();
     return this;
   }
 
+  /**
+   * Creates the actual {@link Scanner} with the given arguments. This method is part of the builder
+   * pattern and should be called before any other method.
+   *
+   * @return Receiver of the call.
+   */
   public SerializationTestHelper<T> setArgs(List<String> args) {
     compilationTestHelper =
         CompilationTestHelper.newInstance(Scanner.class, getClass()).setArgs(args);
     return this;
   }
 
+  /**
+   * Sets factory. This method is part of the builder pattern.
+   *
+   * @param factory Factory instance.
+   * @return Receiver of the call.
+   */
   public SerializationTestHelper<T> setFactory(DisplayFactory<T> factory) {
     this.factory = factory;
     return this;
   }
 
+  /**
+   * Sets file name and the expected header of output file. This method is part of the builder
+   * pattern.
+   *
+   * @param fileName Output file name.
+   * @param header Expected header.
+   * @return Receiver of the call.
+   */
   public SerializationTestHelper<T> setOutputFileNameAndHeader(String fileName, String header) {
     this.fileName = fileName;
     this.header = header;
     return this;
   }
 
-  public void doTest() {
+  private void prepareTest() {
     Preconditions.checkNotNull(factory, "Factory cannot be null");
     Preconditions.checkNotNull(fileName, "File name cannot be null");
-    Path outputPath = outputDir.resolve(fileName);
+    outputFilePath = outputDir.resolve(fileName);
     try {
-      Files.deleteIfExists(outputPath);
+      Files.deleteIfExists(outputFilePath);
     } catch (IOException ignored) {
-      throw new RuntimeException("Failed to delete older file at: " + outputPath);
+      throw new RuntimeException("Failed to delete older file at: " + outputFilePath);
     }
+  }
+
+  /**
+   * Runs the testing with expecting to encounter a specific error.
+   *
+   * @param exception Expected Exception to be raised by running the test.
+   * @param expectedErrorMessage Expected message to be printed by running the test.
+   */
+  public void doTestWithExpectingError(
+      Class<? extends Exception> exception, String expectedErrorMessage) {
+    String fullExpectedMessage = "Caused by: " + exception.getName() + ": " + expectedErrorMessage;
+    prepareTest();
+    AssertionError ex = assertThrows(AssertionError.class, () -> compilationTestHelper.doTest());
+    assert ex.getMessage().contains(fullExpectedMessage);
+  }
+
+  /** Runs the test. */
+  public void doTest() {
+    prepareTest();
     compilationTestHelper.doTest();
-    List<T> actualOutputs = readActualOutputs(outputPath);
+    List<T> actualOutputs = readActualOutputs();
     compare(actualOutputs);
   }
 
@@ -132,16 +210,16 @@ public class SerializationTestHelper<T extends Display> {
     fail(errorMessage.toString());
   }
 
-  private List<T> readActualOutputs(Path outputPath) {
+  private List<T> readActualOutputs() {
     List<T> outputs = new ArrayList<>();
     BufferedReader reader;
     try {
-      reader = Files.newBufferedReader(outputPath, Charset.defaultCharset());
+      reader = Files.newBufferedReader(outputFilePath, Charset.defaultCharset());
       String actualHeader = reader.readLine();
       if (!header.equals(actualHeader)) {
         fail(
             "Expected header of "
-                + outputPath.getFileName()
+                + outputFilePath.getFileName()
                 + " to be: "
                 + header
                 + "\nBut found: "
