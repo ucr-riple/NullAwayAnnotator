@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import javax.annotation.Nonnull;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -37,43 +38,37 @@ import org.xml.sax.SAXException;
 
 public class ErrorProneCLIFlagsConfig implements Config {
 
-  public final Path outputDirectory;
-  public final boolean methodTrackerIsActive;
-  public final boolean fieldTrackerIsActive;
-  public final boolean callTrackerIsActive;
-  public final boolean classTrackerIsActive;
-  public final Serializer serializer;
+  @Nonnull private final Path outputDirectory;
+  private final boolean methodTrackerIsActive;
+  private final boolean fieldTrackerIsActive;
+  private final boolean callTrackerIsActive;
+  private final boolean classTrackerIsActive;
+  private final Serializer serializer;
   static final String EP_FL_NAMESPACE = "Scanner";
   static final String FL_CONFIG_PATH = EP_FL_NAMESPACE + ":ConfigPath";
 
-  public ErrorProneCLIFlagsConfig() {
-    this.methodTrackerIsActive = false;
-    this.fieldTrackerIsActive = false;
-    this.callTrackerIsActive = false;
-    this.classTrackerIsActive = false;
-    this.outputDirectory = null;
-    this.serializer = new Serializer(this);
-  }
-
   public ErrorProneCLIFlagsConfig(ErrorProneFlags flags) {
     String configFilePath = flags.get(FL_CONFIG_PATH).orElse(null);
-    Document document = null;
-    if (configFilePath != null) {
-      try {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        document = builder.parse(Files.newInputStream(Paths.get(configFilePath)));
-        document.normalize();
-      } catch (IOException | SAXException | ParserConfigurationException e) {
-        throw new RuntimeException("Error in reading/parsing config at path: " + configFilePath, e);
-      }
+    if (configFilePath == null) {
+      throw new IllegalStateException(
+          "Error in Scanner Checker configuration, should be set with via error prone flag: (-XepOpt:Scanner:ConfigPath)");
+    }
+    Document document;
+    try {
+      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      DocumentBuilder builder = factory.newDocumentBuilder();
+      document = builder.parse(Files.newInputStream(Paths.get(configFilePath)));
+      document.normalize();
+    } catch (IOException | SAXException | ParserConfigurationException e) {
+      throw new RuntimeException("Error in reading/parsing config at path: " + configFilePath, e);
     }
     String outputDirectoryPathInString =
         XMLUtil.getValueFromTag(document, "/scanner/path", String.class).orElse(null);
-    // Here we do not throw an exception if outputDirectoryPathInString is null , since this
-    // constructor can still be called when the checker is not activated.
-    this.outputDirectory =
-        (outputDirectoryPathInString != null) ? Paths.get(outputDirectoryPathInString) : null;
+    if (outputDirectoryPathInString == null) {
+      throw new IllegalArgumentException(
+          "Output path cannot be null, should be set it in config file within <path> tag");
+    }
+    this.outputDirectory = Paths.get(outputDirectoryPathInString);
     this.methodTrackerIsActive =
         XMLUtil.getValueFromAttribute(document, "/scanner/method", "active", Boolean.class)
             .orElse(false);
@@ -86,7 +81,7 @@ public class ErrorProneCLIFlagsConfig implements Config {
     this.classTrackerIsActive =
         XMLUtil.getValueFromAttribute(document, "/scanner/class", "active", Boolean.class)
             .orElse(false);
-    this.serializer = (this.outputDirectory == null) ? null : new Serializer(this);
+    this.serializer = new Serializer(this);
   }
 
   public boolean callTrackerIsActive() {
@@ -109,6 +104,7 @@ public class ErrorProneCLIFlagsConfig implements Config {
     return serializer;
   }
 
+  @Nonnull
   public Path getOutputDirectory() {
     return outputDirectory;
   }
