@@ -24,14 +24,11 @@
 
 package edu.ucr.cs.riple.scanner.out;
 
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.VisitorState;
-import com.sun.source.tree.VariableTree;
 import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.riple.scanner.Config;
 import edu.ucr.cs.riple.scanner.SymbolUtil;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -39,7 +36,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import javax.lang.model.element.Modifier;
 
 public class MethodInfo {
   public final Symbol.MethodSymbol symbol;
@@ -47,12 +44,10 @@ public class MethodInfo {
   final int id;
 
   private Boolean[] annotFlags;
-  private String[] parameterNames;
   private boolean hasNullableAnnotation;
   private int parent = -1;
   private static int LAST_ID = 0;
   private static final Set<MethodInfo> discovered = new HashSet<>();
-  private URI uri;
 
   private MethodInfo(Symbol.MethodSymbol method) {
     this.id = ++LAST_ID;
@@ -98,23 +93,17 @@ public class MethodInfo {
   @Override
   public String toString() {
     Preconditions.checkArgument(symbol != null, "Should not be null at this point.");
-    return id
-        + "\t"
-        + (clazz != null ? clazz.flatName() : "null")
-        + "\t"
-        + symbol
-        + "\t"
-        + parent
-        + "\t"
-        + symbol.getParameters().size()
-        + "\t"
-        + Arrays.toString(annotFlags)
-        + "\t"
-        + hasNullableAnnotation
-        + "\t"
-        + Arrays.toString(parameterNames)
-        + "\t"
-        + uri.getPath();
+    return String.join(
+        "\t",
+        String.valueOf(id),
+        (clazz != null ? clazz.flatName() : "null"),
+        symbol.toString(),
+        String.valueOf(parent),
+        String.valueOf(symbol.getParameters().size()),
+        Arrays.toString(annotFlags),
+        String.valueOf(hasNullableAnnotation),
+        getVisibilityOfMethod(),
+        String.valueOf(!symbol.getReturnType().isPrimitiveOrVoid()));
   }
 
   public static String header() {
@@ -132,9 +121,9 @@ public class MethodInfo {
         + "\t"
         + "nullable"
         + "\t"
-        + "parameters"
+        + "visibility"
         + "\t"
-        + "uri";
+        + "non-primitive-return";
   }
 
   public void setParamAnnotations(List<Boolean> annotFlags) {
@@ -149,23 +138,23 @@ public class MethodInfo {
     this.hasNullableAnnotation = SymbolUtil.hasNullableAnnotation(this.symbol, config);
   }
 
-  public void setURI(URI toUri) {
-    this.uri = toUri;
-  }
-
-  public void setParameterNames(List<? extends VariableTree> parameters) {
-    this.parameterNames =
-        parameters.stream()
-            .map(
-                new Function<VariableTree, String>() {
-                  @Override
-                  public @Nullable String apply(@Nullable VariableTree variableTree) {
-                    if (variableTree == null) {
-                      return null;
-                    }
-                    return variableTree.getName().toString();
-                  }
-                })
-            .toArray(String[]::new);
+  /**
+   * Return string value of visibility
+   *
+   * @return "public" if public, "private" if private, "protected" if protected and "package" if the
+   *     method has package visibility.
+   */
+  private String getVisibilityOfMethod() {
+    Set<Modifier> modifiers = symbol.getModifiers();
+    if (modifiers.contains(Modifier.PUBLIC)) {
+      return "public";
+    }
+    if (modifiers.contains(Modifier.PRIVATE)) {
+      return "private";
+    }
+    if (modifiers.contains(Modifier.PROTECTED)) {
+      return "protected";
+    }
+    return "package";
   }
 }

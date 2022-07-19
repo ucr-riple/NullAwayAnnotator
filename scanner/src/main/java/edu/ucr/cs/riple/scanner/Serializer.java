@@ -53,8 +53,8 @@ public class Serializer {
   public static final String METHOD_INFO_FILE_NAME = "method_info.tsv";
   public static final String CLASS_INFO_FILE_NAME = "class_info.tsv";
 
-  public Serializer(ErrorProneCLIFlagsConfig config) {
-    Path outputDirectory = config.outputDirectory;
+  public Serializer(Config config) {
+    Path outputDirectory = config.getOutputDirectory();
     this.fieldGraphPath = outputDirectory.resolve(FIELD_GRAPH_FILE_NAME);
     this.callGraphPath = outputDirectory.resolve(CALL_GRAPH_FILE_NAME);
     this.methodInfoPath = outputDirectory.resolve(METHOD_INFO_FILE_NAME);
@@ -116,19 +116,19 @@ public class Serializer {
   }
 
   /** Initializes every file which will be re-generated in the new run of NullAway. */
-  private void initializeOutputFiles(ErrorProneCLIFlagsConfig config) {
+  private void initializeOutputFiles(Config config) {
     try {
-      Files.createDirectories(config.outputDirectory);
-      if (config.callTrackerIsActive) {
+      Files.createDirectories(config.getOutputDirectory());
+      if (config.callTrackerIsActive()) {
         initializeFile(callGraphPath, TrackerNode.header());
       }
-      if (config.fieldTrackerIsActive) {
+      if (config.fieldTrackerIsActive()) {
         initializeFile(fieldGraphPath, TrackerNode.header());
       }
-      if (config.methodTrackerIsActive) {
+      if (config.methodTrackerIsActive()) {
         initializeFile(methodInfoPath, MethodInfo.header());
       }
-      if (config.classTrackerIsActive) {
+      if (config.classTrackerIsActive()) {
         initializeFile(classInfoPath, ClassInfo.header());
       }
     } catch (IOException e) {

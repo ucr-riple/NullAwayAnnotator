@@ -51,10 +51,33 @@ public class ClassInfoTest extends ScannerBaseTest<ClassInfoDisplay> {
   }
 
   @Test
-  public void BasicTest() {
+  public void basicTest() {
     tester
         .addSourceLines("edu/ucr/A.java", "package edu.ucr;", "public class A", "{", "}")
         .setExpectedOutputs(new ClassInfoDisplay("edu.ucr.A", "edu/ucr/A.java"))
+        .doTest();
+  }
+
+  @Test
+  public void checkClassesAreWrittenInFlatName() {
+    tester
+        .addSourceFile("SampleClassForTest.java")
+        .setExpectedOutputs(
+            new ClassInfoDisplay(
+                "edu.ucr.cs.riple.scanner.testdata.SampleClassForTest",
+                "edu/ucr/cs/riple/scanner/SampleClassForTest.java"),
+            new ClassInfoDisplay(
+                "edu.ucr.cs.riple.scanner.testdata.SampleClassForTest$Inner",
+                "edu/ucr/cs/riple/scanner/SampleClassForTest.java"),
+            new ClassInfoDisplay(
+                "edu.ucr.cs.riple.scanner.testdata.SampleClassForTest$1InnerMethod",
+                "edu/ucr/cs/riple/scanner/SampleClassForTest.java"),
+            new ClassInfoDisplay(
+                "edu.ucr.cs.riple.scanner.testdata.SampleClassForTest$1InnerMethod$1",
+                "edu/ucr/cs/riple/scanner/SampleClassForTest.java"),
+            new ClassInfoDisplay(
+                "edu.ucr.cs.riple.scanner.testdata.Run",
+                "edu/ucr/cs/riple/scanner/SampleClassForTest.java"))
         .doTest();
   }
 }

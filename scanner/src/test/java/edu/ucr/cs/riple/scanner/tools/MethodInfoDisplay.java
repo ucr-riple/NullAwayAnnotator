@@ -35,8 +35,8 @@ public class MethodInfoDisplay implements Display {
   public final String size;
   public final String flags;
   public final String hasNullableAnnotation;
-  public final String paramNames;
-  public String path;
+  public final String visibility;
+  public final String hasNonPrimitiveReturn;
 
   public MethodInfoDisplay(
       String id,
@@ -46,8 +46,8 @@ public class MethodInfoDisplay implements Display {
       String size,
       String flags,
       String hasNullableAnnotation,
-      String paramNames,
-      String path) {
+      String visibility,
+      String hasNonPrimitiveReturn) {
     this.id = id;
     this.clazz = clazz;
     this.symbol = symbol;
@@ -55,8 +55,8 @@ public class MethodInfoDisplay implements Display {
     this.size = size;
     this.flags = flags;
     this.hasNullableAnnotation = hasNullableAnnotation;
-    this.paramNames = paramNames;
-    this.path = path;
+    this.visibility = visibility;
+    this.hasNonPrimitiveReturn = hasNonPrimitiveReturn;
   }
 
   @Override
@@ -64,21 +64,27 @@ public class MethodInfoDisplay implements Display {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     MethodInfoDisplay that = (MethodInfoDisplay) o;
-    return Objects.equals(id, that.id)
-        && Objects.equals(clazz, that.clazz)
+    return Objects.equals(clazz, that.clazz)
         && Objects.equals(symbol, that.symbol)
         && Objects.equals(parent, that.parent)
         && Objects.equals(size, that.size)
         && Objects.equals(flags, that.flags)
         && Objects.equals(hasNullableAnnotation, that.hasNullableAnnotation)
-        && Objects.equals(paramNames, that.paramNames)
-        && Objects.equals(path, that.path);
+        && Objects.equals(visibility, that.visibility)
+        && Objects.equals(hasNonPrimitiveReturn, that.hasNonPrimitiveReturn);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(
-        id, clazz, symbol, parent, size, flags, hasNullableAnnotation, paramNames, path);
+        clazz,
+        symbol,
+        parent,
+        size,
+        flags,
+        hasNullableAnnotation,
+        visibility,
+        hasNonPrimitiveReturn);
   }
 
   @Override
@@ -104,11 +110,11 @@ public class MethodInfoDisplay implements Display {
         + ", hasNullableAnnotation='"
         + hasNullableAnnotation
         + '\''
-        + ", paramNames='"
-        + paramNames
+        + ", visibility='"
+        + visibility
         + '\''
-        + ", path='"
-        + path
+        + ", hasNonPrimitiveReturn='"
+        + hasNonPrimitiveReturn
         + '\'';
   }
 }

@@ -35,30 +35,21 @@ public class MethodNode {
   public String method;
   public String clazz;
   public int size;
-  public boolean[] annotFlags;
   public boolean hasNullableAnnotation;
-  public String[] parameterNames;
-  public String uri;
 
   public MethodNode(
       int id,
       String clazz,
       String method,
       List<Integer> children,
-      boolean[] annotFlags,
       int parent,
-      boolean hasNullableAnnotation,
-      String[] parameterNames,
-      String uri) {
+      boolean hasNullableAnnotation) {
     this.id = id;
     this.clazz = clazz;
     this.method = method;
     this.children = children;
-    this.annotFlags = annotFlags;
     this.parent = parent;
     this.hasNullableAnnotation = hasNullableAnnotation;
-    this.parameterNames = parameterNames;
-    this.uri = uri;
   }
 
   public MethodNode() {}
@@ -69,19 +60,13 @@ public class MethodNode {
       String method,
       Integer parent,
       int size,
-      boolean[] annotFlags,
-      boolean hasNullableAnnotation,
-      String[] parameterNames,
-      String uri) {
+      boolean hasNullableAnnotation) {
     this.parent = parent;
     this.id = id;
     this.method = method;
     this.clazz = clazz;
     this.size = size;
-    this.annotFlags = annotFlags;
     this.hasNullableAnnotation = hasNullableAnnotation;
-    this.parameterNames = parameterNames;
-    this.uri = uri;
   }
 
   void addChild(Integer id) {
@@ -100,8 +85,7 @@ public class MethodNode {
         && Objects.equals(parent, that.parent)
         && Objects.equals(id, that.id)
         && Objects.equals(method, that.method)
-        && Objects.equals(clazz, that.clazz)
-        && Objects.equals(uri, that.uri);
+        && Objects.equals(clazz, that.clazz);
   }
 
   @Override

@@ -25,7 +25,6 @@
 package edu.ucr.cs.riple.core.metadata.method;
 
 import edu.ucr.cs.riple.core.metadata.MetaData;
-import edu.ucr.cs.riple.core.util.Utility;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,17 +40,7 @@ public class MethodInheritanceTree extends MetaData<MethodNode> {
 
   public MethodInheritanceTree(Path path) {
     super(path);
-    final MethodNode top =
-        new MethodNode(
-            -1,
-            "null",
-            "null",
-            Collections.emptyList(),
-            new boolean[] {},
-            -1,
-            false,
-            new String[] {},
-            "null");
+    final MethodNode top = new MethodNode(-1, "null", "null", Collections.emptyList(), -1, false);
     nodes.put(-1, top);
   }
 
@@ -76,16 +65,7 @@ public class MethodInheritanceTree extends MetaData<MethodNode> {
     if (size > maxsize) {
       maxsize = size;
     }
-    node.fillInformation(
-        id,
-        values[1],
-        values[2],
-        parentId,
-        size,
-        Utility.convertStringToBooleanArray(values[5]),
-        Boolean.getBoolean(values[6]),
-        Utility.convertStringToStringArray(values[7]),
-        values[8]);
+    node.fillInformation(id, values[1], values[2], parentId, size, Boolean.parseBoolean(values[6]));
     if (parentId != -1) {
       MethodNode parent = nodes.get(parentId);
       if (parent == null) {
