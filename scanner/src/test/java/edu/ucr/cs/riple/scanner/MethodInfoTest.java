@@ -72,7 +72,7 @@ public class MethodInfoTest extends ScannerBaseTest<MethodInfoDisplay> {
           + "\t"
           + "visibility"
           + "\t"
-          +  "non-primitive-return"
+          + "non-primitive-return"
           + "\t"
           + "parameters"
           + "\t"
@@ -179,6 +179,81 @@ public class MethodInfoTest extends ScannerBaseTest<MethodInfoDisplay> {
                 "true",
                 "[]",
                 "edu/ucr/A.java"))
+        .doTest();
+  }
+
+  @Test
+  public void visibilityAndReturnTypeTest() {
+    tester
+        .addSourceLines(
+            "edu/ucr/A.java",
+            "package edu.ucr;",
+            "public abstract class A {",
+            "   static Object publicMethod(){",
+            "      return new Object();",
+            "   }",
+            "   public abstract Object publicAbstractMethod();",
+            "}")
+        .addSourceLines(
+            "edu/ucr/B.java",
+            "package edu.ucr;",
+            "import javax.annotation.Nullable;",
+            "public interface B {",
+            "   void foo();",
+            "   @Nullable",
+            "   default Object run() {",
+            "       return null;",
+            "   }",
+            "}")
+        .setExpectedOutputs(
+            new MethodInfoDisplay(
+                "1",
+                "edu.ucr.A",
+                "publicMethod()",
+                "0",
+                "0",
+                "[]",
+                "false",
+                "package",
+                "true",
+                "[]",
+                "edu/ucr/A.java"),
+            new MethodInfoDisplay(
+                "2",
+                "edu.ucr.A",
+                "publicAbstractMethod()",
+                "0",
+                "0",
+                "[]",
+                "false",
+                "public",
+                "true",
+                "[]",
+                "edu/ucr/A.java"),
+            new MethodInfoDisplay(
+                "3",
+                "edu.ucr.B",
+                "foo()",
+                "0",
+                "0",
+                "[]",
+                "false",
+                "public",
+                "false",
+                "[]",
+                "edu/ucr/B.java"),
+            new MethodInfoDisplay(
+                "4",
+                "edu.ucr.B",
+                "run()",
+                "0",
+                "0",
+                "[]",
+                "true",
+                "public",
+                "true",
+                "[]",
+                "edu/ucr/B.java"))
         .doTest();
   }
 }
