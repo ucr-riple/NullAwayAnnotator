@@ -77,7 +77,7 @@ public class ConfigurationTest {
             .setOutputFileNameAndHeader("Unknown", "Unknown")
             .addSourceFile("SampleClassForTest.java")
             .setFactory(factory);
-    tester.doTest(
+    tester.doTestWithExpectingError(
         IllegalStateException.class,
         "Error in Scanner Checker configuration, should be set with via error prone flag: (-XepOpt:Scanner:ConfigPath)");
   }
@@ -118,7 +118,7 @@ public class ConfigurationTest {
             .setOutputFileNameAndHeader("Unknown", "Unknown")
             .addSourceFile("SampleClassForTest.java")
             .setFactory(factory);
-    tester.doTest(
+    tester.doTestWithExpectingError(
         IllegalArgumentException.class,
         "Output path cannot be null, should be set it in config file within <path> tag");
   }
