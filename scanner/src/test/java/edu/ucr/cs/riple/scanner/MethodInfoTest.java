@@ -36,13 +36,22 @@ public class MethodInfoTest extends ScannerBaseTest<MethodInfoDisplay> {
 
   private static final DisplayFactory<MethodInfoDisplay> METHOD_DISPLAY_FACTORY =
       values -> {
-        Preconditions.checkArgument(values.length == 9, "Expected to find 9 values on each line");
+        Preconditions.checkArgument(values.length == 11, "Expected to find 11 values on each line");
         // Outputs are written in Temp Directory and is not known at compile time, therefore,
         // relative paths are getting compared.
         MethodInfoDisplay display =
             new MethodInfoDisplay(
-                values[0], values[1], values[2], values[3], values[4], values[5], values[6],
-                values[7], values[8]);
+                values[0],
+                values[1],
+                values[2],
+                values[3],
+                values[4],
+                values[5],
+                values[6],
+                values[7],
+                values[8],
+                values[9],
+                values[10]);
         display.path = display.path.substring(display.path.indexOf("edu/ucr/"));
         return display;
       };
@@ -60,6 +69,10 @@ public class MethodInfoTest extends ScannerBaseTest<MethodInfoDisplay> {
           + "flags"
           + "\t"
           + "nullable"
+          + "\t"
+          + "visibility"
+          + "\t"
+          + "non-primitive-return"
           + "\t"
           + "parameters"
           + "\t"
@@ -90,8 +103,157 @@ public class MethodInfoTest extends ScannerBaseTest<MethodInfoDisplay> {
                 "0",
                 "[]",
                 "false",
+                "public",
+                "true",
                 "[]",
                 "edu/ucr/A.java"))
+        .doTest();
+  }
+
+  @Test
+  public void visibilityTest() {
+    tester
+        .addSourceLines(
+            "edu/ucr/A.java",
+            "package edu.ucr;",
+            "public class A {",
+            "   public Object publicMethod(){",
+            "      return new Object();",
+            "   }",
+            "   private Object privateMethod(){",
+            "      return new Object();",
+            "   }",
+            "   protected Object protectedMethod(){",
+            "      return new Object();",
+            "   }",
+            "   Object packageMethod(){",
+            "      return new Object();",
+            "   }",
+            "}")
+        .setExpectedOutputs(
+            new MethodInfoDisplay(
+                "1",
+                "edu.ucr.A",
+                "publicMethod()",
+                "0",
+                "0",
+                "[]",
+                "false",
+                "public",
+                "true",
+                "[]",
+                "edu/ucr/A.java"),
+            new MethodInfoDisplay(
+                "2",
+                "edu.ucr.A",
+                "privateMethod()",
+                "0",
+                "0",
+                "[]",
+                "false",
+                "private",
+                "true",
+                "[]",
+                "edu/ucr/A.java"),
+            new MethodInfoDisplay(
+                "3",
+                "edu.ucr.A",
+                "protectedMethod()",
+                "0",
+                "0",
+                "[]",
+                "false",
+                "protected",
+                "true",
+                "[]",
+                "edu/ucr/A.java"),
+            new MethodInfoDisplay(
+                "4",
+                "edu.ucr.A",
+                "packageMethod()",
+                "0",
+                "0",
+                "[]",
+                "false",
+                "package",
+                "true",
+                "[]",
+                "edu/ucr/A.java"))
+        .doTest();
+  }
+
+  @Test
+  public void visibilityAndReturnTypeTest() {
+    tester
+        .addSourceLines(
+            "edu/ucr/A.java",
+            "package edu.ucr;",
+            "public abstract class A {",
+            "   static Object publicMethod(){",
+            "      return new Object();",
+            "   }",
+            "   public abstract Object publicAbstractMethod();",
+            "}")
+        .addSourceLines(
+            "edu/ucr/B.java",
+            "package edu.ucr;",
+            "import javax.annotation.Nullable;",
+            "public interface B {",
+            "   void foo();",
+            "   @Nullable",
+            "   default Object run() {",
+            "       return null;",
+            "   }",
+            "}")
+        .setExpectedOutputs(
+            new MethodInfoDisplay(
+                "1",
+                "edu.ucr.A",
+                "publicMethod()",
+                "0",
+                "0",
+                "[]",
+                "false",
+                "package",
+                "true",
+                "[]",
+                "edu/ucr/A.java"),
+            new MethodInfoDisplay(
+                "2",
+                "edu.ucr.A",
+                "publicAbstractMethod()",
+                "0",
+                "0",
+                "[]",
+                "false",
+                "public",
+                "true",
+                "[]",
+                "edu/ucr/A.java"),
+            new MethodInfoDisplay(
+                "3",
+                "edu.ucr.B",
+                "foo()",
+                "0",
+                "0",
+                "[]",
+                "false",
+                "public",
+                "false",
+                "[]",
+                "edu/ucr/B.java"),
+            new MethodInfoDisplay(
+                "4",
+                "edu.ucr.B",
+                "run()",
+                "0",
+                "0",
+                "[]",
+                "true",
+                "public",
+                "true",
+                "[]",
+                "edu/ucr/B.java"))
         .doTest();
   }
 }
