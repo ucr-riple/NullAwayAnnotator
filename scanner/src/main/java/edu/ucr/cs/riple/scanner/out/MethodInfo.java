@@ -29,7 +29,6 @@ import com.google.errorprone.VisitorState;
 import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.riple.scanner.Config;
 import edu.ucr.cs.riple.scanner.SymbolUtil;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -49,7 +48,6 @@ public class MethodInfo {
   private int parent = -1;
   private static int LAST_ID = 0;
   private static final Set<MethodInfo> discovered = new HashSet<>();
-  private URI uri;
 
   private MethodInfo(Symbol.MethodSymbol method) {
     this.id = ++LAST_ID;
@@ -105,8 +103,7 @@ public class MethodInfo {
         Arrays.toString(annotFlags),
         String.valueOf(hasNullableAnnotation),
         getVisibilityOfMethod(),
-        String.valueOf(!symbol.getReturnType().isPrimitiveOrVoid()),
-        uri.getPath());
+        String.valueOf(!symbol.getReturnType().isPrimitiveOrVoid()));
   }
 
   public static String header() {
@@ -126,9 +123,7 @@ public class MethodInfo {
         + "\t"
         + "visibility"
         + "\t"
-        + "non-primitive-return"
-        + "\t"
-        + "uri";
+        + "non-primitive-return";
   }
 
   public void setParamAnnotations(List<Boolean> annotFlags) {
@@ -141,10 +136,6 @@ public class MethodInfo {
 
   public void setAnnotation(Config config) {
     this.hasNullableAnnotation = SymbolUtil.hasNullableAnnotation(this.symbol, config);
-  }
-
-  public void setURI(URI toUri) {
-    this.uri = toUri;
   }
 
   /**

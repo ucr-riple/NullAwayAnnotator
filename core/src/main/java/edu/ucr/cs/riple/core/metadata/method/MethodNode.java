@@ -36,7 +36,6 @@ public class MethodNode {
   public String clazz;
   public int size;
   public boolean hasNullableAnnotation;
-  public String uri;
 
   public MethodNode(
       int id,
@@ -52,7 +51,6 @@ public class MethodNode {
     this.children = children;
     this.parent = parent;
     this.hasNullableAnnotation = hasNullableAnnotation;
-    this.uri = uri;
   }
 
   public MethodNode() {}
@@ -63,15 +61,13 @@ public class MethodNode {
       String method,
       Integer parent,
       int size,
-      boolean hasNullableAnnotation,
-      String uri) {
+      boolean hasNullableAnnotation) {
     this.parent = parent;
     this.id = id;
     this.method = method;
     this.clazz = clazz;
     this.size = size;
     this.hasNullableAnnotation = hasNullableAnnotation;
-    this.uri = uri;
   }
 
   void addChild(Integer id) {
@@ -90,8 +86,7 @@ public class MethodNode {
         && Objects.equals(parent, that.parent)
         && Objects.equals(id, that.id)
         && Objects.equals(method, that.method)
-        && Objects.equals(clazz, that.clazz)
-        && Objects.equals(uri, that.uri);
+        && Objects.equals(clazz, that.clazz);
   }
 
   @Override

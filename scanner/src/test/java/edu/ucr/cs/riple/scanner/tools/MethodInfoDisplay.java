@@ -37,7 +37,6 @@ public class MethodInfoDisplay implements Display {
   public final String hasNullableAnnotation;
   public final String visibility;
   public final String hasNonPrimitiveReturn;
-  public String path;
 
   public MethodInfoDisplay(
       String id,
@@ -48,8 +47,7 @@ public class MethodInfoDisplay implements Display {
       String flags,
       String hasNullableAnnotation,
       String visibility,
-      String hasNonPrimitiveReturn,
-      String path) {
+      String hasNonPrimitiveReturn) {
     this.id = id;
     this.clazz = clazz;
     this.symbol = symbol;
@@ -59,7 +57,6 @@ public class MethodInfoDisplay implements Display {
     this.hasNullableAnnotation = hasNullableAnnotation;
     this.visibility = visibility;
     this.hasNonPrimitiveReturn = hasNonPrimitiveReturn;
-    this.path = path;
   }
 
   @Override
@@ -74,8 +71,7 @@ public class MethodInfoDisplay implements Display {
         && Objects.equals(flags, that.flags)
         && Objects.equals(hasNullableAnnotation, that.hasNullableAnnotation)
         && Objects.equals(visibility, that.visibility)
-        && Objects.equals(hasNonPrimitiveReturn, that.hasNonPrimitiveReturn)
-        && Objects.equals(path, that.path);
+        && Objects.equals(hasNonPrimitiveReturn, that.hasNonPrimitiveReturn);
   }
 
   @Override
@@ -88,8 +84,7 @@ public class MethodInfoDisplay implements Display {
         flags,
         hasNullableAnnotation,
         visibility,
-        hasNonPrimitiveReturn,
-        path);
+        hasNonPrimitiveReturn);
   }
 
   @Override
@@ -120,9 +115,6 @@ public class MethodInfoDisplay implements Display {
         + '\''
         + ", hasNonPrimitiveReturn='"
         + hasNonPrimitiveReturn
-        + '\''
-        + ", path='"
-        + path
         + '\'';
   }
 }

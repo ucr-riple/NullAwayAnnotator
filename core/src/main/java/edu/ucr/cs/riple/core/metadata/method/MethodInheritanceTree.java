@@ -66,8 +66,7 @@ public class MethodInheritanceTree extends MetaData<MethodNode> {
     if (size > maxsize) {
       maxsize = size;
     }
-    node.fillInformation(
-        id, values[1], values[2], parentId, size, Boolean.parseBoolean(values[6]), values[9]);
+    node.fillInformation(id, values[1], values[2], parentId, size, Boolean.parseBoolean(values[6]));
     if (parentId != -1) {
       MethodNode parent = nodes.get(parentId);
       if (parent == null) {
