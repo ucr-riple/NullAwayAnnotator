@@ -109,6 +109,7 @@ public class MethodInfo {
         Arrays.toString(annotFlags),
         String.valueOf(hasNullableAnnotation),
         getVisibilityOfMethod(),
+        String.valueOf(!symbol.getReturnType().isPrimitiveOrVoid()),
         Arrays.toString(parameterNames),
         uri.getPath());
   }
@@ -129,6 +130,8 @@ public class MethodInfo {
         + "nullable"
         + "\t"
         + "visibility"
+        + "\t"
+        + "non-primitive-return"
         + "\t"
         + "parameters"
         + "\t"
@@ -170,8 +173,8 @@ public class MethodInfo {
   /**
    * Return string value of visibility
    *
-   * @return "public" if public, "private" if private and "package" if the method has package
-   *     visibility.
+   * @return "public" if public, "private" if private, "protected" if protected and "package" if the
+   *     method has package visibility.
    */
   private String getVisibilityOfMethod() {
     Set<Modifier> modifiers = symbol.getModifiers();
@@ -180,6 +183,9 @@ public class MethodInfo {
     }
     if (modifiers.contains(Modifier.PRIVATE)) {
       return "private";
+    }
+    if (modifiers.contains(Modifier.PROTECTED)) {
+      return "protected";
     }
     return "package";
   }

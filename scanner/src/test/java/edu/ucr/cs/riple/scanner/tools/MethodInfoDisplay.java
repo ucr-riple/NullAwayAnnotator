@@ -36,6 +36,7 @@ public class MethodInfoDisplay implements Display {
   public final String flags;
   public final String hasNullableAnnotation;
   public final String visibility;
+  public final String hasNonPrimitiveReturn;
   public final String paramNames;
   public String path;
 
@@ -48,6 +49,7 @@ public class MethodInfoDisplay implements Display {
       String flags,
       String hasNullableAnnotation,
       String visibility,
+      String hasNonPrimitiveReturn,
       String paramNames,
       String path) {
     this.id = id;
@@ -58,6 +60,7 @@ public class MethodInfoDisplay implements Display {
     this.flags = flags;
     this.hasNullableAnnotation = hasNullableAnnotation;
     this.visibility = visibility;
+    this.hasNonPrimitiveReturn = hasNonPrimitiveReturn;
     this.paramNames = paramNames;
     this.path = path;
   }
@@ -74,6 +77,7 @@ public class MethodInfoDisplay implements Display {
         && Objects.equals(flags, that.flags)
         && Objects.equals(hasNullableAnnotation, that.hasNullableAnnotation)
         && Objects.equals(visibility, that.visibility)
+        && Objects.equals(hasNonPrimitiveReturn, that.hasNonPrimitiveReturn)
         && Objects.equals(paramNames, that.paramNames)
         && Objects.equals(path, that.path);
   }
@@ -81,7 +85,16 @@ public class MethodInfoDisplay implements Display {
   @Override
   public int hashCode() {
     return Objects.hash(
-        clazz, symbol, parent, size, flags, hasNullableAnnotation, visibility, paramNames, path);
+        clazz,
+        symbol,
+        parent,
+        size,
+        flags,
+        hasNullableAnnotation,
+        visibility,
+        hasNonPrimitiveReturn,
+        paramNames,
+        path);
   }
 
   @Override
@@ -109,6 +122,9 @@ public class MethodInfoDisplay implements Display {
         + '\''
         + ", visibility='"
         + visibility
+        + '\''
+        + ", hasNonPrimitiveReturn='"
+        + hasNonPrimitiveReturn
         + '\''
         + ", paramNames='"
         + paramNames
