@@ -40,8 +40,7 @@ public class MethodInheritanceTree extends MetaData<MethodNode> {
 
   public MethodInheritanceTree(Path path) {
     super(path);
-    final MethodNode top =
-        new MethodNode(-1, "null", "null", Collections.emptyList(), -1, false, "null");
+    final MethodNode top = new MethodNode(-1, "null", "null", Collections.emptyList(), -1, false);
     nodes.put(-1, top);
   }
 

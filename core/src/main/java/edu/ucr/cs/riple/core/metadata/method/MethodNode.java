@@ -43,8 +43,7 @@ public class MethodNode {
       String method,
       List<Integer> children,
       int parent,
-      boolean hasNullableAnnotation,
-      String uri) {
+      boolean hasNullableAnnotation) {
     this.id = id;
     this.clazz = clazz;
     this.method = method;
