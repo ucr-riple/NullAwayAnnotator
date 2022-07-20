@@ -24,10 +24,18 @@
 
 package edu.ucr.cs.riple.core.injectors;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.changes.Change;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class VirtualInjector extends AnnotationInjector {
 
@@ -36,7 +44,27 @@ public class VirtualInjector extends AnnotationInjector {
   }
 
   public void injectFixes(Set<Fix> fixes) {
-    // todo
+    if (!config.downStreamDependenciesAnalysisActivated) {
+      throw new IllegalStateException(
+          "Downstream dependencies not activated, cannot inject annotations virtually!");
+    }
+    Path path = config.nullawayLibraryModelLoaderPath;
+    Preconditions.checkNotNull(
+        path,
+        "NullawayLibraryModelLoaderPath cannot be null while Downstream dependencies analysis is activated.");
+    try (OutputStream os = new FileOutputStream(path.toFile())) {
+      Set<String> rows =
+          fixes.stream()
+              .filter((Predicate<Fix>) Fix::isOnMethod)
+              .map(fix -> fix.toMethod().clazz + "\t" + fix.toMethod().method)
+              .collect(Collectors.toSet());
+      for (String row : rows) {
+        os.write(row.getBytes(Charset.defaultCharset()), 0, row.length());
+      }
+      os.flush();
+    } catch (IOException e) {
+      throw new RuntimeException("Error happened for writing at file: " + path, e);
+    }
   }
 
   @Override

@@ -30,7 +30,7 @@ import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.explorers.Explorer;
 import edu.ucr.cs.riple.core.explorers.OptimizedExplorer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
-import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
+import edu.ucr.cs.riple.core.injectors.VirtualInjector;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -66,7 +66,7 @@ public class DownStreamDependencyAnalyzer {
     this.config = config;
     this.modules = config.getSubModules();
     this.tree = tree;
-    this.injector = new PhysicalInjector(config);
+    this.injector = new VirtualInjector(config);
     this.methods = tree.getPublicMethodsWithNonPrimitivesReturn().stream().map(MethodStatus::new);
   }
 
