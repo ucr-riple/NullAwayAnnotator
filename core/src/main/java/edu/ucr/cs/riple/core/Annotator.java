@@ -109,7 +109,7 @@ public class Annotator {
               config.dir.resolve("fixes.tsv"), Fix.factory(config, fieldDeclarationAnalysis));
       MethodInheritanceTree tree =
           new MethodInheritanceTree(config.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
-      RegionTracker tracker = new CompoundTracker(config.dir, tree);
+      RegionTracker tracker = new CompoundTracker(config, tree);
       Explorer explorer =
           config.exhaustiveSearch
               ? new ExhaustiveExplorer(injector, errorBank, fixBank, fixes, tree, config)

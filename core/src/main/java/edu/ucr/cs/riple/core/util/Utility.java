@@ -25,11 +25,11 @@
 package edu.ucr.cs.riple.core.util;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.primitives.Booleans;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Factory;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.metadata.submodules.Module;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -42,7 +42,6 @@ import java.io.OutputStreamWriter;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -120,31 +119,6 @@ public class Utility {
       throw new RuntimeException(
           "Could not create the Annotator report json file: " + reportsPath, e);
     }
-  }
-
-  public static boolean[] convertStringToBooleanArray(String content) {
-    if (content == null) {
-      return new boolean[0];
-    }
-    content = content.substring(1, content.length() - 1);
-    if (content.length() == 0) {
-      return new boolean[0];
-    }
-    content = content.replaceAll("\\s", "");
-    return Booleans.toArray(
-        Arrays.stream(content.split(",")).map(Boolean::parseBoolean).collect(Collectors.toList()));
-  }
-
-  public static String[] convertStringToStringArray(String content) {
-    if (content == null) {
-      return new String[0];
-    }
-    content = content.substring(1, content.length() - 1);
-    if (content.length() == 0) {
-      return new String[0];
-    }
-    content = content.replaceAll("\\s", "");
-    return Arrays.stream(content.split(",")).toArray(String[]::new);
   }
 
   public static Set<Fix> readFixesFromOutputDirectory(Config config, Factory<Fix> factory) {
@@ -259,14 +233,20 @@ public class Utility {
     }
   }
 
+  public static void buildProject(Config config, Module module) {
+    buildProject(config, module.command, false);
+  }
+
   public static void buildProject(Config config) {
-    long timer = config.log.startTimer();
-    buildProject(config, false);
-    config.log.stopTimerAndCaptureBuildTime(timer);
-    config.log.incrementBuildRequest();
+    buildProject(config, config.buildCommand, false);
   }
 
   public static void buildProject(Config config, boolean initSerializationEnabled) {
+    buildProject(config, config.buildCommand, initSerializationEnabled);
+  }
+
+  private static void buildProject(
+      Config config, String buildCommand, boolean initSerializationEnabled) {
     FixSerializationConfig.Builder nullAwayConfig =
         new FixSerializationConfig.Builder()
             .setSuggest(true, true)
@@ -274,7 +254,10 @@ public class Utility {
             .setFieldInitInfo(initSerializationEnabled);
     nullAwayConfig.writeAsXML(config.nullAwayConfigPath.toString());
     try {
-      Utility.executeCommand(config.buildCommand, config);
+      long timer = config.log.startTimer();
+      Utility.executeCommand(buildCommand, config);
+      config.log.stopTimerAndCaptureBuildTime(timer);
+      config.log.incrementBuildRequest();
     } catch (Exception e) {
       throw new RuntimeException("Could not run command: " + config.buildCommand);
     }

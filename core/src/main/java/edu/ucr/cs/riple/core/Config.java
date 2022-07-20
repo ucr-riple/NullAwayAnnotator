@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.core;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.log.Log;
+import edu.ucr.cs.riple.core.metadata.submodules.Module;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -330,6 +331,22 @@ public class Config {
   private static void showHelpAndQuit(HelpFormatter formatter, Options options) {
     formatter.printHelp("Annotator config Flags", options);
     System.exit(1);
+  }
+
+  /**
+   * Returns the set of downstream dependencies, returns empty list if {@link
+   * Config#downStreamDependenciesAnalysisActivated} is false.
+   *
+   * @return ImmutableSet of {@link edu.ucr.cs.riple.core.metadata.submodules.Module}.
+   */
+  public ImmutableSet<Module> getSubModules() {
+    if (!this.downStreamDependenciesAnalysisActivated) {
+      return ImmutableSet.of();
+    }
+    final int[] id = {1};
+    return downstreamModulesBuildCommands.stream()
+        .map(command -> new Module("module-" + id[0]++, command))
+        .collect(ImmutableSet.toImmutableSet());
   }
 
   static class OrElse<T> {

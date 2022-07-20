@@ -43,11 +43,11 @@ public class Fix extends Hashable {
   public final String annotation;
   public final Set<String> reasons;
 
-  public Fix(Change change, String reason, String encClass, String endMethod) {
+  public Fix(Change change, String reason, String encClass, String encMethod) {
     this.change = change;
     this.annotation = change.annotation;
     this.encClass = encClass;
-    this.encMethod = endMethod;
+    this.encMethod = encMethod;
     this.reasons = reason != null ? Sets.newHashSet(reason) : new HashSet<>();
   }
 

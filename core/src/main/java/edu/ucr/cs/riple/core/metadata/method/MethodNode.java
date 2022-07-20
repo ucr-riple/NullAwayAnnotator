@@ -36,6 +36,31 @@ public class MethodNode {
   public String clazz;
   public int size;
   public boolean hasNullableAnnotation;
+  public Visibility visibility;
+  public boolean hasNonPrimitiveReturn;
+
+  public enum Visibility {
+    PUBLIC,
+    PRIVATE,
+    PACKAGE,
+    PROTECTED;
+
+    public static MethodNode.Visibility parse(String value) {
+      String toLower = value.toLowerCase();
+      switch (toLower) {
+        case "public":
+          return MethodNode.Visibility.PUBLIC;
+        case "private":
+          return MethodNode.Visibility.PRIVATE;
+        case "protected":
+          return MethodNode.Visibility.PROTECTED;
+        case "package":
+          return MethodNode.Visibility.PACKAGE;
+        default:
+          throw new IllegalArgumentException("Unknown visibility type: " + value);
+      }
+    }
+  }
 
   public MethodNode(
       int id,
@@ -60,13 +85,17 @@ public class MethodNode {
       String method,
       Integer parent,
       int size,
-      boolean hasNullableAnnotation) {
+      boolean hasNullableAnnotation,
+      String visibility,
+      boolean hasNonPrimitiveReturn) {
     this.parent = parent;
     this.id = id;
     this.method = method;
     this.clazz = clazz;
     this.size = size;
     this.hasNullableAnnotation = hasNullableAnnotation;
+    this.visibility = Visibility.parse(visibility);
+    this.hasNonPrimitiveReturn = hasNonPrimitiveReturn;
   }
 
   void addChild(Integer id) {

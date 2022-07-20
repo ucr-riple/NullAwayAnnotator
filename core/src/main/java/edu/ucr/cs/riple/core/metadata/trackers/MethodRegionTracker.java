@@ -24,12 +24,13 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.injector.location.OnMethod;
-import java.nio.file.Path;
+import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,8 +38,8 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
 
   private final MethodInheritanceTree tree;
 
-  public MethodRegionTracker(Path path, MethodInheritanceTree tree) {
-    super(path);
+  public MethodRegionTracker(Config config, MethodInheritanceTree tree) {
+    super(config.dir.resolve(Serializer.CALL_GRAPH_FILE_NAME));
     this.tree = tree;
   }
 
@@ -66,7 +67,6 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
             candidate ->
                 candidate.calleeClass.equals(clazz) && candidate.calleeMember.equals(method),
             clazz)
-        .stream()
         .map(node -> new Region(node.callerMethod, node.callerClass))
         .collect(Collectors.toSet());
   }

@@ -22,35 +22,14 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.trackers;
+package edu.ucr.cs.riple.core.metadata.submodules;
 
-import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+public class Module {
+  public final String name;
+  public final String command;
 
-public class CompoundTracker implements RegionTracker {
-
-  private final List<RegionTracker> trackers;
-
-  public CompoundTracker(Config config, MethodInheritanceTree tree) {
-    this.trackers = new ArrayList<>();
-    MethodRegionTracker methodRegionTracker = new MethodRegionTracker(config, tree);
-    this.trackers.add(new FieldRegionTracker(config));
-    this.trackers.add(methodRegionTracker);
-    this.trackers.add(new ParameterRegionTracker(tree, methodRegionTracker));
-  }
-
-  @Override
-  public Set<Region> getRegions(Fix location) {
-    for (RegionTracker tracker : this.trackers) {
-      Set<Region> ans = tracker.getRegions(location);
-      if (ans != null) {
-        return ans;
-      }
-    }
-    throw new IllegalStateException("Region cannot be null at this point." + location);
+  public Module(String name, String command) {
+    this.command = command;
+    this.name = name;
   }
 }
