@@ -29,6 +29,8 @@ import edu.ucr.cs.riple.core.explorers.BasicExplorer;
 import edu.ucr.cs.riple.core.explorers.ExhaustiveExplorer;
 import edu.ucr.cs.riple.core.explorers.Explorer;
 import edu.ucr.cs.riple.core.explorers.OptimizedExplorer;
+import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
+import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.field.FieldInitializationAnalysis;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
@@ -38,7 +40,7 @@ import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
-import edu.ucr.cs.riple.injector.Change;
+import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.HashMap;
 import java.util.Set;
@@ -55,7 +57,7 @@ public class Annotator {
   public Annotator(Config config) {
     this.config = config;
     this.reports = new HashMap<>();
-    this.injector = new AnnotationInjector(config);
+    this.injector = new PhysicalInjector(config);
   }
 
   public void start() {
@@ -78,11 +80,11 @@ public class Annotator {
             .collect(Collectors.toSet());
     FieldInitializationAnalysis analysis =
         new FieldInitializationAnalysis(config.dir.resolve("field_init.tsv"));
-    Set<Change> initializers =
+    Set<AddAnnotation> initializers =
         analysis.findInitializers(uninitializedFields).stream()
-            .map(onMethod -> new Change(onMethod, config.initializerAnnot, true))
+            .map(onMethod -> new AddAnnotation(onMethod, config.initializerAnnot))
             .collect(Collectors.toSet());
-    this.injector.injectChanges(initializers);
+    this.injector.injectAnnotations(initializers);
   }
 
   private void explore() {

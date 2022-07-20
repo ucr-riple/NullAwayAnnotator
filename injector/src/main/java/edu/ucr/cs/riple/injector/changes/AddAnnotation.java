@@ -1,7 +1,5 @@
 /*
- * MIT License
- *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 University of California, Riverside.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,16 +20,31 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.tools;
+package edu.ucr.cs.riple.injector.changes;
 
-import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.injector.changes.Change;
+import com.github.javaparser.ast.CompilationUnit;
 import edu.ucr.cs.riple.injector.location.Location;
+import org.json.simple.JSONObject;
 
-/** Wrapper class for {@link Change} with default values, used to create tests. */
-public class TFix extends Fix {
+public class AddAnnotation extends Change {
+  public AddAnnotation(Location location, String annotation) {
+    super(location, annotation);
+  }
 
-  public TFix(Location location) {
-    super(new TChange(location), null, null, null);
+  @Override
+  public boolean apply(CompilationUnit tree) {
+    return this.location.apply(tree, annotation, true);
+  }
+
+  @Override
+  public JSONObject getJson() {
+    JSONObject res = super.getJson();
+    res.put("INJECT", true);
+    return res;
+  }
+
+  @Override
+  public Change duplicate() {
+    return new AddAnnotation(location.duplicate(), annotation);
   }
 }

@@ -24,13 +24,14 @@
 
 package edu.ucr.cs.riple.core.tools;
 
-import edu.ucr.cs.riple.injector.Change;
+import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.location.Location;
 
 /** Wrapper class for {@link Change} with default values, used to create tests. */
-public class TChange extends Change {
+public class TChange extends AddAnnotation {
 
   public TChange(Location location) {
-    super(location, "javax.annotation.Nullable", true);
+    super(location, "javax.annotation.Nullable");
   }
 }

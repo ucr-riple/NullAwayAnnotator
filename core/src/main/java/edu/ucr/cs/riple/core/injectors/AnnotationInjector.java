@@ -22,44 +22,54 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core;
+package edu.ucr.cs.riple.core.injectors;
 
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.injector.Change;
-import edu.ucr.cs.riple.injector.Injector;
-import edu.ucr.cs.riple.injector.WorkListBuilder;
+import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.changes.Change;
+import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class AnnotationInjector {
-  private final Injector injector;
+public abstract class AnnotationInjector {
+  protected final Config config;
 
   public AnnotationInjector(Config config) {
-    this.injector = Injector.builder().keepStyle(!config.lexicalPreservationDisabled).build();
+    this.config = config;
   }
 
   public void removeFixes(Set<Fix> fixes) {
     if (fixes == null || fixes.size() == 0) {
       return;
     }
-    Set<Change> toRemove =
+    Set<RemoveAnnotation> toRemove =
         fixes.stream()
-            .map(fix -> new Change(fix.change.location, fix.annotation, false))
+            .map(fix -> new RemoveAnnotation(fix.change.location, fix.annotation))
             .collect(Collectors.toSet());
-    injector.start(new WorkListBuilder(toRemove).getWorkLists(), false);
+    removeAnnotations(toRemove);
   }
 
   public void injectFixes(Set<Fix> fixes) {
     if (fixes == null || fixes.size() == 0) {
       return;
     }
-    injectChanges(fixes.stream().map(fix -> fix.change).collect(Collectors.toSet()));
+    injectAnnotations(fixes.stream().map(fix -> fix.change).collect(Collectors.toSet()));
   }
 
-  public void injectChanges(Set<Change> changes) {
+  public void removeAnnotations(Set<RemoveAnnotation> changes) {
     if (changes == null || changes.size() == 0) {
       return;
     }
-    injector.start(new WorkListBuilder(changes).getWorkLists(), false);
+    applyChanges(changes);
   }
+
+  public void injectAnnotations(Set<AddAnnotation> changes) {
+    if (changes == null || changes.size() == 0) {
+      return;
+    }
+    applyChanges(changes);
+  }
+
+  protected abstract <T extends Change> void applyChanges(Set<T> changes);
 }

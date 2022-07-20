@@ -27,9 +27,9 @@ package edu.ucr.cs.riple.injector.tools;
 import static edu.ucr.cs.riple.injector.tools.Utility.pathOf;
 import static org.junit.Assert.fail;
 
-import edu.ucr.cs.riple.injector.Change;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.WorkListBuilder;
+import edu.ucr.cs.riple.injector.changes.Change;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;

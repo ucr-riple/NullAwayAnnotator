@@ -22,6 +22,7 @@
 
 package edu.ucr.cs.riple.injector;
 
+import edu.ucr.cs.riple.injector.changes.Change;
 import java.util.ArrayList;
 import java.util.List;
 

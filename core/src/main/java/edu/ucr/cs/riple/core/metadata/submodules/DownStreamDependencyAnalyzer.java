@@ -24,13 +24,19 @@
 
 package edu.ucr.cs.riple.core.metadata.submodules;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
+import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class DownStreamDependencyAnalyzer {
 
@@ -69,6 +75,22 @@ public class DownStreamDependencyAnalyzer {
     Utility.buildProject(config, module);
     Utility.setScannerCheckerActivation(config, false);
     MethodRegionTracker tracker = new MethodRegionTracker(config, tree);
+    Set<Fix> fixes =
+        methods.stream()
+            .filter(
+                (Predicate<MethodStatus>)
+                    input ->
+                        !tracker.getCallersOfMethod(input.node.clazz, input.node.method).isEmpty())
+            .map(
+                methodStatus ->
+                    new Fix(
+                        new AddAnnotation(
+                            new OnMethod("null", methodStatus.node.clazz, methodStatus.node.method),
+                            config.nullableAnnot),
+                        "null",
+                        "null",
+                        "null"))
+            .collect(Collectors.toSet());
   }
 
   public int effectOnDownstreamDependencies(String clazz, String method) {

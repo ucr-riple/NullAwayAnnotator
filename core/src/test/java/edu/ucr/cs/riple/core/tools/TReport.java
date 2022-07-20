@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.core.tools;
 
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.injector.Change;
+import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Set;
 import java.util.function.Function;
@@ -41,7 +41,7 @@ public class TReport extends Report {
 
   public TReport(Location root, int effect, String encClass, String encMethod) {
     super(
-        new Fix(new Change(root, "javax.annotation.Nullable", true), null, encClass, encMethod),
+        new Fix(new AddAnnotation(root, "javax.annotation.Nullable"), null, encClass, encMethod),
         effect);
   }
 

@@ -22,16 +22,24 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.tools;
+package edu.ucr.cs.riple.core.injectors;
 
-import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.injector.Injector;
+import edu.ucr.cs.riple.injector.WorkListBuilder;
 import edu.ucr.cs.riple.injector.changes.Change;
-import edu.ucr.cs.riple.injector.location.Location;
+import java.util.Set;
 
-/** Wrapper class for {@link Change} with default values, used to create tests. */
-public class TFix extends Fix {
+public class PhysicalInjector extends AnnotationInjector {
+  private final Injector injector;
 
-  public TFix(Location location) {
-    super(new TChange(location), null, null, null);
+  public PhysicalInjector(Config config) {
+    super(config);
+    this.injector = Injector.builder().keepStyle(!this.config.lexicalPreservationDisabled).build();
+  }
+
+  @Override
+  protected <T extends Change> void applyChanges(Set<T> changes) {
+    this.injector.start(new WorkListBuilder<>(changes).getWorkLists(), false);
   }
 }

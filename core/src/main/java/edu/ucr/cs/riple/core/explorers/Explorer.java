@@ -25,9 +25,9 @@
 package edu.ucr.cs.riple.core.explorers;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.AnnotationInjector;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.graph.FixGraph;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Bank;

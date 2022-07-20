@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,16 +22,26 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.tools;
+package edu.ucr.cs.riple.core.injectors;
 
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.changes.Change;
-import edu.ucr.cs.riple.injector.location.Location;
+import java.util.Set;
 
-/** Wrapper class for {@link Change} with default values, used to create tests. */
-public class TFix extends Fix {
+public class VirtualInjector extends AnnotationInjector {
 
-  public TFix(Location location) {
-    super(new TChange(location), null, null, null);
+  public VirtualInjector(Config config) {
+    super(config);
+  }
+
+  public void injectFixes(Set<Fix> fixes) {
+    // todo
+  }
+
+  @Override
+  public <T extends Change> void applyChanges(Set<T> changes) {
+    throw new UnsupportedOperationException(
+        "Cannot remove/add annotations with this injector, use physical annotations instead.");
   }
 }

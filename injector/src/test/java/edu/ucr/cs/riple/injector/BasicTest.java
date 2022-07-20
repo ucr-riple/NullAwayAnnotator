@@ -24,6 +24,8 @@
 
 package edu.ucr.cs.riple.injector;
 
+import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,10 +37,8 @@ public class BasicTest extends BaseInjectorTest {
   @Test
   public void skip_duplicate_annotation() {
     Change Change =
-        new Change(
-            new OnMethod("Super.java", "com.uber.Super", "test()"),
-            "javax.annotation.Nullable",
-            true);
+        new AddAnnotation(
+            new OnMethod("Super.java", "com.uber.Super", "test()"), "javax.annotation.Nullable");
     injectorTestHelper
         .addInput(
             "Super.java",
@@ -80,13 +80,12 @@ public class BasicTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new Change(
+            new AddAnnotation(
                 new OnMethod(
                     "Super.java",
                     "com.uber.Super",
                     "test(@javax.annotation.Nullable java.lang.Object)"),
-                "javax.annotation.Nullable",
-                true))
+                "javax.annotation.Nullable"))
         .start();
   }
 
@@ -118,10 +117,9 @@ public class BasicTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new Change(
+            new AddAnnotation(
                 new OnMethod("Main.java", "com.uber.Main$Test", "run()"),
-                "javax.annotation.Nullable",
-                true))
+                "javax.annotation.Nullable"))
         .start();
   }
 
@@ -154,10 +152,9 @@ public class BasicTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new Change(
+            new AddAnnotation(
                 new OnMethod("Main.java", "com.uber.Main$Test", "run()"),
-                "javax.annotation.Nullable",
-                true))
+                "javax.annotation.Nullable"))
         .start();
   }
 }
