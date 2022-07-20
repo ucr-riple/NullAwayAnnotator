@@ -33,7 +33,7 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
     uninitializedFields.forEach(
         fix -> {
           OnField onField = fix.change.location.toField();
-          findAllNodes(
+          findNodes(
                   candidate ->
                       onField.variables.contains(candidate.field)
                           && candidate.initializerLocation.clazz.equals(onField.clazz),

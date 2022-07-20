@@ -24,7 +24,6 @@
 
 package edu.ucr.cs.riple.core.metadata.method;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import java.nio.file.Path;
@@ -147,10 +146,8 @@ public class MethodInheritanceTree extends MetaData<MethodNode> {
 
   public ImmutableSet<MethodNode> getPublicMethodsWithNonPrimitivesReturn() {
     return findAllNodes(
-            (Predicate<MethodNode>)
-                node ->
-                    node.hasNonPrimitiveReturn
-                        && node.visibility.equals(MethodNode.Visibility.PUBLIC))
+            node ->
+                node.hasNonPrimitiveReturn && node.visibility.equals(MethodNode.Visibility.PUBLIC))
         .collect(ImmutableSet.toImmutableSet());
   }
 }

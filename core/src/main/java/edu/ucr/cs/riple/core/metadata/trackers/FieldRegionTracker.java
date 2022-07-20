@@ -50,7 +50,7 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
     }
     OnField field = fix.toField();
     Set<Region> ans =
-        findAllNodes(
+        findNodes(
                 candidate ->
                     candidate.calleeClass.equals(field.clazz)
                         && field.variables.contains(candidate.calleeMember),

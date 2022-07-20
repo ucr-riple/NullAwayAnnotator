@@ -28,10 +28,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -101,7 +98,7 @@ public abstract class MetaData<T> {
     return node;
   }
 
-  protected Stream<T> findAllNodes(Predicate<T> c, Object... keys) {
+  protected Stream<T> findNodes(Predicate<T> c, Object... keys) {
     if (keys.length == 0) {
       throw new RuntimeException("findAllNodes needs keys to compute the hash and cannot be empty");
     }
@@ -110,5 +107,9 @@ public abstract class MetaData<T> {
       return Stream.of();
     }
     return candidateIds.stream().filter(c);
+  }
+
+  public Stream<T> findAllNodes(Predicate<T> c) {
+    return idHash.values().stream().flatMap(Collection::stream).filter(c);
   }
 }
