@@ -46,7 +46,7 @@ public class BasicExplorer extends Explorer {
       ImmutableSet<Fix> fixes,
       MethodInheritanceTree methodInheritanceTree,
       Config config) {
-    super(injector, errorBank, fixBank, fixes, methodInheritanceTree, config);
+    super(injector, errorBank, fixBank, fixes, methodInheritanceTree, config.depth, config);
   }
 
   @Override

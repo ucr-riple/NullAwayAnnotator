@@ -24,9 +24,16 @@
 
 package edu.ucr.cs.riple.core.metadata.submodules;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.explorers.Explorer;
+import edu.ucr.cs.riple.core.explorers.OptimizedExplorer;
+import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
+import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
+import edu.ucr.cs.riple.core.metadata.index.Bank;
+import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
@@ -35,16 +42,15 @@ import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DownStreamDependencyAnalyzer {
 
   private final ImmutableSet<Module> modules;
-  private final ImmutableSet<MethodStatus> methods;
+  private final Stream<MethodStatus> methods;
   private final Config config;
-
   private final MethodInheritanceTree tree;
+  private final AnnotationInjector injector;
 
   static class MethodStatus {
     final MethodNode node;
@@ -60,10 +66,8 @@ public class DownStreamDependencyAnalyzer {
     this.config = config;
     this.modules = config.getSubModules();
     this.tree = tree;
-    this.methods =
-        tree.getPublicMethodsWithNonPrimitivesReturn().stream()
-            .map(MethodStatus::new)
-            .collect(ImmutableSet.toImmutableSet());
+    this.injector = new PhysicalInjector(config);
+    this.methods = tree.getPublicMethodsWithNonPrimitivesReturn().stream().map(MethodStatus::new);
   }
 
   public void explore() {
@@ -75,12 +79,10 @@ public class DownStreamDependencyAnalyzer {
     Utility.buildProject(config, module);
     Utility.setScannerCheckerActivation(config, false);
     MethodRegionTracker tracker = new MethodRegionTracker(config, tree);
-    Set<Fix> fixes =
-        methods.stream()
+    ImmutableSet<Fix> fixes =
+        methods
             .filter(
-                (Predicate<MethodStatus>)
-                    input ->
-                        !tracker.getCallersOfMethod(input.node.clazz, input.node.method).isEmpty())
+                input -> !tracker.getCallersOfMethod(input.node.clazz, input.node.method).isEmpty())
             .map(
                 methodStatus ->
                     new Fix(
@@ -90,13 +92,38 @@ public class DownStreamDependencyAnalyzer {
                         "null",
                         "null",
                         "null"))
-            .collect(Collectors.toSet());
+            .collect(ImmutableSet.toImmutableSet());
+    FieldDeclarationAnalysis fieldDeclarationAnalysis =
+        new FieldDeclarationAnalysis(config.dir.resolve("class_info.tsv"));
+    Bank<Error> errorBank = new Bank<>(config.dir.resolve("errors.tsv"), Error::new);
+    Bank<Fix> fixBank =
+        new Bank<>(config.dir.resolve("fixes.tsv"), Fix.factory(config, fieldDeclarationAnalysis));
+    Explorer explorer =
+        new OptimizedExplorer(injector, errorBank, fixBank, tracker, fixes, tree, 1, config);
+    ImmutableSet<Report> reports = explorer.explore();
+    methods.forEach(
+        method -> {
+          MethodNode node = method.node;
+          Optional<Report> optional =
+              reports.stream()
+                  .filter(
+                      input ->
+                          input.root.toMethod().method.equals(node.method)
+                              && input.root.toMethod().clazz.equals(node.clazz))
+                  .findAny();
+          optional.ifPresent(report -> method.effect += report.effect);
+        });
   }
 
-  public int effectOnDownstreamDependencies(String clazz, String method) {
+  public int effectOnDownstreamDependencies(Fix fix) {
+    if (!fix.isOnMethod()) {
+      return 0;
+    }
+    OnMethod onMethod = fix.toMethod();
     Optional<MethodStatus> optional =
-        this.methods.stream()
-            .filter(m -> m.node.method.equals(method) && m.node.clazz.equals(clazz))
+        this.methods
+            .filter(
+                m -> m.node.method.equals(onMethod.method) && m.node.clazz.equals(onMethod.clazz))
             .findAny();
     return optional.map(methodStatus -> methodStatus.effect).orElse(0);
   }

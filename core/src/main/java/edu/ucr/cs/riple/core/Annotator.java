@@ -37,6 +37,7 @@ import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
+import edu.ucr.cs.riple.core.metadata.submodules.DownStreamDependencyAnalyzer;
 import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -117,12 +118,22 @@ public class Annotator {
               ? new ExhaustiveExplorer(injector, errorBank, fixBank, fixes, tree, config)
               : config.optimized
                   ? new OptimizedExplorer(
-                      injector, errorBank, fixBank, tracker, fixes, tree, config)
+                      injector, errorBank, fixBank, tracker, fixes, tree, config.depth, config)
                   : new BasicExplorer(injector, errorBank, fixBank, fixes, tree, config);
+      DownStreamDependencyAnalyzer downStreamDependencyAnalyzer =
+          new DownStreamDependencyAnalyzer(config, tree);
+      if (config.downStreamDependenciesAnalysisActivated) {
+        downStreamDependencyAnalyzer.explore();
+      }
       ImmutableSet<Report> latestReports = explorer.explore();
       int sizeBefore = reports.size();
       latestReports.forEach(
           report -> {
+            if (config.downStreamDependenciesAnalysisActivated) {
+              report.effect =
+                  report.effect
+                      + downStreamDependencyAnalyzer.effectOnDownstreamDependencies(report.root);
+            }
             reports.putIfAbsent(report.root, report);
             reports.get(report.root).effect = report.effect;
             reports.get(report.root).finished = report.finished;

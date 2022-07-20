@@ -53,8 +53,9 @@ public class OptimizedExplorer extends Explorer {
       RegionTracker tracker,
       ImmutableSet<Fix> fixes,
       MethodInheritanceTree methodInheritanceTree,
+      int depth,
       Config config) {
-    super(injector, errorBank, fixBank, fixes, methodInheritanceTree, config);
+    super(injector, errorBank, fixBank, fixes, methodInheritanceTree, depth, config);
     this.tracker = tracker;
   }
 

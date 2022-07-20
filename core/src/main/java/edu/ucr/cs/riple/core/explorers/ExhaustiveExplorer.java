@@ -41,7 +41,7 @@ public class ExhaustiveExplorer extends Explorer {
       ImmutableSet<Fix> fixes,
       MethodInheritanceTree tree,
       Config config) {
-    super(injector, errorBank, fixBank, fixes, tree, config);
+    super(injector, errorBank, fixBank, fixes, tree, config.depth, config);
   }
 
   @Override

@@ -45,12 +45,15 @@ public abstract class Explorer {
 
   protected final MethodInheritanceTree methodInheritanceTree;
 
+  protected final int depth;
+
   public Explorer(
       AnnotationInjector injector,
       Bank<Error> errorBank,
       Bank<Fix> fixBank,
       ImmutableSet<Fix> fixes,
       MethodInheritanceTree methodInheritanceTree,
+      int depth,
       Config config) {
     this.injector = injector;
     this.errorBank = errorBank;
@@ -59,6 +62,7 @@ public abstract class Explorer {
     this.reports =
         fixes.stream().map(fix -> new Report(fix, 1)).collect(ImmutableSet.toImmutableSet());
     this.config = config;
+    this.depth = depth;
     this.fixGraph = new FixGraph<>(Node::new);
   }
 
@@ -95,7 +99,7 @@ public abstract class Explorer {
 
   public ImmutableSet<Report> explore() {
     System.out.println("Max Depth level: " + config.depth);
-    for (int i = 0; i < config.depth; i++) {
+    for (int i = 0; i < this.depth; i++) {
       System.out.print("Analyzing at level " + (i + 1) + ", ");
       initializeFixGraph();
       config.log.updateNodeNumber(fixGraph.getAllNodes().size());
