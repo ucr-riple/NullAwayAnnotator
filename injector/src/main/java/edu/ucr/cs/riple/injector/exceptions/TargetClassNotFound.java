@@ -24,6 +24,7 @@ package edu.ucr.cs.riple.injector.exceptions;
 
 import com.github.javaparser.ast.Node;
 
+/** Exception class which should be thrown when a target class on a {@link Node} is not found. */
 public class TargetClassNotFound extends Exception {
 
   static final String REPORT_MESSAGE =

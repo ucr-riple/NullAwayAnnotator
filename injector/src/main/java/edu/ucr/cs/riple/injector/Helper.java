@@ -50,8 +50,16 @@ import javax.annotation.Nonnull;
 import me.tongfei.progressbar.ProgressBar;
 import me.tongfei.progressbar.ProgressBarStyle;
 
+/** A utility class. */
 public class Helper {
 
+  /**
+   * Extracts the callable simple name from callable signature. (e.g. in input "run(Object i)"
+   * returns "run").
+   *
+   * @param signature callable signature in string.
+   * @return callable simple name.
+   */
   public static String extractCallableName(String signature) {
     StringBuilder ans = new StringBuilder();
     int level = 0;
@@ -72,37 +80,49 @@ public class Helper {
     return ans.toString();
   }
 
+  /**
+   * Checks if callableDec's signature is equals to signature passed in the argument.
+   *
+   * @param callableDec callable declaration node.
+   * @param signature signature of the callable in string.
+   * @return true, if signature matches the callable and false otherwise.
+   */
   public static boolean matchesCallableSignature(
       CallableDeclaration<?> callableDec, String signature) {
+    // match simple names.
     if (!callableDec.getName().toString().equals(extractCallableName(signature))) {
       return false;
     }
-    return matchesParameterTypesInCallable(
-        extractParamTypesOfCallableInString(signature),
-        extractParamTypesOfCallableInString(callableDec));
-  }
-
-  private static boolean matchesParameterTypesInCallable(List<String> params, List<String> other) {
-    if (params.size() != other.size()) {
+    // match parameter types.
+    List<String> paramTypesFromCallableDeclaration =
+        extractParamTypesOfCallableInString(callableDec);
+    List<String> paramTypesFromCallableSignature = extractParamTypesOfCallableInString(signature);
+    if (paramTypesFromCallableDeclaration.size() != paramTypesFromCallableSignature.size()) {
       return false;
     }
-    for (String i : params) {
-      String found = null;
-      String last_i = simpleName(i);
-      for (String j : other) {
-        String last_j = simpleName(j);
-        if (j.equals(i) || last_i.equals(last_j)) {
-          found = j;
-        }
+    int size = paramTypesFromCallableDeclaration.size();
+    for (int i = 0; i < size; i++) {
+      String callableType = paramTypesFromCallableDeclaration.get(i);
+      String signatureType = paramTypesFromCallableSignature.get(i);
+      if (signatureType.equals(callableType)) {
+        continue;
       }
-      if (found == null) {
-        return false;
+      String simpleCallableType = simpleName(callableType);
+      String simpleSignatureType = simpleName(signatureType);
+      if (simpleCallableType.equals(simpleSignatureType)) {
+        continue;
       }
-      other.remove(found);
+      return false;
     }
     return true;
   }
 
+  /**
+   * Extracts parameters type from a {@link CallableDeclaration}.
+   *
+   * @param callableDec callable declaration instance.
+   * @return List of parameters type in string.
+   */
   private static List<String> extractParamTypesOfCallableInString(
       CallableDeclaration<?> callableDec) {
     ArrayList<String> paramTypes = new ArrayList<>();
@@ -118,11 +138,21 @@ public class Helper {
     return paramTypes;
   }
 
+  /**
+   * Walks on the AST starting from the cursor in {@link
+   * com.github.javaparser.ast.Node.TreeTraversal#DIRECT_CHILDREN} manner, and adds all visiting
+   * nodes which holds the predicate.
+   *
+   * @param cursor starting node for traversal.
+   * @param candidates list of candidates, an empty list should be passed at the call site, accepted
+   *     visited nodes will be added to this list.
+   * @param predicate predicate to check if a node should be added to list of candidates.
+   */
   private static void walk(Node cursor, List<Node> candidates, Predicate<Node> predicate) {
     cursor.walk(
         Node.TreeTraversal.DIRECT_CHILDREN,
         node -> {
-          if (!isTopLevelDeclaration(node)) {
+          if (!isTypeDeclarationOrAnonymousClass(node)) {
             walk(node, candidates, predicate);
           }
           if (predicate.test(node)) {
@@ -131,6 +161,16 @@ public class Helper {
         });
   }
 
+  /**
+   * Finds Top-Level type declaration within a {@link CompilationUnit} tree by name, this node is
+   * direct child of the compilation unit tree and can be: [{@link ClassOrInterfaceDeclaration},
+   * {@link EnumDeclaration}, {@link AnnotationDeclaration}].
+   *
+   * @param tree instance of compilation unit tree.
+   * @param name name of the declaration.
+   * @return the typeDeclaration with the given name.
+   * @throws TargetClassNotFound if the target class is not found.
+   */
   @Nonnull
   private static TypeDeclaration<?> findTopLevelClassDeclarationOnCompilationUnit(
       CompilationUnit tree, String name) throws TargetClassNotFound {
@@ -154,8 +194,15 @@ public class Helper {
     throw new TargetClassNotFound("Top-Level", name, tree);
   }
 
-  private static Node findTopLevelDirectInnerClass(Node cursor, String name)
-      throws TargetClassNotFound {
+  /**
+   * Locates the inner class with the given name which is directly connected to cursor.
+   *
+   * @param cursor Parent node of inner class.
+   * @param name Name of the inner class.
+   * @return inner class with the given name.
+   * @throws TargetClassNotFound if the target class is not found.
+   */
+  private static Node findDirectInnerClass(Node cursor, String name) throws TargetClassNotFound {
     List<Node> nodes = new ArrayList<>();
     cursor.walk(
         Node.TreeTraversal.DIRECT_CHILDREN,
@@ -165,12 +212,21 @@ public class Helper {
           }
         });
     if (nodes.size() == 0) {
-      throw new TargetClassNotFound("Top-Level-Direct-Inner-Class", name, cursor);
+      throw new TargetClassNotFound("Direct-Inner-Class", name, cursor);
     }
     return nodes.get(0);
   }
 
-  private static Node findTopLevelInnerClass(Node cursor, String name, int index)
+  /**
+   * Locates the inner class with the given name at specific index.
+   *
+   * @param cursor Starting node for traversal.
+   * @param name name of the inner class.
+   * @param index index of the desired node among the candidates.
+   * @return inner class with the given name and index.
+   * @throws TargetClassNotFound if the target class is not found.
+   */
+  private static Node findInnerClass(Node cursor, String name, int index)
       throws TargetClassNotFound {
     final List<Node> candidates = new ArrayList<>();
     walk(
@@ -187,12 +243,18 @@ public class Helper {
           return isDeclarationWithName(node, name);
         });
     if (index >= candidates.size()) {
-      throw new TargetClassNotFound("Top-Level-Inner-Class", index + name, cursor);
+      throw new TargetClassNotFound("Non-Direct-Inner-Class", index + name, cursor);
     }
     return candidates.get(index);
   }
 
-  private static boolean isTopLevelDeclaration(Node node) {
+  /**
+   * Checks if node is a type declaration or an anonymous class.
+   *
+   * @param node Node instance.
+   * @return true if is a type declaration or an anonymous class and false otherwise.
+   */
+  private static boolean isTypeDeclarationOrAnonymousClass(Node node) {
     return node instanceof ClassOrInterfaceDeclaration
         || node instanceof EnumDeclaration
         || node instanceof AnnotationDeclaration
@@ -200,6 +262,13 @@ public class Helper {
             && ((ObjectCreationExpr) node).getAnonymousClassBody().isPresent());
   }
 
+  /**
+   * Checks if the node is of type {@link TypeDeclaration} and a specific name.
+   *
+   * @param node input node.
+   * @param name name.
+   * @return true the node is subtype of TypeDeclaration and has the given name.
+   */
   private static boolean isDeclarationWithName(Node node, String name) {
     if (node instanceof TypeDeclaration<?>) {
       return ((TypeDeclaration<?>) node).getNameAsString().equals(name);
@@ -207,8 +276,15 @@ public class Helper {
     return false;
   }
 
-  private static Node findTopLevelAnonymousClass(Node cursor, int index)
-      throws TargetClassNotFound {
+  /**
+   * Locates an anonymous class at specific index.
+   *
+   * @param cursor Starting node for traversal.
+   * @param index index.
+   * @return anonymous class at specific index.
+   * @throws TargetClassNotFound if the target class is not found.
+   */
+  private static Node findAnonymousClass(Node cursor, int index) throws TargetClassNotFound {
     final List<Node> candidates = new ArrayList<>();
     walk(
         cursor,
@@ -225,6 +301,12 @@ public class Helper {
     return candidates.get(index);
   }
 
+  /**
+   * Returns members of the type declaration.
+   *
+   * @param node Node instance.
+   * @return {@link NodeList} containing member of node.
+   */
   private static NodeList<BodyDeclaration<?>> getMembersOfNode(Node node) {
     if (node == null) {
       return null;
@@ -244,6 +326,15 @@ public class Helper {
     return null;
   }
 
+  /**
+   * Returns {@link NodeList} containing all members of an Enum/Interface/Class/Annotation
+   * Declaration by flat name from a compilation unit tree.
+   *
+   * @param cu Compilation Unit tree instance.
+   * @param flatName Flat name in string.
+   * @return {@link NodeList} containing all members
+   * @throws TargetClassNotFound if the target class is not found.
+   */
   public static NodeList<BodyDeclaration<?>> getClassOrInterfaceOrEnumDeclarationMembersByFlatName(
       CompilationUnit cu, String flatName) throws TargetClassNotFound {
     String packageName;
@@ -270,19 +361,19 @@ public class Helper {
       int index = indexString.equals("") ? 0 : Integer.parseInt(indexString) - 1;
       Preconditions.checkNotNull(cursor);
       if (key.matches("\\d+")) {
-        cursor = findTopLevelAnonymousClass(cursor, index);
+        cursor = findAnonymousClass(cursor, index);
       } else {
         cursor =
             indexString.equals("")
-                ? findTopLevelDirectInnerClass(cursor, actualName)
-                : findTopLevelInnerClass(cursor, actualName, index);
+                ? findDirectInnerClass(cursor, actualName)
+                : findInnerClass(cursor, actualName, index);
       }
     }
     return getMembersOfNode(cursor);
   }
 
   /**
-   * Extract the integer at the start of string (e.g. 129uid -> 129).
+   * Extracts the integer at the start of string (e.g. 129uid -> 129).
    *
    * @param key string containing the integer.
    * @return the integer at the start of the key, empty if no digit found at the beginning (e.g.
@@ -300,6 +391,13 @@ public class Helper {
     return key.substring(0, index);
   }
 
+  /**
+   * Extracts simple name of fully qualified name. (e.g. for "{@code a.c.b.Foo<a.b.Bar, a.c.b.Foo>}"
+   * will return "{@code Foo<Bar,Foo>}").
+   *
+   * @param name Fully qualified name.
+   * @return simple name.
+   */
   public static String simpleName(String name) {
     int index = 0;
     StringBuilder ans = new StringBuilder();
@@ -323,20 +421,49 @@ public class Helper {
       }
       index++;
     }
-    if (name.length() > 0) ans.append(tmp);
+    if (name.length() > 0) {
+      ans.append(tmp);
+    }
     return ans.toString().replaceAll(" ", "");
   }
 
+  /**
+   * Extracts the package name from fully qualified name. (e.g. for "{@code a.c.b.Foo<a.b.Bar, a.c.b.Foo>}" will return "{@code a.c.b").
+   * @param Fully qualified name in String.
+   * @return Package name.
+   */
   public static String getPackageName(String name) {
     if (!name.contains(".")) {
       return null;
     }
-    int index = name.lastIndexOf(".");
-    return name.substring(0, index);
+    List<String> verified = new ArrayList<>();
+    StringBuilder current = new StringBuilder();
+    int index = 0;
+    while (index < name.length()) {
+      char currentChar = name.charAt(index);
+      if (currentChar == '.') {
+        verified.add(current.toString());
+        current = new StringBuilder();
+      } else {
+        if (Character.isAlphabetic(currentChar) || Character.isDigit(currentChar)) {
+          current.append(currentChar);
+        } else {
+          break;
+        }
+      }
+      index++;
+    }
+    return String.join(".", verified);
   }
 
+  /**
+   * Returns a list of parameters extracted from callable signature. (e.g. for "{@code foo(@  CustomAnnot  (exp, exp2) a.c.b.Foo<a.b.Bar, a.c.b.Foo>, java.lang.Object)}" will return "{@code [a.c.b.Foo<a.b.Bar, a.c.b.Foo>, java.lang.Object]").
+   * @param signature callable signature.
+   * @return List of extracted parameters types.
+   */
   private static List<String> extractParamTypesOfCallableInString(String signature) {
-    signature = signature.substring(signature.indexOf("(")).replace("(", "").replace(")", "");
+    signature = signature.substring(signature.indexOf("("));
+    signature = signature.substring(1, signature.length() - 1);
     int index = 0;
     int generic_level = 0;
     List<String> ans = new ArrayList<>();
@@ -345,13 +472,21 @@ public class Helper {
       char c = signature.charAt(index);
       switch (c) {
         case '@':
-          while (signature.charAt(index + 1) == ' ' && index + 1 < signature.length()) index++;
+          while (signature.charAt(index + 1) == ' ' && index + 1 < signature.length()) {
+            index++;
+          }
           int annot_level = 0;
           boolean finished = false;
           while (!finished && index < signature.length()) {
-            if (signature.charAt(index) == '(') ++annot_level;
-            if (signature.charAt(index) == ')') --annot_level;
-            if (signature.charAt(index) == ' ' && annot_level == 0) finished = true;
+            if (signature.charAt(index) == '(') {
+              ++annot_level;
+            }
+            if (signature.charAt(index) == ')') {
+              --annot_level;
+            }
+            if (signature.charAt(index) == ' ' && annot_level == 0) {
+              finished = true;
+            }
             index++;
           }
           index--;
@@ -368,17 +503,28 @@ public class Helper {
           if (generic_level == 0) {
             ans.add(tmp.toString());
             tmp = new StringBuilder();
-          } else tmp.append(c);
+          } else {
+            tmp.append(c);
+          }
           break;
         default:
           tmp.append(c);
       }
       index++;
     }
-    if (signature.length() > 0 && generic_level == 0) ans.add(tmp.toString());
+    if (signature.length() > 0 && generic_level == 0) {
+      ans.add(tmp.toString().strip());
+    }
     return ans;
   }
 
+  /**
+   * Creates a progress bar.
+   *
+   * @param task Task name.
+   * @param steps Number of required steps to complete task.
+   * @return Progress bar instance.
+   */
   public static ProgressBar createProgressBar(String task, int steps) {
     return new ProgressBar(
         task,
