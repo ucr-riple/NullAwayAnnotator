@@ -232,16 +232,7 @@ public class Helper {
     walk(
         cursor,
         candidates,
-        node -> {
-          Optional<Node> parent = node.getParentNode();
-          if (parent.isEmpty()) {
-            return false;
-          }
-          if (parent.get().equals(cursor)) {
-            return false;
-          }
-          return isDeclarationWithName(node, name);
-        });
+        node -> isDeclarationWithName(node, name));
     if (index >= candidates.size()) {
       throw new TargetClassNotFound("Non-Direct-Inner-Class", index + name, cursor);
     }
