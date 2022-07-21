@@ -50,11 +50,11 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
     }
     OnField field = fix.toField();
     Set<Region> ans =
-        findNodes(
+        findNodesWithHashHint(
                 candidate ->
                     candidate.calleeClass.equals(field.clazz)
                         && field.variables.contains(candidate.calleeMember),
-                field.clazz)
+                TrackerNode.hash(field.clazz))
             .map(trackerNode -> new Region(trackerNode.callerMethod, trackerNode.callerClass))
             .collect(Collectors.toSet());
     ans.add(new Region("null", field.clazz));

@@ -24,6 +24,8 @@
 
 package edu.ucr.cs.riple.core.metadata;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -33,9 +35,10 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public abstract class MetaData<T> {
-  HashMap<Integer, List<T>> idHash;
+  protected final Multimap<Integer, T> idHash;
 
   public MetaData(Path path) {
+    idHash = MultimapBuilder.hashKeys().arrayListValues().build();
     setup();
     try {
       fillNodes(path);
@@ -44,9 +47,7 @@ public abstract class MetaData<T> {
     }
   }
 
-  protected void setup() {
-    idHash = new HashMap<>();
-  }
+  protected void setup() {}
 
   protected void fillNodes(Path path) throws IOException {
     BufferedReader reader;
@@ -56,17 +57,7 @@ public abstract class MetaData<T> {
     while (line != null) {
       T node = addNodeByLine(line.split("\t"));
       if (node != null) {
-        Integer hash = node.hashCode();
-        if (idHash.containsKey(hash)) {
-          List<T> localList = idHash.get(hash);
-          if (!localList.contains(node)) {
-            localList.add(node);
-          }
-        } else {
-          List<T> singleHash = new ArrayList<>();
-          singleHash.add(node);
-          idHash.put(hash, singleHash);
-        }
+        idHash.put(node.hashCode(), node);
       }
       line = reader.readLine();
     }
@@ -75,41 +66,18 @@ public abstract class MetaData<T> {
 
   protected abstract T addNodeByLine(String[] values);
 
-  public interface Comparator<T> {
-    boolean matches(T candidate);
+  protected T findNodeWithHashHint(Predicate<T> c, int hash) {
+    Collection<T> candidateIds = idHash.get(hash);
+    Optional<T> optional = candidateIds.stream().filter(c).findFirst();
+    return optional.orElse(null);
   }
 
-  protected T findNode(Comparator<T> c, String... keys) {
-    if (keys.length == 0) {
-      throw new RuntimeException("findNode needs keys to compute the hash and cannot be empty");
-    }
-    T node = null;
-    int hash = Arrays.hashCode(keys);
-    List<T> candidateIds = idHash.get(hash);
-    if (candidateIds == null) {
-      return null;
-    }
-    for (T candidate : candidateIds) {
-      if (c.matches(candidate)) {
-        node = candidate;
-        break;
-      }
-    }
-    return node;
-  }
-
-  protected Stream<T> findNodes(Predicate<T> c, Object... keys) {
-    if (keys.length == 0) {
-      throw new RuntimeException("findAllNodes needs keys to compute the hash and cannot be empty");
-    }
-    List<T> candidateIds = idHash.get(Arrays.hashCode(keys));
-    if (candidateIds == null) {
-      return Stream.of();
-    }
+  protected Stream<T> findNodesWithHashHint(Predicate<T> c, int hash) {
+    Collection<T> candidateIds = idHash.get(hash);
     return candidateIds.stream().filter(c);
   }
 
-  public Stream<T> findAllNodes(Predicate<T> c) {
-    return idHash.values().stream().flatMap(Collection::stream).filter(c);
+  protected Stream<T> findNodes(Predicate<T> c) {
+    return idHash.values().stream().filter(c);
   }
 }

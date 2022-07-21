@@ -21,9 +21,13 @@ public class FieldDeclarationInfo {
     return clazz.equals(info.clazz);
   }
 
+  public static int hash(String clazz) {
+    return Objects.hash(clazz);
+  }
+
   @Override
   public int hashCode() {
-    return Objects.hash(clazz);
+    return hash(clazz);
   }
 
   public int size() {

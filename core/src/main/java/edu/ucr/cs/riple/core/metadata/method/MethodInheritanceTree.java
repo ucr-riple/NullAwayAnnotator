@@ -36,7 +36,7 @@ import java.util.Set;
 
 public class MethodInheritanceTree extends MetaData<MethodNode> {
 
-  HashMap<Integer, MethodNode> nodes;
+  private HashMap<Integer, MethodNode> nodes;
   private static int maxsize = 0;
 
   public MethodInheritanceTree(Path path) {
@@ -138,14 +138,13 @@ public class MethodInheritanceTree extends MetaData<MethodNode> {
   }
 
   public MethodNode findNode(String method, String clazz) {
-    return findNode(
+    return findNodeWithHashHint(
         candidate -> candidate.clazz.equals(clazz) && candidate.method.equals(method),
-        method,
-        clazz);
+        MethodNode.hash(method, clazz));
   }
 
   public ImmutableSet<MethodNode> getPublicMethodsWithNonPrimitivesReturn() {
-    return findAllNodes(
+    return findNodes(
             node ->
                 node.hasNonPrimitiveReturn && node.visibility.equals(MethodNode.Visibility.PUBLIC))
         .collect(ImmutableSet.toImmutableSet());

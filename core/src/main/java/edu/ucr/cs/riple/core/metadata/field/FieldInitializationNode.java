@@ -21,8 +21,12 @@ public class FieldInitializationNode {
     return initializerLocation.equals(that.initializerLocation) && this.field.equals(that.field);
   }
 
+  public static int hash(String clazz) {
+    return Objects.hash(clazz);
+  }
+
   @Override
   public int hashCode() {
-    return Objects.hash(initializerLocation.clazz);
+    return hash(initializerLocation.clazz);
   }
 }

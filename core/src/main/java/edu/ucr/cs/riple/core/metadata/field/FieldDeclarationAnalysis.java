@@ -55,7 +55,8 @@ public class FieldDeclarationAnalysis extends MetaData<FieldDeclarationInfo> {
   }
 
   public Set<String> getInLineMultipleFieldDeclarationsOnField(String clazz, Set<String> field) {
-    FieldDeclarationInfo candidate = findNode(node -> node.clazz.equals(clazz), clazz);
+    FieldDeclarationInfo candidate =
+        findNodeWithHashHint(node -> node.clazz.equals(clazz), FieldDeclarationInfo.hash(clazz));
     if (candidate == null) {
       return Sets.newHashSet(field);
     }

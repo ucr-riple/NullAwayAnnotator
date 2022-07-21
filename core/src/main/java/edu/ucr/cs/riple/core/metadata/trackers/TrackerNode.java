@@ -51,8 +51,12 @@ public class TrackerNode {
         && callerMethod.equals(that.callerMethod);
   }
 
+  public static int hash(String clazz) {
+    return Objects.hash(clazz);
+  }
+
   @Override
   public int hashCode() {
-    return Objects.hash(calleeClass);
+    return hash(calleeClass);
   }
 }

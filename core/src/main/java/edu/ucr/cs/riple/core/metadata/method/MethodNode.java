@@ -117,8 +117,12 @@ public class MethodNode {
         && Objects.equals(clazz, that.clazz);
   }
 
+  public static int hash(String method, String clazz) {
+    return Objects.hash(method, clazz);
+  }
+
   @Override
   public int hashCode() {
-    return Objects.hash(method, clazz);
+    return hash(method, clazz);
   }
 }

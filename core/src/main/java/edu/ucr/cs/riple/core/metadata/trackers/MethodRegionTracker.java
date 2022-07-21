@@ -63,10 +63,10 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
   }
 
   public Set<Region> getCallersOfMethod(String clazz, String method) {
-    return findNodes(
+    return findNodesWithHashHint(
             candidate ->
                 candidate.calleeClass.equals(clazz) && candidate.calleeMember.equals(method),
-            clazz)
+            TrackerNode.hash(clazz))
         .map(node -> new Region(node.callerMethod, node.callerClass))
         .collect(Collectors.toSet());
   }
