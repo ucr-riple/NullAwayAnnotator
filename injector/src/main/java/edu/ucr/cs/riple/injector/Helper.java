@@ -36,6 +36,7 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.google.common.base.Preconditions;
+import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -45,6 +46,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
+import javax.annotation.Nonnull;
 import me.tongfei.progressbar.ProgressBar;
 import me.tongfei.progressbar.ProgressBarStyle;
 
@@ -80,14 +82,6 @@ public class Helper {
         extractParamTypesOfCallableInString(callableDec));
   }
 
-  public static boolean matchesCallableSignature(String signature, String other) {
-    if (!extractCallableName(signature).equals(extractCallableName(other))) {
-      return false;
-    }
-    return matchesParameterTypesInCallable(
-        extractParamTypesOfCallableInString(signature), extractParamTypesOfCallableInString(other));
-  }
-
   private static boolean matchesParameterTypesInCallable(List<String> params, List<String> other) {
     if (params.size() != other.size()) {
       return false;
@@ -109,7 +103,7 @@ public class Helper {
     return true;
   }
 
-  public static List<String> extractParamTypesOfCallableInString(
+  private static List<String> extractParamTypesOfCallableInString(
       CallableDeclaration<?> callableDec) {
     ArrayList<String> paramTypes = new ArrayList<>();
     for (Parameter param : callableDec.getParameters()) {
@@ -137,8 +131,13 @@ public class Helper {
         });
   }
 
+  @Nonnull
   private static TypeDeclaration<?> findTopLevelClassDeclarationOnCompilationUnit(
-      CompilationUnit tree, String name) {
+      CompilationUnit tree, String name) throws TargetClassNotFound {
+    Optional<ClassOrInterfaceDeclaration> classDeclaration = tree.getClassByName(name);
+    if (classDeclaration.isPresent()) {
+      return classDeclaration.get();
+    }
     Optional<EnumDeclaration> enumDeclaration = tree.getEnumByName(name);
     if (enumDeclaration.isPresent()) {
       return enumDeclaration.get();
@@ -149,10 +148,14 @@ public class Helper {
       return annotationDeclaration.get();
     }
     Optional<ClassOrInterfaceDeclaration> interfaceDeclaration = tree.getInterfaceByName(name);
-    return interfaceDeclaration.orElseGet(() -> tree.getClassByName(name).orElse(null));
+    if (interfaceDeclaration.isPresent()) {
+      return interfaceDeclaration.get();
+    }
+    throw new TargetClassNotFound("Top-Level", name, tree);
   }
 
-  public static Node findTopLevelDirectInnerClass(Node cursor, String name) {
+  private static Node findTopLevelDirectInnerClass(Node cursor, String name)
+      throws TargetClassNotFound {
     List<Node> nodes = new ArrayList<>();
     cursor.walk(
         Node.TreeTraversal.DIRECT_CHILDREN,
@@ -161,19 +164,21 @@ public class Helper {
             nodes.add(node);
           }
         });
-    Preconditions.checkArgument(
-        nodes.size() > 0, "Could not find inner class " + name + " on:\n" + cursor);
+    if (nodes.size() == 0) {
+      throw new TargetClassNotFound("Top-Level-Direct-Inner-Class", name, cursor);
+    }
     return nodes.get(0);
   }
 
-  private static Node findTopLevelInnerClass(Node cursor, String name, int index) {
+  private static Node findTopLevelInnerClass(Node cursor, String name, int index)
+      throws TargetClassNotFound {
     final List<Node> candidates = new ArrayList<>();
     walk(
         cursor,
         candidates,
         node -> {
           Optional<Node> parent = node.getParentNode();
-          if (!parent.isPresent()) {
+          if (parent.isEmpty()) {
             return false;
           }
           if (parent.get().equals(cursor)) {
@@ -181,6 +186,9 @@ public class Helper {
           }
           return isDeclarationWithName(node, name);
         });
+    if (index >= candidates.size()) {
+      throw new TargetClassNotFound("Top-Level-Inner-Class", index + name, cursor);
+    }
     return candidates.get(index);
   }
 
@@ -199,7 +207,8 @@ public class Helper {
     return false;
   }
 
-  private static Node findTopLevelAnonymousClass(Node cursor, int index) {
+  private static Node findTopLevelAnonymousClass(Node cursor, int index)
+      throws TargetClassNotFound {
     final List<Node> candidates = new ArrayList<>();
     walk(
         cursor,
@@ -210,6 +219,9 @@ public class Helper {
           }
           return false;
         });
+    if (index >= candidates.size()) {
+      throw new TargetClassNotFound("Top-Level-Anonymous-Class", "$" + index, cursor);
+    }
     return candidates.get(index);
   }
 
@@ -233,7 +245,7 @@ public class Helper {
   }
 
   public static NodeList<BodyDeclaration<?>> getClassOrInterfaceOrEnumDeclarationMembersByFlatName(
-      CompilationUnit cu, String flatName) {
+      CompilationUnit cu, String flatName) throws TargetClassNotFound {
     String packageName;
     Optional<PackageDeclaration> packageDeclaration = cu.getPackageDeclaration();
     if (packageDeclaration.isPresent()) {
@@ -276,7 +288,7 @@ public class Helper {
    * @return the integer at the start of the key, empty if no digit found at the beginning (e.g.
    *     u129 -> empty)
    */
-  public static String extractIntegerFromBeginningOfStringInString(String key) {
+  private static String extractIntegerFromBeginningOfStringInString(String key) {
     int index = 0;
     while (index < key.length()) {
       char c = key.charAt(index);
@@ -323,7 +335,7 @@ public class Helper {
     return name.substring(0, index);
   }
 
-  public static List<String> extractParamTypesOfCallableInString(String signature) {
+  private static List<String> extractParamTypesOfCallableInString(String signature) {
     signature = signature.substring(signature.indexOf("(")).replace("(", "").replace(")", "");
     int index = 0;
     int generic_level = 0;

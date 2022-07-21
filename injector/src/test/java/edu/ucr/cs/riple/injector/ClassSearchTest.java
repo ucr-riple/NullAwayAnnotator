@@ -24,8 +24,15 @@
 
 package edu.ucr.cs.riple.injector;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.CompilationUnit;
+import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.Collections;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -467,5 +474,33 @@ public class ClassSearchTest extends BaseInjectorTest {
                 "javax.annotation.Nullable",
                 true))
         .start(true);
+  }
+
+  @Test
+  public void proper_report_for_class_not_found_test() {
+    String[] clazzLines =
+        new String[] {
+          "package com.test;", "public @interface Main{", "   public String foo();", "}"
+        };
+    ByteArrayOutputStream err = new ByteArrayOutputStream();
+    System.setErr(new PrintStream(err));
+    injectorTestHelper
+        .addInput("Main.java", clazzLines)
+        .expectOutput(clazzLines)
+        .addChanges(
+            new Change(
+                new OnMethod("Main.java", "com.test.NotIncluded", "foo(java.lang.Object)"),
+                "javax.annotation.Nullable",
+                true))
+        .start();
+    String errOutput = err.toString();
+    CompilationUnit tree = StaticJavaParser.parse(String.join("\n", clazzLines));
+    TargetClassNotFound thrown =
+        assertThrows(
+            TargetClassNotFound.class,
+            () ->
+                Helper.getClassOrInterfaceOrEnumDeclarationMembersByFlatName(
+                    tree, "com.test.NotIncluded"));
+    assert thrown.getMessage().strip().equals(errOutput.strip());
   }
 }
