@@ -28,7 +28,7 @@ import com.github.javaparser.ast.Node;
 public class TargetClassNotFound extends Exception {
 
   static final String REPORT_MESSAGE =
-      "If you do see the class on the source code, please report this bug at: https://github.com/nimakarimipour/NullAwayAnnotator/issues. Thank you!";
+      "If the class is in generated code or otherwise not present in the source, this is expected and this message can be safely ignored. If you do see the class on the source code, please report this bug at: https://github.com/nimakarimipour/NullAwayAnnotator/issues. Thank you!";
 
   public TargetClassNotFound(String type, String name, Node cursor) {
     super(
