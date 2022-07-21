@@ -30,7 +30,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -67,14 +66,11 @@ public abstract class MetaData<T> {
   protected abstract T addNodeByLine(String[] values);
 
   protected T findNodeWithHashHint(Predicate<T> c, int hash) {
-    Collection<T> candidateIds = idHash.get(hash);
-    Optional<T> optional = candidateIds.stream().filter(c).findFirst();
-    return optional.orElse(null);
+    return findNodesWithHashHint(c, hash).findFirst().orElse(null);
   }
 
   protected Stream<T> findNodesWithHashHint(Predicate<T> c, int hash) {
-    Collection<T> candidateIds = idHash.get(hash);
-    return candidateIds.stream().filter(c);
+    return idHash.get(hash).stream().filter(c);
   }
 
   protected Stream<T> findNodes(Predicate<T> c) {
