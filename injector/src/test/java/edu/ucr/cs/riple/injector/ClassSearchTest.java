@@ -477,7 +477,17 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void proper_report_for_class_not_found_test() {
+  public void proper_report_in_err_std_for_class_not_found_test() {
+    String expectedErrorMessage =
+        "Could not find class of type: Top-Level with name: NotIncluded on Cursor:\n"
+            + "package com.test;\n"
+            + "\n"
+            + "public @interface Main {\n"
+            + "\n"
+            + "    public String foo();\n"
+            + "}\n"
+            + "\n"
+            + "If the class is in generated code or otherwise not present in the source, this is expected and this message can be safely ignored. If you do see the class on the source code, please report this bug at: https://github.com/nimakarimipour/NullAwayAnnotator/issues. Thank you!\n";
     String[] clazzLines =
         new String[] {
           "package com.test;", "public @interface Main{", "   public String foo();", "}"
@@ -493,7 +503,25 @@ public class ClassSearchTest extends BaseInjectorTest {
                 "javax.annotation.Nullable",
                 true))
         .start();
-    String errOutput = err.toString();
+    assert err.toString().equals(expectedErrorMessage);
+  }
+
+  @Test
+  public void proper_exception_check_for_class_not_found_test() {
+    String expectedErrorMessage =
+        "Could not find class of type: Top-Level with name: NotIncluded on Cursor:\n"
+            + "package com.test;\n"
+            + "\n"
+            + "public @interface Main {\n"
+            + "\n"
+            + "    public String foo();\n"
+            + "}\n"
+            + "\n"
+            + "If the class is in generated code or otherwise not present in the source, this is expected and this message can be safely ignored. If you do see the class on the source code, please report this bug at: https://github.com/nimakarimipour/NullAwayAnnotator/issues. Thank you!";
+    String[] clazzLines =
+        new String[] {
+          "package com.test;", "public @interface Main{", "   public String foo();", "}"
+        };
     CompilationUnit tree = StaticJavaParser.parse(String.join("\n", clazzLines));
     TargetClassNotFound thrown =
         assertThrows(
@@ -501,6 +529,6 @@ public class ClassSearchTest extends BaseInjectorTest {
             () ->
                 Helper.getClassOrInterfaceOrEnumDeclarationMembersByFlatName(
                     tree, "com.test.NotIncluded"));
-    assert thrown.getMessage().strip().equals(errOutput.strip());
+    assert thrown.getMessage().strip().equals(expectedErrorMessage.strip());
   }
 }

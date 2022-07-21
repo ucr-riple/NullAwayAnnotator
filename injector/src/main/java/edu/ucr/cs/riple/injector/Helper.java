@@ -229,10 +229,7 @@ public class Helper {
   private static Node findInnerClass(Node cursor, String name, int index)
       throws TargetClassNotFound {
     final List<Node> candidates = new ArrayList<>();
-    walk(
-        cursor,
-        candidates,
-        node -> isDeclarationWithName(node, name));
+    walk(cursor, candidates, node -> isDeclarationWithName(node, name));
     if (index >= candidates.size()) {
       throw new TargetClassNotFound("Non-Direct-Inner-Class", index + name, cursor);
     }
