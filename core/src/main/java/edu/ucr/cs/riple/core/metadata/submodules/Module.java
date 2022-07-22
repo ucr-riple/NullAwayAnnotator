@@ -24,8 +24,13 @@
 
 package edu.ucr.cs.riple.core.metadata.submodules;
 
+/** Represents modules mainly used by denoting downstream dependencies. */
 public class Module {
+
+  /** Module name. */
   public final String name;
+
+  /** Command run to build the module. */
   public final String command;
 
   public Module(String name, String command) {
