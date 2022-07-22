@@ -34,8 +34,13 @@ import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/** Tracker for Methods. */
 public class MethodRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
 
+  /**
+   * {@link MethodInheritanceTree} instance, used to retrieve regions that will be affected due to
+   * inheritance violations.
+   */
   private final MethodInheritanceTree tree;
 
   public MethodRegionTracker(Config config, MethodInheritanceTree tree) {
@@ -54,7 +59,9 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
       return null;
     }
     OnMethod onMethod = fix.toMethod();
+    // Add callers of method.
     Set<Region> regions = getCallersOfMethod(onMethod.clazz, onMethod.method);
+    // Add immediate super method.
     MethodNode parent = tree.getSuperMethod(onMethod.method, onMethod.clazz);
     if (parent != null) {
       regions.add(new Region(parent.method, parent.clazz));
@@ -62,6 +69,13 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
     return regions;
   }
 
+  /**
+   * Returns set of regions where the target method is called.
+   *
+   * @param clazz Fully qualified name of the class of the target method.
+   * @param method Method signature.
+   * @return Set of regions where target method is called.
+   */
   public Set<Region> getCallersOfMethod(String clazz, String method) {
     return findNodesWithHashHint(
             candidate ->

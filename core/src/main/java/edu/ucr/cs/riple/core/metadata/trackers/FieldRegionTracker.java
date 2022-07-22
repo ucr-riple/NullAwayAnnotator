@@ -32,6 +32,7 @@ import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/** Tracker for Fields. */
 public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
 
   public FieldRegionTracker(Config config) {
@@ -49,6 +50,7 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
       return null;
     }
     OnField field = fix.toField();
+    // Add all regions where the field is assigned a new value or read.
     Set<Region> ans =
         findNodesWithHashHint(
                 candidate ->

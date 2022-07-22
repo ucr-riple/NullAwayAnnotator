@@ -30,9 +30,16 @@ import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/** Tracker for Method Parameters. */
 public class ParameterRegionTracker implements RegionTracker {
 
+  /**
+   * {@link MethodInheritanceTree} instance, used to retrieve regions that will be affected due to
+   * inheritance violations.
+   */
   private final MethodInheritanceTree tree;
+
+  /** {@link MethodRegionTracker} instance, used to retrieve all sites. */
   private final MethodRegionTracker methodRegionTracker;
 
   public ParameterRegionTracker(
@@ -47,11 +54,14 @@ public class ParameterRegionTracker implements RegionTracker {
       return null;
     }
     OnParameter parameter = fix.toParameter();
+    // Get regions which will be potentially affected by inheritance violations.
     Set<Region> regions =
         tree.getSubMethods(parameter.method, parameter.clazz, false).stream()
             .map(node -> new Region(node.method, node.clazz))
             .collect(Collectors.toSet());
+    // Add the method the fix is targeting.
     regions.add(new Region(parameter.method, parameter.clazz));
+    // Add all call sites.
     regions.addAll(methodRegionTracker.getCallersOfMethod(parameter.clazz, parameter.method));
     return regions;
   }

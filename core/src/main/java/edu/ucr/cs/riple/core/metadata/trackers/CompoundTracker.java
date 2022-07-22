@@ -31,8 +31,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/** Container class for all trackers. This tracker can handle all fix types. */
 public class CompoundTracker implements RegionTracker {
 
+  /** List of all trackers. */
   private final List<RegionTracker> trackers;
 
   public CompoundTracker(Config config, MethodInheritanceTree tree) {
