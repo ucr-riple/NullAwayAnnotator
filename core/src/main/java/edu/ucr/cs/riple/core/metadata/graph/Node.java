@@ -32,11 +32,7 @@ import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.injector.location.OnMethod;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class Node {
 
@@ -79,8 +75,8 @@ public class Node {
   public void updateRegions(RegionTracker tracker) {
     this.regions.clear();
     this.regions.addAll(this.rootSource);
-    tree.forEach(fix -> regions.addAll(tracker.getRegions(fix)));
-    tree.stream()
+    this.tree.forEach(fix -> tracker.getRegions(fix).ifPresent(regions::addAll));
+    this.tree.stream()
         .filter(fix -> fix.isOnParameter() && fix.isModifyingConstructor())
         .forEach(fix -> regions.add(new Region("null", fix.change.location.clazz)));
   }

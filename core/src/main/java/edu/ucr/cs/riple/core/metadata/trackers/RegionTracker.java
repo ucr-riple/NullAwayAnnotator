@@ -25,8 +25,8 @@
 package edu.ucr.cs.riple.core.metadata.trackers;
 
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import java.util.Optional;
 import java.util.Set;
-import javax.annotation.Nullable;
 
 /**
  * Interface for trackers. Trackers can locate regions where a {@link Fix} can potentially introduce
@@ -35,12 +35,11 @@ import javax.annotation.Nullable;
 public interface RegionTracker {
 
   /**
-   * Returns Set of regions where a fix can introduce new errors if injected. Should return {@code
-   * null} if the tracker does not know anything about that fix type.
+   * Returns Set of regions where a fix can introduce new errors if injected. Should return {@link
+   * Optional#EMPTY} if the tracker does not know anything about that fix type.
    *
    * @param fix a Fix instance.
    * @return Set of regions.
    */
-  @Nullable
-  Set<Region> getRegions(Fix fix);
+  Optional<Set<Region>> getRegions(Fix fix);
 }

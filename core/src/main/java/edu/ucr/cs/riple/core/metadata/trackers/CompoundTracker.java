@@ -29,6 +29,7 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /** Container class for all trackers. This tracker can handle all fix types. */
@@ -46,10 +47,10 @@ public class CompoundTracker implements RegionTracker {
   }
 
   @Override
-  public Set<Region> getRegions(Fix location) {
+  public Optional<Set<Region>> getRegions(Fix location) {
     for (RegionTracker tracker : this.trackers) {
-      Set<Region> ans = tracker.getRegions(location);
-      if (ans != null) {
+      Optional<Set<Region>> ans = tracker.getRegions(location);
+      if (ans.isPresent()) {
         return ans;
       }
     }

@@ -31,6 +31,7 @@ import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.scanner.Serializer;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -54,9 +55,9 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
   }
 
   @Override
-  public Set<Region> getRegions(Fix fix) {
+  public Optional<Set<Region>> getRegions(Fix fix) {
     if (!fix.isOnMethod()) {
-      return null;
+      return Optional.empty();
     }
     OnMethod onMethod = fix.toMethod();
     // Add callers of method.
@@ -66,7 +67,7 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
     if (parent != null) {
       regions.add(new Region(parent.method, parent.clazz));
     }
-    return regions;
+    return Optional.of(regions);
   }
 
   /**

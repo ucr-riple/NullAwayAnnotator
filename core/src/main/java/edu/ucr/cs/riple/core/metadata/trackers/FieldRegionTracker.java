@@ -29,6 +29,7 @@ import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,9 +46,9 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
   }
 
   @Override
-  public Set<Region> getRegions(Fix fix) {
+  public Optional<Set<Region>> getRegions(Fix fix) {
     if (!fix.isOnField()) {
-      return null;
+      return Optional.empty();
     }
     OnField field = fix.toField();
     // Add all regions where the field is assigned a new value or read.
@@ -60,6 +61,6 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
             .map(trackerNode -> new Region(trackerNode.callerMethod, trackerNode.callerClass))
             .collect(Collectors.toSet());
     ans.add(new Region("null", field.clazz));
-    return ans;
+    return Optional.of(ans);
   }
 }

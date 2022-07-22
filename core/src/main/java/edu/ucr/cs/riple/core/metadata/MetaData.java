@@ -49,7 +49,7 @@ public abstract class MetaData<T extends Hashable> {
   protected final Multimap<Integer, T> contents;
 
   /**
-   * Constructor for this container. Once this constructor is invoked, all dara will be loaded from
+   * Constructor for this container. Once this constructor is invoked, all data will be loaded from
    * the file.
    *
    * @param path Path to the file containing the data.
@@ -60,7 +60,7 @@ public abstract class MetaData<T extends Hashable> {
     try {
       fillNodes(path);
     } catch (IOException e) {
-      throw new RuntimeException("Did not found file at" + path, e);
+      throw new RuntimeException("Error happened while loading content of file: " + path, e);
     }
   }
 
@@ -94,7 +94,8 @@ public abstract class MetaData<T extends Hashable> {
   }
 
   /**
-   * Creates an instance of {@code T} corresponding to values in a row.
+   * Creates an instance of {@code T} corresponding to the values in a row. This method is called on
+   * every row of the loaded file.
    *
    * @param values Values in a row.
    * @return Instance of {@code T}.
