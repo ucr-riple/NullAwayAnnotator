@@ -38,7 +38,7 @@ import javax.annotation.Nullable;
  */
 public class MethodInheritanceTree extends MetaData<MethodNode> {
 
-  /** Each method has a unique id across all nodes. This hashmap, maps ids to nodes. */
+  /** Each method has a unique id across all methods. This hashmap, maps ids to nodes. */
   private HashMap<Integer, MethodNode> nodes;
 
   public MethodInheritanceTree(Path path) {
