@@ -63,7 +63,7 @@ public class TrackerNode implements Hashable {
    * on classes value if the actual instance is not available.
    *
    * @param clazz Full qualified name.
-   * @return hash.
+   * @return Expected hash.
    */
   public static int hash(String clazz) {
     return Objects.hash(clazz);

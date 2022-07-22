@@ -25,27 +25,45 @@
 package edu.ucr.cs.riple.core.metadata.method;
 
 import edu.ucr.cs.riple.core.metadata.Hashable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
+/** Container class to store method's information in {@link MethodInheritanceTree} tree. */
 public class MethodNode implements Hashable {
-  public List<Integer> children;
+
+  /** Set of children's id. */
+  public Set<Integer> children;
+  /** Parent's node id. */
   public Integer parent;
+  /** A unique id for method across all methods. */
   public Integer id;
+  /** Method signature. */
   public String method;
+  /** Fully qualified name of the class. */
   public String clazz;
-  public int size;
+  /** Number of parameters. */
+  public int numberOfParameters;
+  /** Is true if the method is already annotated with {@code Nullable} annotation. */
   public boolean hasNullableAnnotation;
+  /** Visibility of the method. */
   public Visibility visibility;
+  /** Is true if the method has non-primitive return. */
   public boolean hasNonPrimitiveReturn;
 
+  public static final MethodNode TOP = top();
+
+  /** Visibility of method. */
   public enum Visibility {
     PUBLIC,
     PRIVATE,
     PACKAGE,
     PROTECTED;
 
+    /**
+     * Parses a string representation of visibility to an {@link Visibility} instance.
+     *
+     * @param value Visibility value in string.
+     * @return Corresponding visibility instance.
+     */
     public static MethodNode.Visibility parse(String value) {
       String toLower = value.toLowerCase();
       switch (toLower) {
@@ -63,47 +81,72 @@ public class MethodNode implements Hashable {
     }
   }
 
-  public MethodNode(
-      int id,
-      String clazz,
-      String method,
-      List<Integer> children,
-      int parent,
-      boolean hasNullableAnnotation) {
-    this.id = id;
-    this.clazz = clazz;
-    this.method = method;
-    this.children = children;
-    this.parent = parent;
-    this.hasNullableAnnotation = hasNullableAnnotation;
+  /**
+   * Creates a singleton instance of top object. Top is root of the {@link MethodInheritanceTree}
+   * tree.
+   *
+   * @return The top Node.
+   */
+  private static MethodNode top() {
+    if (TOP == null) {
+      MethodNode node = new MethodNode(-1);
+      node.fillInformation("null", "null", -1, 0, false, "private", false);
+      return node;
+    }
+    return TOP;
   }
 
-  public MethodNode() {}
+  /**
+   * Creates a MethodNode with a unique id.
+   *
+   * @param id A unique id.
+   */
+  public MethodNode(int id) {
+    this.id = id;
+  }
 
+  /**
+   * Initializes this instance's values.
+   *
+   * @param clazz Fully qualified name of containing class.
+   * @param method Method signature.
+   * @param parent Parent's id.
+   * @param numberOfParameters Number of parameters.
+   * @param hasNullableAnnotation True, if it has Nullable Annotation.
+   * @param visibility Visibility of this method.
+   * @param hasNonPrimitiveReturn True, if it has a non-primitive return.
+   */
   void fillInformation(
-      Integer id,
       String clazz,
       String method,
       Integer parent,
-      int size,
+      int numberOfParameters,
       boolean hasNullableAnnotation,
       String visibility,
       boolean hasNonPrimitiveReturn) {
     this.parent = parent;
-    this.id = id;
     this.method = method;
     this.clazz = clazz;
-    this.size = size;
+    this.numberOfParameters = numberOfParameters;
     this.hasNullableAnnotation = hasNullableAnnotation;
     this.visibility = Visibility.parse(visibility);
     this.hasNonPrimitiveReturn = hasNonPrimitiveReturn;
   }
 
+  /**
+   * Adds a child to the list of children.
+   *
+   * @param id Child id.
+   */
   void addChild(Integer id) {
     if (children == null) {
-      children = new ArrayList<>();
+      children = new HashSet<>();
     }
     children.add(id);
+  }
+
+  public boolean isNonTop() {
+    return !Objects.equals(this.id, TOP.id);
   }
 
   @Override
@@ -118,6 +161,14 @@ public class MethodNode implements Hashable {
         && Objects.equals(clazz, that.clazz);
   }
 
+  /**
+   * Calculates hash. This method is used outside this class to calculate the expected hash bashed
+   * on classes value if the actual instance is not available.
+   *
+   * @param method Method signature.
+   * @param clazz Fully qualified name of the containing class.
+   * @return Expected hash.
+   */
   public static int hash(String method, String clazz) {
     return Objects.hash(method, clazz);
   }

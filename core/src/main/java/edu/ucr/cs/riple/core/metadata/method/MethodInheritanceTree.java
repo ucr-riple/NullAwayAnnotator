@@ -27,22 +27,24 @@ package edu.ucr.cs.riple.core.metadata.method;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import javax.annotation.Nullable;
 
+/**
+ * The top-down tree structure of methods in the target module, where each method's parent node, is
+ * their immediate overriding method.
+ */
 public class MethodInheritanceTree extends MetaData<MethodNode> {
 
+  /** Each method has a unique id across all nodes. This hashmap, maps ids to nodes. */
   private HashMap<Integer, MethodNode> nodes;
-  private static int maxsize = 0;
 
   public MethodInheritanceTree(Path path) {
     super(path);
-    final MethodNode top = new MethodNode(-1, "null", "null", Collections.emptyList(), -1, false);
-    nodes.put(-1, top);
+    // The root node of this tree with id: -1.
+    nodes.put(-1, MethodNode.TOP);
   }
 
   @Override
@@ -53,21 +55,19 @@ public class MethodInheritanceTree extends MetaData<MethodNode> {
 
   @Override
   protected MethodNode addNodeByLine(String[] values) {
+    // Nodes unique id.
     Integer id = Integer.parseInt(values[0]);
     MethodNode node;
     if (nodes.containsKey(id)) {
       node = nodes.get(id);
     } else {
-      node = new MethodNode();
+      node = new MethodNode(id);
       nodes.put(id, node);
     }
+    // Fill nodes information.
     Integer parentId = Integer.parseInt(values[3]);
     int size = Integer.parseInt(values[4]);
-    if (size > maxsize) {
-      maxsize = size;
-    }
     node.fillInformation(
-        id,
         values[1],
         values[2],
         parentId,
@@ -75,35 +75,54 @@ public class MethodInheritanceTree extends MetaData<MethodNode> {
         Boolean.parseBoolean(values[6]),
         values[7],
         Boolean.parseBoolean(values[8]));
+    // If node has a non-top parent.
     if (parentId != -1) {
       MethodNode parent = nodes.get(parentId);
+      // If parent has not been seen visited before.
       if (parent == null) {
-        parent = new MethodNode();
+        parent = new MethodNode(parentId);
         nodes.put(parentId, parent);
       }
+      // Parent is already visited.
       parent.addChild(id);
     }
     return node;
   }
 
+  /**
+   * Locates the immediate super method of input method.
+   *
+   * @param method Method signature of input.
+   * @param clazz Fully qualified name of the input method.
+   * @return Corresponding node of the overridden method, null if method has no parent.
+   */
+  @Nullable
   public MethodNode getClosestSuperMethod(String method, String clazz) {
     MethodNode node = findNode(method, clazz);
     if (node == null) {
       return null;
     }
     MethodNode parent = nodes.get(node.parent);
-    return parent != null ? (nodes.get(parent.id) == null ? null : parent) : null;
+    return parent.isNonTop() ? parent : null;
   }
 
-  public List<MethodNode> getSubMethods(String method, String clazz, boolean recursive) {
-    List<MethodNode> ans = new ArrayList<>();
+  /**
+   * Locates the overriding methods of input method.
+   *
+   * @param method Method signature of input.
+   * @param clazz Fully qualified name of the input method.
+   * @param recursive If ture, it will travers the inheritance tree recursively.
+   * @return ImmutableSet of overriding methods.
+   */
+  public ImmutableSet<MethodNode> getSubMethods(String method, String clazz, boolean recursive) {
     MethodNode node = findNode(method, clazz);
     if (node == null) {
-      return ans;
+      return ImmutableSet.of();
     }
     if (node.children == null) {
-      return ans;
+      return ImmutableSet.of();
     }
+    Set<MethodNode> ans = new HashSet<>();
     Set<Integer> workList = new HashSet<>(node.children);
     while (!workList.isEmpty()) {
       Set<Integer> tmp = new HashSet<>();
@@ -122,27 +141,27 @@ public class MethodInheritanceTree extends MetaData<MethodNode> {
       workList.clear();
       workList.addAll(tmp);
     }
-    return ans;
+    return ImmutableSet.copyOf(ans);
   }
 
-  public MethodNode getSuperMethod(String method, String clazz) {
-    MethodNode node = findNode(method, clazz);
-    if (node == null) {
-      return null;
-    }
-    MethodNode parent = nodes.get(node.parent);
-    if (parent == null || parent.clazz == null || parent.clazz.equals("null")) {
-      return null;
-    }
-    return parent;
-  }
-
+  /**
+   * Locates a node based on the method signature and fully qualified class name.
+   *
+   * @param method Method signature.
+   * @param clazz Fully Qualified name of the class.
+   * @return Corresponding node.
+   */
   public MethodNode findNode(String method, String clazz) {
     return findNodeWithHashHint(
         candidate -> candidate.clazz.equals(clazz) && candidate.method.equals(method),
         MethodNode.hash(method, clazz));
   }
 
+  /**
+   * Returns public method with public visibility and non-primitive return type.
+   *
+   * @return ImmutableSet of method nodes.
+   */
   public ImmutableSet<MethodNode> getPublicMethodsWithNonPrimitivesReturn() {
     return findNodes(
             node ->
