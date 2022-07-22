@@ -74,7 +74,9 @@ public class Helper {
           --level;
           break;
         default:
-          if (level == 0) ans.append(current);
+          if (level == 0) {
+            ans.append(current);
+          }
       }
     }
     return ans.toString();
