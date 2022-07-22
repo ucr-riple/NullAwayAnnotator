@@ -32,9 +32,9 @@ import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.injector.location.OnMethod;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -90,7 +90,7 @@ public class Node {
   }
 
   public void updateStatus(
-      int effect, Set<Fix> fixesInOneRound, List<Fix> triggered, MethodInheritanceTree mit) {
+      int effect, Set<Fix> fixesInOneRound, Collection<Fix> triggered, MethodInheritanceTree mit) {
     updateTriggered(triggered);
     final int[] numberOfSuperMethodsAnnotatedOutsideTree = {0};
     this.tree.stream()
@@ -123,7 +123,7 @@ public class Node {
     this.effect = effect + numberOfSuperMethodsAnnotatedOutsideTree[0];
   }
 
-  public void updateTriggered(List<Fix> fixes) {
+  public void updateTriggered(Collection<Fix> fixes) {
     int sizeBefore = this.triggered.size();
     this.triggered.addAll(fixes);
     int sizeAfter = this.triggered.size();

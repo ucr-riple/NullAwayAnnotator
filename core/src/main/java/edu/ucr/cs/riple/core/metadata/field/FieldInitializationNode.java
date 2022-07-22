@@ -1,9 +1,10 @@
 package edu.ucr.cs.riple.core.metadata.field;
 
+import edu.ucr.cs.riple.core.metadata.Hashable;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.Objects;
 
-public class FieldInitializationNode {
+public class FieldInitializationNode implements Hashable {
 
   final OnMethod initializerLocation;
   final String field;

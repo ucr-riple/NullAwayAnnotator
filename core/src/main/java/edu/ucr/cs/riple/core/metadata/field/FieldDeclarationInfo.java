@@ -1,10 +1,11 @@
 package edu.ucr.cs.riple.core.metadata.field;
 
+import edu.ucr.cs.riple.core.metadata.Hashable;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public class FieldDeclarationInfo {
+public class FieldDeclarationInfo implements Hashable {
   public final Set<Set<String>> fields;
   public final String clazz;
 

@@ -24,14 +24,14 @@
 
 package edu.ucr.cs.riple.core.metadata.index;
 
-import java.util.List;
+import java.util.Collection;
 
 public class Result<T> {
 
   public final int size;
-  public final List<T> dif;
+  public final Collection<T> dif;
 
-  public Result(int size, List<T> dif) {
+  public Result(int size, Collection<T> dif) {
     this.size = size;
     this.dif = dif;
   }

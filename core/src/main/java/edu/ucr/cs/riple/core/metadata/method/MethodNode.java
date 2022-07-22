@@ -24,11 +24,12 @@
 
 package edu.ucr.cs.riple.core.metadata.method;
 
+import edu.ucr.cs.riple.core.metadata.Hashable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class MethodNode {
+public class MethodNode implements Hashable {
   public List<Integer> children;
   public Integer parent;
   public Integer id;

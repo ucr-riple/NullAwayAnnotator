@@ -24,9 +24,10 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
+import edu.ucr.cs.riple.core.metadata.Hashable;
 import java.util.Objects;
 
-public class TrackerNode {
+public class TrackerNode implements Hashable {
   public final String callerClass;
   public final String callerMethod;
   public final String calleeMember;

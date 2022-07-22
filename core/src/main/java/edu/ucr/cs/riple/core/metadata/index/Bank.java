@@ -27,11 +27,11 @@ package edu.ucr.cs.riple.core.metadata.index;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.Collection;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public class Bank<T extends Hashable> {
+public class Bank<T extends Enclosed> {
 
   private final Index<T> rootInClass;
   private final Index<T> rootInMethod;
@@ -61,7 +61,7 @@ public class Bank<T extends Hashable> {
     }
   }
 
-  private Result<T> compareByList(List<T> previousItems, List<T> currentItems) {
+  private Result<T> compareByList(Collection<T> previousItems, Collection<T> currentItems) {
     int size = currentItems.size() - previousItems.size();
     previousItems.forEach(currentItems::remove);
     return new Result<>(size, currentItems);

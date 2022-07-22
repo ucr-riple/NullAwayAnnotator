@@ -26,23 +26,22 @@ package edu.ucr.cs.riple.core.metadata.index;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class Index<T extends Hashable> {
+public class Index<T extends Enclosed> {
 
-  private final HashMap<Integer, List<T>> items;
+  private final Multimap<Integer, T> items;
   private final Factory<T> factory;
   private final Path path;
   private final Index.Type type;
@@ -56,7 +55,7 @@ public class Index<T extends Hashable> {
   public Index(Path path, Index.Type type, Factory<T> factory) {
     this.type = type;
     this.path = path;
-    this.items = new HashMap<>();
+    this.items = MultimapBuilder.hashKeys().arrayListValues().build();
     this.factory = factory;
     this.total = 0;
   }
@@ -75,13 +74,7 @@ public class Index<T extends Hashable> {
         } else {
           hash = Objects.hash(item.encClass, item.encMethod);
         }
-        if (items.containsKey(hash)) {
-          items.get(hash).add(item);
-        } else {
-          List<T> newList = new ArrayList<>();
-          newList.add(item);
-          items.put(hash, newList);
-        }
+        items.put(hash, item);
         line = br.readLine();
       }
     } catch (IOException e) {
@@ -89,28 +82,20 @@ public class Index<T extends Hashable> {
     }
   }
 
-  public List<T> getByClass(String clazz) {
-    List<T> ans = items.get(Objects.hash(clazz));
-    if (ans == null) {
-      return Collections.emptyList();
-    }
-    return ans.stream().filter(item -> item.encClass.equals(clazz)).collect(Collectors.toList());
+  public Collection<T> getByClass(String clazz) {
+    return items.get(Objects.hash(clazz)).stream()
+        .filter(item -> item.encClass.equals(clazz))
+        .collect(Collectors.toList());
   }
 
-  public List<T> getByMethod(String clazz, String method) {
-    List<T> ans = items.get(Objects.hash(clazz, method));
-    if (ans == null) {
-      return Collections.emptyList();
-    }
-    return ans.stream()
+  public Collection<T> getByMethod(String clazz, String method) {
+    return items.get(Objects.hash(clazz, method)).stream()
         .filter(item -> item.encClass.equals(clazz) && item.encMethod.equals(method))
         .collect(Collectors.toList());
   }
 
-  public List<T> getAllEntities() {
-    List<T> ans = new ArrayList<>();
-    items.forEach((integer, ts) -> ans.addAll(ts));
-    return ans;
+  public Collection<T> getAllEntities() {
+    return items.values();
   }
 
   public Set<Region> getRegionsForFixes(Predicate<T> comparable) {

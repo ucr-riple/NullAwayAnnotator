@@ -37,7 +37,7 @@ import java.util.Objects;
 import java.util.Set;
 import org.json.simple.JSONObject;
 
-public class Fix extends Hashable {
+public class Fix extends Enclosed {
 
   public final AddAnnotation change;
   public final String annotation;

@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core.metadata.index;
 
-public abstract class Hashable {
+public abstract class Enclosed {
   protected String encClass;
   protected String encMethod;
 }

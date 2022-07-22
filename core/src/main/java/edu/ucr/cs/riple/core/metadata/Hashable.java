@@ -22,9 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.index;
+package edu.ucr.cs.riple.core.metadata;
 
-public interface Factory<T extends Enclosed> {
-
-  T build(String[] info);
-}
+/** Marker interface for defining expected type for {@link MetaData}. */
+public interface Hashable {}

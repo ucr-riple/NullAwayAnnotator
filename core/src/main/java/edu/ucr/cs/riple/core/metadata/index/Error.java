@@ -25,7 +25,7 @@ package edu.ucr.cs.riple.core.metadata.index;
 
 import java.util.Objects;
 
-public class Error extends Hashable {
+public class Error extends Enclosed {
   public final String messageType;
   public final String message;
 
