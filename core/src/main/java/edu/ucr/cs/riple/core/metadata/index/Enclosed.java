@@ -24,7 +24,36 @@
 
 package edu.ucr.cs.riple.core.metadata.index;
 
+import edu.ucr.cs.riple.core.metadata.trackers.Region;
+
+/**
+ * Subtype of this class, are outputs of analysis at program points (code locations). This class,
+ * stores the containing {@link Region} info of that program point.
+ */
 public abstract class Enclosed {
-  protected String encClass;
-  protected String encMethod;
+
+  /** Containing region. */
+  protected final Region region;
+
+  public Enclosed(String encClass, String encMethod) {
+    this.region = new Region(encMethod, encClass);
+  }
+
+  /**
+   * Fully qualified name of the containing region.
+   *
+   * @return Fully qualified name the class.
+   */
+  public String encClass() {
+    return this.region.clazz;
+  }
+
+  /**
+   * Method signature of the containing region.
+   *
+   * @return Method signature.
+   */
+  public String encMethod() {
+    return this.region.method;
+  }
 }

@@ -45,7 +45,7 @@ public abstract class AnnotationInjector {
     }
     Set<RemoveAnnotation> toRemove =
         fixes.stream()
-            .map(fix -> new RemoveAnnotation(fix.change.location, fix.annotation))
+            .map(fix -> new RemoveAnnotation(fix.change.location, fix.change.annotation))
             .collect(Collectors.toSet());
     removeAnnotations(toRemove);
   }

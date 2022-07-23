@@ -39,9 +39,9 @@ public class Region {
   /** Fully qualified name of the enclosing class of the region. */
   public final String clazz;
 
-  public Region(String method, String clazz) {
-    this.method = method == null ? "null" : method;
-    this.clazz = clazz == null ? "null" : clazz;
+  public Region(String encMethod, String encClass) {
+    this.method = encMethod == null ? "null" : encMethod;
+    this.clazz = encClass == null ? "null" : encClass;
   }
 
   @Override

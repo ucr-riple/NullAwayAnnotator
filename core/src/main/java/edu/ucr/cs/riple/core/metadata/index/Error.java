@@ -25,19 +25,27 @@ package edu.ucr.cs.riple.core.metadata.index;
 
 import java.util.Objects;
 
+/** Represents an error reported by NullAway. */
 public class Error extends Enclosed {
+
+  /** Error Type. */
   public final String messageType;
+  /** Error message. */
   public final String message;
 
-  public Error(String[] infos) {
-    this(infos[0], infos[1], infos[2], infos[3]);
+  /**
+   * NullAway serializes error on TSV file, this constructor is called for each line of that file.
+   *
+   * @param values Values in row of a TSV file.
+   */
+  public Error(String[] values) {
+    this(values[0], values[1], values[2], values[3]);
   }
 
-  public Error(String messageType, String message, String clazz, String method) {
+  public Error(String messageType, String message, String encClass, String encMethod) {
+    super(encClass, encMethod);
     this.messageType = messageType;
     this.message = message;
-    this.encMethod = method;
-    this.encClass = clazz;
   }
 
   @Override

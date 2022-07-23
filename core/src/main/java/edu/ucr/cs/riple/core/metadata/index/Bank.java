@@ -31,13 +31,25 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.function.Predicate;
 
+/**
+ * Responsible for tracking status of generated outputs. It indexes outputs, can save states and
+ * compute the difference between states.
+ *
+ * @param <T> Extends Enclosed.
+ */
 public class Bank<T extends Enclosed> {
 
+  /** Initial state indexed by enclosing class. */
   private final Index<T> rootInClass;
+  /** Initial state indexed by enclosing class and method. */
   private final Index<T> rootInMethod;
-  private Index<T> currentInMethod;
+  /** Current state indexed by enclosing class. */
   private Index<T> currentInClass;
+  /** Current state indexed by enclosing class and method. */
+  private Index<T> currentInMethod;
+  /** Factory instance to parse outputs. */
   private final Factory<T> factory;
+  /** Path to file where outputs are stored. */
   private final Path path;
 
   public Bank(Path path, Factory<T> factory) {
@@ -50,6 +62,12 @@ public class Bank<T extends Enclosed> {
     Preconditions.checkArgument(rootInClass.total == rootInMethod.total);
   }
 
+  /**
+   * Overwrites the current state with the new generated output,
+   *
+   * @param saveClass If true, current index by class will be updated.
+   * @param saveMethod if true, current index by class and method will be updated.
+   */
   public void saveState(boolean saveClass, boolean saveMethod) {
     if (saveClass) {
       currentInClass = new Index<>(this.path, Index.Type.BY_CLASS, factory);
@@ -61,24 +79,50 @@ public class Bank<T extends Enclosed> {
     }
   }
 
+  /**
+   * Computes the difference between two collections (A - B).
+   *
+   * @param previousItems B.
+   * @param currentItems A.
+   * @return Corresponding {@link Result} instance storing result of (A - B).
+   */
   private Result<T> compareByList(Collection<T> previousItems, Collection<T> currentItems) {
     int size = currentItems.size() - previousItems.size();
     previousItems.forEach(currentItems::remove);
     return new Result<>(size, currentItems);
   }
 
-  public Result<T> compareByMethod(String className, String methodName, boolean fresh) {
+  /**
+   * Computes the difference in items enclosed by the given enclosing class and method in current
+   * state and root state.
+   *
+   * @param encClass Enclosing fully qualified class name.
+   * @param encMethod Enclosing method signature.
+   * @return Corresponding {@link Result}.
+   */
+  public Result<T> compareByMethod(String encClass, String encMethod, boolean fresh) {
     saveState(false, fresh);
     return compareByList(
-        rootInMethod.getByMethod(className, methodName),
-        currentInMethod.getByMethod(className, methodName));
+        rootInMethod.getByMethod(encClass, encMethod),
+        currentInMethod.getByMethod(encClass, encMethod));
   }
 
+  /**
+   * Computes the difference in current state and root state.
+   *
+   * @return Corresponding {@link Result} instance.
+   */
   public Result<T> compare() {
-    return compareByList(rootInMethod.getAllEntities(), currentInMethod.getAllEntities());
+    return compareByList(rootInMethod.values(), currentInMethod.values());
   }
 
-  public Set<Region> getRegionsForFixes(Predicate<T> c) {
-    return rootInClass.getRegionsForFixes(c);
+  /**
+   * Returns all items regions that holds the given predicate.
+   *
+   * @param predicate Predicate provided by caller.
+   * @return Set of regions.
+   */
+  public Set<Region> getRegionsForFixes(Predicate<T> predicate) {
+    return rootInClass.getRegionsOfMatchingItems(predicate);
   }
 }
