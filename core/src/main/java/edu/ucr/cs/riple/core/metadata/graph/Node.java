@@ -34,30 +34,41 @@ import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.*;
 
+/**
+ * Vertex in {@link ConflictGraph} graph. It stores a fix tree (starting from a root) and all it's
+ * impact on the source code information.
+ */
 public class Node {
 
-  /** Fix to process */
+  /** Root fix of the tree. */
   public final Fix root;
 
-  /** Tree of all fixes connecting to root. */
+  /** Set of all fixes in tree. */
   public final Set<Fix> tree;
 
+  /** Set of potentially impacted by any node in tree. */
   public final Set<Region> regions;
 
+  /** Set of triggered fixes if tree is applied. */
   public Set<Fix> triggered;
 
+  /** Unique id of Node across all nodes. */
   public int id;
 
   /** Effect of applying containing change */
   public int effect;
 
-  /** if <code>true</code>, set of triggered has been updated */
+  /**
+   * if <code>true</code>, set of triggered fixes has been updated, and the node still needs further
+   * process.
+   */
   public boolean changed;
 
+  /** Corresponding report of processing root. */
   public Report report;
 
-  /** Regions where original errors reported, all are for root node */
-  private Set<Region> rootSource;
+  /** Regions where original errors reported and NullAway suggested root for that. */
+  private Set<Region> origins;
 
   public Node(Fix root) {
     this.regions = new HashSet<>();
@@ -68,26 +79,66 @@ public class Node {
     this.changed = false;
   }
 
-  public void setRootSource(Bank<Fix> fixBank) {
-    this.rootSource = fixBank.getRegionsForFixes(fix -> fix.equals(root));
+  /**
+   * Initializes rootSource. Collects all regions where error reported from {@link Bank}
+   *
+   * @param fixBank {@link Bank} instance.
+   */
+  public void setOrigins(Bank<Fix> fixBank) {
+    this.origins = fixBank.getRegionsForFixes(fix -> fix.equals(root));
   }
 
-  public void updateRegions(RegionTracker tracker) {
+  /**
+   * It clears the set of regions and will recalculate the potentially impacted regions. Potentially
+   * impacted regions are mentioned below:
+   *
+   * <ul>
+   *   <li>All regions that a usage of the set of targeted elements by fixes has been observed.
+   *   <li>All regions which can be impacted due to inheritance violation rules.
+   *   <li>If a fix is targeting a constructor parameter, class field initialization region will
+   *       also be added to this list. (Constructor failures in field initialization, causes errors
+   *       to be reported on that class field initialization regions.)
+   * </ul>
+   *
+   * @param tracker Tracker instance.
+   */
+  public void reCollectPotentiallyImpactedRegions(RegionTracker tracker) {
     this.regions.clear();
-    this.regions.addAll(this.rootSource);
+    // Add origins.
+    this.regions.addAll(this.origins);
     this.tree.forEach(fix -> tracker.getRegions(fix).ifPresent(regions::addAll));
+    // Add class initialization region, if a fix is modifying a parameter on constructor.
     this.tree.stream()
         .filter(fix -> fix.isOnParameter() && fix.isModifyingConstructor())
         .forEach(fix -> regions.add(new Region(fix.change.location.clazz, "null")));
   }
 
+  /**
+   * Checks if a node has a shared region with this node's regions.
+   *
+   * @param other Other Node instance.
+   * @return true, if there is a conflict and a region is shared.
+   */
   public boolean hasConflictInRegions(Node other) {
     return !Collections.disjoint(other.regions, this.regions);
   }
 
+  /**
+   * Updates node status. Should be called when all annotations in tree are applied to the source
+   * code and the target project has been rebuilt.
+   *
+   * @param effect Local effect calculated based on the number of errors in impacted regions.
+   * @param fixesInOneRound All fixes applied simultaneously to the source code.
+   * @param triggered Triggered fixes collected from impacted regions.
+   * @param mit Method inheritance tree instance.
+   */
   public void updateStatus(
       int effect, Set<Fix> fixesInOneRound, Collection<Fix> triggered, MethodInheritanceTree mit) {
-    updateTriggered(triggered);
+    // Update list of triggered fixes.
+    this.updateTriggered(triggered);
+    // A fix in a tree, can have a super method that is not part of this node's tree but be present
+    // in another node's tree. In this case since both are applied, an error due to inheritance
+    // violation will not be reported. This calculation below will fix that.
     final int[] numberOfSuperMethodsAnnotatedOutsideTree = {0};
     this.tree.stream()
         .filter(Fix::isOnMethod)
@@ -95,8 +146,11 @@ public class Node {
             fix -> {
               OnMethod onMethod = fix.toMethod();
               return mit.getClosestSuperMethod(onMethod.method, onMethod.clazz);
-            })
-        .filter(node -> node != null && !node.hasNullableAnnotation)
+            }) // List of super methods of all fixes in tree.
+        .filter(
+            node ->
+                node != null
+                    && !node.hasNullableAnnotation) // If node is already annotated, ignore it.
         .forEach(
             node -> {
               if (tree.stream()
@@ -105,6 +159,7 @@ public class Node {
                           fix.isOnMethod()
                               && fix.toMethod().method.equals(node.method)
                               && fix.toMethod().clazz.equals(node.clazz))) {
+                // Super method is already inside tree, ignore it.
                 return;
               }
               if (fixesInOneRound.stream()
@@ -113,12 +168,20 @@ public class Node {
                           fix.isOnMethod()
                               && fix.toMethod().method.equals(node.method)
                               && fix.toMethod().clazz.equals(node.clazz))) {
+                // Super method is not in this tree and is present in source code due to injection
+                // for another node, count it.
                 numberOfSuperMethodsAnnotatedOutsideTree[0]++;
               }
             });
+    // Fix the actual error below.
     this.effect = effect + numberOfSuperMethodsAnnotatedOutsideTree[0];
   }
 
+  /**
+   * Updated the triggered list and the status of node.
+   *
+   * @param fixes Collection of triggered fixes.
+   */
   public void updateTriggered(Collection<Fix> fixes) {
     int sizeBefore = this.triggered.size();
     this.triggered.addAll(fixes);
@@ -126,6 +189,7 @@ public class Node {
     this.changed = (sizeAfter != sizeBefore);
   }
 
+  /** Merges triggered fixes to the tree, to prepare the analysis for the next depth. */
   public void mergeTriggered() {
     this.tree.addAll(this.triggered);
     this.triggered.clear();
@@ -136,6 +200,13 @@ public class Node {
     return getHash(root);
   }
 
+  /**
+   * Calculates hash. This method is used outside this class to calculate the expected hash bashed
+   * on classes value if the actual instance is not available.
+   *
+   * @param fix Fix instance.
+   * @return Expected hash.
+   */
   public static int getHash(Fix fix) {
     return Objects.hash(fix);
   }

@@ -54,7 +54,7 @@ public class BasicExplorer extends Explorer {
     System.out.println(
         "Scheduling for: " + reports.size() + " builds for: " + reports.size() + " fixes");
     ProgressBar pb = Utility.createProgressBar("Processing", reports.size());
-    for (Node node : fixGraph.getAllNodes()) {
+    for (Node node : graph.getAllNodes()) {
       pb.step();
       Set<Fix> fixes = node.tree;
       injector.injectFixes(fixes);

@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
-import edu.ucr.cs.riple.core.metadata.graph.FixGraph;
+import edu.ucr.cs.riple.core.metadata.graph.ConflictGraph;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -41,7 +41,7 @@ public abstract class Explorer {
   protected final Bank<Fix> fixBank;
   protected final ImmutableSet<Report> reports;
   protected final Config config;
-  protected final FixGraph<Node> fixGraph;
+  protected final ConflictGraph<Node> graph;
 
   protected final MethodInheritanceTree methodInheritanceTree;
 
@@ -63,18 +63,18 @@ public abstract class Explorer {
         fixes.stream().map(fix -> new Report(fix, 1)).collect(ImmutableSet.toImmutableSet());
     this.config = config;
     this.depth = depth;
-    this.fixGraph = new FixGraph<>(Node::new);
+    this.graph = new ConflictGraph<>(Node::new);
   }
 
   protected void initializeFixGraph() {
-    this.fixGraph.clear();
+    this.graph.clear();
     this.reports.stream()
         .filter(report -> !report.finished && (!config.bailout || report.effect > 0))
         .forEach(
             report -> {
               Fix root = report.root;
-              Node node = fixGraph.findOrCreate(root);
-              node.setRootSource(fixBank);
+              Node node = graph.findOrCreate(root);
+              node.setOrigins(fixBank);
               node.report = report;
               node.triggered = report.triggered;
               node.tree.addAll(report.tree);
@@ -83,7 +83,7 @@ public abstract class Explorer {
   }
 
   protected void finalizeReports() {
-    fixGraph
+    graph
         .getAllNodes()
         .forEach(
             node -> {
@@ -102,8 +102,8 @@ public abstract class Explorer {
     for (int i = 0; i < this.depth; i++) {
       System.out.print("Analyzing at level " + (i + 1) + ", ");
       initializeFixGraph();
-      config.log.updateNodeNumber(fixGraph.getAllNodes().size());
-      if (fixGraph.isEmpty()) {
+      config.log.updateNodeNumber(graph.getAllNodes().size());
+      if (graph.isEmpty()) {
         System.out.println("Analysis finished at this iteration.");
         break;
       }

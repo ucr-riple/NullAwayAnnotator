@@ -62,18 +62,18 @@ public class OptimizedExplorer extends Explorer {
   @Override
   protected void initializeFixGraph() {
     super.initializeFixGraph();
-    this.fixGraph.getAllNodes().forEach(node -> node.updateRegions(tracker));
+    this.graph.getAllNodes().forEach(node -> node.reCollectPotentiallyImpactedRegions(tracker));
   }
 
   @Override
   protected void executeNextCycle() {
-    fixGraph.findGroups();
-    HashMap<Integer, Set<Node>> groups = fixGraph.getGroups();
+    graph.findGroups();
+    HashMap<Integer, Set<Node>> groups = graph.getGroups();
     System.out.println(
         "Scheduling for: "
             + groups.size()
             + " builds for: "
-            + fixGraph.getAllNodes().size()
+            + graph.getAllNodes().size()
             + " fixes");
     ProgressBar pb = Utility.createProgressBar("Processing", groups.size());
     for (Set<Node> group : groups.values()) {

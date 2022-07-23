@@ -35,12 +35,18 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class FixGraph<T extends Node> {
+/**
+ * The Conflict Graph for the exploring process. In this graph vertices are {@link Node} and there
+ * is an edge between two nodes, if they share a potentially impacted region.
+ *
+ * @param <T>
+ */
+public class ConflictGraph<T extends Node> {
   public final HashMap<Integer, Set<T>> nodes;
   private final HashMap<Integer, Set<T>> groups;
   private final Factory<T> factory;
 
-  public FixGraph(Factory<T> factory) {
+  public ConflictGraph(Factory<T> factory) {
     nodes = new HashMap<>();
     groups = new HashMap<>();
     this.factory = factory;
