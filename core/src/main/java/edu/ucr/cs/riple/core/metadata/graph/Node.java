@@ -78,7 +78,7 @@ public class Node {
     this.tree.forEach(fix -> tracker.getRegions(fix).ifPresent(regions::addAll));
     this.tree.stream()
         .filter(fix -> fix.isOnParameter() && fix.isModifyingConstructor())
-        .forEach(fix -> regions.add(new Region("null", fix.change.location.clazz)));
+        .forEach(fix -> regions.add(new Region(fix.change.location.clazz, "null")));
   }
 
   public boolean hasConflictInRegions(Node other) {

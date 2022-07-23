@@ -58,9 +58,9 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
                     candidate.calleeClass.equals(field.clazz)
                         && field.variables.contains(candidate.calleeMember),
                 TrackerNode.hash(field.clazz))
-            .map(trackerNode -> new Region(trackerNode.callerMethod, trackerNode.callerClass))
+            .map(trackerNode -> new Region(trackerNode.callerClass, trackerNode.callerMethod))
             .collect(Collectors.toSet());
-    ans.add(new Region("null", field.clazz));
+    ans.add(new Region(field.clazz, "null"));
     return Optional.of(ans);
   }
 }

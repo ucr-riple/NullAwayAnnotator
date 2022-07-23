@@ -36,7 +36,7 @@ public abstract class Enclosed {
   protected final Region region;
 
   public Enclosed(String encClass, String encMethod) {
-    this.region = new Region(encMethod, encClass);
+    this.region = new Region(encClass, encMethod);
   }
 
   /**
