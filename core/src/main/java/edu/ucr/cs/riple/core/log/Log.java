@@ -2,8 +2,8 @@ package edu.ucr.cs.riple.core.log;
 
 public class Log {
 
-  int node;
-  int requested;
+  long node;
+  long requested;
   long time;
   long buildTime = 0;
 
@@ -42,7 +42,7 @@ public class Log {
     this.requested += 1;
   }
 
-  public void updateNodeNumber(int number) {
+  public void updateNodeNumber(long number) {
     this.node += number;
   }
 }

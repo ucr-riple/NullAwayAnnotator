@@ -41,7 +41,7 @@ public abstract class Explorer {
   protected final Bank<Fix> fixBank;
   protected final ImmutableSet<Report> reports;
   protected final Config config;
-  protected final ConflictGraph<Node> graph;
+  protected final ConflictGraph graph;
 
   protected final MethodInheritanceTree methodInheritanceTree;
 
@@ -63,7 +63,7 @@ public abstract class Explorer {
         fixes.stream().map(fix -> new Report(fix, 1)).collect(ImmutableSet.toImmutableSet());
     this.config = config;
     this.depth = depth;
-    this.graph = new ConflictGraph<>(Node::new);
+    this.graph = new ConflictGraph();
   }
 
   protected void initializeFixGraph() {
@@ -73,7 +73,7 @@ public abstract class Explorer {
         .forEach(
             report -> {
               Fix root = report.root;
-              Node node = graph.findOrCreate(root);
+              Node node = graph.addNodeToVertices(root);
               node.setOrigins(fixBank);
               node.report = report;
               node.triggered = report.triggered;
@@ -84,7 +84,7 @@ public abstract class Explorer {
 
   protected void finalizeReports() {
     graph
-        .getAllNodes()
+        .getNodes()
         .forEach(
             node -> {
               Report report = node.report;
@@ -102,7 +102,7 @@ public abstract class Explorer {
     for (int i = 0; i < this.depth; i++) {
       System.out.print("Analyzing at level " + (i + 1) + ", ");
       initializeFixGraph();
-      config.log.updateNodeNumber(graph.getAllNodes().size());
+      config.log.updateNodeNumber(graph.getNodes().count());
       if (graph.isEmpty()) {
         System.out.println("Analysis finished at this iteration.");
         break;

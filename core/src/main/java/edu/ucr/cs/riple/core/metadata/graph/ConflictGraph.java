@@ -24,71 +24,51 @@
 
 package edu.ucr.cs.riple.core.metadata.graph;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * The Conflict Graph for the exploring process. In this graph vertices are {@link Node} and there
  * is an edge between two nodes, if they share a potentially impacted region.
- *
- * @param <T>
  */
-public class ConflictGraph<T extends Node> {
-  public final HashMap<Integer, Set<T>> nodes;
-  private final HashMap<Integer, Set<T>> groups;
-  private final Factory<T> factory;
+public class ConflictGraph {
 
-  public ConflictGraph(Factory<T> factory) {
-    nodes = new HashMap<>();
+  /** Nodes in this graph */
+  public final Multimap<Integer, Node> nodes;
+  /**
+   * Groups in this graph, nodes which does not have any conflict in regions will in the same group.
+   * Please note that this is a graph coloring problem, set of groups is calculated using a greedy
+   * algorithm can may not be optimal.
+   */
+  private final HashMap<Integer, Set<Node>> groups;
+
+  public ConflictGraph() {
+    nodes = MultimapBuilder.hashKeys().arrayListValues().build();
     groups = new HashMap<>();
-    this.factory = factory;
   }
 
-  public T findOrCreate(Fix fix) {
-    int hash = Node.getHash(fix);
-    if (nodes.containsKey(hash)) {
-      for (T candidate : nodes.get(hash)) {
-        if (candidate.root.equals(fix)) {
-          return candidate;
-        }
-      }
-      T newNode = factory.build(fix);
-      nodes.get(hash).add(newNode);
-      return newNode;
-    }
-    T newNode = factory.build(fix);
-    Set<T> newSet = new HashSet<>();
-    newSet.add(newNode);
-    nodes.put(hash, newSet);
-    return newNode;
+  /**
+   * Adds a node to the list of vertices.
+   *
+   * @param fix Corresponding fix for node.
+   * @return The created node.
+   */
+  public Node addNodeToVertices(Fix fix) {
+    Node node = new Node(fix);
+    nodes.put(Node.getHash(fix), node);
+    return node;
   }
 
-  @SuppressWarnings("ALL")
-  public void remove(Fix fix) {
-    int hash = Node.getHash(fix);
-    T toRemove = null;
-    if (nodes.containsKey(hash)) {
-      for (T candidate : nodes.get(hash)) {
-        if (candidate.root.equals(fix)) {
-          toRemove = candidate;
-          break;
-        }
-      }
-    }
-    nodes.remove(toRemove);
-  }
-
+  /**
+   * Colors the graph based on edges, no two vertices which there is an edge connecting them will be
+   * in the same group. A greedy algorithm is used to find the solution.
+   */
   public void findGroups() {
     this.groups.clear();
-    Set<T> allNodes = getAllNodes();
+    Collection<Node> allNodes = nodes.values();
     final int[] id = {0};
     allNodes.forEach(node -> node.id = id[0]++);
     int size = allNodes.size();
@@ -96,8 +76,8 @@ public class ConflictGraph<T extends Node> {
     for (int i = 0; i < size; ++i) {
       adj[i] = new LinkedList<>();
     }
-    for (T node : allNodes) {
-      for (T other : allNodes) {
+    for (Node node : allNodes) {
+      for (Node other : allNodes) {
         if (node.equals(other)) {
           continue;
         }
@@ -106,11 +86,18 @@ public class ConflictGraph<T extends Node> {
         }
       }
     }
-    colorGraph(adj, allNodes, size);
+    colorGraph(adj, allNodes);
   }
 
-  private void colorGraph(LinkedList<Integer>[] adj, Set<T> nodes, int v) {
-    List<T> allNodes = new ArrayList<>(nodes);
+  /**
+   * Performs the actual coloring.
+   *
+   * @param adj Martic of adjancey.
+   * @param nodes Nodes in the graph.
+   */
+  private void colorGraph(LinkedList<Integer>[] adj, Collection<Node> nodes) {
+    int v = nodes.size();
+    List<Node> allNodes = new ArrayList<>(nodes);
     int[] result = new int[v];
     Arrays.fill(result, -1);
     result[0] = 0;
@@ -131,7 +118,7 @@ public class ConflictGraph<T extends Node> {
     }
     for (int i = 0; i < result.length; i++) {
       if (!groups.containsKey(result[i])) {
-        Set<T> newList = new HashSet<>();
+        Set<Node> newList = new HashSet<>();
         newList.add(allNodes.get(i));
         groups.put(result[i], newList);
       } else {
@@ -140,19 +127,31 @@ public class ConflictGraph<T extends Node> {
     }
   }
 
-  public HashMap<Integer, Set<T>> getGroups() {
-    return groups;
+  /**
+   * Returns the collected groups.
+   *
+   * @return CollectionGroups.
+   */
+  public Collection<Set<Node>> getGroups() {
+    return groups.values();
   }
 
-  public Set<T> getAllNodes() {
-    return nodes.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
+  /** @return returns all nodes in the graph. */
+  public Stream<Node> getNodes() {
+    return nodes.values().stream();
   }
 
+  /** Clears all nodes and groups. */
   public void clear() {
     nodes.clear();
     groups.clear();
   }
 
+  /**
+   * Checks if graph has any node.
+   *
+   * @return true, if the graph is empty.
+   */
   public boolean isEmpty() {
     return nodes.isEmpty();
   }

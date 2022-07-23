@@ -36,10 +36,7 @@ import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import me.tongfei.progressbar.ProgressBar;
 
@@ -62,21 +59,17 @@ public class OptimizedExplorer extends Explorer {
   @Override
   protected void initializeFixGraph() {
     super.initializeFixGraph();
-    this.graph.getAllNodes().forEach(node -> node.reCollectPotentiallyImpactedRegions(tracker));
+    this.graph.getNodes().forEach(node -> node.reCollectPotentiallyImpactedRegions(tracker));
   }
 
   @Override
   protected void executeNextCycle() {
     graph.findGroups();
-    HashMap<Integer, Set<Node>> groups = graph.getGroups();
+    Collection<Set<Node>> groups = graph.getGroups();
     System.out.println(
-        "Scheduling for: "
-            + groups.size()
-            + " builds for: "
-            + graph.getAllNodes().size()
-            + " fixes");
+        "Scheduling for: " + groups.size() + " builds for: " + graph.getNodes().count() + " fixes");
     ProgressBar pb = Utility.createProgressBar("Processing", groups.size());
-    for (Set<Node> group : groups.values()) {
+    for (Set<Node> group : groups) {
       pb.step();
       Set<Fix> fixes =
           group.stream().flatMap(node -> node.tree.stream()).collect(Collectors.toSet());

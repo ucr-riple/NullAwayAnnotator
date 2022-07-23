@@ -27,7 +27,6 @@ package edu.ucr.cs.riple.core.explorers;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
-import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
@@ -54,18 +53,21 @@ public class BasicExplorer extends Explorer {
     System.out.println(
         "Scheduling for: " + reports.size() + " builds for: " + reports.size() + " fixes");
     ProgressBar pb = Utility.createProgressBar("Processing", reports.size());
-    for (Node node : graph.getAllNodes()) {
-      pb.step();
-      Set<Fix> fixes = node.tree;
-      injector.injectFixes(fixes);
-      Utility.buildProject(config);
-      errorBank.saveState(false, true);
-      fixBank.saveState(false, true);
-      Result<Error> res = errorBank.compare();
-      node.effect = res.size;
-      node.updateStatus(res.size, fixes, fixBank.compare().dif, methodInheritanceTree);
-      injector.removeFixes(fixes);
-    }
+    graph
+        .getNodes()
+        .forEach(
+            node -> {
+              pb.step();
+              Set<Fix> fixes = node.tree;
+              injector.injectFixes(fixes);
+              Utility.buildProject(config);
+              errorBank.saveState(false, true);
+              fixBank.saveState(false, true);
+              Result<Error> res = errorBank.compare();
+              node.effect = res.size;
+              node.updateStatus(res.size, fixes, fixBank.compare().dif, methodInheritanceTree);
+              injector.removeFixes(fixes);
+            });
     pb.close();
   }
 }
