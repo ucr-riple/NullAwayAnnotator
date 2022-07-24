@@ -87,6 +87,10 @@ public class OnField extends Location {
     return true;
   }
 
+  public boolean isOnFieldWithName(String fieldName) {
+    return variables.contains(fieldName);
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

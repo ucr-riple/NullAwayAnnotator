@@ -46,6 +46,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -121,7 +122,7 @@ public class Utility {
     }
   }
 
-  public static Set<Fix> readFixesFromOutputDirectory(Config config, Factory<Fix> factory) {
+  public static Stream<Fix> readFixesFromOutputDirectory(Config config, Factory<Fix> factory) {
     Path fixesPath = config.dir.resolve("fixes.tsv");
     Set<Fix> fixes = new HashSet<>();
     try {
@@ -141,7 +142,7 @@ public class Utility {
     } catch (IOException e) {
       throw new RuntimeException("Exception happened in reading fixes at: " + fixesPath, e);
     }
-    return fixes;
+    return fixes.stream();
   }
 
   /**

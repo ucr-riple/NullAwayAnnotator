@@ -162,8 +162,8 @@ public class MethodNode implements Hashable {
   }
 
   /**
-   * Calculates hash. This method is used outside this class to calculate the expected hash bashed
-   * on classes value if the actual instance is not available.
+   * Calculates hash. This method is used outside this class to calculate the expected hash based on
+   * classes value if the actual instance is not available.
    *
    * @param method Method signature.
    * @param clazz Fully qualified name of the containing class.

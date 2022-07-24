@@ -56,7 +56,7 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
         findNodesWithHashHint(
                 candidate ->
                     candidate.calleeClass.equals(field.clazz)
-                        && field.variables.contains(candidate.calleeMember),
+                        && field.isOnFieldWithName(candidate.calleeMember),
                 TrackerNode.hash(field.clazz))
             .map(trackerNode -> new Region(trackerNode.callerClass, trackerNode.callerMethod))
             .collect(Collectors.toSet());

@@ -59,8 +59,8 @@ public class TrackerNode implements Hashable {
   }
 
   /**
-   * Calculates hash. This method is used outside this class to calculate the expected hash bashed
-   * on classes value if the actual instance is not available.
+   * Calculates hash. This method is used outside this class to calculate the expected hash based on
+   * classes value if the actual instance is not available.
    *
    * @param clazz Full qualified name.
    * @return Expected hash.

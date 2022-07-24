@@ -201,8 +201,8 @@ public class Node {
   }
 
   /**
-   * Calculates hash. This method is used outside this class to calculate the expected hash bashed
-   * on classes value if the actual instance is not available.
+   * Calculates hash. This method is used outside this class to calculate the expected hash based on
+   * classes value if the actual instance is not available.
    *
    * @param fix Fix instance.
    * @return Expected hash.

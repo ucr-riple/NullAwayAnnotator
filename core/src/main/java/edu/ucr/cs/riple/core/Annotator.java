@@ -42,6 +42,7 @@ import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.HashMap;
 import java.util.Set;
@@ -75,14 +76,16 @@ public class Annotator {
     this.reports.clear();
     System.out.println("Making the first build...");
     Utility.buildProject(config, true);
-    Set<Fix> uninitializedFields =
-        Utility.readFixesFromOutputDirectory(config, Fix.factory(config, null)).stream()
-            .filter(fix -> fix.reasons.contains("FIELD_NO_INIT") && fix.isOnField())
+    Set<OnField> uninitializedFields =
+        Utility.readFixesFromOutputDirectory(config, Fix.factory(config, null))
+            .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
+            .map(Fix::toField)
             .collect(Collectors.toSet());
     FieldInitializationAnalysis analysis =
         new FieldInitializationAnalysis(config.dir.resolve("field_init.tsv"));
     Set<AddAnnotation> initializers =
-        analysis.findInitializers(uninitializedFields).stream()
+        analysis
+            .findInitializers(uninitializedFields)
             .map(onMethod -> new AddAnnotation(onMethod, config.initializerAnnot))
             .collect(Collectors.toSet());
     this.injector.injectAnnotations(initializers);
@@ -96,16 +99,13 @@ public class Annotator {
         new FieldDeclarationAnalysis(config.dir.resolve("class_info.tsv"));
     while (true) {
       Utility.buildProject(config);
-      Set<Fix> remainingFixes =
+      Stream<Fix> remainingFixes =
           Utility.readFixesFromOutputDirectory(
               config, Fix.factory(config, fieldDeclarationAnalysis));
       if (config.useCache) {
-        remainingFixes =
-            remainingFixes.stream()
-                .filter(fix -> !reports.containsKey(fix))
-                .collect(Collectors.toSet());
+        remainingFixes = remainingFixes.filter(fix -> !reports.containsKey(fix));
       }
-      ImmutableSet<Fix> fixes = ImmutableSet.copyOf(remainingFixes);
+      ImmutableSet<Fix> fixes = remainingFixes.collect(ImmutableSet.toImmutableSet());
       Bank<Error> errorBank = new Bank<>(config.dir.resolve("errors.tsv"), Error::new);
       Bank<Fix> fixBank =
           new Bank<>(
