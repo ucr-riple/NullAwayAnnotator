@@ -33,7 +33,7 @@ public class FieldDeclarationAnalysis extends MetaData<FieldDeclarationInfo> {
       tree = StaticJavaParser.parse(new File(path));
       NodeList<BodyDeclaration<?>> members;
       try {
-        members = Helper.getClassOrInterfaceOrEnumDeclarationMembersByFlatName(tree, clazz);
+        members = Helper.getTypeDeclarationMembersByFlatName(tree, clazz);
       } catch (TargetClassNotFound notFound) {
         System.err.println(notFound.getMessage());
         return null;

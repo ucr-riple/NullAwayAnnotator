@@ -334,15 +334,16 @@ public class Helper {
   }
 
   /**
-   * Returns {@link NodeList} containing all members of an Enum/Interface/Class/Annotation
-   * Declaration by flat name from a compilation unit tree.
+   * Returns {@link NodeList} containing all members of an
+   * Enum/Interface/Class/AnonymousClass/Annotation Declaration by flat name from a compilation unit
+   * tree.
    *
    * @param cu Compilation Unit tree instance.
    * @param flatName Flat name in string.
    * @return {@link NodeList} containing all members
    * @throws TargetClassNotFound if the target class is not found.
    */
-  public static NodeList<BodyDeclaration<?>> getClassOrInterfaceOrEnumDeclarationMembersByFlatName(
+  public static NodeList<BodyDeclaration<?>> getTypeDeclarationMembersByFlatName(
       CompilationUnit cu, String flatName) throws TargetClassNotFound {
     String packageName;
     Optional<PackageDeclaration> packageDeclaration = cu.getPackageDeclaration();

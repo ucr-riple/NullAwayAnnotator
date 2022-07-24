@@ -91,7 +91,7 @@ public abstract class Location {
   public boolean apply(CompilationUnit tree, String annotation, boolean inject) {
     NodeList<BodyDeclaration<?>> clazz;
     try {
-      clazz = Helper.getClassOrInterfaceOrEnumDeclarationMembersByFlatName(tree, this.clazz);
+      clazz = Helper.getTypeDeclarationMembersByFlatName(tree, this.clazz);
     } catch (TargetClassNotFound notFound) {
       System.err.println(notFound.getMessage());
       return false;

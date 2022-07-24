@@ -509,9 +509,7 @@ public class ClassSearchTest extends BaseInjectorTest {
     TargetClassNotFound thrown =
         assertThrows(
             TargetClassNotFound.class,
-            () ->
-                Helper.getClassOrInterfaceOrEnumDeclarationMembersByFlatName(
-                    tree, "com.test.NotIncluded"));
+            () -> Helper.getTypeDeclarationMembersByFlatName(tree, "com.test.NotIncluded"));
     assertTrue(thrown.getMessage().contains(expectedErrorMessage));
   }
 }
