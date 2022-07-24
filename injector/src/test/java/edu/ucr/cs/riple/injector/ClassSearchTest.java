@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.injector;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -478,16 +479,7 @@ public class ClassSearchTest extends BaseInjectorTest {
 
   @Test
   public void proper_report_in_err_std_for_class_not_found_test() {
-    String expectedErrorMessage =
-        "Could not find class of type: Top-Level with name: NotIncluded on Cursor:\n"
-            + "package com.test;\n"
-            + "\n"
-            + "public @interface Main {\n"
-            + "\n"
-            + "    public String foo();\n"
-            + "}\n"
-            + "\n"
-            + "If the class is in generated code or otherwise not present in the source, this is expected and this message can be safely ignored. If you do see the class on the source code, please report this bug at: https://github.com/nimakarimipour/NullAwayAnnotator/issues. Thank you!\n";
+    String expectedErrorMessage = "Could not find class of type: Top-Level with name: NotIncluded";
     String[] clazzLines =
         new String[] {
           "package com.test;", "public @interface Main{", "   public String foo();", "}"
@@ -503,21 +495,12 @@ public class ClassSearchTest extends BaseInjectorTest {
                 "javax.annotation.Nullable",
                 true))
         .start();
-    assert err.toString().equals(expectedErrorMessage);
+    assertTrue(err.toString().contains(expectedErrorMessage));
   }
 
   @Test
   public void proper_exception_check_for_class_not_found_test() {
-    String expectedErrorMessage =
-        "Could not find class of type: Top-Level with name: NotIncluded on Cursor:\n"
-            + "package com.test;\n"
-            + "\n"
-            + "public @interface Main {\n"
-            + "\n"
-            + "    public String foo();\n"
-            + "}\n"
-            + "\n"
-            + "If the class is in generated code or otherwise not present in the source, this is expected and this message can be safely ignored. If you do see the class on the source code, please report this bug at: https://github.com/nimakarimipour/NullAwayAnnotator/issues. Thank you!";
+    String expectedErrorMessage = "Could not find class of type: Top-Level with name: NotIncluded";
     String[] clazzLines =
         new String[] {
           "package com.test;", "public @interface Main{", "   public String foo();", "}"
@@ -529,6 +512,6 @@ public class ClassSearchTest extends BaseInjectorTest {
             () ->
                 Helper.getClassOrInterfaceOrEnumDeclarationMembersByFlatName(
                     tree, "com.test.NotIncluded"));
-    assert thrown.getMessage().strip().equals(expectedErrorMessage.strip());
+    assertTrue(thrown.getMessage().contains(expectedErrorMessage));
   }
 }
