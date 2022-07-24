@@ -181,7 +181,7 @@ public class Helper {
   }
 
   /**
-   * Finds Top-Level type declaration within a {@link CompilationUnit} tree by name, this node is
+   * Finds Top-Level type declaration within a {@link CompilationUnit} tree by name, this node is a
    * direct child of the compilation unit tree and can be: [{@link ClassOrInterfaceDeclaration},
    * {@link EnumDeclaration}, {@link AnnotationDeclaration}].
    *
