@@ -33,10 +33,12 @@ import org.json.simple.JSONObject;
 
 public class OnMethod extends Location {
   public final String method;
+  public final Helper.SignatureMatcher matcher;
 
   public OnMethod(String uri, String clazz, String method) {
     super(LocationType.METHOD, uri, clazz);
     this.method = method;
+    this.matcher = new Helper.SignatureMatcher(method);
   }
 
   @Override
@@ -58,7 +60,7 @@ public class OnMethod extends Location {
         bodyDeclaration ->
             bodyDeclaration.ifCallableDeclaration(
                 callableDeclaration -> {
-                  if (Helper.matchesCallableSignature(callableDeclaration, method)) {
+                  if (this.matcher.matchesCallableDeclaration(callableDeclaration)) {
                     applyAnnotation(callableDeclaration, annotation, inject);
                     success[0] = true;
                   }

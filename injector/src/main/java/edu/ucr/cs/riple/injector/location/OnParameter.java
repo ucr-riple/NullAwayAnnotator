@@ -36,11 +36,13 @@ import org.json.simple.JSONObject;
 public class OnParameter extends Location {
   public final String method;
   public final int index;
+  private final Helper.SignatureMatcher matcher;
 
   public OnParameter(String uri, String clazz, String method, int index) {
     super(LocationType.PARAMETER, uri, clazz);
     this.method = method;
     this.index = index;
+    this.matcher = new Helper.SignatureMatcher(method);
   }
 
   @Override
@@ -63,7 +65,7 @@ public class OnParameter extends Location {
         bodyDeclaration ->
             bodyDeclaration.ifCallableDeclaration(
                 callableDeclaration -> {
-                  if (Helper.matchesCallableSignature(callableDeclaration, method)) {
+                  if (matcher.matchesCallableDeclaration(callableDeclaration)) {
                     NodeList<?> params = callableDeclaration.getParameters();
                     if (index < params.size()) {
                       if (params.get(index) instanceof Parameter) {

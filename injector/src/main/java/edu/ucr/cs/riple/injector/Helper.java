@@ -53,6 +53,59 @@ import me.tongfei.progressbar.ProgressBarStyle;
 /** A utility class. */
 public class Helper {
 
+  /** Utility class to match {@link CallableDeclaration} with their signatures in {@code String}. */
+  public static class SignatureMatcher {
+
+    /** Simple name of the callable. */
+    private final String callableName;
+    /** List of parameters detected from signature in string. */
+    private final List<String> parameterTypes;
+
+    /**
+     * Constructor to make a matcher instance.
+     * @param signature Signature to process.
+     */
+    public SignatureMatcher(String signature) {
+      this.callableName = extractCallableName(signature);
+      this.parameterTypes = extractParamTypesOfCallableInString(signature);
+    }
+
+    /**
+     * Checks if callableDec's signature is equals to parsed signature.
+     *
+     * @param callableDec callable declaration node.
+     * @return true, if signature matches the callable and false otherwise.
+     */
+    public boolean matchesCallableDeclaration(CallableDeclaration<?> callableDec) {
+      // match callable names.
+      if (!callableDec.getName().toString().equals(callableName)) {
+        return false;
+      }
+      // match parameter types.
+      List<String> paramTypesFromCallableSignature =
+          extractParamTypesOfCallableInString(callableDec);
+      if (parameterTypes.size() != paramTypesFromCallableSignature.size()) {
+        return false;
+      }
+      int size = parameterTypes.size();
+      for (int i = 0; i < size; i++) {
+        String callableType = parameterTypes.get(i);
+        String signatureType = paramTypesFromCallableSignature.get(i);
+        if (signatureType.equals(callableType)) {
+          continue;
+        }
+        String simpleCallableType = simpleName(callableType);
+        String simpleSignatureType = simpleName(signatureType);
+        if (simpleCallableType.equals(simpleSignatureType)) {
+          continue;
+        }
+        // Param types are different.
+        return false;
+      }
+      return true;
+    }
+  }
+
   /**
    * Extracts the callable simple name from callable signature. (e.g. in input "run(Object i)"
    * returns "run").
@@ -80,43 +133,6 @@ public class Helper {
       }
     }
     return ans.toString();
-  }
-
-  /**
-   * Checks if callableDec's signature is equals to signature passed in the argument.
-   *
-   * @param callableDec callable declaration node.
-   * @param signature signature of the callable in string.
-   * @return true, if signature matches the callable and false otherwise.
-   */
-  public static boolean matchesCallableSignature(
-      CallableDeclaration<?> callableDec, String signature) {
-    // match simple names.
-    if (!callableDec.getName().toString().equals(extractCallableName(signature))) {
-      return false;
-    }
-    // match parameter types.
-    List<String> paramTypesFromCallableDeclaration =
-        extractParamTypesOfCallableInString(callableDec);
-    List<String> paramTypesFromCallableSignature = extractParamTypesOfCallableInString(signature);
-    if (paramTypesFromCallableDeclaration.size() != paramTypesFromCallableSignature.size()) {
-      return false;
-    }
-    int size = paramTypesFromCallableDeclaration.size();
-    for (int i = 0; i < size; i++) {
-      String callableType = paramTypesFromCallableDeclaration.get(i);
-      String signatureType = paramTypesFromCallableSignature.get(i);
-      if (signatureType.equals(callableType)) {
-        continue;
-      }
-      String simpleCallableType = simpleName(callableType);
-      String simpleSignatureType = simpleName(signatureType);
-      if (simpleCallableType.equals(simpleSignatureType)) {
-        continue;
-      }
-      return false;
-    }
-    return true;
   }
 
   /**
