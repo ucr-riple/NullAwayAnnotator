@@ -108,7 +108,7 @@ public class Helper {
   }
 
   /**
-   * Extracts the callable simple name from callable signature. (e.g. in input "run(Object i)"
+   * Extracts the callable simple name from callable signature. (e.g. on input "run(Object i)"
    * returns "run").
    *
    * @param signature callable signature in string.
