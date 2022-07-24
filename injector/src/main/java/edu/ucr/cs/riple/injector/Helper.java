@@ -63,6 +63,7 @@ public class Helper {
 
     /**
      * Constructor to make a matcher instance.
+     *
      * @param signature Signature to process.
      */
     public SignatureMatcher(String signature) {
