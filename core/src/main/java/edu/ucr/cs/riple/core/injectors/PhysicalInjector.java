@@ -30,6 +30,7 @@ import edu.ucr.cs.riple.injector.WorkListBuilder;
 import edu.ucr.cs.riple.injector.changes.Change;
 import java.util.Set;
 
+/** Wrapper tool used to inject annotations Physically to the source code. */
 public class PhysicalInjector extends AnnotationInjector {
   private final Injector injector;
 

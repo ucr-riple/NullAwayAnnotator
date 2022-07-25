@@ -37,17 +37,24 @@ import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Wrapper tool used to inject annotations Virtually to the source code. This injector serializes
+ * requested changes to a file which later can be read by a library model loaders and make its
+ * impact by library models.
+ */
 public class VirtualInjector extends AnnotationInjector {
 
   public VirtualInjector(Config config) {
     super(config);
   }
 
+  @Override
   public void injectFixes(Set<Fix> fixes) {
     if (!config.downStreamDependenciesAnalysisActivated) {
       throw new IllegalStateException(
           "Downstream dependencies not activated, cannot inject annotations virtually!");
     }
+    // Path to serialize annotations to library model loader path.
     Path path = config.nullawayLibraryModelLoaderPath;
     Preconditions.checkNotNull(
         path,
@@ -70,6 +77,6 @@ public class VirtualInjector extends AnnotationInjector {
   @Override
   public <T extends Change> void applyChanges(Set<T> changes) {
     throw new UnsupportedOperationException(
-        "Cannot remove/add annotations with this injector, use physical annotations instead.");
+        "Cannot remove/add annotations with this injector, use physical injector instead.");
   }
 }

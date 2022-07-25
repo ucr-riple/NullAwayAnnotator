@@ -32,13 +32,20 @@ import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/** Wrapper tool used to inject annotations to the source code. */
 public abstract class AnnotationInjector {
+  /** Core config. */
   protected final Config config;
 
   public AnnotationInjector(Config config) {
     this.config = config;
   }
 
+  /**
+   * Removes fixes from source code.
+   *
+   * @param fixes List of fixes to remove.
+   */
   public void removeFixes(Set<Fix> fixes) {
     if (fixes == null || fixes.size() == 0) {
       return;
@@ -50,6 +57,11 @@ public abstract class AnnotationInjector {
     removeAnnotations(toRemove);
   }
 
+  /**
+   * Applies fixes to the source code.
+   *
+   * @param fixes Set of fixes to apply.
+   */
   public void injectFixes(Set<Fix> fixes) {
     if (fixes == null || fixes.size() == 0) {
       return;
@@ -57,6 +69,11 @@ public abstract class AnnotationInjector {
     injectAnnotations(fixes.stream().map(fix -> fix.change).collect(Collectors.toSet()));
   }
 
+  /**
+   * Removes annotation from the source code.
+   *
+   * @param changes Set of annotations to remove.
+   */
   public void removeAnnotations(Set<RemoveAnnotation> changes) {
     if (changes == null || changes.size() == 0) {
       return;
@@ -64,6 +81,11 @@ public abstract class AnnotationInjector {
     applyChanges(changes);
   }
 
+  /**
+   * Injects annotations to the source code.
+   *
+   * @param changes Set of annotations to inject.
+   */
   public void injectAnnotations(Set<AddAnnotation> changes) {
     if (changes == null || changes.size() == 0) {
       return;
@@ -71,5 +93,10 @@ public abstract class AnnotationInjector {
     applyChanges(changes);
   }
 
+  /**
+   * Applies the requested changes to the source code.
+   *
+   * @param changes Set of requested changes.
+   */
   protected abstract <T extends Change> void applyChanges(Set<T> changes);
 }
