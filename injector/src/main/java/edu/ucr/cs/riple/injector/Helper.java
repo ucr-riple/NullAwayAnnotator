@@ -29,10 +29,8 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.AnnotationDeclaration;
 import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
-import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.google.common.base.Preconditions;
@@ -52,60 +50,6 @@ import me.tongfei.progressbar.ProgressBarStyle;
 
 /** A utility class. */
 public class Helper {
-
-  /** Utility class to match {@link CallableDeclaration} with their signatures in {@code String}. */
-  public static class SignatureMatcher {
-
-    /** Simple name of the callable. */
-    private final String callableName;
-    /** List of parameters detected from signature in string. */
-    private final List<String> parameterTypes;
-
-    /**
-     * Constructor to make a matcher instance.
-     *
-     * @param signature Signature to process.
-     */
-    public SignatureMatcher(String signature) {
-      this.callableName = extractCallableName(signature);
-      this.parameterTypes = extractParamTypesOfCallableInString(signature);
-    }
-
-    /**
-     * Checks if callableDec's signature is equals to parsed signature.
-     *
-     * @param callableDec callable declaration node.
-     * @return true, if signature matches the callable and false otherwise.
-     */
-    public boolean matchesCallableDeclaration(CallableDeclaration<?> callableDec) {
-      // match callable names.
-      if (!callableDec.getName().toString().equals(callableName)) {
-        return false;
-      }
-      // match parameter types.
-      List<String> paramTypesFromCallableSignature =
-          extractParamTypesOfCallableInString(callableDec);
-      if (parameterTypes.size() != paramTypesFromCallableSignature.size()) {
-        return false;
-      }
-      int size = parameterTypes.size();
-      for (int i = 0; i < size; i++) {
-        String callableType = parameterTypes.get(i);
-        String signatureType = paramTypesFromCallableSignature.get(i);
-        if (signatureType.equals(callableType)) {
-          continue;
-        }
-        String simpleCallableType = simpleName(callableType);
-        String simpleSignatureType = simpleName(signatureType);
-        if (simpleCallableType.equals(simpleSignatureType)) {
-          continue;
-        }
-        // Param types are different.
-        return false;
-      }
-      return true;
-    }
-  }
 
   /**
    * Extracts the callable simple name from callable signature. (e.g. on input "run(Object i)"
@@ -134,27 +78,6 @@ public class Helper {
       }
     }
     return ans.toString();
-  }
-
-  /**
-   * Extracts parameters type from a {@link CallableDeclaration}.
-   *
-   * @param callableDec callable declaration instance.
-   * @return List of parameters type in string.
-   */
-  private static List<String> extractParamTypesOfCallableInString(
-      CallableDeclaration<?> callableDec) {
-    ArrayList<String> paramTypes = new ArrayList<>();
-    for (Parameter param : callableDec.getParameters()) {
-      if (param != null) {
-        String typeInString = param.getType().asString();
-        if (param.isVarArgs()) {
-          typeInString += "...";
-        }
-        paramTypes.add(typeInString);
-      }
-    }
-    return paramTypes;
   }
 
   /**
@@ -462,68 +385,6 @@ public class Helper {
       index++;
     }
     return String.join(".", verified);
-  }
-
-  /**
-   * Returns a list of parameters extracted from callable signature. (e.g. for "{@code foo(@  CustomAnnot  (exp, exp2) a.c.b.Foo<a.b.Bar, a.c.b.Foo>, java.lang.Object)}" will return "{@code [a.c.b.Foo<a.b.Bar, a.c.b.Foo>, java.lang.Object]").
-   * @param signature callable signature.
-   * @return List of extracted parameters types.
-   */
-  private static List<String> extractParamTypesOfCallableInString(String signature) {
-    signature = signature.substring(signature.indexOf("("));
-    signature = signature.substring(1, signature.length() - 1);
-    int index = 0;
-    int generic_level = 0;
-    List<String> ans = new ArrayList<>();
-    StringBuilder tmp = new StringBuilder();
-    while (index < signature.length()) {
-      char c = signature.charAt(index);
-      switch (c) {
-        case '@':
-          while (signature.charAt(index + 1) == ' ' && index + 1 < signature.length()) {
-            index++;
-          }
-          int annot_level = 0;
-          boolean finished = false;
-          while (!finished && index < signature.length()) {
-            if (signature.charAt(index) == '(') {
-              ++annot_level;
-            }
-            if (signature.charAt(index) == ')') {
-              --annot_level;
-            }
-            if (signature.charAt(index) == ' ' && annot_level == 0) {
-              finished = true;
-            }
-            index++;
-          }
-          index--;
-          break;
-        case '<':
-          generic_level++;
-          tmp.append(c);
-          break;
-        case '>':
-          generic_level--;
-          tmp.append(c);
-          break;
-        case ',':
-          if (generic_level == 0) {
-            ans.add(tmp.toString());
-            tmp = new StringBuilder();
-          } else {
-            tmp.append(c);
-          }
-          break;
-        default:
-          tmp.append(c);
-      }
-      index++;
-    }
-    if (signature.length() > 0 && generic_level == 0) {
-      ans.add(tmp.toString().strip());
-    }
-    return ans;
   }
 
   /**

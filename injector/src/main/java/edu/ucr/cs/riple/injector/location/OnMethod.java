@@ -27,18 +27,19 @@ package edu.ucr.cs.riple.injector.location;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.SignatureMatcher;
 import java.util.Objects;
 import java.util.function.Consumer;
 import org.json.simple.JSONObject;
 
 public class OnMethod extends Location {
   public final String method;
-  public final Helper.SignatureMatcher matcher;
+  public final SignatureMatcher matcher;
 
   public OnMethod(String uri, String clazz, String method) {
     super(LocationType.METHOD, uri, clazz);
     this.method = method;
-    this.matcher = new Helper.SignatureMatcher(method);
+    this.matcher = new SignatureMatcher(method);
   }
 
   @Override
