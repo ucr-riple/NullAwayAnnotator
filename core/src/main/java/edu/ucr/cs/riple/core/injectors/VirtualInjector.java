@@ -75,6 +75,11 @@ public class VirtualInjector extends AnnotationInjector {
   }
 
   @Override
+  public void removeFixes(Set<Fix> fixes) {
+    // No op.
+  }
+
+  @Override
   public <T extends Change> void applyChanges(Set<T> changes) {
     throw new UnsupportedOperationException(
         "Cannot remove/add annotations with this injector, use physical injector instead.");
