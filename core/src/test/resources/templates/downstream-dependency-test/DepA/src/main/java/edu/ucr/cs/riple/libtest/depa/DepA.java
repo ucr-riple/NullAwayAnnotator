@@ -1,7 +1,5 @@
 /*
- * MIT License
- *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 University of California, Riverside.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,38 +20,30 @@
  * THE SOFTWARE.
  */
 
-plugins {
-    id 'com.github.sherter.google-java-format' version '0.9'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
-    id 'application'
-}
+package edu.ucr.cs.riple.libtest.depa;
 
-application {
-    mainClass = 'Main'
-}
+import edu.ucr.cs.riple.libtest.target.Foo;
 
-dependencies {
+public class DepA {
+  Object field1 = new Object();
+  Object field2 = new Object();
+  Object field3 = new Object();
 
-    implementation project(':injector')
-    implementation project(':scanner')
-    implementation deps.build.guava
-    implementation deps.build.json
-    implementation deps.build.progressbar
-    implementation deps.build.javaparser
-    implementation deps.build.commonscli
-    testImplementation deps.build.commonsio
-}
+  Foo foo;
 
-task installScanner(type: Exec) {
+  DepA() {
+    Foo foo = new Foo();
+  }
 
-    executable "sh"
-    args "-c", "./../gradlew :scanner:publishToMavenLocal"
-}
-tasks.test.dependsOn("installScanner")
+  public void setField1() {
+    this.field1 = foo.returnNullableBad(0);
+  }
 
-test {
-    filter {
-        //todo: remove this once NullAway version 0.9.9 has been released. Running test below now will fail on Github action since it is only compatible with local version of NullAway.
-        excludeTestsMatching "edu.ucr.cs.riple.core.DownstreamAnalysisTest"
-    }
+  public void setField2() {
+    this.field2 = foo.returnNullableBad(0);
+  }
+
+  public void setField3() {
+    this.field3 = foo.returnNullableBad(0);
+  }
 }

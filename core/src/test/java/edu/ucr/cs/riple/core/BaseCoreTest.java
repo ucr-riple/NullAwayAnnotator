@@ -26,11 +26,12 @@ package edu.ucr.cs.riple.core;
 
 import edu.ucr.cs.riple.core.tools.CoreTestHelper;
 import edu.ucr.cs.riple.core.tools.Utility;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
@@ -42,23 +43,44 @@ import org.junit.runners.JUnit4;
 public abstract class BaseCoreTest {
   @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
+  protected final String projectTemplate;
   protected Path projectPath;
   protected Path outDirPath;
   protected CoreTestHelper coreTestHelper;
 
+  public BaseCoreTest(String projectTemplate) {
+    this.projectTemplate = projectTemplate;
+  }
+
   @Before
   public void setup() {
     outDirPath = Paths.get(temporaryFolder.getRoot().getAbsolutePath());
-    projectPath = outDirPath.resolve("unittest");
-    Path pathToUnitTestDir = Utility.getPathOfResource("unittest");
+    projectPath = outDirPath.resolve(projectTemplate);
+    Path templates = Paths.get("templates");
+    Path pathToUnitTestDir =
+        Utility.getPathOfResource(templates.resolve(projectTemplate).toString());
     try {
       FileUtils.deleteDirectory(projectPath.toFile());
       FileUtils.copyDirectory(pathToUnitTestDir.toFile(), projectPath.toFile());
       ProcessBuilder processBuilder = Utility.createProcessInstance();
       processBuilder.directory(projectPath.toFile());
       processBuilder.command("gradle", "wrapper", "--gradle-version", "6.1");
-      File buildFile = projectPath.resolve("build.gradle").toFile();
-      String buildContent = FileUtils.readFileToString(buildFile, Charset.defaultCharset());
+      try (Stream<Path> paths = Files.walk(projectPath)) {
+        paths
+            .filter(
+                input -> input.toFile().isFile() && input.toFile().getName().equals("build.gradle"))
+            .forEach(path -> updateErrorProneFlags(path, outDirPath));
+      }
+      processBuilder.start().waitFor();
+    } catch (IOException | InterruptedException e) {
+      throw new RuntimeException("Preparation for test failed", e);
+    }
+    coreTestHelper = new CoreTestHelper(projectPath, outDirPath);
+  }
+
+  private static void updateErrorProneFlags(Path path, Path outDirPath) {
+    try {
+      String buildContent = FileUtils.readFileToString(path.toFile(), Charset.defaultCharset());
       buildContent =
           buildContent.replace(
               "-XepOpt:NullAway:FixSerializationConfigPath=",
@@ -67,11 +89,9 @@ public abstract class BaseCoreTest {
           buildContent.replace(
               "-XepOpt:Scanner:ConfigPath=",
               "-XepOpt:Scanner:ConfigPath=" + outDirPath.resolve("scanner.xml"));
-      FileUtils.writeStringToFile(buildFile, buildContent, Charset.defaultCharset());
-      processBuilder.start().waitFor();
-    } catch (IOException | InterruptedException e) {
-      throw new RuntimeException("Preparation for test failed", e);
+      FileUtils.writeStringToFile(path.toFile(), buildContent, Charset.defaultCharset());
+    } catch (Exception exception) {
+      throw new RuntimeException("Preparation for test failed", exception);
     }
-    coreTestHelper = new CoreTestHelper(projectPath, outDirPath);
   }
 }

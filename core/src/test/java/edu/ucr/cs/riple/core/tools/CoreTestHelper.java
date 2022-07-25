@@ -58,7 +58,6 @@ public class CoreTestHelper {
   private BiPredicate<Report, Report> predicate;
   private int depth = 1;
   private boolean requestCompleteLoop = false;
-
   private boolean disableBailout = false;
 
   public CoreTestHelper(Path projectPath, Path outDirPath) {
