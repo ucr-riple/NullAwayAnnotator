@@ -6,7 +6,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.injector.Helper;
 import java.io.File;
@@ -15,7 +15,6 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Detects multiple inline field declarations. An annotation will be injected on top of the field
@@ -62,7 +61,7 @@ public class FieldDeclarationAnalysis extends MetaData<FieldDeclarationInfo> {
                       info.addNewSetOfFieldDeclarations(
                           vars.stream()
                               .map(NodeWithSimpleName::getNameAsString)
-                              .collect(Collectors.toSet()));
+                              .collect(ImmutableSet.toImmutableSet()));
                     }
                   }));
       return info.isEmpty() ? null : info;
@@ -76,18 +75,19 @@ public class FieldDeclarationAnalysis extends MetaData<FieldDeclarationInfo> {
    * the parameter.
    *
    * @param clazz Flat name of the enclosing class.
-   * @param field Subset of all fields declared within the same statement in the given class.
+   * @param fields Subset of all fields declared within the same statement in the given class.
    * @return Set of all fields declared within that statement.
    */
-  public Set<String> getInLineMultipleFieldDeclarationsOnField(String clazz, Set<String> field) {
+  public ImmutableSet<String> getInLineMultipleFieldDeclarationsOnField(
+      String clazz, Set<String> fields) {
     FieldDeclarationInfo candidate =
         findNodeWithHashHint(node -> node.clazz.equals(clazz), FieldDeclarationInfo.hash(clazz));
     if (candidate == null) {
       // No inline multiple field declarations.
-      return Sets.newHashSet(field);
+      return ImmutableSet.copyOf(fields);
     }
-    Optional<Set<String>> inLineGroupFieldDeclaration =
-        candidate.fields.stream().filter(group -> !Collections.disjoint(group, field)).findFirst();
-    return inLineGroupFieldDeclaration.orElse(Sets.newHashSet(field));
+    Optional<ImmutableSet<String>> inLineGroupFieldDeclaration =
+        candidate.fields.stream().filter(group -> !Collections.disjoint(group, fields)).findFirst();
+    return inLineGroupFieldDeclaration.orElse(ImmutableSet.copyOf(fields));
   }
 }

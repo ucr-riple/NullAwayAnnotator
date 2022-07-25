@@ -1,5 +1,6 @@
 package edu.ucr.cs.riple.core.metadata.field;
 
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.Hashable;
 import java.util.HashSet;
 import java.util.Objects;
@@ -8,7 +9,7 @@ import java.util.Set;
 /** Used to store information regarding multiple field declaration statements in classes. */
 public class FieldDeclarationInfo implements Hashable {
   /** Set of al fields declared within one statement. */
-  public final Set<Set<String>> fields;
+  public final Set<ImmutableSet<String>> fields;
   /** Flat name of the containing class. */
   public final String clazz;
 
@@ -55,7 +56,7 @@ public class FieldDeclarationInfo implements Hashable {
    *
    * @param collection Set of all fields declared within the same statement.
    */
-  public void addNewSetOfFieldDeclarations(Set<String> collection) {
+  public void addNewSetOfFieldDeclarations(ImmutableSet<String> collection) {
     this.fields.add(collection);
   }
 }
