@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 
 /**
  * Container class which loads its content from a file in TSV format. For faster retrieval, it uses
- * hashing techniques to store data. Fir faster retrieval, the anticipated hash must be passed to
+ * hashing techniques to store data. For faster retrieval, the anticipated hash must be passed to
  * search methods.
  *
  * @param <T> Any class which implements {@link Hashable}.
