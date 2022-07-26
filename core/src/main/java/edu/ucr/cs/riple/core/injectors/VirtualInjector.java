@@ -52,13 +52,13 @@ public class VirtualInjector extends AnnotationInjector {
   public void injectFixes(Set<Fix> fixes) {
     if (!config.downStreamDependenciesAnalysisActivated) {
       throw new IllegalStateException(
-          "Downstream dependencies not activated, cannot inject annotations virtually!");
+          "downstream dependencies analysis not activated, cannot inject annotations virtually!");
     }
     // Path to serialize annotations to library model loader path.
     Path path = config.nullawayLibraryModelLoaderPath;
     Preconditions.checkNotNull(
         path,
-        "NullawayLibraryModelLoaderPath cannot be null while Downstream dependencies analysis is activated.");
+        "NullawayLibraryModelLoaderPath cannot be null while downstream dependencies analysis is activated.");
     try (OutputStream os = new FileOutputStream(path.toFile())) {
       Set<String> rows =
           fixes.stream()
