@@ -70,7 +70,7 @@ public class DownStreamDependencyAnalyzer {
 
   /** Container class for storing overall effect of each method. */
   static class MethodStatus {
-    /** Node in {@link MethodInheritanceTree }corresponding to a public method. */
+    /** Node in {@link MethodInheritanceTree} corresponding to a public method. */
     final MethodNode node;
     /**
      * Effect of injecting a {@code Nullable} annotation on pointing method of node on downstream
