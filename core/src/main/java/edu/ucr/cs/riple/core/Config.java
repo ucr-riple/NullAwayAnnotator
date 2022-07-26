@@ -357,6 +357,7 @@ public class Config {
     if (!this.downStreamDependenciesAnalysisActivated) {
       return ImmutableSet.of();
     }
+    // Variables inside lambda must be final, need to wrap it a final array.
     final int[] id = {1};
     return downstreamModulesBuildCommands.stream()
         .map(command -> new Module("module-" + id[0]++, command))
