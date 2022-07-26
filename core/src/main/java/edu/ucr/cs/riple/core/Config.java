@@ -364,38 +364,6 @@ public class Config {
         .collect(ImmutableSet.toImmutableSet());
   }
 
-  static class OrElse<T> {
-    final Object value;
-    final Class<T> klass;
-
-    OrElse(Object value, Class<T> klass) {
-      this.value = value;
-      this.klass = klass;
-    }
-
-    T orElse(T other) {
-      return value == null ? other : klass.cast(this.value);
-    }
-  }
-
-  static class CollectionOrElse<T> {
-    final Collection<?> value;
-    final Class<T> klass;
-
-    CollectionOrElse(Collection<?> value, Class<T> klass) {
-      this.value = value;
-      this.klass = klass;
-    }
-
-    Collection<T> orElse(Collection<T> other) {
-      if (value == null) {
-        return other;
-      } else {
-        return this.value.stream().map(klass::cast).collect(Collectors.toList());
-      }
-    }
-  }
-
   private <T> OrElse<T> getValueFromKey(JSONObject json, String key, Class<T> klass) {
     if (json == null) {
       return new OrElse<>(null, klass);
@@ -432,6 +400,38 @@ public class Config {
       }
       throw new IllegalStateException(
           "Expected type to be json array, found: " + jsonValue.value.getClass());
+    }
+  }
+
+  private static class OrElse<T> {
+    final Object value;
+    final Class<T> klass;
+
+    OrElse(Object value, Class<T> klass) {
+      this.value = value;
+      this.klass = klass;
+    }
+
+    T orElse(T other) {
+      return value == null ? other : klass.cast(this.value);
+    }
+  }
+
+  private static class CollectionOrElse<T> {
+    final Collection<?> value;
+    final Class<T> klass;
+
+    CollectionOrElse(Collection<?> value, Class<T> klass) {
+      this.value = value;
+      this.klass = klass;
+    }
+
+    Collection<T> orElse(Collection<T> other) {
+      if (value == null) {
+        return other;
+      } else {
+        return this.value.stream().map(klass::cast).collect(Collectors.toList());
+      }
     }
   }
 
