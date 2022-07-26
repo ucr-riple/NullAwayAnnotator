@@ -34,7 +34,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 /**
- * NullAway Library Model, used to communicate (NullAway assumptions) with NullAway when analysing
+ * NullAway Library Model, used to communicate (Nullability assumptions) with NullAway when analysing
  * downstream dependencies.
  */
 @AutoService(LibraryModels.class)
