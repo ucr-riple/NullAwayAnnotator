@@ -87,6 +87,15 @@ public abstract class Location {
 
   protected abstract void fillJsonInformation(JSONObject res);
 
+  /**
+   * Applies the change to the target element on the given compilation unit tree.
+   *
+   * @param tree CompilationUnit Tree to locate the target element.
+   * @param annotation Fully qualified name of the annotation.
+   * @param inject If set to true, the given annotation will be added to the target element, and if
+   *     set to false, the given annotation will be removed from the element.
+   * @return true, if the change applied successfully.
+   */
   public boolean apply(CompilationUnit tree, String annotation, boolean inject) {
     NodeList<BodyDeclaration<?>> clazz =
         Helper.getClassOrInterfaceOrEnumDeclarationMembersByFlatName(tree, this.clazz);
