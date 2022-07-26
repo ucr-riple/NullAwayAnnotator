@@ -44,9 +44,13 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * Analyzer for downstream dependencies. It collects public APIs used in the dependencies and
- * collects a summarization of an overall effect across all downstream dependencies. These data can
- * be fed to the Annotator main process in the decision process.
+ * Analyzer for downstream dependencies.
+ *
+ * <p>This class analyzes switching the nullability of public APIs of one compilation target, in
+ * order to compute the effect on said target's downstream dependencies of adding annotations to
+ * those APIs. It does so by building said downstream dependencies. It collects the effect (number
+ * of additional errors) of each such change, by summing across all downstream dependencies. This
+ * data then be fed to the Annotator main process in the decision process.
  */
 public class DownStreamDependencyAnalyzer {
 
