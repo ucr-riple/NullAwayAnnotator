@@ -29,9 +29,9 @@ import com.google.common.base.Predicate;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.changes.Change;
+import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.Set;
@@ -59,7 +59,7 @@ public class VirtualInjector extends AnnotationInjector {
     Preconditions.checkNotNull(
         path,
         "NullawayLibraryModelLoaderPath cannot be null while downstream dependencies analysis is activated.");
-    try (OutputStream os = new FileOutputStream(path.toFile())) {
+    try (BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(path.toFile()))) {
       Set<String> rows =
           fixes.stream()
               .filter((Predicate<Fix>) Fix::isOnMethod)
