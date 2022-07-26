@@ -46,7 +46,7 @@ public class Fix extends Enclosed {
 
   /** Suggested change. */
   public final AddAnnotation change;
-  /** Reasons this fix is suggested by NUllAway in string. */
+  /** Reasons this fix is suggested by NullAway in string. */
   public final Set<String> reasons;
 
   public Fix(AddAnnotation change, String reason, String encClass, String encMethod) {
