@@ -28,7 +28,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
-import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.SignatureMatcher;
 import java.util.Objects;
 import java.util.function.Consumer;
 import org.json.simple.JSONObject;
@@ -36,11 +36,13 @@ import org.json.simple.JSONObject;
 public class OnParameter extends Location {
   public final String method;
   public final int index;
+  private final SignatureMatcher matcher;
 
   public OnParameter(String uri, String clazz, String method, int index) {
     super(LocationType.PARAMETER, uri, clazz);
     this.method = method;
     this.index = index;
+    this.matcher = new SignatureMatcher(method);
   }
 
   @Override
@@ -63,7 +65,7 @@ public class OnParameter extends Location {
         bodyDeclaration ->
             bodyDeclaration.ifCallableDeclaration(
                 callableDeclaration -> {
-                  if (Helper.matchesCallableSignature(callableDeclaration, method)) {
+                  if (matcher.matchesCallableDeclaration(callableDeclaration)) {
                     NodeList<?> params = callableDeclaration.getParameters();
                     if (index < params.size()) {
                       if (params.get(index) instanceof Parameter) {

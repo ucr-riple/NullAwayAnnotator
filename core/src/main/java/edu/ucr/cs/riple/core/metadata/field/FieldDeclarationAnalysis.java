@@ -9,6 +9,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
@@ -46,9 +47,11 @@ public class FieldDeclarationAnalysis extends MetaData<FieldDeclarationInfo> {
     CompilationUnit tree;
     try {
       tree = StaticJavaParser.parse(new File(path));
-      NodeList<BodyDeclaration<?>> members =
-          Helper.getClassOrInterfaceOrEnumDeclarationMembersByFlatName(tree, clazz);
-      if (members == null) {
+      NodeList<BodyDeclaration<?>> members;
+      try {
+        members = Helper.getTypeDeclarationMembersByFlatName(tree, clazz);
+      } catch (TargetClassNotFound notFound) {
+        System.err.println(notFound.getMessage());
         return null;
       }
       FieldDeclarationInfo info = new FieldDeclarationInfo(clazz);

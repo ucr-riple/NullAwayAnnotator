@@ -32,6 +32,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -97,9 +98,11 @@ public abstract class Location {
    * @return true, if the change applied successfully.
    */
   public boolean apply(CompilationUnit tree, String annotation, boolean inject) {
-    NodeList<BodyDeclaration<?>> clazz =
-        Helper.getClassOrInterfaceOrEnumDeclarationMembersByFlatName(tree, this.clazz);
-    if (clazz == null) {
+    NodeList<BodyDeclaration<?>> clazz;
+    try {
+      clazz = Helper.getTypeDeclarationMembersByFlatName(tree, this.clazz);
+    } catch (TargetClassNotFound notFound) {
+      System.err.println(notFound.getMessage());
       return false;
     }
     return applyToMember(clazz, annotation, inject);
