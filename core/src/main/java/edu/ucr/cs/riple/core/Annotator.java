@@ -99,13 +99,11 @@ public class Annotator {
         new FieldDeclarationAnalysis(config.dir.resolve("class_info.tsv"));
     while (true) {
       Utility.buildProject(config);
-      Stream<Fix> remainingFixes =
+      ImmutableSet<Fix> fixes =
           Utility.readFixesFromOutputDirectory(
-              config, Fix.factory(config, fieldDeclarationAnalysis));
-      if (config.useCache) {
-        remainingFixes = remainingFixes.filter(fix -> !reports.containsKey(fix));
-      }
-      ImmutableSet<Fix> fixes = remainingFixes.collect(ImmutableSet.toImmutableSet());
+                  config, Fix.factory(config, fieldDeclarationAnalysis))
+              .filter(fix -> !config.useCache || !reports.containsKey(fix))
+              .collect(ImmutableSet.toImmutableSet());
       Bank<Error> errorBank = new Bank<>(config.dir.resolve("errors.tsv"), Error::new);
       Bank<Fix> fixBank =
           new Bank<>(
