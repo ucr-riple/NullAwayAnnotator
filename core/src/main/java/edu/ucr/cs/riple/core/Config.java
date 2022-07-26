@@ -353,7 +353,7 @@ public class Config {
    *
    * @return ImmutableSet of {@link edu.ucr.cs.riple.core.metadata.submodules.Module}.
    */
-  public ImmutableSet<Module> getSubModules() {
+  public ImmutableSet<Module> getDownstreamDependencies() {
     if (!this.downStreamDependenciesAnalysisActivated) {
       return ImmutableSet.of();
     }

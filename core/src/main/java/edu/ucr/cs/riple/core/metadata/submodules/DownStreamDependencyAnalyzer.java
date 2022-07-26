@@ -82,7 +82,7 @@ public class DownStreamDependencyAnalyzer {
 
   public DownStreamDependencyAnalyzer(Config config, MethodInheritanceTree tree) {
     this.config = config;
-    this.modules = config.getSubModules();
+    this.modules = config.getDownstreamDependencies();
     this.tree = tree;
     this.injector = new VirtualInjector(config);
     this.methods = tree.getPublicMethodsWithNonPrimitivesReturn().stream().map(MethodStatus::new);
