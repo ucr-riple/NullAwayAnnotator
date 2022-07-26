@@ -24,8 +24,16 @@
 
 package edu.ucr.cs.riple.injector;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.CompilationUnit;
+import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.Collections;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -467,5 +475,41 @@ public class ClassSearchTest extends BaseInjectorTest {
                 "javax.annotation.Nullable",
                 true))
         .start(true);
+  }
+
+  @Test
+  public void proper_report_in_err_std_for_class_not_found_test() {
+    String expectedErrorMessage = "Could not find class of type: Top-Level with name: NotIncluded";
+    String[] clazzLines =
+        new String[] {
+          "package com.test;", "public @interface Main{", "   public String foo();", "}"
+        };
+    ByteArrayOutputStream err = new ByteArrayOutputStream();
+    System.setErr(new PrintStream(err));
+    injectorTestHelper
+        .addInput("Main.java", clazzLines)
+        .expectOutput(clazzLines)
+        .addChanges(
+            new Change(
+                new OnMethod("Main.java", "com.test.NotIncluded", "foo(java.lang.Object)"),
+                "javax.annotation.Nullable",
+                true))
+        .start();
+    assertTrue(err.toString().contains(expectedErrorMessage));
+  }
+
+  @Test
+  public void proper_exception_check_for_class_not_found_test() {
+    String expectedErrorMessage = "Could not find class of type: Top-Level with name: NotIncluded";
+    String[] clazzLines =
+        new String[] {
+          "package com.test;", "public @interface Main{", "   public String foo();", "}"
+        };
+    CompilationUnit tree = StaticJavaParser.parse(String.join("\n", clazzLines));
+    TargetClassNotFound thrown =
+        assertThrows(
+            TargetClassNotFound.class,
+            () -> Helper.getTypeDeclarationMembersByFlatName(tree, "com.test.NotIncluded"));
+    assertTrue(thrown.getMessage().contains(expectedErrorMessage));
   }
 }
