@@ -68,22 +68,6 @@ public class DownStreamDependencyAnalyzer {
    */
   private final VirtualInjector injector;
 
-  /** Container class for storing overall effect of each method. */
-  static class MethodStatus {
-    /** Node in {@link MethodInheritanceTree} corresponding to a public method. */
-    final MethodNode node;
-    /**
-     * Effect of injecting a {@code Nullable} annotation on pointing method of node on downstream
-     * dependencies.
-     */
-    int effect;
-
-    public MethodStatus(MethodNode node) {
-      this.node = node;
-      this.effect = 0;
-    }
-  }
-
   public DownStreamDependencyAnalyzer(Config config, MethodInheritanceTree tree) {
     this.config = config;
     this.modules = config.getDownstreamDependencies();
@@ -170,5 +154,21 @@ public class DownStreamDependencyAnalyzer {
                 m -> m.node.method.equals(onMethod.method) && m.node.clazz.equals(onMethod.clazz))
             .findAny();
     return optional.map(methodStatus -> methodStatus.effect).orElse(0);
+  }
+
+  /** Container class for storing overall effect of each method. */
+  private static class MethodStatus {
+    /** Node in {@link MethodInheritanceTree} corresponding to a public method. */
+    final MethodNode node;
+    /**
+     * Effect of injecting a {@code Nullable} annotation on pointing method of node on downstream
+     * dependencies.
+     */
+    int effect;
+
+    public MethodStatus(MethodNode node) {
+      this.node = node;
+      this.effect = 0;
+    }
   }
 }
