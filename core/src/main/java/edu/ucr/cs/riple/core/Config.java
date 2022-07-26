@@ -28,6 +28,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.metadata.submodules.Module;
+import edu.ucr.cs.riple.core.util.Utility;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -196,7 +197,7 @@ public class Config {
             "ddbc",
             "downstream-dependencies-build-command",
             true,
-            "Set of commands to build downstream dependencies separated by comma");
+            "Path to a file containing all downstream dependencies build commands separated by new line.");
     downstreamDependenciesBuildCommandOption.setRequired(false);
     options.addOption(downstreamDependenciesBuildCommandOption);
     Option nullawayLibraryModelLoaderPathOption =
@@ -224,7 +225,8 @@ public class Config {
     }
 
     // Below is only to guide IDE that cmd is nonnull at this point.
-    Preconditions.checkNotNull(cmd, "cmd cannot be null, error in CommandLineParser for returning null.");
+    Preconditions.checkNotNull(
+        cmd, "cmd cannot be null, error in CommandLineParser for returning null.");
 
     if (cmd.hasOption(downstreamDependenciesBuildCommandOption)
         != cmd.hasOption(nullawayLibraryModelLoaderPathOption)) {
@@ -260,8 +262,9 @@ public class Config {
         cmd.hasOption(downstreamDependenciesBuildCommandOption);
     if (this.downStreamDependenciesAnalysisActivated) {
       this.downstreamModulesBuildCommands =
-          ImmutableSet.copyOf(
-              cmd.getOptionValue(downstreamDependenciesBuildCommandOption).split(","));
+          Utility.readFileLines(
+                  Paths.get(cmd.getOptionValue(downstreamDependenciesBuildCommandOption)))
+              .collect(ImmutableSet.toImmutableSet());
       this.nullawayLibraryModelLoaderPath =
           Paths.get(cmd.getOptionValue(nullawayLibraryModelLoaderPathOption));
     } else {

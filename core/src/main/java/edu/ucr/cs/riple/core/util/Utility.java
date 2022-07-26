@@ -39,6 +39,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -290,6 +291,20 @@ public class Utility {
     } catch (Exception ignored) {
       System.err.println("Could not write log to: " + file.getAbsolutePath());
       System.err.println("Writing here: " + config.log);
+    }
+  }
+
+  /**
+   * Read all lines from a file as a Stream
+   *
+   * @param path The path to the file.
+   * @return The lines from the file as a Stream.
+   */
+  public static Stream<String> readFileLines(Path path) {
+    try (Stream<String> stream = Files.lines(path)) {
+      return stream;
+    } catch (IOException e) {
+      throw new RuntimeException("Exception while reading file: " + path, e);
     }
   }
 }
