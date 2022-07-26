@@ -74,7 +74,7 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
   /** Stores class field / method initialization status. */
   private static class Class {
     /** Set of initializer methods. */
-    private final Set<InitializerMethod> methods;
+    private final Set<InitializerMethod> initializers;
     /** Fully qualified name of the class. */
     private final String clazz;
     /** URI to file where the class exists. */
@@ -87,7 +87,7 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
      * @param uri URI to the file where the class exists.
      */
     private Class(String clazz, String uri) {
-      this.methods = new HashSet<>();
+      this.initializers = new HashSet<>();
       this.clazz = clazz;
       this.uri = uri;
     }
@@ -118,7 +118,7 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
       }
       // Check if initializer method has been observed before.
       Optional<InitializerMethod> optionalMethod =
-          this.methods.stream()
+          this.initializers.stream()
               .filter(
                   method -> method.signature.equals(fieldInitializationNode.getInitializerMethod()))
               .findAny();
@@ -131,7 +131,7 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
             new InitializerMethod(fieldInitializationNode.getInitializerMethod());
         method.fields.add(fieldInitializationNode.getFieldName());
         // Add to list of observed.
-        this.methods.add(method);
+        this.initializers.add(method);
       }
     }
 
@@ -145,7 +145,7 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
     private OnMethod findInitializer() {
       InitializerMethod maxMethod = null;
       int maxScore = 1; // Initializer score must be at least 1.
-      for (InitializerMethod m : this.methods) {
+      for (InitializerMethod m : this.initializers) {
         if (m.fields.size() > maxScore) {
           maxScore = m.fields.size();
           maxMethod = m;

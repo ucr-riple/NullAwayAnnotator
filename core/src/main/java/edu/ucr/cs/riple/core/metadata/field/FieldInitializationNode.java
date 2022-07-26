@@ -6,7 +6,8 @@ import java.util.Objects;
 
 /**
  * Stores field initialization information serialized by NullAway. Each instance contains the
- * initialized field, and the initializer method information.
+ * initialized field, and the initializer method information. The initializer method writes a {@code
+ * Nonnull} value to the field and guarantees the field be nonnull at all exit points in method.
  */
 public class FieldInitializationNode implements Hashable {
 
