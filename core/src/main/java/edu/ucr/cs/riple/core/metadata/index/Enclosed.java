@@ -27,7 +27,7 @@ package edu.ucr.cs.riple.core.metadata.index;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 
 /**
- * Subtype of this class, are outputs of analysis at program points (code locations). This class,
+ * Subtypes of this class are outputs of analysis at program points (code locations). This class,
  * stores the containing {@link Region} info of that program point.
  */
 public abstract class Enclosed {
