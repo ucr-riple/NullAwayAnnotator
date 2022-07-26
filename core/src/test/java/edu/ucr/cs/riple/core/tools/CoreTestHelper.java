@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiPredicate;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
@@ -59,6 +60,12 @@ public class CoreTestHelper {
   private int depth = 1;
   private boolean requestCompleteLoop = false;
   private boolean disableBailout = false;
+
+  private boolean downstreamDependencyAnalysisActivated = false;
+
+  private Set<String> downstreamBuildCommands;
+
+  private String libraryModelLoaderPath;
 
   public CoreTestHelper(Path projectPath, Path outDirPath) {
     this.projectPath = projectPath;
@@ -119,6 +126,26 @@ public class CoreTestHelper {
 
   public CoreTestHelper requestCompleteLoop() {
     this.requestCompleteLoop = true;
+    return this;
+  }
+
+  public CoreTestHelper enableDownstreamDependencyAnalysis(
+      String libraryModelLoaderPath, String... dependencies) {
+    this.downstreamDependencyAnalysisActivated = true;
+    this.libraryModelLoaderPath = libraryModelLoaderPath;
+    this.downstreamBuildCommands =
+        Arrays.stream(dependencies)
+            .map(
+                new Function<String, String>() {
+                  @Override
+                  public String apply(String s) {
+                    //        builder.buildCommand =
+                    //                Utility.changeDirCommand(projectPath.toString()) + " &&
+                    // ./gradlew compileJava";
+                    return null;
+                  }
+                })
+            .collect(Collectors.toSet());
     return this;
   }
 
@@ -201,6 +228,9 @@ public class CoreTestHelper {
     builder.chain = true;
     builder.outerLoopActivation = requestCompleteLoop;
     builder.optimized = true;
+    builder.downStreamDependenciesAnalysisActivated = downstreamDependencyAnalysisActivated;
+    builder.nullawayLibraryModelLoaderPath = libraryModelLoaderPath;
+    builder.downstreamModulesBuildCommands = downstreamBuildCommands;
     builder.write(path);
   }
 

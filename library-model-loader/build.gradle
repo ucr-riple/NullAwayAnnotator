@@ -1,7 +1,5 @@
 /*
- * MIT License
- *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 University of California, Riverside.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,9 +20,15 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'NullAwayAnnotator'
-include 'core'
-include 'scanner'
-include 'injector'
-include 'library-model-loader'
+plugins {
+    id "java-library"
+    id 'com.github.sherter.google-java-format' version '0.9'
+}
 
+dependencies {
+    compileOnly deps.apt.autoService
+    annotationProcessor deps.apt.autoService
+    compileOnly deps.build.nullaway
+    annotationProcessor deps.build.nullaway
+    compileOnly deps.build.guava
+}

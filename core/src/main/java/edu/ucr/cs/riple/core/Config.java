@@ -313,17 +313,22 @@ public class Config {
     this.buildCommand = getValueFromKey(jsonObject, "BUILD_COMMAND", String.class).orElse(null);
     this.downstreamModulesBuildCommands =
         ImmutableSet.copyOf(
-            getArrayValueFromKey(jsonObject, "DOWNSTREAM_ANALYSIS:BUILD_COMMANDS", String.class)
+            getArrayValueFromKey(
+                    jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:BUILD_COMMANDS", String.class)
                 .orElse(Collections.emptyList()));
     String nullawayLibraryModelLoaderPathString =
         getValueFromKey(
-                jsonObject, "DOWNSTREAM_ANALYSIS:NULLAWAY_LIBRAR_MODEL_LOADER_PATH", String.class)
+                jsonObject,
+                "DOWNSTREAM_DEPENDENCY_ANALYSIS:LIBRARY_MODEL_LOADER_PATH",
+                String.class)
             .orElse(null);
     this.nullawayLibraryModelLoaderPath =
         nullawayLibraryModelLoaderPathString == null
             ? null
             : Paths.get(nullawayLibraryModelLoaderPathString);
-    this.downStreamDependenciesAnalysisActivated = (nullawayLibraryModelLoaderPath != null);
+    this.downStreamDependenciesAnalysisActivated =
+        getValueFromKey(jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:ACTIVATION", Boolean.class)
+            .orElse(false);
     this.log = new Log();
     log.reset();
   }
@@ -436,6 +441,10 @@ public class Config {
     public boolean redirectBuildOutputToStdErr = false;
     public boolean lexicalPreservationActivation = true;
     public boolean outerLoopActivation = true;
+
+    public boolean downStreamDependenciesAnalysisActivated = false;
+    public Set<String> downstreamModulesBuildCommands;
+    public String nullawayLibraryModelLoaderPath;
     public int depth = 1;
 
     public void write(Path path) {
@@ -470,7 +479,21 @@ public class Config {
       json.put("DEPTH", depth);
       json.put("EXHAUSTIVE_SEARCH", exhaustiveSearch);
       json.put("REDIRECT_BUILD_OUTPUT_TO_STDERR", redirectBuildOutputToStdErr);
-      // todo add downstream dependencies here
+      JSONObject downstreamDependency = new JSONObject();
+      downstreamDependency.put("ACTIVATION", downStreamDependenciesAnalysisActivated);
+      if (downStreamDependenciesAnalysisActivated) {
+        Preconditions.checkNotNull(
+            nullawayLibraryModelLoaderPath,
+            "nullawayLibraryModelLoaderPath cannot be null to enable down stream dependency analysis.");
+        downstreamDependency.put("LIBRARY_MODEL_LOADER_PATH", nullawayLibraryModelLoaderPath);
+        JSONArray downstreamBuildCommandsJSON = new JSONArray();
+        Preconditions.checkNotNull(
+            downstreamModulesBuildCommands,
+            "downstreamModulesBuildCommands cannot be null to enable down stream dependency analysis.");
+        downstreamBuildCommandsJSON.addAll(downstreamModulesBuildCommands);
+        downstreamDependency.put("BUILD_COMMANDS", downstreamBuildCommandsJSON);
+      }
+      json.put("DOWNSTREAM_DEPENDENCY_ANALYSIS", downstreamDependency);
       try (FileWriter file = new FileWriter(path.toFile())) {
         file.write(json.toJSONString());
       } catch (IOException e) {
