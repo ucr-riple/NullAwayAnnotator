@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -43,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiPredicate;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
@@ -131,20 +131,23 @@ public class CoreTestHelper {
 
   public CoreTestHelper enableDownstreamDependencyAnalysis(
       String libraryModelLoaderPath, String... dependencies) {
+    // Path to update library model
+    String root =
+        Utility.changeDirCommand(Paths.get(System.getProperty("user.dir")).getParent().toString());
+    String reloadLibraryModel =
+        Utility.changeDirCommand(root) + " && ./gradlew library-model-loader:jar";
     this.downstreamDependencyAnalysisActivated = true;
     this.libraryModelLoaderPath = libraryModelLoaderPath;
     this.downstreamBuildCommands =
         Arrays.stream(dependencies)
             .map(
-                new Function<String, String>() {
-                  @Override
-                  public String apply(String s) {
-                    //        builder.buildCommand =
-                    //                Utility.changeDirCommand(projectPath.toString()) + " &&
-                    // ./gradlew compileJava";
-                    return null;
-                  }
-                })
+                projectName ->
+                    reloadLibraryModel
+                        + " && "
+                        + Utility.changeDirCommand(projectPath.toString())
+                        + " && ./gradlew :"
+                        + projectName
+                        + ":compileJava")
             .collect(Collectors.toSet());
     return this;
   }

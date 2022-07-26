@@ -25,6 +25,9 @@ plugins {
     id 'com.github.sherter.google-java-format' version '0.9'
 }
 
+version=""
+archivesBaseName = "librarymodel"
+
 dependencies {
     compileOnly deps.apt.autoService
     annotationProcessor deps.apt.autoService
