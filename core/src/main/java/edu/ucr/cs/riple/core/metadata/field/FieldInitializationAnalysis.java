@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -73,8 +72,11 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
 
   /** Stores class field / method initialization status. */
   private static class Class {
-    /** Set of initializer methods. */
-    private final Set<InitializerMethod> initializers;
+    /**
+     * HashMap of initializer methods. Used HashMap for fast retrievals based on the method's
+     * signature.
+     */
+    private final HashMap<String, InitializerMethod> initializers;
     /** Fully qualified name of the class. */
     private final String clazz;
     /** URI to file where the class exists. */
@@ -87,7 +89,7 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
      * @param uri URI to the file where the class exists.
      */
     private Class(String clazz, String uri) {
-      this.initializers = new HashSet<>();
+      this.initializers = new HashMap<>();
       this.clazz = clazz;
       this.uri = uri;
     }
@@ -117,21 +119,18 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
         return;
       }
       // Check if initializer method has been observed before.
-      Optional<InitializerMethod> optionalMethod =
-          this.initializers.stream()
-              .filter(
-                  method -> method.signature.equals(fieldInitializationNode.getInitializerMethod()))
-              .findAny();
-      if (optionalMethod.isPresent()) {
+      InitializerMethod observedInitializer =
+          this.initializers.get(fieldInitializationNode.getInitializerMethod());
+      if (observedInitializer != null) {
         // Method has been observed before, add the field info.
-        optionalMethod.get().fields.add(fieldInitializationNode.getFieldName());
+        observedInitializer.fields.add(fieldInitializationNode.getFieldName());
       } else {
         // Method has not been observed before, create and add the field info.
         InitializerMethod method =
             new InitializerMethod(fieldInitializationNode.getInitializerMethod());
         method.fields.add(fieldInitializationNode.getFieldName());
         // Add to list of observed.
-        this.initializers.add(method);
+        this.initializers.put(method.signature, method);
       }
     }
 
@@ -145,7 +144,7 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
     private OnMethod findInitializer() {
       InitializerMethod maxMethod = null;
       int maxScore = 1; // Initializer score must be at least 1.
-      for (InitializerMethod m : this.initializers) {
+      for (InitializerMethod m : this.initializers.values()) {
         if (m.fields.size() > maxScore) {
           maxScore = m.fields.size();
           maxMethod = m;
