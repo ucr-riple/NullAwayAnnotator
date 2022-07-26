@@ -210,7 +210,7 @@ public class Config {
 
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
-    CommandLine cmd = null;
+    CommandLine cmd;
 
     if (args.length == 1 && (args[0].equals("-h") || args[0].equals("--help"))) {
       showHelpAndQuit(formatter, options);
@@ -221,8 +221,9 @@ public class Config {
     } catch (ParseException e) {
       System.out.println(e.getMessage());
       showHelpAndQuit(formatter, options);
+      // return below is an unreachable statement, added it to guide javac if any error happens in parsing cmd, the program ends.
+      return;
     }
-    Preconditions.checkNotNull(cmd, "Something wrong happened.");
 
     if (cmd.hasOption(downstreamDependenciesBuildCommandOption)
         != cmd.hasOption(nullawayLibraryModelLoaderPathOption)) {
