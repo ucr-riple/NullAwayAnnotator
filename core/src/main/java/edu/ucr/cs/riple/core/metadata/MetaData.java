@@ -44,7 +44,7 @@ public abstract class MetaData<T extends Hashable> {
 
   /**
    * Contents, every element is mapped to it's computed hash, note that two different items can have
-   * an identical hash, therefore it s of type {@link Multimap} (not HashMap) to hold both items.
+   * an identical hash, therefore it is of type {@link Multimap} (not HashMap) to hold both items.
    */
   protected final Multimap<Integer, T> contents;
 
