@@ -210,7 +210,7 @@ public class Config {
 
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
-    CommandLine cmd;
+    CommandLine cmd = null;
 
     if (args.length == 1 && (args[0].equals("-h") || args[0].equals("--help"))) {
       showHelpAndQuit(formatter, options);
@@ -221,10 +221,10 @@ public class Config {
     } catch (ParseException e) {
       System.out.println(e.getMessage());
       showHelpAndQuit(formatter, options);
-      // return below is an unreachable statement, added it to guide javac if any error happens in
-      // parsing cmd, the program ends.
-      return;
     }
+
+    // Below is only to guide IDE that cmd is nonnull at this point.
+    Preconditions.checkNotNull(cmd, "cmd cannot be null, error in CommandLineParser for returning null.");
 
     if (cmd.hasOption(downstreamDependenciesBuildCommandOption)
         != cmd.hasOption(nullawayLibraryModelLoaderPathOption)) {
