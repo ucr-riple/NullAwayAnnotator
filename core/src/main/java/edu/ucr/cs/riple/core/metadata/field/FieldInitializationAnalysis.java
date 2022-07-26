@@ -19,6 +19,58 @@ import java.util.stream.Stream;
  */
 public class FieldInitializationAnalysis extends MetaData<FieldInitializationNode> {
 
+  /**
+   * Constructs an {@link FieldInitializationAnalysis} instance. After this call, all serialized
+   * information from NullAway has been processed.
+   *
+   * @param path Path to field initialization info coming from NullAway.
+   */
+  public FieldInitializationAnalysis(Path path) {
+    super(path);
+  }
+
+  @Override
+  protected FieldInitializationNode addNodeByLine(String[] values) {
+    Location location = Location.createLocationFromArrayInfo(values);
+    return location.isOnMethod()
+        ? new FieldInitializationNode(location.toMethod(), values[6])
+        : null;
+  }
+
+  /**
+   * Processes all uninitialized fields and method initializers and chooses the initializers with
+   * the heuristic below:
+   *
+   * <ol>
+   *   <li>It method must initialize at least more than one uninitialized field.
+   *   <li>Each initialization, increments method's score by one.
+   *   <li>Each class can have at most one initializer and the method with highest score will be
+   *       selected.
+   * </ol>
+   *
+   * @param uninitializedFields Set of uninitialized fields.
+   * @return Location of initializers.
+   */
+  public Stream<OnMethod> findInitializers(Set<OnField> uninitializedFields) {
+    // Set does not have a get() method, instead we use map here which can find the element
+    // efficiently.
+    Map<String, Class> classes = new HashMap<>();
+    uninitializedFields.forEach(
+        onField ->
+            findNodesWithHashHint(
+                    candidate ->
+                        onField.isOnFieldWithName(candidate.getFieldName())
+                            && candidate.getClassName().equals(onField.clazz),
+                    FieldInitializationNode.hash(onField.clazz))
+                .forEach(
+                    node -> {
+                      Class clazz = new Class(node.getClassName(), node.getURI());
+                      classes.putIfAbsent(clazz.clazz, clazz);
+                      classes.get(clazz.clazz).visit(node);
+                    }));
+    return classes.values().stream().map(Class::findInitializer).filter(Objects::nonNull);
+  }
+
   /** Stores class field / method initialization status. */
   private static class Class {
     /** Set of initializer methods. */
@@ -127,57 +179,5 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
     public int hashCode() {
       return Objects.hash(signature);
     }
-  }
-
-  /**
-   * Constructs an {@link FieldInitializationAnalysis} instance. After this call, all serialized
-   * information from NullAway has been processed.
-   *
-   * @param path Path to field initialization info coming from NullAway.
-   */
-  public FieldInitializationAnalysis(Path path) {
-    super(path);
-  }
-
-  @Override
-  protected FieldInitializationNode addNodeByLine(String[] values) {
-    Location location = Location.createLocationFromArrayInfo(values);
-    return location.isOnMethod()
-        ? new FieldInitializationNode(location.toMethod(), values[6])
-        : null;
-  }
-
-  /**
-   * Processes all uninitialized fields and method initializers and chooses the initializers with
-   * the heuristic below:
-   *
-   * <ol>
-   *   <li>It method must initialize at least more than one uninitialized field.
-   *   <li>Each initialization, increments method's score by one.
-   *   <li>Each class can have at most one initializer and the method with highest score will be
-   *       selected.
-   * </ol>
-   *
-   * @param uninitializedFields Set of uninitialized fields.
-   * @return Location of initializers.
-   */
-  public Stream<OnMethod> findInitializers(Set<OnField> uninitializedFields) {
-    // Set does not have a get() method, instead we use map here which can find the element
-    // efficiently.
-    Map<String, Class> classes = new HashMap<>();
-    uninitializedFields.forEach(
-        onField ->
-            findNodesWithHashHint(
-                    candidate ->
-                        onField.isOnFieldWithName(candidate.getFieldName())
-                            && candidate.getClassName().equals(onField.clazz),
-                    FieldInitializationNode.hash(onField.clazz))
-                .forEach(
-                    node -> {
-                      Class clazz = new Class(node.getClassName(), node.getURI());
-                      classes.putIfAbsent(clazz.clazz, clazz);
-                      classes.get(clazz.clazz).visit(node);
-                    }));
-    return classes.values().stream().map(Class::findInitializer).filter(Objects::nonNull);
   }
 }
