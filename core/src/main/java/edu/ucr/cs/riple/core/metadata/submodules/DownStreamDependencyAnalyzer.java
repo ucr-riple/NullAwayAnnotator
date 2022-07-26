@@ -63,8 +63,8 @@ public class DownStreamDependencyAnalyzer {
   /** Method inheritance instance. */
   private final MethodInheritanceTree tree;
   /**
-   * VirtualInjector instance, annotations are not going to be actually injected physically in the
-   * source codes and should only be loaded in a library model.
+   * VirtualInjector instance. Annotations should only be loaded in a library model and not
+   * physically injected.
    */
   private final VirtualInjector injector;
 
