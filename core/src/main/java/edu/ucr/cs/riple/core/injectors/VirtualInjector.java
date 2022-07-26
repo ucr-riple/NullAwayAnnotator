@@ -38,7 +38,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Wrapper tool used to inject annotations Virtually to the source code. This injector serializes
+ * Wrapper tool used to inject annotations virtually to the source code. This injector serializes
  * requested changes to a file which later can be read by a library model loaders and make its
  * impact by library models.
  */
