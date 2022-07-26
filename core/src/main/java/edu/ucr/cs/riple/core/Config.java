@@ -221,14 +221,15 @@ public class Config {
     } catch (ParseException e) {
       System.out.println(e.getMessage());
       showHelpAndQuit(formatter, options);
-      // return below is an unreachable statement, added it to guide javac if any error happens in parsing cmd, the program ends.
+      // return below is an unreachable statement, added it to guide javac if any error happens in
+      // parsing cmd, the program ends.
       return;
     }
 
     if (cmd.hasOption(downstreamDependenciesBuildCommandOption)
         != cmd.hasOption(nullawayLibraryModelLoaderPathOption)) {
       throw new IllegalArgumentException(
-          "To activate downstream dependencies analysis, both --nullaway-library-model-loader-path and --downstream-modules-build-command options must be activated");
+          "To enable downstream dependencies analysis, both --nullaway-library-model-loader-path and --downstream-modules-build-command options must be passed");
     }
 
     this.buildCommand = cmd.getOptionValue(buildCommandOption.getLongOpt());
