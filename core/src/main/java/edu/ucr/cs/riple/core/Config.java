@@ -226,7 +226,8 @@ public class Config {
 
     // Below is only to guide IDE that cmd is nonnull at this point.
     Preconditions.checkNotNull(
-        cmd, "cmd cannot be null, error in CommandLineParser for returning null.");
+        cmd,
+        "cmd cannot be null at this point, as that will cause CommandLineParser.parse to throw ParseException, and the handler above should stop execution in that case.");
 
     if (cmd.hasOption(downstreamDependenciesBuildCommandOption)
         != cmd.hasOption(nullawayLibraryModelLoaderPathOption)) {
