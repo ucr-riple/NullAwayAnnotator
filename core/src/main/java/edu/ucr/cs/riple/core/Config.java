@@ -25,7 +25,10 @@
 package edu.ucr.cs.riple.core;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.log.Log;
+import edu.ucr.cs.riple.core.metadata.submodules.Module;
+import edu.ucr.cs.riple.core.util.Utility;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -34,6 +37,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -41,6 +48,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -59,6 +67,9 @@ public class Config {
   public final String buildCommand;
   public final String nullableAnnot;
   public final String initializerAnnot;
+  public final ImmutableSet<String> downstreamModulesBuildCommands;
+  public final Path nullawayLibraryModelLoaderPath;
+  public final boolean downStreamDependenciesAnalysisActivated;
   public final Log log;
   public final int depth;
 
@@ -180,6 +191,24 @@ public class Config {
     scannerConfigPathOption.setRequired(true);
     options.addOption(scannerConfigPathOption);
 
+    // Down stream analysis
+    Option downstreamDependenciesBuildCommandOption =
+        new Option(
+            "ddbc",
+            "downstream-dependencies-build-command",
+            true,
+            "Path to a file containing all downstream dependencies build commands separated by new line.");
+    downstreamDependenciesBuildCommandOption.setRequired(false);
+    options.addOption(downstreamDependenciesBuildCommandOption);
+    Option nullawayLibraryModelLoaderPathOption =
+        new Option(
+            "nlmlp",
+            "nullaway-library-model-loader-path",
+            true,
+            "NullAway Library Model loader path");
+    nullawayLibraryModelLoaderPathOption.setRequired(false);
+    options.addOption(nullawayLibraryModelLoaderPathOption);
+
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd = null;
@@ -194,7 +223,17 @@ public class Config {
       System.out.println(e.getMessage());
       showHelpAndQuit(formatter, options);
     }
-    Preconditions.checkNotNull(cmd, "Error parsing cmd, cmd cannot bu null");
+
+    // Below is only to guide IDE that cmd is nonnull at this point.
+    Preconditions.checkNotNull(
+        cmd,
+        "cmd cannot be null at this point, as that will cause CommandLineParser.parse to throw ParseException, and the handler above should stop execution in that case.");
+
+    if (cmd.hasOption(downstreamDependenciesBuildCommandOption)
+        != cmd.hasOption(nullawayLibraryModelLoaderPathOption)) {
+      throw new IllegalArgumentException(
+          "To enable downstream dependencies analysis, both --nullaway-library-model-loader-path and --downstream-modules-build-command options must be passed");
+    }
 
     this.buildCommand = cmd.getOptionValue(buildCommandOption.getLongOpt());
     this.nullableAnnot =
@@ -219,6 +258,21 @@ public class Config {
     this.disableOuterLoop = cmd.hasOption(disableOuterLoopOption.getLongOpt());
     this.optimized = !cmd.hasOption(disableOptimizationOption.getLongOpt());
     this.exhaustiveSearch = cmd.hasOption(exhaustiveSearchOption.getLongOpt());
+
+    this.downStreamDependenciesAnalysisActivated =
+        cmd.hasOption(downstreamDependenciesBuildCommandOption);
+    if (this.downStreamDependenciesAnalysisActivated) {
+      this.downstreamModulesBuildCommands =
+          Utility.readFileLines(
+                  Paths.get(cmd.getOptionValue(downstreamDependenciesBuildCommandOption)))
+              .collect(ImmutableSet.toImmutableSet());
+      this.nullawayLibraryModelLoaderPath =
+          Paths.get(cmd.getOptionValue(nullawayLibraryModelLoaderPathOption));
+    } else {
+      this.nullawayLibraryModelLoaderPath = null;
+      this.downstreamModulesBuildCommands = null;
+    }
+
     this.log = new Log();
     this.log.reset();
   }
@@ -265,10 +319,26 @@ public class Config {
         Paths.get(
             getValueFromKey(jsonObject, "SCANNER_CONFIG_PATH", String.class)
                 .orElse("/tmp/NullAwayFix/scanner.xml"));
-    this.dir =
-        Paths.get(
-            getValueFromKey(jsonObject, "OUTPUT_DIR", String.class).orElse("/tmp/NullAwayFix"));
+    this.dir = Paths.get(getValueFromKey(jsonObject, "OUTPUT_DIR", String.class).orElse(null));
     this.buildCommand = getValueFromKey(jsonObject, "BUILD_COMMAND", String.class).orElse(null);
+    this.downstreamModulesBuildCommands =
+        ImmutableSet.copyOf(
+            getArrayValueFromKey(
+                    jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:BUILD_COMMANDS", String.class)
+                .orElse(Collections.emptyList()));
+    String nullawayLibraryModelLoaderPathString =
+        getValueFromKey(
+                jsonObject,
+                "DOWNSTREAM_DEPENDENCY_ANALYSIS:LIBRARY_MODEL_LOADER_PATH",
+                String.class)
+            .orElse(null);
+    this.nullawayLibraryModelLoaderPath =
+        nullawayLibraryModelLoaderPathString == null
+            ? null
+            : Paths.get(nullawayLibraryModelLoaderPathString);
+    this.downStreamDependenciesAnalysisActivated =
+        getValueFromKey(jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:ACTIVATION", Boolean.class)
+            .orElse(false);
     this.log = new Log();
     log.reset();
   }
@@ -278,18 +348,21 @@ public class Config {
     System.exit(1);
   }
 
-  static class OrElse<T> {
-    final Object value;
-    final Class<T> klass;
-
-    OrElse(Object value, Class<T> klass) {
-      this.value = value;
-      this.klass = klass;
+  /**
+   * Returns the set of downstream dependencies, returns empty list if {@link
+   * Config#downStreamDependenciesAnalysisActivated} is false.
+   *
+   * @return ImmutableSet of {@link edu.ucr.cs.riple.core.metadata.submodules.Module}.
+   */
+  public ImmutableSet<Module> getDownstreamDependencies() {
+    if (!this.downStreamDependenciesAnalysisActivated) {
+      return ImmutableSet.of();
     }
-
-    T orElse(T other) {
-      return value == null ? other : klass.cast(this.value);
-    }
+    // Variables inside lambda must be final, need to wrap it a final array.
+    final int[] id = {1};
+    return downstreamModulesBuildCommands.stream()
+        .map(command -> new Module("module-" + id[0]++, command))
+        .collect(ImmutableSet.toImmutableSet());
   }
 
   private <T> OrElse<T> getValueFromKey(JSONObject json, String key, Class<T> klass) {
@@ -314,6 +387,55 @@ public class Config {
     }
   }
 
+  private <T> CollectionOrElse<T> getArrayValueFromKey(
+      JSONObject json, String key, Class<T> klass) {
+    if (json == null) {
+      return new CollectionOrElse<>(null, klass);
+    }
+    OrElse<T> jsonValue = getValueFromKey(json, key, klass);
+    if (jsonValue.value == null) {
+      return new CollectionOrElse<>(null, klass);
+    } else {
+      if (jsonValue.value instanceof JSONArray) {
+        return new CollectionOrElse<>((JSONArray) jsonValue.value, klass);
+      }
+      throw new IllegalStateException(
+          "Expected type to be json array, found: " + jsonValue.value.getClass());
+    }
+  }
+
+  private static class OrElse<T> {
+    final Object value;
+    final Class<T> klass;
+
+    OrElse(Object value, Class<T> klass) {
+      this.value = value;
+      this.klass = klass;
+    }
+
+    T orElse(T other) {
+      return value == null ? other : klass.cast(this.value);
+    }
+  }
+
+  private static class CollectionOrElse<T> {
+    final Collection<?> value;
+    final Class<T> klass;
+
+    CollectionOrElse(Collection<?> value, Class<T> klass) {
+      this.value = value;
+      this.klass = klass;
+    }
+
+    Collection<T> orElse(Collection<T> other) {
+      if (value == null) {
+        return other;
+      } else {
+        return this.value.stream().map(klass::cast).collect(Collectors.toList());
+      }
+    }
+  }
+
   public static class Builder {
 
     public String buildCommand;
@@ -330,6 +452,10 @@ public class Config {
     public boolean redirectBuildOutputToStdErr = false;
     public boolean lexicalPreservationActivation = true;
     public boolean outerLoopActivation = true;
+
+    public boolean downStreamDependenciesAnalysisActivated = false;
+    public Set<String> downstreamModulesBuildCommands;
+    public String nullawayLibraryModelLoaderPath;
     public int depth = 1;
 
     public void write(Path path) {
@@ -364,6 +490,21 @@ public class Config {
       json.put("DEPTH", depth);
       json.put("EXHAUSTIVE_SEARCH", exhaustiveSearch);
       json.put("REDIRECT_BUILD_OUTPUT_TO_STDERR", redirectBuildOutputToStdErr);
+      JSONObject downstreamDependency = new JSONObject();
+      downstreamDependency.put("ACTIVATION", downStreamDependenciesAnalysisActivated);
+      if (downStreamDependenciesAnalysisActivated) {
+        Preconditions.checkNotNull(
+            nullawayLibraryModelLoaderPath,
+            "nullawayLibraryModelLoaderPath cannot be null to enable down stream dependency analysis.");
+        downstreamDependency.put("LIBRARY_MODEL_LOADER_PATH", nullawayLibraryModelLoaderPath);
+        JSONArray downstreamBuildCommandsJSON = new JSONArray();
+        Preconditions.checkNotNull(
+            downstreamModulesBuildCommands,
+            "downstreamModulesBuildCommands cannot be null to enable down stream dependency analysis.");
+        downstreamBuildCommandsJSON.addAll(downstreamModulesBuildCommands);
+        downstreamDependency.put("BUILD_COMMANDS", downstreamBuildCommandsJSON);
+      }
+      json.put("DOWNSTREAM_DEPENDENCY_ANALYSIS", downstreamDependency);
       try (FileWriter file = new FileWriter(path.toFile())) {
         file.write(json.toJSONString());
       } catch (IOException e) {

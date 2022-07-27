@@ -24,14 +24,21 @@
 
 package edu.ucr.cs.riple.core.metadata.index;
 
-import java.util.List;
+import java.util.Collection;
 
-public class Result<T> {
+/**
+ * Stores the result of comparison between two collections A and B (A - B).
+ *
+ * @param <T> Extends {@link Enclosed}
+ */
+public class Result<T extends Enclosed> {
 
+  /** Difference in number of elements in collection A and B. */
   public final int size;
-  public final List<T> dif;
+  /** Items that are present in A, but not B. */
+  public final Collection<T> dif;
 
-  public Result(int size, List<T> dif) {
+  public Result(int size, Collection<T> dif) {
     this.size = size;
     this.dif = dif;
   }

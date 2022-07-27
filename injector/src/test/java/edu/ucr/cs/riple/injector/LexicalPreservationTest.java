@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.injector;
 
+import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.Collections;
@@ -67,10 +68,9 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new Change(
+            new AddAnnotation(
                 new OnMethod("Super.java", "com.uber.Super", "test()"),
-                "javax.annotation.Nullable",
-                true))
+                "javax.annotation.Nullable"))
         .start(true);
   }
 
@@ -229,10 +229,9 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new Change(
+            new AddAnnotation(
                 new OnMethod("Super.java", "com.uber.Super", "test()"),
-                "javax.annotation.Nullable",
-                true))
+                "javax.annotation.Nullable"))
         .start(true);
   }
 
@@ -268,10 +267,9 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "   class Bar{ }",
             "}")
         .addChanges(
-            new Change(
+            new AddAnnotation(
                 new OnMethod("Super.java", "com.uber.Super", "test()"),
-                "javax.annotation.Nullable",
-                true))
+                "javax.annotation.Nullable"))
         .start(true);
   }
 
@@ -297,14 +295,12 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "   private Object allTest[];",
             "}")
         .addChanges(
-            new Change(
+            new AddAnnotation(
                 new OnField("B.java", "com.uber.B", Collections.singleton("allTest")),
-                "javax.annotation.Nullable",
-                true),
-            new Change(
+                "javax.annotation.Nullable"),
+            new AddAnnotation(
                 new OnField("A.java", "com.uber.A", Collections.singleton("allTest")),
-                "javax.annotation.Nullable",
-                true))
+                "javax.annotation.Nullable"))
         .start(true);
   }
 }

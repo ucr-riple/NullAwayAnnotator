@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,15 +22,11 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.tools;
+package edu.ucr.cs.riple.core;
 
-import edu.ucr.cs.riple.injector.Change;
-import edu.ucr.cs.riple.injector.location.Location;
+public class DownstreamAnalysisTest extends BaseCoreTest {
 
-/** Wrapper class for {@link Change} with default values, used to create tests. */
-public class TChange extends Change {
-
-  public TChange(Location location) {
-    super(location, "javax.annotation.Nullable", true);
+  public DownstreamAnalysisTest() {
+    super("downstream-dependency-test");
   }
 }

@@ -26,62 +26,77 @@ package edu.ucr.cs.riple.core.metadata.index;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class Index<T extends Hashable> {
+/**
+ * Indexes contents of type {@link Enclosed} based on the computed hash for fast retrieval. This
+ * data structure loads its data from a file at the given path.
+ */
+public class Index<T extends Enclosed> {
 
-  private final HashMap<Integer, List<T>> items;
+  /**
+   * Contents of the index. Items can have a duplicate hashes, therefore a {@link Multimap} is used.
+   */
+  private final Multimap<Integer, T> items;
+  /** Factory instance. */
   private final Factory<T> factory;
+  /** Path to the file to load the content from. */
   private final Path path;
+  /** Type of index. Used to compute hash. */
   private final Index.Type type;
+  /** Total number of items. */
   public int total;
 
+  /** Index type. */
   public enum Type {
     BY_METHOD,
     BY_CLASS
   }
 
+  /**
+   * Creates an instance of Index.
+   *
+   * @param path Path to the file to load the data from.
+   * @param type Type of index.
+   * @param factory Factory to create instances from file lines.
+   */
   public Index(Path path, Index.Type type, Factory<T> factory) {
     this.type = type;
     this.path = path;
-    this.items = new HashMap<>();
+    this.items = MultimapBuilder.hashKeys().arrayListValues().build();
     this.factory = factory;
     this.total = 0;
   }
 
+  /** Starts the reading and index process. */
   public void index() {
     items.clear();
     try (BufferedReader br = Files.newBufferedReader(this.path, UTF_8)) {
       String line = br.readLine();
-      if (line != null) line = br.readLine();
+      if (line != null) {
+        line = br.readLine();
+      }
       while (line != null) {
         T item = factory.build(line.split("\t"));
         total++;
         int hash;
         if (type.equals(Index.Type.BY_CLASS)) {
-          hash = Objects.hash(item.encClass);
+          hash = Objects.hash(item.encClass());
         } else {
-          hash = Objects.hash(item.encClass, item.encMethod);
+          hash = Objects.hash(item.encClass(), item.encMethod());
         }
-        if (items.containsKey(hash)) {
-          items.get(hash).add(item);
-        } else {
-          List<T> newList = new ArrayList<>();
-          newList.add(item);
-          items.put(hash, newList);
-        }
+        items.put(hash, item);
         line = br.readLine();
       }
     } catch (IOException e) {
@@ -89,34 +104,47 @@ public class Index<T extends Hashable> {
     }
   }
 
-  public List<T> getByClass(String clazz) {
-    List<T> ans = items.get(Objects.hash(clazz));
-    if (ans == null) {
-      return Collections.emptyList();
-    }
-    return ans.stream().filter(item -> item.encClass.equals(clazz)).collect(Collectors.toList());
-  }
-
-  public List<T> getByMethod(String clazz, String method) {
-    List<T> ans = items.get(Objects.hash(clazz, method));
-    if (ans == null) {
-      return Collections.emptyList();
-    }
-    return ans.stream()
-        .filter(item -> item.encClass.equals(clazz) && item.encMethod.equals(method))
+  /**
+   * Returns all contents which are enclosed by the given class.
+   *
+   * @param clazz Fully qualified name of the class.
+   * @return Stored contents that are enclosed by the given class.
+   */
+  public Collection<T> getByClass(String clazz) {
+    return items.get(Objects.hash(clazz)).stream()
+        .filter(item -> item.encClass().equals(clazz))
         .collect(Collectors.toList());
   }
 
-  public List<T> getAllEntities() {
-    List<T> ans = new ArrayList<>();
-    items.forEach((integer, ts) -> ans.addAll(ts));
-    return ans;
+  /**
+   * Returns all contents which are enclosed by the given class and method.
+   *
+   * @param clazz Fully qualified name of the class.
+   * @param method Method signature.
+   * @return Stored contents that are enclosed by the given class and method.
+   */
+  public Collection<T> getByMethod(String clazz, String method) {
+    return items.get(Objects.hash(clazz, method)).stream()
+        .filter(item -> item.encClass().equals(clazz) && item.encMethod().equals(method))
+        .collect(Collectors.toList());
   }
 
-  public Set<Region> getRegionsForFixes(Predicate<T> comparable) {
-    return getAllEntities().stream()
-        .filter(comparable)
-        .map(t -> new Region(t.encMethod, t.encClass))
-        .collect(Collectors.toSet());
+  /**
+   * Returns all values.
+   *
+   * @return Collection of all values.
+   */
+  public Collection<T> values() {
+    return items.values();
+  }
+
+  /**
+   * Returns all items regions that holds the given predicate.
+   *
+   * @param predicate Predicate provided by caller.
+   * @return Set of regions.
+   */
+  public Set<Region> getRegionsOfMatchingItems(Predicate<T> predicate) {
+    return values().stream().filter(predicate).map(t -> t.region).collect(Collectors.toSet());
   }
 }

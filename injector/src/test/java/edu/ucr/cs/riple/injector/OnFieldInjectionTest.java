@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.injector;
 
+import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Collections;
 import org.junit.Test;
@@ -55,10 +56,9 @@ public class OnFieldInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new Change(
+            new AddAnnotation(
                 new OnField("Super.java", "com.uber.Super", Collections.singleton("h")),
-                "javax.annotation.Nullable",
-                true))
+                "javax.annotation.Nullable"))
         .start();
   }
 }

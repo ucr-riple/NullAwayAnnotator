@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.injector;
 
+import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
@@ -54,13 +55,12 @@ public class RemovalTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new Change(
+            new RemoveAnnotation(
                 new OnMethod(
                     "Super.java",
                     "com.uber.Super",
                     "test(@javax.annotation.Nullable java.lang.Object)"),
-                "javax.annotation.Nullable",
-                false))
+                "javax.annotation.Nullable"))
         .start();
   }
 
@@ -83,14 +83,13 @@ public class RemovalTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new Change(
+            new RemoveAnnotation(
                 new OnParameter(
                     "Super.java",
                     "com.uber.Super",
                     "test(@javax.annotation.Nullable java.lang.Object)",
                     0),
-                "javax.annotation.Nullable",
-                false))
+                "javax.annotation.Nullable"))
         .start();
   }
 
@@ -113,14 +112,13 @@ public class RemovalTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new Change(
+            new RemoveAnnotation(
                 new OnParameter(
                     "Super.java",
                     "com.uber.Super",
                     "test(@javax.annotation.Nullable java.lang.Object)",
                     0),
-                "javax.annotation.Nullable",
-                false))
+                "javax.annotation.Nullable"))
         .start();
   }
 
@@ -145,10 +143,9 @@ public class RemovalTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new Change(
+            new RemoveAnnotation(
                 new OnField("Super.java", "com.uber.Super", Collections.singleton("f")),
-                "javax.annotation.Nullable",
-                false))
+                "javax.annotation.Nullable"))
         .start();
   }
 }

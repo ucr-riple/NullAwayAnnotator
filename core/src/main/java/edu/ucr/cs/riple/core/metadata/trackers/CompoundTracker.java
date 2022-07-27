@@ -24,32 +24,33 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
-import edu.ucr.cs.riple.scanner.Serializer;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
+/** Container class for all trackers. This tracker can handle all fix types. */
 public class CompoundTracker implements RegionTracker {
 
+  /** List of all trackers. */
   private final List<RegionTracker> trackers;
 
-  public CompoundTracker(Path dir, MethodInheritanceTree tree) {
+  public CompoundTracker(Config config, MethodInheritanceTree tree) {
     this.trackers = new ArrayList<>();
-    MethodRegionTracker methodRegionTracker =
-        new MethodRegionTracker(dir.resolve(Serializer.CALL_GRAPH_FILE_NAME), tree);
-    this.trackers.add(new FieldRegionTracker(dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME)));
+    MethodRegionTracker methodRegionTracker = new MethodRegionTracker(config, tree);
+    this.trackers.add(new FieldRegionTracker(config));
     this.trackers.add(methodRegionTracker);
     this.trackers.add(new ParameterRegionTracker(tree, methodRegionTracker));
   }
 
   @Override
-  public Set<Region> getRegions(Fix location) {
+  public Optional<Set<Region>> getRegions(Fix location) {
     for (RegionTracker tracker : this.trackers) {
-      Set<Region> ans = tracker.getRegions(location);
-      if (ans != null) {
+      Optional<Set<Region>> ans = tracker.getRegions(location);
+      if (ans.isPresent()) {
         return ans;
       }
     }

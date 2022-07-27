@@ -26,13 +26,22 @@ package edu.ucr.cs.riple.core.metadata.trackers;
 
 import java.util.Objects;
 
+/**
+ * Class for denoting a region in source code. A region can be either a method body or class field
+ * initialization body.
+ */
 public class Region {
+  /**
+   * Signature of the method where this region is enclosed. If region is a class field
+   * initialization region, method value will be String of {@code "null"} not {@code null}.
+   */
   public final String method;
+  /** Fully qualified name of the enclosing class of the region. */
   public final String clazz;
 
-  public Region(String method, String clazz) {
-    this.method = method == null ? "null" : method;
-    this.clazz = clazz == null ? "null" : clazz;
+  public Region(String encClass, String encMethod) {
+    this.clazz = encClass == null ? "null" : encClass;
+    this.method = encMethod == null ? "null" : encMethod;
   }
 
   @Override

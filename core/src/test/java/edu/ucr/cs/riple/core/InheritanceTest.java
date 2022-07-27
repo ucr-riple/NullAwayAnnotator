@@ -35,6 +35,10 @@ import org.junit.Test;
 
 public class InheritanceTest extends BaseCoreTest {
 
+  public InheritanceTest() {
+    super("unittest");
+  }
+
   @Test
   public void basic_method() {
     coreTestHelper

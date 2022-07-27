@@ -24,21 +24,28 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.injector.location.OnMethod;
-import java.nio.file.Path;
+import edu.ucr.cs.riple.scanner.Serializer;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/** Tracker for Methods. */
 public class MethodRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
 
+  /**
+   * {@link MethodInheritanceTree} instance, used to retrieve regions that will be affected due to
+   * inheritance violations.
+   */
   private final MethodInheritanceTree tree;
 
-  public MethodRegionTracker(Path path, MethodInheritanceTree tree) {
-    super(path);
+  public MethodRegionTracker(Config config, MethodInheritanceTree tree) {
+    super(config.dir.resolve(Serializer.CALL_GRAPH_FILE_NAME));
     this.tree = tree;
   }
 
@@ -48,26 +55,34 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
   }
 
   @Override
-  public Set<Region> getRegions(Fix fix) {
+  public Optional<Set<Region>> getRegions(Fix fix) {
     if (!fix.isOnMethod()) {
-      return null;
+      return Optional.empty();
     }
     OnMethod onMethod = fix.toMethod();
+    // Add callers of method.
     Set<Region> regions = getCallersOfMethod(onMethod.clazz, onMethod.method);
-    MethodNode parent = tree.getSuperMethod(onMethod.method, onMethod.clazz);
+    // Add immediate super method.
+    MethodNode parent = tree.getClosestSuperMethod(onMethod.method, onMethod.clazz);
     if (parent != null) {
-      regions.add(new Region(parent.method, parent.clazz));
+      regions.add(new Region(parent.clazz, parent.method));
     }
-    return regions;
+    return Optional.of(regions);
   }
 
+  /**
+   * Returns set of regions where the target method is called.
+   *
+   * @param clazz Fully qualified name of the class of the target method.
+   * @param method Method signature.
+   * @return Set of regions where target method is called.
+   */
   public Set<Region> getCallersOfMethod(String clazz, String method) {
-    return findAllNodes(
+    return findNodesWithHashHint(
             candidate ->
                 candidate.calleeClass.equals(clazz) && candidate.calleeMember.equals(method),
-            clazz)
-        .stream()
-        .map(node -> new Region(node.callerMethod, node.callerClass))
+            TrackerNode.hash(clazz))
+        .map(node -> new Region(node.callerClass, node.callerMethod))
         .collect(Collectors.toSet());
   }
 }

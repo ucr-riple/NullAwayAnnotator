@@ -25,13 +25,13 @@
 package edu.ucr.cs.riple.core.tools;
 
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.injector.Change;
+import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.location.Location;
 
 /** Wrapper class for {@link Change} with default values, used to create tests. */
 public class TFix extends Fix {
 
   public TFix(Location location) {
-    super(new TChange(location), null, null, null);
+    super(new DefaultAnnotation(location), null, null, null);
   }
 }

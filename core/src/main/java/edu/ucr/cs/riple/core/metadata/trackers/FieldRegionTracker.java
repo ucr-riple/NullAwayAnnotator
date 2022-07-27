@@ -24,17 +24,20 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.location.OnField;
-import java.nio.file.Path;
+import edu.ucr.cs.riple.scanner.Serializer;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/** Tracker for Fields. */
 public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
 
-  public FieldRegionTracker(Path path) {
-    super(path);
+  public FieldRegionTracker(Config config) {
+    super(config.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME));
   }
 
   @Override
@@ -43,21 +46,21 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
   }
 
   @Override
-  public Set<Region> getRegions(Fix fix) {
+  public Optional<Set<Region>> getRegions(Fix fix) {
     if (!fix.isOnField()) {
-      return null;
+      return Optional.empty();
     }
     OnField field = fix.toField();
+    // Add all regions where the field is assigned a new value or read.
     Set<Region> ans =
-        findAllNodes(
+        findNodesWithHashHint(
                 candidate ->
                     candidate.calleeClass.equals(field.clazz)
-                        && field.variables.contains(candidate.calleeMember),
-                field.clazz)
-            .stream()
-            .map(trackerNode -> new Region(trackerNode.callerMethod, trackerNode.callerClass))
+                        && field.isOnFieldWithName(candidate.calleeMember),
+                TrackerNode.hash(field.clazz))
+            .map(trackerNode -> new Region(trackerNode.callerClass, trackerNode.callerMethod))
             .collect(Collectors.toSet());
-    ans.add(new Region("null", field.clazz));
-    return ans;
+    ans.add(new Region(field.clazz, "null"));
+    return Optional.of(ans);
   }
 }

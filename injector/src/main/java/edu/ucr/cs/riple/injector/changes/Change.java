@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.injector;
+package edu.ucr.cs.riple.injector.changes;
 
 import com.github.javaparser.ast.CompilationUnit;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -28,20 +28,16 @@ import java.util.Objects;
 import org.json.simple.JSONObject;
 
 @SuppressWarnings("unchecked")
-public class Change {
+public abstract class Change {
   public final Location location;
   public final String annotation;
-  public final boolean inject;
 
-  public Change(Location location, String annotation, boolean inject) {
+  public Change(Location location, String annotation) {
     this.annotation = annotation;
     this.location = location;
-    this.inject = inject;
   }
 
-  public boolean apply(CompilationUnit tree) {
-    return this.location.apply(tree, annotation, inject);
-  }
+  public abstract boolean apply(CompilationUnit tree);
 
   @Override
   public boolean equals(Object o) {
@@ -59,14 +55,11 @@ public class Change {
   public JSONObject getJson() {
     JSONObject res = new JSONObject();
     res.put("LOCATION", location.getJson());
-    res.put("INJECT", inject);
     res.put("ANNOTATION", annotation);
     return res;
   }
 
-  public Change duplicate() {
-    return new Change(location.duplicate(), annotation, inject);
-  }
+  public abstract Change duplicate();
 
   @Override
   public String toString() {

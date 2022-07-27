@@ -28,6 +28,7 @@ import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.printer.DefaultPrettyPrinter;
 import com.github.javaparser.printer.configuration.DefaultPrinterConfiguration;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
+import edu.ucr.cs.riple.injector.changes.Change;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;

@@ -25,8 +25,8 @@
 package edu.ucr.cs.riple.core.explorers;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.AnnotationInjector;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -37,7 +37,7 @@ import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -53,29 +53,26 @@ public class OptimizedExplorer extends Explorer {
       RegionTracker tracker,
       ImmutableSet<Fix> fixes,
       MethodInheritanceTree methodInheritanceTree,
+      int depth,
       Config config) {
-    super(injector, errorBank, fixBank, fixes, methodInheritanceTree, config);
+    super(injector, errorBank, fixBank, fixes, methodInheritanceTree, depth, config);
     this.tracker = tracker;
   }
 
   @Override
   protected void initializeFixGraph() {
     super.initializeFixGraph();
-    this.fixGraph.getAllNodes().forEach(node -> node.updateRegions(tracker));
+    this.graph.getNodes().forEach(node -> node.reCollectPotentiallyImpactedRegions(tracker));
   }
 
   @Override
   protected void executeNextCycle() {
-    fixGraph.findGroups();
-    HashMap<Integer, Set<Node>> groups = fixGraph.getGroups();
+    graph.findGroups();
+    Collection<Set<Node>> groups = graph.getGroups();
     System.out.println(
-        "Scheduling for: "
-            + groups.size()
-            + " builds for: "
-            + fixGraph.getAllNodes().size()
-            + " fixes");
+        "Scheduling for: " + groups.size() + " builds for: " + graph.getNodes().count() + " fixes");
     ProgressBar pb = Utility.createProgressBar("Processing", groups.size());
-    for (Set<Node> group : groups.values()) {
+    for (Set<Node> group : groups) {
       pb.step();
       Set<Fix> fixes =
           group.stream().flatMap(node -> node.tree.stream()).collect(Collectors.toSet());

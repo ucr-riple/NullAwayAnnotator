@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.injector;
 
+import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,11 +51,10 @@ public class OnMethodSearchTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new Change(
+            new AddAnnotation(
                 new OnMethod(
                     "Main.java", "com.uber.Main", "Main(java.lang.String,java.lang.Object...)"),
-                "javax.annotation.Initializer",
-                true))
+                "javax.annotation.Initializer"))
         .start();
   }
 
@@ -90,10 +90,9 @@ public class OnMethodSearchTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new Change(
+            new AddAnnotation(
                 new OnMethod("Super.java", "com.uber.Super", "test()"),
-                "javax.annotation.Nullable",
-                true))
+                "javax.annotation.Nullable"))
         .start();
   }
 }

@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -58,8 +59,13 @@ public class CoreTestHelper {
   private BiPredicate<Report, Report> predicate;
   private int depth = 1;
   private boolean requestCompleteLoop = false;
-
   private boolean disableBailout = false;
+
+  private boolean downstreamDependencyAnalysisActivated = false;
+
+  private Set<String> downstreamBuildCommands;
+
+  private String libraryModelLoaderPath;
 
   public CoreTestHelper(Path projectPath, Path outDirPath) {
     this.projectPath = projectPath;
@@ -120,6 +126,26 @@ public class CoreTestHelper {
 
   public CoreTestHelper requestCompleteLoop() {
     this.requestCompleteLoop = true;
+    return this;
+  }
+
+  public CoreTestHelper enableDownstreamDependencyAnalysis(
+      String libraryModelLoaderPath, String... dependencies) {
+    // Path to update library model
+    String libraryModelLoaderSrcRoot =
+        Utility.changeDirCommand(Paths.get(System.getProperty("user.dir")).getParent().toString());
+    this.downstreamDependencyAnalysisActivated = true;
+    this.libraryModelLoaderPath = libraryModelLoaderPath;
+    this.downstreamBuildCommands =
+        Arrays.stream(dependencies)
+            .map(
+                projectName ->
+                    String.format(
+                        "%s && ./gradlew library-model-loader:jar && %s && ./gradlew :%s:compileJava",
+                        Utility.changeDirCommand(libraryModelLoaderSrcRoot),
+                        Utility.changeDirCommand(projectPath.toString()),
+                        projectName))
+            .collect(Collectors.toSet());
     return this;
   }
 
@@ -202,6 +228,9 @@ public class CoreTestHelper {
     builder.chain = true;
     builder.outerLoopActivation = requestCompleteLoop;
     builder.optimized = true;
+    builder.downStreamDependenciesAnalysisActivated = downstreamDependencyAnalysisActivated;
+    builder.nullawayLibraryModelLoaderPath = libraryModelLoaderPath;
+    builder.downstreamModulesBuildCommands = downstreamBuildCommands;
     builder.write(path);
   }
 

@@ -22,15 +22,16 @@
 
 package edu.ucr.cs.riple.injector;
 
+import edu.ucr.cs.riple.injector.changes.Change;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class WorkListBuilder {
-  private final Collection<Change> changes;
+public class WorkListBuilder<T extends Change> {
+  private final Collection<T> changes;
 
-  public WorkListBuilder(Collection<Change> changes) {
+  public WorkListBuilder(Collection<T> changes) {
     if (changes == null) {
       throw new RuntimeException("location array cannot be null");
     }

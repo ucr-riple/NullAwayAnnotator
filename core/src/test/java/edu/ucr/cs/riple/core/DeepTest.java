@@ -39,6 +39,10 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class DeepTest extends BaseCoreTest {
 
+  public DeepTest() {
+    super("unittest");
+  }
+
   @Test
   public void field_assign_nullable_bailout_enabled() {
     coreTestHelper

@@ -24,12 +24,19 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
+import edu.ucr.cs.riple.core.metadata.Hashable;
 import java.util.Objects;
 
-public class TrackerNode {
+/** Container class for holding information regarding usage of class members within classes. */
+public class TrackerNode implements Hashable {
+
+  /** Fully qualified names of the caller class. */
   public final String callerClass;
+  /** Method signature of the caller. "null" if used in class initialization region, not null. */
   public final String callerMethod;
+  /** Callee field name if field and method signature if method. */
   public final String calleeMember;
+  /** Fully qualified name of the enclosing class of callee. */
   public final String calleeClass;
 
   public TrackerNode(
@@ -51,8 +58,19 @@ public class TrackerNode {
         && callerMethod.equals(that.callerMethod);
   }
 
+  /**
+   * Calculates hash. This method is used outside this class to calculate the expected hash based on
+   * instance's properties value if the actual instance is not available.
+   *
+   * @param clazz Full qualified name.
+   * @return Expected hash.
+   */
+  public static int hash(String clazz) {
+    return Objects.hash(clazz);
+  }
+
   @Override
   public int hashCode() {
-    return Objects.hash(calleeClass);
+    return hash(calleeClass);
   }
 }

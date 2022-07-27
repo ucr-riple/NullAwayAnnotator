@@ -38,6 +38,10 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class CoreTest extends BaseCoreTest {
 
+  public CoreTest() {
+    super("unittest");
+  }
+
   @Test
   public void field() {
     coreTestHelper

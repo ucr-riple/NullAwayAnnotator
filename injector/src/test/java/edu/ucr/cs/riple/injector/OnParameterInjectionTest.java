@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.injector;
 
+import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,10 +59,9 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new Change(
+            new AddAnnotation(
                 new OnParameter("Super.java", "com.uber.Super", "test(java.lang.Object)", 0),
-                "javax.annotation.Nullable",
-                true))
+                "javax.annotation.Nullable"))
         .start();
   }
 
@@ -92,10 +92,9 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new Change(
+            new AddAnnotation(
                 new OnParameter("Super.java", "com.uber.Super", "test(Object)", 0),
-                "javax.annotation.Nullable",
-                true))
+                "javax.annotation.Nullable"))
         .start();
   }
 
@@ -132,14 +131,13 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             "   int index, int[] params, int exception, CallSiteReference site, BootstrapMethod bootstrap);",
             "}")
         .addChanges(
-            new Change(
+            new AddAnnotation(
                 new OnParameter(
                     "SSAInstructionFactory.java",
                     "com.uber.SSAInstructionFactory",
                     "InvokeInstruction(int,int,int[],int,com.ibm.wala.classLoader.CallSiteReference,com.ibm.wala.shrikeCT.BootstrapMethodsReader.BootstrapMethod)",
                     5),
-                "javax.annotation.Nullable",
-                true))
+                "javax.annotation.Nullable"))
         .start();
   }
 
@@ -173,14 +171,13 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new Change(
+            new AddAnnotation(
                 new OnParameter(
                     "ModRef.java",
                     "com.uber.ModRef",
                     "computeMod(com.ibm.wala.ipa.callgraph.CallGraph,com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis<T>,com.ibm.wala.ipa.slicer.HeapExclusions)",
                     2),
-                "javax.annotation.Nullable",
-                true))
+                "javax.annotation.Nullable"))
         .start();
   }
 
@@ -234,14 +231,13 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             "    }",
             "}")
         .addChanges(
-            new Change(
+            new AddAnnotation(
                 new OnParameter(
                     "ModRef.java",
                     "com.uber.ModRef",
                     "ModRef(com.ibm.wala.classLoader.IMethod,com.ibm.wala.ipa.callgraph.Context,com.ibm.wala.cfg.AbstractCFG<?,?>,com.ibm.wala.ssa.SSAInstruction[],com.ibm.wala.ssa.SSAOptions,java.util.Map<java.lang.Integer,com.ibm.wala.ssa.ConstantValue>)",
                     5),
-                "javax.annotation.Nullable",
-                true))
+                "javax.annotation.Nullable"))
         .start();
   }
 
@@ -269,14 +265,13 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new Change(
+            new AddAnnotation(
                 new OnParameter(
                     "WeakKeyReference.java",
                     "com.uber.WeakKeyReference",
                     "WeakKeyReference(@org.checkerframework.checker.nullness.qual.Nullable K,java.lang.ref.ReferenceQueue<K>)",
                     1),
-                "javax.annotation.Nullable",
-                true))
+                "javax.annotation.Nullable"))
         .start();
   }
 }

@@ -25,8 +25,8 @@
 package edu.ucr.cs.riple.core.explorers;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.AnnotationInjector;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
@@ -41,7 +41,7 @@ public class ExhaustiveExplorer extends Explorer {
       ImmutableSet<Fix> fixes,
       MethodInheritanceTree tree,
       Config config) {
-    super(injector, errorBank, fixBank, fixes, tree, config);
+    super(injector, errorBank, fixBank, fixes, tree, config.depth, config);
   }
 
   @Override

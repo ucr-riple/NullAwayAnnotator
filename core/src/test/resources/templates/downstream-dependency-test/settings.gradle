@@ -22,9 +22,9 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.index;
+rootProject.name = 'downstream-dependency-test'
+include 'Target'
+include 'DepA'
+include 'DepB'
+include 'DepC'
 
-public abstract class Hashable {
-  protected String encClass;
-  protected String encMethod;
-}

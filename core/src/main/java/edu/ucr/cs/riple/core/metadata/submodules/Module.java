@@ -22,11 +22,19 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.graph;
+package edu.ucr.cs.riple.core.metadata.submodules;
 
-import edu.ucr.cs.riple.core.metadata.index.Fix;
+/** Represents modules mainly used by denoting downstream dependencies. */
+public class Module {
 
-public interface Factory<T extends Node> {
+  /** Module name. */
+  public final String name;
 
-  T build(Fix fix);
+  /** Command run to build the module. */
+  public final String command;
+
+  public Module(String name, String command) {
+    this.command = command;
+    this.name = name;
+  }
 }
