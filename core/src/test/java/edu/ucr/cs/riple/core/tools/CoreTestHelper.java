@@ -132,22 +132,19 @@ public class CoreTestHelper {
   public CoreTestHelper enableDownstreamDependencyAnalysis(
       String libraryModelLoaderPath, String... dependencies) {
     // Path to update library model
-    String root =
+    String libraryModelLoaderSrcRoot =
         Utility.changeDirCommand(Paths.get(System.getProperty("user.dir")).getParent().toString());
-    String reloadLibraryModel =
-        Utility.changeDirCommand(root) + " && ./gradlew library-model-loader:jar";
     this.downstreamDependencyAnalysisActivated = true;
     this.libraryModelLoaderPath = libraryModelLoaderPath;
     this.downstreamBuildCommands =
         Arrays.stream(dependencies)
             .map(
                 projectName ->
-                    reloadLibraryModel
-                        + " && "
-                        + Utility.changeDirCommand(projectPath.toString())
-                        + " && ./gradlew :"
-                        + projectName
-                        + ":compileJava")
+                    String.format(
+                        "%s && ./gradlew library-model-loader:jar && %s && ./gradlew :%s:compileJava",
+                        Utility.changeDirCommand(libraryModelLoaderSrcRoot),
+                        Utility.changeDirCommand(projectPath.toString()),
+                        projectName))
             .collect(Collectors.toSet());
     return this;
   }
