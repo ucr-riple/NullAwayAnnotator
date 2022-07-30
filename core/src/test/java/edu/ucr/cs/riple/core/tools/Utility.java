@@ -35,7 +35,7 @@ public class Utility {
         Objects.requireNonNull(Utility.class.getClassLoader().getResource(relativePath)).getFile());
   }
 
-  public static String changeDirCommand(String path) {
+  public static String changeDirCommand(Path path) {
     String os = System.getProperty("os.name").toLowerCase();
     return (os.startsWith("windows") ? "dir" : "cd") + " " + path;
   }

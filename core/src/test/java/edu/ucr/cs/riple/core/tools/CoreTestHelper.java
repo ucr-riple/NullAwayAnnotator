@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -131,22 +130,9 @@ public class CoreTestHelper {
 
   public CoreTestHelper enableDownstreamDependencyAnalysis(
       String libraryModelLoaderPath, String... dependencies) {
-    // Path to update library model
-    String libraryModelLoaderSrcRoot =
-        Utility.changeDirCommand(Paths.get(System.getProperty("user.dir")).getParent().toString());
-    this.downstreamDependencyAnalysisActivated = true;
-    this.libraryModelLoaderPath = libraryModelLoaderPath;
-    this.downstreamBuildCommands =
-        Arrays.stream(dependencies)
-            .map(
-                projectName ->
-                    String.format(
-                        "%s && ./gradlew library-model-loader:jar && %s && ./gradlew :%s:compileJava",
-                        Utility.changeDirCommand(libraryModelLoaderSrcRoot),
-                        Utility.changeDirCommand(projectPath.toString()),
-                        projectName))
-            .collect(Collectors.toSet());
-    return this;
+    // todo: Complete this function the in the follow up PRs.
+    throw new UnsupportedOperationException(
+        "This function is not implemented yet, will be updated in the follow up PRs.");
   }
 
   public void start() {
@@ -214,10 +200,25 @@ public class CoreTestHelper {
     fail(errorMessage.toString());
   }
 
+  /**
+   * Computes the build command for the project template. It includes, changing directory command
+   * from root to project root dir, command to compile the project and the computed paths to config
+   * files which will be passed through gradle command line arguments.
+   *
+   * @return The command to build the project including the command line arguments, this command can
+   *     be executed from any directory,
+   */
+  private String computeBuildCommandWithGradleCLArguments() {
+    return String.format(
+        "%s && ./gradlew compileJava -Pscanner-config-path=%s -Pnullaway-config-path=%s",
+        Utility.changeDirCommand(projectPath),
+        outDirPath.resolve("scanner.xml"),
+        outDirPath.resolve("config.xml"));
+  }
+
   private void makeAnnotatorConfigFile(Path path) {
     Config.Builder builder = new Config.Builder();
-    builder.buildCommand =
-        Utility.changeDirCommand(projectPath.toString()) + " && ./gradlew compileJava";
+    builder.buildCommand = computeBuildCommandWithGradleCLArguments();
     builder.scannerConfigPath = outDirPath.resolve("scanner.xml").toString();
     builder.nullAwayConfigPath = outDirPath.resolve("config.xml").toString();
     builder.nullableAnnotation = "javax.annotation.Nullable";

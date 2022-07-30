@@ -27,11 +27,8 @@ package edu.ucr.cs.riple.core;
 import edu.ucr.cs.riple.core.tools.CoreTestHelper;
 import edu.ucr.cs.riple.core.tools.Utility;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
@@ -64,34 +61,20 @@ public abstract class BaseCoreTest {
       FileUtils.copyDirectory(pathToUnitTestDir.toFile(), projectPath.toFile());
       ProcessBuilder processBuilder = Utility.createProcessInstance();
       processBuilder.directory(projectPath.toFile());
-      processBuilder.command("gradle", "wrapper", "--gradle-version", "6.1");
-      try (Stream<Path> paths = Files.walk(projectPath)) {
-        paths
-            .filter(
-                input -> input.toFile().isFile() && input.toFile().getName().equals("build.gradle"))
-            .forEach(path -> updateErrorProneFlags(path, outDirPath));
+      processBuilder.command(
+          "gradle",
+          "wrapper",
+          "--gradle-version",
+          "6.1",
+          "-Pscanner-config-path=default",
+          "-Pnullaway-config-path=default");
+      int success = processBuilder.start().waitFor();
+      if (success != 0) {
+        throw new RuntimeException("Unsuccessful creation of gradle wrapper.");
       }
-      processBuilder.start().waitFor();
     } catch (IOException | InterruptedException e) {
       throw new RuntimeException("Preparation for test failed", e);
     }
     coreTestHelper = new CoreTestHelper(projectPath, outDirPath);
-  }
-
-  private static void updateErrorProneFlags(Path path, Path outDirPath) {
-    try {
-      String buildContent = FileUtils.readFileToString(path.toFile(), Charset.defaultCharset());
-      buildContent =
-          buildContent.replace(
-              "-XepOpt:NullAway:FixSerializationConfigPath=",
-              "-XepOpt:NullAway:FixSerializationConfigPath=" + outDirPath.resolve("config.xml"));
-      buildContent =
-          buildContent.replace(
-              "-XepOpt:Scanner:ConfigPath=",
-              "-XepOpt:Scanner:ConfigPath=" + outDirPath.resolve("scanner.xml"));
-      FileUtils.writeStringToFile(path.toFile(), buildContent, Charset.defaultCharset());
-    } catch (Exception exception) {
-      throw new RuntimeException("Preparation for test failed", exception);
-    }
   }
 }
