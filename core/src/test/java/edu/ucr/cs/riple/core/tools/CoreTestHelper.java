@@ -218,7 +218,8 @@ public class CoreTestHelper {
 
   private void makeAnnotatorConfigFile(Path path) {
     Config.Builder builder = new Config.Builder();
-    builder.buildCommand = computeBuildCommandWithGradleCLArguments();
+    builder.buildCommand =
+        Utility.computeBuildCommandWithGradleCLArguments(this.projectPath, this.outDirPath);
     builder.scannerConfigPath = outDirPath.resolve("scanner.xml").toString();
     builder.nullAwayConfigPath = outDirPath.resolve("config.xml").toString();
     builder.nullableAnnotation = "javax.annotation.Nullable";
