@@ -338,7 +338,6 @@ public class Config {
     }
     this.log = new Log();
     this.log.reset();
-    makeOutputDirectoriesForModules();
   }
 
   /**
@@ -413,23 +412,6 @@ public class Config {
                 .orElse(Collections.emptySet()));
     this.log = new Log();
     log.reset();
-    makeOutputDirectoriesForModules();
-  }
-
-  /** Creates output directories for target project and all downstream dependencies. */
-  private void makeOutputDirectoriesForModules() {
-    if (!target.dir.toFile().mkdirs()) {
-      throw new RuntimeException(
-          "Could not create output directory for target project: " + target.dir.toFile());
-    }
-    downstreamInfo.forEach(
-        info -> {
-          if (!info.dir.toFile().mkdirs()) {
-            throw new RuntimeException(
-                "Could not create output directory for downstream dependency: "
-                    + info.dir.toFile());
-          }
-        });
   }
 
   private static void showHelpAndQuit(HelpFormatter formatter, Options options) {

@@ -63,5 +63,9 @@ public class ModuleInfo {
     this.scannerConfig = scannerConfig;
     this.id = GLOBAL_ID++;
     this.dir = globalDir.resolve(String.valueOf(this.id));
+    if (!this.dir.toFile().mkdirs()) {
+      throw new RuntimeException(
+          "Could not create output directory for project: " + this.dir.toFile());
+    }
   }
 }
