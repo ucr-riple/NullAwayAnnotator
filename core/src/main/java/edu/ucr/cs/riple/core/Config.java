@@ -459,17 +459,17 @@ public class Config {
   }
 
   @SuppressWarnings({"SameParameterValue", "unchecked"})
-  private <T> StreamOrElse<T> getArrayValueFromKey(
+  private <T> CollectionOrElse<T> getArrayValueFromKey(
       JSONObject json, String key, Function<JSONObject, T> mapper, Class<T> klass) {
     if (json == null) {
-      return new StreamOrElse<>(null, klass);
+      return new CollectionOrElse<>(null, klass);
     }
     OrElse<T> jsonValue = getValueFromKey(json, key, klass);
     if (jsonValue.value == null) {
-      return new StreamOrElse<>(null, klass);
+      return new CollectionOrElse<>(null, klass);
     } else {
       if (jsonValue.value instanceof JSONArray) {
-        return new StreamOrElse<>(((JSONArray) jsonValue.value).stream().map(mapper), klass);
+        return new CollectionOrElse<>(((JSONArray) jsonValue.value).stream().map(mapper), klass);
       }
       throw new IllegalStateException(
           "Expected type to be json array, found: " + jsonValue.value.getClass());
@@ -490,11 +490,11 @@ public class Config {
     }
   }
 
-  private static class StreamOrElse<T> {
+  private static class CollectionOrElse<T> {
     private final Stream<?> value;
     private final Class<T> klass;
 
-    StreamOrElse(Stream<?> value, Class<T> klass) {
+    CollectionOrElse(Stream<?> value, Class<T> klass) {
       this.value = value;
       this.klass = klass;
     }
