@@ -56,7 +56,7 @@ import java.util.stream.Stream;
 public class DownStreamDependencyAnalyzer {
 
   /** Set of downstream dependencies. */
-  private final ImmutableSet<ModuleInfo> modules;
+  private final Stream<ModuleInfo> modules;
   /** Public APIs in the target modules that have a non-primitive return value. */
   private final Stream<MethodStatus> methods;
   /** Annotator Config. */
@@ -86,7 +86,7 @@ public class DownStreamDependencyAnalyzer {
     Utility.buildDownstreamDependencies(config);
     Utility.setScannerCheckerActivation(modules, false);
     // Collect callers of public APIs in module.
-    MethodRegionTracker tracker = new MethodRegionTracker(config, tree);
+    MethodRegionTracker tracker = new MethodRegionTracker(config.downstreamInfo, tree);
     // Generate fixes corresponding methods.
     ImmutableSet<Fix> fixes =
         methods
@@ -107,11 +107,13 @@ public class DownStreamDependencyAnalyzer {
             .collect(ImmutableSet.toImmutableSet());
     // Explorer initializations.
     FieldDeclarationAnalysis fieldDeclarationAnalysis =
-        new FieldDeclarationAnalysis(config.globalDir.resolve("class_info.tsv"));
-    Bank<Error> errorBank = new Bank<>(config.globalDir.resolve("errors.tsv"), Error::new);
+        new FieldDeclarationAnalysis(config.downstreamInfo);
+    Bank<Error> errorBank =
+        new Bank<>(config.downstreamInfo.map(info -> info.dir.resolve("errors.tsv")), Error::new);
     Bank<Fix> fixBank =
         new Bank<>(
-            config.globalDir.resolve("fixes.tsv"), Fix.factory(config, fieldDeclarationAnalysis));
+            config.downstreamInfo.map(info -> info.dir.resolve("fixes.tsv")),
+            Fix.factory(config, fieldDeclarationAnalysis));
     Explorer explorer =
         new OptimizedExplorer(injector, errorBank, fixBank, tracker, fixes, tree, 1, config);
     ImmutableSet<Report> reports = explorer.explore();

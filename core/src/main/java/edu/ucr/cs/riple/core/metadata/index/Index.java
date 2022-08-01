@@ -38,6 +38,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Indexes contents of type {@link Enclosed} based on the computed hash for fast retrieval. This
@@ -52,7 +53,7 @@ public class Index<T extends Enclosed> {
   /** Factory instance. */
   private final Factory<T> factory;
   /** Path to the file to load the content from. */
-  private final Path path;
+  private final Stream<Path> paths;
   /** Type of index. Used to compute hash. */
   private final Index.Type type;
   /** Total number of items. */
@@ -65,15 +66,15 @@ public class Index<T extends Enclosed> {
   }
 
   /**
-   * Creates an instance of Index.
+   * Creates an instance of Index. Contents are accumulated from multiple sources.
    *
-   * @param path Path to the file to load the data from.
+   * @param paths Stream of paths to load the data from.
    * @param type Type of index.
    * @param factory Factory to create instances from file lines.
    */
-  public Index(Path path, Index.Type type, Factory<T> factory) {
+  public Index(Stream<Path> paths, Index.Type type, Factory<T> factory) {
     this.type = type;
-    this.path = path;
+    this.paths = paths;
     this.items = MultimapBuilder.hashKeys().arrayListValues().build();
     this.factory = factory;
     this.total = 0;
@@ -82,26 +83,29 @@ public class Index<T extends Enclosed> {
   /** Starts the reading and index process. */
   public void index() {
     items.clear();
-    try (BufferedReader br = Files.newBufferedReader(this.path, UTF_8)) {
-      String line = br.readLine();
-      if (line != null) {
-        line = br.readLine();
-      }
-      while (line != null) {
-        T item = factory.build(line.split("\t"));
-        total++;
-        int hash;
-        if (type.equals(Index.Type.BY_CLASS)) {
-          hash = Objects.hash(item.encClass());
-        } else {
-          hash = Objects.hash(item.encClass(), item.encMethod());
-        }
-        items.put(hash, item);
-        line = br.readLine();
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    paths.forEach(
+        path -> {
+          try (BufferedReader br = Files.newBufferedReader(path, UTF_8)) {
+            String line = br.readLine();
+            if (line != null) {
+              line = br.readLine();
+            }
+            while (line != null) {
+              T item = factory.build(line.split("\t"));
+              total++;
+              int hash;
+              if (type.equals(Type.BY_CLASS)) {
+                hash = Objects.hash(item.encClass());
+              } else {
+                hash = Objects.hash(item.encClass(), item.encMethod());
+              }
+              items.put(hash, item);
+              line = br.readLine();
+            }
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+        });
   }
 
   /**

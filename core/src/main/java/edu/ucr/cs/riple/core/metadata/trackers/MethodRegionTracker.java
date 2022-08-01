@@ -24,7 +24,8 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
-import edu.ucr.cs.riple.core.Config;
+import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
@@ -34,6 +35,7 @@ import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /** Tracker for Methods. */
 public class MethodRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
@@ -44,8 +46,16 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
    */
   private final MethodInheritanceTree tree;
 
-  public MethodRegionTracker(Config config, MethodInheritanceTree tree) {
-    super(config.globalDir.resolve(Serializer.CALL_GRAPH_FILE_NAME));
+  public MethodRegionTracker(ModuleInfo info, MethodInheritanceTree tree) {
+    super(info.dir.resolve(Serializer.CALL_GRAPH_FILE_NAME));
+    this.tree = tree;
+  }
+
+  public MethodRegionTracker(Stream<ModuleInfo> modules, MethodInheritanceTree tree) {
+    super(
+        modules
+            .map(info -> info.dir.resolve(Serializer.CALL_GRAPH_FILE_NAME))
+            .collect(ImmutableSet.toImmutableSet()));
     this.tree = tree;
   }
 

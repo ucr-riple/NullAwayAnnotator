@@ -25,7 +25,6 @@
 package edu.ucr.cs.riple.core;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.io.FileWriter;
@@ -36,11 +35,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -104,7 +100,7 @@ public class Config {
   /** If enabled, effects of public API on downstream dependencies will be considered. */
   public final boolean downStreamDependenciesAnalysisActivated;
   /** Sets of config path information for all downstream dependencies. */
-  public final ImmutableSet<ModuleInfo> downstreamInfo;
+  public final Stream<ModuleInfo> downstreamInfo;
   /**
    * Path to nullaway library model loader, which enables the communication between annotator and
    * nullaway when processing downstream dependencies.
@@ -326,8 +322,7 @@ public class Config {
                   line -> {
                     String[] info = line.split("\\t");
                     return new ModuleInfo(this.globalDir, Paths.get(info[0]), Paths.get(info[1]));
-                  })
-              .collect(ImmutableSet.toImmutableSet());
+                  });
       this.nullawayLibraryModelLoaderPath =
           Paths.get(cmd.getOptionValue(nullawayLibraryModelLoaderPathOption));
       this.downstreamDependenciesBuildCommand =
@@ -405,13 +400,12 @@ public class Config {
             ? null
             : Paths.get(nullawayLibraryModelLoaderPathString);
     this.downstreamInfo =
-        ImmutableSet.copyOf(
-            getArrayValueFromKey(
-                    jsonObject,
-                    "DOWNSTREAM_DEPENDENCY_ANALYSIS:CONFIG_PATHS",
-                    instance -> ModuleInfo.buildFromJson(globalDir, instance),
-                    ModuleInfo.class)
-                .orElse(Collections.emptySet()));
+        getArrayValueFromKey(
+                jsonObject,
+                "DOWNSTREAM_DEPENDENCY_ANALYSIS:CONFIG_PATHS",
+                instance -> ModuleInfo.buildFromJson(globalDir, instance),
+                ModuleInfo.class)
+            .orElse(Stream.of());
     this.log = new Log();
     log.reset();
   }
@@ -444,17 +438,17 @@ public class Config {
   }
 
   @SuppressWarnings({"SameParameterValue", "unchecked"})
-  private <T> CollectionOrElse<T> getArrayValueFromKey(
+  private <T> StreamOrElse<T> getArrayValueFromKey(
       JSONObject json, String key, Function<JSONObject, T> mapper, Class<T> klass) {
     if (json == null) {
-      return new CollectionOrElse<>(null, klass);
+      return new StreamOrElse<>(null, klass);
     }
     OrElse<T> jsonValue = getValueFromKey(json, key, klass);
     if (jsonValue.value == null) {
-      return new CollectionOrElse<>(null, klass);
+      return new StreamOrElse<>(null, klass);
     } else {
       if (jsonValue.value instanceof JSONArray) {
-        return new CollectionOrElse<>(((JSONArray) jsonValue.value).stream().map(mapper), klass);
+        return new StreamOrElse<>(((JSONArray) jsonValue.value).stream().map(mapper), klass);
       }
       throw new IllegalStateException(
           "Expected type to be json array, found: " + jsonValue.value.getClass());
@@ -475,20 +469,20 @@ public class Config {
     }
   }
 
-  private static class CollectionOrElse<T> {
+  private static class StreamOrElse<T> {
     private final Stream<?> value;
     private final Class<T> klass;
 
-    CollectionOrElse(Stream<?> value, Class<T> klass) {
+    StreamOrElse(Stream<?> value, Class<T> klass) {
       this.value = value;
       this.klass = klass;
     }
 
-    Collection<T> orElse(Collection<T> other) {
+    Stream<T> orElse(Stream<T> other) {
       if (value == null) {
         return other;
       } else {
-        return this.value.map(klass::cast).collect(Collectors.toList());
+        return this.value.map(klass::cast);
       }
     }
   }

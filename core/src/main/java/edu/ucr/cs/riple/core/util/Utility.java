@@ -189,8 +189,7 @@ public class Utility {
     }
   }
 
-  public static void setScannerCheckerActivation(
-      ImmutableSet<ModuleInfo> modules, boolean activation) {
+  public static void setScannerCheckerActivation(Stream<ModuleInfo> modules, boolean activation) {
     modules.forEach(info -> setScannerCheckerActivation(info, activation));
   }
 

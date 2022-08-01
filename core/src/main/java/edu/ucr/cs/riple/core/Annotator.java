@@ -95,8 +95,7 @@ public class Annotator {
     Utility.setScannerCheckerActivation(config.target, true);
     Utility.buildTarget(config);
     Utility.setScannerCheckerActivation(config.target, false);
-    FieldDeclarationAnalysis fieldDeclarationAnalysis =
-        new FieldDeclarationAnalysis(config.globalDir.resolve("class_info.tsv"));
+    FieldDeclarationAnalysis fieldDeclarationAnalysis = new FieldDeclarationAnalysis(config.target);
     while (true) {
       Utility.buildTarget(config);
       ImmutableSet<Fix> fixes =
@@ -110,7 +109,7 @@ public class Annotator {
               config.globalDir.resolve("fixes.tsv"), Fix.factory(config, fieldDeclarationAnalysis));
       MethodInheritanceTree tree =
           new MethodInheritanceTree(config.globalDir.resolve(Serializer.METHOD_INFO_FILE_NAME));
-      RegionTracker tracker = new CompoundTracker(config, tree);
+      RegionTracker tracker = new CompoundTracker(config.target, tree);
       Explorer explorer =
           config.exhaustiveSearch
               ? new ExhaustiveExplorer(injector, errorBank, fixBank, fixes, tree, config)

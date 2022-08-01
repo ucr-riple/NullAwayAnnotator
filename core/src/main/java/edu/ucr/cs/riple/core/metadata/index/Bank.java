@@ -30,6 +30,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * Responsible for tracking status of generated outputs. It indexes outputs, can save states and
@@ -50,16 +51,20 @@ public class Bank<T extends Enclosed> {
   /** Factory instance to parse outputs. */
   private final Factory<T> factory;
   /** Path to file where outputs are stored. */
-  private final Path path;
+  private final Stream<Path> paths;
 
-  public Bank(Path path, Factory<T> factory) {
+  public Bank(Stream<Path> paths, Factory<T> factory) {
     this.factory = factory;
-    this.path = path;
-    rootInClass = new Index<>(path, Index.Type.BY_CLASS, factory);
-    rootInMethod = new Index<>(path, Index.Type.BY_METHOD, factory);
+    this.paths = paths;
+    rootInClass = new Index<>(paths, Index.Type.BY_CLASS, factory);
+    rootInMethod = new Index<>(paths, Index.Type.BY_METHOD, factory);
     rootInMethod.index();
     rootInClass.index();
     Preconditions.checkArgument(rootInClass.total == rootInMethod.total);
+  }
+
+  public Bank(Path path, Factory<T> factory) {
+    this(Stream.of(path), factory);
   }
 
   /**
@@ -70,11 +75,11 @@ public class Bank<T extends Enclosed> {
    */
   public void saveState(boolean saveClass, boolean saveMethod) {
     if (saveClass) {
-      currentInClass = new Index<>(this.path, Index.Type.BY_CLASS, factory);
+      currentInClass = new Index<>(paths, Index.Type.BY_CLASS, factory);
       currentInClass.index();
     }
     if (saveMethod) {
-      currentInMethod = new Index<>(this.path, Index.Type.BY_METHOD, factory);
+      currentInMethod = new Index<>(paths, Index.Type.BY_METHOD, factory);
       currentInMethod.index();
     }
   }
