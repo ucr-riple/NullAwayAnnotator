@@ -37,6 +37,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -409,7 +410,7 @@ public class Config {
                     "DOWNSTREAM_DEPENDENCY_ANALYSIS:CONFIG_PATHS",
                     instance -> ModuleInfo.buildFromJson(globalDir, instance),
                     ModuleInfo.class)
-                .orElse(Stream.of()));
+                .orElse(Collections.emptySet()));
     this.log = new Log();
     log.reset();
     makeOutputDirectoriesForModules();
@@ -499,9 +500,9 @@ public class Config {
       this.klass = klass;
     }
 
-    Collection<T> orElse(Stream<T> other) {
+    Collection<T> orElse(Collection<T> other) {
       if (value == null) {
-        return other.collect(Collectors.toList());
+        return other;
       } else {
         return this.value.map(klass::cast).collect(Collectors.toList());
       }
