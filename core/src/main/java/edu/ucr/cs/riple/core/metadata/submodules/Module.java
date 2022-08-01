@@ -24,17 +24,22 @@
 
 package edu.ucr.cs.riple.core.metadata.submodules;
 
+import java.nio.file.Path;
+
 /** Represents modules mainly used by denoting downstream dependencies. */
 public class Module {
 
   /** Module name. */
   public final String name;
 
-  /** Command run to build the module. */
-  public final String command;
+  /** Path to NullAway Config. */
+  public final Path nullawayConfigPath;
+  /** Path to Scanner Config. */
+  public final Path scannerConfigPath;
 
-  public Module(String name, String command) {
-    this.command = command;
+  public Module(String name, Path nullawayConfigPath, Path scannerConfigPath) {
+    this.nullawayConfigPath = nullawayConfigPath;
+    this.scannerConfigPath = scannerConfigPath;
     this.name = name;
   }
 }

@@ -40,36 +40,82 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+/**
+ * Config class for Annotator. Different flags can be set with either command line arguments or an
+ * input json file.
+ */
 public class Config {
+  /**
+   * If activated, annotator will bail out from the search tree as soon as the effectiveness gets
+   * zero or less.
+   */
   public final boolean bailout;
+  /** If activated, all optimization techniques will be applied through all searches. */
   public final boolean optimized;
+  /**
+   * If activated, all suggested fixes from NullAway will be applied to the source code regardless
+   * of their effectiveness.
+   */
   public final boolean exhaustiveSearch;
+  /**
+   * If set to true, the default pretty printer will be used to print the transformed AST, otherwise
+   * {@link com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter} will be used
+   * to preserve the code style.
+   */
   public final boolean lexicalPreservationDisabled;
+  /**
+   * If activated, all containing fixes in the fix tree will be applied to the source code,
+   * otherwise only the root fix will be applied.
+   */
   public final boolean chain;
+  /**
+   * If enabled, at each iteration fixes with effectiveness will be tagged to exclude them in
+   * further iterations.
+   */
   public final boolean useCache;
+  /** If true, build outputs will be redirected to STD Err. */
   public final boolean redirectBuildOutputToStdErr;
+  /** If activated, it will disable the outer loop. */
   public final boolean disableOuterLoop;
+  /** Path to directory where all outputs of nullaway and scanner checker is located. */
   public final Path dir;
+  /** Path to NullAway configPath. */
   public final Path nullAwayConfigPath;
+  /** Path to Scanner config path. */
   public final Path scannerConfigPath;
+  /** Command to build the target module. */
   public final String buildCommand;
+  /** Fully qualified name of the {@code nullable} annotation. */
   public final String nullableAnnot;
+  /** Fully qualified name of the {@code initializer} annotation. */
   public final String initializerAnnot;
-  public final ImmutableSet<String> downstreamModulesBuildCommands;
-  public final Path nullawayLibraryModelLoaderPath;
+  /** If enabled, effects of public API on downstream dependencies will be considered. */
   public final boolean downStreamDependenciesAnalysisActivated;
+  /** Sets of config path information for all downstream dependencies. */
+  public final ImmutableSet<DownstreamConfig> downstreamConfigPaths;
+  /**
+   * Path to nullaway library model loader, which enables the communication between annotator and
+   * nullaway when processing downstream dependencies.
+   */
+  public final Path nullawayLibraryModelLoaderPath;
+  /** Command to build the all downstream dependencies at once. */
+  public final String downstreamDependenciesBuildCommand;
+
   public final Log log;
   public final int depth;
 
@@ -93,7 +139,7 @@ public class Config {
             "bc",
             "build-command",
             true,
-            "Command to Run NullAway on the target project, this command must include changing directory from root to the target project");
+            "Command to build the target project, this command must include changing directory from root to the target project");
     buildCommandOption.setRequired(true);
     options.addOption(buildCommandOption);
 
@@ -192,22 +238,33 @@ public class Config {
     options.addOption(scannerConfigPathOption);
 
     // Down stream analysis
+    OptionGroup downstreamDepAnalysisOption = new OptionGroup();
+    downstreamDepAnalysisOption.setRequired(false);
     Option downstreamDependenciesBuildCommandOption =
         new Option(
             "ddbc",
             "downstream-dependencies-build-command",
             true,
-            "Path to a file containing all downstream dependencies build commands separated by new line.");
-    downstreamDependenciesBuildCommandOption.setRequired(false);
-    options.addOption(downstreamDependenciesBuildCommandOption);
+            "Command to build all downstream dependencies at once, this command must include changing directory from root to the target project");
+    downstreamDependenciesBuildCommandOption.setRequired(true);
+    downstreamDepAnalysisOption.addOption(downstreamDependenciesBuildCommandOption);
     Option nullawayLibraryModelLoaderPathOption =
         new Option(
             "nlmlp",
             "nullaway-library-model-loader-path",
             true,
             "NullAway Library Model loader path");
-    nullawayLibraryModelLoaderPathOption.setRequired(false);
-    options.addOption(nullawayLibraryModelLoaderPathOption);
+    nullawayLibraryModelLoaderPathOption.setRequired(true);
+    downstreamDepAnalysisOption.addOption(nullawayLibraryModelLoaderPathOption);
+    Option downstreamConfigPathsOption =
+        new Option(
+            "ddcp",
+            "downstream-dependencies-config-path",
+            true,
+            "Path to tsv file containing path to nullaway and scanner config files.");
+    downstreamConfigPathsOption.setRequired(true);
+    downstreamDepAnalysisOption.addOption(downstreamConfigPathsOption);
+    options.addOptionGroup(downstreamDepAnalysisOption);
 
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
@@ -262,15 +319,23 @@ public class Config {
     this.downStreamDependenciesAnalysisActivated =
         cmd.hasOption(downstreamDependenciesBuildCommandOption);
     if (this.downStreamDependenciesAnalysisActivated) {
-      this.downstreamModulesBuildCommands =
+      this.downstreamConfigPaths =
           Utility.readFileLines(
                   Paths.get(cmd.getOptionValue(downstreamDependenciesBuildCommandOption)))
+              .map(
+                  line -> {
+                    String[] info = line.split("\\t");
+                    return new DownstreamConfig(Paths.get(info[0]), Paths.get(info[1]));
+                  })
               .collect(ImmutableSet.toImmutableSet());
       this.nullawayLibraryModelLoaderPath =
           Paths.get(cmd.getOptionValue(nullawayLibraryModelLoaderPathOption));
+      this.downstreamDependenciesBuildCommand =
+          cmd.getOptionValue(downstreamDependenciesBuildCommandOption.getLongOpt());
     } else {
       this.nullawayLibraryModelLoaderPath = null;
-      this.downstreamModulesBuildCommands = null;
+      this.downstreamConfigPaths = null;
+      this.downstreamDependenciesBuildCommand = null;
     }
 
     this.log = new Log();
@@ -321,11 +386,12 @@ public class Config {
                 .orElse("/tmp/NullAwayFix/scanner.xml"));
     this.dir = Paths.get(getValueFromKey(jsonObject, "OUTPUT_DIR", String.class).orElse(null));
     this.buildCommand = getValueFromKey(jsonObject, "BUILD_COMMAND", String.class).orElse(null);
-    this.downstreamModulesBuildCommands =
-        ImmutableSet.copyOf(
-            getArrayValueFromKey(
-                    jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:BUILD_COMMANDS", String.class)
-                .orElse(Collections.emptyList()));
+    this.downStreamDependenciesAnalysisActivated =
+        getValueFromKey(jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:ACTIVATION", Boolean.class)
+            .orElse(false);
+    this.downstreamDependenciesBuildCommand =
+        getValueFromKey(jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:BUILD_COMMAND", String.class)
+            .orElse(null);
     String nullawayLibraryModelLoaderPathString =
         getValueFromKey(
                 jsonObject,
@@ -336,9 +402,14 @@ public class Config {
         nullawayLibraryModelLoaderPathString == null
             ? null
             : Paths.get(nullawayLibraryModelLoaderPathString);
-    this.downStreamDependenciesAnalysisActivated =
-        getValueFromKey(jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:ACTIVATION", Boolean.class)
-            .orElse(false);
+    this.downstreamConfigPaths =
+        ImmutableSet.copyOf(
+            getArrayValueFromKey(
+                    jsonObject,
+                    "DOWNSTREAM_DEPENDENCY_ANALYSIS:CONFIG_PATHS",
+                    DownstreamConfig::new,
+                    DownstreamConfig.class)
+                .orElse(Collections.emptySet()));
     this.log = new Log();
     log.reset();
   }
@@ -360,8 +431,8 @@ public class Config {
     }
     // Variables inside lambda must be final, need to wrap it a final array.
     final int[] id = {1};
-    return downstreamModulesBuildCommands.stream()
-        .map(command -> new Module("module-" + id[0]++, command))
+    return downstreamConfigPaths.stream()
+        .map(paths -> new Module("module-" + id[0]++, paths.nullawayConfig, paths.scannerConfig))
         .collect(ImmutableSet.toImmutableSet());
   }
 
@@ -387,8 +458,9 @@ public class Config {
     }
   }
 
+  @SuppressWarnings({"SameParameterValue", "unchecked"})
   private <T> CollectionOrElse<T> getArrayValueFromKey(
-      JSONObject json, String key, Class<T> klass) {
+      JSONObject json, String key, Function<JSONObject, T> mapper, Class<T> klass) {
     if (json == null) {
       return new CollectionOrElse<>(null, klass);
     }
@@ -397,10 +469,37 @@ public class Config {
       return new CollectionOrElse<>(null, klass);
     } else {
       if (jsonValue.value instanceof JSONArray) {
-        return new CollectionOrElse<>((JSONArray) jsonValue.value, klass);
+        return new CollectionOrElse<>(((JSONArray) jsonValue.value).stream().map(mapper), klass);
       }
       throw new IllegalStateException(
           "Expected type to be json array, found: " + jsonValue.value.getClass());
+    }
+  }
+
+  /**
+   * Container class to hold paths to nullaway and scanner config files for each downstream
+   * dependency.
+   */
+  private static class DownstreamConfig {
+    /** Path to nullaway config. */
+    private final Path nullawayConfig;
+    /** Path to scanner config. */
+    private final Path scannerConfig;
+
+    public DownstreamConfig(Path nullawayConfig, Path scannerConfig) {
+      this.nullawayConfig = nullawayConfig;
+      this.scannerConfig = scannerConfig;
+    }
+
+    private DownstreamConfig(JSONObject jsonObject) {
+      String nullawayConfigPath = (String) jsonObject.get("NULLAWAY");
+      String scannerConfigPath = (String) jsonObject.get("SCANNER");
+      if (nullawayConfigPath == null || scannerConfigPath == null) {
+        throw new IllegalArgumentException(
+            "Both paths to NullAway and Scanner config files must be set with NULLAWAY and SCANNER keys!");
+      }
+      this.nullawayConfig = Paths.get(nullawayConfigPath);
+      this.scannerConfig = Paths.get(scannerConfigPath);
     }
   }
 
@@ -419,10 +518,10 @@ public class Config {
   }
 
   private static class CollectionOrElse<T> {
-    final Collection<?> value;
+    final Stream<?> value;
     final Class<T> klass;
 
-    CollectionOrElse(Collection<?> value, Class<T> klass) {
+    CollectionOrElse(Stream<?> value, Class<T> klass) {
       this.value = value;
       this.klass = klass;
     }
@@ -431,7 +530,7 @@ public class Config {
       if (value == null) {
         return other;
       } else {
-        return this.value.stream().map(klass::cast).collect(Collectors.toList());
+        return this.value.map(klass::cast).collect(Collectors.toList());
       }
     }
   }
@@ -458,6 +557,7 @@ public class Config {
     public String nullawayLibraryModelLoaderPath;
     public int depth = 1;
 
+    @SuppressWarnings("unchecked")
     public void write(Path path) {
       Preconditions.checkNotNull(
           buildCommand, "Build command must be initialized to construct the config.");

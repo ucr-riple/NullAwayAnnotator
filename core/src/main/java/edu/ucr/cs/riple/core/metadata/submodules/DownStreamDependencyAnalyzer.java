@@ -91,7 +91,7 @@ public class DownStreamDependencyAnalyzer {
    */
   private void analyzeDownstreamDependency(Module module) {
     Utility.setScannerCheckerActivation(config, true);
-    Utility.buildProject(config, module);
+    Utility.buildDownstreamDependencies(config);
     Utility.setScannerCheckerActivation(config, false);
     // Collect callers of public APIs in module.
     MethodRegionTracker tracker = new MethodRegionTracker(config, tree);

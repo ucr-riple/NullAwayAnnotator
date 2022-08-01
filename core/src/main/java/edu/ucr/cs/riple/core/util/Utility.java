@@ -235,8 +235,8 @@ public class Utility {
     }
   }
 
-  public static void buildProject(Config config, Module module) {
-    buildProject(config, module.command, false);
+  public static void buildDownstreamDependencies(Config config) {
+    buildProject(config, config.downstreamDependenciesBuildCommand, false);
   }
 
   public static void buildProject(Config config) {
