@@ -77,7 +77,7 @@ public class OptimizedExplorer extends Explorer {
       Set<Fix> fixes =
           group.stream().flatMap(node -> node.tree.stream()).collect(Collectors.toSet());
       injector.injectFixes(fixes);
-      Utility.buildProject(config);
+      Utility.buildTarget(config);
       errorBank.saveState(false, true);
       fixBank.saveState(false, true);
       group.forEach(

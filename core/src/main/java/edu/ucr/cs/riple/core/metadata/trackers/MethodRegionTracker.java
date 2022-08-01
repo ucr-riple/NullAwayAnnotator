@@ -45,7 +45,7 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
   private final MethodInheritanceTree tree;
 
   public MethodRegionTracker(Config config, MethodInheritanceTree tree) {
-    super(config.dir.resolve(Serializer.CALL_GRAPH_FILE_NAME));
+    super(config.globalDir.resolve(Serializer.CALL_GRAPH_FILE_NAME));
     this.tree = tree;
   }
 

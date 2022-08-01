@@ -72,17 +72,17 @@ public class Annotator {
 
   private void preprocess() {
     System.out.println("Preprocessing...");
-    Utility.setScannerCheckerActivation(config, true);
+    Utility.setScannerCheckerActivation(config.target, true);
     this.reports.clear();
     System.out.println("Making the first build...");
-    Utility.buildProject(config, true);
+    Utility.buildTarget(config, true);
     Set<OnField> uninitializedFields =
         Utility.readFixesFromOutputDirectory(config, Fix.factory(config, null))
             .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
             .map(Fix::toField)
             .collect(Collectors.toSet());
     FieldInitializationAnalysis analysis =
-        new FieldInitializationAnalysis(config.dir.resolve("field_init.tsv"));
+        new FieldInitializationAnalysis(config.globalDir.resolve("field_init.tsv"));
     Set<AddAnnotation> initializers =
         analysis
             .findInitializers(uninitializedFields)
@@ -92,24 +92,24 @@ public class Annotator {
   }
 
   private void explore() {
-    Utility.setScannerCheckerActivation(config, true);
-    Utility.buildProject(config);
-    Utility.setScannerCheckerActivation(config, false);
+    Utility.setScannerCheckerActivation(config.target, true);
+    Utility.buildTarget(config);
+    Utility.setScannerCheckerActivation(config.target, false);
     FieldDeclarationAnalysis fieldDeclarationAnalysis =
-        new FieldDeclarationAnalysis(config.dir.resolve("class_info.tsv"));
+        new FieldDeclarationAnalysis(config.globalDir.resolve("class_info.tsv"));
     while (true) {
-      Utility.buildProject(config);
+      Utility.buildTarget(config);
       ImmutableSet<Fix> fixes =
           Utility.readFixesFromOutputDirectory(
                   config, Fix.factory(config, fieldDeclarationAnalysis))
               .filter(fix -> !config.useCache || !reports.containsKey(fix))
               .collect(ImmutableSet.toImmutableSet());
-      Bank<Error> errorBank = new Bank<>(config.dir.resolve("errors.tsv"), Error::new);
+      Bank<Error> errorBank = new Bank<>(config.globalDir.resolve("errors.tsv"), Error::new);
       Bank<Fix> fixBank =
           new Bank<>(
-              config.dir.resolve("fixes.tsv"), Fix.factory(config, fieldDeclarationAnalysis));
+              config.globalDir.resolve("fixes.tsv"), Fix.factory(config, fieldDeclarationAnalysis));
       MethodInheritanceTree tree =
-          new MethodInheritanceTree(config.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
+          new MethodInheritanceTree(config.globalDir.resolve(Serializer.METHOD_INFO_FILE_NAME));
       RegionTracker tracker = new CompoundTracker(config, tree);
       Explorer explorer =
           config.exhaustiveSearch

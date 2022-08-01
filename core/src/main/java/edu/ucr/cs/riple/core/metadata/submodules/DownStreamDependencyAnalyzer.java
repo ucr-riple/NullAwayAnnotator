@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.metadata.submodules;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.explorers.Explorer;
 import edu.ucr.cs.riple.core.explorers.OptimizedExplorer;
@@ -55,7 +56,7 @@ import java.util.stream.Stream;
 public class DownStreamDependencyAnalyzer {
 
   /** Set of downstream dependencies. */
-  private final ImmutableSet<Module> modules;
+  private final ImmutableSet<ModuleInfo> modules;
   /** Public APIs in the target modules that have a non-primitive return value. */
   private final Stream<MethodStatus> methods;
   /** Annotator Config. */
@@ -70,7 +71,7 @@ public class DownStreamDependencyAnalyzer {
 
   public DownStreamDependencyAnalyzer(Config config, MethodInheritanceTree tree) {
     this.config = config;
-    this.modules = config.getDownstreamDependencies();
+    this.modules = config.downstreamInfo;
     this.tree = tree;
     this.injector = new VirtualInjector(config);
     this.methods = tree.getPublicMethodsWithNonPrimitivesReturn().stream().map(MethodStatus::new);
@@ -81,18 +82,9 @@ public class DownStreamDependencyAnalyzer {
    * dependencies are calculated.
    */
   public void explore() {
-    modules.forEach(this::analyzeDownstreamDependency);
-  }
-
-  /**
-   * Analyzes effects of public methods on a module.
-   *
-   * @param module A downstream dependency.
-   */
-  private void analyzeDownstreamDependency(Module module) {
-    Utility.setScannerCheckerActivation(config, true);
+    Utility.setScannerCheckerActivation(modules, true);
     Utility.buildDownstreamDependencies(config);
-    Utility.setScannerCheckerActivation(config, false);
+    Utility.setScannerCheckerActivation(modules, false);
     // Collect callers of public APIs in module.
     MethodRegionTracker tracker = new MethodRegionTracker(config, tree);
     // Generate fixes corresponding methods.
@@ -115,10 +107,11 @@ public class DownStreamDependencyAnalyzer {
             .collect(ImmutableSet.toImmutableSet());
     // Explorer initializations.
     FieldDeclarationAnalysis fieldDeclarationAnalysis =
-        new FieldDeclarationAnalysis(config.dir.resolve("class_info.tsv"));
-    Bank<Error> errorBank = new Bank<>(config.dir.resolve("errors.tsv"), Error::new);
+        new FieldDeclarationAnalysis(config.globalDir.resolve("class_info.tsv"));
+    Bank<Error> errorBank = new Bank<>(config.globalDir.resolve("errors.tsv"), Error::new);
     Bank<Fix> fixBank =
-        new Bank<>(config.dir.resolve("fixes.tsv"), Fix.factory(config, fieldDeclarationAnalysis));
+        new Bank<>(
+            config.globalDir.resolve("fixes.tsv"), Fix.factory(config, fieldDeclarationAnalysis));
     Explorer explorer =
         new OptimizedExplorer(injector, errorBank, fixBank, tracker, fixes, tree, 1, config);
     ImmutableSet<Report> reports = explorer.explore();

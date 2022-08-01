@@ -60,7 +60,7 @@ public class BasicExplorer extends Explorer {
               pb.step();
               Set<Fix> fixes = node.tree;
               injector.injectFixes(fixes);
-              Utility.buildProject(config);
+              Utility.buildTarget(config);
               errorBank.saveState(false, true);
               fixBank.saveState(false, true);
               Result<Error> res = errorBank.compare();

@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
 
   public FieldRegionTracker(Config config) {
-    super(config.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME));
+    super(config.globalDir.resolve(Serializer.FIELD_GRAPH_FILE_NAME));
   }
 
   @Override

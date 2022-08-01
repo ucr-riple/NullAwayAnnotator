@@ -27,7 +27,6 @@ package edu.ucr.cs.riple.core;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.log.Log;
-import edu.ucr.cs.riple.core.metadata.submodules.Module;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -92,12 +91,10 @@ public class Config {
   public final boolean redirectBuildOutputToStdErr;
   /** If activated, it will disable the outer loop. */
   public final boolean disableOuterLoop;
+  /** Info of target module. */
+  public final ModuleInfo target;
   /** Path to directory where all outputs of nullaway and scanner checker is located. */
-  public final Path dir;
-  /** Path to NullAway configPath. */
-  public final Path nullAwayConfigPath;
-  /** Path to Scanner config path. */
-  public final Path scannerConfigPath;
+  public final Path globalDir;
   /** Command to build the target module. */
   public final String buildCommand;
   /** Fully qualified name of the {@code nullable} annotation. */
@@ -107,7 +104,7 @@ public class Config {
   /** If enabled, effects of public API on downstream dependencies will be considered. */
   public final boolean downStreamDependenciesAnalysisActivated;
   /** Sets of config path information for all downstream dependencies. */
-  public final ImmutableSet<DownstreamConfig> downstreamConfigPaths;
+  public final ImmutableSet<ModuleInfo> downstreamInfo;
   /**
    * Path to nullaway library model loader, which enables the communication between annotator and
    * nullaway when processing downstream dependencies.
@@ -303,9 +300,12 @@ public class Config {
             cmd.hasOption(depthOption.getLongOpt())
                 ? cmd.getOptionValue(depthOption.getLongOpt())
                 : "5");
-    this.dir = Paths.get(cmd.getOptionValue(dirOption.getLongOpt()));
-    this.nullAwayConfigPath = Paths.get(cmd.getOptionValue(nullAwayConfigPathOption.getLongOpt()));
-    this.scannerConfigPath = Paths.get(cmd.getOptionValue(scannerConfigPathOption.getLongOpt()));
+    this.globalDir = Paths.get(cmd.getOptionValue(dirOption.getLongOpt()));
+    this.target =
+        new ModuleInfo(
+            globalDir,
+            Paths.get(cmd.getOptionValue(nullAwayConfigPathOption.getLongOpt())),
+            Paths.get(cmd.getOptionValue(scannerConfigPathOption.getLongOpt())));
     this.lexicalPreservationDisabled = cmd.hasOption(disableLexicalPreservationOption.getLongOpt());
     this.chain = cmd.hasOption(chainOption.getLongOpt());
     this.redirectBuildOutputToStdErr =
@@ -319,13 +319,13 @@ public class Config {
     this.downStreamDependenciesAnalysisActivated =
         cmd.hasOption(downstreamDependenciesBuildCommandOption);
     if (this.downStreamDependenciesAnalysisActivated) {
-      this.downstreamConfigPaths =
+      this.downstreamInfo =
           Utility.readFileLines(
                   Paths.get(cmd.getOptionValue(downstreamDependenciesBuildCommandOption)))
               .map(
                   line -> {
                     String[] info = line.split("\\t");
-                    return new DownstreamConfig(Paths.get(info[0]), Paths.get(info[1]));
+                    return new ModuleInfo(this.globalDir, Paths.get(info[0]), Paths.get(info[1]));
                   })
               .collect(ImmutableSet.toImmutableSet());
       this.nullawayLibraryModelLoaderPath =
@@ -334,7 +334,7 @@ public class Config {
           cmd.getOptionValue(downstreamDependenciesBuildCommandOption.getLongOpt());
     } else {
       this.nullawayLibraryModelLoaderPath = null;
-      this.downstreamConfigPaths = null;
+      this.downstreamInfo = null;
       this.downstreamDependenciesBuildCommand = null;
     }
 
@@ -376,15 +376,17 @@ public class Config {
     this.initializerAnnot =
         getValueFromKey(jsonObject, "ANNOTATION:INITIALIZER", String.class)
             .orElse("javax.annotation.Nullable");
-    this.nullAwayConfigPath =
-        Paths.get(
-            getValueFromKey(jsonObject, "NULLAWAY_CONFIG_PATH", String.class)
-                .orElse("/tmp/NullAwayFix/config.xml"));
-    this.scannerConfigPath =
-        Paths.get(
-            getValueFromKey(jsonObject, "SCANNER_CONFIG_PATH", String.class)
-                .orElse("/tmp/NullAwayFix/scanner.xml"));
-    this.dir = Paths.get(getValueFromKey(jsonObject, "OUTPUT_DIR", String.class).orElse(null));
+    this.globalDir =
+        Paths.get(getValueFromKey(jsonObject, "OUTPUT_DIR", String.class).orElse(null));
+    this.target =
+        new ModuleInfo(
+            globalDir,
+            Paths.get(
+                getValueFromKey(jsonObject, "NULLAWAY_CONFIG_PATH", String.class)
+                    .orElse("/tmp/NullAwayFix/config.xml")),
+            Paths.get(
+                getValueFromKey(jsonObject, "SCANNER_CONFIG_PATH", String.class)
+                    .orElse("/tmp/NullAwayFix/scanner.xml")));
     this.buildCommand = getValueFromKey(jsonObject, "BUILD_COMMAND", String.class).orElse(null);
     this.downStreamDependenciesAnalysisActivated =
         getValueFromKey(jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:ACTIVATION", Boolean.class)
@@ -402,13 +404,13 @@ public class Config {
         nullawayLibraryModelLoaderPathString == null
             ? null
             : Paths.get(nullawayLibraryModelLoaderPathString);
-    this.downstreamConfigPaths =
+    this.downstreamInfo =
         ImmutableSet.copyOf(
             getArrayValueFromKey(
                     jsonObject,
                     "DOWNSTREAM_DEPENDENCY_ANALYSIS:CONFIG_PATHS",
-                    DownstreamConfig::new,
-                    DownstreamConfig.class)
+                    instance -> ModuleInfo.buildFromJson(globalDir, instance),
+                    ModuleInfo.class)
                 .orElse(Collections.emptySet()));
     this.log = new Log();
     log.reset();
@@ -417,23 +419,6 @@ public class Config {
   private static void showHelpAndQuit(HelpFormatter formatter, Options options) {
     formatter.printHelp("Annotator config Flags", options);
     System.exit(1);
-  }
-
-  /**
-   * Returns the set of downstream dependencies, returns empty list if {@link
-   * Config#downStreamDependenciesAnalysisActivated} is false.
-   *
-   * @return ImmutableSet of {@link edu.ucr.cs.riple.core.metadata.submodules.Module}.
-   */
-  public ImmutableSet<Module> getDownstreamDependencies() {
-    if (!this.downStreamDependenciesAnalysisActivated) {
-      return ImmutableSet.of();
-    }
-    // Variables inside lambda must be final, need to wrap it a final array.
-    final int[] id = {1};
-    return downstreamConfigPaths.stream()
-        .map(paths -> new Module("module-" + id[0]++, paths.nullawayConfig, paths.scannerConfig))
-        .collect(ImmutableSet.toImmutableSet());
   }
 
   private <T> OrElse<T> getValueFromKey(JSONObject json, String key, Class<T> klass) {
@@ -476,36 +461,9 @@ public class Config {
     }
   }
 
-  /**
-   * Container class to hold paths to nullaway and scanner config files for each downstream
-   * dependency.
-   */
-  private static class DownstreamConfig {
-    /** Path to nullaway config. */
-    private final Path nullawayConfig;
-    /** Path to scanner config. */
-    private final Path scannerConfig;
-
-    public DownstreamConfig(Path nullawayConfig, Path scannerConfig) {
-      this.nullawayConfig = nullawayConfig;
-      this.scannerConfig = scannerConfig;
-    }
-
-    private DownstreamConfig(JSONObject jsonObject) {
-      String nullawayConfigPath = (String) jsonObject.get("NULLAWAY");
-      String scannerConfigPath = (String) jsonObject.get("SCANNER");
-      if (nullawayConfigPath == null || scannerConfigPath == null) {
-        throw new IllegalArgumentException(
-            "Both paths to NullAway and Scanner config files must be set with NULLAWAY and SCANNER keys!");
-      }
-      this.nullawayConfig = Paths.get(nullawayConfigPath);
-      this.scannerConfig = Paths.get(scannerConfigPath);
-    }
-  }
-
   private static class OrElse<T> {
-    final Object value;
-    final Class<T> klass;
+    private final Object value;
+    private final Class<T> klass;
 
     OrElse(Object value, Class<T> klass) {
       this.value = value;
@@ -518,8 +476,8 @@ public class Config {
   }
 
   private static class CollectionOrElse<T> {
-    final Stream<?> value;
-    final Class<T> klass;
+    private final Stream<?> value;
+    private final Class<T> klass;
 
     CollectionOrElse(Stream<?> value, Class<T> klass) {
       this.value = value;

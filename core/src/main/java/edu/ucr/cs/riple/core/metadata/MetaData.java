@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.metadata;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import java.io.BufferedReader;
@@ -62,6 +63,25 @@ public abstract class MetaData<T extends Hashable> {
     } catch (IOException e) {
       throw new RuntimeException("Error happened while loading content of file: " + path, e);
     }
+  }
+
+  /**
+   * Constructor for this container. Contents are accumulated from multiple sources. Once this
+   * constructor is invoked, all data will be loaded from the file.
+   *
+   * @param paths Paths to all files containing data.
+   */
+  public MetaData(ImmutableSet<Path> paths) {
+    contents = MultimapBuilder.hashKeys().arrayListValues().build();
+    setup();
+    paths.forEach(
+        path -> {
+          try {
+            fillNodes(path);
+          } catch (IOException e) {
+            throw new RuntimeException("Error happened while loading content of file: " + path, e);
+          }
+        });
   }
 
   /**
