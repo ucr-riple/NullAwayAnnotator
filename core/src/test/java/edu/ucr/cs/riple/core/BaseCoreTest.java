@@ -70,7 +70,7 @@ public abstract class BaseCoreTest {
           "-Pnullaway-config-path=default");
       int success = processBuilder.start().waitFor();
       if (success != 0) {
-        throw new RuntimeException("Unsuccessful creation of gradle wrapper.");
+        throw new RuntimeException("Unable to create Gradle Wrapper.");
       }
     } catch (IOException | InterruptedException e) {
       throw new RuntimeException("Preparation for test failed", e);

@@ -123,8 +123,8 @@ public class Utility {
     }
   }
 
-  public static Stream<Fix> readFixesFromOutputDirectory(Config config, Factory<Fix> factory) {
-    Path fixesPath = config.globalDir.resolve("fixes.tsv");
+  public static Stream<Fix> readFixesFromOutputDirectory(ModuleInfo info, Factory<Fix> factory) {
+    Path fixesPath = info.dir.resolve("fixes.tsv");
     Set<Fix> fixes = new HashSet<>();
     try {
       try (BufferedReader br = new BufferedReader(new FileReader(fixesPath.toFile()))) {

@@ -311,7 +311,6 @@ public class Config {
     this.disableOuterLoop = cmd.hasOption(disableOuterLoopOption.getLongOpt());
     this.optimized = !cmd.hasOption(disableOptimizationOption.getLongOpt());
     this.exhaustiveSearch = cmd.hasOption(exhaustiveSearchOption.getLongOpt());
-
     this.downStreamDependenciesAnalysisActivated =
         cmd.hasOption(downstreamDependenciesBuildCommandOption);
     if (this.downStreamDependenciesAnalysisActivated) {
@@ -329,12 +328,12 @@ public class Config {
           cmd.getOptionValue(downstreamDependenciesBuildCommandOption.getLongOpt());
     } else {
       this.nullawayLibraryModelLoaderPath = null;
-      this.downstreamInfo = null;
+      this.downstreamInfo = Stream.empty();
       this.downstreamDependenciesBuildCommand = null;
     }
-
     this.log = new Log();
     this.log.reset();
+    makeOutputDirectoriesForModules();
   }
 
   /**
@@ -408,6 +407,23 @@ public class Config {
             .orElse(Stream.of());
     this.log = new Log();
     log.reset();
+    makeOutputDirectoriesForModules();
+  }
+
+  /** Creates output directories for target project and all downstream dependencies. */
+  private void makeOutputDirectoriesForModules() {
+    if (!target.dir.toFile().mkdirs()) {
+      throw new RuntimeException(
+          "Could not create output directory for target project: " + target.dir.toFile());
+    }
+    downstreamInfo.forEach(
+        info -> {
+          if (!info.dir.toFile().mkdirs()) {
+            throw new RuntimeException(
+                "Could not create output directory for downstream dependency: "
+                    + info.dir.toFile());
+          }
+        });
   }
 
   private static void showHelpAndQuit(HelpFormatter formatter, Options options) {

@@ -77,12 +77,12 @@ public class Annotator {
     System.out.println("Making the first build...");
     Utility.buildTarget(config, true);
     Set<OnField> uninitializedFields =
-        Utility.readFixesFromOutputDirectory(config, Fix.factory(config, null))
+        Utility.readFixesFromOutputDirectory(config.target, Fix.factory(config, null))
             .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
             .map(Fix::toField)
             .collect(Collectors.toSet());
     FieldInitializationAnalysis analysis =
-        new FieldInitializationAnalysis(config.globalDir.resolve("field_init.tsv"));
+        new FieldInitializationAnalysis(config.target.dir.resolve("field_init.tsv"));
     Set<AddAnnotation> initializers =
         analysis
             .findInitializers(uninitializedFields)
@@ -100,15 +100,16 @@ public class Annotator {
       Utility.buildTarget(config);
       ImmutableSet<Fix> fixes =
           Utility.readFixesFromOutputDirectory(
-                  config, Fix.factory(config, fieldDeclarationAnalysis))
+                  config.target, Fix.factory(config, fieldDeclarationAnalysis))
               .filter(fix -> !config.useCache || !reports.containsKey(fix))
               .collect(ImmutableSet.toImmutableSet());
-      Bank<Error> errorBank = new Bank<>(config.globalDir.resolve("errors.tsv"), Error::new);
+      Bank<Error> errorBank = new Bank<>(config.target.dir.resolve("errors.tsv"), Error::new);
       Bank<Fix> fixBank =
           new Bank<>(
-              config.globalDir.resolve("fixes.tsv"), Fix.factory(config, fieldDeclarationAnalysis));
+              config.target.dir.resolve("fixes.tsv"),
+              Fix.factory(config, fieldDeclarationAnalysis));
       MethodInheritanceTree tree =
-          new MethodInheritanceTree(config.globalDir.resolve(Serializer.METHOD_INFO_FILE_NAME));
+          new MethodInheritanceTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
       RegionTracker tracker = new CompoundTracker(config.target, tree);
       Explorer explorer =
           config.exhaustiveSearch
