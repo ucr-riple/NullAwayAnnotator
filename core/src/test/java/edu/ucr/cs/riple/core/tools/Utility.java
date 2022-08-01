@@ -35,7 +35,7 @@ public class Utility {
         Objects.requireNonNull(Utility.class.getClassLoader().getResource(relativePath)).getFile());
   }
 
-  public static String changeDirCommand(String path) {
+  public static String changeDirCommand(Path path) {
     String os = System.getProperty("os.name").toLowerCase();
     return (os.startsWith("windows") ? "dir" : "cd") + " " + path;
   }
@@ -44,5 +44,23 @@ public class Utility {
     ProcessBuilder pb = new ProcessBuilder();
     String os = System.getProperty("os.name").toLowerCase();
     return os.startsWith("windows") ? pb.command("cmd.exe", "/c") : pb.command("bash", "-c");
+  }
+
+  /**
+   * Computes the build command for the project template. It includes, changing directory command
+   * from root to project root dir, command to compile the project and the computed paths to config
+   * files which will be passed through gradle command line arguments.
+   *
+   * @param projectPath Path to project directory.
+   * @param outDirPath Path to serialization output directory,
+   * @return The command to build the project including the command line arguments, this command can
+   *     * be executed from any directory.
+   */
+  public static String computeBuildCommandWithGradleCLArguments(Path projectPath, Path outDirPath) {
+    return String.format(
+        "%s && ./gradlew compileJava -Pscanner-config-path=%s -Pnullaway-config-path=%s",
+        Utility.changeDirCommand(projectPath),
+        outDirPath.resolve("scanner.xml"),
+        outDirPath.resolve("config.xml"));
   }
 }
