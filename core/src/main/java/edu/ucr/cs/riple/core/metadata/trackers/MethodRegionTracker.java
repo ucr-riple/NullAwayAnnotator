@@ -35,7 +35,6 @@ import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /** Tracker for Methods. */
 public class MethodRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
@@ -51,9 +50,9 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
     this.tree = tree;
   }
 
-  public MethodRegionTracker(Stream<ModuleInfo> modules, MethodInheritanceTree tree) {
+  public MethodRegionTracker(ImmutableSet<ModuleInfo> modules, MethodInheritanceTree tree) {
     super(
-        modules
+        modules.stream()
             .map(info -> info.dir.resolve(Serializer.CALL_GRAPH_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));
     this.tree = tree;

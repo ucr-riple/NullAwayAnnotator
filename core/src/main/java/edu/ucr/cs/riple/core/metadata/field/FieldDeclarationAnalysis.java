@@ -16,7 +16,6 @@ import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 /**
  * Detects multiple inline field declarations. An annotation will be injected on top of the field
@@ -50,8 +49,11 @@ public class FieldDeclarationAnalysis extends MetaData<FieldDeclarationInfo> {
    *
    * @param modules Information of set of modules.
    */
-  public FieldDeclarationAnalysis(Stream<ModuleInfo> modules) {
-    super(modules.map(info -> info.dir.resolve(FILE_NAME)).collect(ImmutableSet.toImmutableSet()));
+  public FieldDeclarationAnalysis(ImmutableSet<ModuleInfo> modules) {
+    super(
+        modules.stream()
+            .map(info -> info.dir.resolve(FILE_NAME))
+            .collect(ImmutableSet.toImmutableSet()));
   }
 
   @Override

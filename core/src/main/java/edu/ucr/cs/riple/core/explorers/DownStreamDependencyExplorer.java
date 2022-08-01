@@ -54,7 +54,7 @@ import java.util.stream.Stream;
 public class DownStreamDependencyExplorer {
 
   /** Set of downstream dependencies. */
-  private final Stream<ModuleInfo> modules;
+  private final ImmutableSet<ModuleInfo> modules;
   /** Public APIs in the target modules that have a non-primitive return value. */
   private final Stream<MethodStatus> methods;
   /** Annotator Config. */
@@ -107,10 +107,11 @@ public class DownStreamDependencyExplorer {
     FieldDeclarationAnalysis fieldDeclarationAnalysis =
         new FieldDeclarationAnalysis(config.downstreamInfo);
     Bank<Error> errorBank =
-        new Bank<>(config.downstreamInfo.map(info -> info.dir.resolve("errors.tsv")), Error::new);
+        new Bank<>(
+            config.downstreamInfo.stream().map(info -> info.dir.resolve("errors.tsv")), Error::new);
     Bank<Fix> fixBank =
         new Bank<>(
-            config.downstreamInfo.map(info -> info.dir.resolve("fixes.tsv")),
+            config.downstreamInfo.stream().map(info -> info.dir.resolve("fixes.tsv")),
             Fix.factory(config, fieldDeclarationAnalysis));
     Explorer explorer =
         new OptimizedExplorer(injector, errorBank, fixBank, tracker, fixes, tree, 1, config);

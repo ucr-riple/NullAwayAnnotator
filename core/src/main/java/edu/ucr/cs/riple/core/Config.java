@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.io.FileWriter;
@@ -35,8 +36,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -100,7 +103,7 @@ public class Config {
   /** If enabled, effects of public API on downstream dependencies will be considered. */
   public final boolean downStreamDependenciesAnalysisActivated;
   /** Sets of config path information for all downstream dependencies. */
-  public final Stream<ModuleInfo> downstreamInfo;
+  public final ImmutableSet<ModuleInfo> downstreamInfo;
   /**
    * Path to nullaway library model loader, which enables the communication between annotator and
    * nullaway when processing downstream dependencies.
@@ -321,14 +324,15 @@ public class Config {
                   line -> {
                     String[] info = line.split("\\t");
                     return new ModuleInfo(this.globalDir, Paths.get(info[0]), Paths.get(info[1]));
-                  });
+                  })
+              .collect(ImmutableSet.toImmutableSet());
       this.nullawayLibraryModelLoaderPath =
           Paths.get(cmd.getOptionValue(nullawayLibraryModelLoaderPathOption));
       this.downstreamDependenciesBuildCommand =
           cmd.getOptionValue(downstreamDependenciesBuildCommandOption.getLongOpt());
     } else {
       this.nullawayLibraryModelLoaderPath = null;
-      this.downstreamInfo = Stream.empty();
+      this.downstreamInfo = ImmutableSet.of();
       this.downstreamDependenciesBuildCommand = null;
     }
     this.log = new Log();
@@ -399,12 +403,13 @@ public class Config {
             ? null
             : Paths.get(nullawayLibraryModelLoaderPathString);
     this.downstreamInfo =
-        getArrayValueFromKey(
-                jsonObject,
-                "DOWNSTREAM_DEPENDENCY_ANALYSIS:CONFIG_PATHS",
-                instance -> ModuleInfo.buildFromJson(globalDir, instance),
-                ModuleInfo.class)
-            .orElse(Stream.of());
+        ImmutableSet.copyOf(
+            getArrayValueFromKey(
+                    jsonObject,
+                    "DOWNSTREAM_DEPENDENCY_ANALYSIS:CONFIG_PATHS",
+                    instance -> ModuleInfo.buildFromJson(globalDir, instance),
+                    ModuleInfo.class)
+                .orElse(Stream.of()));
     this.log = new Log();
     log.reset();
     makeOutputDirectoriesForModules();
@@ -494,11 +499,11 @@ public class Config {
       this.klass = klass;
     }
 
-    Stream<T> orElse(Stream<T> other) {
+    Collection<T> orElse(Stream<T> other) {
       if (value == null) {
-        return other;
+        return other.collect(Collectors.toList());
       } else {
-        return this.value.map(klass::cast);
+        return this.value.map(klass::cast).collect(Collectors.toList());
       }
     }
   }

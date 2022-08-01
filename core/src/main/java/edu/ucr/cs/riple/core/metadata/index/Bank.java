@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.metadata.index;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -51,13 +52,13 @@ public class Bank<T extends Enclosed> {
   /** Factory instance to parse outputs. */
   private final Factory<T> factory;
   /** Path to file where outputs are stored. */
-  private final Stream<Path> paths;
+  private final ImmutableSet<Path> paths;
 
   public Bank(Stream<Path> paths, Factory<T> factory) {
     this.factory = factory;
-    this.paths = paths;
-    rootInClass = new Index<>(paths, Index.Type.BY_CLASS, factory);
-    rootInMethod = new Index<>(paths, Index.Type.BY_METHOD, factory);
+    this.paths = paths.collect(ImmutableSet.toImmutableSet());
+    rootInClass = new Index<>(this.paths, Index.Type.BY_CLASS, factory);
+    rootInMethod = new Index<>(this.paths, Index.Type.BY_METHOD, factory);
     rootInMethod.index();
     rootInClass.index();
     Preconditions.checkArgument(rootInClass.total == rootInMethod.total);

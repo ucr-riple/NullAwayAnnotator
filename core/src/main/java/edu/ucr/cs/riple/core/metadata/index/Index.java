@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.metadata.index;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
@@ -38,7 +39,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Indexes contents of type {@link Enclosed} based on the computed hash for fast retrieval. This
@@ -52,8 +52,8 @@ public class Index<T extends Enclosed> {
   private final Multimap<Integer, T> items;
   /** Factory instance. */
   private final Factory<T> factory;
-  /** Path to the file to load the content from. */
-  private final Stream<Path> paths;
+  /** Paths to the file to load the content from. */
+  private final ImmutableSet<Path> paths;
   /** Type of index. Used to compute hash. */
   private final Index.Type type;
   /** Total number of items. */
@@ -68,11 +68,11 @@ public class Index<T extends Enclosed> {
   /**
    * Creates an instance of Index. Contents are accumulated from multiple sources.
    *
-   * @param paths Stream of paths to load the data from.
+   * @param paths ImmutableSet of paths to load the data from.
    * @param type Type of index.
    * @param factory Factory to create instances from file lines.
    */
-  public Index(Stream<Path> paths, Index.Type type, Factory<T> factory) {
+  public Index(ImmutableSet<Path> paths, Index.Type type, Factory<T> factory) {
     this.type = type;
     this.paths = paths;
     this.items = MultimapBuilder.hashKeys().arrayListValues().build();

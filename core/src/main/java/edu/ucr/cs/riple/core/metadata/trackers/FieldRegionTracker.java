@@ -33,7 +33,6 @@ import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /** Tracker for Fields. */
 public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
@@ -42,9 +41,9 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
     super(info.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME));
   }
 
-  public FieldRegionTracker(Stream<ModuleInfo> modules) {
+  public FieldRegionTracker(ImmutableSet<ModuleInfo> modules) {
     super(
-        modules
+        modules.stream()
             .map(info -> info.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));
   }
