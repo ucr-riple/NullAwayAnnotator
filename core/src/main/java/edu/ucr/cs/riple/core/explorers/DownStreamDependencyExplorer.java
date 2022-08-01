@@ -22,14 +22,12 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.submodules;
+package edu.ucr.cs.riple.core.explorers;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.explorers.Explorer;
-import edu.ucr.cs.riple.core.explorers.OptimizedExplorer;
 import edu.ucr.cs.riple.core.injectors.VirtualInjector;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
@@ -53,7 +51,7 @@ import java.util.stream.Stream;
  * of additional errors) of each such change, by summing across all downstream dependencies. This
  * data then be fed to the Annotator main process in the decision process.
  */
-public class DownStreamDependencyAnalyzer {
+public class DownStreamDependencyExplorer {
 
   /** Set of downstream dependencies. */
   private final Stream<ModuleInfo> modules;
@@ -69,7 +67,7 @@ public class DownStreamDependencyAnalyzer {
    */
   private final VirtualInjector injector;
 
-  public DownStreamDependencyAnalyzer(Config config, MethodInheritanceTree tree) {
+  public DownStreamDependencyExplorer(Config config, MethodInheritanceTree tree) {
     this.config = config;
     this.modules = config.downstreamInfo;
     this.tree = tree;

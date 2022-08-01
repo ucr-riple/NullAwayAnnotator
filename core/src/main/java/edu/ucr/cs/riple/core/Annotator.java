@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.explorers.BasicExplorer;
+import edu.ucr.cs.riple.core.explorers.DownStreamDependencyExplorer;
 import edu.ucr.cs.riple.core.explorers.ExhaustiveExplorer;
 import edu.ucr.cs.riple.core.explorers.Explorer;
 import edu.ucr.cs.riple.core.explorers.OptimizedExplorer;
@@ -37,7 +38,6 @@ import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
-import edu.ucr.cs.riple.core.metadata.submodules.DownStreamDependencyAnalyzer;
 import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -117,10 +117,10 @@ public class Annotator {
                   ? new OptimizedExplorer(
                       injector, errorBank, fixBank, tracker, fixes, tree, config.depth, config)
                   : new BasicExplorer(injector, errorBank, fixBank, fixes, tree, config);
-      DownStreamDependencyAnalyzer downStreamDependencyAnalyzer =
-          new DownStreamDependencyAnalyzer(config, tree);
+      DownStreamDependencyExplorer downStreamDependencyExplorer =
+          new DownStreamDependencyExplorer(config, tree);
       if (config.downStreamDependenciesAnalysisActivated) {
-        downStreamDependencyAnalyzer.explore();
+        downStreamDependencyExplorer.explore();
       }
       ImmutableSet<Report> latestReports = explorer.explore();
       int sizeBefore = reports.size();
@@ -129,7 +129,7 @@ public class Annotator {
             if (config.downStreamDependenciesAnalysisActivated) {
               report.effect =
                   report.effect
-                      + downStreamDependencyAnalyzer.effectOnDownstreamDependencies(report.root);
+                      + downStreamDependencyExplorer.effectOnDownstreamDependencies(report.root);
             }
             reports.putIfAbsent(report.root, report);
             reports.get(report.root).effect = report.effect;
