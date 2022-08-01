@@ -200,22 +200,6 @@ public class CoreTestHelper {
     fail(errorMessage.toString());
   }
 
-  /**
-   * Computes the build command for the project template. It includes, changing directory command
-   * from root to project root dir, command to compile the project and the computed paths to config
-   * files which will be passed through gradle command line arguments.
-   *
-   * @return The command to build the project including the command line arguments, this command can
-   *     be executed from any directory,
-   */
-  private String computeBuildCommandWithGradleCLArguments() {
-    return String.format(
-        "%s && ./gradlew compileJava -Pscanner-config-path=%s -Pnullaway-config-path=%s",
-        Utility.changeDirCommand(projectPath),
-        outDirPath.resolve("scanner.xml"),
-        outDirPath.resolve("config.xml"));
-  }
-
   private void makeAnnotatorConfigFile(Path path) {
     Config.Builder builder = new Config.Builder();
     builder.buildCommand =
