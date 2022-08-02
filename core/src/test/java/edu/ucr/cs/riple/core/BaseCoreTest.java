@@ -31,7 +31,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
@@ -45,12 +44,12 @@ public abstract class BaseCoreTest {
   @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   protected final String projectTemplate;
-  protected final Set<String> modules;
+  protected final List<String> modules;
   protected Path projectPath;
   protected Path outDirPath;
   protected CoreTestHelper coreTestHelper;
 
-  public BaseCoreTest(String projectTemplate, Set<String> modules) {
+  public BaseCoreTest(String projectTemplate, List<String> modules) {
     this.projectTemplate = projectTemplate;
     this.modules = modules;
   }

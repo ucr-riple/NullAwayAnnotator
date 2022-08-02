@@ -36,8 +36,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -147,6 +147,16 @@ public class Config {
     configPath.setRequired(false);
     options.addOption(configPath);
 
+    // Config Paths
+    Option configPathsOption =
+        new Option(
+            "cp",
+            "config-paths",
+            true,
+            "Path to tsv file containing path to nullaway and scanner config files.");
+    configPathsOption.setRequired(true);
+    options.addOption(configPathsOption);
+
     // Nullable Annotation
     Option nullableOption =
         new Option("n", "nullable", true, "Fully Qualified name of the Nullable annotation");
@@ -222,21 +232,17 @@ public class Config {
     dirOption.setRequired(true);
     options.addOption(dirOption);
 
-    // NullAway Config Path
-    Option nullAwayConfigPathOption =
-        new Option("ncp", "nullaway-config-path", true, "Path to the NullAway Config");
-    nullAwayConfigPathOption.setRequired(true);
-    options.addOption(nullAwayConfigPathOption);
-
-    // Scanner Config Path
-    Option scannerConfigPathOption =
-        new Option("scp", "scanner-config-path", true, "Path to the Scanner Config");
-    scannerConfigPathOption.setRequired(true);
-    options.addOption(scannerConfigPathOption);
-
     // Down stream analysis
     OptionGroup downstreamDepAnalysisOption = new OptionGroup();
     downstreamDepAnalysisOption.setRequired(false);
+    Option downstreamDependenciesActivationOption =
+        new Option(
+            "ddaa",
+            "downstream-dependencies-analysis-activation",
+            true,
+            "Activates downstream dependency analysis");
+    downstreamDependenciesActivationOption.setRequired(true);
+    downstreamDepAnalysisOption.addOption(downstreamDependenciesActivationOption);
     Option downstreamDependenciesBuildCommandOption =
         new Option(
             "ddbc",
@@ -253,14 +259,6 @@ public class Config {
             "NullAway Library Model loader path");
     nullawayLibraryModelLoaderPathOption.setRequired(true);
     downstreamDepAnalysisOption.addOption(nullawayLibraryModelLoaderPathOption);
-    Option downstreamConfigPathsOption =
-        new Option(
-            "ddcp",
-            "downstream-dependencies-config-path",
-            true,
-            "Path to tsv file containing path to nullaway and scanner config files.");
-    downstreamConfigPathsOption.setRequired(true);
-    downstreamDepAnalysisOption.addOption(downstreamConfigPathsOption);
     options.addOptionGroup(downstreamDepAnalysisOption);
 
     HelpFormatter formatter = new HelpFormatter();
@@ -283,12 +281,6 @@ public class Config {
         cmd,
         "cmd cannot be null at this point, as that will cause CommandLineParser.parse to throw ParseException, and the handler above should stop execution in that case.");
 
-    if (cmd.hasOption(downstreamDependenciesBuildCommandOption)
-        != cmd.hasOption(nullawayLibraryModelLoaderPathOption)) {
-      throw new IllegalArgumentException(
-          "To enable downstream dependencies analysis, both --nullaway-library-model-loader-path and --downstream-modules-build-command options must be passed");
-    }
-
     this.buildCommand = cmd.getOptionValue(buildCommandOption.getLongOpt());
     this.nullableAnnot =
         cmd.hasOption(nullableOption.getLongOpt())
@@ -301,11 +293,18 @@ public class Config {
                 ? cmd.getOptionValue(depthOption.getLongOpt())
                 : "5");
     this.globalDir = Paths.get(cmd.getOptionValue(dirOption.getLongOpt()));
-    this.target =
-        new ModuleInfo(
-            globalDir,
-            Paths.get(cmd.getOptionValue(nullAwayConfigPathOption.getLongOpt())),
-            Paths.get(cmd.getOptionValue(scannerConfigPathOption.getLongOpt())));
+    List<ModuleInfo> moduleInfoList =
+        Utility.readFileLines(
+                Paths.get(cmd.getOptionValue(downstreamDependenciesBuildCommandOption)))
+            .map(
+                line -> {
+                  String[] info = line.split("\\t");
+                  return new ModuleInfo(this.globalDir, Paths.get(info[0]), Paths.get(info[1]));
+                })
+            .collect(Collectors.toList());
+    Preconditions.checkArgument(moduleInfoList.size() > 0, "Target module config paths not found.");
+    // First line is information for the target module.
+    this.target = moduleInfoList.get(0);
     this.lexicalPreservationDisabled = cmd.hasOption(disableLexicalPreservationOption.getLongOpt());
     this.chain = cmd.hasOption(chainOption.getLongOpt());
     this.redirectBuildOutputToStdErr =
@@ -316,17 +315,10 @@ public class Config {
     this.optimized = !cmd.hasOption(disableOptimizationOption.getLongOpt());
     this.exhaustiveSearch = cmd.hasOption(exhaustiveSearchOption.getLongOpt());
     this.downStreamDependenciesAnalysisActivated =
-        cmd.hasOption(downstreamDependenciesBuildCommandOption);
+        cmd.hasOption(downstreamDependenciesActivationOption.getLongOpt());
     if (this.downStreamDependenciesAnalysisActivated) {
-      this.downstreamInfo =
-          Utility.readFileLines(
-                  Paths.get(cmd.getOptionValue(downstreamDependenciesBuildCommandOption)))
-              .map(
-                  line -> {
-                    String[] info = line.split("\\t");
-                    return new ModuleInfo(this.globalDir, Paths.get(info[0]), Paths.get(info[1]));
-                  })
-              .collect(ImmutableSet.toImmutableSet());
+      moduleInfoList.remove(0);
+      this.downstreamInfo = ImmutableSet.copyOf(moduleInfoList);
       this.nullawayLibraryModelLoaderPath =
           Paths.get(cmd.getOptionValue(nullawayLibraryModelLoaderPathOption));
       this.downstreamDependenciesBuildCommand =
@@ -376,15 +368,14 @@ public class Config {
             .orElse("javax.annotation.Nullable");
     this.globalDir =
         Paths.get(getValueFromKey(jsonObject, "OUTPUT_DIR", String.class).orElse(null));
-    this.target =
-        new ModuleInfo(
-            globalDir,
-            Paths.get(
-                getValueFromKey(jsonObject, "NULLAWAY_CONFIG_PATH", String.class)
-                    .orElse("/tmp/NullAwayFix/config.xml")),
-            Paths.get(
-                getValueFromKey(jsonObject, "SCANNER_CONFIG_PATH", String.class)
-                    .orElse("/tmp/NullAwayFix/scanner.xml")));
+    List<ModuleInfo> moduleInfoList =
+        getArrayValueFromKey(
+                jsonObject,
+                "CONFIG_PATHS",
+                instance -> ModuleInfo.buildFromJson(globalDir, instance),
+                ModuleInfo.class)
+            .orElse(Collections.emptyList());
+    this.target = moduleInfoList.get(0);
     this.buildCommand = getValueFromKey(jsonObject, "BUILD_COMMAND", String.class).orElse(null);
     this.downStreamDependenciesAnalysisActivated =
         getValueFromKey(jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:ACTIVATION", Boolean.class)
@@ -402,14 +393,8 @@ public class Config {
         nullawayLibraryModelLoaderPathString == null
             ? null
             : Paths.get(nullawayLibraryModelLoaderPathString);
-    this.downstreamInfo =
-        ImmutableSet.copyOf(
-            getArrayValueFromKey(
-                    jsonObject,
-                    "DOWNSTREAM_DEPENDENCY_ANALYSIS:CONFIG_PATHS",
-                    instance -> ModuleInfo.buildFromJson(globalDir, instance),
-                    ModuleInfo.class)
-                .orElse(Collections.emptySet()));
+    moduleInfoList.remove(0);
+    this.downstreamInfo = ImmutableSet.copyOf(moduleInfoList);
     this.log = new Log();
     log.reset();
   }
@@ -442,17 +427,17 @@ public class Config {
   }
 
   @SuppressWarnings({"SameParameterValue", "unchecked"})
-  private <T> CollectionOrElse<T> getArrayValueFromKey(
+  private <T> ListOrElse<T> getArrayValueFromKey(
       JSONObject json, String key, Function<JSONObject, T> mapper, Class<T> klass) {
     if (json == null) {
-      return new CollectionOrElse<>(null, klass);
+      return new ListOrElse<>(null, klass);
     }
     OrElse<T> jsonValue = getValueFromKey(json, key, klass);
     if (jsonValue.value == null) {
-      return new CollectionOrElse<>(null, klass);
+      return new ListOrElse<>(null, klass);
     } else {
       if (jsonValue.value instanceof JSONArray) {
-        return new CollectionOrElse<>(((JSONArray) jsonValue.value).stream().map(mapper), klass);
+        return new ListOrElse<>(((JSONArray) jsonValue.value).stream().map(mapper), klass);
       }
       throw new IllegalStateException(
           "Expected type to be json array, found: " + jsonValue.value.getClass());
@@ -473,16 +458,16 @@ public class Config {
     }
   }
 
-  private static class CollectionOrElse<T> {
+  private static class ListOrElse<T> {
     private final Stream<?> value;
     private final Class<T> klass;
 
-    CollectionOrElse(Stream<?> value, Class<T> klass) {
+    ListOrElse(Stream<?> value, Class<T> klass) {
       this.value = value;
       this.klass = klass;
     }
 
-    Collection<T> orElse(Collection<T> other) {
+    List<T> orElse(List<T> other) {
       if (value == null) {
         return other;
       } else {
@@ -497,8 +482,7 @@ public class Config {
     public String initializerAnnotation;
     public String nullableAnnotation;
     public String outputDir;
-    public String nullAwayConfigPath;
-    public String scannerConfigPath;
+    public Set<ModuleInfo> configPaths;
     public boolean chain = false;
     public boolean optimized = true;
     public boolean exhaustiveSearch = false;
@@ -507,9 +491,7 @@ public class Config {
     public boolean redirectBuildOutputToStdErr = false;
     public boolean lexicalPreservationActivation = true;
     public boolean outerLoopActivation = true;
-
     public boolean downStreamDependenciesAnalysisActivated = false;
-    public Set<ModuleInfo> downstreamModuleInfoSet;
     public String nullawayLibraryModelLoaderPath;
     public String downstreamBuildCommand;
     public int depth = 1;
@@ -524,10 +506,6 @@ public class Config {
       Preconditions.checkNotNull(
           outputDir, "Output Directory must be initialized to construct the config.");
       Preconditions.checkNotNull(
-          nullAwayConfigPath, "NulLAway Config Path must be initialized to construct the config.");
-      Preconditions.checkNotNull(
-          scannerConfigPath, "Scanner Config Path must be initialized to construct the config.");
-      Preconditions.checkNotNull(
           nullableAnnotation, "Nullable Annotation must be initialized to construct the config.");
       JSONObject json = new JSONObject();
       json.put("BUILD_COMMAND", buildCommand);
@@ -538,8 +516,6 @@ public class Config {
       json.put("LEXICAL_PRESERVATION", lexicalPreservationActivation);
       json.put("OUTER_LOOP", outerLoopActivation);
       json.put("OUTPUT_DIR", outputDir);
-      json.put("NULLAWAY_CONFIG_PATH", nullAwayConfigPath);
-      json.put("SCANNER_CONFIG_PATH", scannerConfigPath);
       json.put("CHAIN", chain);
       json.put("OPTIMIZED", optimized);
       json.put("CACHE", cache);
@@ -547,6 +523,18 @@ public class Config {
       json.put("DEPTH", depth);
       json.put("EXHAUSTIVE_SEARCH", exhaustiveSearch);
       json.put("REDIRECT_BUILD_OUTPUT_TO_STDERR", redirectBuildOutputToStdErr);
+      JSONArray configPathsJson = new JSONArray();
+      configPathsJson.addAll(
+          configPaths.stream()
+              .map(
+                  info -> {
+                    JSONObject res = new JSONObject();
+                    res.put("NULLAWAY", info.nullawayConfig.toString());
+                    res.put("SCANNER", info.scannerConfig.toString());
+                    return res;
+                  })
+              .collect(Collectors.toSet()));
+      json.put("CONFIG_PATHS", configPathsJson);
       JSONObject downstreamDependency = new JSONObject();
       downstreamDependency.put("ACTIVATION", downStreamDependenciesAnalysisActivated);
       if (downStreamDependenciesAnalysisActivated) {
@@ -554,21 +542,6 @@ public class Config {
             nullawayLibraryModelLoaderPath,
             "nullawayLibraryModelLoaderPath cannot be null to enable down stream dependency analysis.");
         downstreamDependency.put("LIBRARY_MODEL_LOADER_PATH", nullawayLibraryModelLoaderPath);
-        JSONArray downstreamConfigPaths = new JSONArray();
-        Preconditions.checkNotNull(
-            downstreamModuleInfoSet,
-            "downstreamBuildCommand cannot be null to enable down stream dependency analysis.");
-        downstreamConfigPaths.addAll(
-            downstreamModuleInfoSet.stream()
-                .map(
-                    info -> {
-                      JSONObject res = new JSONObject();
-                      res.put("NULLAWAY", info.nullawayConfig);
-                      res.put("SCANNER", info.scannerConfig);
-                      return res;
-                    })
-                .collect(Collectors.toSet()));
-        downstreamDependency.put("CONFIG_PATHS", downstreamConfigPaths);
         Preconditions.checkNotNull(downstreamBuildCommand);
         downstreamDependency.put("BUILD_COMMAND", downstreamBuildCommand);
       }

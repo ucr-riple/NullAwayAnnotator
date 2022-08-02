@@ -32,6 +32,7 @@ import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collections;
+import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -40,7 +41,7 @@ import org.junit.runners.JUnit4;
 public class DeepTest extends BaseCoreTest {
 
   public DeepTest() {
-    super("unittest", singleton("unittest"));
+    super("unittest", List.of("unittest"));
   }
 
   @Test

@@ -31,12 +31,13 @@ import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
+import java.util.List;
 import org.junit.Test;
 
 public class InheritanceTest extends BaseCoreTest {
 
   public InheritanceTest() {
-    super("unittest", singleton("unittest"));
+    super("unittest", List.of("unittest"));
   }
 
   @Test

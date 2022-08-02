@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.tools;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -59,7 +60,7 @@ public class Utility {
    * @return Gradle command line values with flags.
    */
   public static Set<String> computeConfigPathsWithGradleArguments(
-      Path outDirPath, Set<String> modules) {
+      Path outDirPath, List<String> modules) {
     return modules.stream()
         .flatMap(
             name -> {
@@ -86,7 +87,7 @@ public class Utility {
    *     * be executed from any directory.
    */
   public static String computeBuildCommandWithGradleCLArguments(
-      Path projectPath, Path outDirPath, Set<String> modules) {
+      Path projectPath, Path outDirPath, List<String> modules) {
     return String.format(
         "%s && ./gradlew compileJava %s --rerun-tasks",
         Utility.changeDirCommand(projectPath),

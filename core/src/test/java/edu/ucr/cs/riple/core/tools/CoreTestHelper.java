@@ -53,17 +53,16 @@ public class CoreTestHelper {
   private final Set<Report> expectedReports;
   private final Path projectPath;
   private final Path srcSet;
-  private final Set<String> modules;
+  private final List<String> modules;
   private final Path outDirPath;
   private final Map<String, String[]> fileMap;
-
   private BiPredicate<Report, Report> predicate;
   private int depth = 1;
   private boolean requestCompleteLoop = false;
   private boolean disableBailout = false;
   private boolean downstreamDependencyAnalysisActivated = false;
 
-  public CoreTestHelper(Path projectPath, Path outDirPath, Set<String> modules) {
+  public CoreTestHelper(Path projectPath, Path outDirPath, List<String> modules) {
     this.projectPath = projectPath;
     this.outDirPath = outDirPath;
     this.expectedReports = new HashSet<>();
@@ -126,11 +125,9 @@ public class CoreTestHelper {
     return this;
   }
 
-  public CoreTestHelper enableDownstreamDependencyAnalysis(
-      String buildCommand, ModuleInfo... dependencies) {
-    // todo: Complete this function the in the follow up PRs.
-    throw new UnsupportedOperationException(
-        "This function is not implemented yet, will be updated in the follow up PRs.");
+  public CoreTestHelper enableDownstreamDependencyAnalysis() {
+    this.downstreamDependencyAnalysisActivated = true;
+    return this;
   }
 
   public void start() {
@@ -203,8 +200,15 @@ public class CoreTestHelper {
     builder.buildCommand =
         Utility.computeBuildCommandWithGradleCLArguments(
             this.projectPath, this.outDirPath, modules);
-    builder.scannerConfigPath = outDirPath.resolve("unittest-scanner.xml").toString();
-    builder.nullAwayConfigPath = outDirPath.resolve("unittest-nullaway.xml").toString();
+    builder.configPaths =
+        modules.stream()
+            .map(
+                name ->
+                    new ModuleInfo(
+                        outDirPath,
+                        outDirPath.resolve(name + "-nullaway.xml"),
+                        outDirPath.resolve(name + "-scanner.xml")))
+            .collect(Collectors.toSet());
     builder.nullableAnnotation = "javax.annotation.Nullable";
     builder.initializerAnnotation = "test.Initializer";
     builder.outputDir = outDirPath.toString();
