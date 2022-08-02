@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.VirtualInjector;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
@@ -36,6 +37,7 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
+import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -117,7 +119,8 @@ public class DownStreamDependencyExplorer {
             config.downstreamInfo.stream().map(info -> info.dir.resolve("fixes.tsv")),
             Fix.factory(config, fieldDeclarationAnalysis));
     Explorer explorer =
-        new OptimizedExplorer(injector, errorBank, fixBank, tracker, fixes, tree, 1, config);
+        new OptimizedDownstreamDependencyAnalyzer(
+            injector, errorBank, fixBank, tracker, fixes, tree, 1, config);
     ImmutableSet<Report> reports = explorer.explore();
     // Update method status based on the results.
     methods.forEach(
@@ -167,6 +170,27 @@ public class DownStreamDependencyExplorer {
     public MethodStatus(MethodNode node) {
       this.node = node;
       this.effect = 0;
+    }
+  }
+
+  /** Explorer for analyzing downstream dependencies. */
+  private static class OptimizedDownstreamDependencyAnalyzer extends OptimizedExplorer {
+
+    public OptimizedDownstreamDependencyAnalyzer(
+        AnnotationInjector injector,
+        Bank<Error> errorBank,
+        Bank<Fix> fixBank,
+        RegionTracker tracker,
+        ImmutableSet<Fix> fixes,
+        MethodInheritanceTree methodInheritanceTree,
+        int depth,
+        Config config) {
+      super(injector, errorBank, fixBank, tracker, fixes, methodInheritanceTree, depth, config);
+    }
+
+    @Override
+    public void rerunAnalysis() {
+      Utility.buildDownstreamDependencies(config);
     }
   }
 }

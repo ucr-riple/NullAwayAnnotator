@@ -233,7 +233,7 @@ public class CoreTestHelper {
                       "ucr",
                       "cs",
                       "riple",
-                      "librarymode",
+                      "librarymodel",
                       "nullable-methods.tsv"));
     } else {
       builder.buildCommand =

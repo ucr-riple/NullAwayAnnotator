@@ -36,12 +36,13 @@ public class DownstreamAnalysisTest extends BaseCoreTest {
   }
 
   @Test
-  public void public_method() {
+  public void public_method_with_downstream_dependency_enabled() {
     coreTestHelper
         .addExpectedReports(
-            new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int i)"), 3),
-            new TReport(
-                new OnMethod("Foo.java", "test.target.Foo", "returnNullableGood(int i)"), -4))
+            new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int)"), 5),
+            new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableGood(int)"), -4))
+        .setPredicate((report, other) -> report.effect == other.effect)
+        .toDepth(1)
         .enableDownstreamDependencyAnalysis()
         .start();
   }
