@@ -50,40 +50,28 @@ public class Utility {
   }
 
   /**
-   * Creates the gradle command line default arguments. Project name is used as a prefix for config
-   * files names.
-   *
-   * @param projectNames Set of all projects in the template.
-   * @return Set of Gradle command line arguments with default values.
-   */
-  public static Set<String> computeConfigPathsWithGradleArguments(Set<String> projectNames) {
-    final String defaultValue = "unknown";
-    return projectNames.stream()
-        .flatMap(
-            name ->
-                Stream.of(
-                    String.format("-P%s-nullaway-config-path=%s", name, defaultValue),
-                    String.format("-P%s-scanner-config-path=%s", name, defaultValue)))
-        .collect(Collectors.toSet());
-  }
-
-  /**
-   * Creates the gradle command line arguments. Project name is used as a prefix for config files
+   * Creates the gradle command line arguments. Project names are used as a prefix for config files
    * names and output paths.
    *
    * @param outDirPath Root output path.
-   * @param projectName Project name (Prefix for all variable name and values).
+   * @param modules Name of all containing projects in the template. (Prefix for all variable name
+   *     and values).
    * @return Gradle command line values with flags.
    */
-  private static String computeConfigPathsWithGradleArguments(Path outDirPath, String projectName) {
-    String nullawayConfigName = projectName + "-nullaway.xml";
-    String scannerConfigName = projectName + "-scanner.xml";
-    return String.format(
-        "-P%s-nullaway-config-path=%s -P%s-scanner-config-path=%s",
-        projectName,
-        outDirPath.resolve(nullawayConfigName),
-        projectName,
-        outDirPath.resolve(scannerConfigName));
+  public static Set<String> computeConfigPathsWithGradleArguments(
+      Path outDirPath, Set<String> modules) {
+    return modules.stream()
+        .flatMap(
+            name -> {
+              String nullawayConfigName = name + "-nullaway.xml";
+              String scannerConfigName = name + "-scanner.xml";
+              return Stream.of(
+                  String.format(
+                      "-P%s-nullaway-config-path=%s", name, outDirPath.resolve(nullawayConfigName)),
+                  String.format(
+                      "-P%s-scanner-config-path=%s", name, outDirPath.resolve(scannerConfigName)));
+            })
+        .collect(Collectors.toSet());
   }
 
   /**
@@ -93,15 +81,15 @@ public class Utility {
    *
    * @param projectPath Path to project directory.
    * @param outDirPath Path to serialization output directory,
-   * @param targetProject Name of the target project.
+   * @param modules Set of names of the modules in the template.
    * @return The command to build the project including the command line arguments, this command can
    *     * be executed from any directory.
    */
   public static String computeBuildCommandWithGradleCLArguments(
-      Path projectPath, Path outDirPath, String targetProject) {
+      Path projectPath, Path outDirPath, Set<String> modules) {
     return String.format(
         "%s && ./gradlew compileJava %s --rerun-tasks",
         Utility.changeDirCommand(projectPath),
-        computeConfigPathsWithGradleArguments(outDirPath, targetProject));
+        String.join(" ", computeConfigPathsWithGradleArguments(outDirPath, modules)));
   }
 }

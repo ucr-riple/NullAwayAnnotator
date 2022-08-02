@@ -27,6 +27,6 @@ package edu.ucr.cs.riple.core;
 public class DownstreamAnalysisTest extends BaseCoreTest {
 
   public DownstreamAnalysisTest() {
-    super("downstream-dependency-test");
+    super("downstream-dependency-test", null);
   }
 }

@@ -40,7 +40,7 @@ import org.junit.runners.JUnit4;
 public class DeepTest extends BaseCoreTest {
 
   public DeepTest() {
-    super("unittest");
+    super("unittest", singleton("unittest"));
   }
 
   @Test

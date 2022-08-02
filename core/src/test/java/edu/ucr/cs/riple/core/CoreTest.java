@@ -39,7 +39,7 @@ import org.junit.runners.JUnit4;
 public class CoreTest extends BaseCoreTest {
 
   public CoreTest() {
-    super("unittest");
+    super("unittest", singleton("unittest"));
   }
 
   @Test

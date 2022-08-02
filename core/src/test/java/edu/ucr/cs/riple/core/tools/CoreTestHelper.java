@@ -53,6 +53,7 @@ public class CoreTestHelper {
   private final Set<Report> expectedReports;
   private final Path projectPath;
   private final Path srcSet;
+  private final Set<String> modules;
   private final Path outDirPath;
   private final Map<String, String[]> fileMap;
 
@@ -60,19 +61,15 @@ public class CoreTestHelper {
   private int depth = 1;
   private boolean requestCompleteLoop = false;
   private boolean disableBailout = false;
-
   private boolean downstreamDependencyAnalysisActivated = false;
 
-  private Set<String> downstreamBuildCommands;
-
-  private String libraryModelLoaderPath;
-
-  public CoreTestHelper(Path projectPath, Path outDirPath) {
+  public CoreTestHelper(Path projectPath, Path outDirPath, Set<String> modules) {
     this.projectPath = projectPath;
     this.outDirPath = outDirPath;
     this.expectedReports = new HashSet<>();
     this.fileMap = new HashMap<>();
     this.srcSet = this.projectPath.resolve("src").resolve("main").resolve("java").resolve("test");
+    this.modules = modules;
   }
 
   public CoreTestHelper addInputLines(String path, String... lines) {
@@ -205,7 +202,7 @@ public class CoreTestHelper {
     Config.Builder builder = new Config.Builder();
     builder.buildCommand =
         Utility.computeBuildCommandWithGradleCLArguments(
-            this.projectPath, this.outDirPath, "unittest");
+            this.projectPath, this.outDirPath, modules);
     builder.scannerConfigPath = outDirPath.resolve("unittest-scanner.xml").toString();
     builder.nullAwayConfigPath = outDirPath.resolve("unittest-nullaway.xml").toString();
     builder.nullableAnnotation = "javax.annotation.Nullable";
@@ -216,9 +213,6 @@ public class CoreTestHelper {
     builder.chain = true;
     builder.outerLoopActivation = requestCompleteLoop;
     builder.optimized = true;
-    builder.downStreamDependenciesAnalysisActivated = downstreamDependencyAnalysisActivated;
-    builder.nullawayLibraryModelLoaderPath = libraryModelLoaderPath;
-    //    builder.downstreamModuleInfoSet = downstreamBuildCommands;
     builder.write(path);
   }
 

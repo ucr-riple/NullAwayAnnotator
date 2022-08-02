@@ -36,7 +36,7 @@ import org.junit.Test;
 public class InheritanceTest extends BaseCoreTest {
 
   public InheritanceTest() {
-    super("unittest");
+    super("unittest", singleton("unittest"));
   }
 
   @Test

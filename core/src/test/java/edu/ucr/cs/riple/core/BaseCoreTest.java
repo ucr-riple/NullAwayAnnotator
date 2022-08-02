@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
@@ -42,17 +41,18 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public abstract class BaseCoreTest {
+
   @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   protected final String projectTemplate;
+  protected final Set<String> modules;
   protected Path projectPath;
   protected Path outDirPath;
   protected CoreTestHelper coreTestHelper;
 
-  protected Set<String> subprojects = Collections.singleton("unittest");
-
-  public BaseCoreTest(String projectTemplate) {
+  public BaseCoreTest(String projectTemplate, Set<String> modules) {
     this.projectTemplate = projectTemplate;
+    this.modules = modules;
   }
 
   @Before
@@ -72,7 +72,7 @@ public abstract class BaseCoreTest {
       commands.add("wrapper");
       commands.add("--gradle-version");
       commands.add("6.1");
-      commands.addAll(Utility.computeConfigPathsWithGradleArguments(subprojects));
+      commands.addAll(Utility.computeConfigPathsWithGradleArguments(outDirPath, modules));
       processBuilder.command(commands);
       int success = processBuilder.start().waitFor();
       if (success != 0) {
@@ -81,6 +81,6 @@ public abstract class BaseCoreTest {
     } catch (IOException | InterruptedException e) {
       throw new RuntimeException("Preparation for test failed", e);
     }
-    coreTestHelper = new CoreTestHelper(projectPath, outDirPath);
+    coreTestHelper = new CoreTestHelper(projectPath, outDirPath, modules);
   }
 }
