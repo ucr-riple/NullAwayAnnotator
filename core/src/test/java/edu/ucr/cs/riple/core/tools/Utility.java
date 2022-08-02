@@ -27,6 +27,9 @@ package edu.ucr.cs.riple.core.tools;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Utility {
 
@@ -44,6 +47,24 @@ public class Utility {
     ProcessBuilder pb = new ProcessBuilder();
     String os = System.getProperty("os.name").toLowerCase();
     return os.startsWith("windows") ? pb.command("cmd.exe", "/c") : pb.command("bash", "-c");
+  }
+
+  /**
+   * Creates the gradle command line default arguments. Project name is used as a prefix for config
+   * files names.
+   *
+   * @param projectNames Set of all projects in the template.
+   * @return Set of Gradle command line arguments with default values.
+   */
+  public static Set<String> computeConfigPathsWithGradleArguments(Set<String> projectNames) {
+    final String defaultValue = "unknown";
+    return projectNames.stream()
+        .flatMap(
+            name ->
+                Stream.of(
+                    String.format("-P%s-nullaway-config-path=%s", name, defaultValue),
+                    String.format("-P%s-scanner-config-path=%s", name, defaultValue)))
+        .collect(Collectors.toSet());
   }
 
   /**

@@ -29,6 +29,10 @@ import edu.ucr.cs.riple.core.tools.Utility;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
@@ -44,6 +48,8 @@ public abstract class BaseCoreTest {
   protected Path projectPath;
   protected Path outDirPath;
   protected CoreTestHelper coreTestHelper;
+
+  protected Set<String> subprojects = Collections.singleton("unittest");
 
   public BaseCoreTest(String projectTemplate) {
     this.projectTemplate = projectTemplate;
@@ -61,13 +67,13 @@ public abstract class BaseCoreTest {
       FileUtils.copyDirectory(pathToUnitTestDir.toFile(), projectPath.toFile());
       ProcessBuilder processBuilder = Utility.createProcessInstance();
       processBuilder.directory(projectPath.toFile());
-      processBuilder.command(
-          "gradle",
-          "wrapper",
-          "--gradle-version",
-          "6.1",
-          "-Punittest-scanner-config-path=default",
-          "-Punittest-nullaway-config-path=default");
+      List<String> commands = new ArrayList<>();
+      commands.add("gradle");
+      commands.add("wrapper");
+      commands.add("--gradle-version");
+      commands.add("6.1");
+      commands.addAll(Utility.computeConfigPathsWithGradleArguments(subprojects));
+      processBuilder.command(commands);
       int success = processBuilder.start().waitFor();
       if (success != 0) {
         throw new RuntimeException("Unable to create Gradle Wrapper.");
