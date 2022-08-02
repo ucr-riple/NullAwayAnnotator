@@ -20,36 +20,20 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.libtest.depb;
+package test.depc;
 
-import edu.ucr.cs.riple.libtest.target.Foo;
+import test.target.Foo;
 
-public class DepB {
+public class DepC {
 
   Foo foo = new Foo();
+  Object f;
 
-  public void run() {
-    exec1(foo.returnNullableBad(0));
-    exec2(foo.returnNullableBad(0));
+  DepC() {
+    f = foo.returnNullableBad(0);
   }
 
-  public void exec1(Object obj) {
-    System.out.println(obj);
-  }
-
-  public void exec2(Object obj) {
-    System.out.println(obj);
-    System.out.println(exec3(foo.returnNullableBad(0)));
-  }
-
-  public Object exec3(Object obj) {
-    if (obj == null) {
-      return foo.returnNullableBad(0);
-    }
-    return obj;
-  }
-
-  public Object exec4() {
-    return foo.returnNullableGood(0);
+  public Object returnNullableInDepC() {
+    return foo.returnNullableBad(0);
   }
 }

@@ -39,10 +39,7 @@ public class DownstreamAnalysisTest extends BaseCoreTest {
   public void public_method() {
     coreTestHelper
         .addExpectedReports(
-            new TReport(
-                new OnMethod(
-                    "Foo.java", "edu.ucr.cs.riple.libtest.target.Foo", "returnNullableBad(int i)"),
-                3))
+            new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int i)"), 3))
         .enableDownstreamDependencyAnalysis()
         .start();
   }

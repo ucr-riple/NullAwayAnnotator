@@ -57,6 +57,7 @@ public abstract class BaseCoreTest {
   @Before
   public void setup() {
     outDirPath = Paths.get(temporaryFolder.getRoot().getAbsolutePath());
+    outDirPath = Paths.get("/tmp/NullAwayFix");
     projectPath = outDirPath.resolve(projectTemplate);
     Path templates = Paths.get("templates");
     Path pathToUnitTestDir =
@@ -72,8 +73,11 @@ public abstract class BaseCoreTest {
       commands.add("--gradle-version");
       commands.add("6.1");
       commands.addAll(Utility.computeConfigPathsWithGradleArguments(outDirPath, modules));
-      commands.add("-Plibrary-model-loader-path=unknwown");
+      commands.add(
+          "-Plibrary-model-loader-path="
+              + Utility.getPathToLibraryModel().resolve("build").resolve("libs"));
       processBuilder.command(commands);
+      System.out.println(String.join(" ", commands));
       int success = processBuilder.start().waitFor();
       if (success != 0) {
         throw new RuntimeException("Unable to create Gradle Wrapper.");

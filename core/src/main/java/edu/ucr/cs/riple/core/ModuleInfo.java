@@ -24,6 +24,8 @@
 
 package edu.ucr.cs.riple.core;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.json.simple.JSONObject;
@@ -36,10 +38,8 @@ public class ModuleInfo {
   public final Path scannerConfig;
   /** Directory where all serialized data from checkers are located. */
   public final Path dir;
-  /** Unique id for this build info. */
-  private final int id;
   /** Global counter for assigning unique id for each instance. */
-  private static int GLOBAL_ID = 0;
+  public static int GLOBAL_ID = 0;
 
   /**
    * Creates an instance of {@link ModuleInfo} from the given json object.
@@ -61,11 +61,15 @@ public class ModuleInfo {
   public ModuleInfo(Path globalDir, Path nullawayConfig, Path scannerConfig) {
     this.nullawayConfig = nullawayConfig;
     this.scannerConfig = scannerConfig;
-    this.id = GLOBAL_ID++;
-    this.dir = globalDir.resolve(String.valueOf(this.id));
-    if (!this.dir.toFile().mkdirs()) {
-      throw new RuntimeException(
-          "Could not create output directory for project: " + this.dir.toFile());
+    this.dir = globalDir.resolve(String.valueOf(GLOBAL_ID++));
+    try {
+      Files.deleteIfExists(this.dir);
+      if (!this.dir.toFile().mkdirs()) {
+        throw new RuntimeException(
+            "Could not create output directory for project: " + this.dir.toFile());
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 }

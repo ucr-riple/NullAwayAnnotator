@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.libtest.target;
+package test.target;
 
 public class Foo {
   Object field = new Object();

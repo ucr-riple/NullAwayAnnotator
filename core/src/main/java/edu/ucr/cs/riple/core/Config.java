@@ -38,7 +38,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -482,7 +481,12 @@ public class Config {
     public String initializerAnnotation;
     public String nullableAnnotation;
     public String outputDir;
-    public Set<ModuleInfo> configPaths;
+    /**
+     * List of modules, did not use {@link java.util.Set} to preserve order. First project is the
+     * target project.
+     */
+    public List<ModuleInfo> configPaths;
+
     public boolean chain = false;
     public boolean optimized = true;
     public boolean exhaustiveSearch = false;
@@ -533,7 +537,7 @@ public class Config {
                     res.put("SCANNER", info.scannerConfig.toString());
                     return res;
                   })
-              .collect(Collectors.toSet()));
+              .collect(Collectors.toList()));
       json.put("CONFIG_PATHS", configPathsJson);
       JSONObject downstreamDependency = new JSONObject();
       downstreamDependency.put("ACTIVATION", downStreamDependenciesAnalysisActivated);

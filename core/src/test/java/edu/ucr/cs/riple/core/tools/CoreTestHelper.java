@@ -150,7 +150,7 @@ public class CoreTestHelper {
 
   /** Checks if all src inputs are subpackages of test package. */
   private void checkSourcePackages() {
-    try (Stream<Path> walk = Files.walk(srcSet)) {
+    try (Stream<Path> walk = Files.walk(projectPath)) {
       walk.filter(path -> path.toFile().isFile() && path.toFile().getName().endsWith(".java"))
           .forEach(
               path -> {
@@ -198,9 +198,6 @@ public class CoreTestHelper {
 
   private void makeAnnotatorConfigFile(Path path) {
     Config.Builder builder = new Config.Builder();
-    builder.buildCommand =
-        Utility.computeBuildCommandWithGradleCLArguments(
-            this.projectPath, this.outDirPath, modules);
     builder.configPaths =
         modules.stream()
             .map(
@@ -209,7 +206,8 @@ public class CoreTestHelper {
                         outDirPath,
                         outDirPath.resolve(name + "-nullaway.xml"),
                         outDirPath.resolve(name + "-scanner.xml")))
-            .collect(Collectors.toSet());
+            .collect(Collectors.toList());
+    ModuleInfo.GLOBAL_ID = 0;
     builder.nullableAnnotation = "javax.annotation.Nullable";
     builder.initializerAnnotation = "test.Initializer";
     builder.outputDir = outDirPath.toString();
@@ -225,7 +223,11 @@ public class CoreTestHelper {
               this.projectPath, this.outDirPath, modules);
       builder.downstreamBuildCommand = builder.buildCommand;
       builder.nullawayLibraryModelLoaderPath =
-          Paths.get(System.getProperty("dir"), "src", "main", "resources", "nullable-methods.tsv");
+          Paths.get(System.getProperty("user.dir"))
+              .getParent()
+              .resolve(
+                  Paths.get(
+                      "library-model-loader", "src", "main", "resources", "nullable-methods.tsv"));
     } else {
       builder.buildCommand =
           Utility.computeBuildCommandWithGradleCLArguments(

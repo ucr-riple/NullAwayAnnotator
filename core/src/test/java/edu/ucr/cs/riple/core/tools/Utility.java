@@ -108,15 +108,16 @@ public class Utility {
   public static String computeBuildCommandWithGradleCLArgumentsWithLibraryModelLoader(
       Path projectPath, Path outDirPath, List<String> modules) {
     return String.format(
-        "%s && ./gradlew library-model-loader:jar %s && ./gradlew compileJava %s -Plibrary-model-loader-path=%s --rerun-tasks",
-        Utility.changeDirCommand(Paths.get(System.getProperty("dir"))),
+        "%s && ./gradlew library-model-loader:jar && %s && ./gradlew compileJava %s -Plibrary-model-loader-path=%s --rerun-tasks",
+        Utility.changeDirCommand(Paths.get(System.getProperty("user.dir")).getParent()),
         Utility.changeDirCommand(projectPath),
         String.join(" ", computeConfigPathsWithGradleArguments(outDirPath, modules)),
-        Paths.get(
-            System.getProperty("dir"),
-            "library-model-loader",
-            "build",
-            "libs",
-            "librarymodel.jar"));
+        getPathToLibraryModel().resolve(Paths.get("build", "libs", "librarymodel.jar")));
+  }
+
+  public static Path getPathToLibraryModel() {
+    return Paths.get(System.getProperty("user.dir"))
+        .getParent()
+        .resolve(Paths.get("library-model-loader"));
   }
 }

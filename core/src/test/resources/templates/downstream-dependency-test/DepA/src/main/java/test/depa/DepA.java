@@ -20,9 +20,9 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.libtest.depa;
+package test.depa;
 
-import edu.ucr.cs.riple.libtest.target.Foo;
+import test.target.Foo;
 
 public class DepA {
   Object field1 = new Object();
