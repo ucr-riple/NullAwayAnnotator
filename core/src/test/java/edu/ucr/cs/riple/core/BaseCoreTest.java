@@ -77,7 +77,6 @@ public abstract class BaseCoreTest {
           "-Plibrary-model-loader-path="
               + Utility.getPathToLibraryModel().resolve("build").resolve("libs"));
       processBuilder.command(commands);
-      System.out.println(String.join(" ", commands));
       int success = processBuilder.start().waitFor();
       if (success != 0) {
         throw new RuntimeException("Unable to create Gradle Wrapper.");

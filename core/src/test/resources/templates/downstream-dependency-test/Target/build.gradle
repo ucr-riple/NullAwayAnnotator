@@ -54,7 +54,7 @@ tasks.withType(JavaCompile) {
     if (!name.toLowerCase().contains("test")) {
         options.errorprone.errorproneArgs += ["-XepDisableAllChecks",
                                               "-Xep:NullAway:WARN",
-                                              "-XepOpt:NullAway:AnnotatedPackages=edu.ucr.cs.riple.libtest",
+                                              "-XepOpt:NullAway:AnnotatedPackages=test",
                                               "-XepOpt:NullAway:SerializeFixMetadata=true",
                                               "-XepOpt:NullAway:FixSerializationConfigPath=" + project.getProperty("Target-nullaway-config-path"),
                                               "-Xep:Scanner:ERROR",

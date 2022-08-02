@@ -223,11 +223,8 @@ public class CoreTestHelper {
               this.projectPath, this.outDirPath, modules);
       builder.downstreamBuildCommand = builder.buildCommand;
       builder.nullawayLibraryModelLoaderPath =
-          Paths.get(System.getProperty("user.dir"))
-              .getParent()
-              .resolve(
-                  Paths.get(
-                      "library-model-loader", "src", "main", "resources", "nullable-methods.tsv"));
+          Utility.getPathToLibraryModel()
+              .resolve(Paths.get("src", "main", "resources", "nullable-methods.tsv"));
     } else {
       builder.buildCommand =
           Utility.computeBuildCommandWithGradleCLArguments(
