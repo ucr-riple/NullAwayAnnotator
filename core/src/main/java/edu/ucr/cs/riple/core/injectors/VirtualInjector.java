@@ -49,10 +49,12 @@ public class VirtualInjector extends AnnotationInjector {
   public VirtualInjector(Config config) {
     super(config);
     this.libraryModelPath = config.nullawayLibraryModelLoaderPath;
-    Preconditions.checkNotNull(
-        libraryModelPath,
-        "NullawayLibraryModelLoaderPath cannot be null while downstream dependencies analysis is activated.");
-    clear();
+    if (config.downStreamDependenciesAnalysisActivated) {
+      Preconditions.checkNotNull(
+          libraryModelPath,
+          "NullawayLibraryModelLoaderPath cannot be null while downstream dependencies analysis is activated.");
+      clear();
+    }
   }
 
   /** Removes any existing entry from library models. */
