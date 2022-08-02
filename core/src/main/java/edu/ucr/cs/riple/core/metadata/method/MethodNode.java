@@ -89,7 +89,7 @@ public class MethodNode implements Hashable {
    */
   private static MethodNode top() {
     if (TOP == null) {
-      MethodNode node = new MethodNode(-1);
+      MethodNode node = new MethodNode(0);
       node.fillInformation("null", "null", -1, 0, false, "private", false);
       return node;
     }

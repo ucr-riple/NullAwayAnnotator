@@ -25,7 +25,6 @@
 package edu.ucr.cs.riple.core.injectors;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.changes.Change;
@@ -62,8 +61,8 @@ public class VirtualInjector extends AnnotationInjector {
     try (BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(path.toFile()))) {
       Set<String> rows =
           fixes.stream()
-              .filter((Predicate<Fix>) Fix::isOnMethod)
-              .map(fix -> fix.toMethod().clazz + "\t" + fix.toMethod().method)
+              .filter(Fix::isOnMethod)
+              .map(fix -> fix.toMethod().clazz + "\t" + fix.toMethod().method + "\n")
               .collect(Collectors.toSet());
       for (String row : rows) {
         os.write(row.getBytes(Charset.defaultCharset()), 0, row.length());

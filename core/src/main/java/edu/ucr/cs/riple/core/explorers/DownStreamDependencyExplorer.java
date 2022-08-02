@@ -40,7 +40,6 @@ import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * Analyzer for downstream dependencies.
@@ -56,7 +55,7 @@ public class DownStreamDependencyExplorer {
   /** Set of downstream dependencies. */
   private final ImmutableSet<ModuleInfo> modules;
   /** Public APIs in the target modules that have a non-primitive return value. */
-  private final Stream<MethodStatus> methods;
+  private final ImmutableSet<MethodStatus> methods;
   /** Annotator Config. */
   private final Config config;
   /** Method inheritance instance. */
@@ -72,7 +71,10 @@ public class DownStreamDependencyExplorer {
     this.modules = config.downstreamInfo;
     this.tree = tree;
     this.injector = new VirtualInjector(config);
-    this.methods = tree.getPublicMethodsWithNonPrimitivesReturn().stream().map(MethodStatus::new);
+    this.methods =
+        tree.getPublicMethodsWithNonPrimitivesReturn().stream()
+            .map(MethodStatus::new)
+            .collect(ImmutableSet.toImmutableSet());
   }
 
   /**
@@ -80,6 +82,7 @@ public class DownStreamDependencyExplorer {
    * dependencies are calculated.
    */
   public void explore() {
+    System.out.println("Analysing downstream dependencies...");
     Utility.setScannerCheckerActivation(modules, true);
     Utility.buildDownstreamDependencies(config);
     Utility.setScannerCheckerActivation(modules, false);
@@ -87,7 +90,7 @@ public class DownStreamDependencyExplorer {
     MethodRegionTracker tracker = new MethodRegionTracker(config.downstreamInfo, tree);
     // Generate fixes corresponding methods.
     ImmutableSet<Fix> fixes =
-        methods
+        methods.stream()
             .filter(
                 input ->
                     !tracker
@@ -129,6 +132,7 @@ public class DownStreamDependencyExplorer {
                   .findAny();
           optional.ifPresent(report -> method.effect += report.effect);
         });
+    System.out.println("Analysing downstream dependencies completed!");
   }
 
   /**
@@ -143,7 +147,7 @@ public class DownStreamDependencyExplorer {
     }
     OnMethod onMethod = fix.toMethod();
     Optional<MethodStatus> optional =
-        this.methods
+        this.methods.stream()
             .filter(
                 m -> m.node.method.equals(onMethod.method) && m.node.clazz.equals(onMethod.clazz))
             .findAny();

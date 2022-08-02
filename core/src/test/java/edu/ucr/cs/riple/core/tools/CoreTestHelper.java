@@ -224,7 +224,17 @@ public class CoreTestHelper {
       builder.downstreamBuildCommand = builder.buildCommand;
       builder.nullawayLibraryModelLoaderPath =
           Utility.getPathToLibraryModel()
-              .resolve(Paths.get("src", "main", "resources", "nullable-methods.tsv"));
+              .resolve(
+                  Paths.get(
+                      "src",
+                      "main",
+                      "resources",
+                      "edu",
+                      "ucr",
+                      "cs",
+                      "riple",
+                      "librarymode",
+                      "nullable-methods.tsv"));
     } else {
       builder.buildCommand =
           Utility.computeBuildCommandWithGradleCLArguments(

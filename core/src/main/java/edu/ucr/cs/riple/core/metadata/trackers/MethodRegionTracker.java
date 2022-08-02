@@ -73,7 +73,7 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
     Set<Region> regions = getCallersOfMethod(onMethod.clazz, onMethod.method);
     // Add immediate super method.
     MethodNode parent = tree.getClosestSuperMethod(onMethod.method, onMethod.clazz);
-    if (parent != null) {
+    if (parent != null && parent.isNonTop()) {
       regions.add(new Region(parent.clazz, parent.method));
     }
     return Optional.of(regions);

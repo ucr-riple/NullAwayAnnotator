@@ -108,7 +108,7 @@ public class Utility {
   public static String computeBuildCommandWithGradleCLArgumentsWithLibraryModelLoader(
       Path projectPath, Path outDirPath, List<String> modules) {
     return String.format(
-        "%s && ./gradlew library-model-loader:jar && %s && ./gradlew compileJava %s -Plibrary-model-loader-path=%s --rerun-tasks",
+        "%s && ./gradlew library-model-loader:jar --rerun-tasks && %s && ./gradlew compileJava %s -Plibrary-model-loader-path=%s --rerun-tasks",
         Utility.changeDirCommand(Paths.get(System.getProperty("user.dir")).getParent()),
         Utility.changeDirCommand(projectPath),
         String.join(" ", computeConfigPathsWithGradleArguments(outDirPath, modules)),

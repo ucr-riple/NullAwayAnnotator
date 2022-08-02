@@ -63,6 +63,7 @@ tasks.withType(JavaCompile) {
                                               "-XepOpt:NullAway:FixSerializationConfigPath=" + project.getProperty("DepA-nullaway-config-path"),
                                               "-Xep:Scanner:ERROR",
                                               "-XepOpt:Scanner:ConfigPath=" + project.getProperty("DepA-scanner-config-path"),
+                                              "-XepOpt:NullAway:AcknowledgeLibraryModelsOfAnnotatedCode=true",
                                               "-XepDisableAllWarnings"]
         options.compilerArgs << "-Xmaxerrs" << "100000"
     }
