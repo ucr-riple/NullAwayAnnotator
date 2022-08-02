@@ -492,7 +492,7 @@ public class Config {
     public boolean lexicalPreservationActivation = true;
     public boolean outerLoopActivation = true;
     public boolean downStreamDependenciesAnalysisActivated = false;
-    public String nullawayLibraryModelLoaderPath;
+    public Path nullawayLibraryModelLoaderPath;
     public String downstreamBuildCommand;
     public int depth = 1;
 
@@ -541,7 +541,8 @@ public class Config {
         Preconditions.checkNotNull(
             nullawayLibraryModelLoaderPath,
             "nullawayLibraryModelLoaderPath cannot be null to enable down stream dependency analysis.");
-        downstreamDependency.put("LIBRARY_MODEL_LOADER_PATH", nullawayLibraryModelLoaderPath);
+        downstreamDependency.put(
+            "LIBRARY_MODEL_LOADER_PATH", nullawayLibraryModelLoaderPath.toString());
         Preconditions.checkNotNull(downstreamBuildCommand);
         downstreamDependency.put("BUILD_COMMAND", downstreamBuildCommand);
       }

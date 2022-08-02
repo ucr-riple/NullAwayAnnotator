@@ -24,9 +24,26 @@
 
 package edu.ucr.cs.riple.core;
 
+import edu.ucr.cs.riple.core.tools.TReport;
+import edu.ucr.cs.riple.injector.location.OnMethod;
+import java.util.List;
+import org.junit.Test;
+
 public class DownstreamAnalysisTest extends BaseCoreTest {
 
   public DownstreamAnalysisTest() {
-    super("downstream-dependency-test", null);
+    super("downstream-dependency-test", List.of("Target", "DepA", "DepB", "DepC"));
+  }
+
+  @Test
+  public void public_method() {
+    coreTestHelper
+        .addExpectedReports(
+            new TReport(
+                new OnMethod(
+                    "Foo.java", "edu.ucr.cs.riple.libtest.target.Foo", "returnNullableBad(int i)"),
+                3))
+        .enableDownstreamDependencyAnalysis()
+        .start();
   }
 }

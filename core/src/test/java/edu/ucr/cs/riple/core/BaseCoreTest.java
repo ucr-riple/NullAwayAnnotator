@@ -72,6 +72,7 @@ public abstract class BaseCoreTest {
       commands.add("--gradle-version");
       commands.add("6.1");
       commands.addAll(Utility.computeConfigPathsWithGradleArguments(outDirPath, modules));
+      commands.add("-Plibrary-model-loader-path=unknwown");
       processBuilder.command(commands);
       int success = processBuilder.start().waitFor();
       if (success != 0) {

@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -217,6 +218,19 @@ public class CoreTestHelper {
     builder.chain = true;
     builder.outerLoopActivation = requestCompleteLoop;
     builder.optimized = true;
+    builder.downStreamDependenciesAnalysisActivated = downstreamDependencyAnalysisActivated;
+    if (downstreamDependencyAnalysisActivated) {
+      builder.buildCommand =
+          Utility.computeBuildCommandWithGradleCLArgumentsWithLibraryModelLoader(
+              this.projectPath, this.outDirPath, modules);
+      builder.downstreamBuildCommand = builder.buildCommand;
+      builder.nullawayLibraryModelLoaderPath =
+          Paths.get(System.getProperty("dir"), "src", "main", "resources", "nullable-methods.tsv");
+    } else {
+      builder.buildCommand =
+          Utility.computeBuildCommandWithGradleCLArguments(
+              this.projectPath, this.outDirPath, modules);
+    }
     builder.write(path);
   }
 
