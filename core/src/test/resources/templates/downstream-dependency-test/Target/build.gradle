@@ -53,12 +53,12 @@ test {
 tasks.withType(JavaCompile) {
     if (!name.toLowerCase().contains("test")) {
         options.errorprone.errorproneArgs += ["-XepDisableAllChecks",
-                                              "-Xep:NullAway:ERROR",
+                                              "-Xep:NullAway:WARN",
                                               "-XepOpt:NullAway:AnnotatedPackages=edu.ucr.cs.riple.libtest",
                                               "-XepOpt:NullAway:SerializeFixMetadata=true",
-                                              "-XepOpt:NullAway:FixSerializationConfigPath=" + project.getProperty("nullaway-config-path"),
+                                              "-XepOpt:NullAway:FixSerializationConfigPath=" + project.getProperty("Target-nullaway-config-path"),
                                               "-Xep:Scanner:ERROR",
-                                              "-XepOpt:Scanner:ConfigPath=" + project.getProperty("scanner-config-path"),
+                                              "-XepOpt:Scanner:ConfigPath=" + project.getProperty("Target-scanner-config-path"),
                                               "-XepDisableAllWarnings"]
         options.compilerArgs << "-Xmaxerrs" << "100000"
     }

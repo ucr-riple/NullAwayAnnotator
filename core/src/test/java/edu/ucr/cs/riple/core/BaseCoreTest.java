@@ -66,8 +66,8 @@ public abstract class BaseCoreTest {
           "wrapper",
           "--gradle-version",
           "6.1",
-          "-Pscanner-config-path=default",
-          "-Pnullaway-config-path=default");
+          "-Punittest-scanner-config-path=default",
+          "-Punittest-nullaway-config-path=default");
       int success = processBuilder.start().waitFor();
       if (success != 0) {
         throw new RuntimeException("Unable to create Gradle Wrapper.");

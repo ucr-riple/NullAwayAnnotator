@@ -28,6 +28,7 @@ import static org.junit.Assert.fail;
 
 import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.injector.Helper;
 import java.io.IOException;
@@ -129,7 +130,7 @@ public class CoreTestHelper {
   }
 
   public CoreTestHelper enableDownstreamDependencyAnalysis(
-      String libraryModelLoaderPath, String... dependencies) {
+      String buildCommand, ModuleInfo... dependencies) {
     // todo: Complete this function the in the follow up PRs.
     throw new UnsupportedOperationException(
         "This function is not implemented yet, will be updated in the follow up PRs.");
@@ -203,9 +204,10 @@ public class CoreTestHelper {
   private void makeAnnotatorConfigFile(Path path) {
     Config.Builder builder = new Config.Builder();
     builder.buildCommand =
-        Utility.computeBuildCommandWithGradleCLArguments(this.projectPath, this.outDirPath);
-    builder.scannerConfigPath = outDirPath.resolve("scanner.xml").toString();
-    builder.nullAwayConfigPath = outDirPath.resolve("config.xml").toString();
+        Utility.computeBuildCommandWithGradleCLArguments(
+            this.projectPath, this.outDirPath, "unittest");
+    builder.scannerConfigPath = outDirPath.resolve("unittest-scanner.xml").toString();
+    builder.nullAwayConfigPath = outDirPath.resolve("unittest-nullaway.xml").toString();
     builder.nullableAnnotation = "javax.annotation.Nullable";
     builder.initializerAnnotation = "test.Initializer";
     builder.outputDir = outDirPath.toString();
@@ -216,7 +218,7 @@ public class CoreTestHelper {
     builder.optimized = true;
     builder.downStreamDependenciesAnalysisActivated = downstreamDependencyAnalysisActivated;
     builder.nullawayLibraryModelLoaderPath = libraryModelLoaderPath;
-    builder.downstreamModulesBuildCommands = downstreamBuildCommands;
+    //    builder.downstreamModuleInfoSet = downstreamBuildCommands;
     builder.write(path);
   }
 

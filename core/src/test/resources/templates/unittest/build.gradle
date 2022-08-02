@@ -58,9 +58,9 @@ tasks.withType(JavaCompile) {
                                               "-Xep:NullAway:ERROR",
                                               "-XepOpt:NullAway:AnnotatedPackages=test",
                                               "-XepOpt:NullAway:SerializeFixMetadata=true",
-                                              "-XepOpt:NullAway:FixSerializationConfigPath=" + project.getProperty("nullaway-config-path"),
+                                              "-XepOpt:NullAway:FixSerializationConfigPath=" + project.getProperty("unittest-nullaway-config-path"),
                                               "-Xep:Scanner:ERROR",
-                                              "-XepOpt:Scanner:ConfigPath=" + project.getProperty("scanner-config-path"),
+                                              "-XepOpt:Scanner:ConfigPath=" + project.getProperty("unittest-scanner-config-path"),
                                               "-XepDisableAllWarnings"]
         options.compilerArgs << "-Xmaxerrs" << "100000"
     }

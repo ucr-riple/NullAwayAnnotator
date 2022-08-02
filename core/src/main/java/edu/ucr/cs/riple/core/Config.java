@@ -509,8 +509,9 @@ public class Config {
     public boolean outerLoopActivation = true;
 
     public boolean downStreamDependenciesAnalysisActivated = false;
-    public Set<String> downstreamModulesBuildCommands;
+    public Set<ModuleInfo> downstreamModuleInfoSet;
     public String nullawayLibraryModelLoaderPath;
+    public String downstreamBuildCommand;
     public int depth = 1;
 
     @SuppressWarnings("unchecked")
@@ -553,12 +554,23 @@ public class Config {
             nullawayLibraryModelLoaderPath,
             "nullawayLibraryModelLoaderPath cannot be null to enable down stream dependency analysis.");
         downstreamDependency.put("LIBRARY_MODEL_LOADER_PATH", nullawayLibraryModelLoaderPath);
-        JSONArray downstreamBuildCommandsJSON = new JSONArray();
+        JSONArray downstreamConfigPaths = new JSONArray();
         Preconditions.checkNotNull(
-            downstreamModulesBuildCommands,
-            "downstreamModulesBuildCommands cannot be null to enable down stream dependency analysis.");
-        downstreamBuildCommandsJSON.addAll(downstreamModulesBuildCommands);
-        downstreamDependency.put("BUILD_COMMANDS", downstreamBuildCommandsJSON);
+            downstreamModuleInfoSet,
+            "downstreamBuildCommand cannot be null to enable down stream dependency analysis.");
+        downstreamConfigPaths.addAll(
+            downstreamModuleInfoSet.stream()
+                .map(
+                    info -> {
+                      JSONObject res = new JSONObject();
+                      res.put("NULLAWAY", info.nullawayConfig);
+                      res.put("SCANNER", info.scannerConfig);
+                      return res;
+                    })
+                .collect(Collectors.toSet()));
+        downstreamDependency.put("CONFIG_PATHS", downstreamConfigPaths);
+        Preconditions.checkNotNull(downstreamBuildCommand);
+        downstreamDependency.put("BUILD_COMMAND", downstreamBuildCommand);
       }
       json.put("DOWNSTREAM_DEPENDENCY_ANALYSIS", downstreamDependency);
       try (FileWriter file = new FileWriter(path.toFile())) {

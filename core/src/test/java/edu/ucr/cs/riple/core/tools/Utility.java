@@ -47,20 +47,40 @@ public class Utility {
   }
 
   /**
+   * Creates the gradle command line arguments. Project name is used as a prefix for config files
+   * names and output paths.
+   *
+   * @param outDirPath Root output path.
+   * @param projectName Project name (Prefix for all variable name and values).
+   * @return Gradle command line values with flags.
+   */
+  private static String computeConfigPathsWithGradleArguments(Path outDirPath, String projectName) {
+    String nullawayConfigName = projectName + "-nullaway.xml";
+    String scannerConfigName = projectName + "-scanner.xml";
+    return String.format(
+        "-P%s-nullaway-config-path=%s -P%s-scanner-config-path=%s",
+        projectName,
+        outDirPath.resolve(nullawayConfigName),
+        projectName,
+        outDirPath.resolve(scannerConfigName));
+  }
+
+  /**
    * Computes the build command for the project template. It includes, changing directory command
    * from root to project root dir, command to compile the project and the computed paths to config
    * files which will be passed through gradle command line arguments.
    *
    * @param projectPath Path to project directory.
    * @param outDirPath Path to serialization output directory,
+   * @param targetProject Name of the target project.
    * @return The command to build the project including the command line arguments, this command can
    *     * be executed from any directory.
    */
-  public static String computeBuildCommandWithGradleCLArguments(Path projectPath, Path outDirPath) {
+  public static String computeBuildCommandWithGradleCLArguments(
+      Path projectPath, Path outDirPath, String targetProject) {
     return String.format(
-        "%s && ./gradlew compileJava -Pscanner-config-path=%s -Pnullaway-config-path=%s",
+        "%s && ./gradlew compileJava %s --rerun-tasks",
         Utility.changeDirCommand(projectPath),
-        outDirPath.resolve("scanner.xml"),
-        outDirPath.resolve("config.xml"));
+        computeConfigPathsWithGradleArguments(outDirPath, targetProject));
   }
 }
