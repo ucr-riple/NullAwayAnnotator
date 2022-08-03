@@ -87,6 +87,7 @@ public class Index<T extends Enclosed> {
         path -> {
           try (BufferedReader br = Files.newBufferedReader(path, UTF_8)) {
             String line = br.readLine();
+            // Skip TSV header.
             if (line != null) {
               line = br.readLine();
             }
