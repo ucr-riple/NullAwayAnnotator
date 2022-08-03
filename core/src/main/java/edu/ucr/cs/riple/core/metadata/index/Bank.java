@@ -31,7 +31,6 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 /**
  * Responsible for tracking status of generated outputs. It indexes outputs, can save states and
@@ -54,9 +53,9 @@ public class Bank<T extends Enclosed> {
   /** Path to file where outputs are stored. */
   private final ImmutableSet<Path> paths;
 
-  public Bank(Stream<Path> paths, Factory<T> factory) {
+  public Bank(ImmutableSet<Path> paths, Factory<T> factory) {
     this.factory = factory;
-    this.paths = paths.collect(ImmutableSet.toImmutableSet());
+    this.paths = paths;
     rootInClass = new Index<>(this.paths, Index.Type.BY_CLASS, factory);
     rootInMethod = new Index<>(this.paths, Index.Type.BY_METHOD, factory);
     rootInMethod.index();
@@ -65,7 +64,7 @@ public class Bank<T extends Enclosed> {
   }
 
   public Bank(Path path, Factory<T> factory) {
-    this(Stream.of(path), factory);
+    this(ImmutableSet.of(path), factory);
   }
 
   /**

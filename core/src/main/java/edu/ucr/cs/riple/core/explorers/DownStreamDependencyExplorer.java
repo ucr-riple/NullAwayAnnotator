@@ -113,10 +113,15 @@ public class DownStreamDependencyExplorer {
         new FieldDeclarationAnalysis(config.downstreamInfo);
     Bank<Error> errorBank =
         new Bank<>(
-            config.downstreamInfo.stream().map(info -> info.dir.resolve("errors.tsv")), Error::new);
+            config.downstreamInfo.stream()
+                .map(info -> info.dir.resolve("errors.tsv"))
+                .collect(ImmutableSet.toImmutableSet()),
+            Error::new);
     Bank<Fix> fixBank =
         new Bank<>(
-            config.downstreamInfo.stream().map(info -> info.dir.resolve("fixes.tsv")),
+            config.downstreamInfo.stream()
+                .map(info -> info.dir.resolve("fixes.tsv"))
+                .collect(ImmutableSet.toImmutableSet()),
             Fix.factory(config, fieldDeclarationAnalysis));
     Explorer explorer =
         new OptimizedDownstreamDependencyAnalyzer(
