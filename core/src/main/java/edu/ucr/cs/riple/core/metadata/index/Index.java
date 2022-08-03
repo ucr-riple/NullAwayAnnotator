@@ -57,7 +57,7 @@ public class Index<T extends Enclosed> {
   /** Type of index. Used to compute hash. */
   private final Index.Type type;
   /** Total number of items. */
-  public int total;
+  private int total;
 
   /** Index type. */
   public enum Type {
@@ -152,5 +152,14 @@ public class Index<T extends Enclosed> {
    */
   public Set<Region> getRegionsOfMatchingItems(Predicate<T> predicate) {
     return values().stream().filter(predicate).map(t -> t.region).collect(Collectors.toSet());
+  }
+
+  /**
+   * Get total number of items in this index.
+   *
+   * @return Total number of items.
+   */
+  public int getTotal() {
+    return total;
   }
 }

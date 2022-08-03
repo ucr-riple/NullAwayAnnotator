@@ -60,7 +60,7 @@ public class Bank<T extends Enclosed> {
     rootInMethod = new Index<>(this.paths, Index.Type.BY_METHOD, factory);
     rootInMethod.index();
     rootInClass.index();
-    Preconditions.checkArgument(rootInClass.total == rootInMethod.total);
+    Preconditions.checkArgument(rootInClass.getTotal() == rootInMethod.getTotal());
   }
 
   public Bank(Path path, Factory<T> factory) {
