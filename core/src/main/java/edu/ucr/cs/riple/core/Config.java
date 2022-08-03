@@ -46,7 +46,6 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.json.simple.JSONArray;
@@ -232,47 +231,58 @@ public class Config {
     options.addOption(dirOption);
 
     // Down stream analysis
-    OptionGroup downstreamDepAnalysisOption = new OptionGroup();
-    downstreamDepAnalysisOption.setRequired(false);
+    // Activation
     Option downstreamDependenciesActivationOption =
         new Option(
-            "ddaa",
-            "downstream-dependencies-analysis-activation",
-            true,
+            "adda",
+            "activate-downstream-dependencies-analysis",
+            false,
             "Activates downstream dependency analysis");
-    downstreamDependenciesActivationOption.setRequired(true);
-    downstreamDepAnalysisOption.addOption(downstreamDependenciesActivationOption);
+    downstreamDependenciesActivationOption.setRequired(false);
+    options.addOption(downstreamDependenciesActivationOption);
+    // Down stream analysis: Build Command.
     Option downstreamDependenciesBuildCommandOption =
         new Option(
             "ddbc",
             "downstream-dependencies-build-command",
             true,
             "Command to build all downstream dependencies at once, this command must include changing directory from root to the target project");
-    downstreamDependenciesBuildCommandOption.setRequired(true);
-    downstreamDepAnalysisOption.addOption(downstreamDependenciesBuildCommandOption);
+    downstreamDependenciesBuildCommandOption.setRequired(false);
+    options.addOption(downstreamDependenciesBuildCommandOption);
+    // Down stream analysis: NullAway Library Model Path.
     Option nullawayLibraryModelLoaderPathOption =
         new Option(
             "nlmlp",
             "nullaway-library-model-loader-path",
             true,
             "NullAway Library Model loader path");
-    nullawayLibraryModelLoaderPathOption.setRequired(true);
-    downstreamDepAnalysisOption.addOption(nullawayLibraryModelLoaderPathOption);
-    options.addOptionGroup(downstreamDepAnalysisOption);
+    nullawayLibraryModelLoaderPathOption.setRequired(false);
+    options.addOption(nullawayLibraryModelLoaderPathOption);
 
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd = null;
 
     if (args.length == 1 && (args[0].equals("-h") || args[0].equals("--help"))) {
-      showHelpAndQuit(formatter, options);
+      showHelp(formatter, options);
+      // Exit
+      System.exit(0);
     }
 
     try {
       cmd = parser.parse(options, args);
     } catch (ParseException e) {
-      System.out.println(e.getMessage());
-      showHelpAndQuit(formatter, options);
+      showHelp(formatter, options);
+      throw new IllegalArgumentException("Error in reading config flags: " + e.getMessage(), e);
+    }
+
+    // Check if either all flags are available or none is present
+    if (!(cmd.hasOption(downstreamDependenciesActivationOption)
+            == cmd.hasOption(downstreamDependenciesBuildCommandOption)
+        && cmd.hasOption(downstreamDependenciesActivationOption)
+            == cmd.hasOption(nullawayLibraryModelLoaderPathOption))) {
+      throw new IllegalArgumentException(
+          "To activate downstream dependency analysis, all flags [--activate-downstream-dependencies-analysis, --downstream-dependencies-build-command (arg), --nullaway-library-model-loader-path (arg)] must be present!");
     }
 
     // Below is only to guide IDE that cmd is nonnull at this point.
@@ -293,8 +303,7 @@ public class Config {
                 : "5");
     this.globalDir = Paths.get(cmd.getOptionValue(dirOption.getLongOpt()));
     List<ModuleInfo> moduleInfoList =
-        Utility.readFileLines(
-                Paths.get(cmd.getOptionValue(downstreamDependenciesBuildCommandOption)))
+        Utility.readFileLines(Paths.get(cmd.getOptionValue(configPathsOption))).stream()
             .map(
                 line -> {
                   String[] info = line.split("\\t");
@@ -398,9 +407,8 @@ public class Config {
     log.reset();
   }
 
-  private static void showHelpAndQuit(HelpFormatter formatter, Options options) {
+  private static void showHelp(HelpFormatter formatter, Options options) {
     formatter.printHelp("Annotator config Flags", options);
-    System.exit(1);
   }
 
   private <T> OrElse<T> getValueFromKey(JSONObject json, String key, Class<T> klass) {

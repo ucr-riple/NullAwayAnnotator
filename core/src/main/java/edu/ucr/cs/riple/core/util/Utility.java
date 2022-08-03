@@ -44,6 +44,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -308,14 +309,14 @@ public class Utility {
   }
 
   /**
-   * Read all lines from a file as a Stream
+   * Read all lines from a file and returns as a List.
    *
    * @param path The path to the file.
    * @return The lines from the file as a Stream.
    */
-  public static Stream<String> readFileLines(Path path) {
+  public static List<String> readFileLines(Path path) {
     try (Stream<String> stream = Files.lines(path)) {
-      return stream;
+      return stream.collect(Collectors.toList());
     } catch (IOException e) {
       throw new RuntimeException("Exception while reading file: " + path, e);
     }

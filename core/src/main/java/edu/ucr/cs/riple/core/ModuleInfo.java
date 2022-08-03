@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import org.json.simple.JSONObject;
 
 /** Container class to hold paths to nullaway and scanner config files. */
@@ -71,5 +72,18 @@ public class ModuleInfo {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    ModuleInfo that = (ModuleInfo) o;
+    return nullawayConfig.equals(that.nullawayConfig) && scannerConfig.equals(that.scannerConfig);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(nullawayConfig, scannerConfig);
   }
 }
