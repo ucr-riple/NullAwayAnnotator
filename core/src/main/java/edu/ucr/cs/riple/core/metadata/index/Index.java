@@ -68,7 +68,8 @@ public class Index<T extends Enclosed> {
   /**
    * Creates an instance of Index. Contents are accumulated from multiple sources.
    *
-   * @param paths ImmutableSet of paths to load the data from.
+   * @param paths ImmutableSet of paths to load the data from. Each file is a TSV file containing
+   *     information to create an instance of {@link Enclosed}.
    * @param type Type of index.
    * @param factory Factory to create instances from file lines.
    */
