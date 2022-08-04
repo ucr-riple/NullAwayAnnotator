@@ -86,7 +86,7 @@ public class Utility {
    * @return The command to build the project including the command line arguments, this command can
    *     * be executed from any directory.
    */
-  public static String computeBuildCommandWithGradleCLArgumentsWithLibraryModelLoader(
+  public static String computeBuildCommandWithGradleCLArgumentsAndLibraryModelLoader(
       Path projectPath, Path outDirPath, List<String> modules) {
     return String.format(
         "%s && ./gradlew library-model-loader:jar --rerun-tasks && %s && ./gradlew compileJava %s -Plibrary-model-loader-path=%s --rerun-tasks",

@@ -218,11 +218,11 @@ public class CoreTestHelper {
     builder.optimized = true;
     builder.downStreamDependenciesAnalysisActivated = downstreamDependencyAnalysisActivated;
     builder.buildCommand =
-        Utility.computeBuildCommandWithGradleCLArgumentsWithLibraryModelLoader(
+        Utility.computeBuildCommandWithGradleCLArgumentsAndLibraryModelLoader(
             this.projectPath, this.outDirPath, modules);
     if (downstreamDependencyAnalysisActivated) {
       builder.buildCommand =
-          Utility.computeBuildCommandWithGradleCLArgumentsWithLibraryModelLoader(
+          Utility.computeBuildCommandWithGradleCLArgumentsAndLibraryModelLoader(
               this.projectPath, this.outDirPath, modules);
       builder.downstreamBuildCommand = builder.buildCommand;
       builder.nullawayLibraryModelLoaderPath =
