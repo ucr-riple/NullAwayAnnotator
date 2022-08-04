@@ -35,7 +35,7 @@ application {
 dependencies {
 
     implementation project(':injector')
-    implementation project(':scanner')
+    implementation project(':annotator-scanner')
     implementation deps.build.guava
     implementation deps.build.json
     implementation deps.build.progressbar
@@ -47,6 +47,6 @@ dependencies {
 task installScanner(type: Exec) {
 
     executable "sh"
-    args "-c", "./../gradlew :scanner:publishToMavenLocal"
+    args "-c", "./../gradlew :annotator-scanner:publishToMavenLocal"
 }
 tasks.test.dependsOn("installScanner")

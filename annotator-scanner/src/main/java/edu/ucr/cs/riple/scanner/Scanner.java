@@ -49,7 +49,7 @@ import javax.lang.model.element.ElementKind;
 
 @AutoService(BugChecker.class)
 @BugPattern(
-    name = "Scanner",
+    name = "AnnotatorScanner",
     altNames = {"TypeBasedStructureSerializer"},
     summary = "Serialized type based call/field graph.",
     tags = BugPattern.StandardTags.STYLE,
