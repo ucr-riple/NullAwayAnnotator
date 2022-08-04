@@ -65,6 +65,10 @@ public class OptimizedExplorer extends Explorer {
     this.graph.getNodes().forEach(node -> node.reCollectPotentiallyImpactedRegions(tracker));
   }
 
+  protected void rerunAnalysis() {
+    Utility.buildTarget(config);
+  }
+
   @Override
   protected void executeNextCycle() {
     graph.findGroups();
@@ -77,7 +81,7 @@ public class OptimizedExplorer extends Explorer {
       Set<Fix> fixes =
           group.stream().flatMap(node -> node.tree.stream()).collect(Collectors.toSet());
       injector.injectFixes(fixes);
-      Utility.buildProject(config);
+      rerunAnalysis();
       errorBank.saveState(false, true);
       fixBank.saveState(false, true);
       group.forEach(

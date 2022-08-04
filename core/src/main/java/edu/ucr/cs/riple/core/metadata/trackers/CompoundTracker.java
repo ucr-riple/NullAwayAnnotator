@@ -24,7 +24,8 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
-import edu.ucr.cs.riple.core.Config;
+import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import java.util.ArrayList;
@@ -38,10 +39,18 @@ public class CompoundTracker implements RegionTracker {
   /** List of all trackers. */
   private final List<RegionTracker> trackers;
 
-  public CompoundTracker(Config config, MethodInheritanceTree tree) {
+  public CompoundTracker(ModuleInfo info, MethodInheritanceTree tree) {
     this.trackers = new ArrayList<>();
-    MethodRegionTracker methodRegionTracker = new MethodRegionTracker(config, tree);
-    this.trackers.add(new FieldRegionTracker(config));
+    MethodRegionTracker methodRegionTracker = new MethodRegionTracker(info, tree);
+    this.trackers.add(new FieldRegionTracker(info));
+    this.trackers.add(methodRegionTracker);
+    this.trackers.add(new ParameterRegionTracker(tree, methodRegionTracker));
+  }
+
+  public CompoundTracker(ImmutableSet<ModuleInfo> modules, MethodInheritanceTree tree) {
+    this.trackers = new ArrayList<>();
+    MethodRegionTracker methodRegionTracker = new MethodRegionTracker(modules, tree);
+    this.trackers.add(new FieldRegionTracker(modules));
     this.trackers.add(methodRegionTracker);
     this.trackers.add(new ParameterRegionTracker(tree, methodRegionTracker));
   }

@@ -50,10 +50,3 @@ task installScanner(type: Exec) {
     args "-c", "./../gradlew :scanner:publishToMavenLocal"
 }
 tasks.test.dependsOn("installScanner")
-
-test {
-    filter {
-        //todo: remove this once NullAway version 0.9.9 has been released. Running test below now will fail on Github action since it is only compatible with local version of NullAway.
-        excludeTestsMatching "edu.ucr.cs.riple.core.DownstreamAnalysisTest"
-    }
-}

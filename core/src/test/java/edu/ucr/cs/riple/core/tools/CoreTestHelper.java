@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,12 +28,14 @@ import static org.junit.Assert.fail;
 
 import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.injector.Helper;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -52,26 +54,22 @@ public class CoreTestHelper {
   private final Set<Report> expectedReports;
   private final Path projectPath;
   private final Path srcSet;
+  private final List<String> modules;
   private final Path outDirPath;
   private final Map<String, String[]> fileMap;
-
   private BiPredicate<Report, Report> predicate;
   private int depth = 1;
   private boolean requestCompleteLoop = false;
   private boolean disableBailout = false;
-
   private boolean downstreamDependencyAnalysisActivated = false;
 
-  private Set<String> downstreamBuildCommands;
-
-  private String libraryModelLoaderPath;
-
-  public CoreTestHelper(Path projectPath, Path outDirPath) {
+  public CoreTestHelper(Path projectPath, Path outDirPath, List<String> modules) {
     this.projectPath = projectPath;
     this.outDirPath = outDirPath;
     this.expectedReports = new HashSet<>();
     this.fileMap = new HashMap<>();
     this.srcSet = this.projectPath.resolve("src").resolve("main").resolve("java").resolve("test");
+    this.modules = modules;
   }
 
   public CoreTestHelper addInputLines(String path, String... lines) {
@@ -128,11 +126,9 @@ public class CoreTestHelper {
     return this;
   }
 
-  public CoreTestHelper enableDownstreamDependencyAnalysis(
-      String libraryModelLoaderPath, String... dependencies) {
-    // todo: Complete this function the in the follow up PRs.
-    throw new UnsupportedOperationException(
-        "This function is not implemented yet, will be updated in the follow up PRs.");
+  public CoreTestHelper enableDownstreamDependencyAnalysis() {
+    this.downstreamDependencyAnalysisActivated = true;
+    return this;
   }
 
   public void start() {
@@ -154,7 +150,7 @@ public class CoreTestHelper {
 
   /** Checks if all src inputs are subpackages of test package. */
   private void checkSourcePackages() {
-    try (Stream<Path> walk = Files.walk(srcSet)) {
+    try (Stream<Path> walk = Files.walk(projectPath)) {
       walk.filter(path -> path.toFile().isFile() && path.toFile().getName().endsWith(".java"))
           .forEach(
               path -> {
@@ -202,10 +198,16 @@ public class CoreTestHelper {
 
   private void makeAnnotatorConfigFile(Path path) {
     Config.Builder builder = new Config.Builder();
-    builder.buildCommand =
-        Utility.computeBuildCommandWithGradleCLArguments(this.projectPath, this.outDirPath);
-    builder.scannerConfigPath = outDirPath.resolve("scanner.xml").toString();
-    builder.nullAwayConfigPath = outDirPath.resolve("config.xml").toString();
+    builder.configPaths =
+        modules.stream()
+            .map(
+                name ->
+                    new ModuleInfo(
+                        outDirPath,
+                        outDirPath.resolve(name + "-nullaway.xml"),
+                        outDirPath.resolve(name + "-scanner.xml")))
+            .collect(Collectors.toList());
+    ModuleInfo.GLOBAL_ID = 0;
     builder.nullableAnnotation = "javax.annotation.Nullable";
     builder.initializerAnnotation = "test.Initializer";
     builder.outputDir = outDirPath.toString();
@@ -215,8 +217,31 @@ public class CoreTestHelper {
     builder.outerLoopActivation = requestCompleteLoop;
     builder.optimized = true;
     builder.downStreamDependenciesAnalysisActivated = downstreamDependencyAnalysisActivated;
-    builder.nullawayLibraryModelLoaderPath = libraryModelLoaderPath;
-    builder.downstreamModulesBuildCommands = downstreamBuildCommands;
+    builder.buildCommand =
+        Utility.computeBuildCommandWithLibraryModelLoaderDependency(
+            this.projectPath, this.outDirPath, modules);
+    if (downstreamDependencyAnalysisActivated) {
+      builder.buildCommand =
+          Utility.computeBuildCommandWithLibraryModelLoaderDependency(
+              this.projectPath, this.outDirPath, modules);
+      builder.downstreamBuildCommand = builder.buildCommand;
+      builder.nullawayLibraryModelLoaderPath =
+          Utility.getPathToLibraryModel()
+              .resolve(
+                  Paths.get(
+                      "src",
+                      "main",
+                      "resources",
+                      "edu",
+                      "ucr",
+                      "cs",
+                      "riple",
+                      "librarymodel",
+                      "nullable-methods.tsv"));
+    } else {
+      builder.buildCommand =
+          Utility.computeBuildCommand(this.projectPath, this.outDirPath, modules);
+    }
     builder.write(path);
   }
 

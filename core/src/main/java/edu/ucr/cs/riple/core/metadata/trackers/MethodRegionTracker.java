@@ -24,7 +24,8 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
-import edu.ucr.cs.riple.core.Config;
+import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
@@ -44,8 +45,16 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
    */
   private final MethodInheritanceTree tree;
 
-  public MethodRegionTracker(Config config, MethodInheritanceTree tree) {
-    super(config.dir.resolve(Serializer.CALL_GRAPH_FILE_NAME));
+  public MethodRegionTracker(ModuleInfo info, MethodInheritanceTree tree) {
+    super(info.dir.resolve(Serializer.CALL_GRAPH_FILE_NAME));
+    this.tree = tree;
+  }
+
+  public MethodRegionTracker(ImmutableSet<ModuleInfo> modules, MethodInheritanceTree tree) {
+    super(
+        modules.stream()
+            .map(info -> info.dir.resolve(Serializer.CALL_GRAPH_FILE_NAME))
+            .collect(ImmutableSet.toImmutableSet()));
     this.tree = tree;
   }
 
@@ -64,7 +73,7 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
     Set<Region> regions = getCallersOfMethod(onMethod.clazz, onMethod.method);
     // Add immediate super method.
     MethodNode parent = tree.getClosestSuperMethod(onMethod.method, onMethod.clazz);
-    if (parent != null) {
+    if (parent != null && parent.isNonTop()) {
       regions.add(new Region(parent.clazz, parent.method));
     }
     return Optional.of(regions);

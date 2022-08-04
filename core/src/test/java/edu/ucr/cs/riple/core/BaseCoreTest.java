@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,8 @@ import edu.ucr.cs.riple.core.tools.Utility;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
@@ -38,15 +40,18 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public abstract class BaseCoreTest {
+
   @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   protected final String projectTemplate;
+  protected final List<String> modules;
   protected Path projectPath;
   protected Path outDirPath;
   protected CoreTestHelper coreTestHelper;
 
-  public BaseCoreTest(String projectTemplate) {
+  public BaseCoreTest(String projectTemplate, List<String> modules) {
     this.projectTemplate = projectTemplate;
+    this.modules = modules;
   }
 
   @Before
@@ -61,13 +66,16 @@ public abstract class BaseCoreTest {
       FileUtils.copyDirectory(pathToUnitTestDir.toFile(), projectPath.toFile());
       ProcessBuilder processBuilder = Utility.createProcessInstance();
       processBuilder.directory(projectPath.toFile());
-      processBuilder.command(
-          "gradle",
-          "wrapper",
-          "--gradle-version",
-          "6.1",
-          "-Pscanner-config-path=default",
-          "-Pnullaway-config-path=default");
+      List<String> commands = new ArrayList<>();
+      commands.add("gradle");
+      commands.add("wrapper");
+      commands.add("--gradle-version");
+      commands.add("6.1");
+      commands.addAll(Utility.computeConfigPathsWithGradleArguments(outDirPath, modules));
+      commands.add(
+          "-Plibrary-model-loader-path="
+              + Utility.getPathToLibraryModel().resolve("build").resolve("libs"));
+      processBuilder.command(commands);
       int success = processBuilder.start().waitFor();
       if (success != 0) {
         throw new RuntimeException("Unable to create Gradle Wrapper.");
@@ -75,6 +83,6 @@ public abstract class BaseCoreTest {
     } catch (IOException | InterruptedException e) {
       throw new RuntimeException("Preparation for test failed", e);
     }
-    coreTestHelper = new CoreTestHelper(projectPath, outDirPath);
+    coreTestHelper = new CoreTestHelper(projectPath, outDirPath, modules);
   }
 }

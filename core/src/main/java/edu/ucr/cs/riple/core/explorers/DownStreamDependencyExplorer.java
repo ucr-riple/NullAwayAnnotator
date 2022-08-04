@@ -22,13 +22,13 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.submodules;
+package edu.ucr.cs.riple.core.explorers;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.explorers.Explorer;
-import edu.ucr.cs.riple.core.explorers.OptimizedExplorer;
+import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.VirtualInjector;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
@@ -37,11 +37,11 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
+import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * Analyzer for downstream dependencies.
@@ -52,12 +52,12 @@ import java.util.stream.Stream;
  * of additional errors) of each such change, by summing across all downstream dependencies. This
  * data then be fed to the Annotator main process in the decision process.
  */
-public class DownStreamDependencyAnalyzer {
+public class DownStreamDependencyExplorer {
 
   /** Set of downstream dependencies. */
-  private final ImmutableSet<Module> modules;
+  private final ImmutableSet<ModuleInfo> modules;
   /** Public APIs in the target modules that have a non-primitive return value. */
-  private final Stream<MethodStatus> methods;
+  private final ImmutableSet<MethodStatus> methods;
   /** Annotator Config. */
   private final Config config;
   /** Method inheritance instance. */
@@ -68,12 +68,15 @@ public class DownStreamDependencyAnalyzer {
    */
   private final VirtualInjector injector;
 
-  public DownStreamDependencyAnalyzer(Config config, MethodInheritanceTree tree) {
+  public DownStreamDependencyExplorer(Config config, MethodInheritanceTree tree) {
     this.config = config;
-    this.modules = config.getDownstreamDependencies();
+    this.modules = config.downstreamInfo;
     this.tree = tree;
     this.injector = new VirtualInjector(config);
-    this.methods = tree.getPublicMethodsWithNonPrimitivesReturn().stream().map(MethodStatus::new);
+    this.methods =
+        tree.getPublicMethodsWithNonPrimitivesReturn().stream()
+            .map(MethodStatus::new)
+            .collect(ImmutableSet.toImmutableSet());
   }
 
   /**
@@ -81,23 +84,15 @@ public class DownStreamDependencyAnalyzer {
    * dependencies are calculated.
    */
   public void explore() {
-    modules.forEach(this::analyzeDownstreamDependency);
-  }
-
-  /**
-   * Analyzes effects of public methods on a module.
-   *
-   * @param module A downstream dependency.
-   */
-  private void analyzeDownstreamDependency(Module module) {
-    Utility.setScannerCheckerActivation(config, true);
-    Utility.buildProject(config, module);
-    Utility.setScannerCheckerActivation(config, false);
+    System.out.println("Analysing downstream dependencies...");
+    Utility.setScannerCheckerActivation(modules, true);
+    Utility.buildDownstreamDependencies(config);
+    Utility.setScannerCheckerActivation(modules, false);
     // Collect callers of public APIs in module.
-    MethodRegionTracker tracker = new MethodRegionTracker(config, tree);
+    MethodRegionTracker tracker = new MethodRegionTracker(config.downstreamInfo, tree);
     // Generate fixes corresponding methods.
     ImmutableSet<Fix> fixes =
-        methods
+        methods.stream()
             .filter(
                 input ->
                     !tracker
@@ -115,12 +110,22 @@ public class DownStreamDependencyAnalyzer {
             .collect(ImmutableSet.toImmutableSet());
     // Explorer initializations.
     FieldDeclarationAnalysis fieldDeclarationAnalysis =
-        new FieldDeclarationAnalysis(config.dir.resolve("class_info.tsv"));
-    Bank<Error> errorBank = new Bank<>(config.dir.resolve("errors.tsv"), Error::new);
+        new FieldDeclarationAnalysis(config.downstreamInfo);
+    Bank<Error> errorBank =
+        new Bank<>(
+            config.downstreamInfo.stream()
+                .map(info -> info.dir.resolve("errors.tsv"))
+                .collect(ImmutableSet.toImmutableSet()),
+            Error::new);
     Bank<Fix> fixBank =
-        new Bank<>(config.dir.resolve("fixes.tsv"), Fix.factory(config, fieldDeclarationAnalysis));
+        new Bank<>(
+            config.downstreamInfo.stream()
+                .map(info -> info.dir.resolve("fixes.tsv"))
+                .collect(ImmutableSet.toImmutableSet()),
+            Fix.factory(config, fieldDeclarationAnalysis));
     Explorer explorer =
-        new OptimizedExplorer(injector, errorBank, fixBank, tracker, fixes, tree, 1, config);
+        new OptimizedDownstreamDependencyAnalyzer(
+            injector, errorBank, fixBank, tracker, fixes, tree, 1, config);
     ImmutableSet<Report> reports = explorer.explore();
     // Update method status based on the results.
     methods.forEach(
@@ -135,6 +140,7 @@ public class DownStreamDependencyAnalyzer {
                   .findAny();
           optional.ifPresent(report -> method.effect += report.effect);
         });
+    System.out.println("Analysing downstream dependencies completed!");
   }
 
   /**
@@ -149,7 +155,7 @@ public class DownStreamDependencyAnalyzer {
     }
     OnMethod onMethod = fix.toMethod();
     Optional<MethodStatus> optional =
-        this.methods
+        this.methods.stream()
             .filter(
                 m -> m.node.method.equals(onMethod.method) && m.node.clazz.equals(onMethod.clazz))
             .findAny();
@@ -169,6 +175,27 @@ public class DownStreamDependencyAnalyzer {
     public MethodStatus(MethodNode node) {
       this.node = node;
       this.effect = 0;
+    }
+  }
+
+  /** Explorer for analyzing downstream dependencies. */
+  private static class OptimizedDownstreamDependencyAnalyzer extends OptimizedExplorer {
+
+    public OptimizedDownstreamDependencyAnalyzer(
+        AnnotationInjector injector,
+        Bank<Error> errorBank,
+        Bank<Fix> fixBank,
+        RegionTracker tracker,
+        ImmutableSet<Fix> fixes,
+        MethodInheritanceTree methodInheritanceTree,
+        int depth,
+        Config config) {
+      super(injector, errorBank, fixBank, tracker, fixes, methodInheritanceTree, depth, config);
+    }
+
+    @Override
+    public void rerunAnalysis() {
+      Utility.buildDownstreamDependencies(config);
     }
   }
 }

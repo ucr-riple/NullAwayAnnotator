@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.explorers.BasicExplorer;
+import edu.ucr.cs.riple.core.explorers.DownStreamDependencyExplorer;
 import edu.ucr.cs.riple.core.explorers.ExhaustiveExplorer;
 import edu.ucr.cs.riple.core.explorers.Explorer;
 import edu.ucr.cs.riple.core.explorers.OptimizedExplorer;
@@ -37,7 +38,6 @@ import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
-import edu.ucr.cs.riple.core.metadata.submodules.DownStreamDependencyAnalyzer;
 import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -72,17 +72,17 @@ public class Annotator {
 
   private void preprocess() {
     System.out.println("Preprocessing...");
-    Utility.setScannerCheckerActivation(config, true);
+    Utility.setScannerCheckerActivation(config.target, true);
     this.reports.clear();
     System.out.println("Making the first build...");
-    Utility.buildProject(config, true);
+    Utility.buildTarget(config, true);
     Set<OnField> uninitializedFields =
-        Utility.readFixesFromOutputDirectory(config, Fix.factory(config, null))
+        Utility.readFixesFromOutputDirectory(config.target, Fix.factory(config, null))
             .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
             .map(Fix::toField)
             .collect(Collectors.toSet());
     FieldInitializationAnalysis analysis =
-        new FieldInitializationAnalysis(config.dir.resolve("field_init.tsv"));
+        new FieldInitializationAnalysis(config.target.dir.resolve("field_init.tsv"));
     Set<AddAnnotation> initializers =
         analysis
             .findInitializers(uninitializedFields)
@@ -92,25 +92,25 @@ public class Annotator {
   }
 
   private void explore() {
-    Utility.setScannerCheckerActivation(config, true);
-    Utility.buildProject(config);
-    Utility.setScannerCheckerActivation(config, false);
-    FieldDeclarationAnalysis fieldDeclarationAnalysis =
-        new FieldDeclarationAnalysis(config.dir.resolve("class_info.tsv"));
+    Utility.setScannerCheckerActivation(config.target, true);
+    Utility.buildTarget(config);
+    Utility.setScannerCheckerActivation(config.target, false);
+    FieldDeclarationAnalysis fieldDeclarationAnalysis = new FieldDeclarationAnalysis(config.target);
     while (true) {
-      Utility.buildProject(config);
+      Utility.buildTarget(config);
       ImmutableSet<Fix> fixes =
           Utility.readFixesFromOutputDirectory(
-                  config, Fix.factory(config, fieldDeclarationAnalysis))
+                  config.target, Fix.factory(config, fieldDeclarationAnalysis))
               .filter(fix -> !config.useCache || !reports.containsKey(fix))
               .collect(ImmutableSet.toImmutableSet());
-      Bank<Error> errorBank = new Bank<>(config.dir.resolve("errors.tsv"), Error::new);
+      Bank<Error> errorBank = new Bank<>(config.target.dir.resolve("errors.tsv"), Error::new);
       Bank<Fix> fixBank =
           new Bank<>(
-              config.dir.resolve("fixes.tsv"), Fix.factory(config, fieldDeclarationAnalysis));
+              config.target.dir.resolve("fixes.tsv"),
+              Fix.factory(config, fieldDeclarationAnalysis));
       MethodInheritanceTree tree =
-          new MethodInheritanceTree(config.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
-      RegionTracker tracker = new CompoundTracker(config, tree);
+          new MethodInheritanceTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
+      RegionTracker tracker = new CompoundTracker(config.target, tree);
       Explorer explorer =
           config.exhaustiveSearch
               ? new ExhaustiveExplorer(injector, errorBank, fixBank, fixes, tree, config)
@@ -118,10 +118,10 @@ public class Annotator {
                   ? new OptimizedExplorer(
                       injector, errorBank, fixBank, tracker, fixes, tree, config.depth, config)
                   : new BasicExplorer(injector, errorBank, fixBank, fixes, tree, config);
-      DownStreamDependencyAnalyzer downStreamDependencyAnalyzer =
-          new DownStreamDependencyAnalyzer(config, tree);
+      DownStreamDependencyExplorer downStreamDependencyExplorer =
+          new DownStreamDependencyExplorer(config, tree);
       if (config.downStreamDependenciesAnalysisActivated) {
-        downStreamDependencyAnalyzer.explore();
+        downStreamDependencyExplorer.explore();
       }
       ImmutableSet<Report> latestReports = explorer.explore();
       int sizeBefore = reports.size();
@@ -130,7 +130,7 @@ public class Annotator {
             if (config.downStreamDependenciesAnalysisActivated) {
               report.effect =
                   report.effect
-                      + downStreamDependencyAnalyzer.effectOnDownstreamDependencies(report.root);
+                      + downStreamDependencyExplorer.effectOnDownstreamDependencies(report.root);
             }
             reports.putIfAbsent(report.root, report);
             reports.get(report.root).effect = report.effect;

@@ -20,36 +20,30 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.libtest.depb;
+package test.depa;
 
-import edu.ucr.cs.riple.libtest.target.Foo;
+import test.target.Foo;
 
-public class DepB {
+public class DepA {
+  Object field1 = new Object();
+  Object field2 = new Object();
+  Object field3 = new Object();
 
-  Foo foo = new Foo();
+  Foo foo;
 
-  public void run() {
-    exec1(foo.returnNullableBad(0));
-    exec2(foo.returnNullableBad(0));
+  DepA() {
+    Foo foo = new Foo();
   }
 
-  public void exec1(Object obj) {
-    System.out.println(obj);
+  public void setField1() {
+    this.field1 = foo.returnNullableBad(0);
   }
 
-  public void exec2(Object obj) {
-    System.out.println(obj);
-    System.out.println(exec3(foo.returnNullableBad(0)));
+  public void setField2() {
+    this.field2 = foo.returnNullableBad(0);
   }
 
-  public Object exec3(Object obj) {
-    if (obj == null) {
-      return foo.returnNullableBad(0);
-    }
-    return obj;
-  }
-
-  public Object exec4() {
-    return foo.returnNullableGood(0);
+  public void setField3() {
+    this.field3 = foo.returnNullableBad(0);
   }
 }

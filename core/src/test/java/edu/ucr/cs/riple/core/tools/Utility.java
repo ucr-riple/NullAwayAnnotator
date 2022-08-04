@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,11 @@ package edu.ucr.cs.riple.core.tools;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Utility {
 
@@ -47,20 +51,75 @@ public class Utility {
   }
 
   /**
+   * Creates the gradle command line arguments. Project names are used as a prefix for config files
+   * names and output paths.
+   *
+   * @param outDirPath Root output path.
+   * @param modules Name of all containing projects in the template. (Prefix for all variable name
+   *     and values).
+   * @return Gradle command line values with flags.
+   */
+  public static Set<String> computeConfigPathsWithGradleArguments(
+      Path outDirPath, List<String> modules) {
+    return modules.stream()
+        .flatMap(
+            name -> {
+              String nullawayConfigName = name + "-nullaway.xml";
+              String scannerConfigName = name + "-scanner.xml";
+              return Stream.of(
+                  String.format(
+                      "-P%s-nullaway-config-path=%s", name, outDirPath.resolve(nullawayConfigName)),
+                  String.format(
+                      "-P%s-scanner-config-path=%s", name, outDirPath.resolve(scannerConfigName)));
+            })
+        .collect(Collectors.toSet());
+  }
+
+  /**
    * Computes the build command for the project template. It includes, changing directory command
-   * from root to project root dir, command to compile the project and the computed paths to config
+   * from root to project root dir, command to compile the project, and the computed paths to config
    * files which will be passed through gradle command line arguments.
    *
    * @param projectPath Path to project directory.
    * @param outDirPath Path to serialization output directory,
+   * @param modules Set of names of the modules in the template.
    * @return The command to build the project including the command line arguments, this command can
    *     * be executed from any directory.
    */
-  public static String computeBuildCommandWithGradleCLArguments(Path projectPath, Path outDirPath) {
+  public static String computeBuildCommand(
+      Path projectPath, Path outDirPath, List<String> modules) {
     return String.format(
-        "%s && ./gradlew compileJava -Pscanner-config-path=%s -Pnullaway-config-path=%s",
+        "%s && ./gradlew compileJava %s -Plibrary-model-loader-path=%s --rerun-tasks",
         Utility.changeDirCommand(projectPath),
-        outDirPath.resolve("scanner.xml"),
-        outDirPath.resolve("config.xml"));
+        String.join(" ", computeConfigPathsWithGradleArguments(outDirPath, modules)),
+        getPathToLibraryModel().resolve(Paths.get("build", "libs", "librarymodel.jar")));
+  }
+
+  /**
+   * Computes the build command for the project template. It includes, changing directory command
+   * from root to project root dir, command to compile the project, command to update library model
+   * loader jar and the computed paths to config files which will be passed through gradle command
+   * line arguments.
+   *
+   * @param projectPath Path to project directory.
+   * @param outDirPath Path to serialization output directory,
+   * @param modules Set of names of the modules in the template.
+   * @return The command to build the project including the command line arguments, this command can
+   *     * be executed from any directory.
+   */
+  public static String computeBuildCommandWithLibraryModelLoaderDependency(
+      Path projectPath, Path outDirPath, List<String> modules) {
+    return String.format(
+        "%s && ./gradlew library-model-loader:jar --rerun-tasks && %s && ./gradlew compileJava %s -Plibrary-model-loader-path=%s --rerun-tasks",
+        Utility.changeDirCommand(Paths.get(System.getProperty("user.dir")).getParent()),
+        Utility.changeDirCommand(projectPath),
+        String.join(" ", computeConfigPathsWithGradleArguments(outDirPath, modules)),
+        getPathToLibraryModel().resolve(Paths.get("build", "libs", "librarymodel.jar")));
+  }
+
+  public static Path getPathToLibraryModel() {
+    return Paths.get(System.getProperty("user.dir"))
+        .getParent()
+        .resolve(Paths.get("library-model-loader"));
   }
 }

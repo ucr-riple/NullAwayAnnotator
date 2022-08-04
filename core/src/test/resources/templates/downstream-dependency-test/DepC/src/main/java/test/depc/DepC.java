@@ -1,7 +1,5 @@
 /*
- * MIT License
- *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 University of California, Riverside.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,19 +20,20 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.submodules;
+package test.depc;
 
-/** Represents modules mainly used by denoting downstream dependencies. */
-public class Module {
+import test.target.Foo;
 
-  /** Module name. */
-  public final String name;
+public class DepC {
 
-  /** Command run to build the module. */
-  public final String command;
+  Foo foo = new Foo();
+  Object f;
 
-  public Module(String name, String command) {
-    this.command = command;
-    this.name = name;
+  DepC() {
+    f = foo.returnNullableBad(0);
+  }
+
+  public Object returnNullableInDepC() {
+    return foo.returnNullableBad(0);
   }
 }

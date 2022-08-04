@@ -33,20 +33,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-/**
- * NullAway Library Model, used to communicate (Nullability assumptions) with NullAway when
- * analysing downstream dependencies.
- */
 @AutoService(LibraryModels.class)
 public class LibraryModelLoader implements LibraryModels {
 
   public final String NULLABLE_METHOD_LIST_FILE_NAME = "nullable-methods.tsv";
-  /** Methods with nullable returns. */
   public final ImmutableSet<MethodRef> nullableMethods;
 
   // Assuming this constructor will be called when picked by service loader
   public LibraryModelLoader() {
-    nullableMethods = parseTSVFileFromResourcesToMethodRef(NULLABLE_METHOD_LIST_FILE_NAME);
+    this.nullableMethods = parseTSVFileFromResourcesToMethodRef(NULLABLE_METHOD_LIST_FILE_NAME);
   }
 
   /**
@@ -56,12 +51,12 @@ public class LibraryModelLoader implements LibraryModels {
    * @param name File name in resources.
    * @return ImmutableSet of content in the passed file. Returns empty if the file does not exist.
    */
-  private static ImmutableSet<MethodRef> parseTSVFileFromResourcesToMethodRef(String name) {
+  private ImmutableSet<MethodRef> parseTSVFileFromResourcesToMethodRef(String name) {
     // Check if resource exists
-    if (LibraryModelLoader.class.getResource(name) == null) {
+    if (getClass().getResource(name) == null) {
       return ImmutableSet.of();
     }
-    try (InputStream is = LibraryModelLoader.class.getResourceAsStream(name)) {
+    try (InputStream is = getClass().getResourceAsStream(name)) {
       if (is == null) {
         return ImmutableSet.of();
       }
@@ -69,7 +64,7 @@ public class LibraryModelLoader implements LibraryModels {
       BufferedReader reader = new BufferedReader(new InputStreamReader(is));
       String line = reader.readLine();
       while (line != null) {
-        String[] values = line.split("\t");
+        String[] values = line.split("\\t");
         contents.add(methodRef(values[0], values[1]));
         line = reader.readLine();
       }
@@ -81,46 +76,46 @@ public class LibraryModelLoader implements LibraryModels {
 
   @Override
   public ImmutableSetMultimap<MethodRef, Integer> failIfNullParameters() {
-    return null;
-  }
-
-  @Override
-  public ImmutableSetMultimap<MethodRef, Integer> explicitlyNullableParameters() {
-    return null;
+    return ImmutableSetMultimap.of();
   }
 
   @Override
   public ImmutableSetMultimap<MethodRef, Integer> nonNullParameters() {
-    return null;
+    return ImmutableSetMultimap.of();
   }
 
   @Override
   public ImmutableSetMultimap<MethodRef, Integer> nullImpliesTrueParameters() {
-    return null;
+    return ImmutableSetMultimap.of();
   }
 
   @Override
   public ImmutableSetMultimap<MethodRef, Integer> nullImpliesFalseParameters() {
-    return null;
+    return ImmutableSetMultimap.of();
   }
 
   @Override
   public ImmutableSetMultimap<MethodRef, Integer> nullImpliesNullParameters() {
-    return null;
+    return ImmutableSetMultimap.of();
   }
 
   @Override
   public ImmutableSet<MethodRef> nullableReturns() {
-    return null;
+    return nullableMethods;
+  }
+
+  @Override
+  public ImmutableSetMultimap<MethodRef, Integer> explicitlyNullableParameters() {
+    return ImmutableSetMultimap.of();
   }
 
   @Override
   public ImmutableSet<MethodRef> nonNullReturns() {
-    return null;
+    return ImmutableSet.of();
   }
 
   @Override
   public ImmutableSetMultimap<MethodRef, Integer> castToNonNullMethods() {
-    return null;
+    return ImmutableSetMultimap.of();
   }
 }

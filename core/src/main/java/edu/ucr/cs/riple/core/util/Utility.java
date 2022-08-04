@@ -26,10 +26,10 @@ package edu.ucr.cs.riple.core.util;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Factory;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.submodules.Module;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -44,6 +44,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -66,7 +67,7 @@ import org.w3c.dom.Element;
 /** Utility class. */
 public class Utility {
 
-  public static void executeCommand(String command, Config config) {
+  public static void executeCommand(Config config, String command) {
     try {
       Process p = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
       BufferedReader reader = new BufferedReader(new InputStreamReader(p.getErrorStream()));
@@ -84,7 +85,7 @@ public class Utility {
 
   @SuppressWarnings("ALL")
   public static void writeReports(Config config, ImmutableSet<Report> reports) {
-    Path reportsPath = config.dir.resolve("reports.json");
+    Path reportsPath = config.globalDir.resolve("reports.json");
     JSONObject result = new JSONObject();
     JSONArray reportsJson = new JSONArray();
     for (Report report : reports) {
@@ -123,8 +124,8 @@ public class Utility {
     }
   }
 
-  public static Stream<Fix> readFixesFromOutputDirectory(Config config, Factory<Fix> factory) {
-    Path fixesPath = config.dir.resolve("fixes.tsv");
+  public static Stream<Fix> readFixesFromOutputDirectory(ModuleInfo info, Factory<Fix> factory) {
+    Path fixesPath = info.dir.resolve("fixes.tsv");
     Set<Fix> fixes = new HashSet<>();
     try {
       try (BufferedReader br = new BufferedReader(new FileReader(fixesPath.toFile()))) {
@@ -189,7 +190,12 @@ public class Utility {
     }
   }
 
-  public static void setScannerCheckerActivation(Config config, boolean activation) {
+  public static void setScannerCheckerActivation(
+      ImmutableSet<ModuleInfo> modules, boolean activation) {
+    modules.forEach(info -> setScannerCheckerActivation(info, activation));
+  }
+
+  public static void setScannerCheckerActivation(ModuleInfo info, boolean activation) {
     DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
     try {
       DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -221,47 +227,55 @@ public class Utility {
 
       // Output dir
       Element outputDir = doc.createElement("path");
-      outputDir.setTextContent(config.dir.toString());
+      outputDir.setTextContent(info.dir.toString());
       rootElement.appendChild(outputDir);
 
       // Writings
       TransformerFactory transformerFactory = TransformerFactory.newInstance();
       Transformer transformer = transformerFactory.newTransformer();
       DOMSource source = new DOMSource(doc);
-      StreamResult result = new StreamResult(config.scannerConfigPath.toFile());
+      StreamResult result = new StreamResult(info.scannerConfig.toFile());
       transformer.transform(source, result);
     } catch (ParserConfigurationException | TransformerException e) {
       throw new RuntimeException("Error happened in writing config.", e);
     }
   }
 
-  public static void buildProject(Config config, Module module) {
-    buildProject(config, module.command, false);
+  public static void buildDownstreamDependencies(Config config) {
+    config.downstreamInfo.forEach(
+        module -> {
+          FixSerializationConfig.Builder nullAwayConfig =
+              new FixSerializationConfig.Builder()
+                  .setSuggest(true, true)
+                  .setOutputDirectory(module.dir.toString())
+                  .setFieldInitInfo(false);
+          nullAwayConfig.writeAsXML(module.nullawayConfig.toString());
+        });
+    build(config, config.downstreamDependenciesBuildCommand);
   }
 
-  public static void buildProject(Config config) {
-    buildProject(config, config.buildCommand, false);
+  public static void buildTarget(Config config) {
+    buildTarget(config, false);
   }
 
-  public static void buildProject(Config config, boolean initSerializationEnabled) {
-    buildProject(config, config.buildCommand, initSerializationEnabled);
-  }
-
-  private static void buildProject(
-      Config config, String buildCommand, boolean initSerializationEnabled) {
+  public static void buildTarget(Config config, boolean initSerializationEnabled) {
     FixSerializationConfig.Builder nullAwayConfig =
         new FixSerializationConfig.Builder()
             .setSuggest(true, true)
-            .setOutputDirectory(config.dir.toString())
+            .setOutputDirectory(config.target.dir.toString())
             .setFieldInitInfo(initSerializationEnabled);
-    nullAwayConfig.writeAsXML(config.nullAwayConfigPath.toString());
+    nullAwayConfig.writeAsXML(config.target.nullawayConfig.toString());
+    build(config, config.buildCommand);
+  }
+
+  private static void build(Config config, String command) {
     try {
       long timer = config.log.startTimer();
-      Utility.executeCommand(buildCommand, config);
+      Utility.executeCommand(config, command);
       config.log.stopTimerAndCaptureBuildTime(timer);
       config.log.incrementBuildRequest();
     } catch (Exception e) {
-      throw new RuntimeException("Could not run command: " + config.buildCommand);
+      throw new RuntimeException("Could not run command: " + command);
     }
   }
 
@@ -282,7 +296,7 @@ public class Utility {
   }
 
   public static void writeLog(Config config) {
-    File file = config.dir.resolve("log.txt").toFile();
+    File file = config.globalDir.resolve("log.txt").toFile();
     try (FileOutputStream fos = new FileOutputStream(file)) {
       BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
       bw.write(config.log.toString());
@@ -295,14 +309,14 @@ public class Utility {
   }
 
   /**
-   * Read all lines from a file as a Stream
+   * Read all lines from a file and returns as a List.
    *
    * @param path The path to the file.
    * @return The lines from the file as a Stream.
    */
-  public static Stream<String> readFileLines(Path path) {
+  public static List<String> readFileLines(Path path) {
     try (Stream<String> stream = Files.lines(path)) {
-      return stream;
+      return stream.collect(Collectors.toList());
     } catch (IOException e) {
       throw new RuntimeException("Exception while reading file: " + path, e);
     }

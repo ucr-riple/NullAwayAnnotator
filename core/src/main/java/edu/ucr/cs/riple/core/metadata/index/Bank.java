@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.metadata.index;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -50,16 +51,20 @@ public class Bank<T extends Enclosed> {
   /** Factory instance to parse outputs. */
   private final Factory<T> factory;
   /** Path to file where outputs are stored. */
-  private final Path path;
+  private final ImmutableSet<Path> paths;
 
-  public Bank(Path path, Factory<T> factory) {
+  public Bank(ImmutableSet<Path> paths, Factory<T> factory) {
     this.factory = factory;
-    this.path = path;
-    rootInClass = new Index<>(path, Index.Type.BY_CLASS, factory);
-    rootInMethod = new Index<>(path, Index.Type.BY_METHOD, factory);
+    this.paths = paths;
+    rootInClass = new Index<>(this.paths, Index.Type.BY_CLASS, factory);
+    rootInMethod = new Index<>(this.paths, Index.Type.BY_METHOD, factory);
     rootInMethod.index();
     rootInClass.index();
-    Preconditions.checkArgument(rootInClass.total == rootInMethod.total);
+    Preconditions.checkArgument(rootInClass.getTotal() == rootInMethod.getTotal());
+  }
+
+  public Bank(Path path, Factory<T> factory) {
+    this(ImmutableSet.of(path), factory);
   }
 
   /**
@@ -70,11 +75,11 @@ public class Bank<T extends Enclosed> {
    */
   public void saveState(boolean saveClass, boolean saveMethod) {
     if (saveClass) {
-      currentInClass = new Index<>(this.path, Index.Type.BY_CLASS, factory);
+      currentInClass = new Index<>(paths, Index.Type.BY_CLASS, factory);
       currentInClass.index();
     }
     if (saveMethod) {
-      currentInMethod = new Index<>(this.path, Index.Type.BY_METHOD, factory);
+      currentInMethod = new Index<>(paths, Index.Type.BY_METHOD, factory);
       currentInMethod.index();
     }
   }

@@ -25,7 +25,6 @@
 package edu.ucr.cs.riple.core.injectors;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.changes.Change;
@@ -44,8 +43,27 @@ import java.util.stream.Collectors;
  */
 public class VirtualInjector extends AnnotationInjector {
 
+  /** Path to library model loader */
+  private final Path libraryModelPath;
+
   public VirtualInjector(Config config) {
     super(config);
+    this.libraryModelPath = config.nullawayLibraryModelLoaderPath;
+    if (config.downStreamDependenciesAnalysisActivated) {
+      Preconditions.checkNotNull(
+          libraryModelPath,
+          "NullawayLibraryModelLoaderPath cannot be null while downstream dependencies analysis is activated.");
+      clear();
+    }
+  }
+
+  /** Removes any existing entry from library models. */
+  private void clear() {
+    try {
+      new FileOutputStream(libraryModelPath.toFile()).close();
+    } catch (IOException e) {
+      throw new RuntimeException("Could not clear library model loader content", e);
+    }
   }
 
   @Override
@@ -54,29 +72,25 @@ public class VirtualInjector extends AnnotationInjector {
       throw new IllegalStateException(
           "Downstream dependencies analysis not activated, cannot inject annotations virtually!");
     }
-    // Path to serialize annotations to library model loader path.
-    Path path = config.nullawayLibraryModelLoaderPath;
-    Preconditions.checkNotNull(
-        path,
-        "NullawayLibraryModelLoaderPath cannot be null while downstream dependencies analysis is activated.");
-    try (BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(path.toFile()))) {
+    try (BufferedOutputStream os =
+        new BufferedOutputStream(new FileOutputStream(libraryModelPath.toFile()))) {
       Set<String> rows =
           fixes.stream()
-              .filter((Predicate<Fix>) Fix::isOnMethod)
-              .map(fix -> fix.toMethod().clazz + "\t" + fix.toMethod().method)
+              .filter(Fix::isOnMethod)
+              .map(fix -> fix.toMethod().clazz + "\t" + fix.toMethod().method + "\n")
               .collect(Collectors.toSet());
       for (String row : rows) {
         os.write(row.getBytes(Charset.defaultCharset()), 0, row.length());
       }
       os.flush();
     } catch (IOException e) {
-      throw new RuntimeException("Error happened for writing at file: " + path, e);
+      throw new RuntimeException("Error happened for writing at file: " + libraryModelPath, e);
     }
   }
 
   @Override
   public void removeFixes(Set<Fix> fixes) {
-    // No op.
+    clear();
   }
 
   @Override

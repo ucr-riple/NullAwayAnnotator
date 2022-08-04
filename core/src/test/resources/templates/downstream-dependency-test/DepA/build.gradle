@@ -31,6 +31,8 @@ plugins {
 group 'org.example'
 version '1.0-SNAPSHOT'
 
+def libraryloader = project.getProperty("library-model-loader-path")
+
 repositories {
     mavenLocal()
     mavenCentral()
@@ -39,8 +41,9 @@ repositories {
 dependencies {
     compileOnly project(":Target")
 
-    annotationProcessor "com.uber.nullaway:nullaway:0.9.7"
+    annotationProcessor "com.uber.nullaway:nullaway:0.9.9"
     annotationProcessor "edu.ucr.cs.riple.nullawayannotator:scanner:1.3.2-SNAPSHOT"
+    annotationProcessor files(libraryloader)
 
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
     errorprone "com.google.errorprone:error_prone_core:2.3.2"
@@ -54,12 +57,13 @@ test {
 tasks.withType(JavaCompile) {
     if (!name.toLowerCase().contains("test")) {
         options.errorprone.errorproneArgs += ["-XepDisableAllChecks",
-                                              "-Xep:NullAway:ERROR",
-                                              "-XepOpt:NullAway:AnnotatedPackages=edu.ucr.cs.riple.libtest",
+                                              "-Xep:NullAway:WARN",
+                                              "-XepOpt:NullAway:AnnotatedPackages=test",
                                               "-XepOpt:NullAway:SerializeFixMetadata=true",
-                                              "-XepOpt:NullAway:FixSerializationConfigPath=" + project.getProperty("nullaway-config-path"),
+                                              "-XepOpt:NullAway:FixSerializationConfigPath=" + project.getProperty("DepA-nullaway-config-path"),
                                               "-Xep:Scanner:ERROR",
-                                              "-XepOpt:Scanner:ConfigPath=" + project.getProperty("scanner-config-path"),
+                                              "-XepOpt:Scanner:ConfigPath=" + project.getProperty("DepA-scanner-config-path"),
+                                              "-XepOpt:NullAway:AcknowledgeLibraryModelsOfAnnotatedCode=true",
                                               "-XepDisableAllWarnings"]
         options.compilerArgs << "-Xmaxerrs" << "100000"
     }
