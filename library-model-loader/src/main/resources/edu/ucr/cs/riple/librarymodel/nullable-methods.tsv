@@ -1,0 +1,2 @@
+test.target.Foo	returnNullableBad(int)
+test.target.Foo	returnNullableGood(int)

@@ -25,11 +25,12 @@ package test.target;
 public class Foo {
   Object field = new Object();
 
-  // Making this method will resolve 5 errors here and will introduce 8 new errors on downstream
+  // Making this method will resolve 5 errors here and will introduce 1 new error here and 8 new
+  // errors on downstream dependencies.
   // dependencies.
   public Object returnNullableBad(int i) {
     // Just to create 5 places where it returns nullable, so making this method @Nullable will
-    // resolve 5 NullAway errors, Should not be marked as @Nullable.
+    // resolve 5 NullAway errors
     if (i < 0) {
       return null;
     }
@@ -52,8 +53,7 @@ public class Foo {
   // Making this method will resolve 5 errors here and will introduce 1 error on downstream
   // dependencies.
   public Object returnNullableGood(int i) {
-    // Just to create 5 places where it returns nullable, so making this method @Nullable will
-    // resolve 5 NullAway errors, Should be marked as @Nullable.
+    // Just to create 5 places where it returns nullable.
     if (i < 0) {
       return null;
     }
