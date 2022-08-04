@@ -217,6 +217,9 @@ public class CoreTestHelper {
     builder.outerLoopActivation = requestCompleteLoop;
     builder.optimized = true;
     builder.downStreamDependenciesAnalysisActivated = downstreamDependencyAnalysisActivated;
+    builder.buildCommand =
+        Utility.computeBuildCommandWithGradleCLArgumentsWithLibraryModelLoader(
+            this.projectPath, this.outDirPath, modules);
     if (downstreamDependencyAnalysisActivated) {
       builder.buildCommand =
           Utility.computeBuildCommandWithGradleCLArgumentsWithLibraryModelLoader(
@@ -235,10 +238,6 @@ public class CoreTestHelper {
                       "riple",
                       "librarymodel",
                       "nullable-methods.tsv"));
-    } else {
-      builder.buildCommand =
-          Utility.computeBuildCommandWithGradleCLArguments(
-              this.projectPath, this.outDirPath, modules);
     }
     builder.write(path);
   }

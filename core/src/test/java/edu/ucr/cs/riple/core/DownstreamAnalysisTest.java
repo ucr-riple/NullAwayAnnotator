@@ -46,4 +46,15 @@ public class DownstreamAnalysisTest extends BaseCoreTest {
         .enableDownstreamDependencyAnalysis()
         .start();
   }
+
+  @Test
+  public void public_method_with_downstream_dependency_disabled() {
+    coreTestHelper
+        .addExpectedReports(
+            new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int)"), -4),
+            new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableGood(int)"), -5))
+        .setPredicate((report, other) -> report.effect == other.effect)
+        .toDepth(1)
+        .start();
+  }
 }
