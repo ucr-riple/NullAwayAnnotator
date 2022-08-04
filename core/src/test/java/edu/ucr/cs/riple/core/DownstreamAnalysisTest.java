@@ -41,7 +41,9 @@ public class DownstreamAnalysisTest extends BaseCoreTest {
         .addExpectedReports(
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int)"), 5),
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableGood(int)"), -4))
-        .setPredicate((report, other) -> report.effect == other.effect)
+        .setPredicate(
+            (expected, found) ->
+                expected.root.equals(found.root) && expected.effect == found.effect)
         .toDepth(1)
         .enableDownstreamDependencyAnalysis()
         .start();
@@ -53,7 +55,9 @@ public class DownstreamAnalysisTest extends BaseCoreTest {
         .addExpectedReports(
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int)"), -4),
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableGood(int)"), -5))
-        .setPredicate((report, other) -> report.effect == other.effect)
+        .setPredicate(
+            (expected, found) ->
+                expected.root.equals(found.root) && expected.effect == found.effect)
         .toDepth(1)
         .start();
   }
