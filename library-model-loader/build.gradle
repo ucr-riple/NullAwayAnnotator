@@ -31,7 +31,7 @@ archivesBaseName = "librarymodel"
 dependencies {
     compileOnly deps.apt.autoService
     annotationProcessor deps.apt.autoService
-    implementation deps.build.nullaway
+    compileOnly deps.build.nullaway
     annotationProcessor deps.build.nullaway
     compileOnly deps.build.guava
 }
