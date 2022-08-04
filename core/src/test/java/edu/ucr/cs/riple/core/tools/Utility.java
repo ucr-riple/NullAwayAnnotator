@@ -77,8 +77,8 @@ public class Utility {
 
   /**
    * Computes the build command for the project template. It includes, changing directory command
-   * from root to project root dir, command to compile the project, path to library model loader and
-   * the computed paths to config files which will be passed through gradle command line arguments.
+   * from root to project root dir, command to compile the project, and the computed paths to config
+   * files which will be passed through gradle command line arguments.
    *
    * @param projectPath Path to project directory.
    * @param outDirPath Path to serialization output directory,
@@ -86,7 +86,28 @@ public class Utility {
    * @return The command to build the project including the command line arguments, this command can
    *     * be executed from any directory.
    */
-  public static String computeBuildCommandWithGradleCLArgumentsAndLibraryModelLoader(
+  public static String computeBuildCommand(
+      Path projectPath, Path outDirPath, List<String> modules) {
+    return String.format(
+        "%s && ./gradlew compileJava %s -Plibrary-model-loader-path=%s --rerun-tasks",
+        Utility.changeDirCommand(projectPath),
+        String.join(" ", computeConfigPathsWithGradleArguments(outDirPath, modules)),
+        getPathToLibraryModel().resolve(Paths.get("build", "libs", "librarymodel.jar")));
+  }
+
+  /**
+   * Computes the build command for the project template. It includes, changing directory command
+   * from root to project root dir, command to compile the project, command to update library model
+   * loader jar and the computed paths to config files which will be passed through gradle command
+   * line arguments.
+   *
+   * @param projectPath Path to project directory.
+   * @param outDirPath Path to serialization output directory,
+   * @param modules Set of names of the modules in the template.
+   * @return The command to build the project including the command line arguments, this command can
+   *     * be executed from any directory.
+   */
+  public static String computeBuildCommandWithLibraryModelLoaderDependency(
       Path projectPath, Path outDirPath, List<String> modules) {
     return String.format(
         "%s && ./gradlew library-model-loader:jar --rerun-tasks && %s && ./gradlew compileJava %s -Plibrary-model-loader-path=%s --rerun-tasks",

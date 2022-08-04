@@ -218,11 +218,11 @@ public class CoreTestHelper {
     builder.optimized = true;
     builder.downStreamDependenciesAnalysisActivated = downstreamDependencyAnalysisActivated;
     builder.buildCommand =
-        Utility.computeBuildCommandWithGradleCLArgumentsAndLibraryModelLoader(
+        Utility.computeBuildCommandWithLibraryModelLoaderDependency(
             this.projectPath, this.outDirPath, modules);
     if (downstreamDependencyAnalysisActivated) {
       builder.buildCommand =
-          Utility.computeBuildCommandWithGradleCLArgumentsAndLibraryModelLoader(
+          Utility.computeBuildCommandWithLibraryModelLoaderDependency(
               this.projectPath, this.outDirPath, modules);
       builder.downstreamBuildCommand = builder.buildCommand;
       builder.nullawayLibraryModelLoaderPath =
@@ -238,6 +238,9 @@ public class CoreTestHelper {
                       "riple",
                       "librarymodel",
                       "nullable-methods.tsv"));
+    } else {
+      builder.buildCommand =
+          Utility.computeBuildCommand(this.projectPath, this.outDirPath, modules);
     }
     builder.write(path);
   }
