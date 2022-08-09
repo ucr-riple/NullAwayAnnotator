@@ -29,20 +29,35 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.util.FixSerializationConfig;
+import edu.ucr.cs.riple.core.util.Utility;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 public class ConfigurationTest {
 
@@ -158,6 +173,61 @@ public class ConfigurationTest {
                         testDir, Paths.get(i + "nullaway.xml"), Paths.get(i + "scanner.xml")))
             .collect(ImmutableSet.toImmutableSet());
     assertEquals(downstreamInfo, config.downstreamInfo);
+  }
+
+  @Test
+  public void test_config_files_have_different_uuid() {
+    Set<String> observed = new HashSet<>();
+    // Test for NullAway config
+    FixSerializationConfig config = new FixSerializationConfig();
+    Path nullawayConfigPath = testDir.resolve("nullaway.xml");
+    for (int i = 0; i < 5; i++) {
+      Utility.writeNullAwayConfigInXMLFormat(config, nullawayConfigPath.toString());
+      String uuid = getValueFromTag(nullawayConfigPath, "/serialization/uuid");
+      if (observed.contains(uuid)) {
+        throw new IllegalStateException(
+            "Duplicate UUID found for NullAway config: " + uuid + " in set: " + observed);
+      }
+      observed.add(uuid);
+    }
+    observed.clear();
+    // Test for Scanner config
+    Path scannerConfig = testDir.resolve("scanner.xml");
+    ModuleInfo moduleInfo = new ModuleInfo(testDir, nullawayConfigPath, scannerConfig);
+    for (int i = 0; i < 5; i++) {
+      Utility.setScannerCheckerActivation(moduleInfo, true);
+      String uuid = getValueFromTag(scannerConfig, "/scanner/uuid");
+      if (observed.contains(uuid)) {
+        throw new IllegalStateException(
+            "Duplicate UUID found for Scanner config: " + uuid + " in set: " + observed);
+      }
+      observed.add(uuid);
+    }
+  }
+
+  /**
+   * Helper method for reading value of a node located at /key_1/key_2/.../key_n (in the form of
+   * {@code Xpath} query) from a xml document at the given path.
+   *
+   * @param path Path to xml file.
+   * @param key Key to locate the value, can be nested in the form of {@code Xpath} query (e.g.
+   *     /key1/key2/.../key_n).
+   * @return The value in the specified keychain as {@code String}.
+   */
+  private static String getValueFromTag(Path path, String key) {
+    try {
+      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      DocumentBuilder builder = factory.newDocumentBuilder();
+      Document doc = builder.parse(Files.newInputStream(path));
+      doc.normalize();
+      XPath xPath = XPathFactory.newInstance().newXPath();
+      return ((Node) xPath.compile(key).evaluate(doc, XPathConstants.NODE)).getTextContent();
+    } catch (XPathExpressionException
+        | ParserConfigurationException
+        | IOException
+        | SAXException ex) {
+      throw new RuntimeException("Could not extract value from tag: " + key, ex);
+    }
   }
 
   /** Container class for CLI Flag. */
