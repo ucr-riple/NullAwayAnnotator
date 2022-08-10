@@ -107,7 +107,7 @@ public class ConfigurationTest {
   }
 
   @Test
-  public void test_required_flags_missing_cli() {
+  public void testRequiredFlagsMissingCli() {
     // Check if each is missed.
     for (int i = 0; i < requiredFlagsCli.size(); i++) {
       List<CLIFlag> incompleteFlags = new ArrayList<>(requiredFlagsCli);
@@ -123,7 +123,7 @@ public class ConfigurationTest {
   }
 
   @Test
-  public void test_required_flags_cli() {
+  public void testRequiredFlagsCli() {
     Config config = new Config(makeCommandLineArguments(requiredFlagsCli));
     assertEquals("./gradlew compileJava", config.buildCommand);
     assertEquals(testDir, config.globalDir);
@@ -134,7 +134,7 @@ public class ConfigurationTest {
   }
 
   @Test
-  public void test_required_flags_missing_for_downstream_dependency_analysis_cli() {
+  public void testRequiredFlagsMissingForDownstreamDependencyAnalysisCli() {
     String expectedErrorMessage =
         "To activate downstream dependency analysis, all flags [--activate-downstream-dependencies-analysis, --downstream-dependencies-build-command (arg), --nullaway-library-model-loader-path (arg)] must be present!";
     // Check if each is missed.
@@ -152,7 +152,7 @@ public class ConfigurationTest {
   }
 
   @Test
-  public void test_required_flags_for_downstream_dependency_analysis_cli() {
+  public void testRequiredFlagsForDownstreamDependencyAnalysisCli() {
     List<CLIFlag> flags = new ArrayList<>(requiredFlagsCli);
     flags.addAll(requiredDownsStreamDependencyFlagsCli);
     Config config = new Config(makeCommandLineArguments(flags));
@@ -176,7 +176,7 @@ public class ConfigurationTest {
   }
 
   @Test
-  public void test_config_files_have_different_uuid() {
+  public void testConfigFilesHaveDifferentUUID() {
     Set<String> observed = new HashSet<>();
     // Test for NullAway config
     FixSerializationConfig config = new FixSerializationConfig();
