@@ -25,7 +25,10 @@
 package edu.ucr.cs.riple.scanner;
 
 import com.google.common.base.Preconditions;
+import edu.ucr.cs.riple.scanner.out.MethodInfo;
 import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -52,6 +55,26 @@ public interface Config {
 
   @Nonnull
   Path getOutputDirectory();
+
+  Context getContext();
+
+  class Context {
+    public final Set<MethodInfo> methodIs;
+    private int id;
+
+    public Context() {
+      this.id = 0;
+      this.methodIs = new HashSet<>();
+    }
+
+    public int getNextUniqueID() {
+      return ++id;
+    }
+
+    public void visitMethod(MethodInfo methodInfo) {
+      this.methodIs.add(methodInfo);
+    }
+  }
 
   class Builder {
     private Path outputDirectory;

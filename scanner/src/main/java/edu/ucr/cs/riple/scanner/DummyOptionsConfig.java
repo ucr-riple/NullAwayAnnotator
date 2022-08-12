@@ -62,4 +62,9 @@ public class DummyOptionsConfig implements Config {
   public Path getOutputDirectory() {
     throw new IllegalStateException(ERROR_MESSAGE);
   }
+
+  @Override
+  public Context getContext() {
+    throw new IllegalStateException(ERROR_MESSAGE);
+  }
 }

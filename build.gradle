@@ -49,8 +49,10 @@ allprojects {
 apply from: "gradle/dependencies.gradle"
 
 subprojects { proj ->
+
     proj.apply plugin: "java"
     proj.apply plugin: "net.ltgt.errorprone"
+
     proj.dependencies {
         errorprone deps.build.errorProneCore
         errorproneJavac deps.build.errorProneJavac
@@ -60,13 +62,16 @@ subprojects { proj ->
         testImplementation deps.test.junitapi
         testRuntimeOnly deps.test.junitengine
     }
+
     proj.tasks.withType(JavaCompile) {
-        options.errorprone {
-            check("StringSplitter", CheckSeverity.OFF)
-            check("WildcardImport", CheckSeverity.ERROR)
-            check("MissingBraces", CheckSeverity.ERROR)
-            if (project.name != "ban-mutable-static") {
-                check("BanMutableStatic", CheckSeverity.ERROR)
+        if (!name.toLowerCase().contains("test")) {
+            options.errorprone {
+                check("StringSplitter", CheckSeverity.OFF)
+                check("WildcardImport", CheckSeverity.ERROR)
+                check("MissingBraces", CheckSeverity.ERROR)
+                if (project.name != "ban-mutable-static") {
+                    check("BanMutableStatic", CheckSeverity.ERROR)
+                }
             }
         }
     }

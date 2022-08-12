@@ -44,6 +44,8 @@ public class ErrorProneCLIFlagsConfig implements Config {
   private final boolean callTrackerIsActive;
   private final boolean classTrackerIsActive;
   private final Serializer serializer;
+
+  private final Context context;
   static final String EP_FL_NAMESPACE = "Scanner";
   static final String FL_CONFIG_PATH = EP_FL_NAMESPACE + ":ConfigPath";
 
@@ -82,6 +84,7 @@ public class ErrorProneCLIFlagsConfig implements Config {
         XMLUtil.getValueFromAttribute(document, "/scanner/class", "active", Boolean.class)
             .orElse(false);
     this.serializer = new Serializer(this);
+    this.context = new Context();
   }
 
   @Override
@@ -113,5 +116,10 @@ public class ErrorProneCLIFlagsConfig implements Config {
   @Override
   public Path getOutputDirectory() {
     return outputDirectory;
+  }
+
+  @Override
+  public Context getContext() {
+    return context;
   }
 }

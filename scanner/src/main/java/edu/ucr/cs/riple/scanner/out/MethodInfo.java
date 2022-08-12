@@ -41,30 +41,27 @@ import javax.lang.model.element.Modifier;
 public class MethodInfo {
   public final Symbol.MethodSymbol symbol;
   public final Symbol.ClassSymbol clazz;
-  final int id;
-
+  private final int id;
   private Boolean[] annotFlags;
   private boolean hasNullableAnnotation;
   private int parent = -1;
-  public static final Context.Key<Integer> METHOD_INFO_LAST_ID = new Context.Key<>();
   public static final Context.Key<Set<MethodInfo>> DISCOVERED_METHOD_NODES = new Context.Key<>();
 
-  private MethodInfo(Symbol.MethodSymbol method, VisitorState state) {
-    this.id = state.context.get(METHOD_INFO_LAST_ID) + 1;
+  private MethodInfo(Symbol.MethodSymbol method, Config.Context context) {
+    this.id = context.getNextUniqueID();
     this.symbol = method;
     this.clazz = (method != null) ? method.enclClass() : null;
-    state.context.get(DISCOVERED_METHOD_NODES).add(this);
-    state.context.put(METHOD_INFO_LAST_ID, this.id);
+    context.visitMethod(this);
   }
 
-  public static MethodInfo findOrCreate(Symbol.MethodSymbol method, VisitorState state) {
+  public static MethodInfo findOrCreate(Symbol.MethodSymbol method, Config.Context context) {
     Symbol.ClassSymbol clazz = method.enclClass();
     Optional<MethodInfo> optionalMethodInfo =
-        state.context.get(DISCOVERED_METHOD_NODES).stream()
+        context.methodIs.stream()
             .filter(
                 methodInfo -> methodInfo.symbol.equals(method) && methodInfo.clazz.equals(clazz))
             .findAny();
-    return optionalMethodInfo.orElseGet(() -> new MethodInfo(method, state));
+    return optionalMethodInfo.orElseGet(() -> new MethodInfo(method, context));
   }
 
   @Override
@@ -84,14 +81,14 @@ public class MethodInfo {
     return Objects.hash(symbol, clazz);
   }
 
-  public void findParent(VisitorState state) {
+  public void findParent(VisitorState state, Config.Context context) {
     Symbol.MethodSymbol superMethod =
         SymbolUtil.getClosestOverriddenMethod(symbol, state.getTypes());
     if (superMethod == null || superMethod.toString().equals("null")) {
       this.parent = 0;
       return;
     }
-    MethodInfo superMethodInfo = findOrCreate(superMethod, state);
+    MethodInfo superMethodInfo = findOrCreate(superMethod, context);
     this.parent = superMethodInfo.id;
   }
 

@@ -34,7 +34,6 @@ import com.google.errorprone.bugpatterns.BugChecker;
 import com.google.errorprone.matchers.Description;
 import com.google.errorprone.util.ASTHelpers;
 import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
@@ -45,7 +44,6 @@ import edu.ucr.cs.riple.scanner.out.ClassInfo;
 import edu.ucr.cs.riple.scanner.out.MethodInfo;
 import edu.ucr.cs.riple.scanner.out.TrackerNode;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import javax.lang.model.element.ElementKind;
 
@@ -59,7 +57,6 @@ import javax.lang.model.element.ElementKind;
 @SuppressWarnings("BugPatternNaming")
 public class Scanner extends BugChecker
     implements BugChecker.MethodInvocationTreeMatcher,
-        BugChecker.CompilationUnitTreeMatcher,
         BugChecker.MemberSelectTreeMatcher,
         BugChecker.MethodTreeMatcher,
         BugChecker.IdentifierTreeMatcher,
@@ -74,18 +71,6 @@ public class Scanner extends BugChecker
 
   public Scanner(ErrorProneFlags flags) {
     this.config = new ErrorProneCLIFlagsConfig(flags);
-  }
-
-  @Override
-  public Description matchCompilationUnit(CompilationUnitTree tree, VisitorState state) {
-    // Just to make sure state is correctly initialized.
-    if (state.context.get(MethodInfo.METHOD_INFO_LAST_ID) == null) {
-      state.context.put(MethodInfo.METHOD_INFO_LAST_ID, 0);
-    }
-    if (state.context.get(MethodInfo.DISCOVERED_METHOD_NODES) == null) {
-      state.context.put(MethodInfo.DISCOVERED_METHOD_NODES, new HashSet<>());
-    }
-    return Description.NO_MATCH;
   }
 
   @Override
@@ -118,8 +103,8 @@ public class Scanner extends BugChecker
       return Description.NO_MATCH;
     }
     Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(tree);
-    MethodInfo methodInfo = MethodInfo.findOrCreate(methodSymbol, state);
-    methodInfo.findParent(state);
+    MethodInfo methodInfo = MethodInfo.findOrCreate(methodSymbol, config.getContext());
+    methodInfo.findParent(state, config.getContext());
     methodInfo.setAnnotation(config);
     List<Boolean> paramAnnotations = new ArrayList<>();
     for (int i = 0; i < methodSymbol.getParameters().size(); i++) {
