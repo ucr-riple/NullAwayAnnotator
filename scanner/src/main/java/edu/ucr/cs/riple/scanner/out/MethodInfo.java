@@ -27,7 +27,6 @@ package edu.ucr.cs.riple.scanner.out;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.VisitorState;
 import com.sun.tools.javac.code.Symbol;
-import com.sun.tools.javac.util.Context;
 import edu.ucr.cs.riple.scanner.Config;
 import edu.ucr.cs.riple.scanner.SymbolUtil;
 import java.util.Arrays;
@@ -45,7 +44,6 @@ public class MethodInfo {
   private Boolean[] annotFlags;
   private boolean hasNullableAnnotation;
   private int parent = -1;
-  public static final Context.Key<Set<MethodInfo>> DISCOVERED_METHOD_NODES = new Context.Key<>();
 
   private MethodInfo(Symbol.MethodSymbol method, Config.Context context) {
     this.id = context.getNextUniqueID();

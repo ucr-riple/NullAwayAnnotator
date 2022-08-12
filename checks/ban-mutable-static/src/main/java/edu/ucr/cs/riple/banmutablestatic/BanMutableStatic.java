@@ -54,6 +54,8 @@ public class BanMutableStatic extends BugChecker implements BugChecker.VariableT
 
   @Override
   public Description matchVariable(VariableTree tree, VisitorState state) {
+    // At this moment, this checker This only covers "shallow" mutability. Will make it cover deep
+    // cases in future which is not the priority for now.
     boolean isStatic = tree.getModifiers().getFlags().contains(Modifier.STATIC);
     boolean isMutable = !tree.getModifiers().getFlags().contains(Modifier.FINAL);
     if (isMutable && isStatic) {

@@ -160,7 +160,7 @@ public class CoreTestHelper {
                 }
               });
     } catch (IOException e) {
-      e.printStackTrace();
+      throw new RuntimeException("Error happened in processing src under: " + projectPath, e);
     }
   }
 
