@@ -47,6 +47,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.xml.parsers.DocumentBuilder;
@@ -179,6 +180,11 @@ public class Utility {
       outputDir.setTextContent(config.outputDirectory);
       rootElement.appendChild(outputDir);
 
+      // UUID
+      Element uuid = doc.createElement("uuid");
+      uuid.setTextContent(UUID.randomUUID().toString());
+      rootElement.appendChild(uuid);
+
       // Writings
       TransformerFactory transformerFactory = TransformerFactory.newInstance();
       Transformer transformer = transformerFactory.newTransformer();
@@ -229,6 +235,11 @@ public class Utility {
       Element outputDir = doc.createElement("path");
       outputDir.setTextContent(info.dir.toString());
       rootElement.appendChild(outputDir);
+
+      // UUID
+      Element uuid = doc.createElement("uuid");
+      uuid.setTextContent(UUID.randomUUID().toString());
+      rootElement.appendChild(uuid);
 
       // Writings
       TransformerFactory transformerFactory = TransformerFactory.newInstance();
