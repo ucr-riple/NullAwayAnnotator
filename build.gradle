@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
+import net.ltgt.gradle.errorprone.CheckSeverity
 buildscript {
     repositories {
         mavenCentral()
@@ -29,6 +29,11 @@ buildscript {
         classpath 'com.vanniktech:gradle-maven-publish-plugin:0.14.2'
     }
 }
+
+plugins{
+    id "net.ltgt.errorprone" version "2.0.1" apply false
+}
+
 allprojects {
     group = GROUP
     version = VERSION_NAME
@@ -41,8 +46,30 @@ allprojects {
     }
 }
 
-subprojects {
-    apply plugin: "java"
+apply from: "gradle/dependencies.gradle"
+
+subprojects { proj ->
+    proj.apply plugin: "java"
+    proj.apply plugin: "net.ltgt.errorprone"
+    proj.dependencies {
+        errorprone deps.build.errorProneCore
+        errorproneJavac deps.build.errorProneJavac
+        if(proj.name != "ban-mutable-static"){
+            annotationProcessor project(":checks:ban-mutable-static")
+        }
+        testImplementation deps.test.junitapi
+        testRuntimeOnly deps.test.junitengine
+    }
+    proj.tasks.withType(JavaCompile) {
+        options.errorprone {
+            check("StringSplitter", CheckSeverity.OFF)
+            check("WildcardImport", CheckSeverity.ERROR)
+            check("MissingBraces", CheckSeverity.ERROR)
+            if (project.name != "ban-mutable-static") {
+                check("BanMutableStatic", CheckSeverity.ERROR)
+            }
+        }
+    }
 
     repositories {
         mavenLocal()
@@ -50,13 +77,6 @@ subprojects {
         google()
     }
 
-    apply from: "../gradle/dependencies.gradle"
-
     sourceCompatibility = 1.11
     targetCompatibility = 1.11
-
-    dependencies {
-        testImplementation deps.test.junitapi
-        testRuntimeOnly deps.test.junitengine
-    }
 }

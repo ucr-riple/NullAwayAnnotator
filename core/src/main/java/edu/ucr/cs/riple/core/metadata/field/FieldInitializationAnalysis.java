@@ -71,6 +71,7 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
   }
 
   /** Stores class field / method initialization status. */
+  @SuppressWarnings("JavaLangClash")
   private static class Class {
     /**
      * HashMap of initializer methods. Used HashMap for fast retrievals based on the method's
@@ -96,8 +97,12 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
 
     @Override
     public boolean equals(Object o) {
-      if (this == o) return true;
-      if (!(o instanceof Class)) return false;
+      if (this == o) {
+        return true;
+      }
+      if (!(o instanceof Class)) {
+        return false;
+      }
       Class other = (Class) o;
       return clazz.equals(other.clazz) && uri.equals(other.uri);
     }
@@ -168,8 +173,12 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
 
     @Override
     public boolean equals(Object o) {
-      if (this == o) return true;
-      if (!(o instanceof InitializerMethod)) return false;
+      if (this == o) {
+        return true;
+      }
+      if (!(o instanceof InitializerMethod)) {
+        return false;
+      }
       InitializerMethod other = (InitializerMethod) o;
       return signature.equals(other.signature);
     }

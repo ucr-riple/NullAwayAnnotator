@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.metadata.index;
 import java.util.Objects;
 
 /** Represents an error reported by NullAway. */
+@SuppressWarnings("JavaLangClash")
 public class Error extends Enclosed {
 
   /** Error Type. */
@@ -50,8 +51,12 @@ public class Error extends Enclosed {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Error)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof Error)) {
+      return false;
+    }
     Error error = (Error) o;
     return messageType.equals(error.messageType);
   }

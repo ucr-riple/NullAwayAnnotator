@@ -49,8 +49,12 @@ public class Report {
 
   @Override
   public boolean equals(Object other) {
-    if (this == other) return true;
-    if (!(other instanceof Report)) return false;
+    if (this == other) {
+      return true;
+    }
+    if (!(other instanceof Report)) {
+      return false;
+    }
     Report report = (Report) other;
     return root.equals(report.root);
   }
@@ -69,9 +73,6 @@ public class Report {
    * @return true, if two reports are equal (same effectiveness and all locations)
    */
   public boolean testEquals(Report other) {
-    if (this == other) {
-      return true;
-    }
     if (!this.root.equals(other.root)) {
       return false;
     }

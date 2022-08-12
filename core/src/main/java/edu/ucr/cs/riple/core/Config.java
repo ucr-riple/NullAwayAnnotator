@@ -28,7 +28,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.util.Utility;
-import java.io.FileWriter;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -110,6 +110,8 @@ public class Config {
   public final Path nullawayLibraryModelLoaderPath;
   /** Command to build the all downstream dependencies at once. */
   public final String downstreamDependenciesBuildCommand;
+  /** Global counter for assigning unique id for each instance. */
+  public int moduleCounterID;
 
   public final Log log;
   public final int depth;
@@ -307,7 +309,11 @@ public class Config {
             .map(
                 line -> {
                   String[] info = line.split("\\t");
-                  return new ModuleInfo(this.globalDir, Paths.get(info[0]), Paths.get(info[1]));
+                  return new ModuleInfo(
+                      getNextModuleUniqueID(),
+                      this.globalDir,
+                      Paths.get(info[0]),
+                      Paths.get(info[1]));
                 })
             .collect(Collectors.toList());
     Preconditions.checkArgument(moduleInfoList.size() > 0, "Target module config paths not found.");
@@ -336,6 +342,7 @@ public class Config {
       this.downstreamInfo = ImmutableSet.of();
       this.downstreamDependenciesBuildCommand = null;
     }
+    this.moduleCounterID = 0;
     this.log = new Log();
     this.log.reset();
   }
@@ -380,7 +387,7 @@ public class Config {
         getArrayValueFromKey(
                 jsonObject,
                 "CONFIG_PATHS",
-                instance -> ModuleInfo.buildFromJson(globalDir, instance),
+                instance -> ModuleInfo.buildFromJson(getNextModuleUniqueID(), globalDir, instance),
                 ModuleInfo.class)
             .orElse(Collections.emptyList());
     this.target = moduleInfoList.get(0);
@@ -403,8 +410,19 @@ public class Config {
             : Paths.get(nullawayLibraryModelLoaderPathString);
     moduleInfoList.remove(0);
     this.downstreamInfo = ImmutableSet.copyOf(moduleInfoList);
+    this.moduleCounterID = 0;
     this.log = new Log();
     log.reset();
+  }
+
+  /**
+   * Returns the latest id associated to a module, used to create unique ids for each module and
+   * increments it.
+   *
+   * @return last id value used in integer.
+   */
+  public int getNextModuleUniqueID() {
+    return moduleCounterID++;
   }
 
   private static void showHelp(HelpFormatter formatter, Options options) {
@@ -559,10 +577,11 @@ public class Config {
         downstreamDependency.put("BUILD_COMMAND", downstreamBuildCommand);
       }
       json.put("DOWNSTREAM_DEPENDENCY_ANALYSIS", downstreamDependency);
-      try (FileWriter file = new FileWriter(path.toFile())) {
+      try (BufferedWriter file =
+          Files.newBufferedWriter(path.toFile().toPath(), Charset.defaultCharset())) {
         file.write(json.toJSONString());
       } catch (IOException e) {
-        e.printStackTrace();
+        System.err.println("Error happened in writing config json, " + e);
       }
     }
   }

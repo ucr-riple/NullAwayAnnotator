@@ -33,12 +33,9 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -71,7 +68,8 @@ public class Utility {
   public static void executeCommand(Config config, String command) {
     try {
       Process p = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
-      BufferedReader reader = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+      BufferedReader reader =
+          new BufferedReader(new InputStreamReader(p.getErrorStream(), Charset.defaultCharset()));
       String line;
       while ((line = reader.readLine()) != null) {
         if (config.redirectBuildOutputToStdErr) {
@@ -115,8 +113,8 @@ public class Utility {
           return -1;
         });
     result.put("REPORTS", reportsJson);
-    try {
-      FileWriter writer = new FileWriter(reportsPath.toFile());
+    try (BufferedWriter writer =
+        Files.newBufferedWriter(reportsPath.toFile().toPath(), Charset.defaultCharset())) {
       writer.write(result.toJSONString().replace("\\/", "/").replace("\\\\\\", "\\"));
       writer.flush();
     } catch (IOException e) {
@@ -129,7 +127,8 @@ public class Utility {
     Path fixesPath = info.dir.resolve("fixes.tsv");
     Set<Fix> fixes = new HashSet<>();
     try {
-      try (BufferedReader br = new BufferedReader(new FileReader(fixesPath.toFile()))) {
+      try (BufferedReader br =
+          Files.newBufferedReader(fixesPath.toFile().toPath(), Charset.defaultCharset())) {
         String line;
         br.readLine();
         while ((line = br.readLine()) != null) {
@@ -307,14 +306,12 @@ public class Utility {
   }
 
   public static void writeLog(Config config) {
-    File file = config.globalDir.resolve("log.txt").toFile();
-    try (FileOutputStream fos = new FileOutputStream(file)) {
-      BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+    Path path = config.globalDir.resolve("log.txt");
+    try (BufferedWriter bw = Files.newBufferedWriter(path, Charset.defaultCharset()); ) {
       bw.write(config.log.toString());
       bw.newLine();
-      bw.close();
     } catch (Exception ignored) {
-      System.err.println("Could not write log to: " + file.getAbsolutePath());
+      System.err.println("Could not write log to: " + path);
       System.err.println("Writing here: " + config.log);
     }
   }

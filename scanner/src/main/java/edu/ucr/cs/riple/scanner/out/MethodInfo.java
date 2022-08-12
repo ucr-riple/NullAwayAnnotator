@@ -27,11 +27,11 @@ package edu.ucr.cs.riple.scanner.out;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.VisitorState;
 import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.util.Context;
 import edu.ucr.cs.riple.scanner.Config;
 import edu.ucr.cs.riple.scanner.SymbolUtil;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -46,30 +46,35 @@ public class MethodInfo {
   private Boolean[] annotFlags;
   private boolean hasNullableAnnotation;
   private int parent = -1;
-  private static int LAST_ID = 0;
-  private static final Set<MethodInfo> discovered = new HashSet<>();
+  public static final Context.Key<Integer> METHOD_INFO_LAST_ID = new Context.Key<>();
+  public static final Context.Key<Set<MethodInfo>> DISCOVERED_METHOD_NODES = new Context.Key<>();
 
-  private MethodInfo(Symbol.MethodSymbol method) {
-    this.id = ++LAST_ID;
+  private MethodInfo(Symbol.MethodSymbol method, VisitorState state) {
+    this.id = state.context.get(METHOD_INFO_LAST_ID) + 1;
     this.symbol = method;
     this.clazz = (method != null) ? method.enclClass() : null;
-    discovered.add(this);
+    state.context.get(DISCOVERED_METHOD_NODES).add(this);
+    state.context.put(METHOD_INFO_LAST_ID, this.id);
   }
 
-  public static MethodInfo findOrCreate(Symbol.MethodSymbol method) {
+  public static MethodInfo findOrCreate(Symbol.MethodSymbol method, VisitorState state) {
     Symbol.ClassSymbol clazz = method.enclClass();
     Optional<MethodInfo> optionalMethodInfo =
-        discovered.stream()
+        state.context.get(DISCOVERED_METHOD_NODES).stream()
             .filter(
                 methodInfo -> methodInfo.symbol.equals(method) && methodInfo.clazz.equals(clazz))
             .findAny();
-    return optionalMethodInfo.orElseGet(() -> new MethodInfo(method));
+    return optionalMethodInfo.orElseGet(() -> new MethodInfo(method, state));
   }
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof MethodInfo)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof MethodInfo)) {
+      return false;
+    }
     MethodInfo that = (MethodInfo) o;
     return symbol.equals(that.symbol) && clazz.equals(that.clazz);
   }
@@ -86,7 +91,7 @@ public class MethodInfo {
       this.parent = 0;
       return;
     }
-    MethodInfo superMethodInfo = findOrCreate(superMethod);
+    MethodInfo superMethodInfo = findOrCreate(superMethod, state);
     this.parent = superMethodInfo.id;
   }
 

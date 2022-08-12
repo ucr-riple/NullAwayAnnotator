@@ -47,7 +47,7 @@ public class OnParameter extends Location {
 
   @Override
   public Location duplicate() {
-    return new OnParameter(clazz, uri, method, index);
+    return new OnParameter(uri, clazz, method, index);
   }
 
   @SuppressWarnings("unchecked")
@@ -91,9 +91,15 @@ public class OnParameter extends Location {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof OnParameter)) return false;
-    if (!super.equals(o)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof OnParameter)) {
+      return false;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
     OnParameter other = (OnParameter) o;
     return super.equals(other) && method.equals(other.method) && index == other.index;
   }

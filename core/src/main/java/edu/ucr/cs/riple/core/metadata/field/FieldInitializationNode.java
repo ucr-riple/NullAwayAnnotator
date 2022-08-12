@@ -23,8 +23,12 @@ public class FieldInitializationNode implements Hashable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof FieldInitializationNode)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof FieldInitializationNode)) {
+      return false;
+    }
     FieldInitializationNode that = (FieldInitializationNode) o;
     return initializerLocation.equals(that.initializerLocation) && this.field.equals(that.field);
   }

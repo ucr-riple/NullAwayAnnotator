@@ -41,8 +41,12 @@ public abstract class Change {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Change)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof Change)) {
+      return false;
+    }
     Change other = (Change) o;
     return Objects.equals(location, other.location) && Objects.equals(annotation, other.annotation);
   }

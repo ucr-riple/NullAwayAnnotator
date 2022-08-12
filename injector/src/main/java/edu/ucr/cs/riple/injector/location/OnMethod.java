@@ -44,7 +44,7 @@ public class OnMethod extends Location {
 
   @Override
   public Location duplicate() {
-    return new OnMethod(clazz, uri, method);
+    return new OnMethod(uri, clazz, method);
   }
 
   @SuppressWarnings("unchecked")
@@ -94,8 +94,12 @@ public class OnMethod extends Location {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof OnMethod)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof OnMethod)) {
+      return false;
+    }
     OnMethod other = (OnMethod) o;
     return super.equals(other) && method.equals(other.method);
   }
