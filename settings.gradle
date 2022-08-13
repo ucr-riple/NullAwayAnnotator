@@ -24,7 +24,7 @@
 
 rootProject.name = 'NullAwayAnnotator'
 include 'core'
-include 'annotator-scanner'
+include 'type-annotator-scanner'
 include 'injector'
 include 'library-model-loader'
 

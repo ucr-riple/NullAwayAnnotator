@@ -49,12 +49,12 @@ import javax.lang.model.element.ElementKind;
 
 @AutoService(BugChecker.class)
 @BugPattern(
-    name = "AnnotatorScanner",
+    name = "TypeAnnotatorScanner",
     altNames = {"TypeBasedStructureSerializer"},
     summary = "Serialized type based call/field graph.",
     tags = BugPattern.StandardTags.STYLE,
     severity = SUGGESTION)
-public class Scanner extends BugChecker
+public class TypeAnnotatorScanner extends BugChecker
     implements BugChecker.MethodInvocationTreeMatcher,
         BugChecker.MemberSelectTreeMatcher,
         BugChecker.MethodTreeMatcher,
@@ -64,11 +64,11 @@ public class Scanner extends BugChecker
 
   private final Config config;
 
-  public Scanner() {
+  public TypeAnnotatorScanner() {
     this.config = new DummyOptionsConfig();
   }
 
-  public Scanner(ErrorProneFlags flags) {
+  public TypeAnnotatorScanner(ErrorProneFlags flags) {
     this.config = new ErrorProneCLIFlagsConfig(flags);
   }
 

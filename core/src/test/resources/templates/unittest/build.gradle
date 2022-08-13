@@ -41,7 +41,7 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 
     annotationProcessor "com.uber.nullaway:nullaway:0.9.9"
-    annotationProcessor "edu.ucr.cs.riple.nullawayannotator:annotator-scanner:1.3.2-SNAPSHOT"
+    annotationProcessor "edu.ucr.cs.riple.nullawayannotator:type-annotator-scanner:1.3.2-SNAPSHOT"
 
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
     errorprone "com.google.errorprone:error_prone_core:2.3.2"
@@ -59,8 +59,8 @@ tasks.withType(JavaCompile) {
                                               "-XepOpt:NullAway:AnnotatedPackages=test",
                                               "-XepOpt:NullAway:SerializeFixMetadata=true",
                                               "-XepOpt:NullAway:FixSerializationConfigPath=" + project.getProperty("unittest-nullaway-config-path"),
-                                              "-Xep:AnnotatorScanner:ERROR",
-                                              "-XepOpt:AnnotatorScanner:ConfigPath=" + project.getProperty("unittest-scanner-config-path"),
+                                              "-Xep:TypeAnnotatorScanner:ERROR",
+                                              "-XepOpt:TypeAnnotatorScanner:ConfigPath=" + project.getProperty("unittest-scanner-config-path"),
                                               "-XepDisableAllWarnings"]
         options.compilerArgs << "-Xmaxerrs" << "100000"
     }

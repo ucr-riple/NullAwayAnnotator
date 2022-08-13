@@ -37,7 +37,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 
-public abstract class ScannerBaseTest<T extends Display> {
+public abstract class TypeAnnotatorScannerBaseTest<T extends Display> {
 
   @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
   protected final DisplayFactory<T> factory;
@@ -47,7 +47,7 @@ public abstract class ScannerBaseTest<T extends Display> {
   protected SerializationTestHelper<T> tester;
   protected Path root;
 
-  public ScannerBaseTest(DisplayFactory<T> factory, String header, String fileName) {
+  public TypeAnnotatorScannerBaseTest(DisplayFactory<T> factory, String header, String fileName) {
     this.factory = factory;
     this.header = header;
     this.fileName = fileName;
@@ -77,8 +77,8 @@ public abstract class ScannerBaseTest<T extends Display> {
                 Arrays.asList(
                     "-d",
                     temporaryFolder.getRoot().getAbsolutePath(),
-                    "-Xep:AnnotatorScanner:ERROR",
-                    "-XepOpt:AnnotatorScanner:ConfigPath=" + config))
+                    "-Xep:TypeAnnotatorScanner:ERROR",
+                    "-XepOpt:TypeAnnotatorScanner:ConfigPath=" + config))
             .setOutputFileNameAndHeader(fileName, header)
             .setFactory(factory);
   }

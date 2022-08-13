@@ -1,1 +1,0 @@
-## CODE STRUCTURE SCANNER (Annotator Scanner)
