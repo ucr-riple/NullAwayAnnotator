@@ -113,14 +113,14 @@ public class Test {
 
 Follow the steps below:
 
-* [Annotator Scanner](annotator-scanner/README.md) module should be installed in the ```local maven``` repository.
-    * To install it, run `./gradlew install`
+* [TypeAnnotatorScanner](type-annotator-scanner/README.md) module should be installed in the ```local maven``` repository.
+    * To install it, run `./gradlew publishToMavenLocal`
 
 * Jar file of [Core](core/README.md) module should be located at `runner/jars`.
-    * To create the jar file run: `./gradlew fatjar`
+    * To create the jar file run: `./gradlew shadowJar`
 
 A script is provided which executes all installation tasks above. 
-It installs `Annotator Scanner` checker in `maven local` and creates the jar file of `core` module and moves it to the correct path. To run it, execute the command below:
+It installs `TypeAnnotatorScanner` checker in `maven local` and creates the jar file of `core` module and moves it to the correct path. To run it, execute the command below:
 
 `cd runner/ && ./update.sh`
 
