@@ -96,6 +96,14 @@ public class Annotator {
     Utility.buildTarget(config);
     Utility.setScannerCheckerActivation(config.target, false);
     FieldDeclarationAnalysis fieldDeclarationAnalysis = new FieldDeclarationAnalysis(config.target);
+    MethodInheritanceTree tree =
+        new MethodInheritanceTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
+    // It analyzes effects of all public APIs, does not need to re-compute them per iteration.
+    DownStreamDependencyExplorer downStreamDependencyExplorer =
+        new DownStreamDependencyExplorer(config, tree);
+    if (config.downStreamDependenciesAnalysisActivated) {
+      downStreamDependencyExplorer.explore();
+    }
     while (true) {
       Utility.buildTarget(config);
       ImmutableSet<Fix> fixes =
@@ -108,8 +116,7 @@ public class Annotator {
           new Bank<>(
               config.target.dir.resolve("fixes.tsv"),
               Fix.factory(config, fieldDeclarationAnalysis));
-      MethodInheritanceTree tree =
-          new MethodInheritanceTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
+      tree = new MethodInheritanceTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
       RegionTracker tracker = new CompoundTracker(config.target, tree);
       Explorer explorer =
           config.exhaustiveSearch
@@ -118,11 +125,6 @@ public class Annotator {
                   ? new OptimizedExplorer(
                       injector, errorBank, fixBank, tracker, fixes, tree, config.depth, config)
                   : new BasicExplorer(injector, errorBank, fixBank, fixes, tree, config);
-      DownStreamDependencyExplorer downStreamDependencyExplorer =
-          new DownStreamDependencyExplorer(config, tree);
-      if (config.downStreamDependenciesAnalysisActivated) {
-        downStreamDependencyExplorer.explore();
-      }
       ImmutableSet<Report> latestReports = explorer.explore();
       int sizeBefore = reports.size();
       latestReports.forEach(
