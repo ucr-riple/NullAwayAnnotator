@@ -7,7 +7,7 @@ Below are the series of information serialized by this checker:
 2. Method info to construct the `Method Inheritance Tree`.
 3. Class info.
 
-See section below where each series is described in details
+See sections below where each series is described in details
 
 #### Region
 
@@ -53,10 +53,10 @@ To activate the `Type Annotator Scanner` checker pass the flag below to the buil
 The config file is written in `xml` format has the structure below:
 ```xml
 <scanner>
-    <method activation="true"></method>
-    <field activation="true"></field> 
-    <call activation="true"></call>
-    <class activation="true"></class>
+    <method activation="true"/>
+    <field activation="true"/>
+    <call activation="true"/>
+    <class activation="true"/>
     <path> Path to designated output directory </path>
 </scanner>
 ```
