@@ -8,4 +8,3 @@ pushd "$PROJECT_ROOT"
    ./gradlew :core:shadowJar --rerun-tasks
    mv core/build/libs/"$CURRENT_VERSION" runner/jars/core.jar
 popd
-
