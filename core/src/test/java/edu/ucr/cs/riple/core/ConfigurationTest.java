@@ -118,6 +118,7 @@ public class ConfigurationTest {
               IllegalArgumentException.class,
               () -> new Config(makeCommandLineArguments(incompleteFlags)));
       // Check the error message.
+      System.out.println(ex.getMessage());
       assertTrue(ex.getMessage().contains(expectedErrorMessage));
     }
   }
