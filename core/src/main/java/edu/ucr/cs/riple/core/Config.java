@@ -148,7 +148,7 @@ public class Config {
     // Config Paths
     Option configPathsOption =
         new Option(
-            "cp",
+            "x",
             "config-paths",
             true,
             "Path to tsv file containing path to nullaway and scanner config files.");
