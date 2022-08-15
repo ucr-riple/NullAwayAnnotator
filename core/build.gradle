@@ -25,6 +25,7 @@
 plugins {
     id 'com.github.sherter.google-java-format' version '0.9'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'maven-publish'
     id 'application'
 }
 
@@ -50,3 +51,14 @@ task installScanner(type: Exec) {
     args "-c", "./../gradlew :scanner:publishToMavenLocal --rerun-tasks"
 }
 tasks.test.dependsOn("installScanner")
+
+publishing {
+    publications {
+        shadow(MavenPublication) { publication ->
+            project.shadow.component(publication)
+        }
+    }
+    repositories {
+        mavenLocal()
+    }
+}
