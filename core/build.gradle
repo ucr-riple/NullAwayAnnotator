@@ -45,12 +45,7 @@ dependencies {
     testImplementation deps.build.commonsio
 }
 
-task installScanner(type: Exec) {
-
-    executable "sh"
-    args "-c", "./../gradlew :scanner:publishToMavenLocal --rerun-tasks"
-}
-tasks.test.dependsOn("installScanner")
+tasks.test.dependsOn(':scanner:publishToMavenLocal')
 
 publishing {
     publications {
