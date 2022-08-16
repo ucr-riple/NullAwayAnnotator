@@ -581,7 +581,7 @@ public class Config {
           Files.newBufferedWriter(path.toFile().toPath(), Charset.defaultCharset())) {
         file.write(json.toJSONString());
       } catch (IOException e) {
-        System.err.println("Error happened in writing config json, " + e);
+        System.err.println("Error happened in writing config json: " + e);
       }
     }
   }
