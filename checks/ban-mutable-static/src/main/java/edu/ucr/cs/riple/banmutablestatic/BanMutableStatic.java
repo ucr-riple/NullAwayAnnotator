@@ -36,6 +36,10 @@ import com.sun.source.tree.VariableTree;
 import com.sun.tools.javac.code.Symbol;
 import javax.lang.model.element.Modifier;
 
+/**
+ * Checker for disallowing mutable declaration of static fields. At this moment it only covers
+ * shallow mutability, deep mutability will be covered in the future.
+ */
 @AutoService(BugChecker.class)
 @BugPattern(
     name = "BanMutableStatic",
@@ -54,8 +58,6 @@ public class BanMutableStatic extends BugChecker implements BugChecker.VariableT
 
   @Override
   public Description matchVariable(VariableTree tree, VisitorState state) {
-    // At this moment, this checker only covers "shallow" mutability. Will make it cover deep
-    // cases in future which is not the priority for now.
     boolean isStatic = tree.getModifiers().getFlags().contains(Modifier.STATIC);
     boolean isMutable = !tree.getModifiers().getFlags().contains(Modifier.FINAL);
     if (isMutable && isStatic) {
