@@ -22,10 +22,8 @@
  * THE SOFTWARE.
  */
 
-import edu.ucr.cs.riple.core.Annotator;
-import edu.ucr.cs.riple.core.Config;
+package edu.ucr.cs.riple.core;
 
-@SuppressWarnings("DefaultPackage")
 public class Main {
 
   public static void main(String[] args) {

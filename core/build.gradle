@@ -29,7 +29,7 @@ plugins {
 }
 
 application {
-    mainClass = 'Main'
+    mainClass = 'edu.ucr.cs.riple.core.Main'
 }
 
 dependencies {
