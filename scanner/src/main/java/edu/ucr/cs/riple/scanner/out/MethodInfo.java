@@ -161,8 +161,9 @@ public class MethodInfo {
   }
 
   /**
-   * Calculates hash. This method is used outside this class to calculate the expected hash based on
-   * instance's properties value if the actual instance is not available.
+   * Calculates hash. The hash is calculated based on a {@link
+   * com.sun.tools.javac.code.Symbol.MethodSymbol} instance since we want to predict the hash of a
+   * potential {@link MethodInfo} object without creating the {@link MethodInfo} instance.
    *
    * @param method Method Symbol.
    * @return Expected hash.
