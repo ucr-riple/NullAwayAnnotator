@@ -28,6 +28,7 @@ import com.google.common.base.Preconditions;
 import com.google.errorprone.VisitorState;
 import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.riple.scanner.Config;
+import edu.ucr.cs.riple.scanner.ScannerContext;
 import edu.ucr.cs.riple.scanner.SymbolUtil;
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,17 +46,18 @@ public class MethodInfo {
   private boolean hasNullableAnnotation;
   private int parent = -1;
 
-  private MethodInfo(Symbol.MethodSymbol method, Config.Context context) {
+  private MethodInfo(Symbol.MethodSymbol method, ScannerContext context) {
     this.id = context.getNextUniqueID();
     this.symbol = method;
     this.clazz = (method != null) ? method.enclClass() : null;
     context.visitMethod(this);
   }
 
-  public static MethodInfo findOrCreate(Symbol.MethodSymbol method, Config.Context context) {
+  public static MethodInfo findOrCreate(Symbol.MethodSymbol method, ScannerContext context) {
     Symbol.ClassSymbol clazz = method.enclClass();
     Optional<MethodInfo> optionalMethodInfo =
-        context.methodIs.stream()
+        context
+            .getVisitedMethodsWithHashHint(hash(method))
             .filter(
                 methodInfo -> methodInfo.symbol.equals(method) && methodInfo.clazz.equals(clazz))
             .findAny();
@@ -76,10 +78,10 @@ public class MethodInfo {
 
   @Override
   public int hashCode() {
-    return Objects.hash(symbol, clazz);
+    return hash(symbol);
   }
 
-  public void findParent(VisitorState state, Config.Context context) {
+  public void findParent(VisitorState state, ScannerContext context) {
     Symbol.MethodSymbol superMethod =
         SymbolUtil.getClosestOverriddenMethod(symbol, state.getTypes());
     if (superMethod == null || superMethod.toString().equals("null")) {
@@ -156,5 +158,16 @@ public class MethodInfo {
       return "protected";
     }
     return "package";
+  }
+
+  /**
+   * Calculates hash. This method is used outside this class to calculate the expected hash based on
+   * instance's properties value if the actual instance is not available.
+   *
+   * @param method Method Symbol.
+   * @return Expected hash.
+   */
+  public static int hash(Symbol method) {
+    return Objects.hash(method, method.enclClass());
   }
 }
