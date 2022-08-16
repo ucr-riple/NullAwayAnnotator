@@ -47,12 +47,12 @@ public class ScannerContext {
    * Last given id to the most recent newly visited method. Used to assign unique ids for each
    * method.
    */
-  private int id;
+  private int methodId;
   /** Type Annotator Scanner config. */
   private final Config config;
 
   public ScannerContext(Config config) {
-    this.id = 0;
+    this.methodId = 0;
     this.visitedMethods = MultimapBuilder.hashKeys().arrayListValues().build();
     this.config = config;
   }
@@ -62,8 +62,8 @@ public class ScannerContext {
    *
    * @return unique id.
    */
-  public int getNextUniqueID() {
-    return ++id;
+  public int getNextMethodId() {
+    return ++methodId;
   }
 
   /**

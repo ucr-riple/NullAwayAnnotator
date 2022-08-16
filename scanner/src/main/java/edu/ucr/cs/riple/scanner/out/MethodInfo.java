@@ -47,7 +47,7 @@ public class MethodInfo {
   private int parent = -1;
 
   private MethodInfo(Symbol.MethodSymbol method, ScannerContext context) {
-    this.id = context.getNextUniqueID();
+    this.id = context.getNextMethodId();
     this.symbol = method;
     this.clazz = (method != null) ? method.enclClass() : null;
     context.visitMethod(this);
