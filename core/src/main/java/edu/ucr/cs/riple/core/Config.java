@@ -421,7 +421,7 @@ public class Config {
    *
    * @return last id value used in integer.
    */
-  public int getNextModuleUniqueID() {
+  private int getNextModuleUniqueID() {
     return moduleCounterID++;
   }
 
