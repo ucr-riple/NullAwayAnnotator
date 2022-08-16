@@ -38,7 +38,7 @@ A node corresponding to method `m` contains the information below:
 #### Class info
 Serializes flat name of all observed classes and uri of the file containing the class.
 
-These data is used by the `core` module to detect multiple inline field declarations.
+This data is used by the `core` module to detect multiple inline field declarations.
 
 ### Error Prone Flags / Config File Format
 
