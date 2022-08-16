@@ -62,10 +62,10 @@ public class BanMutableStatic extends BugChecker implements BugChecker.VariableT
     boolean isMutable = !tree.getModifiers().getFlags().contains(Modifier.FINAL);
     if (isMutable && isStatic) {
       Symbol symbol = ASTHelpers.getSymbol(tree);
-      Description.Builder builder = buildDescription(tree);
-      builder.setMessage(String.format(ERROR_MESSAGE, symbol, symbol.type, symbol));
-      builder.setLinkUrl(LINK_URL);
-      return builder.build();
+      return buildDescription(tree)
+          .setMessage(String.format(ERROR_MESSAGE, symbol, symbol.type, symbol))
+          .setLinkUrl(LINK_URL)
+          .build();
     }
     return Description.NO_MATCH;
   }
