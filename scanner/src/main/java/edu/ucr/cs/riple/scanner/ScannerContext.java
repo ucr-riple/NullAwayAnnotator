@@ -27,7 +27,6 @@ package edu.ucr.cs.riple.scanner;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import edu.ucr.cs.riple.scanner.out.MethodInfo;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 /**
@@ -48,12 +47,12 @@ public class ScannerContext {
    * Last given id to the most recent newly visited method. Used to assign unique ids for each
    * method.
    */
-  private final AtomicInteger id;
+  private int id;
   /** Type Annotator Scanner config. */
   private final Config config;
 
   public ScannerContext(Config config) {
-    this.id = new AtomicInteger();
+    this.id = 0;
     this.visitedMethods = MultimapBuilder.hashKeys().arrayListValues().build();
     this.config = config;
   }
@@ -64,7 +63,7 @@ public class ScannerContext {
    * @return unique id.
    */
   public int getNextUniqueID() {
-    return id.incrementAndGet();
+    return ++id;
   }
 
   /**
