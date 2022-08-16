@@ -98,7 +98,11 @@ public class Annotator {
     FieldDeclarationAnalysis fieldDeclarationAnalysis = new FieldDeclarationAnalysis(config.target);
     MethodInheritanceTree tree =
         new MethodInheritanceTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
-    // It analyzes effects of all public APIs, does not need to re-compute them per iteration.
+    // downStreamDependencyExplorer analyzes effects of all public APIs on downstream dependencies.
+    // Through iterations, since the source code for downstream dependencies does not change and the
+    // computation does not depend on the changes in the target module, it will compute the same
+    // result in each iteration, therefore we perform the analysis only once and reuse it in each
+    // iteration.
     DownStreamDependencyExplorer downStreamDependencyExplorer =
         new DownStreamDependencyExplorer(config, tree);
     if (config.downStreamDependenciesAnalysisActivated) {
