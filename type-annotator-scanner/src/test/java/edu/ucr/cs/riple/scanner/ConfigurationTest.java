@@ -73,13 +73,15 @@ public class ConfigurationTest {
         new SerializationTestHelper<>(root)
             .setArgs(
                 Arrays.asList(
-                    "-d", temporaryFolder.getRoot().getAbsolutePath(), "-Xep:Scanner:ERROR"))
+                    "-d",
+                    temporaryFolder.getRoot().getAbsolutePath(),
+                    "-Xep:TypeAnnotatorScanner:ERROR"))
             .setOutputFileNameAndHeader("Unknown", "Unknown")
             .addSourceFile("SampleClassForTest.java")
             .setFactory(factory);
     tester.doTestWithExpectingError(
         IllegalStateException.class,
-        "Error in Scanner Checker configuration, should be set with via error prone flag: (-XepOpt:Scanner:ConfigPath)");
+        "Error in Scanner Checker configuration, should be set with via error prone flag: (-XepOpt:TypeAnnotatorScanner:ConfigPath)");
   }
 
   @Test
@@ -113,8 +115,8 @@ public class ConfigurationTest {
                 Arrays.asList(
                     "-d",
                     temporaryFolder.getRoot().getAbsolutePath(),
-                    "-Xep:Scanner:ERROR",
-                    "-XepOpt:Scanner:ConfigPath=" + config))
+                    "-Xep:TypeAnnotatorScanner:ERROR",
+                    "-XepOpt:TypeAnnotatorScanner:ConfigPath=" + config))
             .setOutputFileNameAndHeader("Unknown", "Unknown")
             .addSourceFile("SampleClassForTest.java")
             .setFactory(factory);
