@@ -58,6 +58,11 @@ publishing {
     }
 }
 
+jar {
+    // add this classifier to prevent overwriting jar and shadowJar outputs to preserve incremental build of gradle.
+    archiveClassifier = "nonshadow"
+}
+
 // To remove the "-all" postfix from the produced jar file.
 shadowJar {
     archiveClassifier = null
