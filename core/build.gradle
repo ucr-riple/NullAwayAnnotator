@@ -57,3 +57,8 @@ publishing {
         mavenLocal()
     }
 }
+
+// To remove the "-all" postfix from the produced jar file.
+shadowJar {
+    archiveClassifier = null
+}
