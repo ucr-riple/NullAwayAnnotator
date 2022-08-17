@@ -25,6 +25,7 @@
 plugins {
     id 'com.github.sherter.google-java-format' version '0.9'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'maven-publish'
     id 'application'
 }
 
@@ -44,9 +45,25 @@ dependencies {
     testImplementation deps.build.commonsio
 }
 
-task installScanner(type: Exec) {
+tasks.test.dependsOn(':type-annotator-scanner:publishToMavenLocal')
 
-    executable "sh"
-    args "-c", "./../gradlew :type-annotator-scanner:publishToMavenLocal --rerun-tasks"
+publishing {
+    publications {
+        shadow(MavenPublication) { publication ->
+            project.shadow.component(publication)
+        }
+    }
+    repositories {
+        mavenLocal()
+    }
 }
-tasks.test.dependsOn("installScanner")
+
+jar {
+    // add this classifier to prevent overwriting jar and shadowJar outputs to preserve incremental build of gradle.
+    archiveClassifier = "nonshadow"
+}
+
+// To remove the "-all" postfix from the produced jar file.
+shadowJar {
+    archiveClassifier = null
+}
