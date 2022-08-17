@@ -52,10 +52,10 @@ public class TrackerNode {
   @Override
   public String toString() {
     if (callerClass == null) {
-      return null;
+      return "";
     }
     if (!force && callerMethod == null) {
-      return null;
+      return "";
     }
     Symbol enclosingClass = member.enclClass();
     return String.join(

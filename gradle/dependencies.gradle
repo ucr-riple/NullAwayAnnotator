@@ -24,9 +24,15 @@
 
 // The oldest version of Error Prone that we support running on
 def oldestErrorProneApi = "2.4.0"
+// Latest released Error Prone version that we've tested with
+def latestErrorProneVersion = "2.14.0"
+// Default to using latest tested Error Prone version, except on Java 8, where 2.10.0 is the last version
+// that works
+def defaultErrorProneVersion =  JavaVersion.current() >= JavaVersion.VERSION_11 ? latestErrorProneVersion : "2.10.0"
 
 
 def versions = [
+        errorProne             : defaultErrorProneVersion,
         errorProneApi          : project.hasProperty("epApiVersion") ? epApiVersion : oldestErrorProneApi,
         autoService            : "1.0-rc7",
         javaparser             : "3.24.0",
@@ -51,6 +57,8 @@ def build = [
         javaparser              : "com.github.javaparser:javaparser-core:${versions.javaparser}",
         commonscli              : "commons-cli:commons-cli:${versions.cli}",
         commonsio               : "commons-io:commons-io:${versions.commonsio}",
+        errorProneCore          : "com.google.errorprone:error_prone_core:${versions.errorProne}",
+        errorProneJavac         : "com.google.errorprone:javac:9+181-r4173-1",
         errorProneCheckApi      : "com.google.errorprone:error_prone_check_api:${versions.errorProneApi}",
         nullaway                : "com.uber.nullaway:nullaway:${versions.nullaway}",
 ]

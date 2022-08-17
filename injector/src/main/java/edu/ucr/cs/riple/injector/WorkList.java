@@ -36,7 +36,11 @@ public class WorkList {
   }
 
   public void addLocation(Change newLocation) {
-    for (Change location : changes) if (location.equals(newLocation)) return;
+    for (Change location : changes) {
+      if (location.equals(newLocation)) {
+        return;
+      }
+    }
     changes.add(newLocation);
   }
 
@@ -49,8 +53,11 @@ public class WorkList {
   }
 
   public void addContainingAnnotationsToList(List<String> annotsList) {
-    for (Change location : changes)
-      if (!annotsList.contains(location.annotation)) annotsList.add(location.annotation);
+    for (Change location : changes) {
+      if (!annotsList.contains(location.annotation)) {
+        annotsList.add(location.annotation);
+      }
+    }
   }
 
   public String className() {

@@ -36,7 +36,8 @@ public class PhysicalInjector extends AnnotationInjector {
 
   public PhysicalInjector(Config config) {
     super(config);
-    this.injector = Injector.builder().keepStyle(!this.config.lexicalPreservationDisabled).build();
+    this.injector =
+        Injector.builder().preserveStyle(!this.config.lexicalPreservationDisabled).build();
   }
 
   @Override

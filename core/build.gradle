@@ -29,7 +29,7 @@ plugins {
 }
 
 application {
-    mainClass = 'Main'
+    mainClass = 'edu.ucr.cs.riple.core.Main'
 }
 
 dependencies {
@@ -47,6 +47,6 @@ dependencies {
 task installScanner(type: Exec) {
 
     executable "sh"
-    args "-c", "./../gradlew :scanner:publishToMavenLocal"
+    args "-c", "./../gradlew :scanner:publishToMavenLocal --rerun-tasks"
 }
 tasks.test.dependsOn("installScanner")

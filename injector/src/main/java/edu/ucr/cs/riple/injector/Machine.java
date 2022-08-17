@@ -31,9 +31,9 @@ import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinte
 import edu.ucr.cs.riple.injector.changes.Change;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -48,10 +48,12 @@ public class Machine {
   private final boolean keep;
   private final int total;
   private int processed = 0;
+  private final boolean log;
 
-  public Machine(List<WorkList> workLists, boolean keep) {
+  public Machine(List<WorkList> workLists, boolean keep, boolean log) {
     this.workLists = workLists;
     this.keep = keep;
+    this.log = log;
     this.printer = new DefaultPrettyPrinter(new DefaultPrinterConfiguration());
     AtomicInteger sum = new AtomicInteger();
     workLists.forEach(workList -> sum.addAndGet(workList.getChanges().size()));
@@ -60,7 +62,8 @@ public class Machine {
 
   private void overWriteToFile(CompilationUnit changed, String uri) {
     Path path = Paths.get(uri);
-    try (Writer writer = new FileWriter(path.toFile())) {
+    try (Writer writer =
+        Files.newBufferedWriter(path.toFile().toPath(), Charset.defaultCharset())) {
       Files.createDirectories(path.getParent());
       String toWrite = keep ? LexicalPreservingPrinter.print(changed) : printer.print(changed);
       writer.write(toWrite);
@@ -82,18 +85,19 @@ public class Machine {
       }
       for (Change location : workList.getChanges()) {
         try {
-          if (Injector.LOG) {
+          if (log) {
             pb.step();
           }
           if (applyChange(tree, location)) {
             processed++;
           }
         } catch (Exception ignored) {
+          System.err.println("Encountered Exception: " + ignored);
         }
       }
       overWriteToFile(tree, workList.getUri());
     }
-    if (Injector.LOG) {
+    if (log) {
       pb.stepTo(total);
     }
     pb.close();

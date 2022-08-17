@@ -83,6 +83,33 @@ public class MethodInfoTest extends ScannerBaseTest<MethodInfoDisplay> {
   }
 
   @Test
+  public void TestID() {
+    tester
+        .addSourceLines(
+            "edu/ucr/A.java",
+            "package edu.ucr;",
+            "public class A {",
+            "   public Object returnNonNull(){",
+            "      return new Object();",
+            "   }",
+            "}")
+        .addSourceLines(
+            "edu/ucr/B.java",
+            "package edu.ucr;",
+            "public class B extends A{",
+            "   public Object returnNonNull(){",
+            "      return new Object();",
+            "   }",
+            "}")
+        .setExpectedOutputs(
+            new MethodInfoDisplay(
+                "1", "edu.ucr.A", "returnNonNull()", "0", "0", "[]", "false", "public", "true"),
+            new MethodInfoDisplay(
+                "2", "edu.ucr.B", "returnNonNull()", "1", "0", "[]", "false", "public", "true"))
+        .doTest();
+  }
+
+  @Test
   public void visibilityTest() {
     tester
         .addSourceLines(

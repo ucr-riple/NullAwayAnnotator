@@ -28,10 +28,10 @@ import com.google.common.base.Preconditions;
 import com.google.errorprone.VisitorState;
 import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.riple.scanner.Config;
+import edu.ucr.cs.riple.scanner.ScannerContext;
 import edu.ucr.cs.riple.scanner.SymbolUtil;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -41,52 +41,54 @@ import javax.lang.model.element.Modifier;
 public class MethodInfo {
   public final Symbol.MethodSymbol symbol;
   public final Symbol.ClassSymbol clazz;
-  final int id;
-
+  private final int id;
   private Boolean[] annotFlags;
   private boolean hasNullableAnnotation;
   private int parent = -1;
-  private static int LAST_ID = 0;
-  private static final Set<MethodInfo> discovered = new HashSet<>();
 
-  private MethodInfo(Symbol.MethodSymbol method) {
-    this.id = ++LAST_ID;
+  private MethodInfo(Symbol.MethodSymbol method, ScannerContext context) {
+    this.id = context.getNextMethodId();
     this.symbol = method;
     this.clazz = (method != null) ? method.enclClass() : null;
-    discovered.add(this);
+    context.visitMethod(this);
   }
 
-  public static MethodInfo findOrCreate(Symbol.MethodSymbol method) {
+  public static MethodInfo findOrCreate(Symbol.MethodSymbol method, ScannerContext context) {
     Symbol.ClassSymbol clazz = method.enclClass();
     Optional<MethodInfo> optionalMethodInfo =
-        discovered.stream()
+        context
+            .getVisitedMethodsWithHashHint(hash(method))
             .filter(
                 methodInfo -> methodInfo.symbol.equals(method) && methodInfo.clazz.equals(clazz))
             .findAny();
-    return optionalMethodInfo.orElseGet(() -> new MethodInfo(method));
+    return optionalMethodInfo.orElseGet(() -> new MethodInfo(method, context));
   }
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof MethodInfo)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof MethodInfo)) {
+      return false;
+    }
     MethodInfo that = (MethodInfo) o;
     return symbol.equals(that.symbol) && clazz.equals(that.clazz);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(symbol, clazz);
+    return hash(symbol);
   }
 
-  public void findParent(VisitorState state) {
+  public void findParent(VisitorState state, ScannerContext context) {
     Symbol.MethodSymbol superMethod =
         SymbolUtil.getClosestOverriddenMethod(symbol, state.getTypes());
     if (superMethod == null || superMethod.toString().equals("null")) {
       this.parent = 0;
       return;
     }
-    MethodInfo superMethodInfo = findOrCreate(superMethod);
+    MethodInfo superMethodInfo = findOrCreate(superMethod, context);
     this.parent = superMethodInfo.id;
   }
 
@@ -156,5 +158,17 @@ public class MethodInfo {
       return "protected";
     }
     return "package";
+  }
+
+  /**
+   * Calculates hash. The hash is calculated based on a {@link
+   * com.sun.tools.javac.code.Symbol.MethodSymbol} instance since we want to predict the hash of a
+   * potential {@link MethodInfo} object without creating the {@link MethodInfo} instance.
+   *
+   * @param method Method Symbol.
+   * @return Expected hash.
+   */
+  public static int hash(Symbol method) {
+    return Objects.hash(method, method.enclClass());
   }
 }

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,11 +22,15 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'NullAwayAnnotator'
-include 'core'
-include 'scanner'
-include 'injector'
-include 'library-model-loader'
-include 'checks'
-include 'checks:ban-mutable-static'
+plugins {
+    id "net.ltgt.errorprone" version "2.0.1" apply false
+    id 'com.github.sherter.google-java-format' version '0.9'
+}
 
+dependencies {
+    compileOnly deps.apt.autoServiceAnnot
+    annotationProcessor deps.apt.autoService
+    compileOnly deps.build.errorProneCheckApi
+
+    testImplementation deps.test.errorProneTestHelpers
+}
