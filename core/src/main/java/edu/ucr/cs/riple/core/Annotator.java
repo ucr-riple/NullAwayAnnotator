@@ -96,6 +96,18 @@ public class Annotator {
     Utility.buildTarget(config);
     Utility.setScannerCheckerActivation(config.target, false);
     FieldDeclarationAnalysis fieldDeclarationAnalysis = new FieldDeclarationAnalysis(config.target);
+    MethodInheritanceTree tree =
+        new MethodInheritanceTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
+    // downStreamDependencyExplorer analyzes effects of all public APIs on downstream dependencies.
+    // Through iterations, since the source code for downstream dependencies does not change and the
+    // computation does not depend on the changes in the target module, it will compute the same
+    // result in each iteration, therefore we perform the analysis only once and reuse it in each
+    // iteration.
+    DownStreamDependencyExplorer downStreamDependencyExplorer =
+        new DownStreamDependencyExplorer(config, tree);
+    if (config.downStreamDependenciesAnalysisActivated) {
+      downStreamDependencyExplorer.explore();
+    }
     while (true) {
       Utility.buildTarget(config);
       ImmutableSet<Fix> fixes =
@@ -108,8 +120,7 @@ public class Annotator {
           new Bank<>(
               config.target.dir.resolve("fixes.tsv"),
               Fix.factory(config, fieldDeclarationAnalysis));
-      MethodInheritanceTree tree =
-          new MethodInheritanceTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
+      tree = new MethodInheritanceTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
       RegionTracker tracker = new CompoundTracker(config.target, tree);
       Explorer explorer =
           config.exhaustiveSearch
@@ -118,11 +129,6 @@ public class Annotator {
                   ? new OptimizedExplorer(
                       injector, errorBank, fixBank, tracker, fixes, tree, config.depth, config)
                   : new BasicExplorer(injector, errorBank, fixBank, fixes, tree, config);
-      DownStreamDependencyExplorer downStreamDependencyExplorer =
-          new DownStreamDependencyExplorer(config, tree);
-      if (config.downStreamDependenciesAnalysisActivated) {
-        downStreamDependencyExplorer.explore();
-      }
       ImmutableSet<Report> latestReports = explorer.explore();
       int sizeBefore = reports.size();
       latestReports.forEach(
