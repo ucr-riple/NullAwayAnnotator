@@ -49,8 +49,12 @@ public class TrackerNode implements Hashable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof TrackerNode)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof TrackerNode)) {
+      return false;
+    }
     TrackerNode that = (TrackerNode) o;
     return callerClass.equals(that.callerClass)
         && calleeMember.equals(that.calleeMember)

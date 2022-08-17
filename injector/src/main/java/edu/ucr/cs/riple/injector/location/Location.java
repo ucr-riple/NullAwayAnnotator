@@ -182,8 +182,12 @@ public abstract class Location {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Location)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof Location)) {
+      return false;
+    }
     Location other = (Location) o;
     return type == other.type && clazz.equals(other.clazz);
   }

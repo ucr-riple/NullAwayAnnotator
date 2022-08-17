@@ -73,6 +73,8 @@ public class ConflictGraph {
    * Colors the graph based on edges, no two vertices which there is an edge connecting them will be
    * in the same group. A greedy algorithm is used to find the solution.
    */
+  // TODO: Remove SuppressWarnings below later.
+  @SuppressWarnings("JdkObsolete")
   public void findGroups() {
     this.groups.clear();
     Collection<Node> allNodes = nodes.values();
@@ -118,7 +120,9 @@ public class ConflictGraph {
       }
       int cr;
       for (cr = 0; cr < v; cr++) {
-        if (available[cr]) break;
+        if (available[cr]) {
+          break;
+        }
       }
       result[u] = cr;
       Arrays.fill(available, true);
@@ -143,7 +147,11 @@ public class ConflictGraph {
     return groups.values();
   }
 
-  /** @return returns all nodes in the graph. */
+  /**
+   * Returns all nodes values as stream.
+   *
+   * @return returns all nodes in the graph.
+   */
   public Stream<Node> getNodes() {
     return nodes.values().stream();
   }

@@ -27,11 +27,11 @@ import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import java.util.List;
 
 public class Injector {
-  public final boolean KEEP;
-  public static boolean LOG;
+  public final boolean preserveStyle;
+  public boolean log;
 
   public Injector(boolean keepStyle) {
-    this.KEEP = keepStyle;
+    this.preserveStyle = keepStyle;
   }
 
   public static InjectorBuilder builder() {
@@ -39,12 +39,12 @@ public class Injector {
   }
 
   public Report start(List<WorkList> workLists, boolean log) {
-    LOG = log;
+    this.log = log;
     Report report = new Report();
     for (WorkList workList : workLists) {
       report.totalNumberOfDistinctLocations += workList.getChanges().size();
     }
-    report.processed = new Machine(workLists, KEEP).start();
+    report.processed = new Machine(workLists, preserveStyle, log).start();
     return report;
   }
 
@@ -59,7 +59,7 @@ public class Injector {
   public static class InjectorBuilder {
     private boolean keepStyle = false;
 
-    public InjectorBuilder keepStyle(boolean keep) {
+    public InjectorBuilder preserveStyle(boolean keep) {
       this.keepStyle = keep;
       return this;
     }

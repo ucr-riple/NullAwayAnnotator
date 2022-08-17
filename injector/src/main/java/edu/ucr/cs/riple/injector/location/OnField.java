@@ -45,7 +45,7 @@ public class OnField extends Location {
 
   @Override
   public Location duplicate() {
-    return new OnField(clazz, uri, new HashSet<>(variables));
+    return new OnField(uri, clazz, new HashSet<>(variables));
   }
 
   @SuppressWarnings("unchecked")
@@ -93,9 +93,15 @@ public class OnField extends Location {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof OnField)) return false;
-    if (!super.equals(o)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof OnField)) {
+      return false;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
     OnField other = (OnField) o;
     return super.equals(other) && !Collections.disjoint(variables, other.variables);
   }

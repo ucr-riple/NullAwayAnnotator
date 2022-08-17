@@ -81,7 +81,7 @@ public class InjectorTestHelper {
   }
 
   public void start(boolean keepStyle) {
-    Injector injector = Injector.builder().keepStyle(keepStyle).build();
+    Injector injector = Injector.builder().preserveStyle(keepStyle).build();
     injector.start(new WorkListBuilder(changes).getWorkLists(), keepStyle);
     for (String key : files) {
       try {

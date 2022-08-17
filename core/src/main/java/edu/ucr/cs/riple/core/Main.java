@@ -22,8 +22,7 @@
  * THE SOFTWARE.
  */
 
-import edu.ucr.cs.riple.core.Annotator;
-import edu.ucr.cs.riple.core.Config;
+package edu.ucr.cs.riple.core;
 
 public class Main {
 

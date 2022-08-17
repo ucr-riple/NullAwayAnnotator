@@ -84,27 +84,33 @@ public class ErrorProneCLIFlagsConfig implements Config {
     this.serializer = new Serializer(this);
   }
 
+  @Override
   public boolean callTrackerIsActive() {
     return callTrackerIsActive;
   }
 
+  @Override
   public boolean fieldTrackerIsActive() {
     return fieldTrackerIsActive;
   }
 
+  @Override
   public boolean methodTrackerIsActive() {
     return methodTrackerIsActive;
   }
 
+  @Override
   public boolean classTrackerIsActive() {
     return classTrackerIsActive;
   }
 
+  @Override
   public Serializer getSerializer() {
     return serializer;
   }
 
   @Nonnull
+  @Override
   public Path getOutputDirectory() {
     return outputDirectory;
   }

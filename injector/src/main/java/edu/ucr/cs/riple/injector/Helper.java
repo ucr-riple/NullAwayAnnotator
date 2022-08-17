@@ -63,7 +63,9 @@ public class Helper {
     int level = 0;
     for (int i = 0; i < signature.length(); i++) {
       char current = signature.charAt(i);
-      if (current == '(') break;
+      if (current == '(') {
+        break;
+      }
       switch (current) {
         case '>':
           ++level;
@@ -359,8 +361,10 @@ public class Helper {
   }
 
   /**
-   * Extracts the package name from fully qualified name. (e.g. for "{@code a.c.b.Foo<a.b.Bar, a.c.b.Foo>}" will return "{@code a.c.b").
-   * @param Fully qualified name in String.
+   * Extracts the package name from fully qualified name. (e.g. for "{@code a.c.b.Foo<a.b.Bar,
+   * a.c.b.Foo>}" will return "{@code a.c.b}").
+   *
+   * @param name Fully qualified name in String.
    * @return Package name.
    */
   public static String getPackageName(String name) {

@@ -54,6 +54,7 @@ import javax.lang.model.element.ElementKind;
     summary = "Serialized type based call/field graph.",
     tags = BugPattern.StandardTags.STYLE,
     severity = SUGGESTION)
+@SuppressWarnings("BugPatternNaming")
 public class TypeAnnotatorScanner extends BugChecker
     implements BugChecker.MethodInvocationTreeMatcher,
         BugChecker.MemberSelectTreeMatcher,
@@ -62,22 +63,23 @@ public class TypeAnnotatorScanner extends BugChecker
         BugChecker.VariableTreeMatcher,
         BugChecker.ClassTreeMatcher {
 
-  private final Config config;
+  private final ScannerContext context;
 
   public TypeAnnotatorScanner() {
-    this.config = new DummyOptionsConfig();
+    this.context = new ScannerContext(new DummyOptionsConfig());
   }
 
   public TypeAnnotatorScanner(ErrorProneFlags flags) {
-    this.config = new ErrorProneCLIFlagsConfig(flags);
+    this.context = new ScannerContext(new ErrorProneCLIFlagsConfig(flags));
   }
 
   @Override
   public Description matchClass(ClassTree classTree, VisitorState visitorState) {
-    if (!config.classTrackerIsActive()) {
+    if (!context.getConfig().classTrackerIsActive()) {
       return Description.NO_MATCH;
     }
-    config
+    context
+        .getConfig()
         .getSerializer()
         .serializeClassInfo(
             new ClassInfo(
@@ -87,6 +89,7 @@ public class TypeAnnotatorScanner extends BugChecker
 
   @Override
   public Description matchMethodInvocation(MethodInvocationTree tree, VisitorState state) {
+    Config config = context.getConfig();
     if (!config.callTrackerIsActive()) {
       return Description.NO_MATCH;
     }
@@ -98,12 +101,13 @@ public class TypeAnnotatorScanner extends BugChecker
 
   @Override
   public Description matchMethod(MethodTree tree, VisitorState state) {
+    Config config = context.getConfig();
     if (!config.methodTrackerIsActive()) {
       return Description.NO_MATCH;
     }
     Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(tree);
-    MethodInfo methodInfo = MethodInfo.findOrCreate(methodSymbol);
-    methodInfo.findParent(state);
+    MethodInfo methodInfo = MethodInfo.findOrCreate(methodSymbol, context);
+    methodInfo.findParent(state, context);
     methodInfo.setAnnotation(config);
     List<Boolean> paramAnnotations = new ArrayList<>();
     for (int i = 0; i < methodSymbol.getParameters().size(); i++) {
@@ -116,7 +120,7 @@ public class TypeAnnotatorScanner extends BugChecker
 
   @Override
   public Description matchVariable(VariableTree tree, VisitorState state) {
-    if (!config.fieldTrackerIsActive()) {
+    if (!context.getConfig().fieldTrackerIsActive()) {
       return Description.NO_MATCH;
     }
     serializeField(ASTHelpers.getSymbol(tree.getInitializer()), state, true);
@@ -125,7 +129,7 @@ public class TypeAnnotatorScanner extends BugChecker
 
   @Override
   public Description matchIdentifier(IdentifierTree tree, VisitorState state) {
-    if (!config.fieldTrackerIsActive()) {
+    if (!context.getConfig().fieldTrackerIsActive()) {
       return Description.NO_MATCH;
     }
     serializeField(ASTHelpers.getSymbol(tree), state, false);
@@ -134,7 +138,7 @@ public class TypeAnnotatorScanner extends BugChecker
 
   @Override
   public Description matchMemberSelect(MemberSelectTree tree, VisitorState state) {
-    if (!config.fieldTrackerIsActive()) {
+    if (!context.getConfig().fieldTrackerIsActive()) {
       return Description.NO_MATCH;
     }
     serializeField(ASTHelpers.getSymbol(tree), state, false);
@@ -143,7 +147,8 @@ public class TypeAnnotatorScanner extends BugChecker
 
   private void serializeField(Symbol symbol, VisitorState state, boolean force) {
     if (symbol != null && symbol.getKind() == ElementKind.FIELD) {
-      config
+      context
+          .getConfig()
           .getSerializer()
           .serializeFieldGraphNode(new TrackerNode(symbol, state.getPath(), force));
     }

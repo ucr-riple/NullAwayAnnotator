@@ -160,7 +160,7 @@ public class CoreTestHelper {
                 }
               });
     } catch (IOException e) {
-      e.printStackTrace();
+      throw new RuntimeException("Error happened in processing src under: " + projectPath, e);
     }
   }
 
@@ -198,16 +198,17 @@ public class CoreTestHelper {
 
   private void makeAnnotatorConfigFile(Path path) {
     Config.Builder builder = new Config.Builder();
+    final int[] id = {0};
     builder.configPaths =
         modules.stream()
             .map(
                 name ->
                     new ModuleInfo(
+                        id[0]++,
                         outDirPath,
                         outDirPath.resolve(name + "-nullaway.xml"),
                         outDirPath.resolve(name + "-scanner.xml")))
             .collect(Collectors.toList());
-    ModuleInfo.GLOBAL_ID = 0;
     builder.nullableAnnotation = "javax.annotation.Nullable";
     builder.initializerAnnotation = "test.Initializer";
     builder.outputDir = outDirPath.toString();

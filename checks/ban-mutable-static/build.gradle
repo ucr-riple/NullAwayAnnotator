@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,30 +23,14 @@
  */
 
 plugins {
+    id "net.ltgt.errorprone" version "2.0.1" apply false
     id 'com.github.sherter.google-java-format' version '0.9'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
-    id 'application'
-}
-
-application {
-    mainClass = 'edu.ucr.cs.riple.core.Main'
 }
 
 dependencies {
+    compileOnly deps.apt.autoServiceAnnot
+    annotationProcessor deps.apt.autoService
+    compileOnly deps.build.errorProneCheckApi
 
-    implementation project(':injector')
-    implementation project(':type-annotator-scanner')
-    implementation deps.build.guava
-    implementation deps.build.json
-    implementation deps.build.progressbar
-    implementation deps.build.javaparser
-    implementation deps.build.commonscli
-    testImplementation deps.build.commonsio
+    testImplementation deps.test.errorProneTestHelpers
 }
-
-task installScanner(type: Exec) {
-
-    executable "sh"
-    args "-c", "./../gradlew :type-annotator-scanner:publishToMavenLocal --rerun-tasks"
-}
-tasks.test.dependsOn("installScanner")
