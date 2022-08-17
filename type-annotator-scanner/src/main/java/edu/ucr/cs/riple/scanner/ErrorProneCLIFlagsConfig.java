@@ -44,14 +44,14 @@ public class ErrorProneCLIFlagsConfig implements Config {
   private final boolean callTrackerIsActive;
   private final boolean classTrackerIsActive;
   private final Serializer serializer;
-  static final String EP_FL_NAMESPACE = "Scanner";
+  static final String EP_FL_NAMESPACE = "TypeAnnotatorScanner";
   static final String FL_CONFIG_PATH = EP_FL_NAMESPACE + ":ConfigPath";
 
   public ErrorProneCLIFlagsConfig(ErrorProneFlags flags) {
     String configFilePath = flags.get(FL_CONFIG_PATH).orElse(null);
     if (configFilePath == null) {
       throw new IllegalStateException(
-          "Error in Scanner Checker configuration, should be set with via error prone flag: (-XepOpt:Scanner:ConfigPath)");
+          "Error in Scanner Checker configuration, should be set with via error prone flag: (-XepOpt:TypeAnnotatorScanner:ConfigPath)");
     }
     Document document;
     try {

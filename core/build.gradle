@@ -36,7 +36,7 @@ application {
 dependencies {
 
     implementation project(':injector')
-    implementation project(':scanner')
+    implementation project(':type-annotator-scanner')
     implementation deps.build.guava
     implementation deps.build.json
     implementation deps.build.progressbar
