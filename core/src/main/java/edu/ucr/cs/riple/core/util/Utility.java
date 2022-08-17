@@ -40,6 +40,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -307,12 +308,11 @@ public class Utility {
 
   public static void writeLog(Config config) {
     Path path = config.globalDir.resolve("log.txt");
-    try (BufferedWriter bw = Files.newBufferedWriter(path, Charset.defaultCharset()); ) {
-      bw.write(config.log.toString());
-      bw.newLine();
-    } catch (Exception ignored) {
+    try {
+      Files.write(path, Collections.singleton(config.log.toString()), Charset.defaultCharset());
+    } catch (IOException exception) {
       System.err.println("Could not write log to: " + path);
-      System.err.println("Writing here: " + config.log);
+      System.err.println("Writing in STD Error:\n" + config.log);
     }
   }
 
