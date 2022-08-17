@@ -138,8 +138,12 @@ public class Fix extends Enclosed {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Fix)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof Fix)) {
+      return false;
+    }
     Fix fix = (Fix) o;
     return change.equals(fix.change);
   }

@@ -48,7 +48,10 @@ public class SignatureMatcher {
   }
 
   /**
-   * Returns a list of parameters extracted from callable signature. (e.g. for "{@code foo(@  CustomAnnot  (exp, exp2) a.c.b.Foo<a.b.Bar, a.c.b.Foo>, java.lang.Object)}" will return "{@code [a.c.b.Foo<a.b.Bar, a.c.b.Foo>, java.lang.Object]").
+   * Returns a list of parameters extracted from callable signature. (e.g. for "{@code foo(@
+   * CustomAnnot (exp, exp2) a.c.b.Foo<a.b.Bar, a.c.b.Foo>, java.lang.Object)}" will return "{@code
+   * [a.c.b.Foo<a.b.Bar, a.c.b.Foo>, java.lang.Object]}").
+   *
    * @param signature callable signature.
    * @return List of extracted parameters types.
    */

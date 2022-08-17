@@ -129,7 +129,7 @@ public class ConfigurationTest {
     assertEquals(testDir, config.globalDir);
     assertEquals("edu.ucr.Initializer", config.initializerAnnot);
     assertEquals(
-        new ModuleInfo(testDir, Paths.get("0nullaway.xml"), Paths.get("0scanner.xml")),
+        new ModuleInfo(0, testDir, Paths.get("0nullaway.xml"), Paths.get("0scanner.xml")),
         config.target);
   }
 
@@ -160,7 +160,7 @@ public class ConfigurationTest {
     assertEquals(testDir, config.globalDir);
     assertEquals("edu.ucr.Initializer", config.initializerAnnot);
     assertEquals(
-        new ModuleInfo(testDir, Paths.get("0nullaway.xml"), Paths.get("0scanner.xml")),
+        new ModuleInfo(0, testDir, Paths.get("0nullaway.xml"), Paths.get("0scanner.xml")),
         config.target);
     assertEquals(testDir.resolve("library-model.tsv"), config.nullawayLibraryModelLoaderPath);
     assertTrue(config.downStreamDependenciesAnalysisActivated);
@@ -170,7 +170,7 @@ public class ConfigurationTest {
             .mapToObj(
                 i ->
                     new ModuleInfo(
-                        testDir, Paths.get(i + "nullaway.xml"), Paths.get(i + "scanner.xml")))
+                        i, testDir, Paths.get(i + "nullaway.xml"), Paths.get(i + "scanner.xml")))
             .collect(ImmutableSet.toImmutableSet());
     assertEquals(downstreamInfo, config.downstreamInfo);
   }
@@ -193,7 +193,7 @@ public class ConfigurationTest {
     observed.clear();
     // Test for Scanner config
     Path scannerConfig = testDir.resolve("scanner.xml");
-    ModuleInfo moduleInfo = new ModuleInfo(testDir, nullawayConfigPath, scannerConfig);
+    ModuleInfo moduleInfo = new ModuleInfo(0, testDir, nullawayConfigPath, scannerConfig);
     for (int i = 0; i < 5; i++) {
       Utility.setScannerCheckerActivation(moduleInfo, true);
       String uuid = getValueFromTag(scannerConfig, "/scanner/uuid");

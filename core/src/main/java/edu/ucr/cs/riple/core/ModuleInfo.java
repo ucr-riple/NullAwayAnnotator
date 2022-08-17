@@ -39,30 +39,30 @@ public class ModuleInfo {
   public final Path scannerConfig;
   /** Directory where all serialized data from checkers are located. */
   public final Path dir;
-  /** Global counter for assigning unique id for each instance. */
-  public static int GLOBAL_ID = 0;
 
   /**
    * Creates an instance of {@link ModuleInfo} from the given json object.
    *
+   * @param id Global unique id for this module.
    * @param globalDir Global path for all Annotator/Scanner/NullAway outputs.
    * @param jsonObject Json Object to retrieve values.
    * @return An instance of {@link ModuleInfo}.
    */
-  public static ModuleInfo buildFromJson(Path globalDir, JSONObject jsonObject) {
+  public static ModuleInfo buildFromJson(int id, Path globalDir, JSONObject jsonObject) {
     String nullawayConfigPath = (String) jsonObject.get("NULLAWAY");
     String scannerConfigPath = (String) jsonObject.get("SCANNER");
     if (nullawayConfigPath == null || scannerConfigPath == null) {
       throw new IllegalArgumentException(
           "Both paths to NullAway and Scanner config files must be set with NULLAWAY and SCANNER keys!");
     }
-    return new ModuleInfo(globalDir, Paths.get(nullawayConfigPath), Paths.get(scannerConfigPath));
+    return new ModuleInfo(
+        id, globalDir, Paths.get(nullawayConfigPath), Paths.get(scannerConfigPath));
   }
 
-  public ModuleInfo(Path globalDir, Path nullawayConfig, Path scannerConfig) {
+  public ModuleInfo(int id, Path globalDir, Path nullawayConfig, Path scannerConfig) {
     this.nullawayConfig = nullawayConfig;
     this.scannerConfig = scannerConfig;
-    this.dir = globalDir.resolve(String.valueOf(GLOBAL_ID++));
+    this.dir = globalDir.resolve(String.valueOf(id));
     try {
       Files.deleteIfExists(this.dir);
       if (!this.dir.toFile().mkdirs()) {
@@ -76,8 +76,9 @@ public class ModuleInfo {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (!(o instanceof ModuleInfo)) {
+      return false;
+    }
     ModuleInfo that = (ModuleInfo) o;
     return nullawayConfig.equals(that.nullawayConfig) && scannerConfig.equals(that.scannerConfig);
   }

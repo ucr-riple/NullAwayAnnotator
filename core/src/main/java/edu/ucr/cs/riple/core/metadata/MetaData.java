@@ -28,8 +28,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -97,20 +98,20 @@ public abstract class MetaData<T extends Hashable> {
    * @throws IOException if file not is found.
    */
   protected void fillNodes(Path path) throws IOException {
-    BufferedReader reader;
-    reader = new BufferedReader(new FileReader(path.toFile()));
-    String line = reader.readLine();
-    if (line != null) {
-      line = reader.readLine();
-    }
-    while (line != null) {
-      T node = addNodeByLine(line.split("\t"));
-      if (node != null) {
-        contents.put(node.hashCode(), node);
+    try (BufferedReader reader =
+        Files.newBufferedReader(path.toFile().toPath(), Charset.defaultCharset())) {
+      String line = reader.readLine();
+      if (line != null) {
+        line = reader.readLine();
       }
-      line = reader.readLine();
+      while (line != null) {
+        T node = addNodeByLine(line.split("\t"));
+        if (node != null) {
+          contents.put(node.hashCode(), node);
+        }
+        line = reader.readLine();
+      }
     }
-    reader.close();
   }
 
   /**

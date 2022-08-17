@@ -25,7 +25,9 @@
 package edu.ucr.cs.riple.core.metadata.method;
 
 import edu.ucr.cs.riple.core.metadata.Hashable;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 /** Container class to store method's information in {@link MethodInheritanceTree} tree. */
 public class MethodNode implements Hashable {
@@ -151,8 +153,12 @@ public class MethodNode implements Hashable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof MethodNode)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof MethodNode)) {
+      return false;
+    }
     MethodNode that = (MethodNode) o;
     return Objects.equals(children, that.children)
         && Objects.equals(parent, that.parent)

@@ -20,8 +20,12 @@ public class FieldDeclarationInfo implements Hashable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof FieldDeclarationInfo)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof FieldDeclarationInfo)) {
+      return false;
+    }
     FieldDeclarationInfo info = (FieldDeclarationInfo) o;
     return clazz.equals(info.clazz);
   }

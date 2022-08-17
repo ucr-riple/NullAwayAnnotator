@@ -105,7 +105,7 @@ public class Index<T extends Enclosed> {
               line = br.readLine();
             }
           } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error happened in indexing", e);
           }
         });
   }
