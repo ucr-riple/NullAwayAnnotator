@@ -117,7 +117,7 @@ Follow the steps below:
     * To install it, run `./gradlew publishToMavenLocal`
 
 * Jar file of [Core](core/README.md) module should be located at `runner/jars`.
-    * To create the jar file run: `./gradlew shadowJar`
+    * To create the jar file run: `./gradlew publishToMavenLocal`
 
 A script is provided which executes all installation tasks above. 
 It installs `TypeAnnotatorScanner` checker in `maven local` and creates the jar file of `core` module and moves it to the correct path. To run it, execute the command below:
