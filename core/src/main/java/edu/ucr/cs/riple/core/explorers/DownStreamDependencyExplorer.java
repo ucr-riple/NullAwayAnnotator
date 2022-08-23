@@ -140,7 +140,7 @@ public class DownStreamDependencyExplorer {
                           input.root.toMethod().method.equals(node.method)
                               && input.root.toMethod().clazz.equals(node.clazz))
                   .findAny();
-          optional.ifPresent(report -> method.effect += report.effect);
+          optional.ifPresent(report -> method.effect += report.localEffect);
         });
     System.out.println("Analysing downstream dependencies completed!");
   }
@@ -168,20 +168,27 @@ public class DownStreamDependencyExplorer {
    * Returns the lower bound of number of errors of applying a fix and its associated chain of fixes
    * on the target on downstream dependencies.
    *
-   * @param root Root of the fix tree.
-   * @param chain Chain of the fix tree associated to root.
+   * @param tree Tree of the fix tree associated to root.
    * @return Lower bound of number of errors on downstream dependencies.
    */
-  public int computeLowerBoundOfNumberOfErrors(Fix root, Set<Fix> chain) {
-    // For optimization purposes, we avoid making a new list which includes root and chain in one
-    // single list.
-    int effectOfRoot = effectOnDownstreamDependencies(root);
+  public int computeLowerBoundOfNumberOfErrors(Set<Fix> tree) {
     OptionalInt lowerBoundEffectOfChainOptional =
-        chain.stream().mapToInt(this::effectOnDownstreamDependencies).max();
+        tree.stream().mapToInt(this::effectOnDownstreamDependencies).max();
     if (lowerBoundEffectOfChainOptional.isEmpty()) {
-      return effectOfRoot;
+      return 0;
     }
-    return Math.max(effectOfRoot, lowerBoundEffectOfChainOptional.getAsInt());
+    return lowerBoundEffectOfChainOptional.getAsInt();
+  }
+
+  /**
+   * Returns the upper bound of number of errors of applying a fix and its associated chain of fixes
+   * on the target on downstream dependencies.
+   *
+   * @param tree Tree of the fix tree associated to root.
+   * @return Lower bound of number of errors on downstream dependencies.
+   */
+  public int computeUpperBoundOfNumberOfErrors(Set<Fix> tree) {
+    return tree.stream().mapToInt(this::effectOnDownstreamDependencies).sum();
   }
 
   /** Container class for storing overall effect of each method. */

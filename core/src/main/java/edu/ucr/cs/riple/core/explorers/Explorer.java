@@ -69,7 +69,7 @@ public abstract class Explorer {
   protected void initializeFixGraph() {
     this.graph.clear();
     this.reports.stream()
-        .filter(report -> !report.finished && (!config.bailout || report.effect > 0))
+        .filter(report -> !report.finished && (!config.bailout || report.localEffect > 0))
         .forEach(
             report -> {
               Fix root = report.root;
@@ -88,7 +88,7 @@ public abstract class Explorer {
         .forEach(
             node -> {
               Report report = node.report;
-              report.effect = node.effect;
+              report.localEffect = node.effect;
               report.tree = node.tree;
               report.triggered = node.triggered;
               report.finished = !node.changed;

@@ -83,35 +83,31 @@ public class Utility {
     }
   }
 
-  @SuppressWarnings("ALL")
+  @SuppressWarnings("unchecked")
   public static void writeReports(Config config, ImmutableSet<Report> reports) {
     Path reportsPath = config.globalDir.resolve("reports.json");
     JSONObject result = new JSONObject();
     JSONArray reportsJson = new JSONArray();
     for (Report report : reports) {
       JSONObject reportJson = report.root.getJson();
-      reportJson.put("EFFECT", report.effect);
+      reportJson.put("LOCAL EFFECT", report.localEffect);
+      reportJson.put("OVERALL EFFECT", report.getOverallEffect(config));
+      reportJson.put("Upper Bound EFFECT", report.getUpperBoundEffectOnDownstreamDependencies());
+      reportJson.put("Lower Bound EFFECT", report.getLowerBoundEffectOnDownstreamDependencies());
       reportJson.put("FINISHED", report.finished);
       JSONArray followUps = new JSONArray();
-      if (config.chain && report.effect < 1) {
+      if (config.chain && report.localEffect < 1) {
         report.tree.remove(report.root);
-        followUps.addAll(
-            report.tree.stream().map(fix -> fix.getJson()).collect(Collectors.toList()));
+        followUps.addAll(report.tree.stream().map(Fix::getJson).collect(Collectors.toList()));
       }
       reportJson.put("TREE", followUps);
       reportsJson.add(reportJson);
     }
     reportsJson.sort(
         (o1, o2) -> {
-          int first = (Integer) ((JSONObject) o1).get("EFFECT");
-          int second = (Integer) ((JSONObject) o2).get("EFFECT");
-          if (first == second) {
-            return 0;
-          }
-          if (first < second) {
-            return 1;
-          }
-          return -1;
+          int first = (Integer) ((JSONObject) o1).get("OVERALL EFFECT");
+          int second = (Integer) ((JSONObject) o2).get("OVERALL EFFECT");
+          return Integer.compare(second, first);
         });
     result.put("REPORTS", reportsJson);
     try (BufferedWriter writer =

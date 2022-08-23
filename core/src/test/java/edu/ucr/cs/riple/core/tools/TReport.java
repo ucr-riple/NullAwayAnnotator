@@ -35,6 +35,9 @@ import javax.annotation.Nullable;
 
 /** Wrapper class for {@link Report} with default values, used to create tests. */
 public class TReport extends Report {
+
+  private final int expectedValue;
+
   public TReport(Location root, int effect) {
     this(root, effect, "", "");
   }
@@ -43,6 +46,7 @@ public class TReport extends Report {
     super(
         new Fix(new AddAnnotation(root, "javax.annotation.Nullable"), null, encClass, encMethod),
         effect);
+    this.expectedValue = effect;
   }
 
   public TReport(
@@ -59,5 +63,14 @@ public class TReport extends Report {
       this.tree.addAll(
           addToTree.stream().map((Function<Location, Fix>) TFix::new).collect(Collectors.toSet()));
     }
+  }
+
+  /**
+   * Returns the target value which is under examination under tests.
+   *
+   * @return expected value for the property under examination.
+   */
+  public int getExpectedValue() {
+    return this.expectedValue;
   }
 }

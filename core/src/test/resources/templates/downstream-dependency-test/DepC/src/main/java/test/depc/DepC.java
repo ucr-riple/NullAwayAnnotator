@@ -36,4 +36,8 @@ public class DepC {
   public Object returnNullableInDepC() {
     return foo.returnNullableBad(0);
   }
+
+  public Object returnFoo() {
+    return foo.bar();
+  }
 }

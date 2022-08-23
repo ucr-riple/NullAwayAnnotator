@@ -72,7 +72,7 @@ public class InheritanceTest extends BaseCoreTest {
     coreTestHelper
         .addInputDirectory("test", "builder")
         .requestCompleteLoop()
-        .setPredicate(Report::testEquals)
+        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
         .addExpectedReports(
             new TReport(new OnField("A.java", "test.A", singleton("arg3")), -1),
             new TReport(new OnField("A.java", "test.A", singleton("arg2")), -1),
@@ -111,7 +111,7 @@ public class InheritanceTest extends BaseCoreTest {
   public void parameter_track() {
     coreTestHelper
         .addInputDirectory("test", "parametertrack")
-        .setPredicate(Report::testEquals)
+        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
         .disableBailOut()
         .toDepth(10)
         .addExpectedReports(
@@ -132,7 +132,7 @@ public class InheritanceTest extends BaseCoreTest {
   public void method_track() {
     coreTestHelper
         .addInputDirectory("test", "methodtrack")
-        .setPredicate(Report::testEquals)
+        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
         .disableBailOut()
         .toDepth(10)
         .addExpectedReports(

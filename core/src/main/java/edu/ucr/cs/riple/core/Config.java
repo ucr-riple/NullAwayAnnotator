@@ -352,13 +352,12 @@ public class Config {
    *
    * @param configPath path to config file.
    */
-  public Config(String configPath) {
+  public Config(Path configPath) {
     Preconditions.checkNotNull(configPath);
     JSONObject jsonObject;
     try {
       Object obj =
-          new JSONParser()
-              .parse(Files.newBufferedReader(Paths.get(configPath), Charset.defaultCharset()));
+          new JSONParser().parse(Files.newBufferedReader(configPath, Charset.defaultCharset()));
       jsonObject = (JSONObject) obj;
     } catch (Exception e) {
       throw new RuntimeException("Error in reading/parsing config at path: " + configPath, e);

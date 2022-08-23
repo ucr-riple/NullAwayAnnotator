@@ -134,20 +134,18 @@ public class Annotator {
       latestReports.forEach(
           report -> {
             if (config.downStreamDependenciesAnalysisActivated) {
-              report.effect =
-                  report.effect
-                      + downStreamDependencyExplorer.computeLowerBoundOfNumberOfErrors(
-                          report.root, report.tree);
+              report.computeBoundariesOfEffectivenessOnDownstreamDependencies(
+                  downStreamDependencyExplorer);
             }
             reports.putIfAbsent(report.root, report);
-            reports.get(report.root).effect = report.effect;
+            reports.get(report.root).localEffect = report.localEffect;
             reports.get(report.root).finished = report.finished;
             reports.get(report.root).tree = report.tree;
             reports.get(report.root).triggered = report.triggered;
           });
       injector.injectFixes(
           latestReports.stream()
-              .filter(report -> report.effect < 1)
+              .filter(report -> report.getOverallEffect(config) < 1)
               .flatMap(report -> config.chain ? report.tree.stream() : Stream.of(report.root))
               .collect(Collectors.toSet()));
       if (sizeBefore == this.reports.size()) {
