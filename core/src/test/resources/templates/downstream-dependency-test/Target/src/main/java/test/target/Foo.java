@@ -43,11 +43,16 @@ public class Foo {
     if (i > 20 && i < 30) {
       return null;
     }
+    if (i > 30 && i < 40) {
+      return foo();
+    }
     return null;
   }
 
   public void run() {
     this.field = returnNullableBad(0);
+    // Just to make a new error for annotating foo() @Nullable.
+    this.field = foo();
   }
 
   // Making this method will resolve 5 errors here and will introduce 1 error on downstream
@@ -66,6 +71,10 @@ public class Foo {
     if (i > 20 && i < 30) {
       return null;
     }
+    return null;
+  }
+
+  public Object foo() {
     return null;
   }
 }

@@ -24,7 +24,11 @@
 
 package edu.ucr.cs.riple.core;
 
+import static com.google.common.collect.Sets.newHashSet;
+import static java.util.Collections.singleton;
+
 import edu.ucr.cs.riple.core.tools.TReport;
+import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.List;
 import org.junit.Test;
@@ -36,7 +40,7 @@ public class DownstreamAnalysisTest extends BaseCoreTest {
   }
 
   @Test
-  public void public_method_with_downstream_dependency_enabled() {
+  public void publicMethodWithDownstreamDependencyEnabled() {
     coreTestHelper
         .addExpectedReports(
             // Change reduces errors on target by -4, but increases them in downstream dependency
@@ -44,7 +48,10 @@ public class DownstreamAnalysisTest extends BaseCoreTest {
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int)"), 5),
             // Change reduces errors on target by -5, but increases them in downstream dependency
             // DepA by 0, DepB by 1 and DepC by 0. Hence, the total effect is: -4.
-            new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableGood(int)"), -4))
+            new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableGood(int)"), -4),
+            // Method is not called on downstream dependencies and its overall effect must not get
+            // impacted.
+            new TReport(new OnMethod("Foo.java", "test.target.Foo", "foo()"), 1))
         .setPredicate(
             (expected, found) ->
                 expected.root.equals(found.root) && expected.effect == found.effect)
@@ -54,15 +61,47 @@ public class DownstreamAnalysisTest extends BaseCoreTest {
   }
 
   @Test
-  public void public_method_with_downstream_dependency_disabled() {
+  public void publicMethodWithDownstreamDependencyDisabled() {
     coreTestHelper
         .addExpectedReports(
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int)"), -4),
-            new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableGood(int)"), -5))
+            new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableGood(int)"), -5),
+            new TReport(new OnMethod("Foo.java", "test.target.Foo", "foo()"), 1))
         .setPredicate(
             (expected, found) ->
                 expected.root.equals(found.root) && expected.effect == found.effect)
         .toDepth(1)
+        .start();
+  }
+
+  @Test
+  public void lowerBoundComputationTest() {
+    coreTestHelper
+        .addExpectedReports(
+            // Only returnNullableBad triggers new errors in this fix chain (+9) and overall effect
+            // (as explained in tests above) should be 5.
+            new TReport(
+                new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int)"),
+                5,
+                null,
+                singleton(new OnField("Foo.java", "test.target.Foo", singleton("field")))),
+            // Only returnNullableBad triggers new errors in this fix chain (+1) and overall effect
+            // (as explained in tests above) should be -4.
+            new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableGood(int)"), -4),
+            // Root fix does not trigger any error on downstream dependency but returnNullableBad is
+            // present in the fix tree, therefore the lower bound effect for the tree should be 9.
+            // Overall -6 (effect of fix tree locally) + 9 (lower bound of tree) = 3.
+            new TReport(
+                new OnMethod("Foo.java", "test.target.Foo", "foo()"),
+                3,
+                newHashSet(
+                    new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int)"),
+                    new OnField("Foo.java", "test.target.Foo", singleton("field"))),
+                null))
+        .setPredicate(Report::testEquals)
+        .toDepth(5)
+        .enableDownstreamDependencyAnalysis()
+        .requestCompleteLoop()
         .start();
   }
 }

@@ -42,6 +42,8 @@ import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.Set;
 
 /**
  * Analyzer for downstream dependencies.
@@ -149,7 +151,7 @@ public class DownStreamDependencyExplorer {
    * @param fix Fix targeting an element in target.
    * @return Effect on downstream dependencies.
    */
-  public int effectOnDownstreamDependencies(Fix fix) {
+  private int effectOnDownstreamDependencies(Fix fix) {
     if (!fix.isOnMethod()) {
       return 0;
     }
@@ -160,6 +162,26 @@ public class DownStreamDependencyExplorer {
                 m -> m.node.method.equals(onMethod.method) && m.node.clazz.equals(onMethod.clazz))
             .findAny();
     return optional.map(methodStatus -> methodStatus.effect).orElse(0);
+  }
+
+  /**
+   * Returns the lower bound of number of errors of applying a fix and its associated chain of fixes
+   * on the target on downstream dependencies.
+   *
+   * @param root Root of the fix tree.
+   * @param chain Chain of the fix tree associated to root.
+   * @return Lower bound of number of errors on downstream dependencies.
+   */
+  public int computeLowerBoundOfNumberOfErrors(Fix root, Set<Fix> chain) {
+    // For optimization purposes, we avoid making a new list which includes root and chain in one
+    // single list.
+    int effectOfRoot = effectOnDownstreamDependencies(root);
+    OptionalInt lowerBoundEffectOfChainOptional =
+        chain.stream().mapToInt(this::effectOnDownstreamDependencies).max();
+    if (lowerBoundEffectOfChainOptional.isEmpty()) {
+      return effectOfRoot;
+    }
+    return Math.max(effectOfRoot, lowerBoundEffectOfChainOptional.getAsInt());
   }
 
   /** Container class for storing overall effect of each method. */

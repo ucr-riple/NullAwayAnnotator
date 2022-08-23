@@ -136,7 +136,8 @@ public class Annotator {
             if (config.downStreamDependenciesAnalysisActivated) {
               report.effect =
                   report.effect
-                      + downStreamDependencyExplorer.effectOnDownstreamDependencies(report.root);
+                      + downStreamDependencyExplorer.computeLowerBoundOfNumberOfErrors(
+                          report.root, report.tree);
             }
             reports.putIfAbsent(report.root, report);
             reports.get(report.root).effect = report.effect;
