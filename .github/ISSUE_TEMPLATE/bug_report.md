@@ -17,7 +17,7 @@ Steps to reproduce the behavior: (Prefer a code snippet)
 A clear and concise description of what you expected to happen.
 
 **Stack trace**
-If applicable, add stacktrace of the exception below.
+If applicable, add stack trace of the exception below.
 
 **OS (please complete the following information):**
  - OS: [e.g. iOS]
