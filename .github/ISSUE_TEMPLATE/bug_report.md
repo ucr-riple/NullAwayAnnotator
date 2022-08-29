@@ -16,8 +16,8 @@ Steps to reproduce the behavior: (Prefer a code snippet)
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+**Stack trace**
+If applicable, add stack trace of the exception below.
 
 **OS (please complete the following information):**
  - OS: [e.g. iOS]
