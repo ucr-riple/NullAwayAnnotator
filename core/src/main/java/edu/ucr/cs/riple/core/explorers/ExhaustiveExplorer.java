@@ -51,6 +51,6 @@ public class ExhaustiveExplorer extends Explorer {
 
   @Override
   protected void finalizeReports() {
-    this.reports.forEach(report -> report.effect = -1);
+    this.reports.forEach(report -> report.localEffect = -1);
   }
 }

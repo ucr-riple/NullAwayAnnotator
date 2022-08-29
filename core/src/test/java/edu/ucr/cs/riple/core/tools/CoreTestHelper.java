@@ -51,17 +51,18 @@ import org.apache.commons.io.FileUtils;
 
 public class CoreTestHelper {
 
-  private final Set<Report> expectedReports;
+  private final Set<TReport> expectedReports;
   private final Path projectPath;
   private final Path srcSet;
   private final List<String> modules;
   private final Path outDirPath;
   private final Map<String, String[]> fileMap;
-  private BiPredicate<Report, Report> predicate;
+  private BiPredicate<TReport, Report> predicate;
   private int depth = 1;
   private boolean requestCompleteLoop = false;
   private boolean disableBailout = false;
   private boolean downstreamDependencyAnalysisActivated = false;
+  private Config config;
 
   public CoreTestHelper(Path projectPath, Path outDirPath, List<String> modules) {
     this.projectPath = projectPath;
@@ -80,7 +81,7 @@ public class CoreTestHelper {
     return this;
   }
 
-  public CoreTestHelper setPredicate(BiPredicate<Report, Report> predicate) {
+  public CoreTestHelper setPredicate(BiPredicate<TReport, Report> predicate) {
     this.predicate = predicate;
     return this;
   }
@@ -111,7 +112,7 @@ public class CoreTestHelper {
     return this;
   }
 
-  public CoreTestHelper addExpectedReports(Report... reports) {
+  public CoreTestHelper addExpectedReports(TReport... reports) {
     this.expectedReports.addAll(Arrays.asList(reports));
     return this;
   }
@@ -134,15 +135,15 @@ public class CoreTestHelper {
   public void start() {
     if (predicate == null) {
       predicate =
-          (report, other) ->
-              report.root.change.location.equals(other.root.change.location)
-                  && report.effect == other.effect;
+          (expected, found) ->
+              expected.root.change.location.equals(found.root.change.location)
+                  && expected.getExpectedValue() == found.localEffect;
     }
     Path configPath = outDirPath.resolve("config.json");
     createFiles();
     checkSourcePackages();
     makeAnnotatorConfigFile(configPath);
-    Config config = new Config(configPath.toString());
+    config = new Config(configPath);
     Annotator annotator = new Annotator(config);
     annotator.start();
     compare(annotator.reports.values());
@@ -166,8 +167,8 @@ public class CoreTestHelper {
 
   private void compare(Collection<Report> actualOutput) {
     List<Report> notFound = new ArrayList<>();
-    for (Report expected : expectedReports) {
-      if (actualOutput.stream().noneMatch(report -> predicate.test(report, expected))) {
+    for (TReport expected : expectedReports) {
+      if (actualOutput.stream().noneMatch(report -> predicate.test(expected, report))) {
         notFound.add(expected);
       } else {
         actualOutput.remove(expected);
@@ -196,7 +197,7 @@ public class CoreTestHelper {
     fail(errorMessage.toString());
   }
 
-  private void makeAnnotatorConfigFile(Path path) {
+  private void makeAnnotatorConfigFile(Path configPath) {
     Config.Builder builder = new Config.Builder();
     final int[] id = {0};
     builder.configPaths =
@@ -243,7 +244,7 @@ public class CoreTestHelper {
       builder.buildCommand =
           Utility.computeBuildCommand(this.projectPath, this.outDirPath, modules);
     }
-    builder.write(path);
+    builder.write(configPath);
   }
 
   private void createFiles() {
@@ -255,5 +256,13 @@ public class CoreTestHelper {
             throw new RuntimeException("Failed to write line at: " + key, e);
           }
         });
+  }
+
+  public Config getConfig() {
+    if (config == null) {
+      throw new IllegalStateException(
+          "Config has not been initialized yet, can only access it after a call of start method.");
+    }
+    return config;
   }
 }

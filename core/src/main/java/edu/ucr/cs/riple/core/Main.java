@@ -24,12 +24,14 @@
 
 package edu.ucr.cs.riple.core;
 
+import java.nio.file.Paths;
+
 public class Main {
 
   public static void main(String[] args) {
     Config config;
     if (args.length == 2 && args[0].equals("--path")) {
-      config = new Config(args[1]);
+      config = new Config(Paths.get(args[1]));
     } else {
       config = new Config(args);
     }

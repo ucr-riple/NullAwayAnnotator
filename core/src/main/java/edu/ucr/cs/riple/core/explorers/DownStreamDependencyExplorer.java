@@ -42,6 +42,8 @@ import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.Set;
 
 /**
  * Analyzer for downstream dependencies.
@@ -138,7 +140,7 @@ public class DownStreamDependencyExplorer {
                           input.root.toMethod().method.equals(node.method)
                               && input.root.toMethod().clazz.equals(node.clazz))
                   .findAny();
-          optional.ifPresent(report -> method.effect += report.effect);
+          optional.ifPresent(report -> method.effect += report.localEffect);
         });
     System.out.println("Analysing downstream dependencies completed!");
   }
@@ -149,7 +151,7 @@ public class DownStreamDependencyExplorer {
    * @param fix Fix targeting an element in target.
    * @return Effect on downstream dependencies.
    */
-  public int effectOnDownstreamDependencies(Fix fix) {
+  private int effectOnDownstreamDependencies(Fix fix) {
     if (!fix.isOnMethod()) {
       return 0;
     }
@@ -160,6 +162,33 @@ public class DownStreamDependencyExplorer {
                 m -> m.node.method.equals(onMethod.method) && m.node.clazz.equals(onMethod.clazz))
             .findAny();
     return optional.map(methodStatus -> methodStatus.effect).orElse(0);
+  }
+
+  /**
+   * Returns the lower bound of number of errors of applying a fix and its associated chain of fixes
+   * on the target on downstream dependencies.
+   *
+   * @param tree Tree of the fix tree associated to root.
+   * @return Lower bound of number of errors on downstream dependencies.
+   */
+  public int computeLowerBoundOfNumberOfErrors(Set<Fix> tree) {
+    OptionalInt lowerBoundEffectOfChainOptional =
+        tree.stream().mapToInt(this::effectOnDownstreamDependencies).max();
+    if (lowerBoundEffectOfChainOptional.isEmpty()) {
+      return 0;
+    }
+    return lowerBoundEffectOfChainOptional.getAsInt();
+  }
+
+  /**
+   * Returns the upper bound of number of errors of applying a fix and its associated chain of fixes
+   * on the target on downstream dependencies.
+   *
+   * @param tree Tree of the fix tree associated to root.
+   * @return Lower bound of number of errors on downstream dependencies.
+   */
+  public int computeUpperBoundOfNumberOfErrors(Set<Fix> tree) {
+    return tree.stream().mapToInt(this::effectOnDownstreamDependencies).sum();
   }
 
   /** Container class for storing overall effect of each method. */

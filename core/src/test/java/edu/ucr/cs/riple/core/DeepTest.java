@@ -91,7 +91,7 @@ public class DeepTest extends BaseCoreTest {
   public void param_pass_test() {
     coreTestHelper
         .addInputDirectory("test", "parampass")
-        .setPredicate(Report::testEquals)
+        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
         .toDepth(10)
         .addExpectedReports(
             new TReport(
