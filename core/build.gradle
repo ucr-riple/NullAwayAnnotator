@@ -49,7 +49,7 @@ tasks.test.dependsOn(':type-annotator-scanner:publishToMavenLocal')
 
 // Set up environment variables for test configuration tu run with the latest development version.
 tasks.test.doFirst {
-    environment "NULLAWAY_TEST_VERSION", "0.9.9"
+    environment "NULLAWAY_TEST_VERSION", "0.9.10-SNAPSHOT"
     environment "TYPE_ANNOTATOR_SCANNER_VERSION", project.version
 }
 
@@ -72,4 +72,17 @@ jar {
 // To remove the "-all" postfix from the produced jar file.
 shadowJar {
     archiveClassifier = null
+}
+
+
+
+// TODO: Remove below once NullAway 0.9.10 is released
+tasks.test {
+    filter {
+        //exclude all tests below as they are only compatible with NullAway 0.9.10 (The upcoming version).
+        excludeTestsMatching "edu.ucr.cs.riple.core.CoreTest"
+        excludeTestsMatching "edu.ucr.cs.riple.core.DeepTest"
+        excludeTestsMatching "edu.ucr.cs.riple.core.InheritanceTest"
+        excludeTestsMatching "edu.ucr.cs.riple.core.DownstreamAnalysisTest"
+    }
 }

@@ -33,7 +33,8 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
   @Override
   protected FieldInitializationNode addNodeByLine(String[] values) {
     Location location = Location.createLocationFromArrayInfo(values);
-    Preconditions.checkNotNull(location, "Field Location cannot be null: " + Arrays.toString(values));
+    Preconditions.checkNotNull(
+        location, "Field Location cannot be null: " + Arrays.toString(values));
     return location.isOnMethod()
         ? new FieldInitializationNode(location.toMethod(), values[6])
         : null;
