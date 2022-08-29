@@ -39,6 +39,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.openjdk.tools.javac.util.Assert;
 
 public class SerializationTestHelper<T extends Display> {
 
@@ -167,7 +168,7 @@ public class SerializationTestHelper<T extends Display> {
     String fullExpectedMessage = "Caused by: " + exception.getName() + ": " + expectedErrorMessage;
     prepareTest();
     AssertionError ex = assertThrows(AssertionError.class, () -> compilationTestHelper.doTest());
-    assert ex.getMessage().contains(fullExpectedMessage);
+    Assert.check(ex.getMessage().contains(fullExpectedMessage));
   }
 
   /** Runs the test. */

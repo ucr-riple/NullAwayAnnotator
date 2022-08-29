@@ -43,8 +43,12 @@ public class TrackerNodeDisplay implements Display {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof TrackerNodeDisplay)) {
+      return false;
+    }
     TrackerNodeDisplay that = (TrackerNodeDisplay) o;
     return callerClass.equals(that.callerClass)
         && callerMethod.equals(that.callerMethod)
@@ -59,7 +63,7 @@ public class TrackerNodeDisplay implements Display {
 
   @Override
   public String toString() {
-    return "callerClass='"
+    return "\ncallerClass='"
         + callerClass
         + '\''
         + ", callerMethod='"
