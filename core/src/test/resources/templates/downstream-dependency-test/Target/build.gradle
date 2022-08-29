@@ -38,8 +38,8 @@ repositories {
 
 dependencies {
 
-    annotationProcessor "com.uber.nullaway:nullaway:0.9.9"
-    annotationProcessor "edu.ucr.cs.riple.nullawayannotator:type-annotator-scanner:1.3.3-SNAPSHOT"
+    annotationProcessor "com.uber.nullaway:nullaway:" + System.getenv('NULLAWAY_TEST_VERSION')
+    annotationProcessor "edu.ucr.cs.riple.nullawayannotator:type-annotator-scanner:" + System.getenv('TYPE_ANNOTATOR_SCANNER')
 
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
     errorprone "com.google.errorprone:error_prone_core:2.3.2"
