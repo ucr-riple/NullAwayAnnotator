@@ -16,7 +16,7 @@ Steps to reproduce the behavior: (Prefer a code snippet)
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
-**Stacktrace**
+**Stack trace**
 If applicable, add stacktrace of the exception below.
 
 **OS (please complete the following information):**
