@@ -171,13 +171,12 @@ public class MethodInheritanceTree extends MetaData<MethodNode> {
   }
 
   /**
-   * Checks if tree contains the passed method location information. Can be used to detect if the
-   * passed method, is declared in the target module.
+   * Checks if the passed method, is declared in the target module.
    *
    * @param location Location of the method.
    * @return true, if tree contains the method and false otherwise.
    */
-  public boolean contains(OnMethod location) {
+  public boolean declaredInModule(OnMethod location) {
     return findNode(location.method, location.clazz) != null;
   }
 }

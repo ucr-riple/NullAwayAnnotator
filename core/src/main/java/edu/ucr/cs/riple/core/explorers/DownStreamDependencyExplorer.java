@@ -257,7 +257,7 @@ public class DownStreamDependencyExplorer {
                                     error ->
                                         error.nonnullTarget != null
                                             && error.nonnullTarget.isOnParameter()
-                                            && methodInheritanceTree.contains(
+                                            && methodInheritanceTree.declaredInModule(
                                                 error.nonnullTarget.toMethod()))
                                 .map(error -> error.nonnullTarget.toParameter())
                                 .collect(Collectors.toSet());
