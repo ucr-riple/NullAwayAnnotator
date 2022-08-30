@@ -303,18 +303,21 @@ public class DownStreamDependencyExplorer {
     @Override
     protected void finalizeReports() {
       super.finalizeReports();
+      // Collect impacted parameters in target module by downstream dependencies.
       graph
           .getNodes()
           .forEach(
               node ->
                   node.root.ifOnMethod(
                       method -> {
+                        // Impacted parameters.
                         Set<OnParameter> parameters =
                             node.triggeredErrors.stream()
                                 .filter(
                                     error ->
                                         error.nonnullTarget != null
                                             && error.nonnullTarget.isOnParameter()
+                                            // Method is declared in the target module.
                                             && methodDeclarationTree.declaredInModule(
                                                 error.nonnullTarget.toMethod()))
                                 .map(error -> error.nonnullTarget.toParameter())
