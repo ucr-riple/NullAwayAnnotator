@@ -36,12 +36,12 @@ import javax.annotation.Nullable;
  * The top-down tree structure of methods in the target module, where each method's parent node, is
  * their immediate overriding method.
  */
-public class MethodInheritanceTree extends MetaData<MethodNode> {
+public class MethodDeclarationTree extends MetaData<MethodNode> {
 
   /** Each method has a unique id across all methods. This hashmap, maps ids to nodes. */
   private HashMap<Integer, MethodNode> nodes;
 
-  public MethodInheritanceTree(Path path) {
+  public MethodDeclarationTree(Path path) {
     super(path);
     // The root node of this tree with id: -1.
     nodes.put(-1, MethodNode.TOP);
@@ -111,7 +111,7 @@ public class MethodInheritanceTree extends MetaData<MethodNode> {
    *
    * @param method Method signature of input.
    * @param clazz Fully qualified name of the input method.
-   * @param recursive If ture, it will travers the inheritance tree recursively.
+   * @param recursive If ture, it will travers the declaration tree recursively.
    * @return ImmutableSet of overriding methods.
    */
   public ImmutableSet<MethodNode> getSubMethods(String method, String clazz, boolean recursive) {
