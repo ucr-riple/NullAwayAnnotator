@@ -218,7 +218,7 @@ public class DownStreamDependencyExplorer {
 
   /**
    * Returns set of parameters that will receive {@code @Nullable}, if any of the methods in the
-   * fixTree are annotated as {@link @Nullable}.
+   * fixTree are annotated as {@code @Nullable}.
    *
    * @param fixTree Fix tree.
    * @return Immutable set of impacted parameters.
@@ -340,7 +340,7 @@ public class DownStreamDependencyExplorer {
 
     /**
      * Returns set of parameters that will receive {@code @Nullable} if the passed method is
-     * annotated as {@link @Nullable}.
+     * annotated as {@code @Nullable}.
      *
      * @param method Method to be annotated.
      * @return Set of impacted parameters. If no parameter is impacted, empty set will be returned.

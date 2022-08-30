@@ -168,8 +168,8 @@ public class Annotator {
                                     new Fix(
                                         new AddAnnotation(onParameter, config.nullableAnnot),
                                         "PASSING_NULLABLE",
-                                        "null",
-                                        "null")))
+                                        onParameter.clazz,
+                                        onParameter.method)))
                 // Remove already processed fixes
                 .filter(input -> !reports.containsKey(input))
                 .collect(Collectors.toSet());
