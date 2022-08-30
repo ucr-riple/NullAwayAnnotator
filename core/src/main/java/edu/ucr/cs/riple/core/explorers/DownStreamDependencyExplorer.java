@@ -218,13 +218,13 @@ public class DownStreamDependencyExplorer {
 
   /**
    * Returns set of parameters that will receive {@code @Nullable}, if any of the methods in the
-   * tree are annotated as {@link @Nullable}.
+   * fixTree are annotated as {@link @Nullable}.
    *
-   * @param tree Fix tree.
+   * @param fixTree Fix tree.
    * @return Immutable set of impacted parameters.
    */
-  public ImmutableSet<OnParameter> getImpactedParameters(Set<Fix> tree) {
-    return tree.stream()
+  public ImmutableSet<OnParameter> getImpactedParameters(Set<Fix> fixTree) {
+    return fixTree.stream()
         .filter(Fix::isOnMethod)
         .flatMap(
             fix -> {
@@ -320,6 +320,16 @@ public class DownStreamDependencyExplorer {
                                 .map(error -> error.nonnullTarget.toParameter())
                                 .collect(Collectors.toSet());
                         if (!parameters.isEmpty()) {
+                          // Update uri for each parameter. These triggered fixes does not have an
+                          // actual physical uri since they are provided as a jar file in downstream
+                          // dependencies.
+                          parameters.forEach(
+                              onParameter ->
+                                  onParameter.uri =
+                                      methodDeclarationTree.findNode(
+                                              onParameter.method, onParameter.clazz)
+                                          .location
+                                          .uri);
                           nullableFlowMap.put(method, parameters);
                         }
                       }));
