@@ -84,5 +84,6 @@ tasks.test {
         excludeTestsMatching "edu.ucr.cs.riple.core.DeepTest"
         excludeTestsMatching "edu.ucr.cs.riple.core.InheritanceTest"
         excludeTestsMatching "edu.ucr.cs.riple.core.DownstreamAnalysisTest"
+        excludeTestsMatching "edu.ucr.cs.riple.core.ArgumentNullableFlowTest"
     }
 }
