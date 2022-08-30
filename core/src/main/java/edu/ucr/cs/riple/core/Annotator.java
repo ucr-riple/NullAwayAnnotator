@@ -37,7 +37,7 @@ import edu.ucr.cs.riple.core.metadata.field.FieldInitializationAnalysis;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
+import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -96,8 +96,8 @@ public class Annotator {
     Utility.buildTarget(config);
     Utility.setScannerCheckerActivation(config.target, false);
     FieldDeclarationAnalysis fieldDeclarationAnalysis = new FieldDeclarationAnalysis(config.target);
-    MethodInheritanceTree tree =
-        new MethodInheritanceTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
+    MethodDeclarationTree tree =
+        new MethodDeclarationTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
     // downStreamDependencyExplorer analyzes effects of all public APIs on downstream dependencies.
     // Through iterations, since the source code for downstream dependencies does not change and the
     // computation does not depend on the changes in the target module, it will compute the same
@@ -120,7 +120,7 @@ public class Annotator {
           new Bank<>(
               config.target.dir.resolve("fixes.tsv"),
               Fix.factory(config, fieldDeclarationAnalysis));
-      tree = new MethodInheritanceTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
+      tree = new MethodDeclarationTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
       RegionTracker tracker = new CompoundTracker(config.target, tree);
       Explorer explorer =
           config.exhaustiveSearch

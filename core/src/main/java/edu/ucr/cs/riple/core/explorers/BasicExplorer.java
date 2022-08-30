@@ -31,7 +31,7 @@ import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.Result;
-import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
+import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.util.Set;
 import me.tongfei.progressbar.ProgressBar;
@@ -43,9 +43,9 @@ public class BasicExplorer extends Explorer {
       Bank<Error> errorBank,
       Bank<Fix> fixBank,
       ImmutableSet<Fix> fixes,
-      MethodInheritanceTree methodInheritanceTree,
+      MethodDeclarationTree methodDeclarationTree,
       Config config) {
-    super(injector, errorBank, fixBank, fixes, methodInheritanceTree, config.depth, config);
+    super(injector, errorBank, fixBank, fixes, methodDeclarationTree, config.depth, config);
   }
 
   @Override
@@ -66,7 +66,7 @@ public class BasicExplorer extends Explorer {
               Result<Error> res = errorBank.compare();
               node.effect = res.size;
               node.updateStatus(
-                  res.size, fixes, fixBank.compare().dif, res.dif, methodInheritanceTree);
+                  res.size, fixes, fixBank.compare().dif, res.dif, methodDeclarationTree);
               injector.removeFixes(fixes);
             });
     pb.close();

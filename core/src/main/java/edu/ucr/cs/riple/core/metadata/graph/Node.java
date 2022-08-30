@@ -29,7 +29,7 @@ import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
+import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -140,14 +140,15 @@ public class Node {
    * @param effect Local effect calculated based on the number of errors in impacted regions.
    * @param fixesInOneRound All fixes applied simultaneously to the source code.
    * @param triggeredFixes Triggered fixes collected from impacted regions.
-   * @param mit Method inheritance tree instance.
+   * @param triggeredErrors Triggered Errors collected from impacted regions.
+   * @param mdt Method declaration tree instance.
    */
   public void updateStatus(
       int effect,
       Set<Fix> fixesInOneRound,
       Collection<Fix> triggeredFixes,
       Collection<Error> triggeredErrors,
-      MethodInheritanceTree mit) {
+      MethodDeclarationTree mdt) {
     // Update list of triggered fixes.
     this.updateTriggered(triggeredFixes);
     // Update list of triggered errors.
@@ -161,7 +162,7 @@ public class Node {
         .map(
             fix -> {
               OnMethod onMethod = fix.toMethod();
-              return mit.getClosestSuperMethod(onMethod.method, onMethod.clazz);
+              return mdt.getClosestSuperMethod(onMethod.method, onMethod.clazz);
             }) // List of super methods of all fixes in tree.
         .filter(
             node ->

@@ -32,7 +32,7 @@ import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.Result;
-import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
+import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -52,10 +52,10 @@ public class OptimizedExplorer extends Explorer {
       Bank<Fix> fixBank,
       RegionTracker tracker,
       ImmutableSet<Fix> fixes,
-      MethodInheritanceTree methodInheritanceTree,
+      MethodDeclarationTree tree,
       int depth,
       Config config) {
-    super(injector, errorBank, fixBank, fixes, methodInheritanceTree, depth, config);
+    super(injector, errorBank, fixBank, fixes, tree, depth, config);
     this.tracker = tracker;
   }
 
@@ -97,7 +97,7 @@ public class OptimizedExplorer extends Explorer {
                   new ArrayList<>(fixBank.compareByMethod(region.clazz, region.method, false).dif));
             }
             node.updateStatus(
-                totalEffect, fixes, triggeredFixes, triggeredErrors, methodInheritanceTree);
+                totalEffect, fixes, triggeredFixes, triggeredErrors, methodDeclarationTree);
           });
       injector.removeFixes(fixes);
     }

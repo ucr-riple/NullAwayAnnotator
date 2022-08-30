@@ -34,7 +34,7 @@ import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
+import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
@@ -65,15 +65,15 @@ public class DownStreamDependencyExplorer {
   private final ImmutableSet<MethodStatus> methods;
   /** Annotator Config. */
   private final Config config;
-  /** Method inheritance instance. */
-  private final MethodInheritanceTree tree;
+  /** Method declaration tree instance. */
+  private final MethodDeclarationTree tree;
   /**
    * VirtualInjector instance. Annotations should only be loaded in a library model and not
    * physically injected.
    */
   private final VirtualInjector injector;
 
-  public DownStreamDependencyExplorer(Config config, MethodInheritanceTree tree) {
+  public DownStreamDependencyExplorer(Config config, MethodDeclarationTree tree) {
     this.config = config;
     this.modules = config.downstreamInfo;
     this.tree = tree;
@@ -139,8 +139,7 @@ public class DownStreamDependencyExplorer {
     methods.forEach(
         method -> {
           MethodNode node = method.node;
-          method.impactedParameters =
-              explorer.nullableFlowMap.get(node.location);
+          method.impactedParameters = explorer.nullableFlowMap.get(node.location);
           Optional<Report> optional =
               reports.stream()
                   .filter(input -> input.root.toMethod().equals(node.location))
@@ -195,11 +194,11 @@ public class DownStreamDependencyExplorer {
 
   /** Container class for storing overall effect of each method. */
   private static class MethodStatus {
-    /** Node in {@link MethodInheritanceTree} corresponding to a public method. */
+    /** Node in {@link MethodDeclarationTree} corresponding to a public method. */
     final MethodNode node;
     /**
      * Set of parameters in target module that will receive {@code Nullable} value if target method
-     * in node is annotated as {@link @Nullable}.
+     * in node is annotated as {@code @Nullable}.
      */
     public Set<OnParameter> impactedParameters;
     /**
@@ -230,10 +229,10 @@ public class DownStreamDependencyExplorer {
         Bank<Fix> fixBank,
         RegionTracker tracker,
         ImmutableSet<Fix> fixes,
-        MethodInheritanceTree methodInheritanceTree,
+        MethodDeclarationTree methodDeclarationTree,
         int depth,
         Config config) {
-      super(injector, errorBank, fixBank, tracker, fixes, methodInheritanceTree, depth, config);
+      super(injector, errorBank, fixBank, tracker, fixes, methodDeclarationTree, depth, config);
       nullableFlowMap = new HashMap<>();
     }
 
@@ -257,7 +256,7 @@ public class DownStreamDependencyExplorer {
                                     error ->
                                         error.nonnullTarget != null
                                             && error.nonnullTarget.isOnParameter()
-                                            && methodInheritanceTree.declaredInModule(
+                                            && methodDeclarationTree.declaredInModule(
                                                 error.nonnullTarget.toMethod()))
                                 .map(error -> error.nonnullTarget.toParameter())
                                 .collect(Collectors.toSet());

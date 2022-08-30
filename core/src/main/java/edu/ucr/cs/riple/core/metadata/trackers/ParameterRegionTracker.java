@@ -25,7 +25,7 @@
 package edu.ucr.cs.riple.core.metadata.trackers;
 
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
+import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Optional;
 import java.util.Set;
@@ -35,16 +35,16 @@ import java.util.stream.Collectors;
 public class ParameterRegionTracker implements RegionTracker {
 
   /**
-   * {@link MethodInheritanceTree} instance, used to retrieve regions that will be affected due to
+   * {@link MethodDeclarationTree} instance, used to retrieve regions that will be affected due to
    * inheritance violations.
    */
-  private final MethodInheritanceTree tree;
+  private final MethodDeclarationTree tree;
 
   /** {@link MethodRegionTracker} instance, used to retrieve all sites. */
   private final MethodRegionTracker methodRegionTracker;
 
   public ParameterRegionTracker(
-      MethodInheritanceTree tree, MethodRegionTracker methodRegionTracker) {
+      MethodDeclarationTree tree, MethodRegionTracker methodRegionTracker) {
     this.tree = tree;
     this.methodRegionTracker = methodRegionTracker;
   }
