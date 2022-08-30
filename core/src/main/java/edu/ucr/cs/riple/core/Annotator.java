@@ -45,6 +45,7 @@ import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -108,12 +109,18 @@ public class Annotator {
     if (config.downStreamDependenciesAnalysisActivated) {
       downStreamDependencyExplorer.explore();
     }
+    // Set of fixes collected from downstream dependencies that are triggered due to changes in the
+    // upstream module (target) public API.
+    Set<Fix> triggeredFixesFromDownstreamDependencies = new HashSet<>();
+
     while (true) {
       Utility.buildTarget(config);
       ImmutableSet<Fix> fixes =
-          Utility.readFixesFromOutputDirectory(
-                  config.target, Fix.factory(config, fieldDeclarationAnalysis))
-              .filter(fix -> !config.useCache || !reports.containsKey(fix))
+          Stream.concat(
+                  triggeredFixesFromDownstreamDependencies.stream(),
+                  Utility.readFixesFromOutputDirectory(
+                          config.target, Fix.factory(config, fieldDeclarationAnalysis))
+                      .filter(fix -> !config.useCache || !reports.containsKey(fix)))
               .collect(ImmutableSet.toImmutableSet());
       Bank<Error> errorBank = new Bank<>(config.target.dir.resolve("errors.tsv"), Error::new);
       Bank<Fix> fixBank =
@@ -148,7 +155,27 @@ public class Annotator {
               .filter(report -> report.getOverallEffect(config) < 1)
               .flatMap(report -> config.chain ? report.tree.stream() : Stream.of(report.root))
               .collect(Collectors.toSet()));
-      if (sizeBefore == this.reports.size()) {
+      // Collect impacted parameters from changes in target module due to usages in downstream
+      // dependencies.
+      if (config.downStreamDependenciesAnalysisActivated) {
+        triggeredFixesFromDownstreamDependencies =
+            latestReports.stream()
+                .flatMap(
+                    report ->
+                        downStreamDependencyExplorer.getImpactedParameters(report.tree).stream()
+                            .map(
+                                onParameter ->
+                                    new Fix(
+                                        new AddAnnotation(onParameter, config.nullableAnnot),
+                                        "PASSING_NULLABLE",
+                                        "null",
+                                        "null")))
+                // Remove already processed fixes
+                .filter(input -> !reports.containsKey(input))
+                .collect(Collectors.toSet());
+      }
+      if (sizeBefore == this.reports.size()
+          && triggeredFixesFromDownstreamDependencies.size() == 0) {
         System.out.println("\nFinished annotating.");
         Utility.writeReports(
             config, reports.values().stream().collect(ImmutableSet.toImmutableSet()));
