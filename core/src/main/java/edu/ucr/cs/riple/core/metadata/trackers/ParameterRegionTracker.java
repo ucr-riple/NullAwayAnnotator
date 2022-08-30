@@ -44,7 +44,7 @@ public class ParameterRegionTracker implements RegionTracker {
   private final MethodRegionTracker methodRegionTracker;
 
   public ParameterRegionTracker(
-          MethodDeclarationTree tree, MethodRegionTracker methodRegionTracker) {
+      MethodDeclarationTree tree, MethodRegionTracker methodRegionTracker) {
     this.tree = tree;
     this.methodRegionTracker = methodRegionTracker;
   }
