@@ -77,12 +77,12 @@ shadowJar {
 
 
 // TODO: Remove below once NullAway 0.9.10 is released
-tasks.test {
-    filter {
-        //exclude all tests below as they are only compatible with NullAway 0.9.10 (The upcoming version).
-        excludeTestsMatching "edu.ucr.cs.riple.core.CoreTest"
-        excludeTestsMatching "edu.ucr.cs.riple.core.DeepTest"
-        excludeTestsMatching "edu.ucr.cs.riple.core.InheritanceTest"
-        excludeTestsMatching "edu.ucr.cs.riple.core.DownstreamAnalysisTest"
-    }
-}
+//tasks.test {
+//    filter {
+//        //exclude all tests below as they are only compatible with NullAway 0.9.10 (The upcoming version).
+//        excludeTestsMatching "edu.ucr.cs.riple.core.CoreTest"
+//        excludeTestsMatching "edu.ucr.cs.riple.core.DeepTest"
+//        excludeTestsMatching "edu.ucr.cs.riple.core.InheritanceTest"
+//        excludeTestsMatching "edu.ucr.cs.riple.core.DownstreamAnalysisTest"
+//    }
+//}

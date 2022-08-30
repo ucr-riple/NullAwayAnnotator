@@ -65,7 +65,8 @@ public class BasicExplorer extends Explorer {
               fixBank.saveState(false, true);
               Result<Error> res = errorBank.compare();
               node.effect = res.size;
-              node.updateStatus(res.size, fixes, fixBank.compare().dif, methodInheritanceTree);
+              node.updateStatus(
+                  res.size, fixes, fixBank.compare().dif, res.dif, methodInheritanceTree);
               injector.removeFixes(fixes);
             });
     pb.close();

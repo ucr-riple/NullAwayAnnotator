@@ -58,7 +58,7 @@ public class ParameterRegionTracker implements RegionTracker {
     // Get regions which will be potentially affected by inheritance violations.
     Set<Region> regions =
         tree.getSubMethods(parameter.method, parameter.clazz, false).stream()
-            .map(node -> new Region(node.clazz, node.method))
+            .map(node -> new Region(node.location.clazz, node.location.method))
             .collect(Collectors.toSet());
     // Add the method the fix is targeting.
     regions.add(new Region(parameter.clazz, parameter.method));

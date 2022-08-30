@@ -38,6 +38,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 import org.json.simple.JSONObject;
 
 /**
@@ -102,6 +103,16 @@ public class Fix extends Enclosed {
   }
 
   /**
+   * Visit this fix if it is targeting an element of kind {@link
+   * edu.ucr.cs.riple.injector.location.LocationType#METHOD}
+   *
+   * @param consumer Consumer instance.
+   */
+  public void ifOnMethod(Consumer<OnMethod> consumer) {
+    change.location.ifMethod(consumer);
+  }
+
+  /**
    * Checks if fix is targeting a parameter.
    *
    * @return true, if fix is targeting a parameter.
@@ -120,6 +131,16 @@ public class Fix extends Enclosed {
   }
 
   /**
+   * Visit this fix if it is targeting an element of kind {@link
+   * edu.ucr.cs.riple.injector.location.LocationType#PARAMETER}
+   *
+   * @param consumer Consumer instance.
+   */
+  public void ifOnParameter(Consumer<OnParameter> consumer) {
+    change.location.ifParameter(consumer);
+  }
+
+  /**
    * Checks if fix is targeting a field.
    *
    * @return true, if fix is targeting a field.
@@ -135,6 +156,16 @@ public class Fix extends Enclosed {
    */
   public OnField toField() {
     return change.location.toField();
+  }
+
+  /**
+   * Visit this fix if it is targeting an element of kind {@link
+   * edu.ucr.cs.riple.injector.location.LocationType#FIELD}
+   *
+   * @param consumer Consumer instance.
+   */
+  public void ifOnField(Consumer<OnField> consumer) {
+    change.location.ifField(consumer);
   }
 
   @Override

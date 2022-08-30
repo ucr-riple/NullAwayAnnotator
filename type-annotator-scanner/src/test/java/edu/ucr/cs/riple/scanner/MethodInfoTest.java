@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.scanner;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.scanner.tools.DisplayFactory;
 import edu.ucr.cs.riple.scanner.tools.MethodInfoDisplay;
+import java.util.Arrays;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -36,7 +37,12 @@ public class MethodInfoTest extends TypeAnnotatorScannerBaseTest<MethodInfoDispl
 
   private static final DisplayFactory<MethodInfoDisplay> METHOD_DISPLAY_FACTORY =
       values -> {
-        Preconditions.checkArgument(values.length == 10, "Expected to find 11 values on each line");
+        Preconditions.checkArgument(
+            values.length == 10,
+            "Expected to find 10 values on each line, but found: "
+                + values.length
+                + ", "
+                + Arrays.toString(values));
         MethodInfoDisplay display =
             new MethodInfoDisplay(
                 values[0], values[1], values[2], values[3], values[4], values[5], values[6],

@@ -76,7 +76,7 @@ public abstract class Explorer {
               Node node = graph.addNodeToVertices(root);
               node.setOrigins(fixBank);
               node.report = report;
-              node.triggered = report.triggered;
+              node.triggeredFixes = report.triggered;
               node.tree.addAll(report.tree);
               node.mergeTriggered();
             });
@@ -90,7 +90,7 @@ public abstract class Explorer {
               Report report = node.report;
               report.localEffect = node.effect;
               report.tree = node.tree;
-              report.triggered = node.triggered;
+              report.triggered = node.triggeredFixes;
               report.finished = !node.changed;
             });
   }

@@ -27,11 +27,13 @@ package edu.ucr.cs.riple.core.metadata.graph;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
+import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.injector.location.OnMethod;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -54,7 +56,10 @@ public class Node {
   public final Set<Region> regions;
 
   /** Set of triggered fixes if tree is applied. */
-  public Set<Fix> triggered;
+  public Set<Fix> triggeredFixes;
+
+  /** Collection of triggered fixes if tree is applied. */
+  public Collection<Error> triggeredErrors;
 
   /** Unique id of Node across all nodes. */
   public int id;
@@ -77,7 +82,8 @@ public class Node {
   public Node(Fix root) {
     this.regions = new HashSet<>();
     this.root = root;
-    this.triggered = new HashSet<>();
+    this.triggeredFixes = new HashSet<>();
+    this.triggeredErrors = new ArrayList<>();
     this.effect = 0;
     this.tree = Sets.newHashSet(root);
     this.changed = false;
@@ -133,13 +139,19 @@ public class Node {
    *
    * @param effect Local effect calculated based on the number of errors in impacted regions.
    * @param fixesInOneRound All fixes applied simultaneously to the source code.
-   * @param triggered Triggered fixes collected from impacted regions.
+   * @param triggeredFixes Triggered fixes collected from impacted regions.
    * @param mit Method inheritance tree instance.
    */
   public void updateStatus(
-      int effect, Set<Fix> fixesInOneRound, Collection<Fix> triggered, MethodInheritanceTree mit) {
+      int effect,
+      Set<Fix> fixesInOneRound,
+      Collection<Fix> triggeredFixes,
+      Collection<Error> triggeredErrors,
+      MethodInheritanceTree mit) {
     // Update list of triggered fixes.
-    this.updateTriggered(triggered);
+    this.updateTriggered(triggeredFixes);
+    // Update list of triggered errors.
+    this.triggeredErrors = triggeredErrors;
     // A fix in a tree, can have a super method that is not part of this node's tree but be present
     // in another node's tree. In this case since both are applied, an error due to inheritance
     // violation will not be reported. This calculation below will fix that.
@@ -156,22 +168,16 @@ public class Node {
                 node != null
                     && !node.hasNullableAnnotation) // If node is already annotated, ignore it.
         .forEach(
-            node -> {
+            superMethodNode -> {
               if (tree.stream()
                   .anyMatch(
-                      fix ->
-                          fix.isOnMethod()
-                              && fix.toMethod().method.equals(node.method)
-                              && fix.toMethod().clazz.equals(node.clazz))) {
+                      fix -> fix.isOnMethod() && fix.toMethod().equals(superMethodNode.location))) {
                 // Super method is already inside tree, ignore it.
                 return;
               }
               if (fixesInOneRound.stream()
                   .anyMatch(
-                      fix ->
-                          fix.isOnMethod()
-                              && fix.toMethod().method.equals(node.method)
-                              && fix.toMethod().clazz.equals(node.clazz))) {
+                      fix -> fix.isOnMethod() && fix.toMethod().equals(superMethodNode.location))) {
                 // Super method is not in this tree and is present in source code due to injection
                 // for another node, count it.
                 numberOfSuperMethodsAnnotatedOutsideTree[0]++;
@@ -187,16 +193,17 @@ public class Node {
    * @param fixes Collection of triggered fixes.
    */
   public void updateTriggered(Collection<Fix> fixes) {
-    int sizeBefore = this.triggered.size();
-    this.triggered.addAll(fixes);
-    int sizeAfter = this.triggered.size();
+    int sizeBefore = this.triggeredFixes.size();
+    this.triggeredFixes.addAll(fixes);
+    int sizeAfter = this.triggeredFixes.size();
     this.changed = (sizeAfter != sizeBefore);
   }
 
   /** Merges triggered fixes to the tree, to prepare the analysis for the next depth. */
   public void mergeTriggered() {
-    this.tree.addAll(this.triggered);
-    this.triggered.clear();
+    this.tree.addAll(this.triggeredFixes);
+    this.triggeredFixes.clear();
+    this.triggeredErrors.clear();
   }
 
   @Override
