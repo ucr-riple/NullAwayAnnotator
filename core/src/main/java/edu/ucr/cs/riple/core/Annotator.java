@@ -119,8 +119,8 @@ public class Annotator {
           Stream.concat(
                   triggeredFixesFromDownstreamDependencies.stream(),
                   Utility.readFixesFromOutputDirectory(
-                          config.target, Fix.factory(config, fieldDeclarationAnalysis))
-                      .filter(fix -> !config.useCache || !reports.containsKey(fix)))
+                      config.target, Fix.factory(config, fieldDeclarationAnalysis)))
+              .filter(fix -> !config.useCache || !reports.containsKey(fix))
               .collect(ImmutableSet.toImmutableSet());
       Bank<Error> errorBank = new Bank<>(config.target.dir.resolve("errors.tsv"), Error::new);
       Bank<Fix> fixBank =
