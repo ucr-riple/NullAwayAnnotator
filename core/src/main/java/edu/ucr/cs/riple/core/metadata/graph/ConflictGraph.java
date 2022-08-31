@@ -74,7 +74,7 @@ public class ConflictGraph {
    * in the same group. A greedy algorithm is used to find the solution.
    */
   // TODO: Remove SuppressWarnings below later.
-  @SuppressWarnings({"JdkObsolete"})
+  @SuppressWarnings("JdkObsolete")
   public void findGroups() {
     this.groups.clear();
     Collection<Node> allNodes = nodes.values();
