@@ -77,11 +77,14 @@ public class Error extends Enclosed {
       return false;
     }
     Error error = (Error) o;
-    return messageType.equals(error.messageType);
+    return messageType.equals(error.messageType)
+        && message.equals(error.message)
+        // Since location is @Nullable, used Objects.equal.
+        && Objects.equals(nonnullTarget, error.nonnullTarget);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(messageType);
+    return Objects.hash(messageType, message, nonnullTarget);
   }
 }
