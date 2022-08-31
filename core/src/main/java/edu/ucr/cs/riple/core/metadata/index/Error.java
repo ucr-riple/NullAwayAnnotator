@@ -40,7 +40,7 @@ public class Error extends Enclosed {
    * If non-null, this error involved a pseudo-assignment of a @Nullable expression into a @NonNull
    * target, and this field is the Symbol for that target.
    */
-  @Nullable private final Location location;
+  @Nullable private final Location nonnullTarget;
 
   /**
    * NullAway serializes error on TSV file, this constructor is called for each line of that file.
@@ -65,7 +65,7 @@ public class Error extends Enclosed {
     super(encClass, encMethod);
     this.messageType = messageType;
     this.message = message;
-    this.location = nonnullTargetLocation;
+    this.nonnullTarget = nonnullTargetLocation;
   }
 
   @Override
@@ -77,11 +77,14 @@ public class Error extends Enclosed {
       return false;
     }
     Error error = (Error) o;
-    return messageType.equals(error.messageType);
+    return messageType.equals(error.messageType)
+        && message.equals(error.message)
+        // Since location is @Nullable, used Objects.equal.
+        && Objects.equals(nonnullTarget, error.nonnullTarget);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(messageType);
+    return Objects.hash(messageType, message, nonnullTarget);
   }
 }
