@@ -23,7 +23,10 @@
  */
 package edu.ucr.cs.riple.core.metadata.index;
 
+import edu.ucr.cs.riple.injector.location.Location;
+import java.util.Arrays;
 import java.util.Objects;
+import javax.annotation.Nullable;
 
 /** Represents an error reported by NullAway. */
 @SuppressWarnings("JavaLangClash")
@@ -33,6 +36,11 @@ public class Error extends Enclosed {
   public final String messageType;
   /** Error message. */
   public final String message;
+  /**
+   * If non-null, this error involved a pseudo-assignment of a @Nullable expression into a @NonNull
+   * target, and this field is the Symbol for that target.
+   */
+  @Nullable private final Location nonnullTarget;
 
   /**
    * NullAway serializes error on TSV file, this constructor is called for each line of that file.
@@ -40,13 +48,24 @@ public class Error extends Enclosed {
    * @param values Values in row of a TSV file.
    */
   public Error(String[] values) {
-    this(values[0], values[1], values[2], values[3]);
+    this(
+        values[0],
+        values[1],
+        values[2],
+        values[3],
+        Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 4, 10)));
   }
 
-  public Error(String messageType, String message, String encClass, String encMethod) {
+  public Error(
+      String messageType,
+      String message,
+      String encClass,
+      String encMethod,
+      @Nullable Location nonnullTargetLocation) {
     super(encClass, encMethod);
     this.messageType = messageType;
     this.message = message;
+    this.nonnullTarget = nonnullTargetLocation;
   }
 
   @Override
@@ -58,11 +77,14 @@ public class Error extends Enclosed {
       return false;
     }
     Error error = (Error) o;
-    return messageType.equals(error.messageType);
+    return messageType.equals(error.messageType)
+        && message.equals(error.message)
+        // Since nonnullTarget is @Nullable, used Objects.equal.
+        && Objects.equals(nonnullTarget, error.nonnullTarget);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(messageType);
+    return Objects.hash(messageType, message, nonnullTarget);
   }
 }

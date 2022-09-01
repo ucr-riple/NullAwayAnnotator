@@ -36,6 +36,7 @@ import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
 import org.json.simple.JSONObject;
 
 public abstract class Location {
@@ -62,23 +63,45 @@ public abstract class Location {
     this.uri = uri;
   }
 
-  public static Location createLocationFromArrayInfo(String[] infos) {
+  /**
+   * Creates an instance of {@link Location} based on values written in a row of a TSV file. These
+   * values should be in order of:
+   *
+   * <ol>
+   *   <li>Element Kind
+   *   <li>Fully qualified Class flat name
+   *   <li>Method Signature
+   *   <li>Parameter / Variable name
+   *   <li>Index in the argument list (Applicable to only parameter types)
+   *   <li>URI to file containing the target element
+   * </ol>
+   *
+   * If Element Kind is {@code "null"}, {@code null} will be returned.
+   *
+   * @param values Array of values in the expected order described above.
+   * @return Corresponding {@link Location} instance.
+   */
+  @Nullable
+  public static Location createLocationFromArrayInfo(String[] values) {
     Preconditions.checkArgument(
-        infos.length >= 6,
+        values.length >= 6,
         "Expected at least 6 arguments to create a Location instance but found: "
-            + Arrays.toString(infos));
-    LocationType type = LocationType.getType(infos[0]);
-    String uri = infos[5];
-    String clazz = infos[1];
+            + Arrays.toString(values));
+    if (values[0] == null || values[0].equals("null")) {
+      return null;
+    }
+    LocationType type = LocationType.getType(values[0]);
+    String uri = values[5];
+    String clazz = values[1];
     switch (type) {
       case FIELD:
-        return new OnField(uri, clazz, Sets.newHashSet(infos[3]));
+        return new OnField(uri, clazz, Sets.newHashSet(values[3]));
       case METHOD:
-        return new OnMethod(uri, clazz, infos[2]);
+        return new OnMethod(uri, clazz, values[2]);
       case PARAMETER:
-        return new OnParameter(uri, clazz, infos[2], Integer.parseInt(infos[4]));
+        return new OnParameter(uri, clazz, values[2], Integer.parseInt(values[4]));
     }
-    throw new RuntimeException("Cannot reach this statement, infos: " + Arrays.toString(infos));
+    throw new RuntimeException("Cannot reach this statement, values: " + Arrays.toString(values));
   }
 
   public abstract Location duplicate();

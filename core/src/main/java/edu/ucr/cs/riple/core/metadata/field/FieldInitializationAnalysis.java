@@ -1,10 +1,12 @@
 package edu.ucr.cs.riple.core.metadata.field;
 
+import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -31,6 +33,8 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
   @Override
   protected FieldInitializationNode addNodeByLine(String[] values) {
     Location location = Location.createLocationFromArrayInfo(values);
+    Preconditions.checkNotNull(
+        location, "Field Location cannot be null: " + Arrays.toString(values));
     return location.isOnMethod()
         ? new FieldInitializationNode(location.toMethod(), values[6])
         : null;
