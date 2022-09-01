@@ -170,7 +170,7 @@ public class Node {
                     && !node.hasNullableAnnotation) // If node is already annotated, ignore it.
         .forEach(
             superMethodNode -> {
-              if (tree.stream()
+              if (this.tree.stream()
                   .anyMatch(
                       fix -> fix.isOnMethod() && fix.toMethod().equals(superMethodNode.location))) {
                 // Super method is already inside tree, ignore it.
