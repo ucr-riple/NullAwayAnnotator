@@ -29,7 +29,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-/** Container class to store method's information in {@link MethodInheritanceTree} tree. */
+/** Container class to store method's information in {@link MethodDeclarationTree} tree. */
 public class MethodNode implements Hashable {
 
   /** Set of children's id. */
@@ -84,7 +84,7 @@ public class MethodNode implements Hashable {
   }
 
   /**
-   * Creates a singleton instance of top object. Top is root of the {@link MethodInheritanceTree}
+   * Creates a singleton instance of top object. Top is root of the {@link MethodDeclarationTree}
    * tree.
    *
    * @return The top Node.

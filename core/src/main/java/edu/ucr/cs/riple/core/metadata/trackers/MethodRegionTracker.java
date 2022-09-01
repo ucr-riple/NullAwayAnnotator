@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
+import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.scanner.Serializer;
@@ -40,17 +40,17 @@ import java.util.stream.Collectors;
 public class MethodRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
 
   /**
-   * {@link MethodInheritanceTree} instance, used to retrieve regions that will be affected due to
+   * {@link MethodDeclarationTree} instance, used to retrieve regions that will be affected due to
    * inheritance violations.
    */
-  private final MethodInheritanceTree tree;
+  private final MethodDeclarationTree tree;
 
-  public MethodRegionTracker(ModuleInfo info, MethodInheritanceTree tree) {
+  public MethodRegionTracker(ModuleInfo info, MethodDeclarationTree tree) {
     super(info.dir.resolve(Serializer.CALL_GRAPH_FILE_NAME));
     this.tree = tree;
   }
 
-  public MethodRegionTracker(ImmutableSet<ModuleInfo> modules, MethodInheritanceTree tree) {
+  public MethodRegionTracker(ImmutableSet<ModuleInfo> modules, MethodDeclarationTree tree) {
     super(
         modules.stream()
             .map(info -> info.dir.resolve(Serializer.CALL_GRAPH_FILE_NAME))

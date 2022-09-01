@@ -28,7 +28,7 @@ import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.method.MethodInheritanceTree;
+import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -134,10 +134,10 @@ public class Node {
    * @param effect Local effect calculated based on the number of errors in impacted regions.
    * @param fixesInOneRound All fixes applied simultaneously to the source code.
    * @param triggered Triggered fixes collected from impacted regions.
-   * @param mit Method inheritance tree instance.
+   * @param tree Method declaration tree instance.
    */
   public void updateStatus(
-      int effect, Set<Fix> fixesInOneRound, Collection<Fix> triggered, MethodInheritanceTree mit) {
+      int effect, Set<Fix> fixesInOneRound, Collection<Fix> triggered, MethodDeclarationTree tree) {
     // Update list of triggered fixes.
     this.updateTriggered(triggered);
     // A fix in a tree, can have a super method that is not part of this node's tree but be present
@@ -149,7 +149,7 @@ public class Node {
         .map(
             fix -> {
               OnMethod onMethod = fix.toMethod();
-              return mit.getClosestSuperMethod(onMethod.method, onMethod.clazz);
+              return tree.getClosestSuperMethod(onMethod.method, onMethod.clazz);
             }) // List of super methods of all fixes in tree.
         .filter(
             node ->
@@ -157,7 +157,7 @@ public class Node {
                     && !node.hasNullableAnnotation) // If node is already annotated, ignore it.
         .forEach(
             node -> {
-              if (tree.stream()
+              if (this.tree.stream()
                   .anyMatch(
                       fix ->
                           fix.isOnMethod()
