@@ -51,25 +51,19 @@ public class MethodInfoTest extends TypeAnnotatorScannerBaseTest<MethodInfoDispl
         return display;
       };
   private static final String HEADER =
-      "id"
-          + "\t"
-          + "class"
-          + "\t"
-          + "method"
-          + "\t"
-          + "parent"
-          + "\t"
-          + "size"
-          + "\t"
-          + "flags"
-          + "\t"
-          + "nullable"
-          + "\t"
-          + "visibility"
-          + "\t"
-          + "non-primitive-return"
-          + "\t"
-          + "uri";
+      String.join(
+          "\t",
+          "id",
+          "class",
+          "method",
+          "parent",
+          "size",
+          "flags",
+          "nullable",
+          "visibility",
+          "non-primitive-return",
+          "uri");
+
   private static final String FILE_NAME = "method_info.tsv";
 
   public MethodInfoTest() {
