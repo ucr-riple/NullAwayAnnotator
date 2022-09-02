@@ -183,7 +183,7 @@ public class CoreTestHelper {
           .append(notFound.size())
           .append(" expected Reports were NOT found:")
           .append("\n")
-          .append(notFound.stream().map(Report::toString).collect(Collectors.toList()))
+          .append(notFound.stream().map(Report::toString).collect(Collectors.joining("\n")))
           .append("\n");
     }
     if (actualOutput.size() != 0) {
@@ -191,7 +191,7 @@ public class CoreTestHelper {
           .append(actualOutput.size())
           .append(" unexpected Reports were found:")
           .append("\n")
-          .append(actualOutput.stream().map(Report::toString).collect(Collectors.toList()))
+          .append(actualOutput.stream().map(Report::toString).collect(Collectors.joining("\n")))
           .append("\n");
     }
     fail(errorMessage.toString());

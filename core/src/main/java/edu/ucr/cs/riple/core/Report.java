@@ -128,8 +128,7 @@ public class Report {
         + ", "
         + root
         + ", "
-        + tree.stream().map(fix -> fix.change.location).collect(Collectors.toSet())
-        + "\n";
+        + tree.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
   }
 
   /**

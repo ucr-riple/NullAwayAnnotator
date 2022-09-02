@@ -55,6 +55,6 @@ public class ClassInfoDisplay implements Display {
 
   @Override
   public String toString() {
-    return "\nclazz='" + clazz + '\'' + ", path='" + path + '\'';
+    return "clazz='" + clazz + '\'' + ", path='" + path + '\'';
   }
 }

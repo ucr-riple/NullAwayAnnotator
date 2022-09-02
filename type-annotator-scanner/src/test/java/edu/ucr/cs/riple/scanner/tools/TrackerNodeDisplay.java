@@ -63,7 +63,7 @@ public class TrackerNodeDisplay implements Display {
 
   @Override
   public String toString() {
-    return "\ncallerClass='"
+    return "callerClass='"
         + callerClass
         + '\''
         + ", callerMethod='"

@@ -98,7 +98,7 @@ public class MethodInfoDisplay implements Display {
 
   @Override
   public String toString() {
-    return "\nid='"
+    return "id='"
         + id
         + '\''
         + ", clazz='"
