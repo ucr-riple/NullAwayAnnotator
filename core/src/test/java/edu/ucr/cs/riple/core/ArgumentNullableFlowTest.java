@@ -48,8 +48,7 @@ public class ArgumentNullableFlowTest extends BaseCoreTest {
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullable(int)"), -2),
             // Report below should appear due to flow of Nullable back to target by downstream
             // dependencies. The triggered error is resolvable by making the method @Nullable,
-            // therefore,
-            // the overall effect is 0.
+            // therefore, the overall effect is 0.
             new TReport(
                 new OnParameter(
                     "Foo.java", "test.target.Foo", "bar1(java.lang.Object,java.lang.Object)", 0),
