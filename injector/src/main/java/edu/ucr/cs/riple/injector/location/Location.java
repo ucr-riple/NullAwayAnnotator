@@ -181,6 +181,11 @@ public abstract class Location {
     if (this instanceof OnMethod) {
       return (OnMethod) this;
     }
+    // If location is of kind PARAMETER, toMethod will return the location of the enclosing method
+    // of the parameter.
+    if (this instanceof OnParameter) {
+      return new OnMethod(uri, clazz, toParameter().method);
+    }
     return null;
   }
 

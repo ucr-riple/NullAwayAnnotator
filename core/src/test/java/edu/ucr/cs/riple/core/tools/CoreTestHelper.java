@@ -133,12 +133,6 @@ public class CoreTestHelper {
   }
 
   public void start() {
-    if (predicate == null) {
-      predicate =
-          (expected, found) ->
-              expected.root.change.location.equals(found.root.change.location)
-                  && expected.getExpectedValue() == found.localEffect;
-    }
     Path configPath = outDirPath.resolve("config.json");
     createFiles();
     checkSourcePackages();
@@ -146,6 +140,12 @@ public class CoreTestHelper {
     config = new Config(configPath);
     Annotator annotator = new Annotator(config);
     annotator.start();
+    if (predicate == null) {
+      predicate =
+          (expected, found) ->
+              expected.root.change.location.equals(found.root.change.location)
+                  && expected.getExpectedValue() == found.getOverallEffect(config);
+    }
     compare(annotator.reports.values());
   }
 
@@ -183,7 +183,7 @@ public class CoreTestHelper {
           .append(notFound.size())
           .append(" expected Reports were NOT found:")
           .append("\n")
-          .append(notFound.stream().map(Report::toString).collect(Collectors.toList()))
+          .append(notFound.stream().map(Report::toString).collect(Collectors.joining("\n")))
           .append("\n");
     }
     if (actualOutput.size() != 0) {
@@ -191,7 +191,7 @@ public class CoreTestHelper {
           .append(actualOutput.size())
           .append(" unexpected Reports were found:")
           .append("\n")
-          .append(actualOutput.stream().map(Report::toString).collect(Collectors.toList()))
+          .append(actualOutput.stream().map(Report::toString).collect(Collectors.joining("\n")))
           .append("\n");
     }
     fail(errorMessage.toString());
@@ -219,9 +219,6 @@ public class CoreTestHelper {
     builder.outerLoopActivation = requestCompleteLoop;
     builder.optimized = true;
     builder.downStreamDependenciesAnalysisActivated = downstreamDependencyAnalysisActivated;
-    builder.buildCommand =
-        Utility.computeBuildCommandWithLibraryModelLoaderDependency(
-            this.projectPath, this.outDirPath, modules);
     if (downstreamDependencyAnalysisActivated) {
       builder.buildCommand =
           Utility.computeBuildCommandWithLibraryModelLoaderDependency(

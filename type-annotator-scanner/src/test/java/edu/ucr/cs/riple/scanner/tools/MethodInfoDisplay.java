@@ -37,6 +37,7 @@ public class MethodInfoDisplay implements Display {
   public final String hasNullableAnnotation;
   public final String visibility;
   public final String hasNonPrimitiveReturn;
+  public String uri;
 
   public MethodInfoDisplay(
       String id,
@@ -47,7 +48,8 @@ public class MethodInfoDisplay implements Display {
       String flags,
       String hasNullableAnnotation,
       String visibility,
-      String hasNonPrimitiveReturn) {
+      String hasNonPrimitiveReturn,
+      String uri) {
     this.id = id;
     this.clazz = clazz;
     this.symbol = symbol;
@@ -57,12 +59,17 @@ public class MethodInfoDisplay implements Display {
     this.hasNullableAnnotation = hasNullableAnnotation;
     this.visibility = visibility;
     this.hasNonPrimitiveReturn = hasNonPrimitiveReturn;
+    this.uri = uri;
   }
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof MethodInfoDisplay)) {
+      return false;
+    }
     MethodInfoDisplay that = (MethodInfoDisplay) o;
     return Objects.equals(clazz, that.clazz)
         && Objects.equals(symbol, that.symbol)
@@ -71,7 +78,8 @@ public class MethodInfoDisplay implements Display {
         && Objects.equals(flags, that.flags)
         && Objects.equals(hasNullableAnnotation, that.hasNullableAnnotation)
         && Objects.equals(visibility, that.visibility)
-        && Objects.equals(hasNonPrimitiveReturn, that.hasNonPrimitiveReturn);
+        && Objects.equals(hasNonPrimitiveReturn, that.hasNonPrimitiveReturn)
+        && Objects.equals(uri, that.uri);
   }
 
   @Override
@@ -84,7 +92,8 @@ public class MethodInfoDisplay implements Display {
         flags,
         hasNullableAnnotation,
         visibility,
-        hasNonPrimitiveReturn);
+        hasNonPrimitiveReturn,
+        uri);
   }
 
   @Override
@@ -115,6 +124,9 @@ public class MethodInfoDisplay implements Display {
         + '\''
         + ", hasNonPrimitiveReturn='"
         + hasNonPrimitiveReturn
+        + '\''
+        + ", uri='"
+        + uri
         + '\'';
   }
 }

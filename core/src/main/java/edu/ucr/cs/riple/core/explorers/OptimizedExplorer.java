@@ -87,14 +87,17 @@ public class OptimizedExplorer extends Explorer {
       group.forEach(
           node -> {
             int totalEffect = 0;
-            List<Fix> localTriggered = new ArrayList<>();
+            List<Fix> triggeredFixes = new ArrayList<>();
+            List<Error> triggeredErrors = new ArrayList<>();
             for (Region region : node.regions) {
               Result<Error> res = errorBank.compareByMethod(region.clazz, region.method, false);
               totalEffect += res.size;
-              localTriggered.addAll(
+              triggeredErrors.addAll(res.dif);
+              triggeredFixes.addAll(
                   new ArrayList<>(fixBank.compareByMethod(region.clazz, region.method, false).dif));
             }
-            node.updateStatus(totalEffect, fixes, localTriggered, methodDeclarationTree);
+            node.updateStatus(
+                totalEffect, fixes, triggeredFixes, triggeredErrors, methodDeclarationTree);
           });
       injector.removeFixes(fixes);
     }

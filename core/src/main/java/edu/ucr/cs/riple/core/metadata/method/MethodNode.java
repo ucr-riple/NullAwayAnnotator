@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.metadata.method;
 
 import edu.ucr.cs.riple.core.metadata.Hashable;
+import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -38,10 +39,8 @@ public class MethodNode implements Hashable {
   public Integer parent;
   /** A unique id for method across all methods. */
   public Integer id;
-  /** Method signature. */
-  public String method;
-  /** Fully qualified name of the class. */
-  public String clazz;
+  /** Location of the containing method. */
+  public OnMethod location;
   /** Number of parameters. */
   public int numberOfParameters;
   /** Is true if the method is already annotated with {@code Nullable} annotation. */
@@ -92,7 +91,7 @@ public class MethodNode implements Hashable {
   private static MethodNode top() {
     if (TOP == null) {
       MethodNode node = new MethodNode(0);
-      node.fillInformation("null", "null", -1, 0, false, "private", false);
+      node.fillInformation(null, -1, 0, false, "private", false);
       return node;
     }
     return TOP;
@@ -110,8 +109,7 @@ public class MethodNode implements Hashable {
   /**
    * Initializes this instance's values.
    *
-   * @param clazz Fully qualified name of containing class.
-   * @param method Method signature.
+   * @param location Location of containing method.
    * @param parent Parent's id.
    * @param numberOfParameters Number of parameters.
    * @param hasNullableAnnotation True, if it has Nullable Annotation.
@@ -119,16 +117,14 @@ public class MethodNode implements Hashable {
    * @param hasNonPrimitiveReturn True, if it has a non-primitive return.
    */
   void fillInformation(
-      String clazz,
-      String method,
+      OnMethod location,
       Integer parent,
       int numberOfParameters,
       boolean hasNullableAnnotation,
       String visibility,
       boolean hasNonPrimitiveReturn) {
     this.parent = parent;
-    this.method = method;
-    this.clazz = clazz;
+    this.location = location;
     this.numberOfParameters = numberOfParameters;
     this.hasNullableAnnotation = hasNullableAnnotation;
     this.visibility = Visibility.parse(visibility);
@@ -163,8 +159,7 @@ public class MethodNode implements Hashable {
     return Objects.equals(children, that.children)
         && Objects.equals(parent, that.parent)
         && Objects.equals(id, that.id)
-        && Objects.equals(method, that.method)
-        && Objects.equals(clazz, that.clazz);
+        && Objects.equals(location, that.location);
   }
 
   /**
@@ -181,6 +176,6 @@ public class MethodNode implements Hashable {
 
   @Override
   public int hashCode() {
-    return hash(method, clazz);
+    return hash(location.method, location.clazz);
   }
 }

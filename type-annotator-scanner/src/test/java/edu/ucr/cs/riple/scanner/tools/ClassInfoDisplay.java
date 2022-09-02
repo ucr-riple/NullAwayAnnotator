@@ -38,8 +38,12 @@ public class ClassInfoDisplay implements Display {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof ClassInfoDisplay)) {
+      return false;
+    }
     ClassInfoDisplay that = (ClassInfoDisplay) o;
     return clazz.equals(that.clazz) && path.equals(that.path);
   }

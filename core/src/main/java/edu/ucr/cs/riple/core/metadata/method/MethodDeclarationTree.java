@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.metadata.method;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.MetaData;
+import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -68,8 +69,7 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
     Integer parentId = Integer.parseInt(values[3]);
     int size = Integer.parseInt(values[4]);
     node.fillInformation(
-        values[1],
-        values[2],
+        new OnMethod(values[9], values[1], values[2]),
         parentId,
         size,
         Boolean.parseBoolean(values[6]),
@@ -153,7 +153,8 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
    */
   public MethodNode findNode(String method, String clazz) {
     return findNodeWithHashHint(
-        candidate -> candidate.clazz.equals(clazz) && candidate.method.equals(method),
+        candidate ->
+            candidate.location.clazz.equals(clazz) && candidate.location.method.equals(method),
         MethodNode.hash(method, clazz));
   }
 
@@ -167,5 +168,15 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
             node ->
                 node.hasNonPrimitiveReturn && node.visibility.equals(MethodNode.Visibility.PUBLIC))
         .collect(ImmutableSet.toImmutableSet());
+  }
+
+  /**
+   * Checks if the passed method, is declared in the target module.
+   *
+   * @param location Location of the method.
+   * @return true, if tree contains the method and false otherwise.
+   */
+  public boolean declaredInModule(OnMethod location) {
+    return findNode(location.method, location.clazz) != null;
   }
 }

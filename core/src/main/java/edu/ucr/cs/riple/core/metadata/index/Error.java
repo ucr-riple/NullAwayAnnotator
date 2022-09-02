@@ -40,7 +40,7 @@ public class Error extends Enclosed {
    * If non-null, this error involved a pseudo-assignment of a @Nullable expression into a @NonNull
    * target, and this field is the Symbol for that target.
    */
-  @Nullable private final Location nonnullTarget;
+  @Nullable public final Location nonnullTarget;
 
   /**
    * NullAway serializes error on TSV file, this constructor is called for each line of that file.

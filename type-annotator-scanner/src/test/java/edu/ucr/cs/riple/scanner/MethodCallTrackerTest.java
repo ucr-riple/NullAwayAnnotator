@@ -32,7 +32,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class MethodTrackerTest extends TypeAnnotatorScannerBaseTest<TrackerNodeDisplay> {
+public class MethodCallTrackerTest extends TypeAnnotatorScannerBaseTest<TrackerNodeDisplay> {
 
   private static final DisplayFactory<TrackerNodeDisplay> METHOD_TRACKER_DISPLAY_FACTORY =
       values -> {
@@ -43,7 +43,7 @@ public class MethodTrackerTest extends TypeAnnotatorScannerBaseTest<TrackerNodeD
       "CALLER_CLASS" + '\t' + "CALLER_METHOD" + '\t' + "MEMBER" + '\t' + "CALLEE_CLASS";
   private static final String FILE_NAME = "call_graph.tsv";
 
-  public MethodTrackerTest() {
+  public MethodCallTrackerTest() {
     super(METHOD_TRACKER_DISPLAY_FACTORY, HEADER, FILE_NAME);
   }
 

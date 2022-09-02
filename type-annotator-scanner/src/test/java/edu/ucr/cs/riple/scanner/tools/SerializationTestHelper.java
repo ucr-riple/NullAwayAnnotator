@@ -39,6 +39,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.openjdk.tools.javac.util.Assert;
 
 public class SerializationTestHelper<T extends Display> {
 
@@ -167,7 +168,7 @@ public class SerializationTestHelper<T extends Display> {
     String fullExpectedMessage = "Caused by: " + exception.getName() + ": " + expectedErrorMessage;
     prepareTest();
     AssertionError ex = assertThrows(AssertionError.class, () -> compilationTestHelper.doTest());
-    assert ex.getMessage().contains(fullExpectedMessage);
+    Assert.check(ex.getMessage().contains(fullExpectedMessage));
   }
 
   /** Runs the test. */
@@ -196,7 +197,7 @@ public class SerializationTestHelper<T extends Display> {
           .append(notFound.size())
           .append(" expected outputs were NOT found:")
           .append("\n")
-          .append(notFound.stream().map(T::toString).collect(Collectors.toList()))
+          .append(notFound.stream().map(T::toString).collect(Collectors.joining("\n")))
           .append("\n");
     }
     if (actualOutput.size() != 0) {
@@ -204,7 +205,7 @@ public class SerializationTestHelper<T extends Display> {
           .append(actualOutput.size())
           .append(" unexpected outputs were found:")
           .append("\n")
-          .append(actualOutput.stream().map(T::toString).collect(Collectors.toList()))
+          .append(actualOutput.stream().map(T::toString).collect(Collectors.joining("\n")))
           .append("\n");
     }
     fail(errorMessage.toString());

@@ -30,6 +30,7 @@ import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.riple.scanner.Config;
 import edu.ucr.cs.riple.scanner.ScannerContext;
 import edu.ucr.cs.riple.scanner.SymbolUtil;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -39,21 +40,24 @@ import java.util.Set;
 import javax.lang.model.element.Modifier;
 
 public class MethodInfo {
-  public final Symbol.MethodSymbol symbol;
-  public final Symbol.ClassSymbol clazz;
+  private final Symbol.MethodSymbol symbol;
+  private final Symbol.ClassSymbol clazz;
+  private final URI uri;
   private final int id;
   private Boolean[] annotFlags;
   private boolean hasNullableAnnotation;
   private int parent = -1;
 
-  private MethodInfo(Symbol.MethodSymbol method, ScannerContext context) {
+  private MethodInfo(Symbol.MethodSymbol method, VisitorState state, ScannerContext context) {
     this.id = context.getNextMethodId();
     this.symbol = method;
     this.clazz = (method != null) ? method.enclClass() : null;
+    this.uri = state.getPath().getCompilationUnit().getSourceFile().toUri();
     context.visitMethod(this);
   }
 
-  public static MethodInfo findOrCreate(Symbol.MethodSymbol method, ScannerContext context) {
+  public static MethodInfo findOrCreate(
+      Symbol.MethodSymbol method, VisitorState state, ScannerContext context) {
     Symbol.ClassSymbol clazz = method.enclClass();
     Optional<MethodInfo> optionalMethodInfo =
         context
@@ -61,7 +65,7 @@ public class MethodInfo {
             .filter(
                 methodInfo -> methodInfo.symbol.equals(method) && methodInfo.clazz.equals(clazz))
             .findAny();
-    return optionalMethodInfo.orElseGet(() -> new MethodInfo(method, context));
+    return optionalMethodInfo.orElseGet(() -> new MethodInfo(method, state, context));
   }
 
   @Override
@@ -88,7 +92,7 @@ public class MethodInfo {
       this.parent = 0;
       return;
     }
-    MethodInfo superMethodInfo = findOrCreate(superMethod, context);
+    MethodInfo superMethodInfo = findOrCreate(superMethod, state, context);
     this.parent = superMethodInfo.id;
   }
 
@@ -105,27 +109,23 @@ public class MethodInfo {
         Arrays.toString(annotFlags),
         String.valueOf(hasNullableAnnotation),
         getVisibilityOfMethod(),
-        String.valueOf(!symbol.getReturnType().isPrimitiveOrVoid()));
+        String.valueOf(!symbol.getReturnType().isPrimitiveOrVoid()),
+        uri.toString());
   }
 
   public static String header() {
-    return "id"
-        + "\t"
-        + "class"
-        + "\t"
-        + "method"
-        + "\t"
-        + "parent"
-        + "\t"
-        + "size"
-        + "\t"
-        + "flags"
-        + "\t"
-        + "nullable"
-        + "\t"
-        + "visibility"
-        + "\t"
-        + "non-primitive-return";
+    return String.join(
+        "\t",
+        "id",
+        "class",
+        "method",
+        "parent",
+        "size",
+        "flags",
+        "nullable",
+        "visibility",
+        "non-primitive-return",
+        "uri");
   }
 
   public void setParamAnnotations(List<Boolean> annotFlags) {
