@@ -1,4 +1,4 @@
-## NullAwayAnnotator
+## NullAwayAnnotator  [![Build Status](https://github.com/nimakarimipour/NullAwayAnnotator/actions/workflows/continuous-integration.yml/badge.svg)]
 ```NullAwayAnnotator``` or simply (Annotator) is a tool that can automatically infer types in source code and injects the 
 corresponding annotations to pass [NullAway](https://github.com/uber/NullAway) checks.
 
