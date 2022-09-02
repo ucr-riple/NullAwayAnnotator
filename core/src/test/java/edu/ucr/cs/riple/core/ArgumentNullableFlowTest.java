@@ -47,7 +47,8 @@ public class ArgumentNullableFlowTest extends BaseCoreTest {
             // DepA by 2, DepB by 0 and DepC by 1. Hence, the total effect is: -2.
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullable(int)"), -2),
             // Report below should appear due to flow of Nullable back to target by downstream
-            // dependencies. The triggered error is resolvable by making the method @Nullable, therefore,
+            // dependencies. The triggered error is resolvable by making the method @Nullable,
+            // therefore,
             // the overall effect is 0.
             new TReport(
                 new OnParameter(

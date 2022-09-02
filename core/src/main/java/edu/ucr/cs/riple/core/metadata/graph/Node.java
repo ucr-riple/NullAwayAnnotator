@@ -58,7 +58,7 @@ public class Node {
   /** Set of triggered fixes if tree is applied. */
   public Set<Fix> triggeredFixes;
 
-  /** Collection of triggered fixes if tree is applied. */
+  /** Collection of triggered errors if tree is applied. */
   public Collection<Error> triggeredErrors;
 
   /** Unique id of Node across all nodes. */
