@@ -63,10 +63,14 @@ public class BasicExplorer extends Explorer {
               Utility.buildTarget(config);
               errorBank.saveState(false, true);
               fixBank.saveState(false, true);
-              Result<Error> res = errorBank.compare();
-              node.effect = res.size;
+              Result<Error> errorComparisonResult = errorBank.compare();
+              node.effect = errorComparisonResult.size;
               node.updateStatus(
-                  res.size, fixes, fixBank.compare().dif, res.dif, methodDeclarationTree);
+                  errorComparisonResult.size,
+                  fixes,
+                  fixBank.compare().dif,
+                  errorComparisonResult.dif,
+                  methodDeclarationTree);
               injector.removeFixes(fixes);
             });
     pb.close();
