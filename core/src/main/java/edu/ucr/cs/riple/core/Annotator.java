@@ -135,17 +135,16 @@ public class Annotator {
     // upstream module (target) public API.
     Set<Fix> triggeredFixesFromDownstreamDependencies = new HashSet<>();
     boolean noNewFixTriggered = false;
-    while (!(config.disableOuterLoop || noNewFixTriggered)) {
+    while (!noNewFixTriggered) {
       noNewFixTriggered =
           executeNextIteration(
               triggeredFixesFromDownstreamDependencies,
               fieldDeclarationAnalysis,
               downStreamDependencyExplorer);
+      if(config.disableOuterLoop){
+        break;
+      }
     }
-    executeNextIteration(
-            triggeredFixesFromDownstreamDependencies,
-            fieldDeclarationAnalysis,
-            downStreamDependencyExplorer);
     System.out.println("\nFinished annotating.");
     Utility.writeReports(config, reports.values().stream().collect(ImmutableSet.toImmutableSet()));
   }
