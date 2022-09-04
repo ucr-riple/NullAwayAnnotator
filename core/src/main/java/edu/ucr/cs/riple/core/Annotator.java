@@ -143,9 +143,9 @@ public class Annotator {
               downStreamDependencyExplorer);
     }
     executeNextIteration(
-        triggeredFixesFromDownstreamDependencies,
-        fieldDeclarationAnalysis,
-        downStreamDependencyExplorer);
+            triggeredFixesFromDownstreamDependencies,
+            fieldDeclarationAnalysis,
+            downStreamDependencyExplorer);
     System.out.println("\nFinished annotating.");
     Utility.writeReports(config, reports.values().stream().collect(ImmutableSet.toImmutableSet()));
   }
@@ -217,7 +217,8 @@ public class Annotator {
     // Collect impacted parameters from changes in target module due to usages in downstream
     // dependencies.
     if (config.downStreamDependenciesAnalysisActivated) {
-      triggeredFixesFromDownstreamDependencies =
+      triggeredFixesFromDownstreamDependencies.clear();
+      triggeredFixesFromDownstreamDependencies.addAll(
           latestReports.stream()
               .flatMap(
                   report ->
@@ -231,7 +232,7 @@ public class Annotator {
                                       onParameter.method)))
               // Remove already processed fixes
               .filter(input -> !reports.containsKey(input))
-              .collect(Collectors.toSet());
+              .collect(Collectors.toSet()));
     }
     // Return true if no new fix is suggested and none if the injections in this iteration had an
     // impact on target module.

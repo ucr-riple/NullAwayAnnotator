@@ -26,8 +26,15 @@ package edu.ucr.cs.riple.core;
 
 import java.nio.file.Paths;
 
+/** Starting point. */
 public class Main {
 
+  /**
+   * Starting point.
+   *
+   * @param args if flag '--path' is found, all configurations will be set up based on the given
+   *     json file, otherwise they will be set up according to the set of received cli arguments.
+   */
   public static void main(String[] args) {
     Config config;
     if (args.length == 2 && args[0].equals("--path")) {
