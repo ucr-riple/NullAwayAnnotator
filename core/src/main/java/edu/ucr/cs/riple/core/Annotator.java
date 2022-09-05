@@ -147,11 +147,12 @@ public class Annotator {
                   downStreamDependencyExplorer);
             }
             cachedReports.putIfAbsent(report.root, report);
-            cachedReports.get(report.root).localEffect = report.localEffect;
-            cachedReports.get(report.root).finished = report.finished;
-            cachedReports.get(report.root).tree = report.tree;
-            cachedReports.get(report.root).triggeredFixes = report.triggeredFixes;
-            cachedReports.get(report.root).triggeredErrors = report.triggeredErrors;
+            Report cachedReport = cachedReports.get(report.root);
+            cachedReport.localEffect = report.localEffect;
+            cachedReport.finished = report.finished;
+            cachedReport.tree = report.tree;
+            cachedReport.triggeredFixes = report.triggeredFixes;
+            cachedReport.triggeredErrors = report.triggeredErrors;
           });
 
       // Tag reports according to selected analysis mode.
