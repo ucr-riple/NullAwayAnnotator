@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.explorers.DownStreamDependencyExplorer;
@@ -54,7 +55,7 @@ public class Report {
   /**
    * Set of fixes that will be triggered in target module if fix tree is applied to the source code.
    */
-  public ImmutableSet<Error> triggeredErrors;
+  public ImmutableList<Error> triggeredErrors;
   /** If true, all leaves of fix tree are not resolvable by any {@code @Nullable} annotation. */
   public boolean finished;
   /**
@@ -122,7 +123,7 @@ public class Report {
     this.tree = Sets.newHashSet(root);
     this.finished = false;
     this.triggeredFixes = ImmutableSet.of();
-    this.triggeredErrors = ImmutableSet.of();
+    this.triggeredErrors = ImmutableList.of();
     this.lowerBoundEffectOnDownstreamDependencies = 0;
     this.upperBoundEffectOnDownstreamDependencies = 0;
     this.tag = Tag.DISCARD;

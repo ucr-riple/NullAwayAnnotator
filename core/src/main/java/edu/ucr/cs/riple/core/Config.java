@@ -432,7 +432,7 @@ public class Config {
             this.downStreamDependenciesAnalysisActivated,
             getValueFromKey(
                     jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:ANALYSIS_MODE", String.class)
-                .orElse(null),
+                .orElse("default"),
             false);
     this.downstreamInfo = ImmutableSet.copyOf(moduleInfoList);
     this.moduleCounterID = 0;
@@ -548,6 +548,7 @@ public class Config {
     public boolean outerLoopActivation = true;
     public boolean downStreamDependenciesAnalysisActivated = false;
     public Path nullawayLibraryModelLoaderPath;
+    public AnalysisMode mode = AnalysisMode.LOCAL;
     public String downstreamBuildCommand;
     public int depth = 1;
 
@@ -596,11 +597,14 @@ public class Config {
         Preconditions.checkNotNull(
             nullawayLibraryModelLoaderPath,
             "nullawayLibraryModelLoaderPath cannot be null to enable down stream dependency analysis.");
+        Preconditions.checkArgument(
+            !mode.equals(AnalysisMode.LOCAL),
+            "Cannot perform downstream dependencies analysis with mode: \"Local\", use one of [default|lower_bound|upper_bound].");
         downstreamDependency.put(
             "LIBRARY_MODEL_LOADER_PATH", nullawayLibraryModelLoaderPath.toString());
         Preconditions.checkNotNull(downstreamBuildCommand);
         downstreamDependency.put("BUILD_COMMAND", downstreamBuildCommand);
-        downstreamDependency.put("ANALYSIS_MODE", "default");
+        downstreamDependency.put("ANALYSIS_MODE", mode.name());
       }
       json.put("DOWNSTREAM_DEPENDENCY_ANALYSIS", downstreamDependency);
       try (BufferedWriter file =

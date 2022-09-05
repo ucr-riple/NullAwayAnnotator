@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.tools;
 
 import static org.junit.Assert.fail;
 
+import edu.ucr.cs.riple.core.AnalysisMode;
 import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
@@ -62,6 +63,7 @@ public class CoreTestHelper {
   private boolean requestCompleteLoop = false;
   private boolean disableBailout = false;
   private boolean downstreamDependencyAnalysisActivated = false;
+  private AnalysisMode mode = AnalysisMode.LOCAL;
   private Config config;
 
   public CoreTestHelper(Path projectPath, Path outDirPath, List<String> modules) {
@@ -127,9 +129,18 @@ public class CoreTestHelper {
     return this;
   }
 
-  public CoreTestHelper enableDownstreamDependencyAnalysis() {
+  public CoreTestHelper enableDownstreamDependencyAnalysis(AnalysisMode mode) {
     this.downstreamDependencyAnalysisActivated = true;
+    if (mode.equals(AnalysisMode.LOCAL)) {
+      throw new IllegalArgumentException(
+          "Cannot perform downstream dependencies analysis with mode: " + mode.name());
+    }
+    this.mode = mode;
     return this;
+  }
+
+  public CoreTestHelper enableDownstreamDependencyAnalysis() {
+    return enableDownstreamDependencyAnalysis(AnalysisMode.LOWER_BOUND);
   }
 
   public void start() {
@@ -219,6 +230,7 @@ public class CoreTestHelper {
     builder.outerLoopActivation = requestCompleteLoop;
     builder.optimized = true;
     builder.downStreamDependenciesAnalysisActivated = downstreamDependencyAnalysisActivated;
+    builder.mode = mode;
     if (downstreamDependencyAnalysisActivated) {
       builder.buildCommand =
           Utility.computeBuildCommandWithLibraryModelLoaderDependency(

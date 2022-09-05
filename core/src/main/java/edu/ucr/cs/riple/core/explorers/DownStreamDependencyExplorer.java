@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.explorers;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimaps;
@@ -155,7 +156,11 @@ public class DownStreamDependencyExplorer {
                   reports.stream()
                       .filter(input -> input.root.toMethod().equals(node.location))
                       .findAny();
-              optional.ifPresent(report -> method.effect += report.localEffect);
+              optional.ifPresent(
+                  report -> {
+                    method.effect += report.localEffect;
+                    method.triggeredErrors = report.triggeredErrors;
+                  });
             });
     System.out.println("Analysing downstream dependencies completed!");
   }
@@ -266,7 +271,7 @@ public class DownStreamDependencyExplorer {
      * List of triggered errors in downstream dependencies if method is annotated as {@code
      * Nullable}.
      */
-    public List<Error> triggeredErrors;
+    public ImmutableList<Error> triggeredErrors;
     /**
      * Effect of injecting a {@code Nullable} annotation on pointing method of node on downstream
      * dependencies.
