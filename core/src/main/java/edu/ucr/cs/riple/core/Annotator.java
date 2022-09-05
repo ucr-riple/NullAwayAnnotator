@@ -154,7 +154,7 @@ public class Annotator {
             cachedReports.get(report.root).triggeredErrors = report.triggeredErrors;
           });
 
-      // Tag reports accordingly
+      // Tag reports according to selected analysis mode.
       config.mode.tag(config, tree, downStreamDependencyExplorer, latestReports);
       // Inject approved fixes.
       injector.injectFixes(
@@ -165,6 +165,7 @@ public class Annotator {
       if (config.downStreamDependenciesAnalysisActivated) {
         triggeredFixesFromDownstreamDependencies =
             latestReports.stream()
+                .filter(Report::approved)
                 .flatMap(
                     report ->
                         downStreamDependencyExplorer.getImpactedParameters(report.tree).stream()
