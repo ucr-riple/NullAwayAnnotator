@@ -146,7 +146,7 @@ public class CoreTestHelper {
               expected.root.change.location.equals(found.root.change.location)
                   && expected.getExpectedValue() == found.getOverallEffect(config);
     }
-    compare(annotator.reports.values());
+    compare(annotator.cachedReports.values());
   }
 
   /** Checks if all src inputs are subpackages of test package. */

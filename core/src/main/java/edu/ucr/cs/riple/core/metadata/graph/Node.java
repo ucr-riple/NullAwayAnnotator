@@ -137,14 +137,14 @@ public class Node {
    * Updates node status. Should be called when all annotations in tree are applied to the source
    * code and the target project has been rebuilt.
    *
-   * @param effect Local effect calculated based on the number of errors in impacted regions.
+   * @param localEffect Local effect calculated based on the number of errors in impacted regions.
    * @param fixesInOneRound All fixes applied simultaneously to the source code.
    * @param triggeredFixes Triggered fixes collected from impacted regions.
    * @param triggeredErrors Triggered Errors collected from impacted regions.
    * @param mdt Method declaration tree instance.
    */
   public void updateStatus(
-      int effect,
+      int localEffect,
       Set<Fix> fixesInOneRound,
       Collection<Fix> triggeredFixes,
       Collection<Error> triggeredErrors,
@@ -185,7 +185,7 @@ public class Node {
               }
             });
     // Fix the actual error below.
-    this.effect = effect + numberOfSuperMethodsAnnotatedOutsideTree[0];
+    this.effect = localEffect + numberOfSuperMethodsAnnotatedOutsideTree[0];
   }
 
   /**

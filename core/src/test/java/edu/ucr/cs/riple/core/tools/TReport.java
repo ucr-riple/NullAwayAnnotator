@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.tools;
 
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
@@ -44,7 +45,8 @@ public class TReport extends Report {
 
   public TReport(Location root, int effect, String encClass, String encMethod) {
     super(
-        new Fix(new AddAnnotation(root, "javax.annotation.Nullable"), null, encClass, encMethod),
+        new Fix(
+            new AddAnnotation(root, "javax.annotation.Nullable"), null, encClass, encMethod, true),
         effect);
     this.expectedValue = effect;
   }
@@ -56,8 +58,10 @@ public class TReport extends Report {
       @Nullable Set<Location> triggered) {
     this(root, effect);
     if (triggered != null) {
-      this.triggered =
-          triggered.stream().map((Function<Location, Fix>) TFix::new).collect(Collectors.toSet());
+      this.triggeredFixes =
+          triggered.stream()
+              .map((Function<Location, Fix>) TFix::new)
+              .collect(ImmutableSet.toImmutableSet());
     }
     if (addToTree != null) {
       this.tree.addAll(

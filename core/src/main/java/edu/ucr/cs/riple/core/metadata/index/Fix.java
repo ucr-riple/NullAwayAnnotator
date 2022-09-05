@@ -52,10 +52,22 @@ public class Fix extends Enclosed {
   /** Reasons this fix is suggested by NullAway in string. */
   public final Set<String> reasons;
 
-  public Fix(AddAnnotation change, String reason, String encClass, String encMethod) {
+  /**
+   * If true, the fix is suggested due to an error in the target module, false if the fix is
+   * suggested due to error in downstream dependencies.
+   */
+  public final boolean sourceIsOnTarget;
+
+  public Fix(
+      AddAnnotation change,
+      String reason,
+      String encClass,
+      String encMethod,
+      boolean sourceIsOnTarget) {
     super(encClass, encMethod);
     this.change = change;
     this.reasons = reason != null ? Sets.newHashSet(reason) : new HashSet<>();
+    this.sourceIsOnTarget = sourceIsOnTarget;
   }
 
   /**
@@ -80,7 +92,8 @@ public class Fix extends Enclosed {
             });
       }
       Preconditions.checkArgument(info[7].equals("nullable"), "unsupported annotation: " + info[7]);
-      return new Fix(new AddAnnotation(location, config.nullableAnnot), info[6], info[8], info[9]);
+      return new Fix(
+          new AddAnnotation(location, config.nullableAnnot), info[6], info[8], info[9], true);
     };
   }
 

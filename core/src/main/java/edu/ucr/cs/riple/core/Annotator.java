@@ -65,11 +65,11 @@ public class Annotator {
    * suggestion. Note: Set does not have get method, here we use map which retrieves elements
    * efficiently.
    */
-  public final HashMap<Fix, Report> reports;
+  public final HashMap<Fix, Report> cachedReports;
 
   public Annotator(Config config) {
     this.config = config;
-    this.reports = new HashMap<>();
+    this.cachedReports = new HashMap<>();
     this.injector = new PhysicalInjector(config);
   }
 
@@ -95,7 +95,7 @@ public class Annotator {
   private void preprocess() {
     System.out.println("Preprocessing...");
     Utility.setScannerCheckerActivation(config.target, true);
-    this.reports.clear();
+    this.cachedReports.clear();
     System.out.println("Making the first build...");
     Utility.buildTarget(config, true);
     Set<OnField> uninitializedFields =
@@ -136,17 +136,60 @@ public class Annotator {
     Set<Fix> triggeredFixesFromDownstreamDependencies = new HashSet<>();
     boolean noNewFixTriggered = false;
     while (!noNewFixTriggered) {
-      noNewFixTriggered =
-          executeNextIteration(
-              triggeredFixesFromDownstreamDependencies,
-              fieldDeclarationAnalysis,
-              downStreamDependencyExplorer);
+      ImmutableSet<Report> latestReports =
+          executeNextIteration(triggeredFixesFromDownstreamDependencies, fieldDeclarationAnalysis);
+      int sizeBefore = cachedReports.size();
+      // Update cached reports store.
+      latestReports.forEach(
+          report -> {
+            if (config.downStreamDependenciesAnalysisActivated) {
+              report.computeBoundariesOfEffectivenessOnDownstreamDependencies(
+                  downStreamDependencyExplorer);
+            }
+            cachedReports.putIfAbsent(report.root, report);
+            cachedReports.get(report.root).localEffect = report.localEffect;
+            cachedReports.get(report.root).finished = report.finished;
+            cachedReports.get(report.root).tree = report.tree;
+            cachedReports.get(report.root).triggeredFixes = report.triggeredFixes;
+            cachedReports.get(report.root).triggeredErrors = report.triggeredErrors;
+          });
+
+      // Tag reports accordingly
+      config.mode.tag(config, tree, downStreamDependencyExplorer, latestReports);
+      // Inject approved fixes.
+      injector.injectFixes(
+          latestReports.stream()
+              .filter(Report::approved)
+              .flatMap(report -> config.chain ? report.tree.stream() : Stream.of(report.root))
+              .collect(Collectors.toSet()));
+      if (config.downStreamDependenciesAnalysisActivated) {
+        triggeredFixesFromDownstreamDependencies =
+            latestReports.stream()
+                .flatMap(
+                    report ->
+                        downStreamDependencyExplorer.getImpactedParameters(report.tree).stream()
+                            .map(
+                                onParameter ->
+                                    new Fix(
+                                        new AddAnnotation(onParameter, config.nullableAnnot),
+                                        "PASSING_NULLABLE",
+                                        onParameter.clazz,
+                                        onParameter.method,
+                                        false)))
+                // Remove already processed fixes
+                .filter(input -> !cachedReports.containsKey(input))
+                .collect(Collectors.toSet());
+      }
       if (config.disableOuterLoop) {
         break;
       }
+      noNewFixTriggered =
+          sizeBefore == this.cachedReports.size()
+              && triggeredFixesFromDownstreamDependencies.size() == 0;
     }
     System.out.println("\nFinished annotating.");
-    Utility.writeReports(config, reports.values().stream().collect(ImmutableSet.toImmutableSet()));
+    Utility.writeReports(
+        config, cachedReports.values().stream().collect(ImmutableSet.toImmutableSet()));
   }
 
   /**
@@ -156,14 +199,11 @@ public class Annotator {
    *     dependencies due to injection of previous iteration.
    * @param fieldDeclarationAnalysis Field Declaration analysis to detect fixes on multiple inline
    *     field declaration statements.
-   * @param downStreamDependencyExplorer Downstream dependency analyzer to compute the effect of
-   *     fixes on downstream dependencies.
-   * @return true, if no new fix is suggested and false otherwise.
+   * @return Immutable set of reports from the executed iteration.
    */
-  private boolean executeNextIteration(
+  private ImmutableSet<Report> executeNextIteration(
       Set<Fix> triggeredFixesFromDownstreamDependencies,
-      FieldDeclarationAnalysis fieldDeclarationAnalysis,
-      DownStreamDependencyExplorer downStreamDependencyExplorer) {
+      FieldDeclarationAnalysis fieldDeclarationAnalysis) {
     Utility.buildTarget(config);
     // Suggested fixes of target at the current state.
     ImmutableSet<Fix> fixes =
@@ -171,7 +211,7 @@ public class Annotator {
                 triggeredFixesFromDownstreamDependencies.stream(),
                 Utility.readFixesFromOutputDirectory(
                     config.target, Fix.factory(config, fieldDeclarationAnalysis)))
-            .filter(fix -> !config.useCache || !reports.containsKey(fix))
+            .filter(fix -> !config.useCache || !cachedReports.containsKey(fix))
             .collect(ImmutableSet.toImmutableSet());
 
     // Initializing required explorer instances.
@@ -190,52 +230,7 @@ public class Annotator {
                 ? new OptimizedExplorer(
                     injector, errorBank, fixBank, tracker, fixes, tree, config.depth, config)
                 : new BasicExplorer(injector, errorBank, fixBank, fixes, tree, config);
-
     // Result of the iteration analysis.
-    ImmutableSet<Report> latestReports = explorer.explore();
-    int sizeBefore = reports.size();
-    // Update cached reports store.
-    latestReports.forEach(
-        report -> {
-          if (config.downStreamDependenciesAnalysisActivated) {
-            report.computeBoundariesOfEffectivenessOnDownstreamDependencies(
-                downStreamDependencyExplorer);
-          }
-          reports.putIfAbsent(report.root, report);
-          reports.get(report.root).localEffect = report.localEffect;
-          reports.get(report.root).finished = report.finished;
-          reports.get(report.root).tree = report.tree;
-          reports.get(report.root).triggered = report.triggered;
-        });
-    // Inject marked fixes.
-    injector.injectFixes(
-        latestReports.stream()
-            .filter(report -> report.getOverallEffect(config) < 1)
-            .flatMap(report -> config.chain ? report.tree.stream() : Stream.of(report.root))
-            .collect(Collectors.toSet()));
-    // Collect impacted parameters from changes in target module due to usages in downstream
-    // dependencies.
-    if (config.downStreamDependenciesAnalysisActivated) {
-      triggeredFixesFromDownstreamDependencies.clear();
-      triggeredFixesFromDownstreamDependencies.addAll(
-          latestReports.stream()
-              .flatMap(
-                  report ->
-                      downStreamDependencyExplorer.getImpactedParameters(report.tree).stream()
-                          .map(
-                              onParameter ->
-                                  new Fix(
-                                      new AddAnnotation(onParameter, config.nullableAnnot),
-                                      "PASSING_NULLABLE",
-                                      onParameter.clazz,
-                                      onParameter.method)))
-              // Remove already processed fixes
-              .filter(input -> !reports.containsKey(input))
-              .collect(Collectors.toSet()));
-    }
-    // Return true if no new fix is suggested and none if the injections in this iteration had an
-    // impact on target module.
-    return sizeBefore == this.reports.size()
-        && triggeredFixesFromDownstreamDependencies.size() == 0;
+    return explorer.explore();
   }
 }

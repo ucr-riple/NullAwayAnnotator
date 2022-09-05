@@ -110,6 +110,11 @@ public class Config {
   public final Path nullawayLibraryModelLoaderPath;
   /** Command to build the all downstream dependencies at once. */
   public final String downstreamDependenciesBuildCommand;
+  /**
+   * Analysis mode. Will impact inference decisions when downstream dependency analysis is
+   * activated.
+   */
+  public final AnalysisMode mode;
   /** Global counter for assigning unique id for each instance. */
   public int moduleCounterID;
 
@@ -260,10 +265,19 @@ public class Config {
             "NullAway Library Model loader path");
     nullawayLibraryModelLoaderPathOption.setRequired(false);
     options.addOption(nullawayLibraryModelLoaderPathOption);
+    // Down stream analysis: Analysis mode.
+    Option analysisMode =
+        new Option(
+            "am",
+            "analysis-mode",
+            true,
+            "Analysis mode. Can be [default|upper_bound|lower_bound|strict]");
+    analysisMode.setRequired(false);
+    options.addOption(analysisMode);
 
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
-    CommandLine cmd = null;
+    CommandLine cmd;
 
     if (args.length == 1 && (args[0].equals("-h") || args[0].equals("--help"))) {
       showHelp(formatter, options);
@@ -330,6 +344,11 @@ public class Config {
     this.exhaustiveSearch = cmd.hasOption(exhaustiveSearchOption.getLongOpt());
     this.downStreamDependenciesAnalysisActivated =
         cmd.hasOption(downstreamDependenciesActivationOption.getLongOpt());
+    this.mode =
+        AnalysisMode.parseMode(
+            this.downStreamDependenciesAnalysisActivated,
+            cmd.getOptionValue(analysisMode),
+            !cmd.hasOption(analysisMode));
     if (this.downStreamDependenciesAnalysisActivated) {
       moduleInfoList.remove(0);
       this.downstreamInfo = ImmutableSet.copyOf(moduleInfoList);
@@ -408,6 +427,13 @@ public class Config {
             ? null
             : Paths.get(nullawayLibraryModelLoaderPathString);
     moduleInfoList.remove(0);
+    this.mode =
+        AnalysisMode.parseMode(
+            this.downStreamDependenciesAnalysisActivated,
+            getValueFromKey(
+                    jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:ANALYSIS_MODE", String.class)
+                .orElse(null),
+            false);
     this.downstreamInfo = ImmutableSet.copyOf(moduleInfoList);
     this.moduleCounterID = 0;
     this.log = new Log();
@@ -574,6 +600,7 @@ public class Config {
             "LIBRARY_MODEL_LOADER_PATH", nullawayLibraryModelLoaderPath.toString());
         Preconditions.checkNotNull(downstreamBuildCommand);
         downstreamDependency.put("BUILD_COMMAND", downstreamBuildCommand);
+        downstreamDependency.put("ANALYSIS_MODE", "default");
       }
       json.put("DOWNSTREAM_DEPENDENCY_ANALYSIS", downstreamDependency);
       try (BufferedWriter file =

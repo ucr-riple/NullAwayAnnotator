@@ -32,6 +32,6 @@ import edu.ucr.cs.riple.injector.location.Location;
 public class TFix extends Fix {
 
   public TFix(Location location) {
-    super(new DefaultAnnotation(location), null, null, null);
+    super(new DefaultAnnotation(location), null, null, null, true);
   }
 }

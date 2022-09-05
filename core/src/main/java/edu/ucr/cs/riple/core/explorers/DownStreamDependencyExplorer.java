@@ -46,6 +46,7 @@ import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
@@ -121,7 +122,8 @@ public class DownStreamDependencyExplorer {
                             config.nullableAnnot),
                         "null",
                         "null",
-                        "null"))
+                        "null",
+                        true))
             .collect(ImmutableSet.toImmutableSet());
     // Explorer initializations.
     FieldDeclarationAnalysis fieldDeclarationAnalysis =
@@ -234,6 +236,22 @@ public class DownStreamDependencyExplorer {
         .collect(ImmutableSet.toImmutableSet());
   }
 
+  public List<Error> getTriggeredErrors(Fix fix) {
+    if (!fix.isOnMethod()) {
+      return Collections.emptyList();
+    }
+    OnMethod method = fix.toMethod();
+    MethodNode node = tree.findNode(method);
+    if (!node.isPublicMethodWithNonPrimitiveReturnType()) {
+      return Collections.emptyList();
+    }
+    MethodStatus status = fetchStatus(fix);
+    if (status == null) {
+      return Collections.emptyList();
+    }
+    return status.triggeredErrors;
+  }
+
   /** Container class for storing overall effect of each method. */
   private static class MethodStatus {
     /** Node in {@link MethodDeclarationTree} corresponding to a public method. */
@@ -243,6 +261,12 @@ public class DownStreamDependencyExplorer {
      * method in node is annotated as {@code @Nullable}.
      */
     public Set<OnParameter> impactedParameters;
+
+    /**
+     * List of triggered errors in downstream dependencies if method is annotated as {@code
+     * Nullable}.
+     */
+    public List<Error> triggeredErrors;
     /**
      * Effect of injecting a {@code Nullable} annotation on pointing method of node on downstream
      * dependencies.

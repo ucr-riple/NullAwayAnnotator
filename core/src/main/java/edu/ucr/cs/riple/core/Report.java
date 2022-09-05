@@ -24,11 +24,13 @@
 
 package edu.ucr.cs.riple.core;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.explorers.DownStreamDependencyExplorer;
+import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.injector.location.Location;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -48,7 +50,11 @@ public class Report {
   /**
    * Set of fixes that will be triggered in target module if fix tree is applied to the source code.
    */
-  public Set<Fix> triggered;
+  public ImmutableSet<Fix> triggeredFixes;
+  /**
+   * Set of fixes that will be triggered in target module if fix tree is applied to the source code.
+   */
+  public ImmutableSet<Error> triggeredErrors;
   /** If true, all leaves of fix tree are not resolvable by any {@code @Nullable} annotation. */
   public boolean finished;
   /**
@@ -62,14 +68,64 @@ public class Report {
    */
   private int upperBoundEffectOnDownstreamDependencies;
 
+  /** Status of the report. */
+  private Tag tag;
+
+  /**
+   * Checks if any of the fix in tree, will trigger an unresolvable error in downstream
+   * dependencies.
+   *
+   * @param mdt Method declaration tre instance.
+   * @param explorer Downstream dependency to fetch status of applying each fix on downstream
+   *     dependencies.
+   * @return true, if report contains a fix which will trigger an unresolvable error in downstream
+   *     dependency.
+   */
+  public boolean containsDestructiveMethod(
+      MethodDeclarationTree mdt, DownStreamDependencyExplorer explorer) {
+    return this.tree.stream()
+        .anyMatch(
+            fix ->
+                explorer.getTriggeredErrors(fix).stream()
+                    .anyMatch(error -> !mdt.declaredInModule(error.nonnullTarget)));
+  }
+
+  /**
+   * Setter for tag.
+   *
+   * @param tag tag value.
+   */
+  public void tag(Tag tag) {
+    this.tag = tag;
+  }
+
+  /**
+   * Checks if report's fix tree is approved by analysis and should be applied.
+   *
+   * @return true, if fix tree should be applied and false otherwise.
+   */
+  public boolean approved() {
+    return this.tag.equals(Tag.APPLY);
+  }
+
+  /** Denotes the status of report. */
+  enum Tag {
+    /** If tagged with this tag, report tree will be injected. */
+    APPLY,
+    /** If tagged with this tag, report tree will not be injected and will be discarded. */
+    DISCARD,
+  }
+
   public Report(Fix root, int localEffect) {
     this.localEffect = localEffect;
     this.root = root;
     this.tree = Sets.newHashSet(root);
     this.finished = false;
-    this.triggered = new HashSet<>();
+    this.triggeredFixes = ImmutableSet.of();
+    this.triggeredErrors = ImmutableSet.of();
     this.lowerBoundEffectOnDownstreamDependencies = 0;
     this.upperBoundEffectOnDownstreamDependencies = 0;
+    this.tag = Tag.DISCARD;
   }
 
   @Override
@@ -115,9 +171,9 @@ public class Report {
       return false;
     }
     Set<Location> thisTriggered =
-        this.triggered.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
+        this.triggeredFixes.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
     Set<Location> otherTriggered =
-        other.triggered.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
+        other.triggeredFixes.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
     return otherTriggered.equals(thisTriggered);
   }
 
