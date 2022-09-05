@@ -141,7 +141,7 @@ public class Annotator {
               triggeredFixesFromDownstreamDependencies,
               fieldDeclarationAnalysis,
               downStreamDependencyExplorer);
-      if(config.disableOuterLoop){
+      if (config.disableOuterLoop) {
         break;
       }
     }
