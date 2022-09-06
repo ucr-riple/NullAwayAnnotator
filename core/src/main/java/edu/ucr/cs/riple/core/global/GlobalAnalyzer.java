@@ -86,11 +86,8 @@ public class GlobalAnalyzer {
             MethodImpact::hashCode);
   }
 
-  /**
-   * Exploration phase begins. When this method finishes, all methods effect on downstream
-   * dependencies are calculated.
-   */
-  public void explore() {
+  /** Analyzes effects of changes in public methods in downstream dependencies. */
+  public void analyzeDownstreamDependencies() {
     System.out.println("Analysing downstream dependencies...");
     Utility.setScannerCheckerActivation(modules, true);
     Utility.buildDownstreamDependencies(config);

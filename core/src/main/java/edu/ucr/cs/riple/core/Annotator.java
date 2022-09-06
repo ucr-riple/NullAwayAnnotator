@@ -106,7 +106,7 @@ public class Annotator {
     // iteration.
     GlobalAnalyzer globalAnalyzer = new GlobalAnalyzer(config, tree);
     if (config.downStreamDependenciesAnalysisActivated) {
-      globalAnalyzer.explore();
+      globalAnalyzer.analyzeDownstreamDependencies();
     }
     // Set of fixes collected from downstream dependencies that are triggered due to changes in the
     // upstream module (target) public API.
