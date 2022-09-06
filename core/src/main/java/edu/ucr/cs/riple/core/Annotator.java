@@ -29,6 +29,8 @@ import edu.ucr.cs.riple.core.explorers.BasicExplorer;
 import edu.ucr.cs.riple.core.explorers.ExhaustiveExplorer;
 import edu.ucr.cs.riple.core.explorers.Explorer;
 import edu.ucr.cs.riple.core.explorers.OptimizedExplorer;
+import edu.ucr.cs.riple.core.explorers.suppliers.ExhaustiveSupplier;
+import edu.ucr.cs.riple.core.explorers.suppliers.TargetModuleSupplier;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzerImpl;
 import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;
@@ -36,8 +38,6 @@ import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.field.FieldInitializationAnalysis;
-import edu.ucr.cs.riple.core.metadata.index.Bank;
-import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
@@ -140,8 +140,7 @@ public class Annotator {
     boolean noNewFixTriggered = false;
     while (!noNewFixTriggered) {
       ImmutableSet<Report> latestReports =
-          executeNextIteration(
-              triggeredFixesFromDownstreamDependencies, fieldDeclarationAnalysis, globalAnalyzer);
+          executeNextIteration(triggeredFixesFromDownstreamDependencies, fieldDeclarationAnalysis);
       int sizeBefore = cachedReports.size();
       // Update cached reports store.
       latestReports.forEach(
@@ -211,8 +210,7 @@ public class Annotator {
    */
   private ImmutableSet<Report> executeNextIteration(
       Set<Fix> triggeredFixesFromDownstreamDependencies,
-      FieldDeclarationAnalysis fieldDeclarationAnalysis,
-      GlobalAnalyzer globalAnalyzer) {
+      FieldDeclarationAnalysis fieldDeclarationAnalysis) {
     Utility.buildTarget(config);
     // Suggested fixes of target at the current state.
     ImmutableSet<Fix> fixes =
@@ -224,30 +222,16 @@ public class Annotator {
             .collect(ImmutableSet.toImmutableSet());
 
     // Initializing required explorer instances.
-    Bank<Error> errorBank = new Bank<>(config.target.dir.resolve("errors.tsv"), Error::new);
-    Bank<Fix> fixBank =
-        new Bank<>(
-            config.target.dir.resolve("fixes.tsv"), Fix.factory(config, fieldDeclarationAnalysis));
     MethodDeclarationTree tree =
         new MethodDeclarationTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
     RegionTracker tracker = new CompoundTracker(config.target, tree);
-
+    TargetModuleSupplier supplier = new TargetModuleSupplier(config, tree);
     Explorer explorer =
         config.exhaustiveSearch
-            ? new ExhaustiveExplorer(injector, errorBank, fixBank, fixes, tree, config)
+            ? new ExhaustiveExplorer(fixes, new ExhaustiveSupplier(config, tree))
             : config.optimized
-                ? new OptimizedExplorer(
-                    injector,
-                    errorBank,
-                    fixBank,
-                    tracker,
-                    fixes,
-                    tree,
-                    globalAnalyzer,
-                    config.depth,
-                    config)
-                : new BasicExplorer(
-                    injector, errorBank, fixBank, fixes, tree, globalAnalyzer, config);
+                ? new OptimizedExplorer(fixes, supplier, tracker)
+                : new BasicExplorer(fixes, supplier);
     // Result of the iteration analysis.
     return explorer.explore();
   }

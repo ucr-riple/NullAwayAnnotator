@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,25 +22,29 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers;
+package edu.ucr.cs.riple.core.explorers.suppliers;
 
-import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.explorers.suppliers.ExhaustiveSupplier;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
+import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;
+import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 
-public class ExhaustiveExplorer extends Explorer {
+/** Supplier for exhaustive analysis. This will be mostly used in experiments. */
+public class ExhaustiveSupplier extends TargetModuleSupplier {
 
-  public ExhaustiveExplorer(ImmutableSet<Fix> fixes, ExhaustiveSupplier supplier) {
-    super(fixes, supplier);
+  /**
+   * Constructor for exhaustive supplier.
+   *
+   * @param config Annotator config instance.
+   * @param tree Method declaration tree instance for methods in target module.
+   */
+  public ExhaustiveSupplier(Config config, MethodDeclarationTree tree) {
+    super(config, tree);
   }
 
   @Override
-  protected void executeNextCycle() {
-    // NO OP
-  }
-
-  @Override
-  protected void finalizeReports() {
-    this.reports.forEach(report -> report.localEffect = -1);
+  public GlobalAnalyzer getGlobalAnalyzer() {
+    // Exhaustive search does not consider the effect of fixes, it applies all suggested fixes.
+    return new NoOpGlobalAnalyzer();
   }
 }

@@ -25,15 +25,11 @@
 package edu.ucr.cs.riple.core.explorers;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
-import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
+import edu.ucr.cs.riple.core.explorers.suppliers.Supplier;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
-import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.Result;
-import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -47,17 +43,8 @@ import me.tongfei.progressbar.ProgressBar;
 public class OptimizedExplorer extends Explorer {
   private final RegionTracker tracker;
 
-  public OptimizedExplorer(
-      AnnotationInjector injector,
-      Bank<Error> errorBank,
-      Bank<Fix> fixBank,
-      RegionTracker tracker,
-      ImmutableSet<Fix> fixes,
-      MethodDeclarationTree tree,
-      GlobalAnalyzer globalAnalyzer,
-      int depth,
-      Config config) {
-    super(injector, errorBank, fixBank, fixes, tree, globalAnalyzer, depth, config);
+  public OptimizedExplorer(ImmutableSet<Fix> fixes, Supplier supplier, RegionTracker tracker) {
+    super(fixes, supplier);
     this.tracker = tracker;
   }
 

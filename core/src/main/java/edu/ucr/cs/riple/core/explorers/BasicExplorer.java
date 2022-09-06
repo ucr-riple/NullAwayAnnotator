@@ -25,37 +25,18 @@
 package edu.ucr.cs.riple.core.explorers;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
-import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
-import edu.ucr.cs.riple.core.metadata.index.Bank;
+import edu.ucr.cs.riple.core.explorers.suppliers.Supplier;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.Result;
-import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.util.Set;
 import me.tongfei.progressbar.ProgressBar;
 
 public class BasicExplorer extends Explorer {
 
-  public BasicExplorer(
-      AnnotationInjector injector,
-      Bank<Error> errorBank,
-      Bank<Fix> fixBank,
-      ImmutableSet<Fix> fixes,
-      MethodDeclarationTree methodDeclarationTree,
-      GlobalAnalyzer globalAnalyzer,
-      Config config) {
-    super(
-        injector,
-        errorBank,
-        fixBank,
-        fixes,
-        methodDeclarationTree,
-        globalAnalyzer,
-        config.depth,
-        config);
+  public BasicExplorer(ImmutableSet<Fix> fixes, Supplier supplier) {
+    super(fixes, supplier);
   }
 
   @Override

@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.core.explorers;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.explorers.suppliers.Supplier;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.graph.ConflictGraph;
@@ -49,24 +50,16 @@ public abstract class Explorer {
   protected final GlobalAnalyzer globalAnalyzer;
   protected final int depth;
 
-  public Explorer(
-      AnnotationInjector injector,
-      Bank<Error> errorBank,
-      Bank<Fix> fixBank,
-      ImmutableSet<Fix> fixes,
-      MethodDeclarationTree methodDeclarationTree,
-      GlobalAnalyzer globalAnalyzer,
-      int depth,
-      Config config) {
-    this.injector = injector;
-    this.errorBank = errorBank;
-    this.fixBank = fixBank;
-    this.methodDeclarationTree = methodDeclarationTree;
+  public Explorer(ImmutableSet<Fix> fixes, Supplier supplier) {
+    this.injector = supplier.getInjector();
+    this.errorBank = supplier.getErrorBank();
+    this.fixBank = supplier.getFixBank();
+    this.methodDeclarationTree = supplier.getMethodDeclarationTree();
     this.reports =
         fixes.stream().map(fix -> new Report(fix, 1)).collect(ImmutableSet.toImmutableSet());
-    this.globalAnalyzer = globalAnalyzer;
-    this.depth = depth;
-    this.config = config;
+    this.globalAnalyzer = supplier.getGlobalAnalyzer();
+    this.depth = supplier.depth();
+    this.config = supplier.getConfig();
     this.graph = new ConflictGraph();
   }
 

@@ -26,61 +26,38 @@ package edu.ucr.cs.riple.core.explorers.suppliers;
 
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
+import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
-import edu.ucr.cs.riple.core.metadata.index.Bank;
-import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.injectors.VirtualInjector;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 
-/** Supplier for initializing an {@link edu.ucr.cs.riple.core.explorers.Explorer} instance. */
-public interface Supplier {
+/**
+ * Supplier for downstream dependency analysis. It has the following characteristics:
+ *
+ * <ul>
+ *   <li>Annotations are virtually injected on downstream dependencies.
+ *   <li>Analysis is performed only to depth 1.
+ *   <li>Global impact of annotations are neglected.
+ * </ul>
+ */
+public class DownstreamDependencySupplier extends AbstractSupplier {
 
-  /**
-   * Getter for {@link Bank} of {@link Fix} instances.
-   *
-   * @return Fix Bank instance.
-   */
-  Bank<Fix> getFixBank();
+  public DownstreamDependencySupplier(Config config, MethodDeclarationTree tree) {
+    super(config.downstreamInfo, config, tree);
+  }
 
-  /**
-   * Getter for {@link Bank} of {@link Error} instance.
-   *
-   * @return Error Bank instance.
-   */
-  Bank<Error> getErrorBank();
+  @Override
+  protected AnnotationInjector initializeInjector() {
+    return new VirtualInjector(config);
+  }
 
-  /**
-   * Getter for {@link AnnotationInjector} instance.
-   *
-   * @return Annotation Injector instance.
-   */
-  AnnotationInjector getInjector();
+  @Override
+  protected int initializeDepth() {
+    return 1;
+  }
 
-  /**
-   * Getter for {@link MethodDeclarationTree} instance.
-   *
-   * @return MethodDeclarationTree instance.
-   */
-  MethodDeclarationTree getMethodDeclarationTree();
-
-  /**
-   * Getter for {@link GlobalAnalyzer} instance.
-   *
-   * @return GlobalAnalyzer instance.
-   */
-  GlobalAnalyzer getGlobalAnalyzer();
-
-  /**
-   * Getter for depth of analysis.
-   *
-   * @return depth.
-   */
-  int depth();
-
-  /**
-   * Getter for {@link Config} instance.
-   *
-   * @return Config instance.
-   */
-  Config getConfig();
+  @Override
+  protected GlobalAnalyzer initializeGlobalAnalyzer() {
+    return new NoOpGlobalAnalyzer();
+  }
 }

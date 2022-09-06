@@ -25,13 +25,9 @@
 package edu.ucr.cs.riple.core.global;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.explorers.OptimizedExplorer;
-import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
-import edu.ucr.cs.riple.core.metadata.index.Bank;
-import edu.ucr.cs.riple.core.metadata.index.Error;
+import edu.ucr.cs.riple.core.explorers.suppliers.DownstreamDependencySupplier;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -52,24 +48,8 @@ public class DownstreamImpactAnalyzer extends OptimizedExplorer {
   private final HashMap<OnMethod, Set<OnParameter>> nullableFlowMap;
 
   public DownstreamImpactAnalyzer(
-      AnnotationInjector injector,
-      Bank<Error> errorBank,
-      Bank<Fix> fixBank,
-      RegionTracker tracker,
-      ImmutableSet<Fix> fixes,
-      MethodDeclarationTree methodDeclarationTree,
-      int depth,
-      Config config) {
-    super(
-        injector,
-        errorBank,
-        fixBank,
-        tracker,
-        fixes,
-        methodDeclarationTree,
-        new NoOpGlobalAnalyzer(),
-        depth,
-        config);
+      ImmutableSet<Fix> fixes, DownstreamDependencySupplier supplier, RegionTracker tracker) {
+    super(fixes, supplier, tracker);
     this.nullableFlowMap = new HashMap<>();
   }
 

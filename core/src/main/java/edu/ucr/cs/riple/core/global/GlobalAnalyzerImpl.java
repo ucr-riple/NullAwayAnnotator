@@ -30,9 +30,7 @@ import com.google.common.collect.Multimaps;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.injectors.VirtualInjector;
-import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
-import edu.ucr.cs.riple.core.metadata.index.Bank;
+import edu.ucr.cs.riple.core.explorers.suppliers.DownstreamDependencySupplier;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
@@ -61,17 +59,11 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
   private final Config config;
   /** Method declaration tree instance. */
   private final MethodDeclarationTree tree;
-  /**
-   * VirtualInjector instance. Annotations should only be loaded in a library model and not
-   * physically injected.
-   */
-  private final VirtualInjector injector;
 
   public GlobalAnalyzerImpl(Config config, MethodDeclarationTree tree) {
     this.config = config;
     this.modules = config.downstreamInfo;
     this.tree = tree;
-    this.injector = new VirtualInjector(config);
     this.methods =
         Multimaps.index(
             tree.getPublicMethodsWithNonPrimitivesReturn().stream()
@@ -110,23 +102,9 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
                         "null",
                         true))
             .collect(ImmutableSet.toImmutableSet());
-    // Explorer initializations.
-    FieldDeclarationAnalysis fieldDeclarationAnalysis =
-        new FieldDeclarationAnalysis(config.downstreamInfo);
-    Bank<Error> errorBank =
-        new Bank<>(
-            config.downstreamInfo.stream()
-                .map(info -> info.dir.resolve("errors.tsv"))
-                .collect(ImmutableSet.toImmutableSet()),
-            Error::new);
-    Bank<Fix> fixBank =
-        new Bank<>(
-            config.downstreamInfo.stream()
-                .map(info -> info.dir.resolve("fixes.tsv"))
-                .collect(ImmutableSet.toImmutableSet()),
-            Fix.factory(config, fieldDeclarationAnalysis));
     DownstreamImpactAnalyzer analyzer =
-        new DownstreamImpactAnalyzer(injector, errorBank, fixBank, tracker, fixes, tree, 1, config);
+        new DownstreamImpactAnalyzer(
+            fixes, new DownstreamDependencySupplier(config, tree), tracker);
     ImmutableSet<Report> reports = analyzer.explore();
     // Update method status based on the results.
     methods

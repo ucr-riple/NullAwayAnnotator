@@ -24,63 +24,50 @@
 
 package edu.ucr.cs.riple.core.explorers.suppliers;
 
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
+import edu.ucr.cs.riple.core.global.GlobalAnalyzerImpl;
+import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
-import edu.ucr.cs.riple.core.metadata.index.Bank;
-import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 
-/** Supplier for initializing an {@link edu.ucr.cs.riple.core.explorers.Explorer} instance. */
-public interface Supplier {
+/**
+ * Supplier for target module analysis. It has the following characteristics:
+ *
+ * <ul>
+ *   <li>Annotations are physically injected on target module.
+ *   <li>Analysis is performed to depth set in config.
+ *   <li>Depending on the config, global impact of annotations can be considered.
+ * </ul>
+ */
+public class TargetModuleSupplier extends AbstractSupplier {
 
   /**
-   * Getter for {@link Bank} of {@link Fix} instances.
+   * Constructor for target module supplier instance.
    *
-   * @return Fix Bank instance.
+   * @param config Annotator config instance.
+   * @param tree Method declaration tree for methods in target module.
    */
-  Bank<Fix> getFixBank();
+  public TargetModuleSupplier(Config config, MethodDeclarationTree tree) {
+    super(ImmutableSet.of(config.target), config, tree);
+  }
 
-  /**
-   * Getter for {@link Bank} of {@link Error} instance.
-   *
-   * @return Error Bank instance.
-   */
-  Bank<Error> getErrorBank();
+  @Override
+  protected AnnotationInjector initializeInjector() {
+    return new PhysicalInjector(config);
+  }
 
-  /**
-   * Getter for {@link AnnotationInjector} instance.
-   *
-   * @return Annotation Injector instance.
-   */
-  AnnotationInjector getInjector();
+  @Override
+  protected int initializeDepth() {
+    return config.depth;
+  }
 
-  /**
-   * Getter for {@link MethodDeclarationTree} instance.
-   *
-   * @return MethodDeclarationTree instance.
-   */
-  MethodDeclarationTree getMethodDeclarationTree();
-
-  /**
-   * Getter for {@link GlobalAnalyzer} instance.
-   *
-   * @return GlobalAnalyzer instance.
-   */
-  GlobalAnalyzer getGlobalAnalyzer();
-
-  /**
-   * Getter for depth of analysis.
-   *
-   * @return depth.
-   */
-  int depth();
-
-  /**
-   * Getter for {@link Config} instance.
-   *
-   * @return Config instance.
-   */
-  Config getConfig();
+  @Override
+  protected GlobalAnalyzer initializeGlobalAnalyzer() {
+    return config.downStreamDependenciesAnalysisActivated
+        ? new GlobalAnalyzerImpl(config, tree)
+        : new NoOpGlobalAnalyzer();
+  }
 }
