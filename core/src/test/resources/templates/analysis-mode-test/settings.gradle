@@ -24,7 +24,5 @@
 
 rootProject.name = 'analysis-mode-test'
 include 'Target'
-include 'DepA'
-include 'DepB'
-include 'DepC'
+include 'Dep'
 

@@ -60,9 +60,9 @@ tasks.withType(JavaCompile) {
                                               "-Xep:NullAway:WARN",
                                               "-XepOpt:NullAway:AnnotatedPackages=test",
                                               "-XepOpt:NullAway:SerializeFixMetadata=true",
-                                              "-XepOpt:NullAway:FixSerializationConfigPath=" + project.getProperty("DepC-nullaway-config-path"),
+                                              "-XepOpt:NullAway:FixSerializationConfigPath=" + project.getProperty("Dep-nullaway-config-path"),
                                               "-Xep:TypeAnnotatorScanner:ERROR",
-                                              "-XepOpt:TypeAnnotatorScanner:ConfigPath=" + project.getProperty("DepC-scanner-config-path"),
+                                              "-XepOpt:TypeAnnotatorScanner:ConfigPath=" + project.getProperty("Dep-scanner-config-path"),
                                               "-XepOpt:NullAway:AcknowledgeLibraryModelsOfAnnotatedCode=true",
                                               "-XepDisableAllWarnings"]
         options.compilerArgs << "-Xmaxerrs" << "100000"

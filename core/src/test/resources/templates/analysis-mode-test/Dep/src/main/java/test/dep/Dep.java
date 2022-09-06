@@ -20,6 +20,23 @@
  * THE SOFTWARE.
  */
 
-package test.depa;
+package test.dep;
 
-public class DepA {}
+import test.target.Foo;
+
+public class Dep {
+
+  Foo foo;
+  Object field = new Object();
+
+  Dep() {
+    foo = new Foo();
+  }
+
+  public void bar() {
+    field = foo.returnNullBad();
+    foo.takeNullGood(foo.returnNullBad());
+    foo.takeNullGood(foo.returnNullGood());
+    foo.takeNullBad(foo.returnNullGood());
+  }
+}

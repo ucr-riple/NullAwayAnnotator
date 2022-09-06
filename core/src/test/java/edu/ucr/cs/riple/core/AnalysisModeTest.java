@@ -39,7 +39,7 @@ import org.junit.Test;
 public class AnalysisModeTest extends BaseCoreTest {
 
   public AnalysisModeTest() {
-    super("analysis-mode-test", List.of("Target", "DepA", "DepB", "DepC"));
+    super("analysis-mode-test", List.of("Target", "Dep"));
   }
 
   @Test
