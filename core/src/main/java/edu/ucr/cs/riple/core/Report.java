@@ -69,8 +69,27 @@ public class Report {
    */
   private int upperBoundEffectOnDownstreamDependencies;
 
+  enum Tag {
+    /** If tagged with this tag, report tree will be injected. */
+    APPLY,
+    /** If tagged with this tag, report tree will not be injected and will be discarded. */
+    DISCARD,
+  }
+
   /** Status of the report. */
   private Tag tag;
+
+  public Report(Fix root, int localEffect) {
+    this.localEffect = localEffect;
+    this.root = root;
+    this.tree = Sets.newHashSet(root);
+    this.finished = false;
+    this.triggeredFixes = ImmutableSet.of();
+    this.triggeredErrors = ImmutableList.of();
+    this.lowerBoundEffectOnDownstreamDependencies = 0;
+    this.upperBoundEffectOnDownstreamDependencies = 0;
+    this.tag = Tag.DISCARD;
+  }
 
   /**
    * Checks if any of the fix in tree, will trigger an unresolvable error in downstream
@@ -106,26 +125,6 @@ public class Report {
    */
   public boolean approved() {
     return this.tag.equals(Tag.APPLY);
-  }
-
-  /** Denotes the status of report. */
-  enum Tag {
-    /** If tagged with this tag, report tree will be injected. */
-    APPLY,
-    /** If tagged with this tag, report tree will not be injected and will be discarded. */
-    DISCARD,
-  }
-
-  public Report(Fix root, int localEffect) {
-    this.localEffect = localEffect;
-    this.root = root;
-    this.tree = Sets.newHashSet(root);
-    this.finished = false;
-    this.triggeredFixes = ImmutableSet.of();
-    this.triggeredErrors = ImmutableList.of();
-    this.lowerBoundEffectOnDownstreamDependencies = 0;
-    this.upperBoundEffectOnDownstreamDependencies = 0;
-    this.tag = Tag.DISCARD;
   }
 
   @Override

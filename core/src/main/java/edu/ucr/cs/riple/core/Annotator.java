@@ -155,12 +155,18 @@ public class Annotator {
 
       // Tag reports according to selected analysis mode.
       config.mode.tag(config, tree, globalAnalyzer, latestReports);
+
       // Inject approved fixes.
-      injector.injectFixes(
+      Set<Fix> selectedFixes =
           latestReports.stream()
               .filter(Report::approved)
               .flatMap(report -> config.chain ? report.tree.stream() : Stream.of(report.root))
-              .collect(Collectors.toSet()));
+              .collect(Collectors.toSet());
+      injector.injectFixes(selectedFixes);
+
+      // Update impact saved state.
+      globalAnalyzer.updateImpactsAfterInjection(selectedFixes);
+
       if (config.downStreamDependenciesAnalysisActivated) {
         triggeredFixesFromDownstreamDependencies =
             latestReports.stream()

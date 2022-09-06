@@ -42,7 +42,6 @@ import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -143,16 +142,11 @@ public class GlobalAnalyzer {
         .forEach(
             method -> {
               MethodNode node = method.node;
-              method.impactedParameters = explorer.getImpactedParameters(node.location);
-              Optional<Report> optional =
-                  reports.stream()
-                      .filter(input -> input.root.toMethod().equals(node.location))
-                      .findAny();
-              optional.ifPresent(
-                  report -> {
-                    method.effect += report.localEffect;
-                    method.triggeredErrors = new ArrayList<>(report.triggeredErrors);
-                  });
+              Set<OnParameter> impactedParameters = explorer.getImpactedParameters(node.location);
+              reports.stream()
+                  .filter(input -> input.root.toMethod().equals(node.location))
+                  .findAny()
+                  .ifPresent(report -> method.setStatus(report, impactedParameters));
             });
     System.out.println("Analysing downstream dependencies completed!");
   }
@@ -185,7 +179,7 @@ public class GlobalAnalyzer {
    */
   private int effectOnDownstreamDependencies(Fix fix) {
     MethodImpact status = fetchStatus(fix);
-    return status == null ? 0 : status.effect;
+    return status == null ? 0 : status.getEffect();
   }
 
   /**
@@ -228,7 +222,7 @@ public class GlobalAnalyzer {
         .flatMap(
             fix -> {
               MethodImpact status = fetchStatus(fix);
-              return status == null ? Stream.of() : status.impactedParameters.stream();
+              return status == null ? Stream.of() : status.getImpactedParameters().stream();
             })
         .collect(ImmutableSet.toImmutableSet());
   }
@@ -241,18 +235,23 @@ public class GlobalAnalyzer {
    * @return List of triggered errors.
    */
   public List<Error> getTriggeredErrors(Fix fix) {
+    // We currently only store impact of methods on downstream dependencies.
     if (!fix.isOnMethod()) {
-      return Collections.emptyList();
-    }
-    OnMethod method = fix.toMethod();
-    MethodNode node = tree.findNode(method);
-    if (!node.isPublicMethodWithNonPrimitiveReturnType()) {
       return Collections.emptyList();
     }
     MethodImpact impact = fetchStatus(fix);
     if (impact == null) {
       return Collections.emptyList();
     }
-    return impact.triggeredErrors;
+    return impact.getTriggeredErrors();
+  }
+
+  /**
+   * Updates state of methods after injection of fixes in target module.
+   *
+   * @param fixes Set of injected fixes.
+   */
+  public void updateImpactsAfterInjection(Set<Fix> fixes) {
+    this.methods.values().forEach(methodImpact -> methodImpact.updateStatus(fixes));
   }
 }
