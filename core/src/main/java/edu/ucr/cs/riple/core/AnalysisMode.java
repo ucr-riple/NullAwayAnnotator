@@ -27,7 +27,7 @@ package edu.ucr.cs.riple.core;
 import static edu.ucr.cs.riple.core.Report.Tag.APPLY;
 import static edu.ucr.cs.riple.core.Report.Tag.DISCARD;
 
-import edu.ucr.cs.riple.core.explorers.DownStreamDependencyExplorer;
+import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import java.util.Collection;
 import javax.annotation.Nullable;
@@ -43,7 +43,7 @@ public enum AnalysisMode {
     public void tag(
         Config config,
         MethodDeclarationTree mdt,
-        DownStreamDependencyExplorer explorer,
+        GlobalAnalyzer analyzer,
         Collection<Report> reports) {
       reports.forEach(
           report -> {
@@ -65,7 +65,7 @@ public enum AnalysisMode {
     public void tag(
         Config config,
         MethodDeclarationTree mdt,
-        DownStreamDependencyExplorer explorer,
+        GlobalAnalyzer analyzer,
         Collection<Report> reports) {
       reports.forEach(
           report -> {
@@ -75,7 +75,7 @@ public enum AnalysisMode {
               return;
             }
             // Check for destructive methods.
-            if (report.containsDestructiveMethod(mdt, explorer)) {
+            if (report.containsDestructiveMethod(mdt, analyzer)) {
               report.tag(DISCARD);
               return;
             }
@@ -98,7 +98,7 @@ public enum AnalysisMode {
     public void tag(
         Config config,
         MethodDeclarationTree mdt,
-        DownStreamDependencyExplorer explorer,
+        GlobalAnalyzer analyzer,
         Collection<Report> reports) {
       reports.forEach(
           report -> {
@@ -120,7 +120,7 @@ public enum AnalysisMode {
     public void tag(
         Config config,
         MethodDeclarationTree mdt,
-        DownStreamDependencyExplorer explorer,
+        GlobalAnalyzer analyzer,
         Collection<Report> reports) {
       reports.forEach(
           report -> {
@@ -138,13 +138,13 @@ public enum AnalysisMode {
    *
    * @param config Annotator config.
    * @param mdt Method declaration tree instance.
-   * @param explorer Downstream dependency instance.
+   * @param analyzer Downstream dependency instance.
    * @param reports Reports to be processed.
    */
   public abstract void tag(
       Config config,
       MethodDeclarationTree mdt,
-      DownStreamDependencyExplorer explorer,
+      GlobalAnalyzer analyzer,
       Collection<Report> reports);
 
   /**

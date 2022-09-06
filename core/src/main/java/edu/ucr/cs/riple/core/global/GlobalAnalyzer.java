@@ -22,16 +22,14 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers;
+package edu.ucr.cs.riple.core.global;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimaps;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.VirtualInjector;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
@@ -40,18 +38,16 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
-import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
@@ -64,12 +60,12 @@ import javax.annotation.Nullable;
  * of additional errors) of each such change, by summing across all downstream dependencies. This
  * data then be fed to the Annotator main process in the decision process.
  */
-public class DownStreamDependencyExplorer {
+public class GlobalAnalyzer {
 
   /** Set of downstream dependencies. */
   private final ImmutableSet<ModuleInfo> modules;
   /** Public APIs in the target modules that have a non-primitive return value. */
-  private final ImmutableMultimap<Integer, MethodStatus> methods;
+  private final ImmutableMultimap<Integer, MethodImpact> methods;
   /** Annotator Config. */
   private final Config config;
   /** Method declaration tree instance. */
@@ -80,7 +76,7 @@ public class DownStreamDependencyExplorer {
    */
   private final VirtualInjector injector;
 
-  public DownStreamDependencyExplorer(Config config, MethodDeclarationTree tree) {
+  public GlobalAnalyzer(Config config, MethodDeclarationTree tree) {
     this.config = config;
     this.modules = config.downstreamInfo;
     this.tree = tree;
@@ -88,16 +84,13 @@ public class DownStreamDependencyExplorer {
     this.methods =
         Multimaps.index(
             tree.getPublicMethodsWithNonPrimitivesReturn().stream()
-                .map(MethodStatus::new)
+                .map(MethodImpact::new)
                 .collect(ImmutableSet.toImmutableSet()),
-            MethodStatus::hashCode);
+            MethodImpact::hashCode);
   }
 
-  /**
-   * Exploration phase begins. When this method finishes, all methods effect on downstream
-   * dependencies are calculated.
-   */
-  public void explore() {
+  /** Analyzes effects of changes in public methods in downstream dependencies. */
+  public void analyzeDownstreamDependencies() {
     System.out.println("Analysing downstream dependencies...");
     Utility.setScannerCheckerActivation(modules, true);
     Utility.buildDownstreamDependencies(config);
@@ -113,13 +106,13 @@ public class DownStreamDependencyExplorer {
                         .getCallersOfMethod(input.node.location.clazz, input.node.location.method)
                         .isEmpty()) // skip methods that are not called anywhere.
             .map(
-                methodStatus ->
+                methodImpact ->
                     new Fix(
                         new AddAnnotation(
                             new OnMethod(
                                 "null",
-                                methodStatus.node.location.clazz,
-                                methodStatus.node.location.method),
+                                methodImpact.node.location.clazz,
+                                methodImpact.node.location.method),
                             config.nullableAnnot),
                         "null",
                         "null",
@@ -141,9 +134,8 @@ public class DownStreamDependencyExplorer {
                 .map(info -> info.dir.resolve("fixes.tsv"))
                 .collect(ImmutableSet.toImmutableSet()),
             Fix.factory(config, fieldDeclarationAnalysis));
-    OptimizedDownstreamDependencyAnalyzer explorer =
-        new OptimizedDownstreamDependencyAnalyzer(
-            injector, errorBank, fixBank, tracker, fixes, tree, 1, config);
+    DownstreamImpactAnalyzer explorer =
+        new DownstreamImpactAnalyzer(injector, errorBank, fixBank, tracker, fixes, tree, 1, config);
     ImmutableSet<Report> reports = explorer.explore();
     // Update method status based on the results.
     methods
@@ -159,26 +151,26 @@ public class DownStreamDependencyExplorer {
               optional.ifPresent(
                   report -> {
                     method.effect += report.localEffect;
-                    method.triggeredErrors = report.triggeredErrors;
+                    method.triggeredErrors = new ArrayList<>(report.triggeredErrors);
                   });
             });
     System.out.println("Analysing downstream dependencies completed!");
   }
 
   /**
-   * Retrieves the corresponding {@link MethodStatus} to a fix.
+   * Retrieves the corresponding {@link MethodImpact} to a fix.
    *
    * @param fix Target fix.
-   * @return Corresponding {@link MethodStatus}, null if not located.
+   * @return Corresponding {@link MethodImpact}, null if not located.
    */
   @Nullable
-  private MethodStatus fetchStatus(Fix fix) {
+  private MethodImpact fetchStatus(Fix fix) {
     if (!fix.isOnMethod()) {
       return null;
     }
     OnMethod onMethod = fix.toMethod();
-    int predictedHash = MethodStatus.hash(onMethod.method, onMethod.clazz);
-    Optional<MethodStatus> optional =
+    int predictedHash = MethodImpact.hash(onMethod.method, onMethod.clazz);
+    Optional<MethodImpact> optional =
         this.methods.get(predictedHash).stream()
             .filter(m -> m.node.location.equals(onMethod))
             .findAny();
@@ -192,7 +184,7 @@ public class DownStreamDependencyExplorer {
    * @return Effect on downstream dependencies.
    */
   private int effectOnDownstreamDependencies(Fix fix) {
-    MethodStatus status = fetchStatus(fix);
+    MethodImpact status = fetchStatus(fix);
     return status == null ? 0 : status.effect;
   }
 
@@ -203,7 +195,7 @@ public class DownStreamDependencyExplorer {
    * @param tree Tree of the fix tree associated to root.
    * @return Lower bound of number of errors on downstream dependencies.
    */
-  public int computeLowerBoundOfNumberOfErrors(Set<Fix> tree) {
+  public int computeLowerBoundOfNumberOfErrorsDownstream(Set<Fix> tree) {
     OptionalInt lowerBoundEffectOfChainOptional =
         tree.stream().mapToInt(this::effectOnDownstreamDependencies).max();
     if (lowerBoundEffectOfChainOptional.isEmpty()) {
@@ -219,7 +211,7 @@ public class DownStreamDependencyExplorer {
    * @param tree Tree of the fix tree associated to root.
    * @return Lower bound of number of errors on downstream dependencies.
    */
-  public int computeUpperBoundOfNumberOfErrors(Set<Fix> tree) {
+  public int computeUpperBoundOfNumberOfErrorsDownstream(Set<Fix> tree) {
     return tree.stream().mapToInt(this::effectOnDownstreamDependencies).sum();
   }
 
@@ -235,7 +227,7 @@ public class DownStreamDependencyExplorer {
         .filter(Fix::isOnMethod)
         .flatMap(
             fix -> {
-              MethodStatus status = fetchStatus(fix);
+              MethodImpact status = fetchStatus(fix);
               return status == null ? Stream.of() : status.impactedParameters.stream();
             })
         .collect(ImmutableSet.toImmutableSet());
@@ -250,132 +242,10 @@ public class DownStreamDependencyExplorer {
     if (!node.isPublicMethodWithNonPrimitiveReturnType()) {
       return Collections.emptyList();
     }
-    MethodStatus status = fetchStatus(fix);
-    if (status == null) {
+    MethodImpact impact = fetchStatus(fix);
+    if (impact == null) {
       return Collections.emptyList();
     }
-    return status.triggeredErrors;
-  }
-
-  /** Container class for storing overall effect of each method. */
-  private static class MethodStatus {
-    /** Node in {@link MethodDeclarationTree} corresponding to a public method. */
-    final MethodNode node;
-    /**
-     * Set of parameters in target module that will receive {@code Nullable} value if targeted
-     * method in node is annotated as {@code @Nullable}.
-     */
-    public Set<OnParameter> impactedParameters;
-
-    /**
-     * List of triggered errors in downstream dependencies if method is annotated as {@code
-     * Nullable}.
-     */
-    public ImmutableList<Error> triggeredErrors;
-    /**
-     * Effect of injecting a {@code Nullable} annotation on pointing method of node on downstream
-     * dependencies.
-     */
-    int effect;
-
-    public MethodStatus(MethodNode node) {
-      this.node = node;
-      this.effect = 0;
-    }
-
-    @Override
-    public int hashCode() {
-      return hash(node.location.method, node.location.clazz);
-    }
-
-    /**
-     * Calculates hash. This method is used outside this class to calculate the expected hash based
-     * on instance's properties value if the actual instance is not available.
-     *
-     * @param method Method signature.
-     * @param clazz Fully qualified name of the containing class.
-     * @return Expected hash.
-     */
-    public static int hash(String method, String clazz) {
-      return MethodNode.hash(method, clazz);
-    }
-  }
-
-  /** Explorer for analyzing downstream dependencies. */
-  private static class OptimizedDownstreamDependencyAnalyzer extends OptimizedExplorer {
-
-    /**
-     * Map of public methods in target module to parameters in target module, which are source of
-     * nullable flow back to upstream module (target) from downstream dependencies, if annotated as
-     * {@code @Nullable}.
-     */
-    private final HashMap<OnMethod, Set<OnParameter>> nullableFlowMap;
-
-    public OptimizedDownstreamDependencyAnalyzer(
-        AnnotationInjector injector,
-        Bank<Error> errorBank,
-        Bank<Fix> fixBank,
-        RegionTracker tracker,
-        ImmutableSet<Fix> fixes,
-        MethodDeclarationTree methodDeclarationTree,
-        int depth,
-        Config config) {
-      super(injector, errorBank, fixBank, tracker, fixes, methodDeclarationTree, depth, config);
-      this.nullableFlowMap = new HashMap<>();
-    }
-
-    @Override
-    public void rerunAnalysis() {
-      Utility.buildDownstreamDependencies(config);
-    }
-
-    @Override
-    protected void finalizeReports() {
-      super.finalizeReports();
-      // Collect impacted parameters in target module by downstream dependencies.
-      graph
-          .getNodes()
-          .forEach(
-              node ->
-                  node.root.ifOnMethod(
-                      method -> {
-                        // Impacted parameters.
-                        Set<OnParameter> parameters =
-                            node.triggeredErrors.stream()
-                                .filter(
-                                    error ->
-                                        error.nonnullTarget != null
-                                            && error.nonnullTarget.isOnParameter()
-                                            // Method is declared in the target module.
-                                            && methodDeclarationTree.declaredInModule(
-                                                error.nonnullTarget.toMethod()))
-                                .map(error -> error.nonnullTarget.toParameter())
-                                .collect(Collectors.toSet());
-                        if (!parameters.isEmpty()) {
-                          // Update uri for each parameter. These triggered fixes does not have an
-                          // actual physical uri since they are provided as a jar file in downstream
-                          // dependencies.
-                          parameters.forEach(
-                              onParameter ->
-                                  onParameter.uri =
-                                      methodDeclarationTree.findNode(
-                                              onParameter.method, onParameter.clazz)
-                                          .location
-                                          .uri);
-                          nullableFlowMap.put(method, parameters);
-                        }
-                      }));
-    }
-
-    /**
-     * Returns set of parameters that will receive {@code @Nullable} if the passed method is
-     * annotated as {@code @Nullable}.
-     *
-     * @param method Method to be annotated.
-     * @return Set of impacted parameters. If no parameter is impacted, empty set will be returned.
-     */
-    private Set<OnParameter> getImpactedParameters(OnMethod method) {
-      return nullableFlowMap.getOrDefault(method, Collections.emptySet());
-    }
+    return impact.triggeredErrors;
   }
 }

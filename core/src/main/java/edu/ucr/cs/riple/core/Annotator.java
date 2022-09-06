@@ -26,10 +26,10 @@ package edu.ucr.cs.riple.core;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.explorers.BasicExplorer;
-import edu.ucr.cs.riple.core.explorers.DownStreamDependencyExplorer;
 import edu.ucr.cs.riple.core.explorers.ExhaustiveExplorer;
 import edu.ucr.cs.riple.core.explorers.Explorer;
 import edu.ucr.cs.riple.core.explorers.OptimizedExplorer;
+import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
@@ -121,15 +121,14 @@ public class Annotator {
     FieldDeclarationAnalysis fieldDeclarationAnalysis = new FieldDeclarationAnalysis(config.target);
     MethodDeclarationTree tree =
         new MethodDeclarationTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
-    // downStreamDependencyExplorer analyzes effects of all public APIs on downstream dependencies.
+    // globalAnalyzer analyzes effects of all public APIs on downstream dependencies.
     // Through iterations, since the source code for downstream dependencies does not change and the
     // computation does not depend on the changes in the target module, it will compute the same
     // result in each iteration, therefore we perform the analysis only once and reuse it in each
     // iteration.
-    DownStreamDependencyExplorer downStreamDependencyExplorer =
-        new DownStreamDependencyExplorer(config, tree);
+    GlobalAnalyzer globalAnalyzer = new GlobalAnalyzer(config, tree);
     if (config.downStreamDependenciesAnalysisActivated) {
-      downStreamDependencyExplorer.explore();
+      globalAnalyzer.analyzeDownstreamDependencies();
     }
     // Set of fixes collected from downstream dependencies that are triggered due to changes in the
     // upstream module (target) public API.
@@ -143,8 +142,7 @@ public class Annotator {
       latestReports.forEach(
           report -> {
             if (config.downStreamDependenciesAnalysisActivated) {
-              report.computeBoundariesOfEffectivenessOnDownstreamDependencies(
-                  downStreamDependencyExplorer);
+              report.computeBoundariesOfEffectivenessOnDownstreamDependencies(globalAnalyzer);
             }
             cachedReports.putIfAbsent(report.root, report);
             Report cachedReport = cachedReports.get(report.root);
@@ -156,7 +154,7 @@ public class Annotator {
           });
 
       // Tag reports according to selected analysis mode.
-      config.mode.tag(config, tree, downStreamDependencyExplorer, latestReports);
+      config.mode.tag(config, tree, globalAnalyzer, latestReports);
       // Inject approved fixes.
       injector.injectFixes(
           latestReports.stream()
@@ -169,7 +167,7 @@ public class Annotator {
                 .filter(Report::approved)
                 .flatMap(
                     report ->
-                        downStreamDependencyExplorer.getImpactedParameters(report.tree).stream()
+                        globalAnalyzer.getImpactedParameters(report.tree).stream()
                             .map(
                                 onParameter ->
                                     new Fix(

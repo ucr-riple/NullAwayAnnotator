@@ -27,7 +27,7 @@ package edu.ucr.cs.riple.core;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import edu.ucr.cs.riple.core.explorers.DownStreamDependencyExplorer;
+import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
@@ -77,17 +77,16 @@ public class Report {
    * dependencies.
    *
    * @param mdt Method declaration tre instance.
-   * @param explorer Downstream dependency to fetch status of applying each fix on downstream
+   * @param analyzer Downstream dependency to fetch status of applying each fix on downstream
    *     dependencies.
    * @return true, if report contains a fix which will trigger an unresolvable error in downstream
    *     dependency.
    */
-  public boolean containsDestructiveMethod(
-      MethodDeclarationTree mdt, DownStreamDependencyExplorer explorer) {
+  public boolean containsDestructiveMethod(MethodDeclarationTree mdt, GlobalAnalyzer analyzer) {
     return this.tree.stream()
         .anyMatch(
             fix ->
-                explorer.getTriggeredErrors(fix).stream()
+                analyzer.getTriggeredErrors(fix).stream()
                     .anyMatch(error -> !mdt.declaredInModule(error.nonnullTarget)));
   }
 
@@ -194,12 +193,11 @@ public class Report {
    *
    * @param explorer Downstream dependency instance.
    */
-  public void computeBoundariesOfEffectivenessOnDownstreamDependencies(
-      DownStreamDependencyExplorer explorer) {
+  public void computeBoundariesOfEffectivenessOnDownstreamDependencies(GlobalAnalyzer explorer) {
     this.lowerBoundEffectOnDownstreamDependencies =
-        explorer.computeLowerBoundOfNumberOfErrors(tree);
+        explorer.computeLowerBoundOfNumberOfErrorsDownstream(tree);
     this.upperBoundEffectOnDownstreamDependencies =
-        explorer.computeUpperBoundOfNumberOfErrors(tree);
+        explorer.computeUpperBoundOfNumberOfErrorsDownstream(tree);
   }
 
   /**
