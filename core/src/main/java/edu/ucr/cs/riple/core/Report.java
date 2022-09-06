@@ -25,7 +25,7 @@
 package edu.ucr.cs.riple.core;
 
 import com.google.common.collect.Sets;
-import edu.ucr.cs.riple.core.explorers.DownStreamDependencyExplorer;
+import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.HashSet;
@@ -137,12 +137,11 @@ public class Report {
    *
    * @param explorer Downstream dependency instance.
    */
-  public void computeBoundariesOfEffectivenessOnDownstreamDependencies(
-      DownStreamDependencyExplorer explorer) {
+  public void computeBoundariesOfEffectivenessOnDownstreamDependencies(GlobalAnalyzer explorer) {
     this.lowerBoundEffectOnDownstreamDependencies =
-        explorer.computeLowerBoundOfNumberOfErrors(tree);
+        explorer.computeLowerBoundOfNumberOfErrorsDownstream(tree);
     this.upperBoundEffectOnDownstreamDependencies =
-        explorer.computeUpperBoundOfNumberOfErrors(tree);
+        explorer.computeUpperBoundOfNumberOfErrorsDownstream(tree);
   }
 
   /**
