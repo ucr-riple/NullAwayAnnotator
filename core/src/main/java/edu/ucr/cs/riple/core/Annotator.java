@@ -30,6 +30,7 @@ import edu.ucr.cs.riple.core.explorers.ExhaustiveExplorer;
 import edu.ucr.cs.riple.core.explorers.Explorer;
 import edu.ucr.cs.riple.core.explorers.OptimizedExplorer;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
+import edu.ucr.cs.riple.core.global.GlobalAnalyzerImpl;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
@@ -126,7 +127,7 @@ public class Annotator {
     // computation does not depend on the changes in the target module, it will compute the same
     // result in each iteration, therefore we perform the analysis only once and reuse it in each
     // iteration.
-    GlobalAnalyzer globalAnalyzer = new GlobalAnalyzer(config, tree);
+    GlobalAnalyzer globalAnalyzer = new GlobalAnalyzerImpl(config, tree);
     if (config.downStreamDependenciesAnalysisActivated) {
       globalAnalyzer.analyzeDownstreamDependencies();
     }

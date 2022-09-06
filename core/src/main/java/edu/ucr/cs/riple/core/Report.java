@@ -96,8 +96,7 @@ public class Report {
    * dependencies.
    *
    * @param mdt Method declaration tre instance.
-   * @param analyzer Downstream dependency to fetch status of applying each fix on downstream
-   *     dependencies.
+   * @param analyzer Analyzer to check impact of method.
    * @return true, if report contains a fix which will trigger an unresolvable error in downstream
    *     dependency.
    */
