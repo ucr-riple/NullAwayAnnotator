@@ -69,7 +69,7 @@ public class Report {
    */
   private int upperBoundEffectOnDownstreamDependencies;
 
-  enum Tag {
+  public enum Tag {
     /** If tagged with this tag, report tree will be injected. */
     APPLY,
     /** If tagged with this tag, report tree will not be injected and will be discarded. */
@@ -200,16 +200,20 @@ public class Report {
   }
 
   /**
-   * Returns the overall effect of applying fix tree associated to this report. If downstream
-   * dependency analysis is activated, overall effect will be sum of local effect and lower bound of
-   * number of errors on downstream dependencies.
+   * Returns the overall effect of applying fix tree associated to this report according to {@link
+   * AnalysisMode}.
    *
    * @return Overall effect ot applying the fix tree.
    */
   public int getOverallEffect(Config config) {
-    return config.downStreamDependenciesAnalysisActivated
-        ? this.localEffect + this.lowerBoundEffectOnDownstreamDependencies
-        : this.localEffect;
+    AnalysisMode mode = config.mode;
+    if (mode.equals(AnalysisMode.LOCAL)) {
+      return this.localEffect;
+    }
+    if (mode.equals(AnalysisMode.UPPER_BOUND)) {
+      return this.localEffect + this.upperBoundEffectOnDownstreamDependencies;
+    }
+    return this.localEffect + this.lowerBoundEffectOnDownstreamDependencies;
   }
 
   /**
@@ -228,5 +232,14 @@ public class Report {
    */
   public int getUpperBoundEffectOnDownstreamDependencies() {
     return upperBoundEffectOnDownstreamDependencies;
+  }
+
+  /**
+   * Getter for tag.
+   *
+   * @return tag.
+   */
+  public Tag getTag() {
+    return tag;
   }
 }

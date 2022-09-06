@@ -133,16 +133,16 @@ public class GlobalAnalyzer {
                 .map(info -> info.dir.resolve("fixes.tsv"))
                 .collect(ImmutableSet.toImmutableSet()),
             Fix.factory(config, fieldDeclarationAnalysis));
-    DownstreamImpactAnalyzer explorer =
+    DownstreamImpactAnalyzer analyzer =
         new DownstreamImpactAnalyzer(injector, errorBank, fixBank, tracker, fixes, tree, 1, config);
-    ImmutableSet<Report> reports = explorer.explore();
+    ImmutableSet<Report> reports = analyzer.explore();
     // Update method status based on the results.
     methods
         .values()
         .forEach(
             method -> {
               MethodNode node = method.node;
-              Set<OnParameter> impactedParameters = explorer.getImpactedParameters(node.location);
+              Set<OnParameter> impactedParameters = analyzer.getImpactedParameters(node.location);
               reports.stream()
                   .filter(input -> input.root.toMethod().equals(node.location))
                   .findAny()
