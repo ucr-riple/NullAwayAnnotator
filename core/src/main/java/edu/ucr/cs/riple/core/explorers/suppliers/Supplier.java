@@ -31,15 +31,19 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.injector.Injector;
 
-/**
- * Supplier for initializing {@link edu.ucr.cs.riple.core.explorers.Explorer} instance.
- */
+/** Supplier for initializing {@link edu.ucr.cs.riple.core.explorers.Explorer} instance. */
 public interface Supplier {
-    Bank<Fix> getFixBank();
-    Bank<Error> getErrorBank();
-    int depth();
-    String getBuildCommand();
-    Config getConfig();
-    Injector getInjector();
-    MethodDeclarationTree getMethodDeclarationTree();
+  Bank<Fix> getFixBank();
+
+  Bank<Error> getErrorBank();
+
+  int depth();
+
+  String getBuildCommand();
+
+  Config getConfig();
+
+  Injector getInjector();
+
+  MethodDeclarationTree getMethodDeclarationTree();
 }
