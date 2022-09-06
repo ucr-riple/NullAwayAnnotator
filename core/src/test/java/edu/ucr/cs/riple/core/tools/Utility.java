@@ -118,7 +118,8 @@ public class Utility {
   }
 
   /**
-   * Unit test directory, annotator repository resides in this directory.
+   * Computes the path to NullAway library models loader. Library models loader resides in the unit
+   * test temporary directory.
    *
    * @param unittestDir path to Unit test.
    * @return Path to nullaway library model loader.

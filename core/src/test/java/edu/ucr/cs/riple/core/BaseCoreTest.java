@@ -63,6 +63,7 @@ public abstract class BaseCoreTest {
         Utility.getPathOfResource(templates.resolve(projectTemplate).toString());
     Path repositoryDirectory = Paths.get(System.getProperty("user.dir")).getParent();
     try {
+      // Create a separate library models loader to avoid races between unit tests.
       FileUtils.copyDirectory(
           repositoryDirectory.toFile(), outDirPath.resolve("Annotator").toFile());
       FileUtils.deleteDirectory(projectPath.toFile());
