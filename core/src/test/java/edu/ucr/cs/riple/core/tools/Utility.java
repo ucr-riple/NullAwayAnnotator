@@ -92,7 +92,7 @@ public class Utility {
         "%s && ./gradlew compileJava %s -Plibrary-model-loader-path=%s --rerun-tasks",
         Utility.changeDirCommand(projectPath),
         String.join(" ", computeConfigPathsWithGradleArguments(outDirPath, modules)),
-        getPathToLibraryModel().resolve(Paths.get("build", "libs", "librarymodel.jar")));
+        getPathToLibraryModel(outDirPath).resolve(Paths.get("build", "libs", "librarymodel.jar")));
   }
 
   /**
@@ -111,15 +111,19 @@ public class Utility {
       Path projectPath, Path outDirPath, List<String> modules) {
     return String.format(
         "%s && ./gradlew library-model-loader:jar --rerun-tasks && %s && ./gradlew compileJava %s -Plibrary-model-loader-path=%s --rerun-tasks",
-        Utility.changeDirCommand(Paths.get(System.getProperty("user.dir")).getParent()),
+        Utility.changeDirCommand(outDirPath.resolve("Annotator")),
         Utility.changeDirCommand(projectPath),
         String.join(" ", computeConfigPathsWithGradleArguments(outDirPath, modules)),
-        getPathToLibraryModel().resolve(Paths.get("build", "libs", "librarymodel.jar")));
+        getPathToLibraryModel(outDirPath).resolve(Paths.get("build", "libs", "librarymodel.jar")));
   }
 
-  public static Path getPathToLibraryModel() {
-    return Paths.get(System.getProperty("user.dir"))
-        .getParent()
-        .resolve(Paths.get("library-model-loader"));
+  /**
+   * Unit test directory, annotator repository resides in this directory.
+   *
+   * @param unittestDir path to Unit test.
+   * @return Path to nullaway library model loader.
+   */
+  public static Path getPathToLibraryModel(Path unittestDir) {
+    return unittestDir.resolve("Annotator").resolve(Paths.get("library-model-loader"));
   }
 }

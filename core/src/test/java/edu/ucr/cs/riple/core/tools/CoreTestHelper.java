@@ -237,7 +237,7 @@ public class CoreTestHelper {
               this.projectPath, this.outDirPath, modules);
       builder.downstreamBuildCommand = builder.buildCommand;
       builder.nullawayLibraryModelLoaderPath =
-          Utility.getPathToLibraryModel()
+          Utility.getPathToLibraryModel(outDirPath)
               .resolve(
                   Paths.get(
                       "src",

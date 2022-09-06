@@ -38,7 +38,7 @@ allprojects {
     group = GROUP
     version = VERSION_NAME
     tasks.withType(Test) {
-        maxParallelForks = 1
+        maxParallelForks = Runtime.getRuntime().availableProcessors()
         systemProperties = [
                 'junit.jupiter.execution.parallel.enabled': 'true',
                 'junit.jupiter.execution.parallel.mode.default': 'concurrent'
