@@ -195,9 +195,9 @@ public class Report {
    */
   public void computeBoundariesOfEffectivenessOnDownstreamDependencies(GlobalAnalyzer explorer) {
     this.lowerBoundEffectOnDownstreamDependencies =
-        explorer.computeLowerBoundOfNumberOfErrorsDownstream(tree);
+        explorer.computeLowerBoundOfNumberOfErrors(tree);
     this.upperBoundEffectOnDownstreamDependencies =
-        explorer.computeUpperBoundOfNumberOfErrorsDownstream(tree);
+        explorer.computeUpperBoundOfNumberOfErrors(tree);
   }
 
   /**

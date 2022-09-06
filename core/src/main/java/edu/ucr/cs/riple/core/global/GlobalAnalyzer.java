@@ -195,7 +195,7 @@ public class GlobalAnalyzer {
    * @param tree Tree of the fix tree associated to root.
    * @return Lower bound of number of errors on downstream dependencies.
    */
-  public int computeLowerBoundOfNumberOfErrorsDownstream(Set<Fix> tree) {
+  public int computeLowerBoundOfNumberOfErrors(Set<Fix> tree) {
     OptionalInt lowerBoundEffectOfChainOptional =
         tree.stream().mapToInt(this::effectOnDownstreamDependencies).max();
     if (lowerBoundEffectOfChainOptional.isEmpty()) {
@@ -211,7 +211,7 @@ public class GlobalAnalyzer {
    * @param tree Tree of the fix tree associated to root.
    * @return Lower bound of number of errors on downstream dependencies.
    */
-  public int computeUpperBoundOfNumberOfErrorsDownstream(Set<Fix> tree) {
+  public int computeUpperBoundOfNumberOfErrors(Set<Fix> tree) {
     return tree.stream().mapToInt(this::effectOnDownstreamDependencies).sum();
   }
 
@@ -233,6 +233,13 @@ public class GlobalAnalyzer {
         .collect(ImmutableSet.toImmutableSet());
   }
 
+  /**
+   * Collects list of triggered errors in downstream dependencies if fix is applied in the target
+   * module.
+   *
+   * @param fix Fix instance to be applied in the target module.
+   * @return List of triggered errors.
+   */
   public List<Error> getTriggeredErrors(Fix fix) {
     if (!fix.isOnMethod()) {
       return Collections.emptyList();
