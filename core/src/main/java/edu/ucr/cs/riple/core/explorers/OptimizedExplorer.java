@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.explorers;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
@@ -53,9 +54,10 @@ public class OptimizedExplorer extends Explorer {
       RegionTracker tracker,
       ImmutableSet<Fix> fixes,
       MethodDeclarationTree tree,
+      GlobalAnalyzer globalAnalyzer,
       int depth,
       Config config) {
-    super(injector, errorBank, fixBank, fixes, tree, depth, config);
+    super(injector, errorBank, fixBank, fixes, tree, globalAnalyzer, depth, config);
     this.tracker = tracker;
   }
 

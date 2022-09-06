@@ -60,7 +60,16 @@ public class DownstreamImpactAnalyzer extends OptimizedExplorer {
       MethodDeclarationTree methodDeclarationTree,
       int depth,
       Config config) {
-    super(injector, errorBank, fixBank, tracker, fixes, methodDeclarationTree, depth, config);
+    super(
+        injector,
+        errorBank,
+        fixBank,
+        tracker,
+        fixes,
+        methodDeclarationTree,
+        new NoOpGlobalAnalyzer(),
+        depth,
+        config);
     this.nullableFlowMap = new HashMap<>();
   }
 

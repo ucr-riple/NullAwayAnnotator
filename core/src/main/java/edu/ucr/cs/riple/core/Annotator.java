@@ -31,6 +31,7 @@ import edu.ucr.cs.riple.core.explorers.Explorer;
 import edu.ucr.cs.riple.core.explorers.OptimizedExplorer;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzerImpl;
+import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
@@ -127,17 +128,20 @@ public class Annotator {
     // computation does not depend on the changes in the target module, it will compute the same
     // result in each iteration, therefore we perform the analysis only once and reuse it in each
     // iteration.
-    GlobalAnalyzer globalAnalyzer = new GlobalAnalyzerImpl(config, tree);
-    if (config.downStreamDependenciesAnalysisActivated) {
-      globalAnalyzer.analyzeDownstreamDependencies();
-    }
+    GlobalAnalyzer globalAnalyzer =
+        config.downStreamDependenciesAnalysisActivated
+            ? new GlobalAnalyzerImpl(config, tree)
+            : new NoOpGlobalAnalyzer();
+    globalAnalyzer.analyzeDownstreamDependencies();
+
     // Set of fixes collected from downstream dependencies that are triggered due to changes in the
     // upstream module (target) public API.
     Set<Fix> triggeredFixesFromDownstreamDependencies = new HashSet<>();
     boolean noNewFixTriggered = false;
     while (!noNewFixTriggered) {
       ImmutableSet<Report> latestReports =
-          executeNextIteration(triggeredFixesFromDownstreamDependencies, fieldDeclarationAnalysis);
+          executeNextIteration(
+              triggeredFixesFromDownstreamDependencies, fieldDeclarationAnalysis, globalAnalyzer);
       int sizeBefore = cachedReports.size();
       // Update cached reports store.
       latestReports.forEach(
@@ -207,7 +211,8 @@ public class Annotator {
    */
   private ImmutableSet<Report> executeNextIteration(
       Set<Fix> triggeredFixesFromDownstreamDependencies,
-      FieldDeclarationAnalysis fieldDeclarationAnalysis) {
+      FieldDeclarationAnalysis fieldDeclarationAnalysis,
+      GlobalAnalyzer globalAnalyzer) {
     Utility.buildTarget(config);
     // Suggested fixes of target at the current state.
     ImmutableSet<Fix> fixes =
@@ -232,8 +237,17 @@ public class Annotator {
             ? new ExhaustiveExplorer(injector, errorBank, fixBank, fixes, tree, config)
             : config.optimized
                 ? new OptimizedExplorer(
-                    injector, errorBank, fixBank, tracker, fixes, tree, config.depth, config)
-                : new BasicExplorer(injector, errorBank, fixBank, fixes, tree, config);
+                    injector,
+                    errorBank,
+                    fixBank,
+                    tracker,
+                    fixes,
+                    tree,
+                    globalAnalyzer,
+                    config.depth,
+                    config)
+                : new BasicExplorer(
+                    injector, errorBank, fixBank, fixes, tree, globalAnalyzer, config);
     // Result of the iteration analysis.
     return explorer.explore();
   }

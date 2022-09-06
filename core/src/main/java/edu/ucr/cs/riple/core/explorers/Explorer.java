@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.core.explorers;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.graph.ConflictGraph;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
@@ -37,15 +38,15 @@ import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import java.util.HashSet;
 
 public abstract class Explorer {
+
   protected final AnnotationInjector injector;
   protected final Bank<Error> errorBank;
   protected final Bank<Fix> fixBank;
   protected final ImmutableSet<Report> reports;
   protected final Config config;
   protected final ConflictGraph graph;
-
   protected final MethodDeclarationTree methodDeclarationTree;
-
+  protected final GlobalAnalyzer globalAnalyzer;
   protected final int depth;
 
   public Explorer(
@@ -54,6 +55,7 @@ public abstract class Explorer {
       Bank<Fix> fixBank,
       ImmutableSet<Fix> fixes,
       MethodDeclarationTree methodDeclarationTree,
+      GlobalAnalyzer globalAnalyzer,
       int depth,
       Config config) {
     this.injector = injector;
@@ -62,8 +64,9 @@ public abstract class Explorer {
     this.methodDeclarationTree = methodDeclarationTree;
     this.reports =
         fixes.stream().map(fix -> new Report(fix, 1)).collect(ImmutableSet.toImmutableSet());
-    this.config = config;
+    this.globalAnalyzer = globalAnalyzer;
     this.depth = depth;
+    this.config = config;
     this.graph = new ConflictGraph();
   }
 

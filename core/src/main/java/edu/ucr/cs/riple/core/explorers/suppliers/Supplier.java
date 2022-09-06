@@ -22,37 +22,24 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers;
+package edu.ucr.cs.riple.core.explorers.suppliers;
 
-import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;
-import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+import edu.ucr.cs.riple.injector.Injector;
 
-public class ExhaustiveExplorer extends Explorer {
-
-  public ExhaustiveExplorer(
-      AnnotationInjector injector,
-      Bank<Error> errorBank,
-      Bank<Fix> fixBank,
-      ImmutableSet<Fix> fixes,
-      MethodDeclarationTree tree,
-      Config config) {
-    super(
-        injector, errorBank, fixBank, fixes, tree, new NoOpGlobalAnalyzer(), config.depth, config);
-  }
-
-  @Override
-  protected void executeNextCycle() {
-    // NO OP
-  }
-
-  @Override
-  protected void finalizeReports() {
-    this.reports.forEach(report -> report.localEffect = -1);
-  }
+/**
+ * Supplier for initializing {@link edu.ucr.cs.riple.core.explorers.Explorer} instance.
+ */
+public interface Supplier {
+    Bank<Fix> getFixBank();
+    Bank<Error> getErrorBank();
+    int depth();
+    String getBuildCommand();
+    Config getConfig();
+    Injector getInjector();
+    MethodDeclarationTree getMethodDeclarationTree();
 }

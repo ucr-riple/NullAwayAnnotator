@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.explorers;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -44,8 +45,17 @@ public class BasicExplorer extends Explorer {
       Bank<Fix> fixBank,
       ImmutableSet<Fix> fixes,
       MethodDeclarationTree methodDeclarationTree,
+      GlobalAnalyzer globalAnalyzer,
       Config config) {
-    super(injector, errorBank, fixBank, fixes, methodDeclarationTree, config.depth, config);
+    super(
+        injector,
+        errorBank,
+        fixBank,
+        fixes,
+        methodDeclarationTree,
+        globalAnalyzer,
+        config.depth,
+        config);
   }
 
   @Override
