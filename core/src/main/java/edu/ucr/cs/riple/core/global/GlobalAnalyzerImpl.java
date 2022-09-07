@@ -212,4 +212,10 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
   public void updateImpactsAfterInjection(Set<Fix> fixes) {
     this.methods.values().forEach(methodImpact -> methodImpact.updateStatus(fixes));
   }
+
+  @Override
+  public boolean isDestructiveFix(Fix fix) {
+    return getTriggeredErrors(fix).stream()
+        .anyMatch(error -> !tree.declaredInModule(error.nonnullTarget));
+  }
 }

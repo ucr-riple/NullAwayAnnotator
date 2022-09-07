@@ -153,7 +153,7 @@ public class Annotator {
           });
 
       // Tag reports according to selected analysis mode.
-      config.mode.tag(config, tree, globalAnalyzer, latestReports);
+      config.mode.tag(config, globalAnalyzer, latestReports);
 
       // Inject approved fixes.
       Set<Fix> selectedFixes =

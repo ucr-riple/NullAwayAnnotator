@@ -30,7 +30,6 @@ import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Objects;
 import java.util.Set;
@@ -101,12 +100,8 @@ public class Report {
    * @return true, if report contains a fix which will trigger an unresolvable error in downstream
    *     dependency.
    */
-  public boolean containsDestructiveMethod(MethodDeclarationTree mdt, GlobalAnalyzer analyzer) {
-    return this.tree.stream()
-        .anyMatch(
-            fix ->
-                analyzer.getTriggeredErrors(fix).stream()
-                    .anyMatch(error -> !mdt.declaredInModule(error.nonnullTarget)));
+  public boolean containsDestructiveMethod(GlobalAnalyzer analyzer) {
+    return this.tree.stream().anyMatch(analyzer::isDestructiveFix);
   }
 
   /**
