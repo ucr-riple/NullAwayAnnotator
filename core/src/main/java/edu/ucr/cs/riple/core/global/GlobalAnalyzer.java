@@ -59,7 +59,7 @@ public interface GlobalAnalyzer {
    * on the target on downstream dependencies.
    *
    * @param tree Tree of the fix tree associated to root.
-   * @return Lower bound of number of errors on downstream dependencies.
+   * @return Upper bound of number of errors on downstream dependencies.
    */
   int computeUpperBoundOfNumberOfErrors(Set<Fix> tree);
 
