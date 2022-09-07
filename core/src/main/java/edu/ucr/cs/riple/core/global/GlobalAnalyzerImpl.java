@@ -130,7 +130,7 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
    * @return Corresponding {@link MethodImpact}, null if not located.
    */
   @Nullable
-  private MethodImpact fetchStatus(Fix fix) {
+  private MethodImpact fetchMethodImpactForFix(Fix fix) {
     if (!fix.isOnMethod()) {
       return null;
     }
@@ -151,14 +151,14 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
    * @return Effect on downstream dependencies.
    */
   private int effectOnDownstreamDependencies(Fix fix, Set<Location> fixesLocation) {
-    MethodImpact status = fetchStatus(fix);
-    if (status == null) {
+    MethodImpact methodImpact = fetchMethodImpactForFix(fix);
+    if (methodImpact == null) {
       return 0;
     }
-    int individualEffect = status.getEffect();
+    int individualEffect = methodImpact.getEffect();
     // Some triggered errors might be resolved due to fixes in the tree, and we should not double
     // count them.
-    List<Error> triggeredErrors = status.getTriggeredErrors();
+    List<Error> triggeredErrors = methodImpact.getTriggeredErrors();
     long resolvedErrors =
         triggeredErrors.stream()
             .filter(error -> fixesLocation.contains(error.nonnullTarget))
@@ -189,8 +189,8 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
         .filter(Fix::isOnMethod)
         .flatMap(
             fix -> {
-              MethodImpact status = fetchStatus(fix);
-              return status == null ? Stream.of() : status.getImpactedParameters().stream();
+              MethodImpact impact = fetchMethodImpactForFix(fix);
+              return impact == null ? Stream.of() : impact.getImpactedParameters().stream();
             })
         .collect(ImmutableSet.toImmutableSet());
   }
@@ -201,7 +201,7 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
     if (!fix.isOnMethod()) {
       return Collections.emptyList();
     }
-    MethodImpact impact = fetchStatus(fix);
+    MethodImpact impact = fetchMethodImpactForFix(fix);
     if (impact == null) {
       return Collections.emptyList();
     }
