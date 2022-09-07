@@ -39,8 +39,6 @@ import javax.annotation.Nullable;
 public class TReport extends Report {
 
   private final int expectedValue;
-  /** If null, tag is not part of assessment in that test. */
-  @Nullable public final Tag expectedTag;
 
   public TReport(Location root, int effect) {
     this(root, effect, null);
@@ -56,7 +54,9 @@ public class TReport extends Report {
             new AddAnnotation(root, "javax.annotation.Nullable"), null, encClass, encMethod, true),
         effect);
     this.expectedValue = effect;
-    this.expectedTag = tag;
+    if(tag != null){
+      this.tag(tag);
+    }
   }
 
   public TReport(
@@ -89,15 +89,5 @@ public class TReport extends Report {
   @Override
   public int getOverallEffect(Config config) {
     return expectedValue;
-  }
-
-  /**
-   * Returns the expected value examination under in tests.
-   *
-   * @return expected tag.
-   */
-  @Nullable
-  public Tag getExpectedTag() {
-    return this.expectedTag;
   }
 }
