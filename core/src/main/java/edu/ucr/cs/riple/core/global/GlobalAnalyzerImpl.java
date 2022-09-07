@@ -54,7 +54,7 @@ import javax.annotation.Nullable;
 public class GlobalAnalyzerImpl implements GlobalAnalyzer {
 
   /** Set of downstream dependencies. */
-  private final ImmutableSet<ModuleInfo> modules;
+  private final ImmutableSet<ModuleInfo> downstreamModules;
   /** Public APIs in the target modules that have a non-primitive return value. */
   private final ImmutableMultimap<Integer, MethodImpact> methods;
   /** Annotator Config. */
@@ -64,7 +64,7 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
 
   public GlobalAnalyzerImpl(Config config, MethodDeclarationTree tree) {
     this.config = config;
-    this.modules = config.downstreamInfo;
+    this.downstreamModules = config.downstreamInfo;
     this.tree = tree;
     this.methods =
         Multimaps.index(
@@ -77,9 +77,9 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
   @Override
   public void analyzeDownstreamDependencies() {
     System.out.println("Analyzing downstream dependencies...");
-    Utility.setScannerCheckerActivation(modules, true);
+    Utility.setScannerCheckerActivation(downstreamModules, true);
     Utility.buildDownstreamDependencies(config);
-    Utility.setScannerCheckerActivation(modules, false);
+    Utility.setScannerCheckerActivation(downstreamModules, false);
     // Collect callers of public APIs in module.
     MethodRegionTracker tracker = new MethodRegionTracker(config.downstreamInfo, tree);
     // Generate fixes corresponding methods.
