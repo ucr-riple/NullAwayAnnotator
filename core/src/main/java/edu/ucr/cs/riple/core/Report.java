@@ -30,6 +30,7 @@ import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Objects;
 import java.util.Set;
@@ -68,6 +69,17 @@ public class Report {
    */
   private int upperBoundEffectOnDownstreamDependencies;
 
+  /** Denotes the final decision regarding the injection of the report. */
+  public enum Tag {
+    /** If tagged with this tag, report tree will be injected. */
+    APPLY,
+    /** If tagged with this tag, report tree will not be injected and will be discarded. */
+    DISCARD,
+  }
+
+  /** Status of the report. */
+  private Tag tag;
+
   public Report(Fix root, int localEffect) {
     this.localEffect = localEffect;
     this.root = root;
@@ -77,6 +89,42 @@ public class Report {
     this.triggeredErrors = ImmutableList.of();
     this.lowerBoundEffectOnDownstreamDependencies = 0;
     this.upperBoundEffectOnDownstreamDependencies = 0;
+    this.tag = Tag.DISCARD;
+  }
+
+  /**
+   * Checks if any of the fix in tree, will trigger an unresolvable error in downstream
+   * dependencies.
+   *
+   * @param mdt Method declaration tre instance.
+   * @param analyzer Analyzer to check impact of method.
+   * @return true, if report contains a fix which will trigger an unresolvable error in downstream
+   *     dependency.
+   */
+  public boolean containsDestructiveMethod(MethodDeclarationTree mdt, GlobalAnalyzer analyzer) {
+    return this.tree.stream()
+        .anyMatch(
+            fix ->
+                analyzer.getTriggeredErrors(fix).stream()
+                    .anyMatch(error -> !mdt.declaredInModule(error.nonnullTarget)));
+  }
+
+  /**
+   * Setter for tag.
+   *
+   * @param tag tag value.
+   */
+  public void tag(Tag tag) {
+    this.tag = tag;
+  }
+
+  /**
+   * Checks if report's fix tree is approved by analysis and should be applied.
+   *
+   * @return true, if fix tree should be applied and false otherwise.
+   */
+  public boolean approved() {
+    return this.tag.equals(Tag.APPLY);
   }
 
   @Override
@@ -125,8 +173,7 @@ public class Report {
         this.triggeredFixes.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
     Set<Location> otherTriggered =
         other.triggeredFixes.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
-    boolean ans = otherTriggered.equals(thisTriggered);
-    return ans;
+    return otherTriggered.equals(thisTriggered);
   }
 
   @Override
@@ -153,18 +200,20 @@ public class Report {
   }
 
   /**
-   * Returns the overall effect of applying fix tree associated to this report. If downstream
-   * dependency analysis is activated, overall effect will be sum of local effect and lower bound of
-   * number of errors on downstream dependencies.
+   * Returns the overall effect of applying fix tree associated to this report according to {@link
+   * AnalysisMode}.
    *
-   * @param config Annotator config.
    * @return Overall effect ot applying the fix tree.
    */
   public int getOverallEffect(Config config) {
-    if (config.downStreamDependenciesAnalysisActivated) {
-      return this.localEffect + this.lowerBoundEffectOnDownstreamDependencies;
+    AnalysisMode mode = config.mode;
+    if (mode.equals(AnalysisMode.LOCAL)) {
+      return this.localEffect;
     }
-    return this.localEffect;
+    if (mode.equals(AnalysisMode.UPPER_BOUND)) {
+      return this.localEffect + this.upperBoundEffectOnDownstreamDependencies;
+    }
+    return this.localEffect + this.lowerBoundEffectOnDownstreamDependencies;
   }
 
   /**
