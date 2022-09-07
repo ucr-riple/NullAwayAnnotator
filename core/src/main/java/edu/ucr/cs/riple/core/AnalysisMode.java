@@ -115,7 +115,6 @@ public enum AnalysisMode {
    * Tags reports based on the analysis mode.
    *
    * @param config Annotator config.
-   * @param mdt Method declaration tree instance.
    * @param analyzer Downstream dependency instance.
    * @param reports Reports to be processed.
    */
