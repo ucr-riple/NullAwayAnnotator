@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,27 +22,21 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core;
+package edu.ucr.cs.riple.core.explorers.suppliers;
 
-import java.nio.file.Paths;
+import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 
-/** Starting point. */
-public class Main {
+/** Supplier for exhaustive analysis. This will be mostly used in experiments. */
+public class ExhaustiveSupplier extends TargetModuleSupplier {
 
   /**
-   * Starting point.
+   * Constructor for exhaustive supplier.
    *
-   * @param args if flag '--path' is found, all configurations will be set up based on the given
-   *     json file, otherwise they will be set up according to the set of received cli arguments.
+   * @param config Annotator config instance.
+   * @param tree Method declaration tree instance for methods in target module.
    */
-  public static void main(String[] args) {
-    Config config;
-    if (args.length == 2 && args[0].equals("--path")) {
-      config = new Config(Paths.get(args[1]));
-    } else {
-      config = new Config(args);
-    }
-    Annotator annotator = new Annotator(config);
-    annotator.start();
+  public ExhaustiveSupplier(Config config, MethodDeclarationTree tree) {
+    super(config, tree);
   }
 }

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,26 +22,49 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers;
+package edu.ucr.cs.riple.core.global;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.explorers.suppliers.ExhaustiveSupplier;
-import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;
+import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.injector.location.OnParameter;
+import java.util.List;
+import java.util.Set;
 
-public class ExhaustiveExplorer extends Explorer {
+/**
+ * This global analyzer does not have any information regarding the impact of changes in target
+ * module in dependencies, the main purpose of this class is to avoid initializing GlobalAnalyzer
+ * instances to {@code null} when impact on dependencies is not considered.
+ */
+public class NoOpGlobalAnalyzer implements GlobalAnalyzer {
 
-  public ExhaustiveExplorer(ImmutableSet<Fix> fixes, ExhaustiveSupplier supplier) {
-    super(fixes, supplier, new NoOpGlobalAnalyzer());
+  @Override
+  public void analyzeDownstreamDependencies() {
+    // No operation needed.
   }
 
   @Override
-  protected void executeNextCycle() {
-    // NO OP
+  public int computeLowerBoundOfNumberOfErrors(Set<Fix> tree) {
+    return 0;
   }
 
   @Override
-  protected void finalizeReports() {
-    this.reports.forEach(report -> report.localEffect = -1);
+  public int computeUpperBoundOfNumberOfErrors(Set<Fix> tree) {
+    return 0;
+  }
+
+  @Override
+  public ImmutableSet<OnParameter> getImpactedParameters(Set<Fix> fixTree) {
+    return ImmutableSet.of();
+  }
+
+  @Override
+  public List<Error> getTriggeredErrors(Fix fix) {
+    return List.of();
+  }
+
+  @Override
+  public void updateImpactsAfterInjection(Set<Fix> fixes) {
+    // No operation needed.
   }
 }

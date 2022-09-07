@@ -147,6 +147,15 @@ public class MethodNode implements Hashable {
     return !Objects.equals(this.id, TOP.id);
   }
 
+  /**
+   * Checks if method is public with non-primitive return type.
+   *
+   * @return true if method is public with non-primitive return type and false otherwise.
+   */
+  public boolean isPublicMethodWithNonPrimitiveReturnType() {
+    return hasNonPrimitiveReturn && visibility.equals(MethodNode.Visibility.PUBLIC);
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -27,6 +27,8 @@ package edu.ucr.cs.riple.core.explorers;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.explorers.suppliers.Supplier;
+import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.graph.ConflictGraph;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
@@ -34,49 +36,44 @@ import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+import java.util.HashSet;
 
 public abstract class Explorer {
+
   protected final AnnotationInjector injector;
   protected final Bank<Error> errorBank;
   protected final Bank<Fix> fixBank;
   protected final ImmutableSet<Report> reports;
   protected final Config config;
   protected final ConflictGraph graph;
-
   protected final MethodDeclarationTree methodDeclarationTree;
-
+  protected final GlobalAnalyzer globalAnalyzer;
   protected final int depth;
 
-  public Explorer(
-      AnnotationInjector injector,
-      Bank<Error> errorBank,
-      Bank<Fix> fixBank,
-      ImmutableSet<Fix> fixes,
-      MethodDeclarationTree methodDeclarationTree,
-      int depth,
-      Config config) {
-    this.injector = injector;
-    this.errorBank = errorBank;
-    this.fixBank = fixBank;
-    this.methodDeclarationTree = methodDeclarationTree;
+  public Explorer(ImmutableSet<Fix> fixes, Supplier supplier, GlobalAnalyzer globalAnalyzer) {
+    this.injector = supplier.getInjector();
+    this.errorBank = supplier.getErrorBank();
+    this.fixBank = supplier.getFixBank();
+    this.methodDeclarationTree = supplier.getMethodDeclarationTree();
     this.reports =
         fixes.stream().map(fix -> new Report(fix, 1)).collect(ImmutableSet.toImmutableSet());
-    this.config = config;
-    this.depth = depth;
+    this.globalAnalyzer = globalAnalyzer;
+    this.depth = supplier.depth();
+    this.config = supplier.getConfig();
     this.graph = new ConflictGraph();
   }
 
   protected void initializeFixGraph() {
     this.graph.clear();
     this.reports.stream()
-        .filter(report -> !report.finished && (!config.bailout || report.localEffect > 0))
+        .filter(input -> input.isInProgress(config))
         .forEach(
             report -> {
               Fix root = report.root;
               Node node = graph.addNodeToVertices(root);
               node.setOrigins(fixBank);
               node.report = report;
-              node.triggeredFixes = report.triggered;
+              node.triggeredFixes = new HashSet<>(report.triggeredFixes);
               node.tree.addAll(report.tree);
               node.mergeTriggered();
             });
@@ -90,7 +87,8 @@ public abstract class Explorer {
               Report report = node.report;
               report.localEffect = node.effect;
               report.tree = node.tree;
-              report.triggered = node.triggeredFixes;
+              report.triggeredFixes = ImmutableSet.copyOf(node.triggeredFixes);
+              report.triggeredErrors = node.triggeredErrors;
               report.finished = !node.changed;
             });
   }

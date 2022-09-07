@@ -25,14 +25,12 @@
 package edu.ucr.cs.riple.core.explorers;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
+import edu.ucr.cs.riple.core.explorers.suppliers.Supplier;
+import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
-import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.Result;
-import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -43,19 +41,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import me.tongfei.progressbar.ProgressBar;
 
-public class OptimizedExplorer extends Explorer {
+public class OptimizedExplorer extends BasicExplorer {
   private final RegionTracker tracker;
 
   public OptimizedExplorer(
-      AnnotationInjector injector,
-      Bank<Error> errorBank,
-      Bank<Fix> fixBank,
-      RegionTracker tracker,
       ImmutableSet<Fix> fixes,
-      MethodDeclarationTree tree,
-      int depth,
-      Config config) {
-    super(injector, errorBank, fixBank, fixes, tree, depth, config);
+      Supplier supplier,
+      GlobalAnalyzer globalAnalyzer,
+      RegionTracker tracker) {
+    super(fixes, supplier, globalAnalyzer);
     this.tracker = tracker;
   }
 
@@ -86,18 +80,20 @@ public class OptimizedExplorer extends Explorer {
       fixBank.saveState(false, true);
       group.forEach(
           node -> {
-            int totalEffect = 0;
+            int localEffect = 0;
             List<Fix> triggeredFixes = new ArrayList<>();
             List<Error> triggeredErrors = new ArrayList<>();
             for (Region region : node.regions) {
-              Result<Error> res = errorBank.compareByMethod(region.clazz, region.method, false);
-              totalEffect += res.size;
-              triggeredErrors.addAll(res.dif);
+              Result<Error> errorComparisonResult =
+                  errorBank.compareByMethod(region.clazz, region.method, false);
+              localEffect += errorComparisonResult.size;
+              triggeredErrors.addAll(errorComparisonResult.dif);
               triggeredFixes.addAll(
-                  new ArrayList<>(fixBank.compareByMethod(region.clazz, region.method, false).dif));
+                  fixBank.compareByMethod(region.clazz, region.method, false).dif);
             }
+            addTriggeredFixesFromDownstream(node, triggeredFixes);
             node.updateStatus(
-                totalEffect, fixes, triggeredFixes, triggeredErrors, methodDeclarationTree);
+                localEffect, fixes, triggeredFixes, triggeredErrors, methodDeclarationTree);
           });
       injector.removeFixes(fixes);
     }

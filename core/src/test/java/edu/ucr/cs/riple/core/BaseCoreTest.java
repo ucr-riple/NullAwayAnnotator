@@ -61,7 +61,11 @@ public abstract class BaseCoreTest {
     Path templates = Paths.get("templates");
     Path pathToUnitTestDir =
         Utility.getPathOfResource(templates.resolve(projectTemplate).toString());
+    Path repositoryDirectory = Paths.get(System.getProperty("user.dir")).getParent();
     try {
+      // Create a separate library models loader to avoid races between unit tests.
+      FileUtils.copyDirectory(
+          repositoryDirectory.toFile(), outDirPath.resolve("Annotator").toFile());
       FileUtils.deleteDirectory(projectPath.toFile());
       FileUtils.copyDirectory(pathToUnitTestDir.toFile(), projectPath.toFile());
       ProcessBuilder processBuilder = Utility.createProcessInstance();
@@ -74,7 +78,7 @@ public abstract class BaseCoreTest {
       commands.addAll(Utility.computeConfigPathsWithGradleArguments(outDirPath, modules));
       commands.add(
           "-Plibrary-model-loader-path="
-              + Utility.getPathToLibraryModel().resolve("build").resolve("libs"));
+              + Utility.getPathToLibraryModel(outDirPath).resolve("build").resolve("libs"));
       processBuilder.command(commands);
       int success = processBuilder.start().waitFor();
       if (success != 0) {

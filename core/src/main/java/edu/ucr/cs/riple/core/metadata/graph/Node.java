@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core.metadata.graph;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
@@ -59,7 +59,7 @@ public class Node {
   public Set<Fix> triggeredFixes;
 
   /** Collection of triggered errors if tree is applied. */
-  public ImmutableSet<Error> triggeredErrors;
+  public ImmutableList<Error> triggeredErrors;
 
   /** Unique id of Node across all nodes. */
   public int id;
@@ -83,7 +83,7 @@ public class Node {
     this.regions = new HashSet<>();
     this.root = root;
     this.triggeredFixes = new HashSet<>();
-    this.triggeredErrors = ImmutableSet.of();
+    this.triggeredErrors = ImmutableList.of();
     this.effect = 0;
     this.tree = Sets.newHashSet(root);
     this.changed = false;
@@ -137,14 +137,14 @@ public class Node {
    * Updates node status. Should be called when all annotations in tree are applied to the source
    * code and the target project has been rebuilt.
    *
-   * @param effect Local effect calculated based on the number of errors in impacted regions.
+   * @param localEffect Local effect calculated based on the number of errors in impacted regions.
    * @param fixesInOneRound All fixes applied simultaneously to the source code.
    * @param triggeredFixes Triggered fixes collected from impacted regions.
    * @param triggeredErrors Triggered Errors collected from impacted regions.
    * @param mdt Method declaration tree instance.
    */
   public void updateStatus(
-      int effect,
+      int localEffect,
       Set<Fix> fixesInOneRound,
       Collection<Fix> triggeredFixes,
       Collection<Error> triggeredErrors,
@@ -152,7 +152,7 @@ public class Node {
     // Update list of triggered fixes.
     this.updateTriggered(triggeredFixes);
     // Update list of triggered errors.
-    this.triggeredErrors = ImmutableSet.copyOf(triggeredErrors);
+    this.triggeredErrors = ImmutableList.copyOf(triggeredErrors);
     // A fix in a tree, can have a super method that is not part of this node's tree but be present
     // in another node's tree. In this case since both are applied, an error due to inheritance
     // violation will not be reported. This calculation below will fix that.
@@ -185,7 +185,7 @@ public class Node {
               }
             });
     // Fix the actual error below.
-    this.effect = effect + numberOfSuperMethodsAnnotatedOutsideTree[0];
+    this.effect = localEffect + numberOfSuperMethodsAnnotatedOutsideTree[0];
   }
 
   /**
@@ -203,6 +203,7 @@ public class Node {
   /** Merges triggered fixes to the tree, to prepare the analysis for the next depth. */
   public void mergeTriggered() {
     this.tree.addAll(this.triggeredFixes);
+    this.tree.forEach(fix -> fix.fixSourceIsInTarget = true);
     this.triggeredFixes.clear();
   }
 

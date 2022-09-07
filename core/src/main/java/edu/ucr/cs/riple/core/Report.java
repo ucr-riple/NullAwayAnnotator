@@ -24,11 +24,13 @@
 
 package edu.ucr.cs.riple.core;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import edu.ucr.cs.riple.core.explorers.DownStreamDependencyExplorer;
+import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
+import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.location.Location;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -48,7 +50,11 @@ public class Report {
   /**
    * Set of fixes that will be triggered in target module if fix tree is applied to the source code.
    */
-  public Set<Fix> triggered;
+  public ImmutableSet<Fix> triggeredFixes;
+  /**
+   * Set of fixes that will be triggered in target module if fix tree is applied to the source code.
+   */
+  public ImmutableList<Error> triggeredErrors;
   /** If true, all leaves of fix tree are not resolvable by any {@code @Nullable} annotation. */
   public boolean finished;
   /**
@@ -67,7 +73,8 @@ public class Report {
     this.root = root;
     this.tree = Sets.newHashSet(root);
     this.finished = false;
-    this.triggered = new HashSet<>();
+    this.triggeredFixes = ImmutableSet.of();
+    this.triggeredErrors = ImmutableList.of();
     this.lowerBoundEffectOnDownstreamDependencies = 0;
     this.upperBoundEffectOnDownstreamDependencies = 0;
   }
@@ -107,17 +114,15 @@ public class Report {
     }
     this.tree.add(this.root);
     other.tree.add(other.root);
-    Set<Location> thisTree =
-        this.tree.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
-    Set<Location> otherTree =
-        other.tree.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
+    Set<Location> thisTree = this.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
+    Set<Location> otherTree = other.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
     if (!thisTree.equals(otherTree)) {
       return false;
     }
     Set<Location> thisTriggered =
-        this.triggered.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
+        this.triggeredFixes.stream().map(Fix::toLocation).collect(Collectors.toSet());
     Set<Location> otherTriggered =
-        other.triggered.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
+        other.triggeredFixes.stream().map(Fix::toLocation).collect(Collectors.toSet());
     return otherTriggered.equals(thisTriggered);
   }
 
@@ -128,7 +133,7 @@ public class Report {
         + ", "
         + root
         + ", "
-        + tree.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
+        + tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
   }
 
   /**
@@ -137,8 +142,7 @@ public class Report {
    *
    * @param explorer Downstream dependency instance.
    */
-  public void computeBoundariesOfEffectivenessOnDownstreamDependencies(
-      DownStreamDependencyExplorer explorer) {
+  public void computeBoundariesOfEffectivenessOnDownstreamDependencies(GlobalAnalyzer explorer) {
     this.lowerBoundEffectOnDownstreamDependencies =
         explorer.computeLowerBoundOfNumberOfErrors(tree);
     this.upperBoundEffectOnDownstreamDependencies =
@@ -150,12 +154,14 @@ public class Report {
    * dependency analysis is activated, overall effect will be sum of local effect and lower bound of
    * number of errors on downstream dependencies.
    *
+   * @param config Annotator config.
    * @return Overall effect ot applying the fix tree.
    */
   public int getOverallEffect(Config config) {
-    return config.downStreamDependenciesAnalysisActivated
-        ? this.localEffect + this.lowerBoundEffectOnDownstreamDependencies
-        : this.localEffect;
+    if (config.downStreamDependenciesAnalysisActivated) {
+      return this.localEffect + this.lowerBoundEffectOnDownstreamDependencies;
+    }
+    return this.localEffect;
   }
 
   /**
@@ -174,5 +180,17 @@ public class Report {
    */
   public int getUpperBoundEffectOnDownstreamDependencies() {
     return upperBoundEffectOnDownstreamDependencies;
+  }
+
+  /**
+   * Checks if the report needs further investigation. If a fix is suggested from downstream
+   * dependencies, it should still be included the next cycle.
+   *
+   * @param config Annotator config instance.
+   * @return true, if report needs further investigation.
+   */
+  public boolean isInProgress(Config config) {
+    return (!finished && (!config.bailout || localEffect > 0))
+        || triggeredFixes.stream().anyMatch(input -> !input.fixSourceIsInTarget);
   }
 }

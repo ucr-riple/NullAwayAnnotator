@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.metadata.method;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.MetaData;
+import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -42,16 +43,20 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
   /** Each method has a unique id across all methods. This hashmap, maps ids to nodes. */
   private HashMap<Integer, MethodNode> nodes;
 
+  /** Set of all classes flat name declared in module. */
+  private HashSet<String> classNames;
+
   public MethodDeclarationTree(Path path) {
     super(path);
-    // The root node of this tree with id: -1.
-    nodes.put(-1, MethodNode.TOP);
   }
 
   @Override
   protected void setup() {
     super.setup();
-    nodes = new HashMap<>();
+    this.classNames = new HashSet<>();
+    this.nodes = new HashMap<>();
+    // The root node of this tree with id: -1.
+    nodes.put(-1, MethodNode.TOP);
   }
 
   @Override
@@ -86,6 +91,8 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
       // Parent is already visited.
       parent.addChild(id);
     }
+    // Update list of all declared classes.
+    this.classNames.add(node.location.clazz);
     return node;
   }
 
@@ -164,19 +171,21 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
    * @return ImmutableSet of method nodes.
    */
   public ImmutableSet<MethodNode> getPublicMethodsWithNonPrimitivesReturn() {
-    return findNodes(
-            node ->
-                node.hasNonPrimitiveReturn && node.visibility.equals(MethodNode.Visibility.PUBLIC))
+    return findNodes(MethodNode::isPublicMethodWithNonPrimitiveReturnType)
         .collect(ImmutableSet.toImmutableSet());
   }
 
   /**
-   * Checks if the passed method, is declared in the target module.
+   * Checks if the passed location is targeting an element declared in the target module.
    *
-   * @param location Location of the method.
-   * @return true, if tree contains the method and false otherwise.
+   * @param location Location of the element.
+   * @return true, if the passed location is nonnull and is targeting an element in the target
+   *     module, and false otherwise.
    */
-  public boolean declaredInModule(OnMethod location) {
-    return findNode(location.method, location.clazz) != null;
+  public boolean declaredInModule(@Nullable Location location) {
+    if (location == null || location.clazz.equals("null")) {
+      return false;
+    }
+    return this.classNames.contains(location.clazz);
   }
 }

@@ -26,16 +26,18 @@ package edu.ucr.cs.riple.core;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.explorers.BasicExplorer;
-import edu.ucr.cs.riple.core.explorers.DownStreamDependencyExplorer;
 import edu.ucr.cs.riple.core.explorers.ExhaustiveExplorer;
 import edu.ucr.cs.riple.core.explorers.Explorer;
 import edu.ucr.cs.riple.core.explorers.OptimizedExplorer;
+import edu.ucr.cs.riple.core.explorers.suppliers.ExhaustiveSupplier;
+import edu.ucr.cs.riple.core.explorers.suppliers.TargetModuleSupplier;
+import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
+import edu.ucr.cs.riple.core.global.GlobalAnalyzerImpl;
+import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.field.FieldInitializationAnalysis;
-import edu.ucr.cs.riple.core.metadata.index.Bank;
-import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
@@ -45,24 +47,34 @@ import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * The main class of the core module. Responsible for analyzing the target module and injecting the
+ * corresponding annotations.
+ */
 public class Annotator {
 
+  /** Injector instance. */
   private final AnnotationInjector injector;
+  /** Annotator config. */
   private final Config config;
-  // Set does not have get method, here we use map which retrieves elements efficiently.
-  public final HashMap<Fix, Report> reports;
+  /**
+   * Map of fix to their corresponding reports, used to detect processed fixes in a new batch of fix
+   * suggestion. Note: Set does not have get method, here we use map which retrieves elements
+   * efficiently.
+   */
+  public final HashMap<Fix, Report> cachedReports;
 
   public Annotator(Config config) {
     this.config = config;
-    this.reports = new HashMap<>();
+    this.cachedReports = new HashMap<>();
     this.injector = new PhysicalInjector(config);
   }
 
+  /** Starts the annotating process consist of preprocess followed by explore phase. */
   public void start() {
     preprocess();
     long timer = config.log.startTimer();
@@ -71,10 +83,20 @@ public class Annotator {
     Utility.writeLog(config);
   }
 
+  /**
+   * Performs all the preprocessing tasks.
+   *
+   * <ul>
+   *   <li>Performs the first build of the target module.
+   *   <li>Detects uninitialized fields.
+   *   <li>Detects initializer method candidates.
+   *   <li>Marks selected initializer methods with {@code @Initializer} annotation.
+   * </ul>
+   */
   private void preprocess() {
     System.out.println("Preprocessing...");
     Utility.setScannerCheckerActivation(config.target, true);
-    this.reports.clear();
+    this.cachedReports.clear();
     System.out.println("Making the first build...");
     Utility.buildTarget(config, true);
     Set<OnField> uninitializedFields =
@@ -92,6 +114,7 @@ public class Annotator {
     this.injector.injectAnnotations(initializers);
   }
 
+  /** Performs iterations of inference/injection until no unseen fix is suggested. */
   private void explore() {
     Utility.setScannerCheckerActivation(config.target, true);
     Utility.buildTarget(config);
@@ -99,91 +122,87 @@ public class Annotator {
     FieldDeclarationAnalysis fieldDeclarationAnalysis = new FieldDeclarationAnalysis(config.target);
     MethodDeclarationTree tree =
         new MethodDeclarationTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
-    // downStreamDependencyExplorer analyzes effects of all public APIs on downstream dependencies.
+    // globalAnalyzer analyzes effects of all public APIs on downstream dependencies.
     // Through iterations, since the source code for downstream dependencies does not change and the
     // computation does not depend on the changes in the target module, it will compute the same
     // result in each iteration, therefore we perform the analysis only once and reuse it in each
     // iteration.
-    DownStreamDependencyExplorer downStreamDependencyExplorer =
-        new DownStreamDependencyExplorer(config, tree);
-    if (config.downStreamDependenciesAnalysisActivated) {
-      downStreamDependencyExplorer.explore();
-    }
-    // Set of fixes collected from downstream dependencies that are triggered due to changes in the
-    // upstream module (target) public API.
-    Set<Fix> triggeredFixesFromDownstreamDependencies = new HashSet<>();
-
-    while (true) {
-      Utility.buildTarget(config);
-      ImmutableSet<Fix> fixes =
-          Stream.concat(
-                  triggeredFixesFromDownstreamDependencies.stream(),
-                  Utility.readFixesFromOutputDirectory(
-                      config.target, Fix.factory(config, fieldDeclarationAnalysis)))
-              .filter(fix -> !config.useCache || !reports.containsKey(fix))
-              .collect(ImmutableSet.toImmutableSet());
-      Bank<Error> errorBank = new Bank<>(config.target.dir.resolve("errors.tsv"), Error::new);
-      Bank<Fix> fixBank =
-          new Bank<>(
-              config.target.dir.resolve("fixes.tsv"),
-              Fix.factory(config, fieldDeclarationAnalysis));
-      tree = new MethodDeclarationTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
-      RegionTracker tracker = new CompoundTracker(config.target, tree);
-      Explorer explorer =
-          config.exhaustiveSearch
-              ? new ExhaustiveExplorer(injector, errorBank, fixBank, fixes, tree, config)
-              : config.optimized
-                  ? new OptimizedExplorer(
-                      injector, errorBank, fixBank, tracker, fixes, tree, config.depth, config)
-                  : new BasicExplorer(injector, errorBank, fixBank, fixes, tree, config);
-      ImmutableSet<Report> latestReports = explorer.explore();
-      int sizeBefore = reports.size();
+    GlobalAnalyzer globalAnalyzer =
+        config.downStreamDependenciesAnalysisActivated
+            ? new GlobalAnalyzerImpl(config, tree)
+            : new NoOpGlobalAnalyzer();
+    globalAnalyzer.analyzeDownstreamDependencies();
+    boolean noNewFixTriggered = false;
+    while (!noNewFixTriggered) {
+      ImmutableSet<Report> latestReports =
+          executeNextIteration(globalAnalyzer, fieldDeclarationAnalysis);
+      int sizeBefore = cachedReports.size();
+      // Update cached reports store.
       latestReports.forEach(
           report -> {
             if (config.downStreamDependenciesAnalysisActivated) {
-              report.computeBoundariesOfEffectivenessOnDownstreamDependencies(
-                  downStreamDependencyExplorer);
+              report.computeBoundariesOfEffectivenessOnDownstreamDependencies(globalAnalyzer);
             }
-            reports.putIfAbsent(report.root, report);
-            reports.get(report.root).localEffect = report.localEffect;
-            reports.get(report.root).finished = report.finished;
-            reports.get(report.root).tree = report.tree;
-            reports.get(report.root).triggered = report.triggered;
+            cachedReports.putIfAbsent(report.root, report);
+            Report cachedReport = cachedReports.get(report.root);
+            cachedReport.localEffect = report.localEffect;
+            cachedReport.finished = report.finished;
+            cachedReport.tree = report.tree;
+            cachedReport.triggeredFixes = report.triggeredFixes;
+            cachedReport.triggeredErrors = report.triggeredErrors;
           });
-      injector.injectFixes(
+
+      // Inject approved fixes.
+      Set<Fix> selectedFixes =
           latestReports.stream()
               .filter(report -> report.getOverallEffect(config) < 1)
               .flatMap(report -> config.chain ? report.tree.stream() : Stream.of(report.root))
-              .collect(Collectors.toSet()));
-      // Collect impacted parameters from changes in target module due to usages in downstream
-      // dependencies.
-      if (config.downStreamDependenciesAnalysisActivated) {
-        triggeredFixesFromDownstreamDependencies =
-            latestReports.stream()
-                .flatMap(
-                    report ->
-                        downStreamDependencyExplorer.getImpactedParameters(report.tree).stream()
-                            .map(
-                                onParameter ->
-                                    new Fix(
-                                        new AddAnnotation(onParameter, config.nullableAnnot),
-                                        "PASSING_NULLABLE",
-                                        onParameter.clazz,
-                                        onParameter.method)))
-                // Remove already processed fixes
-                .filter(input -> !reports.containsKey(input))
-                .collect(Collectors.toSet());
-      }
-      if (sizeBefore == this.reports.size()
-          && triggeredFixesFromDownstreamDependencies.size() == 0) {
-        System.out.println("\nFinished annotating.");
-        Utility.writeReports(
-            config, reports.values().stream().collect(ImmutableSet.toImmutableSet()));
-        return;
-      }
+              .collect(Collectors.toSet());
+      injector.injectFixes(selectedFixes);
+
+      // Update impact saved state.
+      globalAnalyzer.updateImpactsAfterInjection(selectedFixes);
+
       if (config.disableOuterLoop) {
-        return;
+        break;
       }
+      noNewFixTriggered = sizeBefore == this.cachedReports.size();
     }
+    System.out.println("\nFinished annotating.");
+    Utility.writeReports(
+        config, cachedReports.values().stream().collect(ImmutableSet.toImmutableSet()));
+  }
+
+  /**
+   * Executes the next iteration of exploration.
+   *
+   * @param globalAnalyzer Global Analyzer instance.
+   * @param fieldDeclarationAnalysis Field Declaration analysis to detect fixes on multiple inline
+   *     field declaration statements.
+   * @return Immutable set of reports from the executed iteration.
+   */
+  private ImmutableSet<Report> executeNextIteration(
+      GlobalAnalyzer globalAnalyzer, FieldDeclarationAnalysis fieldDeclarationAnalysis) {
+    Utility.buildTarget(config);
+    // Suggested fixes of target at the current state.
+    ImmutableSet<Fix> fixes =
+        Utility.readFixesFromOutputDirectory(
+                config.target, Fix.factory(config, fieldDeclarationAnalysis))
+            .filter(fix -> !config.useCache || !cachedReports.containsKey(fix))
+            .collect(ImmutableSet.toImmutableSet());
+
+    // Initializing required explorer instances.
+    MethodDeclarationTree tree =
+        new MethodDeclarationTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
+    RegionTracker tracker = new CompoundTracker(config.target, tree);
+    TargetModuleSupplier supplier = new TargetModuleSupplier(config, tree);
+    Explorer explorer =
+        config.exhaustiveSearch
+            ? new ExhaustiveExplorer(fixes, new ExhaustiveSupplier(config, tree))
+            : config.optimized
+                ? new OptimizedExplorer(fixes, supplier, globalAnalyzer, tracker)
+                : new BasicExplorer(fixes, supplier, globalAnalyzer);
+    // Result of the iteration analysis.
+    return explorer.explore();
   }
 }

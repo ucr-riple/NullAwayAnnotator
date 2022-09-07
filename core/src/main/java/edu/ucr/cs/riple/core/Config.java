@@ -263,7 +263,7 @@ public class Config {
 
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
-    CommandLine cmd = null;
+    CommandLine cmd;
 
     if (args.length == 1 && (args[0].equals("-h") || args[0].equals("--help"))) {
       showHelp(formatter, options);

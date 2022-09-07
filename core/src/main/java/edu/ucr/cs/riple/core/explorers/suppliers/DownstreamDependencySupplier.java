@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,27 +22,35 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core;
+package edu.ucr.cs.riple.core.explorers.suppliers;
 
-import java.nio.file.Paths;
+import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
+import edu.ucr.cs.riple.core.injectors.VirtualInjector;
+import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 
-/** Starting point. */
-public class Main {
+/**
+ * Supplier for downstream dependency analysis. It has the following characteristics:
+ *
+ * <ul>
+ *   <li>Annotations are virtually injected on downstream dependencies.
+ *   <li>Analysis is performed only to depth 1.
+ *   <li>Global impact of annotations are neglected.
+ * </ul>
+ */
+public class DownstreamDependencySupplier extends AbstractSupplier {
 
-  /**
-   * Starting point.
-   *
-   * @param args if flag '--path' is found, all configurations will be set up based on the given
-   *     json file, otherwise they will be set up according to the set of received cli arguments.
-   */
-  public static void main(String[] args) {
-    Config config;
-    if (args.length == 2 && args[0].equals("--path")) {
-      config = new Config(Paths.get(args[1]));
-    } else {
-      config = new Config(args);
-    }
-    Annotator annotator = new Annotator(config);
-    annotator.start();
+  public DownstreamDependencySupplier(Config config, MethodDeclarationTree tree) {
+    super(config.downstreamInfo, config, tree);
+  }
+
+  @Override
+  protected AnnotationInjector initializeInjector() {
+    return new VirtualInjector(config);
+  }
+
+  @Override
+  protected int initializeDepth() {
+    return 1;
   }
 }

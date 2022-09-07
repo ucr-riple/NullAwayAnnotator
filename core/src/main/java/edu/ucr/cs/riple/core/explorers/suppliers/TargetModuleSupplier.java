@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,26 +22,42 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers;
+package edu.ucr.cs.riple.core.explorers.suppliers;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.explorers.suppliers.ExhaustiveSupplier;
-import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
+import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
+import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 
-public class ExhaustiveExplorer extends Explorer {
+/**
+ * Supplier for target module analysis. It has the following characteristics:
+ *
+ * <ul>
+ *   <li>Annotations are physically injected on target module.
+ *   <li>Analysis is performed to depth set in config.
+ *   <li>Depending on the config, global impact of annotations can be considered.
+ * </ul>
+ */
+public class TargetModuleSupplier extends AbstractSupplier {
 
-  public ExhaustiveExplorer(ImmutableSet<Fix> fixes, ExhaustiveSupplier supplier) {
-    super(fixes, supplier, new NoOpGlobalAnalyzer());
+  /**
+   * Constructor for target module supplier instance.
+   *
+   * @param config Annotator config instance.
+   * @param tree Method declaration tree for methods in target module.
+   */
+  public TargetModuleSupplier(Config config, MethodDeclarationTree tree) {
+    super(ImmutableSet.of(config.target), config, tree);
   }
 
   @Override
-  protected void executeNextCycle() {
-    // NO OP
+  protected AnnotationInjector initializeInjector() {
+    return new PhysicalInjector(config);
   }
 
   @Override
-  protected void finalizeReports() {
-    this.reports.forEach(report -> report.localEffect = -1);
+  protected int initializeDepth() {
+    return config.depth;
   }
 }
