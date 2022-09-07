@@ -50,14 +50,14 @@ public abstract class Explorer {
   protected final GlobalAnalyzer globalAnalyzer;
   protected final int depth;
 
-  public Explorer(ImmutableSet<Fix> fixes, Supplier supplier) {
+  public Explorer(ImmutableSet<Fix> fixes, Supplier supplier, GlobalAnalyzer globalAnalyzer) {
     this.injector = supplier.getInjector();
     this.errorBank = supplier.getErrorBank();
     this.fixBank = supplier.getFixBank();
     this.methodDeclarationTree = supplier.getMethodDeclarationTree();
     this.reports =
         fixes.stream().map(fix -> new Report(fix, 1)).collect(ImmutableSet.toImmutableSet());
-    this.globalAnalyzer = supplier.getGlobalAnalyzer();
+    this.globalAnalyzer = globalAnalyzer;
     this.depth = supplier.depth();
     this.config = supplier.getConfig();
     this.graph = new ConflictGraph();
@@ -66,7 +66,7 @@ public abstract class Explorer {
   protected void initializeFixGraph() {
     this.graph.clear();
     this.reports.stream()
-        .filter(report -> !report.finished && (!config.bailout || report.localEffect > 0))
+        .filter(input -> input.isInProgress(config))
         .forEach(
             report -> {
               Fix root = report.root;

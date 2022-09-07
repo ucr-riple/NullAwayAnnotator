@@ -44,27 +44,32 @@ public class ArgumentNullableFlowTest extends BaseCoreTest {
     coreTestHelper
         .addExpectedReports(
             // Change reduces errors on target by -5, but increases them in downstream dependency
-            // DepA by 2, DepB by 0 and DepC by 1. Hence, the total effect is: -2.
-            new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullable(int)"), -2),
-            // Report below should appear due to flow of Nullable back to target by downstream
-            // dependencies. The triggered error is resolvable by making the method @Nullable,
-            // therefore, the overall effect is 0.
+            // DepA by 1 (Resolvable), DepB by 0 and DepC by 2 (1 resolvable).
+            // Parameters param1 and param2 in bar1 and bar2 will receive Nullable from downstream
+            // dependencies,
+            // param1 will be @Nullable with no triggered errors, param2 will trigger one error.
+            // Hence, the overall effect is: -5 + (from downstream dependency) 1 + (in target) 1 =
+            // -3.
             new TReport(
-                new OnParameter(
-                    "Foo.java", "test.target.Foo", "bar1(java.lang.Object,java.lang.Object)", 0),
-                0,
+                new OnMethod("Foo.java", "test.target.Foo", "returnNullable(int)"),
+                -3,
                 newHashSet(
+                    new OnParameter(
+                        "Foo.java",
+                        "test.target.Foo",
+                        "bar1(java.lang.Object,java.lang.Object)",
+                        0),
+                    new OnParameter(
+                        "Foo.java",
+                        "test.target.Foo",
+                        "bar2(java.lang.Object,java.lang.Object)",
+                        1),
                     new OnMethod(
                         "Foo.java", "test.target.Foo", "bar1(java.lang.Object,java.lang.Object)")),
-                Collections.emptySet()),
-            // Report below should appear due to flow of Nullable back to target by downstream
-            // dependencies. The triggered error is not resolvable, therefore, the overall effect 1.
-            new TReport(
-                new OnParameter(
-                    "Foo.java", "test.target.Foo", "bar2(java.lang.Object,java.lang.Object)", 1),
-                1))
+                Collections.emptySet()))
+        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
         .toDepth(5)
-        .requestCompleteLoop()
+        .disableBailOut()
         .enableDownstreamDependencyAnalysis()
         .start();
   }
@@ -73,15 +78,10 @@ public class ArgumentNullableFlowTest extends BaseCoreTest {
   public void nullableFlowDetectionDisabledTest() {
     coreTestHelper
         .addExpectedReports(
-            // Change reduces errors on target by -5
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullable(int)"), -5))
-        .setPredicate(
-            (expected, found) ->
-                expected.root.equals(found.root)
-                    && expected.getOverallEffect(coreTestHelper.getConfig())
-                        == found.getOverallEffect(coreTestHelper.getConfig()))
+        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
         .toDepth(5)
-        .requestCompleteLoop()
+        .disableBailOut()
         .start();
   }
 }

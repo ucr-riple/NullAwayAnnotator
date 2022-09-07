@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.tools;
 
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
@@ -76,5 +77,10 @@ public class TReport extends Report {
    */
   public int getExpectedValue() {
     return this.expectedValue;
+  }
+
+  @Override
+  public int getOverallEffect(Config config) {
+    return expectedValue;
   }
 }

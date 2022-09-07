@@ -25,8 +25,6 @@
 package edu.ucr.cs.riple.core.explorers.suppliers;
 
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
-import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 
 /** Supplier for exhaustive analysis. This will be mostly used in experiments. */
@@ -40,11 +38,5 @@ public class ExhaustiveSupplier extends TargetModuleSupplier {
    */
   public ExhaustiveSupplier(Config config, MethodDeclarationTree tree) {
     super(config, tree);
-  }
-
-  @Override
-  public GlobalAnalyzer getGlobalAnalyzer() {
-    // Exhaustive search does not consider the effect of fixes, it applies all suggested fixes.
-    return new NoOpGlobalAnalyzer();
   }
 }

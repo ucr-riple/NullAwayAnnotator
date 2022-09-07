@@ -27,7 +27,6 @@ package edu.ucr.cs.riple.core.explorers.suppliers;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
-import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
@@ -44,8 +43,6 @@ public abstract class AbstractSupplier implements Supplier {
   protected final Bank<Error> errorBank;
   /** Injector instance. */
   protected final AnnotationInjector injector;
-  /** Global Analyzer instance. */
-  protected final GlobalAnalyzer globalAnalyzer;
   /** Method declaration tree instance. */
   protected final MethodDeclarationTree tree;
   /** Depth of analysis. */
@@ -63,7 +60,6 @@ public abstract class AbstractSupplier implements Supplier {
     this.fixBank = initializeFixBank(modules);
     this.errorBank = initializeErrorBank(modules);
     this.injector = initializeInjector();
-    this.globalAnalyzer = initializeGlobalAnalyzer();
     this.depth = initializeDepth();
   }
 
@@ -80,13 +76,6 @@ public abstract class AbstractSupplier implements Supplier {
    * @return depth of analysis.
    */
   protected abstract int initializeDepth();
-
-  /**
-   * Initializer for globalAnalyzer.
-   *
-   * @return {@link GlobalAnalyzer} instance.
-   */
-  protected abstract GlobalAnalyzer initializeGlobalAnalyzer();
 
   /**
    * Initializer for errorBank.
@@ -134,11 +123,6 @@ public abstract class AbstractSupplier implements Supplier {
   @Override
   public MethodDeclarationTree getMethodDeclarationTree() {
     return tree;
-  }
-
-  @Override
-  public GlobalAnalyzer getGlobalAnalyzer() {
-    return globalAnalyzer;
   }
 
   @Override

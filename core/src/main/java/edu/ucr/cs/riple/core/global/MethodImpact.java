@@ -30,21 +30,22 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.injector.location.OnParameter;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /** Container class for storing overall effect of each method. */
 public class MethodImpact {
   /** Node in {@link MethodDeclarationTree} corresponding to a public method. */
   final MethodNode node;
   /**
-   * Set of parameters in target module that will receive {@code Nullable} value if targeted method
-   * in node is annotated as {@code @Nullable}.
+   * Map of parameters in target module that will receive {@code Nullable} value if targeted method
+   * in node is annotated as {@code @Nullable} with their corresponding triggered errors.
    */
-  private final HashMap<OnParameter, Integer> impactedParametersMap;
+  private final HashMap<OnParameter, List<Error>> impactedParametersMap;
   /**
    * Set of triggered errors in downstream dependencies if target method in node is annotated as
    * {@code @Nullable}.
@@ -88,17 +89,17 @@ public class MethodImpact {
    */
   public void setStatus(Report report, Set<OnParameter> impactedParameters) {
     this.effect = report.localEffect;
-    this.triggeredErrors = report.triggeredErrors;
+    this.triggeredErrors = new ArrayList<>(report.triggeredErrors);
     // Count the number of times each parameter received a @Nullable.
     impactedParameters.forEach(
         onParameter -> {
-          long count =
+          List<Error> triggered =
               triggeredErrors.stream()
                   .filter(
                       error ->
                           error.nonnullTarget != null && error.nonnullTarget.equals(onParameter))
-                  .count();
-          impactedParametersMap.put(onParameter, (int) count);
+                  .collect(Collectors.toList());
+          impactedParametersMap.put(onParameter, triggered);
         });
   }
 
@@ -121,12 +122,12 @@ public class MethodImpact {
   }
 
   /**
-   * Returns collection of parameters on target module that will receive {@code @Nullable} if method
-   * in node is annotated as {@code @Nullable}.
+   * Returns set of parameters on target module that will receive {@code @Nullable} if method in
+   * node is annotated as {@code @Nullable}.
    *
-   * @return Collection of parameters location.
+   * @return Set of parameters location.
    */
-  public Collection<OnParameter> getImpactedParameters() {
+  public Set<OnParameter> getImpactedParameters() {
     return impactedParametersMap.keySet();
   }
 
@@ -140,12 +141,15 @@ public class MethodImpact {
    */
   public void updateStatus(Set<Fix> fixes) {
     Set<OnParameter> invalidatedParameters = new HashSet<>();
+    List<Error> invalidatedErrors = new ArrayList<>();
     fixes.forEach(
         fix ->
             fix.ifOnParameter(
                 onParameter -> {
                   if (impactedParametersMap.containsKey(onParameter)) {
-                    effect -= impactedParametersMap.get(onParameter);
+                    List<Error> errors = impactedParametersMap.get(onParameter);
+                    effect -= errors.size();
+                    invalidatedErrors.addAll(errors);
                     invalidatedParameters.add(onParameter);
                   }
                 }));
@@ -153,6 +157,7 @@ public class MethodImpact {
       // This is impossible, however for safety issues, we set it to zero.
       effect = 0;
     }
+    triggeredErrors.removeAll(invalidatedErrors);
     invalidatedParameters.forEach(impactedParametersMap::remove);
   }
 }

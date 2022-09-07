@@ -125,7 +125,8 @@ public class Report {
         this.triggeredFixes.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
     Set<Location> otherTriggered =
         other.triggeredFixes.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
-    return otherTriggered.equals(thisTriggered);
+    boolean ans = otherTriggered.equals(thisTriggered);
+    return ans;
   }
 
   @Override
@@ -182,5 +183,17 @@ public class Report {
    */
   public int getUpperBoundEffectOnDownstreamDependencies() {
     return upperBoundEffectOnDownstreamDependencies;
+  }
+
+  /**
+   * Checks if the report needs further investigation. If a fix is suggested from downstream
+   * dependencies, it should still be included the next cycle.
+   *
+   * @param config Annotator config instance.
+   * @return true, if report needs further investigation.
+   */
+  public boolean isInProgress(Config config) {
+    return (!finished && (!config.bailout || localEffect > 0))
+        || triggeredFixes.stream().anyMatch(input -> !input.fixSourceIsInTarget);
   }
 }

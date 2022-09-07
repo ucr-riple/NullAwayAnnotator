@@ -47,7 +47,6 @@ import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -133,14 +132,10 @@ public class Annotator {
             ? new GlobalAnalyzerImpl(config, tree)
             : new NoOpGlobalAnalyzer();
     globalAnalyzer.analyzeDownstreamDependencies();
-
-    // Set of fixes collected from downstream dependencies that are triggered due to changes in the
-    // upstream module (target) public API.
-    Set<Fix> triggeredFixesFromDownstreamDependencies = new HashSet<>();
     boolean noNewFixTriggered = false;
     while (!noNewFixTriggered) {
       ImmutableSet<Report> latestReports =
-          executeNextIteration(triggeredFixesFromDownstreamDependencies, fieldDeclarationAnalysis);
+          executeNextIteration(globalAnalyzer, fieldDeclarationAnalysis);
       int sizeBefore = cachedReports.size();
       // Update cached reports store.
       latestReports.forEach(
@@ -168,31 +163,10 @@ public class Annotator {
       // Update impact saved state.
       globalAnalyzer.updateImpactsAfterInjection(selectedFixes);
 
-      if (config.downStreamDependenciesAnalysisActivated) {
-        triggeredFixesFromDownstreamDependencies =
-            latestReports.stream()
-                .filter(report -> report.getOverallEffect(config) < 1)
-                .flatMap(
-                    report ->
-                        globalAnalyzer.getImpactedParameters(report.tree).stream()
-                            .map(
-                                onParameter ->
-                                    new Fix(
-                                        new AddAnnotation(onParameter, config.nullableAnnot),
-                                        "PASSING_NULLABLE",
-                                        onParameter.clazz,
-                                        onParameter.method,
-                                        false)))
-                // Remove already processed fixes
-                .filter(input -> !cachedReports.containsKey(input))
-                .collect(Collectors.toSet());
-      }
       if (config.disableOuterLoop) {
         break;
       }
-      noNewFixTriggered =
-          sizeBefore == this.cachedReports.size()
-              && triggeredFixesFromDownstreamDependencies.size() == 0;
+      noNewFixTriggered = sizeBefore == this.cachedReports.size();
     }
     System.out.println("\nFinished annotating.");
     Utility.writeReports(
@@ -202,22 +176,18 @@ public class Annotator {
   /**
    * Executes the next iteration of exploration.
    *
-   * @param triggeredFixesFromDownstreamDependencies Set of triggered fixes from downstream
-   *     dependencies due to injection of previous iteration.
+   * @param globalAnalyzer Global Analyzer instance.
    * @param fieldDeclarationAnalysis Field Declaration analysis to detect fixes on multiple inline
    *     field declaration statements.
    * @return Immutable set of reports from the executed iteration.
    */
   private ImmutableSet<Report> executeNextIteration(
-      Set<Fix> triggeredFixesFromDownstreamDependencies,
-      FieldDeclarationAnalysis fieldDeclarationAnalysis) {
+      GlobalAnalyzer globalAnalyzer, FieldDeclarationAnalysis fieldDeclarationAnalysis) {
     Utility.buildTarget(config);
     // Suggested fixes of target at the current state.
     ImmutableSet<Fix> fixes =
-        Stream.concat(
-                triggeredFixesFromDownstreamDependencies.stream(),
-                Utility.readFixesFromOutputDirectory(
-                    config.target, Fix.factory(config, fieldDeclarationAnalysis)))
+        Utility.readFixesFromOutputDirectory(
+                config.target, Fix.factory(config, fieldDeclarationAnalysis))
             .filter(fix -> !config.useCache || !cachedReports.containsKey(fix))
             .collect(ImmutableSet.toImmutableSet());
 
@@ -230,8 +200,8 @@ public class Annotator {
         config.exhaustiveSearch
             ? new ExhaustiveExplorer(fixes, new ExhaustiveSupplier(config, tree))
             : config.optimized
-                ? new OptimizedExplorer(fixes, supplier, tracker)
-                : new BasicExplorer(fixes, supplier);
+                ? new OptimizedExplorer(fixes, supplier, globalAnalyzer, tracker)
+                : new BasicExplorer(fixes, supplier, globalAnalyzer);
     // Result of the iteration analysis.
     return explorer.explore();
   }

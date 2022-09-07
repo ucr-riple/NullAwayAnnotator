@@ -26,9 +26,6 @@ package edu.ucr.cs.riple.core.explorers.suppliers;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
-import edu.ucr.cs.riple.core.global.GlobalAnalyzerImpl;
-import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
@@ -62,12 +59,5 @@ public class TargetModuleSupplier extends AbstractSupplier {
   @Override
   protected int initializeDepth() {
     return config.depth;
-  }
-
-  @Override
-  protected GlobalAnalyzer initializeGlobalAnalyzer() {
-    return config.downStreamDependenciesAnalysisActivated
-        ? new GlobalAnalyzerImpl(config, tree)
-        : new NoOpGlobalAnalyzer();
   }
 }

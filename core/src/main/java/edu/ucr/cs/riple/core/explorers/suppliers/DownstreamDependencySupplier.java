@@ -25,8 +25,6 @@
 package edu.ucr.cs.riple.core.explorers.suppliers;
 
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
-import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.VirtualInjector;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
@@ -54,10 +52,5 @@ public class DownstreamDependencySupplier extends AbstractSupplier {
   @Override
   protected int initializeDepth() {
     return 1;
-  }
-
-  @Override
-  protected GlobalAnalyzer initializeGlobalAnalyzer() {
-    return new NoOpGlobalAnalyzer();
   }
 }

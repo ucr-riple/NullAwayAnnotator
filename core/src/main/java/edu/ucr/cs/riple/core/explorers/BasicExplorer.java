@@ -26,17 +26,23 @@ package edu.ucr.cs.riple.core.explorers;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.explorers.suppliers.Supplier;
+import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
+import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.Result;
 import edu.ucr.cs.riple.core.util.Utility;
+import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.location.Location;
+import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Collectors;
 import me.tongfei.progressbar.ProgressBar;
 
 public class BasicExplorer extends Explorer {
 
-  public BasicExplorer(ImmutableSet<Fix> fixes, Supplier supplier) {
-    super(fixes, supplier);
+  public BasicExplorer(ImmutableSet<Fix> fixes, Supplier supplier, GlobalAnalyzer globalAnalyzer) {
+    super(fixes, supplier, globalAnalyzer);
   }
 
   @Override
@@ -56,14 +62,39 @@ public class BasicExplorer extends Explorer {
               fixBank.saveState(false, true);
               Result<Error> errorComparisonResult = errorBank.compare();
               node.effect = errorComparisonResult.size;
+              Collection<Fix> fixComparisonResultDif = fixBank.compare().dif;
+              addTriggeredFixesFromDownstream(node, fixComparisonResultDif);
               node.updateStatus(
                   errorComparisonResult.size,
                   fixes,
-                  fixBank.compare().dif,
+                  fixComparisonResultDif,
                   errorComparisonResult.dif,
                   methodDeclarationTree);
               injector.removeFixes(fixes);
             });
     pb.close();
+  }
+
+  /**
+   * Updates list of triggered fixes with fixes triggered from downstream dependencies.
+   *
+   * @param node Node in process.
+   * @param localTriggeredFixes Collection of triggered fixes locally.
+   */
+  public void addTriggeredFixesFromDownstream(Node node, Collection<Fix> localTriggeredFixes) {
+    Set<Location> currentLocationTargetedByTree =
+        node.tree.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
+    localTriggeredFixes.addAll(
+        globalAnalyzer.getImpactedParameters(node.tree).stream()
+            .filter(input -> !currentLocationTargetedByTree.contains(input))
+            .map(
+                onParameter ->
+                    new Fix(
+                        new AddAnnotation(onParameter, config.nullableAnnot),
+                        "PASSING_NULLABLE",
+                        onParameter.clazz,
+                        onParameter.method,
+                        false))
+            .collect(Collectors.toList()));
   }
 }

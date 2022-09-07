@@ -38,6 +38,7 @@ import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collections;
@@ -45,6 +46,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
@@ -74,7 +76,7 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
 
   @Override
   public void analyzeDownstreamDependencies() {
-    System.out.println("Analysing downstream dependencies...");
+    System.out.println("Analyzing downstream dependencies...");
     Utility.setScannerCheckerActivation(modules, true);
     Utility.buildDownstreamDependencies(config);
     Utility.setScannerCheckerActivation(modules, false);
@@ -100,7 +102,7 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
                         "null",
                         "null",
                         "null",
-                        true))
+                        false))
             .collect(ImmutableSet.toImmutableSet());
     DownstreamImpactAnalyzer analyzer =
         new DownstreamImpactAnalyzer(
@@ -118,7 +120,7 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
                   .findAny()
                   .ifPresent(report -> method.setStatus(report, impactedParameters));
             });
-    System.out.println("Analysing downstream dependencies completed!");
+    System.out.println("Analyzing downstream dependencies completed!");
   }
 
   /**
@@ -145,17 +147,31 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
    * Returns the effect of applying a fix on the target on downstream dependencies.
    *
    * @param fix Fix targeting an element in target.
+   * @param fixesLocation Location in target that will be annotated as {@code @Nullable}.
    * @return Effect on downstream dependencies.
    */
-  private int effectOnDownstreamDependencies(Fix fix) {
+  private int effectOnDownstreamDependencies(Fix fix, Set<Location> fixesLocation) {
     MethodImpact status = fetchStatus(fix);
-    return status == null ? 0 : status.getEffect();
+    if (status == null) {
+      return 0;
+    }
+    int individualEffect = status.getEffect();
+    // Some triggered errors might be resolved due to fixes in the tree, and we should not double
+    // count them.
+    List<Error> triggeredErrors = status.getTriggeredErrors();
+    long resolvedErrors =
+        triggeredErrors.stream()
+            .filter(error -> fixesLocation.contains(error.nonnullTarget))
+            .count();
+    return individualEffect - (int) resolvedErrors;
   }
 
   @Override
   public int computeLowerBoundOfNumberOfErrors(Set<Fix> tree) {
+    Set<Location> fixesLocation =
+        tree.stream().map(f -> f.change.location).collect(Collectors.toSet());
     OptionalInt lowerBoundEffectOfChainOptional =
-        tree.stream().mapToInt(this::effectOnDownstreamDependencies).max();
+        tree.stream().mapToInt(fix -> effectOnDownstreamDependencies(fix, fixesLocation)).max();
     if (lowerBoundEffectOfChainOptional.isEmpty()) {
       return 0;
     }
@@ -164,7 +180,9 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
 
   @Override
   public int computeUpperBoundOfNumberOfErrors(Set<Fix> tree) {
-    return tree.stream().mapToInt(this::effectOnDownstreamDependencies).sum();
+    Set<Location> fixesLocation =
+        tree.stream().map(f -> f.change.location).collect(Collectors.toSet());
+    return tree.stream().mapToInt(fix -> effectOnDownstreamDependencies(fix, fixesLocation)).sum();
   }
 
   @Override

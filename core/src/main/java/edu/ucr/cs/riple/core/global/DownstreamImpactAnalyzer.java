@@ -49,7 +49,7 @@ public class DownstreamImpactAnalyzer extends OptimizedExplorer {
 
   public DownstreamImpactAnalyzer(
       ImmutableSet<Fix> fixes, DownstreamDependencySupplier supplier, RegionTracker tracker) {
-    super(fixes, supplier, tracker);
+    super(fixes, supplier, new NoOpGlobalAnalyzer(), tracker);
     this.nullableFlowMap = new HashMap<>();
   }
 

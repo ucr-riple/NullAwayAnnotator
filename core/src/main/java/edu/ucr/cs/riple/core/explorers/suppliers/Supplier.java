@@ -25,7 +25,6 @@
 package edu.ucr.cs.riple.core.explorers.suppliers;
 
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -62,13 +61,6 @@ public interface Supplier {
    * @return MethodDeclarationTree instance.
    */
   MethodDeclarationTree getMethodDeclarationTree();
-
-  /**
-   * Getter for {@link GlobalAnalyzer} instance.
-   *
-   * @return GlobalAnalyzer instance.
-   */
-  GlobalAnalyzer getGlobalAnalyzer();
 
   /**
    * Getter for depth of analysis.

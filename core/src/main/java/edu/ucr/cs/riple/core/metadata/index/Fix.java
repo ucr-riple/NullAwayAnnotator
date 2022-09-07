@@ -56,18 +56,18 @@ public class Fix extends Enclosed {
    * If true, the fix is suggested due to an error in the target module, false if the fix is
    * suggested due to error in downstream dependencies.
    */
-  public final boolean sourceIsOnTarget;
+  public boolean fixSourceIsInTarget;
 
   public Fix(
       AddAnnotation change,
       String reason,
       String encClass,
       String encMethod,
-      boolean sourceIsOnTarget) {
+      boolean fixSourceIsInTarget) {
     super(encClass, encMethod);
     this.change = change;
     this.reasons = reason != null ? Sets.newHashSet(reason) : new HashSet<>();
-    this.sourceIsOnTarget = sourceIsOnTarget;
+    this.fixSourceIsInTarget = fixSourceIsInTarget;
   }
 
   /**

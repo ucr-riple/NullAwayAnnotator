@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.explorers;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.explorers.suppliers.Supplier;
+import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
@@ -40,11 +41,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import me.tongfei.progressbar.ProgressBar;
 
-public class OptimizedExplorer extends Explorer {
+public class OptimizedExplorer extends BasicExplorer {
   private final RegionTracker tracker;
 
-  public OptimizedExplorer(ImmutableSet<Fix> fixes, Supplier supplier, RegionTracker tracker) {
-    super(fixes, supplier);
+  public OptimizedExplorer(
+      ImmutableSet<Fix> fixes,
+      Supplier supplier,
+      GlobalAnalyzer globalAnalyzer,
+      RegionTracker tracker) {
+    super(fixes, supplier, globalAnalyzer);
     this.tracker = tracker;
   }
 
@@ -86,6 +91,7 @@ public class OptimizedExplorer extends Explorer {
               triggeredFixes.addAll(
                   fixBank.compareByMethod(region.clazz, region.method, false).dif);
             }
+            addTriggeredFixesFromDownstream(node, triggeredFixes);
             node.updateStatus(
                 localEffect, fixes, triggeredFixes, triggeredErrors, methodDeclarationTree);
           });
