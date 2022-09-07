@@ -87,7 +87,8 @@ public class ArgumentNullableFlowTest extends BaseCoreTest {
   public void nullableFlowDetectionDisabledTest() {
     coreTestHelper
         .addExpectedReports(
-            new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullable(int)"), -5))
+            new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullable(int)"), -5),
+            new TReport(new OnMethod("Foo.java", "test.target.Foo", "getNull()"), -1))
         .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
         .toDepth(5)
         .disableBailOut()
