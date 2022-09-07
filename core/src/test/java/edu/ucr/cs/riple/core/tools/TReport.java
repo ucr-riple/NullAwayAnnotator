@@ -90,6 +90,7 @@ public class TReport extends Report {
   public int getOverallEffect(Config config) {
     return expectedValue;
   }
+<<<<<<< HEAD
 
   /**
    * Returns the expected value examination under in tests.
@@ -99,4 +100,6 @@ public class TReport extends Report {
   public Tag getExpectedTag() {
     return this.expectedTag;
   }
+=======
+>>>>>>> master
 }

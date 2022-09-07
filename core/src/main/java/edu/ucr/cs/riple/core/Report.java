@@ -95,7 +95,6 @@ public class Report {
    * Checks if any of the fix in tree, will trigger an unresolvable error in downstream
    * dependencies.
    *
-   * @param mdt Method declaration tre instance.
    * @param analyzer Analyzer to check impact of method.
    * @return true, if report contains a fix which will trigger an unresolvable error in downstream
    *     dependency.
@@ -205,6 +204,7 @@ public class Report {
    * Returns the overall effect of applying fix tree associated to this report according to {@link
    * AnalysisMode}.
    *
+   * @param config Annotator config.
    * @return Overall effect ot applying the fix tree.
    */
   public int getOverallEffect(Config config) {
