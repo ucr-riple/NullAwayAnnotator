@@ -140,8 +140,7 @@ public class MethodImpact {
    * @param fixes List of injected fixes.
    */
   public void updateStatus(Set<Fix> fixes) {
-    Set<OnParameter> invalidatedParameters = new HashSet<>();
-    List<Error> invalidatedErrors = new ArrayList<>();
+    Set<OnParameter> annotatedParameters = new HashSet<>();
     fixes.forEach(
         fix ->
             fix.ifOnParameter(
@@ -149,15 +148,14 @@ public class MethodImpact {
                   if (impactedParametersMap.containsKey(onParameter)) {
                     List<Error> errors = impactedParametersMap.get(onParameter);
                     effect -= errors.size();
-                    invalidatedErrors.addAll(errors);
-                    invalidatedParameters.add(onParameter);
+                    triggeredErrors.removeAll(errors);
+                    annotatedParameters.add(onParameter);
                   }
                 }));
     if (effect < 0) {
       // This is impossible, however for safety issues, we set it to zero.
       effect = 0;
     }
-    triggeredErrors.removeAll(invalidatedErrors);
-    invalidatedParameters.forEach(impactedParametersMap::remove);
+    annotatedParameters.forEach(impactedParametersMap::remove);
   }
 }
