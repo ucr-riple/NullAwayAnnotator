@@ -41,6 +41,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -203,6 +204,41 @@ public class ConfigurationTest {
       }
       observed.add(uuid);
     }
+  }
+
+  @Test
+  public void testAnalysisModeFlags() {
+    List<CLIFlag> baseFlags = new ArrayList<>(requiredFlagsCli);
+    Config config;
+    // Check mode downstream dependency off.
+    config = new Config(makeCommandLineArguments(requiredFlagsCli));
+    assertEquals(AnalysisMode.LOCAL, config.mode);
+
+    baseFlags.addAll(requiredDownsStreamDependencyFlagsCli);
+
+    // Check default mode downstream dependency on.
+    config = new Config(makeCommandLineArguments(baseFlags));
+    assertEquals(AnalysisMode.LOWER_BOUND, config.mode);
+
+    Map<String, AnalysisMode> modes =
+        Map.of(
+            "upper_bound",
+            AnalysisMode.UPPER_BOUND,
+            "lower_bound",
+            AnalysisMode.LOWER_BOUND,
+            "default",
+            AnalysisMode.LOWER_BOUND,
+            "strict",
+            AnalysisMode.STRICT);
+
+    modes.forEach(
+        (flagValue, expectedMode) -> {
+          CLIFlag flag = new CLIFlagWithValue("am", flagValue);
+          ArrayList<CLIFlag> flags = new ArrayList<>(baseFlags);
+          flags.add(flag);
+          Config c = new Config(makeCommandLineArguments(flags));
+          assertEquals(expectedMode, c.mode);
+        });
   }
 
   /**

@@ -142,7 +142,7 @@ public enum AnalysisMode {
     }
     mode = mode.toLowerCase();
     if (mode.equals("lower_bound") || mode.equals("default")) {
-      return UPPER_BOUND;
+      return LOWER_BOUND;
     }
     if (mode.equals("upper_bound")) {
       return UPPER_BOUND;
