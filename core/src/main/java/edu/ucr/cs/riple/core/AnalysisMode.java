@@ -24,8 +24,8 @@
 
 package edu.ucr.cs.riple.core;
 
-import static edu.ucr.cs.riple.core.Report.Tag.APPLY;
-import static edu.ucr.cs.riple.core.Report.Tag.DISCARD;
+import static edu.ucr.cs.riple.core.Report.Tag.APPROVE;
+import static edu.ucr.cs.riple.core.Report.Tag.REJECT;
 
 import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
@@ -48,9 +48,9 @@ public enum AnalysisMode {
       reports.forEach(
           report -> {
             if (report.localEffect < 1) {
-              report.tag(APPLY);
+              report.tag(APPROVE);
             } else {
-              report.tag(DISCARD);
+              report.tag(REJECT);
             }
           });
     }
@@ -71,16 +71,16 @@ public enum AnalysisMode {
           report -> {
             // Check for destructive methods.
             if (report.containsDestructiveMethod(mdt, analyzer)) {
-              report.tag(DISCARD);
+              report.tag(REJECT);
               return;
             }
             // Apply if effect is less than 1.
             if (report.localEffect < 1) {
-              report.tag(APPLY);
+              report.tag(APPROVE);
               return;
             }
             // Discard.
-            report.tag(DISCARD);
+            report.tag(REJECT);
           });
     }
   },
@@ -98,9 +98,9 @@ public enum AnalysisMode {
       reports.forEach(
           report -> {
             if (report.localEffect + report.getUpperBoundEffectOnDownstreamDependencies() < 1) {
-              report.tag(APPLY);
+              report.tag(APPROVE);
             } else {
-              report.tag(DISCARD);
+              report.tag(REJECT);
             }
           });
     }
@@ -120,9 +120,9 @@ public enum AnalysisMode {
       reports.forEach(
           report -> {
             if (report.localEffect + report.getLowerBoundEffectOnDownstreamDependencies() < 1) {
-              report.tag(APPLY);
+              report.tag(APPROVE);
             } else {
-              report.tag(DISCARD);
+              report.tag(REJECT);
             }
           });
     }

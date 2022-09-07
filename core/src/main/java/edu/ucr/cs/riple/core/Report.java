@@ -72,9 +72,9 @@ public class Report {
   /** Denotes the final decision regarding the injection of the report. */
   public enum Tag {
     /** If tagged with this tag, report tree will be injected. */
-    APPLY,
+    APPROVE,
     /** If tagged with this tag, report tree will not be injected and will be discarded. */
-    DISCARD,
+    REJECT,
   }
 
   /** Status of the report. */
@@ -89,7 +89,7 @@ public class Report {
     this.triggeredErrors = ImmutableList.of();
     this.lowerBoundEffectOnDownstreamDependencies = 0;
     this.upperBoundEffectOnDownstreamDependencies = 0;
-    this.tag = Tag.DISCARD;
+    this.tag = Tag.REJECT;
   }
 
   /**
@@ -119,12 +119,21 @@ public class Report {
   }
 
   /**
+   * Getter for tag.
+   *
+   * @return Reports tag.
+   */
+  public Tag getTag() {
+    return this.tag;
+  }
+
+  /**
    * Checks if report's fix tree is approved by analysis and should be applied.
    *
    * @return true, if fix tree should be applied and false otherwise.
    */
   public boolean approved() {
-    return this.tag.equals(Tag.APPLY);
+    return this.tag.equals(Tag.APPROVE);
   }
 
   @Override
