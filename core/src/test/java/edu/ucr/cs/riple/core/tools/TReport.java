@@ -54,7 +54,7 @@ public class TReport extends Report {
             new AddAnnotation(root, "javax.annotation.Nullable"), null, encClass, encMethod, true),
         effect);
     this.expectedValue = effect;
-    if(tag != null){
+    if (tag != null) {
       this.tag(tag);
     }
   }
