@@ -74,7 +74,8 @@ public interface GlobalAnalyzer {
 
   /**
    * Collects list of triggered errors in downstream dependencies if fix is applied in the target
-   * module. It also includes triggered errors that can be resolved via an annotation in target (upstream) module.
+   * module. It also includes triggered errors that can be resolved via an annotation in target
+   * (upstream) module.
    *
    * @param fix Fix instance to be applied in the target module.
    * @return List of triggered errors.
