@@ -83,7 +83,7 @@ public class BasicExplorer extends Explorer {
    */
   public void addTriggeredFixesFromDownstream(Node node, Collection<Fix> localTriggeredFixes) {
     Set<Location> currentLocationTargetedByTree =
-        node.tree.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
+        node.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
     localTriggeredFixes.addAll(
         globalAnalyzer.getImpactedParameters(node.tree).stream()
             .filter(input -> !currentLocationTargetedByTree.contains(input))

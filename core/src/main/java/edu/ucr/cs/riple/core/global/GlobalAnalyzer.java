@@ -59,7 +59,7 @@ public interface GlobalAnalyzer {
    * on the target on downstream dependencies.
    *
    * @param tree Tree of the fix tree associated to root.
-   * @return Lower bound of number of errors on downstream dependencies.
+   * @return Upper bound of number of errors on downstream dependencies.
    */
   int computeUpperBoundOfNumberOfErrors(Set<Fix> tree);
 
@@ -74,7 +74,8 @@ public interface GlobalAnalyzer {
 
   /**
    * Collects list of triggered errors in downstream dependencies if fix is applied in the target
-   * module.
+   * module. It also includes triggered errors that can be resolved via an annotation in target
+   * (upstream) module.
    *
    * @param fix Fix instance to be applied in the target module.
    * @return List of triggered errors.

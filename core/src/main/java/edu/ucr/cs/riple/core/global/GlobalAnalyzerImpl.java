@@ -54,7 +54,7 @@ import javax.annotation.Nullable;
 public class GlobalAnalyzerImpl implements GlobalAnalyzer {
 
   /** Set of downstream dependencies. */
-  private final ImmutableSet<ModuleInfo> modules;
+  private final ImmutableSet<ModuleInfo> downstreamModules;
   /** Public APIs in the target modules that have a non-primitive return value. */
   private final ImmutableMultimap<Integer, MethodImpact> methods;
   /** Annotator Config. */
@@ -64,7 +64,7 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
 
   public GlobalAnalyzerImpl(Config config, MethodDeclarationTree tree) {
     this.config = config;
-    this.modules = config.downstreamInfo;
+    this.downstreamModules = config.downstreamInfo;
     this.tree = tree;
     this.methods =
         Multimaps.index(
@@ -77,9 +77,9 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
   @Override
   public void analyzeDownstreamDependencies() {
     System.out.println("Analyzing downstream dependencies...");
-    Utility.setScannerCheckerActivation(modules, true);
+    Utility.setScannerCheckerActivation(downstreamModules, true);
     Utility.buildDownstreamDependencies(config);
-    Utility.setScannerCheckerActivation(modules, false);
+    Utility.setScannerCheckerActivation(downstreamModules, false);
     // Collect callers of public APIs in module.
     MethodRegionTracker tracker = new MethodRegionTracker(config.downstreamInfo, tree);
     // Generate fixes corresponding methods.
@@ -104,8 +104,8 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
                         "null",
                         false))
             .collect(ImmutableSet.toImmutableSet());
-    DownstreamImpactAnalyzer analyzer =
-        new DownstreamImpactAnalyzer(
+    DownstreamImpactExplorer analyzer =
+        new DownstreamImpactExplorer(
             fixes, new DownstreamDependencySupplier(config, tree), tracker);
     ImmutableSet<Report> reports = analyzer.explore();
     // Update method status based on the results.
@@ -130,7 +130,7 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
    * @return Corresponding {@link MethodImpact}, null if not located.
    */
   @Nullable
-  private MethodImpact fetchStatus(Fix fix) {
+  private MethodImpact fetchMethodImpactForFix(Fix fix) {
     if (!fix.isOnMethod()) {
       return null;
     }
@@ -151,14 +151,14 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
    * @return Effect on downstream dependencies.
    */
   private int effectOnDownstreamDependencies(Fix fix, Set<Location> fixesLocation) {
-    MethodImpact status = fetchStatus(fix);
-    if (status == null) {
+    MethodImpact methodImpact = fetchMethodImpactForFix(fix);
+    if (methodImpact == null) {
       return 0;
     }
-    int individualEffect = status.getEffect();
+    int individualEffect = methodImpact.getEffect();
     // Some triggered errors might be resolved due to fixes in the tree, and we should not double
     // count them.
-    List<Error> triggeredErrors = status.getTriggeredErrors();
+    List<Error> triggeredErrors = methodImpact.getTriggeredErrors();
     long resolvedErrors =
         triggeredErrors.stream()
             .filter(error -> fixesLocation.contains(error.nonnullTarget))
@@ -168,10 +168,9 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
 
   @Override
   public int computeLowerBoundOfNumberOfErrors(Set<Fix> tree) {
-    Set<Location> fixesLocation =
-        tree.stream().map(f -> f.change.location).collect(Collectors.toSet());
+    Set<Location> fixLocations = tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
     OptionalInt lowerBoundEffectOfChainOptional =
-        tree.stream().mapToInt(fix -> effectOnDownstreamDependencies(fix, fixesLocation)).max();
+        tree.stream().mapToInt(fix -> effectOnDownstreamDependencies(fix, fixLocations)).max();
     if (lowerBoundEffectOfChainOptional.isEmpty()) {
       return 0;
     }
@@ -180,8 +179,7 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
 
   @Override
   public int computeUpperBoundOfNumberOfErrors(Set<Fix> tree) {
-    Set<Location> fixesLocation =
-        tree.stream().map(f -> f.change.location).collect(Collectors.toSet());
+    Set<Location> fixesLocation = tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
     return tree.stream().mapToInt(fix -> effectOnDownstreamDependencies(fix, fixesLocation)).sum();
   }
 
@@ -191,8 +189,8 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
         .filter(Fix::isOnMethod)
         .flatMap(
             fix -> {
-              MethodImpact status = fetchStatus(fix);
-              return status == null ? Stream.of() : status.getImpactedParameters().stream();
+              MethodImpact impact = fetchMethodImpactForFix(fix);
+              return impact == null ? Stream.of() : impact.getImpactedParameters().stream();
             })
         .collect(ImmutableSet.toImmutableSet());
   }
@@ -203,7 +201,7 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
     if (!fix.isOnMethod()) {
       return Collections.emptyList();
     }
-    MethodImpact impact = fetchStatus(fix);
+    MethodImpact impact = fetchMethodImpactForFix(fix);
     if (impact == null) {
       return Collections.emptyList();
     }

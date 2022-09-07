@@ -166,16 +166,6 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
   }
 
   /**
-   * Locates a node based on the method location.
-   *
-   * @param method Method location.
-   * @return Corresponding node.
-   */
-  public MethodNode findNode(OnMethod method) {
-    return findNode(method.method, method.clazz);
-  }
-
-  /**
    * Returns public method with public visibility and non-primitive return type.
    *
    * @return ImmutableSet of method nodes.
@@ -186,14 +176,14 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
   }
 
   /**
-   * Checks if the passed location, is targeting an element declared in the target module.
+   * Checks if the passed location is targeting an element declared in the target module.
    *
    * @param location Location of the element.
    * @return true, if the passed location is nonnull and is targeting an element in the target
    *     module, and false otherwise.
    */
   public boolean declaredInModule(@Nullable Location location) {
-    if (location == null) {
+    if (location == null || location.clazz.equals("null")) {
       return false;
     }
     return this.classNames.contains(location.clazz);

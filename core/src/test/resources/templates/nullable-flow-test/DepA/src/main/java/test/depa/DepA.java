@@ -42,4 +42,10 @@ public class DepA {
     // pass ans back to Target module.
     foo.bar1(ans, new Object());
   }
+
+  public Object run() {
+    Object o = Foo.getNull();
+    Foo.takeNull(o);
+    return o;
+  }
 }
