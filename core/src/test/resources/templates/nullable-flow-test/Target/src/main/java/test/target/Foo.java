@@ -53,4 +53,12 @@ public class Foo {
     // If param2 is @Nullable, error below is unresolvable.
     Object hash = param2.hashCode();
   }
+
+  public static Object getNull() {
+    return null;
+  }
+
+  public static void takeNull(Object o) {
+    /* No-Op */
+  }
 }

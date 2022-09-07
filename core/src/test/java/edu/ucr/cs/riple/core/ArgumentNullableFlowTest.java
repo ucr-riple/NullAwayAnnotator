@@ -66,6 +66,15 @@ public class ArgumentNullableFlowTest extends BaseCoreTest {
                         1),
                     new OnMethod(
                         "Foo.java", "test.target.Foo", "bar1(java.lang.Object,java.lang.Object)")),
+                Collections.emptySet()),
+            // Change creates two errors on downstream dependencies (1 resolvable) and resolves one
+            // error locally, therefore the overall effect is 0.
+            new TReport(
+                new OnMethod("Foo.java", "test.target.Foo", "getNull()"),
+                0,
+                newHashSet(
+                    new OnParameter(
+                        "Foo.java", "test.target.Foo", "takeNull(java.lang.Object)", 0)),
                 Collections.emptySet()))
         .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
         .toDepth(5)
