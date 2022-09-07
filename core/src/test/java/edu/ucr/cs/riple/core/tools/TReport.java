@@ -90,16 +90,14 @@ public class TReport extends Report {
   public int getOverallEffect(Config config) {
     return expectedValue;
   }
-<<<<<<< HEAD
 
   /**
    * Returns the expected value examination under in tests.
    *
    * @return expected tag.
    */
+  @Nullable
   public Tag getExpectedTag() {
     return this.expectedTag;
   }
-=======
->>>>>>> master
 }
