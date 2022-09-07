@@ -168,8 +168,7 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
 
   @Override
   public int computeLowerBoundOfNumberOfErrors(Set<Fix> tree) {
-    Set<Location> fixesLocation =
-        tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
+    Set<Location> fixesLocation = tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
     OptionalInt lowerBoundEffectOfChainOptional =
         tree.stream().mapToInt(fix -> effectOnDownstreamDependencies(fix, fixesLocation)).max();
     if (lowerBoundEffectOfChainOptional.isEmpty()) {
@@ -180,8 +179,7 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
 
   @Override
   public int computeUpperBoundOfNumberOfErrors(Set<Fix> tree) {
-    Set<Location> fixesLocation =
-        tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
+    Set<Location> fixesLocation = tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
     return tree.stream().mapToInt(fix -> effectOnDownstreamDependencies(fix, fixesLocation)).sum();
   }
 

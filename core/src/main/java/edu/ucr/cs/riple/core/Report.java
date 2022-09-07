@@ -114,10 +114,8 @@ public class Report {
     }
     this.tree.add(this.root);
     other.tree.add(other.root);
-    Set<Location> thisTree =
-        this.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
-    Set<Location> otherTree =
-        other.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
+    Set<Location> thisTree = this.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
+    Set<Location> otherTree = other.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
     if (!thisTree.equals(otherTree)) {
       return false;
     }

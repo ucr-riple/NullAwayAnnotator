@@ -102,7 +102,7 @@ public class Fix extends Enclosed {
    *
    * @return Location information.
    */
-  public Location toLocation(){
+  public Location toLocation() {
     return change.location;
   }
 
