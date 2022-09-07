@@ -125,8 +125,7 @@ public class Report {
         this.triggeredFixes.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
     Set<Location> otherTriggered =
         other.triggeredFixes.stream().map(fix -> fix.change.location).collect(Collectors.toSet());
-    boolean ans = otherTriggered.equals(thisTriggered);
-    return ans;
+    return otherTriggered.equals(thisTriggered);
   }
 
   @Override
