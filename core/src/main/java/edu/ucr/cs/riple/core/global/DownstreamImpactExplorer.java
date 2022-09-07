@@ -37,8 +37,12 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/** Explorer for analyzing downstream dependencies. */
-public class DownstreamImpactAnalyzer extends OptimizedExplorer {
+/**
+ * Explorer for analyzing downstream dependencies. Used by {@link GlobalAnalyzerImpl} to compute the
+ * effects of changes in upstream on downstream dependencies. This explorer cannot be used to
+ * compute the effects in target module.
+ */
+class DownstreamImpactExplorer extends OptimizedExplorer {
 
   /**
    * Map of public methods in target module to parameters in target module, which are source of
@@ -47,7 +51,7 @@ public class DownstreamImpactAnalyzer extends OptimizedExplorer {
    */
   private final HashMap<OnMethod, Set<OnParameter>> nullableFlowMap;
 
-  public DownstreamImpactAnalyzer(
+  public DownstreamImpactExplorer(
       ImmutableSet<Fix> fixes, DownstreamDependencySupplier supplier, RegionTracker tracker) {
     super(fixes, supplier, new NoOpGlobalAnalyzer(), tracker);
     this.nullableFlowMap = new HashMap<>();
