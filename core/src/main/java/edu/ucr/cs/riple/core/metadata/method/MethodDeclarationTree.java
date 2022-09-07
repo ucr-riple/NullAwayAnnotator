@@ -166,16 +166,6 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
   }
 
   /**
-   * Locates a node based on the method location.
-   *
-   * @param method Method location.
-   * @return Corresponding node.
-   */
-  public MethodNode findNode(OnMethod method) {
-    return findNode(method.method, method.clazz);
-  }
-
-  /**
    * Returns public method with public visibility and non-primitive return type.
    *
    * @return ImmutableSet of method nodes.
