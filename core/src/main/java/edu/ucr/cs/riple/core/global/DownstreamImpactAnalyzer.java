@@ -77,7 +77,7 @@ public class DownstreamImpactAnalyzer extends OptimizedExplorer {
                                           && error.nonnullTarget.isOnParameter()
                                           // Method is declared in the target module.
                                           && methodDeclarationTree.declaredInModule(
-                                              error.nonnullTarget.toMethod()))
+                                              error.nonnullTarget))
                               .map(error -> error.nonnullTarget.toParameter())
                               .collect(Collectors.toSet());
                       if (!parameters.isEmpty()) {
