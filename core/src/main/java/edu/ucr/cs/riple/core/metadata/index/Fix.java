@@ -98,6 +98,15 @@ public class Fix extends Enclosed {
   }
 
   /**
+   * Returns the targeted location information.
+   *
+   * @return Location information.
+   */
+  public Location toLocation(){
+    return change.location;
+  }
+
+  /**
    * Checks if fix is targeting a method.
    *
    * @return true, if fix is targeting a method.

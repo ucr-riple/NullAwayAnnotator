@@ -183,7 +183,7 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
    *     module, and false otherwise.
    */
   public boolean declaredInModule(@Nullable Location location) {
-    if (location == null) {
+    if (location == null || location.clazz.equals("null")) {
       return false;
     }
     return this.classNames.contains(location.clazz);
