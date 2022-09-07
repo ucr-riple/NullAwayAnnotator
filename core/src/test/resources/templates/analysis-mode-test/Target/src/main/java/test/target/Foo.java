@@ -27,7 +27,7 @@ public class Foo {
   int i;
 
   public Object returnNullBad() {
-    // Just to create 5 places where it returns nullable, so making this method @Nullable will
+    // Just to create 6 places where it returns nullable, so making this method @Nullable will
     // resolve 5 NullAway errors
     if (i < 0) {
       return null;
@@ -48,7 +48,7 @@ public class Foo {
   }
 
   public Object returnNullGood() {
-    // Just to create 5 places where it returns nullable, so making this method @Nullable will
+    // Just to create 6 places where it returns nullable, so making this method @Nullable will
     // resolve 5 NullAway errors
     if (i < 0) {
       return null;
