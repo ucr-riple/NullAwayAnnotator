@@ -186,7 +186,7 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
   }
 
   /**
-   * Checks if the passed location, is targeting an element declared in the target module.
+   * Checks if the passed location is targeting an element declared in the target module.
    *
    * @param location Location of the element.
    * @return true, if the passed location is nonnull and is targeting an element in the target
