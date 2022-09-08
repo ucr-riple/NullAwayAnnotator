@@ -28,6 +28,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.SignatureMatcher;
+import edu.ucr.cs.riple.injector.changes.Change;
 import java.util.Objects;
 import java.util.function.Consumer;
 import org.json.simple.JSONObject;
@@ -54,15 +55,14 @@ public class OnMethod extends Location {
   }
 
   @Override
-  protected boolean applyToMember(
-      NodeList<BodyDeclaration<?>> clazz, String annotation, boolean inject) {
+  protected boolean applyToMember(NodeList<BodyDeclaration<?>> clazz, Change change) {
     final boolean[] success = {false};
     clazz.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifCallableDeclaration(
                 callableDeclaration -> {
                   if (this.matcher.matchesCallableDeclaration(callableDeclaration)) {
-                    applyAnnotation(callableDeclaration, annotation, inject);
+                    change.visit(callableDeclaration);
                     success[0] = true;
                   }
                 }));
@@ -74,7 +74,7 @@ public class OnMethod extends Location {
                     if (annotationMemberDeclaration
                         .getNameAsString()
                         .equals(Helper.extractCallableName(method))) {
-                      applyAnnotation(annotationMemberDeclaration, annotation, inject);
+                      change.visit(annotationMemberDeclaration);
                       success[0] = true;
                     }
                   }));

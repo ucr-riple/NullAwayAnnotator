@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.injector.location;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import edu.ucr.cs.riple.injector.changes.Change;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
@@ -57,8 +58,7 @@ public class OnField extends Location {
   }
 
   @Override
-  protected boolean applyToMember(
-      NodeList<BodyDeclaration<?>> clazz, String annotation, boolean inject) {
+  protected boolean applyToMember(NodeList<BodyDeclaration<?>> clazz, Change change) {
     final boolean[] success = {false};
     clazz.forEach(
         bodyDeclaration ->
@@ -68,7 +68,7 @@ public class OnField extends Location {
                       fieldDeclaration.asFieldDeclaration().getVariables();
                   for (VariableDeclarator v : vars) {
                     if (variables.contains(v.getName().toString())) {
-                      applyAnnotation(fieldDeclaration, annotation, inject);
+                      change.visit(fieldDeclaration);
                       success[0] = true;
                       break;
                     }

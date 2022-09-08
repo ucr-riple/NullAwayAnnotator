@@ -22,21 +22,53 @@
 
 package edu.ucr.cs.riple.injector.changes;
 
-import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
+import com.github.javaparser.ast.expr.Name;
+import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
+import javax.annotation.Nullable;
 import org.json.simple.JSONObject;
 
 public class AddAnnotation extends Change {
-  public AddAnnotation(Location location, String annotation) {
+
+  /** Argument of the annotation. If null, the added annotation will be a marker annotation. */
+  @Nullable private final String argument;
+
+  public AddAnnotation(Location location, String annotation, @Nullable String argument) {
     super(location, annotation);
+    this.argument = argument;
+  }
+
+  public AddAnnotation(Location location, String annotation) {
+    this(location, annotation, null);
   }
 
   @Override
-  public boolean apply(CompilationUnit tree) {
-    return this.location.apply(tree, annotation, true);
+  public void visit(NodeWithAnnotations<?> node) {
+    final String annotSimpleName = Helper.simpleName(annotation);
+    NodeList<AnnotationExpr> annotations = node.getAnnotations();
+    AnnotationExpr annotationExpr =
+        this.argument == null
+            ? new MarkerAnnotationExpr(annotSimpleName)
+            : new SingleMemberAnnotationExpr(
+                new Name(annotSimpleName), new StringLiteralExpr(argument));
+    boolean exists = annotations.stream().anyMatch(annot -> annot.equals(annotationExpr));
+    if (!exists) {
+      if (argument == null || argument.equals("")) {
+        node.addMarkerAnnotation(annotSimpleName);
+      } else {
+        node.addAnnotation(annotationExpr);
+      }
+    }
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public JSONObject getJson() {
     JSONObject res = super.getJson();
     res.put("INJECT", true);
@@ -45,6 +77,6 @@ public class AddAnnotation extends Change {
 
   @Override
   public Change duplicate() {
-    return new AddAnnotation(location.duplicate(), annotation);
+    return new AddAnnotation(location.duplicate(), annotation, argument);
   }
 }

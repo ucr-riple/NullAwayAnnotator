@@ -22,7 +22,10 @@
 
 package edu.ucr.cs.riple.injector.changes;
 
-import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import org.json.simple.JSONObject;
 
@@ -32,11 +35,18 @@ public class RemoveAnnotation extends Change {
   }
 
   @Override
-  public boolean apply(CompilationUnit tree) {
-    return this.location.apply(tree, annotation, false);
+  public void visit(NodeWithAnnotations<?> node) {
+    final String annotSimpleName = Helper.simpleName(annotation);
+    NodeList<AnnotationExpr> annotations = node.getAnnotations();
+    annotations.removeIf(
+        annot -> {
+          String thisAnnotName = annot.getNameAsString();
+          return thisAnnotName.equals(annotation) || thisAnnotName.equals(annotSimpleName);
+        });
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public JSONObject getJson() {
     JSONObject res = super.getJson();
     res.put("INJECT", false);
