@@ -57,13 +57,18 @@ public class AddAnnotation extends Change {
             ? new MarkerAnnotationExpr(annotSimpleName)
             : new SingleMemberAnnotationExpr(
                 new Name(annotSimpleName), new StringLiteralExpr(argument));
-    boolean exists = annotations.stream().anyMatch(annot -> annot.equals(annotationExpr));
-    if (!exists) {
-      if (argument == null || argument.equals("")) {
-        node.addMarkerAnnotation(annotSimpleName);
-      } else {
-        node.addAnnotation(annotationExpr);
-      }
+
+    // Check if annot already exists.
+    boolean annotAlreadyExists =
+        annotations.stream().anyMatch(annot -> annot.equals(annotationExpr));
+    if (annotAlreadyExists) {
+      return;
+    }
+
+    if (argument == null || argument.equals("")) {
+      node.addMarkerAnnotation(annotSimpleName);
+    } else {
+      node.addAnnotation(annotationExpr);
     }
   }
 
