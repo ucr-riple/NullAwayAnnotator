@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.core;
 import static edu.ucr.cs.riple.core.Report.Tag.APPROVE;
 import static edu.ucr.cs.riple.core.Report.Tag.REJECT;
 
+import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import java.util.Collection;
 
@@ -64,6 +65,8 @@ public enum AnalysisMode {
               report.tag(REJECT);
               return;
             }
+            // Just a sanity check.
+            Preconditions.checkArgument(report.getUpperBoundEffectOnDownstreamDependencies() == 0);
             // Apply if effect is less than 1.
             if (report.localEffect < 1) {
               report.tag(APPROVE);
