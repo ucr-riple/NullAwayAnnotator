@@ -47,6 +47,10 @@ public class Foo {
     return null;
   }
 
+  public Object getNull() {
+    return returnNullBad();
+  }
+
   public Object returnNullGood() {
     // Just to create 6 places where it returns nullable, so making this method @Nullable will
     // resolve 5 NullAway errors

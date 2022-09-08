@@ -27,9 +27,9 @@ package edu.ucr.cs.riple.core;
 import static edu.ucr.cs.riple.core.Report.Tag.APPROVE;
 import static edu.ucr.cs.riple.core.Report.Tag.REJECT;
 
+import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import java.util.Collection;
-import javax.annotation.Nullable;
 
 /** Analysis mode in making inference decisions. */
 public enum AnalysisMode {
@@ -65,6 +65,8 @@ public enum AnalysisMode {
               report.tag(REJECT);
               return;
             }
+            // Just a sanity check.
+            Preconditions.checkArgument(report.getUpperBoundEffectOnDownstreamDependencies() == 0);
             // Apply if effect is less than 1.
             if (report.localEffect < 1) {
               report.tag(APPROVE);
@@ -133,11 +135,11 @@ public enum AnalysisMode {
    * @return the corresponding {@link AnalysisMode}.
    */
   public static AnalysisMode parseMode(
-      boolean downStreamDependenciesAnalysisActivated, @Nullable String mode, boolean useDefault) {
+      boolean downStreamDependenciesAnalysisActivated, String mode) {
     if (!downStreamDependenciesAnalysisActivated) {
       return LOCAL;
     }
-    if (useDefault || mode == null) {
+    if (mode == null) {
       return LOWER_BOUND;
     }
     mode = mode.toLowerCase();

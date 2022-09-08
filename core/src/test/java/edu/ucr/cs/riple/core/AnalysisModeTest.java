@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core;
 
 import static edu.ucr.cs.riple.core.AnalysisMode.LOWER_BOUND;
 import static edu.ucr.cs.riple.core.AnalysisMode.STRICT;
+import static edu.ucr.cs.riple.core.AnalysisMode.UPPER_BOUND;
 import static edu.ucr.cs.riple.core.Report.Tag.APPROVE;
 import static edu.ucr.cs.riple.core.Report.Tag.REJECT;
 
@@ -83,6 +84,29 @@ public class AnalysisModeTest extends BaseCoreTest {
         .toDepth(5)
         .disableBailOut()
         .enableDownstreamDependencyAnalysis(LOWER_BOUND)
+        .start();
+  }
+
+  @Test
+  public void upperBoundModeTest() {
+    coreTestHelper
+        .addExpectedReports(
+            new TReport(
+                new OnMethod("Foo.java", "test.target.Foo", "returnNullGood()"), -6, APPROVE),
+            // Resolves 6 errors locally but creates 1 error on downstream dependencies that cannot
+            // be resolved, one of the triggered fixes in the tree, triggers an error in downstream
+            // dependency, the overall effect is -6 + 1 + 1 = -4 in upper bound mode.
+            new TReport(
+                new OnMethod("Foo.java", "test.target.Foo", "returnNullBad()"), -4, APPROVE))
+        .setPredicate(
+            (expected, found) ->
+                expected.root.equals(found.root)
+                    && expected.getExpectedValue()
+                        == found.getOverallEffect(coreTestHelper.getConfig())
+                    && Objects.equals(expected.getTag(), found.getTag()))
+        .toDepth(5)
+        .disableBailOut()
+        .enableDownstreamDependencyAnalysis(UPPER_BOUND)
         .start();
   }
 }
