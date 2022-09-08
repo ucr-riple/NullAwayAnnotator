@@ -24,8 +24,8 @@ package edu.ucr.cs.riple.injector.changes;
 
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
-import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import org.json.simple.JSONObject;
 
@@ -36,13 +36,12 @@ public class RemoveAnnotation extends Change {
 
   @Override
   public void visit(NodeWithAnnotations<?> node) {
-    final String annotSimpleName = Helper.simpleName(annotation);
+    // We only insert annotations with their simple name, therefore, we should only remove
+    // the annotation if it matches with the simple name (otherwise, the annotation was not injected
+    // by the core module request and should not be touched).
+    AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationSimpleName);
     NodeList<AnnotationExpr> annotations = node.getAnnotations();
-    annotations.removeIf(
-        annot -> {
-          String thisAnnotName = annot.getNameAsString();
-          return thisAnnotName.equals(annotation) || thisAnnotName.equals(annotSimpleName);
-        });
+    annotations.removeIf(annotationExpr::equals);
   }
 
   @Override

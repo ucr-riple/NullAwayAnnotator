@@ -24,6 +24,7 @@ package edu.ucr.cs.riple.injector.changes;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Objects;
 import org.json.simple.JSONObject;
@@ -33,10 +34,13 @@ public abstract class Change {
   public final Location location;
   /** Annotation full name. */
   public final String annotation;
+  /** Annotation simple name. */
+  public final String annotationSimpleName;
 
   public Change(Location location, String annotation) {
     this.annotation = annotation;
     this.location = location;
+    this.annotationSimpleName = Helper.simpleName(annotation);
   }
 
   /**

@@ -29,7 +29,6 @@ import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
-import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import javax.annotation.Nullable;
 import org.json.simple.JSONObject;
@@ -50,13 +49,12 @@ public class AddAnnotation extends Change {
 
   @Override
   public void visit(NodeWithAnnotations<?> node) {
-    final String annotSimpleName = Helper.simpleName(annotation);
     NodeList<AnnotationExpr> annotations = node.getAnnotations();
     AnnotationExpr annotationExpr =
         this.argument == null
-            ? new MarkerAnnotationExpr(annotSimpleName)
+            ? new MarkerAnnotationExpr(annotationSimpleName)
             : new SingleMemberAnnotationExpr(
-                new Name(annotSimpleName), new StringLiteralExpr(argument));
+                new Name(annotationSimpleName), new StringLiteralExpr(argument));
 
     // Check if annot already exists.
     boolean annotAlreadyExists =
@@ -66,7 +64,7 @@ public class AddAnnotation extends Change {
     }
 
     if (argument == null || argument.equals("")) {
-      node.addMarkerAnnotation(annotSimpleName);
+      node.addMarkerAnnotation(annotationSimpleName);
     } else {
       node.addAnnotation(annotationExpr);
     }
