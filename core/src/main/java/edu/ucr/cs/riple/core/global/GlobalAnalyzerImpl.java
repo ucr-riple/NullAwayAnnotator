@@ -214,7 +214,7 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
   }
 
   @Override
-  public boolean isDestructiveFix(Fix fix) {
+  public boolean isFixForcingDownstreamChanges(Fix fix) {
     return getTriggeredErrors(fix).stream()
         .anyMatch(error -> !tree.declaredInModule(error.nonnullTarget));
   }
