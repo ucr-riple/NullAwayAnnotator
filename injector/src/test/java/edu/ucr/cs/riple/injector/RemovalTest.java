@@ -24,6 +24,8 @@
 
 package edu.ucr.cs.riple.injector;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -94,7 +96,39 @@ public class RemovalTest extends BaseInjectorTest {
   }
 
   @Test
+  public void remove_annot_param_full_name() {
+    injectorTestHelper
+        .addInput(
+            "Super.java",
+            "package com.uber;",
+            "import javax.annotation.Nullable;",
+            "public class Super {",
+            "   @Nullable Object test(@javax.annotation.Nullable Object o) {",
+            "   }",
+            "}")
+        .expectOutput(
+            "package com.uber;",
+            "import javax.annotation.Nullable;",
+            "public class Super {",
+            "   @Nullable Object test(Object o) {",
+            "   }",
+            "}")
+        .addChanges(
+            new RemoveAnnotation(
+                new OnParameter(
+                    "Super.java",
+                    "com.uber.Super",
+                    "test(@javax.annotation.Nullable java.lang.Object)",
+                    0),
+                "javax.annotation.Nullable"));
+    assertThrows(AssertionError.class, () -> injectorTestHelper.start());
+  }
+
+  @Test
   public void remove_annot_field() {
+    // Injector should not remove annotations that are present with fully qualified name. This test
+    // is designed to alert us if we decide we would like injector to remove these too in the
+    // future.
     injectorTestHelper
         .addInput(
             "Super.java",
