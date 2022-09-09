@@ -139,9 +139,6 @@ public enum AnalysisMode {
     if (!downStreamDependenciesAnalysisActivated) {
       return LOCAL;
     }
-    if (mode == null) {
-      return LOWER_BOUND;
-    }
     mode = mode.toLowerCase();
     if (mode.equals("lower_bound") || mode.equals("default")) {
       return LOWER_BOUND;
