@@ -100,7 +100,7 @@ public class Report {
    *     dependency.
    */
   public boolean containsDestructiveMethod(GlobalAnalyzer analyzer) {
-    return this.tree.stream().anyMatch(analyzer::isFixForcingDownstreamChanges);
+    return this.tree.stream().anyMatch(analyzer::isNotFixableOnTarget);
   }
 
   /**

@@ -97,5 +97,5 @@ public interface GlobalAnalyzer {
    * @param fix Fix to apply
    * @return true if the method triggers an unresolvable error in downstream dependencies.
    */
-  boolean isFixForcingDownstreamChanges(Fix fix);
+  boolean isNotFixableOnTarget(Fix fix);
 }
