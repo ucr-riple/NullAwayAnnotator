@@ -208,12 +208,12 @@ public class ConfigurationTest {
 
   @Test
   public void testAnalysisModeFlags() {
-    List<CLIFlag> baseFlags = new ArrayList<>(requiredFlagsCli);
     Config config;
     // Check mode downstream dependency off.
     config = new Config(makeCommandLineArguments(requiredFlagsCli));
     assertEquals(AnalysisMode.LOCAL, config.mode);
 
+    List<CLIFlag> baseFlags = new ArrayList<>(requiredFlagsCli);
     baseFlags.addAll(requiredDownsStreamDependencyFlagsCli);
 
     // Check default mode downstream dependency on.

@@ -347,8 +347,8 @@ public class Config {
     this.mode =
         AnalysisMode.parseMode(
             this.downStreamDependenciesAnalysisActivated,
-            cmd.getOptionValue(analysisMode),
-            !cmd.hasOption(analysisMode));
+            cmd.getOptionValue(analysisMode, "default"));
+
     if (this.downStreamDependenciesAnalysisActivated) {
       moduleInfoList.remove(0);
       this.downstreamInfo = ImmutableSet.copyOf(moduleInfoList);
@@ -432,8 +432,8 @@ public class Config {
             this.downStreamDependenciesAnalysisActivated,
             getValueFromKey(
                     jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:ANALYSIS_MODE", String.class)
-                .orElse("default"),
-            false);
+                .orElse("default"));
+
     this.downstreamInfo = ImmutableSet.copyOf(moduleInfoList);
     this.moduleCounterID = 0;
     this.log = new Log();

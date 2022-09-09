@@ -38,4 +38,8 @@ public class Dep {
     foo.takeNullGood(foo.returnNullBad());
     foo.takeNullGood(foo.returnNullGood());
   }
+
+  public Object getNullDown() {
+    return foo.getNull();
+  }
 }

@@ -69,7 +69,7 @@ public class NoOpGlobalAnalyzer implements GlobalAnalyzer {
   }
 
   @Override
-  public boolean isDestructiveFix(Fix fix) {
+  public boolean isNotFixableOnTarget(Fix fix) {
     return false;
   }
 }

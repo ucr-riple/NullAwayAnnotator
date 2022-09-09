@@ -214,7 +214,11 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
   }
 
   @Override
-  public boolean isDestructiveFix(Fix fix) {
+  public boolean isNotFixableOnTarget(Fix fix) {
+    // For unresolvable errors, nonnullTarget is initialized with location instance which all fields
+    // are initialized to "null" string value. declaredInModule method in methodDeclarationTree
+    // will return false for these locations. Hence, both the existence of fix and fix targeting an
+    // element in target module is covered.
     return getTriggeredErrors(fix).stream()
         .anyMatch(error -> !tree.declaredInModule(error.nonnullTarget));
   }
