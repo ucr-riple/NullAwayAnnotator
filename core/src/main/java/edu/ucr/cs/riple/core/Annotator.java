@@ -48,6 +48,7 @@ import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -150,6 +151,33 @@ public class Annotator {
     Stream<Fix> remainingFixes =
         Utility.readFixesFromOutputDirectory(
             config.target, Fix.factory(config, fieldDeclarationAnalysis));
+
+    if (config.forceResolveActivated) {
+      // Collect all regions for NullUnmarked.
+      Set<AddAnnotation> nullUnMarkedAnnotations =
+          remainingErrors.stream()
+              // filter non-method regions.
+              .filter(error -> !error.encMethod().equals("null"))
+              // find the corresponding method nodes.
+              .map(error -> tree.findNode(error.encMethod(), error.encClass()).location)
+              // impossible, just sanity check or future nullness checker hints
+              .filter(Objects::nonNull)
+              .map(location -> new AddAnnotation(location, config.nullUnMarkedAnnotation))
+              .collect(Collectors.toSet());
+      injector.injectAnnotations(nullUnMarkedAnnotations);
+
+      // Collect NullAway.init SuppressWarnings
+      Set<AddAnnotation> suppressWarningsAnnotations =
+          remainingFixes
+              .filter(
+                  fix ->
+                      fix.isOnField()
+                          && (fix.reasons.contains("FIELD_NO_INIT")
+                              || fix.reasons.contains("METHOD_NO_INIT")))
+              .map(fix -> new AddAnnotation(fix.toField(), "SuppressWarning", "NullAway.init"))
+              .collect(Collectors.toSet());
+      injector.injectAnnotations(suppressWarningsAnnotations);
+    }
 
     System.out.println("\nFinished annotating.");
     Utility.writeReports(config, cache.reports().stream().collect(ImmutableSet.toImmutableSet()));
