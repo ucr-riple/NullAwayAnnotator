@@ -67,4 +67,9 @@ public class NoOpGlobalAnalyzer implements GlobalAnalyzer {
   public void updateImpactsAfterInjection(Set<Fix> fixes) {
     // No operation needed.
   }
+
+  @Override
+  public boolean isNotFixableOnTarget(Fix fix) {
+    return false;
+  }
 }

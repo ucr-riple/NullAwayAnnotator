@@ -61,6 +61,7 @@ public class MethodImpact {
     this.node = node;
     this.effect = 0;
     this.impactedParametersMap = new HashMap<>();
+    this.triggeredErrors = new ArrayList<>();
   }
 
   @Override

@@ -68,6 +68,17 @@ public class Report {
    */
   private int upperBoundEffectOnDownstreamDependencies;
 
+  /** Denotes the final decision regarding the injection of the report. */
+  public enum Tag {
+    /** If tagged with this tag, report tree will be injected. */
+    APPROVE,
+    /** If tagged with this tag, report tree will not be injected and will be discarded. */
+    REJECT,
+  }
+
+  /** Status of the report. */
+  private Tag tag;
+
   public Report(Fix root, int localEffect) {
     this.localEffect = localEffect;
     this.root = root;
@@ -77,6 +88,46 @@ public class Report {
     this.triggeredErrors = ImmutableList.of();
     this.lowerBoundEffectOnDownstreamDependencies = 0;
     this.upperBoundEffectOnDownstreamDependencies = 0;
+    this.tag = Tag.REJECT;
+  }
+
+  /**
+   * Checks if any of the fix in tree, will trigger an unresolvable error in downstream
+   * dependencies.
+   *
+   * @param analyzer Analyzer to check impact of method.
+   * @return true, if report contains a fix which will trigger an unresolvable error in downstream
+   *     dependency.
+   */
+  public boolean containsDestructiveMethod(GlobalAnalyzer analyzer) {
+    return this.tree.stream().anyMatch(analyzer::isNotFixableOnTarget);
+  }
+
+  /**
+   * Setter for tag.
+   *
+   * @param tag tag value.
+   */
+  public void tag(Tag tag) {
+    this.tag = tag;
+  }
+
+  /**
+   * Getter for tag.
+   *
+   * @return Reports tag.
+   */
+  public Tag getTag() {
+    return this.tag;
+  }
+
+  /**
+   * Checks if report's fix tree is approved by analysis and should be applied.
+   *
+   * @return true, if fix tree should be applied and false otherwise.
+   */
+  public boolean approved() {
+    return this.tag.equals(Tag.APPROVE);
   }
 
   @Override
@@ -150,18 +201,21 @@ public class Report {
   }
 
   /**
-   * Returns the overall effect of applying fix tree associated to this report. If downstream
-   * dependency analysis is activated, overall effect will be sum of local effect and lower bound of
-   * number of errors on downstream dependencies.
+   * Returns the overall effect of applying fix tree associated to this report according to {@link
+   * AnalysisMode}.
    *
    * @param config Annotator config.
    * @return Overall effect ot applying the fix tree.
    */
   public int getOverallEffect(Config config) {
-    if (config.downStreamDependenciesAnalysisActivated) {
-      return this.localEffect + this.lowerBoundEffectOnDownstreamDependencies;
+    AnalysisMode mode = config.mode;
+    if (mode.equals(AnalysisMode.LOCAL)) {
+      return this.localEffect;
     }
-    return this.localEffect;
+    if (mode.equals(AnalysisMode.UPPER_BOUND)) {
+      return this.localEffect + this.upperBoundEffectOnDownstreamDependencies;
+    }
+    return this.localEffect + this.lowerBoundEffectOnDownstreamDependencies;
   }
 
   /**

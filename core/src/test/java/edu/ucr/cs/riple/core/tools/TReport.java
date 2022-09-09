@@ -41,15 +41,22 @@ public class TReport extends Report {
   private final int expectedValue;
 
   public TReport(Location root, int effect) {
-    this(root, effect, "", "");
+    this(root, effect, null);
   }
 
-  public TReport(Location root, int effect, String encClass, String encMethod) {
+  public TReport(Location root, int effect, Tag tag) {
+    this(root, effect, "", "", tag);
+  }
+
+  public TReport(Location root, int effect, String encClass, String encMethod, Tag tag) {
     super(
         new Fix(
             new AddAnnotation(root, "javax.annotation.Nullable"), null, encClass, encMethod, true),
         effect);
     this.expectedValue = effect;
+    if (tag != null) {
+      this.tag(tag);
+    }
   }
 
   public TReport(
