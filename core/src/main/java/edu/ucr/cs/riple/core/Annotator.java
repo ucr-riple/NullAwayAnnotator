@@ -38,6 +38,7 @@ import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.field.FieldInitializationAnalysis;
+import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
@@ -46,6 +47,7 @@ import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -141,6 +143,13 @@ public class Annotator {
       executeNextIteration(globalAnalyzer, fieldDeclarationAnalysis);
       cache.enable();
     }
+
+    // Collect regions with remaining errors.
+    Utility.buildTarget(config);
+    List<Error> remainingErrors = Utility.readErrorsFromOutputDirectory(config.target);
+    Stream<Fix> remainingFixes =
+        Utility.readFixesFromOutputDirectory(
+            config.target, Fix.factory(config, fieldDeclarationAnalysis));
 
     System.out.println("\nFinished annotating.");
     Utility.writeReports(config, cache.reports().stream().collect(ImmutableSet.toImmutableSet()));
