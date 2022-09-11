@@ -46,7 +46,6 @@ import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
-import java.util.HashMap;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -61,16 +60,13 @@ public class Annotator {
   private final AnnotationInjector injector;
   /** Annotator config. */
   private final Config config;
-  /**
-   * Map of fix to their corresponding reports, used to detect processed fixes in a new batch of fix
-   * suggestion. Note: Set does not have get method, here we use map which retrieves elements
-   * efficiently.
-   */
-  public final HashMap<Fix, Report> cachedReports;
+
+  /** Reports cache. */
+  public final ReportCache cache;
 
   public Annotator(Config config) {
     this.config = config;
-    this.cachedReports = new HashMap<>();
+    this.cache = new ReportCache(config);
     this.injector = new PhysicalInjector(config);
   }
 
@@ -96,7 +92,6 @@ public class Annotator {
   private void preprocess() {
     System.out.println("Preprocessing...");
     Utility.setScannerCheckerActivation(config.target, true);
-    this.cachedReports.clear();
     System.out.println("Making the first build...");
     Utility.buildTarget(config, true);
     Set<OnField> uninitializedFields =
@@ -132,66 +127,79 @@ public class Annotator {
             ? new GlobalAnalyzerImpl(config, tree)
             : new NoOpGlobalAnalyzer();
     globalAnalyzer.analyzeDownstreamDependencies();
-    boolean noNewFixTriggered = false;
-    while (!noNewFixTriggered) {
-      ImmutableSet<Report> latestReports =
-          executeNextIteration(globalAnalyzer, fieldDeclarationAnalysis);
-      int sizeBefore = cachedReports.size();
-      // Update cached reports store.
-      latestReports.forEach(
-          report -> {
-            if (config.downStreamDependenciesAnalysisActivated) {
-              report.computeBoundariesOfEffectivenessOnDownstreamDependencies(globalAnalyzer);
-            }
-            cachedReports.putIfAbsent(report.root, report);
-            Report cachedReport = cachedReports.get(report.root);
-            cachedReport.localEffect = report.localEffect;
-            cachedReport.finished = report.finished;
-            cachedReport.tree = report.tree;
-            cachedReport.triggeredFixes = report.triggeredFixes;
-            cachedReport.triggeredErrors = report.triggeredErrors;
-          });
 
-      // Tag reports according to selected analysis mode.
-      config.mode.tag(config, globalAnalyzer, latestReports);
-
-      // Inject approved fixes.
-      Set<Fix> selectedFixes =
-          latestReports.stream()
-              .filter(Report::approved)
-              .flatMap(report -> config.chain ? report.tree.stream() : Stream.of(report.root))
-              .collect(Collectors.toSet());
-      injector.injectFixes(selectedFixes);
-
-      // Update impact saved state.
-      globalAnalyzer.updateImpactsAfterInjection(selectedFixes);
-
+    // Outer loop starts.
+    while (cache.isUpdated()) {
+      executeNextIteration(globalAnalyzer, fieldDeclarationAnalysis);
       if (config.disableOuterLoop) {
         break;
       }
-      noNewFixTriggered = sizeBefore == this.cachedReports.size();
     }
+
+    // Perform once last iteration including all fixes.
+    if (!config.disableOuterLoop) {
+      cache.disable();
+      executeNextIteration(globalAnalyzer, fieldDeclarationAnalysis);
+      cache.enable();
+    }
+
     System.out.println("\nFinished annotating.");
-    Utility.writeReports(
-        config, cachedReports.values().stream().collect(ImmutableSet.toImmutableSet()));
+    Utility.writeReports(config, cache.reports().stream().collect(ImmutableSet.toImmutableSet()));
   }
 
   /**
-   * Executes the next iteration of exploration.
+   * Performs single iteration of inference/injection.
+   *
+   * @param globalAnalyzer Global analyzer instance to detect impact of fixes outside of target
+   *     module.
+   * @param fieldDeclarationAnalysis Field declaration instance to detect fixes targeting inline
+   *     multiple field declaration statements.
+   */
+  private void executeNextIteration(
+      GlobalAnalyzer globalAnalyzer, FieldDeclarationAnalysis fieldDeclarationAnalysis) {
+    ImmutableSet<Report> latestReports =
+        processTriggeredFixes(globalAnalyzer, fieldDeclarationAnalysis);
+    // Compute boundaries of effects on downstream dependencies.
+    latestReports.forEach(
+        report -> {
+          if (config.downStreamDependenciesAnalysisActivated) {
+            report.computeBoundariesOfEffectivenessOnDownstreamDependencies(globalAnalyzer);
+          }
+        });
+    // Update cached reports store.
+    cache.update(latestReports);
+
+    // Tag reports according to selected analysis mode.
+    config.mode.tag(config, globalAnalyzer, latestReports);
+
+    // Inject approved fixes.
+    Set<Fix> selectedFixes =
+        latestReports.stream()
+            .filter(Report::approved)
+            .flatMap(report -> config.chain ? report.tree.stream() : Stream.of(report.root))
+            .collect(Collectors.toSet());
+    injector.injectFixes(selectedFixes);
+
+    // Update impact saved state.
+    globalAnalyzer.updateImpactsAfterInjection(selectedFixes);
+  }
+
+  /**
+   * Processes triggered fixes.
    *
    * @param globalAnalyzer Global Analyzer instance.
    * @param fieldDeclarationAnalysis Field Declaration analysis to detect fixes on multiple inline
    *     field declaration statements.
-   * @return Immutable set of reports from the executed iteration.
+   * @return Immutable set of reports from the triggered fixes.
    */
-  private ImmutableSet<Report> executeNextIteration(
+  private ImmutableSet<Report> processTriggeredFixes(
       GlobalAnalyzer globalAnalyzer, FieldDeclarationAnalysis fieldDeclarationAnalysis) {
     Utility.buildTarget(config);
     // Suggested fixes of target at the current state.
     ImmutableSet<Fix> fixes =
         Utility.readFixesFromOutputDirectory(
                 config.target, Fix.factory(config, fieldDeclarationAnalysis))
-            .filter(fix -> !config.useCache || !cachedReports.containsKey(fix))
+            .filter(fix -> !cache.processedFix(fix))
             .collect(ImmutableSet.toImmutableSet());
 
     // Initializing required explorer instances.
