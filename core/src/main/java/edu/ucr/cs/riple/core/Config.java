@@ -287,7 +287,7 @@ public class Config {
 
     // Force resolve activation
     Option activateForceResolveOption =
-        new Option("afr", "active-force-resolve", true, "Activates force resolve mode.");
+        new Option("fr", "force-resolve", true, "Activates force resolve mode.");
     activateForceResolveOption.setRequired(false);
     options.addOption(activateForceResolveOption);
 
