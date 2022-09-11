@@ -130,6 +130,7 @@ public class Annotator {
             ? new GlobalAnalyzerImpl(config, tree)
             : new NoOpGlobalAnalyzer();
     globalAnalyzer.analyzeDownstreamDependencies();
+
     // Outer loop starts.
     while (cache.isUpdated()) {
       executeNextIteration(globalAnalyzer, fieldDeclarationAnalysis);

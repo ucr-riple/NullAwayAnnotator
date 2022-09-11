@@ -69,7 +69,7 @@ public class NoOpGlobalAnalyzer implements GlobalAnalyzer {
   }
 
   @Override
-  public boolean isFixForcingDownstreamChanges(Fix fix) {
+  public boolean isNotFixableOnTarget(Fix fix) {
     return false;
   }
 }

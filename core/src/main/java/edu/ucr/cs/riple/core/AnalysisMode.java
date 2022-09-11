@@ -129,18 +129,12 @@ public enum AnalysisMode {
    * @param downStreamDependenciesAnalysisActivated if true, downstream dependency analysis is
    *     activated.
    * @param mode passed mode.
-   * @param useDefault if true, no value is provided by the user and the default mode will be
-   *     returned. (If downstream dependency analysis is activated default is {@link
-   *     AnalysisMode#LOWER_BOUND}, otherwise the default is {@link AnalysisMode#LOCAL}).
    * @return the corresponding {@link AnalysisMode}.
    */
   public static AnalysisMode parseMode(
       boolean downStreamDependenciesAnalysisActivated, String mode) {
     if (!downStreamDependenciesAnalysisActivated) {
       return LOCAL;
-    }
-    if (mode == null) {
-      return LOWER_BOUND;
     }
     mode = mode.toLowerCase();
     if (mode.equals("lower_bound") || mode.equals("default")) {
