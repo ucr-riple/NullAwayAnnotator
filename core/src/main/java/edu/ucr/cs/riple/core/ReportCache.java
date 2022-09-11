@@ -73,16 +73,7 @@ public class ReportCache {
    */
   public void update(ImmutableSet<Report> reports) {
     int size = store.keySet().size();
-    reports.forEach(
-        report -> {
-          store.putIfAbsent(report.root, report);
-          Report cachedReport = store.get(report.root);
-          cachedReport.localEffect = report.localEffect;
-          cachedReport.finished = report.finished;
-          cachedReport.tree = report.tree;
-          cachedReport.triggeredFixes = report.triggeredFixes;
-          cachedReport.triggeredErrors = report.triggeredErrors;
-        });
+    reports.forEach(report -> store.put(report.root, report));
     if (size == store.keySet().size()) {
       stateUpdated = false;
     }
