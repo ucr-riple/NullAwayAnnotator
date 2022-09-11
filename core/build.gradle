@@ -49,7 +49,7 @@ tasks.test.dependsOn(':type-annotator-scanner:publishToMavenLocal')
 
 // Set up environment variables for test configuration tu run with the latest development version.
 tasks.test.doFirst {
-    environment "NULLAWAY_TEST_VERSION", "0.9.10"
+    environment "NULLAWAY_TEST_VERSION", "0.10.0"
     environment "TYPE_ANNOTATOR_SCANNER_VERSION", project.version
 }
 

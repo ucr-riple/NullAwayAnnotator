@@ -73,11 +73,11 @@ public class Annotator {
     this.injector = new PhysicalInjector(config);
   }
 
-  /** Starts the annotating process consist of preprocess followed by explore phase. */
+  /** Starts the annotating process consist of preprocess followed by the "annotate" phase. */
   public void start() {
     preprocess();
     long timer = config.log.startTimer();
-    explore();
+    annotate();
     config.log.stopTimerAndCapture(timer);
     Utility.writeLog(config);
   }
@@ -113,7 +113,7 @@ public class Annotator {
   }
 
   /** Performs iterations of inference/injection until no unseen fix is suggested. */
-  private void explore() {
+  private void annotate() {
     Utility.setScannerCheckerActivation(config.target, true);
     Utility.buildTarget(config);
     Utility.setScannerCheckerActivation(config.target, false);
