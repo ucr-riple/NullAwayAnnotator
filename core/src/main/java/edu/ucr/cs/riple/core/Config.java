@@ -286,10 +286,10 @@ public class Config {
     options.addOption(analysisMode);
 
     // Force resolve activation
-    Option forceResolveActivation =
+    Option activateForceResolveOption =
         new Option("afr", "active-force-resolve", true, "Activates force resolve mode.");
-    forceResolveActivation.setRequired(false);
-    options.addOption(forceResolveActivation);
+    activateForceResolveOption.setRequired(false);
+    options.addOption(activateForceResolveOption);
 
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
@@ -376,10 +376,10 @@ public class Config {
       this.downstreamInfo = ImmutableSet.of();
       this.downstreamDependenciesBuildCommand = null;
     }
-    this.forceResolveActivated = cmd.hasOption(forceResolveActivation);
+    this.forceResolveActivated = cmd.hasOption(activateForceResolveOption);
     this.nullUnMarkedAnnotation =
         this.forceResolveActivated
-            ? cmd.getOptionValue(forceResolveActivation)
+            ? cmd.getOptionValue(activateForceResolveOption)
             : "org.jspecify.nullness.NullUnmarked";
     this.moduleCounterID = 0;
     this.log = new Log();

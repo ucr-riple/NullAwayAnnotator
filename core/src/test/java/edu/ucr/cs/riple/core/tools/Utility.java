@@ -24,8 +24,15 @@
 
 package edu.ucr.cs.riple.core.tools;
 
+import edu.ucr.cs.riple.core.metadata.index.Error;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -33,6 +40,48 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Utility {
+
+  /**
+   * Executes a shell command in a subprocess.
+   *
+   * @param command The shell command to run.
+   */
+  public static void executeCommand(String command) {
+    try {
+      Process p = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
+      BufferedReader reader =
+          new BufferedReader(new InputStreamReader(p.getErrorStream(), Charset.defaultCharset()));
+      //noinspection StatementWithEmptyBody
+      while (reader.readLine() != null) {}
+      p.waitFor();
+    } catch (Exception e) {
+      throw new RuntimeException("Exception happened in executing command: " + command, e);
+    }
+  }
+
+  /**
+   * Reads serialized errors at the given path.
+   *
+   * @param path Path to errors.tsv.
+   * @return List of serialized errors.
+   */
+  public static List<Error> readErrorsFromOutputDirectory(Path path) {
+    List<Error> errors = new ArrayList<>();
+    try {
+      try (BufferedReader br =
+          Files.newBufferedReader(path.toFile().toPath(), Charset.defaultCharset())) {
+        String line;
+        // Skip headers.
+        br.readLine();
+        while ((line = br.readLine()) != null) {
+          errors.add(new Error(line.split("\t")));
+        }
+      }
+    } catch (IOException e) {
+      throw new RuntimeException("Exception happened in reading errors at: " + path, e);
+    }
+    return errors;
+  }
 
   public static Path getPathOfResource(String relativePath) {
     return Paths.get(

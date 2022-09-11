@@ -141,15 +141,16 @@ public class Utility {
    *
    * @param info Module info.
    * @param factory Fix factory to create {@link Fix} instance from array of values.
-   * @return Stream of serialized fixes.
+   * @return Set of serialized fixes.
    */
-  public static Stream<Fix> readFixesFromOutputDirectory(ModuleInfo info, Factory<Fix> factory) {
+  public static Set<Fix> readFixesFromOutputDirectory(ModuleInfo info, Factory<Fix> factory) {
     Path fixesPath = info.dir.resolve("fixes.tsv");
     Set<Fix> fixes = new HashSet<>();
     try {
       try (BufferedReader br =
           Files.newBufferedReader(fixesPath.toFile().toPath(), Charset.defaultCharset())) {
         String line;
+        // Skip header.
         br.readLine();
         while ((line = br.readLine()) != null) {
           Fix fix = factory.build(line.split("\t"));
@@ -164,7 +165,7 @@ public class Utility {
     } catch (IOException e) {
       throw new RuntimeException("Exception happened in reading fixes at: " + fixesPath, e);
     }
-    return fixes.stream();
+    return fixes;
   }
 
   /**
@@ -180,6 +181,7 @@ public class Utility {
       try (BufferedReader br =
           Files.newBufferedReader(errorsPath.toFile().toPath(), Charset.defaultCharset())) {
         String line;
+        // Skip header.
         br.readLine();
         while ((line = br.readLine()) != null) {
           errors.add(new Error(line.split("\t")));

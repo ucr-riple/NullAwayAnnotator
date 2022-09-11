@@ -87,4 +87,9 @@ public class Error extends Enclosed {
   public int hashCode() {
     return Objects.hash(messageType, message, nonnullTarget);
   }
+
+  @Override
+  public String toString() {
+    return "Type='" + messageType + '\'' + ", message='" + message + '\'';
+  }
 }

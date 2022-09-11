@@ -31,6 +31,7 @@ import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.injector.Helper;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -62,6 +63,7 @@ public class CoreTestHelper {
   private int depth = 1;
   private boolean requestCompleteLoop = false;
   private boolean disableBailout = false;
+  private boolean forceResolveActivated = false;
   private boolean downstreamDependencyAnalysisActivated = false;
   private AnalysisMode mode = AnalysisMode.LOCAL;
   private Config config;
@@ -139,6 +141,11 @@ public class CoreTestHelper {
     return this;
   }
 
+  public CoreTestHelper enableForceResolve() {
+    this.forceResolveActivated = true;
+    return this;
+  }
+
   public CoreTestHelper enableDownstreamDependencyAnalysis() {
     return enableDownstreamDependencyAnalysis(AnalysisMode.LOWER_BOUND);
   }
@@ -158,6 +165,37 @@ public class CoreTestHelper {
                   && expected.getExpectedValue() == found.getOverallEffect(config);
     }
     compare(new ArrayList<>(annotator.cache.reports()));
+    checkBuildsStatus();
+  }
+
+  private void checkBuildsStatus() {
+    if (mode.equals(AnalysisMode.STRICT) && modules.size() > 1) {
+      // Build downstream dependencies.
+      Utility.executeCommand(config.downstreamDependenciesBuildCommand);
+      // Verify no error is reported in downstream dependencies.
+      for (int i = 1; i < modules.size(); i++) {
+        Path path = outDirPath.resolve(i + "").resolve("errors.tsv");
+        List<Error> errors = Utility.readErrorsFromOutputDirectory(path);
+        if (errors.size() != 0) {
+          fail(
+              "Strict mode introduced errors in downstream dependency module: "
+                  + modules.get(i)
+                  + ", errors:\n"
+                  + errors.stream().map(Error::toString).collect(Collectors.joining("\n")));
+        }
+      }
+    }
+    if (forceResolveActivated) {
+      // Check no error will be reported in Target module
+      Utility.executeCommand(config.buildCommand);
+      Path path = outDirPath.resolve("0").resolve("errors.tsv");
+      List<Error> errors = Utility.readErrorsFromOutputDirectory(path);
+      if (errors.size() != 0) {
+        fail(
+            "Force Resolve Mode did not resolve all errors:\n"
+                + errors.stream().map(Error::toString).collect(Collectors.joining("\n")));
+      }
+    }
   }
 
   /** Checks if all src inputs are subpackages of test package. */
@@ -231,6 +269,7 @@ public class CoreTestHelper {
     builder.optimized = true;
     builder.downStreamDependenciesAnalysisActivated = downstreamDependencyAnalysisActivated;
     builder.mode = mode;
+    builder.forceResolveActivation = forceResolveActivated;
     if (downstreamDependencyAnalysisActivated) {
       builder.buildCommand =
           Utility.computeBuildCommandWithLibraryModelLoaderDependency(

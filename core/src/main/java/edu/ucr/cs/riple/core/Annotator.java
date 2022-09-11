@@ -98,7 +98,7 @@ public class Annotator {
     System.out.println("Making the first build...");
     Utility.buildTarget(config, true);
     Set<OnField> uninitializedFields =
-        Utility.readFixesFromOutputDirectory(config.target, Fix.factory(config, null))
+        Utility.readFixesFromOutputDirectory(config.target, Fix.factory(config, null)).stream()
             .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
             .map(Fix::toField)
             .collect(Collectors.toSet());
@@ -146,38 +146,8 @@ public class Annotator {
       cache.enable();
     }
 
-    // Collect regions with remaining errors.
-    Utility.buildTarget(config);
-    List<Error> remainingErrors = Utility.readErrorsFromOutputDirectory(config.target);
-    Stream<Fix> remainingFixes =
-        Utility.readFixesFromOutputDirectory(
-            config.target, Fix.factory(config, fieldDeclarationAnalysis));
-
     if (config.forceResolveActivated) {
-      // Collect all regions for NullUnmarked.
-      Set<AddAnnotation> nullUnMarkedAnnotations =
-          remainingErrors.stream()
-              // filter non-method regions.
-              .filter(error -> !error.encMethod().equals("null"))
-              // find the corresponding method nodes.
-              .map(error -> tree.findNode(error.encMethod(), error.encClass()).location)
-              // impossible, just sanity check or future nullness checker hints
-              .filter(Objects::nonNull)
-              .map(location -> new AddAnnotation(location, config.nullUnMarkedAnnotation))
-              .collect(Collectors.toSet());
-      injector.injectAnnotations(nullUnMarkedAnnotations);
-
-      // Collect NullAway.init SuppressWarnings
-      Set<AddAnnotation> suppressWarningsAnnotations =
-          remainingFixes
-              .filter(
-                  fix ->
-                      fix.isOnField()
-                          && (fix.reasons.contains("FIELD_NO_INIT")
-                              || fix.reasons.contains("METHOD_NO_INIT")))
-              .map(fix -> new AddAnnotation(fix.toField(), "SuppressWarning", "NullAway.init"))
-              .collect(Collectors.toSet());
-      injector.injectAnnotations(suppressWarningsAnnotations);
+      forceResolveRemainingErrors(fieldDeclarationAnalysis, tree);
     }
 
     System.out.println("\nFinished annotating.");
@@ -236,6 +206,7 @@ public class Annotator {
     ImmutableSet<Fix> fixes =
         Utility.readFixesFromOutputDirectory(
                 config.target, Fix.factory(config, fieldDeclarationAnalysis))
+            .stream()
             .filter(fix -> !cache.processedFix(fix))
             .collect(ImmutableSet.toImmutableSet());
 
@@ -252,5 +223,72 @@ public class Annotator {
                 : new BasicExplorer(fixes, supplier, globalAnalyzer);
     // Result of the iteration analysis.
     return explorer.explore();
+  }
+
+  /**
+   * Resolves all remaining errors in target module by following steps below:
+   *
+   * <ul>
+   *   <li>Enclosing method of triggered errors will be marked with {@code @NullUnmarked}
+   *       annotation.
+   *   <li>Uninitialized fields (inline or by constructor) will be annotated as
+   *       {@code @SuppressWarnings("NullAway.init")}.
+   *   <li>Explicit {@code Nullable} assignments to fields will be annotated as
+   *       {@code @SuppressWarnings("NullAway")}.
+   * </ul>
+   *
+   * @param fieldDeclarationAnalysis Field declaration analysis.
+   * @param tree Method Declaration analysis.
+   */
+  private void forceResolveRemainingErrors(
+      FieldDeclarationAnalysis fieldDeclarationAnalysis, MethodDeclarationTree tree) {
+    // Collect regions with remaining errors.
+    Utility.buildTarget(config);
+    List<Error> remainingErrors = Utility.readErrorsFromOutputDirectory(config.target);
+    Set<Fix> remainingFixes =
+        Utility.readFixesFromOutputDirectory(
+            config.target, Fix.factory(config, fieldDeclarationAnalysis));
+
+    // Collect all regions for NullUnmarked.
+    Set<AddAnnotation> nullUnMarkedAnnotations =
+        remainingErrors.stream()
+            // filter non-method regions.
+            .filter(error -> !error.encMethod().equals("null"))
+            // find the corresponding method nodes.
+            .map(error -> tree.findNode(error.encMethod(), error.encClass()).location)
+            // impossible, just sanity check or future nullness checker hints
+            .filter(Objects::nonNull)
+            .map(location -> new AddAnnotation(location, config.nullUnMarkedAnnotation))
+            .collect(Collectors.toSet());
+    injector.injectAnnotations(nullUnMarkedAnnotations);
+
+    // Collect explicit Nullable initialization to fields
+    Set<AddAnnotation> suppressWarningsAnnotations =
+        remainingFixes.stream()
+            .filter(
+                fix -> {
+                  if (!(fix.isOnField() && fix.reasons.contains("ASSIGN_FIELD_NULLABLE"))) {
+                    return false;
+                  }
+                  OnField onField = fix.toField();
+                  return onField.clazz.equals(fix.encClass()) && fix.encMethod().equals("");
+                })
+            .map(fix -> new AddAnnotation(fix.toField(), "SuppressWarnings", "NullAway"))
+            .collect(Collectors.toSet());
+    injector.injectAnnotations(suppressWarningsAnnotations);
+
+    // Collect NullAway.init SuppressWarnings
+    Set<AddAnnotation> initializationSuppressWarningsAnnotations =
+        remainingFixes.stream()
+            .filter(
+                fix ->
+                    fix.isOnField()
+                        && (fix.reasons.contains("METHOD_NO_INIT")
+                            || fix.reasons.contains("FIELD_NO_INIT")))
+            .map(fix -> new AddAnnotation(fix.toField(), "SuppressWarnings", "NullAway.Init"))
+            // Exclude already annotated fields with a general NullAway suppress warning.
+            .filter(f -> !suppressWarningsAnnotations.contains(f))
+            .collect(Collectors.toSet());
+    injector.injectAnnotations(initializationSuppressWarningsAnnotations);
   }
 }

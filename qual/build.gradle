@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,12 +22,20 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'NullAwayAnnotator'
-include 'core'
-include 'type-annotator-scanner'
-include 'injector'
-include 'library-model-loader'
-include 'checks'
-include 'checks:ban-mutable-static'
-include 'qual'
+buildscript {
+    repositories {
+        mavenCentral()
+        google() // For Gradle 4.0+
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:4.1.1'
+    }
+}
+
+plugins {
+    id 'com.github.sherter.google-java-format' version '0.9'
+}
+
+apply plugin: 'com.vanniktech.maven.publish'
 
