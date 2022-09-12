@@ -63,7 +63,7 @@ public class AddAnnotationWithArgument extends AddAnnotation {
       return;
     }
 
-    // Annotation with the same name exists, collapse if off, add it directly.
+    // Annotation with the same name exists, if collapse is off, add it directly.
     if (!collapseArguments) {
       addAnnotationExpressionOnNode(node, argumentExp);
       return;
