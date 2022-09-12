@@ -50,7 +50,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
         .expectOutput(
             "package com.uber;",
             "public class Super {",
-            "   @SuppressWarning(\"NullAway.init\")",
+            "   @SuppressWarnings(\"NullAway.Init\")",
             "   Object h = new Object();",
             "   public void test(Object f) {",
             "      h = f;",
@@ -59,8 +59,8 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
         .addChanges(
             new AddAnnotation(
                 new OnField("Super.java", "com.uber.Super", Collections.singleton("h")),
-                "SuppressWarning",
-                "NullAway.init"))
+                "SuppressWarnings",
+                "NullAway.Init"))
         .start();
   }
 
@@ -71,7 +71,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "Super.java",
             "package com.uber;",
             "public class Super {",
-            "   @SuppressWarning(\"NullAway.init\")",
+            "   @SuppressWarnings(\"NullAway.Init\")",
             "   Object h = new Object();",
             "   public void test(Object f) {",
             "      h = f;",
@@ -80,7 +80,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
         .expectOutput(
             "package com.uber;",
             "public class Super {",
-            "   @SuppressWarning(\"NullAway.init\")",
+            "   @SuppressWarnings(\"NullAway.Init\")",
             "   Object h = new Object();",
             "   public void test(Object f) {",
             "      h = f;",
@@ -89,8 +89,8 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
         .addChanges(
             new AddAnnotation(
                 new OnField("Super.java", "com.uber.Super", Collections.singleton("h")),
-                "SuppressWarning",
-                "NullAway.init"))
+                "SuppressWarnings",
+                "NullAway.Init"))
         .start();
   }
 
@@ -101,7 +101,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "Super.java",
             "package com.uber;",
             "public class Super {",
-            "   @SuppressWarning(\"something else\")",
+            "   @SuppressWarnings(\"something else\")",
             "   Object h = new Object();",
             "   public void test(Object f) {",
             "      h = f;",
@@ -110,8 +110,8 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
         .expectOutput(
             "package com.uber;",
             "public class Super {",
-            "   @SuppressWarning(\"something else\")",
-            "   @SuppressWarning(\"NullAway.init\")",
+            "   @SuppressWarnings(\"something else\")",
+            "   @SuppressWarnings(\"NullAway.Init\")",
             "   Object h = new Object();",
             "   public void test(Object f) {",
             "      h = f;",
@@ -120,8 +120,8 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
         .addChanges(
             new AddAnnotation(
                 new OnField("Super.java", "com.uber.Super", Collections.singleton("h")),
-                "SuppressWarning",
-                "NullAway.init"))
+                "SuppressWarnings",
+                "NullAway.Init"))
         .start();
   }
 
