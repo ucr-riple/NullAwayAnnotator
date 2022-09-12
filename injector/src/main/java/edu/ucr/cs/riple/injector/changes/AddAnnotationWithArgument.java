@@ -82,7 +82,7 @@ public class AddAnnotationWithArgument extends AddAnnotation {
         (SingleMemberAnnotationExpr) existingAnnotation;
     ArrayInitializerExpr updatedMemberValue = new ArrayInitializerExpr();
     NodeList<Expression> nodeList = new NodeList<>();
-    nodeList.add(new StringLiteralExpr(argument));
+    nodeList.add(argumentExp);
 
     if (singleMemberAnnotationExpr.getMemberValue() instanceof StringLiteralExpr) {
       // Add updated annotation.
