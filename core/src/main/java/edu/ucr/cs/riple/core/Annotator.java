@@ -45,6 +45,7 @@ import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddAnnotationWithArgument;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.List;
@@ -273,7 +274,10 @@ public class Annotator {
                   OnField onField = fix.toField();
                   return onField.clazz.equals(fix.encClass()) && fix.encMethod().equals("");
                 })
-            .map(fix -> new AddAnnotation(fix.toField(), "SuppressWarnings", "NullAway"))
+            .map(
+                fix ->
+                    new AddAnnotationWithArgument(
+                        fix.toField(), "SuppressWarnings", "NullAway", true))
             .collect(Collectors.toSet());
     injector.injectAnnotations(suppressWarningsAnnotations);
 
@@ -285,7 +289,10 @@ public class Annotator {
                     fix.isOnField()
                         && (fix.reasons.contains("METHOD_NO_INIT")
                             || fix.reasons.contains("FIELD_NO_INIT")))
-            .map(fix -> new AddAnnotation(fix.toField(), "SuppressWarnings", "NullAway.Init"))
+            .map(
+                fix ->
+                    new AddAnnotationWithArgument(
+                        fix.toField(), "SuppressWarnings", "NullAway.Init", true))
             // Exclude already annotated fields with a general NullAway suppress warning.
             .filter(f -> !suppressWarningsAnnotations.contains(f))
             .collect(Collectors.toSet());

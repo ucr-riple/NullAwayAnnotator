@@ -25,36 +25,20 @@ package edu.ucr.cs.riple.injector.changes;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
-import com.github.javaparser.ast.expr.Name;
-import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
-import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import edu.ucr.cs.riple.injector.location.Location;
-import javax.annotation.Nullable;
 import org.json.simple.JSONObject;
 
 public class AddAnnotation extends Change {
 
-  /** Argument of the annotation. If null, the added annotation will be a marker annotation. */
-  @Nullable private final String argument;
-
-  public AddAnnotation(Location location, String annotation, @Nullable String argument) {
-    super(location, annotation);
-    this.argument = argument;
-  }
-
   public AddAnnotation(Location location, String annotation) {
-    this(location, annotation, null);
+    super(location, annotation);
   }
 
   @Override
   public void visit(NodeWithAnnotations<?> node) {
     NodeList<AnnotationExpr> annotations = node.getAnnotations();
-    AnnotationExpr annotationExpr =
-        this.argument == null
-            ? new MarkerAnnotationExpr(annotationSimpleName)
-            : new SingleMemberAnnotationExpr(
-                new Name(annotationSimpleName), new StringLiteralExpr(argument));
+    AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationSimpleName);
 
     // Check if annot already exists.
     boolean annotAlreadyExists =
@@ -62,12 +46,7 @@ public class AddAnnotation extends Change {
     if (annotAlreadyExists) {
       return;
     }
-
-    if (argument == null || argument.equals("")) {
-      node.addMarkerAnnotation(annotationSimpleName);
-    } else {
-      node.addAnnotation(annotationExpr);
-    }
+    node.addMarkerAnnotation(annotationSimpleName);
   }
 
   @Override
@@ -80,6 +59,6 @@ public class AddAnnotation extends Change {
 
   @Override
   public Change duplicate() {
-    return new AddAnnotation(location.duplicate(), annotation, argument);
+    return new AddAnnotation(location.duplicate(), annotation);
   }
 }

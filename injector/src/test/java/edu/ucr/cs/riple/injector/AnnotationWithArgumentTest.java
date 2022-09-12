@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.injector;
 
-import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddAnnotationWithArgument;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
@@ -40,7 +40,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
     injectorTestHelper
         .addInput(
             "Super.java",
-            "package com.uber;",
+            "package com.edu;",
             "public class Super {",
             "   Object h = new Object();",
             "   public void test(Object f) {",
@@ -48,7 +48,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package com.edu;",
             "public class Super {",
             "   @SuppressWarnings(\"NullAway.Init\")",
             "   Object h = new Object();",
@@ -57,10 +57,11 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotation(
-                new OnField("Super.java", "com.uber.Super", Collections.singleton("h")),
+            new AddAnnotationWithArgument(
+                new OnField("Super.java", "com.edu.Super", Collections.singleton("h")),
                 "SuppressWarnings",
-                "NullAway.Init"))
+                "NullAway.Init",
+                true))
         .start();
   }
 
@@ -69,7 +70,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
     injectorTestHelper
         .addInput(
             "Super.java",
-            "package com.uber;",
+            "package com.edu;",
             "public class Super {",
             "   @SuppressWarnings(\"NullAway.Init\")",
             "   Object h = new Object();",
@@ -78,7 +79,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package com.edu;",
             "public class Super {",
             "   @SuppressWarnings(\"NullAway.Init\")",
             "   Object h = new Object();",
@@ -87,10 +88,11 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotation(
-                new OnField("Super.java", "com.uber.Super", Collections.singleton("h")),
+            new AddAnnotationWithArgument(
+                new OnField("Super.java", "com.edu.Super", Collections.singleton("h")),
                 "SuppressWarnings",
-                "NullAway.Init"))
+                "NullAway.Init",
+                true))
         .start();
   }
 
@@ -99,7 +101,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
     injectorTestHelper
         .addInput(
             "Super.java",
-            "package com.uber;",
+            "package com.edu;",
             "public class Super {",
             "   @SuppressWarnings(\"something else\")",
             "   Object h = new Object();",
@@ -108,29 +110,29 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package com.edu;",
             "public class Super {",
-            "   @SuppressWarnings(\"something else\")",
-            "   @SuppressWarnings(\"NullAway.Init\")",
+            "   @SuppressWarnings({\"NullAway.Init\", \"something else\"})",
             "   Object h = new Object();",
             "   public void test(Object f) {",
             "      h = f;",
             "   }",
             "}")
         .addChanges(
-            new AddAnnotation(
-                new OnField("Super.java", "com.uber.Super", Collections.singleton("h")),
+            new AddAnnotationWithArgument(
+                new OnField("Super.java", "com.edu.Super", Collections.singleton("h")),
                 "SuppressWarnings",
-                "NullAway.Init"))
+                "NullAway.Init",
+                true))
         .start();
   }
 
   @Test
-  public void onMethodNullUnmarkedTest() {
+  public void onMethodCustomAnnotTest() {
     injectorTestHelper
         .addInput(
             "Super.java",
-            "package com.uber;",
+            "package com.edu;",
             "public class Super {",
             "   Object h = new Object();",
             "   public void test(Object f) {",
@@ -138,20 +140,21 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
-            "import edu.ucr.NullUnmarked;",
+            "package com.edu;",
+            "import edu.ucr.CustomNull;",
             "public class Super {",
             "   Object h = new Object();",
-            "   @NullUnmarked(\"Prefix: Creates 2 errors on downstream dependencies\")",
+            "   @CustomNull(\"Prefix: Creates 2 errors on downstream dependencies\")",
             "   public void test(Object f) {",
             "      h = f;",
             "   }",
             "}")
         .addChanges(
-            new AddAnnotation(
-                new OnMethod("Super.java", "com.uber.Super", "test(java.lang.Object)"),
-                "edu.ucr.NullUnmarked",
-                "Prefix: Creates 2 errors on downstream dependencies"))
+            new AddAnnotationWithArgument(
+                new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
+                "edu.ucr.CustomNull",
+                "Prefix: Creates 2 errors on downstream dependencies",
+                true))
         .start();
   }
 
@@ -160,7 +163,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
     injectorTestHelper
         .addInput(
             "Super.java",
-            "package com.uber;",
+            "package com.edu;",
             "public class Super {",
             "   Object h = new Object();",
             "   public void test(Object f) {",
@@ -168,7 +171,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package com.edu;",
             "import edu.ucr.NullMessage;",
             "public class Super {",
             "   Object h = new Object();",
@@ -177,10 +180,142 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotation(
-                new OnParameter("Super.java", "com.uber.Super", "test(java.lang.Object)", 0),
+            new AddAnnotationWithArgument(
+                new OnParameter("Super.java", "com.edu.Super", "test(java.lang.Object)", 0),
                 "edu.ucr.NullMessage",
-                "Receives null from downstream"))
+                "Receives null from downstream",
+                true))
+        .start();
+  }
+
+  @Test
+  public void onMethodCustomAnnotSingleArgExistsTest() {
+    injectorTestHelper
+        .addInput(
+            "Super.java",
+            "package com.edu;",
+            "public class Super {",
+            "   Object h = new Object();",
+            "   @CustomNull(\"arg1\")",
+            "   public void test(Object f) {",
+            "      h = f;",
+            "   }",
+            "}")
+        .expectOutput(
+            "package com.edu;",
+            "import edu.ucr.CustomNull;",
+            "public class Super {",
+            "   Object h = new Object();",
+            "   @CustomNull(\"arg1\")",
+            "   public void test(Object f) {",
+            "      h = f;",
+            "   }",
+            "}")
+        .addChanges(
+            new AddAnnotationWithArgument(
+                new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
+                "edu.ucr.CustomNull",
+                "arg1",
+                true))
+        .start();
+  }
+
+  @Test
+  public void onMethodCustomAnnotMultiArgExistsTest() {
+    injectorTestHelper
+        .addInput(
+            "Super.java",
+            "package com.edu;",
+            "public class Super {",
+            "   Object h = new Object();",
+            "   @Other({\"arg1\", \"arg2\"})",
+            "   @CustomNull({\"arg1\", \"arg2\"})",
+            "   public void test(Object f) {",
+            "      h = f;",
+            "   }",
+            "}")
+        .expectOutput(
+            "package com.edu;",
+            "import edu.ucr.CustomNull;",
+            "public class Super {",
+            "   Object h = new Object();",
+            "   @Other({\"arg1\", \"arg2\"})",
+            "   @CustomNull({\"arg1\", \"arg2\"})",
+            "   public void test(Object f) {",
+            "      h = f;",
+            "   }",
+            "}")
+        .addChanges(
+            new AddAnnotationWithArgument(
+                new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
+                "edu.ucr.CustomNull",
+                "arg1",
+                true))
+        .start();
+  }
+
+  @Test
+  public void onMethodCollapseOnTest() {
+    injectorTestHelper
+        .addInput(
+            "Super.java",
+            "package com.edu;",
+            "public class Super {",
+            "   Object h = new Object();",
+            "   @CustomNull({\"arg1\", \"arg2\"})",
+            "   public void test(Object f) {",
+            "      h = f;",
+            "   }",
+            "}")
+        .expectOutput(
+            "package com.edu;",
+            "import edu.ucr.CustomNull;",
+            "public class Super {",
+            "   Object h = new Object();",
+            "   @CustomNull({ \"arg3\", \"arg1\", \"arg2\"})",
+            "   public void test(Object f) {",
+            "      h = f;",
+            "   }",
+            "}")
+        .addChanges(
+            new AddAnnotationWithArgument(
+                new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
+                "edu.ucr.CustomNull",
+                "arg3",
+                true))
+        .start();
+  }
+
+  @Test
+  public void onMethodCollapseOffTest() {
+    injectorTestHelper
+        .addInput(
+            "Super.java",
+            "package com.edu;",
+            "public class Super {",
+            "   Object h = new Object();",
+            "   @CustomNull({\"arg1\", \"arg2\"})",
+            "   public void test(Object f) {",
+            "      h = f;",
+            "   }",
+            "}")
+        .expectOutput(
+            "package com.edu;",
+            "import edu.ucr.CustomNull;",
+            "public class Super {",
+            "   Object h = new Object();",
+            "   @CustomNull({\"arg1\", \"arg2\"})",
+            "   @CustomNull(\"arg3\")",
+            "   public void test(Object f) {",
+            "      h = f;",
+            "   }",
+            "}")
+        .addChanges(
+            new AddAnnotationWithArgument(
+                new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
+                "edu.ucr.CustomNull",
+                "arg3",
+                false))
         .start();
   }
 }
