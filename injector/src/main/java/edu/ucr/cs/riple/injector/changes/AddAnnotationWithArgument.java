@@ -59,13 +59,13 @@ public class AddAnnotationWithArgument extends AddAnnotation {
         node.getAnnotationByName(annotationSimpleName);
     if (annotationWithSameNameExists.isEmpty()) {
       // No annotation with this name exists, add it directly.
-      addAnnotationExpressOnNode(node, argumentExp);
+      addAnnotationExpressionOnNode(node, argumentExp);
       return;
     }
 
     // Annotation with the same name exists, collapse if off, add it directly.
     if (!collapseArguments) {
-      addAnnotationExpressOnNode(node, argumentExp);
+      addAnnotationExpressionOnNode(node, argumentExp);
       return;
     }
 
@@ -103,7 +103,7 @@ public class AddAnnotationWithArgument extends AddAnnotation {
         location.duplicate(), annotation, argument, collapseArguments);
   }
 
-  private void addAnnotationExpressOnNode(NodeWithAnnotations<?> node, Expression argument) {
+  private void addAnnotationExpressionOnNode(NodeWithAnnotations<?> node, Expression argument) {
     AnnotationExpr annotationExpr =
         new SingleMemberAnnotationExpr(new Name(annotationSimpleName), argument);
     node.addAnnotation(annotationExpr);
