@@ -280,7 +280,7 @@ public class Annotator {
             .map(
                 fix ->
                     new AddSingleElementAnnotation(
-                        fix.toField(), "SuppressWarnings", "NullAway", true))
+                        fix.toField(), "SuppressWarnings", "NullAway", false))
             .collect(Collectors.toSet());
     injector.injectAnnotations(suppressWarningsAnnotations);
 
@@ -295,7 +295,7 @@ public class Annotator {
             .map(
                 fix ->
                     new AddSingleElementAnnotation(
-                        fix.toField(), "SuppressWarnings", "NullAway.Init", true))
+                        fix.toField(), "SuppressWarnings", "NullAway.Init", false))
             // Exclude already annotated fields with a general NullAway suppress warning.
             .filter(f -> !suppressWarningsAnnotations.contains(f))
             .collect(Collectors.toSet());

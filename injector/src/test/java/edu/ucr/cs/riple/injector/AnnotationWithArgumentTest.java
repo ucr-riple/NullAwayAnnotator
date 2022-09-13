@@ -62,7 +62,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
                 new OnField("Super.java", "com.edu.Super", Collections.singleton("h")),
                 "SuppressWarnings",
                 "NullAway.Init",
-                true))
+                false))
         .start();
   }
 
@@ -93,7 +93,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
                 new OnField("Super.java", "com.edu.Super", Collections.singleton("h")),
                 "SuppressWarnings",
                 "NullAway.Init",
-                true))
+                false))
         .start();
   }
 
@@ -124,7 +124,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
                 new OnField("Super.java", "com.edu.Super", Collections.singleton("h")),
                 "SuppressWarnings",
                 "NullAway.Init",
-                true))
+                false))
         .start();
   }
 
@@ -155,7 +155,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
                 new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
                 "edu.ucr.CustomNull",
                 "Prefix: Creates 2 errors on downstream dependencies",
-                true))
+                false))
         .start();
   }
 
@@ -185,7 +185,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
                 new OnParameter("Super.java", "com.edu.Super", "test(java.lang.Object)", 0),
                 "edu.ucr.NullMessage",
                 "Receives null from downstream",
-                true))
+                false))
         .start();
   }
 
@@ -217,7 +217,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
                 new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
                 "edu.ucr.CustomNull",
                 "arg1",
-                true))
+                false))
         .start();
   }
 
@@ -251,7 +251,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
                 new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
                 "edu.ucr.CustomNull",
                 "arg1",
-                true))
+                false))
         .start();
   }
 
@@ -283,7 +283,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
                 new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
                 "edu.ucr.CustomNull",
                 "arg3",
-                true))
+                false))
         .start();
   }
 
@@ -316,7 +316,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
                 new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
                 "edu.ucr.CustomNull",
                 "arg3",
-                false))
+                true))
         .start();
   }
 
@@ -347,7 +347,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
                 new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
                 "edu.ucr.CustomNull",
                 "arg3",
-                false))
+                true))
         .start();
   }
 
@@ -378,7 +378,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
                 new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
                 "edu.ucr.CustomNull",
                 "arg3",
-                true))
+                false))
         .start();
   }
 }

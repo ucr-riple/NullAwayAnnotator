@@ -48,16 +48,16 @@ public class AddSingleElementAnnotation extends AddAnnotation {
    * If true, if an annotation with the same name exists, the existing annotation should include the
    * passed argument, otherwise, a new annotation will be injected to the node.
    */
-  private final boolean collapseArguments;
+  private final boolean repeatable;
 
   public AddSingleElementAnnotation(
-      Location location, String annotation, String argument, boolean collapseArguments) {
+      Location location, String annotation, String argument, boolean repeatable) {
     super(location, annotation);
     Preconditions.checkArgument(
         argument != null && !argument.equals(""),
         "argument cannot be null or empty, use AddAnnotation instead.");
     this.argument = argument;
-    this.collapseArguments = collapseArguments;
+    this.repeatable = repeatable;
   }
 
   @Override
@@ -96,7 +96,7 @@ public class AddSingleElementAnnotation extends AddAnnotation {
     }
 
     // Annotation with the same name exists, if collapse is off, add it directly.
-    if (!collapseArguments) {
+    if (repeatable) {
       addAnnotationExpressionOnNode(node, argumentExp);
       return;
     }
@@ -131,8 +131,7 @@ public class AddSingleElementAnnotation extends AddAnnotation {
 
   @Override
   public Change duplicate() {
-    return new AddSingleElementAnnotation(
-        location.duplicate(), annotation, argument, collapseArguments);
+    return new AddSingleElementAnnotation(location.duplicate(), annotation, argument, repeatable);
   }
 
   /**
