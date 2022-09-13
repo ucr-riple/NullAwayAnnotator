@@ -38,7 +38,8 @@ public class RemoveAnnotation extends Change {
   public void visit(NodeWithAnnotations<?> node) {
     // We only insert annotations with their simple name, therefore, we should only remove
     // the annotation if it matches with the simple name (otherwise, the annotation was not injected
-    // by the core module request and should not be touched).
+    // by the core module request and should not be touched). Also, we currently require removing
+    // only MarkerAnnotations, removal of other types of annotations are not supported yet.
     AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationSimpleName);
     NodeList<AnnotationExpr> annotations = node.getAnnotations();
     annotations.removeIf(annotationExpr::equals);
