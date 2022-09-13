@@ -318,4 +318,66 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
                 false))
         .start();
   }
+
+  @Test
+  public void testImportNotExistsCollapseOff() {
+    injectorTestHelper
+        .addInput(
+            "Super.java",
+            "package com.edu;",
+            "public class Super {",
+            "   Object h = new Object();",
+            "   public void test(Object f) {",
+            "      h = f;",
+            "   }",
+            "}")
+        .expectOutput(
+            "package com.edu;",
+            "import edu.ucr.CustomNull;",
+            "public class Super {",
+            "   Object h = new Object();",
+            "   @CustomNull(\"arg3\")",
+            "   public void test(Object f) {",
+            "      h = f;",
+            "   }",
+            "}")
+        .addChanges(
+            new AddAnnotationWithArgument(
+                new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
+                "edu.ucr.CustomNull",
+                "arg3",
+                false))
+        .start();
+  }
+
+  @Test
+  public void testImportNotExistsCollapseOn() {
+    injectorTestHelper
+        .addInput(
+            "Super.java",
+            "package com.edu;",
+            "public class Super {",
+            "   Object h = new Object();",
+            "   public void test(Object f) {",
+            "      h = f;",
+            "   }",
+            "}")
+        .expectOutput(
+            "package com.edu;",
+            "import edu.ucr.CustomNull;",
+            "public class Super {",
+            "   Object h = new Object();",
+            "   @CustomNull(\"arg3\")",
+            "   public void test(Object f) {",
+            "      h = f;",
+            "   }",
+            "}")
+        .addChanges(
+            new AddAnnotationWithArgument(
+                new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
+                "edu.ucr.CustomNull",
+                "arg3",
+                true))
+        .start();
+  }
 }
