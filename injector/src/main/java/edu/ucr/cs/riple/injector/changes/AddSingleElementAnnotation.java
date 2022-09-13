@@ -107,7 +107,7 @@ public class AddSingleElementAnnotation extends AddAnnotation {
       throw new UnsupportedOperationException(
           "Cannot update existing annotation with type: "
               + existingAnnotation.getClass()
-              + ". Please file a issue with the expected behaviour at: https://github.com/nimakarimipour/NullAwayAnnotator/issues. Thank you!");
+              + ". Please file an issue with the expected behaviour at: https://github.com/nimakarimipour/NullAwayAnnotator/issues. Thank you!");
     }
 
     SingleMemberAnnotationExpr singleMemberAnnotationExpr =
