@@ -121,7 +121,7 @@ public class Config {
   /**
    * If activated, AutoAnnotator will try to resolve all remaining errors by marking the enclosing
    * method as {@code NullUnMarked}. It will also mark uninitialized fields with
-   * {@code @SuppressWarning("NullAway.init")}
+   * {@code @SuppressWarning("NullAway.Init")}
    */
   public final boolean forceResolveActivated;
 

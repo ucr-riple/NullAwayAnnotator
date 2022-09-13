@@ -234,7 +234,7 @@ public class Annotator {
    *   <li>Enclosing method of triggered errors will be marked with {@code @NullUnmarked}
    *       annotation.
    *   <li>Uninitialized fields (inline or by constructor) will be annotated as
-   *       {@code @SuppressWarnings("NullAway.init")}.
+   *       {@code @SuppressWarnings("NullAway.Init")}.
    *   <li>Explicit {@code Nullable} assignments to fields will be annotated as
    *       {@code @SuppressWarnings("NullAway")}.
    * </ul>
@@ -282,7 +282,7 @@ public class Annotator {
             .collect(Collectors.toSet());
     injector.injectAnnotations(suppressWarningsAnnotations);
 
-    // Collect NullAway.init SuppressWarnings
+    // Collect NullAway.Init SuppressWarnings
     Set<AddAnnotation> initializationSuppressWarningsAnnotations =
         remainingFixes.stream()
             .filter(
