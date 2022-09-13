@@ -37,10 +37,11 @@ import java.util.Optional;
 /**
  * Used to add <a
  * href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-9.html#jls-SingleElementAnnotation">Single
- * Element Annotations</a> on elements in source code.
+ * Element Annotations</a> with only one member on elements in source code. If the annotation
+ * already exists, it can be collapsed into a single annotation with multiple elements if requested.
  */
 public class AddSingleElementAnnotation extends AddAnnotation {
-  /** Argument of the annotation. If null, the added annotation will be a marker annotation. */
+  /** Argument of the annotation. */
   private final String argument;
 
   /**
