@@ -97,6 +97,9 @@ public class RemovalTest extends BaseInjectorTest {
 
   @Test
   public void remove_annot_param_full_name() {
+    // Injector should not remove annotations that are present with fully qualified name. This test
+    // is designed to alert us if we decide we would like injector to remove these too in the
+    // future.
     injectorTestHelper
         .addInput(
             "Super.java",
@@ -126,9 +129,6 @@ public class RemovalTest extends BaseInjectorTest {
 
   @Test
   public void remove_annot_field() {
-    // Injector should not remove annotations that are present with fully qualified name. This test
-    // is designed to alert us if we decide we would like injector to remove these too in the
-    // future.
     injectorTestHelper
         .addInput(
             "Super.java",
