@@ -170,6 +170,7 @@ public class CoreTest extends BaseCoreTest {
                 new OnField("Main.java", "test.Main", newHashSet("f1", "f2", "f3", "f4")), 9),
             new TReport(new OnField("Main.java", "test.Main", singleton("f5")), 1))
         .toDepth(1)
+        // This causes the test to report a failure if any errors remain when building the target.
         .enableForceResolve()
         .start();
   }
