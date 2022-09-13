@@ -46,6 +46,7 @@ import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddAnnotationWithArgument;
+import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.List;
@@ -108,7 +109,7 @@ public class Annotator {
     Set<AddAnnotation> initializers =
         analysis
             .findInitializers(uninitializedFields)
-            .map(onMethod -> new AddAnnotation(onMethod, config.initializerAnnot))
+            .map(onMethod -> new AddMarkerAnnotation(onMethod, config.initializerAnnot))
             .collect(Collectors.toSet());
     this.injector.injectAnnotations(initializers);
   }
@@ -259,7 +260,7 @@ public class Annotator {
             .map(error -> tree.findNode(error.encMethod(), error.encClass()).location)
             // impossible, just sanity check or future nullness checker hints
             .filter(Objects::nonNull)
-            .map(location -> new AddAnnotation(location, config.nullUnMarkedAnnotation))
+            .map(location -> new AddMarkerAnnotation(location, config.nullUnMarkedAnnotation))
             .collect(Collectors.toSet());
     injector.injectAnnotations(nullUnMarkedAnnotations);
 

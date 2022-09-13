@@ -34,6 +34,11 @@ import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Optional;
 
+/**
+ * Used to add <a
+ * href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-9.html#jls-SingleElementAnnotation">Single
+ * Element Annotations</a> on elements in source code.
+ */
 public class AddAnnotationWithArgument extends AddAnnotation {
   /** Argument of the annotation. If null, the added annotation will be a marker annotation. */
   private final String argument;

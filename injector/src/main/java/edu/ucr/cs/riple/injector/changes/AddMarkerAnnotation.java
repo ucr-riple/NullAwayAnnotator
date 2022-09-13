@@ -22,21 +22,39 @@
 
 package edu.ucr.cs.riple.injector.changes;
 
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
+import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import edu.ucr.cs.riple.injector.location.Location;
-import org.json.simple.JSONObject;
 
-/** Used to add annotations on elements in source code. */
-public abstract class AddAnnotation extends Change {
+/**
+ * Used to add <a
+ * href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-9.html#jls-MarkerAnnotation">Marker
+ * Annotation</a> on elements in source code.
+ */
+public class AddMarkerAnnotation extends AddAnnotation {
 
-  public AddAnnotation(Location location, String annotation) {
+  public AddMarkerAnnotation(Location location, String annotation) {
     super(location, annotation);
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public JSONObject getJson() {
-    JSONObject res = super.getJson();
-    res.put("INJECT", true);
-    return res;
+  public void visit(NodeWithAnnotations<?> node) {
+    NodeList<AnnotationExpr> annotations = node.getAnnotations();
+    AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationSimpleName);
+
+    // Check if annot already exists.
+    boolean annotAlreadyExists =
+        annotations.stream().anyMatch(annot -> annot.equals(annotationExpr));
+    if (annotAlreadyExists) {
+      return;
+    }
+    node.addMarkerAnnotation(annotationSimpleName);
+  }
+
+  @Override
+  public Change duplicate() {
+    return new AddMarkerAnnotation(location, annotation);
   }
 }

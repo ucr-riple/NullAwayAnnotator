@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.injector;
 
-import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import org.junit.Test;
@@ -72,10 +72,10 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnMethod("Super.java", "com.uber.Super", "test(boolean)"),
                 "javax.annotation.Nullable"),
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnMethod("test/Superb.java", "com.uber.test.Superb", "test(boolean)"),
                 "javax.annotation.Nullable"))
         .start();
@@ -108,7 +108,7 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnMethod("Main.java", "com.uber.Main$Test", "run()"),
                 "javax.annotation.Nullable"))
         .start();
@@ -148,7 +148,7 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnMethod("Super.java", "com.uber.Super$SuperInner", "bar(java.lang.Object)"),
                 "javax.annotation.Nullable"))
         .start();
@@ -178,7 +178,7 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnMethod("Main.java", "com.uber.Main$1Helper", "run()"),
                 "javax.annotation.Nullable"))
         .start();
@@ -222,10 +222,10 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnMethod("Super.java", "com.uber.Super", "test(Object, String, String)"),
                 "javax.annotation.Nullable"),
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnParameter("Super.java", "com.uber.Super", "test(Object, Object, String)", 1),
                 "javax.annotation.Nullable"))
         .start();
@@ -280,10 +280,10 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnMethod("Super.java", "com.uber.Super", "getPredNodeNumbers(T)"),
                 "javax.annotation.Nullable"),
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnMethod(
                     "Super.java",
                     "com.uber.Super",
@@ -314,7 +314,7 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnMethod(
                     "Super.java",
                     "com.uber.Super",
@@ -343,7 +343,7 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnMethod(
                     "Super.java",
                     "com.uber.Super",
@@ -371,7 +371,7 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnMethod(
                     "Main.java", "com.uber.Main", "format(java.lang.String,java.lang.Object...)"),
                 "javax.annotation.Initializer"))

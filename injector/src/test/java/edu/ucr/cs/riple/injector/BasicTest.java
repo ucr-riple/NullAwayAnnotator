@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.injector;
 
-import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import org.junit.Test;
@@ -37,7 +37,7 @@ public class BasicTest extends BaseInjectorTest {
   @Test
   public void skip_duplicate_annotation() {
     Change Change =
-        new AddAnnotation(
+        new AddMarkerAnnotation(
             new OnMethod("Super.java", "com.uber.Super", "test()"), "javax.annotation.Nullable");
     injectorTestHelper
         .addInput(
@@ -80,7 +80,7 @@ public class BasicTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnMethod(
                     "Super.java",
                     "com.uber.Super",
@@ -117,7 +117,7 @@ public class BasicTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnMethod("Main.java", "com.uber.Main$Test", "run()"),
                 "javax.annotation.Nullable"))
         .start();
@@ -152,7 +152,7 @@ public class BasicTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnMethod("Main.java", "com.uber.Main$Test", "run()"),
                 "javax.annotation.Nullable"))
         .start();

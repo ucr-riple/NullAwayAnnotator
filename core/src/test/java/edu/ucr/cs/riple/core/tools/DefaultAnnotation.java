@@ -25,10 +25,11 @@
 package edu.ucr.cs.riple.core.tools;
 
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 
 /** Wrapper class for {@link AddAnnotation} with default values, used to create tests. */
-public class DefaultAnnotation extends AddAnnotation {
+public class DefaultAnnotation extends AddMarkerAnnotation {
 
   public DefaultAnnotation(Location location) {
     super(location, "javax.annotation.Nullable");

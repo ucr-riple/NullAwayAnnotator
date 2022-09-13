@@ -30,6 +30,7 @@ import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -93,7 +94,7 @@ public class Fix extends Enclosed {
       }
       Preconditions.checkArgument(info[7].equals("nullable"), "unsupported annotation: " + info[7]);
       return new Fix(
-          new AddAnnotation(location, config.nullableAnnot), info[6], info[8], info[9], true);
+          new AddMarkerAnnotation(location, config.nullableAnnot), info[6], info[8], info[9], true);
     };
   }
 
