@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.injector;
 
-import edu.ucr.cs.riple.injector.changes.AddAnnotationWithArgument;
+import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
@@ -58,7 +58,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotationWithArgument(
+            new AddSingleElementAnnotation(
                 new OnField("Super.java", "com.edu.Super", Collections.singleton("h")),
                 "SuppressWarnings",
                 "NullAway.Init",
@@ -89,7 +89,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotationWithArgument(
+            new AddSingleElementAnnotation(
                 new OnField("Super.java", "com.edu.Super", Collections.singleton("h")),
                 "SuppressWarnings",
                 "NullAway.Init",
@@ -120,7 +120,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotationWithArgument(
+            new AddSingleElementAnnotation(
                 new OnField("Super.java", "com.edu.Super", Collections.singleton("h")),
                 "SuppressWarnings",
                 "NullAway.Init",
@@ -151,7 +151,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotationWithArgument(
+            new AddSingleElementAnnotation(
                 new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
                 "edu.ucr.CustomNull",
                 "Prefix: Creates 2 errors on downstream dependencies",
@@ -181,7 +181,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotationWithArgument(
+            new AddSingleElementAnnotation(
                 new OnParameter("Super.java", "com.edu.Super", "test(java.lang.Object)", 0),
                 "edu.ucr.NullMessage",
                 "Receives null from downstream",
@@ -213,7 +213,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotationWithArgument(
+            new AddSingleElementAnnotation(
                 new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
                 "edu.ucr.CustomNull",
                 "arg1",
@@ -247,7 +247,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotationWithArgument(
+            new AddSingleElementAnnotation(
                 new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
                 "edu.ucr.CustomNull",
                 "arg1",
@@ -279,7 +279,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotationWithArgument(
+            new AddSingleElementAnnotation(
                 new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
                 "edu.ucr.CustomNull",
                 "arg3",
@@ -312,7 +312,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotationWithArgument(
+            new AddSingleElementAnnotation(
                 new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
                 "edu.ucr.CustomNull",
                 "arg3",
@@ -343,7 +343,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotationWithArgument(
+            new AddSingleElementAnnotation(
                 new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
                 "edu.ucr.CustomNull",
                 "arg3",
@@ -374,7 +374,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotationWithArgument(
+            new AddSingleElementAnnotation(
                 new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
                 "edu.ucr.CustomNull",
                 "arg3",

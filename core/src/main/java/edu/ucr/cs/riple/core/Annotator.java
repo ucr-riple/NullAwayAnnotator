@@ -45,7 +45,7 @@ import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
-import edu.ucr.cs.riple.injector.changes.AddAnnotationWithArgument;
+import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
@@ -277,7 +277,7 @@ public class Annotator {
                 })
             .map(
                 fix ->
-                    new AddAnnotationWithArgument(
+                    new AddSingleElementAnnotation(
                         fix.toField(), "SuppressWarnings", "NullAway", true))
             .collect(Collectors.toSet());
     injector.injectAnnotations(suppressWarningsAnnotations);
@@ -292,7 +292,7 @@ public class Annotator {
                             || fix.reasons.contains("FIELD_NO_INIT")))
             .map(
                 fix ->
-                    new AddAnnotationWithArgument(
+                    new AddSingleElementAnnotation(
                         fix.toField(), "SuppressWarnings", "NullAway.Init", true))
             // Exclude already annotated fields with a general NullAway suppress warning.
             .filter(f -> !suppressWarningsAnnotations.contains(f))

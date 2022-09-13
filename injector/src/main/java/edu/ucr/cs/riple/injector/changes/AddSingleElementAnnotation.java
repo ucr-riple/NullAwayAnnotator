@@ -39,7 +39,7 @@ import java.util.Optional;
  * href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-9.html#jls-SingleElementAnnotation">Single
  * Element Annotations</a> on elements in source code.
  */
-public class AddAnnotationWithArgument extends AddAnnotation {
+public class AddSingleElementAnnotation extends AddAnnotation {
   /** Argument of the annotation. If null, the added annotation will be a marker annotation. */
   private final String argument;
 
@@ -49,7 +49,7 @@ public class AddAnnotationWithArgument extends AddAnnotation {
    */
   private final boolean collapseArguments;
 
-  public AddAnnotationWithArgument(
+  public AddSingleElementAnnotation(
       Location location, String annotation, String argument, boolean collapseArguments) {
     super(location, annotation);
     Preconditions.checkArgument(
@@ -130,7 +130,7 @@ public class AddAnnotationWithArgument extends AddAnnotation {
 
   @Override
   public Change duplicate() {
-    return new AddAnnotationWithArgument(
+    return new AddSingleElementAnnotation(
         location.duplicate(), annotation, argument, collapseArguments);
   }
 
