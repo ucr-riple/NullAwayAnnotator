@@ -114,7 +114,6 @@ public class AddSingleElementAnnotation extends AddAnnotation {
         (SingleMemberAnnotationExpr) existingAnnotation;
     ArrayInitializerExpr updatedMemberValue = new ArrayInitializerExpr();
     NodeList<Expression> nodeList = new NodeList<>();
-    nodeList.add(argumentExp);
 
     if (singleMemberAnnotationExpr.getMemberValue() instanceof StringLiteralExpr) {
       // Add updated annotation.
@@ -125,6 +124,7 @@ public class AddSingleElementAnnotation extends AddAnnotation {
           (ArrayInitializerExpr) singleMemberAnnotationExpr.getMemberValue();
       nodeList.addAll(existingMembers.getValues());
     }
+    nodeList.add(argumentExp);
     updatedMemberValue.setValues(nodeList);
     singleMemberAnnotationExpr.setMemberValue(updatedMemberValue);
   }

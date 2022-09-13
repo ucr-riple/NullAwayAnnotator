@@ -113,7 +113,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
         .expectOutput(
             "package com.edu;",
             "public class Super {",
-            "   @SuppressWarnings({\"NullAway.Init\", \"something else\"})",
+            "   @SuppressWarnings({\"something else\", \"NullAway.Init\"})",
             "   Object h = new Object();",
             "   public void test(Object f) {",
             "      h = f;",
@@ -256,7 +256,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
   }
 
   @Test
-  public void onMethodCollapseOnTest() {
+  public void onMethodRepeatableOnTest() {
     injectorTestHelper
         .addInput(
             "Super.java",
@@ -273,7 +273,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "import edu.ucr.CustomNull;",
             "public class Super {",
             "   Object h = new Object();",
-            "   @CustomNull({ \"arg3\", \"arg1\", \"arg2\"})",
+            "   @CustomNull({\"arg1\", \"arg2\", \"arg3\"})",
             "   public void test(Object f) {",
             "      h = f;",
             "   }",
@@ -288,7 +288,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
   }
 
   @Test
-  public void onMethodCollapseOffTest() {
+  public void onMethodRepeatableOffTest() {
     injectorTestHelper
         .addInput(
             "Super.java",
@@ -321,7 +321,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
   }
 
   @Test
-  public void testImportNotExistsCollapseOff() {
+  public void testImportNotExistsRepeatableOff() {
     injectorTestHelper
         .addInput(
             "Super.java",
@@ -352,7 +352,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
   }
 
   @Test
-  public void testImportNotExistsCollapseOn() {
+  public void testImportNotExistsRepeatableOn() {
     injectorTestHelper
         .addInput(
             "Super.java",
