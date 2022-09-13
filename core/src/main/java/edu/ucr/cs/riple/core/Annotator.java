@@ -252,6 +252,8 @@ public class Annotator {
             config.target, Fix.factory(config, fieldDeclarationAnalysis));
 
     // Collect all regions for NullUnmarked.
+    // For all errors in regions which correspond to a method's body, we can add @NullUnmarked at
+    // the method level.
     Set<AddAnnotation> nullUnMarkedAnnotations =
         remainingErrors.stream()
             // filter non-method regions.
