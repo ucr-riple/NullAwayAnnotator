@@ -259,10 +259,10 @@ public class Annotator {
             // filter non-method regions.
             .filter(error -> !error.encMethod().equals("null"))
             // find the corresponding method nodes.
-            .map(error -> tree.findNode(error.encMethod(), error.encClass()).location)
+            .map(error -> tree.findNode(error.encMethod(), error.encClass()))
             // impossible, just sanity check or future nullness checker hints
             .filter(Objects::nonNull)
-            .map(location -> new AddMarkerAnnotation(location, config.nullUnMarkedAnnotation))
+            .map(node -> new AddMarkerAnnotation(node.location, config.nullUnMarkedAnnotation))
             .collect(Collectors.toSet());
     injector.injectAnnotations(nullUnMarkedAnnotations);
 
