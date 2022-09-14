@@ -95,13 +95,13 @@ public class AddSingleElementAnnotation extends AddAnnotation {
       return;
     }
 
-    // Annotation with the same name exists, if repeatable is off, add it directly.
+    // Annotation with the same name exists, but the annotation is repeatable, add it directly.
     if (repeatable) {
       addAnnotationExpressionOnNode(node, argumentExp);
       return;
     }
 
-    // Annotation with the same name exists, repeatable is on, update it.
+    // Annotation with the same name exists and is not repeatable, update it.
     AnnotationExpr existingAnnotation = annotationWithSameNameExists.get();
     if (!(existingAnnotation instanceof SingleMemberAnnotationExpr)) {
       throw new UnsupportedOperationException(
