@@ -38,14 +38,19 @@ import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.field.FieldInitializationAnalysis;
+import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -70,11 +75,11 @@ public class Annotator {
     this.injector = new PhysicalInjector(config);
   }
 
-  /** Starts the annotating process consist of preprocess followed by explore phase. */
+  /** Starts the annotating process consist of preprocess followed by the "annotate" phase. */
   public void start() {
     preprocess();
     long timer = config.log.startTimer();
-    explore();
+    annotate();
     config.log.stopTimerAndCapture(timer);
     Utility.writeLog(config);
   }
@@ -95,7 +100,7 @@ public class Annotator {
     System.out.println("Making the first build...");
     Utility.buildTarget(config, true);
     Set<OnField> uninitializedFields =
-        Utility.readFixesFromOutputDirectory(config.target, Fix.factory(config, null))
+        Utility.readFixesFromOutputDirectory(config.target, Fix.factory(config, null)).stream()
             .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
             .map(Fix::toField)
             .collect(Collectors.toSet());
@@ -104,13 +109,13 @@ public class Annotator {
     Set<AddAnnotation> initializers =
         analysis
             .findInitializers(uninitializedFields)
-            .map(onMethod -> new AddAnnotation(onMethod, config.initializerAnnot))
+            .map(onMethod -> new AddMarkerAnnotation(onMethod, config.initializerAnnot))
             .collect(Collectors.toSet());
     this.injector.injectAnnotations(initializers);
   }
 
   /** Performs iterations of inference/injection until no unseen fix is suggested. */
-  private void explore() {
+  private void annotate() {
     Utility.setScannerCheckerActivation(config.target, true);
     Utility.buildTarget(config);
     Utility.setScannerCheckerActivation(config.target, false);
@@ -141,6 +146,10 @@ public class Annotator {
       cache.disable();
       executeNextIteration(globalAnalyzer, fieldDeclarationAnalysis);
       cache.enable();
+    }
+
+    if (config.forceResolveActivated) {
+      forceResolveRemainingErrors(fieldDeclarationAnalysis, tree);
     }
 
     System.out.println("\nFinished annotating.");
@@ -199,6 +208,7 @@ public class Annotator {
     ImmutableSet<Fix> fixes =
         Utility.readFixesFromOutputDirectory(
                 config.target, Fix.factory(config, fieldDeclarationAnalysis))
+            .stream()
             .filter(fix -> !cache.processedFix(fix))
             .collect(ImmutableSet.toImmutableSet());
 
@@ -215,5 +225,80 @@ public class Annotator {
                 : new BasicExplorer(fixes, supplier, globalAnalyzer);
     // Result of the iteration analysis.
     return explorer.explore();
+  }
+
+  /**
+   * Resolves all remaining errors in target module by following steps below:
+   *
+   * <ul>
+   *   <li>Enclosing method of triggered errors will be marked with {@code @NullUnmarked}
+   *       annotation.
+   *   <li>Uninitialized fields (inline or by constructor) will be annotated as
+   *       {@code @SuppressWarnings("NullAway.Init")}.
+   *   <li>Explicit {@code Nullable} assignments to fields will be annotated as
+   *       {@code @SuppressWarnings("NullAway")}.
+   * </ul>
+   *
+   * @param fieldDeclarationAnalysis Field declaration analysis.
+   * @param tree Method Declaration analysis.
+   */
+  private void forceResolveRemainingErrors(
+      FieldDeclarationAnalysis fieldDeclarationAnalysis, MethodDeclarationTree tree) {
+    // Collect regions with remaining errors.
+    Utility.buildTarget(config);
+    List<Error> remainingErrors = Utility.readErrorsFromOutputDirectory(config.target);
+    Set<Fix> remainingFixes =
+        Utility.readFixesFromOutputDirectory(
+            config.target, Fix.factory(config, fieldDeclarationAnalysis));
+
+    // Collect all regions for NullUnmarked.
+    // For all errors in regions which correspond to a method's body, we can add @NullUnmarked at
+    // the method level.
+    Set<AddAnnotation> nullUnMarkedAnnotations =
+        remainingErrors.stream()
+            // filter non-method regions.
+            .filter(error -> !error.encMethod().equals("null"))
+            // find the corresponding method nodes.
+            .map(error -> tree.findNode(error.encMethod(), error.encClass()))
+            // impossible, just sanity check or future nullness checker hints
+            .filter(Objects::nonNull)
+            .map(node -> new AddMarkerAnnotation(node.location, config.nullUnMarkedAnnotation))
+            .collect(Collectors.toSet());
+    injector.injectAnnotations(nullUnMarkedAnnotations);
+
+    // Collect explicit Nullable initialization to fields
+    Set<AddAnnotation> suppressWarningsAnnotations =
+        remainingFixes.stream()
+            .filter(
+                fix -> {
+                  if (!(fix.isOnField() && fix.reasons.contains("ASSIGN_FIELD_NULLABLE"))) {
+                    return false;
+                  }
+                  OnField onField = fix.toField();
+                  return onField.clazz.equals(fix.encClass()) && fix.encMethod().equals("");
+                })
+            .map(
+                fix ->
+                    new AddSingleElementAnnotation(
+                        fix.toField(), "SuppressWarnings", "NullAway", false))
+            .collect(Collectors.toSet());
+    injector.injectAnnotations(suppressWarningsAnnotations);
+
+    // Collect NullAway.Init SuppressWarnings
+    Set<AddAnnotation> initializationSuppressWarningsAnnotations =
+        remainingFixes.stream()
+            .filter(
+                fix ->
+                    fix.isOnField()
+                        && (fix.reasons.contains("METHOD_NO_INIT")
+                            || fix.reasons.contains("FIELD_NO_INIT")))
+            .map(
+                fix ->
+                    new AddSingleElementAnnotation(
+                        fix.toField(), "SuppressWarnings", "NullAway.Init", false))
+            // Exclude already annotated fields with a general NullAway suppress warning.
+            .filter(f -> !suppressWarningsAnnotations.contains(f))
+            .collect(Collectors.toSet());
+    injector.injectAnnotations(initializationSuppressWarningsAnnotations);
   }
 }

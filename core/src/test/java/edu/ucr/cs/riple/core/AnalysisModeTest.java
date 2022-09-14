@@ -109,4 +109,31 @@ public class AnalysisModeTest extends BaseCoreTest {
         .enableDownstreamDependencyAnalysis(UPPER_BOUND)
         .start();
   }
+
+  @Test
+  public void strictModeWithForceResolveTest() {
+    coreTestHelper
+        .addExpectedReports(
+            // Resolves 6 errors locally and all errors on downstream dependencies can be resolved
+            // with no new triggered error, therefore the effect is -6. The fix triggers no error
+            // in downstream dependencies, should be approved.
+            new TReport(
+                new OnMethod("Foo.java", "test.target.Foo", "returnNullGood()"), -6, APPROVE),
+            // Resolves 6 errors locally but creates 1 error on downstream dependencies that cannot
+            // be resolved, therefore the effect is -5. The fix triggers 1 error in downstream
+            // dependencies, should be rejected.
+            new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullBad()"), -5, REJECT))
+        .setPredicate(
+            (expected, found) ->
+                expected.root.equals(found.root)
+                    && expected.getExpectedValue()
+                        == found.getOverallEffect(coreTestHelper.getConfig())
+                    && Objects.equals(expected.getTag(), found.getTag()))
+        .toDepth(5)
+        .disableBailOut()
+        .enableDownstreamDependencyAnalysis(STRICT)
+        // This causes the test to report a failure if any errors remain when building the target.
+        .enableForceResolve()
+        .start();
+  }
 }

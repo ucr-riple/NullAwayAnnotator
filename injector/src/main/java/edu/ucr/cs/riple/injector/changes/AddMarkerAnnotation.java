@@ -27,33 +27,34 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import edu.ucr.cs.riple.injector.location.Location;
-import org.json.simple.JSONObject;
 
-public class RemoveAnnotation extends Change {
-  public RemoveAnnotation(Location location, String annotation) {
+/**
+ * Used to add <a
+ * href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-9.html#jls-MarkerAnnotation">Marker
+ * Annotation</a> on elements in source code.
+ */
+public class AddMarkerAnnotation extends AddAnnotation {
+
+  public AddMarkerAnnotation(Location location, String annotation) {
     super(location, annotation);
   }
 
   @Override
   public void visit(NodeWithAnnotations<?> node) {
-    // We only insert annotations with their simple name, therefore, we should only remove
-    // the annotation if it matches with the simple name (otherwise, the annotation was not injected
-    // by the core module request and should not be touched). Also, we currently require removing
-    // only MarkerAnnotations, removal of other types of annotations are not supported yet.
-    AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationSimpleName);
     NodeList<AnnotationExpr> annotations = node.getAnnotations();
-    annotations.removeIf(annotationExpr::equals);
-  }
+    AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationSimpleName);
 
-  @Override
-  public JSONObject getJson() {
-    JSONObject res = super.getJson();
-    res.put("INJECT", false);
-    return res;
+    // Check if annot already exists.
+    boolean annotAlreadyExists =
+        annotations.stream().anyMatch(annot -> annot.equals(annotationExpr));
+    if (annotAlreadyExists) {
+      return;
+    }
+    node.addMarkerAnnotation(annotationSimpleName);
   }
 
   @Override
   public Change duplicate() {
-    return new RemoveAnnotation(location.duplicate(), annotation);
+    return new AddMarkerAnnotation(location, annotation);
   }
 }

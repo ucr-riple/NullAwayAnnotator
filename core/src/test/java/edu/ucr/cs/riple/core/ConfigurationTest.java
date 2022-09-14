@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -239,6 +240,24 @@ public class ConfigurationTest {
           Config c = new Config(makeCommandLineArguments(flags));
           assertEquals(expectedMode, c.mode);
         });
+  }
+
+  @Test
+  public void testForceResolveFlag() {
+    Config config;
+
+    List<CLIFlag> baseFlags = new ArrayList<>(requiredFlagsCli);
+    baseFlags.addAll(requiredDownsStreamDependencyFlagsCli);
+
+    // Check default mode.
+    config = new Config(makeCommandLineArguments(baseFlags));
+    assertFalse(config.forceResolveActivated);
+
+    CLIFlag flag = new CLIFlagWithValue("fr", "edu.ucr.example.NullUnmarked");
+    baseFlags.add(flag);
+    config = new Config(makeCommandLineArguments(baseFlags));
+    assertTrue(config.forceResolveActivated);
+    assertEquals(config.nullUnMarkedAnnotation, "edu.ucr.example.NullUnmarked");
   }
 
   /**

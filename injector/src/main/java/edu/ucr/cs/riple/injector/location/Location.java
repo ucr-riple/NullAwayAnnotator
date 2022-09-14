@@ -27,11 +27,10 @@ package edu.ucr.cs.riple.injector.location;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.expr.AnnotationExpr;
-import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import java.util.Arrays;
 import java.util.Objects;
@@ -106,8 +105,7 @@ public abstract class Location {
 
   public abstract Location duplicate();
 
-  protected abstract boolean applyToMember(
-      NodeList<BodyDeclaration<?>> clazz, String annotation, boolean inject);
+  protected abstract boolean applyToMember(NodeList<BodyDeclaration<?>> clazz, Change change);
 
   protected abstract void fillJsonInformation(JSONObject res);
 
@@ -115,12 +113,10 @@ public abstract class Location {
    * Applies the change to the target element on the given compilation unit tree.
    *
    * @param tree CompilationUnit Tree to locate the target element.
-   * @param annotation Fully qualified name of the annotation.
-   * @param inject If set to true, the given annotation will be added to the target element, and if
-   *     set to false, the given annotation will be removed from the element.
+   * @param change Change to be applied on the target element.
    * @return true, if the change applied successfully.
    */
-  public boolean apply(CompilationUnit tree, String annotation, boolean inject) {
+  public boolean apply(CompilationUnit tree, Change change) {
     NodeList<BodyDeclaration<?>> clazz;
     try {
       clazz = Helper.getTypeDeclarationMembersByFlatName(tree, this.clazz);
@@ -128,7 +124,7 @@ public abstract class Location {
       System.err.println(notFound.getMessage());
       return false;
     }
-    return applyToMember(clazz, annotation, inject);
+    return applyToMember(clazz, change);
   }
 
   @SuppressWarnings("unchecked")
@@ -139,29 +135,6 @@ public abstract class Location {
     res.put(KEYS.URI, uri);
     fillJsonInformation(res);
     return res;
-  }
-
-  protected static void applyAnnotation(
-      NodeWithAnnotations<?> node, String annotName, boolean inject) {
-    final String annotSimpleName = Helper.simpleName(annotName);
-    NodeList<AnnotationExpr> annotations = node.getAnnotations();
-    boolean exists =
-        annotations.stream()
-            .anyMatch(
-                annot -> {
-                  String thisAnnotName = annot.getNameAsString();
-                  return thisAnnotName.equals(annotName) || thisAnnotName.equals(annotSimpleName);
-                });
-    if (inject && !exists) {
-      node.addMarkerAnnotation(annotSimpleName);
-    }
-    if (!inject) {
-      annotations.removeIf(
-          annot -> {
-            String thisAnnotName = annot.getNameAsString();
-            return thisAnnotName.equals(annotName) || thisAnnotName.equals(annotSimpleName);
-          });
-    }
   }
 
   public void ifMethod(Consumer<OnMethod> consumer) {}

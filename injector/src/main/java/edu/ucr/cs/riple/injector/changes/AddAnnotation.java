@@ -22,29 +22,21 @@
 
 package edu.ucr.cs.riple.injector.changes;
 
-import com.github.javaparser.ast.CompilationUnit;
 import edu.ucr.cs.riple.injector.location.Location;
 import org.json.simple.JSONObject;
 
-public class AddAnnotation extends Change {
+/** Used to add annotations on elements in source code. */
+public abstract class AddAnnotation extends Change {
+
   public AddAnnotation(Location location, String annotation) {
     super(location, annotation);
   }
 
   @Override
-  public boolean apply(CompilationUnit tree) {
-    return this.location.apply(tree, annotation, true);
-  }
-
-  @Override
+  @SuppressWarnings("unchecked")
   public JSONObject getJson() {
     JSONObject res = super.getJson();
     res.put("INJECT", true);
     return res;
-  }
-
-  @Override
-  public Change duplicate() {
-    return new AddAnnotation(location.duplicate(), annotation);
   }
 }

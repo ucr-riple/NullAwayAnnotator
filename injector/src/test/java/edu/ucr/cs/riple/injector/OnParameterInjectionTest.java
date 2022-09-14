@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.injector;
 
-import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,7 +59,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnParameter("Super.java", "com.uber.Super", "test(java.lang.Object)", 0),
                 "javax.annotation.Nullable"))
         .start();
@@ -92,7 +92,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnParameter("Super.java", "com.uber.Super", "test(Object)", 0),
                 "javax.annotation.Nullable"))
         .start();
@@ -131,7 +131,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             "   int index, int[] params, int exception, CallSiteReference site, BootstrapMethod bootstrap);",
             "}")
         .addChanges(
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnParameter(
                     "SSAInstructionFactory.java",
                     "com.uber.SSAInstructionFactory",
@@ -171,7 +171,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnParameter(
                     "ModRef.java",
                     "com.uber.ModRef",
@@ -231,7 +231,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             "    }",
             "}")
         .addChanges(
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnParameter(
                     "ModRef.java",
                     "com.uber.ModRef",
@@ -265,7 +265,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnParameter(
                     "WeakKeyReference.java",
                     "com.uber.WeakKeyReference",

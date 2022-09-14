@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.injector;
 
-import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.Collections;
@@ -68,7 +68,7 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnMethod("Super.java", "com.uber.Super", "test()"),
                 "javax.annotation.Nullable"))
         .start(true);
@@ -229,7 +229,7 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnMethod("Super.java", "com.uber.Super", "test()"),
                 "javax.annotation.Nullable"))
         .start(true);
@@ -267,7 +267,7 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "   class Bar{ }",
             "}")
         .addChanges(
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnMethod("Super.java", "com.uber.Super", "test()"),
                 "javax.annotation.Nullable"))
         .start(true);
@@ -295,10 +295,10 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "   private Object allTest[];",
             "}")
         .addChanges(
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnField("B.java", "com.uber.B", Collections.singleton("allTest")),
                 "javax.annotation.Nullable"),
-            new AddAnnotation(
+            new AddMarkerAnnotation(
                 new OnField("A.java", "com.uber.A", Collections.singleton("allTest")),
                 "javax.annotation.Nullable"))
         .start(true);

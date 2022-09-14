@@ -29,6 +29,7 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import edu.ucr.cs.riple.injector.SignatureMatcher;
+import edu.ucr.cs.riple.injector.changes.Change;
 import java.util.Objects;
 import java.util.function.Consumer;
 import org.json.simple.JSONObject;
@@ -58,8 +59,7 @@ public class OnParameter extends Location {
   }
 
   @Override
-  protected boolean applyToMember(
-      NodeList<BodyDeclaration<?>> members, String annotation, boolean inject) {
+  protected boolean applyToMember(NodeList<BodyDeclaration<?>> members, Change change) {
     final boolean[] success = {false};
     members.forEach(
         bodyDeclaration ->
@@ -69,8 +69,7 @@ public class OnParameter extends Location {
                     NodeList<?> params = callableDeclaration.getParameters();
                     if (index < params.size()) {
                       if (params.get(index) instanceof Parameter) {
-                        applyAnnotation(
-                            (NodeWithAnnotations<?>) params.get(index), annotation, inject);
+                        change.visit((NodeWithAnnotations<?>) params.get(index));
                         success[0] = true;
                       }
                     }

@@ -118,6 +118,16 @@ public class Config {
   /** Global counter for assigning unique id for each instance. */
   public int moduleCounterID;
 
+  /**
+   * If activated, AutoAnnotator will try to resolve all remaining errors by marking the enclosing
+   * method as {@code NullUnMarked}. It will also mark uninitialized fields with
+   * {@code @SuppressWarning("NullAway.Init")}
+   */
+  public final boolean forceResolveActivated;
+
+  /** Fully qualified NullUnmarked annotation. */
+  public final String nullUnMarkedAnnotation;
+
   public final Log log;
   public final int depth;
 
@@ -275,6 +285,12 @@ public class Config {
     analysisMode.setRequired(false);
     options.addOption(analysisMode);
 
+    // Force resolve activation
+    Option activateForceResolveOption =
+        new Option("fr", "force-resolve", true, "Activates force resolve mode.");
+    activateForceResolveOption.setRequired(false);
+    options.addOption(activateForceResolveOption);
+
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
@@ -361,6 +377,11 @@ public class Config {
       this.downstreamInfo = ImmutableSet.of();
       this.downstreamDependenciesBuildCommand = null;
     }
+    this.forceResolveActivated = cmd.hasOption(activateForceResolveOption);
+    this.nullUnMarkedAnnotation =
+        this.forceResolveActivated
+            ? cmd.getOptionValue(activateForceResolveOption)
+            : "org.jspecify.nullness.NullUnmarked";
     this.moduleCounterID = 0;
     this.log = new Log();
     this.log.reset();
@@ -436,6 +457,11 @@ public class Config {
 
     this.downstreamInfo = ImmutableSet.copyOf(moduleInfoList);
     this.moduleCounterID = 0;
+    this.forceResolveActivated =
+        getValueFromKey(jsonObject, "FORCE_RESOLVE", Boolean.class).orElse(false);
+    this.nullUnMarkedAnnotation =
+        getValueFromKey(jsonObject, "ANNOTATION:NULL_UNMARKED", String.class)
+            .orElse("org.jspecify.nullness.NullUnmarked");
     this.log = new Log();
     log.reset();
   }
@@ -550,6 +576,9 @@ public class Config {
     public Path nullawayLibraryModelLoaderPath;
     public AnalysisMode mode = AnalysisMode.LOCAL;
     public String downstreamBuildCommand;
+
+    public boolean forceResolveActivation = false;
+    public String nullUnmarkedAnnotation = "org.jspecify.nullness.NullUnmarked";
     public int depth = 1;
 
     @SuppressWarnings("unchecked")
@@ -568,6 +597,7 @@ public class Config {
       JSONObject annotation = new JSONObject();
       annotation.put("INITIALIZER", initializerAnnotation);
       annotation.put("NULLABLE", nullableAnnotation);
+      annotation.put("NULL_UNMARKED", nullUnmarkedAnnotation);
       json.put("ANNOTATION", annotation);
       json.put("LEXICAL_PRESERVATION", lexicalPreservationActivation);
       json.put("OUTER_LOOP", outerLoopActivation);
@@ -579,6 +609,7 @@ public class Config {
       json.put("DEPTH", depth);
       json.put("EXHAUSTIVE_SEARCH", exhaustiveSearch);
       json.put("REDIRECT_BUILD_OUTPUT_TO_STDERR", redirectBuildOutputToStdErr);
+      json.put("FORCE_RESOLVE", forceResolveActivation);
       JSONArray configPathsJson = new JSONArray();
       configPathsJson.addAll(
           configPaths.stream()
@@ -607,6 +638,7 @@ public class Config {
         downstreamDependency.put("ANALYSIS_MODE", mode.name());
       }
       json.put("DOWNSTREAM_DEPENDENCY_ANALYSIS", downstreamDependency);
+
       try (BufferedWriter file =
           Files.newBufferedWriter(path.toFile().toPath(), Charset.defaultCharset())) {
         file.write(json.toJSONString());

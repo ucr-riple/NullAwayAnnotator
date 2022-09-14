@@ -32,7 +32,7 @@ import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.Result;
 import edu.ucr.cs.riple.core.util.Utility;
-import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Collection;
 import java.util.Set;
@@ -90,7 +90,7 @@ public class BasicExplorer extends Explorer {
             .map(
                 onParameter ->
                     new Fix(
-                        new AddAnnotation(onParameter, config.nullableAnnot),
+                        new AddMarkerAnnotation(onParameter, config.nullableAnnot),
                         "PASSING_NULLABLE",
                         onParameter.clazz,
                         onParameter.method,

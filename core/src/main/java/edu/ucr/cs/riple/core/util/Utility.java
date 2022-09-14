@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Factory;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.io.BufferedReader;
@@ -40,6 +41,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -66,6 +68,13 @@ import org.w3c.dom.Element;
 /** Utility class. */
 public class Utility {
 
+  /**
+   * Executes a shell command in a subprocess. If {@link Config#redirectBuildOutputToStdErr} is
+   * activated, it will write the command's output in std error.
+   *
+   * @param config Annotator config.
+   * @param command The shell command to run.
+   */
   public static void executeCommand(Config config, String command) {
     try {
       Process p = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
@@ -83,6 +92,12 @@ public class Utility {
     }
   }
 
+  /**
+   * Writes reports content in json format in reports.json file in the output directory.
+   *
+   * @param config Annotator config.
+   * @param reports Immutable set of reports.
+   */
   @SuppressWarnings("unchecked")
   public static void writeReports(Config config, ImmutableSet<Report> reports) {
     Path reportsPath = config.globalDir.resolve("reports.json");
@@ -103,6 +118,7 @@ public class Utility {
       reportJson.put("TREE", followUps);
       reportsJson.add(reportJson);
     }
+    // Sort by overall effect.
     reportsJson.sort(
         (o1, o2) -> {
           int first = (Integer) ((JSONObject) o1).get("OVERALL EFFECT");
@@ -120,13 +136,21 @@ public class Utility {
     }
   }
 
-  public static Stream<Fix> readFixesFromOutputDirectory(ModuleInfo info, Factory<Fix> factory) {
+  /**
+   * Reads serialized suggested fixes of passed module in "fixes.tsv" file in the output directory,
+   *
+   * @param info Module info.
+   * @param factory Fix factory to create {@link Fix} instance from array of values.
+   * @return Set of serialized fixes.
+   */
+  public static Set<Fix> readFixesFromOutputDirectory(ModuleInfo info, Factory<Fix> factory) {
     Path fixesPath = info.dir.resolve("fixes.tsv");
     Set<Fix> fixes = new HashSet<>();
     try {
       try (BufferedReader br =
           Files.newBufferedReader(fixesPath.toFile().toPath(), Charset.defaultCharset())) {
         String line;
+        // Skip header.
         br.readLine();
         while ((line = br.readLine()) != null) {
           Fix fix = factory.build(line.split("\t"));
@@ -141,7 +165,32 @@ public class Utility {
     } catch (IOException e) {
       throw new RuntimeException("Exception happened in reading fixes at: " + fixesPath, e);
     }
-    return fixes.stream();
+    return fixes;
+  }
+
+  /**
+   * Reads serialized errors of passed module in "errors.tsv" file in the output directory,
+   *
+   * @param info Module info.
+   * @return List of serialized errors.
+   */
+  public static List<Error> readErrorsFromOutputDirectory(ModuleInfo info) {
+    Path errorsPath = info.dir.resolve("errors.tsv");
+    List<Error> errors = new ArrayList<>();
+    try {
+      try (BufferedReader br =
+          Files.newBufferedReader(errorsPath.toFile().toPath(), Charset.defaultCharset())) {
+        String line;
+        // Skip header.
+        br.readLine();
+        while ((line = br.readLine()) != null) {
+          errors.add(new Error(line.split("\t")));
+        }
+      }
+    } catch (IOException e) {
+      throw new RuntimeException("Exception happened in reading errors at: " + errorsPath, e);
+    }
+    return errors;
   }
 
   /**
@@ -192,11 +241,27 @@ public class Utility {
     }
   }
 
+  /**
+   * Activates/Deactivates {@link edu.ucr.cs.riple.scanner.TypeAnnotatorScanner} features by
+   * updating the {@link edu.ucr.cs.riple.scanner.Config} in {@code XML} format for the given
+   * modules.
+   *
+   * @param modules Immutable set of modules that their configuration files need to be updated.
+   * @param activation activation flag for all features of the scanner.
+   */
   public static void setScannerCheckerActivation(
       ImmutableSet<ModuleInfo> modules, boolean activation) {
     modules.forEach(info -> setScannerCheckerActivation(info, activation));
   }
 
+  /**
+   * Activates/Deactivates {@link edu.ucr.cs.riple.scanner.TypeAnnotatorScanner} features by
+   * updating the {@link edu.ucr.cs.riple.scanner.Config} in {@code XML} format for the given
+   * module.
+   *
+   * @param info module that its configuration file need to be updated.
+   * @param activation activation flag for all features of the scanner.
+   */
   public static void setScannerCheckerActivation(ModuleInfo info, boolean activation) {
     DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
     try {
@@ -248,6 +313,11 @@ public class Utility {
     }
   }
 
+  /**
+   * Builds all downstream dependencies.
+   *
+   * @param config Annotator config.
+   */
   public static void buildDownstreamDependencies(Config config) {
     config.downstreamInfo.forEach(
         module -> {
@@ -261,10 +331,21 @@ public class Utility {
     build(config, config.downstreamDependenciesBuildCommand);
   }
 
+  /**
+   * Builds target.
+   *
+   * @param config Annotator config.
+   */
   public static void buildTarget(Config config) {
     buildTarget(config, false);
   }
 
+  /**
+   * Builds target with control on field initialization serialization.
+   *
+   * @param config Annotator config.
+   * @param initSerializationEnabled Activation flag for field initialization serialization.
+   */
   public static void buildTarget(Config config, boolean initSerializationEnabled) {
     FixSerializationConfig.Builder nullAwayConfig =
         new FixSerializationConfig.Builder()
@@ -275,6 +356,12 @@ public class Utility {
     build(config, config.buildCommand);
   }
 
+  /**
+   * Builds module(s).
+   *
+   * @param config Annotator config.
+   * @param command Command to run to build module(s).
+   */
   private static void build(Config config, String command) {
     try {
       long timer = config.log.startTimer();
@@ -286,6 +373,13 @@ public class Utility {
     }
   }
 
+  /**
+   * Returns a progress bar with the given task name.
+   *
+   * @param taskName Task name.
+   * @param steps Number of total steps to show in the progress bar.
+   * @return Progress bar instance.
+   */
   public static ProgressBar createProgressBar(String taskName, int steps) {
     return new ProgressBar(
         taskName,
@@ -302,6 +396,11 @@ public class Utility {
         Duration.ZERO);
   }
 
+  /**
+   * Writes log in the `log.txt` file at the output directory.
+   *
+   * @param config Annotator config.
+   */
   public static void writeLog(Config config) {
     Path path = config.globalDir.resolve("log.txt");
     try {

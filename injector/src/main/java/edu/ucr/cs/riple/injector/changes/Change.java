@@ -23,21 +23,42 @@
 package edu.ucr.cs.riple.injector.changes;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Objects;
 import org.json.simple.JSONObject;
 
-@SuppressWarnings("unchecked")
 public abstract class Change {
+  /** Target location. */
   public final Location location;
+  /** Annotation full name. */
   public final String annotation;
+  /** Annotation simple name. */
+  public final String annotationSimpleName;
 
   public Change(Location location, String annotation) {
     this.annotation = annotation;
     this.location = location;
+    this.annotationSimpleName = Helper.simpleName(annotation);
   }
 
-  public abstract boolean apply(CompilationUnit tree);
+  /**
+   * Applies the change to the element in the given compilation unit tree that matches the location.
+   *
+   * @param tree Compilation unit tree instance.
+   * @return true, if the changes was applied successfully.
+   */
+  public boolean apply(CompilationUnit tree) {
+    return this.location.apply(tree, this);
+  }
+
+  /**
+   * Visits the given node and applies the change.
+   *
+   * @param node Given node.
+   */
+  public abstract void visit(NodeWithAnnotations<?> node);
 
   @Override
   public boolean equals(Object o) {
@@ -56,6 +77,7 @@ public abstract class Change {
     return Objects.hash(location, annotation);
   }
 
+  @SuppressWarnings("unchecked")
   public JSONObject getJson() {
     JSONObject res = new JSONObject();
     res.put("LOCATION", location.getJson());

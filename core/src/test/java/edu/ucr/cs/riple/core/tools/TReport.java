@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Set;
 import java.util.function.Function;
@@ -51,7 +51,11 @@ public class TReport extends Report {
   public TReport(Location root, int effect, String encClass, String encMethod, Tag tag) {
     super(
         new Fix(
-            new AddAnnotation(root, "javax.annotation.Nullable"), null, encClass, encMethod, true),
+            new AddMarkerAnnotation(root, "javax.annotation.Nullable"),
+            null,
+            encClass,
+            encMethod,
+            true),
         effect);
     this.expectedValue = effect;
     if (tag != null) {
