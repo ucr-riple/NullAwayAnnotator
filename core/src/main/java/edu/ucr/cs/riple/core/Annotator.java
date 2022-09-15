@@ -53,7 +53,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * The main class of the core module. Responsible for analyzing the target module and injecting the
@@ -185,7 +184,7 @@ public class Annotator {
     Set<Fix> selectedFixes =
         latestReports.stream()
             .filter(Report::approved)
-            .flatMap(report -> config.chain ? report.tree.stream() : Stream.of(report.root))
+            .flatMap(report -> report.getSelectedFixes(config))
             .collect(Collectors.toSet());
     injector.injectFixes(selectedFixes);
 

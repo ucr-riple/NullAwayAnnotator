@@ -203,7 +203,6 @@ public class Node {
   /** Merges triggered fixes to the tree, to prepare the analysis for the next depth. */
   public void mergeTriggered() {
     this.tree.addAll(this.triggeredFixes);
-    this.tree.forEach(fix -> fix.fixSourceIsInTarget = true);
     this.triggeredFixes.clear();
   }
 

@@ -67,6 +67,7 @@ public class CoreTestHelper {
   private boolean downstreamDependencyAnalysisActivated = false;
   private AnalysisMode mode = AnalysisMode.LOCAL;
   private Config config;
+  private boolean chain = true;
 
   public CoreTestHelper(Path projectPath, Path outDirPath, List<String> modules) {
     this.projectPath = projectPath;
@@ -148,6 +149,11 @@ public class CoreTestHelper {
 
   public CoreTestHelper enableDownstreamDependencyAnalysis() {
     return enableDownstreamDependencyAnalysis(AnalysisMode.LOWER_BOUND);
+  }
+
+  public CoreTestHelper applyRootFixOnly() {
+    this.chain = false;
+    return this;
   }
 
   public void start() {
@@ -264,7 +270,7 @@ public class CoreTestHelper {
     builder.outputDir = outDirPath.toString();
     builder.depth = depth;
     builder.bailout = !disableBailout;
-    builder.chain = true;
+    builder.chain = chain;
     builder.outerLoopActivation = requestCompleteLoop;
     builder.optimized = true;
     builder.downStreamDependenciesAnalysisActivated = downstreamDependencyAnalysisActivated;

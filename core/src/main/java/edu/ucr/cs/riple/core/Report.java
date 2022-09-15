@@ -34,6 +34,7 @@ import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Container class to store information regarding effectiveness of a fix, its associated fix tree
@@ -246,5 +247,29 @@ public class Report {
   public boolean isInProgress(Config config) {
     return (!finished && (!config.bailout || localEffect > 0))
         || triggeredFixes.stream().anyMatch(input -> !input.fixSourceIsInTarget);
+  }
+
+  /**
+   * Returns the stream of fixes that needs to be applied to source code if report is tagged as
+   * {@link Tag#APPROVE}.
+   *
+   * @param config Annotator config.
+   * @return Stream of selected fixes.
+   */
+  public Stream<Fix> getSelectedFixes(Config config) {
+    return tree.stream()
+        .filter(
+            input -> {
+              // If chain is active, add all fixes
+              if (config.chain) {
+                return true;
+              }
+              // Add all fixes reported from downstream
+              if (!input.fixSourceIsInTarget) {
+                return true;
+              }
+              // Add root.
+              return input.equals(root);
+            });
   }
 }
