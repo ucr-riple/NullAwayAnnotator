@@ -46,13 +46,14 @@ public class MethodInfo {
   private final int id;
   private Boolean[] annotFlags;
   private boolean hasNullableAnnotation;
-  private int parent = -1;
+  private int parent;
 
   private MethodInfo(Symbol.MethodSymbol method, VisitorState state, ScannerContext context) {
     this.id = context.getNextMethodId();
     this.symbol = method;
     this.clazz = (method != null) ? method.enclClass() : null;
     this.uri = state.getPath().getCompilationUnit().getSourceFile().toUri();
+    this.parent = 0;
     context.visitMethod(this);
   }
 

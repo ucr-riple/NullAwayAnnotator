@@ -55,8 +55,8 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
     super.setup();
     this.classNames = new HashSet<>();
     this.nodes = new HashMap<>();
-    // The root node of this tree with id: -1.
-    nodes.put(-1, MethodNode.TOP);
+    // The root node of this tree with id: 0.
+    nodes.put(MethodNode.TOP.id, MethodNode.TOP);
   }
 
   @Override
@@ -81,7 +81,7 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
         values[7],
         Boolean.parseBoolean(values[8]));
     // If node has a non-top parent.
-    if (parentId != -1) {
+    if (parentId > 0) {
       MethodNode parent = nodes.get(parentId);
       // If parent has not been seen visited before.
       if (parent == null) {
