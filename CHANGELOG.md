@@ -1,5 +1,16 @@
 ## CHANGELOG
 
+### VERSION 1.3.3
+- Enabled detection of flow of @Nullable back to upstream from downstream.
+- Renamed `MethodInheritanceTree` to `MethodDeclarationTree`.
+- Added configuration modes for downstream dependency analysis (`strict`|`lower bound` | `upper bound` | `default`).
+- Updated fix tree construction with triggered fixes from downstream dependencies.
+- Added report cache.
+- Added extra cycle for better reduction of errors.
+- Support `@NullUnmarked` and `@SuppressWarnings` injection to resolve all remaining errors.
+- Bug fix in retrieving methods inserted in `MethodDeclarationTree` that are not declared in target module.
+- Bug fixes and refactorings.
+
 ### VERSION 1.3.2
 
 - Added downstream dependency analysis.

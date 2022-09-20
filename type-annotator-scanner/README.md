@@ -83,7 +83,7 @@ repositories {
 }
 
 dependencies {
-    annotationProcessor "edu.ucr.cs.riple.nullawayannotator:type-annotator-scanner:1.3.2-SNAPSHOT"
+    annotationProcessor "edu.ucr.cs.riple.nullawayannotator:type-annotator-scanner:1.3.3-LOCAL"
 
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
     errorprone "com.google.errorprone:error_prone_core:2.3.2"
