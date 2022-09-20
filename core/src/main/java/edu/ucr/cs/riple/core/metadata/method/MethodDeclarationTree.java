@@ -97,7 +97,7 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
   }
 
   /**
-   * Locates the immediate super method of input method.
+   * Locates the immediate super method of input method declared in module.
    *
    * @param method Method signature of input.
    * @param clazz Fully qualified name of the input method.
@@ -110,7 +110,7 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
       return null;
     }
     MethodNode parent = nodes.get(node.parent);
-    return parent.isNonTop() ? parent : null;
+    return (parent.isNonTop() && parent.location != null) ? parent : null;
   }
 
   /**
