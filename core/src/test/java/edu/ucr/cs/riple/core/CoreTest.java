@@ -32,6 +32,8 @@ import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Stream;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -220,6 +222,30 @@ public class CoreTest extends BaseCoreTest {
             new TReport(new OnField("Main.java", "test.Main", singleton("field")), -6),
             new TReport(new OnMethod("Main.java", "test.Main", "returnNullableRecursive()"), -6),
             new TReport(new OnMethod("Main.java", "test.Main", "returnNullable()"), -6))
+        .start();
+  }
+
+  @Test
+  public void overrideMethodDeclaredOutsideModuleTest() {
+    coreTestHelper
+        .addInputLines(
+            "Main.java",
+            "package test;",
+            "import java.util.function.Function;",
+            "import java.util.stream.Stream;",
+            "public class Main {",
+            "   public void run() {",
+            "     Stream.of(\"Foo\").map(new Function<Object, String>() {",
+            "       @Override",
+            "       public String apply(Object o) {",
+            "         return null;",
+            "       }",
+            "     });",
+            "   }",
+            "}")
+        .toDepth(1)
+        .addExpectedReports(
+            new TReport(new OnMethod("Main.java", "test.Main$1", "apply(java.lang.Object)"), -1))
         .start();
   }
 }
