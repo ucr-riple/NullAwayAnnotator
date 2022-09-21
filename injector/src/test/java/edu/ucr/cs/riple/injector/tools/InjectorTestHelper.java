@@ -88,11 +88,13 @@ public class InjectorTestHelper {
         String found =
             FileUtils.readFileToString(
                 pathOf(rootPath.resolve("src"), key).toFile(), Charset.defaultCharset());
-        String trimmedFound = Utility.removeWhiteSpaces(found);
+        // Lexical Preserving Printer adds new lines that will be reverted by calling google java
+        // format, therefore we skip them in tests not cause test failures.
+        String trimmedFound = Utility.removeNewLines(found);
         String expected =
             FileUtils.readFileToString(
                 pathOf(rootPath.resolve("expected"), key).toFile(), Charset.defaultCharset());
-        String trimmedExpected = Utility.removeWhiteSpaces(expected);
+        String trimmedExpected = Utility.removeNewLines(expected);
         if (!trimmedFound.equals(trimmedExpected)) {
           System.out.println("FOUND   : " + trimmedFound);
           System.out.println("EXPECTED: " + trimmedExpected);
@@ -105,7 +107,7 @@ public class InjectorTestHelper {
   }
 
   public void start() {
-    start(false);
+    start(true);
   }
 
   private String[] readLinesOfFileFromResource(String path) {
