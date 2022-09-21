@@ -52,6 +52,6 @@ public class Utility {
    * @return content without any white spaces.
    */
   public static String removeWhiteSpaces(String content) {
-    return content.replaceAll(" ", "").replaceAll("\n", "").replaceAll("\t", "");
+    return content.replaceAll("\n", "");
   }
 }

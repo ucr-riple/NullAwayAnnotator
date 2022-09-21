@@ -105,7 +105,7 @@ public class InjectorTestHelper {
   }
 
   public void start() {
-    start(false);
+    start(true);
   }
 
   private String[] readLinesOfFileFromResource(String path) {

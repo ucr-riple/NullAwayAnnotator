@@ -50,7 +50,8 @@ public class OnFieldInjectionTest extends BaseInjectorTest {
             "package com.uber;",
             "import javax.annotation.Nullable;",
             "public class Super {",
-            "   @Nullable Object h = new Object();",
+            "   @Nullable",
+            "   Object h = new Object();",
             "   public void test(@Nullable Object f) {",
             "      h = f;",
             "   }",
@@ -60,5 +61,37 @@ public class OnFieldInjectionTest extends BaseInjectorTest {
                 new OnField("Super.java", "com.uber.Super", Collections.singleton("h")),
                 "javax.annotation.Nullable"))
         .start();
+  }
+
+  @Test
+  public void fieldNullableWithOtherAnnotations() {
+    injectorTestHelper
+        .addInput(
+            "Super.java",
+            "package com.uber;",
+            "import org.checkerframework.checker.nullness.qual.Nullable;",
+            "public class Super {",
+            "   Object h = new Object();",
+            "   @Nullable",
+            "   public void test(@Nullable Object f) {",
+            "      h = f;",
+            "   }",
+            "}")
+        .expectOutput(
+            "package com.uber;",
+            "import org.checkerframework.checker.nullness.qual.Nullable;",
+            "public class Super {",
+            "   @Nullable",
+            "   Object h = new Object();",
+            "   @Nullable",
+            "   public void test(@Nullable Object f) {",
+            "      h = f;",
+            "   }",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnField("Super.java", "com.uber.Super", Collections.singleton("h")),
+                "org.checkerframework.checker.nullness.qual.Nullable"))
+        .start(true);
   }
 }
