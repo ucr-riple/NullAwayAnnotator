@@ -46,12 +46,12 @@ public class Utility {
   }
 
   /**
-   * Removes all white spaces.
+   * Removes all new lines.
    *
    * @param content content to remove from.
-   * @return content without any white spaces.
+   * @return content without any new lines.
    */
-  public static String removeWhiteSpaces(String content) {
+  public static String removeNewLines(String content) {
     return content.replaceAll("\n", "");
   }
 }
