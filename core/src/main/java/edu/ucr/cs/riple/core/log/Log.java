@@ -1,12 +1,45 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2022 Nima Karimipour
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 package edu.ucr.cs.riple.core.log;
 
+/** Log information for Annotator. */
 public class Log {
 
+  /**
+   * Sum of number of nodes constructed in each {@link
+   * edu.ucr.cs.riple.core.metadata.graph.ConflictGraph}.
+   */
   long node;
+  /** Number of build requests. */
   long requested;
+  /** Total time spent for annotator from start to finish. */
   long time;
+  /** Total time spent in building targets. */
   long buildTime = 0;
 
+  /** Resets all log information. */
   public void reset() {
     this.node = 0;
     this.requested = 0;
@@ -26,22 +59,46 @@ public class Log {
         + buildTime;
   }
 
+  /**
+   * Starts timer and returns the exact time at call site.
+   *
+   * @return The time at executing this function.
+   */
   public long startTimer() {
     return System.currentTimeMillis();
   }
 
+  /**
+   * Calculates the difference between the passed time and current time and adds it to time spent in
+   * total time spent.
+   *
+   * @param timer The return result of calling {@link Log#startTimer()}.
+   */
   public void stopTimerAndCapture(long timer) {
     this.time += System.currentTimeMillis() - timer;
   }
 
+  /**
+   * Calculates the difference between the passed time and current time and adds it to time spent in
+   * build time.
+   *
+   * @param timer The return result of calling {@link Log#startTimer()}.
+   */
   public void stopTimerAndCaptureBuildTime(long timer) {
     this.buildTime += System.currentTimeMillis() - timer;
   }
 
+  /** Increments the number of build requests. */
   public void incrementBuildRequest() {
     this.requested += 1;
   }
 
+  /**
+   * Adds the passed parameter to the number of {@link Log#node}.
+   *
+   * @param number Number of new nodes created in {@link
+   *     edu.ucr.cs.riple.core.metadata.graph.ConflictGraph}.
+   */
   public void updateNodeNumber(long number) {
     this.node += number;
   }
