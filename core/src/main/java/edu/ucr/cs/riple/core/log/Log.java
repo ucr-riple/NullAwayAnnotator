@@ -31,30 +31,30 @@ public class Log {
    * Sum of number of nodes constructed in each {@link
    * edu.ucr.cs.riple.core.metadata.graph.ConflictGraph}.
    */
-  long node;
+  private long nodes;
   /** Number of build requests. */
-  long requested;
+  private long requested;
   /** Total time spent for annotator from start to finish. */
-  long time;
+  private long totalTime;
   /** Total time spent in building targets. */
-  long buildTime = 0;
+  private long buildTime = 0;
 
   /** Resets all log information. */
   public void reset() {
-    this.node = 0;
+    this.nodes = 0;
     this.requested = 0;
-    this.time = 0;
+    this.totalTime = 0;
     this.buildTime = 0;
   }
 
   @Override
   public String toString() {
     return "Total number of nodes="
-        + node
+        + nodes
         + "\nTotal number of Requested builds="
         + requested
         + "\nTotal time="
-        + time
+        + totalTime
         + "\nTotal time spent on builds="
         + buildTime;
   }
@@ -75,7 +75,7 @@ public class Log {
    * @param timer The return result of calling {@link Log#startTimer()}.
    */
   public void stopTimerAndCapture(long timer) {
-    this.time += System.currentTimeMillis() - timer;
+    this.totalTime += System.currentTimeMillis() - timer;
   }
 
   /**
@@ -94,12 +94,12 @@ public class Log {
   }
 
   /**
-   * Adds the passed parameter to the number of {@link Log#node}.
+   * Adds the passed parameter to the number of {@link Log#nodes}.
    *
-   * @param number Number of new nodes created in {@link
+   * @param numberOfNewNodesCreated Number of new nodes created in {@link
    *     edu.ucr.cs.riple.core.metadata.graph.ConflictGraph}.
    */
-  public void updateNodeNumber(long number) {
-    this.node += number;
+  public void updateNodeNumber(long numberOfNewNodesCreated) {
+    this.nodes += numberOfNewNodesCreated;
   }
 }
