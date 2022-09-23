@@ -39,4 +39,13 @@ public abstract class AddAnnotation extends Change {
     res.put("INJECT", true);
     return res;
   }
+
+  @Override
+  public boolean equals(Object other) {
+    boolean superAns = super.equals(other);
+    if (!superAns) {
+      return false;
+    }
+    return other instanceof AddAnnotation;
+  }
 }

@@ -56,4 +56,13 @@ public class RemoveAnnotation extends Change {
   public Change duplicate() {
     return new RemoveAnnotation(location.duplicate(), annotation);
   }
+
+  @Override
+  public boolean equals(Object other) {
+    boolean superAns = super.equals(other);
+    if (!superAns) {
+      return false;
+    }
+    return other instanceof RemoveAnnotation;
+  }
 }
