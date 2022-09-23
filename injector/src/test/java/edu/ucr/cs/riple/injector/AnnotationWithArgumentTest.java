@@ -307,7 +307,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "   Object h = new Object();",
             "   @CustomNull({\"arg1\", \"arg2\"})",
             "@CustomNull(\"arg3\")", // this is intentional, just to pass unit tests, this can be
-                                     // fixes by google java format.
+            // fixes by google java format.
             "   public void test(Object f) {",
             "      h = f;",
             "   }",
