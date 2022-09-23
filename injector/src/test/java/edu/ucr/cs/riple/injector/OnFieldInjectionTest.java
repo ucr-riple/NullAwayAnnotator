@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.injector;
 
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
+import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Collections;
 import org.junit.Test;
@@ -59,6 +60,83 @@ public class OnFieldInjectionTest extends BaseInjectorTest {
         .addChanges(
             new AddMarkerAnnotation(
                 new OnField("Super.java", "com.uber.Super", Collections.singleton("h")),
+                "javax.annotation.Nullable"))
+        .start();
+  }
+
+  @Test
+  public void addAndRemoveOnField() {
+    injectorTestHelper
+        .addInput(
+            "Super.java",
+            "package com.uber;",
+            "import org.hibernate.validator.constraints.NotEmpty;",
+            "public class Super {",
+            "   @Custom",
+            "   private @NotEmpty String foo;",
+            "}")
+        .expectOutput(
+            "package com.uber;",
+            "import javax.annotation.Nullable;",
+            "import org.hibernate.validator.constraints.NotEmpty;",
+            "public class Super {",
+            "   @Custom",
+            "   private @NotEmpty String foo;",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnField("Super.java", "com.uber.Super", Collections.singleton("foo")),
+                "javax.annotation.Nullable"),
+            new RemoveAnnotation(
+                new OnField("Super.java", "com.uber.Super", Collections.singleton("foo")),
+                "javax.annotation.Nullable"))
+        .start(true);
+  }
+
+  @Test
+  public void addOnFieldWithTypeUseAnnotation() {
+    injectorTestHelper
+        .addInput(
+            "Super.java",
+            "package com.uber;",
+            "import org.hibernate.validator.constraints.NotEmpty;",
+            "public class Super {",
+            "   private @NotEmpty String foo;",
+            "}")
+        .expectOutput(
+            "package com.uber;",
+            "import javax.annotation.Nullable;",
+            "import org.hibernate.validator.constraints.NotEmpty;",
+            "public class Super {",
+            "   @Nullable private @NotEmpty String foo;",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnField("Super.java", "com.uber.Super", Collections.singleton("foo")),
+                "javax.annotation.Nullable"))
+        .start();
+  }
+
+  @Test
+  public void addOnFieldWithTypeUseAnnotationWithOtherAnnotsExists() {
+    injectorTestHelper
+        .addInput(
+            "Super.java",
+            "package com.uber;",
+            "import org.hibernate.validator.constraints.NotEmpty;",
+            "public class Super {",
+            "   @JsonProperty private @NotEmpty Baz2 baz2;",
+            "}")
+        .expectOutput(
+            "package com.uber;",
+            "import javax.annotation.Nullable;",
+            "import org.hibernate.validator.constraints.NotEmpty;",
+            "public class Super {",
+            "   @Nullable @JsonProperty private @NotEmpty Baz2 baz2;",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnField("Super.java", "com.uber.Super", Collections.singleton("baz2")),
                 "javax.annotation.Nullable"))
         .start();
   }

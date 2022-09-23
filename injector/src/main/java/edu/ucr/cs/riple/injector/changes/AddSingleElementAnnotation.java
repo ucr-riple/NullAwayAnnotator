@@ -144,6 +144,6 @@ public class AddSingleElementAnnotation extends AddAnnotation {
   private void addAnnotationExpressionOnNode(NodeWithAnnotations<?> node, Expression argument) {
     AnnotationExpr annotationExpr =
         new SingleMemberAnnotationExpr(new Name(annotationSimpleName), argument);
-    node.addAnnotation(annotationExpr);
+    node.getAnnotations().addFirst(annotationExpr);
   }
 }

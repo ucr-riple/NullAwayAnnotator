@@ -42,15 +42,18 @@ public class AddMarkerAnnotation extends AddAnnotation {
   @Override
   public void visit(NodeWithAnnotations<?> node) {
     NodeList<AnnotationExpr> annotations = node.getAnnotations();
-    AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationSimpleName);
 
     // Check if annot already exists.
     boolean annotAlreadyExists =
-        annotations.stream().anyMatch(annot -> annot.equals(annotationExpr));
+        annotations.stream()
+            .anyMatch(
+                annot ->
+                    annot.getName().toString().equals(annotationSimpleName)
+                        || annot.getName().toString().equals(annotation));
     if (annotAlreadyExists) {
       return;
     }
-    node.addMarkerAnnotation(annotationSimpleName);
+    annotations.addFirst(new MarkerAnnotationExpr(annotationSimpleName));
   }
 
   @Override
