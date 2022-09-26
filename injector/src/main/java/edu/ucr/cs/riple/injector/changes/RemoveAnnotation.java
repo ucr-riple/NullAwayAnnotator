@@ -27,6 +27,7 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import edu.ucr.cs.riple.injector.location.Location;
+import java.util.Objects;
 import org.json.simple.JSONObject;
 
 public class RemoveAnnotation extends Change {
@@ -64,5 +65,10 @@ public class RemoveAnnotation extends Change {
       return false;
     }
     return other instanceof RemoveAnnotation;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash("Remove", super.hashCode());
   }
 }
