@@ -23,6 +23,7 @@
 package edu.ucr.cs.riple.injector.changes;
 
 import edu.ucr.cs.riple.injector.location.Location;
+import java.util.Objects;
 import org.json.simple.JSONObject;
 
 /** Used to add annotations on elements in source code. */
@@ -47,5 +48,10 @@ public abstract class AddAnnotation extends Change {
       return false;
     }
     return other instanceof AddAnnotation;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash("Add", super.hashCode());
   }
 }
