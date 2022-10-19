@@ -133,19 +133,21 @@ public class Annotator {
             : new NoOpGlobalAnalyzer();
     globalAnalyzer.analyzeDownstreamDependencies();
 
-    // Outer loop starts.
-    while (cache.isUpdated()) {
-      executeNextIteration(globalAnalyzer, fieldDeclarationAnalysis);
-      if (config.disableOuterLoop) {
-        break;
+    if (config.inferenceActivated) {
+      // Outer loop starts.
+      while (cache.isUpdated()) {
+        executeNextIteration(globalAnalyzer, fieldDeclarationAnalysis);
+        if (config.disableOuterLoop) {
+          break;
+        }
       }
-    }
 
-    // Perform once last iteration including all fixes.
-    if (!config.disableOuterLoop) {
-      cache.disable();
-      executeNextIteration(globalAnalyzer, fieldDeclarationAnalysis);
-      cache.enable();
+      // Perform once last iteration including all fixes.
+      if (!config.disableOuterLoop) {
+        cache.disable();
+        executeNextIteration(globalAnalyzer, fieldDeclarationAnalysis);
+        cache.enable();
+      }
     }
 
     if (config.forceResolveActivated) {
@@ -188,6 +190,10 @@ public class Annotator {
             .flatMap(report -> config.chain ? report.tree.stream() : Stream.of(report.root))
             .collect(Collectors.toSet());
     injector.injectFixes(selectedFixes);
+
+    // Update log.
+    config.log.updateInjectedAnnotations(
+        selectedFixes.stream().map(fix -> fix.change).collect(Collectors.toSet()));
 
     // Update impact saved state.
     globalAnalyzer.updateImpactsAfterInjection(selectedFixes);
@@ -266,6 +272,9 @@ public class Annotator {
             .collect(Collectors.toSet());
     injector.injectAnnotations(nullUnMarkedAnnotations);
 
+    // Update log.
+    config.log.updateInjectedAnnotations(nullUnMarkedAnnotations);
+
     // Collect explicit Nullable initialization to fields
     Set<AddAnnotation> suppressWarningsAnnotations =
         remainingFixes.stream()
@@ -283,6 +292,8 @@ public class Annotator {
                         fix.toField(), "SuppressWarnings", "NullAway", false))
             .collect(Collectors.toSet());
     injector.injectAnnotations(suppressWarningsAnnotations);
+    // Update log.
+    config.log.updateInjectedAnnotations(suppressWarningsAnnotations);
 
     // Collect NullAway.Init SuppressWarnings
     Set<AddAnnotation> initializationSuppressWarningsAnnotations =
@@ -300,5 +311,7 @@ public class Annotator {
             .filter(f -> !suppressWarningsAnnotations.contains(f))
             .collect(Collectors.toSet());
     injector.injectAnnotations(initializationSuppressWarningsAnnotations);
+    // Update log.
+    config.log.updateInjectedAnnotations(initializationSuppressWarningsAnnotations);
   }
 }

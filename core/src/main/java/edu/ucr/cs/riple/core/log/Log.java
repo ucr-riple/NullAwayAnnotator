@@ -24,6 +24,11 @@
 
 package edu.ucr.cs.riple.core.log;
 
+import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 /** Log information for Annotator. */
 public class Log {
 
@@ -39,12 +44,19 @@ public class Log {
   /** Total time spent in building targets. */
   private long buildTime = 0;
 
+  /**
+   * Set of approved and injected annotations. These annotations are evaluated and approved and will
+   * not get removed from the source code.
+   */
+  private final List<AddAnnotation> injectedAnnotations = new ArrayList<>();
+
   /** Resets all log information. */
   public void reset() {
     this.nodes = 0;
     this.requested = 0;
     this.totalTime = 0;
     this.buildTime = 0;
+    this.injectedAnnotations.clear();
   }
 
   @Override
@@ -101,5 +113,23 @@ public class Log {
    */
   public void updateNodeNumber(long numberOfNewNodesCreated) {
     this.nodes += numberOfNewNodesCreated;
+  }
+
+  /**
+   * Updates list of injected annotations with the latest injected annotations.
+   *
+   * @param annotations List of the latest injected annotations.
+   */
+  public void updateInjectedAnnotations(Set<AddAnnotation> annotations) {
+    this.injectedAnnotations.addAll(annotations);
+  }
+
+  /**
+   * Returns list of injected annotations.
+   *
+   * @return List of injected annotations.
+   */
+  public List<AddAnnotation> getInjectedAnnotations() {
+    return injectedAnnotations;
   }
 }
