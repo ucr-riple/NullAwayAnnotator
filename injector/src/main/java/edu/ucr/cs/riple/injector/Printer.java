@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2022 University of California, Riverside.
+ * MIT License
+ *
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +34,6 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.Set;
 
 public class Printer {
@@ -77,22 +78,32 @@ public class Printer {
         return range.get().end.line;
       }
     }
-    // No import exists, should add it on top of outermost child
-    OptionalInt line =
-        tree.getChildNodes().stream()
-            .filter(Helper::isTypeDeclarationOrAnonymousClass)
-            .mapToInt(value -> value.getRange().get().begin.line)
-            .min();
-    if (line.isPresent()) {
-      return line.getAsInt() > 0 ? line.getAsInt() - 1 : 0;
-    }
-    // Not possible, just to be careful. Add imports under package declaration.
+    // No import exists, add below package declaration
     if (tree.getPackageDeclaration().isPresent()) {
       Optional<Range> range = tree.getPackageDeclaration().get().getRange();
       if (range.isPresent()) {
         return range.get().begin.line;
       }
     }
+    // No package exists, add import under copy right header if exists, otherwise on the first line.
+    for (int i = 0; i < lines.size(); i++) {
+      String line = lines.get(i).strip();
+      if (line.equals("")) {
+        continue;
+      }
+      if (line.startsWith("/*")) {
+        int j = i;
+        while (j < lines.size()) {
+          String endLine = lines.get(j);
+          if (endLine.contains("*/")) {
+            return j + 1;
+          }
+          j++;
+        }
+      }
+      return i;
+    }
+
     throw new RuntimeException(
         "Could not figure out the starting point for imports for file at path: " + path);
   }
