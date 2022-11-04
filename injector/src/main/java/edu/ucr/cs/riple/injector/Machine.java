@@ -25,19 +25,12 @@ package edu.ucr.cs.riple.injector;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
-import com.github.javaparser.printer.DefaultPrettyPrinter;
-import com.github.javaparser.printer.configuration.DefaultPrinterConfiguration;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
@@ -48,7 +41,6 @@ import me.tongfei.progressbar.ProgressBar;
 public class Machine {
 
   private final List<WorkList> workLists;
-  private final DefaultPrettyPrinter printer;
   private final boolean keep;
   private final int total;
   private int processed = 0;
@@ -58,23 +50,9 @@ public class Machine {
     this.workLists = workLists;
     this.keep = keep;
     this.log = log;
-    this.printer = new DefaultPrettyPrinter(new DefaultPrinterConfiguration());
     AtomicInteger sum = new AtomicInteger();
     workLists.forEach(workList -> sum.addAndGet(workList.getChanges().size()));
     this.total = sum.get();
-  }
-
-  private void overWriteToFile(CompilationUnit changed, String uri) {
-    Path path = Paths.get(uri);
-    try (Writer writer =
-        Files.newBufferedWriter(path.toFile().toPath(), Charset.defaultCharset())) {
-      Files.createDirectories(path.getParent());
-      String toWrite = keep ? LexicalPreservingPrinter.print(changed) : printer.print(changed);
-      writer.write(toWrite);
-      writer.flush();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   public Integer start() {

@@ -32,6 +32,7 @@ public class Insertion extends Modification {
     super(content, position, kind);
   }
 
+  @Override
   public void visit(List<String> lines) {
     String toInsert;
     switch (kind) {
@@ -48,6 +49,9 @@ public class Insertion extends Modification {
             line.substring(0, startPosition.column)
                 + toInsert
                 + line.substring(startPosition.column));
+        break;
+      default:
+        throw new IllegalArgumentException("Modification on kind: " + kind + " is not supported");
     }
   }
 }

@@ -11,7 +11,7 @@ public class Replacement extends Modification {
   public Replacement(
       String content, Position startPosition, Position endPosition, ElementKind kind) {
     super(content, startPosition, kind);
-    this.endPosition = endPosition;
+    this.endPosition = new Position(endPosition.line - 1, endPosition.column - 1);
     if (content.equals("")) {
       throw new IllegalArgumentException("content cannot be empty, use Deletion instead");
     }
@@ -19,9 +19,22 @@ public class Replacement extends Modification {
 
   @Override
   public void visit(List<String> lines) {
-    String line = lines.get(startPosition.line);
-    String updated =
-        line.substring(0, startPosition.column) + content + line.substring(endPosition.column);
-    lines.set(startPosition.line, updated);
+    StringBuilder line = new StringBuilder(lines.get(startPosition.line));
+    line.replace(startPosition.column, endPosition.column + 1, content);
+    lines.set(startPosition.line, line.toString());
+  }
+
+  @Override
+  public String toString() {
+    return "{startPosition="
+        + startPosition
+        + "{endPosition="
+        + endPosition
+        + ", content='"
+        + content
+        + '\''
+        + ", kind="
+        + kind
+        + '}';
   }
 }

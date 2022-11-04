@@ -60,4 +60,16 @@ public abstract class Modification {
   public int hashCode() {
     return Objects.hash(startPosition, content, kind);
   }
+
+  @Override
+  public String toString() {
+    return "{startPosition="
+        + startPosition
+        + ", content='"
+        + content
+        + '\''
+        + ", kind="
+        + kind
+        + '}';
+  }
 }

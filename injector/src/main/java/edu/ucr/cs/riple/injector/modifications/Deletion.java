@@ -32,19 +32,49 @@ public class Deletion extends Modification {
 
   public Deletion(String content, Position startPosition, Position endPosition, ElementKind kind) {
     super(content, startPosition, kind);
-    this.endPosition = endPosition;
+    this.endPosition = new Position(endPosition.line - 1, endPosition.column - 1);
   }
 
   @Override
   public void visit(List<String> lines) {
-    String line = lines.get(startPosition.line);
-    String removed =
-        line.substring(0, startPosition.column) + line.substring(endPosition.column + 1);
-
+    int start = startPosition.column;
+    int end = endPosition.column;
+    StringBuilder line = new StringBuilder(lines.get(startPosition.line));
+    line.delete(start, end + 1);
+    // char at start is removed, head is one character before start.
+    int head = start - 1;
+    // if head is surrounded by white space, remove the extra whitespace.
+    // (  ...) -> ( ...)
+    if (head > 1 && line.charAt(head - 1) == ' ' && line.charAt(head) == ' ') {
+      line.deleteCharAt(head);
+    }
+    // if head is not alphabetic and is followed by a whitespace, remove it.
+    // (@Nullable ...) -> (...)
+    if (head + 1 < line.length()
+        && !Character.isLetterOrDigit(line.charAt(head))
+        && line.charAt(head + 1) == ' ') {
+      // remove extra white space
+      line.deleteCharAt(head + 1);
+    }
+    String removed = line.toString();
     if (removed.strip().equals("")) {
       lines.remove(startPosition.line);
       return;
     }
     lines.set(startPosition.line, removed);
+  }
+
+  @Override
+  public String toString() {
+    return "{startPosition="
+        + startPosition
+        + "{endPosition="
+        + endPosition
+        + ", content='"
+        + content
+        + '\''
+        + ", kind="
+        + kind
+        + '}';
   }
 }
