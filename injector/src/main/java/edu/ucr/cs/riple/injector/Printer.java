@@ -26,7 +26,6 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import edu.ucr.cs.riple.injector.modifications.Modification;
-import edu.ucr.cs.riple.injector.modifications.Offset;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -52,21 +51,12 @@ public class Printer {
   }
 
   public void applyModifications(Set<Modification> modifications) {
-    Offset offset = new Offset();
-    final int[] currentLine = {0};
     modifications.stream()
         .sorted(
             Comparator.comparingInt((Modification o) -> o.startPosition.line)
-                .thenComparingInt(o -> o.startPosition.column))
-        .forEach(
-            modification -> {
-              if (currentLine[0] != modification.startPosition.line) {
-                // processing a new line
-                offset.column = 0;
-              }
-              currentLine[0] = modification.startPosition.line;
-              modification.visit(lines, offset);
-            });
+                .thenComparingInt(o -> o.startPosition.column)
+                .reversed())
+        .forEach(modification -> modification.visit(lines));
   }
 
   public void addImports(CompilationUnit tree, Set<ImportDeclaration> imports) {

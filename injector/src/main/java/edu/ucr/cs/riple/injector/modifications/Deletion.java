@@ -36,18 +36,15 @@ public class Deletion extends Modification {
   }
 
   @Override
-  public void visit(List<String> lines, Offset offset) {
-    String line = lines.get(offset.line + startPosition.line);
+  public void visit(List<String> lines) {
+    String line = lines.get(startPosition.line);
     String removed =
-        line.substring(0, offset.column + startPosition.column)
-            + line.substring(offset.column + startPosition.column + content.length() + 1);
+        line.substring(0, startPosition.column) + line.substring(endPosition.column + 1);
 
     if (removed.strip().equals("")) {
-      lines.remove(offset.line + startPosition.line);
-      offset.line -= 1;
+      lines.remove(startPosition.line);
       return;
     }
-    lines.set(offset.line + startPosition.line, removed);
-    offset.column -= endPosition.column - startPosition.column;
+    lines.set(startPosition.line, removed);
   }
 }

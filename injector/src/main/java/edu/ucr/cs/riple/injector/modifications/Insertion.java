@@ -32,24 +32,22 @@ public class Insertion extends Modification {
     super(content, position, kind);
   }
 
-  public void visit(List<String> lines, Offset offset) {
+  public void visit(List<String> lines) {
     String toInsert;
     switch (kind) {
       case METHOD:
       case FIELD:
         toInsert = " ".repeat(startPosition.column) + this.content;
-        lines.add(offset.line + startPosition.line, toInsert);
-        offset.line += 1;
+        lines.add(startPosition.line, toInsert);
         break;
       case PARAMETER:
         toInsert = this.content + " ";
-        String line = lines.get(offset.line + startPosition.line);
+        String line = lines.get(startPosition.line);
         lines.set(
-            offset.line + startPosition.line,
-            line.substring(0, offset.column + startPosition.column)
+            startPosition.line,
+            line.substring(0, startPosition.column)
                 + toInsert
-                + line.substring(offset.column + startPosition.column));
-        offset.column += toInsert.length();
+                + line.substring(startPosition.column));
     }
   }
 }

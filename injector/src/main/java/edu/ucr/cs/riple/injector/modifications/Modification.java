@@ -40,7 +40,7 @@ public abstract class Modification {
     this.kind = kind;
   }
 
-  public abstract void visit(List<String> lines, Offset offset);
+  public abstract void visit(List<String> lines);
 
   @Override
   public boolean equals(Object o) {

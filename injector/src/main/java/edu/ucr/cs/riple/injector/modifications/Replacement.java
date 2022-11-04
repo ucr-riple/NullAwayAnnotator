@@ -18,13 +18,10 @@ public class Replacement extends Modification {
   }
 
   @Override
-  public void visit(List<String> lines, Offset offset) {
-    String line = lines.get(offset.line + startPosition.line);
+  public void visit(List<String> lines) {
+    String line = lines.get(startPosition.line);
     String updated =
-        line.substring(0, offset.column + startPosition.column)
-            + content
-            + line.substring(offset.column + endPosition.column);
-    lines.set(offset.line + startPosition.line, updated);
-    offset.column -= endPosition.column - startPosition.column + content.length();
+        line.substring(0, startPosition.column) + content + line.substring(endPosition.column);
+    lines.set(startPosition.line, updated);
   }
 }
