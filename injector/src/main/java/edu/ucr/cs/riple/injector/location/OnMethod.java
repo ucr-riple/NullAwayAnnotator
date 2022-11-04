@@ -24,13 +24,17 @@
 
 package edu.ucr.cs.riple.injector.location;
 
+import com.github.javaparser.Range;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.SignatureMatcher;
 import edu.ucr.cs.riple.injector.changes.Change;
+import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
+import javax.lang.model.element.ElementKind;
 import org.json.simple.JSONObject;
 
 public class OnMethod extends Location {
@@ -55,18 +59,21 @@ public class OnMethod extends Location {
   }
 
   @Override
-  protected boolean applyToMember(NodeList<BodyDeclaration<?>> clazz, Change change) {
-    final boolean[] success = {false};
+  protected Modification applyToMember(NodeList<BodyDeclaration<?>> clazz, Change change) {
+    final Modification[] modification = new Modification[1];
     clazz.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifCallableDeclaration(
                 callableDeclaration -> {
                   if (this.matcher.matchesCallableDeclaration(callableDeclaration)) {
-                    change.visit(callableDeclaration);
-                    success[0] = true;
+                    Optional<Range> range = callableDeclaration.getRange();
+                    range.ifPresent(
+                        value ->
+                            modification[0] =
+                                change.visit(ElementKind.METHOD, callableDeclaration, value));
                   }
                 }));
-    if (!success[0]) {
+    if (modification[0] == null) {
       clazz.forEach(
           bodyDeclaration ->
               bodyDeclaration.ifAnnotationMemberDeclaration(
@@ -74,12 +81,16 @@ public class OnMethod extends Location {
                     if (annotationMemberDeclaration
                         .getNameAsString()
                         .equals(Helper.extractCallableName(method))) {
-                      change.visit(annotationMemberDeclaration);
-                      success[0] = true;
+                      Optional<Range> range = annotationMemberDeclaration.getRange();
+                      range.ifPresent(
+                          value ->
+                              modification[0] =
+                                  change.visit(
+                                      ElementKind.METHOD, annotationMemberDeclaration, value));
                     }
                   }));
     }
-    return success[0];
+    return modification[0];
   }
 
   @Override

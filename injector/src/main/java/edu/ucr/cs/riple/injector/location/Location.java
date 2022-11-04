@@ -32,6 +32,7 @@ import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
+import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -105,7 +106,7 @@ public abstract class Location {
 
   public abstract Location duplicate();
 
-  protected abstract boolean applyToMember(NodeList<BodyDeclaration<?>> clazz, Change change);
+  protected abstract Modification applyToMember(NodeList<BodyDeclaration<?>> clazz, Change change);
 
   protected abstract void fillJsonInformation(JSONObject res);
 
@@ -116,13 +117,13 @@ public abstract class Location {
    * @param change Change to be applied on the target element.
    * @return true, if the change applied successfully.
    */
-  public boolean apply(CompilationUnit tree, Change change) {
+  public Modification apply(CompilationUnit tree, Change change) {
     NodeList<BodyDeclaration<?>> clazz;
     try {
       clazz = Helper.getTypeDeclarationMembersByFlatName(tree, this.clazz);
     } catch (TargetClassNotFound notFound) {
       System.err.println(notFound.getMessage());
-      return false;
+      return null;
     }
     return applyToMember(clazz, change);
   }

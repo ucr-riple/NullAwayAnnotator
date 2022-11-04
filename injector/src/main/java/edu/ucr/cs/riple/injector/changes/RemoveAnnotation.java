@@ -22,12 +22,16 @@
 
 package edu.ucr.cs.riple.injector.changes;
 
-import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.Range;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import edu.ucr.cs.riple.injector.location.Location;
+import edu.ucr.cs.riple.injector.modifications.Deletion;
+import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.util.Objects;
+import java.util.Optional;
+import javax.lang.model.element.ElementKind;
 import org.json.simple.JSONObject;
 
 public class RemoveAnnotation extends Change {
@@ -36,14 +40,21 @@ public class RemoveAnnotation extends Change {
   }
 
   @Override
-  public void visit(NodeWithAnnotations<?> node) {
+  public Modification visit(ElementKind kind, NodeWithAnnotations<?> node, Range range) {
     // We only insert annotations with their simple name, therefore, we should only remove
     // the annotation if it matches with the simple name (otherwise, the annotation was not injected
     // by the core module request and should not be touched). Also, we currently require removing
     // only MarkerAnnotations, removal of other types of annotations are not supported yet.
     AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationSimpleName);
-    NodeList<AnnotationExpr> annotations = node.getAnnotations();
-    annotations.removeIf(annotationExpr::equals);
+    for (AnnotationExpr expr : node.getAnnotations()) {
+      if (expr.equals(annotationExpr)) {
+        Optional<Range> annotRange = expr.getRange();
+        return annotRange
+            .map(value -> new Deletion(expr.toString(), value.begin, value.end, kind))
+            .orElse(null);
+      }
+    }
+    return null;
   }
 
   @Override

@@ -186,7 +186,7 @@ public class Helper {
    * @param node Node instance.
    * @return true if is a type declaration or an anonymous class and false otherwise.
    */
-  private static boolean isTypeDeclarationOrAnonymousClass(Node node) {
+  public static boolean isTypeDeclarationOrAnonymousClass(Node node) {
     return node instanceof ClassOrInterfaceDeclaration
         || node instanceof EnumDeclaration
         || node instanceof AnnotationDeclaration

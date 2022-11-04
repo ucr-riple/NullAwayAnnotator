@@ -24,14 +24,19 @@
 
 package edu.ucr.cs.riple.injector.location;
 
+import com.github.javaparser.Range;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import edu.ucr.cs.riple.injector.SignatureMatcher;
 import edu.ucr.cs.riple.injector.changes.Change;
+import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
+import javax.lang.model.element.ElementKind;
 import org.json.simple.JSONObject;
 
 public class OnParameter extends Location {
@@ -59,8 +64,8 @@ public class OnParameter extends Location {
   }
 
   @Override
-  protected boolean applyToMember(NodeList<BodyDeclaration<?>> members, Change change) {
-    final boolean[] success = {false};
+  protected Modification applyToMember(NodeList<BodyDeclaration<?>> members, Change change) {
+    final Modification[] modification = new Modification[1];
     members.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifCallableDeclaration(
@@ -69,13 +74,20 @@ public class OnParameter extends Location {
                     NodeList<?> params = callableDeclaration.getParameters();
                     if (index < params.size()) {
                       if (params.get(index) instanceof Parameter) {
-                        change.visit((NodeWithAnnotations<?>) params.get(index));
-                        success[0] = true;
+                        Node param = params.get(index);
+                        Optional<Range> range = param.getRange();
+                        range.ifPresent(
+                            value ->
+                                modification[0] =
+                                    change.visit(
+                                        ElementKind.PARAMETER,
+                                        (NodeWithAnnotations<?>) param,
+                                        value));
                       }
                     }
                   }
                 }));
-    return success[0];
+    return modification[0];
   }
 
   @Override

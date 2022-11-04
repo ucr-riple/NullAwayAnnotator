@@ -22,11 +22,14 @@
 
 package edu.ucr.cs.riple.injector.changes;
 
+import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
+import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.util.Objects;
+import javax.lang.model.element.ElementKind;
 import org.json.simple.JSONObject;
 
 public abstract class Change {
@@ -49,7 +52,7 @@ public abstract class Change {
    * @param tree Compilation unit tree instance.
    * @return true, if the changes was applied successfully.
    */
-  public boolean apply(CompilationUnit tree) {
+  public Modification apply(CompilationUnit tree) {
     return this.location.apply(tree, this);
   }
 
@@ -58,7 +61,7 @@ public abstract class Change {
    *
    * @param node Given node.
    */
-  public abstract void visit(NodeWithAnnotations<?> node);
+  public abstract Modification visit(ElementKind kind, NodeWithAnnotations<?> node, Range position);
 
   @Override
   public boolean equals(Object o) {

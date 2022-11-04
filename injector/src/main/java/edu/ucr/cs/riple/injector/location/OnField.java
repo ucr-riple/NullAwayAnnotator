@@ -24,15 +24,19 @@
 
 package edu.ucr.cs.riple.injector.location;
 
+import com.github.javaparser.Range;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import edu.ucr.cs.riple.injector.changes.Change;
+import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import javax.lang.model.element.ElementKind;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -58,8 +62,8 @@ public class OnField extends Location {
   }
 
   @Override
-  protected boolean applyToMember(NodeList<BodyDeclaration<?>> clazz, Change change) {
-    final boolean[] success = {false};
+  protected Modification applyToMember(NodeList<BodyDeclaration<?>> clazz, Change change) {
+    final Modification[] modification = new Modification[1];
     clazz.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifFieldDeclaration(
@@ -68,13 +72,16 @@ public class OnField extends Location {
                       fieldDeclaration.asFieldDeclaration().getVariables();
                   for (VariableDeclarator v : vars) {
                     if (variables.contains(v.getName().toString())) {
-                      change.visit(fieldDeclaration);
-                      success[0] = true;
+                      Optional<Range> range = fieldDeclaration.getRange();
+                      range.ifPresent(
+                          value ->
+                              modification[0] =
+                                  change.visit(ElementKind.FIELD, fieldDeclaration, value));
                       break;
                     }
                   }
                 }));
-    return success[0];
+    return modification[0];
   }
 
   @Override
