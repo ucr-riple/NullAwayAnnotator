@@ -62,4 +62,29 @@ public class OnFieldInjectionTest extends BaseInjectorTest {
                 "javax.annotation.Nullable"))
         .start();
   }
+
+  @Test
+  public void addDeclarationAnnotationOnFieldWithTypeAnnotation() {
+    injectorTestHelper
+        .addInput(
+            "Bar.java",
+            "package edu.ucr;",
+            "import org.hibernate.validator.constraints.NotEmpty;",
+            "public class Bar {",
+            "   private @NotEmpty String foo;",
+            "}")
+        .expectOutput(
+            "package edu.ucr;",
+            "import org.hibernate.validator.constraints.NotEmpty;",
+            "import javax.annotation.Nullable;",
+            "public class Bar {",
+            "   @Nullable",
+            "   private @NotEmpty String foo;",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnField("Bar.java", "edu.ucr.Bar", Collections.singleton("foo")),
+                "javax.annotation.Nullable"))
+        .start();
+  }
 }
