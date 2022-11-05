@@ -332,4 +332,41 @@ public class ImportDeclarationAdditionTest extends BaseInjectorTest {
                 "javax.annotation.Nullable"))
         .start();
   }
+
+  @Test
+  public void withImportWithJavadocWithCopyrightWithPackageTest() {
+    injectorTestHelper
+        .addInput(
+            "Test.java",
+            "/*",
+            " * Copyright content",
+            " */",
+            "package edu.ucr;",
+            "import custom.annots.A;",
+            "/**",
+            " * javadoc",
+            " */",
+            "public class Test {",
+            "   Object h = new Object();",
+            "}")
+        .expectOutput(
+            "/*",
+            " * Copyright content",
+            " */",
+            "package edu.ucr;",
+            "import custom.annots.A;",
+            "import javax.annotation.Nullable;",
+            "/**",
+            " * javadoc",
+            " */",
+            "public class Test {",
+            "   @Nullable",
+            "   Object h = new Object();",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnField("Test.java", "edu.ucr.Test", Collections.singleton("h")),
+                "javax.annotation.Nullable"))
+        .start();
+  }
 }
