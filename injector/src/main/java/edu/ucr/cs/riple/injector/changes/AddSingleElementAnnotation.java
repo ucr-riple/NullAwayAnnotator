@@ -151,7 +151,7 @@ public class AddSingleElementAnnotation extends AddAnnotation {
    *
    * @param argument Argument expression.
    */
-  private Modification addAnnotationExpressionOnNode(
+  private Insertion addAnnotationExpressionOnNode(
       ElementKind kind, Expression argument, Range range) {
     AnnotationExpr annotationExpr =
         new SingleMemberAnnotationExpr(new Name(annotationSimpleName), argument);
