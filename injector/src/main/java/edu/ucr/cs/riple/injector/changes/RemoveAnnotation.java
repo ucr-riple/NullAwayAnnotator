@@ -35,6 +35,11 @@ import javax.annotation.Nullable;
 import javax.lang.model.element.ElementKind;
 import org.json.simple.JSONObject;
 
+/**
+ * Used to remove <a
+ * href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-9.html#jls-MarkerAnnotation">Marker
+ * Annotation</a> on elements in source code.
+ */
 public class RemoveAnnotation extends Change {
   public RemoveAnnotation(Location location, String annotation) {
     super(location, annotation);
