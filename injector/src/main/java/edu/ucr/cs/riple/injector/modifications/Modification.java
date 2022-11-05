@@ -29,10 +29,17 @@ import java.util.List;
 import java.util.Objects;
 import javax.lang.model.element.ElementKind;
 
+/**
+ * Represents a text modification which are translation of {@link
+ * edu.ucr.cs.riple.injector.changes.Change} instances.
+ */
 public abstract class Modification {
 
+  /** Starting position where the modification should be applied in the source file. */
   public final Position startPosition;
+  /** Content of modification. */
   public final String content;
+  /** {@link ElementKind} of the element where this modification is created for. */
   public final ElementKind kind;
 
   public Modification(String content, Position startPosition, ElementKind kind) {
@@ -42,6 +49,11 @@ public abstract class Modification {
     this.kind = kind;
   }
 
+  /**
+   * Visits the source file as list of lines and applies its modification to it.
+   *
+   * @param lines List of lines of the target source code.
+   */
   public abstract void visit(List<String> lines);
 
   @Override
@@ -61,17 +73,5 @@ public abstract class Modification {
   @Override
   public int hashCode() {
     return Objects.hash(startPosition, content, kind);
-  }
-
-  @Override
-  public String toString() {
-    return "{startPosition="
-        + startPosition
-        + ", content='"
-        + content
-        + '\''
-        + ", kind="
-        + kind
-        + '}';
   }
 }
