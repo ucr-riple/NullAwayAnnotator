@@ -37,15 +37,23 @@ public class Insertion extends Modification {
   @Override
   public void visit(List<String> lines) {
     String toInsert;
+    String line = lines.get(startPosition.line);
     switch (kind) {
       case METHOD:
       case FIELD:
-        toInsert = " ".repeat(startPosition.column) + this.content;
+        // need to compute padding manually, cannot use position.column as tab and space
+        // both reserve one column.
+        StringBuilder padding = new StringBuilder();
+        int head = 0;
+        while (head < line.length() && Character.isWhitespace(line.charAt(head))) {
+          padding.append(line.charAt(head) == '\t' ? "    " : " ");
+          head += 1;
+        }
+        toInsert = padding + this.content;
         lines.add(startPosition.line, toInsert);
         break;
       case PARAMETER:
         toInsert = this.content + " ";
-        String line = lines.get(startPosition.line);
         lines.set(
             startPosition.line,
             line.substring(0, startPosition.column)
