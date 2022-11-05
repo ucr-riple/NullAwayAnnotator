@@ -63,6 +63,8 @@ public class Printer {
    * @param modifications Set of modifications.
    */
   public void applyModifications(Set<Modification> modifications) {
+    // Modification are sorted to start from the last position, to make the changes ineffective to
+    // current computed offsets.
     modifications.stream()
         .sorted(
             Comparator.comparingInt((Modification o) -> o.startPosition.line)
