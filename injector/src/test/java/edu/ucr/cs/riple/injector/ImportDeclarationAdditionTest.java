@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.injector;
 
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
+import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.Collections;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,6 +34,78 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class ImportDeclarationAdditionTest extends BaseInjectorTest {
+
+  @Test
+  public void customNullableExists() {
+    // Custom annot with Nullable simple name exists, the import declaration should be skipped.
+    injectorTestHelper
+        .addInput(
+            "Main.java",
+            "package ucr.edu;",
+            "import custom.Nullable;",
+            "public class Main {",
+            "   public enum Test{",
+            "     CLASSIC;",
+            "     public Object run(){",
+            "       return null;",
+            "     }",
+            "   }",
+            "}")
+        .expectOutput(
+            "package ucr.edu;",
+            "import custom.Nullable;",
+            "public class Main {",
+            "   public enum Test{",
+            "     CLASSIC;",
+            "     @Nullable",
+            "     public Object run(){",
+            "       return null;",
+            "     }",
+            "   }",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnMethod("Main.java", "ucr.edu.Main$Test", "run()"),
+                "javax.annotation.Nullable"))
+        .start();
+  }
+
+  @Test
+  public void customEndingWithNullableExists() {
+    // Custom annot ending with Nullable exists, the import declaration should be added since we
+    // only skip if the simple name is exactly is Nullable.
+    injectorTestHelper
+        .addInput(
+            "Main.java",
+            "package ucr.edu;",
+            "import custom.aNullable;",
+            "public class Main {",
+            "   public enum Test{",
+            "     CLASSIC;",
+            "     public Object run(){",
+            "       return null;",
+            "     }",
+            "   }",
+            "}")
+        .expectOutput(
+            "package ucr.edu;",
+            "import custom.aNullable;",
+            "import javax.annotation.Nullable;",
+            "public class Main {",
+            "   public enum Test{",
+            "     CLASSIC;",
+            "     @Nullable",
+            "     public Object run(){",
+            "       return null;",
+            "     }",
+            "   }",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnMethod("Main.java", "ucr.edu.Main$Test", "run()"),
+                "javax.annotation.Nullable"))
+        .start();
+  }
 
   @Test
   public void noImportNoJavadocNoCopyrightNoPackageTest() {
