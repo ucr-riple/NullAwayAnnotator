@@ -28,8 +28,10 @@ import com.github.javaparser.Position;
 import java.util.List;
 import javax.lang.model.element.ElementKind;
 
+/** Represents a replacement of a content in the source file. */
 public class Replacement extends Modification {
 
+  /** The end position of the content that should be replaced. */
   private final Position endPosition;
 
   public Replacement(
@@ -46,19 +48,5 @@ public class Replacement extends Modification {
     StringBuilder line = new StringBuilder(lines.get(startPosition.line));
     line.replace(startPosition.column, endPosition.column + 1, content);
     lines.set(startPosition.line, line.toString());
-  }
-
-  @Override
-  public String toString() {
-    return "{startPosition="
-        + startPosition
-        + "{endPosition="
-        + endPosition
-        + ", content='"
-        + content
-        + '\''
-        + ", kind="
-        + kind
-        + '}';
   }
 }

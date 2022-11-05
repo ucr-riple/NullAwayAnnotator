@@ -28,8 +28,10 @@ import com.github.javaparser.Position;
 import java.util.List;
 import javax.lang.model.element.ElementKind;
 
+/** Represents a deletion of a content in the source file. */
 public class Deletion extends Modification {
 
+  /** The end position of content which should be removed. */
   private final Position endPosition;
 
   public Deletion(String content, Position startPosition, Position endPosition, ElementKind kind) {
@@ -64,19 +66,5 @@ public class Deletion extends Modification {
       return;
     }
     lines.set(startPosition.line, removed);
-  }
-
-  @Override
-  public String toString() {
-    return "{startPosition="
-        + startPosition
-        + "{endPosition="
-        + endPosition
-        + ", content='"
-        + content
-        + '\''
-        + ", kind="
-        + kind
-        + '}';
   }
 }

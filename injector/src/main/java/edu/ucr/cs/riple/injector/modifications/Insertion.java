@@ -28,6 +28,7 @@ import com.github.javaparser.Position;
 import java.util.List;
 import javax.lang.model.element.ElementKind;
 
+/** Represents an insertion of a content in the source file. */
 public class Insertion extends Modification {
 
   public Insertion(String content, Position position, ElementKind kind) {

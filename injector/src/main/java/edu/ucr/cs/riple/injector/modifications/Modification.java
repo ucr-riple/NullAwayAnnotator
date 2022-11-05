@@ -30,7 +30,7 @@ import java.util.Objects;
 import javax.lang.model.element.ElementKind;
 
 /**
- * Represents a text modification which are translation of {@link
+ * Represents a text modification in the source file which are translation of {@link
  * edu.ucr.cs.riple.injector.changes.Change} instances.
  */
 public abstract class Modification {
