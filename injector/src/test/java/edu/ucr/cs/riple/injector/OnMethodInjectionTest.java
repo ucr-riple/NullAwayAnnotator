@@ -402,7 +402,7 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
             "   /**",
             "    * javadoc",
             "    */",
-            "    @Nullable",
+            "\t@Nullable",
             "\tpublic Object run();",
             "}")
         .addChanges(

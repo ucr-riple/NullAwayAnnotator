@@ -46,7 +46,7 @@ public class Insertion extends Modification {
         StringBuilder padding = new StringBuilder();
         int head = 0;
         while (head < line.length() && Character.isWhitespace(line.charAt(head))) {
-          padding.append(line.charAt(head) == '\t' ? "    " : " ");
+          padding.append(line.charAt(head));
           head += 1;
         }
         toInsert = padding + this.content;
