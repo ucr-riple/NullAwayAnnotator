@@ -92,14 +92,19 @@ public class Printer {
         continue;
       }
       if (line.startsWith("/*")) {
-        int j = i;
-        while (j < lines.size()) {
-          String endLine = lines.get(j);
+        while (i < lines.size()) {
+          String endLine = lines.get(i);
           if (endLine.contains("*/")) {
-            return j + 1;
+            return i + 1;
           }
-          j++;
+          i++;
         }
+      }
+      if (line.startsWith("//")) {
+        while (i < lines.size() && lines.get(i).startsWith("//")) {
+          i++;
+        }
+        return i;
       }
       return i;
     }

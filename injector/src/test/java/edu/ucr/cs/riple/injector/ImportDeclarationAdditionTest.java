@@ -199,6 +199,33 @@ public class ImportDeclarationAdditionTest extends BaseInjectorTest {
   }
 
   @Test
+  public void noImportNoJavadocWithCopyrightNoPackageOtherFormatTest() {
+    injectorTestHelper
+        .addInput(
+            "Test.java",
+            "//",
+            "// Copyright content",
+            "// ",
+            "public class Test {",
+            "   Object h = new Object();",
+            "}")
+        .expectOutput(
+            "//",
+            "// Copyright content",
+            "// ",
+            "import javax.annotation.Nullable;",
+            "public class Test {",
+            "   @Nullable",
+            "   Object h = new Object();",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnField("Test.java", "Test", Collections.singleton("h")),
+                "javax.annotation.Nullable"))
+        .start();
+  }
+
+  @Test
   public void withImportWithJavadocWithCopyrightNoPackageTest() {
     injectorTestHelper
         .addInput(
