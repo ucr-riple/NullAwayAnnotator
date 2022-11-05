@@ -35,6 +35,23 @@ import org.junit.runners.JUnit4;
 public class ImportDeclarationAdditionTest extends BaseInjectorTest {
 
   @Test
+  public void noImportNoJavadocNoCopyrightNoPackageTest() {
+    injectorTestHelper
+        .addInput("Test.java", "public class Test {", "   Object h = new Object();", "}")
+        .expectOutput(
+            "import javax.annotation.Nullable;",
+            "public class Test {",
+            "   @Nullable",
+            "   Object h = new Object();",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnField("Test.java", "Test", Collections.singleton("h")),
+                "javax.annotation.Nullable"))
+        .start();
+  }
+
+  @Test
   public void noImportNoJavadocNoCopyrightWithPackageTest() {
     injectorTestHelper
         .addInput(
