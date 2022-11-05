@@ -37,6 +37,7 @@ import edu.ucr.cs.riple.injector.modifications.Insertion;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.modifications.Replacement;
 import java.util.Optional;
+import javax.annotation.Nullable;
 import javax.lang.model.element.ElementKind;
 
 /**
@@ -66,6 +67,7 @@ public class AddSingleElementAnnotation extends AddAnnotation {
   }
 
   @Override
+  @Nullable
   public Modification visit(ElementKind kind, NodeWithAnnotations<?> node, Range range) {
 
     StringLiteralExpr argumentExp = new StringLiteralExpr(argument);
@@ -144,10 +146,11 @@ public class AddSingleElementAnnotation extends AddAnnotation {
   }
 
   /**
-   * Adds an {@link AnnotationExpr} to a {@link NodeWithAnnotations} instance with the given name
-   * and arguments.
+   * Translates addition of an {@link AnnotationExpr} to a {@link NodeWithAnnotations} instance with
+   * the given name and arguments.
    *
    * @param argument Argument expression.
+   * @return A text modification instance.
    */
   private Insertion addAnnotationExpressionOnNode(
       ElementKind kind, Expression argument, Range range) {

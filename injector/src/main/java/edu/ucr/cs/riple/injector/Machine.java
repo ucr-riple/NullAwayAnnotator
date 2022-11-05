@@ -72,7 +72,7 @@ public class Machine {
           if (log) {
             pb.step();
           }
-          Modification modification = change.apply(tree);
+          Modification modification = change.translate(tree);
           if (modification != null) {
             processed++;
             modifications.add(modification);

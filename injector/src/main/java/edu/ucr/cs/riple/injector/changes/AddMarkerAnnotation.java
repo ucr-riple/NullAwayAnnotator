@@ -30,6 +30,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Insertion;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import javax.annotation.Nullable;
 import javax.lang.model.element.ElementKind;
 
 /**
@@ -44,6 +45,7 @@ public class AddMarkerAnnotation extends AddAnnotation {
   }
 
   @Override
+  @Nullable
   public Modification visit(ElementKind kind, NodeWithAnnotations<?> node, Range range) {
     NodeList<AnnotationExpr> annotations = node.getAnnotations();
     AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationSimpleName);

@@ -31,6 +31,7 @@ import edu.ucr.cs.riple.injector.modifications.Deletion;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.util.Objects;
 import java.util.Optional;
+import javax.annotation.Nullable;
 import javax.lang.model.element.ElementKind;
 import org.json.simple.JSONObject;
 
@@ -40,6 +41,7 @@ public class RemoveAnnotation extends Change {
   }
 
   @Override
+  @Nullable
   public Modification visit(ElementKind kind, NodeWithAnnotations<?> node, Range range) {
     // We only insert annotations with their simple name, therefore, we should only remove
     // the annotation if it matches with the simple name (otherwise, the annotation was not injected
