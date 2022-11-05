@@ -305,4 +305,32 @@ public class LexicalPreservationTest extends BaseInjectorTest {
                 "javax.annotation.Nullable"))
         .start(true);
   }
+
+  @Test
+  public void methodInInterfaceWithTab() {
+    injectorTestHelper
+        .addInput(
+            "Run.java",
+            "package edu.ucr;",
+            "public interface Run {",
+            "   /**",
+            "    * javadoc",
+            "    */",
+            "\tpublic Object run();",
+            "}")
+        .expectOutput(
+            "package edu.ucr;",
+            "import javax.annotation.Nullable;",
+            "public interface Run {",
+            "   /**",
+            "    * javadoc",
+            "    */",
+            "\t@Nullable",
+            "\tpublic Object run();",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnMethod("Run.java", "edu.ucr.Run", "run()"), "javax.annotation.Nullable"))
+        .start();
+  }
 }
