@@ -33,6 +33,7 @@ import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import javax.lang.model.element.ElementKind;
 import org.json.simple.JSONObject;
@@ -60,7 +61,7 @@ public class OnMethod extends Location {
 
   @Override
   protected Modification applyToMember(NodeList<BodyDeclaration<?>> clazz, Change change) {
-    final Modification[] modification = new Modification[1];
+    final AtomicReference<Modification> ans = new AtomicReference<>();
     clazz.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifCallableDeclaration(
@@ -69,11 +70,10 @@ public class OnMethod extends Location {
                     Optional<Range> range = callableDeclaration.getRange();
                     range.ifPresent(
                         value ->
-                            modification[0] =
-                                change.visit(ElementKind.METHOD, callableDeclaration, value));
+                            ans.set(change.visit(ElementKind.METHOD, callableDeclaration, value)));
                   }
                 }));
-    if (modification[0] == null) {
+    if (ans.get() == null) {
       clazz.forEach(
           bodyDeclaration ->
               bodyDeclaration.ifAnnotationMemberDeclaration(
@@ -84,13 +84,13 @@ public class OnMethod extends Location {
                       Optional<Range> range = annotationMemberDeclaration.getRange();
                       range.ifPresent(
                           value ->
-                              modification[0] =
+                              ans.set(
                                   change.visit(
-                                      ElementKind.METHOD, annotationMemberDeclaration, value));
+                                      ElementKind.METHOD, annotationMemberDeclaration, value)));
                     }
                   }));
     }
-    return modification[0];
+    return ans.get();
   }
 
   @Override
