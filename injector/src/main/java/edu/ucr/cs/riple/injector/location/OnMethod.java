@@ -66,6 +66,10 @@ public class OnMethod extends Location {
         bodyDeclaration ->
             bodyDeclaration.ifCallableDeclaration(
                 callableDeclaration -> {
+                  if (ans.get() != null) {
+                    // already found the member.
+                    return;
+                  }
                   if (this.matcher.matchesCallableDeclaration(callableDeclaration)) {
                     Optional<Range> range = callableDeclaration.getRange();
                     range.ifPresent(
