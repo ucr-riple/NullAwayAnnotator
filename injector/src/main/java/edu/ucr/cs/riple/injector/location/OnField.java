@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import javax.lang.model.element.ElementKind;
 import org.json.simple.JSONArray;
@@ -63,11 +64,15 @@ public class OnField extends Location {
 
   @Override
   protected Modification applyToMember(NodeList<BodyDeclaration<?>> clazz, Change change) {
-    final Modification[] modification = new Modification[1];
+    final AtomicReference<Modification> ans = new AtomicReference<>();
     clazz.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifFieldDeclaration(
                 fieldDeclaration -> {
+                  if (ans.get() != null) {
+                    // already found the member.
+                    return;
+                  }
                   NodeList<VariableDeclarator> vars =
                       fieldDeclaration.asFieldDeclaration().getVariables();
                   for (VariableDeclarator v : vars) {
@@ -75,13 +80,12 @@ public class OnField extends Location {
                       Optional<Range> range = fieldDeclaration.getRange();
                       range.ifPresent(
                           value ->
-                              modification[0] =
-                                  change.visit(ElementKind.FIELD, fieldDeclaration, value));
+                              ans.set(change.visit(ElementKind.FIELD, fieldDeclaration, value)));
                       break;
                     }
                   }
                 }));
-    return modification[0];
+    return ans.get();
   }
 
   @Override
