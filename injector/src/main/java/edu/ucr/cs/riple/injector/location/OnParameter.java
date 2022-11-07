@@ -35,6 +35,7 @@ import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import javax.lang.model.element.ElementKind;
 import org.json.simple.JSONObject;
@@ -65,11 +66,15 @@ public class OnParameter extends Location {
 
   @Override
   protected Modification applyToMember(NodeList<BodyDeclaration<?>> members, Change change) {
-    final Modification[] modification = new Modification[1];
+    final AtomicReference<Modification> ans = new AtomicReference<>();
     members.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifCallableDeclaration(
                 callableDeclaration -> {
+                  if (ans.get() != null) {
+                    // already found the member.
+                    return;
+                  }
                   if (matcher.matchesCallableDeclaration(callableDeclaration)) {
                     NodeList<?> params = callableDeclaration.getParameters();
                     if (index < params.size()) {
@@ -78,16 +83,16 @@ public class OnParameter extends Location {
                         Optional<Range> range = param.getRange();
                         range.ifPresent(
                             value ->
-                                modification[0] =
+                                ans.set(
                                     change.visit(
                                         ElementKind.PARAMETER,
                                         (NodeWithAnnotations<?>) param,
-                                        value));
+                                        value)));
                       }
                     }
                   }
                 }));
-    return modification[0];
+    return ans.get();
   }
 
   @Override
