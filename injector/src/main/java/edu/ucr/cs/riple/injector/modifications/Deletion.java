@@ -36,6 +36,7 @@ public class Deletion extends Modification {
 
   public Deletion(String content, Position startPosition, Position endPosition, ElementKind kind) {
     super(content, startPosition, kind);
+    // Position in javaparser is not 0 indexed and line and column fields are final.
     this.endPosition = new Position(endPosition.line - 1, endPosition.column - 1);
   }
 

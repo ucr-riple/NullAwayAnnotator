@@ -37,6 +37,7 @@ public class Replacement extends Modification {
   public Replacement(
       String content, Position startPosition, Position endPosition, ElementKind kind) {
     super(content, startPosition, kind);
+    // Position in javaparser is not 0 indexed and line and column fields are final.
     this.endPosition = new Position(endPosition.line - 1, endPosition.column - 1);
     if (content.equals("")) {
       throw new IllegalArgumentException("content cannot be empty, use Deletion instead");
