@@ -228,6 +228,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
         .addInput(
             "Super.java",
             "package com.edu;",
+            "import edu.ucr.CustomNull;",
             "public class Super {",
             "   Object h = new Object();",
             "   @Other({\"arg1\", \"arg2\"})",
@@ -238,6 +239,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "}")
         .expectOutput(
             "package com.edu;",
+            "import edu.ucr.CustomNull;",
             "public class Super {",
             "   Object h = new Object();",
             "   @Other({\"arg1\", \"arg2\"})",
