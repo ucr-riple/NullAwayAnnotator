@@ -52,13 +52,8 @@ public class Deletion extends Modification {
     line.delete(start, end + 1);
     // char at start is removed, head is one character before start.
     int head = start - 1;
-    // if head is surrounded by white space, remove the extra whitespace.
-    // (  ...) -> ( ...)
-    if (head > 1 && line.charAt(head - 1) == ' ' && line.charAt(head) == ' ') {
-      line.deleteCharAt(head);
-    }
-    // if head is not alphabetic and is followed by a whitespace, remove it.
-    // (@Nullable ...) -> (...)
+    // if head is not alphanumeric and is followed by a whitespace, remove it.
+    // (@Nullable Type param) -> (Type param)
     if (head + 1 < line.length()
         && !Character.isLetterOrDigit(line.charAt(head))
         && line.charAt(head + 1) == ' ') {

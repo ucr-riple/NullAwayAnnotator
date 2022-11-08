@@ -153,4 +153,28 @@ public class RemovalTest extends BaseInjectorTest {
                 "javax.annotation.Nullable"))
         .start();
   }
+
+  @Test
+  public void removeMethodInlineAnnot() {
+    injectorTestHelper
+        .addInput(
+            "Test.java",
+            "package edu.ucr;",
+            "import edu.custom.Annot;",
+            "public class Test {",
+            "   public@Annot Object test() {",
+            "   }",
+            "}")
+        .expectOutput(
+            "package edu.ucr;",
+            "import edu.custom.Annot;",
+            "public class Test {",
+            "   public Object test() {",
+            "   }",
+            "}")
+        .addChanges(
+            new RemoveAnnotation(
+                new OnMethod("Test.java", "edu.ucr.Test", "test()"), "edu.custom.Annot"))
+        .start();
+  }
 }
