@@ -121,13 +121,13 @@ public class Printer {
         return range.get().end.line;
       }
     }
-    // No package exists, add import under copy right header if exists, otherwise on the first line.
+    // No package exists, add import under copyright header if exists, otherwise on the first line.
     for (int i = 0; i < lines.size(); i++) {
       String line = lines.get(i).strip();
       if (line.equals("")) {
         continue;
       }
-      // For copy rights surrounded with "/* **/"
+      // For copyrights surrounded with "/* **/"
       if (line.startsWith("/*")) {
         while (i < lines.size()) {
           String endLine = lines.get(i);
@@ -137,7 +137,7 @@ public class Printer {
           i++;
         }
       }
-      // For copy rights starting with "//" on each line.
+      // For copyrights starting with "//" on each line.
       if (line.startsWith("//")) {
         while (i < lines.size() && lines.get(i).startsWith("//")) {
           i++;
