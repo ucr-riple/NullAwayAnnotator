@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.injector.modifications;
 
 import com.github.javaparser.Position;
+import com.google.common.base.Preconditions;
 import java.util.List;
 import javax.lang.model.element.ElementKind;
 
@@ -44,6 +45,9 @@ public class Deletion extends Modification {
   public void visit(List<String> lines) {
     int start = startPosition.column;
     int end = endPosition.column;
+    Preconditions.checkArgument(
+        startPosition.line == endPosition.line,
+        "Cannot delete annotations that are written in multiple lines");
     StringBuilder line = new StringBuilder(lines.get(startPosition.line));
     line.delete(start, end + 1);
     // char at start is removed, head is one character before start.
