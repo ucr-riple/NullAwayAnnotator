@@ -98,7 +98,7 @@ public class Printer {
    *   <li>Immediately after the last existing import statement
    *   <li>Immediately after the package declaration statement
    *   <li>Immediately after the copyright header
-   *   <li>Immediately before non-empty line
+   *   <li>Immediately before the first non-empty line in the file
    * </ol>
    *
    * @param tree The compilation unit tree.
