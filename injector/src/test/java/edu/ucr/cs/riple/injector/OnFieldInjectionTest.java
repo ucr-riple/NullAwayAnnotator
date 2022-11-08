@@ -93,19 +93,19 @@ public class OnFieldInjectionTest extends BaseInjectorTest {
     injectorTestHelper
         .addInput(
             "Super.java",
-            "package com.uber;",
+            "package edu.ucr;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Test {",
             "   Object h = new Object();",
             "   public void test(@Nullable Object f) {",
             "      h = f;",
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package edu.ucr;",
             "import javax.annotation.Nullable;",
             "import edu.ucr.Tainted;",
-            "public class Super {",
+            "public class Test {",
             "   @Nullable",
             "   @Tainted",
             "   Object h = new Object();",
@@ -115,13 +115,13 @@ public class OnFieldInjectionTest extends BaseInjectorTest {
             "}")
         .addChanges(
             new AddMarkerAnnotation(
-                new OnField("Super.java", "com.uber.Super", Collections.singleton("h")),
+                new OnField("Super.java", "edu.ucr.Test", Collections.singleton("h")),
                 "javax.annotation.Nullable"),
             new AddMarkerAnnotation(
-                new OnField("Super.java", "com.uber.Super", Collections.singleton("h")),
+                new OnField("Super.java", "edu.ucr.Test", Collections.singleton("h")),
                 "edu.ucr.Tainted"),
             new AddMarkerAnnotation(
-                new OnField("Super.java", "com.uber.Super", Collections.singleton("h")),
+                new OnField("Super.java", "edu.ucr.Test", Collections.singleton("h")),
                 "javax.annotation.Nullable"))
         .start();
   }

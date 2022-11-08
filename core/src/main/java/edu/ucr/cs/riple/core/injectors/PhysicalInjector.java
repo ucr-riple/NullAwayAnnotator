@@ -26,8 +26,8 @@ package edu.ucr.cs.riple.core.injectors;
 
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.injector.Injector;
-import edu.ucr.cs.riple.injector.WorkListBuilder;
-import edu.ucr.cs.riple.injector.changes.Change;
+import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import java.util.Set;
 
 /** Wrapper tool used to inject annotations Physically to the source code. */
@@ -41,7 +41,12 @@ public class PhysicalInjector extends AnnotationInjector {
   }
 
   @Override
-  protected <T extends Change> void applyChanges(Set<T> changes) {
-    this.injector.start(new WorkListBuilder<>(changes).getWorkLists(), false);
+  public void removeAnnotations(Set<RemoveAnnotation> changes) {
+    this.injector.addAnnotations(changes);
+  }
+
+  @Override
+  public void injectAnnotations(Set<AddAnnotation> changes) {
+    this.injector.removeAnnotations(changes);
   }
 }

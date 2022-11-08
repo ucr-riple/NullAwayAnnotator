@@ -69,6 +69,8 @@ public class Printer {
         .sorted(
             Comparator.comparingInt((Modification o) -> o.startPosition.line)
                 .thenComparingInt(o -> o.startPosition.column)
+                // To make the tests produce deterministic results.
+                .thenComparing(o -> o.content)
                 .reversed())
         .forEach(modification -> modification.visit(lines));
   }

@@ -25,6 +25,7 @@ package edu.ucr.cs.riple.injector;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import java.util.List;
+import java.util.Set;
 
 public class Injector {
   public final boolean preserveStyle;
@@ -48,11 +49,11 @@ public class Injector {
     return report;
   }
 
-  public Report addAnnotations(List<AddAnnotation> requests) {
+  public Report addAnnotations(Set<RemoveAnnotation> requests) {
     return this.start(new WorkListBuilder<>(requests).getWorkLists(), false);
   }
 
-  public Report removeAnnotations(List<RemoveAnnotation> requests) {
+  public Report removeAnnotations(Set<AddAnnotation> requests) {
     return this.start(new WorkListBuilder<>(requests).getWorkLists(), false);
   }
 
