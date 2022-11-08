@@ -87,4 +87,42 @@ public class OnFieldInjectionTest extends BaseInjectorTest {
                 "javax.annotation.Nullable"))
         .start();
   }
+
+  @Test
+  public void fieldMultipleAnnotations() {
+    injectorTestHelper
+        .addInput(
+            "Super.java",
+            "package com.uber;",
+            "import javax.annotation.Nullable;",
+            "public class Super {",
+            "   Object h = new Object();",
+            "   public void test(@Nullable Object f) {",
+            "      h = f;",
+            "   }",
+            "}")
+        .expectOutput(
+            "package com.uber;",
+            "import javax.annotation.Nullable;",
+            "import edu.ucr.Tainted;",
+            "public class Super {",
+            "   @Nullable",
+            "   @Tainted",
+            "   Object h = new Object();",
+            "   public void test(@Nullable Object f) {",
+            "      h = f;",
+            "   }",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnField("Super.java", "com.uber.Super", Collections.singleton("h")),
+                "javax.annotation.Nullable"),
+            new AddMarkerAnnotation(
+                new OnField("Super.java", "com.uber.Super", Collections.singleton("h")),
+                "edu.ucr.Tainted"),
+            new AddMarkerAnnotation(
+                new OnField("Super.java", "com.uber.Super", Collections.singleton("h")),
+                "javax.annotation.Nullable"))
+        .start();
+  }
 }
