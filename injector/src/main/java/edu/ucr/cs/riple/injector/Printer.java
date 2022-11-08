@@ -118,7 +118,7 @@ public class Printer {
     if (tree.getPackageDeclaration().isPresent()) {
       Optional<Range> range = tree.getPackageDeclaration().get().getRange();
       if (range.isPresent()) {
-        return range.get().begin.line;
+        return range.get().end.line;
       }
     }
     // No package exists, add import under copy right header if exists, otherwise on the first line.

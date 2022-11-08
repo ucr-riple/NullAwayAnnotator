@@ -369,4 +369,54 @@ public class ImportDeclarationAdditionTest extends BaseInjectorTest {
                 "javax.annotation.Nullable"))
         .start();
   }
+
+  @Test
+  public void importEndStartOnNewLineTest() {
+    injectorTestHelper
+        .addInput(
+            "Test.java",
+            "import",
+            "          custom.annots.A;",
+            "public class Test {",
+            "   Object h = new Object();",
+            "}")
+        .expectOutput(
+            "import",
+            "          custom.annots.A;",
+            "import javax.annotation.Nullable;",
+            "public class Test {",
+            "   @Nullable",
+            "   Object h = new Object();",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnField("Test.java", "Test", Collections.singleton("h")),
+                "javax.annotation.Nullable"))
+        .start();
+  }
+
+  @Test
+  public void packageEndStartOnNewLineTest() {
+    injectorTestHelper
+        .addInput(
+            "Test.java",
+            "package",
+            "          edu.ucr;",
+            "public class Test {",
+            "   Object h = new Object();",
+            "}")
+        .expectOutput(
+            "package",
+            "          edu.ucr;",
+            "import javax.annotation.Nullable;",
+            "public class Test {",
+            "   @Nullable",
+            "   Object h = new Object();",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnField("Test.java", "edu.ucr.Test", Collections.singleton("h")),
+                "javax.annotation.Nullable"))
+        .start();
+  }
 }
