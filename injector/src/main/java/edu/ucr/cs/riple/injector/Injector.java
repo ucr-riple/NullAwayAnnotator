@@ -40,6 +40,8 @@ public class Injector {
   }
 
   public Report start(List<WorkList> workLists, boolean log) {
+    // Start method does not support addition and deletion on same element. Should be split into
+    // call for addition and deletion separately.
     this.log = log;
     Report report = new Report();
     for (WorkList workList : workLists) {
