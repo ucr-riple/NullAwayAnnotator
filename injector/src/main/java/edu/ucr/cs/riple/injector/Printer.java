@@ -97,7 +97,7 @@ public class Printer {
    * <ol>
    *   <li>Immediately after the last existing import statement
    *   <li>Immediately after the package declaration statement
-   *   <li>Immediately after the copy right header
+   *   <li>Immediately after the copyright header
    *   <li>Immediately before non-empty line
    * </ol>
    *
