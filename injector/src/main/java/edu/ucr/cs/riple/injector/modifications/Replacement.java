@@ -42,12 +42,36 @@ public class Replacement extends Modification {
     if (content.equals("")) {
       throw new IllegalArgumentException("content cannot be empty, use Deletion instead");
     }
+    if (kind.equals(ElementKind.PARAMETER)) {
+      throw new IllegalArgumentException(
+          "Currently does not support replacement of annotation on parameters");
+    }
   }
 
   @Override
   public void visit(List<String> lines) {
     StringBuilder line = new StringBuilder(lines.get(startPosition.line));
-    line.replace(startPosition.column, endPosition.column + 1, content);
-    lines.set(startPosition.line, line.toString());
+    // Since replacements are only on fields and methods, we can compute paddings based on the
+    // starting line.
+    StringBuilder padding = new StringBuilder();
+    int head = 0;
+    while (head < line.length() && Character.isWhitespace(line.charAt(head))) {
+      padding.append(line.charAt(head));
+      head += 1;
+    }
+    head = startPosition.line;
+    while (head < endPosition.line) {
+      lines.remove(startPosition.line);
+      head++;
+    }
+    line = new StringBuilder(lines.get(startPosition.line));
+    line.delete(0, endPosition.column + 1);
+    if (!line.toString().equals("")) {
+      // keep other content if exists.
+      lines.set(startPosition.line, padding + line.toString().strip());
+    } else {
+      lines.remove(startPosition.line);
+    }
+    lines.add(startPosition.line, padding + content);
   }
 }
