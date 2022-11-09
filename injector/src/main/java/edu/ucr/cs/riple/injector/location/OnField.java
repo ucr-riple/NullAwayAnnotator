@@ -42,6 +42,18 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 public class OnField extends Location {
+  /**
+   * Set of field names. It is a set to support inline multiple field declarations. Please see the
+   * example below:
+   *
+   * <ul>
+   *   <li>Foo bar; -> variables = {"bar"}
+   *   <li>Foo bar1, bar2; -> variables = {"bar1", "bar2"}
+   * </ul>
+   *
+   * We do not split inline multiple field declarations on injections, any annotation targeting any
+   * element in {@code variables} will be applied to the group.
+   */
   public final Set<String> variables;
 
   public OnField(String uri, String clazz, Set<String> variables) {

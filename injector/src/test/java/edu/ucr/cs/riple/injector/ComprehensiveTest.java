@@ -70,6 +70,8 @@ public class ComprehensiveTest extends BaseInjectorTest {
             "   Field foo1;",
             "   @Nullable",
             "   Field foo2;",
+            // We don't split inline multiple field declarations, any annotation on foo3 or foo4
+            // will be applied to the group.
             "   @Nullable",
             "   Field foo3, foo4;",
             "   @Nullable",
