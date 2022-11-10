@@ -382,4 +382,54 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
                 "javax.annotation.Initializer"))
         .start();
   }
+
+  @Test
+  public void methodWithMultipleLineDeclaration() {
+    injectorTestHelper
+        .addInput(
+            "Main.java",
+            "package edu.ucr;",
+            "public class Main {",
+            "   @Foo(clazz = String.class, value = \"Some description\")",
+            "   private static @Baz Object foo6(",
+            "       final @Baz Map<String, @Baz Object> m,",
+            "       @Foo(clazz = String.class, value = \"Some argument\") @Baz Object o1,",
+            "       Object o2,",
+            "       Object o3,",
+            "       @Foo(clazz = Object.class, value = \"Some other argument\") @Baz Object o4) {",
+            "     return new @Baz Runnable() {",
+            "       public void run() {",
+            "         System.out.print(\"log\");",
+            "       }",
+            "     };",
+            "   }",
+            "}")
+        .expectOutput(
+            "package edu.ucr;",
+            "import javax.annotation.Nullable;",
+            "public class Main {",
+            "   @Nullable",
+            "   @Foo(clazz = String.class, value = \"Some description\")",
+            "   private static @Baz Object foo6(",
+            "       final @Baz Map<String, @Baz Object> m,",
+            "       @Foo(clazz = String.class, value = \"Some argument\") @Baz Object o1,",
+            "       Object o2,",
+            "       Object o3,",
+            "       @Foo(clazz = Object.class, value = \"Some other argument\") @Baz Object o4) {",
+            "     return new @Baz Runnable() {",
+            "       public void run() {",
+            "         System.out.print(\"log\");",
+            "       }",
+            "     };",
+            "   }",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnMethod(
+                    "Main.java",
+                    "edu.ucr.Main",
+                    "foo6(Map<String, Object>, Object, Object, Object, Object)"),
+                "javax.annotation.Nullable"))
+        .start();
+  }
 }

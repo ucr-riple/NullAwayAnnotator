@@ -22,6 +22,7 @@
 
 package edu.ucr.cs.riple.injector.changes;
 
+import com.github.javaparser.Range;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.ArrayInitializerExpr;
@@ -32,7 +33,12 @@ import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.injector.location.Location;
+import edu.ucr.cs.riple.injector.modifications.Insertion;
+import edu.ucr.cs.riple.injector.modifications.Modification;
+import edu.ucr.cs.riple.injector.modifications.Replacement;
 import java.util.Optional;
+import javax.annotation.Nullable;
+import javax.lang.model.element.ElementKind;
 
 /**
  * Used to add <a
@@ -61,7 +67,8 @@ public class AddSingleElementAnnotation extends AddAnnotation {
   }
 
   @Override
-  public void visit(NodeWithAnnotations<?> node) {
+  @Nullable
+  public Modification visit(ElementKind kind, NodeWithAnnotations<?> node, Range range) {
 
     StringLiteralExpr argumentExp = new StringLiteralExpr(argument);
     // Check all existing annotations with arguments.
@@ -84,21 +91,19 @@ public class AddSingleElementAnnotation extends AddAnnotation {
                       && ((ArrayInitializerExpr) memberExp).getValues().contains(argumentExp);
                 });
     if (argumentExists) {
-      return;
+      return null;
     }
 
     Optional<AnnotationExpr> annotationWithSameNameExists =
         node.getAnnotationByName(annotationSimpleName);
     if (annotationWithSameNameExists.isEmpty()) {
       // No annotation with this name exists, add it directly.
-      addAnnotationExpressionOnNode(node, argumentExp);
-      return;
+      return addAnnotationExpressionOnNode(kind, argumentExp, range);
     }
 
     // Annotation with the same name exists, but the annotation is repeatable, add it directly.
     if (repeatable) {
-      addAnnotationExpressionOnNode(node, argumentExp);
-      return;
+      return addAnnotationExpressionOnNode(kind, argumentExp, range);
     }
 
     // Annotation with the same name exists and is not repeatable, update it.
@@ -110,6 +115,10 @@ public class AddSingleElementAnnotation extends AddAnnotation {
               + ". Please file an issue with the expected behaviour at: https://github.com/nimakarimipour/NullAwayAnnotator/issues. Thank you!");
     }
 
+    Optional<Range> annotRange = existingAnnotation.getRange();
+    if (annotRange.isEmpty()) {
+      return null;
+    }
     SingleMemberAnnotationExpr singleMemberAnnotationExpr =
         (SingleMemberAnnotationExpr) existingAnnotation;
     ArrayInitializerExpr updatedMemberValue = new ArrayInitializerExpr();
@@ -127,6 +136,8 @@ public class AddSingleElementAnnotation extends AddAnnotation {
     nodeList.add(argumentExp);
     updatedMemberValue.setValues(nodeList);
     singleMemberAnnotationExpr.setMemberValue(updatedMemberValue);
+    return new Replacement(
+        singleMemberAnnotationExpr.toString(), annotRange.get().begin, annotRange.get().end, kind);
   }
 
   @Override
@@ -135,15 +146,16 @@ public class AddSingleElementAnnotation extends AddAnnotation {
   }
 
   /**
-   * Adds an {@link AnnotationExpr} to a {@link NodeWithAnnotations} instance with the given name
-   * and arguments.
+   * Translates addition of an {@link AnnotationExpr} to a {@link NodeWithAnnotations} instance with
+   * the given name and arguments.
    *
-   * @param node Node instance.
    * @param argument Argument expression.
+   * @return A text modification instance.
    */
-  private void addAnnotationExpressionOnNode(NodeWithAnnotations<?> node, Expression argument) {
+  private Insertion addAnnotationExpressionOnNode(
+      ElementKind kind, Expression argument, Range range) {
     AnnotationExpr annotationExpr =
         new SingleMemberAnnotationExpr(new Name(annotationSimpleName), argument);
-    node.addAnnotation(annotationExpr);
+    return new Insertion(annotationExpr.toString(), range.begin, kind);
   }
 }

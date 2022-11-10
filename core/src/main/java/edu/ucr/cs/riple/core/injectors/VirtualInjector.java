@@ -26,8 +26,8 @@ package edu.ucr.cs.riple.core.injectors;
 
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.injector.changes.Change;
+import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -57,17 +57,13 @@ public class VirtualInjector extends AnnotationInjector {
     }
   }
 
-  /** Removes any existing entry from library models. */
-  private void clear() {
-    try {
-      new FileOutputStream(libraryModelPath.toFile()).close();
-    } catch (IOException e) {
-      throw new RuntimeException("Could not clear library model loader content", e);
-    }
+  @Override
+  public void removeAnnotations(Set<RemoveAnnotation> changes) {
+    clear();
   }
 
   @Override
-  public void injectFixes(Set<Fix> fixes) {
+  public void injectAnnotations(Set<AddAnnotation> changes) {
     if (!config.downStreamDependenciesAnalysisActivated) {
       throw new IllegalStateException(
           "Downstream dependencies analysis not activated, cannot inject annotations virtually!");
@@ -75,9 +71,9 @@ public class VirtualInjector extends AnnotationInjector {
     try (BufferedOutputStream os =
         new BufferedOutputStream(new FileOutputStream(libraryModelPath.toFile()))) {
       Set<String> rows =
-          fixes.stream()
-              .filter(Fix::isOnMethod)
-              .map(fix -> fix.toMethod().clazz + "\t" + fix.toMethod().method + "\n")
+          changes.stream()
+              .filter(addAnnotation -> addAnnotation.location.isOnMethod())
+              .map(annot -> annot.location.clazz + "\t" + annot.location.toMethod().method + "\n")
               .collect(Collectors.toSet());
       for (String row : rows) {
         os.write(row.getBytes(Charset.defaultCharset()), 0, row.length());
@@ -88,14 +84,12 @@ public class VirtualInjector extends AnnotationInjector {
     }
   }
 
-  @Override
-  public void removeFixes(Set<Fix> fixes) {
-    clear();
-  }
-
-  @Override
-  public <T extends Change> void applyChanges(Set<T> changes) {
-    throw new UnsupportedOperationException(
-        "Cannot remove/add annotations with this injector, use physical injector instead.");
+  /** Removes any existing entry from library models. */
+  private void clear() {
+    try {
+      new FileOutputStream(libraryModelPath.toFile()).close();
+    } catch (IOException e) {
+      throw new RuntimeException("Could not clear library model loader content", e);
+    }
   }
 }

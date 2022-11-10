@@ -22,13 +22,18 @@
 
 package edu.ucr.cs.riple.injector.changes;
 
+import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
+import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.util.Objects;
+import javax.annotation.Nullable;
+import javax.lang.model.element.ElementKind;
 import org.json.simple.JSONObject;
 
+/** Represents a change in the AST of the source code. */
 public abstract class Change {
   /** Target location. */
   public final Location location;
@@ -44,21 +49,26 @@ public abstract class Change {
   }
 
   /**
-   * Applies the change to the element in the given compilation unit tree that matches the location.
+   * Translate the change to a text modification in the source file.
    *
    * @param tree Compilation unit tree instance.
-   * @return true, if the changes was applied successfully.
+   * @return A text modification instance if the translation is successful, otherwise {@code null}
+   *     will be returned.
    */
-  public boolean apply(CompilationUnit tree) {
+  @Nullable
+  public Modification translate(CompilationUnit tree) {
     return this.location.apply(tree, this);
   }
 
   /**
-   * Visits the given node and applies the change.
+   * Visits the given node and translates the change.
    *
    * @param node Given node.
+   * @return A text modification instance if the translation is successful, otherwise {@code null}
+   *     will be returned.
    */
-  public abstract void visit(NodeWithAnnotations<?> node);
+  @Nullable
+  public abstract Modification visit(ElementKind kind, NodeWithAnnotations<?> node, Range position);
 
   @Override
   public boolean equals(Object o) {

@@ -25,26 +25,22 @@ package edu.ucr.cs.riple.injector;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
-import com.github.javaparser.printer.DefaultPrettyPrinter;
-import com.github.javaparser.printer.configuration.DefaultPrinterConfiguration;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
+import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.Change;
+import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import me.tongfei.progressbar.ProgressBar;
 
 public class Machine {
 
   private final List<WorkList> workLists;
-  private final DefaultPrettyPrinter printer;
   private final boolean keep;
   private final int total;
   private int processed = 0;
@@ -54,23 +50,9 @@ public class Machine {
     this.workLists = workLists;
     this.keep = keep;
     this.log = log;
-    this.printer = new DefaultPrettyPrinter(new DefaultPrinterConfiguration());
     AtomicInteger sum = new AtomicInteger();
     workLists.forEach(workList -> sum.addAndGet(workList.getChanges().size()));
     this.total = sum.get();
-  }
-
-  private void overWriteToFile(CompilationUnit changed, String uri) {
-    Path path = Paths.get(uri);
-    try (Writer writer =
-        Files.newBufferedWriter(path.toFile().toPath(), Charset.defaultCharset())) {
-      Files.createDirectories(path.getParent());
-      String toWrite = keep ? LexicalPreservingPrinter.print(changed) : printer.print(changed);
-      writer.write(toWrite);
-      writer.flush();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   public Integer start() {
@@ -83,39 +65,41 @@ public class Machine {
       } catch (FileNotFoundException exception) {
         continue;
       }
-      for (Change location : workList.getChanges()) {
+      Set<Modification> modifications = new HashSet<>();
+      Set<ImportDeclaration> imports = new HashSet<>();
+      for (Change change : workList.getChanges()) {
         try {
           if (log) {
             pb.step();
           }
-          if (applyChange(tree, location)) {
+          Modification modification = change.translate(tree);
+          if (modification != null) {
             processed++;
+            modifications.add(modification);
+            if (change instanceof AddAnnotation) {
+              if (Helper.getPackageName(change.annotation) != null) {
+                ImportDeclaration importDeclaration =
+                    StaticJavaParser.parseImport("import " + change.annotation + ";");
+                if (treeRequiresImportDeclaration(tree, importDeclaration, change.annotation)) {
+                  imports.add(importDeclaration);
+                }
+              }
+            }
           }
         } catch (Exception ignored) {
           System.err.println("Encountered Exception: " + ignored);
         }
       }
-      overWriteToFile(tree, workList.getUri());
+      Printer printer = new Printer(Paths.get(workList.getUri()));
+      printer.applyModifications(modifications);
+      printer.addImports(tree, imports);
+      printer.write();
     }
     if (log) {
       pb.stepTo(total);
     }
     pb.close();
     return processed;
-  }
-
-  private boolean applyChange(CompilationUnit tree, Change change) {
-    boolean success = change.apply(tree);
-    if (success) {
-      if (Helper.getPackageName(change.annotation) != null) {
-        ImportDeclaration importDeclaration =
-            StaticJavaParser.parseImport("import " + change.annotation + ";");
-        if (treeRequiresImportDeclaration(tree, importDeclaration, change.annotation)) {
-          tree.getImports().addFirst(importDeclaration);
-        }
-      }
-    }
-    return success;
   }
 
   private boolean treeRequiresImportDeclaration(

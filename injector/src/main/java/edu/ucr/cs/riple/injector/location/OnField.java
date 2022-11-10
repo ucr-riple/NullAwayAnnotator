@@ -24,19 +24,36 @@
 
 package edu.ucr.cs.riple.injector.location;
 
+import com.github.javaparser.Range;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import edu.ucr.cs.riple.injector.changes.Change;
+import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import javax.lang.model.element.ElementKind;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 public class OnField extends Location {
+  /**
+   * Set of field names. It is a set to support inline multiple field declarations. Please see the
+   * example below:
+   *
+   * <ul>
+   *   <li>Foo bar; -> variables = {"bar"}
+   *   <li>Foo bar1, bar2; -> variables = {"bar1", "bar2"}
+   * </ul>
+   *
+   * We do not split inline multiple field declarations on injections, any annotation targeting any
+   * element in {@code variables} will be applied to the group.
+   */
   public final Set<String> variables;
 
   public OnField(String uri, String clazz, Set<String> variables) {
@@ -58,23 +75,29 @@ public class OnField extends Location {
   }
 
   @Override
-  protected boolean applyToMember(NodeList<BodyDeclaration<?>> clazz, Change change) {
-    final boolean[] success = {false};
+  protected Modification applyToMember(NodeList<BodyDeclaration<?>> clazz, Change change) {
+    final AtomicReference<Modification> ans = new AtomicReference<>();
     clazz.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifFieldDeclaration(
                 fieldDeclaration -> {
+                  if (ans.get() != null) {
+                    // already found the member.
+                    return;
+                  }
                   NodeList<VariableDeclarator> vars =
                       fieldDeclaration.asFieldDeclaration().getVariables();
                   for (VariableDeclarator v : vars) {
                     if (variables.contains(v.getName().toString())) {
-                      change.visit(fieldDeclaration);
-                      success[0] = true;
+                      Optional<Range> range = fieldDeclaration.getRange();
+                      range.ifPresent(
+                          value ->
+                              ans.set(change.visit(ElementKind.FIELD, fieldDeclaration, value)));
                       break;
                     }
                   }
                 }));
-    return success[0];
+    return ans.get();
   }
 
   @Override

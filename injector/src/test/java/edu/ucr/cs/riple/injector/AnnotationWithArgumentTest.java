@@ -129,6 +129,32 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
   }
 
   @Test
+  public void onFieldRepeatableOffTest() {
+    injectorTestHelper
+        .addInput(
+            "Super.java",
+            "package com.edu;",
+            "public class Super {",
+            "   @CustomNull({ \"arg1\", \"arg2\" })",
+            "   Object h = new Object();",
+            "}")
+        .expectOutput(
+            "package com.edu;",
+            "import edu.ucr.CustomNull;",
+            "public class Super {",
+            "   @CustomNull({ \"arg1\", \"arg2\", \"arg3\" })",
+            "   Object h = new Object();",
+            "}")
+        .addChanges(
+            new AddSingleElementAnnotation(
+                new OnField("Super.java", "com.edu.Super", Collections.singleton("h")),
+                "edu.ucr.CustomNull",
+                "arg3",
+                false))
+        .start();
+  }
+
+  @Test
   public void onMethodCustomAnnotTest() {
     injectorTestHelper
         .addInput(
@@ -195,6 +221,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
         .addInput(
             "Super.java",
             "package com.edu;",
+            "import edu.ucr.CustomNull;",
             "public class Super {",
             "   Object h = new Object();",
             "   @CustomNull(\"arg1\")",
@@ -227,6 +254,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
         .addInput(
             "Super.java",
             "package com.edu;",
+            "import edu.ucr.CustomNull;",
             "public class Super {",
             "   Object h = new Object();",
             "   @Other({\"arg1\", \"arg2\"})",
@@ -263,7 +291,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "package com.edu;",
             "public class Super {",
             "   Object h = new Object();",
-            "   @CustomNull({ \"arg1\", \"arg2\" })",
+            "   @CustomNull({\"arg1\", \"arg2\"})",
             "   public void test(Object f) {",
             "      h = f;",
             "   }",
@@ -273,7 +301,8 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "import edu.ucr.CustomNull;",
             "public class Super {",
             "   Object h = new Object();",
-            "   @CustomNull({ \"arg1\", \"arg2\", \"arg3\" })",
+            "   @CustomNull(\"arg3\")",
+            "   @CustomNull({\"arg1\", \"arg2\"})",
             "   public void test(Object f) {",
             "      h = f;",
             "   }",
@@ -283,7 +312,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
                 new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
                 "edu.ucr.CustomNull",
                 "arg3",
-                false))
+                true))
         .start();
   }
 
@@ -305,8 +334,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
             "import edu.ucr.CustomNull;",
             "public class Super {",
             "   Object h = new Object();",
-            "   @CustomNull({\"arg1\", \"arg2\"})",
-            "   @CustomNull(\"arg3\")",
+            "   @CustomNull({ \"arg1\", \"arg2\", \"arg3\" })",
             "   public void test(Object f) {",
             "      h = f;",
             "   }",
@@ -316,7 +344,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
                 new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
                 "edu.ucr.CustomNull",
                 "arg3",
-                true))
+                false))
         .start();
   }
 
@@ -378,6 +406,80 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
                 new OnMethod("Super.java", "com.edu.Super", "test(java.lang.Object)"),
                 "edu.ucr.CustomNull",
                 "arg3",
+                false))
+        .start();
+  }
+
+  @Test
+  public void onFieldMultiLineSuppressWarningTest() {
+    injectorTestHelper
+        .addInput(
+            "Super.java",
+            "package com.edu;",
+            "public class Super {",
+            "   @SuppressWarnings({",
+            "   \"InvalidThrowsLink\",",
+            "   \"MalformedInlineTag\",",
+            "   \"unchecked\"",
+            "   })",
+            "   Object h = new Object();",
+            "   public void test(Object f) {",
+            "      h = f;",
+            "   }",
+            "}")
+        .expectOutput(
+            "package com.edu;",
+            "public class Super {",
+            // Google java format will convert annot below into multi line format if needed.
+            "   @SuppressWarnings({ \"InvalidThrowsLink\", \"MalformedInlineTag\", \"unchecked\", \"NullAway.Init\" })",
+            "   Object h = new Object();",
+            "   public void test(Object f) {",
+            "      h = f;",
+            "   }",
+            "}")
+        .addChanges(
+            new AddSingleElementAnnotation(
+                new OnField("Super.java", "com.edu.Super", Collections.singleton("h")),
+                "SuppressWarnings",
+                "NullAway.Init",
+                false))
+        .start();
+  }
+
+  @Test
+  public void onFieldMultiLineSuppressWarningWithOtherAnnotExistsTest() {
+    injectorTestHelper
+        .addInput(
+            "Super.java",
+            "package com.edu;",
+            "import edu.ucr.CustomAnnot;",
+            "public class Super {",
+            "   @SuppressWarnings({",
+            "   \"InvalidThrowsLink\",",
+            "   \"MalformedInlineTag\",",
+            "   \"unchecked\"",
+            "   }) @CustomAnnot",
+            "   Object h = new Object();",
+            "   public void test(Object f) {",
+            "      h = f;",
+            "   }",
+            "}")
+        .expectOutput(
+            "package com.edu;",
+            "import edu.ucr.CustomAnnot;",
+            "public class Super {",
+            "   @SuppressWarnings({ \"InvalidThrowsLink\", \"MalformedInlineTag\", \"unchecked\", \"NullAway.Init\" })",
+            "   @CustomAnnot",
+            "   Object h = new Object();",
+            "   public void test(Object f) {",
+            "      h = f;",
+            "   }",
+            "}")
+        .addChanges(
+            new AddSingleElementAnnotation(
+                new OnField("Super.java", "com.edu.Super", Collections.singleton("h")),
+                "SuppressWarnings",
+                "NullAway.Init",
                 false))
         .start();
   }

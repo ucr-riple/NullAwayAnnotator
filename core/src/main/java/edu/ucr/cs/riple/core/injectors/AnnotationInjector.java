@@ -27,7 +27,6 @@ package edu.ucr.cs.riple.core.injectors;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
-import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -74,29 +73,12 @@ public abstract class AnnotationInjector {
    *
    * @param changes Set of annotations to remove.
    */
-  public void removeAnnotations(Set<RemoveAnnotation> changes) {
-    if (changes == null || changes.size() == 0) {
-      return;
-    }
-    applyChanges(changes);
-  }
+  public abstract void removeAnnotations(Set<RemoveAnnotation> changes);
 
   /**
    * Injects annotations to the source code.
    *
    * @param changes Set of annotations to inject.
    */
-  public void injectAnnotations(Set<AddAnnotation> changes) {
-    if (changes == null || changes.size() == 0) {
-      return;
-    }
-    applyChanges(changes);
-  }
-
-  /**
-   * Applies the requested changes to the source code.
-   *
-   * @param changes Set of requested changes.
-   */
-  protected abstract <T extends Change> void applyChanges(Set<T> changes);
+  public abstract void injectAnnotations(Set<AddAnnotation> changes);
 }
