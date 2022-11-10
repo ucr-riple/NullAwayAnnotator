@@ -177,4 +177,29 @@ public class RemovalTest extends BaseInjectorTest {
                 new OnMethod("Test.java", "edu.ucr.Test", "test()"), "edu.custom.Annot"))
         .start();
   }
+
+  @Test
+  public void removeParamAnnotEndingWithUnderlineExists() {
+    injectorTestHelper
+        .addInput(
+            "Test.java",
+            "package edu.ucr;",
+            "import javax.annotation.Nullable;",
+            "import com.customAnnot.AnnotationWithNonAlphanumericSuffix$$$$_;",
+            "public class Test {",
+            "   public void foo(@AnnotationWithNonAlphanumericSuffix$$$$_@Nullable Object o) { }",
+            "}")
+        .expectOutput(
+            "package edu.ucr;",
+            "import javax.annotation.Nullable;",
+            "import com.customAnnot.AnnotationWithNonAlphanumericSuffix$$$$_;",
+            "public class Test {",
+            "   public void foo(@AnnotationWithNonAlphanumericSuffix$$$$_ Object o) { }",
+            "}")
+        .addChanges(
+            new RemoveAnnotation(
+                new OnParameter("Test.java", "edu.ucr.Test", "foo(java.lang.Object)", 0),
+                "javax.annotation.Nullable"))
+        .start();
+  }
 }
