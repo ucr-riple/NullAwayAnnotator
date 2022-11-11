@@ -95,7 +95,7 @@ public class TypeAnnotatorScanner extends BugChecker
     }
     config
         .getSerializer()
-        .serializeCallGraphNode(new TrackerNode(ASTHelpers.getSymbol(tree), state.getPath(), true));
+        .serializeCallGraphNode(new TrackerNode(ASTHelpers.getSymbol(tree), state.getPath()));
     return Description.NO_MATCH;
   }
 
@@ -123,7 +123,7 @@ public class TypeAnnotatorScanner extends BugChecker
     if (!context.getConfig().fieldTrackerIsActive()) {
       return Description.NO_MATCH;
     }
-    serializeField(ASTHelpers.getSymbol(tree.getInitializer()), state, true);
+    serializeSymIfField(ASTHelpers.getSymbol(tree.getInitializer()), state);
     return Description.NO_MATCH;
   }
 
@@ -132,7 +132,7 @@ public class TypeAnnotatorScanner extends BugChecker
     if (!context.getConfig().fieldTrackerIsActive()) {
       return Description.NO_MATCH;
     }
-    serializeField(ASTHelpers.getSymbol(tree), state, false);
+    serializeSymIfField(ASTHelpers.getSymbol(tree), state);
     return Description.NO_MATCH;
   }
 
@@ -141,16 +141,16 @@ public class TypeAnnotatorScanner extends BugChecker
     if (!context.getConfig().fieldTrackerIsActive()) {
       return Description.NO_MATCH;
     }
-    serializeField(ASTHelpers.getSymbol(tree), state, false);
+    serializeSymIfField(ASTHelpers.getSymbol(tree), state);
     return Description.NO_MATCH;
   }
 
-  private void serializeField(Symbol symbol, VisitorState state, boolean force) {
+  private void serializeSymIfField(Symbol symbol, VisitorState state) {
     if (symbol != null && symbol.getKind() == ElementKind.FIELD) {
       context
           .getConfig()
           .getSerializer()
-          .serializeFieldGraphNode(new TrackerNode(symbol, state.getPath(), force));
+          .serializeFieldGraphNode(new TrackerNode(symbol, state.getPath()));
     }
   }
 }

@@ -29,14 +29,14 @@ import java.util.Objects;
 public class TrackerNodeDisplay implements Display {
 
   public final String callerClass;
-  public final String callerMethod;
+  public final String callerMember;
   public final String calleeClass;
   public final String member;
 
   public TrackerNodeDisplay(
-      String callerClass, String callerMethod, String calleeClass, String member) {
+      String callerClass, String callerMember, String calleeClass, String member) {
     this.callerClass = callerClass;
-    this.callerMethod = callerMethod;
+    this.callerMember = callerMember;
     this.calleeClass = calleeClass;
     this.member = member;
   }
@@ -51,14 +51,14 @@ public class TrackerNodeDisplay implements Display {
     }
     TrackerNodeDisplay that = (TrackerNodeDisplay) o;
     return callerClass.equals(that.callerClass)
-        && callerMethod.equals(that.callerMethod)
+        && callerMember.equals(that.callerMember)
         && calleeClass.equals(that.calleeClass)
         && member.equals(that.member);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(callerClass, callerMethod, calleeClass, member);
+    return Objects.hash(callerClass, callerMember, calleeClass, member);
   }
 
   @Override
@@ -66,10 +66,10 @@ public class TrackerNodeDisplay implements Display {
     return "callerClass='"
         + callerClass
         + '\''
-        + ", callerMethod='"
-        + callerMethod
+        + ", callerMember='"
+        + callerMember
         + '\''
-        + ", calleeMethod='"
+        + ", calleeClass='"
         + calleeClass
         + '\''
         + ", member='"
