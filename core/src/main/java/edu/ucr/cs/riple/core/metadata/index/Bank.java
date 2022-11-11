@@ -43,11 +43,11 @@ public class Bank<T extends Enclosed> {
   /** Initial state indexed by enclosing class. */
   private final Index<T> rootInClass;
   /** Initial state indexed by enclosing class and method. */
-  private final Index<T> rootInMethod;
+  private final Index<T> rootInMember;
   /** Current state indexed by enclosing class. */
   private Index<T> currentInClass;
   /** Current state indexed by enclosing class and method. */
-  private Index<T> currentInMethod;
+  private Index<T> currentInMember;
   /** Factory instance to parse outputs. */
   private final Factory<T> factory;
   /** Path to file where outputs are stored. */
@@ -57,10 +57,10 @@ public class Bank<T extends Enclosed> {
     this.factory = factory;
     this.paths = paths;
     rootInClass = new Index<>(this.paths, Index.Type.BY_CLASS, factory);
-    rootInMethod = new Index<>(this.paths, Index.Type.BY_METHOD, factory);
-    rootInMethod.index();
+    rootInMember = new Index<>(this.paths, Index.Type.BY_MEMBER, factory);
+    rootInMember.index();
     rootInClass.index();
-    Preconditions.checkArgument(rootInClass.getTotal() == rootInMethod.getTotal());
+    Preconditions.checkArgument(rootInClass.getTotal() == rootInMember.getTotal());
   }
 
   public Bank(Path path, Factory<T> factory) {
@@ -71,16 +71,16 @@ public class Bank<T extends Enclosed> {
    * Overwrites the current state with the new generated output,
    *
    * @param saveClass If true, current index by class will be updated.
-   * @param saveMethod if true, current index by class and method will be updated.
+   * @param saveMember if true, current index by class and member will be updated.
    */
-  public void saveState(boolean saveClass, boolean saveMethod) {
+  public void saveState(boolean saveClass, boolean saveMember) {
     if (saveClass) {
       currentInClass = new Index<>(paths, Index.Type.BY_CLASS, factory);
       currentInClass.index();
     }
-    if (saveMethod) {
-      currentInMethod = new Index<>(paths, Index.Type.BY_METHOD, factory);
-      currentInMethod.index();
+    if (saveMember) {
+      currentInMember = new Index<>(paths, Index.Type.BY_MEMBER, factory);
+      currentInMember.index();
     }
   }
 
@@ -98,18 +98,18 @@ public class Bank<T extends Enclosed> {
   }
 
   /**
-   * Computes the difference in items enclosed by the given enclosing class and method in current
+   * Computes the difference in items enclosed by the given enclosing class and member in current
    * state and root state.
    *
    * @param encClass Enclosing fully qualified class name.
-   * @param encMethod Enclosing method signature.
+   * @param encMember Enclosing member symbol.
    * @return Corresponding {@link Result}.
    */
-  public Result<T> compareByMethod(String encClass, String encMethod, boolean fresh) {
+  public Result<T> compareByMethod(String encClass, String encMember, boolean fresh) {
     saveState(false, fresh);
     return compareByList(
-        rootInMethod.getByMethod(encClass, encMethod),
-        currentInMethod.getByMethod(encClass, encMethod));
+        rootInMember.getByMember(encClass, encMember),
+        currentInMember.getByMember(encClass, encMember));
   }
 
   /**
@@ -118,7 +118,7 @@ public class Bank<T extends Enclosed> {
    * @return Corresponding {@link Result} instance.
    */
   public Result<T> compare() {
-    return compareByList(rootInMethod.values(), currentInMethod.values());
+    return compareByList(rootInMember.values(), currentInMember.values());
   }
 
   /**
