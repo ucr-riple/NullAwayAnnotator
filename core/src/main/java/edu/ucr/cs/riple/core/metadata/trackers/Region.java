@@ -32,16 +32,16 @@ import java.util.Objects;
  */
 public class Region {
   /**
-   * Signature of the method where this region is enclosed. If region is a class field
-   * initialization region, method value will be String of {@code "null"} not {@code null}.
+   * Symbol of the region representative. If region is a class static initialization region, member
+   * value will be String of {@code "null"} not {@code null}.
    */
-  public final String method;
+  public final String member;
   /** Fully qualified name of the enclosing class of the region. */
   public final String clazz;
 
-  public Region(String encClass, String encMethod) {
+  public Region(String encClass, String encMember) {
     this.clazz = encClass == null ? "null" : encClass;
-    this.method = encMethod == null ? "null" : encMethod;
+    this.member = encMember == null ? "null" : encMember;
   }
 
   @Override
@@ -53,16 +53,16 @@ public class Region {
       return false;
     }
     Region region = (Region) o;
-    return Objects.equals(method, region.method) && Objects.equals(clazz, region.clazz);
+    return Objects.equals(member, region.member) && Objects.equals(clazz, region.clazz);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(method, clazz);
+    return Objects.hash(member, clazz);
   }
 
   @Override
   public String toString() {
-    return "class='" + clazz + '\'' + ", method='" + method;
+    return "class='" + clazz + '\'' + ", member='" + member;
   }
 }

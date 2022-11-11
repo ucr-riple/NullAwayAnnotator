@@ -257,9 +257,9 @@ public class Annotator {
     Set<AddAnnotation> nullUnMarkedAnnotations =
         remainingErrors.stream()
             // filter non-method regions.
-            .filter(error -> !error.encMethod().equals("null"))
+            .filter(error -> !error.encMember().equals("null"))
             // find the corresponding method nodes.
-            .map(error -> tree.findNode(error.encMethod(), error.encClass()))
+            .map(error -> tree.findNode(error.encMember(), error.encClass()))
             // impossible, just sanity check or future nullness checker hints
             .filter(Objects::nonNull)
             .map(node -> new AddMarkerAnnotation(node.location, config.nullUnMarkedAnnotation))
@@ -275,7 +275,7 @@ public class Annotator {
                     return false;
                   }
                   OnField onField = fix.toField();
-                  return onField.clazz.equals(fix.encClass()) && fix.encMethod().equals("");
+                  return onField.clazz.equals(fix.encClass()) && fix.encMember().equals("");
                 })
             .map(
                 fix ->

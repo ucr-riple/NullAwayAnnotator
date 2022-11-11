@@ -49,11 +49,11 @@ public abstract class Enclosed {
   }
 
   /**
-   * Method signature of the containing region.
+   * Representative member of the containing region as {@code String}.
    *
-   * @return Method signature.
+   * @return Member symbol in {@code String}.
    */
-  public String encMethod() {
-    return this.region.method;
+  public String encMember() {
+    return this.region.member;
   }
 }
