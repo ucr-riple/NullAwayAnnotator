@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.core;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.singleton;
 
+import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -245,5 +246,32 @@ public class CoreTest extends BaseCoreTest {
         .addExpectedReports(
             new TReport(new OnMethod("Main.java", "test.Main$1", "apply(java.lang.Object)"), -1))
         .start();
+  }
+
+  @Test
+  public void deactivateInferenceTest() {
+    coreTestHelper
+        .addInputLines(
+            "Main.java",
+            "package test;",
+            "public class Main {",
+            "   public Object run() {",
+            "     return null;",
+            "   }",
+            "}")
+        .toDepth(1)
+        .deactivateInference()
+        .start();
+    // Verify that only one @NullUnmarked annotation is injected (No @Nullable injection).
+    Preconditions.checkArgument(
+        coreTestHelper.getConfig().log.getInjectedAnnotations().size() == 1);
+    Preconditions.checkArgument(
+        coreTestHelper
+            .getConfig()
+            .log
+            .getInjectedAnnotations()
+            .get(0)
+            .annotation
+            .equals("org.jspecify.nullness.NullUnmarked"));
   }
 }

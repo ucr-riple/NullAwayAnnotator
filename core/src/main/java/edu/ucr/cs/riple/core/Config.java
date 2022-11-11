@@ -130,6 +130,13 @@ public class Config {
 
   public final Log log;
   public final int depth;
+  /**
+   * Activates inference to add {@code @Nullable} qualifiers.
+   *
+   * <p>Note: Inference mode is mostly deactivated for experiments purposes and the default value is
+   * {@code true} in production.
+   */
+  public final boolean inferenceActivated;
 
   /**
    * Builds config from command line arguments.
@@ -291,6 +298,12 @@ public class Config {
     activateForceResolveOption.setRequired(false);
     options.addOption(activateForceResolveOption);
 
+    // Disable inference
+    Option deactivateInference =
+        new Option("di", "deactivate-inference", false, "Deactivates inference.");
+    deactivateInference.setRequired(false);
+    options.addOption(deactivateInference);
+
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
@@ -377,7 +390,9 @@ public class Config {
       this.downstreamInfo = ImmutableSet.of();
       this.downstreamDependenciesBuildCommand = null;
     }
-    this.forceResolveActivated = cmd.hasOption(activateForceResolveOption);
+    this.inferenceActivated = !cmd.hasOption(deactivateInference);
+    this.forceResolveActivated =
+        !this.inferenceActivated || cmd.hasOption(activateForceResolveOption);
     this.nullUnMarkedAnnotation =
         this.forceResolveActivated
             ? cmd.getOptionValue(activateForceResolveOption)
@@ -459,6 +474,8 @@ public class Config {
     this.moduleCounterID = 0;
     this.forceResolveActivated =
         getValueFromKey(jsonObject, "FORCE_RESOLVE", Boolean.class).orElse(false);
+    this.inferenceActivated =
+        getValueFromKey(jsonObject, "INFERENCE_ACTIVATION", Boolean.class).orElse(true);
     this.nullUnMarkedAnnotation =
         getValueFromKey(jsonObject, "ANNOTATION:NULL_UNMARKED", String.class)
             .orElse("org.jspecify.nullness.NullUnmarked");
@@ -579,6 +596,7 @@ public class Config {
 
     public boolean forceResolveActivation = false;
     public String nullUnmarkedAnnotation = "org.jspecify.nullness.NullUnmarked";
+    public boolean inferenceActivated = true;
     public int depth = 1;
 
     @SuppressWarnings("unchecked")
@@ -610,6 +628,7 @@ public class Config {
       json.put("EXHAUSTIVE_SEARCH", exhaustiveSearch);
       json.put("REDIRECT_BUILD_OUTPUT_TO_STDERR", redirectBuildOutputToStdErr);
       json.put("FORCE_RESOLVE", forceResolveActivation);
+      json.put("INFERENCE_ACTIVATION", inferenceActivated);
       JSONArray configPathsJson = new JSONArray();
       configPathsJson.addAll(
           configPaths.stream()
