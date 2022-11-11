@@ -39,9 +39,34 @@ public class Region {
   /** Fully qualified name of the enclosing class of the region. */
   public final String clazz;
 
+  public final Type type;
+
+  public enum Type {
+    METHOD,
+    FIELD,
+    STATIC_BLOCK
+  }
+
   public Region(String encClass, String encMember) {
     this.clazz = encClass == null ? "null" : encClass;
     this.member = encMember == null ? "null" : encMember;
+    this.type = initType(member);
+  }
+
+  /**
+   * Initializes {@link Region#type} based on the string representation of member.
+   *
+   * @param member Symbol of the region representative.
+   * @return The corresponding Type.
+   */
+  private Type initType(String member) {
+    if (member.equals("null")) {
+      return Type.STATIC_BLOCK;
+    }
+    if (member.contains("(")) {
+      return Type.METHOD;
+    }
+    return Type.FIELD;
   }
 
   @Override
@@ -64,5 +89,17 @@ public class Region {
   @Override
   public String toString() {
     return "class='" + clazz + '\'' + ", member='" + member;
+  }
+
+  public boolean isOnField() {
+    return type.equals(Type.FIELD);
+  }
+
+  public boolean isOnMethod() {
+    return type.equals(Type.METHOD);
+  }
+
+  public boolean isOnStaticBlock() {
+    return type.equals(Type.STATIC_BLOCK);
   }
 }

@@ -56,4 +56,12 @@ public abstract class Enclosed {
   public String encMember() {
     return this.region.member;
   }
+
+  /**
+   * Getter for region.
+   * @return region instance.
+   */
+  public Region getRegion(){
+    return this.region;
+  }
 }

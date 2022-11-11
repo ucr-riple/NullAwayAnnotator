@@ -263,7 +263,7 @@ public class Annotator {
     Set<AddAnnotation> nullUnMarkedAnnotations =
         remainingErrors.stream()
             // filter non-method regions.
-            .filter(error -> !error.encMember().equals("null"))
+            .filter(error -> error.getRegion().isOnMethod())
             // find the corresponding method nodes.
             .map(error -> tree.findNode(error.encMember(), error.encClass()))
             // impossible, just sanity check or future nullness checker hints
