@@ -68,7 +68,7 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
                 TrackerNode.hash(field.clazz))
             .map(trackerNode -> new Region(trackerNode.callerClass, trackerNode.callerMethod))
             .collect(Collectors.toSet());
-    ans.add(new Region(field.clazz, "null"));
+    field.variables.forEach(fieldName -> ans.add(new Region(field.clazz, fieldName)));
     return Optional.of(ans);
   }
 }
