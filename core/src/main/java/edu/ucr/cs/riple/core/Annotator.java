@@ -48,6 +48,7 @@ import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
+import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.List;
 import java.util.Objects;
@@ -265,8 +266,21 @@ public class Annotator {
             // filter non-method regions.
             .filter(error -> error.getRegion().isOnMethod())
             // find the corresponding method nodes.
-            .map(error -> tree.findNode(error.encMember(), error.encClass()))
-            // impossible, just sanity check or future nullness checker hints
+            .map(
+                error -> {
+                  if (error.getRegion().isOnMethod()) {
+                    return tree.findNode(error.encMember(), error.encClass());
+                  }
+                  if (error.nonnullTarget == null) {
+                    return null;
+                  }
+                  if (error.messageType.equals("PASS_NULLABLE")) {
+                    OnMethod calledMethod = error.nonnullTarget.toMethod();
+                    return tree.findNode(calledMethod.method, calledMethod.clazz);
+                  }
+                  return null;
+                })
+            // Filter null values from map above.
             .filter(Objects::nonNull)
             .map(node -> new AddMarkerAnnotation(node.location, config.nullUnMarkedAnnotation))
             .collect(Collectors.toSet());
@@ -276,20 +290,28 @@ public class Annotator {
     config.log.updateInjectedAnnotations(nullUnMarkedAnnotations);
 
     // Collect explicit Nullable initialization to fields
-    Set<AddAnnotation> suppressWarningsAnnotations =
-        remainingFixes.stream()
+    Set<OnField> fieldsWithSuppressWarnings =
+        remainingErrors.stream()
             .filter(
-                fix -> {
-                  if (!(fix.isOnField() && fix.reasons.contains("ASSIGN_FIELD_NULLABLE"))) {
+                error -> {
+                  if (error.nonnullTarget == null || !error.nonnullTarget.isOnField()) {
                     return false;
                   }
-                  OnField onField = fix.toField();
-                  return onField.clazz.equals(fix.encClass()) && fix.encMember().equals("");
+                  if (!error.getRegion().isOnField()) {
+                    return false;
+                  }
+                  OnField onField = error.nonnullTarget.toField();
+                  return onField.clazz.equals(error.getRegion().clazz)
+                      && onField.variables.contains(error.encMember());
                 })
+            .map(error -> error.nonnullTarget.toField())
+            .collect(Collectors.toSet());
+
+    Set<AddAnnotation> suppressWarningsAnnotations =
+        fieldsWithSuppressWarnings.stream()
             .map(
-                fix ->
-                    new AddSingleElementAnnotation(
-                        fix.toField(), "SuppressWarnings", "NullAway", false))
+                onField ->
+                    new AddSingleElementAnnotation(onField, "SuppressWarnings", "NullAway", true))
             .collect(Collectors.toSet());
     injector.injectAnnotations(suppressWarningsAnnotations);
     // Update log.
@@ -303,13 +325,14 @@ public class Annotator {
                     fix.isOnField()
                         && (fix.reasons.contains("METHOD_NO_INIT")
                             || fix.reasons.contains("FIELD_NO_INIT")))
+            // Filter nodes annotated with SuppressWarnings("NullAway")
+            .filter(fix -> !fieldsWithSuppressWarnings.contains(fix.toField()))
             .map(
                 fix ->
                     new AddSingleElementAnnotation(
                         fix.toField(), "SuppressWarnings", "NullAway.Init", false))
-            // Exclude already annotated fields with a general NullAway suppress warning.
-            .filter(f -> !suppressWarningsAnnotations.contains(f))
             .collect(Collectors.toSet());
+
     injector.injectAnnotations(initializationSuppressWarningsAnnotations);
     // Update log.
     config.log.updateInjectedAnnotations(initializationSuppressWarningsAnnotations);

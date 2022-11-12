@@ -42,17 +42,16 @@ import javax.lang.model.element.Modifier;
 public class MethodInfo {
   private final Symbol.MethodSymbol symbol;
   private final Symbol.ClassSymbol clazz;
-  private final URI uri;
+  private URI uri;
   private final int id;
   private Boolean[] annotFlags;
   private boolean hasNullableAnnotation;
   private int parent;
 
-  private MethodInfo(Symbol.MethodSymbol method, VisitorState state, ScannerContext context) {
+  private MethodInfo(Symbol.MethodSymbol method, ScannerContext context) {
     this.id = context.getNextMethodId();
     this.symbol = method;
-    this.clazz = (method != null) ? method.enclClass() : null;
-    this.uri = state.getPath().getCompilationUnit().getSourceFile().toUri();
+    this.clazz = method.enclClass();
     this.parent = 0;
     context.visitMethod(this);
   }
@@ -66,7 +65,7 @@ public class MethodInfo {
             .filter(
                 methodInfo -> methodInfo.symbol.equals(method) && methodInfo.clazz.equals(clazz))
             .findAny();
-    return optionalMethodInfo.orElseGet(() -> new MethodInfo(method, state, context));
+    return optionalMethodInfo.orElseGet(() -> new MethodInfo(method, context));
   }
 
   @Override
@@ -171,5 +170,9 @@ public class MethodInfo {
    */
   public static int hash(Symbol method) {
     return Objects.hash(method, method.enclClass());
+  }
+
+  public void setURI(URI uri) {
+    this.uri = uri;
   }
 }

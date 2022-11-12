@@ -59,9 +59,10 @@ public abstract class Enclosed {
 
   /**
    * Getter for region.
+   *
    * @return region instance.
    */
-  public Region getRegion(){
+  public Region getRegion() {
     return this.region;
   }
 }

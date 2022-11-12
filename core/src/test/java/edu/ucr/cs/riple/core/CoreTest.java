@@ -128,7 +128,7 @@ public class CoreTest extends BaseCoreTest {
   }
 
   @Test
-  public void field_assign_nullable_constructor() {
+  public void fieldAssignNullableConstructor() {
     coreTestHelper
         .addInputLines(
             "Main.java",
@@ -145,6 +145,28 @@ public class CoreTest extends BaseCoreTest {
         .toDepth(1)
         .addExpectedReports(
             new TReport(new OnParameter("Main.java", "test.Main", "Main(java.lang.Object)", 0), 1))
+        .start();
+  }
+
+  @Test
+  public void fieldAssignNullableConstructorForceResolveEnabled() {
+    coreTestHelper
+        .addInputLines(
+            "Main.java",
+            "package test;",
+            "public class Main {",
+            "   Object f;",
+            "   Main(Object f) {",
+            "     this.f = f;",
+            "   }",
+            "}",
+            "class C {",
+            "   Main main = new Main(null);",
+            "}")
+        .toDepth(1)
+        .addExpectedReports(
+            new TReport(new OnParameter("Main.java", "test.Main", "Main(java.lang.Object)", 0), 1))
+        .enableForceResolve()
         .start();
   }
 
