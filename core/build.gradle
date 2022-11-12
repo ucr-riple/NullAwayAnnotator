@@ -50,7 +50,7 @@ tasks.test.dependsOn(':qual:publishToMavenLocal')
 
 // Set up environment variables for test configuration tu run with the latest development version.
 tasks.test.doFirst {
-    environment "NULLAWAY_TEST_VERSION", "0.10.2"
+    environment "NULLAWAY_TEST_VERSION", "0.10.5"
     environment "ANNOTATOR_VERSION", project.version
 }
 
