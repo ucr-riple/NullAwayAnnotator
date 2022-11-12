@@ -51,11 +51,11 @@ public class Injector {
     return report;
   }
 
-  public Report addAnnotations(Set<RemoveAnnotation> requests) {
+  public Report addAnnotations(Set<AddAnnotation> requests) {
     return this.start(new WorkListBuilder<>(requests).getWorkLists(), false);
   }
 
-  public Report removeAnnotations(Set<AddAnnotation> requests) {
+  public Report removeAnnotations(Set<RemoveAnnotation> requests) {
     return this.start(new WorkListBuilder<>(requests).getWorkLists(), false);
   }
 
