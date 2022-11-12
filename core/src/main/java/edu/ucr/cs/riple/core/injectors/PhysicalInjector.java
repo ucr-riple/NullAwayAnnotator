@@ -41,12 +41,12 @@ public class PhysicalInjector extends AnnotationInjector {
   }
 
   @Override
-  public void injectAnnotations(Set<AddAnnotation> changes) {
-    this.injector.addAnnotations(changes);
+  public void removeAnnotations(Set<RemoveAnnotation> changes) {
+    this.injector.removeAnnotations(changes);
   }
 
   @Override
-  public void removeAnnotations(Set<RemoveAnnotation> changes) {
-    this.injector.removeAnnotations(changes);
+  public void injectAnnotations(Set<AddAnnotation> changes) {
+    this.injector.addAnnotations(changes);
   }
 }
