@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.scanner.out;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.VisitorState;
+import com.sun.source.tree.CompilationUnitTree;
 import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.riple.scanner.Config;
 import edu.ucr.cs.riple.scanner.ScannerContext;
@@ -42,23 +43,21 @@ import javax.lang.model.element.Modifier;
 public class MethodInfo {
   private final Symbol.MethodSymbol symbol;
   private final Symbol.ClassSymbol clazz;
-  private final URI uri;
+  private URI uri;
   private final int id;
   private Boolean[] annotFlags;
   private boolean hasNullableAnnotation;
   private int parent;
 
-  private MethodInfo(Symbol.MethodSymbol method, VisitorState state, ScannerContext context) {
+  private MethodInfo(Symbol.MethodSymbol method, ScannerContext context) {
     this.id = context.getNextMethodId();
     this.symbol = method;
     this.clazz = (method != null) ? method.enclClass() : null;
-    this.uri = state.getPath().getCompilationUnit().getSourceFile().toUri();
     this.parent = 0;
     context.visitMethod(this);
   }
 
-  public static MethodInfo findOrCreate(
-      Symbol.MethodSymbol method, VisitorState state, ScannerContext context) {
+  public static MethodInfo findOrCreate(Symbol.MethodSymbol method, ScannerContext context) {
     Symbol.ClassSymbol clazz = method.enclClass();
     Optional<MethodInfo> optionalMethodInfo =
         context
@@ -66,7 +65,7 @@ public class MethodInfo {
             .filter(
                 methodInfo -> methodInfo.symbol.equals(method) && methodInfo.clazz.equals(clazz))
             .findAny();
-    return optionalMethodInfo.orElseGet(() -> new MethodInfo(method, state, context));
+    return optionalMethodInfo.orElseGet(() -> new MethodInfo(method, context));
   }
 
   @Override
@@ -93,7 +92,7 @@ public class MethodInfo {
       this.parent = 0;
       return;
     }
-    MethodInfo superMethodInfo = findOrCreate(superMethod, state, context);
+    MethodInfo superMethodInfo = findOrCreate(superMethod, context);
     this.parent = superMethodInfo.id;
   }
 
@@ -171,5 +170,15 @@ public class MethodInfo {
    */
   public static int hash(Symbol method) {
     return Objects.hash(method, method.enclClass());
+  }
+
+  /**
+   * Sets uri based on the visitor state.
+   *
+   * @param state VisitorState instance.
+   */
+  public void setURI(VisitorState state) {
+    CompilationUnitTree tree = state.getPath().getCompilationUnit();
+    this.uri = tree.getSourceFile() != null ? tree.getSourceFile().toUri() : null;
   }
 }
