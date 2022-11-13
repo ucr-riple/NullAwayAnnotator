@@ -263,8 +263,6 @@ public class Annotator {
     // the method level.
     Set<AddAnnotation> nullUnMarkedAnnotations =
         remainingErrors.stream()
-            // filter non-method regions.
-            .filter(error -> error.getRegion().isOnMethod())
             // find the corresponding method nodes.
             .map(
                 error -> {
