@@ -22,6 +22,8 @@
  * THE SOFTWARE.
  */
 
+import com.vanniktech.maven.publish.SonatypeHost
+
 buildscript {
     repositories {
         mavenCentral()
