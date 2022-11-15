@@ -106,9 +106,10 @@ public class TypeAnnotatorScanner extends BugChecker
       return Description.NO_MATCH;
     }
     Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(tree);
-    MethodInfo methodInfo = MethodInfo.findOrCreate(methodSymbol, state, context);
+    MethodInfo methodInfo = MethodInfo.findOrCreate(methodSymbol, context);
     methodInfo.findParent(state, context);
     methodInfo.setAnnotation(config);
+    methodInfo.setURI(state);
     List<Boolean> paramAnnotations = new ArrayList<>();
     for (int i = 0; i < methodSymbol.getParameters().size(); i++) {
       paramAnnotations.add(SymbolUtil.paramHasNullableAnnotation(methodSymbol, i, config));
