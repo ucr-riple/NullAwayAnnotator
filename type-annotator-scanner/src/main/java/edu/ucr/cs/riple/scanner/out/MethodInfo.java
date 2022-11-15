@@ -110,7 +110,8 @@ public class MethodInfo {
         String.valueOf(hasNullableAnnotation),
         getVisibilityOfMethod(),
         String.valueOf(!symbol.getReturnType().isPrimitiveOrVoid()),
-        uri.toString());
+        // for build systems that might return null for bytecodes.
+        (uri != null ? uri.toString() : "null"));
   }
 
   public static String header() {
