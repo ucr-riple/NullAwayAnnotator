@@ -45,12 +45,15 @@ dependencies {
     testImplementation deps.build.commonsio
 }
 
+// Should be the latest supporting version of NullAway.
+def NULLAWAY_TEST = "0.10.5"
+
 tasks.test.dependsOn(':type-annotator-scanner:publishToMavenLocal')
 tasks.test.dependsOn(':qual:publishToMavenLocal')
 
 // Set up environment variables for test configuration tu run with the latest development version.
 tasks.test.doFirst {
-    environment "NULLAWAY_TEST_VERSION", "0.10.5"
+    environment "NULLAWAY_TEST_VERSION", NULLAWAY_TEST
     environment "ANNOTATOR_VERSION", project.version
 }
 
@@ -74,3 +77,13 @@ jar {
 shadowJar {
     archiveClassifier = null
 }
+
+// Configure test environment
+def nullawayVersionMap = [0:"0.10.4", 1:"0.10.5"]
+tasks.create("configureNullAwayVersion"){
+    if(!project.hasProperty("nullaway-test-version")){
+        return
+    }
+    NULLAWAY_TEST = nullawayVersionMap.get(project.getProperty("nullaway-test-version"))
+}
+tasks.test.dependsOn("configureNullAwayVersion")
