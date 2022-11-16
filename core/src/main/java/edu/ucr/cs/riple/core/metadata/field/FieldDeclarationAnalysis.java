@@ -7,6 +7,7 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.injector.Helper;
@@ -40,8 +41,8 @@ public class FieldDeclarationAnalysis extends MetaData<FieldDeclarationInfo> {
    *
    * @param module Information of the target module.
    */
-  public FieldDeclarationAnalysis(ModuleInfo module) {
-    super(module.dir.resolve(FILE_NAME));
+  public FieldDeclarationAnalysis(Config config, ModuleInfo module) {
+    super(config, module.dir.resolve(FILE_NAME));
   }
 
   /**
@@ -50,8 +51,9 @@ public class FieldDeclarationAnalysis extends MetaData<FieldDeclarationInfo> {
    *
    * @param modules Information of set of modules.
    */
-  public FieldDeclarationAnalysis(ImmutableSet<ModuleInfo> modules) {
+  public FieldDeclarationAnalysis(Config config, ImmutableSet<ModuleInfo> modules) {
     super(
+        config,
         modules.stream()
             .map(info -> info.dir.resolve(FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));

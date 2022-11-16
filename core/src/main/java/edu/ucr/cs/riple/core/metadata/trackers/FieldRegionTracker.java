@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.metadata.trackers;
 
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
@@ -37,12 +38,13 @@ import java.util.stream.Collectors;
 /** Tracker for Fields. */
 public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
 
-  public FieldRegionTracker(ModuleInfo info) {
-    super(info.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME));
+  public FieldRegionTracker(Config config, ModuleInfo info) {
+    super(config, info.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME));
   }
 
-  public FieldRegionTracker(ImmutableSet<ModuleInfo> modules) {
+  public FieldRegionTracker(Config config, ImmutableSet<ModuleInfo> modules) {
     super(
+        config,
         modules.stream()
             .map(info -> info.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));
@@ -68,7 +70,7 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
                 TrackerNode.hash(field.clazz))
             .map(trackerNode -> new Region(trackerNode.callerClass, trackerNode.callerMethod))
             .collect(Collectors.toSet());
-    field.variables.forEach(fieldName -> ans.add(new Region(field.clazz, fieldName)));
+    ans.addAll(config.adapter.getFieldRegionScope(field));
     return Optional.of(ans);
   }
 }

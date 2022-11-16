@@ -1,6 +1,7 @@
 package edu.ucr.cs.riple.core.metadata.field;
 
 import com.google.common.base.Preconditions;
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
@@ -26,8 +27,8 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
    *
    * @param path Path to field initialization info coming from NullAway.
    */
-  public FieldInitializationAnalysis(Path path) {
-    super(path);
+  public FieldInitializationAnalysis(Config config, Path path) {
+    super(config, path);
   }
 
   @Override

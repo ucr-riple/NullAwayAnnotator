@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.metadata.trackers;
 
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
@@ -45,13 +46,15 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
    */
   private final MethodDeclarationTree tree;
 
-  public MethodRegionTracker(ModuleInfo info, MethodDeclarationTree tree) {
-    super(info.dir.resolve(Serializer.CALL_GRAPH_FILE_NAME));
+  public MethodRegionTracker(Config config, ModuleInfo info, MethodDeclarationTree tree) {
+    super(config, info.dir.resolve(Serializer.CALL_GRAPH_FILE_NAME));
     this.tree = tree;
   }
 
-  public MethodRegionTracker(ImmutableSet<ModuleInfo> modules, MethodDeclarationTree tree) {
+  public MethodRegionTracker(
+      Config config, ImmutableSet<ModuleInfo> modules, MethodDeclarationTree tree) {
     super(
+        config,
         modules.stream()
             .map(info -> info.dir.resolve(Serializer.CALL_GRAPH_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));
