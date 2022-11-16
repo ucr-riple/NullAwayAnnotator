@@ -266,24 +266,6 @@ public class Annotator {
             .collect(Collectors.toSet());
     injector.injectAnnotations(nullUnMarkedAnnotations);
 
-    // Collect explicit Nullable initialization to fields
-    Set<AddAnnotation> suppressWarningsAnnotations =
-        remainingFixes.stream()
-            .filter(
-                fix -> {
-                  if (!(fix.isOnField() && fix.reasons.contains("ASSIGN_FIELD_NULLABLE"))) {
-                    return false;
-                  }
-                  OnField onField = fix.toField();
-                  return onField.clazz.equals(fix.encClass()) && fix.encMember().equals("");
-                })
-            .map(
-                fix ->
-                    new AddSingleElementAnnotation(
-                        fix.toField(), "SuppressWarnings", "NullAway", false))
-            .collect(Collectors.toSet());
-    injector.injectAnnotations(suppressWarningsAnnotations);
-
     // Collect NullAway.Init SuppressWarnings
     Set<AddAnnotation> initializationSuppressWarningsAnnotations =
         remainingFixes.stream()
@@ -296,8 +278,6 @@ public class Annotator {
                 fix ->
                     new AddSingleElementAnnotation(
                         fix.toField(), "SuppressWarnings", "NullAway.Init", false))
-            // Exclude already annotated fields with a general NullAway suppress warning.
-            .filter(f -> !suppressWarningsAnnotations.contains(f))
             .collect(Collectors.toSet());
     injector.injectAnnotations(initializationSuppressWarningsAnnotations);
   }
