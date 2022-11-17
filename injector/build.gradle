@@ -45,6 +45,3 @@ googleJavaFormat {
     // don't enforce formatting for generated Java code under buildSrc
     exclude 'tests/**/*.java'
 }
-
-apply plugin: 'com.vanniktech.maven.publish'
-
