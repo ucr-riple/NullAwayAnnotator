@@ -94,7 +94,7 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
             candidate ->
                 candidate.calleeClass.equals(clazz) && candidate.calleeMember.equals(method),
             TrackerNode.hash(clazz))
-        .map(node -> new Region(node.callerClass, node.callerMethod))
+        .map(node -> new Region(node.callerClass, node.callerMember))
         .collect(Collectors.toSet());
   }
 }

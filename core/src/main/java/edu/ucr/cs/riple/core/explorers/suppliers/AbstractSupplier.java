@@ -88,7 +88,7 @@ public abstract class AbstractSupplier implements Supplier {
         modules.stream()
             .map(info -> info.dir.resolve("errors.tsv"))
             .collect(ImmutableSet.toImmutableSet()),
-        Error::new);
+        Error.factory(config));
   }
 
   /**

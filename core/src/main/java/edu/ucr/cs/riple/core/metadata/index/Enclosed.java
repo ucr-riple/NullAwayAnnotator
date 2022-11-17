@@ -35,8 +35,8 @@ public abstract class Enclosed {
   /** Containing region. */
   protected final Region region;
 
-  public Enclosed(String encClass, String encMethod) {
-    this.region = new Region(encClass, encMethod);
+  public Enclosed(Region region) {
+    this.region = region;
   }
 
   /**

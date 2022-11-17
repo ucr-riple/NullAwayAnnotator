@@ -66,11 +66,5 @@ jobs:
         with:
           java-version: 11
           distribution: 'adopt'
-          cache: gradle
       - name: Build with Gradle
         run: ./gradlew test --scan --no-daemon -Pnullaway-test-version=0
-      - name: Archive test report
-        uses: actions/upload-artifact@v2
-        with:
-          name: Test report
-          path: build/reports/tests/test

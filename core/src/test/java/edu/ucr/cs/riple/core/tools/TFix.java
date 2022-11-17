@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.tools;
 
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.location.Location;
 
@@ -32,6 +33,6 @@ import edu.ucr.cs.riple.injector.location.Location;
 public class TFix extends Fix {
 
   public TFix(Location location) {
-    super(new DefaultAnnotation(location), null, null, null, true);
+    super(new DefaultAnnotation(location), null, new Region("null", "null"), true);
   }
 }

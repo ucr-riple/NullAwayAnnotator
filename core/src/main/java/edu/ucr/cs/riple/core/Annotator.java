@@ -249,7 +249,7 @@ public class Annotator {
       FieldDeclarationAnalysis fieldDeclarationAnalysis, MethodDeclarationTree tree) {
     // Collect regions with remaining errors.
     Utility.buildTarget(config);
-    List<Error> remainingErrors = Utility.readErrorsFromOutputDirectory(config.target);
+    List<Error> remainingErrors = Utility.readErrorsFromOutputDirectory(config, config.target);
     Set<Fix> remainingFixes =
         Utility.readFixesFromOutputDirectory(
             config.target, Fix.factory(config, fieldDeclarationAnalysis));
@@ -260,7 +260,7 @@ public class Annotator {
     Set<AddAnnotation> nullUnMarkedAnnotations =
         remainingErrors.stream()
             // filter non-method regions.
-            .filter(error -> !error.getRegion().isOnMethod())
+            .filter(error -> error.getRegion().isOnMethod())
             // find the corresponding method nodes.
             .map(error -> tree.findNode(error.encMember(), error.encClass()))
             // impossible, just sanity check or future nullness checker hints
@@ -268,6 +268,24 @@ public class Annotator {
             .map(node -> new AddMarkerAnnotation(node.location, config.nullUnMarkedAnnotation))
             .collect(Collectors.toSet());
     injector.injectAnnotations(nullUnMarkedAnnotations);
+
+    // Collect explicit Nullable initialization to fields
+    Set<AddAnnotation> suppressWarningsAnnotations =
+        remainingFixes.stream()
+            .filter(
+                fix -> {
+                  if (!(fix.isOnField() && fix.reasons.contains("ASSIGN_FIELD_NULLABLE"))) {
+                    return false;
+                  }
+                  OnField onField = fix.toField();
+                  return onField.clazz.equals(fix.encClass()) && !fix.getRegion().isOnMethod();
+                })
+            .map(
+                fix ->
+                    new AddSingleElementAnnotation(
+                        fix.toField(), "SuppressWarnings", "NullAway", false))
+            .collect(Collectors.toSet());
+    injector.injectAnnotations(suppressWarningsAnnotations);
 
     // Collect NullAway.Init SuppressWarnings
     Set<AddAnnotation> initializationSuppressWarningsAnnotations =

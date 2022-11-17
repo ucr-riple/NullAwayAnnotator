@@ -51,7 +51,7 @@ public class Region {
   public Region(String encClass, String encMember) {
     this.clazz = encClass == null ? "null" : encClass;
     this.member = encMember == null ? "null" : encMember;
-    this.type = initType(member);
+    this.type = getType(member);
   }
 
   /**
@@ -60,7 +60,7 @@ public class Region {
    * @param member Symbol of the region representative.
    * @return The corresponding Type.
    */
-  private Type initType(String member) {
+  public static Type getType(String member) {
     if (member.equals("null")) {
       return Type.STATIC_BLOCK;
     }

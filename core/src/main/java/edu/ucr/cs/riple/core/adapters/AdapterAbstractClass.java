@@ -24,36 +24,12 @@
 
 package edu.ucr.cs.riple.core.adapters;
 
-import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.trackers.Region;
-import edu.ucr.cs.riple.core.metadata.trackers.TrackerNode;
-import edu.ucr.cs.riple.injector.location.Location;
-import edu.ucr.cs.riple.injector.location.OnField;
-import java.util.Set;
+import edu.ucr.cs.riple.core.Config;
 
-public interface Adapter {
+public abstract class AdapterAbstractClass implements Adapter {
+  protected final Config config;
 
-  /**
-   * Deserializes values produced by NullAway in a tsv file and creates a corresponding {@link Fix}
-   * instance.
-   *
-   * @param location Location of the targeted element.
-   * @param values Values in row of a TSV file.
-   * @return Corresponding Error instance with the passed values.
-   */
-  Fix deserializeFix(Location location, String[] values);
-
-  /**
-   * Deserializes values produced by NullAway in a tsv file and creates a corresponding {@link
-   * Error} instance.
-   *
-   * @param values Values in row of a TSV file.
-   * @return Corresponding Error instance with the passed values.
-   */
-  Error deserializeError(String[] values);
-
-  TrackerNode deserializeTrackerNode(String[] values);
-
-  Set<Region> getFieldRegionScope(OnField onField);
+  public AdapterAbstractClass(Config config) {
+    this.config = config;
+  }
 }

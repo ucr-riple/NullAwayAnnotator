@@ -484,16 +484,16 @@ public class Config {
     Path serializationVersionPath = globalDir.resolve("serialization_version.txt");
     if (!serializationVersionPath.toFile().exists()) {
       // Older versions of NullAway.
-      return new NullAwayAdapterVersion0();
+      return new NullAwayAdapterVersion0(this);
     }
     try {
       List<String> lines = Files.readAllLines(serializationVersionPath);
       int version = Integer.parseInt(lines.get(0));
       switch (version) {
         case 0:
-          return new NullAwayAdapterVersion0();
+          return new NullAwayAdapterVersion0(this);
         case 1:
-          return new NullAwayAdapterVersion1();
+          return new NullAwayAdapterVersion1(this);
         default:
           throw new RuntimeException("Unrecognized NullAway serialization version: " + version);
       }

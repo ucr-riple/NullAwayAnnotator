@@ -84,6 +84,9 @@ tasks.create("configureNullAwayVersion"){
     if(!project.hasProperty("nullaway-test-version")){
         return
     }
-    NULLAWAY_TEST = nullawayVersionMap.get(project.getProperty("nullaway-test-version"))
+    NULLAWAY_TEST = nullawayVersionMap.get((project.getProperty("nullaway-test-version")) as int)
+    println "NullAway Test version changed to: " + NULLAWAY_TEST
+
+    // exclude unsupported tests below...
 }
 tasks.test.dependsOn("configureNullAwayVersion")
