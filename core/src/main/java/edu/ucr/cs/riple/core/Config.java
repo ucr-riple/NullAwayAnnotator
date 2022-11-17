@@ -141,6 +141,7 @@ public class Config {
    */
   public final boolean inferenceActivated;
 
+
   /**
    * This adapter is initialized lazily as it requires build of target to serialize its using
    * NullAway serialization version.
