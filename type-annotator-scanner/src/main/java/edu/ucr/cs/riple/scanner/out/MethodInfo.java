@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.scanner.out;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.VisitorState;
+import com.sun.source.tree.CompilationUnitTree;
 import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.riple.scanner.Config;
 import edu.ucr.cs.riple.scanner.ScannerContext;
@@ -56,8 +57,7 @@ public class MethodInfo {
     context.visitMethod(this);
   }
 
-  public static MethodInfo findOrCreate(
-      Symbol.MethodSymbol method, VisitorState state, ScannerContext context) {
+  public static MethodInfo findOrCreate(Symbol.MethodSymbol method, ScannerContext context) {
     Symbol.ClassSymbol clazz = method.enclClass();
     Optional<MethodInfo> optionalMethodInfo =
         context
@@ -92,7 +92,7 @@ public class MethodInfo {
       this.parent = 0;
       return;
     }
-    MethodInfo superMethodInfo = findOrCreate(superMethod, state, context);
+    MethodInfo superMethodInfo = findOrCreate(superMethod, context);
     this.parent = superMethodInfo.id;
   }
 
@@ -110,7 +110,8 @@ public class MethodInfo {
         String.valueOf(hasNullableAnnotation),
         getVisibilityOfMethod(),
         String.valueOf(!symbol.getReturnType().isPrimitiveOrVoid()),
-        uri.toString());
+        // for build systems that might return null for bytecodes.
+        (uri != null ? uri.toString() : "null"));
   }
 
   public static String header() {
@@ -172,7 +173,13 @@ public class MethodInfo {
     return Objects.hash(method, method.enclClass());
   }
 
-  public void setURI(URI uri) {
-    this.uri = uri;
+  /**
+   * Sets uri based on the visitor state.
+   *
+   * @param state VisitorState instance.
+   */
+  public void setURI(VisitorState state) {
+    CompilationUnitTree tree = state.getPath().getCompilationUnit();
+    this.uri = tree.getSourceFile() != null ? tree.getSourceFile().toUri() : null;
   }
 }

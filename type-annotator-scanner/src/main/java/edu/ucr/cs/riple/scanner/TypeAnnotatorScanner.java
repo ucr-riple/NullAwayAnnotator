@@ -110,6 +110,7 @@ public class TypeAnnotatorScanner extends BugChecker
     methodInfo.setURI(state.getPath().getCompilationUnit().getSourceFile().toUri());
     methodInfo.findParent(state, context);
     methodInfo.setAnnotation(config);
+    methodInfo.setURI(state);
     List<Boolean> paramAnnotations = new ArrayList<>();
     for (int i = 0; i < methodSymbol.getParameters().size(); i++) {
       paramAnnotations.add(SymbolUtil.paramHasNullableAnnotation(methodSymbol, i, config));
