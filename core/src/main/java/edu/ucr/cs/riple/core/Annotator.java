@@ -267,6 +267,8 @@ public class Annotator {
                     // Just a sanity check.
                     return null;
                   }
+                  // method called in initialization region of class and received null for
+                  // arguments.
                   if (error.messageType.equals("PASS_NULLABLE")) {
                     OnMethod calledMethod = error.nonnullTarget.toMethod();
                     return tree.findNode(calledMethod.method, calledMethod.clazz);
@@ -276,8 +278,6 @@ public class Annotator {
             .filter(Objects::nonNull)
             .map(node -> new AddMarkerAnnotation(node.location, config.nullUnMarkedAnnotation))
             .collect(Collectors.toSet());
-    // Collect methods received a nullable i their nonnull parameters where called in field
-    // declaration regions of classes (method == "null).
     injector.injectAnnotations(nullUnMarkedAnnotations);
 
     // Collect explicit Nullable initialization to fields
