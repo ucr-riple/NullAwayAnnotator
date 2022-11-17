@@ -22,11 +22,14 @@
  * THE SOFTWARE.
  */
 
+import com.vanniktech.maven.publish.SonatypeHost
+
 plugins {
     id 'com.github.sherter.google-java-format' version '0.9'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
     id 'maven-publish'
     id 'application'
+    id "com.vanniktech.maven.publish"
 }
 
 application {
@@ -63,6 +66,12 @@ publishing {
             project.shadow.component(publication)
         }
     }
+
+    mavenPublishing {
+        publishToMavenCentral(SonatypeHost.S01)
+        signAllPublications()
+    }
+
     repositories {
         mavenLocal()
     }

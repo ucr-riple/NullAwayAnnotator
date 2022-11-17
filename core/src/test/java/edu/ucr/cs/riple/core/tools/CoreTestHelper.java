@@ -65,6 +65,7 @@ public class CoreTestHelper {
   private boolean disableBailout = false;
   private boolean forceResolveActivated = false;
   private boolean downstreamDependencyAnalysisActivated = false;
+  private boolean deactivateInference = false;
   private AnalysisMode mode = AnalysisMode.LOCAL;
   private Config config;
 
@@ -142,6 +143,12 @@ public class CoreTestHelper {
   }
 
   public CoreTestHelper enableForceResolve() {
+    this.forceResolveActivated = true;
+    return this;
+  }
+
+  public CoreTestHelper deactivateInference() {
+    this.deactivateInference = true;
     this.forceResolveActivated = true;
     return this;
   }
@@ -269,6 +276,7 @@ public class CoreTestHelper {
     builder.optimized = true;
     builder.downStreamDependenciesAnalysisActivated = downstreamDependencyAnalysisActivated;
     builder.mode = mode;
+    builder.inferenceActivated = !deactivateInference;
     builder.forceResolveActivation = forceResolveActivated;
     if (downstreamDependencyAnalysisActivated) {
       builder.buildCommand =
