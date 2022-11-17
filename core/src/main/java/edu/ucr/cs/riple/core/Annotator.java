@@ -267,8 +267,7 @@ public class Annotator {
                     // Just a sanity check.
                     return null;
                   }
-                  // method called in initialization region of class and received null for
-                  // arguments.
+                  // For methods invoked in an initialization region, where the error is that `@Nullable` is being passed as an argument, we add a `@NullUnmarked` annotation to the called method.
                   if (error.messageType.equals("PASS_NULLABLE")) {
                     OnMethod calledMethod = error.nonnullTarget.toMethod();
                     return tree.findNode(calledMethod.method, calledMethod.clazz);
