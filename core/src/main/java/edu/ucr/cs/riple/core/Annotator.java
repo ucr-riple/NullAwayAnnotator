@@ -313,7 +313,6 @@ public class Annotator {
             // Exclude already annotated fields with a general NullAway suppress warning.
             .filter(f -> !suppressWarningsAnnotations.contains(f))
             .collect(Collectors.toSet());
-
     injector.injectAnnotations(initializationSuppressWarningsAnnotations);
   }
 }
