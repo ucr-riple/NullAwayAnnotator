@@ -7,7 +7,7 @@ public class Foo {
   Bar f1;
   Bar f2, f3;
   @Nullable Bar nullableBar;
-  Bar f4 = nullableBar.process(null);
+  Bar f4 = nullableBar.process(new Object());
 
   Foo() {
     this.f2 = new Bar();

@@ -309,7 +309,7 @@ public class Annotator {
         fieldsWithSuppressWarnings.stream()
             .map(
                 onField ->
-                    new AddSingleElementAnnotation(onField, "SuppressWarnings", "NullAway", true))
+                    new AddSingleElementAnnotation(onField, "SuppressWarnings", "NullAway", false))
             .collect(Collectors.toSet());
     injector.injectAnnotations(suppressWarningsAnnotations);
     // Update log.

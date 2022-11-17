@@ -96,6 +96,14 @@ tasks.create("configureNullAwayVersion"){
     NULLAWAY_TEST = nullawayVersionMap.get((project.getProperty("nullaway-test-version")) as int)
     println "NullAway Test version changed to: " + NULLAWAY_TEST
 
-    // exclude unsupported tests below...
+    switch (NULLAWAY_TEST){
+        case "0.10.4":
+            test {
+                filter {
+                    excludeTest "edu.ucr.cs.riple.core.CoreTest", "errorInFieldDeclarationForceResolveTest"
+                }
+            }
+            break
+    }
 }
 tasks.test.dependsOn("configureNullAwayVersion")
