@@ -48,7 +48,7 @@ import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
-import edu.ucr.cs.riple.injector.location.OnMethod;
+import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -267,11 +267,13 @@ public class Annotator {
                   if (error.getRegion().isOnMethod()) {
                     return tree.findNode(error.encMember(), error.encClass());
                   }
-                  if (error.nonnullTarget == null) {
-                    return null;
-                  }
-                  if (error.messageType.equals("PASS_NULLABLE")) {
-                    OnMethod calledMethod = error.nonnullTarget.toMethod();
+                  // For methods invoked in an initialization region, where the error is that
+                  // `@Nullable` is being passed as an argument, we add a `@NullUnmarked` annotation
+                  // to the called method.
+                  if (error.messageType.equals("PASS_NULLABLE")
+                      && error.nonnullTarget != null
+                      && error.nonnullTarget.isOnParameter()) {
+                    OnParameter calledMethod = error.nonnullTarget.toParameter();
                     return tree.findNode(calledMethod.method, calledMethod.clazz);
                   }
                   return null;
