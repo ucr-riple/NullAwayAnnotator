@@ -22,17 +22,17 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.tools;
+package edu.ucr.cs.riple.core.adapters;
 
-import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.trackers.Region;
-import edu.ucr.cs.riple.injector.changes.Change;
-import edu.ucr.cs.riple.injector.location.Location;
+import edu.ucr.cs.riple.core.Config;
 
-/** Wrapper class for {@link Change} with default values, used to create tests. */
-public class TFix extends Fix {
+/** Base class for all adapters. */
+public abstract class AdapterAbstractClass implements Adapter {
 
-  public TFix(Location location) {
-    super(new DefaultAnnotation(location), null, new Region("null", "null"), true);
+  /** Annotator config. */
+  protected final Config config;
+
+  public AdapterAbstractClass(Config config) {
+    this.config = config;
   }
 }

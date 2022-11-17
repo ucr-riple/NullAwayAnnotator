@@ -49,7 +49,6 @@ import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
-import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -105,8 +104,7 @@ public class Annotator {
             .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
             .map(Fix::toField)
             .collect(Collectors.toSet());
-    FieldInitializationAnalysis analysis =
-        new FieldInitializationAnalysis(config.target.dir.resolve("field_init.tsv"));
+    FieldInitializationAnalysis analysis = new FieldInitializationAnalysis(config);
     Set<AddAnnotation> initializers =
         analysis
             .findInitializers(uninitializedFields)
@@ -120,9 +118,9 @@ public class Annotator {
     Utility.setScannerCheckerActivation(config.target, true);
     Utility.buildTarget(config);
     Utility.setScannerCheckerActivation(config.target, false);
-    FieldDeclarationAnalysis fieldDeclarationAnalysis = new FieldDeclarationAnalysis(config.target);
-    MethodDeclarationTree tree =
-        new MethodDeclarationTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
+    FieldDeclarationAnalysis fieldDeclarationAnalysis =
+        new FieldDeclarationAnalysis(config, config.target);
+    MethodDeclarationTree tree = new MethodDeclarationTree(config);
     // globalAnalyzer analyzes effects of all public APIs on downstream dependencies.
     // Through iterations, since the source code for downstream dependencies does not change and the
     // computation does not depend on the changes in the target module, it will compute the same
@@ -220,9 +218,8 @@ public class Annotator {
             .collect(ImmutableSet.toImmutableSet());
 
     // Initializing required explorer instances.
-    MethodDeclarationTree tree =
-        new MethodDeclarationTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
-    RegionTracker tracker = new CompoundTracker(config.target, tree);
+    MethodDeclarationTree tree = new MethodDeclarationTree(config);
+    RegionTracker tracker = new CompoundTracker(config, config.target, tree);
     TargetModuleSupplier supplier = new TargetModuleSupplier(config, tree);
     Explorer explorer =
         config.exhaustiveSearch
@@ -253,7 +250,7 @@ public class Annotator {
       FieldDeclarationAnalysis fieldDeclarationAnalysis, MethodDeclarationTree tree) {
     // Collect regions with remaining errors.
     Utility.buildTarget(config);
-    List<Error> remainingErrors = Utility.readErrorsFromOutputDirectory(config.target);
+    List<Error> remainingErrors = Utility.readErrorsFromOutputDirectory(config, config.target);
     Set<Fix> remainingFixes =
         Utility.readFixesFromOutputDirectory(
             config.target, Fix.factory(config, fieldDeclarationAnalysis));
@@ -287,22 +284,23 @@ public class Annotator {
     // Update log.
     config.log.updateInjectedAnnotations(nullUnMarkedAnnotations);
 
-    // Collect explicit Nullable initialization to fields
+    // Collect suppress warnings, errors on field declaration regions.
     Set<OnField> fieldsWithSuppressWarnings =
         remainingErrors.stream()
             .filter(
                 error -> {
-                  if (error.nonnullTarget == null || !error.nonnullTarget.isOnField()) {
-                    return false;
-                  }
                   if (!error.getRegion().isOnField()) {
                     return false;
                   }
-                  OnField onField = error.nonnullTarget.toField();
-                  return onField.clazz.equals(error.getRegion().clazz)
-                      && onField.variables.contains(error.encMember());
+                  // We can silence them by SuppressWarnings("NullAway.Init")
+                  return !error.messageType.equals("METHOD_NO_INIT")
+                      && !error.messageType.equals("FIELD_NO_INIT");
                 })
-            .map(error -> error.nonnullTarget.toField())
+            .map(
+                error ->
+                    fieldDeclarationAnalysis.getLocationOnField(
+                        error.getRegion().clazz, error.getRegion().member))
+            .filter(Objects::nonNull)
             .collect(Collectors.toSet());
 
     Set<AddAnnotation> suppressWarningsAnnotations =

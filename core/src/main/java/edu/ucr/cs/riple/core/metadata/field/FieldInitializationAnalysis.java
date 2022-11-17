@@ -1,11 +1,11 @@
 package edu.ucr.cs.riple.core.metadata.field;
 
 import com.google.common.base.Preconditions;
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,10 +24,10 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
    * Constructs an {@link FieldInitializationAnalysis} instance. After this call, all serialized
    * information from NullAway has been processed.
    *
-   * @param path Path to field initialization info coming from NullAway.
+   * @param config Annotator config.
    */
-  public FieldInitializationAnalysis(Path path) {
-    super(path);
+  public FieldInitializationAnalysis(Config config) {
+    super(config, config.target.dir.resolve("field_init.tsv"));
   }
 
   @Override

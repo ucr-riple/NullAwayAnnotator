@@ -12,9 +12,12 @@ public class FieldDeclarationInfo implements Hashable {
   public final Set<ImmutableSet<String>> fields;
   /** Flat name of the containing class. */
   public final String clazz;
+  /** Path to source file containing this class. */
+  public final String pathToSourceFile;
 
-  public FieldDeclarationInfo(String clazz) {
+  public FieldDeclarationInfo(String path, String clazz) {
     this.clazz = clazz;
+    this.pathToSourceFile = path;
     this.fields = new HashSet<>();
   }
 
@@ -26,8 +29,8 @@ public class FieldDeclarationInfo implements Hashable {
     if (!(o instanceof FieldDeclarationInfo)) {
       return false;
     }
-    FieldDeclarationInfo info = (FieldDeclarationInfo) o;
-    return clazz.equals(info.clazz);
+    FieldDeclarationInfo other = (FieldDeclarationInfo) o;
+    return clazz.equals(other.clazz);
   }
 
   /**

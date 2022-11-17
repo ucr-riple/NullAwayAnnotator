@@ -26,6 +26,9 @@ package edu.ucr.cs.riple.core;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.adapters.Adapter;
+import edu.ucr.cs.riple.core.adapters.NullAwayAdapterVersion0;
+import edu.ucr.cs.riple.core.adapters.NullAwayAdapterVersion1;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.io.BufferedWriter;
@@ -137,6 +140,8 @@ public class Config {
    * {@code true} in production.
    */
   public final boolean inferenceActivated;
+
+  public final Adapter adapter;
 
   /**
    * Builds config from command line arguments.
@@ -400,6 +405,8 @@ public class Config {
     this.moduleCounterID = 0;
     this.log = new Log();
     this.log.reset();
+    this.adapter = initializeAdapter(globalDir);
+    ;
   }
 
   /**
@@ -480,7 +487,37 @@ public class Config {
         getValueFromKey(jsonObject, "ANNOTATION:NULL_UNMARKED", String.class)
             .orElse("org.jspecify.nullness.NullUnmarked");
     this.log = new Log();
+    this.adapter = initializeAdapter(globalDir);
     log.reset();
+  }
+
+  /**
+   * Initializes NullAway serialization adapter according to the serialized version.
+   *
+   * @param globalDir Root path where the serialized version can be located.
+   * @return The corresponding adapter.
+   */
+  private Adapter initializeAdapter(Path globalDir) {
+    Path serializationVersionPath = globalDir.resolve("serialization_version.txt");
+    if (!serializationVersionPath.toFile().exists()) {
+      // Older versions of NullAway.
+      return new NullAwayAdapterVersion0(this);
+    }
+    try {
+      List<String> lines = Files.readAllLines(serializationVersionPath);
+      int version = Integer.parseInt(lines.get(0));
+      switch (version) {
+        case 0:
+          return new NullAwayAdapterVersion0(this);
+        case 1:
+          return new NullAwayAdapterVersion1(this);
+        default:
+          throw new RuntimeException("Unrecognized NullAway serialization version: " + version);
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(
+          "Could not read serialization version at path: " + serializationVersionPath, e);
+    }
   }
 
   /**

@@ -41,6 +41,7 @@ public class Region {
 
   public final Type type;
 
+  /** Different types code segments where a region can target. */
   public enum Type {
     METHOD,
     FIELD,
@@ -50,7 +51,7 @@ public class Region {
   public Region(String encClass, String encMember) {
     this.clazz = encClass == null ? "null" : encClass;
     this.member = encMember == null ? "null" : encMember;
-    this.type = initType(member);
+    this.type = getType(member);
   }
 
   /**
@@ -59,7 +60,7 @@ public class Region {
    * @param member Symbol of the region representative.
    * @return The corresponding Type.
    */
-  private Type initType(String member) {
+  public static Type getType(String member) {
     if (member.equals("null")) {
       return Type.STATIC_BLOCK;
     }
@@ -67,6 +68,24 @@ public class Region {
       return Type.METHOD;
     }
     return Type.FIELD;
+  }
+
+  /**
+   * Checks if region targets a method body.
+   *
+   * @return true, if region is targeting a method body.
+   */
+  public boolean isOnMethod() {
+    return type.equals(Type.METHOD);
+  }
+
+  /**
+   * Checks if region targets a field declaration.
+   *
+   * @return true, if region is targeting a field declaration.
+   */
+  public boolean isOnField() {
+    return type.equals(Type.FIELD);
   }
 
   @Override
@@ -89,17 +108,5 @@ public class Region {
   @Override
   public String toString() {
     return "class='" + clazz + '\'' + ", member='" + member;
-  }
-
-  public boolean isOnField() {
-    return type.equals(Type.FIELD);
-  }
-
-  public boolean isOnMethod() {
-    return type.equals(Type.METHOD);
-  }
-
-  public boolean isOnStaticBlock() {
-    return type.equals(Type.STATIC_BLOCK);
   }
 }
