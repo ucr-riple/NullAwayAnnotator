@@ -98,6 +98,7 @@ public class Annotator {
     Utility.setScannerCheckerActivation(config.target, true);
     System.out.println("Making the first build...");
     Utility.buildTarget(config, true);
+    config.initializeAdapter();
     Set<OnField> uninitializedFields =
         Utility.readFixesFromOutputDirectory(config.target, Fix.factory(config, null)).stream()
             .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
