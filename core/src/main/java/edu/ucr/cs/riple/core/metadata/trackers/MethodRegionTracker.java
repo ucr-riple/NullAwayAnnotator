@@ -25,8 +25,8 @@
 package edu.ucr.cs.riple.core.metadata.trackers;
 
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
-import edu.ucr.cs.riple.core.adapters.Adapter;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
@@ -46,28 +46,24 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
    */
   private final MethodDeclarationTree tree;
 
-  /** Adapter for using NullAway serialized data. */
-  private final Adapter adapter;
-
-  public MethodRegionTracker(Adapter adapter, ModuleInfo info, MethodDeclarationTree tree) {
-    super(info.dir.resolve(Serializer.CALL_GRAPH_FILE_NAME));
+  public MethodRegionTracker(Config config, ModuleInfo info, MethodDeclarationTree tree) {
+    super(config, info.dir.resolve(Serializer.CALL_GRAPH_FILE_NAME));
     this.tree = tree;
-    this.adapter = adapter;
   }
 
   public MethodRegionTracker(
-      Adapter adapter, ImmutableSet<ModuleInfo> modules, MethodDeclarationTree tree) {
+      Config config, ImmutableSet<ModuleInfo> modules, MethodDeclarationTree tree) {
     super(
+        config,
         modules.stream()
             .map(info -> info.dir.resolve(Serializer.CALL_GRAPH_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));
     this.tree = tree;
-    this.adapter = adapter;
   }
 
   @Override
   protected TrackerNode addNodeByLine(String[] values) {
-    return adapter.deserializeTrackerNode(values);
+    return config.adapter.deserializeTrackerNode(values);
   }
 
   @Override

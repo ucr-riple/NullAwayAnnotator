@@ -46,7 +46,7 @@ dependencies {
 }
 
 // Should be the latest supporting version of NullAway.
-def NULLAWAY_TEST = "0.10.5"
+def NULLAWAY_TEST = "0.10.5-SNAPSHOT"
 
 tasks.test.dependsOn(':type-annotator-scanner:publishToMavenLocal')
 tasks.test.dependsOn(':qual:publishToMavenLocal')

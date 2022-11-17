@@ -67,4 +67,4 @@ jobs:
           java-version: 11
           distribution: 'adopt'
       - name: Build with Gradle
-        run: ./gradlew test --scan --no-daemon -Pnullaway-test-version=0
+        run: ./gradlew :core:test --scan --no-daemon -Pnullaway-test-version=0
