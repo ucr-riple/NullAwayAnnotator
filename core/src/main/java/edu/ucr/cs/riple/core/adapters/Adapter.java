@@ -32,6 +32,10 @@ import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Set;
 
+/**
+ * Responsible for performing tasks related to NullAway / Type Annotator Scanner serialization
+ * features.
+ */
 public interface Adapter {
 
   /**
@@ -53,7 +57,21 @@ public interface Adapter {
    */
   Error deserializeError(String[] values);
 
+  /**
+   * Deserializes values produced by Type Annotator Scanner in a tsv file and creates a
+   * corresponding {@link TrackerNode} instance.
+   *
+   * @param values Values in row of a TSV file.
+   * @return Corresponding Error instance with the passed values.
+   */
   TrackerNode deserializeTrackerNode(String[] values);
 
+  /**
+   * Returns a set of regions enclosed by a field. Returns a set since there can multiple inline
+   * field declarations.
+   *
+   * @param onField The target field.
+   * @return Set of regions enclosed by the passed location.
+   */
   Set<Region> getFieldRegionScope(OnField onField);
 }

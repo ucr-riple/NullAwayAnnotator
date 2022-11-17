@@ -26,7 +26,10 @@ package edu.ucr.cs.riple.core.adapters;
 
 import edu.ucr.cs.riple.core.Config;
 
+/** Base class for all adapters. */
 public abstract class AdapterAbstractClass implements Adapter {
+
+  /** Annotator config. */
   protected final Config config;
 
   public AdapterAbstractClass(Config config) {

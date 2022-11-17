@@ -37,6 +37,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 
+/**
+ * Adapter working with versions below:
+ *
+ * <ul>
+ *   <li>NullAway: Serialization version 0
+ *   <li>Type Annotator Scanner: 1.3.3 or below
+ * </ul>
+ */
 public class NullAwayAdapterVersion0 extends AdapterAbstractClass {
 
   public NullAwayAdapterVersion0(Config config) {
