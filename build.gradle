@@ -20,18 +20,10 @@
  * THE SOFTWARE.
  */
 import net.ltgt.gradle.errorprone.CheckSeverity
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.vanniktech:gradle-maven-publish-plugin:0.14.2'
-    }
-}
 
 plugins{
     id "net.ltgt.errorprone" version "2.0.1" apply false
+    id "com.vanniktech.maven.publish" version "0.22.0"
 }
 
 allprojects {
