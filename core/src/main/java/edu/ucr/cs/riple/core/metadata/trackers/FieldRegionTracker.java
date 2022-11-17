@@ -52,7 +52,7 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
 
   @Override
   protected TrackerNode addNodeByLine(String[] values) {
-    return config.adapter.deserializeTrackerNode(values);
+    return config.getAdapter().deserializeTrackerNode(values);
   }
 
   @Override
@@ -70,7 +70,7 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
                 TrackerNode.hash(field.clazz))
             .map(trackerNode -> new Region(trackerNode.callerClass, trackerNode.callerMember))
             .collect(Collectors.toSet());
-    ans.addAll(config.adapter.getFieldRegionScope(field));
+    ans.addAll(config.getAdapter().getFieldRegionScope(field));
     return Optional.of(ans);
   }
 }

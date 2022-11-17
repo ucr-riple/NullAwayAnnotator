@@ -75,7 +75,7 @@ public class Utility {
         // Skip headers.
         br.readLine();
         while ((line = br.readLine()) != null) {
-          errors.add(config.adapter.deserializeError(line.split("\t")));
+          errors.add(config.getAdapter().deserializeError(line.split("\t")));
         }
       }
     } catch (IOException e) {

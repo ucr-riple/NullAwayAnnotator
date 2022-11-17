@@ -141,7 +141,11 @@ public class Config {
    */
   public final boolean inferenceActivated;
 
-  public final Adapter adapter;
+  /**
+   * This adapter is initialized lazily as it requires build of target to serialize its using
+   * NullAway serialization version.
+   */
+  private Adapter adapter;
 
   /**
    * Builds config from command line arguments.
@@ -405,8 +409,6 @@ public class Config {
     this.moduleCounterID = 0;
     this.log = new Log();
     this.log.reset();
-    this.adapter = initializeAdapter(globalDir);
-    ;
   }
 
   /**
@@ -487,30 +489,31 @@ public class Config {
         getValueFromKey(jsonObject, "ANNOTATION:NULL_UNMARKED", String.class)
             .orElse("org.jspecify.nullness.NullUnmarked");
     this.log = new Log();
-    this.adapter = initializeAdapter(globalDir);
     log.reset();
   }
 
-  /**
-   * Initializes NullAway serialization adapter according to the serialized version.
-   *
-   * @param globalDir Root path where the serialized version can be located.
-   * @return The corresponding adapter.
-   */
-  private Adapter initializeAdapter(Path globalDir) {
-    Path serializationVersionPath = globalDir.resolve("serialization_version.txt");
+  /** Initializes NullAway serialization adapter according to the serialized version. */
+  public void initializeAdapter() {
+    if (adapter != null) {
+      // adapter is already initialized.
+      return;
+    }
+    Path serializationVersionPath = target.dir.resolve("serialization_version.txt");
     if (!serializationVersionPath.toFile().exists()) {
       // Older versions of NullAway.
-      return new NullAwayAdapterVersion0(this);
+      this.adapter = new NullAwayAdapterVersion0(this);
+      return;
     }
     try {
       List<String> lines = Files.readAllLines(serializationVersionPath);
       int version = Integer.parseInt(lines.get(0));
       switch (version) {
         case 0:
-          return new NullAwayAdapterVersion0(this);
+          this.adapter = new NullAwayAdapterVersion0(this);
+          break;
         case 1:
-          return new NullAwayAdapterVersion1(this);
+          this.adapter = new NullAwayAdapterVersion1(this);
+          break;
         default:
           throw new RuntimeException("Unrecognized NullAway serialization version: " + version);
       }
@@ -518,6 +521,18 @@ public class Config {
       throw new RuntimeException(
           "Could not read serialization version at path: " + serializationVersionPath, e);
     }
+  }
+
+  /**
+   * Getter for adapter.
+   *
+   * @return adapter.
+   */
+  public Adapter getAdapter() {
+    if (adapter == null) {
+      throw new IllegalStateException("Adapter is not initialized.");
+    }
+    return adapter;
   }
 
   /**

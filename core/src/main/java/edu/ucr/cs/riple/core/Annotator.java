@@ -99,6 +99,7 @@ public class Annotator {
     Utility.setScannerCheckerActivation(config.target, true);
     System.out.println("Making the first build...");
     Utility.buildTarget(config, true);
+    config.initializeAdapter();
     Set<OnField> uninitializedFields =
         Utility.readFixesFromOutputDirectory(config.target, Fix.factory(config, null)).stream()
             .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
@@ -280,7 +281,6 @@ public class Annotator {
             .map(node -> new AddMarkerAnnotation(node.location, config.nullUnMarkedAnnotation))
             .collect(Collectors.toSet());
     injector.injectAnnotations(nullUnMarkedAnnotations);
-
     // Update log.
     config.log.updateInjectedAnnotations(nullUnMarkedAnnotations);
 
@@ -328,7 +328,6 @@ public class Annotator {
                     new AddSingleElementAnnotation(
                         fix.toField(), "SuppressWarnings", "NullAway.Init", false))
             .collect(Collectors.toSet());
-
     injector.injectAnnotations(initializationSuppressWarningsAnnotations);
     // Update log.
     config.log.updateInjectedAnnotations(initializationSuppressWarningsAnnotations);

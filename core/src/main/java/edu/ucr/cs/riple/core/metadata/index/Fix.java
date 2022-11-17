@@ -88,7 +88,7 @@ public class Fix extends Enclosed {
               field.variables.addAll(variables);
             });
       }
-      return config.adapter.deserializeFix(location, values);
+      return config.getAdapter().deserializeFix(location, values);
     };
   }
 

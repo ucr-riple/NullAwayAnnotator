@@ -33,6 +33,7 @@ import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.List;
+import java.util.Set;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -295,5 +296,21 @@ public class CoreTest extends BaseCoreTest {
             .get(0)
             .annotation
             .equals("org.jspecify.nullness.NullUnmarked"));
+  }
+
+  @Test
+  public void errorInFieldDeclarationForceResolveTest() {
+    coreTestHelper
+        .addInputDirectory("test", "fielderrorregion")
+        .addExpectedReports(
+            new TReport(new OnField("Foo.java", "test.Foo", Set.of("f1")), 2),
+            new TReport(new OnField("Foo.java", "test.Foo", Set.of("f2", "f3")), 2),
+            new TReport(new OnField("Foo.java", "test.Foo", Set.of("f0")), -1),
+            new TReport(
+                new OnParameter("Bar.java", "test.Bar", "process(java.lang.Object)", 0), -2),
+            new TReport(new OnField("Foo.java", "test.Foo", Set.of("f4")), 1))
+        .toDepth(1)
+        .enableForceResolve()
+        .start();
   }
 }
