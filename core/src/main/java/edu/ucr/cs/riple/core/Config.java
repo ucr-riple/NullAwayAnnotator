@@ -133,8 +133,19 @@ public class Config {
 
   public final Log log;
   public final int depth;
+  /**
+   * Activates inference to add {@code @Nullable} qualifiers.
+   *
+   * <p>Note: Inference mode is mostly deactivated for experiments purposes and the default value is
+   * {@code true} in production.
+   */
+  public final boolean inferenceActivated;
 
-  public final Adapter adapter;
+  /**
+   * This adapter is initialized lazily as it requires build of target to serialize its using
+   * NullAway serialization version.
+   */
+  private Adapter adapter;
 
   /**
    * Builds config from command line arguments.
@@ -296,6 +307,12 @@ public class Config {
     activateForceResolveOption.setRequired(false);
     options.addOption(activateForceResolveOption);
 
+    // Disable inference
+    Option deactivateInference =
+        new Option("di", "deactivate-inference", false, "Deactivates inference.");
+    deactivateInference.setRequired(false);
+    options.addOption(deactivateInference);
+
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
@@ -382,7 +399,9 @@ public class Config {
       this.downstreamInfo = ImmutableSet.of();
       this.downstreamDependenciesBuildCommand = null;
     }
-    this.forceResolveActivated = cmd.hasOption(activateForceResolveOption);
+    this.inferenceActivated = !cmd.hasOption(deactivateInference);
+    this.forceResolveActivated =
+        !this.inferenceActivated || cmd.hasOption(activateForceResolveOption);
     this.nullUnMarkedAnnotation =
         this.forceResolveActivated
             ? cmd.getOptionValue(activateForceResolveOption)
@@ -390,8 +409,6 @@ public class Config {
     this.moduleCounterID = 0;
     this.log = new Log();
     this.log.reset();
-    this.adapter = initializeAdapter(globalDir);
-    ;
   }
 
   /**
@@ -466,34 +483,37 @@ public class Config {
     this.moduleCounterID = 0;
     this.forceResolveActivated =
         getValueFromKey(jsonObject, "FORCE_RESOLVE", Boolean.class).orElse(false);
+    this.inferenceActivated =
+        getValueFromKey(jsonObject, "INFERENCE_ACTIVATION", Boolean.class).orElse(true);
     this.nullUnMarkedAnnotation =
         getValueFromKey(jsonObject, "ANNOTATION:NULL_UNMARKED", String.class)
             .orElse("org.jspecify.nullness.NullUnmarked");
     this.log = new Log();
-    this.adapter = initializeAdapter(globalDir);
     log.reset();
   }
 
-  /**
-   * Initializes NullAway serialization adapter according to the serialized version.
-   *
-   * @param globalDir Root path where the serialized version can be located.
-   * @return The corresponding adapter.
-   */
-  private Adapter initializeAdapter(Path globalDir) {
-    Path serializationVersionPath = globalDir.resolve("serialization_version.txt");
+  /** Initializes NullAway serialization adapter according to the serialized version. */
+  public void initializeAdapter() {
+    if (adapter != null) {
+      // adapter is already initialized.
+      return;
+    }
+    Path serializationVersionPath = target.dir.resolve("serialization_version.txt");
     if (!serializationVersionPath.toFile().exists()) {
       // Older versions of NullAway.
-      return new NullAwayAdapterVersion0(this);
+      this.adapter = new NullAwayAdapterVersion0(this);
+      return;
     }
     try {
       List<String> lines = Files.readAllLines(serializationVersionPath);
       int version = Integer.parseInt(lines.get(0));
       switch (version) {
         case 0:
-          return new NullAwayAdapterVersion0(this);
+          this.adapter = new NullAwayAdapterVersion0(this);
+          break;
         case 1:
-          return new NullAwayAdapterVersion1(this);
+          this.adapter = new NullAwayAdapterVersion1(this);
+          break;
         default:
           throw new RuntimeException("Unrecognized NullAway serialization version: " + version);
       }
@@ -501,6 +521,18 @@ public class Config {
       throw new RuntimeException(
           "Could not read serialization version at path: " + serializationVersionPath, e);
     }
+  }
+
+  /**
+   * Getter for adapter.
+   *
+   * @return adapter.
+   */
+  public Adapter getAdapter() {
+    if (adapter == null) {
+      throw new IllegalStateException("Adapter is not initialized.");
+    }
+    return adapter;
   }
 
   /**
@@ -616,6 +648,7 @@ public class Config {
 
     public boolean forceResolveActivation = false;
     public String nullUnmarkedAnnotation = "org.jspecify.nullness.NullUnmarked";
+    public boolean inferenceActivated = true;
     public int depth = 1;
 
     @SuppressWarnings("unchecked")
@@ -647,6 +680,7 @@ public class Config {
       json.put("EXHAUSTIVE_SEARCH", exhaustiveSearch);
       json.put("REDIRECT_BUILD_OUTPUT_TO_STDERR", redirectBuildOutputToStdErr);
       json.put("FORCE_RESOLVE", forceResolveActivation);
+      json.put("INFERENCE_ACTIVATION", inferenceActivated);
       JSONArray configPathsJson = new JSONArray();
       configPathsJson.addAll(
           configPaths.stream()

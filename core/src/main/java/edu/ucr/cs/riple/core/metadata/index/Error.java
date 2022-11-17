@@ -59,7 +59,7 @@ public class Error extends Enclosed {
    * @return Factory instance.
    */
   public static Factory<Error> factory(Config config) {
-    return config.adapter::deserializeError;
+    return config.getAdapter()::deserializeError;
   }
 
   @Override

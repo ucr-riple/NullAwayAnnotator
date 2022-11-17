@@ -63,7 +63,7 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
 
   @Override
   protected TrackerNode addNodeByLine(String[] values) {
-    return config.adapter.deserializeTrackerNode(values);
+    return config.getAdapter().deserializeTrackerNode(values);
   }
 
   @Override
