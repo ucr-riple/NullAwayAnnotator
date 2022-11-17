@@ -82,7 +82,8 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
     Utility.buildDownstreamDependencies(config);
     Utility.setScannerCheckerActivation(downstreamModules, false);
     // Collect callers of public APIs in module.
-    MethodRegionTracker tracker = new MethodRegionTracker(config, config.downstreamInfo, tree);
+    MethodRegionTracker tracker =
+        new MethodRegionTracker(config.adapter, config.downstreamInfo, tree);
     // Generate fixes corresponding methods.
     ImmutableSet<Fix> fixes =
         methods.values().stream()

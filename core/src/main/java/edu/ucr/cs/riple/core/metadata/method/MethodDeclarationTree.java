@@ -25,7 +25,6 @@
 package edu.ucr.cs.riple.core.metadata.method;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -47,8 +46,8 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
   /** Set of all classes flat name declared in module. */
   private HashSet<String> classNames;
 
-  public MethodDeclarationTree(Config config, Path path) {
-    super(config, path);
+  public MethodDeclarationTree(Path path) {
+    super(path);
   }
 
   @Override

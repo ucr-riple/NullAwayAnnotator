@@ -55,7 +55,7 @@ public abstract class AbstractSupplier implements Supplier {
   public AbstractSupplier(
       ImmutableSet<ModuleInfo> modules, Config config, MethodDeclarationTree tree) {
     this.config = config;
-    this.fieldDeclarationAnalysis = new FieldDeclarationAnalysis(config, modules);
+    this.fieldDeclarationAnalysis = new FieldDeclarationAnalysis(modules);
     this.tree = tree;
     this.fixBank = initializeFixBank(modules);
     this.errorBank = initializeErrorBank(modules);

@@ -105,7 +105,7 @@ public class Annotator {
             .map(Fix::toField)
             .collect(Collectors.toSet());
     FieldInitializationAnalysis analysis =
-        new FieldInitializationAnalysis(config, config.target.dir.resolve("field_init.tsv"));
+        new FieldInitializationAnalysis(config.target.dir.resolve("field_init.tsv"));
     Set<AddAnnotation> initializers =
         analysis
             .findInitializers(uninitializedFields)
@@ -119,11 +119,9 @@ public class Annotator {
     Utility.setScannerCheckerActivation(config.target, true);
     Utility.buildTarget(config);
     Utility.setScannerCheckerActivation(config.target, false);
-    FieldDeclarationAnalysis fieldDeclarationAnalysis =
-        new FieldDeclarationAnalysis(config, config.target);
+    FieldDeclarationAnalysis fieldDeclarationAnalysis = new FieldDeclarationAnalysis(config.target);
     MethodDeclarationTree tree =
-        new MethodDeclarationTree(
-            config, config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
+        new MethodDeclarationTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
     // globalAnalyzer analyzes effects of all public APIs on downstream dependencies.
     // Through iterations, since the source code for downstream dependencies does not change and the
     // computation does not depend on the changes in the target module, it will compute the same
@@ -216,9 +214,8 @@ public class Annotator {
 
     // Initializing required explorer instances.
     MethodDeclarationTree tree =
-        new MethodDeclarationTree(
-            config, config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
-    RegionTracker tracker = new CompoundTracker(config, config.target, tree);
+        new MethodDeclarationTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
+    RegionTracker tracker = new CompoundTracker(config.adapter, config.target, tree);
     TargetModuleSupplier supplier = new TargetModuleSupplier(config, tree);
     Explorer explorer =
         config.exhaustiveSearch
