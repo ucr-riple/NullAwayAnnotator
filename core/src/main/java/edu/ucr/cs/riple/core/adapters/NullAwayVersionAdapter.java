@@ -24,62 +24,54 @@
 
 package edu.ucr.cs.riple.core.adapters;
 
-import com.google.common.base.Preconditions;
-import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.TrackerNode;
-import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
-import java.util.Arrays;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
- * Adapter working with versions below:
- *
- * <ul>
- *   <li>NullAway: Serialization version 1
- *   <li>Type Annotator Scanner: 1.3.4 or above
- * </ul>
+ * Responsible for performing tasks related to NullAway / Type Annotator Scanner serialization
+ * features.
  */
-public class NullAwayAdapterVersion1 extends AdapterAbstractClass {
+public interface NullAwayVersionAdapter {
 
-  public NullAwayAdapterVersion1(Config config) {
-    super(config);
-  }
+  /**
+   * Deserializes values produced by NullAway in a tsv file and creates a corresponding {@link Fix}
+   * instance.
+   *
+   * @param location Location of the targeted element.
+   * @param values Values in row of a TSV file.
+   * @return Corresponding Error instance with the passed values.
+   */
+  Fix deserializeFix(Location location, String[] values);
 
-  @Override
-  public Fix deserializeFix(Location location, String[] values) {
-    Preconditions.checkArgument(
-        values[7].equals("nullable"), "unsupported annotation: " + values[7]);
-    return new Fix(
-        new AddMarkerAnnotation(location, config.nullableAnnot),
-        values[6],
-        new Region(values[8], values[9]),
-        true);
-  }
+  /**
+   * Deserializes values produced by NullAway in a tsv file and creates a corresponding {@link
+   * Error} instance.
+   *
+   * @param values Values in row of a TSV file.
+   * @return Corresponding Error instance with the passed values.
+   */
+  Error deserializeError(String[] values);
 
-  @Override
-  public Error deserializeError(String[] values) {
-    return new Error(
-        values[0],
-        values[1],
-        new Region(values[2], values[3]),
-        Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 4, 10)));
-  }
+  /**
+   * Deserializes values produced by Type Annotator Scanner in a tsv file and creates a
+   * corresponding {@link TrackerNode} instance.
+   *
+   * @param values Values in row of a TSV file.
+   * @return Corresponding Error instance with the passed values.
+   */
+  TrackerNode deserializeTrackerNode(String[] values);
 
-  @Override
-  public TrackerNode deserializeTrackerNode(String[] values) {
-    return new TrackerNode(values[0], values[1], values[2], values[3]);
-  }
-
-  @Override
-  public Set<Region> getFieldRegionScope(OnField onField) {
-    return onField.variables.stream()
-        .map(fieldName -> new Region(onField.clazz, fieldName))
-        .collect(Collectors.toSet());
-  }
+  /**
+   * Returns a set of regions enclosed by a field. Returns a set since there can multiple inline
+   * field declarations.
+   *
+   * @param onField The target field.
+   * @return Set of regions enclosed by the passed location.
+   */
+  Set<Region> getFieldRegionScope(OnField onField);
 }

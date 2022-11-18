@@ -26,9 +26,9 @@ package edu.ucr.cs.riple.core;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.adapters.Adapter;
-import edu.ucr.cs.riple.core.adapters.NullAwayAdapterVersion0;
-import edu.ucr.cs.riple.core.adapters.NullAwayAdapterVersion1;
+import edu.ucr.cs.riple.core.adapters.NullAwayV0Adapter;
+import edu.ucr.cs.riple.core.adapters.NullAwayV1Adapter;
+import edu.ucr.cs.riple.core.adapters.NullAwayVersionAdapter;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.io.BufferedWriter;
@@ -145,7 +145,7 @@ public class Config {
    * This adapter is initialized lazily as it requires build of target to serialize its using
    * NullAway serialization version.
    */
-  private Adapter adapter;
+  private NullAwayVersionAdapter adapter;
 
   /**
    * Builds config from command line arguments.
@@ -501,7 +501,7 @@ public class Config {
     Path serializationVersionPath = target.dir.resolve("serialization_version.txt");
     if (!serializationVersionPath.toFile().exists()) {
       // Older versions of NullAway.
-      this.adapter = new NullAwayAdapterVersion0(this);
+      this.adapter = new NullAwayV0Adapter(this);
       return;
     }
     try {
@@ -509,10 +509,10 @@ public class Config {
       int version = Integer.parseInt(lines.get(0));
       switch (version) {
         case 0:
-          this.adapter = new NullAwayAdapterVersion0(this);
+          this.adapter = new NullAwayV0Adapter(this);
           break;
         case 1:
-          this.adapter = new NullAwayAdapterVersion1(this);
+          this.adapter = new NullAwayV1Adapter(this);
           break;
         default:
           throw new RuntimeException("Unrecognized NullAway serialization version: " + version);
@@ -528,7 +528,7 @@ public class Config {
    *
    * @return adapter.
    */
-  public Adapter getAdapter() {
+  public NullAwayVersionAdapter getAdapter() {
     if (adapter == null) {
       throw new IllegalStateException("Adapter is not initialized.");
     }
