@@ -65,6 +65,6 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: 11
-          distribution: 'adopt'
+          distribution: 'temurin'
       - name: Build with Gradle
         run: ./gradlew :core:test --scan --no-daemon -Pnullaway-test-version=0
