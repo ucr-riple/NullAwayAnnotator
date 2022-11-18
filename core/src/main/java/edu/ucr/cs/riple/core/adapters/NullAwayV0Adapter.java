@@ -45,10 +45,13 @@ import java.util.Set;
  *   <li>Type Annotator Scanner: 1.3.3 or below
  * </ul>
  */
-public class NullAwayAdapterVersion0 extends AdapterAbstractClass {
+public class NullAwayV0Adapter implements NullAwayVersionAdapter {
 
-  public NullAwayAdapterVersion0(Config config) {
-    super(config);
+  /** Annotator config. */
+  private final Config config;
+
+  public NullAwayV0Adapter(Config config) {
+    this.config = config;
   }
 
   @Override
