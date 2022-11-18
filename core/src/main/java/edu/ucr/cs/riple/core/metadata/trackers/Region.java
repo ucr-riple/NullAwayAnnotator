@@ -41,7 +41,7 @@ public class Region {
 
   public final Type type;
 
-  /** Different types code segments where a region can target. */
+  /** Different types of code segments for a region. */
   public enum Type {
     METHOD,
     FIELD,
