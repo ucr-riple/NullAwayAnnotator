@@ -57,6 +57,10 @@ public class NullAwayV1Adapter implements NullAwayVersionAdapter {
   @Override
   public Fix deserializeFix(Location location, String[] values) {
     Preconditions.checkArgument(
+        values.length == 10,
+        "Expected 10 values to create Fix instance in NullAway serialization version 1 but found: "
+            + values.length);
+    Preconditions.checkArgument(
         values[7].equals("nullable"), "unsupported annotation: " + values[7]);
     return new Fix(
         new AddMarkerAnnotation(location, config.nullableAnnot),
@@ -67,6 +71,10 @@ public class NullAwayV1Adapter implements NullAwayVersionAdapter {
 
   @Override
   public Error deserializeError(String[] values) {
+    Preconditions.checkArgument(
+        values.length == 10,
+        "Expected 10 values to create Error instance in NullAway serialization version 1 but found: "
+            + values.length);
     return new Error(
         values[0],
         values[1],
@@ -76,6 +84,10 @@ public class NullAwayV1Adapter implements NullAwayVersionAdapter {
 
   @Override
   public TrackerNode deserializeTrackerNode(String[] values) {
+    Preconditions.checkArgument(
+        values.length == 4,
+        "Expected 4 values to create TrackerNode instance in NullAway serialization version 1 but found: "
+            + values.length);
     return new TrackerNode(values[0], values[1], values[2], values[3]);
   }
 
