@@ -28,17 +28,17 @@ import java.util.Objects;
 
 public class TrackerNodeDisplay implements Display {
 
-  public final String callerClass;
-  public final String callerMember;
-  public final String calleeClass;
-  public final String calleeMember;
+  public final String regionClass;
+  public final String regionMember;
+  public final String usedClass;
+  public final String usedMember;
 
   public TrackerNodeDisplay(
-      String callerClass, String callerMember, String calleeClass, String calleeMember) {
-    this.callerClass = callerClass;
-    this.callerMember = callerMember;
-    this.calleeClass = calleeClass;
-    this.calleeMember = calleeMember;
+      String regionClass, String regionMember, String usedClass, String usedMember) {
+    this.regionClass = regionClass;
+    this.regionMember = regionMember;
+    this.usedClass = usedClass;
+    this.usedMember = usedMember;
   }
 
   @Override
@@ -50,30 +50,30 @@ public class TrackerNodeDisplay implements Display {
       return false;
     }
     TrackerNodeDisplay that = (TrackerNodeDisplay) o;
-    return callerClass.equals(that.callerClass)
-        && callerMember.equals(that.callerMember)
-        && calleeClass.equals(that.calleeClass)
-        && calleeMember.equals(that.calleeMember);
+    return regionClass.equals(that.regionClass)
+        && regionMember.equals(that.regionMember)
+        && usedClass.equals(that.usedClass)
+        && usedMember.equals(that.usedMember);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(callerClass, callerMember, calleeClass, calleeMember);
+    return Objects.hash(regionClass, regionMember, usedClass, usedMember);
   }
 
   @Override
   public String toString() {
-    return "callerClass='"
-        + callerClass
+    return "regionClass='"
+        + regionClass
         + '\''
-        + ", callerMember='"
-        + callerMember
+        + ", regionMember='"
+        + regionMember
         + '\''
-        + ", calleeClass='"
-        + calleeClass
+        + ", usedClass='"
+        + usedClass
         + '\''
-        + ", calleeMember='"
-        + calleeMember
+        + ", usedMember='"
+        + usedMember
         + '\'';
   }
 }

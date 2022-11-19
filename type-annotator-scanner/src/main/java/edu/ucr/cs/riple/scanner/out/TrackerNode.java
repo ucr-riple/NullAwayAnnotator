@@ -32,12 +32,12 @@ import com.sun.source.util.TreePath;
 import com.sun.tools.javac.code.Symbol;
 
 public class TrackerNode {
-  private final Symbol member;
-  private final Symbol.ClassSymbol callerClass;
-  private final Symbol callerMember;
+  private final Symbol usedMember;
+  private final Symbol.ClassSymbol regionClass;
+  private final Symbol regionMember;
 
-  public TrackerNode(Symbol member, TreePath path) {
-    this.member = member;
+  public TrackerNode(Symbol usedMember, TreePath path) {
+    this.usedMember = usedMember;
     ClassTree enclosingClass;
     MethodTree enclosingMethod;
     enclosingMethod =
@@ -50,7 +50,7 @@ public class TrackerNode {
             : ASTHelpers.findEnclosingNode(path, ClassTree.class);
     if (enclosingClass != null) {
       Symbol.ClassSymbol classSymbol = ASTHelpers.getSymbol(enclosingClass);
-      callerClass = classSymbol;
+      regionClass = classSymbol;
       if (enclosingMethod != null) {
         Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(enclosingMethod);
         if (!methodSymbol.isEnclosedBy(classSymbol)) {
@@ -58,7 +58,7 @@ public class TrackerNode {
         }
       }
       if (enclosingMethod != null) {
-        callerMember = ASTHelpers.getSymbol(enclosingMethod);
+        regionMember = ASTHelpers.getSymbol(enclosingMethod);
       } else {
         // Node is not enclosed by any method, can be a field declaration or enclosed by it.
         Symbol sym = ASTHelpers.getSymbol(path.getLeaf());
@@ -74,33 +74,33 @@ public class TrackerNode {
           }
         }
         if (fieldSymbol != null && fieldSymbol.isEnclosedBy(classSymbol)) {
-          callerMember = fieldSymbol;
+          regionMember = fieldSymbol;
         } else {
-          callerMember = null;
+          regionMember = null;
         }
       }
     } else {
       // just to make them final in declaration.
-      callerMember = null;
-      callerClass = null;
+      regionMember = null;
+      regionClass = null;
     }
   }
 
   @Override
   public String toString() {
-    if (callerClass == null) {
+    if (regionClass == null) {
       return "";
     }
-    Symbol enclosingClass = member.enclClass();
+    Symbol enclosingClass = usedMember.enclClass();
     return String.join(
         "\t",
-        callerClass.flatName(),
-        ((callerMember == null) ? "null" : callerMember.toString()),
-        member.toString(),
+        regionClass.flatName(),
+        ((regionMember == null) ? "null" : regionMember.toString()),
+        usedMember.toString(),
         ((enclosingClass == null) ? "null" : enclosingClass.flatName()));
   }
 
   public static String header() {
-    return "CALLER_CLASS" + '\t' + "CALLER_MEMBER" + '\t' + "MEMBER" + '\t' + "CALLEE_CLASS";
+    return "REGION_CLASS" + '\t' + "REGION_MEMBER" + '\t' + "USED_MEMBER" + '\t' + "USED_CLASS";
   }
 }
