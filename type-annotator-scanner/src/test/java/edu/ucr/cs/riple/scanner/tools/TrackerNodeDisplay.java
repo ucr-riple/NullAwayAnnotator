@@ -31,14 +31,14 @@ public class TrackerNodeDisplay implements Display {
   public final String callerClass;
   public final String callerMember;
   public final String calleeClass;
-  public final String member;
+  public final String calleeMember;
 
   public TrackerNodeDisplay(
-      String callerClass, String callerMember, String calleeClass, String member) {
+      String callerClass, String callerMember, String calleeClass, String calleeMember) {
     this.callerClass = callerClass;
     this.callerMember = callerMember;
     this.calleeClass = calleeClass;
-    this.member = member;
+    this.calleeMember = calleeMember;
   }
 
   @Override
@@ -53,12 +53,12 @@ public class TrackerNodeDisplay implements Display {
     return callerClass.equals(that.callerClass)
         && callerMember.equals(that.callerMember)
         && calleeClass.equals(that.calleeClass)
-        && member.equals(that.member);
+        && calleeMember.equals(that.calleeMember);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(callerClass, callerMember, calleeClass, member);
+    return Objects.hash(callerClass, callerMember, calleeClass, calleeMember);
   }
 
   @Override
@@ -72,8 +72,8 @@ public class TrackerNodeDisplay implements Display {
         + ", calleeClass='"
         + calleeClass
         + '\''
-        + ", member='"
-        + member
+        + ", calleeMember='"
+        + calleeMember
         + '\'';
   }
 }
