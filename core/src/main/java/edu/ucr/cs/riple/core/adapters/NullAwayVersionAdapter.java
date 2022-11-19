@@ -62,7 +62,7 @@ public interface NullAwayVersionAdapter {
    * corresponding {@link TrackerNode} instance.
    *
    * @param values Values in row of a TSV file.
-   * @return Corresponding Error instance with the passed values.
+   * @return Corresponding TrackerNode instance with the passed values.
    */
   TrackerNode deserializeTrackerNode(String[] values);
 
