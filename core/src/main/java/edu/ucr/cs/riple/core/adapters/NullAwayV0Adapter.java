@@ -57,6 +57,10 @@ public class NullAwayV0Adapter implements NullAwayVersionAdapter {
   @Override
   public Fix deserializeFix(Location location, String[] values) {
     Preconditions.checkArgument(
+        values.length == 10,
+        "Expected 10 values to create Fix instance in NullAway serialization version 0 but found: "
+            + values.length);
+    Preconditions.checkArgument(
         values[7].equals("nullable"), "unsupported annotation: " + values[7]);
     String encMember = !Region.getType(values[9]).equals(Region.Type.METHOD) ? "null" : values[9];
     return new Fix(
@@ -68,6 +72,10 @@ public class NullAwayV0Adapter implements NullAwayVersionAdapter {
 
   @Override
   public Error deserializeError(String[] values) {
+    Preconditions.checkArgument(
+        values.length == 10,
+        "Expected 10 values to create Error instance in NullAway serialization version 0 but found: "
+            + values.length);
     String encMember = !Region.getType(values[3]).equals(Region.Type.METHOD) ? "null" : values[3];
     return new Error(
         values[0],
@@ -78,6 +86,10 @@ public class NullAwayV0Adapter implements NullAwayVersionAdapter {
 
   @Override
   public TrackerNode deserializeTrackerNode(String[] values) {
+    Preconditions.checkArgument(
+        values.length == 4,
+        "Expected 4 values to create TrackerNode instance in NullAway serialization version 0 but found: "
+            + values.length);
     String encMember = !Region.getType(values[1]).equals(Region.Type.METHOD) ? "null" : values[1];
     return new TrackerNode(values[0], encMember, values[2], values[3]);
   }
