@@ -40,7 +40,7 @@ public class FieldTrackerTest extends TypeAnnotatorScannerBaseTest<TrackerNodeDi
         return new TrackerNodeDisplay(values[0], values[1], values[3], values[2]);
       };
   private static final String HEADER =
-      "CALLER_CLASS" + '\t' + "CALLER_MEMBER" + '\t' + "MEMBER" + '\t' + "CALLEE_CLASS";
+      "REGION_CLASS" + '\t' + "REGION_MEMBER" + '\t' + "USED_MEMBER" + '\t' + "USED_CLASS";
   private static final String FILE_NAME = "field_graph.tsv";
 
   public FieldTrackerTest() {
