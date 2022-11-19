@@ -44,7 +44,7 @@ public interface NullAwayVersionAdapter {
    *
    * @param location Location of the targeted element.
    * @param values Values in row of a TSV file.
-   * @return Corresponding Error instance with the passed values.
+   * @return Corresponding Fix instance with the passed values.
    */
   Fix deserializeFix(Location location, String[] values);
 
@@ -62,7 +62,7 @@ public interface NullAwayVersionAdapter {
    * corresponding {@link TrackerNode} instance.
    *
    * @param values Values in row of a TSV file.
-   * @return Corresponding Error instance with the passed values.
+   * @return Corresponding TrackerNode instance with the passed values.
    */
   TrackerNode deserializeTrackerNode(String[] values);
 

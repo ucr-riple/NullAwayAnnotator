@@ -49,7 +49,7 @@ dependencies {
 }
 
 // Should be the latest supporting version of NullAway.
-def NULLAWAY_TEST = "0.10.5-SNAPSHOT"
+def NULLAWAY_TEST = "0.10.5"
 
 tasks.test.dependsOn(':type-annotator-scanner:publishToMavenLocal')
 tasks.test.dependsOn(':qual:publishToMavenLocal')
@@ -90,10 +90,10 @@ shadowJar {
 // Configure test environment
 def nullawayVersionMap = [0:"0.10.4", 1:"0.10.5"]
 tasks.create("configureNullAwayVersion"){
-    if(!project.hasProperty("nullaway-test-version")){
+    if(!project.hasProperty("nullaway-serialization-format-version")){
         return
     }
-    NULLAWAY_TEST = nullawayVersionMap.get((project.getProperty("nullaway-test-version")) as int)
+    NULLAWAY_TEST = nullawayVersionMap.get((project.getProperty("nullaway-serialization-format-version")) as int)
     println "NullAway Test version changed to: " + NULLAWAY_TEST
 
     switch (NULLAWAY_TEST){
