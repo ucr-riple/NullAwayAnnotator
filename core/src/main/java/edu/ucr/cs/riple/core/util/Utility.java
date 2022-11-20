@@ -174,7 +174,7 @@ public class Utility {
    * @param info Module info.
    * @return List of serialized errors.
    */
-  public static List<Error> readErrorsFromOutputDirectory(ModuleInfo info) {
+  public static List<Error> readErrorsFromOutputDirectory(Config config, ModuleInfo info) {
     Path errorsPath = info.dir.resolve("errors.tsv");
     List<Error> errors = new ArrayList<>();
     try {
@@ -184,7 +184,7 @@ public class Utility {
         // Skip header.
         br.readLine();
         while ((line = br.readLine()) != null) {
-          errors.add(new Error(line.split("\t")));
+          errors.add(config.getAdapter().deserializeError(line.split("\t")));
         }
       }
     } catch (IOException e) {

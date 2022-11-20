@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.core.metadata;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+import edu.ucr.cs.riple.core.Config;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -50,14 +51,19 @@ public abstract class MetaData<T extends Hashable> {
    */
   protected final Multimap<Integer, T> contents;
 
+  /** Annotator config. */
+  protected final Config config;
+
   /**
    * Constructor for this container. Once this constructor is invoked, all data will be loaded from
    * the file.
    *
+   * @param config Annotator config.
    * @param path Path to the file containing the data.
    */
-  public MetaData(Path path) {
+  public MetaData(Config config, Path path) {
     contents = MultimapBuilder.hashKeys().arrayListValues().build();
+    this.config = config;
     setup();
     try {
       fillNodes(path);
@@ -70,10 +76,12 @@ public abstract class MetaData<T extends Hashable> {
    * Constructor for this container. Contents are accumulated from multiple sources. Once this
    * constructor is invoked, all data will be loaded from the file.
    *
+   * @param config Annotator config.
    * @param paths Paths to all files containing data.
    */
-  public MetaData(ImmutableSet<Path> paths) {
+  public MetaData(Config config, ImmutableSet<Path> paths) {
     contents = MultimapBuilder.hashKeys().arrayListValues().build();
+    this.config = config;
     setup();
     paths.forEach(
         path -> {

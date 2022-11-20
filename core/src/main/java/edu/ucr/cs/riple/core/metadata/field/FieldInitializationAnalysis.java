@@ -1,11 +1,11 @@
 package edu.ucr.cs.riple.core.metadata.field;
 
 import com.google.common.base.Preconditions;
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,13 +21,21 @@ import java.util.stream.Stream;
 public class FieldInitializationAnalysis extends MetaData<FieldInitializationNode> {
 
   /**
+   * Output file name. It contains information about initializations of fields via methods. On each
+   * row, an initializer method along the initialized field is written. A method is considered to be
+   * an initializer for a filed, if the method writes a {@code @Nonnull} value to the field and
+   * leaves it {@code @Nonnull} at exit.
+   */
+  public static final String FILE_NAME = "field_init.tsv";
+
+  /**
    * Constructs an {@link FieldInitializationAnalysis} instance. After this call, all serialized
    * information from NullAway has been processed.
    *
-   * @param path Path to field initialization info coming from NullAway.
+   * @param config Annotator config.
    */
-  public FieldInitializationAnalysis(Path path) {
-    super(path);
+  public FieldInitializationAnalysis(Config config) {
+    super(config, config.target.dir.resolve(FILE_NAME));
   }
 
   @Override

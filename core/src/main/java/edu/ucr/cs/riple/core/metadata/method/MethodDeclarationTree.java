@@ -25,10 +25,11 @@
 package edu.ucr.cs.riple.core.metadata.method;
 
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
-import java.nio.file.Path;
+import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -46,8 +47,8 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
   /** Set of all classes flat name declared in module. */
   private HashSet<String> classNames;
 
-  public MethodDeclarationTree(Path path) {
-    super(path);
+  public MethodDeclarationTree(Config config) {
+    super(config, config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
   }
 
   @Override

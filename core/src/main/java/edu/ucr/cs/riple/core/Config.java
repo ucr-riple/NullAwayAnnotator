@@ -26,6 +26,9 @@ package edu.ucr.cs.riple.core;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.adapters.NullAwayV0Adapter;
+import edu.ucr.cs.riple.core.adapters.NullAwayV1Adapter;
+import edu.ucr.cs.riple.core.adapters.NullAwayVersionAdapter;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.io.BufferedWriter;
@@ -137,6 +140,12 @@ public class Config {
    * {@code true} in production.
    */
   public final boolean inferenceActivated;
+
+  /**
+   * This adapter is initialized lazily as it requires build of target to serialize its using
+   * NullAway serialization version.
+   */
+  private NullAwayVersionAdapter adapter;
 
   /**
    * Builds config from command line arguments.
@@ -481,6 +490,49 @@ public class Config {
             .orElse("org.jspecify.nullness.NullUnmarked");
     this.log = new Log();
     log.reset();
+  }
+
+  /** Initializes NullAway serialization adapter according to the serialized version. */
+  public void initializeAdapter() {
+    if (adapter != null) {
+      // adapter is already initialized.
+      return;
+    }
+    Path serializationVersionPath = target.dir.resolve("serialization_version.txt");
+    if (!serializationVersionPath.toFile().exists()) {
+      // Older versions of NullAway.
+      this.adapter = new NullAwayV0Adapter(this);
+      return;
+    }
+    try {
+      List<String> lines = Files.readAllLines(serializationVersionPath);
+      int version = Integer.parseInt(lines.get(0));
+      switch (version) {
+        case 0:
+          this.adapter = new NullAwayV0Adapter(this);
+          break;
+        case 1:
+          this.adapter = new NullAwayV1Adapter(this);
+          break;
+        default:
+          throw new RuntimeException("Unrecognized NullAway serialization version: " + version);
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(
+          "Could not read serialization version at path: " + serializationVersionPath, e);
+    }
+  }
+
+  /**
+   * Getter for adapter.
+   *
+   * @return adapter.
+   */
+  public NullAwayVersionAdapter getAdapter() {
+    if (adapter == null) {
+      throw new IllegalStateException("Adapter is not initialized.");
+    }
+    return adapter;
   }
 
   /**

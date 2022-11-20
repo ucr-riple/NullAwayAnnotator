@@ -61,7 +61,7 @@ public class Index<T extends Enclosed> {
 
   /** Index type. */
   public enum Type {
-    BY_METHOD,
+    BY_MEMBER,
     BY_CLASS
   }
 
@@ -99,7 +99,7 @@ public class Index<T extends Enclosed> {
               if (type.equals(Type.BY_CLASS)) {
                 hash = Objects.hash(item.encClass());
               } else {
-                hash = Objects.hash(item.encClass(), item.encMethod());
+                hash = Objects.hash(item.encClass(), item.encMember());
               }
               items.put(hash, item);
               line = br.readLine();
@@ -123,15 +123,15 @@ public class Index<T extends Enclosed> {
   }
 
   /**
-   * Returns all contents which are enclosed by the given class and method.
+   * Returns all contents which are enclosed by the given class and member.
    *
    * @param clazz Fully qualified name of the class.
-   * @param method Method signature.
-   * @return Stored contents that are enclosed by the given class and method.
+   * @param member member symbol.
+   * @return Stored contents that are enclosed by the given class and member.
    */
-  public Collection<T> getByMethod(String clazz, String method) {
-    return items.get(Objects.hash(clazz, method)).stream()
-        .filter(item -> item.encClass().equals(clazz) && item.encMethod().equals(method))
+  public Collection<T> getByMember(String clazz, String member) {
+    return items.get(Objects.hash(clazz, member)).stream()
+        .filter(item -> item.encClass().equals(clazz) && item.encMember().equals(member))
         .collect(Collectors.toList());
   }
 

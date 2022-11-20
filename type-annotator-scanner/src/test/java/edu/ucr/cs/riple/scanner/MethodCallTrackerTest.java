@@ -40,7 +40,7 @@ public class MethodCallTrackerTest extends TypeAnnotatorScannerBaseTest<TrackerN
         return new TrackerNodeDisplay(values[0], values[1], values[3], values[2]);
       };
   private static final String HEADER =
-      "CALLER_CLASS" + '\t' + "CALLER_METHOD" + '\t' + "MEMBER" + '\t' + "CALLEE_CLASS";
+      "REGION_CLASS" + '\t' + "REGION_MEMBER" + '\t' + "USED_MEMBER" + '\t' + "USED_CLASS";
   private static final String FILE_NAME = "call_graph.tsv";
 
   public MethodCallTrackerTest() {
@@ -63,6 +63,47 @@ public class MethodCallTrackerTest extends TypeAnnotatorScannerBaseTest<TrackerN
             "   Object foo() { return null; };",
             "}")
         .setExpectedOutputs(new TrackerNodeDisplay("edu.ucr.A", "bar()", "edu.ucr.Other", "foo()"))
+        .doTest();
+  }
+
+  @Test
+  public void fieldDeclaredRegionComputationAllCases() {
+    tester
+        .addSourceLines(
+            "edu/ucr/A.java",
+            "package edu.ucr;",
+            "public class A {",
+            "   B b = new B();",
+            "   Object f0 = b.get();",
+            "   Object f1 = B.staticB();",
+            "   Object f2 = b.c.get();",
+            "   Object f3 = B.staticC.get();",
+            "   {",
+            "       B.staticB();",
+            "   }",
+            "}",
+            "class B {",
+            "   C c = new C();",
+            "   static C staticC = new C();",
+            "   Object get() {",
+            "       return new Object();",
+            "   }",
+            "   static Object staticB() {",
+            "       return new Object();",
+            "   }",
+            "}",
+            "class C {",
+            "   Object val;",
+            "   static Object get() {",
+            "       return new Object();",
+            "   }",
+            "}")
+        .setExpectedOutputs(
+            new TrackerNodeDisplay("edu.ucr.A", "f0", "edu.ucr.B", "get()"),
+            new TrackerNodeDisplay("edu.ucr.A", "f1", "edu.ucr.B", "staticB()"),
+            new TrackerNodeDisplay("edu.ucr.A", "f2", "edu.ucr.C", "get()"),
+            new TrackerNodeDisplay("edu.ucr.A", "f3", "edu.ucr.C", "get()"),
+            new TrackerNodeDisplay("edu.ucr.A", "null", "edu.ucr.B", "staticB()"))
         .doTest();
   }
 }

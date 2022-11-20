@@ -28,17 +28,17 @@ import java.util.Objects;
 
 public class TrackerNodeDisplay implements Display {
 
-  public final String callerClass;
-  public final String callerMethod;
-  public final String calleeClass;
-  public final String member;
+  public final String regionClass;
+  public final String regionMember;
+  public final String usedClass;
+  public final String usedMember;
 
   public TrackerNodeDisplay(
-      String callerClass, String callerMethod, String calleeClass, String member) {
-    this.callerClass = callerClass;
-    this.callerMethod = callerMethod;
-    this.calleeClass = calleeClass;
-    this.member = member;
+      String regionClass, String regionMember, String usedClass, String usedMember) {
+    this.regionClass = regionClass;
+    this.regionMember = regionMember;
+    this.usedClass = usedClass;
+    this.usedMember = usedMember;
   }
 
   @Override
@@ -50,30 +50,30 @@ public class TrackerNodeDisplay implements Display {
       return false;
     }
     TrackerNodeDisplay that = (TrackerNodeDisplay) o;
-    return callerClass.equals(that.callerClass)
-        && callerMethod.equals(that.callerMethod)
-        && calleeClass.equals(that.calleeClass)
-        && member.equals(that.member);
+    return regionClass.equals(that.regionClass)
+        && regionMember.equals(that.regionMember)
+        && usedClass.equals(that.usedClass)
+        && usedMember.equals(that.usedMember);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(callerClass, callerMethod, calleeClass, member);
+    return Objects.hash(regionClass, regionMember, usedClass, usedMember);
   }
 
   @Override
   public String toString() {
-    return "callerClass='"
-        + callerClass
+    return "regionClass='"
+        + regionClass
         + '\''
-        + ", callerMethod='"
-        + callerMethod
+        + ", regionMember='"
+        + regionMember
         + '\''
-        + ", calleeMethod='"
-        + calleeClass
+        + ", usedClass='"
+        + usedClass
         + '\''
-        + ", member='"
-        + member
+        + ", usedMember='"
+        + usedMember
         + '\'';
   }
 }

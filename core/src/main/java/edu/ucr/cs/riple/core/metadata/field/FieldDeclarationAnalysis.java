@@ -7,10 +7,12 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
+import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.TypeAnnotatorScanner;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -38,20 +40,23 @@ public class FieldDeclarationAnalysis extends MetaData<FieldDeclarationInfo> {
   /**
    * Constructor for {@link FieldDeclarationAnalysis}.
    *
+   * @param config Annotator config.
    * @param module Information of the target module.
    */
-  public FieldDeclarationAnalysis(ModuleInfo module) {
-    super(module.dir.resolve(FILE_NAME));
+  public FieldDeclarationAnalysis(Config config, ModuleInfo module) {
+    super(config, module.dir.resolve(FILE_NAME));
   }
 
   /**
    * Constructor for {@link FieldDeclarationAnalysis}. Contents are accumulated from multiple
    * sources.
    *
+   * @param config Annotator config.
    * @param modules Information of set of modules.
    */
-  public FieldDeclarationAnalysis(ImmutableSet<ModuleInfo> modules) {
+  public FieldDeclarationAnalysis(Config config, ImmutableSet<ModuleInfo> modules) {
     super(
+        config,
         modules.stream()
             .map(info -> info.dir.resolve(FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));
@@ -73,7 +78,7 @@ public class FieldDeclarationAnalysis extends MetaData<FieldDeclarationInfo> {
         System.err.println(notFound.getMessage());
         return null;
       }
-      FieldDeclarationInfo info = new FieldDeclarationInfo(clazz);
+      FieldDeclarationInfo info = new FieldDeclarationInfo(path, clazz);
       members.forEach(
           bodyDeclaration ->
               bodyDeclaration.ifFieldDeclaration(
@@ -111,5 +116,21 @@ public class FieldDeclarationAnalysis extends MetaData<FieldDeclarationInfo> {
     Optional<ImmutableSet<String>> inLineGroupFieldDeclaration =
         candidate.fields.stream().filter(group -> !Collections.disjoint(group, fields)).findFirst();
     return inLineGroupFieldDeclaration.orElse(ImmutableSet.copyOf(fields));
+  }
+
+  /**
+   * Creates a {@link OnField} instance targeting the passed field and class.
+   *
+   * @param clazz Enclosing class of the field.
+   * @param field Field name.
+   * @return {@link OnField} instance targeting the passed field and class.
+   */
+  public OnField getLocationOnField(String clazz, String field) {
+    FieldDeclarationInfo candidate =
+        findNodeWithHashHint(node -> node.clazz.equals(clazz), FieldDeclarationInfo.hash(clazz));
+    if (candidate == null) {
+      return null;
+    }
+    return new OnField(candidate.pathToSourceFile, candidate.clazz, Collections.singleton(field));
   }
 }
