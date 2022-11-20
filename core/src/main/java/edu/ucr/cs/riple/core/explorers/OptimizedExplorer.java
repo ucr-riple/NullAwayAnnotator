@@ -85,11 +85,11 @@ public class OptimizedExplorer extends BasicExplorer {
             List<Error> triggeredErrors = new ArrayList<>();
             for (Region region : node.regions) {
               Result<Error> errorComparisonResult =
-                  errorBank.compareByMethod(region.clazz, region.member, false);
+                  errorBank.compareByMember(region.clazz, region.member, false);
               localEffect += errorComparisonResult.size;
               triggeredErrors.addAll(errorComparisonResult.dif);
               triggeredFixes.addAll(
-                  fixBank.compareByMethod(region.clazz, region.member, false).dif);
+                  fixBank.compareByMember(region.clazz, region.member, false).dif);
             }
             addTriggeredFixesFromDownstream(node, triggeredFixes);
             node.updateStatus(
