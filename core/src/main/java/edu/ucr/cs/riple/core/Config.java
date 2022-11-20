@@ -148,6 +148,15 @@ public class Config {
   private NullAwayVersionAdapter adapter;
 
   /**
+   * If enabled, an informative comment explaining the impact of the annotation locally and globally
+   * will be injected along all {@code @NullUnmarked} injections.
+   */
+  public final boolean commentGenerationEnabled;
+
+  /** Prefix to all comments added by annotator; */
+  public final String commentPrefix;
+
+  /**
    * Builds config from command line arguments.
    *
    * @param args arguments.
@@ -313,6 +322,19 @@ public class Config {
     deactivateInference.setRequired(false);
     options.addOption(deactivateInference);
 
+    // Comment
+    // Comment activation
+    Option commentGenerationActivation =
+        new Option("acg", "activate-comment-generation", false, "Activates comment generation.");
+    commentGenerationActivation.setRequired(false);
+    options.addOption(commentGenerationActivation);
+
+    // Comment prefix
+    Option commentPrefix =
+        new Option("cprefix", "comment-prefix", true, "Prefix to all generated comments");
+    commentPrefix.setRequired(false);
+    options.addOption(commentPrefix);
+
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
@@ -406,6 +428,8 @@ public class Config {
         this.forceResolveActivated
             ? cmd.getOptionValue(activateForceResolveOption)
             : "org.jspecify.nullness.NullUnmarked";
+    this.commentGenerationEnabled = cmd.hasOption(commentGenerationActivation);
+    this.commentPrefix = this.commentGenerationEnabled ? cmd.getOptionValue(commentPrefix) : "";
     this.moduleCounterID = 0;
     this.log = new Log();
     this.log.reset();
@@ -488,6 +512,9 @@ public class Config {
     this.nullUnMarkedAnnotation =
         getValueFromKey(jsonObject, "ANNOTATION:NULL_UNMARKED", String.class)
             .orElse("org.jspecify.nullness.NullUnmarked");
+    this.commentGenerationEnabled =
+        getValueFromKey(jsonObject, "COMMENT:ACTIVE", Boolean.class).orElse(false);
+    this.commentPrefix = getValueFromKey(jsonObject, "COMMENT:PREFIX", String.class).orElse("");
     this.log = new Log();
     log.reset();
   }

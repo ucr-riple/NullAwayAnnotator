@@ -304,32 +304,38 @@ public class Annotator {
                 })
             .collect(Collectors.toSet());
 
-    // Analyze impacts of the annotation locally and globally for comment generation.
-    remainingFixes.forEach(
-        fix -> {
-          if (fix.isOnMethod()) {
-            MethodNode node = tree.findNode(fix.toMethod().method, fix.toMethod().clazz);
-            if (node != null && !methodCommentMap.containsKey(node.location)) {
-              String comment = "";
-              if (config.downStreamDependenciesAnalysisActivated
-                  && node.isPublicMethodWithNonPrimitiveReturnType()) {
-                comment += " //dependent: " + analyzer.getTriggeredErrors(fix).size();
+    if (config.commentGenerationEnabled) {
+      // Analyze impacts of the annotation locally and globally for comment generation.
+      remainingFixes.forEach(
+          fix -> {
+            if (fix.isOnMethod()) {
+              MethodNode node = tree.findNode(fix.toMethod().method, fix.toMethod().clazz);
+              if (node != null && !methodCommentMap.containsKey(node.location)) {
+                String comment = "";
+                if (config.downStreamDependenciesAnalysisActivated
+                    && node.isPublicMethodWithNonPrimitiveReturnType()) {
+                  comment += " //dependent: " + analyzer.getTriggeredErrors(fix).size();
+                }
+                Report report = cache.getReportForFix(fix);
+                if (report != null) {
+                  comment += " //local: " + report.localEffect;
+                }
+                methodCommentMap.put(node.location, methodCommentMap.get(node.location) + comment);
               }
-              Report report = cache.getReportForFix(fix);
-              if (report != null) {
-                comment += " //local: " + report.localEffect;
-              }
-              methodCommentMap.put(node.location, methodCommentMap.get(node.location) + comment);
             }
-          }
-        });
+          });
+    }
 
     Set<AddAnnotation> nullUnmarkedInjections =
         nullUnmarkedMethods.stream()
             .map(
                 onMethod ->
                     new AddMarkerAnnotation(
-                        onMethod, config.nullUnMarkedAnnotation, methodCommentMap.get(onMethod)))
+                        onMethod,
+                        config.nullUnMarkedAnnotation,
+                        config.commentGenerationEnabled
+                            ? config.commentPrefix + methodCommentMap.get(onMethod)
+                            : null))
             .collect(Collectors.toSet());
 
     injector.injectAnnotations(nullUnmarkedInjections);
