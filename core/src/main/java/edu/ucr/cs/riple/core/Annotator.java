@@ -334,7 +334,7 @@ public class Annotator {
                         onMethod,
                         config.nullUnMarkedAnnotation,
                         config.commentGenerationEnabled
-                            ? config.commentPrefix + methodCommentMap.get(onMethod)
+                            ? config.commentPrefix + ":" + methodCommentMap.get(onMethod)
                             : null))
             .collect(Collectors.toSet());
 

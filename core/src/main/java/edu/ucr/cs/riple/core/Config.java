@@ -322,18 +322,11 @@ public class Config {
     deactivateInference.setRequired(false);
     options.addOption(deactivateInference);
 
-    // Comment
-    // Comment activation
+    // Comment generation activation
     Option commentGenerationActivation =
-        new Option("acg", "activate-comment-generation", false, "Activates comment generation.");
+        new Option("acg", "activate-comment-generation", true, "Activates comment generation.");
     commentGenerationActivation.setRequired(false);
     options.addOption(commentGenerationActivation);
-
-    // Comment prefix
-    Option commentPrefix =
-        new Option("cprefix", "comment-prefix", true, "Prefix to all generated comments");
-    commentPrefix.setRequired(false);
-    options.addOption(commentPrefix);
 
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
@@ -429,7 +422,10 @@ public class Config {
             ? cmd.getOptionValue(activateForceResolveOption)
             : "org.jspecify.nullness.NullUnmarked";
     this.commentGenerationEnabled = cmd.hasOption(commentGenerationActivation);
-    this.commentPrefix = this.commentGenerationEnabled ? cmd.getOptionValue(commentPrefix) : "";
+    this.commentPrefix =
+        this.commentGenerationEnabled
+            ? cmd.getOptionValue(commentGenerationActivation)
+            : "Annotator";
     this.moduleCounterID = 0;
     this.log = new Log();
     this.log.reset();
@@ -514,7 +510,8 @@ public class Config {
             .orElse("org.jspecify.nullness.NullUnmarked");
     this.commentGenerationEnabled =
         getValueFromKey(jsonObject, "COMMENT:ACTIVE", Boolean.class).orElse(false);
-    this.commentPrefix = getValueFromKey(jsonObject, "COMMENT:PREFIX", String.class).orElse("");
+    this.commentPrefix =
+        getValueFromKey(jsonObject, "COMMENT:PREFIX", String.class).orElse("Annotator");
     this.log = new Log();
     log.reset();
   }

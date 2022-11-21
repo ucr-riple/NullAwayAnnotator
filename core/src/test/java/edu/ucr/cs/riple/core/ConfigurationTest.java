@@ -271,11 +271,10 @@ public class ConfigurationTest {
     config = new Config(makeCommandLineArguments(baseFlags));
     assertFalse(config.commentGenerationEnabled);
 
-    baseFlags.add(new CLIFlag("acg"));
-    baseFlags.add(new CLIFlagWithValue("cprefix", "PREFIX"));
+    baseFlags.add(new CLIFlagWithValue("acg", "CustomPrefix"));
     config = new Config(makeCommandLineArguments(baseFlags));
     assertTrue(config.commentGenerationEnabled);
-    assertEquals(config.commentPrefix, "PREFIX");
+    assertEquals(config.commentPrefix, "CustomPrefix");
   }
 
   /**
