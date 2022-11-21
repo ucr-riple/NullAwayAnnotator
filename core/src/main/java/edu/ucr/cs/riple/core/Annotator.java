@@ -298,8 +298,9 @@ public class Annotator {
                   methodCommentMap.put(
                       node.location,
                       "//local "
-                          + errorBank.getEntriesByRegion(
-                              node.location.clazz, node.location.method));
+                          + errorBank
+                              .getEntriesByRegion(node.location.clazz, node.location.method)
+                              .size());
                   return node.location;
                 })
             .collect(Collectors.toSet());
