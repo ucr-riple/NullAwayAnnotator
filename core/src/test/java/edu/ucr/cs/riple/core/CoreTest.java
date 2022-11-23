@@ -298,7 +298,7 @@ public class CoreTest extends BaseCoreTest {
   }
 
   @Test
-  public void staticBlockFieldInitializationTest() {
+  public void staticBlockLocalVariableInitializationTest() {
     coreTestHelper
         .addInputLines(
             "A.java",
