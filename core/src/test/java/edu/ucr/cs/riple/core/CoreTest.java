@@ -361,4 +361,35 @@ public class CoreTest extends BaseCoreTest {
     Assert.assertEquals(
         expectedAnnotations, Set.copyOf(coreTestHelper.getConfig().log.getInjectedAnnotations()));
   }
+
+  public void staticBlockLocalVariableInitializationTest() {
+    coreTestHelper
+        .addInputLines(
+            "A.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "import java.util.Objects;",
+            "public class A {",
+            "   private static Object f;",
+            "   static {",
+            "      Object a = B.foo();",
+            "      Object b = B.bar();",
+            "      if (Objects.hashCode(a) > Objects.hashCode(b)) {",
+            "          f = a;",
+            "      } else {",
+            "          f = b;",
+            "      }",
+            "   }",
+            "}",
+            "class B {",
+            "   @Nullable",
+            "   public static Object foo() { return null; }",
+            "   @Nullable",
+            "   public static Object bar() { return null; }",
+            "}")
+        .toDepth(5)
+        .addExpectedReports(new TReport(new OnField("A.java", "test.A", singleton("f")), -3))
+        .enableForceResolve()
+        .start();
+  }
 }

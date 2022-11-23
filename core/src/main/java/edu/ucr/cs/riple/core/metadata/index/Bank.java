@@ -105,7 +105,8 @@ public class Bank<T extends Enclosed> {
    * @param encMember Enclosing member symbol.
    * @return Corresponding {@link Result}.
    */
-  public Result<T> compareByMethod(String encClass, String encMember, boolean fresh) {
+  public Result<T> compareByMember(String encClass, String encMember, boolean fresh) {
+
     saveState(false, fresh);
     return compareByList(
         rootInMember.getByMember(encClass, encMember),
