@@ -36,6 +36,7 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
+import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -81,7 +82,7 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
     Utility.buildDownstreamDependencies(config);
     Utility.setScannerCheckerActivation(downstreamModules, false);
     // Collect callers of public APIs in module.
-    MethodRegionTracker tracker = new MethodRegionTracker(config.downstreamInfo, tree);
+    MethodRegionTracker tracker = new MethodRegionTracker(config, config.downstreamInfo, tree);
     // Generate fixes corresponding methods.
     ImmutableSet<Fix> fixes =
         methods.values().stream()
@@ -100,8 +101,7 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
                                 methodImpact.node.location.method),
                             config.nullableAnnot),
                         "null",
-                        "null",
-                        "null",
+                        new Region("null", "null"),
                         false))
             .collect(ImmutableSet.toImmutableSet());
     DownstreamImpactExplorer analyzer =

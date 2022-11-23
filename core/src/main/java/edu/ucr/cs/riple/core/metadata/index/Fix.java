@@ -28,9 +28,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
+import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
-import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -59,13 +59,8 @@ public class Fix extends Enclosed {
    */
   public boolean fixSourceIsInTarget;
 
-  public Fix(
-      AddAnnotation change,
-      String reason,
-      String encClass,
-      String encMethod,
-      boolean fixSourceIsInTarget) {
-    super(encClass, encMethod);
+  public Fix(AddAnnotation change, String reason, Region region, boolean fixSourceIsInTarget) {
+    super(region);
     this.change = change;
     this.reasons = reason != null ? Sets.newHashSet(reason) : new HashSet<>();
     this.fixSourceIsInTarget = fixSourceIsInTarget;
@@ -81,9 +76,10 @@ public class Fix extends Enclosed {
    * @return Factory instance.
    */
   public static Factory<Fix> factory(Config config, FieldDeclarationAnalysis analysis) {
-    return info -> {
-      Location location = Location.createLocationFromArrayInfo(info);
-      Preconditions.checkNotNull(location, "Fix Location cannot be null: " + Arrays.toString(info));
+    return values -> {
+      Location location = Location.createLocationFromArrayInfo(values);
+      Preconditions.checkNotNull(
+          location, "Fix Location cannot be null: " + Arrays.toString(values));
       if (analysis != null) {
         location.ifField(
             field -> {
@@ -92,9 +88,7 @@ public class Fix extends Enclosed {
               field.variables.addAll(variables);
             });
       }
-      Preconditions.checkArgument(info[7].equals("nullable"), "unsupported annotation: " + info[7]);
-      return new Fix(
-          new AddMarkerAnnotation(location, config.nullableAnnot), info[6], info[8], info[9], true);
+      return config.getAdapter().deserializeFix(location, values);
     };
   }
 

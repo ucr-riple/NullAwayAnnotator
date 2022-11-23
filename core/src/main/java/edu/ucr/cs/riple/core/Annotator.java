@@ -49,7 +49,6 @@ import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
-import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -100,13 +99,13 @@ public class Annotator {
     Utility.setScannerCheckerActivation(config.target, true);
     System.out.println("Making the first build...");
     Utility.buildTarget(config, true);
+    config.initializeAdapter();
     Set<OnField> uninitializedFields =
         Utility.readFixesFromOutputDirectory(config.target, Fix.factory(config, null)).stream()
             .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
             .map(Fix::toField)
             .collect(Collectors.toSet());
-    FieldInitializationAnalysis analysis =
-        new FieldInitializationAnalysis(config.target.dir.resolve("field_init.tsv"));
+    FieldInitializationAnalysis analysis = new FieldInitializationAnalysis(config);
     Set<AddAnnotation> initializers =
         analysis
             .findInitializers(uninitializedFields)
@@ -120,9 +119,9 @@ public class Annotator {
     Utility.setScannerCheckerActivation(config.target, true);
     Utility.buildTarget(config);
     Utility.setScannerCheckerActivation(config.target, false);
-    FieldDeclarationAnalysis fieldDeclarationAnalysis = new FieldDeclarationAnalysis(config.target);
-    MethodDeclarationTree tree =
-        new MethodDeclarationTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
+    FieldDeclarationAnalysis fieldDeclarationAnalysis =
+        new FieldDeclarationAnalysis(config, config.target);
+    MethodDeclarationTree tree = new MethodDeclarationTree(config);
     // globalAnalyzer analyzes effects of all public APIs on downstream dependencies.
     // Through iterations, since the source code for downstream dependencies does not change and the
     // computation does not depend on the changes in the target module, it will compute the same
@@ -220,9 +219,8 @@ public class Annotator {
             .collect(ImmutableSet.toImmutableSet());
 
     // Initializing required explorer instances.
-    MethodDeclarationTree tree =
-        new MethodDeclarationTree(config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
-    RegionTracker tracker = new CompoundTracker(config.target, tree);
+    MethodDeclarationTree tree = new MethodDeclarationTree(config);
+    RegionTracker tracker = new CompoundTracker(config, config.target, tree);
     TargetModuleSupplier supplier = new TargetModuleSupplier(config, tree);
     Explorer explorer =
         config.exhaustiveSearch
@@ -253,7 +251,7 @@ public class Annotator {
       FieldDeclarationAnalysis fieldDeclarationAnalysis, MethodDeclarationTree tree) {
     // Collect regions with remaining errors.
     Utility.buildTarget(config);
-    List<Error> remainingErrors = Utility.readErrorsFromOutputDirectory(config.target);
+    List<Error> remainingErrors = Utility.readErrorsFromOutputDirectory(config, config.target);
     Set<Fix> remainingFixes =
         Utility.readFixesFromOutputDirectory(
             config.target, Fix.factory(config, fieldDeclarationAnalysis));
@@ -266,8 +264,8 @@ public class Annotator {
             // find the corresponding method nodes.
             .map(
                 error -> {
-                  if (!error.encMethod().equals("null")) {
-                    return tree.findNode(error.encMethod(), error.encClass());
+                  if (error.getRegion().isOnMethod()) {
+                    return tree.findNode(error.encMember(), error.encClass());
                   }
                   if (error.nonnullTarget == null) {
                     // Just a sanity check.
@@ -299,7 +297,7 @@ public class Annotator {
                     return false;
                   }
                   OnField onField = fix.toField();
-                  return onField.clazz.equals(fix.encClass()) && fix.encMethod().equals("");
+                  return onField.clazz.equals(fix.encClass()) && !fix.getRegion().isOnMethod();
                 })
             .map(
                 fix ->
@@ -322,8 +320,6 @@ public class Annotator {
                 fix ->
                     new AddSingleElementAnnotation(
                         fix.toField(), "SuppressWarnings", "NullAway.Init", false))
-            // Exclude already annotated fields with a general NullAway suppress warning.
-            .filter(f -> !suppressWarningsAnnotations.contains(f))
             .collect(Collectors.toSet());
     injector.injectAnnotations(initializationSuppressWarningsAnnotations);
     // Update log.

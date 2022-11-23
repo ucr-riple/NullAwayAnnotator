@@ -31,6 +31,7 @@ import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.Result;
+import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -92,8 +93,7 @@ public class BasicExplorer extends Explorer {
                     new Fix(
                         new AddMarkerAnnotation(onParameter, config.nullableAnnot),
                         "PASSING_NULLABLE",
-                        onParameter.clazz,
-                        onParameter.method,
+                        new Region(onParameter.clazz, onParameter.method),
                         false))
             .collect(Collectors.toList()));
   }

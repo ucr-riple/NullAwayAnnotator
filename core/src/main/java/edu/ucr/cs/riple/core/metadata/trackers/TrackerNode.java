@@ -32,17 +32,17 @@ public class TrackerNode implements Hashable {
 
   /** Fully qualified names of the caller class. */
   public final String callerClass;
-  /** Method signature of the caller. "null" if used in class initialization region, not null. */
-  public final String callerMethod;
+  /** Symbol the target region. */
+  public final String callerMember;
   /** Callee field name if field and method signature if method. */
   public final String calleeMember;
   /** Fully qualified name of the enclosing class of callee. */
   public final String calleeClass;
 
   public TrackerNode(
-      String callerClass, String callerMethod, String calleeMember, String calleeClass) {
+      String callerClass, String callerMember, String calleeMember, String calleeClass) {
     this.callerClass = callerClass;
-    this.callerMethod = callerMethod;
+    this.callerMember = callerMember;
     this.calleeMember = calleeMember;
     this.calleeClass = calleeClass;
   }
@@ -59,7 +59,7 @@ public class TrackerNode implements Hashable {
     return callerClass.equals(that.callerClass)
         && calleeMember.equals(that.calleeMember)
         && calleeClass.equals(that.calleeClass)
-        && callerMethod.equals(that.callerMethod);
+        && callerMember.equals(that.callerMember);
   }
 
   /**

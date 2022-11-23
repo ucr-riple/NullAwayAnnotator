@@ -35,8 +35,8 @@ public abstract class Enclosed {
   /** Containing region. */
   protected final Region region;
 
-  public Enclosed(String encClass, String encMethod) {
-    this.region = new Region(encClass, encMethod);
+  public Enclosed(Region region) {
+    this.region = region;
   }
 
   /**
@@ -49,11 +49,20 @@ public abstract class Enclosed {
   }
 
   /**
-   * Method signature of the containing region.
+   * Representative member of the containing region as {@code String}.
    *
-   * @return Method signature.
+   * @return Member symbol in {@code String}.
    */
-  public String encMethod() {
-    return this.region.method;
+  public String encMember() {
+    return this.region.member;
+  }
+
+  /**
+   * Getter for region.
+   *
+   * @return region.
+   */
+  public Region getRegion() {
+    return region;
   }
 }
