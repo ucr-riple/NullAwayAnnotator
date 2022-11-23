@@ -362,6 +362,7 @@ public class CoreTest extends BaseCoreTest {
         expectedAnnotations, Set.copyOf(coreTestHelper.getConfig().log.getInjectedAnnotations()));
   }
 
+  @Test
   public void staticBlockLocalVariableInitializationTest() {
     coreTestHelper
         .addInputLines(
