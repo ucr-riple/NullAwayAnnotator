@@ -52,7 +52,8 @@ public class MethodInfo {
   private MethodInfo(Symbol.MethodSymbol method, ScannerContext context) {
     this.id = context.getNextMethodId();
     this.symbol = method;
-    this.clazz = method.enclClass();
+    this.clazz = (method != null) ? method.enclClass() : null;
+    ;
     this.parent = 0;
     context.visitMethod(this);
   }

@@ -1,9 +1,9 @@
 set -exu
 
-CURRENT_VERSION="core-1.3.4-SNAPSHOT.jar"
+CURRENT_VERSION="core-1.3.3-LOCAL.jar"
 PROJECT_ROOT=${PROJECT_ROOT:-$(git rev-parse --show-toplevel)}
 
 pushd "$PROJECT_ROOT"
-   ./gradlew publishToMavenLocal --rerun-tasks
+   ./gradlew publishToMavenLocal -x signMavenPublication --rerun-tasks
    mv core/build/libs/"$CURRENT_VERSION" runner/jars/core.jar
 popd
