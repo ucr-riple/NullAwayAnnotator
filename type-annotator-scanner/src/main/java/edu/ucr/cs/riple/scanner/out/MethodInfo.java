@@ -53,7 +53,6 @@ public class MethodInfo {
     this.id = context.getNextMethodId();
     this.symbol = method;
     this.clazz = (method != null) ? method.enclClass() : null;
-    ;
     this.parent = 0;
     context.visitMethod(this);
   }
