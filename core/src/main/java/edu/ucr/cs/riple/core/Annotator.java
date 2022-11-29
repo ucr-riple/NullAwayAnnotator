@@ -48,7 +48,7 @@ import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
-import edu.ucr.cs.riple.injector.location.OnMethod;
+import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -267,42 +267,53 @@ public class Annotator {
                   if (error.getRegion().isOnMethod()) {
                     return tree.findNode(error.encMember(), error.encClass());
                   }
-                  if (error.nonnullTarget == null) {
-                    // Just a sanity check.
-                    return null;
-                  }
                   // For methods invoked in an initialization region, where the error is that
                   // `@Nullable` is being passed as an argument, we add a `@NullUnmarked` annotation
                   // to the called method.
-                  if (error.messageType.equals("PASS_NULLABLE")) {
-                    OnMethod calledMethod = error.nonnullTarget.toMethod();
-                    return tree.findNode(calledMethod.method, calledMethod.clazz);
+                  if (error.messageType.equals("PASS_NULLABLE")
+                      && error.nonnullTarget != null
+                      && error.nonnullTarget.isOnParameter()) {
+                    OnParameter nullableParameter = error.nonnullTarget.toParameter();
+                    return tree.findNode(nullableParameter.method, nullableParameter.clazz);
                   }
                   return null;
                 })
+            // Filter null values from map above.
             .filter(Objects::nonNull)
             .map(node -> new AddMarkerAnnotation(node.location, config.nullUnMarkedAnnotation))
             .collect(Collectors.toSet());
     injector.injectAnnotations(nullUnMarkedAnnotations);
-
     // Update log.
     config.log.updateInjectedAnnotations(nullUnMarkedAnnotations);
 
-    // Collect explicit Nullable initialization to fields
-    Set<AddAnnotation> suppressWarningsAnnotations =
-        remainingFixes.stream()
+    // Collect suppress warnings, errors on field declaration regions.
+    Set<OnField> fieldsWithSuppressWarnings =
+        remainingErrors.stream()
             .filter(
-                fix -> {
-                  if (!(fix.isOnField() && fix.reasons.contains("ASSIGN_FIELD_NULLABLE"))) {
+                error -> {
+                  if (!error.getRegion().isOnField()) {
                     return false;
                   }
-                  OnField onField = fix.toField();
-                  return onField.clazz.equals(fix.encClass()) && !fix.getRegion().isOnMethod();
+                  if (error.messageType.equals("PASS_NULLABLE")) {
+                    // It is already resolved with @NullUnmarked selected above.
+                    return false;
+                  }
+                  // We can silence them by SuppressWarnings("NullAway.Init")
+                  return !error.messageType.equals("METHOD_NO_INIT")
+                      && !error.messageType.equals("FIELD_NO_INIT");
                 })
             .map(
-                fix ->
-                    new AddSingleElementAnnotation(
-                        fix.toField(), "SuppressWarnings", "NullAway", false))
+                error ->
+                    fieldDeclarationAnalysis.getLocationOnField(
+                        error.getRegion().clazz, error.getRegion().member))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+
+    Set<AddAnnotation> suppressWarningsAnnotations =
+        fieldsWithSuppressWarnings.stream()
+            .map(
+                onField ->
+                    new AddSingleElementAnnotation(onField, "SuppressWarnings", "NullAway", false))
             .collect(Collectors.toSet());
     injector.injectAnnotations(suppressWarningsAnnotations);
     // Update log.
@@ -316,6 +327,8 @@ public class Annotator {
                     fix.isOnField()
                         && (fix.reasons.contains("METHOD_NO_INIT")
                             || fix.reasons.contains("FIELD_NO_INIT")))
+            // Filter nodes annotated with SuppressWarnings("NullAway")
+            .filter(fix -> !fieldsWithSuppressWarnings.contains(fix.toField()))
             .map(
                 fix ->
                     new AddSingleElementAnnotation(

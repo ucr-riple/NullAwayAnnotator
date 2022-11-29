@@ -29,10 +29,16 @@ import static java.util.Collections.singleton;
 
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.tools.TReport;
+import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -295,6 +301,108 @@ public class CoreTest extends BaseCoreTest {
             .get(0)
             .annotation
             .equals("org.jspecify.nullness.NullUnmarked"));
+  }
+
+  @Test
+  public void errorInFieldDeclarationForceResolveTest() {
+    coreTestHelper
+        .addInputDirectory("test", "fielderrorregion")
+        .addExpectedReports(
+            new TReport(new OnField("Foo.java", "test.Foo", Set.of("f1")), 2),
+            new TReport(new OnField("Foo.java", "test.Foo", Set.of("f2", "f3")), 2),
+            new TReport(new OnField("Foo.java", "test.Foo", Set.of("f0")), -1),
+            new TReport(new OnParameter("Bar.java", "test.Bar", "process(java.lang.Object)", 0), 1),
+            new TReport(new OnField("Foo.java", "test.Foo", Set.of("f4")), 1),
+            new TReport(new OnField("Foo.java", "test.Foo", Set.of("f5")), 0))
+        .toDepth(1)
+        .enableForceResolve()
+        .start();
+    Path srcRoot = coreTestHelper.getSourceRoot();
+    Set<AddAnnotation> expectedAnnotations =
+        Set.of(
+            new AddMarkerAnnotation(
+                new OnField(srcRoot.resolve("Foo.java").toString(), "test.Foo", Set.of("f0")),
+                "javax.annotation.Nullable"),
+            new AddMarkerAnnotation(
+                new OnMethod(
+                    srcRoot.resolve("Bar.java").toString(),
+                    "test.Bar",
+                    "process(java.lang.Object)"),
+                "org.jspecify.nullness.NullUnmarked"),
+            new AddSingleElementAnnotation(
+                new OnField(srcRoot.resolve("Foo.java").toString(), "test.Foo", Set.of("f4")),
+                "SuppressWarnings",
+                "NullAway",
+                false),
+            new AddSingleElementAnnotation(
+                new OnField(srcRoot.resolve("Foo.java").toString(), "test.Foo", Set.of("f2", "f3")),
+                "SuppressWarnings",
+                "NullAway.Init",
+                false),
+            new AddSingleElementAnnotation(
+                new OnField(srcRoot.resolve("Foo.java").toString(), "test.Foo", Set.of("f1")),
+                "SuppressWarnings",
+                "NullAway.Init",
+                false),
+            new AddMarkerAnnotation(
+                new OnField(srcRoot.resolve("Foo.java").toString(), "test.Foo", Set.of("f5")),
+                "javax.annotation.Nullable"));
+    // todo: change test infrastructure to do the expected added annotations comparison internally
+    // in the upcoming refactoring cycle.
+    Assert.assertEquals(
+        expectedAnnotations, Set.copyOf(coreTestHelper.getConfig().log.getInjectedAnnotations()));
+  }
+
+  @Test
+  public void initializationErrorWithMultipleConstructors() {
+    coreTestHelper
+        .addInputLines(
+            "Foo.java",
+            "package test;",
+            "public class Foo {",
+            "   Object f1;",
+            "   Object f2;",
+            "   Object f3;",
+            "   Object f4 = null;",
+            "   Foo() { }",
+            "   Foo(int i) { }",
+            "   Foo(int i, int j) { }",
+            "   void bar1() {",
+            "     f3.hashCode();",
+            "     f4.hashCode();",
+            "   }",
+            "   void bar2() {",
+            "     f3.hashCode();",
+            "     f4.hashCode();",
+            "   }",
+            "}")
+        .addExpectedReports(
+            new TReport(new OnField("Foo.java", "test.Foo", Set.of("f1")), 0),
+            new TReport(new OnField("Foo.java", "test.Foo", Set.of("f2")), 0),
+            new TReport(new OnField("Foo.java", "test.Foo", Set.of("f3")), 2),
+            new TReport(new OnField("Foo.java", "test.Foo", Set.of("f4")), 1))
+        .toDepth(1)
+        .enableForceResolve()
+        .start();
+    String pathToFoo = coreTestHelper.getSourceRoot().resolve("Foo.java").toString();
+    Set<AddAnnotation> expectedAnnotations =
+        Set.of(
+            new AddMarkerAnnotation(
+                new OnField(pathToFoo, "test.Foo", Set.of("f1")), "javax.annotation.Nullable"),
+            new AddMarkerAnnotation(
+                new OnField(pathToFoo, "test.Foo", Set.of("f2")), "javax.annotation.Nullable"),
+            new AddSingleElementAnnotation(
+                new OnField(pathToFoo, "test.Foo", Set.of("f3")),
+                "SuppressWarnings",
+                "NullAway.Init",
+                false),
+            new AddSingleElementAnnotation(
+                new OnField(pathToFoo, "test.Foo", Set.of("f4")),
+                "SuppressWarnings",
+                "NullAway",
+                false));
+    Assert.assertEquals(
+        expectedAnnotations, Set.copyOf(coreTestHelper.getConfig().log.getInjectedAnnotations()));
   }
 
   @Test

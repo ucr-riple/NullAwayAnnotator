@@ -12,6 +12,7 @@ import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
+import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.TypeAnnotatorScanner;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -77,18 +78,16 @@ public class FieldDeclarationAnalysis extends MetaData<FieldDeclarationInfo> {
         System.err.println(notFound.getMessage());
         return null;
       }
-      FieldDeclarationInfo info = new FieldDeclarationInfo(clazz);
+      FieldDeclarationInfo info = new FieldDeclarationInfo(path, clazz);
       members.forEach(
           bodyDeclaration ->
               bodyDeclaration.ifFieldDeclaration(
                   fieldDeclaration -> {
                     NodeList<VariableDeclarator> vars = fieldDeclaration.getVariables();
-                    if (vars.size() > 1) { // Check if it is an inline multiple field declaration.
-                      info.addNewSetOfFieldDeclarations(
-                          vars.stream()
-                              .map(NodeWithSimpleName::getNameAsString)
-                              .collect(ImmutableSet.toImmutableSet()));
-                    }
+                    info.addNewSetOfFieldDeclarations(
+                        vars.stream()
+                            .map(NodeWithSimpleName::getNameAsString)
+                            .collect(ImmutableSet.toImmutableSet()));
                   }));
       return info.isEmpty() ? null : info;
     } catch (FileNotFoundException e) {
@@ -115,5 +114,21 @@ public class FieldDeclarationAnalysis extends MetaData<FieldDeclarationInfo> {
     Optional<ImmutableSet<String>> inLineGroupFieldDeclaration =
         candidate.fields.stream().filter(group -> !Collections.disjoint(group, fields)).findFirst();
     return inLineGroupFieldDeclaration.orElse(ImmutableSet.copyOf(fields));
+  }
+
+  /**
+   * Creates a {@link OnField} instance targeting the passed field and class.
+   *
+   * @param clazz Enclosing class of the field.
+   * @param field Field name.
+   * @return {@link OnField} instance targeting the passed field and class.
+   */
+  public OnField getLocationOnField(String clazz, String field) {
+    FieldDeclarationInfo candidate =
+        findNodeWithHashHint(node -> node.clazz.equals(clazz), FieldDeclarationInfo.hash(clazz));
+    if (candidate == null) {
+      return null;
+    }
+    return new OnField(candidate.pathToSourceFile, candidate.clazz, Collections.singleton(field));
   }
 }

@@ -79,6 +79,15 @@ public class Region {
     return type.equals(Type.METHOD);
   }
 
+  /**
+   * Checks if region targets a field declaration.
+   *
+   * @return true, if region is targeting a field declaration.
+   */
+  public boolean isOnField() {
+    return type.equals(Type.FIELD);
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
