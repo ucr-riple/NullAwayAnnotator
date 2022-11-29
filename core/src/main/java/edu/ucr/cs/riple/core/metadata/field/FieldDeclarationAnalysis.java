@@ -84,12 +84,10 @@ public class FieldDeclarationAnalysis extends MetaData<FieldDeclarationInfo> {
               bodyDeclaration.ifFieldDeclaration(
                   fieldDeclaration -> {
                     NodeList<VariableDeclarator> vars = fieldDeclaration.getVariables();
-                    if (vars.size() > 1) { // Check if it is an inline multiple field declaration.
-                      info.addNewSetOfFieldDeclarations(
-                          vars.stream()
-                              .map(NodeWithSimpleName::getNameAsString)
-                              .collect(ImmutableSet.toImmutableSet()));
-                    }
+                    info.addNewSetOfFieldDeclarations(
+                        vars.stream()
+                            .map(NodeWithSimpleName::getNameAsString)
+                            .collect(ImmutableSet.toImmutableSet()));
                   }));
       return info.isEmpty() ? null : info;
     } catch (FileNotFoundException e) {
