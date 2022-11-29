@@ -1,6 +1,6 @@
 set -exu
 
-CURRENT_VERSION="core-1.3.3-LOCAL.jar"
+CURRENT_VERSION="core-1.3.4.jar"
 PROJECT_ROOT=${PROJECT_ROOT:-$(git rev-parse --show-toplevel)}
 
 pushd "$PROJECT_ROOT"

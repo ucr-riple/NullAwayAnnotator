@@ -11,7 +11,7 @@ Below are the instructions to prepare the target project:
 
 #### Dependencies
 1. `NullAway` checker must be activated with version >= `0.9.7`
-2. `AnnotatorScanner` checker must be activated with version >= `1.2.6-LOCAL`, see more about `AnnotatorScanner` [here](../type-annotator-scanner/README.md).
+2. `AnnotatorScanner` checker must be activated with version >= `1.2.6`, see more about `AnnotatorScanner` [here](../type-annotator-scanner/README.md).
 
 #### Error Prone Flags
 ```
@@ -29,7 +29,7 @@ Please find a sample project setup below:
 ```groovy
 dependencies {
     annotationProcessor "edu.ucr.cs.riple:nullaway:0.9.6"
-    annotationProcessor "edu.ucr.cs.riple.annotator:annotator-scanner:1.3.3-LOCAL"
+    annotationProcessor "edu.ucr.cs.riple.annotator:annotator-scanner:1.3.4"
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
     errorprone "com.google.errorprone:error_prone_core:2.3.2"
     errorproneJavac "com.google.errorprone:javac:9+181-r4173-1"
