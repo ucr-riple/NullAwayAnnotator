@@ -294,6 +294,10 @@ public class Annotator {
                   if (!error.getRegion().isOnField()) {
                     return false;
                   }
+                  if (error.messageType.equals("PASS_NULLABLE") && error.getRegion().isOnField()) {
+                    // It is already resolved with @NullUnmarked selected above.
+                    return false;
+                  }
                   // We can silence them by SuppressWarnings("NullAway.Init")
                   return !error.messageType.equals("METHOD_NO_INIT")
                       && !error.messageType.equals("FIELD_NO_INIT");

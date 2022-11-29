@@ -342,11 +342,6 @@ public class CoreTest extends BaseCoreTest {
                 "NullAway",
                 false),
             new AddSingleElementAnnotation(
-                new OnField(srcRoot.resolve("Foo.java").toString(), "test.Foo", Set.of("f0")),
-                "SuppressWarnings",
-                "NullAway",
-                false),
-            new AddSingleElementAnnotation(
                 new OnField(srcRoot.resolve("Foo.java").toString(), "test.Foo", Set.of("f2", "f3")),
                 "SuppressWarnings",
                 "NullAway.Init",
