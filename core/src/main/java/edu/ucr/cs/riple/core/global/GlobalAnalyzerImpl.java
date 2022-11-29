@@ -106,7 +106,7 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
             .collect(ImmutableSet.toImmutableSet());
     DownstreamImpactExplorer analyzer =
         new DownstreamImpactExplorer(
-            fixes, new DownstreamDependencySupplier(config, tree), tracker);
+            fixes, new DownstreamDependencySupplier(config, tracker, tree));
     ImmutableSet<Report> reports = analyzer.explore();
     // Update method status based on the results.
     methods

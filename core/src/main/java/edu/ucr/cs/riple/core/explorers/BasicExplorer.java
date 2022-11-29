@@ -25,76 +25,47 @@
 package edu.ucr.cs.riple.core.explorers;
 
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.explorers.suppliers.Supplier;
-import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
-import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.index.Result;
-import edu.ucr.cs.riple.core.metadata.trackers.Region;
-import edu.ucr.cs.riple.core.util.Utility;
-import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
-import edu.ucr.cs.riple.injector.location.Location;
-import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
-import me.tongfei.progressbar.ProgressBar;
+import java.util.HashSet;
 
 public class BasicExplorer extends Explorer {
 
-  public BasicExplorer(ImmutableSet<Fix> fixes, Supplier supplier, GlobalAnalyzer globalAnalyzer) {
-    super(fixes, supplier, globalAnalyzer);
+  public BasicExplorer(ImmutableSet<Fix> fixes, Supplier supplier) {
+    super(fixes, supplier);
   }
 
   @Override
-  protected void executeNextCycle() {
-    System.out.println(
-        "Scheduling for: " + reports.size() + " builds for: " + reports.size() + " fixes");
-    ProgressBar pb = Utility.createProgressBar("Processing", reports.size());
+  protected void initializeFixGraph() {
+    super.initializeFixGraph();
+    this.reports.stream()
+        .filter(input -> input.isInProgress(config))
+        .forEach(
+            report -> {
+              Fix root = report.root;
+              Node node = graph.addNodeToVertices(root);
+              node.setOrigins(supplier.getFixBank());
+              node.report = report;
+              node.triggeredFixes = new HashSet<>(report.triggeredFixes);
+              node.tree.addAll(report.tree);
+              node.mergeTriggered();
+            });
+  }
+
+  @Override
+  protected void collectGraphResults() {
     graph
         .getNodes()
         .forEach(
             node -> {
-              pb.step();
-              Set<Fix> fixes = node.tree;
-              injector.injectFixes(fixes);
-              Utility.buildTarget(config);
-              errorBank.saveState(false, true);
-              fixBank.saveState(false, true);
-              Result<Error> errorComparisonResult = errorBank.compare();
-              node.effect = errorComparisonResult.size;
-              Collection<Fix> fixComparisonResultDif = fixBank.compare().dif;
-              addTriggeredFixesFromDownstream(node, fixComparisonResultDif);
-              node.updateStatus(
-                  errorComparisonResult.size,
-                  fixes,
-                  fixComparisonResultDif,
-                  errorComparisonResult.dif,
-                  methodDeclarationTree);
-              injector.removeFixes(fixes);
+              Report report = node.report;
+              report.localEffect = node.effect;
+              report.tree = node.tree;
+              report.triggeredFixes = ImmutableSet.copyOf(node.triggeredFixes);
+              report.triggeredErrors = node.triggeredErrors;
+              report.finished = !node.changed;
             });
-    pb.close();
-  }
-
-  /**
-   * Updates list of triggered fixes with fixes triggered from downstream dependencies.
-   *
-   * @param node Node in process.
-   * @param localTriggeredFixes Collection of triggered fixes locally.
-   */
-  public void addTriggeredFixesFromDownstream(Node node, Collection<Fix> localTriggeredFixes) {
-    Set<Location> currentLocationTargetedByTree =
-        node.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
-    localTriggeredFixes.addAll(
-        globalAnalyzer.getImpactedParameters(node.tree).stream()
-            .filter(input -> !currentLocationTargetedByTree.contains(input))
-            .map(
-                onParameter ->
-                    new Fix(
-                        new AddMarkerAnnotation(onParameter, config.nullableAnnot),
-                        "PASSING_NULLABLE",
-                        new Region(onParameter.clazz, onParameter.method),
-                        false))
-            .collect(Collectors.toList()));
   }
 }

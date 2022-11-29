@@ -26,22 +26,16 @@ package edu.ucr.cs.riple.core.explorers;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.explorers.suppliers.ExhaustiveSupplier;
-import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 
 public class ExhaustiveExplorer extends Explorer {
 
   public ExhaustiveExplorer(ImmutableSet<Fix> fixes, ExhaustiveSupplier supplier) {
-    super(fixes, supplier, new NoOpGlobalAnalyzer());
+    super(fixes, supplier);
   }
 
   @Override
-  protected void executeNextCycle() {
-    // NO OP
-  }
-
-  @Override
-  protected void finalizeReports() {
+  protected void collectGraphResults() {
     this.reports.forEach(report -> report.localEffect = -1);
   }
 }

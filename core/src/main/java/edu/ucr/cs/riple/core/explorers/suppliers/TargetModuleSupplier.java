@@ -25,10 +25,18 @@
 package edu.ucr.cs.riple.core.explorers.suppliers;
 
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.CompilerRunner;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.explorers.impactanalyzers.BasicImpactAnalyzer;
+import edu.ucr.cs.riple.core.explorers.impactanalyzers.ImpactAnalyzer;
+import edu.ucr.cs.riple.core.explorers.impactanalyzers.OptimizedImpactAnalyzer;
+import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
+import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
+import edu.ucr.cs.riple.core.util.Utility;
 
 /**
  * Supplier for target module analysis. It has the following characteristics:
@@ -41,14 +49,19 @@ import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
  */
 public class TargetModuleSupplier extends AbstractSupplier {
 
+  protected final GlobalAnalyzer globalAnalyzer;
+
   /**
    * Constructor for target module supplier instance.
    *
    * @param config Annotator config instance.
+   * @param globalAnalyzer Global analyzer instance.
    * @param tree Method declaration tree for methods in target module.
    */
-  public TargetModuleSupplier(Config config, MethodDeclarationTree tree) {
+  public TargetModuleSupplier(
+      Config config, GlobalAnalyzer globalAnalyzer, MethodDeclarationTree tree) {
     super(ImmutableSet.of(config.target), config, tree);
+    this.globalAnalyzer = globalAnalyzer;
   }
 
   @Override
@@ -59,5 +72,24 @@ public class TargetModuleSupplier extends AbstractSupplier {
   @Override
   protected int initializeDepth() {
     return config.depth;
+  }
+
+  @Override
+  public GlobalAnalyzer getGlobalAnalyzer() {
+    return globalAnalyzer;
+  }
+
+  @Override
+  public CompilerRunner getCompilerRunner() {
+    return () -> Utility.buildTarget(config);
+  }
+
+  @Override
+  public ImpactAnalyzer getImpactAnalyzer() {
+    if (config.optimized) {
+      RegionTracker tracker = new CompoundTracker(config, config.target, tree);
+      return new OptimizedImpactAnalyzer(config, this, tracker);
+    }
+    return new BasicImpactAnalyzer(config, this);
   }
 }

@@ -24,10 +24,18 @@
 
 package edu.ucr.cs.riple.core.explorers.suppliers;
 
+import edu.ucr.cs.riple.core.CompilerRunner;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.explorers.impactanalyzers.BasicImpactAnalyzer;
+import edu.ucr.cs.riple.core.explorers.impactanalyzers.ImpactAnalyzer;
+import edu.ucr.cs.riple.core.explorers.impactanalyzers.OptimizedImpactAnalyzer;
+import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
+import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.VirtualInjector;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
+import edu.ucr.cs.riple.core.util.Utility;
 
 /**
  * Supplier for downstream dependency analysis. It has the following characteristics:
@@ -40,8 +48,12 @@ import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
  */
 public class DownstreamDependencySupplier extends AbstractSupplier {
 
-  public DownstreamDependencySupplier(Config config, MethodDeclarationTree tree) {
+  private final RegionTracker tracker;
+
+  public DownstreamDependencySupplier(
+      Config config, RegionTracker tracker, MethodDeclarationTree tree) {
     super(config.downstreamInfo, config, tree);
+    this.tracker = tracker;
   }
 
   @Override
@@ -52,5 +64,22 @@ public class DownstreamDependencySupplier extends AbstractSupplier {
   @Override
   protected int initializeDepth() {
     return 1;
+  }
+
+  @Override
+  public GlobalAnalyzer getGlobalAnalyzer() {
+    return new NoOpGlobalAnalyzer();
+  }
+
+  @Override
+  public CompilerRunner getCompilerRunner() {
+    return () -> Utility.buildDownstreamDependencies(config);
+  }
+
+  @Override
+  public ImpactAnalyzer getImpactAnalyzer() {
+    return config.optimized
+        ? new OptimizedImpactAnalyzer(config, this, tracker)
+        : new BasicImpactAnalyzer(config, this);
   }
 }

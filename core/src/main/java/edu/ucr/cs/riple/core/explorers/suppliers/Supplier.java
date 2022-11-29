@@ -24,7 +24,10 @@
 
 package edu.ucr.cs.riple.core.explorers.suppliers;
 
+import edu.ucr.cs.riple.core.CompilerRunner;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.explorers.impactanalyzers.ImpactAnalyzer;
+import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -75,4 +78,25 @@ public interface Supplier {
    * @return Config instance.
    */
   Config getConfig();
+
+  /**
+   * Getter for {@link GlobalAnalyzer} instance.
+   *
+   * @return GlobalAnalyzer instance.
+   */
+  GlobalAnalyzer getGlobalAnalyzer();
+
+  /**
+   * Getter for {@link CompilerRunner} to rerun analysis on the processing module.
+   *
+   * @return CompilerRunner instance.
+   */
+  CompilerRunner getCompilerRunner();
+
+  /**
+   * Getter for {@link ImpactAnalyzer}.
+   *
+   * @return ImpactAnalyzer instance.
+   */
+  ImpactAnalyzer getImpactAnalyzer();
 }
