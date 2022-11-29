@@ -51,7 +51,7 @@ public class ErrorProneCLIFlagsConfig implements Config {
     String configFilePath = flags.get(FL_CONFIG_PATH).orElse(null);
     if (configFilePath == null) {
       throw new IllegalStateException(
-          "Error in Scanner Checker configuration, should be set with via error prone flag: (-XepOpt:TypeAnnotatorScanner:ConfigPath)");
+          "Error in Scanner Checker configuration, should be set with via error prone flag: (-XepOpt:AnnotatorScanner:ConfigPath)");
     }
     Document document;
     try {

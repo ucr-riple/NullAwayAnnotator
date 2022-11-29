@@ -77,8 +77,8 @@ public abstract class AnnotatorScannerBaseTest<T extends Display> {
                 Arrays.asList(
                     "-d",
                     temporaryFolder.getRoot().getAbsolutePath(),
-                    "-Xep:TypeAnnotatorScanner:ERROR",
-                    "-XepOpt:TypeAnnotatorScanner:ConfigPath=" + config))
+                    "-Xep:AnnotatorScanner:ERROR",
+                    "-XepOpt:AnnotatorScanner:ConfigPath=" + config))
             .setOutputFileNameAndHeader(fileName, header)
             .setFactory(factory);
   }
