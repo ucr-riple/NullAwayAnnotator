@@ -1,5 +1,15 @@
 ## CHANGELOG
 
+### Version 1.3.4
+- Added inference deactivation mode.
+- Updated injector infrastructure.
+- Added infrastructure to support backward compatibility with previous versions of NullAway.
+- Updated SuppressWarnings injections logic.
+- Renamed maven group id and annotator core and scanner modules.
+- Added release scripts to cut a release in maven central.
+- Updated region computation for field declarations. 
+- Bug fixes and refactorings.
+
 ### VERSION 1.3.3
 - Enabled detection of flow of @Nullable back to upstream from downstream.
 - Renamed `MethodInheritanceTree` to `MethodDeclarationTree`.
