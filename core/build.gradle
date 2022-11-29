@@ -102,6 +102,7 @@ tasks.create("configureNullAwayVersion"){
             test {
                 filter {
                     excludeTest "edu.ucr.cs.riple.core.CoreTest", "errorInFieldDeclarationForceResolveTest"
+                    excludeTest "edu.ucr.cs.riple.core.CoreTest", "initializationErrorWithMultipleConstructors"
                 }
             }
             break
