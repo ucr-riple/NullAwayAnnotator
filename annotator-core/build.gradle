@@ -46,6 +46,7 @@ dependencies {
     implementation deps.build.javaparser
     implementation deps.build.commonscli
     testImplementation deps.build.commonsio
+    testImplementation 'junit:junit:4.13.1'
 }
 
 // Should be the latest supporting version of NullAway.
