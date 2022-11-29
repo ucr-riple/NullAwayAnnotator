@@ -75,13 +75,13 @@ public class ConfigurationTest {
                 Arrays.asList(
                     "-d",
                     temporaryFolder.getRoot().getAbsolutePath(),
-                    "-Xep:TypeAnnotatorScanner:ERROR"))
+                    "-Xep:AnnotatorScanner:ERROR"))
             .setOutputFileNameAndHeader("Unknown", "Unknown")
             .addSourceFile("SampleClassForTest.java")
             .setFactory(factory);
     tester.doTestWithExpectingError(
         IllegalStateException.class,
-        "Error in Scanner Checker configuration, should be set with via error prone flag: (-XepOpt:TypeAnnotatorScanner:ConfigPath)");
+        "Error in Scanner Checker configuration, should be set with via error prone flag: (-XepOpt:AnnotatorScanner:ConfigPath)");
   }
 
   @Test
@@ -115,8 +115,8 @@ public class ConfigurationTest {
                 Arrays.asList(
                     "-d",
                     temporaryFolder.getRoot().getAbsolutePath(),
-                    "-Xep:TypeAnnotatorScanner:ERROR",
-                    "-XepOpt:TypeAnnotatorScanner:ConfigPath=" + config))
+                    "-Xep:AnnotatorScanner:ERROR",
+                    "-XepOpt:AnnotatorScanner:ConfigPath=" + config))
             .setOutputFileNameAndHeader("Unknown", "Unknown")
             .addSourceFile("SampleClassForTest.java")
             .setFactory(factory);

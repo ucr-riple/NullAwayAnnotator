@@ -30,7 +30,7 @@ import static org.junit.Assert.fail;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.CompilationTestHelper;
-import edu.ucr.cs.riple.scanner.TypeAnnotatorScanner;
+import edu.ucr.cs.riple.scanner.AnnotatorScanner;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -110,14 +110,14 @@ public class SerializationTestHelper<T extends Display> {
   }
 
   /**
-   * Creates the actual {@link TypeAnnotatorScanner} with the given arguments. This method is part
-   * of the builder pattern and should be called before any other method.
+   * Creates the actual {@link AnnotatorScanner} with the given arguments. This method is part of
+   * the builder pattern and should be called before any other method.
    *
    * @return Receiver of the call.
    */
   public SerializationTestHelper<T> setArgs(List<String> args) {
     compilationTestHelper =
-        CompilationTestHelper.newInstance(TypeAnnotatorScanner.class, getClass()).setArgs(args);
+        CompilationTestHelper.newInstance(AnnotatorScanner.class, getClass()).setArgs(args);
     return this;
   }
 

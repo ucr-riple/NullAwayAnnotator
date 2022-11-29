@@ -30,7 +30,7 @@ import javax.annotation.Nonnull;
 public class DummyOptionsConfig implements Config {
 
   static final String ERROR_MESSAGE =
-      "Error in configuring Scanner Checker, a path must be passed via Error Prone Flag (-XepOpt:Scanner:ConfigPath) where output directory is in XML format.";
+      "Error in configuring Scanner Checker, a path must be passed via Error Prone Flag (-XepOpt:AnnotatorScanner:ConfigPath) where output directory is in XML format.";
 
   @Override
   public boolean callTrackerIsActive() {

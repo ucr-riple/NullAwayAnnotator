@@ -31,6 +31,7 @@ import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Factory;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.scanner.AnnotatorScanner;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -242,9 +243,8 @@ public class Utility {
   }
 
   /**
-   * Activates/Deactivates {@link edu.ucr.cs.riple.scanner.TypeAnnotatorScanner} features by
-   * updating the {@link edu.ucr.cs.riple.scanner.Config} in {@code XML} format for the given
-   * modules.
+   * Activates/Deactivates {@link AnnotatorScanner} features by updating the {@link
+   * edu.ucr.cs.riple.scanner.Config} in {@code XML} format for the given modules.
    *
    * @param modules Immutable set of modules that their configuration files need to be updated.
    * @param activation activation flag for all features of the scanner.
@@ -255,9 +255,8 @@ public class Utility {
   }
 
   /**
-   * Activates/Deactivates {@link edu.ucr.cs.riple.scanner.TypeAnnotatorScanner} features by
-   * updating the {@link edu.ucr.cs.riple.scanner.Config} in {@code XML} format for the given
-   * module.
+   * Activates/Deactivates {@link AnnotatorScanner} features by updating the {@link
+   * edu.ucr.cs.riple.scanner.Config} in {@code XML} format for the given module.
    *
    * @param info module that its configuration file need to be updated.
    * @param activation activation flag for all features of the scanner.

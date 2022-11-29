@@ -44,7 +44,7 @@ public class ErrorProneCLIFlagsConfig implements Config {
   private final boolean callTrackerIsActive;
   private final boolean classTrackerIsActive;
   private final Serializer serializer;
-  static final String EP_FL_NAMESPACE = "TypeAnnotatorScanner";
+  static final String EP_FL_NAMESPACE = "AnnotatorScanner";
   static final String FL_CONFIG_PATH = EP_FL_NAMESPACE + ":ConfigPath";
 
   public ErrorProneCLIFlagsConfig(ErrorProneFlags flags) {

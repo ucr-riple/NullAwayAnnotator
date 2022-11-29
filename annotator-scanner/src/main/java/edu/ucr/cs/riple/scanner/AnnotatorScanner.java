@@ -49,13 +49,13 @@ import javax.lang.model.element.ElementKind;
 
 @AutoService(BugChecker.class)
 @BugPattern(
-    name = "TypeAnnotatorScanner",
+    name = "AnnotatorScanner",
     altNames = {"TypeBasedStructureSerializer"},
-    summary = "Serialized type based call/field graph.",
+    summary = "Serializes type-based metadata regarding code structure.",
     tags = BugPattern.StandardTags.STYLE,
     severity = SUGGESTION)
 @SuppressWarnings("BugPatternNaming")
-public class TypeAnnotatorScanner extends BugChecker
+public class AnnotatorScanner extends BugChecker
     implements BugChecker.MethodInvocationTreeMatcher,
         BugChecker.MemberSelectTreeMatcher,
         BugChecker.MethodTreeMatcher,
@@ -65,11 +65,11 @@ public class TypeAnnotatorScanner extends BugChecker
 
   private final ScannerContext context;
 
-  public TypeAnnotatorScanner() {
+  public AnnotatorScanner() {
     this.context = new ScannerContext(new DummyOptionsConfig());
   }
 
-  public TypeAnnotatorScanner(ErrorProneFlags flags) {
+  public AnnotatorScanner(ErrorProneFlags flags) {
     this.context = new ScannerContext(new ErrorProneCLIFlagsConfig(flags));
   }
 

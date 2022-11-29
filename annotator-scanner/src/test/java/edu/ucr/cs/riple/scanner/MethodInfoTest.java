@@ -33,7 +33,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class MethodInfoTest extends TypeAnnotatorScannerBaseTest<MethodInfoDisplay> {
+public class MethodInfoTest extends AnnotatorScannerBaseTest<MethodInfoDisplay> {
 
   private static final DisplayFactory<MethodInfoDisplay> METHOD_DISPLAY_FACTORY =
       values -> {

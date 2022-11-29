@@ -32,7 +32,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class FieldTrackerTest extends TypeAnnotatorScannerBaseTest<TrackerNodeDisplay> {
+public class FieldTrackerTest extends AnnotatorScannerBaseTest<TrackerNodeDisplay> {
 
   private static final DisplayFactory<TrackerNodeDisplay> FIELD_TRACKER_DISPLAY_FACTORY =
       values -> {
