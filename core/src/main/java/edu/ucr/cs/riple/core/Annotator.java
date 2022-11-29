@@ -294,7 +294,7 @@ public class Annotator {
                   if (!error.getRegion().isOnField()) {
                     return false;
                   }
-                  if (error.messageType.equals("PASS_NULLABLE") && error.getRegion().isOnField()) {
+                  if (error.messageType.equals("PASS_NULLABLE")) {
                     // It is already resolved with @NullUnmarked selected above.
                     return false;
                   }
