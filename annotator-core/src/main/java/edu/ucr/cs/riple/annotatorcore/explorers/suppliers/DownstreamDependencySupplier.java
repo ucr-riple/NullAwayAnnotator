@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,12 +22,35 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'NullAwayAnnotator'
-include 'annotator-core'
-include 'annotator-scanner'
-include 'injector'
-include 'library-model-loader'
-include 'checks'
-include 'checks:ban-mutable-static'
-include 'qual'
+package edu.ucr.cs.riple.annotatorcore.explorers.suppliers;
 
+import edu.ucr.cs.riple.annotatorcore.Config;
+import edu.ucr.cs.riple.annotatorcore.injectors.AnnotationInjector;
+import edu.ucr.cs.riple.annotatorcore.injectors.VirtualInjector;
+import edu.ucr.cs.riple.annotatorcore.metadata.method.MethodDeclarationTree;
+
+/**
+ * Supplier for downstream dependency analysis. It has the following characteristics:
+ *
+ * <ul>
+ *   <li>Annotations are virtually injected on downstream dependencies.
+ *   <li>Analysis is performed only to depth 1.
+ *   <li>Global impact of annotations are neglected.
+ * </ul>
+ */
+public class DownstreamDependencySupplier extends AbstractSupplier {
+
+  public DownstreamDependencySupplier(Config config, MethodDeclarationTree tree) {
+    super(config.downstreamInfo, config, tree);
+  }
+
+  @Override
+  protected AnnotationInjector initializeInjector() {
+    return new VirtualInjector(config);
+  }
+
+  @Override
+  protected int initializeDepth() {
+    return 1;
+  }
+}

@@ -22,12 +22,26 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'NullAwayAnnotator'
-include 'annotator-core'
-include 'annotator-scanner'
-include 'injector'
-include 'library-model-loader'
-include 'checks'
-include 'checks:ban-mutable-static'
-include 'qual'
+package edu.ucr.cs.riple.annotatorscanner.out;
 
+import com.sun.source.tree.CompilationUnitTree;
+import com.sun.tools.javac.code.Symbol;
+
+public class ClassInfo {
+  public final Symbol.ClassSymbol clazz;
+  public final String path;
+
+  public ClassInfo(Symbol.ClassSymbol clazz, CompilationUnitTree compilationUnitTree) {
+    this.clazz = clazz;
+    this.path = compilationUnitTree.getSourceFile().toUri().getPath();
+  }
+
+  public static String header() {
+    return "class" + '\t' + "path";
+  }
+
+  @Override
+  public String toString() {
+    return clazz.flatName() + "\t" + path;
+  }
+}

@@ -22,12 +22,7 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'NullAwayAnnotator'
-include 'annotator-core'
-include 'annotator-scanner'
-include 'injector'
-include 'library-model-loader'
-include 'checks'
-include 'checks:ban-mutable-static'
-include 'qual'
+package edu.ucr.cs.riple.annotatorcore.metadata;
 
+/** Marker interface for defining expected type for {@link MetaData}. */
+public interface Hashable {}

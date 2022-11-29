@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,12 +22,17 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'NullAwayAnnotator'
-include 'annotator-core'
-include 'annotator-scanner'
-include 'injector'
-include 'library-model-loader'
-include 'checks'
-include 'checks:ban-mutable-static'
-include 'qual'
+package edu.ucr.cs.riple.annotatorcore.tools;
 
+import edu.ucr.cs.riple.annotatorcore.metadata.index.Fix;
+import edu.ucr.cs.riple.annotatorcore.metadata.trackers.Region;
+import edu.ucr.cs.riple.injector.changes.Change;
+import edu.ucr.cs.riple.injector.location.Location;
+
+/** Wrapper class for {@link Change} with default values, used to create tests. */
+public class TFix extends Fix {
+
+  public TFix(Location location) {
+    super(new DefaultAnnotation(location), null, new Region("null", "null"), true);
+  }
+}

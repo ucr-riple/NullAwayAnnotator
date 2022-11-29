@@ -22,12 +22,26 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'NullAwayAnnotator'
-include 'annotator-core'
-include 'annotator-scanner'
-include 'injector'
-include 'library-model-loader'
-include 'checks'
-include 'checks:ban-mutable-static'
-include 'qual'
+package edu.ucr.cs.riple.annotatorcore.explorers;
 
+import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.annotatorcore.explorers.suppliers.ExhaustiveSupplier;
+import edu.ucr.cs.riple.annotatorcore.global.NoOpGlobalAnalyzer;
+import edu.ucr.cs.riple.annotatorcore.metadata.index.Fix;
+
+public class ExhaustiveExplorer extends Explorer {
+
+  public ExhaustiveExplorer(ImmutableSet<Fix> fixes, ExhaustiveSupplier supplier) {
+    super(fixes, supplier, new NoOpGlobalAnalyzer());
+  }
+
+  @Override
+  protected void executeNextCycle() {
+    // NO OP
+  }
+
+  @Override
+  protected void finalizeReports() {
+    this.reports.forEach(report -> report.localEffect = -1);
+  }
+}

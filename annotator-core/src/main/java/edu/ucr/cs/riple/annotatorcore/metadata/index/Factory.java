@@ -22,12 +22,19 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'NullAwayAnnotator'
-include 'annotator-core'
-include 'annotator-scanner'
-include 'injector'
-include 'library-model-loader'
-include 'checks'
-include 'checks:ban-mutable-static'
-include 'qual'
+package edu.ucr.cs.riple.annotatorcore.metadata.index;
 
+/**
+ * Factory class to enable {@link Index} to create a new instance from values written in string at
+ * each line of output files.
+ */
+public interface Factory<T extends Enclosed> {
+
+  /**
+   * Creates an instance of {@code T} from values in string.
+   *
+   * @param values values of instance {@code T} in string.
+   * @return instance of T.
+   */
+  T build(String[] values);
+}

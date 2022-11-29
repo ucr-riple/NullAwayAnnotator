@@ -1,0 +1,111 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2020 Nima Karimipour
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+import com.vanniktech.maven.publish.SonatypeHost
+
+plugins {
+    id 'com.github.sherter.google-java-format' version '0.9'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'maven-publish'
+    id 'application'
+    id "com.vanniktech.maven.publish"
+}
+
+application {
+    mainClass = 'edu.ucr.cs.riple.core.Main'
+}
+
+dependencies {
+
+    implementation project(':injector')
+    implementation project(':annotator-scanner')
+    implementation deps.build.guava
+    implementation deps.build.json
+    implementation deps.build.progressbar
+    implementation deps.build.javaparser
+    implementation deps.build.commonscli
+    testImplementation deps.build.commonsio
+}
+
+// Should be the latest supporting version of NullAway.
+def NULLAWAY_TEST = "0.10.5"
+
+tasks.test.dependsOn(':annotator-scanner:publishToMavenLocal')
+tasks.test.dependsOn(':qual:publishToMavenLocal')
+
+// Set up environment variables for test configuration tu run with the latest development version.
+tasks.test.doFirst {
+    environment "NULLAWAY_TEST_VERSION", NULLAWAY_TEST
+    environment "ANNOTATOR_VERSION", project.version
+}
+
+publishing {
+    publications {
+        shadow(MavenPublication) { publication ->
+            project.shadow.component(publication)
+        }
+    }
+
+    mavenPublishing {
+        publishToMavenCentral(SonatypeHost.S01)
+        signAllPublications()
+    }
+
+    repositories {
+        mavenLocal()
+    }
+}
+
+jar {
+    // add this classifier to prevent overwriting jar and shadowJar outputs to preserve incremental build of gradle.
+    archiveClassifier = "nonshadow"
+}
+
+// To remove the "-all" postfix from the produced jar file.
+shadowJar {
+    archiveClassifier = null
+}
+
+// Configure test environment
+def nullawayVersionMap = [0:"0.10.4", 1:"0.10.5"]
+tasks.create("configureNullAwayVersion"){
+    if(!project.hasProperty("nullaway-serialization-format-version")){
+        return
+    }
+    NULLAWAY_TEST = nullawayVersionMap.get((project.getProperty("nullaway-serialization-format-version")) as int)
+    println "NullAway Test version changed to: " + NULLAWAY_TEST
+
+    // exclude unsupported tests below...
+    switch (NULLAWAY_TEST){
+        case "0.10.4":
+            test {
+                filter {
+                    excludeTest "edu.ucr.cs.riple.core.CoreTest", "errorInFieldDeclarationForceResolveTest"
+                    excludeTest "edu.ucr.cs.riple.core.CoreTest", "initializationErrorWithMultipleConstructors"
+                }
+            }
+            break
+    }
+}
+tasks.test.dependsOn("configureNullAwayVersion")

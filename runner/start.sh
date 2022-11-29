@@ -1,26 +1,15 @@
 set -exu
 
+CURRENT_VERSION="core-1.3.3-LOCAL.jar"
 PROJECT_ROOT=${PROJECT_ROOT:-$(git rev-parse --show-toplevel)}
 
 pushd "$PROJECT_ROOT"
-  pushd runner
-    DIR=jars
-    if [ ! -d "$DIR" ]; then
-        echo "$DIR does not exists, creating..."
-        mkdir jars
-    fi
-    FILE=./jars/core.jar
-    if [ ! -f "$FILE" ]; then
-        echo "$FILE does not exists, creating..."
-        ./update.sh
-    fi
-  popd
-popd
+   ./gradlew publishToMavenLocal -x signMavenPublication --rerun-tasks
+   mv core/build/libs/"$CURRENT_VERSION" runner/jars/core.jar
 
-pushd "$PROJECT_ROOT"
-  pushd runner
-    pushd "$DIR"
-      java -jar core.jar "$@"
-    popd
-  popd
+   pushd runner
+       pushd "$DIR"
+         java -jar core.jar "$@"
+       popd
+     popd
 popd

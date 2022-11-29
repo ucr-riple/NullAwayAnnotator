@@ -22,12 +22,47 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'NullAwayAnnotator'
-include 'annotator-core'
-include 'annotator-scanner'
-include 'injector'
-include 'library-model-loader'
-include 'checks'
-include 'checks:ban-mutable-static'
-include 'qual'
+package edu.ucr.cs.riple.annotatorcore.metadata.index;
 
+import edu.ucr.cs.riple.annotatorcore.metadata.trackers.Region;
+
+/**
+ * Subtypes of this class are outputs of analysis at program points (code locations). This class,
+ * stores the containing {@link Region} info of that program point.
+ */
+public abstract class Enclosed {
+
+  /** Containing region. */
+  protected final Region region;
+
+  public Enclosed(Region region) {
+    this.region = region;
+  }
+
+  /**
+   * Fully qualified name of the containing region.
+   *
+   * @return Fully qualified name the class.
+   */
+  public String encClass() {
+    return this.region.clazz;
+  }
+
+  /**
+   * Representative member of the containing region as {@code String}.
+   *
+   * @return Member symbol in {@code String}.
+   */
+  public String encMember() {
+    return this.region.member;
+  }
+
+  /**
+   * Getter for region.
+   *
+   * @return region instance.
+   */
+  public Region getRegion() {
+    return this.region;
+  }
+}

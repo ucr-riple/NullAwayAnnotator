@@ -22,12 +22,24 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'NullAwayAnnotator'
-include 'annotator-core'
-include 'annotator-scanner'
-include 'injector'
-include 'library-model-loader'
-include 'checks'
-include 'checks:ban-mutable-static'
-include 'qual'
+package edu.ucr.cs.riple.annotatorcore.metadata.trackers;
 
+import edu.ucr.cs.riple.annotatorcore.metadata.index.Fix;
+import java.util.Optional;
+import java.util.Set;
+
+/**
+ * Interface for trackers. Trackers can locate regions where a {@link Fix} can potentially introduce
+ * new errors if injected.
+ */
+public interface RegionTracker {
+
+  /**
+   * Returns Set of regions where a fix can introduce new errors if injected. Should return {@link
+   * Optional#EMPTY} if the tracker does not know anything about that fix type.
+   *
+   * @param fix a Fix instance.
+   * @return Set of regions.
+   */
+  Optional<Set<Region>> getRegions(Fix fix);
+}

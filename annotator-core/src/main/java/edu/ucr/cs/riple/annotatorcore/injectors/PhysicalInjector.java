@@ -22,12 +22,31 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'NullAwayAnnotator'
-include 'annotator-core'
-include 'annotator-scanner'
-include 'injector'
-include 'library-model-loader'
-include 'checks'
-include 'checks:ban-mutable-static'
-include 'qual'
+package edu.ucr.cs.riple.annotatorcore.injectors;
 
+import edu.ucr.cs.riple.annotatorcore.Config;
+import edu.ucr.cs.riple.injector.Injector;
+import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
+import java.util.Set;
+
+/** Wrapper tool used to inject annotations Physically to the source code. */
+public class PhysicalInjector extends AnnotationInjector {
+  private final Injector injector;
+
+  public PhysicalInjector(Config config) {
+    super(config);
+    this.injector =
+        Injector.builder().preserveStyle(!this.config.lexicalPreservationDisabled).build();
+  }
+
+  @Override
+  public void removeAnnotations(Set<RemoveAnnotation> changes) {
+    this.injector.removeAnnotations(changes);
+  }
+
+  @Override
+  public void injectAnnotations(Set<AddAnnotation> changes) {
+    this.injector.addAnnotations(changes);
+  }
+}

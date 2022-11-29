@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,12 +22,44 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'NullAwayAnnotator'
-include 'annotator-core'
-include 'annotator-scanner'
-include 'injector'
-include 'library-model-loader'
-include 'checks'
-include 'checks:ban-mutable-static'
-include 'qual'
+package edu.ucr.cs.riple.annotatorscanner;
 
+import java.nio.file.Path;
+import javax.annotation.Nonnull;
+
+public class DummyOptionsConfig implements Config {
+
+  static final String ERROR_MESSAGE =
+      "Error in configuring Scanner Checker, a path must be passed via Error Prone Flag (-XepOpt:Scanner:ConfigPath) where output directory is in XML format.";
+
+  @Override
+  public boolean callTrackerIsActive() {
+    throw new IllegalStateException(ERROR_MESSAGE);
+  }
+
+  @Override
+  public boolean fieldTrackerIsActive() {
+    throw new IllegalStateException(ERROR_MESSAGE);
+  }
+
+  @Override
+  public boolean methodTrackerIsActive() {
+    throw new IllegalStateException(ERROR_MESSAGE);
+  }
+
+  @Override
+  public boolean classTrackerIsActive() {
+    throw new IllegalStateException(ERROR_MESSAGE);
+  }
+
+  @Override
+  public Serializer getSerializer() {
+    throw new IllegalStateException(ERROR_MESSAGE);
+  }
+
+  @Nonnull
+  @Override
+  public Path getOutputDirectory() {
+    throw new IllegalStateException(ERROR_MESSAGE);
+  }
+}

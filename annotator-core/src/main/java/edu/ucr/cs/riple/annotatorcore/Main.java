@@ -22,12 +22,27 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'NullAwayAnnotator'
-include 'annotator-core'
-include 'annotator-scanner'
-include 'injector'
-include 'library-model-loader'
-include 'checks'
-include 'checks:ban-mutable-static'
-include 'qual'
+package edu.ucr.cs.riple.annotatorcore;
 
+import java.nio.file.Paths;
+
+/** Starting point. */
+public class Main {
+
+  /**
+   * Starting point.
+   *
+   * @param args if flag '--path' is found, all configurations will be set up based on the given
+   *     json file, otherwise they will be set up according to the set of received cli arguments.
+   */
+  public static void main(String[] args) {
+    Config config;
+    if (args.length == 2 && args[0].equals("--path")) {
+      config = new Config(Paths.get(args[1]));
+    } else {
+      config = new Config(args);
+    }
+    Annotator annotator = new Annotator(config);
+    annotator.start();
+  }
+}

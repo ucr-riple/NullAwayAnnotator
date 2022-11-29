@@ -22,12 +22,24 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'NullAwayAnnotator'
-include 'annotator-core'
-include 'annotator-scanner'
-include 'injector'
-include 'library-model-loader'
-include 'checks'
-include 'checks:ban-mutable-static'
-include 'qual'
+package edu.ucr.cs.riple.annotatorcore.metadata.index;
 
+import java.util.Collection;
+
+/**
+ * Stores the result of comparison between two collections A and B (A - B).
+ *
+ * @param <T> Extends {@link Enclosed}
+ */
+public class Result<T extends Enclosed> {
+
+  /** Difference in number of elements in collection A and B. */
+  public final int size;
+  /** Items that are present in A, but not B. */
+  public final Collection<T> dif;
+
+  public Result(int size, Collection<T> dif) {
+    this.size = size;
+    this.dif = dif;
+  }
+}

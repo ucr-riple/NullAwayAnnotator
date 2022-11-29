@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,12 +22,19 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'NullAwayAnnotator'
-include 'annotator-core'
-include 'annotator-scanner'
-include 'injector'
-include 'library-model-loader'
-include 'checks'
-include 'checks:ban-mutable-static'
-include 'qual'
+package edu.ucr.cs.riple.annotatorscanner.tools;
 
+/**
+ * Factory class to enable {@link SerializationTestHelper} to create a new instance from values
+ * written in string at each line of output files.
+ */
+public interface DisplayFactory<T extends Display> {
+
+  /**
+   * Creates an instance of {@code T} from values in string.
+   *
+   * @param values values of instance {@code T} in string.
+   * @return instance of T.
+   */
+  T fromValuesInString(String[] values);
+}
