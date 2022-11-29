@@ -312,7 +312,8 @@ public class CoreTest extends BaseCoreTest {
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f2", "f3")), 2),
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f0")), -1),
             new TReport(new OnParameter("Bar.java", "test.Bar", "process(java.lang.Object)", 0), 1),
-            new TReport(new OnField("Foo.java", "test.Foo", Set.of("f4")), 1))
+            new TReport(new OnField("Foo.java", "test.Foo", Set.of("f4")), 1),
+            new TReport(new OnField("Foo.java", "test.Foo", Set.of("f5")), 0))
         .toDepth(1)
         .enableForceResolve()
         .start();
@@ -342,7 +343,10 @@ public class CoreTest extends BaseCoreTest {
                 new OnField(srcRoot.resolve("Foo.java").toString(), "test.Foo", Set.of("f1")),
                 "SuppressWarnings",
                 "NullAway.Init",
-                false));
+                false),
+            new AddMarkerAnnotation(
+                new OnField(srcRoot.resolve("Foo.java").toString(), "test.Foo", Set.of("f5")),
+                "javax.annotation.Nullable"));
     // todo: change test infrastructure to do the expected added annotations comparison internally
     // in the upcoming refactoring cycle.
     Assert.assertEquals(

@@ -9,6 +9,8 @@ public class Foo {
   @Nullable Bar nullableBar;
   Bar f4 = nullableBar.process(new Object());
 
+  Bar f5;
+
   Foo() {
     this.f2 = new Bar();
   }
