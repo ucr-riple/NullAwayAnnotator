@@ -273,8 +273,8 @@ public class Annotator {
                   if (error.messageType.equals("PASS_NULLABLE")
                       && error.nonnullTarget != null
                       && error.nonnullTarget.isOnParameter()) {
-                    OnParameter calledMethod = error.nonnullTarget.toParameter();
-                    return tree.findNode(calledMethod.method, calledMethod.clazz);
+                    OnParameter nullableParameter = error.nonnullTarget.toParameter();
+                    return tree.findNode(nullableParameter.method, nullableParameter.clazz);
                   }
                   return null;
                 })
