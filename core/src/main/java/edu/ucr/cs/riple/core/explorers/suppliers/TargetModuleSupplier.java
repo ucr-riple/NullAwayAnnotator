@@ -25,9 +25,9 @@
 package edu.ucr.cs.riple.core.explorers.suppliers;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.CompilerRunner;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.explorers.impactanalyzers.BasicImpactAnalyzer;
+import edu.ucr.cs.riple.core.explorers.impactanalyzers.CompilerRunner;
 import edu.ucr.cs.riple.core.explorers.impactanalyzers.ImpactAnalyzer;
 import edu.ucr.cs.riple.core.explorers.impactanalyzers.OptimizedImpactAnalyzer;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
@@ -80,16 +80,12 @@ public class TargetModuleSupplier extends AbstractSupplier {
   }
 
   @Override
-  public CompilerRunner getCompilerRunner() {
-    return () -> Utility.buildTarget(config);
-  }
-
-  @Override
   public ImpactAnalyzer getImpactAnalyzer() {
+    CompilerRunner runner = () -> Utility.buildTarget(config);
     if (config.optimized) {
       RegionTracker tracker = new CompoundTracker(config, config.target, tree);
-      return new OptimizedImpactAnalyzer(config, this, tracker);
+      return new OptimizedImpactAnalyzer(config, runner, this, tracker);
     }
-    return new BasicImpactAnalyzer(config, this);
+    return new BasicImpactAnalyzer(config, runner, this);
   }
 }

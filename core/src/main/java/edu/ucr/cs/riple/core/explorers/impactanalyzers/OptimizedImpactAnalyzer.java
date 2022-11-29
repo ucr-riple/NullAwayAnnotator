@@ -17,12 +17,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import me.tongfei.progressbar.ProgressBar;
 
-public class OptimizedImpactAnalyzer extends ImpactAnalyzer {
+public class OptimizedImpactAnalyzer extends AbstractImpactAnalyzer {
 
   private final RegionTracker regionTracker;
 
-  public OptimizedImpactAnalyzer(Config config, Supplier supplier, RegionTracker regionTracker) {
-    super(config, supplier);
+  public OptimizedImpactAnalyzer(
+      Config config, CompilerRunner runner, Supplier supplier, RegionTracker regionTracker) {
+    super(config, runner, supplier);
     this.regionTracker = regionTracker;
   }
 

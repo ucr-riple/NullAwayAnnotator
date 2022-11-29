@@ -25,17 +25,21 @@
 package edu.ucr.cs.riple.core.explorers;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.explorers.suppliers.ExhaustiveSupplier;
+import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 
-public class ExhaustiveExplorer extends Explorer {
+public class ExhaustiveExplorer implements Explorer {
 
-  public ExhaustiveExplorer(ImmutableSet<Fix> fixes, ExhaustiveSupplier supplier) {
-    super(fixes, supplier);
+  private final ImmutableSet<Fix> fixes;
+
+  public ExhaustiveExplorer(ImmutableSet<Fix> fixes) {
+    this.fixes = fixes;
   }
 
   @Override
-  protected void collectGraphResults() {
-    this.reports.forEach(report -> report.localEffect = -1);
+  public ImmutableSet<Report> explore() {
+    return this.fixes.stream()
+        .map(fix -> new Report(fix, -1))
+        .collect(ImmutableSet.toImmutableSet());
   }
 }

@@ -22,29 +22,9 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers.suppliers;
+package edu.ucr.cs.riple.core.explorers.impactanalyzers;
 
-import edu.ucr.cs.riple.core.CompilerRunner;
-import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;
-import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+public interface CompilerRunner {
 
-/** Supplier for exhaustive analysis. This will be mostly used in experiments. */
-public class ExhaustiveSupplier extends TargetModuleSupplier {
-
-  /**
-   * Constructor for exhaustive supplier.
-   *
-   * @param config Annotator config instance.
-   * @param tree Method declaration tree instance for methods in target module.
-   */
-  public ExhaustiveSupplier(Config config, MethodDeclarationTree tree) {
-    super(config, new NoOpGlobalAnalyzer(), tree);
-  }
-
-  @Override
-  public CompilerRunner getCompilerRunner() {
-    // Does not need to do anything.
-    return () -> {};
-  }
+  void run();
 }

@@ -24,10 +24,10 @@
 
 package edu.ucr.cs.riple.core.explorers.suppliers;
 
-import edu.ucr.cs.riple.core.CompilerRunner;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.explorers.impactanalyzers.AbstractImpactAnalyzer;
 import edu.ucr.cs.riple.core.explorers.impactanalyzers.BasicImpactAnalyzer;
-import edu.ucr.cs.riple.core.explorers.impactanalyzers.ImpactAnalyzer;
+import edu.ucr.cs.riple.core.explorers.impactanalyzers.CompilerRunner;
 import edu.ucr.cs.riple.core.explorers.impactanalyzers.OptimizedImpactAnalyzer;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;
@@ -72,14 +72,10 @@ public class DownstreamDependencySupplier extends AbstractSupplier {
   }
 
   @Override
-  public CompilerRunner getCompilerRunner() {
-    return () -> Utility.buildDownstreamDependencies(config);
-  }
-
-  @Override
-  public ImpactAnalyzer getImpactAnalyzer() {
+  public AbstractImpactAnalyzer getImpactAnalyzer() {
+    CompilerRunner runner = () -> Utility.buildDownstreamDependencies(config);
     return config.optimized
-        ? new OptimizedImpactAnalyzer(config, this, tracker)
-        : new BasicImpactAnalyzer(config, this);
+        ? new OptimizedImpactAnalyzer(config, runner, this, tracker)
+        : new BasicImpactAnalyzer(config, runner, this);
   }
 }

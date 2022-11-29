@@ -25,47 +25,51 @@
 package edu.ucr.cs.riple.core.explorers;
 
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.explorers.impactanalyzers.ImpactAnalyzer;
 import edu.ucr.cs.riple.core.explorers.suppliers.Supplier;
-import edu.ucr.cs.riple.core.metadata.graph.Node;
+import edu.ucr.cs.riple.core.metadata.graph.ConflictGraph;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import java.util.HashSet;
 
-public class BasicExplorer extends AbstractExplorer {
+public abstract class AbstractExplorer implements Explorer {
 
-  public BasicExplorer(ImmutableSet<Fix> fixes, Supplier supplier) {
-    super(fixes, supplier);
+  protected final ImmutableSet<Report> reports;
+  protected final Config config;
+  protected final ConflictGraph graph;
+  protected final int depth;
+  protected ImpactAnalyzer analyzer;
+  protected final Supplier supplier;
+
+  public AbstractExplorer(ImmutableSet<Fix> fixes, Supplier supplier) {
+    this.supplier = supplier;
+    this.reports =
+        fixes.stream().map(fix -> new Report(fix, 1)).collect(ImmutableSet.toImmutableSet());
+    this.depth = supplier.depth();
+    this.config = supplier.getConfig();
+    this.graph = new ConflictGraph();
+    this.analyzer = supplier.getImpactAnalyzer();
   }
 
-  @Override
   protected void initializeFixGraph() {
-    super.initializeFixGraph();
-    this.reports.stream()
-        .filter(input -> input.isInProgress(config))
-        .forEach(
-            report -> {
-              Fix root = report.root;
-              Node node = graph.addNodeToVertices(root);
-              node.setOrigins(supplier.getFixBank());
-              node.report = report;
-              node.triggeredFixes = new HashSet<>(report.triggeredFixes);
-              node.tree.addAll(report.tree);
-              node.mergeTriggered();
-            });
+    this.graph.clear();
   }
 
-  @Override
-  protected void collectGraphResults() {
-    graph
-        .getNodes()
-        .forEach(
-            node -> {
-              Report report = node.report;
-              report.localEffect = node.effect;
-              report.tree = node.tree;
-              report.triggeredFixes = ImmutableSet.copyOf(node.triggeredFixes);
-              report.triggeredErrors = node.triggeredErrors;
-              report.finished = !node.changed;
-            });
+  protected abstract void collectGraphResults();
+
+  public ImmutableSet<Report> explore() {
+    System.out.println("Max Depth level: " + config.depth);
+    for (int i = 0; i < this.depth; i++) {
+      System.out.print("Analyzing at level " + (i + 1) + ", ");
+      initializeFixGraph();
+      config.log.updateNodeNumber(graph.getNodes().count());
+      if (graph.isEmpty()) {
+        System.out.println("Analysis finished at this iteration.");
+        break;
+      }
+      analyzer.analyzeImpacts(graph);
+      collectGraphResults();
+    }
+    return reports;
   }
 }

@@ -11,16 +11,17 @@ import java.util.Collection;
 import java.util.Set;
 import me.tongfei.progressbar.ProgressBar;
 
-public class BasicImpactAnalyzer extends ImpactAnalyzer {
+public class BasicImpactAnalyzer extends AbstractImpactAnalyzer {
 
-  public BasicImpactAnalyzer(Config config, Supplier supplier) {
-    super(config, supplier);
+  public BasicImpactAnalyzer(Config config, CompilerRunner runner, Supplier supplier) {
+    super(config, runner, supplier);
   }
 
   @Override
   public void analyzeImpacts(ConflictGraph graph) {
-    System.out.println("Scheduling for: ");
-    ProgressBar pb = Utility.createProgressBar("Processing", 0);
+    int count = (int) graph.getNodes().count();
+    System.out.println("Scheduling for: " + count + " runs.");
+    ProgressBar pb = Utility.createProgressBar("Processing", count);
     graph
         .getNodes()
         .forEach(
