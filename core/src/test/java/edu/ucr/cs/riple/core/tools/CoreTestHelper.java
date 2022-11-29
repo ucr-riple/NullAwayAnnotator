@@ -321,4 +321,19 @@ public class CoreTestHelper {
     }
     return config;
   }
+
+  /**
+   * Returns path to src directory where all test inputs exist.
+   *
+   * @return Path to root src directory.
+   */
+  public Path getSourceRoot() {
+    return getConfig()
+        .globalDir
+        .resolve("unittest")
+        .resolve("src")
+        .resolve("main")
+        .resolve("java")
+        .resolve("test");
+  }
 }
