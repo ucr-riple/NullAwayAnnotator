@@ -80,7 +80,7 @@ public class TargetModuleSupplier extends AbstractSupplier {
   }
 
   @Override
-  public ConflictGraphProcessor getImpactAnalyzer() {
+  public ConflictGraphProcessor getGraphProcessor() {
     CompilerRunner runner = () -> Utility.buildTarget(config);
     if (config.optimized) {
       RegionTracker tracker = new CompoundTracker(config, config.target, tree);

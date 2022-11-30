@@ -214,7 +214,7 @@ public class Annotator {
             .filter(fix -> !cache.processedFix(fix))
             .collect(ImmutableSet.toImmutableSet());
 
-    // Initializing required explorer instances.
+    // Initializing required evaluator instances.
     MethodDeclarationTree tree = new MethodDeclarationTree(config);
     TargetModuleSupplier supplier = new TargetModuleSupplier(config, globalAnalyzer, tree);
     Evaluator evaluator =

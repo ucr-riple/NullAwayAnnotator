@@ -37,8 +37,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Explorer for analyzing downstream dependencies. Used by {@link GlobalAnalyzerImpl} to compute the
- * effects of changes in upstream on downstream dependencies. This explorer cannot be used to
+ * Evaluator for analyzing downstream dependencies. Used by {@link GlobalAnalyzerImpl} to compute
+ * the effects of changes in upstream on downstream dependencies. This evaluator cannot be used to
  * compute the effects in target module.
  */
 class DownstreamImpactEvaluator extends BasicEvaluator {

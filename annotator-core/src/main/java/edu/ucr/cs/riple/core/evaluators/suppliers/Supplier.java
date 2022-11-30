@@ -89,7 +89,7 @@ public interface Supplier {
   /**
    * Getter for {@link ConflictGraphProcessor}.
    *
-   * @return ImpactAnalyzer instance.
+   * @return Graph processor instance.
    */
-  ConflictGraphProcessor getImpactAnalyzer();
+  ConflictGraphProcessor getGraphProcessor();
 }

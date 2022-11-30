@@ -72,7 +72,7 @@ public class DownstreamDependencySupplier extends AbstractSupplier {
   }
 
   @Override
-  public AbstractConflictGraphProcessor getImpactAnalyzer() {
+  public AbstractConflictGraphProcessor getGraphProcessor() {
     CompilerRunner runner = () -> Utility.buildDownstreamDependencies(config);
     return config.optimized
         ? new ParallelConflictGraphProcessor(config, runner, this, tracker)

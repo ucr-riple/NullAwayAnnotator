@@ -53,7 +53,7 @@ public abstract class AbstractEvaluator implements Evaluator {
     this.depth = supplier.depth();
     this.config = supplier.getConfig();
     this.graph = new ConflictGraph();
-    this.analyzer = supplier.getImpactAnalyzer();
+    this.analyzer = supplier.getGraphProcessor();
   }
 
   /**

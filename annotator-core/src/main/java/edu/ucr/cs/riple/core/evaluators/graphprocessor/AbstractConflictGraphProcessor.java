@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Nima Karimipour
+ * Copyright (c) 2020 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -52,7 +52,7 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
   /** Error bank instance to store state of fixes before and after of injections. */
   protected final Bank<Error> errorBank;
   /** Global analyzer to retrieve impacts of fixes globally. */
-  protected final GlobalAnalyzer analyzer;
+  protected final GlobalAnalyzer globalAnalyzer;
   /** Annotator config. */
   protected final Config config;
   /** Handler to re-run compiler. */
@@ -64,7 +64,7 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
     this.injector = supplier.getInjector();
     this.fixBank = supplier.getFixBank();
     this.errorBank = supplier.getErrorBank();
-    this.analyzer = supplier.getGlobalAnalyzer();
+    this.globalAnalyzer = supplier.getGlobalAnalyzer();
     this.compilerRunner = runner;
   }
 
@@ -78,7 +78,7 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
     Set<Location> currentLocationTargetedByTree =
         node.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
     localTriggeredFixes.addAll(
-        analyzer.getImpactedParameters(node.tree).stream()
+        globalAnalyzer.getImpactedParameters(node.tree).stream()
             .filter(input -> !currentLocationTargetedByTree.contains(input))
             .map(
                 onParameter ->
