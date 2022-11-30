@@ -107,7 +107,6 @@ public class AnnotatorScanner extends BugChecker
     }
     Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(tree);
     MethodInfo methodInfo = MethodInfo.findOrCreate(methodSymbol, context);
-    methodInfo.setURI(state);
     methodInfo.findParent(state, context);
     methodInfo.setAnnotation(config);
     methodInfo.setURI(state);
