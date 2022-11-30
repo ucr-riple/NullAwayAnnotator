@@ -22,21 +22,15 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers;
+package edu.ucr.cs.riple.core.evaluators;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 
-/**
- * This evaluator does not evaluate the given fixes based on the impacts on the result of the
- * analysis, and considers all the given fixes to have a local effect of -1. This evaluator is used
- * for exhaustive search approach.
- */
-public class VoidEvaluator implements Evaluator {
+/** Interface for evaluators. Evaluators create reports from the impacts of fixes. */
+public interface Evaluator {
 
-  @Override
-  public ImmutableSet<Report> evaluate(ImmutableSet<Fix> fixes) {
-    return fixes.stream().map(fix -> new Report(fix, -1)).collect(ImmutableSet.toImmutableSet());
-  }
+  /** Makes an Immutable Set of reports from impacts of the given fixes. */
+  ImmutableSet<Report> evaluate(ImmutableSet<Fix> fixes);
 }

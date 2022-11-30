@@ -22,13 +22,13 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers.suppliers;
+package edu.ucr.cs.riple.core.evaluators.suppliers;
 
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.explorers.graphprocessor.AbstractConflictGraphProcessor;
-import edu.ucr.cs.riple.core.explorers.graphprocessor.CompilerRunner;
-import edu.ucr.cs.riple.core.explorers.graphprocessor.ParallelConflictGraphProcessor;
-import edu.ucr.cs.riple.core.explorers.graphprocessor.SequentialConflictGraphProcessor;
+import edu.ucr.cs.riple.core.evaluators.graphprocessor.AbstractConflictGraphProcessor;
+import edu.ucr.cs.riple.core.evaluators.graphprocessor.CompilerRunner;
+import edu.ucr.cs.riple.core.evaluators.graphprocessor.ParallelConflictGraphProcessor;
+import edu.ucr.cs.riple.core.evaluators.graphprocessor.SequentialConflictGraphProcessor;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;

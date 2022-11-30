@@ -25,10 +25,10 @@
 package edu.ucr.cs.riple.core;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.explorers.BasicEvaluator;
-import edu.ucr.cs.riple.core.explorers.Evaluator;
-import edu.ucr.cs.riple.core.explorers.VoidEvaluator;
-import edu.ucr.cs.riple.core.explorers.suppliers.TargetModuleSupplier;
+import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
+import edu.ucr.cs.riple.core.evaluators.Evaluator;
+import edu.ucr.cs.riple.core.evaluators.VoidEvaluator;
+import edu.ucr.cs.riple.core.evaluators.suppliers.TargetModuleSupplier;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzerImpl;
 import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;

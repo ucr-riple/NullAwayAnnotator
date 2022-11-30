@@ -22,10 +22,10 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers.graphprocessor;
+package edu.ucr.cs.riple.core.evaluators.graphprocessor;
 
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.explorers.suppliers.Supplier;
+import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.graph.Node;

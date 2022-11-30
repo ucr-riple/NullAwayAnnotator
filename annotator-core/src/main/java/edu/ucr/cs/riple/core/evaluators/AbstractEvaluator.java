@@ -22,13 +22,13 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers;
+package edu.ucr.cs.riple.core.evaluators;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.explorers.graphprocessor.ConflictGraphProcessor;
-import edu.ucr.cs.riple.core.explorers.suppliers.Supplier;
+import edu.ucr.cs.riple.core.evaluators.graphprocessor.ConflictGraphProcessor;
+import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.metadata.graph.ConflictGraph;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Fix;

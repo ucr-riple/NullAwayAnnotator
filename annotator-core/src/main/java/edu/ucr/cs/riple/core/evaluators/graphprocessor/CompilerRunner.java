@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,15 +22,11 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers;
+package edu.ucr.cs.riple.core.evaluators.graphprocessor;
 
-import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
+/** Interface for rerunning the analysis/compiler. */
+public interface CompilerRunner {
 
-/** Interface for evaluators. Evaluators create reports from the impacts of fixes. */
-public interface Evaluator {
-
-  /** Makes an Immutable Set of reports from impacts of the given fixes. */
-  ImmutableSet<Report> evaluate(ImmutableSet<Fix> fixes);
+  /** Runs the analysis/compiler. */
+  void run();
 }

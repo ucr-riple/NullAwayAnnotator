@@ -24,8 +24,8 @@
 
 package edu.ucr.cs.riple.core.global;
 
-import edu.ucr.cs.riple.core.explorers.BasicEvaluator;
-import edu.ucr.cs.riple.core.explorers.suppliers.DownstreamDependencySupplier;
+import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
+import edu.ucr.cs.riple.core.evaluators.suppliers.DownstreamDependencySupplier;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.injector.location.OnMethod;
