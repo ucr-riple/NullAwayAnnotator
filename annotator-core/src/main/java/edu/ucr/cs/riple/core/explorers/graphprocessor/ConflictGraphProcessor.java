@@ -22,11 +22,23 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers.impactanalyzers;
+package edu.ucr.cs.riple.core.explorers.graphprocessor;
 
 import edu.ucr.cs.riple.core.metadata.graph.ConflictGraph;
+import edu.ucr.cs.riple.core.metadata.graph.Node;
+import java.util.stream.Stream;
 
-public interface ImpactAnalyzer {
+/**
+ * Interface for conflict-graph processors. Subclasses of this type, can compute the impacts of a
+ * set of fixes given in a conflict graph.
+ */
+public interface ConflictGraphProcessor {
 
-  void analyzeImpacts(ConflictGraph graph);
+  /**
+   * Processes the given conflict graph and computes the impact of including nodes.
+   *
+   * @param graph Conflict graph containing the target fixes.
+   * @return Processed nodes of the given graph.
+   */
+  Stream<Node> process(ConflictGraph graph);
 }

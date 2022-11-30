@@ -26,8 +26,11 @@ package edu.ucr.cs.riple.core.explorers;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.metadata.index.Fix;
 
-public interface Explorer {
+/** Interface for evaluators. Evaluators create reports from the impacts of fixes. */
+public interface Evaluator {
 
-  ImmutableSet<Report> explore();
+  /** Makes an Immutable Set of reports from impacts of the given fixes. */
+  ImmutableSet<Report> evaluate(ImmutableSet<Fix> fixes);
 }

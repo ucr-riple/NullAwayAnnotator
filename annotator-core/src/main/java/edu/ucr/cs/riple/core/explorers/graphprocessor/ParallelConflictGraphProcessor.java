@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers.impactanalyzers;
+package edu.ucr.cs.riple.core.explorers.graphprocessor;
 
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.explorers.suppliers.Supplier;
@@ -39,27 +39,39 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import me.tongfei.progressbar.ProgressBar;
 
-public class OptimizedImpactAnalyzer extends AbstractImpactAnalyzer {
+/**
+ * Parallel processor which computes the impact of nodes in parallel. In this processor,
+ * non-conflicting nodes are processed simultaneously. The conflict graph will be used to determine
+ * the minimum number of non-conflicting groups using graph coloring techniques.
+ */
+public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcessor {
 
+  /** Tracker instance to check conflicts. */
   private final RegionTracker regionTracker;
 
-  public OptimizedImpactAnalyzer(
+  public ParallelConflictGraphProcessor(
       Config config, CompilerRunner runner, Supplier supplier, RegionTracker regionTracker) {
     super(config, runner, supplier);
     this.regionTracker = regionTracker;
   }
 
   @Override
-  public void analyzeImpacts(ConflictGraph graph) {
+  public Stream<Node> process(ConflictGraph graph) {
     graph.getNodes().forEach(node -> node.reCollectPotentiallyImpactedRegions(regionTracker));
+    // find non-conflicting groups.
     graph.findGroups();
-    Collection<Set<Node>> groups = graph.getGroups();
+    Collection<Set<Node>> nonConflictingGroups = graph.getGroups();
     System.out.println(
-        "Scheduling for: " + groups.size() + " builds for: " + graph.getNodes().count() + " fixes");
-    ProgressBar pb = Utility.createProgressBar("Processing", groups.size());
-    for (Set<Node> group : groups) {
+        "Scheduling for: "
+            + nonConflictingGroups.size()
+            + " builds for: "
+            + graph.getNodes().count()
+            + " fixes");
+    ProgressBar pb = Utility.createProgressBar("Processing", nonConflictingGroups.size());
+    for (Set<Node> group : nonConflictingGroups) {
       pb.step();
       Set<Fix> fixes =
           group.stream().flatMap(node -> node.tree.stream()).collect(Collectors.toSet());
@@ -87,5 +99,6 @@ public class OptimizedImpactAnalyzer extends AbstractImpactAnalyzer {
       injector.removeFixes(fixes);
     }
     pb.close();
+    return graph.getNodes();
   }
 }

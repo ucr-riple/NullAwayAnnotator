@@ -25,9 +25,9 @@
 package edu.ucr.cs.riple.core;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.explorers.BasicExplorer;
-import edu.ucr.cs.riple.core.explorers.ExhaustiveExplorer;
-import edu.ucr.cs.riple.core.explorers.Explorer;
+import edu.ucr.cs.riple.core.explorers.BasicEvaluator;
+import edu.ucr.cs.riple.core.explorers.Evaluator;
+import edu.ucr.cs.riple.core.explorers.VoidEvaluator;
 import edu.ucr.cs.riple.core.explorers.suppliers.TargetModuleSupplier;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzerImpl;
@@ -217,12 +217,10 @@ public class Annotator {
     // Initializing required explorer instances.
     MethodDeclarationTree tree = new MethodDeclarationTree(config);
     TargetModuleSupplier supplier = new TargetModuleSupplier(config, globalAnalyzer, tree);
-    Explorer explorer =
-        config.exhaustiveSearch
-            ? new ExhaustiveExplorer(fixes)
-            : new BasicExplorer(fixes, supplier);
+    Evaluator evaluator =
+        config.exhaustiveSearch ? new VoidEvaluator() : new BasicEvaluator(supplier);
     // Result of the iteration analysis.
-    return explorer.explore();
+    return evaluator.evaluate(fixes);
   }
 
   /**

@@ -22,27 +22,30 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers.impactanalyzers;
+package edu.ucr.cs.riple.core.explorers.graphprocessor;
 
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.explorers.suppliers.Supplier;
 import edu.ucr.cs.riple.core.metadata.graph.ConflictGraph;
+import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.Result;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Stream;
 import me.tongfei.progressbar.ProgressBar;
 
-public class BasicImpactAnalyzer extends AbstractImpactAnalyzer {
+/** Basic processor which processes the impact of each node sequentially. */
+public class SequentialConflictGraphProcessor extends AbstractConflictGraphProcessor {
 
-  public BasicImpactAnalyzer(Config config, CompilerRunner runner, Supplier supplier) {
+  public SequentialConflictGraphProcessor(Config config, CompilerRunner runner, Supplier supplier) {
     super(config, runner, supplier);
   }
 
   @Override
-  public void analyzeImpacts(ConflictGraph graph) {
+  public Stream<Node> process(ConflictGraph graph) {
     int count = (int) graph.getNodes().count();
     System.out.println("Scheduling for: " + count + " runs.");
     ProgressBar pb = Utility.createProgressBar("Processing", count);
@@ -69,5 +72,6 @@ public class BasicImpactAnalyzer extends AbstractImpactAnalyzer {
               injector.removeFixes(fixes);
             });
     pb.close();
+    return graph.getNodes();
   }
 }

@@ -25,10 +25,10 @@
 package edu.ucr.cs.riple.core.explorers.suppliers;
 
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.explorers.impactanalyzers.AbstractImpactAnalyzer;
-import edu.ucr.cs.riple.core.explorers.impactanalyzers.BasicImpactAnalyzer;
-import edu.ucr.cs.riple.core.explorers.impactanalyzers.CompilerRunner;
-import edu.ucr.cs.riple.core.explorers.impactanalyzers.OptimizedImpactAnalyzer;
+import edu.ucr.cs.riple.core.explorers.graphprocessor.AbstractConflictGraphProcessor;
+import edu.ucr.cs.riple.core.explorers.graphprocessor.CompilerRunner;
+import edu.ucr.cs.riple.core.explorers.graphprocessor.ParallelConflictGraphProcessor;
+import edu.ucr.cs.riple.core.explorers.graphprocessor.SequentialConflictGraphProcessor;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
@@ -72,10 +72,10 @@ public class DownstreamDependencySupplier extends AbstractSupplier {
   }
 
   @Override
-  public AbstractImpactAnalyzer getImpactAnalyzer() {
+  public AbstractConflictGraphProcessor getImpactAnalyzer() {
     CompilerRunner runner = () -> Utility.buildDownstreamDependencies(config);
     return config.optimized
-        ? new OptimizedImpactAnalyzer(config, runner, this, tracker)
-        : new BasicImpactAnalyzer(config, runner, this);
+        ? new ParallelConflictGraphProcessor(config, runner, this, tracker)
+        : new SequentialConflictGraphProcessor(config, runner, this);
   }
 }

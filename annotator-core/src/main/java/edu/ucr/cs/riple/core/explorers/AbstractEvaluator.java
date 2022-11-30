@@ -27,49 +27,66 @@ package edu.ucr.cs.riple.core.explorers;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.explorers.impactanalyzers.ImpactAnalyzer;
+import edu.ucr.cs.riple.core.explorers.graphprocessor.ConflictGraphProcessor;
 import edu.ucr.cs.riple.core.explorers.suppliers.Supplier;
 import edu.ucr.cs.riple.core.metadata.graph.ConflictGraph;
+import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import java.util.stream.Stream;
 
-public abstract class AbstractExplorer implements Explorer {
+/** Abstract class for evaluators. */
+public abstract class AbstractEvaluator implements Evaluator {
 
-  protected final ImmutableSet<Report> reports;
+  /** Annotator config. */
   protected final Config config;
+  /** Conflict graph to storing unprocessed fixes. */
   protected final ConflictGraph graph;
+  /** Depth of analysis. */
   protected final int depth;
-  protected ImpactAnalyzer analyzer;
+  /** Graph processor to process the graph. */
+  protected ConflictGraphProcessor analyzer;
+  /** Supplier used for initialization. */
   protected final Supplier supplier;
 
-  public AbstractExplorer(ImmutableSet<Fix> fixes, Supplier supplier) {
+  public AbstractEvaluator(Supplier supplier) {
     this.supplier = supplier;
-    this.reports =
-        fixes.stream().map(fix -> new Report(fix, 1)).collect(ImmutableSet.toImmutableSet());
     this.depth = supplier.depth();
     this.config = supplier.getConfig();
     this.graph = new ConflictGraph();
     this.analyzer = supplier.getImpactAnalyzer();
   }
 
-  protected void initializeFixGraph() {
+  /**
+   * Initializes conflict graph for the upcoming iteration.
+   *
+   * @param reports The latest created reports from the fixes.
+   */
+  protected void initializeFixGraph(ImmutableSet<Report> reports) {
     this.graph.clear();
   }
 
-  protected abstract void collectGraphResults();
+  /**
+   * Collects results created by the processors working on the conflict graph.
+   *
+   * @param nodes Result of the analysis.
+   */
+  protected abstract void collectGraphResults(Stream<Node> nodes);
 
   @Override
-  public ImmutableSet<Report> explore() {
+  public ImmutableSet<Report> evaluate(ImmutableSet<Fix> fixes) {
+    ImmutableSet<Report> reports =
+        fixes.stream().map(fix -> new Report(fix, 1)).collect(ImmutableSet.toImmutableSet());
     System.out.println("Max Depth level: " + config.depth);
     for (int i = 0; i < this.depth; i++) {
       System.out.print("Analyzing at level " + (i + 1) + ", ");
-      initializeFixGraph();
+      initializeFixGraph(reports);
       config.log.updateNodeNumber(graph.getNodes().count());
       if (graph.isEmpty()) {
         System.out.println("Analysis finished at this iteration.");
         break;
       }
-      analyzer.analyzeImpacts(graph);
-      collectGraphResults();
+      Stream<Node> nodes = analyzer.process(graph);
+      collectGraphResults(nodes);
     }
     return reports;
   }

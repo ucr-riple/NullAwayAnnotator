@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,24 +22,11 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers;
+package edu.ucr.cs.riple.core.explorers.graphprocessor;
 
-import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
+/** Interface for rerunning the analysis/compiler. */
+public interface CompilerRunner {
 
-public class ExhaustiveExplorer implements Explorer {
-
-  private final ImmutableSet<Fix> fixes;
-
-  public ExhaustiveExplorer(ImmutableSet<Fix> fixes) {
-    this.fixes = fixes;
-  }
-
-  @Override
-  public ImmutableSet<Report> explore() {
-    return this.fixes.stream()
-        .map(fix -> new Report(fix, -1))
-        .collect(ImmutableSet.toImmutableSet());
-  }
+  /** Runs the analysis/compiler. */
+  void run();
 }

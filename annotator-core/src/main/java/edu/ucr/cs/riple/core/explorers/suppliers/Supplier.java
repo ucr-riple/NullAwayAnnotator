@@ -25,8 +25,8 @@
 package edu.ucr.cs.riple.core.explorers.suppliers;
 
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.explorers.AbstractExplorer;
-import edu.ucr.cs.riple.core.explorers.impactanalyzers.ImpactAnalyzer;
+import edu.ucr.cs.riple.core.explorers.AbstractEvaluator;
+import edu.ucr.cs.riple.core.explorers.graphprocessor.ConflictGraphProcessor;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
@@ -34,7 +34,7 @@ import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 
-/** Supplier for initializing an {@link AbstractExplorer} instance. */
+/** Supplier for initializing an {@link AbstractEvaluator} instance. */
 public interface Supplier {
 
   /**
@@ -87,9 +87,9 @@ public interface Supplier {
   GlobalAnalyzer getGlobalAnalyzer();
 
   /**
-   * Getter for {@link ImpactAnalyzer}.
+   * Getter for {@link ConflictGraphProcessor}.
    *
    * @return ImpactAnalyzer instance.
    */
-  ImpactAnalyzer getImpactAnalyzer();
+  ConflictGraphProcessor getImpactAnalyzer();
 }

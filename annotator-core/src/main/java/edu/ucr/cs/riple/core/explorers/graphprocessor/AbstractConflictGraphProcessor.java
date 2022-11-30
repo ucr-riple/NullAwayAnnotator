@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers.impactanalyzers;
+package edu.ucr.cs.riple.core.explorers.graphprocessor;
 
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.explorers.suppliers.Supplier;
@@ -40,17 +40,25 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public abstract class AbstractImpactAnalyzer implements ImpactAnalyzer {
+/** Base class for conflict graph processors. */
+public abstract class AbstractConflictGraphProcessor implements ConflictGraphProcessor {
 
+  /** Method declaration tree. */
   protected final MethodDeclarationTree methodDeclarationTree;
+  /** Injector used in the processor to inject / remove fixes. */
   protected final AnnotationInjector injector;
+  /** Fix bank instance to store state of fixes before and after of injections. */
   protected final Bank<Fix> fixBank;
+  /** Error bank instance to store state of fixes before and after of injections. */
   protected final Bank<Error> errorBank;
+  /** Global analyzer to retrieve impacts of fixes globally. */
   protected final GlobalAnalyzer analyzer;
+  /** Annotator config. */
   protected final Config config;
+  /** Handler to re-run compiler. */
   protected final CompilerRunner compilerRunner;
 
-  public AbstractImpactAnalyzer(Config config, CompilerRunner runner, Supplier supplier) {
+  public AbstractConflictGraphProcessor(Config config, CompilerRunner runner, Supplier supplier) {
     this.config = config;
     this.methodDeclarationTree = supplier.getMethodDeclarationTree();
     this.injector = supplier.getInjector();

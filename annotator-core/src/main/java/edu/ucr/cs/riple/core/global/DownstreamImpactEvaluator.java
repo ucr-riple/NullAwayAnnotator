@@ -24,10 +24,9 @@
 
 package edu.ucr.cs.riple.core.global;
 
-import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.explorers.BasicExplorer;
+import edu.ucr.cs.riple.core.explorers.BasicEvaluator;
 import edu.ucr.cs.riple.core.explorers.suppliers.DownstreamDependencySupplier;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
@@ -35,13 +34,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Explorer for analyzing downstream dependencies. Used by {@link GlobalAnalyzerImpl} to compute the
  * effects of changes in upstream on downstream dependencies. This explorer cannot be used to
  * compute the effects in target module.
  */
-class DownstreamImpactExplorer extends BasicExplorer {
+class DownstreamImpactEvaluator extends BasicEvaluator {
 
   /**
    * Map of public methods in target module to parameters in target module, which are source of
@@ -52,48 +52,45 @@ class DownstreamImpactExplorer extends BasicExplorer {
 
   private final MethodDeclarationTree methodDeclarationTree;
 
-  public DownstreamImpactExplorer(ImmutableSet<Fix> fixes, DownstreamDependencySupplier supplier) {
-    super(fixes, supplier);
+  public DownstreamImpactEvaluator(DownstreamDependencySupplier supplier) {
+    super(supplier);
     this.nullableFlowMap = new HashMap<>();
     this.methodDeclarationTree = supplier.getMethodDeclarationTree();
   }
 
   @Override
-  protected void collectGraphResults() {
-    super.collectGraphResults();
+  protected void collectGraphResults(Stream<Node> nodes) {
     // Collect impacted parameters in target module by downstream dependencies.
-    graph
-        .getNodes()
-        .forEach(
-            node ->
-                node.root.ifOnMethod(
-                    method -> {
-                      // Impacted parameters.
-                      Set<OnParameter> parameters =
-                          node.triggeredErrors.stream()
-                              .filter(
-                                  error ->
-                                      error.nonnullTarget != null
-                                          && error.nonnullTarget.isOnParameter()
-                                          // Method is declared in the target module.
-                                          && methodDeclarationTree.declaredInModule(
-                                              error.nonnullTarget))
-                              .map(error -> error.nonnullTarget.toParameter())
-                              .collect(Collectors.toSet());
-                      if (!parameters.isEmpty()) {
-                        // Update uri for each parameter. These triggered fixes does not have an
-                        // actual physical uri since they are provided as a jar file in downstream
-                        // dependencies.
-                        parameters.forEach(
-                            onParameter ->
-                                onParameter.uri =
-                                    methodDeclarationTree.findNode(
-                                            onParameter.method, onParameter.clazz)
-                                        .location
-                                        .uri);
-                        nullableFlowMap.put(method, parameters);
-                      }
-                    }));
+    nodes.forEach(
+        node ->
+            node.root.ifOnMethod(
+                method -> {
+                  // Impacted parameters.
+                  Set<OnParameter> parameters =
+                      node.triggeredErrors.stream()
+                          .filter(
+                              error ->
+                                  error.nonnullTarget != null
+                                      && error.nonnullTarget.isOnParameter()
+                                      // Method is declared in the target module.
+                                      && methodDeclarationTree.declaredInModule(
+                                          error.nonnullTarget))
+                          .map(error -> error.nonnullTarget.toParameter())
+                          .collect(Collectors.toSet());
+                  if (!parameters.isEmpty()) {
+                    // Update uri for each parameter. These triggered fixes does not have an
+                    // actual physical uri since they are provided as a jar file in downstream
+                    // dependencies.
+                    parameters.forEach(
+                        onParameter ->
+                            onParameter.uri =
+                                methodDeclarationTree.findNode(
+                                        onParameter.method, onParameter.clazz)
+                                    .location
+                                    .uri);
+                    nullableFlowMap.put(method, parameters);
+                  }
+                }));
   }
 
   /**

@@ -30,17 +30,19 @@ import edu.ucr.cs.riple.core.explorers.suppliers.Supplier;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.util.HashSet;
+import java.util.stream.Stream;
 
-public class BasicExplorer extends AbstractExplorer {
+/** Basic evaluator that processes each fix tree entirely with no caching strategies. */
+public class BasicEvaluator extends AbstractEvaluator {
 
-  public BasicExplorer(ImmutableSet<Fix> fixes, Supplier supplier) {
-    super(fixes, supplier);
+  public BasicEvaluator(Supplier supplier) {
+    super(supplier);
   }
 
   @Override
-  protected void initializeFixGraph() {
-    super.initializeFixGraph();
-    this.reports.stream()
+  protected void initializeFixGraph(ImmutableSet<Report> reports) {
+    super.initializeFixGraph(reports);
+    reports.stream()
         .filter(input -> input.isInProgress(config))
         .forEach(
             report -> {
@@ -55,17 +57,15 @@ public class BasicExplorer extends AbstractExplorer {
   }
 
   @Override
-  protected void collectGraphResults() {
-    graph
-        .getNodes()
-        .forEach(
-            node -> {
-              Report report = node.report;
-              report.localEffect = node.effect;
-              report.tree = node.tree;
-              report.triggeredFixes = ImmutableSet.copyOf(node.triggeredFixes);
-              report.triggeredErrors = node.triggeredErrors;
-              report.finished = !node.changed;
-            });
+  protected void collectGraphResults(Stream<Node> nodes) {
+    nodes.forEach(
+        node -> {
+          Report report = node.report;
+          report.localEffect = node.effect;
+          report.tree = node.tree;
+          report.triggeredFixes = ImmutableSet.copyOf(node.triggeredFixes);
+          report.triggeredErrors = node.triggeredErrors;
+          report.finished = !node.changed;
+        });
   }
 }
