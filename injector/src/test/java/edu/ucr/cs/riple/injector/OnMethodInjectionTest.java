@@ -432,30 +432,4 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
                 "javax.annotation.Nullable"))
         .start();
   }
-
-  @Test
-  public void annotWithCommentOnMethod() {
-    injectorTestHelper
-        .addInput(
-            "Main.java",
-            "package edu.ucr;",
-            "public class Main {",
-            "   @Foo(clazz = String.class, value = \"Some description\")",
-            "   public void foo() { }",
-            "}")
-        .expectOutput(
-            "package edu.ucr;",
-            "import edu.ucr.Custom;",
-            "public class Main {",
-            "   @Custom /* some comment */",
-            "   @Foo(clazz = String.class, value = \"Some description\")",
-            "   public void foo() { }",
-            "}")
-        .addChanges(
-            new AddMarkerAnnotation(
-                new OnMethod("Main.java", "edu.ucr.Main", "foo()"),
-                "edu.ucr.Custom",
-                "some comment"))
-        .start();
-  }
 }

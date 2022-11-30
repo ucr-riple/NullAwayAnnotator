@@ -763,29 +763,4 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
                 "javax.annotation.Nullable"))
         .start();
   }
-
-  @Test
-  public void annotWithCommentOnParameter() {
-    injectorTestHelper
-        .addInput(
-            "Main.java",
-            "package edu.ucr;",
-            "public class Main {",
-            "   @Foo(clazz = String.class, value = \"Some description\")",
-            "   public void foo(Object a, Object b, Object c) { }",
-            "}")
-        .expectOutput(
-            "package edu.ucr;",
-            "import edu.ucr.Custom;",
-            "public class Main {",
-            "   @Foo(clazz = String.class, value = \"Some description\")",
-            "   public void foo(Object a, Object b, @Custom /* some comment */ Object c) { }",
-            "}")
-        .addChanges(
-            new AddMarkerAnnotation(
-                new OnParameter("Main.java", "edu.ucr.Main", "foo(Object, Object, Object)", 2),
-                "edu.ucr.Custom",
-                "some comment"))
-        .start();
-  }
 }
