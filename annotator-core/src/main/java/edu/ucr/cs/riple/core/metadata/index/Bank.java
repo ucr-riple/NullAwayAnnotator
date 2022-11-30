@@ -130,15 +130,4 @@ public class Bank<T extends Enclosed> {
   public Set<Region> getRegionsForFixes(Predicate<T> predicate) {
     return rootInClass.getRegionsOfMatchingItems(predicate);
   }
-
-  /**
-   * Fetches all ths index entries in the given region.
-   *
-   * @param regionClass Region class.
-   * @param regionMember Region member.
-   * @return Collection of items enclosed in the given region.
-   */
-  public Collection<T> getEntriesByRegion(String regionClass, String regionMember) {
-    return rootInMember.getByMember(regionClass, regionMember);
-  }
 }
