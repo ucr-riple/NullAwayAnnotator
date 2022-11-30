@@ -39,7 +39,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import me.tongfei.progressbar.ProgressBar;
 
 /**
@@ -59,7 +58,7 @@ public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcess
   }
 
   @Override
-  public Stream<Node> process(ConflictGraph graph) {
+  public void process(ConflictGraph graph) {
     graph.getNodes().forEach(node -> node.reCollectPotentiallyImpactedRegions(regionTracker));
     // find non-conflicting groups.
     graph.findGroups();
@@ -99,6 +98,5 @@ public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcess
       injector.removeFixes(fixes);
     }
     pb.close();
-    return graph.getNodes();
   }
 }

@@ -30,7 +30,6 @@ import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.util.HashSet;
-import java.util.stream.Stream;
 
 /** Basic evaluator that processes each fix tree entirely with no caching strategies. */
 public class BasicEvaluator extends AbstractEvaluator {
@@ -57,15 +56,17 @@ public class BasicEvaluator extends AbstractEvaluator {
   }
 
   @Override
-  protected void collectGraphResults(Stream<Node> nodes) {
-    nodes.forEach(
-        node -> {
-          Report report = node.report;
-          report.localEffect = node.effect;
-          report.tree = node.tree;
-          report.triggeredFixes = ImmutableSet.copyOf(node.triggeredFixes);
-          report.triggeredErrors = node.triggeredErrors;
-          report.finished = !node.changed;
-        });
+  protected void collectGraphResults() {
+    graph
+        .getNodes()
+        .forEach(
+            node -> {
+              Report report = node.report;
+              report.localEffect = node.effect;
+              report.tree = node.tree;
+              report.triggeredFixes = ImmutableSet.copyOf(node.triggeredFixes);
+              report.triggeredErrors = node.triggeredErrors;
+              report.finished = !node.changed;
+            });
   }
 }

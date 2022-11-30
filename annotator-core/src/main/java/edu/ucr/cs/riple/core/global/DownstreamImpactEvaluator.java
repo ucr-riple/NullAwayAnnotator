@@ -26,7 +26,6 @@ package edu.ucr.cs.riple.core.global;
 
 import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
 import edu.ucr.cs.riple.core.evaluators.suppliers.DownstreamDependencySupplier;
-import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
@@ -34,7 +33,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Evaluator for analyzing downstream dependencies. Used by {@link GlobalAnalyzerImpl} to compute
@@ -59,38 +57,41 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
   }
 
   @Override
-  protected void collectGraphResults(Stream<Node> nodes) {
+  protected void collectGraphResults() {
+    super.collectGraphResults();
     // Collect impacted parameters in target module by downstream dependencies.
-    nodes.forEach(
-        node ->
-            node.root.ifOnMethod(
-                method -> {
-                  // Impacted parameters.
-                  Set<OnParameter> parameters =
-                      node.triggeredErrors.stream()
-                          .filter(
-                              error ->
-                                  error.nonnullTarget != null
-                                      && error.nonnullTarget.isOnParameter()
-                                      // Method is declared in the target module.
-                                      && methodDeclarationTree.declaredInModule(
-                                          error.nonnullTarget))
-                          .map(error -> error.nonnullTarget.toParameter())
-                          .collect(Collectors.toSet());
-                  if (!parameters.isEmpty()) {
-                    // Update uri for each parameter. These triggered fixes does not have an
-                    // actual physical uri since they are provided as a jar file in downstream
-                    // dependencies.
-                    parameters.forEach(
-                        onParameter ->
-                            onParameter.uri =
-                                methodDeclarationTree.findNode(
-                                        onParameter.method, onParameter.clazz)
-                                    .location
-                                    .uri);
-                    nullableFlowMap.put(method, parameters);
-                  }
-                }));
+    this.graph
+        .getNodes()
+        .forEach(
+            node ->
+                node.root.ifOnMethod(
+                    method -> {
+                      // Impacted parameters.
+                      Set<OnParameter> parameters =
+                          node.triggeredErrors.stream()
+                              .filter(
+                                  error ->
+                                      error.nonnullTarget != null
+                                          && error.nonnullTarget.isOnParameter()
+                                          // Method is declared in the target module.
+                                          && methodDeclarationTree.declaredInModule(
+                                              error.nonnullTarget))
+                              .map(error -> error.nonnullTarget.toParameter())
+                              .collect(Collectors.toSet());
+                      if (!parameters.isEmpty()) {
+                        // Update uri for each parameter. These triggered fixes does not have an
+                        // actual physical uri since they are provided as a jar file in downstream
+                        // dependencies.
+                        parameters.forEach(
+                            onParameter ->
+                                onParameter.uri =
+                                    methodDeclarationTree.findNode(
+                                            onParameter.method, onParameter.clazz)
+                                        .location
+                                        .uri);
+                        nullableFlowMap.put(method, parameters);
+                      }
+                    }));
   }
 
   /**

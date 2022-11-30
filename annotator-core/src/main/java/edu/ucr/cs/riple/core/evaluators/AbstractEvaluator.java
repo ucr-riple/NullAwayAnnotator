@@ -30,9 +30,7 @@ import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.evaluators.graphprocessor.ConflictGraphProcessor;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.metadata.graph.ConflictGraph;
-import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import java.util.stream.Stream;
 
 /** Abstract class for evaluators. */
 public abstract class AbstractEvaluator implements Evaluator {
@@ -65,18 +63,14 @@ public abstract class AbstractEvaluator implements Evaluator {
     this.graph.clear();
   }
 
-  /**
-   * Collects results created by the processors working on the conflict graph.
-   *
-   * @param nodes Result of the analysis.
-   */
-  protected abstract void collectGraphResults(Stream<Node> nodes);
+  /** Collects results created by the processors working on the conflict graph. */
+  protected abstract void collectGraphResults();
 
   @Override
   public ImmutableSet<Report> evaluate(ImmutableSet<Fix> fixes) {
     ImmutableSet<Report> reports =
         fixes.stream().map(fix -> new Report(fix, 1)).collect(ImmutableSet.toImmutableSet());
-    System.out.println("Max Depth level: " + config.depth);
+    System.out.println("Max Depth level: " + this.depth);
     for (int i = 0; i < this.depth; i++) {
       System.out.print("Analyzing at level " + (i + 1) + ", ");
       initializeFixGraph(reports);
@@ -85,8 +79,8 @@ public abstract class AbstractEvaluator implements Evaluator {
         System.out.println("Analysis finished at this iteration.");
         break;
       }
-      Stream<Node> nodes = analyzer.process(graph);
-      collectGraphResults(nodes);
+      analyzer.process(graph);
+      collectGraphResults();
     }
     return reports;
   }

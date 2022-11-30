@@ -25,8 +25,6 @@
 package edu.ucr.cs.riple.core.evaluators.graphprocessor;
 
 import edu.ucr.cs.riple.core.metadata.graph.ConflictGraph;
-import edu.ucr.cs.riple.core.metadata.graph.Node;
-import java.util.stream.Stream;
 
 /**
  * Interface for conflict-graph processors. Subclasses of this type, can compute the impacts of a
@@ -38,7 +36,6 @@ public interface ConflictGraphProcessor {
    * Processes the given conflict graph and computes the impact of including nodes.
    *
    * @param graph Conflict graph containing the target fixes.
-   * @return Processed nodes of the given graph.
    */
-  Stream<Node> process(ConflictGraph graph);
+  void process(ConflictGraph graph);
 }
