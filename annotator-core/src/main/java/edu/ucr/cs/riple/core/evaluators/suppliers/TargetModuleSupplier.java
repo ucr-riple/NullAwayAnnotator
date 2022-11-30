@@ -22,13 +22,21 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers.suppliers;
+package edu.ucr.cs.riple.core.evaluators.suppliers;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.evaluators.graphprocessor.CompilerRunner;
+import edu.ucr.cs.riple.core.evaluators.graphprocessor.ConflictGraphProcessor;
+import edu.ucr.cs.riple.core.evaluators.graphprocessor.ParallelConflictGraphProcessor;
+import edu.ucr.cs.riple.core.evaluators.graphprocessor.SequentialConflictGraphProcessor;
+import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
+import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
+import edu.ucr.cs.riple.core.util.Utility;
 
 /**
  * Supplier for target module analysis. It has the following characteristics:
@@ -41,14 +49,19 @@ import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
  */
 public class TargetModuleSupplier extends AbstractSupplier {
 
+  protected final GlobalAnalyzer globalAnalyzer;
+
   /**
    * Constructor for target module supplier instance.
    *
    * @param config Annotator config instance.
+   * @param globalAnalyzer Global analyzer instance.
    * @param tree Method declaration tree for methods in target module.
    */
-  public TargetModuleSupplier(Config config, MethodDeclarationTree tree) {
+  public TargetModuleSupplier(
+      Config config, GlobalAnalyzer globalAnalyzer, MethodDeclarationTree tree) {
     super(ImmutableSet.of(config.target), config, tree);
+    this.globalAnalyzer = globalAnalyzer;
   }
 
   @Override
@@ -59,5 +72,20 @@ public class TargetModuleSupplier extends AbstractSupplier {
   @Override
   protected int initializeDepth() {
     return config.depth;
+  }
+
+  @Override
+  public GlobalAnalyzer getGlobalAnalyzer() {
+    return globalAnalyzer;
+  }
+
+  @Override
+  public ConflictGraphProcessor getGraphProcessor() {
+    CompilerRunner runner = () -> Utility.buildTarget(config);
+    if (config.optimized) {
+      RegionTracker tracker = new CompoundTracker(config, config.target, tree);
+      return new ParallelConflictGraphProcessor(config, runner, this, tracker);
+    }
+    return new SequentialConflictGraphProcessor(config, runner, this);
   }
 }

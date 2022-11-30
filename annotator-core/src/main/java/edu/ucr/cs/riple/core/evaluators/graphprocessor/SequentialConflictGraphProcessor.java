@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,35 +22,31 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers;
+package edu.ucr.cs.riple.core.evaluators.graphprocessor;
 
-import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.explorers.suppliers.Supplier;
-import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
-import edu.ucr.cs.riple.core.metadata.graph.Node;
+import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
+import edu.ucr.cs.riple.core.metadata.graph.ConflictGraph;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.Result;
-import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.util.Utility;
-import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
-import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Collection;
 import java.util.Set;
-import java.util.stream.Collectors;
 import me.tongfei.progressbar.ProgressBar;
 
-public class BasicExplorer extends Explorer {
+/** Basic processor which processes the impact of each node sequentially. */
+public class SequentialConflictGraphProcessor extends AbstractConflictGraphProcessor {
 
-  public BasicExplorer(ImmutableSet<Fix> fixes, Supplier supplier, GlobalAnalyzer globalAnalyzer) {
-    super(fixes, supplier, globalAnalyzer);
+  public SequentialConflictGraphProcessor(Config config, CompilerRunner runner, Supplier supplier) {
+    super(config, runner, supplier);
   }
 
   @Override
-  protected void executeNextCycle() {
-    System.out.println(
-        "Scheduling for: " + reports.size() + " builds for: " + reports.size() + " fixes");
-    ProgressBar pb = Utility.createProgressBar("Processing", reports.size());
+  public void process(ConflictGraph graph) {
+    int count = (int) graph.getNodes().count();
+    System.out.println("Scheduling for: " + count + " runs.");
+    ProgressBar pb = Utility.createProgressBar("Processing", count);
     graph
         .getNodes()
         .forEach(
@@ -58,7 +54,7 @@ public class BasicExplorer extends Explorer {
               pb.step();
               Set<Fix> fixes = node.tree;
               injector.injectFixes(fixes);
-              Utility.buildTarget(config);
+              compilerRunner.run();
               errorBank.saveState(false, true);
               fixBank.saveState(false, true);
               Result<Error> errorComparisonResult = errorBank.compare();
@@ -74,27 +70,5 @@ public class BasicExplorer extends Explorer {
               injector.removeFixes(fixes);
             });
     pb.close();
-  }
-
-  /**
-   * Updates list of triggered fixes with fixes triggered from downstream dependencies.
-   *
-   * @param node Node in process.
-   * @param localTriggeredFixes Collection of triggered fixes locally.
-   */
-  public void addTriggeredFixesFromDownstream(Node node, Collection<Fix> localTriggeredFixes) {
-    Set<Location> currentLocationTargetedByTree =
-        node.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
-    localTriggeredFixes.addAll(
-        globalAnalyzer.getImpactedParameters(node.tree).stream()
-            .filter(input -> !currentLocationTargetedByTree.contains(input))
-            .map(
-                onParameter ->
-                    new Fix(
-                        new AddMarkerAnnotation(onParameter, config.nullableAnnot),
-                        "PASSING_NULLABLE",
-                        new Region(onParameter.clazz, onParameter.method),
-                        false))
-            .collect(Collectors.toList()));
   }
 }

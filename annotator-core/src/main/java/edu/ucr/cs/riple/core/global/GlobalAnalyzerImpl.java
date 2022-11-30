@@ -30,7 +30,7 @@ import com.google.common.collect.Multimaps;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.explorers.suppliers.DownstreamDependencySupplier;
+import edu.ucr.cs.riple.core.evaluators.suppliers.DownstreamDependencySupplier;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
@@ -104,10 +104,9 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
                         new Region("null", "null"),
                         false))
             .collect(ImmutableSet.toImmutableSet());
-    DownstreamImpactExplorer analyzer =
-        new DownstreamImpactExplorer(
-            fixes, new DownstreamDependencySupplier(config, tree), tracker);
-    ImmutableSet<Report> reports = analyzer.explore();
+    DownstreamImpactEvaluator analyzer =
+        new DownstreamImpactEvaluator(new DownstreamDependencySupplier(config, tracker, tree));
+    ImmutableSet<Report> reports = analyzer.evaluate(fixes);
     // Update method status based on the results.
     methods
         .values()

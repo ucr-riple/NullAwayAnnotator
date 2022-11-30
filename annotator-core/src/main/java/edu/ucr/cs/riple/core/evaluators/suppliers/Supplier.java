@@ -22,16 +22,19 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers.suppliers;
+package edu.ucr.cs.riple.core.evaluators.suppliers;
 
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.evaluators.AbstractEvaluator;
+import edu.ucr.cs.riple.core.evaluators.graphprocessor.ConflictGraphProcessor;
+import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 
-/** Supplier for initializing an {@link edu.ucr.cs.riple.core.explorers.Explorer} instance. */
+/** Supplier for initializing an {@link AbstractEvaluator} instance. */
 public interface Supplier {
 
   /**
@@ -75,4 +78,18 @@ public interface Supplier {
    * @return Config instance.
    */
   Config getConfig();
+
+  /**
+   * Getter for {@link GlobalAnalyzer} instance.
+   *
+   * @return GlobalAnalyzer instance.
+   */
+  GlobalAnalyzer getGlobalAnalyzer();
+
+  /**
+   * Getter for {@link ConflictGraphProcessor}.
+   *
+   * @return Graph processor instance.
+   */
+  ConflictGraphProcessor getGraphProcessor();
 }

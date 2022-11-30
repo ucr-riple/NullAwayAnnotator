@@ -191,13 +191,13 @@ public class Report {
    * Computes the boundaries of effectiveness of applying the fix tree to target module on
    * downstream dependencies.
    *
-   * @param explorer Downstream dependency instance.
+   * @param analyzer Downstream dependency analyzer instance.
    */
-  public void computeBoundariesOfEffectivenessOnDownstreamDependencies(GlobalAnalyzer explorer) {
+  public void computeBoundariesOfEffectivenessOnDownstreamDependencies(GlobalAnalyzer analyzer) {
     this.lowerBoundEffectOnDownstreamDependencies =
-        explorer.computeLowerBoundOfNumberOfErrors(tree);
+        analyzer.computeLowerBoundOfNumberOfErrors(tree);
     this.upperBoundEffectOnDownstreamDependencies =
-        explorer.computeUpperBoundOfNumberOfErrors(tree);
+        analyzer.computeUpperBoundOfNumberOfErrors(tree);
   }
 
   /**

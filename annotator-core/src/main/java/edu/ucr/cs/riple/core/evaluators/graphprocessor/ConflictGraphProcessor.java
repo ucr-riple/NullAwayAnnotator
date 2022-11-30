@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,26 +22,20 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers;
+package edu.ucr.cs.riple.core.evaluators.graphprocessor;
 
-import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.explorers.suppliers.ExhaustiveSupplier;
-import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.metadata.graph.ConflictGraph;
 
-public class ExhaustiveExplorer extends Explorer {
+/**
+ * Interface for conflict-graph processors. Subclasses of this type, can compute the impacts of a
+ * set of fixes given in a conflict graph.
+ */
+public interface ConflictGraphProcessor {
 
-  public ExhaustiveExplorer(ImmutableSet<Fix> fixes, ExhaustiveSupplier supplier) {
-    super(fixes, supplier, new NoOpGlobalAnalyzer());
-  }
-
-  @Override
-  protected void executeNextCycle() {
-    // NO OP
-  }
-
-  @Override
-  protected void finalizeReports() {
-    this.reports.forEach(report -> report.localEffect = -1);
-  }
+  /**
+   * Processes the given conflict graph and computes the impact of including nodes.
+   *
+   * @param graph Conflict graph containing the target fixes.
+   */
+  void process(ConflictGraph graph);
 }
