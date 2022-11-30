@@ -42,7 +42,7 @@ public abstract class AbstractEvaluator implements Evaluator {
   /** Depth of analysis. */
   protected final int depth;
   /** Graph processor to process the graph. */
-  protected ConflictGraphProcessor analyzer;
+  protected ConflictGraphProcessor processor;
   /** Supplier used for initialization. */
   protected final Supplier supplier;
 
@@ -51,7 +51,7 @@ public abstract class AbstractEvaluator implements Evaluator {
     this.depth = supplier.depth();
     this.config = supplier.getConfig();
     this.graph = new ConflictGraph();
-    this.analyzer = supplier.getGraphProcessor();
+    this.processor = supplier.getGraphProcessor();
   }
 
   /**
@@ -79,7 +79,7 @@ public abstract class AbstractEvaluator implements Evaluator {
         System.out.println("Analysis finished at this iteration.");
         break;
       }
-      analyzer.process(graph);
+      processor.process(graph);
       collectGraphResults();
     }
     return reports;
