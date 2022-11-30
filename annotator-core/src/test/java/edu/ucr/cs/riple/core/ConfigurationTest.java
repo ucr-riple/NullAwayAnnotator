@@ -260,23 +260,6 @@ public class ConfigurationTest {
     assertEquals(config.nullUnMarkedAnnotation, "edu.ucr.example.NullUnmarked");
   }
 
-  @Test
-  public void testCommentGenerationFlag() {
-    Config config;
-
-    List<CLIFlag> baseFlags = new ArrayList<>(requiredFlagsCli);
-    baseFlags.addAll(requiredDownsStreamDependencyFlagsCli);
-
-    // Check default mode.
-    config = new Config(makeCommandLineArguments(baseFlags));
-    assertFalse(config.commentGenerationEnabled);
-
-    baseFlags.add(new CLIFlagWithValue("acg", "CustomPrefix"));
-    config = new Config(makeCommandLineArguments(baseFlags));
-    assertTrue(config.commentGenerationEnabled);
-    assertEquals(config.commentPrefix, "CustomPrefix");
-  }
-
   /**
    * Helper method for reading value of a node located at /key_1/key_2/.../key_n (in the form of
    * {@code Xpath} query) from a xml document at the given path.
