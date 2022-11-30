@@ -67,4 +67,4 @@ jobs:
           java-version: 11
           distribution: 'temurin'
       - name: Build with Gradle
-        run: ./gradlew :core:test --scan -Pnullaway-serialization-format-version=0
+        run: ./gradlew :annotator-core:test --scan -Pnullaway-serialization-format-version=0

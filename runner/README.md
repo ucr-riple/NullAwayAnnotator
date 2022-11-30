@@ -11,15 +11,15 @@ Below are the instructions to prepare the target project:
 
 #### Dependencies
 1. `NullAway` checker must be activated with version >= `0.9.7`
-2. `TypeAnnotatorScanner` checker must be activated with version >= `1.2.6-LOCAL`, see more about `TypeAnnotatorScanner` [here](../type-annotator-scanner/README.md).
+2. `AnnotatorScanner` checker must be activated with version >= `1.2.6`, see more about `AnnotatorScanner` [here](../type-annotator-scanner/README.md).
 
 #### Error Prone Flags
 ```
 "-Xep:NullAway:ERROR", // to activate NullAway
 "-XepOpt:NullAway:SerializeFixMetadata=true",
 "-XepOpt:NullAway:FixSerializationConfigPath=path_to_nullaway_config.xml",
-"-Xep:TypeAnnotatorScanner:ERROR", // to activate Annotator TypeAnnotatorScanner
-"-XepOpt:TypeAnnotatorScanner:ConfigPath=path_to_scanner_config.xml",
+"-Xep:AnnotatorScanner:ERROR", // to activate Annotator AnnotatorScanner
+"-XepOpt:AnnotatorScanner:ConfigPath=path_to_scanner_config.xml",
 ```
 
 `path_to_nullaway_config.xml` and `path_to_scanner_config.xml` are config files which **are not necessary** to create at the time of preparing the project. 
@@ -29,7 +29,7 @@ Please find a sample project setup below:
 ```groovy
 dependencies {
     annotationProcessor "edu.ucr.cs.riple:nullaway:0.9.6"
-    annotationProcessor "edu.ucr.cs.riple.nullawayannotator:type-annotator-scanner:1.3.3-LOCAL"
+    annotationProcessor "edu.ucr.cs.riple.annotator:annotator-scanner:1.3.4"
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
     errorprone "com.google.errorprone:error_prone_core:2.3.2"
     errorproneJavac "com.google.errorprone:javac:9+181-r4173-1"
@@ -42,8 +42,8 @@ tasks.withType(JavaCompile) {
                                               "-XepOpt:NullAway:AnnotatedPackages=com.uber",
                                               "-XepOpt:NullAway:SerializeFixMetadata=true",
                                               "-XepOpt:NullAway:FixSerializationConfigPath=/tmp/NullAwayFix/config.xml",
-                                              "-Xep:TypeAnnotatorScanner:ERROR",
-                                              "-XepOpt:TypeAnnotatorScanner:ConfigPath=/tmp/NullAwayFix/scanner.xml",
+                                              "-Xep:AnnotatorScanner:ERROR",
+                                              "-XepOpt:AnnotatorScanner:ConfigPath=/tmp/NullAwayFix/scanner.xml",
         ]
     }
 }
@@ -63,7 +63,7 @@ cd jars && java -jar core.jar
 In order to run `Annotator` on target project `P`, arguments below **must** be passed to `Annotator`:
 1. `-bc,--build-command <arg>`: Command to run `NullAway` on target `P` enclosed in **""**. Please note that this command should be executable from any directory (e.g. `"cd /Absolute /Path /To /P && ./build"`).
 2. `-i,--initializer <arg>`: Fully qualified name of the `@Initializer` annotation.
-3. `-d,--dir <arg>`: Directory where all outputs of `TypeAnnotatorScanner|NullAway` are serialized.
+3. `-d,--dir <arg>`: Directory where all outputs of `AnnotatorScanner|NullAway` are serialized.
 4. `-cp, --config-paths`: Path to a tsv file containing values defined in [Error Prone](./README.md#Error-Prone-Flags) config paths given in the format: (`path_to_nullaway_config.xml \t path_to_scanner_config`)
 
 By default, `Annotator` has the configuration below:
