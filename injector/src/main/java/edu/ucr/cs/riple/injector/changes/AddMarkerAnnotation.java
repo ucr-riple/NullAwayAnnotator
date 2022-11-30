@@ -40,24 +40,8 @@ import javax.lang.model.element.ElementKind;
  */
 public class AddMarkerAnnotation extends AddAnnotation {
 
-  /**
-   * Comment to be added on the added annotation. If {@code null} no comment will be added. Comment
-   * cannot contain any consecutive characters of {@code *} and {@code /} since this comment will be
-   * added as a trailing comment surrounded by "/* {@literal *}/".
-   */
-  @Nullable public final String comment;
-
-  public AddMarkerAnnotation(Location location, String annotation, @Nullable String comment) {
-    super(location, annotation);
-    this.comment = comment;
-    if (comment != null && comment.contains("*/")) {
-      throw new IllegalArgumentException(
-          "Comment cannot contain pair of \"*/\" characters: " + comment);
-    }
-  }
-
   public AddMarkerAnnotation(Location location, String annotation) {
-    this(location, annotation, null);
+    super(location, annotation);
   }
 
   @Override
@@ -72,28 +56,11 @@ public class AddMarkerAnnotation extends AddAnnotation {
     if (annotAlreadyExists) {
       return null;
     }
-    String contentToAdd =
-        this.comment == null
-            ? annotationExpr.toString()
-            : annotationExpr + " " + getCommentRepresentationInSourceCode();
-    return new Insertion(contentToAdd, range.begin, kind);
+    return new Insertion(annotationExpr.toString(), range.begin, kind);
   }
 
   @Override
   public Change duplicate() {
     return new AddMarkerAnnotation(location, annotation);
-  }
-
-  /**
-   * Returns string representation of comment as trailing comment according to java comment style.
-   *
-   * @return Comment according to java comment style.
-   */
-  private String getCommentRepresentationInSourceCode() {
-    if (this.comment == null) {
-      // to make this method return non-null.
-      throw new RuntimeException("comment is not initialized");
-    }
-    return "/* " + this.comment + " */";
   }
 }

@@ -36,21 +36,16 @@ import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
 import edu.ucr.cs.riple.core.metadata.field.FieldInitializationAnalysis;
-import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
-import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
-import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -152,7 +147,7 @@ public class Annotator {
     }
 
     if (config.forceResolveActivated) {
-      forceResolveRemainingErrors(fieldDeclarationAnalysis, tree, globalAnalyzer);
+      forceResolveRemainingErrors(fieldDeclarationAnalysis, tree);
     }
 
     System.out.println("\nFinished annotating.");
@@ -244,13 +239,9 @@ public class Annotator {
    *
    * @param fieldDeclarationAnalysis Field declaration analysis.
    * @param tree Method Declaration analysis.
-   * @param analyzer Global analyzer instance, used to compute the effect of {@code @NullUnmarked}
-   *     injections globally
    */
   private void forceResolveRemainingErrors(
-      FieldDeclarationAnalysis fieldDeclarationAnalysis,
-      MethodDeclarationTree tree,
-      GlobalAnalyzer analyzer) {
+      FieldDeclarationAnalysis fieldDeclarationAnalysis, MethodDeclarationTree tree) {
     // Collect regions with remaining errors.
     Utility.buildTarget(config);
     List<Error> remainingErrors = Utility.readErrorsFromOutputDirectory(config, config.target);
@@ -258,14 +249,10 @@ public class Annotator {
         Utility.readFixesFromOutputDirectory(
             config.target, Fix.factory(config, fieldDeclarationAnalysis));
 
-    Bank<Error> errorBank =
-        new Bank<>(config.target.dir.resolve("errors.tsv"), Error.factory(config));
-
     // Collect all regions for NullUnmarked.
     // For all errors in regions which correspond to a method's body, we can add @NullUnmarked at
     // the method level.
-    Map<OnMethod, String> methodCommentMap = new HashMap<>();
-    Set<OnMethod> nullUnmarkedMethods =
+    Set<AddAnnotation> nullUnMarkedAnnotations =
         remainingErrors.stream()
             // find the corresponding method nodes.
             .map(
@@ -286,55 +273,11 @@ public class Annotator {
                 })
             // Filter null values from map above.
             .filter(Objects::nonNull)
-            .map(
-                node -> {
-                  methodCommentMap.put(
-                      node.location,
-                      "//local "
-                          + errorBank
-                              .getEntriesByRegion(node.location.clazz, node.location.method)
-                              .size());
-                  return node.location;
-                })
+            .map(node -> new AddMarkerAnnotation(node.location, config.nullUnMarkedAnnotation))
             .collect(Collectors.toSet());
-
-    if (config.commentGenerationEnabled) {
-      // Analyze impacts of the annotation locally and globally for comment generation.
-      remainingFixes.forEach(
-          fix -> {
-            if (fix.isOnMethod()) {
-              MethodNode node = tree.findNode(fix.toMethod().method, fix.toMethod().clazz);
-              if (node != null && !methodCommentMap.containsKey(node.location)) {
-                String comment = "";
-                if (config.downStreamDependenciesAnalysisActivated
-                    && node.isPublicMethodWithNonPrimitiveReturnType()) {
-                  comment += " //dependent: " + analyzer.getTriggeredErrors(fix).size();
-                }
-                Report report = cache.getReportForFix(fix);
-                if (report != null) {
-                  comment += " //local: " + report.localEffect;
-                }
-                methodCommentMap.put(node.location, methodCommentMap.get(node.location) + comment);
-              }
-            }
-          });
-    }
-
-    Set<AddAnnotation> nullUnmarkedInjections =
-        nullUnmarkedMethods.stream()
-            .map(
-                onMethod ->
-                    new AddMarkerAnnotation(
-                        onMethod,
-                        config.nullUnMarkedAnnotation,
-                        config.commentGenerationEnabled
-                            ? config.commentPrefix + ":" + methodCommentMap.get(onMethod)
-                            : null))
-            .collect(Collectors.toSet());
-
-    injector.injectAnnotations(nullUnmarkedInjections);
+    injector.injectAnnotations(nullUnMarkedAnnotations);
     // Update log.
-    config.log.updateInjectedAnnotations(nullUnmarkedInjections);
+    config.log.updateInjectedAnnotations(nullUnMarkedAnnotations);
 
     // Collect suppress warnings, errors on field declaration regions.
     Set<OnField> fieldsWithSuppressWarnings =
