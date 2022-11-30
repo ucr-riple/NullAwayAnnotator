@@ -74,7 +74,7 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
    * @param node Node in process.
    * @param localTriggeredFixes Collection of triggered fixes locally.
    */
-  public void addTriggeredFixesFromDownstream(Node node, Collection<Fix> localTriggeredFixes) {
+  protected void addTriggeredFixesFromDownstream(Node node, Collection<Fix> localTriggeredFixes) {
     Set<Location> currentLocationTargetedByTree =
         node.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
     localTriggeredFixes.addAll(
