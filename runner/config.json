@@ -1,11 +1,10 @@
 {
-  "BUILD_COMMAND": "cd /Users/nima/Developer/NullAwayFixer/Projects/libgdx && ./gradlew :gdx:compileJava",
+  "BUILD_COMMAND": "cd /path/to/target && command to run javac with analysis (e.g. ./gradlew :p:compileJava)",
   "ANNOTATION": {
     "INITIALIZER": "com.badlogic.gdx.Initializer",
-    "NULLABLE": "javax.annotation.Nullable",
-    "NULL_UNMARKED": "com.badlogic.gdx.NullUnmarked"
+    "NULLABLE": "javax.annotation.Nullable"
   },
-  "LEXICAL_PRESERVATION": false,
+  "LEXICAL_PRESERVATION": true,
   "OUTPUT_DIR": "/tmp/NullAwayFix",
   "CHAIN": false,
   "OPTIMIZED": true,
@@ -14,17 +13,15 @@
   "REDIRECT_BUILD_OUTPUT_TO_STDERR": false,
   "EXHAUSTIVE_SEARCH": false,
   "OUTER_LOOP": true,
-  "FORCE_RESOLVE": true,
-  "INFERENCE_ACTIVATION": false,
   "CONFIG_PATHS": [
     {
-      "NULLAWAY": "/tmp/NullAwayFix/nullaway.xml",
-      "SCANNER": "/tmp/NullAwayFix/scanner.xml"
+      "NULLAWAY": "path_to_nullaway_config.xml",
+      "SCANNER": "path_to_scanner_config.xml"
     }
   ],
-  "DEPTH": 5,
+  "DEPTH": 1,
   "DOWNSTREAM_DEPENDENCY": {
-    "ACTIVATION":false,
+    "ACTIVATION":true,
     "BUILD_COMMAND": "cd /path/to/dependencies && command to run javac with analysis (e.g. ./gradlew :p:compileJava)",
     "LIBRARY_MODEL_LOADER_PATH": "path to nullaway library model loader jar"
   }

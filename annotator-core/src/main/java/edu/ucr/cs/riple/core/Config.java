@@ -148,7 +148,7 @@ public class Config {
   private NullAwayVersionAdapter adapter;
 
   /**
-   * config from command line arguments.
+   * Builds config from command line arguments.
    *
    * @param args arguments.
    */

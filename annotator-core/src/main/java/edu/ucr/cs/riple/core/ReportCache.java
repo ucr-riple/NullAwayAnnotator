@@ -106,14 +106,4 @@ public class ReportCache {
   public ImmutableSet<Report> reports() {
     return ImmutableSet.copyOf(store.values());
   }
-
-  /**
-   * Gets the corresponding report for the given fix.
-   *
-   * @param fix Given fix.
-   * @return Report of the processing of the fix.
-   */
-  public Report getReportForFix(Fix fix) {
-    return store.get(fix);
-  }
 }
