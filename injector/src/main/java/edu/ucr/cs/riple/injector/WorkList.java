@@ -51,16 +51,4 @@ public class WorkList {
   public String getUri() {
     return uri;
   }
-
-  public void addContainingAnnotationsToList(List<String> annotsList) {
-    for (Change location : changes) {
-      if (!annotsList.contains(location.annotation)) {
-        annotsList.add(location.annotation);
-      }
-    }
-  }
-
-  public String className() {
-    return changes.get(0).location.clazz;
-  }
 }
