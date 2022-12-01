@@ -54,12 +54,13 @@ public class Injector {
     Map<String, List<Change>> map = new HashMap<>();
     changes.forEach(
         change -> {
-          if (map.containsKey(change.location.uri)) {
-            map.get(change.location.uri).add(change);
+          String path = Helper.extractPath(change.location.uri);
+          if (map.containsKey(path)) {
+            map.get(path).add(change);
           } else {
             List<Change> newList = new ArrayList<>();
             newList.add(change);
-            map.put(change.location.uri, newList);
+            map.put(path, newList);
           }
         });
     map.forEach(
