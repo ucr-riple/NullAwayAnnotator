@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers.suppliers;
+package edu.ucr.cs.riple.core.evaluators.suppliers;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;

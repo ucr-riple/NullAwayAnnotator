@@ -25,12 +25,10 @@
 package edu.ucr.cs.riple.core;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.explorers.BasicExplorer;
-import edu.ucr.cs.riple.core.explorers.ExhaustiveExplorer;
-import edu.ucr.cs.riple.core.explorers.Explorer;
-import edu.ucr.cs.riple.core.explorers.OptimizedExplorer;
-import edu.ucr.cs.riple.core.explorers.suppliers.ExhaustiveSupplier;
-import edu.ucr.cs.riple.core.explorers.suppliers.TargetModuleSupplier;
+import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
+import edu.ucr.cs.riple.core.evaluators.Evaluator;
+import edu.ucr.cs.riple.core.evaluators.VoidEvaluator;
+import edu.ucr.cs.riple.core.evaluators.suppliers.TargetModuleSupplier;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzerImpl;
 import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;
@@ -41,8 +39,6 @@ import edu.ucr.cs.riple.core.metadata.field.FieldInitializationAnalysis;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
-import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
-import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
@@ -218,18 +214,13 @@ public class Annotator {
             .filter(fix -> !cache.processedFix(fix))
             .collect(ImmutableSet.toImmutableSet());
 
-    // Initializing required explorer instances.
+    // Initializing required evaluator instances.
     MethodDeclarationTree tree = new MethodDeclarationTree(config);
-    RegionTracker tracker = new CompoundTracker(config, config.target, tree);
-    TargetModuleSupplier supplier = new TargetModuleSupplier(config, tree);
-    Explorer explorer =
-        config.exhaustiveSearch
-            ? new ExhaustiveExplorer(fixes, new ExhaustiveSupplier(config, tree))
-            : config.optimized
-                ? new OptimizedExplorer(fixes, supplier, globalAnalyzer, tracker)
-                : new BasicExplorer(fixes, supplier, globalAnalyzer);
+    TargetModuleSupplier supplier = new TargetModuleSupplier(config, globalAnalyzer, tree);
+    Evaluator evaluator =
+        config.exhaustiveSearch ? new VoidEvaluator() : new BasicEvaluator(supplier);
     // Result of the iteration analysis.
-    return explorer.explore();
+    return evaluator.evaluate(fixes);
   }
 
   /**

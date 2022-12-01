@@ -22,35 +22,11 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.explorers.suppliers;
+package edu.ucr.cs.riple.core.evaluators.graphprocessor;
 
-import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
-import edu.ucr.cs.riple.core.injectors.VirtualInjector;
-import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+/** Interface for rerunning the analysis/compiler. */
+public interface CompilerRunner {
 
-/**
- * Supplier for downstream dependency analysis. It has the following characteristics:
- *
- * <ul>
- *   <li>Annotations are virtually injected on downstream dependencies.
- *   <li>Analysis is performed only to depth 1.
- *   <li>Global impact of annotations are neglected.
- * </ul>
- */
-public class DownstreamDependencySupplier extends AbstractSupplier {
-
-  public DownstreamDependencySupplier(Config config, MethodDeclarationTree tree) {
-    super(config.downstreamInfo, config, tree);
-  }
-
-  @Override
-  protected AnnotationInjector initializeInjector() {
-    return new VirtualInjector(config);
-  }
-
-  @Override
-  protected int initializeDepth() {
-    return 1;
-  }
+  /** Runs the analysis/compiler. */
+  void run();
 }

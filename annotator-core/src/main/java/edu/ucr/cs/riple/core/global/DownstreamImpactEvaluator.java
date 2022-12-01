@@ -24,12 +24,9 @@
 
 package edu.ucr.cs.riple.core.global;
 
-import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.explorers.OptimizedExplorer;
-import edu.ucr.cs.riple.core.explorers.suppliers.DownstreamDependencySupplier;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
-import edu.ucr.cs.riple.core.util.Utility;
+import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
+import edu.ucr.cs.riple.core.evaluators.suppliers.DownstreamDependencySupplier;
+import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collections;
@@ -38,11 +35,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Explorer for analyzing downstream dependencies. Used by {@link GlobalAnalyzerImpl} to compute the
- * effects of changes in upstream on downstream dependencies. This explorer cannot be used to
+ * Evaluator for analyzing downstream dependencies. Used by {@link GlobalAnalyzerImpl} to compute
+ * the effects of changes in upstream on downstream dependencies. This evaluator cannot be used to
  * compute the effects in target module.
  */
-class DownstreamImpactExplorer extends OptimizedExplorer {
+class DownstreamImpactEvaluator extends BasicEvaluator {
 
   /**
    * Map of public methods in target module to parameters in target module, which are source of
@@ -51,22 +48,19 @@ class DownstreamImpactExplorer extends OptimizedExplorer {
    */
   private final HashMap<OnMethod, Set<OnParameter>> nullableFlowMap;
 
-  public DownstreamImpactExplorer(
-      ImmutableSet<Fix> fixes, DownstreamDependencySupplier supplier, RegionTracker tracker) {
-    super(fixes, supplier, new NoOpGlobalAnalyzer(), tracker);
+  private final MethodDeclarationTree methodDeclarationTree;
+
+  public DownstreamImpactEvaluator(DownstreamDependencySupplier supplier) {
+    super(supplier);
     this.nullableFlowMap = new HashMap<>();
+    this.methodDeclarationTree = supplier.getMethodDeclarationTree();
   }
 
   @Override
-  public void rerunAnalysis() {
-    Utility.buildDownstreamDependencies(config);
-  }
-
-  @Override
-  protected void finalizeReports() {
-    super.finalizeReports();
+  protected void collectGraphResults() {
+    super.collectGraphResults();
     // Collect impacted parameters in target module by downstream dependencies.
-    graph
+    this.graph
         .getNodes()
         .forEach(
             node ->
