@@ -28,6 +28,7 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -47,14 +48,17 @@ public class Printer {
   /** Lines of source file. */
   private final List<String> lines;
 
+  /** Offset store for recording changes in source code. */
+  private final FileOffsetStore offsetStore;
+
   public Printer(Path path) {
     this.path = path;
-
     try {
       lines = Files.readAllLines(path);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+    this.offsetStore = new FileOffsetStore(lines, path);
   }
 
   /**
@@ -72,7 +76,7 @@ public class Printer {
                 // To make the tests produce deterministic results.
                 .thenComparing(o -> o.content)
                 .reversed())
-        .forEach(modification -> modification.visit(lines));
+        .forEach(modification -> modification.visit(lines, offsetStore));
   }
 
   /**
@@ -86,7 +90,11 @@ public class Printer {
       return;
     }
     int line = findStartOffsetForImports(tree);
-    imports.forEach(importDec -> lines.add(line, importDec.toString()));
+    imports.forEach(
+        importDec -> {
+          offsetStore.updateOffsetWithNewLineAddition(line, importDec.toString().length());
+          lines.add(line, importDec.toString());
+        });
   }
 
   /**
@@ -151,12 +159,17 @@ public class Printer {
         "Could not figure out the starting point for imports for file at path: " + path);
   }
 
-  /** Writes the updated lines into the source file. */
-  public void write() {
+  /**
+   * Writes the updated lines into the source file.
+   *
+   * @return offset store corresponding to file changes.
+   */
+  public FileOffsetStore write() {
     try {
       Files.write(path, lines);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+    return offsetStore;
   }
 }

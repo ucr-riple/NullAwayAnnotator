@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.injector.modifications;
 
 import com.github.javaparser.Position;
+import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.util.List;
 import javax.lang.model.element.ElementKind;
 
@@ -36,7 +37,7 @@ public class Insertion extends Modification {
   }
 
   @Override
-  public void visit(List<String> lines) {
+  public void visit(List<String> lines, FileOffsetStore offsetStore) {
     String toInsert;
     String line = lines.get(startPosition.line);
     switch (kind) {
@@ -51,10 +52,13 @@ public class Insertion extends Modification {
           head += 1;
         }
         toInsert = padding + this.content;
+        offsetStore.updateOffsetWithNewLineAddition(startPosition.line, toInsert.length());
         lines.add(startPosition.line, toInsert);
         break;
       case PARAMETER:
         toInsert = this.content + " ";
+        offsetStore.updateOffsetWithAddition(
+            startPosition.line, startPosition.column, toInsert.length());
         lines.set(
             startPosition.line,
             line.substring(0, startPosition.column)

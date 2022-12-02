@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.injector.modifications;
 
 import com.github.javaparser.Position;
+import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.util.List;
 import javax.lang.model.element.ElementKind;
 
@@ -49,7 +50,7 @@ public class Replacement extends Modification {
   }
 
   @Override
-  public void visit(List<String> lines) {
+  public void visit(List<String> lines, FileOffsetStore offsetStore) {
     StringBuilder line = new StringBuilder(lines.get(startPosition.line));
     // Since replacements are only on fields and methods, we can compute paddings based on the
     // starting line.

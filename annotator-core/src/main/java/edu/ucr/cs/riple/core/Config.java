@@ -31,6 +31,8 @@ import edu.ucr.cs.riple.core.adapters.NullAwayV1Adapter;
 import edu.ucr.cs.riple.core.adapters.NullAwayVersionAdapter;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.util.Utility;
+import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
+import edu.ucr.cs.riple.injector.offsets.Offset;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -40,7 +42,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -140,6 +145,8 @@ public class Config {
    * NullAway serialization version.
    */
   private NullAwayVersionAdapter adapter;
+
+  public final OffSetHandler offSetHandler;
 
   /**
    * Builds config from command line arguments.
@@ -394,6 +401,7 @@ public class Config {
             ? cmd.getOptionValue(activateForceResolveOption)
             : "org.jspecify.nullness.NullUnmarked";
     this.moduleCounterID = 0;
+    this.offSetHandler = new OffSetHandler();
     this.log = new Log();
     this.log.reset();
   }
@@ -474,6 +482,7 @@ public class Config {
         getValueFromKey(jsonObject, "ANNOTATION:NULL_UNMARKED", String.class)
             .orElse("org.jspecify.nullness.NullUnmarked");
     this.log = new Log();
+    this.offSetHandler = new OffSetHandler();
     log.reset();
   }
 
@@ -699,6 +708,46 @@ public class Config {
       } catch (IOException e) {
         System.err.println("Error happened in writing config json: " + e);
       }
+    }
+  }
+
+  public static class OffSetHandler {
+    private final Map<Path, List<Offset>> contents;
+
+    public OffSetHandler() {
+      contents = new HashMap<>();
+    }
+
+    public int adapt(Path path, int offset) {
+      return Offset.adapt(offset, contents.getOrDefault(path, List.of()));
+    }
+
+    public void updateOffset(Set<FileOffsetStore> newOffsets) {
+      newOffsets.forEach(
+          store -> {
+            List<Offset> existingOffsets =
+                contents.getOrDefault(store.getPath(), new ArrayList<>());
+            List<Offset> offsets = store.getOffSetsRelativeTo(existingOffsets);
+            existingOffsets.addAll(offsets);
+            // to keep the list small, we can eliminate pairs of offsets making each other neutral.
+            contents.put(store.getPath(), removeOpposingOffsets(existingOffsets));
+          });
+    }
+
+    private List<Offset> removeOpposingOffsets(List<Offset> existingOffsets) {
+      List<Offset> cleaned = new ArrayList<>();
+      for (int i = 0; i < existingOffsets.size(); i++) {
+        Offset current = existingOffsets.get(i);
+        if (i + 1 < existingOffsets.size()) {
+          Offset next = existingOffsets.get(i + 1);
+          if (current.position == next.position && current.dist == -1 * next.dist) {
+            i++;
+            continue;
+          }
+          cleaned.add(current);
+        }
+      }
+      return cleaned;
     }
   }
 }

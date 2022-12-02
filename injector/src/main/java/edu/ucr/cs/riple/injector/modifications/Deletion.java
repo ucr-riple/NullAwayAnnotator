@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.injector.modifications;
 
 import com.github.javaparser.Position;
 import com.google.common.base.Preconditions;
+import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.util.List;
 import javax.lang.model.element.ElementKind;
 
@@ -42,13 +43,14 @@ public class Deletion extends Modification {
   }
 
   @Override
-  public void visit(List<String> lines) {
+  public void visit(List<String> lines, FileOffsetStore offsetStore) {
     int start = startPosition.column;
     int end = endPosition.column;
     Preconditions.checkArgument(
         startPosition.line == endPosition.line,
         "Cannot delete annotations that are written in multiple lines");
-    StringBuilder line = new StringBuilder(lines.get(startPosition.line));
+    String original = lines.get(startPosition.line);
+    StringBuilder line = new StringBuilder(original);
     line.delete(start, end + 1);
     // char at start is removed, head is one character before start.
     int head = start - 1;
@@ -62,9 +64,12 @@ public class Deletion extends Modification {
     }
     String removed = line.toString();
     if (removed.strip().equals("")) {
+      offsetStore.updateOffsetWithLineDeletion(startPosition.line);
       lines.remove(startPosition.line);
       return;
     }
+    offsetStore.updateOffsetWithDeletion(
+        startPosition.line, startPosition.column, original.length() - removed.length());
     lines.set(startPosition.line, removed);
   }
 }
