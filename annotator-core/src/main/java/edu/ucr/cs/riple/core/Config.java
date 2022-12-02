@@ -770,8 +770,8 @@ public class Config {
             i++;
             continue;
           }
-          cleaned.add(current);
         }
+        cleaned.add(current);
       }
       return cleaned;
     }
