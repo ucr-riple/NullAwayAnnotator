@@ -511,6 +511,7 @@ public class Config {
           break;
         case 2:
           this.adapter = new NullAwayV2Adapter(this);
+          break;
         default:
           throw new RuntimeException("Unrecognized NullAway serialization version: " + version);
       }
