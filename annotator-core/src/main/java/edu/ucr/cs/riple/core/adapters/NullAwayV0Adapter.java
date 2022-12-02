@@ -81,6 +81,7 @@ public class NullAwayV0Adapter implements NullAwayVersionAdapter {
         values[0],
         values[1],
         new Region(values[2], encMember),
+        0,
         Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 4, 10)));
   }
 

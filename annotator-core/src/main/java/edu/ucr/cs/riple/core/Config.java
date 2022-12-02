@@ -28,11 +28,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.adapters.NullAwayV0Adapter;
 import edu.ucr.cs.riple.core.adapters.NullAwayV1Adapter;
+import edu.ucr.cs.riple.core.adapters.NullAwayV2Adapter;
 import edu.ucr.cs.riple.core.adapters.NullAwayVersionAdapter;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
-import edu.ucr.cs.riple.injector.offsets.Offset;
+import edu.ucr.cs.riple.injector.offsets.OffsetChange;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -508,6 +509,8 @@ public class Config {
         case 1:
           this.adapter = new NullAwayV1Adapter(this);
           break;
+        case 2:
+          this.adapter = new NullAwayV2Adapter(this);
         default:
           throw new RuntimeException("Unrecognized NullAway serialization version: " + version);
       }
@@ -711,35 +714,56 @@ public class Config {
     }
   }
 
+  /** Responsible for handling offset changes in source file. */
   public static class OffSetHandler {
-    private final Map<Path, List<Offset>> contents;
+    /** Map of file paths to list offset changes. */
+    private final Map<Path, List<OffsetChange>> contents;
 
     public OffSetHandler() {
       contents = new HashMap<>();
     }
 
-    public int adapt(Path path, int offset) {
-      return Offset.adapt(offset, contents.getOrDefault(path, List.of()));
+    /**
+     * Translates the given offset to original offset.
+     *
+     * @param path Path to source file.
+     * @param offset Given offset.
+     * @return Original offset.
+     */
+    public int translate(Path path, int offset) {
+      return OffsetChange.translate(offset, contents.getOrDefault(path, List.of()));
     }
 
+    /**
+     * Updates given offsets with given new offset changes.
+     *
+     * @param newOffsets Given new offset changes.
+     */
     public void updateOffset(Set<FileOffsetStore> newOffsets) {
       newOffsets.forEach(
           store -> {
-            List<Offset> existingOffsets =
+            List<OffsetChange> existingOffsetChanges =
                 contents.getOrDefault(store.getPath(), new ArrayList<>());
-            List<Offset> offsets = store.getOffSetsRelativeTo(existingOffsets);
-            existingOffsets.addAll(offsets);
+            List<OffsetChange> offsetChanges = store.getOffSetsRelativeTo(existingOffsetChanges);
+            existingOffsetChanges.addAll(offsetChanges);
             // to keep the list small, we can eliminate pairs of offsets making each other neutral.
-            contents.put(store.getPath(), removeOpposingOffsets(existingOffsets));
+            contents.put(store.getPath(), removeOpposingOffsets(existingOffsetChanges));
           });
     }
 
-    private List<Offset> removeOpposingOffsets(List<Offset> existingOffsets) {
-      List<Offset> cleaned = new ArrayList<>();
-      for (int i = 0; i < existingOffsets.size(); i++) {
-        Offset current = existingOffsets.get(i);
-        if (i + 1 < existingOffsets.size()) {
-          Offset next = existingOffsets.get(i + 1);
+    /**
+     * Filters opposing offset changes. (e.g. offset change (p1, d1) and (p1, -d1) are opposing and
+     * are noneffective.
+     *
+     * @param existingOffsetChanges Offset changes.
+     * @return Cleaned offset changes.
+     */
+    private List<OffsetChange> removeOpposingOffsets(List<OffsetChange> existingOffsetChanges) {
+      List<OffsetChange> cleaned = new ArrayList<>();
+      for (int i = 0; i < existingOffsetChanges.size(); i++) {
+        OffsetChange current = existingOffsetChanges.get(i);
+        if (i + 1 < existingOffsetChanges.size()) {
+          OffsetChange next = existingOffsetChanges.get(i + 1);
           if (current.position == next.position && current.dist == -1 * next.dist) {
             i++;
             continue;

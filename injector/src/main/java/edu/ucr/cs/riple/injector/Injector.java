@@ -48,7 +48,7 @@ public class Injector {
    * Starts applying the requested changes.
    *
    * @param changes Set of changes.
-   * @return Offset updates of source file.
+   * @return Offset changes of source file.
    */
   public <T extends Change> Set<FileOffsetStore> start(Set<T> changes) {
     // Start method does not support addition and deletion on same element. Should be split into
@@ -128,7 +128,7 @@ public class Injector {
    * Adds the given annotations.
    *
    * @param requests Given annotations.
-   * @return Offset updates of source file.
+   * @return Offset changes of source file.
    */
   public Set<FileOffsetStore> addAnnotations(Set<AddAnnotation> requests) {
     return this.start(requests);
@@ -138,7 +138,7 @@ public class Injector {
    * Deletes the given annotations.
    *
    * @param requests Given annotations.
-   * @return Offset updates of source file.
+   * @return Offset changes of source file.
    */
   public Set<FileOffsetStore> removeAnnotations(Set<RemoveAnnotation> requests) {
     return this.start(requests);

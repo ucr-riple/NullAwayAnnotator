@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 public class NullAwayV1Adapter implements NullAwayVersionAdapter {
 
   /** Annotator config. */
-  private final Config config;
+  protected final Config config;
 
   public NullAwayV1Adapter(Config config) {
     this.config = config;
@@ -79,6 +79,7 @@ public class NullAwayV1Adapter implements NullAwayVersionAdapter {
         values[0],
         values[1],
         new Region(values[2], values[3]),
+        0,
         Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 4, 10)));
   }
 
