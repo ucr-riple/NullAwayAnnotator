@@ -324,7 +324,7 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
                     "com.uber.Super",
                     "getTargetForCall(com.ibm.wala.ipa.callgraph.CGNode[],com.ibm.wala.classLoader.CallSiteReference[][][],com.ibm.wala.classLoader.IClass,com.ibm.wala.ipa.callgraph.propagation.InstanceKey[][])"),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test

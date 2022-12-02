@@ -35,18 +35,15 @@ import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import javax.annotation.Nonnull;
-import me.tongfei.progressbar.ProgressBar;
-import me.tongfei.progressbar.ProgressBarStyle;
 
 /** A utility class. */
 public class Helper {
@@ -392,26 +389,16 @@ public class Helper {
   }
 
   /**
-   * Creates a progress bar.
+   * Corrects Path starting with prefix: {@code file}
    *
-   * @param task Task name.
-   * @param steps Number of required steps to complete task.
-   * @return Progress bar instance.
+   * @param value Path to file.
+   * @return The modified Path.
    */
-  public static ProgressBar createProgressBar(String task, int steps) {
-    return new ProgressBar(
-        task,
-        steps,
-        1000,
-        System.out,
-        ProgressBarStyle.ASCII,
-        "",
-        1,
-        false,
-        null,
-        ChronoUnit.SECONDS,
-        0L,
-        Duration.ZERO);
+  public static String extractPath(String value) {
+    if (!new File(value).exists() && value.startsWith("file:")) {
+      return value.substring("file:".length());
+    }
+    return value;
   }
 
   /**

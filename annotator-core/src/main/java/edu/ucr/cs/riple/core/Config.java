@@ -73,12 +73,6 @@ public class Config {
    */
   public final boolean exhaustiveSearch;
   /**
-   * If set to true, the default pretty printer will be used to print the transformed AST, otherwise
-   * {@link com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter} will be used
-   * to preserve the code style.
-   */
-  public final boolean lexicalPreservationDisabled;
-  /**
    * If activated, all containing fixes in the fix tree will be applied to the source code,
    * otherwise only the root fix will be applied.
    */
@@ -199,12 +193,6 @@ public class Config {
         new Option("i", "initializer", true, "Fully Qualified name of the Initializer annotation");
     initializerOption.setRequired(true);
     options.addOption(initializerOption);
-
-    // Format
-    Option disableLexicalPreservationOption =
-        new Option("dlp", "disable-lexical-preservation", false, "Disables lexical preservation");
-    disableLexicalPreservationOption.setRequired(false);
-    options.addOption(disableLexicalPreservationOption);
 
     // Bailout
     Option disableBailoutOption =
@@ -371,7 +359,6 @@ public class Config {
     Preconditions.checkArgument(moduleInfoList.size() > 0, "Target module config paths not found.");
     // First line is information for the target module.
     this.target = moduleInfoList.get(0);
-    this.lexicalPreservationDisabled = cmd.hasOption(disableLexicalPreservationOption.getLongOpt());
     this.chain = cmd.hasOption(chainOption.getLongOpt());
     this.redirectBuildOutputToStdErr =
         cmd.hasOption(redirectBuildOutputToStdErrOption.getLongOpt());
@@ -431,8 +418,6 @@ public class Config {
     this.redirectBuildOutputToStdErr =
         getValueFromKey(jsonObject, "REDIRECT_BUILD_OUTPUT_TO_STDERR", Boolean.class).orElse(false);
     this.useCache = getValueFromKey(jsonObject, "CACHE", Boolean.class).orElse(true);
-    this.lexicalPreservationDisabled =
-        !getValueFromKey(jsonObject, "LEXICAL_PRESERVATION", Boolean.class).orElse(false);
     this.optimized = getValueFromKey(jsonObject, "OPTIMIZED", Boolean.class).orElse(true);
     this.exhaustiveSearch =
         getValueFromKey(jsonObject, "EXHAUSTIVE_SEARCH", Boolean.class).orElse(true);
@@ -639,7 +624,6 @@ public class Config {
     public boolean cache = true;
     public boolean bailout = true;
     public boolean redirectBuildOutputToStdErr = false;
-    public boolean lexicalPreservationActivation = true;
     public boolean outerLoopActivation = true;
     public boolean downStreamDependenciesAnalysisActivated = false;
     public Path nullawayLibraryModelLoaderPath;
@@ -669,7 +653,6 @@ public class Config {
       annotation.put("NULLABLE", nullableAnnotation);
       annotation.put("NULL_UNMARKED", nullUnmarkedAnnotation);
       json.put("ANNOTATION", annotation);
-      json.put("LEXICAL_PRESERVATION", lexicalPreservationActivation);
       json.put("OUTER_LOOP", outerLoopActivation);
       json.put("OUTPUT_DIR", outputDir);
       json.put("CHAIN", chain);

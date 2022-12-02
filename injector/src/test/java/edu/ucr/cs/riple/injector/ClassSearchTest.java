@@ -155,7 +155,7 @@ public class ClassSearchTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnField("Main.java", "injector.Main$1Helper", Collections.singleton("f1")),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -167,7 +167,7 @@ public class ClassSearchTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnField("Main.java", "injector.Main$Helper", Collections.singleton("f0")),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -179,7 +179,7 @@ public class ClassSearchTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnField("Main.java", "injector.Main$2Helper", Collections.singleton("f2")),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -191,7 +191,7 @@ public class ClassSearchTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnMethod("Main.java", "injector.Main$Type", "get()"),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -203,7 +203,7 @@ public class ClassSearchTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnMethod("Main.java", "injector.Main$Inner", "bar()"),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -215,7 +215,7 @@ public class ClassSearchTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnField("Main.java", "injector.Main$1", Collections.singleton("f1")),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -227,7 +227,7 @@ public class ClassSearchTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnMethod("Main.java", "injector.Main$1$1", "compare()"),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -239,7 +239,7 @@ public class ClassSearchTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnField("Main.java", "injector.Main$1$2", Collections.singleton("f3")),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -251,7 +251,7 @@ public class ClassSearchTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnField("Main.java", "injector.Main$1$2$1", Collections.singleton("f4")),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -264,7 +264,7 @@ public class ClassSearchTest extends BaseInjectorTest {
                 new OnField(
                     "Main.java", "injector.Main$1$2$1$1Helper", Collections.singleton("f5")),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -277,7 +277,7 @@ public class ClassSearchTest extends BaseInjectorTest {
                 new OnField(
                     "Main.java", "injector.Main$1$2$1$1Helper$1", Collections.singleton("f6")),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -290,7 +290,7 @@ public class ClassSearchTest extends BaseInjectorTest {
                 new OnField(
                     "Main.java", "injector.Main$1$2$1$2Helper", Collections.singleton("f7")),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -303,7 +303,7 @@ public class ClassSearchTest extends BaseInjectorTest {
                 new OnField(
                     "Main.java", "injector.Main$1$2$1$2Helper$1", Collections.singleton("f8")),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -315,7 +315,7 @@ public class ClassSearchTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnField("Main.java", "injector.Main$1$2$1$Helper", Collections.singleton("f9")),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -328,7 +328,7 @@ public class ClassSearchTest extends BaseInjectorTest {
                 new OnField(
                     "Main.java", "injector.Main$1$2$1$Helper$1", Collections.singleton("f10")),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -340,7 +340,7 @@ public class ClassSearchTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnField("Main.java", "injector.Main$1$2$1Helper", Collections.singleton("f11")),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -353,7 +353,7 @@ public class ClassSearchTest extends BaseInjectorTest {
                 new OnField(
                     "Main.java", "injector.Main$1$2$1Helper$1", Collections.singleton("f12")),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -365,7 +365,7 @@ public class ClassSearchTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnField("Main.java", "injector.Main$2", Collections.singleton("f13")),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -377,7 +377,7 @@ public class ClassSearchTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnField("Main.java", "injector.Main$1Helper", Collections.singleton("f14")),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -389,7 +389,7 @@ public class ClassSearchTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnMethod("Main.java", "injector.Main$1Helper$InnerHelper", "foo()"),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -401,7 +401,7 @@ public class ClassSearchTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnField("Main.java", "injector.Main$1Helper$1", Collections.singleton("f16")),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -413,7 +413,7 @@ public class ClassSearchTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnField("Main.java", "injector.Main$3", Collections.singleton("f17")),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -425,7 +425,7 @@ public class ClassSearchTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnField("Main.java", "injector.Main$2Helper", Collections.singleton("f18")),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -437,7 +437,7 @@ public class ClassSearchTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnField("Main.java", "injector.Main$3Helper", Collections.singleton("f19")),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -448,7 +448,7 @@ public class ClassSearchTest extends BaseInjectorTest {
         .addChanges(
             new AddMarkerAnnotation(
                 new OnMethod("Main.java", "injector.Outer", "foo()"), "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test

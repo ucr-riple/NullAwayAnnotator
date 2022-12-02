@@ -72,7 +72,7 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnMethod("Super.java", "com.uber.Super", "test()"),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -233,7 +233,7 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnMethod("Super.java", "com.uber.Super", "test()"),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -272,7 +272,7 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnMethod("Super.java", "com.uber.Super", "test()"),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test
@@ -303,7 +303,7 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnField("A.java", "com.uber.A", Collections.singleton("allTest")),
                 "javax.annotation.Nullable"))
-        .start(true);
+        .start();
   }
 
   @Test

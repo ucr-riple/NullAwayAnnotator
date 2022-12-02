@@ -28,17 +28,13 @@ import static edu.ucr.cs.riple.injector.tools.Utility.pathOf;
 import static org.junit.Assert.fail;
 
 import edu.ucr.cs.riple.injector.Injector;
-import edu.ucr.cs.riple.injector.WorkListBuilder;
 import edu.ucr.cs.riple.injector.changes.Change;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 
@@ -80,9 +76,9 @@ public class InjectorTestHelper {
     return this;
   }
 
-  public void start(boolean keepStyle) {
-    Injector injector = Injector.builder().preserveStyle(keepStyle).build();
-    injector.start(new WorkListBuilder(changes).getWorkLists(), keepStyle);
+  public void start() {
+    Injector injector = new Injector();
+    injector.start(Set.copyOf(changes));
     for (String key : files) {
       try {
         String found =
@@ -104,10 +100,6 @@ public class InjectorTestHelper {
         throw new RuntimeException(e);
       }
     }
-  }
-
-  public void start() {
-    start(true);
   }
 
   private String[] readLinesOfFileFromResource(String path) {
