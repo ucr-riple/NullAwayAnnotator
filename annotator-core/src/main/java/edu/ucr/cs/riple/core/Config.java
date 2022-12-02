@@ -765,6 +765,7 @@ public class Config {
         if (i + 1 < existingOffsetChanges.size()) {
           OffsetChange next = existingOffsetChanges.get(i + 1);
           if (current.position == next.position && current.dist == -1 * next.dist) {
+            // opposing offset changes.
             i++;
             continue;
           }
