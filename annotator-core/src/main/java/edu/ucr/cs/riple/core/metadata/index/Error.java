@@ -23,10 +23,14 @@
  */
 package edu.ucr.cs.riple.core.metadata.index;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Objects;
+import java.util.Set;
 import javax.annotation.Nullable;
 
 /** Represents an error reported by NullAway. */
@@ -37,18 +41,18 @@ public class Error extends Enclosed {
   public final String messageType;
   /** Error message. */
   public final String message;
-  /**
-   * If non-null, this error involved a pseudo-assignment of a @Nullable expression into a @NonNull
-   * target, and this field is the Symbol for that target.
-   */
-  @Nullable public final Location nonnullTarget;
+  /** Set of fixes that can resolve this error if exists. */
+  private final ImmutableSet<Fix> fixes;
 
-  public Error(
-      String messageType, String message, Region region, @Nullable Location nonnullTargetLocation) {
+  public Error(String messageType, String message, Region region, @Nullable Fix fix) {
+    this(messageType, message, region, fix == null ? Set.of() : Set.of(fix));
+  }
+
+  public Error(String messageType, String message, Region region, Set<Fix> fixes) {
     super(region);
     this.messageType = messageType;
     this.message = message;
-    this.nonnullTarget = nonnullTargetLocation;
+    this.fixes = ImmutableSet.copyOf(fixes);
   }
 
   /**
@@ -60,6 +64,38 @@ public class Error extends Enclosed {
    */
   public static Factory<Error> factory(Config config) {
     return config.getAdapter()::deserializeError;
+  }
+
+  /**
+   * Checks if error is resolvable with only one fix.
+   *
+   * @return true if error is resolvable with only one fix and false otherwise.
+   */
+  public boolean isSingleFix() {
+    return this.fixes.size() == 1;
+  }
+
+  /**
+   * Checks if error is resolvable and all required fixes corresponds to elements in target module.
+   *
+   * @param tree Method declaration tree instance.
+   * @return true if error is resolvable and all required fixes corresponds to elements in target
+   *     module and false otherwise.
+   */
+  public boolean isFixableOnTarget(MethodDeclarationTree tree) {
+    return this.fixes.size() > 0
+        && fixes.stream().allMatch(fix -> tree.declaredInModule(fix.toLocation()));
+  }
+
+  /**
+   * Returns the location the single fix that resolves this error.
+   *
+   * @return Location of the fix resolving this error.
+   */
+  public Location toResolvingLocation() {
+    Preconditions.checkArgument(fixes.size() == 1);
+    // no get() method, have to use iterator.
+    return fixes.iterator().next().toLocation();
   }
 
   @Override
@@ -74,12 +110,12 @@ public class Error extends Enclosed {
     return messageType.equals(error.messageType)
         && message.equals(error.message)
         // Since nonnullTarget is @Nullable, used Objects.equal.
-        && Objects.equals(nonnullTarget, error.nonnullTarget);
+        && Objects.equals(fixes, error.fixes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(messageType, message, nonnullTarget);
+    return Objects.hash(messageType, message, fixes);
   }
 
   @Override

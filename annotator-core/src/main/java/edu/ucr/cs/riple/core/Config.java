@@ -30,6 +30,7 @@ import edu.ucr.cs.riple.core.adapters.NullAwayV0Adapter;
 import edu.ucr.cs.riple.core.adapters.NullAwayV1Adapter;
 import edu.ucr.cs.riple.core.adapters.NullAwayVersionAdapter;
 import edu.ucr.cs.riple.core.log.Log;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -477,8 +478,12 @@ public class Config {
     log.reset();
   }
 
-  /** Initializes NullAway serialization adapter according to the serialized version. */
-  public void initializeAdapter() {
+  /**
+   * Initializes NullAway serialization adapter according to the serialized version.
+   *
+   * @param fieldDeclarationStore Field declaration store.
+   */
+  public void initializeAdapter(FieldDeclarationStore fieldDeclarationStore) {
     if (adapter != null) {
       // adapter is already initialized.
       return;
@@ -486,7 +491,7 @@ public class Config {
     Path serializationVersionPath = target.dir.resolve("serialization_version.txt");
     if (!serializationVersionPath.toFile().exists()) {
       // Older versions of NullAway.
-      this.adapter = new NullAwayV0Adapter(this);
+      this.adapter = new NullAwayV0Adapter(this, fieldDeclarationStore);
       return;
     }
     try {
@@ -494,10 +499,10 @@ public class Config {
       int version = Integer.parseInt(lines.get(0));
       switch (version) {
         case 0:
-          this.adapter = new NullAwayV0Adapter(this);
+          this.adapter = new NullAwayV0Adapter(this, fieldDeclarationStore);
           break;
         case 1:
-          this.adapter = new NullAwayV1Adapter(this);
+          this.adapter = new NullAwayV1Adapter(this, fieldDeclarationStore);
           break;
         default:
           throw new RuntimeException("Unrecognized NullAway serialization version: " + version);

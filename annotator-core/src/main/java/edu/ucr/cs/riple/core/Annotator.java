@@ -34,7 +34,7 @@ import edu.ucr.cs.riple.core.global.GlobalAnalyzerImpl;
 import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
-import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.field.FieldInitializationAnalysis;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
@@ -65,6 +65,11 @@ public class Annotator {
   /** Reports cache. */
   public final ReportCache cache;
 
+  /** Field declaration store instance. */
+  private FieldDeclarationStore fieldDeclarationStore;
+  /** Method declaration tree instance. */
+  private MethodDeclarationTree methodDeclarationTree;
+
   public Annotator(Config config) {
     this.config = config;
     this.cache = new ReportCache(config);
@@ -94,8 +99,10 @@ public class Annotator {
     System.out.println("Preprocessing...");
     Utility.setScannerCheckerActivation(config.target, true);
     System.out.println("Making the first build...");
+    fieldDeclarationStore = new FieldDeclarationStore(config, config.target);
+    methodDeclarationTree = new MethodDeclarationTree(config);
     Utility.buildTarget(config, true);
-    config.initializeAdapter();
+    config.initializeAdapter(fieldDeclarationStore);
     Set<OnField> uninitializedFields =
         Utility.readFixesFromOutputDirectory(config.target, Fix.factory(config, null)).stream()
             .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
@@ -115,9 +122,6 @@ public class Annotator {
     Utility.setScannerCheckerActivation(config.target, true);
     Utility.buildTarget(config);
     Utility.setScannerCheckerActivation(config.target, false);
-    FieldDeclarationAnalysis fieldDeclarationAnalysis =
-        new FieldDeclarationAnalysis(config, config.target);
-    MethodDeclarationTree tree = new MethodDeclarationTree(config);
     // globalAnalyzer analyzes effects of all public APIs on downstream dependencies.
     // Through iterations, since the source code for downstream dependencies does not change and the
     // computation does not depend on the changes in the target module, it will compute the same
@@ -125,14 +129,14 @@ public class Annotator {
     // iteration.
     GlobalAnalyzer globalAnalyzer =
         config.downStreamDependenciesAnalysisActivated
-            ? new GlobalAnalyzerImpl(config, tree)
+            ? new GlobalAnalyzerImpl(config, methodDeclarationTree)
             : new NoOpGlobalAnalyzer();
     globalAnalyzer.analyzeDownstreamDependencies();
 
     if (config.inferenceActivated) {
       // Outer loop starts.
       while (cache.isUpdated()) {
-        executeNextIteration(globalAnalyzer, fieldDeclarationAnalysis);
+        executeNextIteration(globalAnalyzer, fieldDeclarationStore);
         if (config.disableOuterLoop) {
           break;
         }
@@ -141,13 +145,13 @@ public class Annotator {
       // Perform once last iteration including all fixes.
       if (!config.disableOuterLoop) {
         cache.disable();
-        executeNextIteration(globalAnalyzer, fieldDeclarationAnalysis);
+        executeNextIteration(globalAnalyzer, fieldDeclarationStore);
         cache.enable();
       }
     }
 
     if (config.forceResolveActivated) {
-      forceResolveRemainingErrors(fieldDeclarationAnalysis, tree);
+      forceResolveRemainingErrors(fieldDeclarationStore, methodDeclarationTree);
     }
 
     System.out.println("\nFinished annotating.");
@@ -159,13 +163,13 @@ public class Annotator {
    *
    * @param globalAnalyzer Global analyzer instance to detect impact of fixes outside of target
    *     module.
-   * @param fieldDeclarationAnalysis Field declaration instance to detect fixes targeting inline
+   * @param fieldDeclarationStore Field declaration instance to detect fixes targeting inline
    *     multiple field declaration statements.
    */
   private void executeNextIteration(
-      GlobalAnalyzer globalAnalyzer, FieldDeclarationAnalysis fieldDeclarationAnalysis) {
+      GlobalAnalyzer globalAnalyzer, FieldDeclarationStore fieldDeclarationStore) {
     ImmutableSet<Report> latestReports =
-        processTriggeredFixes(globalAnalyzer, fieldDeclarationAnalysis);
+        processTriggeredFixes(globalAnalyzer, fieldDeclarationStore);
     // Compute boundaries of effects on downstream dependencies.
     latestReports.forEach(
         report -> {
@@ -199,24 +203,24 @@ public class Annotator {
    * Processes triggered fixes.
    *
    * @param globalAnalyzer Global Analyzer instance.
-   * @param fieldDeclarationAnalysis Field Declaration analysis to detect fixes on multiple inline
+   * @param fieldDeclarationStore Field Declaration analysis to detect fixes on multiple inline
    *     field declaration statements.
    * @return Immutable set of reports from the triggered fixes.
    */
   private ImmutableSet<Report> processTriggeredFixes(
-      GlobalAnalyzer globalAnalyzer, FieldDeclarationAnalysis fieldDeclarationAnalysis) {
+      GlobalAnalyzer globalAnalyzer, FieldDeclarationStore fieldDeclarationStore) {
     Utility.buildTarget(config);
     // Suggested fixes of target at the current state.
     ImmutableSet<Fix> fixes =
         Utility.readFixesFromOutputDirectory(
-                config.target, Fix.factory(config, fieldDeclarationAnalysis))
+                config.target, Fix.factory(config, fieldDeclarationStore))
             .stream()
             .filter(fix -> !cache.processedFix(fix))
             .collect(ImmutableSet.toImmutableSet());
 
     // Initializing required evaluator instances.
-    MethodDeclarationTree tree = new MethodDeclarationTree(config);
-    TargetModuleSupplier supplier = new TargetModuleSupplier(config, globalAnalyzer, tree);
+    TargetModuleSupplier supplier =
+        new TargetModuleSupplier(config, globalAnalyzer, methodDeclarationTree);
     Evaluator evaluator =
         config.exhaustiveSearch ? new VoidEvaluator() : new BasicEvaluator(supplier);
     // Result of the iteration analysis.
@@ -235,17 +239,17 @@ public class Annotator {
    *       {@code @SuppressWarnings("NullAway")}.
    * </ul>
    *
-   * @param fieldDeclarationAnalysis Field declaration analysis.
+   * @param fieldDeclarationStore Field declaration analysis.
    * @param tree Method Declaration analysis.
    */
   private void forceResolveRemainingErrors(
-      FieldDeclarationAnalysis fieldDeclarationAnalysis, MethodDeclarationTree tree) {
+      FieldDeclarationStore fieldDeclarationStore, MethodDeclarationTree tree) {
     // Collect regions with remaining errors.
     Utility.buildTarget(config);
     List<Error> remainingErrors = Utility.readErrorsFromOutputDirectory(config, config.target);
     Set<Fix> remainingFixes =
         Utility.readFixesFromOutputDirectory(
-            config.target, Fix.factory(config, fieldDeclarationAnalysis));
+            config.target, Fix.factory(config, fieldDeclarationStore));
 
     // Collect all regions for NullUnmarked.
     // For all errors in regions which correspond to a method's body, we can add @NullUnmarked at
@@ -262,9 +266,9 @@ public class Annotator {
                   // `@Nullable` is being passed as an argument, we add a `@NullUnmarked` annotation
                   // to the called method.
                   if (error.messageType.equals("PASS_NULLABLE")
-                      && error.nonnullTarget != null
-                      && error.nonnullTarget.isOnParameter()) {
-                    OnParameter nullableParameter = error.nonnullTarget.toParameter();
+                      && error.isSingleFix()
+                      && error.toResolvingLocation().isOnParameter()) {
+                    OnParameter nullableParameter = error.toResolvingLocation().toParameter();
                     return tree.findNode(nullableParameter.method, nullableParameter.clazz);
                   }
                   return null;
@@ -295,7 +299,7 @@ public class Annotator {
                 })
             .map(
                 error ->
-                    fieldDeclarationAnalysis.getLocationOnField(
+                    fieldDeclarationStore.getLocationOnField(
                         error.getRegion().clazz, error.getRegion().member))
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());

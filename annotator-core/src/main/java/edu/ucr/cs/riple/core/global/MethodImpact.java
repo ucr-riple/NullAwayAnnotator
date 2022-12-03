@@ -98,7 +98,7 @@ public class MethodImpact {
               triggeredErrors.stream()
                   .filter(
                       error ->
-                          error.nonnullTarget != null && error.nonnullTarget.equals(onParameter))
+                          error.isSingleFix() && error.toResolvingLocation().equals(onParameter))
                   .collect(Collectors.toList());
           impactedParametersMap.put(onParameter, triggered);
         });

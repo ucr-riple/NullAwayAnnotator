@@ -71,12 +71,10 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
                           node.triggeredErrors.stream()
                               .filter(
                                   error ->
-                                      error.nonnullTarget != null
-                                          && error.nonnullTarget.isOnParameter()
-                                          // Method is declared in the target module.
-                                          && methodDeclarationTree.declaredInModule(
-                                              error.nonnullTarget))
-                              .map(error -> error.nonnullTarget.toParameter())
+                                      // Method is declared in the target module.
+                                      error.isFixableOnTarget(methodDeclarationTree)
+                                          && error.toResolvingLocation().isOnParameter())
+                              .map(error -> error.toResolvingLocation().toParameter())
                               .collect(Collectors.toSet());
                       if (!parameters.isEmpty()) {
                         // Update uri for each parameter. These triggered fixes does not have an

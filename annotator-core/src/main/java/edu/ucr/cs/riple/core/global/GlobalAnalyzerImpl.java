@@ -160,7 +160,7 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
     List<Error> triggeredErrors = methodImpact.getTriggeredErrors();
     long resolvedErrors =
         triggeredErrors.stream()
-            .filter(error -> fixesLocation.contains(error.nonnullTarget))
+            .filter(error -> fixesLocation.contains(error.toResolvingLocation()))
             .count();
     return individualEffect - (int) resolvedErrors;
   }
@@ -218,7 +218,6 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
     // are initialized to "null" string value. declaredInModule method in methodDeclarationTree
     // will return false for these locations. Hence, both the existence of fix and fix targeting an
     // element in target module is covered.
-    return getTriggeredErrors(fix).stream()
-        .anyMatch(error -> !tree.declaredInModule(error.nonnullTarget));
+    return getTriggeredErrors(fix).stream().anyMatch(error -> !error.isFixableOnTarget(tree));
   }
 }

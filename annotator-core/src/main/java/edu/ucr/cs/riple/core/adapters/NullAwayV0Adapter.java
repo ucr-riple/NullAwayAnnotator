@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.adapters;
 
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
@@ -45,13 +46,10 @@ import java.util.Set;
  *   <li>Type Annotator Scanner: 1.3.3 or below
  * </ul>
  */
-public class NullAwayV0Adapter implements NullAwayVersionAdapter {
+public class NullAwayV0Adapter extends NullAwayAdapterBaseClass {
 
-  /** Annotator config. */
-  private final Config config;
-
-  public NullAwayV0Adapter(Config config) {
-    this.config = config;
+  public NullAwayV0Adapter(Config config, FieldDeclarationStore fieldDeclarationStore) {
+    super(config, fieldDeclarationStore, 0);
   }
 
   @Override
@@ -77,11 +75,12 @@ public class NullAwayV0Adapter implements NullAwayVersionAdapter {
         "Expected 10 values to create Error instance in NullAway serialization version 0 but found: "
             + values.length);
     String encMember = !Region.getType(values[3]).equals(Region.Type.METHOD) ? "null" : values[3];
-    return new Error(
-        values[0],
-        values[1],
-        new Region(values[2], encMember),
-        Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 4, 10)));
+    Location nonnullTarget =
+        Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 4, 10));
+    String errorType = values[0];
+    String errorMessage = values[1];
+    Region region = new Region(values[2], encMember);
+    return deserializeError(errorType, errorMessage, region, nonnullTarget);
   }
 
   @Override
