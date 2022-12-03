@@ -136,7 +136,7 @@ public class Annotator {
     if (config.inferenceActivated) {
       // Outer loop starts.
       while (cache.isUpdated()) {
-        executeNextIteration(globalAnalyzer, fieldDeclarationStore);
+        executeNextIteration(globalAnalyzer);
         if (config.disableOuterLoop) {
           break;
         }
@@ -145,13 +145,13 @@ public class Annotator {
       // Perform once last iteration including all fixes.
       if (!config.disableOuterLoop) {
         cache.disable();
-        executeNextIteration(globalAnalyzer, fieldDeclarationStore);
+        executeNextIteration(globalAnalyzer);
         cache.enable();
       }
     }
 
     if (config.forceResolveActivated) {
-      forceResolveRemainingErrors(fieldDeclarationStore, methodDeclarationTree);
+      forceResolveRemainingErrors();
     }
 
     System.out.println("\nFinished annotating.");
@@ -163,13 +163,9 @@ public class Annotator {
    *
    * @param globalAnalyzer Global analyzer instance to detect impact of fixes outside of target
    *     module.
-   * @param fieldDeclarationStore Field declaration instance to detect fixes targeting inline
-   *     multiple field declaration statements.
    */
-  private void executeNextIteration(
-      GlobalAnalyzer globalAnalyzer, FieldDeclarationStore fieldDeclarationStore) {
-    ImmutableSet<Report> latestReports =
-        processTriggeredFixes(globalAnalyzer, fieldDeclarationStore);
+  private void executeNextIteration(GlobalAnalyzer globalAnalyzer) {
+    ImmutableSet<Report> latestReports = processTriggeredFixes(globalAnalyzer);
     // Compute boundaries of effects on downstream dependencies.
     latestReports.forEach(
         report -> {
@@ -203,12 +199,9 @@ public class Annotator {
    * Processes triggered fixes.
    *
    * @param globalAnalyzer Global Analyzer instance.
-   * @param fieldDeclarationStore Field Declaration analysis to detect fixes on multiple inline
-   *     field declaration statements.
    * @return Immutable set of reports from the triggered fixes.
    */
-  private ImmutableSet<Report> processTriggeredFixes(
-      GlobalAnalyzer globalAnalyzer, FieldDeclarationStore fieldDeclarationStore) {
+  private ImmutableSet<Report> processTriggeredFixes(GlobalAnalyzer globalAnalyzer) {
     Utility.buildTarget(config);
     // Suggested fixes of target at the current state.
     ImmutableSet<Fix> fixes =
@@ -238,12 +231,8 @@ public class Annotator {
    *   <li>Explicit {@code Nullable} assignments to fields will be annotated as
    *       {@code @SuppressWarnings("NullAway")}.
    * </ul>
-   *
-   * @param fieldDeclarationStore Field declaration analysis.
-   * @param tree Method Declaration analysis.
    */
-  private void forceResolveRemainingErrors(
-      FieldDeclarationStore fieldDeclarationStore, MethodDeclarationTree tree) {
+  private void forceResolveRemainingErrors() {
     // Collect regions with remaining errors.
     Utility.buildTarget(config);
     List<Error> remainingErrors = Utility.readErrorsFromOutputDirectory(config, config.target);
@@ -260,7 +249,7 @@ public class Annotator {
             .map(
                 error -> {
                   if (error.getRegion().isOnMethod()) {
-                    return tree.findNode(error.encMember(), error.encClass());
+                    return methodDeclarationTree.findNode(error.encMember(), error.encClass());
                   }
                   // For methods invoked in an initialization region, where the error is that
                   // `@Nullable` is being passed as an argument, we add a `@NullUnmarked` annotation
@@ -269,7 +258,8 @@ public class Annotator {
                       && error.isSingleFix()
                       && error.toResolvingLocation().isOnParameter()) {
                     OnParameter nullableParameter = error.toResolvingLocation().toParameter();
-                    return tree.findNode(nullableParameter.method, nullableParameter.clazz);
+                    return methodDeclarationTree.findNode(
+                        nullableParameter.method, nullableParameter.clazz);
                   }
                   return null;
                 })
