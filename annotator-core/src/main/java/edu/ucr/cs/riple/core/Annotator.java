@@ -97,11 +97,12 @@ public class Annotator {
    */
   private void preprocess() {
     System.out.println("Preprocessing...");
-    Utility.setScannerCheckerActivation(config.target, true);
     System.out.println("Making the first build...");
+    Utility.setScannerCheckerActivation(config.target, true);
+    Utility.buildTarget(config, true);
+    Utility.setScannerCheckerActivation(config.target, false);
     fieldDeclarationStore = new FieldDeclarationStore(config, config.target);
     methodDeclarationTree = new MethodDeclarationTree(config);
-    Utility.buildTarget(config, true);
     config.initializeAdapter(fieldDeclarationStore);
     Set<OnField> uninitializedFields =
         Utility.readFixesFromOutputDirectory(config.target, Fix.factory(config, null)).stream()
@@ -119,9 +120,6 @@ public class Annotator {
 
   /** Performs iterations of inference/injection until no unseen fix is suggested. */
   private void annotate() {
-    Utility.setScannerCheckerActivation(config.target, true);
-    Utility.buildTarget(config);
-    Utility.setScannerCheckerActivation(config.target, false);
     // globalAnalyzer analyzes effects of all public APIs on downstream dependencies.
     // Through iterations, since the source code for downstream dependencies does not change and the
     // computation does not depend on the changes in the target module, it will compute the same
