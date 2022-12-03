@@ -21,14 +21,14 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Detects multiple inline field declarations. An annotation will be injected on top of the field
- * declaration statement, and in inline multiple field declarations that annotation will be
- * considered for all declaring fields. This class is used to detect these cases and adjust the
- * suggested fix instances. (e.g. If we have Object f, i, j; and a Fix suggesting f to be {@code
- * Nullable}, this class will replace that fix with a fix suggesting f, i, and j be {@code
- * Nullable}.)
+ * Stores field declaration data on classes. It can Detect multiple inline field declarations. An
+ * annotation will be injected on top of the field declaration statement, and in inline multiple
+ * field declarations that annotation will be considered for all declaring fields. This class is
+ * used to detect these cases and adjust the suggested fix instances. (e.g. If we have Object f, i,
+ * j; and a Fix suggesting f to be {@code Nullable}, this class will replace that fix with a fix
+ * suggesting f, i, and j be {@code Nullable}.)
  */
-public class FieldDeclarationAnalysis extends MetaData<FieldDeclarationInfo> {
+public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
 
   /**
    * Output file name. It contains information about all classes existing in source code. Each line
@@ -38,23 +38,22 @@ public class FieldDeclarationAnalysis extends MetaData<FieldDeclarationInfo> {
   public static final String FILE_NAME = "class_info.tsv";
 
   /**
-   * Constructor for {@link FieldDeclarationAnalysis}.
+   * Constructor for {@link FieldDeclarationStore}.
    *
    * @param config Annotator config.
    * @param module Information of the target module.
    */
-  public FieldDeclarationAnalysis(Config config, ModuleInfo module) {
+  public FieldDeclarationStore(Config config, ModuleInfo module) {
     super(config, module.dir.resolve(FILE_NAME));
   }
 
   /**
-   * Constructor for {@link FieldDeclarationAnalysis}. Contents are accumulated from multiple
-   * sources.
+   * Constructor for {@link FieldDeclarationStore}. Contents are accumulated from multiple sources.
    *
    * @param config Annotator config.
    * @param modules Information of set of modules.
    */
-  public FieldDeclarationAnalysis(Config config, ImmutableSet<ModuleInfo> modules) {
+  public FieldDeclarationStore(Config config, ImmutableSet<ModuleInfo> modules) {
     super(
         config,
         modules.stream()

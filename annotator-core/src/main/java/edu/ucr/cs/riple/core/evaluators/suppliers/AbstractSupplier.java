@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
-import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
@@ -48,14 +48,14 @@ public abstract class AbstractSupplier implements Supplier {
   /** Depth of analysis. */
   protected final int depth;
   /** Field declaration analysis to detect fixes on inline multiple field declaration statements. */
-  protected final FieldDeclarationAnalysis fieldDeclarationAnalysis;
+  protected final FieldDeclarationStore fieldDeclarationStore;
   /** Annotator config. */
   protected final Config config;
 
   public AbstractSupplier(
       ImmutableSet<ModuleInfo> modules, Config config, MethodDeclarationTree tree) {
     this.config = config;
-    this.fieldDeclarationAnalysis = new FieldDeclarationAnalysis(config, modules);
+    this.fieldDeclarationStore = new FieldDeclarationStore(config, modules);
     this.tree = tree;
     this.fixBank = initializeFixBank(modules);
     this.errorBank = initializeErrorBank(modules);
@@ -102,7 +102,7 @@ public abstract class AbstractSupplier implements Supplier {
         modules.stream()
             .map(info -> info.dir.resolve("fixes.tsv"))
             .collect(ImmutableSet.toImmutableSet()),
-        Fix.factory(config, fieldDeclarationAnalysis));
+        Fix.factory(config, fieldDeclarationStore));
   }
 
   @Override
