@@ -21,12 +21,12 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Stores field declaration data. It can detect multiple inline field declarations. An annotation
- * will be injected on top of the field declaration statement, and in inline multiple field
- * declarations that annotation will be considered for all declaring fields. This class is used to
- * detect these cases and adjust the suggested fix instances. (e.g. If we have Object f, i, j; and a
- * Fix suggesting f to be {@code Nullable}, this class will replace that fix with a fix suggesting
- * f, i, and j be {@code Nullable}.)
+ * Stores field declaration data on classes. It can Detect multiple inline field declarations. An
+ * annotation will be injected on top of the field declaration statement, and in inline multiple
+ * field declarations that annotation will be considered for all declaring fields. This class is
+ * used to detect these cases and adjust the suggested fix instances. (e.g. If we have Object f, i,
+ * j; and a Fix suggesting f to be {@code Nullable}, this class will replace that fix with a fix
+ * suggesting f, i, and j be {@code Nullable}.)
  */
 public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
 
