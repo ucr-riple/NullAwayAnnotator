@@ -80,7 +80,7 @@ public class NullAwayV0Adapter extends NullAwayAdapterBaseClass {
     String errorType = values[0];
     String errorMessage = values[1];
     Region region = new Region(values[2], encMember);
-    return deserializeError(errorType, errorMessage, region, nonnullTarget);
+    return createError(errorType, errorMessage, region, nonnullTarget);
   }
 
   @Override

@@ -114,7 +114,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
   }
 
   /**
-   * Creates an error.
+   * Creates an {@link Error} instance.
    *
    * @param errorType Error type.
    * @param errorMessage Error message.
@@ -124,7 +124,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
    *     target.
    * @return The corresponding error.
    */
-  protected Error deserializeError(
+  protected Error createError(
       String errorType, String errorMessage, Region region, @Nullable Location nonnullTarget) {
     if (nonnullTarget == null && errorType.equals("METHOD_NO_INIT")) {
       Set<Fix> resolvingFix = generateFixForUnInitializedFields(errorMessage, region);
