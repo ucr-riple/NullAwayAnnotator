@@ -84,7 +84,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
             .collect(Collectors.toSet());
     if (fields.size() == 0) {
       throw new RuntimeException(
-          "Could not extract any uninitialized field in Error message for initialize in version "
+          "Could not extract any uninitialized field in message for initializer error in version "
               + version
               + ": "
               + errorMessage);
