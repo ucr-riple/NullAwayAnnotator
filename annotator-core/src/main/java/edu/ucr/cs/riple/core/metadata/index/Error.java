@@ -109,8 +109,7 @@ public class Error extends Enclosed {
     Error error = (Error) o;
     return messageType.equals(error.messageType)
         && message.equals(error.message)
-        // Since nonnullTarget is @Nullable, used Objects.equal.
-        && Objects.equals(fixes, error.fixes);
+        && fixes.equals(error.fixes);
   }
 
   @Override
