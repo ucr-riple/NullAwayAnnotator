@@ -100,8 +100,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
    * @return Set of fixes for uninitialized fields to resolve the given error.
    */
   protected Set<Fix> generateFixForUnInitializedFields(String errorMessage, Region region) {
-    Set<String> unInitFields = extractUnInitializedFields(errorMessage);
-    return unInitFields.stream()
+    return extractUnInitializedFields(errorMessage).stream()
         .map(
             field ->
                 new Fix(
