@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.model;
 
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.injector.location.Location;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -33,7 +34,9 @@ import java.util.stream.Collectors;
 
 public class Impact {
 
+  /** Target fix. */
   public final Fix fix;
+  /** List of triggered errors, if this fix is applied to source code. */
   protected List<Error> triggeredErrors;
 
   public Impact(Fix fix) {
@@ -41,10 +44,15 @@ public class Impact {
     this.triggeredErrors = new ArrayList<>();
   }
 
+  /**
+   * Updates state after injection of the given fixes permanently.
+   *
+   * @param fixes Set of applied fixes to source code permanently.
+   */
   public void updateStatusAfterInjection(Set<Fix> fixes) {
     triggeredErrors =
         triggeredErrors.stream()
-            .filter(error -> !fixes.contains(error.resolvingFixes))
+            .filter(error -> !fixes.containsAll(error.resolvingFixes))
             .collect(Collectors.toList());
   }
 
@@ -55,5 +63,14 @@ public class Impact {
    */
   public List<Error> getTriggeredErrors() {
     return triggeredErrors;
+  }
+
+  /**
+   * Gets the containing location.
+   *
+   * @return Containing fix location.
+   */
+  public Location toLocation() {
+    return fix.toLocation();
   }
 }

@@ -93,8 +93,7 @@ public class GlobalModelImpl implements GlobalModel {
             .filter(
                 input ->
                     !tracker
-                        .getCallersOfMethod(
-                            input.fix.toLocation().clazz, input.fix.toMethod().method)
+                        .getCallersOfMethod(input.toMethod().clazz, input.toMethod().method)
                         .isEmpty()) // skip methods that are not called anywhere.
             .map(
                 methodImpact ->
@@ -102,8 +101,8 @@ public class GlobalModelImpl implements GlobalModel {
                         new AddMarkerAnnotation(
                             new OnMethod(
                                 "null",
-                                methodImpact.fix.toLocation().clazz,
-                                methodImpact.fix.toLocation().toMethod().method),
+                                methodImpact.toMethod().clazz,
+                                methodImpact.toMethod().method),
                             config.nullableAnnot),
                         "null",
                         new Region("null", "null"),
@@ -119,7 +118,7 @@ public class GlobalModelImpl implements GlobalModel {
             method -> {
               Set<OnParameter> impactedParameters = analyzer.getImpactedParameters(method.fix);
               reports.stream()
-                  .filter(input -> input.root.toMethod().equals(method.fix.toMethod()))
+                  .filter(input -> input.root.toMethod().equals(method.toMethod()))
                   .findAny()
                   .ifPresent(report -> method.setStatus(report, impactedParameters));
             });
@@ -141,7 +140,7 @@ public class GlobalModelImpl implements GlobalModel {
     int predictedHash = MethodImpact.hash(onMethod.method, onMethod.clazz);
     Optional<MethodImpact> optional =
         this.methods.get(predictedHash).stream()
-            .filter(m -> m.fix.toLocation().equals(onMethod))
+            .filter(m -> m.toMethod().equals(onMethod))
             .findAny();
     return optional.orElse(null);
   }

@@ -29,6 +29,7 @@ import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.core.model.Impact;
+import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,7 +55,7 @@ public class MethodImpact extends Impact {
 
   @Override
   public int hashCode() {
-    return hash(fix.toLocation().toMethod().method, fix.toLocation().clazz);
+    return hash(fix.toMethod().method, fix.toMethod().clazz);
   }
 
   /**
@@ -123,5 +124,14 @@ public class MethodImpact extends Impact {
                   }
                 }));
     annotatedParameters.forEach(impactedParametersMap::remove);
+  }
+
+  /**
+   * Gets the containing method location.
+   *
+   * @return Containing method location.
+   */
+  public OnMethod toMethod() {
+    return fix.toMethod();
   }
 }
