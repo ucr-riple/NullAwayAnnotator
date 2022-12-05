@@ -34,7 +34,6 @@ import edu.ucr.cs.riple.core.evaluators.suppliers.DownstreamDependencySupplier;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
-import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -46,7 +45,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
@@ -69,7 +67,14 @@ public class GlobalModelImpl implements GlobalModel {
     this.methods =
         Multimaps.index(
             tree.getPublicMethodsWithNonPrimitivesReturn().stream()
-                .map(methodNode -> new MethodImpact(new Fix(new AddMarkerAnnotation(methodNode.location, config.nullableAnnot), null, null, true)))
+                .map(
+                    methodNode ->
+                        new MethodImpact(
+                            new Fix(
+                                new AddMarkerAnnotation(methodNode.location, config.nullableAnnot),
+                                null,
+                                null,
+                                true)))
                 .collect(ImmutableSet.toImmutableSet()),
             MethodImpact::hashCode);
   }
@@ -88,7 +93,8 @@ public class GlobalModelImpl implements GlobalModel {
             .filter(
                 input ->
                     !tracker
-                        .getCallersOfMethod(input.location.clazz, input.location.toMethod().method)
+                        .getCallersOfMethod(
+                            input.fix.toLocation().clazz, input.fix.toMethod().method)
                         .isEmpty()) // skip methods that are not called anywhere.
             .map(
                 methodImpact ->
@@ -96,8 +102,8 @@ public class GlobalModelImpl implements GlobalModel {
                         new AddMarkerAnnotation(
                             new OnMethod(
                                 "null",
-                                methodImpact.location.clazz,
-                                methodImpact.location.toMethod().method),
+                                methodImpact.fix.toLocation().clazz,
+                                methodImpact.fix.toLocation().toMethod().method),
                             config.nullableAnnot),
                         "null",
                         new Region("null", "null"),
@@ -134,7 +140,9 @@ public class GlobalModelImpl implements GlobalModel {
     OnMethod onMethod = fix.toMethod();
     int predictedHash = MethodImpact.hash(onMethod.method, onMethod.clazz);
     Optional<MethodImpact> optional =
-        this.methods.get(predictedHash).stream().filter(m -> m.location.equals(onMethod)).findAny();
+        this.methods.get(predictedHash).stream()
+            .filter(m -> m.fix.toLocation().equals(onMethod))
+            .findAny();
     return optional.orElse(null);
   }
 
@@ -154,7 +162,7 @@ public class GlobalModelImpl implements GlobalModel {
     // count them.
     List<Error> triggeredErrors = methodImpact.getTriggeredErrors();
     long resolvedErrors =
-        triggeredErrors.stream().filter(error -> fixTree.contains(error.resolvingFixes)).count();
+        triggeredErrors.stream().filter(error -> fixTree.containsAll(error.resolvingFixes)).count();
     return triggeredErrors.size() - (int) resolvedErrors;
   }
 

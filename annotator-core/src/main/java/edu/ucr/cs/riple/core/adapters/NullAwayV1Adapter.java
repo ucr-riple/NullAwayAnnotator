@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.adapters;
 
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
@@ -45,13 +46,10 @@ import java.util.stream.Collectors;
  *   <li>Type Annotator Scanner: 1.3.4 or above
  * </ul>
  */
-public class NullAwayV1Adapter implements NullAwayVersionAdapter {
+public class NullAwayV1Adapter extends NullAwayAdapterBaseClass {
 
-  /** Annotator config. */
-  private final Config config;
-
-  public NullAwayV1Adapter(Config config) {
-    this.config = config;
+  public NullAwayV1Adapter(Config config, FieldDeclarationStore fieldDeclarationStore) {
+    super(config, fieldDeclarationStore, 0);
   }
 
   @Override
@@ -75,19 +73,12 @@ public class NullAwayV1Adapter implements NullAwayVersionAdapter {
         values.length == 10,
         "Expected 10 values to create Error instance in NullAway serialization version 1 but found: "
             + values.length);
-    String messageType = values[0];
     Location nonnullTarget =
         Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 4, 10));
+    String errorMessage = values[1];
+    String errorType = values[0];
     Region region = new Region(values[2], values[3]);
-    Fix resolvingFix =
-        nonnullTarget == null
-            ? null
-            : new Fix(
-                new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot),
-                messageType,
-                region,
-                true);
-    return new Error(messageType, values[1], region, resolvingFix);
+    return createError(errorType, errorMessage, region, nonnullTarget);
   }
 
   @Override

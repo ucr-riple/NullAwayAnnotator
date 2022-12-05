@@ -85,8 +85,7 @@ public class MethodImpact extends Impact {
               triggeredErrors.stream()
                   .filter(
                       error ->
-                          error.resolvingFixes != null
-                              && error.resolvingFixes.toLocation().equals(onParameter))
+                          error.isSingleFix() && error.toResolvingLocation().equals(onParameter))
                   .collect(Collectors.toList());
           impactedParametersMap.put(onParameter, triggered);
         });

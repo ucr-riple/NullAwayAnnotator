@@ -28,7 +28,6 @@ import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
 import edu.ucr.cs.riple.core.evaluators.suppliers.DownstreamDependencySupplier;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
-import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collections;
@@ -73,12 +72,10 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
                           node.triggeredErrors.stream()
                               .filter(
                                   error ->
-                                      error.resolvingFixes != null
-                                          && error.resolvingFixes.isOnParameter()
-                                          // Method is declared in the target module.
-                                          && methodDeclarationTree.declaredInModule(
-                                              error.resolvingFixes.toLocation()))
-                              .map(error -> error.resolvingFixes.toParameter())
+                                      // Method is declared in the target module.
+                                      error.isFixableOnTarget(methodDeclarationTree)
+                                          && error.toResolvingLocation().isOnParameter())
+                              .map(error -> error.toResolvingLocation().toParameter())
                               .collect(Collectors.toSet());
                       if (!parameters.isEmpty()) {
                         // Update uri for each parameter. These triggered fixes does not have an

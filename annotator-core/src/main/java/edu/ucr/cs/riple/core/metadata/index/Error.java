@@ -23,9 +23,11 @@
  */
 package edu.ucr.cs.riple.core.metadata.index;
 
+import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -66,6 +68,26 @@ public class Error extends Enclosed {
     return config.getAdapter()::deserializeError;
   }
 
+  /**
+   * Checks if error is resolvable with only one fix.
+   *
+   * @return true if error is resolvable with only one fix and false otherwise.
+   */
+  public boolean isSingleFix() {
+    return this.resolvingFixes.size() == 1;
+  }
+
+  /**
+   * Returns the location the single fix that resolves this error.
+   *
+   * @return Location of the fix resolving this error.
+   */
+  public Location toResolvingLocation() {
+    Preconditions.checkArgument(resolvingFixes.size() == 1);
+    // no get() method, have to use iterator.
+    return resolvingFixes.iterator().next().toLocation();
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -77,8 +99,7 @@ public class Error extends Enclosed {
     Error error = (Error) o;
     return messageType.equals(error.messageType)
         && message.equals(error.message)
-        // Since nonnullTarget is @Nullable, used Objects.equal.
-        && Objects.equals(resolvingFixes, error.resolvingFixes);
+        && resolvingFixes.equals(error.resolvingFixes);
   }
 
   /**
