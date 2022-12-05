@@ -24,4 +24,37 @@
 
 package edu.ucr.cs.riple.core.evaluators;
 
-public class ModeledEvaluator {}
+import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
+import edu.ucr.cs.riple.core.model.DynamicModel;
+import edu.ucr.cs.riple.core.model.Impact;
+import java.util.stream.Collectors;
+
+public class ModeledEvaluator extends AbstractEvaluator {
+  private final DynamicModel<Impact> model;
+
+  public ModeledEvaluator(Supplier supplier) {
+    super(supplier);
+    this.model = new DynamicModel<>(supplier.getConfig());
+  }
+
+  @Override
+  protected void collectGraphResults(ImmutableSet<Report> reports) {
+    model.updateModelStore(
+        graph
+            .getNodes()
+            .map(node -> new Impact(node.root, node.triggeredErrors))
+            .collect(Collectors.toSet()));
+  }
+
+  @Override
+  protected void initializeFixGraph(ImmutableSet<Report> reports) {
+    super.initializeFixGraph(reports);
+    reports.stream()
+        .filter(report -> !report.isInProgress(config))
+        .flatMap(report -> report.tree.stream())
+        .filter(model::isUnknown)
+        .forEach(graph::addNodeToVertices);
+  }
+}

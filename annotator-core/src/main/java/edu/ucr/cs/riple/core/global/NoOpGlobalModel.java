@@ -28,7 +28,6 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.location.OnParameter;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -59,8 +58,13 @@ public class NoOpGlobalModel implements GlobalModel {
   }
 
   @Override
-  public List<Error> getTriggeredErrors(Fix fix) {
-    return List.of();
+  public boolean isUnknown(Fix fix) {
+    return true;
+  }
+
+  @Override
+  public Set<Error> getTriggeredErrors(Fix fix) {
+    return Set.of();
   }
 
   @Override

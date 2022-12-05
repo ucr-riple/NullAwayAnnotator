@@ -24,28 +24,17 @@
 
 package edu.ucr.cs.riple.core.model;
 
-import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
-import java.util.Set;
+import com.google.common.collect.ImmutableMap;
+import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.injector.location.Location;
 
-public interface Model {
+public abstract class StaticModel<T extends Impact> implements Model {
 
-  boolean isUnknown(Fix fix);
+  protected final ImmutableMap<Location, T> store;
+  protected final Config config;
 
-  /**
-   * Collects list of triggered errors in downstream dependencies if fix is applied in the target
-   * module. It also includes triggered errors that can be resolved via an annotation in target
-   * (upstream) module.
-   *
-   * @param fix Fix instance to be applied in the target module.
-   * @return List of triggered errors.
-   */
-  Set<Error> getTriggeredErrors(Fix fix);
-
-  /**
-   * Updates state of methods after injection of fixes in target module.
-   *
-   * @param fixes Set of injected fixes.
-   */
-  void updateImpactsAfterInjection(Set<Fix> fixes);
+  protected StaticModel(Config config, ImmutableMap<Location, T> store) {
+    this.store = store;
+    this.config = config;
+  }
 }

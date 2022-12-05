@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core.metadata.graph;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
@@ -59,7 +59,7 @@ public class Node {
   public Set<Fix> triggeredFixes;
 
   /** Collection of triggered errors if tree is applied. */
-  public ImmutableList<Error> triggeredErrors;
+  public ImmutableSet<Error> triggeredErrors;
 
   /** Unique id of Node across all nodes. */
   public int id;
@@ -83,7 +83,7 @@ public class Node {
     this.regions = new HashSet<>();
     this.root = root;
     this.triggeredFixes = new HashSet<>();
-    this.triggeredErrors = ImmutableList.of();
+    this.triggeredErrors = ImmutableSet.of();
     this.effect = 0;
     this.tree = Sets.newHashSet(root);
     this.changed = false;
@@ -152,7 +152,7 @@ public class Node {
     // Update list of triggered fixes.
     this.updateTriggered(triggeredFixes);
     // Update list of triggered errors.
-    this.triggeredErrors = ImmutableList.copyOf(triggeredErrors);
+    this.triggeredErrors = ImmutableSet.copyOf(triggeredErrors);
     // A fix in a tree, can have a super method that is not part of this node's tree but be present
     // in another node's tree. In this case since both are applied, an error due to inheritance
     // violation will not be reported. This calculation below will fix that.

@@ -28,6 +28,7 @@ import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.location.Location;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -41,7 +42,7 @@ public class Error extends Enclosed {
   /** Error message. */
   public final String message;
   /** The fix which can resolve this error if such fixes exists. */
-  public final Set<Fix> resolvingFixes;
+  private final Set<Fix> resolvingFixes;
 
   public Error(String messageType, String message, Region region, @Nullable Fix resolvingFix) {
     super(region);
@@ -112,6 +113,16 @@ public class Error extends Enclosed {
   public boolean isFixableOnTarget(MethodDeclarationTree tree) {
     return resolvingFixes.size() > 0
         && this.resolvingFixes.stream().allMatch(fix -> tree.declaredInModule(fix.toLocation()));
+  }
+
+  /**
+   * Checks if this error is resolvable with the given collection of fixes.
+   *
+   * @param fixes Collection fixes.
+   * @return true, if this error is resolvable.
+   */
+  public boolean isResolvableWith(Collection<Fix> fixes) {
+    return fixes.containsAll(this.resolvingFixes);
   }
 
   @Override

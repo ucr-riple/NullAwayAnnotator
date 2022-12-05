@@ -24,9 +24,9 @@
 
 package edu.ucr.cs.riple.core.global;
 
-import com.google.common.collect.ImmutableMultimap;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
+
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimaps;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
@@ -36,47 +36,42 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.core.model.Impact;
+import edu.ucr.cs.riple.core.model.StaticModel;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 /** Implementation for {@link GlobalModel} interface. */
-public class GlobalModelImpl implements GlobalModel {
+public class GlobalModelImpl extends StaticModel<MethodImpact> implements GlobalModel {
 
   /** Set of downstream dependencies. */
   private final ImmutableSet<ModuleInfo> downstreamModules;
-  /** Public APIs in the target modules that have a non-primitive return value. */
-  private final ImmutableMultimap<Integer, MethodImpact> methods;
-  /** Annotator Config. */
-  private final Config config;
   /** Method declaration tree instance. */
   private final MethodDeclarationTree tree;
 
   public GlobalModelImpl(Config config, MethodDeclarationTree tree) {
-    this.config = config;
+    super(
+        config,
+        tree.getPublicMethodsWithNonPrimitivesReturn().stream()
+            .map(
+                methodNode ->
+                    new MethodImpact(
+                        new Fix(
+                            new AddMarkerAnnotation(methodNode.location, config.nullableAnnot),
+                            null,
+                            null,
+                            true)))
+            .collect(toImmutableMap(Impact::toLocation, Function.identity())));
     this.downstreamModules = config.downstreamInfo;
     this.tree = tree;
-    this.methods =
-        Multimaps.index(
-            tree.getPublicMethodsWithNonPrimitivesReturn().stream()
-                .map(
-                    methodNode ->
-                        new MethodImpact(
-                            new Fix(
-                                new AddMarkerAnnotation(methodNode.location, config.nullableAnnot),
-                                null,
-                                null,
-                                true)))
-                .collect(ImmutableSet.toImmutableSet()),
-            MethodImpact::hashCode);
   }
 
   @Override
@@ -89,7 +84,7 @@ public class GlobalModelImpl implements GlobalModel {
     MethodRegionTracker tracker = new MethodRegionTracker(config, config.downstreamInfo, tree);
     // Generate fixes corresponding methods.
     ImmutableSet<Fix> fixes =
-        methods.values().stream()
+        store.values().stream()
             .filter(
                 input ->
                     !tracker
@@ -112,7 +107,7 @@ public class GlobalModelImpl implements GlobalModel {
         new DownstreamImpactEvaluator(new DownstreamDependencySupplier(config, tracker, tree));
     ImmutableSet<Report> reports = analyzer.evaluate(fixes);
     // Update method status based on the results.
-    methods
+    this.store
         .values()
         .forEach(
             method -> {
@@ -137,12 +132,7 @@ public class GlobalModelImpl implements GlobalModel {
       return null;
     }
     OnMethod onMethod = fix.toMethod();
-    int predictedHash = MethodImpact.hash(onMethod.method, onMethod.clazz);
-    Optional<MethodImpact> optional =
-        this.methods.get(predictedHash).stream()
-            .filter(m -> m.toMethod().equals(onMethod))
-            .findAny();
-    return optional.orElse(null);
+    return this.store.getOrDefault(onMethod, null);
   }
 
   /**
@@ -159,9 +149,9 @@ public class GlobalModelImpl implements GlobalModel {
     }
     // Some triggered errors might be resolved due to fixes in the tree, and we should not double
     // count them.
-    List<Error> triggeredErrors = methodImpact.getTriggeredErrors();
+    Set<Error> triggeredErrors = methodImpact.getTriggeredErrors();
     long resolvedErrors =
-        triggeredErrors.stream().filter(error -> fixTree.containsAll(error.resolvingFixes)).count();
+        triggeredErrors.stream().filter(error -> error.isResolvableWith(fixTree)).count();
     return triggeredErrors.size() - (int) resolvedErrors;
   }
 
@@ -193,21 +183,26 @@ public class GlobalModelImpl implements GlobalModel {
   }
 
   @Override
-  public List<Error> getTriggeredErrors(Fix fix) {
+  public boolean isUnknown(Fix fix) {
+    return store.containsKey(fix.toLocation());
+  }
+
+  @Override
+  public Set<Error> getTriggeredErrors(Fix fix) {
     // We currently only store impact of methods on downstream dependencies.
     if (!fix.isOnMethod()) {
-      return Collections.emptyList();
+      return Collections.emptySet();
     }
     MethodImpact impact = fetchMethodImpactForFix(fix);
     if (impact == null) {
-      return Collections.emptyList();
+      return Collections.emptySet();
     }
     return impact.getTriggeredErrors();
   }
 
   @Override
   public void updateImpactsAfterInjection(Set<Fix> fixes) {
-    this.methods.values().forEach(methodImpact -> methodImpact.updateStatusAfterInjection(fixes));
+    this.store.values().forEach(methodImpact -> methodImpact.updateStatusAfterInjection(fixes));
   }
 
   @Override

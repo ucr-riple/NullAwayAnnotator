@@ -31,7 +31,7 @@ import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.core.model.Impact;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -50,7 +50,7 @@ public class MethodImpact extends Impact {
   public MethodImpact(Fix fix) {
     super(fix);
     this.impactedParametersMap = new HashMap<>();
-    this.triggeredErrors = new ArrayList<>();
+    this.triggeredErrors = new HashSet<>();
   }
 
   @Override
@@ -78,7 +78,7 @@ public class MethodImpact extends Impact {
    * @param impactedParameters Set of impacted paramaters.
    */
   public void setStatus(Report report, Set<OnParameter> impactedParameters) {
-    this.triggeredErrors = new ArrayList<>(report.triggeredErrors);
+    this.triggeredErrors = new HashSet<>(report.triggeredErrors);
     // Count the number of times each parameter received a @Nullable.
     impactedParameters.forEach(
         onParameter -> {
@@ -111,7 +111,7 @@ public class MethodImpact extends Impact {
    * @param fixes List of injected fixes.
    */
   @Override
-  public void updateStatusAfterInjection(Set<Fix> fixes) {
+  public void updateStatusAfterInjection(Collection<Fix> fixes) {
     Set<OnParameter> annotatedParameters = new HashSet<>();
     fixes.forEach(
         fix ->

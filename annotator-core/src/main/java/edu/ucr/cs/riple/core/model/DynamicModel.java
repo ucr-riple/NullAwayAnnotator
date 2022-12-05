@@ -24,59 +24,57 @@
 
 package edu.ucr.cs.riple.core.model;
 
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class Impact {
+public class DynamicModel<T extends Impact> implements Model {
 
-  /** Target fix. */
-  public final Fix fix;
-  /** List of triggered errors, if this fix is applied to source code. */
-  protected Set<Error> triggeredErrors;
+  protected final Map<Location, T> store;
+  protected final Config config;
 
-  public Impact(Fix fix) {
-    this.fix = fix;
-    this.triggeredErrors = new HashSet<>();
+  public DynamicModel(Config config) {
+    this.store = new HashMap<>();
+    this.config = config;
   }
 
-  public Impact(Fix fix, Set<Error> triggeredErrors) {
-    this.fix = fix;
-    this.triggeredErrors = triggeredErrors;
+  public Set<Fix> getUnknownFixImpacts(Set<Fix> fixes) {
+    return fixes.stream()
+        .filter(fix -> !store.containsKey(fix.toLocation()))
+        .collect(Collectors.toSet());
   }
 
-  /**
-   * Updates state after injection of the given fixes permanently by removing triggered errors that
-   * are resolved.
-   *
-   * @param fixes Set of applied fixes to source code permanently.
-   */
-  public void updateStatusAfterInjection(Collection<Fix> fixes) {
-    triggeredErrors =
-        triggeredErrors.stream()
-            .filter(error -> !error.isResolvableWith(fixes))
-            .collect(Collectors.toSet());
+  public Set<Error> computeRemainingErrorsOnInjection(Set<Fix> fixes) {
+    return fixes.stream()
+        .flatMap(fix -> store.get(fix.toLocation()).triggeredErrors.stream())
+        .filter(error -> !error.isResolvableWith(fixes))
+        .collect(Collectors.toSet());
   }
 
-  /**
-   * Returns list of triggered errors if method is {@code @Nullable} on downstream dependencies.
-   *
-   * @return List of errors.
-   */
-  public Set<Error> getTriggeredErrors() {
-    return triggeredErrors;
+  public void updateModelStore(Collection<T> newData) {
+    newData.forEach(t -> store.put(t.toLocation(), t));
   }
 
-  /**
-   * Gets the containing location.
-   *
-   * @return Containing fix location.
-   */
-  public Location toLocation() {
-    return fix.toLocation();
+  public void updateModelOnInjection(Collection<Fix> newFixes) {
+    this.store.values().forEach(t -> t.updateStatusAfterInjection(newFixes));
   }
+
+  @Override
+  public boolean isUnknown(Fix fix) {
+    return !this.store.containsKey(fix.toLocation());
+  }
+
+  @Override
+  public Set<Error> getTriggeredErrors(Fix fix) {
+    return null;
+  }
+
+  @Override
+  public void updateImpactsAfterInjection(Set<Fix> fixes) {}
 }
