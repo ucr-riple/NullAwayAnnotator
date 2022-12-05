@@ -27,8 +27,8 @@ package edu.ucr.cs.riple.core.global;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
+import edu.ucr.cs.riple.core.model.Impact;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,36 +37,24 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/** Container class for storing overall effect of each method. */
-public class MethodImpact {
-  /** Node in {@link MethodDeclarationTree} corresponding to a public method. */
-  final MethodNode node;
+/** Container class for storing overall effect of each method in downstream dependencies. */
+public class MethodImpact extends Impact {
+
   /**
    * Map of parameters in target module that will receive {@code Nullable} value if targeted method
    * in node is annotated as {@code @Nullable} with their corresponding triggered errors.
    */
   private final HashMap<OnParameter, List<Error>> impactedParametersMap;
-  /**
-   * Set of triggered errors in downstream dependencies if target method in node is annotated as
-   * {@code @Nullable}.
-   */
-  private List<Error> triggeredErrors;
-  /**
-   * Effect of injecting a {@code Nullable} annotation on pointing method of node on downstream
-   * dependencies.
-   */
-  private int effect;
 
-  public MethodImpact(MethodNode node) {
-    this.node = node;
-    this.effect = 0;
+  public MethodImpact(Fix fix) {
+    super(fix);
     this.impactedParametersMap = new HashMap<>();
     this.triggeredErrors = new ArrayList<>();
   }
 
   @Override
   public int hashCode() {
-    return hash(node.location.method, node.location.clazz);
+    return hash(fix.toLocation().toMethod().method, fix.toLocation().clazz);
   }
 
   /**
@@ -89,7 +77,6 @@ public class MethodImpact {
    * @param impactedParameters Set of impacted paramaters.
    */
   public void setStatus(Report report, Set<OnParameter> impactedParameters) {
-    this.effect = report.localEffect;
     this.triggeredErrors = new ArrayList<>(report.triggeredErrors);
     // Count the number of times each parameter received a @Nullable.
     impactedParameters.forEach(
@@ -98,28 +85,11 @@ public class MethodImpact {
               triggeredErrors.stream()
                   .filter(
                       error ->
-                          error.nonnullTarget != null && error.nonnullTarget.equals(onParameter))
+                          error.resolvingFixes != null
+                              && error.resolvingFixes.toLocation().equals(onParameter))
                   .collect(Collectors.toList());
           impactedParametersMap.put(onParameter, triggered);
         });
-  }
-
-  /**
-   * Getter for effect.
-   *
-   * @return Effect.
-   */
-  public int getEffect() {
-    return effect;
-  }
-
-  /**
-   * Returns list of triggered errors if method is {@code @Nullable} on downstream dependencies.
-   *
-   * @return List of errors.
-   */
-  public List<Error> getTriggeredErrors() {
-    return triggeredErrors;
   }
 
   /**
@@ -140,7 +110,8 @@ public class MethodImpact {
    *
    * @param fixes List of injected fixes.
    */
-  public void updateStatus(Set<Fix> fixes) {
+  @Override
+  public void updateStatusAfterInjection(Set<Fix> fixes) {
     Set<OnParameter> annotatedParameters = new HashSet<>();
     fixes.forEach(
         fix ->
@@ -148,15 +119,10 @@ public class MethodImpact {
                 onParameter -> {
                   if (impactedParametersMap.containsKey(onParameter)) {
                     List<Error> errors = impactedParametersMap.get(onParameter);
-                    effect -= errors.size();
                     triggeredErrors.removeAll(errors);
                     annotatedParameters.add(onParameter);
                   }
                 }));
-    if (effect < 0) {
-      // This is impossible, however for safety issues, we set it to zero.
-      effect = 0;
-    }
     annotatedParameters.forEach(impactedParametersMap::remove);
   }
 }

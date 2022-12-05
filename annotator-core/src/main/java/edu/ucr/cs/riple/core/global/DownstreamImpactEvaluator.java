@@ -26,7 +26,9 @@ package edu.ucr.cs.riple.core.global;
 
 import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
 import edu.ucr.cs.riple.core.evaluators.suppliers.DownstreamDependencySupplier;
+import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collections;
@@ -35,8 +37,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Evaluator for analyzing downstream dependencies. Used by {@link GlobalAnalyzerImpl} to compute
- * the effects of changes in upstream on downstream dependencies. This evaluator cannot be used to
+ * Evaluator for analyzing downstream dependencies. Used by {@link GlobalModelImpl} to compute the
+ * effects of changes in upstream on downstream dependencies. This evaluator cannot be used to
  * compute the effects in target module.
  */
 class DownstreamImpactEvaluator extends BasicEvaluator {
@@ -71,12 +73,12 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
                           node.triggeredErrors.stream()
                               .filter(
                                   error ->
-                                      error.nonnullTarget != null
-                                          && error.nonnullTarget.isOnParameter()
+                                      error.resolvingFixes != null
+                                          && error.resolvingFixes.isOnParameter()
                                           // Method is declared in the target module.
                                           && methodDeclarationTree.declaredInModule(
-                                              error.nonnullTarget))
-                              .map(error -> error.nonnullTarget.toParameter())
+                                              error.resolvingFixes.toLocation()))
+                              .map(error -> error.resolvingFixes.toParameter())
                               .collect(Collectors.toSet());
                       if (!parameters.isEmpty()) {
                         // Update uri for each parameter. These triggered fixes does not have an
@@ -98,10 +100,13 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
    * Returns set of parameters that will receive {@code @Nullable} if the passed method is annotated
    * as {@code @Nullable}.
    *
-   * @param method Method to be annotated.
+   * @param fix Method to be annotated.
    * @return Set of impacted parameters. If no parameter is impacted, empty set will be returned.
    */
-  public Set<OnParameter> getImpactedParameters(OnMethod method) {
-    return nullableFlowMap.getOrDefault(method, Collections.emptySet());
+  public Set<OnParameter> getImpactedParameters(Fix fix) {
+    if (!fix.isOnMethod()) {
+      return Collections.emptySet();
+    }
+    return nullableFlowMap.getOrDefault(fix.toMethod(), Collections.emptySet());
   }
 }

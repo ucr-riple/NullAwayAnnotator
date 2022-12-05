@@ -24,9 +24,10 @@
 package edu.ucr.cs.riple.core.metadata.index;
 
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
-import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Objects;
+import java.util.Set;
 import javax.annotation.Nullable;
 
 /** Represents an error reported by NullAway. */
@@ -37,18 +38,21 @@ public class Error extends Enclosed {
   public final String messageType;
   /** Error message. */
   public final String message;
-  /**
-   * If non-null, this error involved a pseudo-assignment of a @Nullable expression into a @NonNull
-   * target, and this field is the Symbol for that target.
-   */
-  @Nullable public final Location nonnullTarget;
+  /** The fix which can resolve this error if such fixes exists. */
+  public final Set<Fix> resolvingFixes;
 
-  public Error(
-      String messageType, String message, Region region, @Nullable Location nonnullTargetLocation) {
+  public Error(String messageType, String message, Region region, @Nullable Fix resolvingFix) {
     super(region);
     this.messageType = messageType;
     this.message = message;
-    this.nonnullTarget = nonnullTargetLocation;
+    this.resolvingFixes = resolvingFix == null ? Set.of() : Set.of(resolvingFix);
+  }
+
+  public Error(String messageType, String message, Region region, Set<Fix> resolvingFixes) {
+    super(region);
+    this.messageType = messageType;
+    this.message = message;
+    this.resolvingFixes = resolvingFixes;
   }
 
   /**
@@ -74,12 +78,24 @@ public class Error extends Enclosed {
     return messageType.equals(error.messageType)
         && message.equals(error.message)
         // Since nonnullTarget is @Nullable, used Objects.equal.
-        && Objects.equals(nonnullTarget, error.nonnullTarget);
+        && Objects.equals(resolvingFixes, error.resolvingFixes);
+  }
+
+  /**
+   * Checks if error is resolvable and all suggested fixes must be applied to an element in target
+   * module.
+   *
+   * @param tree Method declaration tree to check if elements on are on target.
+   * @return true, if error is resolvable via fixes on target module.
+   */
+  public boolean isFixableOnTarget(MethodDeclarationTree tree) {
+    return resolvingFixes.size() > 0
+        && this.resolvingFixes.stream().allMatch(fix -> tree.declaredInModule(fix.toLocation()));
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(messageType, message, nonnullTarget);
+    return Objects.hash(messageType, message, resolvingFixes);
   }
 
   @Override

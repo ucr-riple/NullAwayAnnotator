@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.core.evaluators.graphprocessor;
 
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
-import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
+import edu.ucr.cs.riple.core.global.GlobalModel;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
@@ -52,7 +52,7 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
   /** Error bank instance to store state of fixes before and after of injections. */
   protected final Bank<Error> errorBank;
   /** Global analyzer to retrieve impacts of fixes globally. */
-  protected final GlobalAnalyzer globalAnalyzer;
+  protected final GlobalModel globalModel;
   /** Annotator config. */
   protected final Config config;
   /** Handler to re-run compiler. */
@@ -64,7 +64,7 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
     this.injector = supplier.getInjector();
     this.fixBank = supplier.getFixBank();
     this.errorBank = supplier.getErrorBank();
-    this.globalAnalyzer = supplier.getGlobalAnalyzer();
+    this.globalModel = supplier.getGlobalAnalyzer();
     this.compilerRunner = runner;
   }
 
@@ -78,7 +78,7 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
     Set<Location> currentLocationTargetedByTree =
         node.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
     localTriggeredFixes.addAll(
-        globalAnalyzer.getImpactedParameters(node.tree).stream()
+        globalModel.getImpactedParameters(node.tree).stream()
             .filter(input -> !currentLocationTargetedByTree.contains(input))
             .map(
                 onParameter ->

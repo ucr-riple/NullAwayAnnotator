@@ -27,7 +27,7 @@ package edu.ucr.cs.riple.core;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
+import edu.ucr.cs.riple.core.global.GlobalModel;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -99,7 +99,7 @@ public class Report {
    * @return true, if report contains a fix which will trigger an unresolvable error in downstream
    *     dependency.
    */
-  public boolean containsDestructiveMethod(GlobalAnalyzer analyzer) {
+  public boolean containsDestructiveMethod(GlobalModel analyzer) {
     return this.tree.stream().anyMatch(analyzer::isNotFixableOnTarget);
   }
 
@@ -193,7 +193,7 @@ public class Report {
    *
    * @param analyzer Downstream dependency analyzer instance.
    */
-  public void computeBoundariesOfEffectivenessOnDownstreamDependencies(GlobalAnalyzer analyzer) {
+  public void computeBoundariesOfEffectivenessOnDownstreamDependencies(GlobalModel analyzer) {
     this.lowerBoundEffectOnDownstreamDependencies =
         analyzer.computeLowerBoundOfNumberOfErrors(tree);
     this.upperBoundEffectOnDownstreamDependencies =

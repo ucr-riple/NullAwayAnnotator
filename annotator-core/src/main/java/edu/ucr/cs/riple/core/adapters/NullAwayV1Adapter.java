@@ -75,11 +75,19 @@ public class NullAwayV1Adapter implements NullAwayVersionAdapter {
         values.length == 10,
         "Expected 10 values to create Error instance in NullAway serialization version 1 but found: "
             + values.length);
-    return new Error(
-        values[0],
-        values[1],
-        new Region(values[2], values[3]),
-        Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 4, 10)));
+    String messageType = values[0];
+    Location nonnullTarget =
+        Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 4, 10));
+    Region region = new Region(values[2], values[3]);
+    Fix resolvingFix =
+        nonnullTarget == null
+            ? null
+            : new Fix(
+                new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot),
+                messageType,
+                region,
+                true);
+    return new Error(messageType, values[1], region, resolvingFix);
   }
 
   @Override

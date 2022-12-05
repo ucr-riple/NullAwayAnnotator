@@ -22,54 +22,38 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.global;
+package edu.ucr.cs.riple.core.model;
 
-import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.injector.location.OnParameter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-/**
- * This global analyzer does not have any information regarding the impact of changes in target
- * module in dependencies, the main purpose of this class is to avoid initializing GlobalAnalyzer
- * instances to {@code null} when impact on dependencies is not considered.
- */
-public class NoOpGlobalAnalyzer implements GlobalAnalyzer {
+public class Impact {
 
-  @Override
-  public void analyzeDownstreamDependencies() {
-    // No operation needed.
+  public final Fix fix;
+  protected List<Error> triggeredErrors;
+
+  public Impact(Fix fix) {
+    this.fix = fix;
+    this.triggeredErrors = new ArrayList<>();
   }
 
-  @Override
-  public int computeLowerBoundOfNumberOfErrors(Set<Fix> tree) {
-    return 0;
+  public void updateStatusAfterInjection(Set<Fix> fixes) {
+    triggeredErrors =
+        triggeredErrors.stream()
+            .filter(error -> !fixes.contains(error.resolvingFixes))
+            .collect(Collectors.toList());
   }
 
-  @Override
-  public int computeUpperBoundOfNumberOfErrors(Set<Fix> tree) {
-    return 0;
-  }
-
-  @Override
-  public ImmutableSet<OnParameter> getImpactedParameters(Set<Fix> fixTree) {
-    return ImmutableSet.of();
-  }
-
-  @Override
-  public List<Error> getTriggeredErrors(Fix fix) {
-    return List.of();
-  }
-
-  @Override
-  public void updateImpactsAfterInjection(Set<Fix> fixes) {
-    // No operation needed.
-  }
-
-  @Override
-  public boolean isNotFixableOnTarget(Fix fix) {
-    return false;
+  /**
+   * Returns list of triggered errors if method is {@code @Nullable} on downstream dependencies.
+   *
+   * @return List of errors.
+   */
+  public List<Error> getTriggeredErrors() {
+    return triggeredErrors;
   }
 }

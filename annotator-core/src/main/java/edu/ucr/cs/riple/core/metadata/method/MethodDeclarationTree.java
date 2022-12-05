@@ -183,8 +183,8 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
    * @return true, if the passed location is nonnull and is targeting an element in the target
    *     module, and false otherwise.
    */
-  public boolean declaredInModule(@Nullable Location location) {
-    if (location == null || location.clazz.equals("null")) {
+  public boolean declaredInModule(Location location) {
+    if (location.clazz.equals("null")) {
       return false;
     }
     return this.classNames.contains(location.clazz);

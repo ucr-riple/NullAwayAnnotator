@@ -30,7 +30,7 @@ import edu.ucr.cs.riple.core.evaluators.graphprocessor.CompilerRunner;
 import edu.ucr.cs.riple.core.evaluators.graphprocessor.ConflictGraphProcessor;
 import edu.ucr.cs.riple.core.evaluators.graphprocessor.ParallelConflictGraphProcessor;
 import edu.ucr.cs.riple.core.evaluators.graphprocessor.SequentialConflictGraphProcessor;
-import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
+import edu.ucr.cs.riple.core.global.GlobalModel;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
@@ -49,19 +49,18 @@ import edu.ucr.cs.riple.core.util.Utility;
  */
 public class TargetModuleSupplier extends AbstractSupplier {
 
-  protected final GlobalAnalyzer globalAnalyzer;
+  protected final GlobalModel globalModel;
 
   /**
    * Constructor for target module supplier instance.
    *
    * @param config Annotator config instance.
-   * @param globalAnalyzer Global analyzer instance.
+   * @param globalModel Global analyzer instance.
    * @param tree Method declaration tree for methods in target module.
    */
-  public TargetModuleSupplier(
-      Config config, GlobalAnalyzer globalAnalyzer, MethodDeclarationTree tree) {
+  public TargetModuleSupplier(Config config, GlobalModel globalModel, MethodDeclarationTree tree) {
     super(ImmutableSet.of(config.target), config, tree);
-    this.globalAnalyzer = globalAnalyzer;
+    this.globalModel = globalModel;
   }
 
   @Override
@@ -75,8 +74,8 @@ public class TargetModuleSupplier extends AbstractSupplier {
   }
 
   @Override
-  public GlobalAnalyzer getGlobalAnalyzer() {
-    return globalAnalyzer;
+  public GlobalModel getGlobalAnalyzer() {
+    return globalModel;
   }
 
   @Override

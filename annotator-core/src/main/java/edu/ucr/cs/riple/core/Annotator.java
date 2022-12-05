@@ -29,9 +29,9 @@ import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
 import edu.ucr.cs.riple.core.evaluators.Evaluator;
 import edu.ucr.cs.riple.core.evaluators.VoidEvaluator;
 import edu.ucr.cs.riple.core.evaluators.suppliers.TargetModuleSupplier;
-import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
-import edu.ucr.cs.riple.core.global.GlobalAnalyzerImpl;
-import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;
+import edu.ucr.cs.riple.core.global.GlobalModel;
+import edu.ucr.cs.riple.core.global.GlobalModelImpl;
+import edu.ucr.cs.riple.core.global.NoOpGlobalModel;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationAnalysis;
@@ -123,16 +123,16 @@ public class Annotator {
     // computation does not depend on the changes in the target module, it will compute the same
     // result in each iteration, therefore we perform the analysis only once and reuse it in each
     // iteration.
-    GlobalAnalyzer globalAnalyzer =
+    GlobalModel globalModel =
         config.downStreamDependenciesAnalysisActivated
-            ? new GlobalAnalyzerImpl(config, tree)
-            : new NoOpGlobalAnalyzer();
-    globalAnalyzer.analyzeDownstreamDependencies();
+            ? new GlobalModelImpl(config, tree)
+            : new NoOpGlobalModel();
+    globalModel.analyzeDownstreamDependencies();
 
     if (config.inferenceActivated) {
       // Outer loop starts.
       while (cache.isUpdated()) {
-        executeNextIteration(globalAnalyzer, fieldDeclarationAnalysis);
+        executeNextIteration(globalModel, fieldDeclarationAnalysis);
         if (config.disableOuterLoop) {
           break;
         }
@@ -141,7 +141,7 @@ public class Annotator {
       // Perform once last iteration including all fixes.
       if (!config.disableOuterLoop) {
         cache.disable();
-        executeNextIteration(globalAnalyzer, fieldDeclarationAnalysis);
+        executeNextIteration(globalModel, fieldDeclarationAnalysis);
         cache.enable();
       }
     }
@@ -157,27 +157,26 @@ public class Annotator {
   /**
    * Performs single iteration of inference/injection.
    *
-   * @param globalAnalyzer Global analyzer instance to detect impact of fixes outside of target
-   *     module.
+   * @param globalModel Global analyzer instance to detect impact of fixes outside of target module.
    * @param fieldDeclarationAnalysis Field declaration instance to detect fixes targeting inline
    *     multiple field declaration statements.
    */
   private void executeNextIteration(
-      GlobalAnalyzer globalAnalyzer, FieldDeclarationAnalysis fieldDeclarationAnalysis) {
+      GlobalModel globalModel, FieldDeclarationAnalysis fieldDeclarationAnalysis) {
     ImmutableSet<Report> latestReports =
-        processTriggeredFixes(globalAnalyzer, fieldDeclarationAnalysis);
+        processTriggeredFixes(globalModel, fieldDeclarationAnalysis);
     // Compute boundaries of effects on downstream dependencies.
     latestReports.forEach(
         report -> {
           if (config.downStreamDependenciesAnalysisActivated) {
-            report.computeBoundariesOfEffectivenessOnDownstreamDependencies(globalAnalyzer);
+            report.computeBoundariesOfEffectivenessOnDownstreamDependencies(globalModel);
           }
         });
     // Update cached reports store.
     cache.update(latestReports);
 
     // Tag reports according to selected analysis mode.
-    config.mode.tag(config, globalAnalyzer, latestReports);
+    config.mode.tag(config, globalModel, latestReports);
 
     // Inject approved fixes.
     Set<Fix> selectedFixes =
@@ -192,19 +191,19 @@ public class Annotator {
         selectedFixes.stream().map(fix -> fix.change).collect(Collectors.toSet()));
 
     // Update impact saved state.
-    globalAnalyzer.updateImpactsAfterInjection(selectedFixes);
+    globalModel.updateImpactsAfterInjection(selectedFixes);
   }
 
   /**
    * Processes triggered fixes.
    *
-   * @param globalAnalyzer Global Analyzer instance.
+   * @param globalModel Global Analyzer instance.
    * @param fieldDeclarationAnalysis Field Declaration analysis to detect fixes on multiple inline
    *     field declaration statements.
    * @return Immutable set of reports from the triggered fixes.
    */
   private ImmutableSet<Report> processTriggeredFixes(
-      GlobalAnalyzer globalAnalyzer, FieldDeclarationAnalysis fieldDeclarationAnalysis) {
+      GlobalModel globalModel, FieldDeclarationAnalysis fieldDeclarationAnalysis) {
     Utility.buildTarget(config);
     // Suggested fixes of target at the current state.
     ImmutableSet<Fix> fixes =
@@ -216,7 +215,7 @@ public class Annotator {
 
     // Initializing required evaluator instances.
     MethodDeclarationTree tree = new MethodDeclarationTree(config);
-    TargetModuleSupplier supplier = new TargetModuleSupplier(config, globalAnalyzer, tree);
+    TargetModuleSupplier supplier = new TargetModuleSupplier(config, globalModel, tree);
     Evaluator evaluator =
         config.exhaustiveSearch ? new VoidEvaluator() : new BasicEvaluator(supplier);
     // Result of the iteration analysis.
@@ -262,9 +261,9 @@ public class Annotator {
                   // `@Nullable` is being passed as an argument, we add a `@NullUnmarked` annotation
                   // to the called method.
                   if (error.messageType.equals("PASS_NULLABLE")
-                      && error.nonnullTarget != null
-                      && error.nonnullTarget.isOnParameter()) {
-                    OnParameter nullableParameter = error.nonnullTarget.toParameter();
+                      && error.resolvingFixes != null
+                      && error.resolvingFixes.isOnParameter()) {
+                    OnParameter nullableParameter = error.resolvingFixes.toParameter();
                     return tree.findNode(nullableParameter.method, nullableParameter.clazz);
                   }
                   return null;

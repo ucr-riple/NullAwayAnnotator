@@ -25,22 +25,21 @@
 package edu.ucr.cs.riple.core.global;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.model.Model;
 import edu.ucr.cs.riple.injector.location.OnParameter;
-import java.util.List;
 import java.util.Set;
 
 /**
- * Analyzer for downstream dependencies.
+ * Model for downstream dependencies.
  *
- * <p>This class analyzes switching the nullability of public APIs of one compilation target, in
- * order to compute the effect on said target's downstream dependencies of adding annotations to
- * those APIs. It does so by building said downstream dependencies. It collects the effect (number
- * of additional errors) of each such change, by summing across all downstream dependencies. This
- * data then be fed to the Annotator main process in the decision process.
+ * <p>This class stores impacts of switching the nullability of public APIs of one compilation
+ * target, in order to compute the effect on said target's downstream dependencies of adding
+ * annotations to those APIs. It does so by building said downstream dependencies. It collects the
+ * effect (number of additional errors) of each such change, by summing across all downstream
+ * dependencies. This data then be fed to the Annotator main process in the decision process.
  */
-public interface GlobalAnalyzer {
+public interface GlobalModel extends Model {
 
   /** Analyzes effects of changes in public methods in downstream dependencies. */
   void analyzeDownstreamDependencies();
@@ -71,23 +70,6 @@ public interface GlobalAnalyzer {
    * @return Immutable set of impacted parameters.
    */
   ImmutableSet<OnParameter> getImpactedParameters(Set<Fix> fixTree);
-
-  /**
-   * Collects list of triggered errors in downstream dependencies if fix is applied in the target
-   * module. It also includes triggered errors that can be resolved via an annotation in target
-   * (upstream) module.
-   *
-   * @param fix Fix instance to be applied in the target module.
-   * @return List of triggered errors.
-   */
-  List<Error> getTriggeredErrors(Fix fix);
-
-  /**
-   * Updates state of methods after injection of fixes in target module.
-   *
-   * @param fixes Set of injected fixes.
-   */
-  void updateImpactsAfterInjection(Set<Fix> fixes);
 
   /**
    * Checks if fix triggers any unresolvable error in downstream dependencies. Unresolvable errors
