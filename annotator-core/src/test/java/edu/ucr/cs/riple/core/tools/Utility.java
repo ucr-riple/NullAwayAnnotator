@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.tools;
 
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -66,7 +67,8 @@ public class Utility {
    * @param path Path to errors.tsv.
    * @return List of serialized errors.
    */
-  public static List<Error> readErrorsFromOutputDirectory(Config config, Path path) {
+  public static List<Error> readErrorsFromOutputDirectory(
+      Config config, Path path, FieldDeclarationStore store) {
     List<Error> errors = new ArrayList<>();
     try {
       try (BufferedReader br =
@@ -75,7 +77,7 @@ public class Utility {
         // Skip headers.
         br.readLine();
         while ((line = br.readLine()) != null) {
-          errors.add(config.getAdapter().deserializeError(line.split("\t")));
+          errors.add(config.getAdapter().deserializeError(line.split("\t"), store));
         }
       }
     } catch (IOException e) {

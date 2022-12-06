@@ -24,7 +24,9 @@
 package edu.ucr.cs.riple.core.metadata.index;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -65,8 +67,8 @@ public class Error extends Enclosed {
    * @param config Config instance.
    * @return Factory instance.
    */
-  public static Factory<Error> factory(Config config) {
-    return config.getAdapter()::deserializeError;
+  public static Factory<Error> factory(Config config, FieldDeclarationStore store) {
+    return values -> config.getAdapter().deserializeError(values, store);
   }
 
   /**
@@ -133,5 +135,9 @@ public class Error extends Enclosed {
   @Override
   public String toString() {
     return "Type='" + messageType + '\'' + ", message='" + message + '\'';
+  }
+
+  public ImmutableSet<Fix> getResolvingFixes() {
+    return ImmutableSet.copyOf(resolvingFixes);
   }
 }

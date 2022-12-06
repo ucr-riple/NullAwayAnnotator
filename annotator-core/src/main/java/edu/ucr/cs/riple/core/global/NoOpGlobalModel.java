@@ -27,7 +27,7 @@ package edu.ucr.cs.riple.core.global;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.injector.location.OnParameter;
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -53,7 +53,7 @@ public class NoOpGlobalModel implements GlobalModel {
   }
 
   @Override
-  public ImmutableSet<OnParameter> getImpactedParameters(Set<Fix> fixTree) {
+  public ImmutableSet<Error> getTriggeredErrorsForCollection(Collection<Fix> fixTree) {
     return ImmutableSet.of();
   }
 

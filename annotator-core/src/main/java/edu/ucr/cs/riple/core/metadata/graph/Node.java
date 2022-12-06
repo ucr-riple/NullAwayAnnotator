@@ -33,6 +33,7 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
+import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.Collection;
 import java.util.Collections;
@@ -92,10 +93,12 @@ public class Node {
   /**
    * Initializes rootSource. Collects all regions where error reported from {@link Bank}
    *
-   * @param fixBank {@link Bank} instance.
+   * @param errorBank {@link Bank} instance.
    */
-  public void setOrigins(Bank<Fix> fixBank) {
-    this.origins = fixBank.getRegionsForFixes(fix -> fix.equals(root));
+  public void setOrigins(Bank<Error> errorBank) {
+    this.origins =
+        errorBank.getRegionsForFix(
+            error -> error.isSingleFix() && error.toResolvingLocation().equals(root.toLocation()));
   }
 
   /**
@@ -139,20 +142,20 @@ public class Node {
    *
    * @param localEffect Local effect calculated based on the number of errors in impacted regions.
    * @param fixesInOneRound All fixes applied simultaneously to the source code.
-   * @param triggeredFixes Triggered fixes collected from impacted regions.
    * @param triggeredErrors Triggered Errors collected from impacted regions.
+   * @param triggeredFixesFromDownstream Set of triggered fixes from downstream.
    * @param mdt Method declaration tree instance.
    */
   public void updateStatus(
       int localEffect,
       Set<Fix> fixesInOneRound,
-      Collection<Fix> triggeredFixes,
       Collection<Error> triggeredErrors,
+      Set<Fix> triggeredFixesFromDownstream,
       MethodDeclarationTree mdt) {
-    // Update list of triggered fixes.
-    this.updateTriggered(triggeredFixes);
     // Update list of triggered errors.
     this.triggeredErrors = ImmutableSet.copyOf(triggeredErrors);
+    // Update list of triggered fixes.
+    this.updateTriggered(triggeredFixesFromDownstream);
     // A fix in a tree, can have a super method that is not part of this node's tree but be present
     // in another node's tree. In this case since both are applied, an error due to inheritance
     // violation will not be reported. This calculation below will fix that.
@@ -191,11 +194,13 @@ public class Node {
   /**
    * Updated the triggered list and the status of node.
    *
-   * @param fixes Collection of triggered fixes.
+   * @param triggeredFixesFromDownstream Set of triggered fixes from downstream.
    */
-  public void updateTriggered(Collection<Fix> fixes) {
+  public void updateTriggered(Set<Fix> triggeredFixesFromDownstream) {
     int sizeBefore = this.triggeredFixes.size();
+    ImmutableSet<Fix> fixes = Utility.getResolvingFixesOfErrors(this.triggeredErrors);
     this.triggeredFixes.addAll(fixes);
+    this.triggeredFixes.addAll(triggeredFixesFromDownstream);
     int sizeAfter = this.triggeredFixes.size();
     this.changed = (sizeAfter != sizeBefore);
   }

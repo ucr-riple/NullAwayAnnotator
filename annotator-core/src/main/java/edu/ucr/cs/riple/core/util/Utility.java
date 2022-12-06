@@ -28,8 +28,8 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.Factory;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.scanner.AnnotatorScanner;
 import java.io.BufferedReader;
@@ -43,11 +43,9 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -138,35 +136,15 @@ public class Utility {
   }
 
   /**
-   * Reads serialized suggested fixes of passed module in "fixes.tsv" file in the output directory,
+   * Reads fixes from the serialized errors in "errors.tsv" file in the output directory,
    *
    * @param info Module info.
-   * @param factory Fix factory to create {@link Fix} instance from array of values.
    * @return Set of serialized fixes.
    */
-  public static Set<Fix> readFixesFromOutputDirectory(ModuleInfo info, Factory<Fix> factory) {
-    Path fixesPath = info.dir.resolve("fixes.tsv");
-    Set<Fix> fixes = new HashSet<>();
-    try {
-      try (BufferedReader br =
-          Files.newBufferedReader(fixesPath.toFile().toPath(), Charset.defaultCharset())) {
-        String line;
-        // Skip header.
-        br.readLine();
-        while ((line = br.readLine()) != null) {
-          Fix fix = factory.build(line.split("\t"));
-          Optional<Fix> existing = fixes.stream().filter(other -> other.equals(fix)).findAny();
-          if (existing.isPresent()) {
-            existing.get().reasons.addAll(fix.reasons);
-          } else {
-            fixes.add(fix);
-          }
-        }
-      }
-    } catch (IOException e) {
-      throw new RuntimeException("Exception happened in reading fixes at: " + fixesPath, e);
-    }
-    return fixes;
+  public static ImmutableSet<Fix> readFixesFromOutputDirectory(
+      Config config, ModuleInfo info, FieldDeclarationStore store) {
+    return ImmutableSet.copyOf(
+        getResolvingFixesOfErrors(readErrorsFromOutputDirectory(config, info, store)));
   }
 
   /**
@@ -175,7 +153,8 @@ public class Utility {
    * @param info Module info.
    * @return List of serialized errors.
    */
-  public static List<Error> readErrorsFromOutputDirectory(Config config, ModuleInfo info) {
+  public static List<Error> readErrorsFromOutputDirectory(
+      Config config, ModuleInfo info, FieldDeclarationStore store) {
     Path errorsPath = info.dir.resolve("errors.tsv");
     List<Error> errors = new ArrayList<>();
     try {
@@ -185,13 +164,25 @@ public class Utility {
         // Skip header.
         br.readLine();
         while ((line = br.readLine()) != null) {
-          errors.add(config.getAdapter().deserializeError(line.split("\t")));
+          errors.add(config.getAdapter().deserializeError(line.split("\t"), store));
         }
       }
     } catch (IOException e) {
       throw new RuntimeException("Exception happened in reading errors at: " + errorsPath, e);
     }
     return errors;
+  }
+
+  /**
+   * Gets resolving fixes of the given errors in a single ImmutableSet.
+   *
+   * @param errors Given errors.
+   * @return ImmutableSet of fixes containing all resolving fixes of the given errors.
+   */
+  public static ImmutableSet<Fix> getResolvingFixesOfErrors(Collection<Error> errors) {
+    return errors.stream()
+        .flatMap(error -> error.getResolvingFixes().stream())
+        .collect(ImmutableSet.toImmutableSet());
   }
 
   /**

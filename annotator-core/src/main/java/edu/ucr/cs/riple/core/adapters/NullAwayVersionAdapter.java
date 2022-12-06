@@ -24,11 +24,10 @@
 
 package edu.ucr.cs.riple.core.adapters;
 
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.TrackerNode;
-import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Set;
 
@@ -39,23 +38,13 @@ import java.util.Set;
 public interface NullAwayVersionAdapter {
 
   /**
-   * Deserializes values produced by NullAway in a tsv file and creates a corresponding {@link Fix}
-   * instance.
-   *
-   * @param location Location of the targeted element.
-   * @param values Values in row of a TSV file.
-   * @return Corresponding Fix instance with the passed values.
-   */
-  Fix deserializeFix(Location location, String[] values);
-
-  /**
    * Deserializes values produced by NullAway in a tsv file and creates a corresponding {@link
    * Error} instance.
    *
    * @param values Values in row of a TSV file.
    * @return Corresponding Error instance with the passed values.
    */
-  Error deserializeError(String[] values);
+  Error deserializeError(String[] values, FieldDeclarationStore store);
 
   /**
    * Deserializes values produced by Type Annotator Scanner in a tsv file and creates a

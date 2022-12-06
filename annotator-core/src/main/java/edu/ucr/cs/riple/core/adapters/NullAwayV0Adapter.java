@@ -28,10 +28,8 @@ import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.TrackerNode;
-import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Arrays;
@@ -53,23 +51,7 @@ public class NullAwayV0Adapter extends NullAwayAdapterBaseClass {
   }
 
   @Override
-  public Fix deserializeFix(Location location, String[] values) {
-    Preconditions.checkArgument(
-        values.length == 10,
-        "Expected 10 values to create Fix instance in NullAway serialization version 0 but found: "
-            + values.length);
-    Preconditions.checkArgument(
-        values[7].equals("nullable"), "unsupported annotation: " + values[7]);
-    String encMember = !Region.getType(values[9]).equals(Region.Type.METHOD) ? "null" : values[9];
-    return new Fix(
-        new AddMarkerAnnotation(location, config.nullableAnnot),
-        values[6],
-        new Region(values[8], encMember),
-        true);
-  }
-
-  @Override
-  public Error deserializeError(String[] values) {
+  public Error deserializeError(String[] values, FieldDeclarationStore store) {
     Preconditions.checkArgument(
         values.length == 10,
         "Expected 10 values to create Error instance in NullAway serialization version 0 but found: "
@@ -80,7 +62,7 @@ public class NullAwayV0Adapter extends NullAwayAdapterBaseClass {
     String errorType = values[0];
     String errorMessage = values[1];
     Region region = new Region(values[2], encMember);
-    return createError(errorType, errorMessage, region, nonnullTarget);
+    return createError(errorType, errorMessage, region, nonnullTarget, store);
   }
 
   @Override

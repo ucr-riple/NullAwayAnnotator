@@ -31,6 +31,7 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
+import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -99,13 +100,14 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
    * @param region Region where the error is reported.
    * @return Set of fixes for uninitialized fields to resolve the given error.
    */
-  protected Set<Fix> generateFixForUnInitializedFields(String errorMessage, Region region) {
+  protected Set<Fix> generateFixForUnInitializedFields(
+      String errorMessage, Region region, FieldDeclarationStore store) {
     return extractUnInitializedFields(errorMessage).stream()
         .map(
             field ->
                 new Fix(
                     new AddMarkerAnnotation(
-                        fieldDeclarationStore.getLocationOnField(region.clazz, field),
+                        extendVariableList(store.getLocationOnField(region.clazz, field), store),
                         config.nullableAnnot),
                     "METHOD_NO_INIT",
                     region,
@@ -125,10 +127,17 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
    * @return The corresponding error.
    */
   protected Error createError(
-      String errorType, String errorMessage, Region region, @Nullable Location nonnullTarget) {
+      String errorType,
+      String errorMessage,
+      Region region,
+      @Nullable Location nonnullTarget,
+      FieldDeclarationStore store) {
     if (nonnullTarget == null && errorType.equals("METHOD_NO_INIT")) {
-      Set<Fix> resolvingFix = generateFixForUnInitializedFields(errorMessage, region);
+      Set<Fix> resolvingFix = generateFixForUnInitializedFields(errorMessage, region, store);
       return new Error(errorType, errorMessage, region, resolvingFix);
+    }
+    if (nonnullTarget != null && nonnullTarget.isOnField()) {
+      nonnullTarget = extendVariableList(nonnullTarget.toField(), store);
     }
     Fix resolvingFix =
         nonnullTarget == null
@@ -139,5 +148,20 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
                 region,
                 true);
     return new Error(errorType, errorMessage, region, resolvingFix);
+  }
+
+  /**
+   * Extends field variable names to full list to include all variables declared in the same
+   * statement.
+   *
+   * @param onField Location of the field.
+   * @param store Field Declaration Store instance.
+   * @return The updated given location.
+   */
+  private static OnField extendVariableList(OnField onField, FieldDeclarationStore store) {
+    Set<String> variables =
+        store.getInLineMultipleFieldDeclarationsOnField(onField.clazz, onField.variables);
+    onField.variables.addAll(variables);
+    return onField;
   }
 }

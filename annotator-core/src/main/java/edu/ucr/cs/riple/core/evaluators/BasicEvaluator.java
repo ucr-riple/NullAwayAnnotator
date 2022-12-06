@@ -47,7 +47,7 @@ public class BasicEvaluator extends AbstractEvaluator {
             report -> {
               Fix root = report.root;
               Node node = graph.addNodeToVertices(root);
-              node.setOrigins(supplier.getFixBank());
+              node.setOrigins(supplier.getErrorBank());
               node.report = report;
               node.triggeredFixes = new HashSet<>(report.triggeredFixes);
               node.tree.addAll(report.tree);

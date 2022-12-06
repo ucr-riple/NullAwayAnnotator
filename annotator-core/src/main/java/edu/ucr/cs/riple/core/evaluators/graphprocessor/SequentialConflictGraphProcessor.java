@@ -31,7 +31,6 @@ import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.Result;
 import edu.ucr.cs.riple.core.util.Utility;
-import java.util.Collection;
 import java.util.Set;
 import me.tongfei.progressbar.ProgressBar;
 
@@ -56,16 +55,14 @@ public class SequentialConflictGraphProcessor extends AbstractConflictGraphProce
               injector.injectFixes(fixes);
               compilerRunner.run();
               errorBank.saveState(false, true);
-              fixBank.saveState(false, true);
               Result<Error> errorComparisonResult = errorBank.compare();
               node.effect = errorComparisonResult.size;
-              Collection<Fix> fixComparisonResultDif = fixBank.compare().dif;
-              addTriggeredFixesFromDownstream(node, fixComparisonResultDif);
+              addTriggeredFixesFromDownstream(node);
               node.updateStatus(
                   errorComparisonResult.size,
                   fixes,
-                  fixComparisonResultDif,
                   errorComparisonResult.dif,
+                  addTriggeredFixesFromDownstream(node),
                   methodDeclarationTree);
               injector.removeFixes(fixes);
             });
