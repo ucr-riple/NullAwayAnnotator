@@ -7,6 +7,7 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
@@ -128,6 +129,6 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
     if (candidate == null) {
       return null;
     }
-    return new OnField(candidate.pathToSourceFile, candidate.clazz, Collections.singleton(field));
+    return new OnField(candidate.pathToSourceFile, candidate.clazz, Sets.newHashSet(field));
   }
 }
