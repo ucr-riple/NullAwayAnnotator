@@ -30,10 +30,8 @@ import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.location.Location;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 /** Represents an error reported by NullAway. */
@@ -125,13 +123,7 @@ public class Error extends Enclosed {
     return "Type='" + messageType + '\'' + ", message='" + message + '\'';
   }
 
-  private Set<Fix> getResolvingFixes() {
+  public ImmutableSet<Fix> getResolvingFixes() {
     return fixes;
-  }
-
-  public static Set<Fix> getResolvingFixesOfErrors(Collection<Error> errors) {
-    return errors.stream()
-        .flatMap(error -> error.getResolvingFixes().stream())
-        .collect(Collectors.toSet());
   }
 }

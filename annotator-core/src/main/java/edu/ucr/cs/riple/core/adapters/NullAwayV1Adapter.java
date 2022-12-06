@@ -28,10 +28,8 @@ import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.TrackerNode;
-import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Arrays;
@@ -50,21 +48,6 @@ public class NullAwayV1Adapter extends NullAwayAdapterBaseClass {
 
   public NullAwayV1Adapter(Config config, FieldDeclarationStore fieldDeclarationStore) {
     super(config, fieldDeclarationStore, 0);
-  }
-
-  @Override
-  public Fix deserializeFix(Location location, String[] values) {
-    Preconditions.checkArgument(
-        values.length == 10,
-        "Expected 10 values to create Fix instance in NullAway serialization version 1 but found: "
-            + values.length);
-    Preconditions.checkArgument(
-        values[7].equals("nullable"), "unsupported annotation: " + values[7]);
-    return new Fix(
-        new AddMarkerAnnotation(location, config.nullableAnnot),
-        values[6],
-        new Region(values[8], values[9]),
-        true);
   }
 
   @Override

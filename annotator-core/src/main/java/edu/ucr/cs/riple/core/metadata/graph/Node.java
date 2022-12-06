@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.metadata.graph;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
@@ -33,6 +34,7 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
+import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.Collection;
 import java.util.Collections;
@@ -209,7 +211,7 @@ public class Node {
    */
   public void updateTriggered(Set<Fix> triggeredFixesFromDownstream) {
     int sizeBefore = this.triggeredFixes.size();
-    Set<Fix> fixes = Error.getResolvingFixesOfErrors(this.triggeredErrors);
+    ImmutableSet<Fix> fixes = Utility.getResolvingFixesOfErrors(this.triggeredErrors);
     this.triggeredFixes.addAll(fixes);
     this.triggeredFixes.addAll(triggeredFixesFromDownstream);
     int sizeAfter = this.triggeredFixes.size();

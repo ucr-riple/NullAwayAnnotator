@@ -236,7 +236,7 @@ public class Annotator {
     Utility.buildTarget(config);
     List<Error> remainingErrors =
         Utility.readErrorsFromOutputDirectory(config, config.target, fieldDeclarationStore);
-    Set<Fix> remainingFixes = Error.getResolvingFixesOfErrors(remainingErrors);
+    ImmutableSet<Fix> remainingFixes = Utility.getResolvingFixesOfErrors(remainingErrors);
 
     // Collect all regions for NullUnmarked.
     // For all errors in regions which correspond to a method's body, we can add @NullUnmarked at

@@ -43,6 +43,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -143,7 +144,7 @@ public class Utility {
   public static ImmutableSet<Fix> readFixesFromOutputDirectory(
       Config config, ModuleInfo info, FieldDeclarationStore store) {
     return ImmutableSet.copyOf(
-        Error.getResolvingFixesOfErrors(readErrorsFromOutputDirectory(config, info, store)));
+        getResolvingFixesOfErrors(readErrorsFromOutputDirectory(config, info, store)));
   }
 
   /**
@@ -170,6 +171,18 @@ public class Utility {
       throw new RuntimeException("Exception happened in reading errors at: " + errorsPath, e);
     }
     return errors;
+  }
+
+  /**
+   * Gets resolving fixes of the given errors in a single ImmutableSet.
+   *
+   * @param errors Given errors.
+   * @return ImmutableSet of fixes containing all resolving fixes of the given errors.
+   */
+  public static ImmutableSet<Fix> getResolvingFixesOfErrors(Collection<Error> errors) {
+    return errors.stream()
+        .flatMap(error -> error.getResolvingFixes().stream())
+        .collect(ImmutableSet.toImmutableSet());
   }
 
   /**
