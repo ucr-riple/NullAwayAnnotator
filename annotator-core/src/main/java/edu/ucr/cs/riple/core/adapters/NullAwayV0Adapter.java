@@ -69,7 +69,7 @@ public class NullAwayV0Adapter extends NullAwayAdapterBaseClass {
   }
 
   @Override
-  public Error deserializeError(String[] values) {
+  public Error deserializeError(String[] values, FieldDeclarationStore store) {
     Preconditions.checkArgument(
         values.length == 10,
         "Expected 10 values to create Error instance in NullAway serialization version 0 but found: "
@@ -80,7 +80,7 @@ public class NullAwayV0Adapter extends NullAwayAdapterBaseClass {
     String errorType = values[0];
     String errorMessage = values[1];
     Region region = new Region(values[2], encMember);
-    return createError(errorType, errorMessage, region, nonnullTarget);
+    return createError(errorType, errorMessage, region, nonnullTarget, store);
   }
 
   @Override

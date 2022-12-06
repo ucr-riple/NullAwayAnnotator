@@ -31,14 +31,11 @@ import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 
 /** Base class for all instances of {@link Supplier}. */
 public abstract class AbstractSupplier implements Supplier {
 
-  /** Fix bank instance. */
-  protected final Bank<Fix> fixBank;
   /** Error Bank instance. */
   protected final Bank<Error> errorBank;
   /** Injector instance. */
@@ -57,7 +54,6 @@ public abstract class AbstractSupplier implements Supplier {
     this.config = config;
     this.fieldDeclarationStore = new FieldDeclarationStore(config, modules);
     this.tree = tree;
-    this.fixBank = initializeFixBank(modules);
     this.errorBank = initializeErrorBank(modules);
     this.injector = initializeInjector();
     this.depth = initializeDepth();
@@ -88,26 +84,7 @@ public abstract class AbstractSupplier implements Supplier {
         modules.stream()
             .map(info -> info.dir.resolve("errors.tsv"))
             .collect(ImmutableSet.toImmutableSet()),
-        Error.factory(config));
-  }
-
-  /**
-   * Initializer for fixBank.
-   *
-   * @param modules Set of modules involved in the analysis.
-   * @return {@link Bank} of {@link Fix} instances.
-   */
-  protected Bank<Fix> initializeFixBank(ImmutableSet<ModuleInfo> modules) {
-    return new Bank<>(
-        modules.stream()
-            .map(info -> info.dir.resolve("fixes.tsv"))
-            .collect(ImmutableSet.toImmutableSet()),
-        Fix.factory(config, fieldDeclarationStore));
-  }
-
-  @Override
-  public Bank<Fix> getFixBank() {
-    return fixBank;
+        Error.factory(config, fieldDeclarationStore));
   }
 
   @Override

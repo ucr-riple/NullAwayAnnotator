@@ -27,7 +27,7 @@ package edu.ucr.cs.riple.core.global;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.injector.location.OnParameter;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -67,10 +67,10 @@ public interface GlobalAnalyzer {
    * Returns set of parameters that will receive {@code @Nullable}, if any of the methods in the
    * fixTree are annotated as {@code @Nullable}.
    *
-   * @param fixTree Fix tree.
+   * @param collection Fix collection.
    * @return Immutable set of impacted parameters.
    */
-  ImmutableSet<OnParameter> getImpactedParameters(Set<Fix> fixTree);
+  ImmutableSet<Error> getTriggeredErrorsForCollection(Collection<Fix> collection);
 
   /**
    * Collects list of triggered errors in downstream dependencies if fix is applied in the target

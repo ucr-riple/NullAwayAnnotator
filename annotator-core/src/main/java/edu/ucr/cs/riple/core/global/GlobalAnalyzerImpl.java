@@ -42,6 +42,7 @@ import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -183,13 +184,13 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
   }
 
   @Override
-  public ImmutableSet<OnParameter> getImpactedParameters(Set<Fix> fixTree) {
+  public ImmutableSet<Error> getTriggeredErrorsForCollection(Collection<Fix> fixTree) {
     return fixTree.stream()
         .filter(Fix::isOnMethod)
         .flatMap(
             fix -> {
               MethodImpact impact = fetchMethodImpactForFix(fix);
-              return impact == null ? Stream.of() : impact.getImpactedParameters().stream();
+              return impact == null ? Stream.of() : impact.getTriggeredErrors().stream();
             })
         .collect(ImmutableSet.toImmutableSet());
   }

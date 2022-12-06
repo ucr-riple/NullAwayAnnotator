@@ -105,9 +105,14 @@ public class Annotator {
     methodDeclarationTree = new MethodDeclarationTree(config);
     config.initializeAdapter(fieldDeclarationStore);
     Set<OnField> uninitializedFields =
-        Utility.readFixesFromOutputDirectory(config.target, Fix.factory(config, null)).stream()
-            .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
-            .map(Fix::toField)
+        Utility.readErrorsFromOutputDirectory(config, config.target, fieldDeclarationStore).stream()
+            .filter(
+                error ->
+                    error.isSingleFix()
+                        && (error.messageType.equals("METHOD_NO_INIT")
+                            || error.messageType.contains("FIELD_NO_INIT"))
+                        && error.toResolvingLocation().isOnField())
+            .map(e -> e.toResolvingLocation().toField())
             .collect(Collectors.toSet());
     FieldInitializationAnalysis analysis = new FieldInitializationAnalysis(config);
     Set<AddAnnotation> initializers =
@@ -203,11 +208,7 @@ public class Annotator {
     Utility.buildTarget(config);
     // Suggested fixes of target at the current state.
     ImmutableSet<Fix> fixes =
-        Utility.readFixesFromOutputDirectory(
-                config.target, Fix.factory(config, fieldDeclarationStore))
-            .stream()
-            .filter(fix -> !cache.processedFix(fix))
-            .collect(ImmutableSet.toImmutableSet());
+        Utility.readFixesFromOutputDirectory(config, config.target, fieldDeclarationStore);
 
     // Initializing required evaluator instances.
     TargetModuleSupplier supplier =
@@ -233,10 +234,9 @@ public class Annotator {
   private void forceResolveRemainingErrors() {
     // Collect regions with remaining errors.
     Utility.buildTarget(config);
-    List<Error> remainingErrors = Utility.readErrorsFromOutputDirectory(config, config.target);
-    Set<Fix> remainingFixes =
-        Utility.readFixesFromOutputDirectory(
-            config.target, Fix.factory(config, fieldDeclarationStore));
+    List<Error> remainingErrors =
+        Utility.readErrorsFromOutputDirectory(config, config.target, fieldDeclarationStore);
+    Set<Fix> remainingFixes = Error.getResolvingFixesOfErrors(remainingErrors);
 
     // Collect all regions for NullUnmarked.
     // For all errors in regions which correspond to a method's body, we can add @NullUnmarked at
