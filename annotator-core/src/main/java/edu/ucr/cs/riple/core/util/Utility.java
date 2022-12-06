@@ -45,7 +45,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -180,9 +182,18 @@ public class Utility {
    * @return ImmutableSet of fixes containing all resolving fixes of the given errors.
    */
   public static ImmutableSet<Fix> getResolvingFixesOfErrors(Collection<Error> errors) {
-    return errors.stream()
+    Map<Fix, Fix> fixToFixMap = new HashMap<>();
+    errors.stream()
         .flatMap(error -> error.getResolvingFixes().stream())
-        .collect(ImmutableSet.toImmutableSet());
+        .forEach(
+            fix -> {
+              if (fixToFixMap.containsKey(fix)) {
+                fixToFixMap.get(fix).reasons.addAll(fix.reasons);
+              } else {
+                fixToFixMap.put(fix, fix);
+              }
+            });
+    return ImmutableSet.copyOf(fixToFixMap.values());
   }
 
   /**
