@@ -41,7 +41,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * Vertex in {@link ConflictGraph} graph. It stores a fix tree (starting from a root) and all it's
@@ -100,18 +99,7 @@ public class Node {
   public void setOrigins(Bank<Error> errorBank) {
     this.origins =
         errorBank.getRegionsForFix(
-            new Predicate<Error>() {
-              @Override
-              public boolean test(Error error) {
-                if (!error.isSingleFix()) {
-                  return false;
-                }
-                if (error.toResolvingLocation().equals(root.toLocation())) {
-                  return true;
-                }
-                return false;
-              }
-            });
+            error -> error.isSingleFix() && error.toResolvingLocation().equals(root.toLocation()));
   }
 
   /**
