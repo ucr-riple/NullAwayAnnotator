@@ -25,56 +25,17 @@
 package edu.ucr.cs.riple.core.model;
 
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-public class DynamicModel<T extends Impact> implements Model {
-
-  protected final Map<Location, T> store;
-  protected final Config config;
+public class DynamicModel<T extends Impact> extends BaseModel<T, HashMap<Location, T>> {
 
   public DynamicModel(Config config) {
-    this.store = new HashMap<>();
-    this.config = config;
-  }
-
-  public Set<Fix> getUnknownFixImpacts(Set<Fix> fixes) {
-    return fixes.stream()
-        .filter(fix -> !store.containsKey(fix.toLocation()))
-        .collect(Collectors.toSet());
-  }
-
-  public Set<Error> computeRemainingErrorsOnInjection(Set<Fix> fixes) {
-    return fixes.stream()
-        .flatMap(fix -> store.get(fix.toLocation()).triggeredErrors.stream())
-        .filter(error -> !error.isResolvableWith(fixes))
-        .collect(Collectors.toSet());
+    super(config, new HashMap<>());
   }
 
   public void updateModelStore(Collection<T> newData) {
     newData.forEach(t -> store.put(t.toLocation(), t));
   }
-
-  public void updateModelOnInjection(Collection<Fix> newFixes) {
-    this.store.values().forEach(t -> t.updateStatusAfterInjection(newFixes));
-  }
-
-  @Override
-  public boolean isUnknown(Fix fix) {
-    return !this.store.containsKey(fix.toLocation());
-  }
-
-  @Override
-  public Set<Error> getTriggeredErrors(Fix fix) {
-    return null;
-  }
-
-  @Override
-  public void updateImpactsAfterInjection(Set<Fix> fixes) {}
 }

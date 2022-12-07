@@ -93,25 +93,6 @@ public class MethodImpact extends Impact {
   }
 
   /**
-   * Returns set of parameters on target module that will receive {@code @Nullable} if method in
-   * node is annotated as {@code @Nullable}.
-   *
-   * @return Set of parameters location.
-   */
-  public Set<OnParameter> getImpactedParameters() {
-    return impactedParametersMap.keySet();
-  }
-
-  /**
-   * Returns list of triggered errors if method is {@code @Nullable} on downstream dependencies.
-   *
-   * @return Set of errors.
-   */
-  public Set<Error> getTriggeredErrors() {
-    return triggeredErrors;
-  }
-
-  /**
    * Updates the status of method's impact after injection of fixes in target module. Potentially
    * part of stored impact result is invalid due to injection of fixes. (e.g. some impacted
    * parameters may already be annotated as {@code @Nullable} and will no longer trigger errors on

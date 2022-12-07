@@ -24,28 +24,45 @@
 
 package edu.ucr.cs.riple.core.model;
 
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import java.util.Set;
+import java.util.Collection;
+import javax.annotation.Nullable;
 
-public interface Model {
+public interface Model<T extends Impact> {
 
   boolean isUnknown(Fix fix);
 
   /**
-   * Collects list of triggered errors in downstream dependencies if fix is applied in the target
-   * module. It also includes triggered errors that can be resolved via an annotation in target
-   * (upstream) module.
+   * Collects set of triggered errors if given fix is applied.
    *
    * @param fix Fix instance to be applied in the target module.
-   * @return List of triggered errors.
+   * @return Set of triggered errors.
    */
-  Set<Error> getTriggeredErrors(Fix fix);
+  ImmutableSet<Error> getTriggeredErrors(Fix fix);
 
   /**
-   * Updates state of methods after injection of fixes in target module.
+   * Updates store after injection of fixes in target module.
    *
    * @param fixes Set of injected fixes.
    */
-  void updateImpactsAfterInjection(Set<Fix> fixes);
+  void updateImpactsAfterInjection(Collection<Fix> fixes);
+
+  /**
+   * Retrieves the corresponding {@link Impact} of a fix.
+   *
+   * @param fix Target fix.
+   * @return Corresponding {@link Impact}, null if not located.
+   */
+  @Nullable
+  T fetchImpact(Fix fix);
+
+  /**
+   * Returns Set of errors that will be triggered if given fixes are applied.
+   *
+   * @param fixes Collection of given fixes.
+   * @return Immutable set of triggered fixes.
+   */
+  ImmutableSet<Error> getTriggeredErrorsForCollection(Collection<Fix> fixes);
 }

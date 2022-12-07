@@ -29,6 +29,7 @@ import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.util.Collection;
 import java.util.Set;
+import javax.annotation.Nullable;
 
 /**
  * This global analyzer does not have any information regarding the impact of changes in target
@@ -53,23 +54,29 @@ public class NoOpGlobalModel implements GlobalModel {
   }
 
   @Override
-  public ImmutableSet<Error> getTriggeredErrorsForCollection(Collection<Fix> fixTree) {
-    return ImmutableSet.of();
-  }
-
-  @Override
   public boolean isUnknown(Fix fix) {
     return true;
   }
 
   @Override
-  public Set<Error> getTriggeredErrors(Fix fix) {
-    return Set.of();
+  public ImmutableSet<Error> getTriggeredErrors(Fix fix) {
+    return ImmutableSet.of();
   }
 
   @Override
-  public void updateImpactsAfterInjection(Set<Fix> fixes) {
+  public void updateImpactsAfterInjection(Collection<Fix> fixes) {
     // No operation needed.
+  }
+
+  @Nullable
+  @Override
+  public MethodImpact fetchImpact(Fix fix) {
+    return null;
+  }
+
+  @Override
+  public ImmutableSet<Error> getTriggeredErrorsForCollection(Collection<Fix> fixes) {
+    return ImmutableSet.of();
   }
 
   @Override

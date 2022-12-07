@@ -24,11 +24,8 @@
 
 package edu.ucr.cs.riple.core.global;
 
-import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.model.Model;
-import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -40,7 +37,7 @@ import java.util.Set;
  * effect (number of additional errors) of each such change, by summing across all downstream
  * dependencies. This data then be fed to the Annotator main process in the decision process.
  */
-public interface GlobalModel extends Model {
+public interface GlobalModel extends Model<MethodImpact> {
 
   /** Analyzes effects of changes in public methods in downstream dependencies. */
   void analyzeDownstreamDependencies();
@@ -62,15 +59,6 @@ public interface GlobalModel extends Model {
    * @return Upper bound of number of errors on downstream dependencies.
    */
   int computeUpperBoundOfNumberOfErrors(Set<Fix> tree);
-
-  /**
-   * Returns set of parameters that will receive {@code @Nullable}, if any of the methods in the
-   * fixTree are annotated as {@code @Nullable}.
-   *
-   * @param collection Fix collection.
-   * @return Immutable set of impacted parameters.
-   */
-  ImmutableSet<Error> getTriggeredErrorsForCollection(Collection<Fix> collection);
 
   /**
    * Checks if fix triggers any unresolvable error in downstream dependencies. Unresolvable errors

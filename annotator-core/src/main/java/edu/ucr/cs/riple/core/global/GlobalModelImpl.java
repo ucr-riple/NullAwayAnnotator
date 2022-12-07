@@ -42,12 +42,9 @@ import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 /** Implementation for {@link GlobalModel} interface. */
@@ -128,12 +125,13 @@ public class GlobalModelImpl extends StaticModel<MethodImpact> implements Global
    * @return Corresponding {@link MethodImpact}, null if not located.
    */
   @Nullable
-  private MethodImpact fetchMethodImpactForFix(Fix fix) {
+  @Override
+  public MethodImpact fetchImpact(Fix fix) {
     if (!fix.isOnMethod()) {
+      // we currently store only impacts of fixes for methods on downstream dependencies.
       return null;
     }
-    OnMethod onMethod = fix.toMethod();
-    return this.store.getOrDefault(onMethod, null);
+    return super.fetchImpact(fix);
   }
 
   /**
@@ -144,7 +142,7 @@ public class GlobalModelImpl extends StaticModel<MethodImpact> implements Global
    * @return Effect on downstream dependencies.
    */
   private int effectOnDownstreamDependencies(Fix fix, Set<Fix> fixTree) {
-    MethodImpact methodImpact = fetchMethodImpactForFix(fix);
+    MethodImpact methodImpact = fetchImpact(fix);
     if (methodImpact == null) {
       return 0;
     }
@@ -169,41 +167,6 @@ public class GlobalModelImpl extends StaticModel<MethodImpact> implements Global
   @Override
   public int computeUpperBoundOfNumberOfErrors(Set<Fix> tree) {
     return tree.stream().mapToInt(fix -> effectOnDownstreamDependencies(fix, tree)).sum();
-  }
-
-  @Override
-  public ImmutableSet<Error> getTriggeredErrorsForCollection(Collection<Fix> fixTree) {
-    return fixTree.stream()
-        .filter(Fix::isOnMethod)
-        .flatMap(
-            fix -> {
-              MethodImpact impact = fetchMethodImpactForFix(fix);
-              return impact == null ? Stream.of() : impact.getTriggeredErrors().stream();
-            })
-        .collect(ImmutableSet.toImmutableSet());
-  }
-
-  @Override
-  public boolean isUnknown(Fix fix) {
-    return store.containsKey(fix.toLocation());
-  }
-
-  @Override
-  public Set<Error> getTriggeredErrors(Fix fix) {
-    // We currently only store impact of methods on downstream dependencies.
-    if (!fix.isOnMethod()) {
-      return Collections.emptySet();
-    }
-    MethodImpact impact = fetchMethodImpactForFix(fix);
-    if (impact == null) {
-      return Collections.emptySet();
-    }
-    return impact.getTriggeredErrors();
-  }
-
-  @Override
-  public void updateImpactsAfterInjection(Set<Fix> fixes) {
-    this.store.values().forEach(methodImpact -> methodImpact.updateStatusAfterInjection(fixes));
   }
 
   @Override

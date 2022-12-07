@@ -28,13 +28,9 @@ import com.google.common.collect.ImmutableMap;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.injector.location.Location;
 
-public abstract class StaticModel<T extends Impact> implements Model {
+public class StaticModel<T extends Impact> extends BaseModel<T, ImmutableMap<Location, T>> {
 
-  protected final ImmutableMap<Location, T> store;
-  protected final Config config;
-
-  protected StaticModel(Config config, ImmutableMap<Location, T> store) {
-    this.store = store;
-    this.config = config;
+  public StaticModel(Config config, ImmutableMap<Location, T> store) {
+    super(config, store);
   }
 }
