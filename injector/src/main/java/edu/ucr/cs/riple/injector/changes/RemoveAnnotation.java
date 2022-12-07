@@ -65,6 +65,7 @@ public class RemoveAnnotation extends Change {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public JSONObject getJson() {
     JSONObject res = super.getJson();
     res.put("INJECT", false);

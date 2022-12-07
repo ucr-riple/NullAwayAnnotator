@@ -48,6 +48,8 @@ subprojects { proj ->
     proj.dependencies {
         errorprone deps.build.errorProneCore
         errorproneJavac deps.build.errorProneJavac
+        // just to pass wierd javac builds.
+        compileOnly 'com.google.errorprone:error_prone_core:2.4.0'
         if(proj.name != "ban-mutable-static"){
             annotationProcessor project(":checks:ban-mutable-static")
         }
@@ -66,6 +68,7 @@ subprojects { proj ->
                 }
             }
         }
+        options.compilerArgs += '-Werror'
     }
 
     repositories {

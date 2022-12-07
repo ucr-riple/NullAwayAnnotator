@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.scanner;
 
-import static com.google.errorprone.BugPattern.SeverityLevel.SUGGESTION;
+import static com.google.errorprone.BugPattern.SeverityLevel.ERROR;
 
 import com.google.auto.service.AutoService;
 import com.google.errorprone.BugPattern;
@@ -53,7 +53,7 @@ import javax.lang.model.element.ElementKind;
     altNames = {"TypeBasedStructureSerializer"},
     summary = "Serializes type-based metadata regarding code structure.",
     tags = BugPattern.StandardTags.STYLE,
-    severity = SUGGESTION)
+    severity = ERROR)
 @SuppressWarnings("BugPatternNaming")
 public class AnnotatorScanner extends BugChecker
     implements BugChecker.MethodInvocationTreeMatcher,

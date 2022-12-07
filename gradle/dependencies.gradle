@@ -57,6 +57,7 @@ def build = [
         javaparser              : "com.github.javaparser:javaparser-core:${versions.javaparser}",
         commonscli              : "commons-cli:commons-cli:${versions.cli}",
         commonsio               : "commons-io:commons-io:${versions.commonsio}",
+        errorProneCoreOld       : "com.google.errorprone:error_prone_core:${oldestErrorProneApi}",
         errorProneCore          : "com.google.errorprone:error_prone_core:${versions.errorProne}",
         errorProneJavac         : "com.google.errorprone:javac:9+181-r4173-1",
         errorProneCheckApi      : "com.google.errorprone:error_prone_check_api:${versions.errorProneApi}",
