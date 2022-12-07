@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Collection;
 import java.util.Map;
@@ -14,10 +15,12 @@ public abstract class BaseModel<T extends Impact, S extends Map<Location, T>> im
 
   protected final S store;
   protected final Config config;
+  protected final MethodDeclarationTree tree;
 
-  public BaseModel(Config config, S store) {
+  public BaseModel(Config config, S store, MethodDeclarationTree tree) {
     this.store = store;
     this.config = config;
+    this.tree = tree;
   }
 
   @Override
@@ -51,5 +54,10 @@ public abstract class BaseModel<T extends Impact, S extends Map<Location, T>> im
   @Override
   public void updateImpactsAfterInjection(Collection<Fix> fixes) {
     this.store.values().forEach(methodImpact -> methodImpact.updateStatusAfterInjection(fixes));
+  }
+
+  @Override
+  public boolean triggeresUnresolvableErrors(Fix fix) {
+    return getTriggeredErrors(fix).stream().anyMatch(error -> !error.isFixableOnTarget(tree));
   }
 }

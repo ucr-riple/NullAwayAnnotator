@@ -80,7 +80,7 @@ public class NoOpGlobalModel implements GlobalModel {
   }
 
   @Override
-  public boolean isNotFixableOnTarget(Fix fix) {
+  public boolean triggeresUnresolvableErrors(Fix fix) {
     return false;
   }
 }

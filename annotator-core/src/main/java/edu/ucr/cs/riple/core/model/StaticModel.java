@@ -26,11 +26,12 @@ package edu.ucr.cs.riple.core.model;
 
 import com.google.common.collect.ImmutableMap;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.injector.location.Location;
 
 public class StaticModel<T extends Impact> extends BaseModel<T, ImmutableMap<Location, T>> {
 
-  public StaticModel(Config config, ImmutableMap<Location, T> store) {
-    super(config, store);
+  public StaticModel(Config config, ImmutableMap<Location, T> store, MethodDeclarationTree tree) {
+    super(config, store, tree);
   }
 }

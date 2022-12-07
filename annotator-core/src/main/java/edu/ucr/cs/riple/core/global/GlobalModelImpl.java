@@ -52,8 +52,6 @@ public class GlobalModelImpl extends StaticModel<MethodImpact> implements Global
 
   /** Set of downstream dependencies. */
   private final ImmutableSet<ModuleInfo> downstreamModules;
-  /** Method declaration tree instance. */
-  private final MethodDeclarationTree tree;
 
   public GlobalModelImpl(Config config, MethodDeclarationTree tree) {
     super(
@@ -67,9 +65,9 @@ public class GlobalModelImpl extends StaticModel<MethodImpact> implements Global
                             null,
                             null,
                             true)))
-            .collect(toImmutableMap(Impact::toLocation, Function.identity())));
+            .collect(toImmutableMap(Impact::toLocation, Function.identity())),
+        tree);
     this.downstreamModules = config.downstreamInfo;
-    this.tree = tree;
   }
 
   @Override
@@ -167,14 +165,5 @@ public class GlobalModelImpl extends StaticModel<MethodImpact> implements Global
   @Override
   public int computeUpperBoundOfNumberOfErrors(Set<Fix> tree) {
     return tree.stream().mapToInt(fix -> effectOnDownstreamDependencies(fix, tree)).sum();
-  }
-
-  @Override
-  public boolean isNotFixableOnTarget(Fix fix) {
-    // For unresolvable errors, nonnullTarget is initialized with location instance which all fields
-    // are initialized to "null" string value. declaredInModule method in methodDeclarationTree
-    // will return false for these locations. Hence, both the existence of fix and fix targeting an
-    // element in target module is covered.
-    return getTriggeredErrors(fix).stream().anyMatch(error -> !error.isFixableOnTarget(tree));
   }
 }

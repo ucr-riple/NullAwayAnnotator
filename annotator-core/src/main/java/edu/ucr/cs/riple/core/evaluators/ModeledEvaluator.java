@@ -36,7 +36,7 @@ public class ModeledEvaluator extends AbstractEvaluator {
 
   public ModeledEvaluator(Supplier supplier) {
     super(supplier);
-    this.model = new DynamicModel<>(supplier.getConfig());
+    this.model = new DynamicModel<>(supplier.getConfig(), supplier.getMethodDeclarationTree());
   }
 
   @Override

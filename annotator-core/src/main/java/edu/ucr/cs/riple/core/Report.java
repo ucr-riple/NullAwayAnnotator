@@ -94,12 +94,12 @@ public class Report {
    * Checks if any of the fix in tree, will trigger an unresolvable error in downstream
    * dependencies.
    *
-   * @param analyzer Analyzer to check impact of method.
+   * @param model Model to check impact of method.
    * @return true, if report contains a fix which will trigger an unresolvable error in downstream
    *     dependency.
    */
-  public boolean containsDestructiveMethod(GlobalModel analyzer) {
-    return this.tree.stream().anyMatch(analyzer::isNotFixableOnTarget);
+  public boolean containsDestructiveMethod(GlobalModel model) {
+    return this.tree.stream().anyMatch(model::triggeresUnresolvableErrors);
   }
 
   /**

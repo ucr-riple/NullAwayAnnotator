@@ -59,14 +59,4 @@ public interface GlobalModel extends Model<MethodImpact> {
    * @return Upper bound of number of errors on downstream dependencies.
    */
   int computeUpperBoundOfNumberOfErrors(Set<Fix> tree);
-
-  /**
-   * Checks if fix triggers any unresolvable error in downstream dependencies. Unresolvable errors
-   * are errors that either no annotation can resolve them, or the corresponding fix is targeting an
-   * element outside the target module.
-   *
-   * @param fix Fix to apply
-   * @return true if the method triggers an unresolvable error in downstream dependencies.
-   */
-  boolean isNotFixableOnTarget(Fix fix);
 }

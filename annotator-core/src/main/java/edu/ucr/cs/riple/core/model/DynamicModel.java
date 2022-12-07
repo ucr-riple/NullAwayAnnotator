@@ -25,14 +25,15 @@
 package edu.ucr.cs.riple.core.model;
 
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Collection;
 import java.util.HashMap;
 
 public class DynamicModel<T extends Impact> extends BaseModel<T, HashMap<Location, T>> {
 
-  public DynamicModel(Config config) {
-    super(config, new HashMap<>());
+  public DynamicModel(Config config, MethodDeclarationTree tree) {
+    super(config, new HashMap<>(), tree);
   }
 
   public void updateModelStore(Collection<T> newData) {
