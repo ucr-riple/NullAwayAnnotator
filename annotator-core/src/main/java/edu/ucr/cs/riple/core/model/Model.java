@@ -30,6 +30,12 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.util.Collection;
 import javax.annotation.Nullable;
 
+/**
+ * Interface for models. Models can store impacts of a fix and compute impact of injections of a
+ * collection of fixes applied together.
+ *
+ * @param <T> the type of saved impacts in this store.
+ */
 public interface Model<T extends Impact> {
 
   boolean isUnknown(Fix fix);

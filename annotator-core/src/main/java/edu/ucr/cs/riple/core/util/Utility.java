@@ -189,7 +189,9 @@ public class Utility {
             fix -> {
               if (fixToFixMap.containsKey(fix)) {
                 fixToFixMap.get(fix).reasons.addAll(fix.reasons);
+                fixToFixMap.get(fix).count++;
               } else {
+                fix.count = 1;
                 fixToFixMap.put(fix, fix);
               }
             });

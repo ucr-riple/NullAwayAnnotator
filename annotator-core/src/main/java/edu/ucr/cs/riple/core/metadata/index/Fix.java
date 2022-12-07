@@ -55,11 +55,15 @@ public class Fix extends Enclosed {
    */
   public boolean fixSourceIsInTarget;
 
+  /** Number of times this fixes is suggested. */
+  public int count;
+
   public Fix(AddAnnotation change, String reason, Region region, boolean fixSourceIsInTarget) {
     super(region);
     this.change = change;
     this.reasons = reason != null ? Sets.newHashSet(reason) : new HashSet<>();
     this.fixSourceIsInTarget = fixSourceIsInTarget;
+    this.count = 1;
   }
 
   /**

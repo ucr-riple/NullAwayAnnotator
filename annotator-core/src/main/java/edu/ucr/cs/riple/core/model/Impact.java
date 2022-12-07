@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/** Stores the set of errors which will be triggered if the containing fix is applied. */
 public class Impact {
 
   /** Target fix. */

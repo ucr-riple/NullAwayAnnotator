@@ -30,12 +30,22 @@ import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Collection;
 import java.util.HashMap;
 
+/**
+ * Dynamic Model is a model that can update it's content with new given information.
+ *
+ * @param <T> type of impacts saved in this model.
+ */
 public class DynamicModel<T extends Impact> extends BaseModel<T, HashMap<Location, T>> {
 
   public DynamicModel(Config config, MethodDeclarationTree tree) {
     super(config, new HashMap<>(), tree);
   }
 
+  /**
+   * Updates the store with new given information.
+   *
+   * @param newData New given impacts.
+   */
   public void updateModelStore(Collection<T> newData) {
     newData.forEach(t -> store.put(t.toLocation(), t));
   }

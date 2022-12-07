@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.global;
 
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
@@ -36,10 +37,11 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.core.model.BaseModel;
 import edu.ucr.cs.riple.core.model.Impact;
-import edu.ucr.cs.riple.core.model.StaticModel;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
+import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.OptionalInt;
@@ -48,7 +50,8 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 
 /** Implementation for {@link GlobalModel} interface. */
-public class GlobalModelImpl extends StaticModel<MethodImpact> implements GlobalModel {
+public class GlobalModelImpl extends BaseModel<MethodImpact, ImmutableMap<Location, MethodImpact>>
+    implements GlobalModel {
 
   /** Set of downstream dependencies. */
   private final ImmutableSet<ModuleInfo> downstreamModules;
