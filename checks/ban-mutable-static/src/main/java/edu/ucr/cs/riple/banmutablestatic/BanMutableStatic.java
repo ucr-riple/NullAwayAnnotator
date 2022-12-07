@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.banmutablestatic;
 
-import static com.google.errorprone.BugPattern.SeverityLevel.ERROR;
+import static com.google.errorprone.BugPattern.SeverityLevel.SUGGESTION;
 
 import com.google.auto.service.AutoService;
 import com.google.errorprone.BugPattern;
@@ -46,7 +46,7 @@ import javax.lang.model.element.Modifier;
     altNames = {"BansMutableStaticFields"},
     summary = "Bans mutable static field declaration",
     tags = BugPattern.StandardTags.STYLE,
-    severity = ERROR)
+    severity = SUGGESTION)
 @SuppressWarnings("BugPatternNaming")
 public class BanMutableStatic extends BugChecker implements BugChecker.VariableTreeMatcher {
 
