@@ -125,7 +125,7 @@ public class Annotator {
 
   /** Performs iterations of inference/injection until no unseen fix is suggested. */
   private void annotate() {
-    // globalAnalyzer analyzes effects of all public APIs on downstream dependencies.
+    // Global model stores effects of all public APIs on downstream dependencies.
     // Through iterations, since the source code for downstream dependencies does not change and the
     // computation does not depend on the changes in the target module, it will compute the same
     // result in each iteration, therefore we perform the analysis only once and reuse it in each
@@ -164,7 +164,7 @@ public class Annotator {
   /**
    * Performs single iteration of inference/injection.
    *
-   * @param globalModel Global analyzer instance to detect impact of fixes outside of target module.
+   * @param globalModel Global model instance to retrieve impact of fixes outside of target module.
    *     multiple field declaration statements.
    */
   private void executeNextIteration(GlobalModel globalModel) {

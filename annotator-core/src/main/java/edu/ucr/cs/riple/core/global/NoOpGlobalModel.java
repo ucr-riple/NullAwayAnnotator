@@ -32,9 +32,9 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 /**
- * This global analyzer does not have any information regarding the impact of changes in target
- * module in dependencies, the main purpose of this class is to avoid initializing GlobalAnalyzer
- * instances to {@code null} when impact on dependencies is not considered.
+ * This global model does not have any information regarding the impact of changes in target module
+ * in dependencies, the main purpose of this class is to avoid initializing GlobalAnalyzer instances
+ * to {@code null} when impact on dependencies is not considered.
  */
 public class NoOpGlobalModel implements GlobalModel {
 
@@ -80,7 +80,7 @@ public class NoOpGlobalModel implements GlobalModel {
   }
 
   @Override
-  public boolean triggeresUnresolvableErrors(Fix fix) {
+  public boolean triggersUnresolvableErrors(Fix fix) {
     return false;
   }
 }

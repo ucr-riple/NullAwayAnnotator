@@ -74,5 +74,5 @@ public interface Model<T extends Impact> {
    * @param fix Fix to apply
    * @return true if the method triggers an unresolvable error.
    */
-  boolean triggeresUnresolvableErrors(Fix fix);
+  boolean triggersUnresolvableErrors(Fix fix);
 }

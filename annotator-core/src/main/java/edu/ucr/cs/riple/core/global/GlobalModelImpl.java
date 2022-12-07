@@ -99,15 +99,15 @@ public class GlobalModelImpl extends StaticModel<MethodImpact> implements Global
                         new Region("null", "null"),
                         false))
             .collect(ImmutableSet.toImmutableSet());
-    DownstreamImpactEvaluator analyzer =
+    DownstreamImpactEvaluator evaluator =
         new DownstreamImpactEvaluator(new DownstreamDependencySupplier(config, tracker, tree));
-    ImmutableSet<Report> reports = analyzer.evaluate(fixes);
+    ImmutableSet<Report> reports = evaluator.evaluate(fixes);
     // Update method status based on the results.
     this.store
         .values()
         .forEach(
             method -> {
-              Set<OnParameter> impactedParameters = analyzer.getImpactedParameters(method.fix);
+              Set<OnParameter> impactedParameters = evaluator.getImpactedParameters(method.fix);
               reports.stream()
                   .filter(input -> input.root.toMethod().equals(method.toMethod()))
                   .findAny()

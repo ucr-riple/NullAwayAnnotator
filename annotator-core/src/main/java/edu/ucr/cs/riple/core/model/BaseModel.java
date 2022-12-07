@@ -57,7 +57,7 @@ public abstract class BaseModel<T extends Impact, S extends Map<Location, T>> im
   }
 
   @Override
-  public boolean triggeresUnresolvableErrors(Fix fix) {
+  public boolean triggersUnresolvableErrors(Fix fix) {
     return getTriggeredErrors(fix).stream().anyMatch(error -> !error.isFixableOnTarget(tree));
   }
 }

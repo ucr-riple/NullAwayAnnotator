@@ -99,7 +99,7 @@ public class Report {
    *     dependency.
    */
   public boolean containsDestructiveMethod(GlobalModel model) {
-    return this.tree.stream().anyMatch(model::triggeresUnresolvableErrors);
+    return this.tree.stream().anyMatch(model::triggersUnresolvableErrors);
   }
 
   /**
@@ -190,13 +190,13 @@ public class Report {
    * Computes the boundaries of effectiveness of applying the fix tree to target module on
    * downstream dependencies.
    *
-   * @param analyzer Downstream dependency analyzer instance.
+   * @param globalModel Global model instance.
    */
-  public void computeBoundariesOfEffectivenessOnDownstreamDependencies(GlobalModel analyzer) {
+  public void computeBoundariesOfEffectivenessOnDownstreamDependencies(GlobalModel globalModel) {
     this.lowerBoundEffectOnDownstreamDependencies =
-        analyzer.computeLowerBoundOfNumberOfErrors(tree);
+        globalModel.computeLowerBoundOfNumberOfErrors(tree);
     this.upperBoundEffectOnDownstreamDependencies =
-        analyzer.computeUpperBoundOfNumberOfErrors(tree);
+        globalModel.computeUpperBoundOfNumberOfErrors(tree);
   }
 
   /**

@@ -47,7 +47,7 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
   protected final AnnotationInjector injector;
   /** Error bank instance to store state of fixes before and after of injections. */
   protected final Bank<Error> errorBank;
-  /** Global analyzer to retrieve impacts of fixes globally. */
+  /** Global model to retrieve impacts of fixes globally. */
   protected final GlobalModel globalModel;
   /** Annotator config. */
   protected final Config config;
@@ -59,7 +59,7 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
     this.methodDeclarationTree = supplier.getMethodDeclarationTree();
     this.injector = supplier.getInjector();
     this.errorBank = supplier.getErrorBank();
-    this.globalModel = supplier.getGlobalAnalyzer();
+    this.globalModel = supplier.getGlobalModel();
     this.compilerRunner = runner;
   }
 

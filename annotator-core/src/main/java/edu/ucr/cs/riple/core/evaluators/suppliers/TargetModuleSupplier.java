@@ -55,7 +55,7 @@ public class TargetModuleSupplier extends AbstractSupplier {
    * Constructor for target module supplier instance.
    *
    * @param config Annotator config instance.
-   * @param globalModel Global analyzer instance.
+   * @param globalModel Global model instance.
    * @param tree Method declaration tree for methods in target module.
    */
   public TargetModuleSupplier(Config config, GlobalModel globalModel, MethodDeclarationTree tree) {
@@ -74,7 +74,7 @@ public class TargetModuleSupplier extends AbstractSupplier {
   }
 
   @Override
-  public GlobalModel getGlobalAnalyzer() {
+  public GlobalModel getGlobalModel() {
     return globalModel;
   }
 

@@ -67,7 +67,7 @@ public class DownstreamDependencySupplier extends AbstractSupplier {
   }
 
   @Override
-  public GlobalModel getGlobalAnalyzer() {
+  public GlobalModel getGlobalModel() {
     return new NoOpGlobalModel();
   }
 

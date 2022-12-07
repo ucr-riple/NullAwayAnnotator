@@ -74,9 +74,9 @@ public interface Supplier {
   /**
    * Getter for {@link GlobalModel} instance.
    *
-   * @return GlobalAnalyzer instance.
+   * @return Global model instance.
    */
-  GlobalModel getGlobalAnalyzer();
+  GlobalModel getGlobalModel();
 
   /**
    * Getter for {@link ConflictGraphProcessor}.
