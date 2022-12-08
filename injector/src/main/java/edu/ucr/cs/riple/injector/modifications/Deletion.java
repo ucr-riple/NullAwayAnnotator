@@ -27,7 +27,6 @@ package edu.ucr.cs.riple.injector.modifications;
 import com.github.javaparser.Position;
 import com.google.common.base.Preconditions;
 import java.util.List;
-import javax.lang.model.element.ElementKind;
 
 /** Represents a deletion of a content in the source file. */
 public class Deletion extends Modification {
@@ -35,8 +34,8 @@ public class Deletion extends Modification {
   /** The end position of content which should be removed. */
   private final Position endPosition;
 
-  public Deletion(String content, Position startPosition, Position endPosition, ElementKind kind) {
-    super(content, startPosition, kind);
+  public Deletion(String content, Position startPosition, Position endPosition) {
+    super(content, startPosition);
     // Position in javaparser is not 0 indexed and line and column fields are final.
     this.endPosition = new Position(endPosition.line - 1, endPosition.column - 1);
   }

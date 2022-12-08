@@ -86,7 +86,7 @@ public class Printer {
       return;
     }
     int line = findStartOffsetForImports(tree);
-    imports.forEach(importDec -> lines.add(line, importDec.toString()));
+    imports.forEach(importDec -> lines.add(line, importDec.toString().strip()));
   }
 
   /**
