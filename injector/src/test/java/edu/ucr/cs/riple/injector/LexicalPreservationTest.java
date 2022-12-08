@@ -259,7 +259,7 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "public class Super {",
             "   @Nullable",
             "   Object test() {",
-            "       init(this.new NodeVisitor(), this.new EdgeVisitor());",
+            "       init(this.new NodeVisitor(), this.new EdgeVisitor());\n",
             "       return foo(this.new Bar(), this.new Foo(), getBuilder().new Foo());",
             "   }",
             "   Object foo(Bar b, Foo f) {",

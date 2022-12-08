@@ -93,7 +93,7 @@ public class Printer {
     imports.forEach(
         importDec -> {
           offsetStore.updateOffsetWithNewLineAddition(line, importDec.toString().length());
-          lines.add(line, importDec.toString());
+          lines.add(line, importDec.toString().strip());
         });
   }
 
