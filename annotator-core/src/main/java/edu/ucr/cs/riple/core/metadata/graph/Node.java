@@ -101,6 +101,11 @@ public class Node {
             error -> error.isSingleFix() && error.toResolvingLocation().equals(root.toLocation()));
   }
 
+  /** Clears origin set. */
+  public void clearOrigins() {
+    this.origins = Set.of();
+  }
+
   /**
    * It clears the set of regions and will recalculate the potentially impacted regions. Potentially
    * impacted regions are mentioned below:

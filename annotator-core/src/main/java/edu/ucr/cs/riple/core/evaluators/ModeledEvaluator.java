@@ -27,11 +27,13 @@ package edu.ucr.cs.riple.core.evaluators;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
+import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.model.DynamicModel;
 import edu.ucr.cs.riple.core.model.Impact;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /** This evaluator uses modeling techniques to compute effect of applying a fix tree. */
@@ -67,9 +69,16 @@ public class ModeledEvaluator extends AbstractEvaluator {
     super.initializeFixGraph(reports);
     // add only fixes that are not stored in model.
     reports.stream()
-        .filter(report -> !report.isInProgress(config))
+        .filter(report -> report.isInProgress(config))
         .flatMap(report -> report.tree.stream())
         .filter(model::isUnknown)
-        .forEach(graph::addNodeToVertices);
+        .forEach(
+            new Consumer<Fix>() {
+              @Override
+              public void accept(Fix fix) {
+                Node node = graph.addNodeToVertices(fix);
+                node.clearOrigins();
+              }
+            });
   }
 }
