@@ -1,4 +1,5 @@
 package injector;
+
 public class Main {
 
   public void foo1() {
