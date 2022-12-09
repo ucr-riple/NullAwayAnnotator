@@ -53,7 +53,8 @@ public class Deletion extends Modification {
     int head = start - 1;
     // if head is not alphanumeric and is followed by a whitespace, remove it.
     // (@Nullable Type param) -> (Type param)
-    if (head + 1 < line.length()
+    if (head > 0
+        && head + 1 < line.length()
         && !Character.isJavaIdentifierPart(line.charAt(head))
         && line.charAt(head + 1) == ' ') {
       // remove extra white space
