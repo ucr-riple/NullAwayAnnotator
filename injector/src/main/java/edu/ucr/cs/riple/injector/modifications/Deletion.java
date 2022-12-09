@@ -43,33 +43,15 @@ public class Deletion extends Modification {
 
   @Override
   public void visit(List<String> lines, FileOffsetStore offsetStore) {
-    int start = startPosition.column;
-    int end = endPosition.column;
+    // all deletion logic below is written based on the fact that Injector only removes annotations
+    // it added itself, therefore it does not cover all cases. All added annotations are inserted in
+    // a single line and are followed by a space.
     Preconditions.checkArgument(
         startPosition.line == endPosition.line,
         "Cannot delete annotations that are written in multiple lines");
-    String original = lines.get(startPosition.line);
-    StringBuilder line = new StringBuilder(original);
-    line.delete(start, end + 1);
-    // char at start is removed, head is one character before start.
-    int head = start - 1;
-    // if head is not alphanumeric and is followed by a whitespace, remove it.
-    // (@Nullable Type param) -> (Type param)
-    if (head > 0
-        && head + 1 < line.length()
-        && !Character.isJavaIdentifierPart(line.charAt(head))
-        && line.charAt(head + 1) == ' ') {
-      // remove extra white space
-      line.deleteCharAt(head + 1);
-    }
-    String removed = line.toString();
-    if (removed.strip().equals("")) {
-      offsetStore.updateOffsetWithLineDeletion(startPosition.line);
-      lines.remove(startPosition.line);
-      return;
-    }
-    offsetStore.updateOffsetWithDeletion(
-        startPosition.line, startPosition.column, original.length() - removed.length());
-    lines.set(startPosition.line, removed);
+    StringBuilder line = new StringBuilder(lines.get(startPosition.line));
+    // add extra 1 for the added white space.
+    line.delete(startPosition.column, endPosition.column + 2);
+    lines.set(startPosition.line, line.toString());
   }
 }
