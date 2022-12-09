@@ -45,8 +45,7 @@ public class Main {
 
               public Object inner() {
                 Comp c = new Comp() { // injector.Main$1$2$1
-                      @Nullable
-                      Object f4;
+                      @Nullable Object f4;
 
                       @Override
                       public Object compare() {

@@ -14,8 +14,7 @@ public class Main {
 
   public void foo() {
     class Helper {
-      @Nullable
-      Object f2;
+      @Nullable Object f2;
     }
   }
 }
