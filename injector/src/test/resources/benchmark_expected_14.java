@@ -92,7 +92,8 @@ public class Main {
                 class Helper { // injector.Main$1$2$1Helper
                   Object f11;
                   final Comp c = new Comp() { // injector.Main$1$2$1Helper$1
-                        @Nullable Object f12;
+                        @Nullable
+                        Object f12;
 
                         @Override
                         public Object compare() {

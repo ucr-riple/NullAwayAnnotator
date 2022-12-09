@@ -113,7 +113,8 @@ public class Main {
       };
 
   Run c1 = new Run() { // injector.Main$2
-        @Nullable Object f13;
+        @Nullable
+        Object f13;
 
         @Override
         public Object exec(@Nullable Object o) {

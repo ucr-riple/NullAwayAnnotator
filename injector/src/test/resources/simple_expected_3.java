@@ -1,5 +1,4 @@
 package injector;
-
 import javax.annotation.Nullable;
 
 public class Main {
@@ -16,7 +15,8 @@ public class Main {
 
   public void foo() {
     class Helper {
-      @Nullable Object f2;
+      @Nullable
+      Object f2;
     }
   }
 }

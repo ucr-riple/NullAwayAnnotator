@@ -44,4 +44,6 @@ compileJava.mustRunAfter verifyGoogleJavaFormat
 googleJavaFormat {
     // don't enforce formatting for generated Java code under buildSrc
     exclude 'tests/**/*.java'
+    // tests expected output does not conform to google java format rules.
+    exclude '**/test/resources/**/*.java'
 }
