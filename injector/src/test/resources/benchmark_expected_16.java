@@ -123,7 +123,8 @@ public class Main {
 
   public void foo() {
     class Helper { // injector.Main$1Helper
-      @Nullable Object f14;
+      @Nullable
+      Object f14;
 
       class InnerHelper { // injector.Main$1Helper$InnerHelper
         Object f15;

@@ -151,7 +151,8 @@ public class Main {
 
     executeRunner(
         new Run() { // injector.Main$3
-          @Nullable Object f17;
+          @Nullable
+          Object f17;
 
           @Override
           public Object exec(@Nullable Object o) {
