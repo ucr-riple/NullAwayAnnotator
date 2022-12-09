@@ -162,7 +162,7 @@ public class RemovalTest extends BaseInjectorTest {
             "package edu.ucr;",
             "import edu.custom.Annot;",
             "public class Test {",
-            "   public@Annot Object test() {",
+            "   public @Annot Object test() {",
             "   }",
             "}")
         .expectOutput(
@@ -187,7 +187,7 @@ public class RemovalTest extends BaseInjectorTest {
             "import javax.annotation.Nullable;",
             "import com.customAnnot.AnnotationWithNonAlphanumericSuffix$$$$_;",
             "public class Test {",
-            "   public void foo(@AnnotationWithNonAlphanumericSuffix$$$$_@Nullable Object o) { }",
+            "   public void foo(@AnnotationWithNonAlphanumericSuffix$$$$_ @Nullable Object o) { }",
             "}")
         .expectOutput(
             "package edu.ucr;",

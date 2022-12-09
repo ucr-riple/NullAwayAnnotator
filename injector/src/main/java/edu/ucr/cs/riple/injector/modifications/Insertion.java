@@ -36,11 +36,12 @@ public class Insertion extends Modification {
 
   @Override
   public void visit(List<String> lines) {
-    String toInsert;
     String line = lines.get(startPosition.line);
-    toInsert = this.content + " ";
     lines.set(
         startPosition.line,
-        line.substring(0, startPosition.column) + toInsert + line.substring(startPosition.column));
+        line.substring(0, startPosition.column)
+            + this.content
+            + " "
+            + line.substring(startPosition.column));
   }
 }
