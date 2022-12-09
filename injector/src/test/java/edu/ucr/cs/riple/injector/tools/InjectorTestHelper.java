@@ -58,6 +58,7 @@ public class InjectorTestHelper {
 
   public InjectorTestHelperOutput addInputSourceFile(String path, String inputFilePath) {
     writeToFile(pathOf(rootPath.resolve("src"), path), readLinesOfFileFromResource(inputFilePath));
+    files.add(path);
     return new InjectorTestHelperOutput(this, rootPath, path);
   }
 
@@ -87,7 +88,7 @@ public class InjectorTestHelper {
         String expected =
             FileUtils.readFileToString(
                 pathOf(rootPath.resolve("expected"), key).toFile(), Charset.defaultCharset());
-        if (!found.equals(expected)) {
+        if (!expected.equals(found)) {
           fail("Expected:\n" + expected + "\nBut found:\n" + found);
         }
       } catch (IOException e) {

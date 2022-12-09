@@ -38,7 +38,6 @@ import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.modifications.Replacement;
 import java.util.Optional;
 import javax.annotation.Nullable;
-import javax.lang.model.element.ElementKind;
 
 /**
  * Used to add <a
@@ -68,7 +67,7 @@ public class AddSingleElementAnnotation extends AddAnnotation {
 
   @Override
   @Nullable
-  public Modification visit(ElementKind kind, NodeWithAnnotations<?> node, Range range) {
+  public Modification visit(NodeWithAnnotations<?> node, Range range) {
 
     StringLiteralExpr argumentExp = new StringLiteralExpr(argument);
     // Check all existing annotations with arguments.
@@ -98,12 +97,12 @@ public class AddSingleElementAnnotation extends AddAnnotation {
         node.getAnnotationByName(annotationSimpleName);
     if (annotationWithSameNameExists.isEmpty()) {
       // No annotation with this name exists, add it directly.
-      return addAnnotationExpressionOnNode(kind, argumentExp, range);
+      return addAnnotationExpressionOnNode(argumentExp, range);
     }
 
     // Annotation with the same name exists, but the annotation is repeatable, add it directly.
     if (repeatable) {
-      return addAnnotationExpressionOnNode(kind, argumentExp, range);
+      return addAnnotationExpressionOnNode(argumentExp, range);
     }
 
     // Annotation with the same name exists and is not repeatable, update it.
@@ -137,7 +136,7 @@ public class AddSingleElementAnnotation extends AddAnnotation {
     updatedMemberValue.setValues(nodeList);
     singleMemberAnnotationExpr.setMemberValue(updatedMemberValue);
     return new Replacement(
-        singleMemberAnnotationExpr.toString(), annotRange.get().begin, annotRange.get().end, kind);
+        singleMemberAnnotationExpr.toString(), annotRange.get().begin, annotRange.get().end);
   }
 
   @Override
@@ -152,10 +151,9 @@ public class AddSingleElementAnnotation extends AddAnnotation {
    * @param argument Argument expression.
    * @return A text modification instance.
    */
-  private Insertion addAnnotationExpressionOnNode(
-      ElementKind kind, Expression argument, Range range) {
+  private Insertion addAnnotationExpressionOnNode(Expression argument, Range range) {
     AnnotationExpr annotationExpr =
         new SingleMemberAnnotationExpr(new Name(annotationSimpleName), argument);
-    return new Insertion(annotationExpr.toString(), range.begin, kind);
+    return new Insertion(annotationExpr.toString(), range.begin);
   }
 }

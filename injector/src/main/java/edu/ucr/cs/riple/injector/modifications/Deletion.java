@@ -28,7 +28,6 @@ import com.github.javaparser.Position;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.util.List;
-import javax.lang.model.element.ElementKind;
 
 /** Represents a deletion of a content in the source file. */
 public class Deletion extends Modification {
@@ -36,8 +35,8 @@ public class Deletion extends Modification {
   /** The end position of content which should be removed. */
   private final Position endPosition;
 
-  public Deletion(String content, Position startPosition, Position endPosition, ElementKind kind) {
-    super(content, startPosition, kind);
+  public Deletion(String content, Position startPosition, Position endPosition) {
+    super(content, startPosition);
     // Position in javaparser is not 0 indexed and line and column fields are final.
     this.endPosition = new Position(endPosition.line - 1, endPosition.column - 1);
   }
@@ -56,7 +55,8 @@ public class Deletion extends Modification {
     int head = start - 1;
     // if head is not alphanumeric and is followed by a whitespace, remove it.
     // (@Nullable Type param) -> (Type param)
-    if (head + 1 < line.length()
+    if (head > 0
+        && head + 1 < line.length()
         && !Character.isJavaIdentifierPart(line.charAt(head))
         && line.charAt(head + 1) == ' ') {
       // remove extra white space
