@@ -172,7 +172,8 @@ public class Main {
 
   public void foo2() {
     class Helper { // injector.Main$3Helper
-      @Nullable Object f19;
+      @Nullable
+      Object f19;
 
       Object bar(boolean b) {
         return null;

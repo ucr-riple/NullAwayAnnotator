@@ -25,7 +25,8 @@ public class Main {
   }
 
   Run c = new Run() { // injector.Main$1
-        @Nullable Object f1;
+        @Nullable
+        Object f1;
         final Comp outerComp = new Comp() { // injector.Main$1$1
               Object f2;
 

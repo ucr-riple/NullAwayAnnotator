@@ -138,7 +138,8 @@ public class Main {
           return null;
         } else {
           return new Comp() { // injector.Main$1Helper$1
-            @Nullable Object f16;
+            @Nullable
+            Object f16;
 
             @Override
             public Object compare() {
