@@ -44,6 +44,6 @@ compileJava.mustRunAfter verifyGoogleJavaFormat
 googleJavaFormat {
     // don't enforce formatting for generated Java code under buildSrc
     exclude 'tests/**/*.java'
-    // exclude test resources from java, injector's expected output will fail on method/injection tests.
+    // tests expected output does not conform to google java format rules.
     exclude '**/test/resources/**/*.java'
 }
