@@ -26,7 +26,6 @@ package edu.ucr.cs.riple.injector.offsets;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -116,7 +115,6 @@ public class FileOffsetStore {
    */
   public List<OffsetChange> getOffSetsRelativeTo(List<OffsetChange> existingOffsetChanges) {
     return offsetChanges.stream()
-        .sorted(Comparator.comparingInt(o -> o.position))
         .map(offsetChange -> offsetChange.relativeTo(existingOffsetChanges))
         .collect(Collectors.toList());
   }
