@@ -92,8 +92,9 @@ public class Printer {
     int line = findStartOffsetForImports(tree);
     imports.forEach(
         importDec -> {
-          offsetStore.updateOffsetWithNewLineAddition(line, importDec.toString().length());
-          lines.add(line, importDec.toString().strip());
+          String toAdd = importDec.toString().strip();
+          offsetStore.updateOffsetWithNewLineAddition(line, toAdd.length());
+          lines.add(line, toAdd);
         });
   }
 

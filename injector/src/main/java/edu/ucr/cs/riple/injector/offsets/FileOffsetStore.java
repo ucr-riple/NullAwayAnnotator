@@ -66,6 +66,7 @@ public class FileOffsetStore {
    */
   public void updateOffsetWithNewLineAddition(int line, int dist) {
     int offset = characterOffsetAtLine(line);
+    // add one to dist for new line.
     this.offsetChanges.add(new OffsetChange(offset, dist + 1));
   }
 
@@ -79,16 +80,6 @@ public class FileOffsetStore {
   public void updateOffsetWithDeletion(int line, int column, int dist) {
     int offset = characterOffsetAtLine(line);
     this.offsetChanges.add(new OffsetChange(offset + column, -1 * dist));
-  }
-
-  /**
-   * Adds an offset change for deletion a line.
-   *
-   * @param line Line number of deleted line.
-   */
-  public void updateOffsetWithLineDeletion(int line) {
-    int offset = characterOffsetAtLine(line);
-    this.offsetChanges.add(new OffsetChange(offset, -1 * (lines.get(line).length() + 1)));
   }
 
   /**

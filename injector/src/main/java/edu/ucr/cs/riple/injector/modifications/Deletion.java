@@ -52,6 +52,8 @@ public class Deletion extends Modification {
     StringBuilder line = new StringBuilder(lines.get(startPosition.line));
     // add extra 1 for the added white space.
     line.delete(startPosition.column, endPosition.column + 2);
+    offsetStore.updateOffsetWithDeletion(
+        startPosition.line, startPosition.column, endPosition.column - startPosition.column + 1);
     lines.set(startPosition.line, line.toString());
   }
 }

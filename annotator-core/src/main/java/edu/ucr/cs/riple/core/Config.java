@@ -24,6 +24,9 @@
 
 package edu.ucr.cs.riple.core;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.adapters.NullAwayV0Adapter;
@@ -725,14 +728,14 @@ public class Config {
     }
 
     /**
-     * Translates the given offset to original offset.
+     * Gets the original offset according to existing offset changes.
      *
      * @param path Path to source file.
      * @param offset Given offset.
      * @return Original offset.
      */
-    public int translate(Path path, int offset) {
-      return OffsetChange.translate(offset, contents.getOrDefault(path, List.of()));
+    public int getOriginalOffset(Path path, int offset) {
+      return OffsetChange.getOriginalOffset(offset, contents.getOrDefault(path, List.of()));
     }
 
     /**
@@ -747,33 +750,31 @@ public class Config {
                 contents.getOrDefault(store.getPath(), new ArrayList<>());
             List<OffsetChange> offsetChanges = store.getOffSetsRelativeTo(existingOffsetChanges);
             existingOffsetChanges.addAll(offsetChanges);
-            // to keep the list small, we can eliminate pairs of offsets making each other neutral.
-            contents.put(store.getPath(), removeOpposingOffsets(existingOffsetChanges));
+            // to keep the list small, we can summarize pairs of offsets.
+            contents.put(store.getPath(), summarizeOffsetChanges(existingOffsetChanges));
           });
     }
 
     /**
-     * Filters opposing offset changes. (e.g. offset change (p1, d1) and (p1, -d1) are opposing and
-     * are noneffective.
+     * Summarizes offset changes. (e.g. offset change (p1, d1) and (p1, -d1 + e) can be summarized
+     * to (p1, e))
      *
-     * @param existingOffsetChanges Offset changes.
+     * @param changes Offset changes.
      * @return Cleaned offset changes.
      */
-    private List<OffsetChange> removeOpposingOffsets(List<OffsetChange> existingOffsetChanges) {
-      List<OffsetChange> cleaned = new ArrayList<>();
-      for (int i = 0; i < existingOffsetChanges.size(); i++) {
-        OffsetChange current = existingOffsetChanges.get(i);
-        if (i + 1 < existingOffsetChanges.size()) {
-          OffsetChange next = existingOffsetChanges.get(i + 1);
-          if (current.position == next.position && current.dist == -1 * next.dist) {
-            // opposing offset changes.
-            i++;
-            continue;
-          }
-        }
-        cleaned.add(current);
-      }
-      return cleaned;
+    private List<OffsetChange> summarizeOffsetChanges(List<OffsetChange> changes) {
+      return changes.stream()
+          .collect(
+              groupingBy(
+                  offsetChange -> offsetChange.position,
+                  mapping(offsetChange -> offsetChange.dist, Collectors.toList())))
+          .entrySet()
+          .stream()
+          .map(
+              entry ->
+                  new OffsetChange(
+                      entry.getKey(), entry.getValue().stream().mapToInt(Integer::intValue).sum()))
+          .collect(Collectors.toList());
     }
   }
 }

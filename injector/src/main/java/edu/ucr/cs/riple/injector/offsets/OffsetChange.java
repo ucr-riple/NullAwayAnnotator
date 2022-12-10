@@ -42,14 +42,13 @@ public class OffsetChange {
   }
 
   /**
-   * Translates the given offset change with the existing changes, to an offset where no other
-   * offset exists.
+   * Computes the original offset of the given offset according to existing offset changes.
    *
    * @param offset Given offset change.
    * @param existingOffsetChanges Existing offsets.
    * @return Original offset.
    */
-  public static int translate(int offset, List<OffsetChange> existingOffsetChanges) {
+  public static int getOriginalOffset(int offset, List<OffsetChange> existingOffsetChanges) {
     if (existingOffsetChanges == null) {
       return offset;
     }
@@ -71,6 +70,6 @@ public class OffsetChange {
    * @return Original offset.
    */
   public OffsetChange relativeTo(List<OffsetChange> offsetChanges) {
-    return new OffsetChange(translate(this.position, offsetChanges), dist);
+    return new OffsetChange(getOriginalOffset(this.position, offsetChanges), dist);
   }
 }
