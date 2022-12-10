@@ -253,7 +253,7 @@ public class CoreTestHelper {
     fail(errorMessage.toString());
   }
 
-  private void makeAnnotatorConfigFile(Path configPath) {
+  public void makeAnnotatorConfigFile(Path configPath) {
     Config.Builder builder = new Config.Builder();
     final int[] id = {0};
     builder.configPaths =

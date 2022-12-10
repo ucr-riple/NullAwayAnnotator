@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core;
 
+import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 
@@ -751,18 +752,18 @@ public class Config {
             List<OffsetChange> offsetChanges = store.getOffSetsRelativeTo(existingOffsetChanges);
             existingOffsetChanges.addAll(offsetChanges);
             // to keep the list small, we can summarize pairs of offsets.
-            contents.put(store.getPath(), summarizeOffsetChanges(existingOffsetChanges));
+            contents.put(store.getPath(), summarizeAndSortOffsetChanges(existingOffsetChanges));
           });
     }
 
     /**
-     * Summarizes offset changes. (e.g. offset change (p1, d1) and (p1, -d1 + e) can be summarized
-     * to (p1, e))
+     * Summarizes and sorts offset changes. (e.g. offset change (p1, d1) and (p1, -d1 + e) can be
+     * summarized to (p1, e))
      *
      * @param changes Offset changes.
      * @return Cleaned offset changes.
      */
-    private List<OffsetChange> summarizeOffsetChanges(List<OffsetChange> changes) {
+    private List<OffsetChange> summarizeAndSortOffsetChanges(List<OffsetChange> changes) {
       return changes.stream()
           .collect(
               groupingBy(
@@ -774,6 +775,7 @@ public class Config {
               entry ->
                   new OffsetChange(
                       entry.getKey(), entry.getValue().stream().mapToInt(Integer::intValue).sum()))
+          .sorted(comparingInt(o -> o.position))
           .collect(Collectors.toList());
     }
   }

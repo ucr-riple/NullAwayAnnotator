@@ -53,7 +53,7 @@ public class Deletion extends Modification {
     // add extra 1 for the added white space.
     line.delete(startPosition.column, endPosition.column + 2);
     offsetStore.updateOffsetWithDeletion(
-        startPosition.line, startPosition.column, endPosition.column - startPosition.column + 1);
+        startPosition.line, startPosition.column, endPosition.column - startPosition.column + 2);
     lines.set(startPosition.line, line.toString());
   }
 }
