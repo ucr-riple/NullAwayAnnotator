@@ -78,8 +78,7 @@ public class Main {
                       }
 
                       class Helper { // injector.Main$1$2$1$Helper
-                        @Nullable
-                        Object f9;
+                        @Nullable Object f9;
                         final Comp c = new Comp() { // injector.Main$1$2$1$Helper$1
                               Object f10;
 

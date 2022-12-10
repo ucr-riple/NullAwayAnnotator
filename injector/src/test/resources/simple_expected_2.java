@@ -10,8 +10,7 @@ public class Main {
   }
 
   class Helper {
-    @Nullable
-    Object f0;
+    @Nullable Object f0;
   }
 
   public void foo() {

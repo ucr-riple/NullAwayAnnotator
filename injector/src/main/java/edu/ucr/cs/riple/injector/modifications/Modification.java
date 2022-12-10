@@ -27,7 +27,6 @@ package edu.ucr.cs.riple.injector.modifications;
 import com.github.javaparser.Position;
 import java.util.List;
 import java.util.Objects;
-import javax.lang.model.element.ElementKind;
 
 /**
  * Represents a text modification in the source file which are translation of {@link
@@ -39,14 +38,11 @@ public abstract class Modification {
   public final Position startPosition;
   /** Content of modification. */
   public final String content;
-  /** {@link ElementKind} of the element where this modification is created for. */
-  public final ElementKind kind;
 
-  public Modification(String content, Position startPosition, ElementKind kind) {
+  public Modification(String content, Position startPosition) {
     // Position in javaparser is not 0 indexed and line and column fields are final.
     this.startPosition = new Position(startPosition.line - 1, startPosition.column - 1);
     this.content = content;
-    this.kind = kind;
   }
 
   /**
@@ -65,13 +61,11 @@ public abstract class Modification {
       return false;
     }
     Modification that = (Modification) o;
-    return startPosition.equals(that.startPosition)
-        && content.equals(that.content)
-        && kind == that.kind;
+    return startPosition.equals(that.startPosition) && content.equals(that.content);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(startPosition, content, kind);
+    return Objects.hash(startPosition, content);
   }
 }

@@ -37,7 +37,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import javax.lang.model.element.ElementKind;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -90,9 +89,7 @@ public class OnField extends Location {
                   for (VariableDeclarator v : vars) {
                     if (variables.contains(v.getName().toString())) {
                       Optional<Range> range = fieldDeclaration.getRange();
-                      range.ifPresent(
-                          value ->
-                              ans.set(change.visit(ElementKind.FIELD, fieldDeclaration, value)));
+                      range.ifPresent(value -> ans.set(change.visit(fieldDeclaration, value)));
                       break;
                     }
                   }

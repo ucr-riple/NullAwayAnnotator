@@ -50,8 +50,7 @@ public class OnFieldInjectionTest extends BaseInjectorTest {
             "package com.uber;",
             "import javax.annotation.Nullable;",
             "public class Super {",
-            "   @Nullable",
-            "   Object h = new Object();",
+            "   @Nullable Object h = new Object();",
             "   public void test(@Nullable Object f) {",
             "      h = f;",
             "   }",
@@ -78,8 +77,7 @@ public class OnFieldInjectionTest extends BaseInjectorTest {
             "import org.hibernate.validator.constraints.NotEmpty;",
             "import javax.annotation.Nullable;",
             "public class Bar {",
-            "   @Nullable",
-            "   private @NotEmpty String foo;",
+            "   @Nullable private @NotEmpty String foo;",
             "}")
         .addChanges(
             new AddMarkerAnnotation(
@@ -106,9 +104,7 @@ public class OnFieldInjectionTest extends BaseInjectorTest {
             "import javax.annotation.Nullable;",
             "import edu.ucr.Tainted;",
             "public class Test {",
-            "   @Nullable",
-            "   @Tainted",
-            "   Object h = new Object();",
+            "   @Nullable @Tainted Object h = new Object();",
             "   public void test(@Nullable Object f) {",
             "      h = f;",
             "   }",

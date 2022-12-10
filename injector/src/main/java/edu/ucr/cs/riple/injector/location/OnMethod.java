@@ -35,7 +35,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import javax.lang.model.element.ElementKind;
 import org.json.simple.JSONObject;
 
 public class OnMethod extends Location {
@@ -72,9 +71,7 @@ public class OnMethod extends Location {
                   }
                   if (this.matcher.matchesCallableDeclaration(callableDeclaration)) {
                     Optional<Range> range = callableDeclaration.getRange();
-                    range.ifPresent(
-                        value ->
-                            ans.set(change.visit(ElementKind.METHOD, callableDeclaration, value)));
+                    range.ifPresent(value -> ans.set(change.visit(callableDeclaration, value)));
                   }
                 }));
     if (ans.get() == null) {
@@ -87,10 +84,7 @@ public class OnMethod extends Location {
                         .equals(Helper.extractCallableName(method))) {
                       Optional<Range> range = annotationMemberDeclaration.getRange();
                       range.ifPresent(
-                          value ->
-                              ans.set(
-                                  change.visit(
-                                      ElementKind.METHOD, annotationMemberDeclaration, value)));
+                          value -> ans.set(change.visit(annotationMemberDeclaration, value)));
                     }
                   }));
     }

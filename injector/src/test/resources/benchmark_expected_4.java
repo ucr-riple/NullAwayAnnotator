@@ -29,8 +29,7 @@ public class Main {
         final Comp outerComp = new Comp() { // injector.Main$1$1
               Object f2;
 
-              @Nullable
-              @Override
+              @Nullable @Override
               public Object compare() {
                 return null;
               }

@@ -46,8 +46,7 @@ public class OnMethodSearchTest extends BaseInjectorTest {
             "package com.uber;",
             "import javax.annotation.Initializer;",
             "public class Main {",
-            "   @Initializer",
-            "   public Main(String type, Object... objs) {",
+            "   @Initializer public Main(String type, Object... objs) {",
             "   }",
             "}")
         .addChanges(
@@ -79,8 +78,7 @@ public class OnMethodSearchTest extends BaseInjectorTest {
             "package com.uber;",
             "import javax.annotation.Nullable;",
             "public class Super {",
-            "   @Nullable",
-            "   Object test() {",
+            "   @Nullable Object test() {",
             "       return new Object();",
             "   }",
             "   class SuperInner {",
