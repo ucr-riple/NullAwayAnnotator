@@ -64,6 +64,7 @@ public class OffsetCalculationTest {
   private Path root;
   /** Path to input in resources directory. */
   private final Path inputPath;
+
   private AnnotationInjector injector;
   private Config config;
 
