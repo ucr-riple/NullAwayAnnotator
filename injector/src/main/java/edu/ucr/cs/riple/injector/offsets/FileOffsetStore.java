@@ -113,7 +113,7 @@ public class FileOffsetStore {
    * @param existingOffsetChanges List of existing offset changes.
    * @return Translated and sorted offsets.
    */
-  public List<OffsetChange> getOffSetsRelativeTo(List<OffsetChange> existingOffsetChanges) {
+  public List<OffsetChange> getOffsetsRelativeTo(List<OffsetChange> existingOffsetChanges) {
     return offsetChanges.stream()
         .map(offsetChange -> offsetChange.relativeTo(existingOffsetChanges))
         .collect(Collectors.toList());

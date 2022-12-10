@@ -152,7 +152,7 @@ public class Config {
   private NullAwayVersionAdapter adapter;
 
   /** Handler for computing the original offset of reported errors with existing changes. */
-  public final OffSetHandler offsetHandler;
+  public final OffsetHandler offsetHandler;
 
   /**
    * Builds config from command line arguments.
@@ -407,7 +407,7 @@ public class Config {
             ? cmd.getOptionValue(activateForceResolveOption)
             : "org.jspecify.nullness.NullUnmarked";
     this.moduleCounterID = 0;
-    this.offsetHandler = new OffSetHandler();
+    this.offsetHandler = new OffsetHandler();
     this.log = new Log();
     this.log.reset();
   }
@@ -488,7 +488,7 @@ public class Config {
         getValueFromKey(jsonObject, "ANNOTATION:NULL_UNMARKED", String.class)
             .orElse("org.jspecify.nullness.NullUnmarked");
     this.log = new Log();
-    this.offsetHandler = new OffSetHandler();
+    this.offsetHandler = new OffsetHandler();
     log.reset();
   }
 
@@ -721,11 +721,11 @@ public class Config {
   }
 
   /** Responsible for handling offset changes in source file. */
-  public static class OffSetHandler {
+  public static class OffsetHandler {
     /** Map of file paths to list offset changes. */
     private final Map<Path, List<OffsetChange>> contents;
 
-    public OffSetHandler() {
+    public OffsetHandler() {
       contents = new HashMap<>();
     }
 
@@ -750,7 +750,7 @@ public class Config {
           store -> {
             List<OffsetChange> existingOffsetChanges =
                 contents.getOrDefault(store.getPath(), new ArrayList<>());
-            List<OffsetChange> offsetChanges = store.getOffSetsRelativeTo(existingOffsetChanges);
+            List<OffsetChange> offsetChanges = store.getOffsetsRelativeTo(existingOffsetChanges);
             existingOffsetChanges.addAll(offsetChanges);
             // to keep the list small, we can summarize pairs of offsets.
             contents.put(store.getPath(), summarizeAndSortOffsetChanges(existingOffsetChanges));
