@@ -53,7 +53,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class OffsetCalculationTest {
+public class OffsetChangeHandlingTest {
 
   @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
   /** Map of field name to original field location offset. */
@@ -83,7 +83,7 @@ public class OffsetCalculationTest {
     }
   }
 
-  public OffsetCalculationTest() {
+  public OffsetChangeHandlingTest() {
     inputPath = Utility.getPathOfResource("offset").resolve("benchmark.java");
     String content;
     try {
@@ -130,7 +130,7 @@ public class OffsetCalculationTest {
   }
 
   @Test
-  public void offsetTest() {
+  public void randomOffsetTest() {
     addAnnotationOn("f1", "f2", "f4", "f6");
     verifyCalculatedOffsets();
     addAnnotationOn("f5", "f12");
@@ -146,6 +146,24 @@ public class OffsetCalculationTest {
     verifyCalculatedOffsets();
     addAnnotationOn("13", "14");
     verifyCalculatedOffsets();
+  }
+
+  @Test
+  public void loopTest() {
+    for (int i = 0; i < 4; i++) {
+      addAnnotationOn("f1", "f8", "f19");
+      verifyCalculatedOffsets();
+      removeAnnotationOn("f1", "f8", "f19");
+      verifyCalculatedOffsets();
+    }
+    addAnnotationOn("f5", "f15");
+    removeAnnotationOn("f5");
+    for (int i = 0; i < 4; i++) {
+      addAnnotationOn("f1", "f8", "f19");
+      verifyCalculatedOffsets();
+      removeAnnotationOn("f1", "f8", "f19");
+      verifyCalculatedOffsets();
+    }
   }
 
   /**
@@ -197,7 +215,7 @@ public class OffsetCalculationTest {
                   toImmutableMap(
                       identity(),
                       s ->
-                          config.offSetHandler.getOriginalOffset(
+                          config.offsetHandler.getOriginalOffset(
                               root.resolve("benchmark.java"), content.indexOf(s))));
       Assert.assertEquals(calculatedOffsetMap, originalFieldOffsetMap);
     } catch (IOException e) {

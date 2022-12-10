@@ -25,7 +25,7 @@ public class NullAwayV2Adapter extends NullAwayV1Adapter {
         values[0],
         values[1],
         new Region(values[2], values[3]),
-        config.offSetHandler.getOriginalOffset(Paths.get(path), offset),
+        config.offsetHandler.getOriginalOffset(Paths.get(path), offset),
         Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 6, 12)));
   }
 }

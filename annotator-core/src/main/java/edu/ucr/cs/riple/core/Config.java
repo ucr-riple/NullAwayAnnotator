@@ -151,7 +151,8 @@ public class Config {
    */
   private NullAwayVersionAdapter adapter;
 
-  public final OffSetHandler offSetHandler;
+  /** Handler for computing the original offset of reported errors with existing changes. */
+  public final OffSetHandler offsetHandler;
 
   /**
    * Builds config from command line arguments.
@@ -406,7 +407,7 @@ public class Config {
             ? cmd.getOptionValue(activateForceResolveOption)
             : "org.jspecify.nullness.NullUnmarked";
     this.moduleCounterID = 0;
-    this.offSetHandler = new OffSetHandler();
+    this.offsetHandler = new OffSetHandler();
     this.log = new Log();
     this.log.reset();
   }
@@ -487,7 +488,7 @@ public class Config {
         getValueFromKey(jsonObject, "ANNOTATION:NULL_UNMARKED", String.class)
             .orElse("org.jspecify.nullness.NullUnmarked");
     this.log = new Log();
-    this.offSetHandler = new OffSetHandler();
+    this.offsetHandler = new OffSetHandler();
     log.reset();
   }
 
