@@ -28,6 +28,7 @@ import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
+import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.util.Set;
 
 /** Wrapper tool used to inject annotations Physically to the source code. */
@@ -41,11 +42,13 @@ public class PhysicalInjector extends AnnotationInjector {
 
   @Override
   public void removeAnnotations(Set<RemoveAnnotation> changes) {
-    this.injector.removeAnnotations(changes);
+    Set<FileOffsetStore> offsetStores = injector.removeAnnotations(changes);
+    config.offsetHandler.updateOffset(offsetStores);
   }
 
   @Override
   public void injectAnnotations(Set<AddAnnotation> changes) {
-    this.injector.addAnnotations(changes);
+    Set<FileOffsetStore> offsetStores = injector.addAnnotations(changes);
+    config.offsetHandler.updateOffset(offsetStores);
   }
 }

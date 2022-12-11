@@ -46,17 +46,24 @@ public class Error extends Enclosed {
   /** The fix which can resolve this error if such fixes exists. */
   private final Set<Fix> resolvingFixes;
 
-  public Error(String messageType, String message, Region region, @Nullable Fix resolvingFix) {
+  /** Offset of program point in original version where error is reported. */
+  private final int offset;
+
+  public Error(
+      String messageType, String message, Region region, int offset, @Nullable Fix resolvingFix) {
     super(region);
     this.messageType = messageType;
     this.message = message;
+    this.offset = offset;
     this.resolvingFixes = resolvingFix == null ? Set.of() : Set.of(resolvingFix);
   }
 
-  public Error(String messageType, String message, Region region, Set<Fix> resolvingFixes) {
+  public Error(
+      String messageType, String message, Region region, int offset, Set<Fix> resolvingFixes) {
     super(region);
     this.messageType = messageType;
     this.message = message;
+    this.offset = offset;
     this.resolvingFixes = resolvingFixes;
   }
 
@@ -102,7 +109,8 @@ public class Error extends Enclosed {
     Error error = (Error) o;
     return messageType.equals(error.messageType)
         && message.equals(error.message)
-        && resolvingFixes.equals(error.resolvingFixes);
+        && resolvingFixes.equals(error.resolvingFixes)
+        && offset == error.offset;
   }
 
   /**
@@ -129,7 +137,7 @@ public class Error extends Enclosed {
 
   @Override
   public int hashCode() {
-    return Objects.hash(messageType, message, resolvingFixes);
+    return Objects.hash(messageType, message, offset, resolvingFixes);
   }
 
   @Override

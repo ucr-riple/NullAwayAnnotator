@@ -62,7 +62,8 @@ public class NullAwayV0Adapter extends NullAwayAdapterBaseClass {
     String errorType = values[0];
     String errorMessage = values[1];
     Region region = new Region(values[2], encMember);
-    return createError(errorType, errorMessage, region, nonnullTarget, store);
+    // since we have no information of offset, we set all to zero.
+    return createError(errorType, errorMessage, region, 0, nonnullTarget, store);
   }
 
   @Override

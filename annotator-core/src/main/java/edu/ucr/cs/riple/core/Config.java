@@ -24,14 +24,21 @@
 
 package edu.ucr.cs.riple.core;
 
+import static java.util.Comparator.comparingInt;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.adapters.NullAwayV0Adapter;
 import edu.ucr.cs.riple.core.adapters.NullAwayV1Adapter;
+import edu.ucr.cs.riple.core.adapters.NullAwayV2Adapter;
 import edu.ucr.cs.riple.core.adapters.NullAwayVersionAdapter;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.util.Utility;
+import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
+import edu.ucr.cs.riple.injector.offsets.OffsetChange;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -41,7 +48,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -141,6 +151,9 @@ public class Config {
    * NullAway serialization version.
    */
   private NullAwayVersionAdapter adapter;
+
+  /** Handler for computing the original offset of reported errors with existing changes. */
+  public final OffsetHandler offsetHandler;
 
   /**
    * Builds config from command line arguments.
@@ -395,6 +408,7 @@ public class Config {
             ? cmd.getOptionValue(activateForceResolveOption)
             : "org.jspecify.nullness.NullUnmarked";
     this.moduleCounterID = 0;
+    this.offsetHandler = new OffsetHandler();
     this.log = new Log();
     this.log.reset();
   }
@@ -475,6 +489,7 @@ public class Config {
         getValueFromKey(jsonObject, "ANNOTATION:NULL_UNMARKED", String.class)
             .orElse("org.jspecify.nullness.NullUnmarked");
     this.log = new Log();
+    this.offsetHandler = new OffsetHandler();
     log.reset();
   }
 
@@ -503,6 +518,9 @@ public class Config {
           break;
         case 1:
           this.adapter = new NullAwayV1Adapter(this, fieldDeclarationStore);
+          break;
+        case 2:
+          this.adapter = new NullAwayV2Adapter(this, fieldDeclarationStore);
           break;
         default:
           throw new RuntimeException("Unrecognized NullAway serialization version: " + version);
@@ -704,6 +722,67 @@ public class Config {
       } catch (IOException e) {
         System.err.println("Error happened in writing config json: " + e);
       }
+    }
+  }
+
+  /** Responsible for handling offset changes in source file. */
+  public static class OffsetHandler {
+    /** Map of file paths to list offset changes. */
+    private final Map<Path, List<OffsetChange>> contents;
+
+    public OffsetHandler() {
+      contents = new HashMap<>();
+    }
+
+    /**
+     * Gets the original offset according to existing offset changes.
+     *
+     * @param path Path to source file.
+     * @param offset Given offset.
+     * @return Original offset.
+     */
+    public int getOriginalOffset(Path path, int offset) {
+      return OffsetChange.getOriginalOffset(offset, contents.getOrDefault(path, List.of()));
+    }
+
+    /**
+     * Updates given offsets with given new offset changes.
+     *
+     * @param newOffsets Given new offset changes.
+     */
+    public void updateOffset(Set<FileOffsetStore> newOffsets) {
+      newOffsets.forEach(
+          store -> {
+            List<OffsetChange> existingOffsetChanges =
+                contents.getOrDefault(store.getPath(), new ArrayList<>());
+            List<OffsetChange> offsetChanges = store.getOffsetsRelativeTo(existingOffsetChanges);
+            existingOffsetChanges.addAll(offsetChanges);
+            // to keep the list small, we can summarize pairs of offsets.
+            contents.put(store.getPath(), summarizeAndSortOffsetChanges(existingOffsetChanges));
+          });
+    }
+
+    /**
+     * Summarizes and sorts offset changes. (e.g. offset change (p1, d1) and (p1, -d1 + e) can be
+     * summarized to (p1, e))
+     *
+     * @param changes Offset changes.
+     * @return Cleaned offset changes.
+     */
+    private List<OffsetChange> summarizeAndSortOffsetChanges(List<OffsetChange> changes) {
+      return changes.stream()
+          .collect(
+              groupingBy(
+                  offsetChange -> offsetChange.position,
+                  mapping(offsetChange -> offsetChange.dist, Collectors.toList())))
+          .entrySet()
+          .stream()
+          .map(
+              entry ->
+                  new OffsetChange(
+                      entry.getKey(), entry.getValue().stream().mapToInt(Integer::intValue).sum()))
+          .sorted(comparingInt(o -> o.position))
+          .collect(Collectors.toList());
     }
   }
 }
