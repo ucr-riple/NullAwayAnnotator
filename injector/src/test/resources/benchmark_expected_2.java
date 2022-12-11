@@ -15,8 +15,7 @@ public class Main {
   static class Inner { // injector.Main$Inner
     Object f0;
 
-    @Nullable
-    public Object bar() {
+    @Nullable public Object bar() {
       return null;
     }
   }

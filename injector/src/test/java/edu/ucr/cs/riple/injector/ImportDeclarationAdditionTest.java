@@ -57,8 +57,7 @@ public class ImportDeclarationAdditionTest extends BaseInjectorTest {
             "public class Main {",
             "   public enum Test{",
             "     CLASSIC;",
-            "     @Nullable",
-            "     public Object run(){",
+            "     @Nullable public Object run(){",
             "       return null;",
             "     }",
             "   }",
@@ -94,8 +93,7 @@ public class ImportDeclarationAdditionTest extends BaseInjectorTest {
             "public class Main {",
             "   public enum Test{",
             "     CLASSIC;",
-            "     @Nullable",
-            "     public Object run(){",
+            "     @Nullable public Object run(){",
             "       return null;",
             "     }",
             "   }",
@@ -114,8 +112,7 @@ public class ImportDeclarationAdditionTest extends BaseInjectorTest {
         .expectOutput(
             "import javax.annotation.Nullable;",
             "public class Test {",
-            "   @Nullable",
-            "   Object h = new Object();",
+            "   @Nullable Object h = new Object();",
             "}")
         .addChanges(
             new AddMarkerAnnotation(
@@ -137,8 +134,7 @@ public class ImportDeclarationAdditionTest extends BaseInjectorTest {
             "package edu.ucr;",
             "import javax.annotation.Nullable;",
             "public class Test {",
-            "   @Nullable",
-            "   Object h = new Object();",
+            "   @Nullable Object h = new Object();",
             "}")
         .addChanges(
             new AddMarkerAnnotation(
@@ -166,8 +162,7 @@ public class ImportDeclarationAdditionTest extends BaseInjectorTest {
             "package edu.ucr;",
             "import javax.annotation.Nullable;",
             "public class Test {",
-            "   @Nullable",
-            "   Object h = new Object();",
+            "   @Nullable Object h = new Object();",
             "}")
         .addChanges(
             new AddMarkerAnnotation(
@@ -201,8 +196,7 @@ public class ImportDeclarationAdditionTest extends BaseInjectorTest {
             " * javadoc",
             " */",
             "public class Test {",
-            "   @Nullable",
-            "   Object h = new Object();",
+            "   @Nullable Object h = new Object();",
             "}")
         .addChanges(
             new AddMarkerAnnotation(
@@ -234,8 +228,7 @@ public class ImportDeclarationAdditionTest extends BaseInjectorTest {
             " * javadoc",
             " */",
             "public class Test {",
-            "   @Nullable",
-            "   Object h = new Object();",
+            "   @Nullable Object h = new Object();",
             "}")
         .addChanges(
             new AddMarkerAnnotation(
@@ -261,8 +254,7 @@ public class ImportDeclarationAdditionTest extends BaseInjectorTest {
             " */",
             "import javax.annotation.Nullable;",
             "public class Test {",
-            "   @Nullable",
-            "   Object h = new Object();",
+            "   @Nullable Object h = new Object();",
             "}")
         .addChanges(
             new AddMarkerAnnotation(
@@ -288,8 +280,7 @@ public class ImportDeclarationAdditionTest extends BaseInjectorTest {
             "// ",
             "import javax.annotation.Nullable;",
             "public class Test {",
-            "   @Nullable",
-            "   Object h = new Object();",
+            "   @Nullable Object h = new Object();",
             "}")
         .addChanges(
             new AddMarkerAnnotation(
@@ -323,8 +314,7 @@ public class ImportDeclarationAdditionTest extends BaseInjectorTest {
             " * javadoc",
             " */",
             "public class Test {",
-            "   @Nullable",
-            "   Object h = new Object();",
+            "   @Nullable Object h = new Object();",
             "}")
         .addChanges(
             new AddMarkerAnnotation(
@@ -360,8 +350,7 @@ public class ImportDeclarationAdditionTest extends BaseInjectorTest {
             " * javadoc",
             " */",
             "public class Test {",
-            "   @Nullable",
-            "   Object h = new Object();",
+            "   @Nullable Object h = new Object();",
             "}")
         .addChanges(
             new AddMarkerAnnotation(
@@ -385,8 +374,7 @@ public class ImportDeclarationAdditionTest extends BaseInjectorTest {
             "          custom.annots.A;",
             "import javax.annotation.Nullable;",
             "public class Test {",
-            "   @Nullable",
-            "   Object h = new Object();",
+            "   @Nullable Object h = new Object();",
             "}")
         .addChanges(
             new AddMarkerAnnotation(
@@ -410,8 +398,7 @@ public class ImportDeclarationAdditionTest extends BaseInjectorTest {
             "          edu.ucr;",
             "import javax.annotation.Nullable;",
             "public class Test {",
-            "   @Nullable",
-            "   Object h = new Object();",
+            "   @Nullable Object h = new Object();",
             "}")
         .addChanges(
             new AddMarkerAnnotation(
