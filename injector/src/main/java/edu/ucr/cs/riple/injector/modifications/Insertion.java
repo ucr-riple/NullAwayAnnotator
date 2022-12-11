@@ -26,43 +26,22 @@ package edu.ucr.cs.riple.injector.modifications;
 
 import com.github.javaparser.Position;
 import java.util.List;
-import javax.lang.model.element.ElementKind;
 
 /** Represents an insertion of a content in the source file. */
 public class Insertion extends Modification {
 
-  public Insertion(String content, Position position, ElementKind kind) {
-    super(content, position, kind);
+  public Insertion(String content, Position position) {
+    super(content, position);
   }
 
   @Override
   public void visit(List<String> lines) {
-    String toInsert;
     String line = lines.get(startPosition.line);
-    switch (kind) {
-      case METHOD:
-      case FIELD:
-        // need to compute padding manually, cannot use position.column as tab and space
-        // both reserve one column.
-        StringBuilder padding = new StringBuilder();
-        int head = 0;
-        while (head < line.length() && Character.isWhitespace(line.charAt(head))) {
-          padding.append(line.charAt(head));
-          head += 1;
-        }
-        toInsert = padding + this.content;
-        lines.add(startPosition.line, toInsert);
-        break;
-      case PARAMETER:
-        toInsert = this.content + " ";
-        lines.set(
-            startPosition.line,
-            line.substring(0, startPosition.column)
-                + toInsert
-                + line.substring(startPosition.column));
-        break;
-      default:
-        throw new IllegalArgumentException("Modification on kind: " + kind + " is not supported");
-    }
+    lines.set(
+        startPosition.line,
+        line.substring(0, startPosition.column)
+            + this.content
+            + " "
+            + line.substring(startPosition.column));
   }
 }

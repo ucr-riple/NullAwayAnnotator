@@ -63,8 +63,7 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "import java.util.Map;",
             "import javax.annotation.Nullable;",
             "public class Super {",
-            "   @Nullable",
-            "   Object test() {",
+            "   @Nullable Object test() {",
             "       return new Object();",
             "   }",
             "}")
@@ -224,8 +223,7 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "   Z z = new Z();",
             "   AA aa = new AA();",
             "   AB ab = new AB();",
-            "   @Nullable",
-            "   Object test() {",
+            "   @Nullable Object test() {",
             "       return new Object();",
             "   }",
             "}")
@@ -244,7 +242,7 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "package com.uber;",
             "public class Super {",
             "   Object test() {",
-            "       init(this.new NodeVisitor(), this.new EdgeVisitor());\n",
+            "       init(this.new NodeVisitor(), this.new EdgeVisitor());",
             "       return foo(this.new Bar(), this.new Foo(), getBuilder().new Foo());",
             "   }",
             "   Object foo(Bar b, Foo f) {",
@@ -257,8 +255,7 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "package com.uber;",
             "import javax.annotation.Nullable;",
             "public class Super {",
-            "   @Nullable",
-            "   Object test() {",
+            "   @Nullable Object test() {",
             "       init(this.new NodeVisitor(), this.new EdgeVisitor());",
             "       return foo(this.new Bar(), this.new Foo(), getBuilder().new Foo());",
             "   }",
@@ -284,8 +281,7 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "package com.uber;",
             "import javax.annotation.Nullable;",
             "public class A {",
-            "   @Nullable",
-            "   private Object[] allTest;",
+            "   @Nullable private Object[] allTest;",
             "}")
         .addInput(
             "B.java", "package com.uber;", "public class B {", "   private Object allTest[];", "}")
@@ -293,8 +289,7 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "package com.uber;",
             "import javax.annotation.Nullable;",
             "public class B {",
-            "   @Nullable",
-            "   private Object allTest[];",
+            "   @Nullable private Object allTest[];",
             "}")
         .addChanges(
             new AddMarkerAnnotation(
@@ -325,8 +320,7 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "   /**",
             "    * javadoc",
             "    */",
-            "\t@Nullable",
-            "\tpublic Object run();",
+            "\t@Nullable public Object run();",
             "}")
         .addChanges(
             new AddMarkerAnnotation(

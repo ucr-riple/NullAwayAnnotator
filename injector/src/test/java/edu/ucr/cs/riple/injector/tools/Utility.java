@@ -44,14 +44,4 @@ public class Utility {
     }
     return ans;
   }
-
-  /**
-   * Removes all new lines.
-   *
-   * @param content content to remove from.
-   * @return content without any new lines.
-   */
-  public static String removeNewLines(String content) {
-    return content.replaceAll("\n", "");
-  }
 }

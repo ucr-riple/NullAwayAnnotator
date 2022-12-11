@@ -37,7 +37,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import javax.lang.model.element.ElementKind;
 import org.json.simple.JSONObject;
 
 public class OnParameter extends Location {
@@ -82,12 +81,7 @@ public class OnParameter extends Location {
                         Node param = params.get(index);
                         Optional<Range> range = param.getRange();
                         range.ifPresent(
-                            value ->
-                                ans.set(
-                                    change.visit(
-                                        ElementKind.PARAMETER,
-                                        (NodeWithAnnotations<?>) param,
-                                        value)));
+                            value -> ans.set(change.visit((NodeWithAnnotations<?>) param, value)));
                       }
                     }
                   }

@@ -1,5 +1,4 @@
 package injector;
-
 import javax.annotation.Nullable;
 
 public class Main {
