@@ -43,7 +43,7 @@ public abstract class AnnotationInjector {
   /**
    * Removes fixes from source code.
    *
-   * @param fixes Set of fixes to remove.
+   * @param fixes List of fixes to remove.
    */
   public void removeFixes(Set<Fix> fixes) {
     if (fixes == null || fixes.size() == 0) {

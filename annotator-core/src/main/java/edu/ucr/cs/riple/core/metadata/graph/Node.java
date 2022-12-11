@@ -149,7 +149,7 @@ public class Node {
       Collection<Fix> triggeredFixes,
       Collection<Error> triggeredErrors,
       MethodDeclarationTree mdt) {
-    // Update set of triggered fixes.
+    // Update list of triggered fixes.
     this.updateTriggered(triggeredFixes);
     // Update set of triggered errors.
     this.triggeredErrors = ImmutableSet.copyOf(triggeredErrors);

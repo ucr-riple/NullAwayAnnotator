@@ -136,7 +136,7 @@ public class MethodImpact {
    * parameters may already be annotated as {@code @Nullable} and will no longer trigger errors on
    * downstream dependencies). This method addresses this issue by updating method's status.
    *
-   * @param fixes Set of injected fixes.
+   * @param fixes List of injected fixes.
    */
   public void updateStatus(Set<Fix> fixes) {
     Set<OnParameter> annotatedParameters = new HashSet<>();
