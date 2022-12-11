@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.injector.modifications;
 
 import com.github.javaparser.Position;
+import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.util.List;
 
 /** Represents an insertion of a content in the source file. */
@@ -35,13 +36,12 @@ public class Insertion extends Modification {
   }
 
   @Override
-  public void visit(List<String> lines) {
+  public void visit(List<String> lines, FileOffsetStore offsetStore) {
+    String toAdd = this.content + " ";
     String line = lines.get(startPosition.line);
+    offsetStore.updateOffsetWithAddition(startPosition.line, startPosition.column, toAdd.length());
     lines.set(
         startPosition.line,
-        line.substring(0, startPosition.column)
-            + this.content
-            + " "
-            + line.substring(startPosition.column));
+        line.substring(0, startPosition.column) + toAdd + line.substring(startPosition.column));
   }
 }

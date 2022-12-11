@@ -121,6 +121,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
    * @param errorType Error type.
    * @param errorMessage Error message.
    * @param region Region where the error is reported,
+   * @param offset offset of program point in original version where error is reported.
    * @param nonnullTarget If {@code @Nonnull}, this error involved a pseudo-assignment of
    *     a @Nullable expression into a @NonNull target, and this field is the Symbol for that
    *     target.
@@ -130,11 +131,12 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
       String errorType,
       String errorMessage,
       Region region,
+      int offset,
       @Nullable Location nonnullTarget,
       FieldDeclarationStore store) {
     if (nonnullTarget == null && errorType.equals("METHOD_NO_INIT")) {
       Set<Fix> resolvingFix = generateFixForUnInitializedFields(errorMessage, region, store);
-      return new Error(errorType, errorMessage, region, resolvingFix);
+      return new Error(errorType, errorMessage, region, offset, resolvingFix);
     }
     if (nonnullTarget != null && nonnullTarget.isOnField()) {
       nonnullTarget = extendVariableList(nonnullTarget.toField(), store);
@@ -147,7 +149,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
                 errorType,
                 region,
                 true);
-    return new Error(errorType, errorMessage, region, resolvingFix);
+    return new Error(errorType, errorMessage, region, offset, resolvingFix);
   }
 
   /**

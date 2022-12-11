@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.injector.modifications;
 
 import com.github.javaparser.Position;
+import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.util.List;
 import java.util.Objects;
 
@@ -49,8 +50,9 @@ public abstract class Modification {
    * Visits the source file as list of lines and applies its modification to it.
    *
    * @param lines List of lines of the target source code.
+   * @param offsetStore Offset change info of the original version.
    */
-  public abstract void visit(List<String> lines);
+  public abstract void visit(List<String> lines, FileOffsetStore offsetStore);
 
   @Override
   public boolean equals(Object o) {

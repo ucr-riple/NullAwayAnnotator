@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.injector.modifications;
 
 import com.github.javaparser.Position;
 import com.google.common.base.Preconditions;
+import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.util.List;
 
 /** Represents a deletion of a content in the source file. */
@@ -41,7 +42,7 @@ public class Deletion extends Modification {
   }
 
   @Override
-  public void visit(List<String> lines) {
+  public void visit(List<String> lines, FileOffsetStore offsetStore) {
     // all deletion logic below is written based on the fact that Injector only removes annotations
     // it added itself, therefore it does not cover all cases. All added annotations are inserted in
     // a single line and are followed by a space.
@@ -51,6 +52,8 @@ public class Deletion extends Modification {
     StringBuilder line = new StringBuilder(lines.get(startPosition.line));
     // add extra 1 for the added white space.
     line.delete(startPosition.column, endPosition.column + 2);
+    offsetStore.updateOffsetWithDeletion(
+        startPosition.line, startPosition.column, endPosition.column - startPosition.column + 2);
     lines.set(startPosition.line, line.toString());
   }
 }

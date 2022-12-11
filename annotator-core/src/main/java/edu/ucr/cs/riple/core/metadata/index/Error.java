@@ -30,6 +30,7 @@ import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.location.Location;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -42,18 +43,28 @@ public class Error extends Enclosed {
   public final String messageType;
   /** Error message. */
   public final String message;
-  /** Set of fixes that can resolve this error if exists. */
-  private final ImmutableSet<Fix> fixes;
+  /** The fix which can resolve this error if such fixes exists. */
+  private final Set<Fix> resolvingFixes;
 
-  public Error(String messageType, String message, Region region, @Nullable Fix fix) {
-    this(messageType, message, region, fix == null ? Set.of() : Set.of(fix));
-  }
+  /** Offset of program point in original version where error is reported. */
+  private final int offset;
 
-  public Error(String messageType, String message, Region region, Set<Fix> fixes) {
+  public Error(
+      String messageType, String message, Region region, int offset, @Nullable Fix resolvingFix) {
     super(region);
     this.messageType = messageType;
     this.message = message;
-    this.fixes = ImmutableSet.copyOf(fixes);
+    this.offset = offset;
+    this.resolvingFixes = resolvingFix == null ? Set.of() : Set.of(resolvingFix);
+  }
+
+  public Error(
+      String messageType, String message, Region region, int offset, Set<Fix> resolvingFixes) {
+    super(region);
+    this.messageType = messageType;
+    this.message = message;
+    this.offset = offset;
+    this.resolvingFixes = resolvingFixes;
   }
 
   /**
@@ -73,19 +84,7 @@ public class Error extends Enclosed {
    * @return true if error is resolvable with only one fix and false otherwise.
    */
   public boolean isSingleFix() {
-    return this.fixes.size() == 1;
-  }
-
-  /**
-   * Checks if error is resolvable and all required fixes corresponds to elements in target module.
-   *
-   * @param tree Method declaration tree instance.
-   * @return true if error is resolvable and all required fixes corresponds to elements in target
-   *     module and false otherwise.
-   */
-  public boolean isFixableOnTarget(MethodDeclarationTree tree) {
-    return this.fixes.size() > 0
-        && fixes.stream().allMatch(fix -> tree.declaredInModule(fix.toLocation()));
+    return this.resolvingFixes.size() == 1;
   }
 
   /**
@@ -94,9 +93,9 @@ public class Error extends Enclosed {
    * @return Location of the fix resolving this error.
    */
   public Location toResolvingLocation() {
-    Preconditions.checkArgument(fixes.size() == 1);
+    Preconditions.checkArgument(resolvingFixes.size() == 1);
     // no get() method, have to use iterator.
-    return fixes.iterator().next().toLocation();
+    return resolvingFixes.iterator().next().toLocation();
   }
 
   @Override
@@ -110,12 +109,35 @@ public class Error extends Enclosed {
     Error error = (Error) o;
     return messageType.equals(error.messageType)
         && message.equals(error.message)
-        && fixes.equals(error.fixes);
+        && resolvingFixes.equals(error.resolvingFixes)
+        && offset == error.offset;
+  }
+
+  /**
+   * Checks if error is resolvable and all suggested fixes must be applied to an element in target
+   * module.
+   *
+   * @param tree Method declaration tree to check if elements on are on target.
+   * @return true, if error is resolvable via fixes on target module.
+   */
+  public boolean isFixableOnTarget(MethodDeclarationTree tree) {
+    return resolvingFixes.size() > 0
+        && this.resolvingFixes.stream().allMatch(fix -> tree.declaredInModule(fix.toLocation()));
+  }
+
+  /**
+   * Checks if this error is resolvable with the given collection of fixes.
+   *
+   * @param fixes Collection fixes.
+   * @return true, if this error is resolvable.
+   */
+  public boolean isResolvableWith(Collection<Fix> fixes) {
+    return fixes.containsAll(this.resolvingFixes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(messageType, message, fixes);
+    return Objects.hash(messageType, message, offset, resolvingFixes);
   }
 
   @Override
@@ -124,6 +146,6 @@ public class Error extends Enclosed {
   }
 
   public ImmutableSet<Fix> getResolvingFixes() {
-    return fixes;
+    return ImmutableSet.copyOf(resolvingFixes);
   }
 }
