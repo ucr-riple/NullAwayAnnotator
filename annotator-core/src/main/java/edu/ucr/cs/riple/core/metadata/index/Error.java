@@ -109,6 +109,7 @@ public class Error extends Enclosed {
     Error error = (Error) o;
     return messageType.equals(error.messageType)
         && message.equals(error.message)
+        && getRegion().equals(error.getRegion())
         && resolvingFixes.equals(error.resolvingFixes)
         && offset == error.offset;
   }

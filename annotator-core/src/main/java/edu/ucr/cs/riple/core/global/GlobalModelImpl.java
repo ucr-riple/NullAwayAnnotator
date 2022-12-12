@@ -44,9 +44,11 @@ import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
+import java.util.Collection;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 /** Implementation for {@link GlobalModel} interface. */
@@ -168,5 +170,35 @@ public class GlobalModelImpl extends BaseModel<MethodImpact, ImmutableMap<Locati
   @Override
   public int computeUpperBoundOfNumberOfErrors(Set<Fix> tree) {
     return tree.stream().mapToInt(fix -> effectOnDownstreamDependencies(fix, tree)).sum();
+  }
+
+  @Override
+  public ImmutableSet<Error> getTriggeredErrorsForCollection(Collection<Fix> fixTree) {
+    return fixTree.stream()
+        .filter(Fix::isOnMethod)
+        .flatMap(
+            fix -> {
+              MethodImpact impact = fetchImpact(fix);
+              return impact == null ? Stream.of() : impact.getTriggeredErrors().stream();
+            })
+        .collect(ImmutableSet.toImmutableSet());
+  }
+
+  @Override
+  public ImmutableSet<Error> getTriggeredErrors(Fix fix) {
+    // We currently only store impact of methods on downstream dependencies.
+    if (!fix.isOnMethod()) {
+      return ImmutableSet.of();
+    }
+    MethodImpact impact = fetchImpact(fix);
+    if (impact == null) {
+      return ImmutableSet.of();
+    }
+    return ImmutableSet.copyOf(impact.getTriggeredErrors());
+  }
+
+  @Override
+  public void updateImpactsAfterInjection(Set<Fix> fixes) {
+    this.store.values().forEach(methodImpact -> methodImpact.updateStatusAfterInjection(fixes));
   }
 }

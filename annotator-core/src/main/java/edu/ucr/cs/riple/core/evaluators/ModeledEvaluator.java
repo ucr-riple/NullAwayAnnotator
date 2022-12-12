@@ -60,7 +60,7 @@ public class ModeledEvaluator extends AbstractEvaluator {
         report -> {
           Fix root = report.root;
           Set<Error> triggeredErrors = model.getTriggeredErrorsForCollection(report.tree);
-          report.localEffect = triggeredErrors.size() - root.count;
+          report.setLocalEffect(triggeredErrors.size() - root.count);
         });
   }
 

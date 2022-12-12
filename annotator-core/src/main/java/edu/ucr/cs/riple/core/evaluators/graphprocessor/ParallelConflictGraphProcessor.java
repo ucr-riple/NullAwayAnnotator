@@ -34,9 +34,8 @@ import edu.ucr.cs.riple.core.metadata.index.Result;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import me.tongfei.progressbar.ProgressBar;
@@ -80,7 +79,7 @@ public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcess
       group.forEach(
           node -> {
             int localEffect = 0;
-            List<Error> triggeredErrors = new ArrayList<>();
+            Set<Error> triggeredErrors = new HashSet<>();
             for (Region region : node.regions) {
               Result<Error> errorComparisonResult =
                   errorBank.compareByMember(region.clazz, region.member, false);
@@ -91,7 +90,7 @@ public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcess
                 localEffect,
                 fixes,
                 triggeredErrors,
-                addTriggeredFixesFromDownstream(node),
+                getTriggeredFixesFromDownstream(node),
                 methodDeclarationTree);
           });
       injector.removeFixes(fixes);

@@ -42,7 +42,7 @@ public enum AnalysisMode {
     public void tag(Config config, GlobalModel globalModel, Collection<Report> reports) {
       reports.forEach(
           report -> {
-            if (report.localEffect < 1) {
+            if (report.getLocalEffect() < 1) {
               report.tag(APPROVE);
             } else {
               report.tag(REJECT);
@@ -68,7 +68,7 @@ public enum AnalysisMode {
             // Just a sanity check.
             Preconditions.checkArgument(report.getUpperBoundEffectOnDownstreamDependencies() == 0);
             // Apply if effect is less than 1.
-            if (report.localEffect < 1) {
+            if (report.getLocalEffect() < 1) {
               report.tag(APPROVE);
               return;
             }
@@ -86,7 +86,8 @@ public enum AnalysisMode {
     public void tag(Config config, GlobalModel globalModel, Collection<Report> reports) {
       reports.forEach(
           report -> {
-            if (report.localEffect + report.getUpperBoundEffectOnDownstreamDependencies() < 1) {
+            if (report.getLocalEffect() + report.getUpperBoundEffectOnDownstreamDependencies()
+                < 1) {
               report.tag(APPROVE);
             } else {
               report.tag(REJECT);
@@ -104,7 +105,8 @@ public enum AnalysisMode {
     public void tag(Config config, GlobalModel globalModel, Collection<Report> reports) {
       reports.forEach(
           report -> {
-            if (report.localEffect + report.getLowerBoundEffectOnDownstreamDependencies() < 1) {
+            if (report.getLocalEffect() + report.getLowerBoundEffectOnDownstreamDependencies()
+                < 1) {
               report.tag(APPROVE);
             } else {
               report.tag(REJECT);

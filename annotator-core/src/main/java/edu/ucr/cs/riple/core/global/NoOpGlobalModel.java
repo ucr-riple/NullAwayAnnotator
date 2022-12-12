@@ -64,7 +64,10 @@ public class NoOpGlobalModel implements GlobalModel {
   }
 
   @Override
-  public void updateImpactsAfterInjection(Collection<Fix> fixes) {
+  public void updateImpactsAfterInjection(Collection<Fix> fixes) {}
+
+  @Override
+  public void updateImpactsAfterInjection(Set<Fix> fixes) {
     // No operation needed.
   }
 

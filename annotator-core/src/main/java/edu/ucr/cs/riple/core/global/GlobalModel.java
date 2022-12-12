@@ -24,8 +24,13 @@
 
 package edu.ucr.cs.riple.core.global;
 
+import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.model.Model;
+
+import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -59,4 +64,11 @@ public interface GlobalModel extends Model<MethodImpact> {
    * @return Upper bound of number of errors on downstream dependencies.
    */
   int computeUpperBoundOfNumberOfErrors(Set<Fix> tree);
+
+  /**
+   * Updates state of methods after injection of fixes in target module.
+   *
+   * @param fixes Set of injected fixes.
+   */
+  void updateImpactsAfterInjection(Set<Fix> fixes);
 }
