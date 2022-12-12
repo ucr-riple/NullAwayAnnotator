@@ -49,17 +49,9 @@ public class NullAwayV1Adapter implements NullAwayVersionAdapter {
 
   /** Annotator config. */
   protected final Config config;
-  /**
-   * In this serialization version, offset of the errors is not serialized. Generally offsets are
-   * used to distinguish errors. On this version of NullAway all serialized errors are treated as
-   * unique errors among all errors. Therefore, we use this offset and increment it for each
-   * serialized error to maintain this assumption.
-   */
-  private int offset;
 
   public NullAwayV1Adapter(Config config) {
     this.config = config;
-    this.offset = 0;
   }
 
   @Override
@@ -87,7 +79,7 @@ public class NullAwayV1Adapter implements NullAwayVersionAdapter {
         values[0],
         values[1],
         new Region(values[2], values[3]),
-        offset++,
+        0,
         Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 4, 10)));
   }
 
