@@ -759,10 +759,11 @@ public class Config {
 
     /**
      * Summarizes and sorts offset changes. (e.g. offset change (p1, d1) and (p1, -d1 + e) can be
-     * summarized to (p1, e))
+     * summarized to (p1, e)). Also during search, we have many consecutive addition and deletion on
+     * the same position, this method can summarize them into a single offset change.
      *
      * @param changes Offset changes.
-     * @return Cleaned offset changes.
+     * @return Summarized and sorted offset changes.
      */
     private List<OffsetChange> summarizeAndSortOffsetChanges(List<OffsetChange> changes) {
       return changes.stream()
