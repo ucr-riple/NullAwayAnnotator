@@ -1,7 +1,5 @@
 package test;
 
-import javax.annotation.Nullable;
-
 public class Main {
 
   enum Type { // test.Main$Type
