@@ -89,8 +89,7 @@ public class FileOffsetStore {
    */
   private int characterOffsetAtLine(int line) {
     int ans = 0;
-    int current = 0;
-    while (current < line && current < lines.size()) {
+    for (int current = 0; current < line && current < lines.size(); current++) {
       ans += lines.get(current).length();
       ans += 1; // for new line.
       current += 1;
