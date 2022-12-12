@@ -154,6 +154,8 @@ public class Config {
 
   /** Handler for computing the original offset of reported errors with existing changes. */
   public final OffsetHandler offsetHandler;
+  /** Controls if offsets in error instance should be processed. */
+  private boolean offsetHandlingIsActivated;
 
   /**
    * Builds config from command line arguments.
@@ -511,12 +513,15 @@ public class Config {
       switch (version) {
         case 0:
           this.adapter = new NullAwayV0Adapter(this);
+          this.offsetHandlingIsActivated = false;
           break;
         case 1:
           this.adapter = new NullAwayV1Adapter(this);
+          this.offsetHandlingIsActivated = false;
           break;
         case 2:
           this.adapter = new NullAwayV2Adapter(this);
+          this.offsetHandlingIsActivated = true;
           break;
         default:
           throw new RuntimeException("Unrecognized NullAway serialization version: " + version);
@@ -725,19 +730,27 @@ public class Config {
   public static class OffsetHandler {
     /** Map of file paths to list offset changes. */
     private final Map<Path, SortedSet<OffsetChange>> contents;
+    /** Annotator config. */
+    private final Config config;
 
-    public OffsetHandler() {
+    public OffsetHandler(Config config) {
       contents = new HashMap<>();
+      this.config = config;
     }
 
     /**
-     * Gets the original offset according to existing offset changes.
+     * Gets the original offset according to existing offset changes if {@link
+     * Config#offsetHandlingIsActivated} is true. Otherwise, the given offset will be returned
+     * unmodified.
      *
      * @param path Path to source file.
      * @param offset Given offset.
      * @return Original offset.
      */
     public int getOriginalOffset(Path path, int offset) {
+      if (!config.offsetHandlingIsActivated) {
+        return offset;
+      }
       return OffsetChange.getOriginalOffset(
           offset, contents.getOrDefault(path, Collections.emptySortedSet()));
     }
@@ -748,6 +761,10 @@ public class Config {
      * @param newOffsets Given new offset changes.
      */
     public void updateOffset(Set<FileOffsetStore> newOffsets) {
+      if (!config.offsetHandlingIsActivated) {
+        // no need to update.
+        return;
+      }
       newOffsets.forEach(
           store -> {
             SortedSet<OffsetChange> existingOffsetChanges =
