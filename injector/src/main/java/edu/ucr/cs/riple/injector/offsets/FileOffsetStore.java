@@ -24,6 +24,8 @@
 
 package edu.ucr.cs.riple.injector.offsets;
 
+import static java.util.Comparator.comparingInt;
+
 import java.nio.file.Path;
 import java.util.List;
 import java.util.SortedSet;
@@ -116,6 +118,7 @@ public class FileOffsetStore {
       SortedSet<OffsetChange> existingOffsetChanges) {
     return offsetChanges.stream()
         .map(offsetChange -> offsetChange.getOffsetWithoutChanges(existingOffsetChanges))
+        .sorted(comparingInt(o -> o.position))
         .collect(Collectors.toCollection(TreeSet::new));
   }
 }

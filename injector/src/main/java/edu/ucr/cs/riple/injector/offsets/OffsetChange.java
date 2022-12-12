@@ -82,7 +82,13 @@ public class OffsetChange implements Comparable<OffsetChange> {
 
   @Override
   public int compareTo(OffsetChange o) {
-    return Integer.compare(this.position, o.position);
+    if (position < o.position) {
+      return -1;
+    }
+    if (position == o.position) {
+      return Integer.compare(numChars, o.numChars);
+    }
+    return 1;
   }
 
   @Override
