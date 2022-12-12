@@ -51,6 +51,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -723,7 +725,7 @@ public class Config {
   /** Responsible for handling offset changes in source file. */
   public static class OffsetHandler {
     /** Map of file paths to list offset changes. */
-    private final Map<Path, List<OffsetChange>> contents;
+    private final Map<Path, SortedSet<OffsetChange>> contents;
 
     public OffsetHandler() {
       contents = new HashMap<>();
@@ -737,7 +739,8 @@ public class Config {
      * @return Original offset.
      */
     public int getOriginalOffset(Path path, int offset) {
-      return OffsetChange.getOriginalOffset(offset, contents.getOrDefault(path, List.of()));
+      return OffsetChange.getOriginalOffset(
+          offset, contents.getOrDefault(path, Collections.emptySortedSet()));
     }
 
     /**
@@ -748,8 +751,8 @@ public class Config {
     public void updateOffset(Set<FileOffsetStore> newOffsets) {
       newOffsets.forEach(
           store -> {
-            List<OffsetChange> existingOffsetChanges =
-                contents.getOrDefault(store.getPath(), new ArrayList<>());
+            SortedSet<OffsetChange> existingOffsetChanges =
+                contents.getOrDefault(store.getPath(), new TreeSet<>());
             List<OffsetChange> offsetChanges = store.getOffsetsRelativeTo(existingOffsetChanges);
             existingOffsetChanges.addAll(offsetChanges);
             // to keep the list small, we can summarize pairs of offsets.
@@ -765,7 +768,7 @@ public class Config {
      * @param changes Offset changes.
      * @return Summarized and sorted offset changes.
      */
-    private List<OffsetChange> summarizeAndSortOffsetChanges(List<OffsetChange> changes) {
+    private SortedSet<OffsetChange> summarizeAndSortOffsetChanges(SortedSet<OffsetChange> changes) {
       return changes.stream()
           .collect(
               groupingBy(
@@ -777,8 +780,9 @@ public class Config {
               entry ->
                   new OffsetChange(
                       entry.getKey(), entry.getValue().stream().mapToInt(Integer::intValue).sum()))
+          // need to sort it before passing it to collector
           .sorted(comparingInt(o -> o.position))
-          .collect(Collectors.toList());
+          .collect(Collectors.toCollection(TreeSet::new));
     }
   }
 }

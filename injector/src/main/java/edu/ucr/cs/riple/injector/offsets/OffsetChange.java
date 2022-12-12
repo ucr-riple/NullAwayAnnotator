@@ -24,13 +24,14 @@
 
 package edu.ucr.cs.riple.injector.offsets;
 
-import java.util.List;
+import java.util.Objects;
+import java.util.SortedSet;
 
 /**
  * Offset change information, stores the number of characters added / removed at a specific
  * position.
  */
-public class OffsetChange {
+public class OffsetChange implements Comparable<OffsetChange> {
 
   /** Index of addition / deletion. */
   public final int position;
@@ -46,11 +47,10 @@ public class OffsetChange {
    * Computes the original offset of the given offset according to existing offset changes.
    *
    * @param offset Given offset change.
-   * @param existingOffsetChanges Existing offsets. The given list should be sorted by ascending by
-   *     {@link OffsetChange#position}.
+   * @param existingOffsetChanges Existing offsets.
    * @return Original offset.
    */
-  public static int getOriginalOffset(int offset, List<OffsetChange> existingOffsetChanges) {
+  public static int getOriginalOffset(int offset, SortedSet<OffsetChange> existingOffsetChanges) {
     if (existingOffsetChanges == null) {
       return offset;
     }
@@ -72,12 +72,33 @@ public class OffsetChange {
    * change is created while other modifications are already applied to source code and the offset
    * according to original source code is desired.
    *
-   * @param offsetChanges Given offset changes. The given list should be sorted by ascending by
-   *     {@link OffsetChange#position}.
+   * @param offsetChanges Given offset changes.
    * @return offset change with same {@link OffsetChange#numChars} and a position assuming the given
    *     list were not applied.
    */
-  public OffsetChange getOffsetWithoutChanges(List<OffsetChange> offsetChanges) {
+  public OffsetChange getOffsetWithoutChanges(SortedSet<OffsetChange> offsetChanges) {
     return new OffsetChange(getOriginalOffset(this.position, offsetChanges), numChars);
+  }
+
+  @Override
+  public int compareTo(OffsetChange o) {
+    return Integer.compare(this.position, o.position);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof OffsetChange)) {
+      return false;
+    }
+    OffsetChange that = (OffsetChange) o;
+    return position == that.position && numChars == that.numChars;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(position, numChars);
   }
 }

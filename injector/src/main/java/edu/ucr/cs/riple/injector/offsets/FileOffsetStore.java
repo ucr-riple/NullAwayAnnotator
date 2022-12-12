@@ -25,8 +25,9 @@
 package edu.ucr.cs.riple.injector.offsets;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /** Stores list of offset changes for a file. */
@@ -35,14 +36,14 @@ public class FileOffsetStore {
   /** Path to file. */
   private final Path path;
   /** List of existing offset changes. */
-  private final List<OffsetChange> offsetChanges;
+  private final SortedSet<OffsetChange> offsetChanges;
   /** Contents of file. */
   private final List<String> lines;
 
   public FileOffsetStore(List<String> lines, Path path) {
     this.lines = lines;
     this.path = path;
-    this.offsetChanges = new ArrayList<>();
+    this.offsetChanges = new TreeSet<>();
   }
 
   /**
@@ -112,7 +113,7 @@ public class FileOffsetStore {
    * @param existingOffsetChanges List of existing offset changes.
    * @return Translated and sorted offsets.
    */
-  public List<OffsetChange> getOffsetsRelativeTo(List<OffsetChange> existingOffsetChanges) {
+  public List<OffsetChange> getOffsetsRelativeTo(SortedSet<OffsetChange> existingOffsetChanges) {
     return offsetChanges.stream()
         .map(offsetChange -> offsetChange.getOffsetWithoutChanges(existingOffsetChanges))
         .collect(Collectors.toList());
