@@ -27,7 +27,7 @@ package edu.ucr.cs.riple.injector.offsets;
 import java.util.List;
 
 /**
- * Offset change information, stores the number of character added / removed at a specific position.
+ * Offset change information, stores the number of characters added / removed at a specific position.
  */
 public class OffsetChange {
 
