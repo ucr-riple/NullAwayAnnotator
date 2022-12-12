@@ -46,7 +46,8 @@ public class OffsetChange {
    * Computes the original offset of the given offset according to existing offset changes.
    *
    * @param offset Given offset change.
-   * @param existingOffsetChanges Existing offsets.
+   * @param existingOffsetChanges Existing offsets. The given list should be sorted by ascending by
+   *     {@link OffsetChange#position}.
    * @return Original offset.
    */
   public static int getOriginalOffset(int offset, List<OffsetChange> existingOffsetChanges) {
@@ -68,7 +69,8 @@ public class OffsetChange {
   /**
    * Creates an offset relative to original source code.
    *
-   * @param offsetChanges Existing offsets.
+   * @param offsetChanges Existing offsets. The given list should be sorted by ascending by {@link
+   *     OffsetChange#position}.
    * @return Original offset.
    */
   public OffsetChange relativeTo(List<OffsetChange> offsetChanges) {
