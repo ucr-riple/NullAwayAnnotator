@@ -769,7 +769,7 @@ public class Config {
           .collect(
               groupingBy(
                   offsetChange -> offsetChange.position,
-                  mapping(offsetChange -> offsetChange.dist, Collectors.toList())))
+                  mapping(offsetChange -> offsetChange.numChars, Collectors.toList())))
           .entrySet()
           .stream()
           .map(

@@ -35,11 +35,11 @@ public class OffsetChange {
   /** Index of addition / deletion. */
   public final int position;
   /** Number of characters added / removed. */
-  public final int dist;
+  public final int numChars;
 
-  public OffsetChange(int position, int dist) {
+  public OffsetChange(int position, int numChars) {
     this.position = position;
-    this.dist = dist;
+    this.numChars = numChars;
   }
 
   /**
@@ -56,7 +56,7 @@ public class OffsetChange {
     int result = offset;
     for (OffsetChange current : existingOffsetChanges) {
       if (result > current.position) {
-        result -= current.dist;
+        result -= current.numChars;
       }
       if (result < current.position) {
         break;
@@ -72,6 +72,6 @@ public class OffsetChange {
    * @return Original offset.
    */
   public OffsetChange relativeTo(List<OffsetChange> offsetChanges) {
-    return new OffsetChange(getOriginalOffset(this.position, offsetChanges), dist);
+    return new OffsetChange(getOriginalOffset(this.position, offsetChanges), numChars);
   }
 }

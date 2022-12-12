@@ -50,23 +50,23 @@ public class FileOffsetStore {
    *
    * @param line Line number where addition occurred.
    * @param column Column number where addition occurred.
-   * @param dist Number of characters added.
+   * @param numChars Number of characters added.
    */
-  public void updateOffsetWithAddition(int line, int column, int dist) {
+  public void updateOffsetWithAddition(int line, int column, int numChars) {
     int offset = characterOffsetAtLine(line);
-    this.offsetChanges.add(new OffsetChange(offset + column, dist));
+    this.offsetChanges.add(new OffsetChange(offset + column, numChars));
   }
 
   /**
    * Adds an offset change for addition along a new line addition.
    *
    * @param line Line number where addition occurred.
-   * @param dist Number of characters added.
+   * @param numChars Number of characters added.
    */
-  public void updateOffsetWithNewLineAddition(int line, int dist) {
+  public void updateOffsetWithNewLineAddition(int line, int numChars) {
     int offset = characterOffsetAtLine(line);
-    // add one to dist for new line.
-    this.offsetChanges.add(new OffsetChange(offset, dist + 1));
+    // add one to numChars for new line.
+    this.offsetChanges.add(new OffsetChange(offset, numChars + 1));
   }
 
   /**
@@ -74,11 +74,11 @@ public class FileOffsetStore {
    *
    * @param line Line number where deletion occurred.
    * @param column Column number where deletion occurred.
-   * @param dist Number of characters removed.
+   * @param numChars Number of characters removed.
    */
-  public void updateOffsetWithDeletion(int line, int column, int dist) {
+  public void updateOffsetWithDeletion(int line, int column, int numChars) {
     int offset = characterOffsetAtLine(line);
-    this.offsetChanges.add(new OffsetChange(offset + column, -1 * dist));
+    this.offsetChanges.add(new OffsetChange(offset + column, -1 * numChars));
   }
 
   /**
