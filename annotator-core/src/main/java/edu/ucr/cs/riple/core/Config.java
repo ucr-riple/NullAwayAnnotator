@@ -781,6 +781,7 @@ public class Config {
               entry ->
                   new OffsetChange(
                       entry.getKey(), entry.getValue().stream().mapToInt(Integer::intValue).sum()))
+          .filter(offsetChange -> offsetChange.numChars == 0)
           .sorted(comparingInt(o -> o.position))
           .collect(Collectors.toCollection(TreeSet::new));
     }
