@@ -52,15 +52,16 @@ public class OffsetChange {
     if (existingOffsetChanges == null) {
       return offset;
     }
+    int result = offset;
     for (OffsetChange current : existingOffsetChanges) {
-      if (offset > current.position) {
-        offset -= current.dist;
+      if (result > current.position) {
+        result -= current.dist;
       }
-      if (offset < current.position) {
+      if (result < current.position) {
         break;
       }
     }
-    return offset;
+    return result;
   }
 
   /**
