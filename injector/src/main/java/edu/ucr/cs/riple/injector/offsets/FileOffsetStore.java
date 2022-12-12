@@ -115,7 +115,7 @@ public class FileOffsetStore {
    */
   public List<OffsetChange> getOffsetsRelativeTo(List<OffsetChange> existingOffsetChanges) {
     return offsetChanges.stream()
-        .map(offsetChange -> offsetChange.relativeTo(existingOffsetChanges))
+        .map(offsetChange -> offsetChange.getOffsetWithoutChanges(existingOffsetChanges))
         .collect(Collectors.toList());
   }
 }

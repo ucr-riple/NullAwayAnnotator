@@ -67,13 +67,17 @@ public class OffsetChange {
   }
 
   /**
-   * Creates an offset relative to original source code.
+   * This method figures out what the offset change would be if the given offset changes were not
+   * applied, and then returns the corresponding offset change instance. Mainly useful if this
+   * change is created while other modifications are already applied to source code and the offset
+   * according to original source code is desired.
    *
-   * @param offsetChanges Existing offsets. The given list should be sorted by ascending by {@link
-   *     OffsetChange#position}.
-   * @return Original offset.
+   * @param offsetChanges Given offset changes. The given list should be sorted by ascending by
+   *     {@link OffsetChange#position}.
+   * @return offset change with same {@link OffsetChange#numChars} and a position assuming the given
+   *     list were not applied.
    */
-  public OffsetChange relativeTo(List<OffsetChange> offsetChanges) {
+  public OffsetChange getOffsetWithoutChanges(List<OffsetChange> offsetChanges) {
     return new OffsetChange(getOriginalOffset(this.position, offsetChanges), numChars);
   }
 }
