@@ -93,7 +93,6 @@ public class FileOffsetStore {
     for (int current = 0; current < line && current < lines.size(); current++) {
       ans += lines.get(current).length();
       ans += 1; // for new line.
-      current += 1;
     }
     return ans;
   }
