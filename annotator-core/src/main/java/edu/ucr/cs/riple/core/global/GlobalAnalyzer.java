@@ -28,7 +28,6 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -73,14 +72,14 @@ public interface GlobalAnalyzer {
   ImmutableSet<Error> getTriggeredErrorsForCollection(Collection<Fix> collection);
 
   /**
-   * Collects list of triggered errors in downstream dependencies if fix is applied in the target
-   * module. It also includes triggered errors that can be resolved via an annotation in target
-   * (upstream) module.
+   * Set of triggered errors in downstream dependencies if fix is applied in the target module. It
+   * also includes triggered errors that can be resolved via an annotation in target (upstream)
+   * module.
    *
    * @param fix Fix instance to be applied in the target module.
-   * @return List of triggered errors.
+   * @return Set of triggered errors.
    */
-  List<Error> getTriggeredErrors(Fix fix);
+  Set<Error> getTriggeredErrors(Fix fix);
 
   /**
    * Updates state of methods after injection of fixes in target module.

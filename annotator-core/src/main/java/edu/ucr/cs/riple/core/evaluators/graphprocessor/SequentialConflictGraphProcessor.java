@@ -57,12 +57,11 @@ public class SequentialConflictGraphProcessor extends AbstractConflictGraphProce
               errorBank.saveState(false, true);
               Result<Error> errorComparisonResult = errorBank.compare();
               node.effect = errorComparisonResult.size;
-              addTriggeredFixesFromDownstream(node);
               node.updateStatus(
                   errorComparisonResult.size,
                   fixes,
                   errorComparisonResult.dif,
-                  addTriggeredFixesFromDownstream(node),
+                  getTriggeredFixesFromDownstream(node),
                   methodDeclarationTree);
               injector.removeFixes(fixes);
             });

@@ -42,12 +42,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -106,13 +107,13 @@ public class Utility {
     JSONArray reportsJson = new JSONArray();
     for (Report report : reports) {
       JSONObject reportJson = report.root.getJson();
-      reportJson.put("LOCAL EFFECT", report.localEffect);
+      reportJson.put("LOCAL EFFECT", report.getLocalEffect());
       reportJson.put("OVERALL EFFECT", report.getOverallEffect(config));
       reportJson.put("Upper Bound EFFECT", report.getUpperBoundEffectOnDownstreamDependencies());
       reportJson.put("Lower Bound EFFECT", report.getLowerBoundEffectOnDownstreamDependencies());
-      reportJson.put("FINISHED", report.finished);
+      reportJson.put("FINISHED", !report.isInProgress(config));
       JSONArray followUps = new JSONArray();
-      if (config.chain && report.localEffect < 1) {
+      if (config.chain && report.getLocalEffect() < 1) {
         report.tree.remove(report.root);
         followUps.addAll(report.tree.stream().map(Fix::getJson).collect(Collectors.toList()));
       }
@@ -141,6 +142,7 @@ public class Utility {
    * Reads fixes from the serialized errors in "errors.tsv" file in the output directory,
    *
    * @param info Module info.
+   * @param store Field Declaration store.
    * @return Set of serialized fixes.
    */
   public static ImmutableSet<Fix> readFixesFromOutputDirectory(
@@ -153,12 +155,13 @@ public class Utility {
    * Reads serialized errors of passed module in "errors.tsv" file in the output directory,
    *
    * @param info Module info.
-   * @return List of serialized errors.
+   * @param store Field Declaration store.
+   * @return Set of serialized errors.
    */
-  public static List<Error> readErrorsFromOutputDirectory(
+  public static Set<Error> readErrorsFromOutputDirectory(
       Config config, ModuleInfo info, FieldDeclarationStore store) {
     Path errorsPath = info.dir.resolve("errors.tsv");
-    List<Error> errors = new ArrayList<>();
+    Set<Error> errors = new HashSet<>();
     try {
       try (BufferedReader br =
           Files.newBufferedReader(errorsPath.toFile().toPath(), Charset.defaultCharset())) {

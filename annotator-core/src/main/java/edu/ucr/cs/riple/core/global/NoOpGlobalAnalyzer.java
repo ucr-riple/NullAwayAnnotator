@@ -28,7 +28,6 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -59,8 +58,8 @@ public class NoOpGlobalAnalyzer implements GlobalAnalyzer {
   }
 
   @Override
-  public List<Error> getTriggeredErrors(Fix fix) {
-    return List.of();
+  public Set<Error> getTriggeredErrors(Fix fix) {
+    return Set.of();
   }
 
   @Override

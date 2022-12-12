@@ -24,13 +24,14 @@
 
 package edu.ucr.cs.riple.core;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -42,21 +43,22 @@ import java.util.stream.Collectors;
 public class Report {
 
   /** Effect on target module. */
-  public int localEffect;
+  private int localEffect;
   /** Root of fix tree associated to this report instance. */
-  public Fix root;
+  public final Fix root;
   /** Fix tree associated to this report instance. */
   public Set<Fix> tree;
   /**
    * Set of fixes that will be triggered in target module if fix tree is applied to the source code.
    */
-  public ImmutableSet<Fix> triggeredFixes;
+  protected ImmutableSet<Fix> triggeredFixesFromDownstream;
   /**
-   * Set of fixes that will be triggered in target module if fix tree is applied to the source code.
+   * Set of errors that will be triggered in target module if fix tree is applied to the source
+   * code.
    */
-  public ImmutableList<Error> triggeredErrors;
+  protected ImmutableSet<Error> triggeredErrors;
   /** If true, all leaves of fix tree are not resolvable by any {@code @Nullable} annotation. */
-  public boolean finished;
+  private boolean started;
   /**
    * Lower bound of number of errors in downstream dependencies if fix tree is applied to the target
    * module.
@@ -67,6 +69,18 @@ public class Report {
    * module.
    */
   private int upperBoundEffectOnDownstreamDependencies;
+
+  public void setStatus(
+      int localEffect,
+      Set<Fix> extendedTree,
+      ImmutableSet<Error> triggeredErrors,
+      Set<Fix> triggeredFixesFromDownstream) {
+    this.localEffect = localEffect;
+    this.tree.addAll(extendedTree);
+    this.triggeredFixesFromDownstream = ImmutableSet.copyOf(triggeredFixesFromDownstream);
+    this.triggeredErrors = ImmutableSet.copyOf(triggeredErrors);
+    this.started = false;
+  }
 
   /** Denotes the final decision regarding the injection of the report. */
   public enum Tag {
@@ -83,12 +97,12 @@ public class Report {
     this.localEffect = localEffect;
     this.root = root;
     this.tree = Sets.newHashSet(root);
-    this.finished = false;
-    this.triggeredFixes = ImmutableSet.of();
-    this.triggeredErrors = ImmutableList.of();
+    this.triggeredFixesFromDownstream = ImmutableSet.of();
+    this.triggeredErrors = ImmutableSet.of();
     this.lowerBoundEffectOnDownstreamDependencies = 0;
     this.upperBoundEffectOnDownstreamDependencies = 0;
     this.tag = Tag.REJECT;
+    this.started = true;
   }
 
   /**
@@ -171,9 +185,19 @@ public class Report {
       return false;
     }
     Set<Location> thisTriggered =
-        this.triggeredFixes.stream().map(Fix::toLocation).collect(Collectors.toSet());
+        Utility.getResolvingFixesOfErrors(this.triggeredErrors).stream()
+            .map(Fix::toLocation)
+            .collect(Collectors.toSet());
+    thisTriggered.addAll(
+        triggeredFixesFromDownstream.stream().map(Fix::toLocation).collect(Collectors.toSet()));
     Set<Location> otherTriggered =
-        other.triggeredFixes.stream().map(Fix::toLocation).collect(Collectors.toSet());
+        Utility.getResolvingFixesOfErrors(other.triggeredErrors).stream()
+            .map(Fix::toLocation)
+            .collect(Collectors.toSet());
+    otherTriggered.addAll(
+        other.triggeredFixesFromDownstream.stream()
+            .map(Fix::toLocation)
+            .collect(Collectors.toSet()));
     return otherTriggered.equals(thisTriggered);
   }
 
@@ -218,6 +242,18 @@ public class Report {
     return this.localEffect + this.lowerBoundEffectOnDownstreamDependencies;
   }
 
+  public int getLocalEffect() {
+    return localEffect;
+  }
+
+  public ImmutableSet<Error> getTriggeredErrors() {
+    return triggeredErrors;
+  }
+
+  public Set<Fix> getTriggeredFixes() {
+    return new HashSet<>(triggeredFixesFromDownstream);
+  }
+
   /**
    * Getter for lower bound effect on downstream dependencies.
    *
@@ -244,7 +280,16 @@ public class Report {
    * @return true, if report needs further investigation.
    */
   public boolean isInProgress(Config config) {
-    return (!finished && (!config.bailout || localEffect > 0))
-        || triggeredFixes.stream().anyMatch(input -> !input.fixSourceIsInTarget);
+    if (started) {
+      return true;
+    }
+    if (triggeredFixesFromDownstream.stream().anyMatch(input -> !input.fixSourceIsInTarget)) {
+      return true;
+    }
+    Set<Fix> triggeredFixes = Utility.getResolvingFixesOfErrors(this.triggeredErrors);
+    if (triggeredFixes.size() == 0 || this.tree.containsAll(triggeredFixes)) {
+      return false;
+    }
+    return !config.bailout || localEffect > 0;
   }
 }

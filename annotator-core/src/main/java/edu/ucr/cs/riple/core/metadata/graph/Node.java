@@ -24,7 +24,6 @@
 
 package edu.ucr.cs.riple.core.metadata.graph;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Report;
@@ -57,23 +56,17 @@ public class Node {
   /** Set of potentially impacted by any node in tree. */
   public final Set<Region> regions;
 
-  /** Set of triggered fixes if tree is applied. */
-  public Set<Fix> triggeredFixes;
+  /** Set of triggered fixes from downstream dependencies if tree is applied. */
+  public Set<Fix> triggeredFixesFromDownstream;
 
-  /** Collection of triggered errors if tree is applied. */
-  public ImmutableList<Error> triggeredErrors;
+  /** Set of triggered errors if tree is applied. */
+  public ImmutableSet<Error> triggeredErrors;
 
   /** Unique id of Node across all nodes. */
   public int id;
 
   /** Effect of applying containing change */
   public int effect;
-
-  /**
-   * if <code>true</code>, set of triggered fixes has been updated, and the node still needs further
-   * process.
-   */
-  public boolean changed;
 
   /** Corresponding report of processing root. */
   public Report report;
@@ -84,11 +77,10 @@ public class Node {
   public Node(Fix root) {
     this.regions = new HashSet<>();
     this.root = root;
-    this.triggeredFixes = new HashSet<>();
-    this.triggeredErrors = ImmutableList.of();
+    this.triggeredFixesFromDownstream = new HashSet<>();
+    this.triggeredErrors = ImmutableSet.of();
     this.effect = 0;
     this.tree = Sets.newHashSet(root);
-    this.changed = false;
   }
 
   /**
@@ -153,10 +145,10 @@ public class Node {
       Collection<Error> triggeredErrors,
       Set<Fix> triggeredFixesFromDownstream,
       MethodDeclarationTree mdt) {
-    // Update list of triggered errors.
-    this.triggeredErrors = ImmutableList.copyOf(triggeredErrors);
-    // Update list of triggered fixes.
-    this.updateTriggered(triggeredFixesFromDownstream);
+    // Update list of triggered fixes from downstream.
+    this.triggeredFixesFromDownstream = triggeredFixesFromDownstream;
+    // Update set of triggered errors.
+    this.triggeredErrors = ImmutableSet.copyOf(triggeredErrors);
     // A fix in a tree, can have a super method that is not part of this node's tree but be present
     // in another node's tree. In this case since both are applied, an error due to inheritance
     // violation will not be reported. This calculation below will fix that.
@@ -167,7 +159,7 @@ public class Node {
             fix -> {
               OnMethod onMethod = fix.toMethod();
               return mdt.getClosestSuperMethod(onMethod.method, onMethod.clazz);
-            }) // List of super methods of all fixes in tree.
+            }) // Collection of super methods of all fixes in tree.
         .filter(
             node ->
                 node != null
@@ -192,25 +184,12 @@ public class Node {
     this.effect = localEffect + numberOfSuperMethodsAnnotatedOutsideTree[0];
   }
 
-  /**
-   * Updated the triggered list and the status of node.
-   *
-   * @param triggeredFixesFromDownstream Set of triggered fixes from downstream.
-   */
-  public void updateTriggered(Set<Fix> triggeredFixesFromDownstream) {
-    int sizeBefore = this.triggeredFixes.size();
-    ImmutableSet<Fix> fixes = Utility.getResolvingFixesOfErrors(this.triggeredErrors);
-    this.triggeredFixes.addAll(fixes);
-    this.triggeredFixes.addAll(triggeredFixesFromDownstream);
-    int sizeAfter = this.triggeredFixes.size();
-    this.changed = (sizeAfter != sizeBefore);
-  }
-
   /** Merges triggered fixes to the tree, to prepare the analysis for the next depth. */
   public void mergeTriggered() {
-    this.tree.addAll(this.triggeredFixes);
+    this.tree.addAll(Utility.getResolvingFixesOfErrors(this.triggeredErrors));
+    this.tree.addAll(this.triggeredFixesFromDownstream);
     this.tree.forEach(fix -> fix.fixSourceIsInTarget = true);
-    this.triggeredFixes.clear();
+    this.triggeredFixesFromDownstream.clear();
   }
 
   @Override
