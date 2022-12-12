@@ -753,7 +753,8 @@ public class Config {
           store -> {
             SortedSet<OffsetChange> existingOffsetChanges =
                 contents.getOrDefault(store.getPath(), new TreeSet<>());
-            List<OffsetChange> offsetChanges = store.getOffsetsRelativeTo(existingOffsetChanges);
+            SortedSet<OffsetChange> offsetChanges =
+                store.getOffsetWithoutChanges(existingOffsetChanges);
             existingOffsetChanges.addAll(offsetChanges);
             // to keep the list small, we can summarize pairs of offsets.
             contents.put(store.getPath(), summarizeAndSortOffsetChanges(existingOffsetChanges));
@@ -780,7 +781,6 @@ public class Config {
               entry ->
                   new OffsetChange(
                       entry.getKey(), entry.getValue().stream().mapToInt(Integer::intValue).sum()))
-          // need to sort it before passing it to collector
           .sorted(comparingInt(o -> o.position))
           .collect(Collectors.toCollection(TreeSet::new));
     }
