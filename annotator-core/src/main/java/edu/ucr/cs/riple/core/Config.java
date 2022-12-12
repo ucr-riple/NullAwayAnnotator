@@ -410,7 +410,7 @@ public class Config {
             ? cmd.getOptionValue(activateForceResolveOption)
             : "org.jspecify.nullness.NullUnmarked";
     this.moduleCounterID = 0;
-    this.offsetHandler = new OffsetHandler();
+    this.offsetHandler = new OffsetHandler(this);
     this.log = new Log();
     this.log.reset();
   }
@@ -491,7 +491,7 @@ public class Config {
         getValueFromKey(jsonObject, "ANNOTATION:NULL_UNMARKED", String.class)
             .orElse("org.jspecify.nullness.NullUnmarked");
     this.log = new Log();
-    this.offsetHandler = new OffsetHandler();
+    this.offsetHandler = new OffsetHandler(this);
     log.reset();
   }
 
