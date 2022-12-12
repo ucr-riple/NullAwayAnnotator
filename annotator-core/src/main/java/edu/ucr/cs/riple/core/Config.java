@@ -155,7 +155,7 @@ public class Config {
   /** Handler for computing the original offset of reported errors with existing changes. */
   public final OffsetHandler offsetHandler;
   /** Controls if offsets in error instance should be processed. */
-  private boolean offsetHandlingIsActivated;
+  public boolean offsetHandlingIsActivated;
 
   /**
    * Builds config from command line arguments.
