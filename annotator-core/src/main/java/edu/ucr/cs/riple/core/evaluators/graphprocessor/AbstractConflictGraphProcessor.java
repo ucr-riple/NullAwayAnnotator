@@ -33,7 +33,6 @@ import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
-import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Set;
@@ -79,7 +78,6 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
                 new Fix(
                     new AddMarkerAnnotation(onParameter, config.nullableAnnot),
                     "PASSING_NULLABLE",
-                    new Region(onParameter.clazz, onParameter.method),
                     false))
         .collect(Collectors.toSet());
   }

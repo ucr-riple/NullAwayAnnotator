@@ -25,7 +25,6 @@
 package edu.ucr.cs.riple.core.metadata.index;
 
 import com.google.common.collect.Sets;
-import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -42,7 +41,7 @@ import org.json.simple.JSONObject;
  * Stores information suggesting adding @Nullable on an element in source code. These suggestions
  * are coming form NullAway.
  */
-public class Fix extends Enclosed {
+public class Fix {
 
   /** Suggested change. */
   public final AddAnnotation change;
@@ -55,8 +54,7 @@ public class Fix extends Enclosed {
    */
   public boolean fixSourceIsInTarget;
 
-  public Fix(AddAnnotation change, String reason, Region region, boolean fixSourceIsInTarget) {
-    super(region);
+  public Fix(AddAnnotation change, String reason, boolean fixSourceIsInTarget) {
     this.change = change;
     this.reasons = reason != null ? Sets.newHashSet(reason) : new HashSet<>();
     this.fixSourceIsInTarget = fixSourceIsInTarget;

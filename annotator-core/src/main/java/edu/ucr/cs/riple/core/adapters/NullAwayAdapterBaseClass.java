@@ -110,7 +110,6 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
                         extendVariableList(store.getLocationOnField(region.clazz, field), store),
                         config.nullableAnnot),
                     "METHOD_NO_INIT",
-                    region,
                     true))
         .collect(Collectors.toSet());
   }
@@ -146,10 +145,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
         nonnullTarget == null
             ? null
             : new Fix(
-                new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot),
-                errorType,
-                region,
-                true);
+                new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot), errorType, true);
     return new Error(
         errorType, errorMessage, region, offset, config.offsetHandlingIsActivated, resolvingFix);
   }
