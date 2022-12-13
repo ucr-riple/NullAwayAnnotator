@@ -46,8 +46,6 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
   protected final MethodDeclarationTree methodDeclarationTree;
   /** Injector used in the processor to inject / remove fixes. */
   protected final AnnotationInjector injector;
-  /** Fix bank instance to store state of fixes before and after of injections. */
-  protected final Bank<Fix> fixBank;
   /** Error bank instance to store state of fixes before and after of injections. */
   protected final Bank<Error> errorBank;
   /** Global analyzer to retrieve impacts of fixes globally. */
@@ -61,7 +59,6 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
     this.config = config;
     this.methodDeclarationTree = supplier.getMethodDeclarationTree();
     this.injector = supplier.getInjector();
-    this.fixBank = supplier.getFixBank();
     this.errorBank = supplier.getErrorBank();
     this.globalAnalyzer = supplier.getGlobalAnalyzer();
     this.compilerRunner = runner;

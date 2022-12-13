@@ -76,7 +76,6 @@ public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcess
       injector.injectFixes(fixes);
       compilerRunner.run();
       errorBank.saveState(false, true);
-      fixBank.saveState(false, true);
       group.forEach(
           node -> {
             int localEffect = 0;

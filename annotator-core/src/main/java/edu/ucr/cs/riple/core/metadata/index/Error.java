@@ -23,6 +23,10 @@
  */
 package edu.ucr.cs.riple.core.metadata.index;
 
+import static java.util.function.UnaryOperator.identity;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
@@ -32,8 +36,10 @@ import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 /** Represents an error reported by NullAway. */
@@ -186,8 +192,11 @@ public class Error extends Enclosed {
    * @return Immutable set of fixes which can resolve all given errors.
    */
   public static ImmutableSet<Fix> getResolvingFixesOfErrors(Collection<Error> errors) {
-    return errors.stream()
-        .flatMap(error -> error.resolvingFixes.stream())
-        .collect(ImmutableSet.toImmutableSet());
+    Map<Fix, Set<Set<String>>> m =
+        errors.stream()
+            .flatMap(error -> error.resolvingFixes.stream())
+            .collect(groupingBy(identity(), mapping(fix -> fix.reasons, Collectors.toSet())));
+    m.forEach((fix, sets) -> sets.forEach(fix.reasons::addAll));
+    return ImmutableSet.copyOf(m.keySet());
   }
 }

@@ -55,7 +55,6 @@ public class SequentialConflictGraphProcessor extends AbstractConflictGraphProce
               injector.injectFixes(fixes);
               compilerRunner.run();
               errorBank.saveState(false, true);
-              fixBank.saveState(false, true);
               Result<Error> errorComparisonResult = errorBank.compare();
               node.effect = errorComparisonResult.size;
               node.updateStatus(

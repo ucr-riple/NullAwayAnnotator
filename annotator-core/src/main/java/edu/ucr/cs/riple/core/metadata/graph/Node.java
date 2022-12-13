@@ -88,10 +88,12 @@ public class Node {
   /**
    * Initializes rootSource. Collects all regions where error reported from {@link Bank}
    *
-   * @param fixBank {@link Bank} instance.
+   * @param errorBank {@link Bank} instance.
    */
-  public void setOrigins(Bank<Fix> fixBank) {
-    this.origins = fixBank.getRegionsForFixes(fix -> fix.equals(root));
+  public void setOrigins(Bank<Error> errorBank) {
+    this.origins =
+        errorBank.getRegionsForElements(
+            error -> error.isSingleFix() && error.getResolvingFixes().contains(root));
   }
 
   /**

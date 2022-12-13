@@ -31,18 +31,10 @@ import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 
 /** Supplier for initializing an {@link AbstractEvaluator} instance. */
 public interface Supplier {
-
-  /**
-   * Getter for {@link Bank} of {@link Fix} instances.
-   *
-   * @return Fix Bank instance.
-   */
-  Bank<Fix> getFixBank();
 
   /**
    * Getter for {@link Bank} of {@link Error} instance.

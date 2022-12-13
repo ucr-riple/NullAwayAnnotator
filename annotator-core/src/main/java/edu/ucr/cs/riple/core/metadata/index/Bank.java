@@ -127,7 +127,7 @@ public class Bank<T extends Enclosed> {
    * @param predicate Predicate provided by caller.
    * @return Set of regions.
    */
-  public Set<Region> getRegionsForFixes(Predicate<T> predicate) {
+  public Set<Region> getRegionsForElements(Predicate<T> predicate) {
     return rootInClass.getRegionsOfMatchingItems(predicate);
   }
 }
