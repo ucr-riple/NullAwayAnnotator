@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Factory;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
@@ -172,9 +173,11 @@ public class Utility {
    * Reads serialized errors of passed module in "errors.tsv" file in the output directory,
    *
    * @param info Module info.
+   * @param fieldDeclarationStore Field Declaration store.
    * @return Set of serialized errors.
    */
-  public static Set<Error> readErrorsFromOutputDirectory(Config config, ModuleInfo info) {
+  public static Set<Error> readErrorsFromOutputDirectory(
+      Config config, ModuleInfo info, FieldDeclarationStore fieldDeclarationStore) {
     Path errorsPath = info.dir.resolve("errors.tsv");
     Set<Error> errors = new HashSet<>();
     try {
@@ -184,7 +187,7 @@ public class Utility {
         // Skip header.
         br.readLine();
         while ((line = br.readLine()) != null) {
-          errors.add(config.getAdapter().deserializeError(line.split("\t")));
+          errors.add(config.getAdapter().deserializeError(line.split("\t"), fieldDeclarationStore));
         }
       }
     } catch (IOException e) {

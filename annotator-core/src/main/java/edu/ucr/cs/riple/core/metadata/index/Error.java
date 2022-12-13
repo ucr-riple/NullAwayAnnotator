@@ -23,10 +23,15 @@
  */
 package edu.ucr.cs.riple.core.metadata.index;
 
+import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
+import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.location.Location;
+import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Objects;
+import java.util.Set;
 import javax.annotation.Nullable;
 
 /** Represents an error reported by NullAway. */
@@ -37,25 +42,27 @@ public class Error extends Enclosed {
   public final String messageType;
   /** Error message. */
   public final String message;
-  /**
-   * If non-null, this error involved a pseudo-assignment of a @Nullable expression into a @NonNull
-   * target, and this field is the Symbol for that target.
-   */
-  @Nullable public final Location nonnullTarget;
-
+  /** The fix which can resolve this error if such fixes exists. */
+  private final Set<Fix> resolvingFixes;
+  /** Offset of program point in original version where error is reported. */
   private final int offset;
 
   public Error(
-      String messageType,
-      String message,
-      Region region,
-      int offset,
-      @Nullable Location nonnullTargetLocation) {
+      String messageType, String message, Region region, int offset, @Nullable Fix resolvingFix) {
     super(region);
     this.messageType = messageType;
     this.message = message;
     this.offset = offset;
-    this.nonnullTarget = nonnullTargetLocation;
+    this.resolvingFixes = resolvingFix == null ? Set.of() : Set.of(resolvingFix);
+  }
+
+  public Error(
+      String messageType, String message, Region region, int offset, Set<Fix> resolvingFixes) {
+    super(region);
+    this.messageType = messageType;
+    this.message = message;
+    this.offset = offset;
+    this.resolvingFixes = resolvingFixes;
   }
 
   /**
@@ -65,8 +72,39 @@ public class Error extends Enclosed {
    * @param config Config instance.
    * @return Factory instance.
    */
-  public static Factory<Error> factory(Config config) {
-    return config.getAdapter()::deserializeError;
+  public static Factory<Error> factory(Config config, FieldDeclarationStore store) {
+    return values -> config.getAdapter().deserializeError(values, store);
+  }
+
+  /**
+   * Checks if error is resolvable with only one fix.
+   *
+   * @return true if error is resolvable with only one fix and false otherwise.
+   */
+  public boolean isSingleFix() {
+    return this.resolvingFixes.size() == 1;
+  }
+
+  /**
+   * Returns the location the single fix that resolves this error.
+   *
+   * @return Location of the fix resolving this error.
+   */
+  public Location toResolvingLocation() {
+    Preconditions.checkArgument(resolvingFixes.size() == 1);
+    // no get() method, have to use iterator.
+    return resolvingFixes.iterator().next().toLocation();
+  }
+
+  /**
+   * Returns the location of the parameter that can resolve this error.
+   *
+   * @return Location of parameter that can resolve this error.
+   */
+  public OnParameter toResolvingParameter() {
+    Location resolvingLocation = toResolvingLocation();
+    Preconditions.checkArgument(resolvingLocation.isOnParameter());
+    return resolvingLocation.toParameter();
   }
 
   @Override
@@ -80,15 +118,26 @@ public class Error extends Enclosed {
     Error error = (Error) o;
     return messageType.equals(error.messageType)
         && message.equals(error.message)
-        && offset == error.offset
-        && region.equals(error.region)
-        // Since nonnullTarget is @Nullable, used Objects.equal.
-        && Objects.equals(nonnullTarget, error.nonnullTarget);
+        && getRegion().equals(error.getRegion())
+        && resolvingFixes.equals(error.resolvingFixes)
+        && offset == error.offset;
+  }
+
+  /**
+   * Checks if error is resolvable and all suggested fixes must be applied to an element in target
+   * module.
+   *
+   * @param tree Method declaration tree to check if elements on are on target.
+   * @return true, if error is resolvable via fixes on target module.
+   */
+  public boolean isFixableOnTarget(MethodDeclarationTree tree) {
+    return resolvingFixes.size() > 0
+        && this.resolvingFixes.stream().allMatch(fix -> tree.declaredInModule(fix.toLocation()));
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(messageType, message, offset, nonnullTarget);
+    return Objects.hash(messageType, message, region, resolvingFixes, offset);
   }
 
   @Override

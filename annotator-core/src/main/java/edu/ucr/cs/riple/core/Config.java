@@ -34,6 +34,7 @@ import edu.ucr.cs.riple.core.adapters.NullAwayV1Adapter;
 import edu.ucr.cs.riple.core.adapters.NullAwayV2Adapter;
 import edu.ucr.cs.riple.core.adapters.NullAwayVersionAdapter;
 import edu.ucr.cs.riple.core.log.Log;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import edu.ucr.cs.riple.injector.offsets.OffsetChange;
@@ -496,7 +497,7 @@ public class Config {
   }
 
   /** Initializes NullAway serialization adapter according to the serialized version. */
-  public void initializeAdapter() {
+  public void initializeAdapter(FieldDeclarationStore fieldDeclarationStore) {
     if (adapter != null) {
       // adapter is already initialized.
       return;
@@ -504,7 +505,7 @@ public class Config {
     Path serializationVersionPath = target.dir.resolve("serialization_version.txt");
     if (!serializationVersionPath.toFile().exists()) {
       // Older versions of NullAway.
-      this.adapter = new NullAwayV0Adapter(this);
+      this.adapter = new NullAwayV0Adapter(this, fieldDeclarationStore);
       return;
     }
     try {
@@ -512,15 +513,15 @@ public class Config {
       int version = Integer.parseInt(lines.get(0));
       switch (version) {
         case 0:
-          this.adapter = new NullAwayV0Adapter(this);
+          this.adapter = new NullAwayV0Adapter(this, fieldDeclarationStore);
           this.offsetHandlingIsActivated = false;
           break;
         case 1:
-          this.adapter = new NullAwayV1Adapter(this);
+          this.adapter = new NullAwayV1Adapter(this, fieldDeclarationStore);
           this.offsetHandlingIsActivated = false;
           break;
         case 2:
-          this.adapter = new NullAwayV2Adapter(this);
+          this.adapter = new NullAwayV2Adapter(this, fieldDeclarationStore);
           this.offsetHandlingIsActivated = true;
           break;
         default:

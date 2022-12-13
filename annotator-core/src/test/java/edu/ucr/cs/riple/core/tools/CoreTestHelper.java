@@ -31,7 +31,6 @@ import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.injector.Helper;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -182,13 +181,17 @@ public class CoreTestHelper {
       // Verify no error is reported in downstream dependencies.
       for (int i = 1; i < modules.size(); i++) {
         Path path = outDirPath.resolve(i + "").resolve("errors.tsv");
-        Set<Error> errors = Utility.readErrorsFromOutputDirectory(config, path);
-        if (errors.size() != 0) {
-          fail(
-              "Strict mode introduced errors in downstream dependency module: "
-                  + modules.get(i)
-                  + ", errors:\n"
-                  + errors.stream().map(Error::toString).collect(Collectors.joining("\n")));
+        try {
+          List<String> lines = Files.readAllLines(path);
+          if (lines.size() != 1) {
+            fail(
+                "Strict mode introduced errors in downstream dependency module: "
+                    + modules.get(i)
+                    + ", errors:\n"
+                    + lines);
+          }
+        } catch (IOException e) {
+          throw new RuntimeException("Exception happened while reading file at: " + path);
         }
       }
     }
@@ -196,11 +199,13 @@ public class CoreTestHelper {
       // Check no error will be reported in Target module
       Utility.executeCommand(config.buildCommand);
       Path path = outDirPath.resolve("0").resolve("errors.tsv");
-      Set<Error> errors = Utility.readErrorsFromOutputDirectory(config, path);
-      if (errors.size() != 0) {
-        fail(
-            "Force Resolve Mode did not resolve all errors:\n"
-                + errors.stream().map(Error::toString).collect(Collectors.joining("\n")));
+      try {
+        List<String> lines = Files.readAllLines(path);
+        if (lines.size() != 1) {
+          fail("Force Resolve Mode did not resolve all errors:\n" + lines);
+        }
+      } catch (IOException e) {
+        throw new RuntimeException("Exception happened while reading file at: " + path);
       }
     }
   }
