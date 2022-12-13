@@ -798,6 +798,7 @@ public class Config {
               entry ->
                   new OffsetChange(
                       entry.getKey(), entry.getValue().stream().mapToInt(value -> value).sum()))
+          .filter(oc -> oc.numChars != 0)
           .collect(Collectors.toCollection(TreeSet::new));
     }
   }
