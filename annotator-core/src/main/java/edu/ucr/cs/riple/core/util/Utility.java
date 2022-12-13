@@ -110,10 +110,9 @@ public class Utility {
       reportJson.put("OVERALL EFFECT", report.getOverallEffect(config));
       reportJson.put("Upper Bound EFFECT", report.getUpperBoundEffectOnDownstreamDependencies());
       reportJson.put("Lower Bound EFFECT", report.getLowerBoundEffectOnDownstreamDependencies());
-      reportJson.put("FINISHED", report.finished);
+      reportJson.put("FINISHED", !report.isInProgress(config));
       JSONArray followUps = new JSONArray();
       if (config.chain && report.localEffect < 1) {
-        report.tree.remove(report.root);
         followUps.addAll(report.tree.stream().map(Fix::getJson).collect(Collectors.toList()));
       }
       reportJson.put("TREE", followUps);

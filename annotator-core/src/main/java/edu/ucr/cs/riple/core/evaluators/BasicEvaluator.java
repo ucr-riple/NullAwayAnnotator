@@ -25,11 +25,11 @@
 package edu.ucr.cs.riple.core.evaluators;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import java.util.HashSet;
 
 /** Basic evaluator that processes each fix tree entirely with no caching strategies. */
 public class BasicEvaluator extends AbstractEvaluator {
@@ -49,8 +49,10 @@ public class BasicEvaluator extends AbstractEvaluator {
               Node node = graph.addNodeToVertices(root);
               node.setOrigins(supplier.getFixBank());
               node.report = report;
-              node.triggeredFixes = new HashSet<>(report.triggeredFixes);
-              node.tree.addAll(report.tree);
+              node.triggeredFixesOnDownstream =
+                  ImmutableSet.copyOf(report.triggeredFixesOnDownstream);
+              node.tree.addAll(Sets.newHashSet(report.tree));
+              node.triggeredErrors = ImmutableSet.copyOf(report.triggeredErrors);
               node.mergeTriggered();
             });
   }
@@ -63,10 +65,11 @@ public class BasicEvaluator extends AbstractEvaluator {
             node -> {
               Report report = node.report;
               report.localEffect = node.effect;
-              report.tree = node.tree;
-              report.triggeredFixes = ImmutableSet.copyOf(node.triggeredFixes);
-              report.triggeredErrors = node.triggeredErrors;
-              report.finished = !node.changed;
+              report.tree = Sets.newHashSet(node.tree);
+              report.triggeredFixesOnDownstream =
+                  ImmutableSet.copyOf(node.triggeredFixesOnDownstream);
+              report.triggeredErrors = ImmutableSet.copyOf(node.triggeredErrors);
+              report.opened = true;
             });
   }
 }

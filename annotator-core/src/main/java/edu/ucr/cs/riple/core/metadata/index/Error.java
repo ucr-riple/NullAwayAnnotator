@@ -24,12 +24,14 @@
 package edu.ucr.cs.riple.core.metadata.index;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnParameter;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -43,26 +45,40 @@ public class Error extends Enclosed {
   /** Error message. */
   public final String message;
   /** The fix which can resolve this error if such fixes exists. */
-  private final Set<Fix> resolvingFixes;
+  private final ImmutableSet<Fix> resolvingFixes;
   /** Offset of program point in original version where error is reported. */
   private final int offset;
+  /** Sensitive to offsets. */
+  private final boolean indexSensitive;
 
   public Error(
-      String messageType, String message, Region region, int offset, @Nullable Fix resolvingFix) {
+      String messageType,
+      String message,
+      Region region,
+      int offset,
+      boolean indexSensitive,
+      @Nullable Fix resolvingFix) {
     super(region);
+    this.indexSensitive = indexSensitive;
     this.messageType = messageType;
     this.message = message;
     this.offset = offset;
-    this.resolvingFixes = resolvingFix == null ? Set.of() : Set.of(resolvingFix);
+    this.resolvingFixes = resolvingFix == null ? ImmutableSet.of() : ImmutableSet.of(resolvingFix);
   }
 
   public Error(
-      String messageType, String message, Region region, int offset, Set<Fix> resolvingFixes) {
+      String messageType,
+      String message,
+      Region region,
+      int offset,
+      boolean indexSensitive,
+      Set<Fix> resolvingFixes) {
     super(region);
+    this.indexSensitive = indexSensitive;
     this.messageType = messageType;
     this.message = message;
     this.offset = offset;
-    this.resolvingFixes = resolvingFixes;
+    this.resolvingFixes = ImmutableSet.copyOf(resolvingFixes);
   }
 
   /**
@@ -74,6 +90,19 @@ public class Error extends Enclosed {
    */
   public static Factory<Error> factory(Config config, FieldDeclarationStore store) {
     return values -> config.getAdapter().deserializeError(values, store);
+  }
+
+  /**
+   * Checks if error is resolvable.
+   *
+   * @return true if error is resolvable and false otherwise.
+   */
+  public boolean hasFix() {
+    return this.resolvingFixes.size() > 0;
+  }
+
+  public ImmutableSet<Fix> getResolvingFixes() {
+    return ImmutableSet.copyOf(this.resolvingFixes);
   }
 
   /**
@@ -116,11 +145,16 @@ public class Error extends Enclosed {
       return false;
     }
     Error error = (Error) o;
-    return messageType.equals(error.messageType)
-        && message.equals(error.message)
+    if (!messageType.equals(error.messageType)) {
+      return false;
+    }
+    if (messageType.equals("METHOD_NO_INIT") && region.equals(error.getRegion())) {
+      return true;
+    }
+    return message.equals(error.message)
         && getRegion().equals(error.getRegion())
         && resolvingFixes.equals(error.resolvingFixes)
-        && offset == error.offset;
+        && (!indexSensitive || offset == error.offset);
   }
 
   /**
@@ -143,5 +177,17 @@ public class Error extends Enclosed {
   @Override
   public String toString() {
     return "Type='" + messageType + '\'' + ", message='" + message + '\'';
+  }
+
+  /**
+   * Collects all resolving fixes in given collection of errors as an immutable set.
+   *
+   * @param errors Collection of errors.
+   * @return Immutable set of fixes which can resolve all given errors.
+   */
+  public static ImmutableSet<Fix> getResolvingFixesOfErrors(Collection<Error> errors) {
+    return errors.stream()
+        .flatMap(error -> error.resolvingFixes.stream())
+        .collect(ImmutableSet.toImmutableSet());
   }
 }

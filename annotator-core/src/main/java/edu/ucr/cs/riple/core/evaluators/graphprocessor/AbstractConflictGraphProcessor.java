@@ -36,7 +36,6 @@ import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
-import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -69,24 +68,22 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
   }
 
   /**
-   * Updates list of triggered fixes with fixes triggered from downstream dependencies.
+   * Get set of triggered fixes from downstream dependencies.
    *
    * @param node Node in process.
-   * @param localTriggeredFixes Collection of triggered fixes locally.
    */
-  protected void addTriggeredFixesFromDownstream(Node node, Collection<Fix> localTriggeredFixes) {
+  protected Set<Fix> getTriggeredFixesFromDownstream(Node node) {
     Set<Location> currentLocationTargetedByTree =
         node.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
-    localTriggeredFixes.addAll(
-        globalAnalyzer.getImpactedParameters(node.tree).stream()
-            .filter(input -> !currentLocationTargetedByTree.contains(input))
-            .map(
-                onParameter ->
-                    new Fix(
-                        new AddMarkerAnnotation(onParameter, config.nullableAnnot),
-                        "PASSING_NULLABLE",
-                        new Region(onParameter.clazz, onParameter.method),
-                        false))
-            .collect(Collectors.toList()));
+    return globalAnalyzer.getImpactedParameters(node.tree).stream()
+        .filter(input -> !currentLocationTargetedByTree.contains(input))
+        .map(
+            onParameter ->
+                new Fix(
+                    new AddMarkerAnnotation(onParameter, config.nullableAnnot),
+                    "PASSING_NULLABLE",
+                    new Region(onParameter.clazz, onParameter.method),
+                    false))
+        .collect(Collectors.toSet());
   }
 }

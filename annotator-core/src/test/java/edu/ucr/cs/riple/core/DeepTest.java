@@ -88,6 +88,39 @@ public class DeepTest extends BaseCoreTest {
   }
 
   @Test
+  public void testTwoReports() {
+    coreTestHelper
+        .addInputLines(
+            "Main.java",
+            "package test;",
+            "public class Main {",
+            "   Object field1;",
+            "   Object field2;",
+            "   Main() {",
+            "     field1 = null;",
+            "     field2 = null;",
+            "   }",
+            "   Object getF1(){ return field1;}",
+            "   Object getF2(){ return field2;}",
+            "}")
+        .toDepth(2)
+        .disableBailOut()
+        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
+        .addExpectedReports(
+            new TReport(
+                new OnField("Main.java", "test.Main", Collections.singleton("field1")),
+                -1,
+                singleton(new OnMethod("Main.java", "test.Main", "getF1()")),
+                null),
+            new TReport(
+                new OnField("Main.java", "test.Main", Collections.singleton("field2")),
+                -1,
+                singleton(new OnMethod("Main.java", "test.Main", "getF2()")),
+                null))
+        .start();
+  }
+
+  @Test
   public void param_pass_test() {
     coreTestHelper
         .addInputDirectory("test", "parampass")

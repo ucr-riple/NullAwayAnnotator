@@ -32,7 +32,6 @@ import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
@@ -70,14 +69,11 @@ public class TReport extends Report {
       @Nullable Set<Location> triggered) {
     this(root, effect);
     if (triggered != null) {
-      this.triggeredFixes =
-          triggered.stream()
-              .map((Function<Location, Fix>) TFix::new)
-              .collect(ImmutableSet.toImmutableSet());
+      this.triggeredErrors =
+          triggered.stream().map(TError::new).collect(ImmutableSet.toImmutableSet());
     }
     if (addToTree != null) {
-      this.tree.addAll(
-          addToTree.stream().map((Function<Location, Fix>) TFix::new).collect(Collectors.toSet()));
+      this.tree = addToTree.stream().map(TFix::new).collect(Collectors.toSet());
     }
   }
 
