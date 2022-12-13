@@ -24,9 +24,12 @@
 
 package edu.ucr.cs.riple.injector.offsets;
 
+import static java.util.Comparator.comparingInt;
+
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /** Stores list of offset changes for a file. */
@@ -35,14 +38,14 @@ public class FileOffsetStore {
   /** Path to file. */
   private final Path path;
   /** List of existing offset changes. */
-  private final List<OffsetChange> offsetChanges;
+  private final SortedSet<OffsetChange> offsetChanges;
   /** Contents of file. */
   private final List<String> lines;
 
   public FileOffsetStore(List<String> lines, Path path) {
     this.lines = lines;
     this.path = path;
-    this.offsetChanges = new ArrayList<>();
+    this.offsetChanges = new TreeSet<>();
   }
 
   /**
@@ -50,23 +53,23 @@ public class FileOffsetStore {
    *
    * @param line Line number where addition occurred.
    * @param column Column number where addition occurred.
-   * @param dist Number of characters added.
+   * @param numChars Number of characters added.
    */
-  public void updateOffsetWithAddition(int line, int column, int dist) {
+  public void updateOffsetWithAddition(int line, int column, int numChars) {
     int offset = characterOffsetAtLine(line);
-    this.offsetChanges.add(new OffsetChange(offset + column, dist));
+    this.offsetChanges.add(new OffsetChange(offset + column, numChars));
   }
 
   /**
    * Adds an offset change for addition along a new line addition.
    *
    * @param line Line number where addition occurred.
-   * @param dist Number of characters added.
+   * @param numChars Number of characters added.
    */
-  public void updateOffsetWithNewLineAddition(int line, int dist) {
+  public void updateOffsetWithNewLineAddition(int line, int numChars) {
     int offset = characterOffsetAtLine(line);
-    // add one to dist for new line.
-    this.offsetChanges.add(new OffsetChange(offset, dist + 1));
+    // add one to numChars for new line.
+    this.offsetChanges.add(new OffsetChange(offset, numChars + 1));
   }
 
   /**
@@ -74,11 +77,11 @@ public class FileOffsetStore {
    *
    * @param line Line number where deletion occurred.
    * @param column Column number where deletion occurred.
-   * @param dist Number of characters removed.
+   * @param numChars Number of characters removed.
    */
-  public void updateOffsetWithDeletion(int line, int column, int dist) {
+  public void updateOffsetWithDeletion(int line, int column, int numChars) {
     int offset = characterOffsetAtLine(line);
-    this.offsetChanges.add(new OffsetChange(offset + column, -1 * dist));
+    this.offsetChanges.add(new OffsetChange(offset + column, -1 * numChars));
   }
 
   /**
@@ -89,11 +92,9 @@ public class FileOffsetStore {
    */
   private int characterOffsetAtLine(int line) {
     int ans = 0;
-    int current = 0;
-    while (current < line && current < lines.size()) {
+    for (int current = 0; current < line && current < lines.size(); current++) {
       ans += lines.get(current).length();
       ans += 1; // for new line.
-      current += 1;
     }
     return ans;
   }
@@ -113,9 +114,11 @@ public class FileOffsetStore {
    * @param existingOffsetChanges List of existing offset changes.
    * @return Translated and sorted offsets.
    */
-  public List<OffsetChange> getOffsetsRelativeTo(List<OffsetChange> existingOffsetChanges) {
+  public SortedSet<OffsetChange> getOffsetWithoutChanges(
+      SortedSet<OffsetChange> existingOffsetChanges) {
     return offsetChanges.stream()
-        .map(offsetChange -> offsetChange.relativeTo(existingOffsetChanges))
-        .collect(Collectors.toList());
+        .map(offsetChange -> offsetChange.getOffsetWithoutChanges(existingOffsetChanges))
+        .sorted(comparingInt(o -> o.position))
+        .collect(Collectors.toCollection(TreeSet::new));
   }
 }

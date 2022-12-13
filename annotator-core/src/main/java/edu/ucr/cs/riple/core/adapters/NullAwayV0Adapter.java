@@ -46,8 +46,17 @@ import java.util.Set;
  */
 public class NullAwayV0Adapter extends NullAwayAdapterBaseClass {
 
+  /**
+   * In this serialization version, offset of the errors is not serialized. Generally offsets are
+   * used to distinguish errors. On this version of NullAway all serialized errors are treated as
+   * unique errors among all errors. Therefore, we use this offset and increment it for each
+   * serialized error to maintain this assumption.
+   */
+  private int offset;
+
   public NullAwayV0Adapter(Config config, FieldDeclarationStore fieldDeclarationStore) {
     super(config, fieldDeclarationStore, 0);
+    this.offset = 0;
   }
 
   @Override
@@ -63,7 +72,7 @@ public class NullAwayV0Adapter extends NullAwayAdapterBaseClass {
     String errorMessage = values[1];
     Region region = new Region(values[2], encMember);
     // since we have no information of offset, we set all to zero.
-    return createError(errorType, errorMessage, region, 0, nonnullTarget, store);
+    return createError(errorType, errorMessage, region, offset++, nonnullTarget, store);
   }
 
   @Override

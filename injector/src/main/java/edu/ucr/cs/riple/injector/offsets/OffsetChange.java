@@ -24,21 +24,23 @@
 
 package edu.ucr.cs.riple.injector.offsets;
 
-import java.util.List;
+import java.util.Objects;
+import java.util.SortedSet;
 
 /**
- * Offset change information, stores the number of character added / removed at a specific position.
+ * Offset change information, stores the number of characters added / removed at a specific
+ * position.
  */
-public class OffsetChange {
+public class OffsetChange implements Comparable<OffsetChange> {
 
   /** Index of addition / deletion. */
   public final int position;
   /** Number of characters added / removed. */
-  public final int dist;
+  public final int numChars;
 
-  public OffsetChange(int position, int dist) {
+  public OffsetChange(int position, int numChars) {
     this.position = position;
-    this.dist = dist;
+    this.numChars = numChars;
   }
 
   /**
@@ -48,28 +50,61 @@ public class OffsetChange {
    * @param existingOffsetChanges Existing offsets.
    * @return Original offset.
    */
-  public static int getOriginalOffset(int offset, List<OffsetChange> existingOffsetChanges) {
+  public static int getOriginalOffset(int offset, SortedSet<OffsetChange> existingOffsetChanges) {
     if (existingOffsetChanges == null) {
       return offset;
     }
+    int result = offset;
     for (OffsetChange current : existingOffsetChanges) {
-      if (offset > current.position) {
-        offset -= current.dist;
+      if (result > current.position) {
+        result -= current.numChars;
       }
-      if (offset < current.position) {
+      if (result < current.position) {
         break;
       }
     }
-    return offset;
+    return result;
   }
 
   /**
-   * Creates an offset relative to original source code.
+   * This method figures out what the offset change would be if the given offset changes were not
+   * applied, and then returns the corresponding offset change instance. Mainly useful if this
+   * change is created while other modifications are already applied to source code and the offset
+   * according to original source code is desired.
    *
-   * @param offsetChanges Existing offsets.
-   * @return Original offset.
+   * @param offsetChanges Given offset changes.
+   * @return offset change with same {@link OffsetChange#numChars} and a position assuming the given
+   *     list were not applied.
    */
-  public OffsetChange relativeTo(List<OffsetChange> offsetChanges) {
-    return new OffsetChange(getOriginalOffset(this.position, offsetChanges), dist);
+  public OffsetChange getOffsetWithoutChanges(SortedSet<OffsetChange> offsetChanges) {
+    return new OffsetChange(getOriginalOffset(this.position, offsetChanges), numChars);
+  }
+
+  @Override
+  public int compareTo(OffsetChange o) {
+    if (position < o.position) {
+      return -1;
+    }
+    if (position == o.position) {
+      return Integer.compare(numChars, o.numChars);
+    }
+    return 1;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof OffsetChange)) {
+      return false;
+    }
+    OffsetChange that = (OffsetChange) o;
+    return position == that.position && numChars == that.numChars;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(position, numChars);
   }
 }

@@ -24,7 +24,6 @@
 
 package edu.ucr.cs.riple.core;
 
-import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 
@@ -52,6 +51,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -154,6 +155,8 @@ public class Config {
 
   /** Handler for computing the original offset of reported errors with existing changes. */
   public final OffsetHandler offsetHandler;
+  /** Controls if offsets in error instance should be processed. */
+  public boolean offsetHandlingIsActivated;
 
   /**
    * Builds config from command line arguments.
@@ -408,7 +411,7 @@ public class Config {
             ? cmd.getOptionValue(activateForceResolveOption)
             : "org.jspecify.nullness.NullUnmarked";
     this.moduleCounterID = 0;
-    this.offsetHandler = new OffsetHandler();
+    this.offsetHandler = new OffsetHandler(this);
     this.log = new Log();
     this.log.reset();
   }
@@ -489,7 +492,7 @@ public class Config {
         getValueFromKey(jsonObject, "ANNOTATION:NULL_UNMARKED", String.class)
             .orElse("org.jspecify.nullness.NullUnmarked");
     this.log = new Log();
-    this.offsetHandler = new OffsetHandler();
+    this.offsetHandler = new OffsetHandler(this);
     log.reset();
   }
 
@@ -515,12 +518,15 @@ public class Config {
       switch (version) {
         case 0:
           this.adapter = new NullAwayV0Adapter(this, fieldDeclarationStore);
+          this.offsetHandlingIsActivated = false;
           break;
         case 1:
           this.adapter = new NullAwayV1Adapter(this, fieldDeclarationStore);
+          this.offsetHandlingIsActivated = false;
           break;
         case 2:
           this.adapter = new NullAwayV2Adapter(this, fieldDeclarationStore);
+          this.offsetHandlingIsActivated = true;
           break;
         default:
           throw new RuntimeException("Unrecognized NullAway serialization version: " + version);
@@ -728,21 +734,30 @@ public class Config {
   /** Responsible for handling offset changes in source file. */
   public static class OffsetHandler {
     /** Map of file paths to list offset changes. */
-    private final Map<Path, List<OffsetChange>> contents;
+    private final Map<Path, SortedSet<OffsetChange>> contents;
+    /** Annotator config. */
+    private final Config config;
 
-    public OffsetHandler() {
+    public OffsetHandler(Config config) {
       contents = new HashMap<>();
+      this.config = config;
     }
 
     /**
-     * Gets the original offset according to existing offset changes.
+     * Gets the original offset according to existing offset changes if {@link
+     * Config#offsetHandlingIsActivated} is true. Otherwise, the given offset will be returned
+     * unmodified.
      *
      * @param path Path to source file.
      * @param offset Given offset.
      * @return Original offset.
      */
     public int getOriginalOffset(Path path, int offset) {
-      return OffsetChange.getOriginalOffset(offset, contents.getOrDefault(path, List.of()));
+      if (!config.offsetHandlingIsActivated) {
+        return offset;
+      }
+      return OffsetChange.getOriginalOffset(
+          offset, contents.getOrDefault(path, Collections.emptySortedSet()));
     }
 
     /**
@@ -751,38 +766,45 @@ public class Config {
      * @param newOffsets Given new offset changes.
      */
     public void updateOffset(Set<FileOffsetStore> newOffsets) {
+      if (!config.offsetHandlingIsActivated) {
+        // no need to update.
+        return;
+      }
       newOffsets.forEach(
           store -> {
-            List<OffsetChange> existingOffsetChanges =
-                contents.getOrDefault(store.getPath(), new ArrayList<>());
-            List<OffsetChange> offsetChanges = store.getOffsetsRelativeTo(existingOffsetChanges);
+            SortedSet<OffsetChange> existingOffsetChanges =
+                contents.getOrDefault(store.getPath(), new TreeSet<>());
+            SortedSet<OffsetChange> offsetChanges =
+                store.getOffsetWithoutChanges(existingOffsetChanges);
             existingOffsetChanges.addAll(offsetChanges);
             // to keep the list small, we can summarize pairs of offsets.
-            contents.put(store.getPath(), summarizeAndSortOffsetChanges(existingOffsetChanges));
+            SortedSet<OffsetChange> result = summarize(existingOffsetChanges);
+            contents.put(store.getPath(), result);
           });
     }
 
     /**
-     * Summarizes and sorts offset changes. (e.g. offset change (p1, d1) and (p1, -d1 + e) can be
-     * summarized to (p1, e))
+     * Summarizes offset changes. (e.g. offset change (p1, d1) and (p1, -d1 + e) can be summarized
+     * to (p1, e)). Also during search, we have many consecutive addition and deletion on the same
+     * position, this method can summarize them into a single offset change.
      *
      * @param changes Offset changes.
-     * @return Cleaned offset changes.
+     * @return Summarized offset changes.
      */
-    private List<OffsetChange> summarizeAndSortOffsetChanges(List<OffsetChange> changes) {
+    private SortedSet<OffsetChange> summarize(SortedSet<OffsetChange> changes) {
       return changes.stream()
           .collect(
               groupingBy(
                   offsetChange -> offsetChange.position,
-                  mapping(offsetChange -> offsetChange.dist, Collectors.toList())))
+                  mapping(offsetChange -> offsetChange.numChars, Collectors.toList())))
           .entrySet()
           .stream()
           .map(
               entry ->
                   new OffsetChange(
-                      entry.getKey(), entry.getValue().stream().mapToInt(Integer::intValue).sum()))
-          .sorted(comparingInt(o -> o.position))
-          .collect(Collectors.toList());
+                      entry.getKey(), entry.getValue().stream().mapToInt(value -> value).sum()))
+          .filter(oc -> oc.numChars != 0)
+          .collect(Collectors.toCollection(TreeSet::new));
     }
   }
 }
