@@ -44,7 +44,7 @@ import javax.annotation.Nullable;
 
 /** Represents an error reported by NullAway. */
 @SuppressWarnings("JavaLangClash")
-public class Error extends Enclosed {
+public class Error {
 
   /** Error Type. */
   public final String messageType;
@@ -56,6 +56,8 @@ public class Error extends Enclosed {
   private final int offset;
   /** Sensitive to offsets. */
   private final boolean indexSensitive;
+  /** Containing region. */
+  protected final Region region;
 
   public Error(
       String messageType,
@@ -64,7 +66,7 @@ public class Error extends Enclosed {
       int offset,
       boolean indexSensitive,
       @Nullable Fix resolvingFix) {
-    super(region);
+    this.region = region;
     this.indexSensitive = indexSensitive;
     this.messageType = messageType;
     this.message = message;
@@ -79,7 +81,7 @@ public class Error extends Enclosed {
       int offset,
       boolean indexSensitive,
       Set<Fix> resolvingFixes) {
-    super(region);
+    this.region = region;
     this.indexSensitive = indexSensitive;
     this.messageType = messageType;
     this.message = message;
@@ -94,7 +96,7 @@ public class Error extends Enclosed {
    * @param config Config instance.
    * @return Factory instance.
    */
-  public static Factory<Error> factory(Config config, FieldDeclarationStore store) {
+  public static Factory factory(Config config, FieldDeclarationStore store) {
     return values -> config.getAdapter().deserializeError(values, store);
   }
 
@@ -140,6 +142,33 @@ public class Error extends Enclosed {
     Location resolvingLocation = toResolvingLocation();
     Preconditions.checkArgument(resolvingLocation.isOnParameter());
     return resolvingLocation.toParameter();
+  }
+
+  /**
+   * Fully qualified name of the containing region.
+   *
+   * @return Fully qualified name the class.
+   */
+  public String encClass() {
+    return this.region.clazz;
+  }
+
+  /**
+   * Representative member of the containing region as {@code String}.
+   *
+   * @return Member symbol in {@code String}.
+   */
+  public String encMember() {
+    return this.region.member;
+  }
+
+  /**
+   * Getter for region.
+   *
+   * @return region instance.
+   */
+  public Region getRegion() {
+    return this.region;
   }
 
   @Override

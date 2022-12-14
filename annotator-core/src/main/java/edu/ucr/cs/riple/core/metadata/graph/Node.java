@@ -27,8 +27,8 @@ package edu.ucr.cs.riple.core.metadata.graph;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
+import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
@@ -86,13 +86,13 @@ public class Node {
   }
 
   /**
-   * Initializes rootSource. Collects all regions where error reported from {@link Bank}
+   * Initializes rootSource. Collects all regions where error reported from {@link ErrorStore}
    *
-   * @param errorBank {@link Bank} instance.
+   * @param errorStore {@link ErrorStore} instance.
    */
-  public void setOrigins(Bank<Error> errorBank) {
+  public void setOrigins(ErrorStore errorStore) {
     this.origins =
-        errorBank.getRegionsForElements(
+        errorStore.getRegionsForElements(
             error -> error.isSingleFix() && error.getResolvingFixes().contains(root));
   }
 
