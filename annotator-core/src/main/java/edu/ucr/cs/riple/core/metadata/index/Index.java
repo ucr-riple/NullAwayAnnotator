@@ -35,40 +35,34 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * Indexes {@link Error} instances based on the computed hash for fast retrieval. This data
- * structure loads its data from a file at the given path.
+ * Indexes {@link Error} instances based on the enclosing region. This data structure loads its data
+ * from a file at the given path.
  */
 public class Index {
 
-  /**
-   * Contents of the index. Items can have a duplicate hashes, therefore a {@link Multimap} is used.
-   */
-  private final Multimap<Integer, Error> items;
+  /** Contents of the index. */
+  private final Multimap<Region, Error> items;
   /** Factory instance. */
   private final Factory factory;
   /** Paths to the file to load the content from. */
   private final ImmutableSet<Path> paths;
-  /** Total number of items. */
-  private int total;
 
   /**
    * Creates an instance of Index. Contents are accumulated from multiple sources.
    *
    * @param paths ImmutableSet of paths to load the data from. Each file is a TSV file containing
-   *     information to create an instance of {@link Enclosed}.
+   *     information to create an instance of {@link Error}.
    * @param factory Factory to create instances from file lines.
    */
   public Index(ImmutableSet<Path> paths, Factory factory) {
     this.paths = paths;
     this.items = MultimapBuilder.hashKeys().arrayListValues().build();
     this.factory = factory;
-    this.total = 0;
   }
 
   /** Starts the reading and index process. */
@@ -84,9 +78,7 @@ public class Index {
             }
             while (line != null) {
               Error error = factory.build(line.split("\t"));
-              total++;
-              int hash = Objects.hash(error.encClass(), error.encMember());
-              items.put(hash, error);
+              items.put(error.getRegion(), error);
               line = br.readLine();
             }
           } catch (IOException e) {
@@ -96,16 +88,13 @@ public class Index {
   }
 
   /**
-   * Returns all contents which are enclosed by the given class and member.
+   * Returns all contents which are enclosed by the given region.
    *
-   * @param clazz Fully qualified name of the class.
-   * @param member member symbol.
-   * @return Stored contents that are enclosed by the given class and member.
+   * @param region Enclosing region.
+   * @return Stored contents that are enclosed by the given region.
    */
-  public Collection<Error> get(String clazz, String member) {
-    return items.get(Objects.hash(clazz, member)).stream()
-        .filter(item -> item.encClass().equals(clazz) && item.encMember().equals(member))
-        .collect(Collectors.toList());
+  public Collection<Error> get(Region region) {
+    return items.get(region);
   }
 
   /**

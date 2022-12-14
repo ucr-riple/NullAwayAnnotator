@@ -31,7 +31,7 @@ package edu.ucr.cs.riple.core.metadata.index;
 public interface Factory {
 
   /**
-   * Creates an instance of {@code T} from values in string.
+   * Creates an instance of {@link Error} from values in string.
    *
    * @param values values of instance {@code T} in string.
    * @return instance of T.
