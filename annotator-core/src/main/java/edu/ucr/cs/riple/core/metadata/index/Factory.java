@@ -28,7 +28,7 @@ package edu.ucr.cs.riple.core.metadata.index;
  * Factory class to enable {@link Index} to create a new instance from values written in string at
  * each line of output files.
  */
-public interface Factory<T extends Enclosed> {
+public interface Factory {
 
   /**
    * Creates an instance of {@code T} from values in string.
@@ -36,5 +36,5 @@ public interface Factory<T extends Enclosed> {
    * @param values values of instance {@code T} in string.
    * @return instance of T.
    */
-  T build(String[] values);
+  Error build(String[] values);
 }

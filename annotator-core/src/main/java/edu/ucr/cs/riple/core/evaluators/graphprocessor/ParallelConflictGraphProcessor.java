@@ -75,14 +75,13 @@ public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcess
           group.stream().flatMap(node -> node.tree.stream()).collect(Collectors.toSet());
       injector.injectFixes(fixes);
       compilerRunner.run();
-      errorBank.saveState(false, true);
+      errorStore.saveState();
       group.forEach(
           node -> {
             int localEffect = 0;
             Set<Error> triggeredErrors = new HashSet<>();
             for (Region region : node.regions) {
-              Result<Error> errorComparisonResult =
-                  errorBank.compareByMember(region.clazz, region.member, false);
+              Result errorComparisonResult = errorStore.compareByRegion(region);
               localEffect += errorComparisonResult.size;
               triggeredErrors.addAll(errorComparisonResult.dif);
             }

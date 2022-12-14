@@ -27,7 +27,6 @@ package edu.ucr.cs.riple.core.evaluators.graphprocessor;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.metadata.graph.ConflictGraph;
-import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.Result;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -54,8 +53,8 @@ public class SequentialConflictGraphProcessor extends AbstractConflictGraphProce
               Set<Fix> fixes = node.tree;
               injector.injectFixes(fixes);
               compilerRunner.run();
-              errorBank.saveState(false, true);
-              Result<Error> errorComparisonResult = errorBank.compare();
+              errorStore.saveState();
+              Result errorComparisonResult = errorStore.compare();
               node.effect = errorComparisonResult.size;
               node.updateStatus(
                   errorComparisonResult.size,

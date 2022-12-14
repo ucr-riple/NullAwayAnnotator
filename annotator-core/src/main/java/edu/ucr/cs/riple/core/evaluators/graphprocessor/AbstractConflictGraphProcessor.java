@@ -29,8 +29,7 @@ import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
-import edu.ucr.cs.riple.core.metadata.index.Bank;
-import edu.ucr.cs.riple.core.metadata.index.Error;
+import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
@@ -45,8 +44,8 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
   protected final MethodDeclarationTree methodDeclarationTree;
   /** Injector used in the processor to inject / remove fixes. */
   protected final AnnotationInjector injector;
-  /** Error bank instance to store state of fixes before and after of injections. */
-  protected final Bank<Error> errorBank;
+  /** Error store instance to store state of fixes before and after of injections. */
+  protected final ErrorStore errorStore;
   /** Global analyzer to retrieve impacts of fixes globally. */
   protected final DownstreamImpactCache downstreamImpactCache;
   /** Annotator config. */
@@ -58,8 +57,8 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
     this.config = config;
     this.methodDeclarationTree = supplier.getMethodDeclarationTree();
     this.injector = supplier.getInjector();
-    this.errorBank = supplier.getErrorBank();
     this.downstreamImpactCache = supplier.getGlobalAnalyzer();
+    this.errorStore = supplier.getErrorStore();
     this.compilerRunner = runner;
   }
 
