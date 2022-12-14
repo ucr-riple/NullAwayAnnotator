@@ -55,7 +55,7 @@ public class TargetModuleSupplier extends AbstractSupplier {
    * Constructor for target module supplier instance.
    *
    * @param config Annotator config instance.
-   * @param downstreamImpactCache Global analyzer instance.
+   * @param downstreamImpactCache Downstream impact cache instance.
    * @param tree Method declaration tree for methods in target module.
    */
   public TargetModuleSupplier(
@@ -75,14 +75,14 @@ public class TargetModuleSupplier extends AbstractSupplier {
   }
 
   @Override
-  public DownstreamImpactCache getGlobalAnalyzer() {
+  public DownstreamImpactCache getDownstreamImpactCache() {
     return downstreamImpactCache;
   }
 
   @Override
   public ConflictGraphProcessor getGraphProcessor() {
     CompilerRunner runner = () -> Utility.buildTarget(config);
-    if (config.optimized) {
+    if (config.useParallelGraphProcessor) {
       RegionTracker tracker = new CompoundTracker(config, config.target, tree);
       return new ParallelConflictGraphProcessor(config, runner, this, tracker);
     }

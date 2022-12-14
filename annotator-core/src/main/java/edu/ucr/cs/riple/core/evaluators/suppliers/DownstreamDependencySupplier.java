@@ -67,14 +67,14 @@ public class DownstreamDependencySupplier extends AbstractSupplier {
   }
 
   @Override
-  public DownstreamImpactCache getGlobalAnalyzer() {
+  public DownstreamImpactCache getDownstreamImpactCache() {
     return new VoidDownstreamImpactCache();
   }
 
   @Override
   public AbstractConflictGraphProcessor getGraphProcessor() {
     CompilerRunner runner = () -> Utility.buildDownstreamDependencies(config);
-    return config.optimized
+    return config.useParallelGraphProcessor
         ? new ParallelConflictGraphProcessor(config, runner, this, tracker)
         : new SequentialConflictGraphProcessor(config, runner, this);
   }

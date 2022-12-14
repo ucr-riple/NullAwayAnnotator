@@ -278,7 +278,7 @@ public class CoreTestHelper {
     builder.bailout = !disableBailout;
     builder.chain = true;
     builder.outerLoopActivation = requestCompleteLoop;
-    builder.optimized = true;
+    builder.useParallelProcessor = true;
     builder.downStreamDependenciesAnalysisActivated = downstreamDependencyAnalysisActivated;
     builder.mode = mode;
     builder.inferenceActivated = !deactivateInference;

@@ -76,7 +76,7 @@ public interface Supplier {
    *
    * @return GlobalAnalyzer instance.
    */
-  DownstreamImpactCache getGlobalAnalyzer();
+  DownstreamImpactCache getDownstreamImpactCache();
 
   /**
    * Getter for {@link ConflictGraphProcessor}.

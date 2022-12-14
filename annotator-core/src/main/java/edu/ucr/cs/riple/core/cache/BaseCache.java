@@ -81,7 +81,7 @@ public abstract class BaseCache<T extends Impact, S extends Map<Location, T>>
     return fixTree.stream()
         .map(fix -> store.get(fix.toLocation()))
         .filter(Objects::nonNull)
-        .flatMap(impact -> impact.triggeredFixesOnDownstream.stream())
+        .flatMap(impact -> impact.getTriggeredFixesOnDownstream().stream())
         // filter fixes that are already inside tree.
         .filter(fix -> !fixTree.contains(fix))
         .collect(ImmutableSet.toImmutableSet());

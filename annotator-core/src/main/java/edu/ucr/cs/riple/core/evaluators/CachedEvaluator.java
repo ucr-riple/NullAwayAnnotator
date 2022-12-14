@@ -43,11 +43,11 @@ import java.util.stream.Collectors;
 public class CachedEvaluator extends AbstractEvaluator {
 
   /** Model to retrieve impacts. */
-  private final TargetModuleCache<Impact> cache;
+  private final TargetModuleCache cache;
 
   public CachedEvaluator(Supplier supplier) {
     super(supplier);
-    this.cache = new TargetModuleCache<>(supplier.getConfig(), supplier.getMethodDeclarationTree());
+    this.cache = new TargetModuleCache(supplier.getConfig(), supplier.getMethodDeclarationTree());
   }
 
   @Override

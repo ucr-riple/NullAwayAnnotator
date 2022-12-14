@@ -3,10 +3,14 @@ package edu.ucr.cs.riple.core.cache;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.injector.location.Location;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.Set;
 
-public class TargetModuleCache<T extends Impact> extends BaseCache<T, HashMap<Location, T>> {
+/**
+ * Cache for storing impacts of fixes on target module. This cache's state is not immutable and can
+ * be updated.
+ */
+public class TargetModuleCache extends BaseCache<Impact, HashMap<Location, Impact>> {
 
   public TargetModuleCache(Config config, MethodDeclarationTree tree) {
     super(config, new HashMap<>(), tree);
@@ -17,7 +21,7 @@ public class TargetModuleCache<T extends Impact> extends BaseCache<T, HashMap<Lo
    *
    * @param newData New given impacts.
    */
-  public void updateCacheState(Collection<T> newData) {
+  public void updateCacheState(Set<Impact> newData) {
     newData.forEach(t -> store.put(t.toLocation(), t));
   }
 }

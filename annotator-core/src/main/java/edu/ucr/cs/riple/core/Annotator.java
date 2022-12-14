@@ -28,9 +28,11 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCacheImpl;
 import edu.ucr.cs.riple.core.cache.downstream.VoidDownstreamImpactCache;
+import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
 import edu.ucr.cs.riple.core.evaluators.CachedEvaluator;
 import edu.ucr.cs.riple.core.evaluators.Evaluator;
 import edu.ucr.cs.riple.core.evaluators.VoidEvaluator;
+import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.evaluators.suppliers.TargetModuleSupplier;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
@@ -116,7 +118,8 @@ public class Annotator {
 
   /** Performs iterations of inference/injection until no unseen fix is suggested. */
   private void annotate() {
-    // globalAnalyzer analyzes effects of all public APIs on downstream dependencies.
+    // Downstream impact cache stores impact of making all public APIs @Nullable on downstream
+    // dependencies.
     // Through iterations, since the source code for downstream dependencies does not change and the
     // computation does not depend on the changes in the target module, it will compute the same
     // result in each iteration, therefore we perform the analysis only once and reuse it in each
@@ -155,8 +158,8 @@ public class Annotator {
   /**
    * Performs single iteration of inference/injection.
    *
-   * @param downstreamImpactCache Global analyzer instance to detect impact of fixes outside of
-   *     target module.
+   * @param downstreamImpactCache Downstream impact cache instance to detect impact of fixes outside
+   *     of target module.
    */
   private void executeNextIteration(DownstreamImpactCache downstreamImpactCache) {
     ImmutableSet<Report> latestReports = processTriggeredFixes(downstreamImpactCache);
@@ -192,7 +195,7 @@ public class Annotator {
   /**
    * Processes triggered fixes.
    *
-   * @param downstreamImpactCache Global Analyzer instance.
+   * @param downstreamImpactCache Downstream impact cache instance.
    * @return Immutable set of reports from the triggered fixes.
    */
   private ImmutableSet<Report> processTriggeredFixes(DownstreamImpactCache downstreamImpactCache) {
@@ -206,10 +209,25 @@ public class Annotator {
     // Initializing required evaluator instances.
     TargetModuleSupplier supplier =
         new TargetModuleSupplier(config, downstreamImpactCache, methodDeclarationTree);
-    Evaluator evaluator =
-        config.exhaustiveSearch ? new VoidEvaluator() : new CachedEvaluator(supplier);
+    Evaluator evaluator = getEvaluator(supplier);
     // Result of the iteration analysis.
     return evaluator.evaluate(fixes);
+  }
+
+  /**
+   * Creates an {@link Evaluator} corresponding to config values.
+   *
+   * @param supplier Supplier to create an instance of Evaluator.
+   * @return {@link Evaluator} corresponding to config values.
+   */
+  private Evaluator getEvaluator(Supplier supplier) {
+    if (config.exhaustiveSearch) {
+      return new VoidEvaluator();
+    }
+    if (config.useImpactCache) {
+      return new CachedEvaluator(supplier);
+    }
+    return new BasicEvaluator(supplier);
   }
 
   /**

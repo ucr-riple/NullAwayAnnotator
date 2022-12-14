@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.cache.downstream;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Report;
@@ -39,8 +40,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/** Container class for storing overall effect of each method in downstream dependencies. */
-public class MethodImpact extends Impact {
+/**
+ * Container class for storing overall effect of fix in downstream dependencies. At this moment,
+ * only impact of public methods with non-primitive return are stored.
+ */
+public class DownstreamImpact extends Impact {
 
   /**
    * Map of parameters in target module that will receive {@code Nullable} value if targeted method
@@ -53,8 +57,10 @@ public class MethodImpact extends Impact {
    */
   private int effect;
 
-  public MethodImpact(Fix fix) {
+  public DownstreamImpact(Fix fix) {
     super(fix);
+    // Only store impacts of fixes targeting methods.
+    Preconditions.checkArgument(fix.isOnMethod());
     this.impactedParametersMap = new HashMap<>();
     this.triggeredErrors = ImmutableSet.of();
   }
@@ -100,7 +106,7 @@ public class MethodImpact extends Impact {
   }
 
   /**
-   * <<<<<<< HEAD ======= Getter for effect.
+   * Getter for effect.
    *
    * @return Effect.
    */

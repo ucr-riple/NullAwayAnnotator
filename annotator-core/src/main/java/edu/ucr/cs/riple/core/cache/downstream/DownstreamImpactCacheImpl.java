@@ -50,9 +50,12 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
-/** Implementation for {@link DownstreamImpactCache} interface. */
+/**
+ * Implementation for {@link DownstreamImpactCache} interface. This cache state is immutable and
+ * once created, cannot be updated.
+ */
 public class DownstreamImpactCacheImpl
-    extends BaseCache<MethodImpact, ImmutableMap<Location, MethodImpact>>
+    extends BaseCache<DownstreamImpact, ImmutableMap<Location, DownstreamImpact>>
     implements DownstreamImpactCache {
 
   /** Set of downstream dependencies. */
@@ -64,7 +67,7 @@ public class DownstreamImpactCacheImpl
         tree.getPublicMethodsWithNonPrimitivesReturn().stream()
             .map(
                 methodNode ->
-                    new MethodImpact(
+                    new DownstreamImpact(
                         new Fix(
                             new AddMarkerAnnotation(methodNode.location, config.nullableAnnot),
                             null,
@@ -91,13 +94,13 @@ public class DownstreamImpactCacheImpl
                         .getCallersOfMethod(input.toMethod().clazz, input.toMethod().method)
                         .isEmpty()) // skip methods that are not called anywhere.
             .map(
-                methodImpact ->
+                downstreamImpact ->
                     new Fix(
                         new AddMarkerAnnotation(
                             new OnMethod(
                                 "null",
-                                methodImpact.toMethod().clazz,
-                                methodImpact.toMethod().method),
+                                downstreamImpact.toMethod().clazz,
+                                downstreamImpact.toMethod().method),
                             config.nullableAnnot),
                         "null",
                         false))
@@ -121,14 +124,14 @@ public class DownstreamImpactCacheImpl
   }
 
   /**
-   * Retrieves the corresponding {@link MethodImpact} to a fix.
+   * Retrieves the corresponding {@link DownstreamImpact} to a fix.
    *
    * @param fix Target fix.
-   * @return Corresponding {@link MethodImpact}, null if not located.
+   * @return Corresponding {@link DownstreamImpact}, null if not located.
    */
   @Nullable
   @Override
-  public MethodImpact fetchImpact(Fix fix) {
+  public DownstreamImpact fetchImpact(Fix fix) {
     if (!fix.isOnMethod()) {
       // we currently store only impacts of fixes for methods on downstream dependencies.
       return null;
@@ -144,13 +147,13 @@ public class DownstreamImpactCacheImpl
    * @return Effect on downstream dependencies.
    */
   private int effectOnDownstreamDependencies(Fix fix, Set<Fix> fixTree) {
-    MethodImpact methodImpact = fetchImpact(fix);
-    if (methodImpact == null) {
+    DownstreamImpact downstreamImpact = fetchImpact(fix);
+    if (downstreamImpact == null) {
       return 0;
     }
     // Some triggered errors might be resolved due to fixes in the tree, and we should not double
     // count them.
-    Set<Error> triggeredErrors = methodImpact.getTriggeredErrors();
+    Set<Error> triggeredErrors = downstreamImpact.getTriggeredErrors();
     long resolvedErrors =
         triggeredErrors.stream().filter(error -> error.isResolvableWith(fixTree)).count();
     return triggeredErrors.size() - (int) resolvedErrors;
@@ -182,7 +185,7 @@ public class DownstreamImpactCacheImpl
         .filter(Fix::isOnMethod)
         .flatMap(
             fix -> {
-              MethodImpact impact = fetchImpact(fix);
+              DownstreamImpact impact = fetchImpact(fix);
               return impact == null ? Stream.of() : impact.getTriggeredErrors().stream();
             })
         .collect(ImmutableSet.toImmutableSet());
@@ -194,7 +197,7 @@ public class DownstreamImpactCacheImpl
     if (!fix.isOnMethod()) {
       return ImmutableSet.of();
     }
-    MethodImpact impact = fetchImpact(fix);
+    DownstreamImpact impact = fetchImpact(fix);
     if (impact == null) {
       return ImmutableSet.of();
     }
@@ -203,6 +206,8 @@ public class DownstreamImpactCacheImpl
 
   @Override
   public void updateImpactsAfterInjection(Collection<Fix> fixes) {
-    this.store.values().forEach(methodImpact -> methodImpact.updateStatusAfterInjection(fixes));
+    this.store
+        .values()
+        .forEach(downstreamImpact -> downstreamImpact.updateStatusAfterInjection(fixes));
   }
 }

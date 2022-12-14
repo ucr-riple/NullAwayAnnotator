@@ -37,7 +37,7 @@ import java.util.Set;
  * of additional errors) of each such change, by summing across all downstream dependencies. This
  * data then be fed to the Annotator main process in the decision process.
  */
-public interface DownstreamImpactCache extends ImpactCache<MethodImpact> {
+public interface DownstreamImpactCache extends ImpactCache<DownstreamImpact> {
 
   /** Analyzes effects of changes in public methods in downstream dependencies. */
   void analyzeDownstreamDependencies();

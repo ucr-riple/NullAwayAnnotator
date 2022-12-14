@@ -201,14 +201,14 @@ public class Report {
    * Computes the boundaries of effectiveness of applying the fix tree to target module on
    * downstream dependencies.
    *
-   * @param analyzer Downstream dependency analyzer instance.
+   * @param downstreamImpactCache Downstream impact cache instance.
    */
   public void computeBoundariesOfEffectivenessOnDownstreamDependencies(
-      DownstreamImpactCache analyzer) {
+      DownstreamImpactCache downstreamImpactCache) {
     this.lowerBoundEffectOnDownstreamDependencies =
-        analyzer.computeLowerBoundOfNumberOfErrors(tree);
+        downstreamImpactCache.computeLowerBoundOfNumberOfErrors(tree);
     this.upperBoundEffectOnDownstreamDependencies =
-        analyzer.computeUpperBoundOfNumberOfErrors(tree);
+        downstreamImpactCache.computeUpperBoundOfNumberOfErrors(tree);
   }
 
   /**
@@ -268,8 +268,7 @@ public class Report {
       // no change in the tree structure.
       return false;
     }
-    boolean ans = !config.bailout || localEffect > 0;
-    return ans;
+    return !config.bailout || localEffect > 0;
   }
 
   public Set<Fix> getFixesForNextIteration() {

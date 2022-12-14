@@ -46,7 +46,7 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
   protected final AnnotationInjector injector;
   /** Error store instance to store state of fixes before and after of injections. */
   protected final ErrorStore errorStore;
-  /** Global analyzer to retrieve impacts of fixes globally. */
+  /** Downstream impact cache to retrieve impacts of fixes globally. */
   protected final DownstreamImpactCache downstreamImpactCache;
   /** Annotator config. */
   protected final Config config;
@@ -57,7 +57,7 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
     this.config = config;
     this.methodDeclarationTree = supplier.getMethodDeclarationTree();
     this.injector = supplier.getInjector();
-    this.downstreamImpactCache = supplier.getGlobalAnalyzer();
+    this.downstreamImpactCache = supplier.getDownstreamImpactCache();
     this.errorStore = supplier.getErrorStore();
     this.compilerRunner = runner;
   }

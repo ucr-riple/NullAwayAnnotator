@@ -32,9 +32,9 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 /**
- * This global analyzer does not have any information regarding the impact of changes in target
- * module in dependencies, the main purpose of this class is to avoid initializing GlobalAnalyzer
- * instances to {@code null} when impact on dependencies is not considered.
+ * This downstream impact cache does not have any information regarding the impact of changes in
+ * target module in dependencies, the main purpose of this class is to avoid initializing downstream
+ * impact cache instances to {@code null} when impact on dependencies is not considered.
  */
 public class VoidDownstreamImpactCache implements DownstreamImpactCache {
 
@@ -73,7 +73,7 @@ public class VoidDownstreamImpactCache implements DownstreamImpactCache {
 
   @Nullable
   @Override
-  public MethodImpact fetchImpact(Fix fix) {
+  public DownstreamImpact fetchImpact(Fix fix) {
     return null;
   }
 

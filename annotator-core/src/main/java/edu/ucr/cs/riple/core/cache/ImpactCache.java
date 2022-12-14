@@ -30,6 +30,12 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.util.Collection;
 import javax.annotation.Nullable;
 
+/**
+ * Interface for a cache saving impacts of fixes on modules. An impact of a fix, is a collection of
+ * triggered errors and fixes when the fix is applied.
+ *
+ * @param <T> Type of impact stored in cache.
+ */
 public interface ImpactCache<T extends Impact> {
 
   boolean isUnknown(Fix fix);
