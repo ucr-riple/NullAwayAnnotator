@@ -36,6 +36,7 @@ import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -192,11 +193,26 @@ public class Error extends Enclosed {
    * @return Immutable set of fixes which can resolve all given errors.
    */
   public static ImmutableSet<Fix> getResolvingFixesOfErrors(Collection<Error> errors) {
-    Map<Fix, Set<Set<String>>> m =
+    Map<Fix, List<Fix>> map =
         errors.stream()
-            .flatMap(error -> error.resolvingFixes.stream())
-            .collect(groupingBy(identity(), mapping(fix -> fix.reasons, Collectors.toSet())));
-    m.forEach((fix, sets) -> sets.forEach(fix.reasons::addAll));
-    return ImmutableSet.copyOf(m.keySet());
+            .flatMap(e -> e.getResolvingFixes().stream())
+            .collect(groupingBy(identity(), mapping(fix -> fix, Collectors.toList())));
+    map.forEach(
+        (fix, fixes) -> {
+          fix.reasons.addAll(
+              fixes.stream().flatMap(f -> f.reasons.stream()).collect(Collectors.toSet()));
+          fix.count = fixes.size();
+        });
+    return ImmutableSet.copyOf(map.keySet());
+  }
+
+  /**
+   * Checks if this error is resolvable with the given collection of fixes.
+   *
+   * @param fixes Collection fixes.
+   * @return true, if this error is resolvable.
+   */
+  public boolean isResolvableWith(Collection<Fix> fixes) {
+    return fixes.containsAll(this.resolvingFixes);
   }
 }

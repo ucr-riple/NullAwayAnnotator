@@ -26,11 +26,11 @@ package edu.ucr.cs.riple.core.evaluators.suppliers;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.evaluators.graphprocessor.CompilerRunner;
 import edu.ucr.cs.riple.core.evaluators.graphprocessor.ConflictGraphProcessor;
 import edu.ucr.cs.riple.core.evaluators.graphprocessor.ParallelConflictGraphProcessor;
 import edu.ucr.cs.riple.core.evaluators.graphprocessor.SequentialConflictGraphProcessor;
-import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
@@ -49,19 +49,19 @@ import edu.ucr.cs.riple.core.util.Utility;
  */
 public class TargetModuleSupplier extends AbstractSupplier {
 
-  protected final GlobalAnalyzer globalAnalyzer;
+  protected final DownstreamImpactCache downstreamImpactCache;
 
   /**
    * Constructor for target module supplier instance.
    *
    * @param config Annotator config instance.
-   * @param globalAnalyzer Global analyzer instance.
+   * @param downstreamImpactCache Global analyzer instance.
    * @param tree Method declaration tree for methods in target module.
    */
   public TargetModuleSupplier(
-      Config config, GlobalAnalyzer globalAnalyzer, MethodDeclarationTree tree) {
+      Config config, DownstreamImpactCache downstreamImpactCache, MethodDeclarationTree tree) {
     super(ImmutableSet.of(config.target), config, tree);
-    this.globalAnalyzer = globalAnalyzer;
+    this.downstreamImpactCache = downstreamImpactCache;
   }
 
   @Override
@@ -75,8 +75,8 @@ public class TargetModuleSupplier extends AbstractSupplier {
   }
 
   @Override
-  public GlobalAnalyzer getGlobalAnalyzer() {
-    return globalAnalyzer;
+  public DownstreamImpactCache getGlobalAnalyzer() {
+    return downstreamImpactCache;
   }
 
   @Override

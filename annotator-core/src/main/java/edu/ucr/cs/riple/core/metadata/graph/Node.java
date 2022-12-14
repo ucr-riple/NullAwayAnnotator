@@ -74,7 +74,7 @@ public class Node {
   public Report report;
 
   /** Regions where original errors reported and NullAway suggested root for that. */
-  private Set<Region> origins;
+  private ImmutableSet<Region> origins;
 
   public Node(Fix root) {
     this.regions = new HashSet<>();
@@ -83,6 +83,7 @@ public class Node {
     this.triggeredErrors = ImmutableSet.of();
     this.effect = 0;
     this.tree = Sets.newHashSet(root);
+    this.origins = ImmutableSet.of();
   }
 
   /**
@@ -92,8 +93,9 @@ public class Node {
    */
   public void setOrigins(Bank<Error> errorBank) {
     this.origins =
-        errorBank.getRegionsForElements(
-            error -> error.isSingleFix() && error.getResolvingFixes().contains(root));
+        ImmutableSet.copyOf(
+            errorBank.getRegionsForElements(
+                error -> error.isSingleFix() && error.getResolvingFixes().contains(root)));
   }
 
   /**

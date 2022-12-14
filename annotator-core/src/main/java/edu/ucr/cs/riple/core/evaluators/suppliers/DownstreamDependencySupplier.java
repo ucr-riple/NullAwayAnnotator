@@ -25,12 +25,12 @@
 package edu.ucr.cs.riple.core.evaluators.suppliers;
 
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
+import edu.ucr.cs.riple.core.cache.downstream.VoidDownstreamImpactCache;
 import edu.ucr.cs.riple.core.evaluators.graphprocessor.AbstractConflictGraphProcessor;
 import edu.ucr.cs.riple.core.evaluators.graphprocessor.CompilerRunner;
 import edu.ucr.cs.riple.core.evaluators.graphprocessor.ParallelConflictGraphProcessor;
 import edu.ucr.cs.riple.core.evaluators.graphprocessor.SequentialConflictGraphProcessor;
-import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
-import edu.ucr.cs.riple.core.global.NoOpGlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.VirtualInjector;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
@@ -67,8 +67,8 @@ public class DownstreamDependencySupplier extends AbstractSupplier {
   }
 
   @Override
-  public GlobalAnalyzer getGlobalAnalyzer() {
-    return new NoOpGlobalAnalyzer();
+  public DownstreamImpactCache getGlobalAnalyzer() {
+    return new VoidDownstreamImpactCache();
   }
 
   @Override

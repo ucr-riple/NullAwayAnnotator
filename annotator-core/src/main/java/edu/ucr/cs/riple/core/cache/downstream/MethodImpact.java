@@ -22,49 +22,46 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.global;
+package edu.ucr.cs.riple.core.cache.downstream;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.cache.Impact;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
+import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/** Container class for storing overall effect of each method. */
-public class MethodImpact {
-  /** Node in {@link MethodDeclarationTree} corresponding to a public method. */
-  final MethodNode node;
+/** Container class for storing overall effect of each method in downstream dependencies. */
+public class MethodImpact extends Impact {
+
   /**
    * Map of parameters in target module that will receive {@code Nullable} value if targeted method
    * in node is annotated as {@code @Nullable} with their corresponding triggered errors.
    */
   private final HashMap<OnParameter, Set<Error>> impactedParametersMap;
   /**
-   * Set of triggered errors in downstream dependencies if target method in node is annotated as
-   * {@code @Nullable}.
-   */
-  private Set<Error> triggeredErrors;
-  /**
    * Effect of injecting a {@code Nullable} annotation on pointing method of node on downstream
    * dependencies.
    */
   private int effect;
 
-  public MethodImpact(MethodNode node) {
-    this.node = node;
-    this.effect = 0;
+  public MethodImpact(Fix fix) {
+    super(fix);
     this.impactedParametersMap = new HashMap<>();
-    this.triggeredErrors = new HashSet<>();
+    this.triggeredErrors = ImmutableSet.of();
   }
 
   @Override
   public int hashCode() {
-    return hash(node.location.method, node.location.clazz);
+    return hash(fix.toMethod().method, fix.toMethod().clazz);
   }
 
   /**
@@ -88,7 +85,7 @@ public class MethodImpact {
    */
   public void setStatus(Report report, Set<OnParameter> impactedParameters) {
     this.effect = report.localEffect;
-    this.triggeredErrors = new HashSet<>(report.triggeredErrors);
+    this.triggeredErrors = ImmutableSet.copyOf(report.triggeredErrors);
     // Count the number of times each parameter received a @Nullable.
     impactedParameters.forEach(
         onParameter -> {
@@ -103,7 +100,7 @@ public class MethodImpact {
   }
 
   /**
-   * Getter for effect.
+   * <<<<<<< HEAD ======= Getter for effect.
    *
    * @return Effect.
    */
@@ -116,18 +113,9 @@ public class MethodImpact {
    *
    * @return Set of errors.
    */
-  public Set<Error> getTriggeredErrors() {
+  @Override
+  public ImmutableSet<Error> getTriggeredErrors() {
     return triggeredErrors;
-  }
-
-  /**
-   * Returns set of parameters on target module that will receive {@code @Nullable} if method in
-   * node is annotated as {@code @Nullable}.
-   *
-   * @return Set of parameters location.
-   */
-  public Set<OnParameter> getImpactedParameters() {
-    return impactedParametersMap.keySet();
   }
 
   /**
@@ -138,8 +126,10 @@ public class MethodImpact {
    *
    * @param fixes List of injected fixes.
    */
-  public void updateStatus(Set<Fix> fixes) {
+  @Override
+  public void updateStatusAfterInjection(Collection<Fix> fixes) {
     Set<OnParameter> annotatedParameters = new HashSet<>();
+    Set<Error> temp = Sets.newHashSet(triggeredErrors);
     fixes.forEach(
         fix ->
             fix.ifOnParameter(
@@ -147,14 +137,20 @@ public class MethodImpact {
                   if (impactedParametersMap.containsKey(onParameter)) {
                     Set<Error> errors = impactedParametersMap.get(onParameter);
                     effect -= errors.size();
-                    triggeredErrors.removeAll(errors);
+                    temp.removeAll(errors);
                     annotatedParameters.add(onParameter);
                   }
                 }));
-    if (effect < 0) {
-      // This is impossible, however for safety issues, we set it to zero.
-      effect = 0;
-    }
+    this.triggeredErrors = ImmutableSet.copyOf(temp);
     annotatedParameters.forEach(impactedParametersMap::remove);
+  }
+
+  /**
+   * Gets the containing method location.
+   *
+   * @return Containing method location.
+   */
+  public OnMethod toMethod() {
+    return fix.toMethod();
   }
 }

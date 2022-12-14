@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.core;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
+import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -96,12 +96,12 @@ public class Report {
    * Checks if any of the fix in tree, will trigger an unresolvable error in downstream
    * dependencies.
    *
-   * @param analyzer Analyzer to check impact of method.
+   * @param cache Downstream cache to check impact of method on downstream dependencies.
    * @return true, if report contains a fix which will trigger an unresolvable error in downstream
    *     dependency.
    */
-  public boolean containsDestructiveMethod(GlobalAnalyzer analyzer) {
-    return this.tree.stream().anyMatch(analyzer::isNotFixableOnTarget);
+  public boolean containsDestructiveMethod(DownstreamImpactCache cache) {
+    return this.tree.stream().anyMatch(cache::triggersUnresolvableErrorsOnDownstream);
   }
 
   /**
@@ -202,7 +202,8 @@ public class Report {
    *
    * @param analyzer Downstream dependency analyzer instance.
    */
-  public void computeBoundariesOfEffectivenessOnDownstreamDependencies(GlobalAnalyzer analyzer) {
+  public void computeBoundariesOfEffectivenessOnDownstreamDependencies(
+      DownstreamImpactCache analyzer) {
     this.lowerBoundEffectOnDownstreamDependencies =
         analyzer.computeLowerBoundOfNumberOfErrors(tree);
     this.upperBoundEffectOnDownstreamDependencies =

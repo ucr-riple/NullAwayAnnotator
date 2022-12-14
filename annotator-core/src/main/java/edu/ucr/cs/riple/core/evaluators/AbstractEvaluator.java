@@ -64,7 +64,7 @@ public abstract class AbstractEvaluator implements Evaluator {
   }
 
   /** Collects results created by the processors working on the conflict graph. */
-  protected abstract void collectGraphResults();
+  protected abstract void collectGraphResults(ImmutableSet<Report> reports);
 
   @Override
   public ImmutableSet<Report> evaluate(ImmutableSet<Fix> fixes) {
@@ -80,7 +80,7 @@ public abstract class AbstractEvaluator implements Evaluator {
         break;
       }
       processor.process(graph);
-      collectGraphResults();
+      collectGraphResults(reports);
     }
     return reports;
   }

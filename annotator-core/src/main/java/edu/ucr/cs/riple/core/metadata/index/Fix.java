@@ -54,10 +54,13 @@ public class Fix {
    */
   public boolean fixSourceIsInTarget;
 
+  public int count;
+
   public Fix(AddAnnotation change, String reason, boolean fixSourceIsInTarget) {
     this.change = change;
     this.reasons = reason != null ? Sets.newHashSet(reason) : new HashSet<>();
     this.fixSourceIsInTarget = fixSourceIsInTarget;
+    this.count = 1;
   }
 
   /**

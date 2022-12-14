@@ -22,53 +22,47 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.global;
+package edu.ucr.cs.riple.core.cache;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.injector.location.OnParameter;
-import java.util.Set;
+import java.util.Collection;
+import javax.annotation.Nullable;
 
-/**
- * This global analyzer does not have any information regarding the impact of changes in target
- * module in dependencies, the main purpose of this class is to avoid initializing GlobalAnalyzer
- * instances to {@code null} when impact on dependencies is not considered.
- */
-public class NoOpGlobalAnalyzer implements GlobalAnalyzer {
+public interface ImpactCache<T extends Impact> {
 
-  @Override
-  public void analyzeDownstreamDependencies() {
-    // No operation needed.
-  }
+  boolean isUnknown(Fix fix);
 
-  @Override
-  public int computeLowerBoundOfNumberOfErrors(Set<Fix> tree) {
-    return 0;
-  }
+  /**
+   * Collects set of triggered errors if given fix is applied.
+   *
+   * @param fix Fix instance to be applied in the target module.
+   * @return Set of triggered errors.
+   */
+  ImmutableSet<Error> getTriggeredErrors(Fix fix);
 
-  @Override
-  public int computeUpperBoundOfNumberOfErrors(Set<Fix> tree) {
-    return 0;
-  }
+  /**
+   * Updates store after injection of fixes in target module.
+   *
+   * @param fixes Set of injected fixes.
+   */
+  void updateImpactsAfterInjection(Collection<Fix> fixes);
 
-  @Override
-  public ImmutableSet<OnParameter> getImpactedParameters(Set<Fix> fixTree) {
-    return ImmutableSet.of();
-  }
+  /**
+   * Retrieves the corresponding {@link Impact} of a fix.
+   *
+   * @param fix Target fix.
+   * @return Corresponding {@link Impact}, null if not located.
+   */
+  @Nullable
+  T fetchImpact(Fix fix);
 
-  @Override
-  public Set<Error> getTriggeredErrors(Fix fix) {
-    return Set.of();
-  }
-
-  @Override
-  public void updateImpactsAfterInjection(Set<Fix> fixes) {
-    // No operation needed.
-  }
-
-  @Override
-  public boolean isNotFixableOnTarget(Fix fix) {
-    return false;
-  }
+  /**
+   * Returns Set of errors that will be triggered if given fixes are applied.
+   *
+   * @param fixes Collection of given fixes.
+   * @return Immutable set of triggered fixes.
+   */
+  ImmutableSet<Error> getTriggeredErrorsForCollection(Collection<Fix> fixes);
 }
