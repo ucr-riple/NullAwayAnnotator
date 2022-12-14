@@ -59,10 +59,19 @@ public interface ImpactCache<T extends Impact> {
   T fetchImpact(Fix fix);
 
   /**
-   * Returns Set of errors that will be triggered if given fixes are applied.
+   * Returns Set of errors that will be triggered if given fixes are applied to target module.
+   *
+   * @param fixes Collection of given fixes.
+   * @return Immutable set of triggered errors.
+   */
+  ImmutableSet<Error> getTriggeredErrorsForCollection(Collection<Fix> fixes);
+
+  /**
+   * Returns Set of fixes on downstream dependencies that will be triggered if given fixes are
+   * applied to target module..
    *
    * @param fixes Collection of given fixes.
    * @return Immutable set of triggered fixes.
    */
-  ImmutableSet<Error> getTriggeredErrorsForCollection(Collection<Fix> fixes);
+  ImmutableSet<Fix> getTriggeredFixesOnDownstreamForCollection(Collection<Fix> fixes);
 }

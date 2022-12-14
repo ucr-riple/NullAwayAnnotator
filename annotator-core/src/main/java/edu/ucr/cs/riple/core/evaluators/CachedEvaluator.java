@@ -24,13 +24,18 @@
 
 package edu.ucr.cs.riple.core.evaluators;
 
+import static java.util.function.UnaryOperator.identity;
+import static java.util.stream.Collectors.toMap;
+
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.cache.Impact;
 import edu.ucr.cs.riple.core.cache.TargetModuleCache;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,28 +43,11 @@ import java.util.stream.Collectors;
 public class CachedEvaluator extends AbstractEvaluator {
 
   /** Model to retrieve impacts. */
-  private final TargetModuleCache<Impact> model;
+  private final TargetModuleCache<Impact> cache;
 
   public CachedEvaluator(Supplier supplier) {
     super(supplier);
-    this.model = new TargetModuleCache<>(supplier.getConfig(), supplier.getMethodDeclarationTree());
-  }
-
-  @Override
-  protected void collectGraphResults(ImmutableSet<Report> reports) {
-    // update model with new data.
-    model.updateCacheState(
-        graph
-            .getNodes()
-            .map(node -> new Impact(node.root, node.triggeredErrors))
-            .collect(Collectors.toSet()));
-    // compute effects.
-    reports.forEach(
-        report -> {
-          Fix root = report.root;
-          Set<Error> triggeredErrors = model.getTriggeredErrorsForCollection(report.tree);
-          report.localEffect = triggeredErrors.size() - root.count;
-        });
+    this.cache = new TargetModuleCache<>(supplier.getConfig(), supplier.getMethodDeclarationTree());
   }
 
   @Override
@@ -68,8 +56,38 @@ public class CachedEvaluator extends AbstractEvaluator {
     // add only fixes that are not stored in model.
     reports.stream()
         .filter(report -> report.isInProgress(config))
-        .flatMap(report -> report.tree.stream())
-        .filter(model::isUnknown)
+        .flatMap(report -> report.getFixesForNextIteration().stream())
+        .filter(cache::isUnknown)
         .forEach(graph::addNodeToVertices);
+  }
+
+  @Override
+  protected void collectGraphResults(ImmutableSet<Report> reports) {
+    // update cache with new data.
+    cache.updateCacheState(
+        graph
+            .getNodes()
+            .map(
+                node ->
+                    new Impact(node.root, node.triggeredErrors, node.triggeredFixesOnDownstream))
+            .collect(Collectors.toSet()));
+
+    // collect requested fixes for each report.
+    Map<Report, Set<Fix>> reportFixMap =
+        reports.stream().collect(toMap(identity(), Report::getFixesForNextIteration));
+
+    // update reports state.
+    reportFixMap.forEach(
+        (report, processedFixes) -> {
+          Set<Fix> newTree = Sets.newHashSet(report.tree);
+          newTree.addAll(processedFixes);
+          Set<Error> triggeredErrors = cache.getTriggeredErrorsForCollection(newTree);
+          report.localEffect = triggeredErrors.size() - report.root.count;
+          report.triggeredErrors = ImmutableSet.copyOf(triggeredErrors);
+          report.triggeredFixesOnDownstream =
+              cache.getTriggeredFixesOnDownstreamForCollection(newTree);
+          report.tree = newTree;
+          report.opened = true;
+        });
   }
 }

@@ -40,14 +40,18 @@ public class Impact {
   /** List of triggered errors, if this fix is applied to source code. */
   protected ImmutableSet<Error> triggeredErrors;
 
+  protected ImmutableSet<Fix> triggeredFixesOnDownstream;
+
   public Impact(Fix fix) {
     this.fix = fix;
     this.triggeredErrors = ImmutableSet.of();
+    this.triggeredFixesOnDownstream = ImmutableSet.of();
   }
 
-  public Impact(Fix fix, Set<Error> triggeredErrors) {
+  public Impact(Fix fix, Set<Error> triggeredErrors, Set<Fix> triggeredFixesOnDownstream) {
     this.fix = fix;
     this.triggeredErrors = ImmutableSet.copyOf(triggeredErrors);
+    this.triggeredFixesOnDownstream = ImmutableSet.copyOf(triggeredFixesOnDownstream);
   }
 
   /**
@@ -65,12 +69,21 @@ public class Impact {
   }
 
   /**
-   * Returns list of triggered errors if method is {@code @Nullable} on downstream dependencies.
+   * Returns list of triggered errors.
    *
-   * @return Set of errors.
+   * @return Immutable Set of errors.
    */
   public ImmutableSet<Error> getTriggeredErrors() {
     return triggeredErrors;
+  }
+
+  /**
+   * Returns list of triggered fixes on downstream dependencies if this fix is applied.
+   *
+   * @return Immutable Set of fixes.
+   */
+  public ImmutableSet<Fix> getTriggeredFixesOnDownstream() {
+    return triggeredFixesOnDownstream;
   }
 
   /**
