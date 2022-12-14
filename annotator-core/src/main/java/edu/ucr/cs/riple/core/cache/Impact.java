@@ -37,9 +37,9 @@ public class Impact {
 
   /** Target fix. */
   public final Fix fix;
-  /** List of triggered errors, if this fix is applied to source code. */
+  /** Set of triggered errors, if this fix is applied to source code. */
   protected ImmutableSet<Error> triggeredErrors;
-
+  /** Set of triggered fixes on downstream dependencies if containing fix is applied. */
   protected ImmutableSet<Fix> triggeredFixesOnDownstream;
 
   public Impact(Fix fix) {
