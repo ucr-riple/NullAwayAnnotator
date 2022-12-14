@@ -81,8 +81,7 @@ public class ErrorStore {
    * @return Corresponding {@link Result}.
    */
   public Result compareByRegion(Region region) {
-    return compareByList(
-        root.get(region.clazz, region.member), current.get(region.clazz, region.member));
+    return compareByList(root.get(region), current.get(region));
   }
 
   /**
