@@ -75,11 +75,9 @@ public abstract class AbstractEvaluator implements Evaluator {
       System.out.print("Analyzing at level " + (i + 1) + ", ");
       initializeFixGraph(reports);
       config.log.updateNodeNumber(graph.getNodes().count());
-      if (graph.isEmpty()) {
-        System.out.println("Analysis finished at this iteration.");
-        break;
+      if (!graph.isEmpty()) {
+        processor.process(graph);
       }
-      processor.process(graph);
       collectGraphResults(reports);
     }
     return reports;

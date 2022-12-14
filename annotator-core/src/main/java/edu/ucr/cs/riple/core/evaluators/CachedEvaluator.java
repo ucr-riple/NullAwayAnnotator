@@ -74,7 +74,9 @@ public class CachedEvaluator extends AbstractEvaluator {
 
     // collect requested fixes for each report.
     Map<Report, Set<Fix>> reportFixMap =
-        reports.stream().collect(toMap(identity(), Report::getFixesForNextIteration));
+        reports.stream()
+            .filter(report -> report.isInProgress(config))
+            .collect(toMap(identity(), Report::getFixesForNextIteration));
 
     // update reports state.
     reportFixMap.forEach(

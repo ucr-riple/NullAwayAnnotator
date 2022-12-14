@@ -242,7 +242,7 @@ public class Error {
    * @return true, if this error is resolvable.
    */
   public boolean isResolvableWith(Collection<Fix> fixes) {
-    if(resolvingFixes.size() == 0){
+    if (resolvingFixes.size() == 0) {
       return false;
     }
     return fixes.containsAll(this.resolvingFixes);
@@ -250,9 +250,10 @@ public class Error {
 
   /**
    * Checks if error is resolvable with fixes.
+   *
    * @return true if error cannot be resolved with any fix.
    */
-  public boolean notResolvable(){
+  public boolean notResolvable() {
     return resolvingFixes.size() == 0;
   }
 }

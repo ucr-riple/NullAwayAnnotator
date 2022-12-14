@@ -268,7 +268,8 @@ public class Report {
       // no change in the tree structure.
       return false;
     }
-    return !config.bailout || localEffect > 0;
+    boolean ans = !config.bailout || localEffect > 0;
+    return ans;
   }
 
   public Set<Fix> getFixesForNextIteration() {
