@@ -47,7 +47,7 @@ public class Error extends Enclosed {
   /** Offset of program point in original version where error is reported. */
   private final int offset;
   /** Error type for method initialization errors from NullAway in {@code String}. */
-  private static final String METHOD_INITIALIZER_ERROR = "METHOD_NO_INIT";
+  public static final String METHOD_INITIALIZER_ERROR = "METHOD_NO_INIT";
 
   public Error(
       String messageType, String message, Region region, int offset, @Nullable Fix resolvingFix) {

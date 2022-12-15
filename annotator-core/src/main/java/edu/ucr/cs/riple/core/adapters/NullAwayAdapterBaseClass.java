@@ -109,7 +109,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
                     new AddMarkerAnnotation(
                         extendVariableList(store.getLocationOnField(region.clazz, field), store),
                         config.nullableAnnot),
-                    "METHOD_NO_INIT",
+                    Error.METHOD_INITIALIZER_ERROR,
                     region,
                     true))
         .collect(Collectors.toSet());
@@ -134,7 +134,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
       int offset,
       @Nullable Location nonnullTarget,
       FieldDeclarationStore store) {
-    if (nonnullTarget == null && errorType.equals("METHOD_NO_INIT")) {
+    if (nonnullTarget == null && errorType.equals(Error.METHOD_INITIALIZER_ERROR)) {
       Set<Fix> resolvingFix = generateFixForUnInitializedFields(errorMessage, region, store);
       return new Error(errorType, errorMessage, region, offset, resolvingFix);
     }
