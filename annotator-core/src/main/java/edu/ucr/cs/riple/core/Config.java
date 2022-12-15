@@ -24,9 +24,6 @@
 
 package edu.ucr.cs.riple.core;
 
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.adapters.NullAwayV0Adapter;
@@ -50,8 +47,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -728,8 +723,8 @@ public class Config {
 
   /** Responsible for handling offset changes in source file. */
   public static class OffsetHandler {
-    /** Map of file paths to list offset changes. */
-    private final Map<Path, SortedSet<OffsetChange>> contents;
+    /** Map of file paths to Offset stores. */
+    private final Map<Path, FileOffsetStore> contents;
     /** Annotator config. */
     private final Config config;
 
@@ -751,8 +746,10 @@ public class Config {
       if (!config.offsetHandlingIsActivated) {
         return offset;
       }
-      return OffsetChange.getOriginalOffset(
-          offset, contents.getOrDefault(path, Collections.emptySortedSet()));
+      if (!contents.containsKey(path)) {
+        return offset;
+      }
+      return OffsetChange.getOriginalOffset(offset, contents.get(path).getOffsetChanges());
     }
 
     /**
@@ -760,46 +757,21 @@ public class Config {
      *
      * @param newOffsets Given new offset changes.
      */
-    public void updateOffset(Set<FileOffsetStore> newOffsets) {
+    public void updateStateWithRecentChanges(Set<FileOffsetStore> newOffsets) {
       if (!config.offsetHandlingIsActivated) {
         // no need to update.
         return;
       }
       newOffsets.forEach(
           store -> {
-            SortedSet<OffsetChange> existingOffsetChanges =
-                contents.getOrDefault(store.getPath(), new TreeSet<>());
-            SortedSet<OffsetChange> offsetChanges =
-                store.getOffsetWithoutChanges(existingOffsetChanges);
-            existingOffsetChanges.addAll(offsetChanges);
-            // to keep the list small, we can summarize pairs of offsets.
-            SortedSet<OffsetChange> result = summarize(existingOffsetChanges);
-            contents.put(store.getPath(), result);
+            if (!contents.containsKey(store.getPath())) {
+              contents.put(store.getPath(), store);
+            } else {
+              contents
+                  .get(store.getPath())
+                  .updateStateWithNewOffsetChanges(store.getOffsetChanges());
+            }
           });
-    }
-
-    /**
-     * Summarizes offset changes. (e.g. offset change (p1, d1) and (p1, -d1 + e) can be summarized
-     * to (p1, e)). Also during search, we have many consecutive addition and deletion on the same
-     * position, this method can summarize them into a single offset change.
-     *
-     * @param changes Offset changes.
-     * @return Summarized offset changes.
-     */
-    private SortedSet<OffsetChange> summarize(SortedSet<OffsetChange> changes) {
-      return changes.stream()
-          .collect(
-              groupingBy(
-                  offsetChange -> offsetChange.position,
-                  mapping(offsetChange -> offsetChange.numChars, Collectors.toList())))
-          .entrySet()
-          .stream()
-          .map(
-              entry ->
-                  new OffsetChange(
-                      entry.getKey(), entry.getValue().stream().mapToInt(value -> value).sum()))
-          .filter(oc -> oc.numChars != 0)
-          .collect(Collectors.toCollection(TreeSet::new));
     }
   }
 }
