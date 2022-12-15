@@ -43,12 +43,12 @@ public class PhysicalInjector extends AnnotationInjector {
   @Override
   public void removeAnnotations(Set<RemoveAnnotation> changes) {
     Set<FileOffsetStore> offsetStores = injector.removeAnnotations(changes);
-    config.offsetHandler.updateOffset(offsetStores);
+    config.offsetHandler.updateStateWithRecentChanges(offsetStores);
   }
 
   @Override
   public void injectAnnotations(Set<AddAnnotation> changes) {
     Set<FileOffsetStore> offsetStores = injector.addAnnotations(changes);
-    config.offsetHandler.updateOffset(offsetStores);
+    config.offsetHandler.updateStateWithRecentChanges(offsetStores);
   }
 }
