@@ -54,6 +54,8 @@ public class Error extends Enclosed {
   private final ImmutableSet<Fix> resolvingFixes;
   /** Offset of program point in original version where error is reported. */
   private final int offset;
+  /** Error type for method initialization errors from NullAway in {@code String}. */
+  public static final String METHOD_INITIALIZER_ERROR = "METHOD_NO_INIT";
 
   public Error(
       String messageType, String message, Region region, int offset, @Nullable Fix resolvingFix) {
@@ -140,12 +142,17 @@ public class Error extends Enclosed {
     if (!messageType.equals(error.messageType)) {
       return false;
     }
-    if (messageType.equals("METHOD_NO_INIT") && region.equals(error.getRegion())) {
+    if (!region.equals(error.region)) {
+      return false;
+    }
+    if (messageType.equals(METHOD_INITIALIZER_ERROR)) {
+      // we do not need to compare error messages as it can be the same error with a different error
+      // message and should not be treated as a separate error.
       return true;
     }
     return message.equals(error.message)
-        && getRegion().equals(error.getRegion())
-        && resolvingFixes.equals(error.resolvingFixes);
+        && resolvingFixes.equals(error.resolvingFixes)
+        && offset == error.offset;
   }
 
   /**
@@ -162,7 +169,13 @@ public class Error extends Enclosed {
 
   @Override
   public int hashCode() {
-    return Objects.hash(messageType, message, region, resolvingFixes, offset);
+    return Objects.hash(
+        messageType,
+        // to make sure equal objects will produce the same hashcode.
+        messageType.equals(METHOD_INITIALIZER_ERROR) ? METHOD_INITIALIZER_ERROR : message,
+        region,
+        resolvingFixes,
+        offset);
   }
 
   @Override
