@@ -55,39 +55,28 @@ public class Error {
   private final ImmutableSet<Fix> resolvingFixes;
   /** Offset of program point in original version where error is reported. */
   private final int offset;
-  /** Sensitive to offsets. */
-  private final boolean indexSensitive;
   /** Containing region. */
   protected final Region region;
+  /** Error type for method initialization errors from NullAway in {@code String}. */
+  public static final String METHOD_INITIALIZER_ERROR = "METHOD_NO_INIT";
 
   public Error(
-      String messageType,
-      String message,
-      Region region,
-      int offset,
-      boolean indexSensitive,
-      @Nullable Fix resolvingFix) {
+      String messageType, String message, Region region, int offset, Set<Fix> resolvingFixes) {
     this.region = region;
-    this.indexSensitive = indexSensitive;
-    this.messageType = messageType;
-    this.message = message;
-    this.offset = offset;
-    this.resolvingFixes = resolvingFix == null ? ImmutableSet.of() : ImmutableSet.of(resolvingFix);
-  }
-
-  public Error(
-      String messageType,
-      String message,
-      Region region,
-      int offset,
-      boolean indexSensitive,
-      Set<Fix> resolvingFixes) {
-    this.region = region;
-    this.indexSensitive = indexSensitive;
     this.messageType = messageType;
     this.message = message;
     this.offset = offset;
     this.resolvingFixes = ImmutableSet.copyOf(resolvingFixes);
+  }
+
+  public Error(
+      String messageType, String message, Region region, int offset, @Nullable Fix resolvingFix) {
+    this(
+        messageType,
+        message,
+        region,
+        offset,
+        resolvingFix == null ? ImmutableSet.of() : ImmutableSet.of(resolvingFix));
   }
 
   /**
@@ -184,13 +173,17 @@ public class Error {
     if (!messageType.equals(error.messageType)) {
       return false;
     }
-    if (messageType.equals("METHOD_NO_INIT") && region.equals(error.getRegion())) {
+    if (!region.equals(error.region)) {
+      return false;
+    }
+    if (messageType.equals(METHOD_INITIALIZER_ERROR)) {
+      // we do not need to compare error messages as it can be the same error with a different error
+      // message and should not be treated as a separate error.
       return true;
     }
     return message.equals(error.message)
-        && getRegion().equals(error.getRegion())
         && resolvingFixes.equals(error.resolvingFixes)
-        && (!indexSensitive || offset == error.offset);
+        && offset == error.offset;
   }
 
   /**
@@ -207,7 +200,13 @@ public class Error {
 
   @Override
   public int hashCode() {
-    return Objects.hash(messageType, message, region, resolvingFixes, offset);
+    return Objects.hash(
+        messageType,
+        // to make sure equal objects will produce the same hashcode.
+        messageType.equals(METHOD_INITIALIZER_ERROR) ? METHOD_INITIALIZER_ERROR : message,
+        region,
+        resolvingFixes,
+        offset);
   }
 
   @Override

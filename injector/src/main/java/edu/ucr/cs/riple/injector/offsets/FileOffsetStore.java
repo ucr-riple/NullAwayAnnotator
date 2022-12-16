@@ -24,10 +24,14 @@
 
 package edu.ucr.cs.riple.injector.offsets;
 
-import static java.util.Comparator.comparingInt;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSortedSet;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -38,12 +42,12 @@ public class FileOffsetStore {
   /** Path to file. */
   private final Path path;
   /** List of existing offset changes. */
-  private final SortedSet<OffsetChange> offsetChanges;
+  private SortedSet<OffsetChange> offsetChanges;
   /** Contents of file. */
-  private final List<String> lines;
+  private final ImmutableList<String> lines;
 
   public FileOffsetStore(List<String> lines, Path path) {
-    this.lines = lines;
+    this.lines = ImmutableList.copyOf(lines);
     this.path = path;
     this.offsetChanges = new TreeSet<>();
   }
@@ -109,16 +113,65 @@ public class FileOffsetStore {
   }
 
   /**
-   * Returns offset changes translated to original offsets according to existing offset changes.
+   * Getter for offset changes.
    *
-   * @param existingOffsetChanges List of existing offset changes.
-   * @return Translated and sorted offsets.
+   * @return Immutable set of offset changes.
    */
-  public SortedSet<OffsetChange> getOffsetWithoutChanges(
-      SortedSet<OffsetChange> existingOffsetChanges) {
-    return offsetChanges.stream()
-        .map(offsetChange -> offsetChange.getOffsetWithoutChanges(existingOffsetChanges))
-        .sorted(comparingInt(o -> o.position))
-        .collect(Collectors.toCollection(TreeSet::new));
+  public ImmutableSortedSet<OffsetChange> getOffsetChanges() {
+    return ImmutableSortedSet.copyOf(this.offsetChanges);
+  }
+
+  /**
+   * Updates existing offset changes with new changes from an operation by {@link
+   * edu.ucr.cs.riple.injector.Injector}.
+   *
+   * @param changes New incoming changes.
+   */
+  public void updateStateWithNewOffsetChanges(ImmutableSortedSet<OffsetChange> changes) {
+    // convert offset changes to original offsets according to existing offset changes.
+    this.offsetChanges.addAll(
+        changes.stream()
+            .map(offsetChange -> offsetChange.getOffsetWithoutChanges(offsetChanges))
+            .collect(Collectors.toSet()));
+    this.summarize();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof FileOffsetStore)) {
+      return false;
+    }
+    FileOffsetStore that = (FileOffsetStore) o;
+    return getPath().equals(that.getPath());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getPath());
+  }
+
+  /**
+   * Summarizes offset changes. (e.g. offset change (p1, d1) and (p1, -d1 + e) can be summarized to
+   * (p1, e)). Also during search, we have many consecutive addition and deletion on the same
+   * position, this method can summarize them into a single offset change.
+   */
+  private void summarize() {
+    offsetChanges =
+        offsetChanges.stream()
+            .collect(
+                groupingBy(
+                    offsetChange -> offsetChange.position,
+                    mapping(offsetChange -> offsetChange.numChars, Collectors.toList())))
+            .entrySet()
+            .stream()
+            .map(
+                entry ->
+                    new OffsetChange(
+                        entry.getKey(), entry.getValue().stream().mapToInt(value -> value).sum()))
+            .filter(oc -> oc.numChars != 0)
+            .collect(Collectors.toCollection(TreeSet::new));
   }
 }
