@@ -31,6 +31,6 @@ import edu.ucr.cs.riple.injector.location.Location;
 public class TError extends Error {
 
   public TError(Location location) {
-    super("null", "null", new Region("null", "null"), 0, false, new TFix(location));
+    super("null", "null", new Region("null", "null"), 0, new TFix(location));
   }
 }

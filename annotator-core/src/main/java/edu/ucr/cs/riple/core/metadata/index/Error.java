@@ -54,18 +54,10 @@ public class Error extends Enclosed {
   private final ImmutableSet<Fix> resolvingFixes;
   /** Offset of program point in original version where error is reported. */
   private final int offset;
-  /** Sensitive to offsets. */
-  private final boolean indexSensitive;
 
   public Error(
-      String messageType,
-      String message,
-      Region region,
-      int offset,
-      boolean indexSensitive,
-      @Nullable Fix resolvingFix) {
+      String messageType, String message, Region region, int offset, @Nullable Fix resolvingFix) {
     super(region);
-    this.indexSensitive = indexSensitive;
     this.messageType = messageType;
     this.message = message;
     this.offset = offset;
@@ -73,14 +65,8 @@ public class Error extends Enclosed {
   }
 
   public Error(
-      String messageType,
-      String message,
-      Region region,
-      int offset,
-      boolean indexSensitive,
-      Set<Fix> resolvingFixes) {
+      String messageType, String message, Region region, int offset, Set<Fix> resolvingFixes) {
     super(region);
-    this.indexSensitive = indexSensitive;
     this.messageType = messageType;
     this.message = message;
     this.offset = offset;
@@ -159,8 +145,7 @@ public class Error extends Enclosed {
     }
     return message.equals(error.message)
         && getRegion().equals(error.getRegion())
-        && resolvingFixes.equals(error.resolvingFixes)
-        && (!indexSensitive || offset == error.offset);
+        && resolvingFixes.equals(error.resolvingFixes);
   }
 
   /**

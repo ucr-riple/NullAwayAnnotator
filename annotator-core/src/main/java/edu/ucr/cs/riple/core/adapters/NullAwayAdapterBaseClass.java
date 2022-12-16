@@ -135,8 +135,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
       FieldDeclarationStore store) {
     if (nonnullTarget == null && errorType.equals("METHOD_NO_INIT")) {
       Set<Fix> resolvingFix = generateFixForUnInitializedFields(errorMessage, region, store);
-      return new Error(
-          errorType, errorMessage, region, offset, config.offsetHandlingIsActivated, resolvingFix);
+      return new Error(errorType, errorMessage, region, offset, resolvingFix);
     }
     if (nonnullTarget != null && nonnullTarget.isOnField()) {
       nonnullTarget = extendVariableList(nonnullTarget.toField(), store);
@@ -146,8 +145,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
             ? null
             : new Fix(
                 new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot), errorType, true);
-    return new Error(
-        errorType, errorMessage, region, offset, config.offsetHandlingIsActivated, resolvingFix);
+    return new Error(errorType, errorMessage, region, offset, resolvingFix);
   }
 
   /**
