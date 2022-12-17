@@ -38,26 +38,64 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/** Config of scanner. */
 public interface Config {
 
+  /**
+   * If true, all method calls invocations data will be serialized.
+   *
+   * @return true, if activated.
+   */
   boolean callTrackerIsActive();
 
+  /**
+   * If true, all field usages data will be serialized.
+   *
+   * @return true, if activated.
+   */
   boolean fieldTrackerIsActive();
 
+  /**
+   * If true, all methods information will be serialized.
+   *
+   * @return true, if activated.
+   */
   boolean methodTrackerIsActive();
 
+  /**
+   * If true, all class data will be serialized.
+   *
+   * @return true, if activated.
+   */
   boolean classTrackerIsActive();
 
+  /**
+   * Returns the using serializer.
+   *
+   * @return Using serializer.
+   */
   Serializer getSerializer();
 
+  /**
+   * Returns root directory where all outputs will be serialized.
+   *
+   * @return Path to root directory where all outputs will be serialized.
+   */
   @Nonnull
   Path getOutputDirectory();
 
+  /** Builder for setting a AnnotatorScanner configuration and output in XML format. */
   class Builder {
+
+    /** Path to output directory. */
     private Path outputDirectory;
+    /** Controls method info serialization. */
     private boolean methodTrackerIsActive;
+    /** Controls field usage info serialization. */
     private boolean fieldTrackerIsActive;
+    /** Controls method invocation serialization. */
     private boolean callTrackerIsActive;
+    /** Controls class info serialization. */
     private boolean classTrackerIsActive;
 
     public Builder() {
@@ -92,6 +130,11 @@ public interface Config {
       return this;
     }
 
+    /**
+     * Outputs the configured object as XML format in the given path.
+     *
+     * @param path Output path.
+     */
     public void writeAsXML(Path path) {
       Preconditions.checkNotNull(this.outputDirectory, "Output directory must be initialized.");
       DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();

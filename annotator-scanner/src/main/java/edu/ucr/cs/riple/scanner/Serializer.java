@@ -39,18 +39,23 @@ import java.nio.file.Path;
  * of this class.
  */
 public class Serializer {
+
   /** Path to write field graph. */
   private final Path fieldGraphPath;
   /** Path to write method call graph. */
   private final Path callGraphPath;
   /** Path to write method info metadata. */
   private final Path methodInfoPath;
-
+  /** Path to write class info data. */
   private final Path classInfoPath;
 
+  /** File name where all field usage data has been stored. */
   public static final String FIELD_GRAPH_FILE_NAME = "field_graph.tsv";
+  /** File name where all method invocations data has been stored. */
   public static final String CALL_GRAPH_FILE_NAME = "call_graph.tsv";
+  /** File name where all method data has been stored. */
   public static final String METHOD_INFO_FILE_NAME = "method_info.tsv";
+  /** File name where all class data has been stored. */
   public static final String CLASS_INFO_FILE_NAME = "class_info.tsv";
 
   public Serializer(Config config) {
@@ -136,6 +141,12 @@ public class Serializer {
     }
   }
 
+  /**
+   * Appends the given string as a row in the file which tha path is given.
+   *
+   * @param row Row to append.
+   * @param path Path to target file.
+   */
   private void appendToFile(String row, Path path) {
     // Since there is no method available in API of either javac or errorprone to inform NullAway
     // that the analysis is finished, we cannot open a single stream and flush it within a finalize

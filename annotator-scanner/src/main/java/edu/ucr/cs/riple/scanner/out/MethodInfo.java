@@ -40,23 +40,43 @@ import java.util.Optional;
 import java.util.Set;
 import javax.lang.model.element.Modifier;
 
+/** Container class to store information regarding a method in source code. */
 public class MethodInfo {
+
+  /** Symbol of containing method. */
   private final Symbol.MethodSymbol symbol;
+  /** Symbol of the enclosing class for the method. */
   private final Symbol.ClassSymbol clazz;
+  /** Path to file containing the source file. */
   private URI uri;
+  /** Unique id assigned to this method across all visited methods. */
   private final int id;
-  private Boolean[] annotFlags;
-  private boolean hasNullableAnnotation;
-  private int parent;
+  /**
+   * Flag value for parameters annotations. If {@code annotFlags[j]} is {@code true} then the
+   * parameter at index {@code j} has a {@code @Nullable} annotation.
+   */
+  private Boolean[] parameterAnnotationFlags;
+  /** If {@link true} the method has a {@link @Nullable} annotation on it's return type. */
+  private boolean hasNullableOnReturnType;
+  /** ID of the closest super method. */
+  private int parentID;
 
   private MethodInfo(Symbol.MethodSymbol method, ScannerContext context) {
     this.id = context.getNextMethodId();
     this.symbol = method;
     this.clazz = (method != null) ? method.enclClass() : null;
-    this.parent = 0;
+    this.parentID = 0;
     context.visitMethod(this);
   }
 
+  /**
+   * Creates a {@link MethodInfo} instance if not visited, otherwise, it will return the
+   * corresponding instance.
+   *
+   * @param method Method symbol.
+   * @param context Scanner context.
+   * @return The corresponding {@link MethodInfo} instance.
+   */
   public static MethodInfo findOrCreate(Symbol.MethodSymbol method, ScannerContext context) {
     Symbol.ClassSymbol clazz = method.enclClass();
     Optional<MethodInfo> optionalMethodInfo =
@@ -85,15 +105,21 @@ public class MethodInfo {
     return hash(symbol);
   }
 
+  /**
+   * Locates the id of the closes super method and initializes it.
+   *
+   * @param state Error prone visitor state.
+   * @param context Scanner context.
+   */
   public void findParent(VisitorState state, ScannerContext context) {
     Symbol.MethodSymbol superMethod =
         SymbolUtil.getClosestOverriddenMethod(symbol, state.getTypes());
     if (superMethod == null || superMethod.toString().equals("null")) {
-      this.parent = 0;
+      this.parentID = 0;
       return;
     }
     MethodInfo superMethodInfo = findOrCreate(superMethod, context);
-    this.parent = superMethodInfo.id;
+    this.parentID = superMethodInfo.id;
   }
 
   @Override
@@ -104,16 +130,21 @@ public class MethodInfo {
         String.valueOf(id),
         (clazz != null ? clazz.flatName() : "null"),
         symbol.toString(),
-        String.valueOf(parent),
+        String.valueOf(parentID),
         String.valueOf(symbol.getParameters().size()),
-        Arrays.toString(annotFlags),
-        String.valueOf(hasNullableAnnotation),
+        Arrays.toString(parameterAnnotationFlags),
+        String.valueOf(hasNullableOnReturnType),
         getVisibilityOfMethod(),
         String.valueOf(!symbol.getReturnType().isPrimitiveOrVoid()),
         // for build systems that might return null for bytecodes.
         (uri != null ? uri.toString() : "null"));
   }
 
+  /**
+   * Returns header of the file where all these instances will be serialized.
+   *
+   * @return Header of target file.
+   */
   public static String header() {
     return String.join(
         "\t",
@@ -129,16 +160,27 @@ public class MethodInfo {
         "uri");
   }
 
-  public void setParamAnnotations(List<Boolean> annotFlags) {
+  /**
+   * Setter for parameter annotation flags.
+   *
+   * @param annotFlags Parameter annotation flags.
+   */
+  public void setAnnotationParameterFlags(List<Boolean> annotFlags) {
     if (annotFlags == null) {
       annotFlags = Collections.emptyList();
     }
-    this.annotFlags = new Boolean[annotFlags.size()];
-    this.annotFlags = annotFlags.toArray(this.annotFlags);
+    this.parameterAnnotationFlags = new Boolean[annotFlags.size()];
+    this.parameterAnnotationFlags = annotFlags.toArray(this.parameterAnnotationFlags);
   }
 
-  public void setAnnotation(Config config) {
-    this.hasNullableAnnotation = SymbolUtil.hasNullableAnnotation(this.symbol, config);
+  /**
+   * Sets return type annotation. Checks if method has {@code @Nullable} annotation on its return
+   * type.
+   *
+   * @param config Scanner config.
+   */
+  public void setReturnTypeAnnotation(Config config) {
+    this.hasNullableOnReturnType = SymbolUtil.hasNullableAnnotation(this.symbol, config);
   }
 
   /**

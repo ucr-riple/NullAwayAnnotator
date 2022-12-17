@@ -27,6 +27,10 @@ package edu.ucr.cs.riple.scanner;
 import java.nio.file.Path;
 import javax.annotation.Nonnull;
 
+/**
+ * Empty config just to stop the process if an error is occurred in configuring the Scanner via
+ * Error Prone flags.
+ */
 public class DummyOptionsConfig implements Config {
 
   static final String ERROR_MESSAGE =

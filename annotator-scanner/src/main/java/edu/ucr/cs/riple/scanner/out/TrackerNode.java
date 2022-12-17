@@ -31,13 +31,18 @@ import com.sun.source.tree.VariableTree;
 import com.sun.source.util.TreePath;
 import com.sun.tools.javac.code.Symbol;
 
+/** Container class for storing regions where a node has been used. */
 public class TrackerNode {
-  private final Symbol usedMember;
+
+  /** Symbol of the used node. */
+  private final Symbol usedNode;
+  /** Symbol of the enclosing class of the region. */
   private final Symbol.ClassSymbol regionClass;
+  /** Symbol of the region. */
   private final Symbol regionMember;
 
-  public TrackerNode(Symbol usedMember, TreePath path) {
-    this.usedMember = usedMember;
+  public TrackerNode(Symbol usedNode, TreePath path) {
+    this.usedNode = usedNode;
     ClassTree enclosingClass;
     MethodTree enclosingMethod;
     enclosingMethod =
@@ -91,15 +96,20 @@ public class TrackerNode {
     if (regionClass == null) {
       return "";
     }
-    Symbol enclosingClass = usedMember.enclClass();
+    Symbol enclosingClass = usedNode.enclClass();
     return String.join(
         "\t",
         regionClass.flatName(),
         ((regionMember == null) ? "null" : regionMember.toString()),
-        usedMember.toString(),
+        usedNode.toString(),
         ((enclosingClass == null) ? "null" : enclosingClass.flatName()));
   }
 
+  /**
+   * Returns header of the file where all these instances will be serialized.
+   *
+   * @return Header of target file.
+   */
   public static String header() {
     return "REGION_CLASS" + '\t' + "REGION_MEMBER" + '\t' + "USED_MEMBER" + '\t' + "USED_CLASS";
   }

@@ -36,14 +36,26 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+/**
+ * provides scanner configuration based on additional flags passed to ErrorProne via
+ * "-XepOpt:[Namespace:]FlagName[=Value]". See. <a href="http://errorprone.info/docs/flags">Error
+ * Prone flags</a>
+ */
 public class ErrorProneCLIFlagsConfig implements Config {
 
+  /** Path to output dir. */
   @Nonnull private final Path outputDirectory;
+  /** Controls method info serialization. */
   private final boolean methodTrackerIsActive;
+  /** Controls field usage serialization. */
   private final boolean fieldTrackerIsActive;
+  /** Controls method invocation serialization. */
   private final boolean callTrackerIsActive;
+  /** Controls class info serialization. */
   private final boolean classTrackerIsActive;
+  /** Serializing instance for writing outputs at the desired paths. */
   private final Serializer serializer;
+
   static final String EP_FL_NAMESPACE = "AnnotatorScanner";
   static final String FL_CONFIG_PATH = EP_FL_NAMESPACE + ":ConfigPath";
 

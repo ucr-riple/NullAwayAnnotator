@@ -63,6 +63,10 @@ public class AnnotatorScanner extends BugChecker
         BugChecker.VariableTreeMatcher,
         BugChecker.ClassTreeMatcher {
 
+  /**
+   * Scanner context to store the state of the checker. Could not use {@link VisitorState#context}
+   * included in Error Prone. See {@link ScannerContext} class for more info.
+   */
   private final ScannerContext context;
 
   public AnnotatorScanner() {
@@ -108,13 +112,13 @@ public class AnnotatorScanner extends BugChecker
     Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(tree);
     MethodInfo methodInfo = MethodInfo.findOrCreate(methodSymbol, context);
     methodInfo.findParent(state, context);
-    methodInfo.setAnnotation(config);
+    methodInfo.setReturnTypeAnnotation(config);
     methodInfo.setURI(state);
     List<Boolean> paramAnnotations = new ArrayList<>();
     for (int i = 0; i < methodSymbol.getParameters().size(); i++) {
       paramAnnotations.add(SymbolUtil.paramHasNullableAnnotation(methodSymbol, i, config));
     }
-    methodInfo.setParamAnnotations(paramAnnotations);
+    methodInfo.setAnnotationParameterFlags(paramAnnotations);
     config.getSerializer().serializeMethodInfo(methodInfo);
     return Description.NO_MATCH;
   }
@@ -146,6 +150,12 @@ public class AnnotatorScanner extends BugChecker
     return Description.NO_MATCH;
   }
 
+  /**
+   * Serializes a field usage if the received symbol is a field.
+   *
+   * @param symbol Received symbol.
+   * @param state Error prone visitor state.
+   */
   private void serializeSymIfField(Symbol symbol, VisitorState state) {
     if (symbol != null && symbol.getKind() == ElementKind.FIELD) {
       context
