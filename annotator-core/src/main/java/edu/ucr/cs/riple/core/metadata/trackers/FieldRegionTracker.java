@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.Optional;
@@ -56,11 +56,11 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
   }
 
   @Override
-  public Optional<Set<Region>> getRegions(Fix fix) {
-    if (!fix.isOnField()) {
+  public Optional<Set<Region>> getRegions(Location location) {
+    if (!location.isOnField()) {
       return Optional.empty();
     }
-    OnField field = fix.toField();
+    OnField field = location.toField();
     // Add all regions where the field is assigned a new value or read.
     Set<Region> ans =
         findNodesWithHashHint(

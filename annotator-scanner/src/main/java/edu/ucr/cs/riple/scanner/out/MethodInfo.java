@@ -56,7 +56,7 @@ public class MethodInfo {
    * parameter at index {@code j} has a {@code @Nullable} annotation.
    */
   private Boolean[] parameterAnnotationFlags;
-  /** If {@link true} the method has a {@link @Nullable} annotation on it's return type. */
+  /** If {@code true} the method has a {@code @Nullable} annotation on it's return type. */
   private boolean hasNullableOnReturnType;
   /** ID of the closest super method. */
   private int parentID;

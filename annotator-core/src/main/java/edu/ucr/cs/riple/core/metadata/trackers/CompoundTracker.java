@@ -27,8 +27,8 @@ package edu.ucr.cs.riple.core.metadata.trackers;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+import edu.ucr.cs.riple.injector.location.Location;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -58,7 +58,7 @@ public class CompoundTracker implements RegionTracker {
   }
 
   @Override
-  public Optional<Set<Region>> getRegions(Fix location) {
+  public Optional<Set<Region>> getRegions(Location location) {
     for (RegionTracker tracker : this.trackers) {
       Optional<Set<Region>> ans = tracker.getRegions(location);
       if (ans.isPresent()) {
