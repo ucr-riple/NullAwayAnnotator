@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.scanner;
 
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import edu.ucr.cs.riple.scanner.tools.Display;
 import edu.ucr.cs.riple.scanner.tools.DisplayFactory;
 import edu.ucr.cs.riple.scanner.tools.SerializationTestHelper;
@@ -65,7 +66,7 @@ public abstract class AnnotatorScannerBaseTest<T extends Display> {
           .setClassTrackerActivation(true)
           .setFieldTrackerActivation(true)
           .setMethodTrackerActivation(true)
-          .addGeneratedCodeDetector("lombok")
+          .addGeneratedCodeDetector(SourceType.LOMBOK)
           .setOutput(root)
           .writeAsXML(configPath);
     } catch (IOException ex) {

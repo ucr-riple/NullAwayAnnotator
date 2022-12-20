@@ -3,6 +3,7 @@ package edu.ucr.cs.riple.core.metadata.trackers.generatedcode;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -24,7 +25,7 @@ public class LombokTracker implements GeneratedRegionTracker {
   public Set<Region> extendWithGeneratedRegions(Set<Region> regions) {
     return regions.stream()
         // filter regions where are created by lombok
-        .filter(region -> region.sourceType.equals("LOMBOK") && region.isOnMethod())
+        .filter(region -> region.sourceType.equals(SourceType.LOMBOK) && region.isOnMethod())
         // find the corresponding method for the region.
         .map(region -> methodDeclarationTree.findNode(region.member, region.clazz))
         .filter(Objects::nonNull)

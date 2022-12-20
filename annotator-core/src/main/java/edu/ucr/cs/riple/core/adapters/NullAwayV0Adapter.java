@@ -33,6 +33,7 @@ import edu.ucr.cs.riple.core.metadata.trackers.TrackerNode;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
@@ -92,7 +93,8 @@ public class NullAwayV0Adapter implements NullAwayVersionAdapter {
             + values.length);
     String regionMember =
         !Region.getType(values[1]).equals(Region.Type.METHOD) ? "null" : values[1];
-    return new TrackerNode(new Region(values[0], regionMember, values[4]), values[2], values[3]);
+    return new TrackerNode(
+        new Region(values[0], regionMember, SourceType.valueOf(values[4])), values[2], values[3]);
   }
 
   @Override

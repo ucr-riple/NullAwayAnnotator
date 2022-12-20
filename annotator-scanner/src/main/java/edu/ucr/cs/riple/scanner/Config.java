@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.scanner;
 
 import com.sun.source.util.TreePath;
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.nio.file.Path;
 import javax.annotation.Nonnull;
 
@@ -79,8 +80,8 @@ public interface Config {
    * {@code "SOURCE"} will be returned and otherwise the name of the code generator will be
    * returned.
    *
-   * @return Name of the generator that produced the code and {@code "SOURCE"} if element exists in
-   *     source code.
+   * @return Associated Source type of the generator that produced the code. If element exists in
+   *     source code and not produced by any processor, it will return {@link SourceType#SOURCE}
    */
-  String getSourceForSymbolAtPath(TreePath path);
+  SourceType getSourceForSymbolAtPath(TreePath path);
 }

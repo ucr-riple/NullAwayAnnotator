@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.scanner;
 
 import com.google.common.base.Preconditions;
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -56,7 +57,7 @@ public class ScannerConfigWriter {
   /** Controls class info serialization. */
   private boolean classTrackerIsActive;
   /** Set of activated generated code detectors. */
-  private final Set<String> activatedGeneratedCodeDetectors;
+  private final Set<SourceType> activatedGeneratedCodeDetectors;
 
   public ScannerConfigWriter() {
     this.methodTrackerIsActive = false;
@@ -91,8 +92,8 @@ public class ScannerConfigWriter {
     return this;
   }
 
-  public ScannerConfigWriter addGeneratedCodeDetector(String name) {
-    this.activatedGeneratedCodeDetectors.add(name);
+  public ScannerConfigWriter addGeneratedCodeDetector(SourceType sourceType) {
+    this.activatedGeneratedCodeDetectors.add(sourceType);
     return this;
   }
 
@@ -151,8 +152,8 @@ public class ScannerConfigWriter {
       Element codeDetectors = doc.createElement("processor");
       rootElement.appendChild(codeDetectors);
       activatedGeneratedCodeDetectors.forEach(
-          s -> {
-            Element processorElement = doc.createElement(s);
+          detectors -> {
+            Element processorElement = doc.createElement(detectors.name());
             processorElement.setAttribute("active", "true");
             codeDetectors.appendChild(processorElement);
           });

@@ -31,6 +31,7 @@ import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.generatedcode.GeneratedRegionTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.generatedcode.LombokTracker;
 import edu.ucr.cs.riple.injector.location.Location;
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -51,7 +52,7 @@ public class CompoundTracker implements RegionTracker {
             methodRegionTracker,
             new ParameterRegionTracker(tree, methodRegionTracker));
     Set<GeneratedRegionTracker> generatedRegionTrackers = new HashSet<>();
-    if (config.generatedCodeDetectors.contains("lombok")) {
+    if (config.generatedCodeDetectors.contains(SourceType.LOMBOK)) {
       generatedRegionTrackers.add(new LombokTracker(tree, methodRegionTracker));
     }
     this.generatedRegionsTrackers = ImmutableSet.copyOf(generatedRegionTrackers);

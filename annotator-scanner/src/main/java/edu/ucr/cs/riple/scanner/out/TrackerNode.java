@@ -31,6 +31,7 @@ import com.sun.source.tree.VariableTree;
 import com.sun.source.util.TreePath;
 import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.riple.scanner.Config;
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 
 /** Container class for storing regions where a node has been used. */
 public class TrackerNode {
@@ -45,7 +46,7 @@ public class TrackerNode {
    * Denotes if the code exists in source code or is generated. If code exists in source code it
    * will have the value {@code "SOURCE"} and if generated, it will have the name of the generator.
    */
-  private final String source;
+  private final SourceType source;
 
   public TrackerNode(Config config, Symbol usedNode, TreePath path) {
     this.usedNode = usedNode;
@@ -110,7 +111,7 @@ public class TrackerNode {
         ((regionMember == null) ? "null" : regionMember.toString()),
         usedNode.toString(),
         ((enclosingClass == null) ? "null" : enclosingClass.flatName()),
-        source);
+        source.name());
   }
 
   /**

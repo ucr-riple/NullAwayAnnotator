@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.util.Objects;
 
 /**
@@ -42,7 +43,7 @@ public class Region {
    * Type of region. If region exists in source code, this value is {@code "SOURCE"}, otherwise it
    * will be the name of the processor created this region. (e.g. {"LOMBOK"}).
    */
-  public final String sourceType;
+  public final SourceType sourceType;
 
   public final Type type;
 
@@ -53,7 +54,7 @@ public class Region {
     STATIC_BLOCK
   }
 
-  public Region(String encClass, String encMember, String sourceType) {
+  public Region(String encClass, String encMember, SourceType sourceType) {
     this.clazz = encClass == null ? "null" : encClass;
     this.member = encMember == null ? "null" : encMember;
     this.type = getType(member);
@@ -61,10 +62,7 @@ public class Region {
   }
 
   public Region(String encClass, String encMember) {
-    this.clazz = encClass == null ? "null" : encClass;
-    this.member = encMember == null ? "null" : encMember;
-    this.type = getType(member);
-    this.sourceType = "SOURCE";
+    this(encClass, encMember, SourceType.SOURCE);
   }
 
   /**

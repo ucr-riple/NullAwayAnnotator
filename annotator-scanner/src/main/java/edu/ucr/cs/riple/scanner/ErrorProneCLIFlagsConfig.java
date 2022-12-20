@@ -29,6 +29,7 @@ import com.google.errorprone.ErrorProneFlags;
 import com.sun.source.util.TreePath;
 import edu.ucr.cs.riple.scanner.generatedcode.GeneratedCodeDetector;
 import edu.ucr.cs.riple.scanner.generatedcode.LombokGeneratedCodeDetector;
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -114,7 +115,7 @@ public class ErrorProneCLIFlagsConfig implements Config {
   private ImmutableSet<GeneratedCodeDetector> initCodeGeneratedCodeDetectors(Document document) {
     Set<GeneratedCodeDetector> codeDetectors = new HashSet<>();
     if (XMLUtil.getValueFromAttribute(
-            document, "/scanner/processor/lombok", "active", Boolean.class)
+            document, "/scanner/processor/" + SourceType.LOMBOK.name(), "active", Boolean.class)
         .orElse(false)) {
       codeDetectors.add(new LombokGeneratedCodeDetector());
     }
@@ -153,12 +154,12 @@ public class ErrorProneCLIFlagsConfig implements Config {
   }
 
   @Override
-  public String getSourceForSymbolAtPath(TreePath path) {
+  public SourceType getSourceForSymbolAtPath(TreePath path) {
     for (GeneratedCodeDetector detector : this.generatedCodeDetectors) {
       if (detector.isGeneratedCode(path)) {
-        return detector.getCodeGeneratorName();
+        return detector.getGeneratorSourceType();
       }
     }
-    return "SOURCE";
+    return SourceType.SOURCE;
   }
 }

@@ -33,6 +33,7 @@ import edu.ucr.cs.riple.core.metadata.index.Factory;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.scanner.AnnotatorScanner;
 import edu.ucr.cs.riple.scanner.ScannerConfigWriter;
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -269,7 +270,7 @@ public class Utility {
         .setClassTrackerActivation(activation)
         .setFieldTrackerActivation(activation)
         .setMethodTrackerActivation(activation)
-        .addGeneratedCodeDetector("lombok")
+        .addGeneratedCodeDetector(SourceType.LOMBOK)
         .setOutput(info.dir)
         .writeAsXML(info.scannerConfig);
   }

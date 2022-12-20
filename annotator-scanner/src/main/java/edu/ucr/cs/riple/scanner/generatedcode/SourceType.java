@@ -24,22 +24,7 @@
 
 package edu.ucr.cs.riple.scanner.generatedcode;
 
-import com.sun.source.util.TreePath;
-
-public interface GeneratedCodeDetector {
-
-  /**
-   * Checks if the received path is inside a generated code.
-   *
-   * @param path Received path.
-   * @return true, if leads to a generated code.
-   */
-  boolean isGeneratedCode(TreePath path);
-
-  /**
-   * Returns the generator source type which produced the code.
-   *
-   * @return Generator source type.
-   */
-  SourceType getGeneratorSourceType();
+public enum SourceType {
+  SOURCE,
+  LOMBOK;
 }

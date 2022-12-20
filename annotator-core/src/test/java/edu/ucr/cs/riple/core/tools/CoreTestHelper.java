@@ -33,6 +33,7 @@ import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -278,7 +279,7 @@ public class CoreTestHelper {
     builder.mode = mode;
     builder.inferenceActivated = !deactivateInference;
     builder.forceResolveActivation = forceResolveActivated;
-    builder.activateLombokCodeDetector = true;
+    builder.sourceTypes.add(SourceType.LOMBOK);
     if (downstreamDependencyAnalysisActivated) {
       builder.buildCommand =
           Utility.computeBuildCommandWithLibraryModelLoaderDependency(
