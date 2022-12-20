@@ -301,6 +301,13 @@ public class Utility {
       uuid.setTextContent(UUID.randomUUID().toString());
       rootElement.appendChild(uuid);
 
+      // Generated code.
+      Element codeDetectors = doc.createElement("processor");
+      rootElement.appendChild(codeDetectors);
+      Element processorElement = doc.createElement("lombok");
+      processorElement.setAttribute("active", "true");
+      codeDetectors.appendChild(processorElement);
+
       // Writings
       TransformerFactory transformerFactory = TransformerFactory.newInstance();
       Transformer transformer = transformerFactory.newTransformer();
