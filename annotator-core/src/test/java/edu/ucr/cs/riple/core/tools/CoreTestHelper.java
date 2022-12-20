@@ -278,6 +278,7 @@ public class CoreTestHelper {
     builder.mode = mode;
     builder.inferenceActivated = !deactivateInference;
     builder.forceResolveActivation = forceResolveActivated;
+    builder.activateLombokCodeDetector = true;
     if (downstreamDependencyAnalysisActivated) {
       builder.buildCommand =
           Utility.computeBuildCommandWithLibraryModelLoaderDependency(

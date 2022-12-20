@@ -141,7 +141,7 @@ public class Config {
    */
   private NullAwayVersionAdapter adapter;
 
-  public final boolean enableLombok = true;
+  public final ImmutableSet<String> generatedCodeDetectors;
 
   /**
    * Builds config from command line arguments.
@@ -303,6 +303,17 @@ public class Config {
     deactivateInference.setRequired(false);
     options.addOption(deactivateInference);
 
+    // Region detection for code generators
+    // Lombok
+    Option activateRegionDetectionForLombok =
+        new Option(
+            "ardl",
+            "activate-region-detection-lombok",
+            false,
+            "Activates region detection for lombok generated code");
+    activateRegionDetectionForLombok.setRequired(false);
+    options.addOption(activateRegionDetectionForLombok);
+
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
@@ -398,6 +409,10 @@ public class Config {
     this.moduleCounterID = 0;
     this.log = new Log();
     this.log.reset();
+    this.generatedCodeDetectors =
+        cmd.hasOption(activateRegionDetectionForLombok)
+            ? ImmutableSet.of("lombok")
+            : ImmutableSet.of();
   }
 
   /**
@@ -475,6 +490,10 @@ public class Config {
     this.nullUnMarkedAnnotation =
         getValueFromKey(jsonObject, "ANNOTATION:NULL_UNMARKED", String.class)
             .orElse("org.jspecify.nullness.NullUnmarked");
+    boolean lombokCodeDetectorActivated =
+        getValueFromKey(jsonObject, "PROCESSORS:LOMBOK:ACTIVATION", Boolean.class).orElse(false);
+    this.generatedCodeDetectors =
+        lombokCodeDetectorActivated ? ImmutableSet.of("lombok") : ImmutableSet.of();
     this.log = new Log();
     log.reset();
   }
@@ -635,6 +654,7 @@ public class Config {
     public boolean forceResolveActivation = false;
     public String nullUnmarkedAnnotation = "org.jspecify.nullness.NullUnmarked";
     public boolean inferenceActivated = true;
+    public boolean activateLombokCodeDetector = false;
     public int depth = 1;
 
     @SuppressWarnings("unchecked")
@@ -694,6 +714,12 @@ public class Config {
         downstreamDependency.put("ANALYSIS_MODE", mode.name());
       }
       json.put("DOWNSTREAM_DEPENDENCY_ANALYSIS", downstreamDependency);
+
+      JSONObject processors = new JSONObject();
+      JSONObject lombok = new JSONObject();
+      lombok.put("ACTIVATION", activateLombokCodeDetector);
+      processors.put("LOMBOK", lombok);
+      json.put("PROCESSORS", processors);
 
       try (BufferedWriter file =
           Files.newBufferedWriter(path.toFile().toPath(), Charset.defaultCharset())) {
