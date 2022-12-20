@@ -95,7 +95,9 @@ public class ScannerConfigWriter {
     Preconditions.checkNotNull(this.outputDirectory, "Output directory must be initialized.");
     DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
     try {
-      // Create file.
+      // Delete if exists.
+      Files.deleteIfExists(path);
+      // Re-Create file.
       Files.createFile(path);
 
       DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
