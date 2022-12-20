@@ -102,7 +102,7 @@ public class TrackerNode {
         regionClass.flatName(),
         ((regionMember == null) ? "null" : regionMember.toString()),
         usedNode.toString(),
-        ((enclosingClass == null) ? "null" : enclosingClass.flatName()));
+        ((enclosingClass == null) ? "null" : enclosingClass.flatName()), sour);
   }
 
   /**
@@ -111,6 +111,6 @@ public class TrackerNode {
    * @return Header of target file.
    */
   public static String header() {
-    return "REGION_CLASS" + '\t' + "REGION_MEMBER" + '\t' + "USED_MEMBER" + '\t' + "USED_CLASS";
+    return "REGION_CLASS" + '\t' + "REGION_MEMBER" + '\t' + "USED_MEMBER" + '\t' + "USED_CLASS" + '\t' + "SOURCE_TYPE";
   }
 }

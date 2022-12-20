@@ -141,6 +141,8 @@ public class Config {
    */
   private NullAwayVersionAdapter adapter;
 
+  public final boolean enableLombok = true;
+
   /**
    * Builds config from command line arguments.
    *

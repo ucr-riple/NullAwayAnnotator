@@ -28,9 +28,10 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+import edu.ucr.cs.riple.core.metadata.trackers.generatedcode.GeneratedRegionTracker;
+import edu.ucr.cs.riple.core.metadata.trackers.generatedcode.LombokTracker;
 import edu.ucr.cs.riple.injector.location.Location;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -38,33 +39,30 @@ import java.util.Set;
 public class CompoundTracker implements RegionTracker {
 
   /** List of all trackers. */
-  private final List<RegionTracker> trackers;
+  private final ImmutableSet<RegionTracker> trackers;
+
+  private final ImmutableSet<GeneratedRegionTracker> generatedRegionsTrackers;
 
   public CompoundTracker(Config config, ModuleInfo info, MethodDeclarationTree tree) {
-    this.trackers = new ArrayList<>();
     MethodRegionTracker methodRegionTracker = new MethodRegionTracker(config, info, tree);
-    this.trackers.add(new FieldRegionTracker(config, info));
-    this.trackers.add(methodRegionTracker);
-    this.trackers.add(new ParameterRegionTracker(tree, methodRegionTracker));
-  }
-
-  public CompoundTracker(
-      Config config, ImmutableSet<ModuleInfo> modules, MethodDeclarationTree tree) {
-    this.trackers = new ArrayList<>();
-    MethodRegionTracker methodRegionTracker = new MethodRegionTracker(config, modules, tree);
-    this.trackers.add(new FieldRegionTracker(config, modules));
-    this.trackers.add(methodRegionTracker);
-    this.trackers.add(new ParameterRegionTracker(tree, methodRegionTracker));
+    this.trackers =
+        ImmutableSet.of(
+            new FieldRegionTracker(config, info),
+            methodRegionTracker,
+            new ParameterRegionTracker(tree, methodRegionTracker));
+    Set<GeneratedRegionTracker> generatedRegionTrackers = new HashSet<>();
+    if (config.enableLombok) {
+      generatedRegionTrackers.add(new LombokTracker(tree, methodRegionTracker));
+    }
+    this.generatedRegionsTrackers = ImmutableSet.copyOf(generatedRegionTrackers);
   }
 
   @Override
   public Optional<Set<Region>> getRegions(Location location) {
-    for (RegionTracker tracker : this.trackers) {
-      Optional<Set<Region>> ans = tracker.getRegions(location);
-      if (ans.isPresent()) {
-        return ans;
-      }
-    }
-    throw new IllegalStateException("Region cannot be null at this point." + location);
+    Set<Region> regions = new HashSet<>();
+    this.trackers.forEach(tracker -> tracker.getRegions(location).ifPresent(regions::addAll));
+    this.generatedRegionsTrackers.forEach(
+        tracker -> regions.addAll(tracker.extendWithGeneratedRegions(regions)));
+    return Optional.of(regions);
   }
 }
