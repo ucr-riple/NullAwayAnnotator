@@ -269,6 +269,7 @@ public class Utility {
         .setClassTrackerActivation(activation)
         .setFieldTrackerActivation(activation)
         .setMethodTrackerActivation(activation)
+        .addGeneratedCodeDetector("lombok")
         .setOutput(info.dir)
         .writeAsXML(info.scannerConfig);
   }
