@@ -32,6 +32,7 @@ import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Factory;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.scanner.AnnotatorScanner;
+import edu.ucr.cs.riple.scanner.ScannerConfigWriter;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -262,61 +263,14 @@ public class Utility {
    * @param activation activation flag for all features of the scanner.
    */
   public static void setScannerCheckerActivation(ModuleInfo info, boolean activation) {
-    DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-    try {
-      DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-      Document doc = docBuilder.newDocument();
-
-      // Root
-      Element rootElement = doc.createElement("scanner");
-      doc.appendChild(rootElement);
-
-      // Method
-      Element methodElement = doc.createElement("method");
-      methodElement.setAttribute("active", String.valueOf(activation));
-      rootElement.appendChild(methodElement);
-
-      // Field
-      Element fieldElement = doc.createElement("field");
-      fieldElement.setAttribute("active", String.valueOf(activation));
-      rootElement.appendChild(fieldElement);
-
-      // Call
-      Element callElement = doc.createElement("call");
-      callElement.setAttribute("active", String.valueOf(activation));
-      rootElement.appendChild(callElement);
-
-      // File
-      Element classElement = doc.createElement("class");
-      classElement.setAttribute("active", String.valueOf(activation));
-      rootElement.appendChild(classElement);
-
-      // Output dir
-      Element outputDir = doc.createElement("path");
-      outputDir.setTextContent(info.dir.toString());
-      rootElement.appendChild(outputDir);
-
-      // UUID
-      Element uuid = doc.createElement("uuid");
-      uuid.setTextContent(UUID.randomUUID().toString());
-      rootElement.appendChild(uuid);
-
-      // Generated code.
-      Element codeDetectors = doc.createElement("processor");
-      rootElement.appendChild(codeDetectors);
-      Element processorElement = doc.createElement("lombok");
-      processorElement.setAttribute("active", "true");
-      codeDetectors.appendChild(processorElement);
-
-      // Writings
-      TransformerFactory transformerFactory = TransformerFactory.newInstance();
-      Transformer transformer = transformerFactory.newTransformer();
-      DOMSource source = new DOMSource(doc);
-      StreamResult result = new StreamResult(info.scannerConfig.toFile());
-      transformer.transform(source, result);
-    } catch (ParserConfigurationException | TransformerException e) {
-      throw new RuntimeException("Error happened in writing config.", e);
-    }
+    ScannerConfigWriter writer = new ScannerConfigWriter();
+    writer
+        .setCallTrackerActivation(activation)
+        .setClassTrackerActivation(activation)
+        .setFieldTrackerActivation(activation)
+        .setMethodTrackerActivation(activation)
+        .setOutput(info.dir)
+        .writeAsXML(info.scannerConfig);
   }
 
   /**
