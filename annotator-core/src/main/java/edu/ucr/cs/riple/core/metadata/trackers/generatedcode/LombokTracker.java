@@ -34,9 +34,20 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Tracker for extending potentially impacted regions for elements which will be use in generated
+ * code by <a href="https://projectlombok.org">Lombok</a>. Lombok automatically propagates
+ * {@code @Nullable} annotation on fields to getter methods, therefore, extends the set of
+ * potentially impacted regions to all callers of that method as well. This tracker, will include
+ * all callers of any method which uses an element in a lombok generated code. This will guarantee
+ * that {@link edu.ucr.cs.riple.core.evaluators.graphprocessor.ParallelConflictGraphProcessor} will
+ * catch any triggered errors by an annotation including all copied annotations by lombok as well.
+ */
 public class LombokTracker implements GeneratedRegionTracker {
 
+  /** Method region tracker to get potentially impacted regions of a method. */
   private final MethodRegionTracker tracker;
+  /** Method declaration tree instance. */
   private final MethodDeclarationTree methodDeclarationTree;
 
   public LombokTracker(
