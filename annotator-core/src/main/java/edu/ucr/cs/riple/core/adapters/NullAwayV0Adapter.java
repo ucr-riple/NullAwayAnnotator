@@ -90,8 +90,9 @@ public class NullAwayV0Adapter implements NullAwayVersionAdapter {
         values.length == 4,
         "Expected 4 values to create TrackerNode instance in NullAway serialization version 0 but found: "
             + values.length);
-    String encMember = !Region.getType(values[1]).equals(Region.Type.METHOD) ? "null" : values[1];
-    return new TrackerNode(values[0], encMember, values[2], values[3]);
+    String regionMember =
+        !Region.getType(values[1]).equals(Region.Type.METHOD) ? "null" : values[1];
+    return new TrackerNode(new Region(values[0], regionMember), values[2], values[3]);
   }
 
   @Override

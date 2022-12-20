@@ -68,7 +68,7 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
                     candidate.calleeClass.equals(field.clazz)
                         && field.isOnFieldWithName(candidate.calleeMember),
                 TrackerNode.hash(field.clazz))
-            .map(trackerNode -> new Region(trackerNode.callerClass, trackerNode.callerMember))
+            .map(trackerNode -> trackerNode.region)
             .collect(Collectors.toSet());
     ans.addAll(config.getAdapter().getFieldRegionScope(field));
     return Optional.of(ans);
