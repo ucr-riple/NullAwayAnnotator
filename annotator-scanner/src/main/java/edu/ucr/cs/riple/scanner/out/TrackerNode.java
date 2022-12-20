@@ -42,10 +42,7 @@ public class TrackerNode {
   private final Symbol.ClassSymbol regionClass;
   /** Symbol of the region. */
   private final Symbol regionMember;
-  /**
-   * Denotes if the code exists in source code or is generated. If code exists in source code it
-   * will have the value {@code "SOURCE"} and if generated, it will have the name of the generator.
-   */
+  /** Source type of the region. */
   private final SourceType source;
 
   public TrackerNode(Config config, Symbol usedNode, TreePath path) {
