@@ -24,11 +24,17 @@
 
 package edu.ucr.cs.riple.scanner;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.ErrorProneFlags;
+import com.sun.source.util.TreePath;
+import edu.ucr.cs.riple.scanner.generatedcode.GeneratedCodeDetector;
+import edu.ucr.cs.riple.scanner.generatedcode.LombokGeneratedCodeDetector;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -55,6 +61,8 @@ public class ErrorProneCLIFlagsConfig implements Config {
   private final boolean classTrackerIsActive;
   /** Serializing instance for writing outputs at the desired paths. */
   private final Serializer serializer;
+  /** Set of activated code generator detectors. */
+  private final ImmutableSet<GeneratedCodeDetector> generatedCodeDetectors;
 
   static final String EP_FL_NAMESPACE = "AnnotatorScanner";
   static final String FL_CONFIG_PATH = EP_FL_NAMESPACE + ":ConfigPath";
@@ -93,7 +101,24 @@ public class ErrorProneCLIFlagsConfig implements Config {
     this.classTrackerIsActive =
         XMLUtil.getValueFromAttribute(document, "/scanner/class", "active", Boolean.class)
             .orElse(false);
+    generatedCodeDetectors = initCodeGeneratedCodeDetectors(document);
     this.serializer = new Serializer(this);
+  }
+
+  /**
+   * Initializes list of activated generated code detectors.
+   *
+   * @param document XML document where all configuration values are read from.
+   * @return Immutable set of activated generated code detectors.
+   */
+  private ImmutableSet<GeneratedCodeDetector> initCodeGeneratedCodeDetectors(Document document) {
+    Set<GeneratedCodeDetector> codeDetectors = new HashSet<>();
+    if (XMLUtil.getValueFromAttribute(
+            document, "/scanner/processor/lombok", "active", Boolean.class)
+        .orElse(false)) {
+      codeDetectors.add(new LombokGeneratedCodeDetector());
+    }
+    return ImmutableSet.copyOf(codeDetectors);
   }
 
   @Override
@@ -125,5 +150,15 @@ public class ErrorProneCLIFlagsConfig implements Config {
   @Override
   public Path getOutputDirectory() {
     return outputDirectory;
+  }
+
+  @Override
+  public String getSourceForSymbolAtPath(TreePath path) {
+    for (GeneratedCodeDetector detector : this.generatedCodeDetectors) {
+      if (detector.isGeneratedCode(path)) {
+        return detector.getCodeGeneratorName();
+      }
+    }
+    return "SOURCE";
   }
 }

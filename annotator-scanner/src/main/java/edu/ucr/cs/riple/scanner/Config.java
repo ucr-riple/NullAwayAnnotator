@@ -25,7 +25,10 @@
 package edu.ucr.cs.riple.scanner;
 
 import com.google.common.base.Preconditions;
+import com.sun.source.util.TreePath;
 import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -84,6 +87,16 @@ public interface Config {
   @Nonnull
   Path getOutputDirectory();
 
+  /**
+   * Returns source for the element at the given path. If the element exists in the source code
+   * {@code "SOURCE"} will be returned and otherwise the name of the code generator will be
+   * returned.
+   *
+   * @return Name of the generator that produced the code and {@code "SOURCE"} if element exists in
+   *     source code.
+   */
+  String getSourceForSymbolAtPath(TreePath path);
+
   /** Builder for setting a AnnotatorScanner configuration and output in XML format. */
   class Builder {
 
@@ -97,12 +110,15 @@ public interface Config {
     private boolean callTrackerIsActive;
     /** Controls class info serialization. */
     private boolean classTrackerIsActive;
+    /** Set of activated generated code detectors. */
+    private final Set<String> activatedGeneratedCodeDetectors;
 
     public Builder() {
       this.methodTrackerIsActive = false;
       this.fieldTrackerIsActive = false;
       this.callTrackerIsActive = false;
       this.classTrackerIsActive = false;
+      this.activatedGeneratedCodeDetectors = new HashSet<>();
     }
 
     public Builder setOutput(Path output) {
@@ -127,6 +143,11 @@ public interface Config {
 
     public Builder setClassTrackerActivation(boolean activation) {
       this.classTrackerIsActive = activation;
+      return this;
+    }
+
+    public Builder addGeneratedCodeDetector(String name) {
+      this.activatedGeneratedCodeDetectors.add(name);
       return this;
     }
 
@@ -170,6 +191,16 @@ public interface Config {
         Element outputDir = doc.createElement("path");
         outputDir.setTextContent(this.outputDirectory.toString());
         rootElement.appendChild(outputDir);
+
+        // Generated code detectors
+        Element codeDetectors = doc.createElement("processor");
+        rootElement.appendChild(codeDetectors);
+        activatedGeneratedCodeDetectors.forEach(
+            s -> {
+              Element processorElement = doc.createElement(s);
+              processorElement.setAttribute("active", "true");
+              codeDetectors.appendChild(processorElement);
+            });
 
         // Writings
         TransformerFactory transformerFactory = TransformerFactory.newInstance();

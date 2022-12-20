@@ -36,11 +36,19 @@ public class FieldTrackerTest extends AnnotatorScannerBaseTest<TrackerNodeDispla
 
   private static final DisplayFactory<TrackerNodeDisplay> FIELD_TRACKER_DISPLAY_FACTORY =
       values -> {
-        Preconditions.checkArgument(values.length == 4, "Expected to find 4 values on each line");
-        return new TrackerNodeDisplay(values[0], values[1], values[3], values[2]);
+        Preconditions.checkArgument(values.length == 5, "Expected to find 5 values on each line");
+        return new TrackerNodeDisplay(values[0], values[1], values[3], values[2], values[4]);
       };
   private static final String HEADER =
-      "REGION_CLASS" + '\t' + "REGION_MEMBER" + '\t' + "USED_MEMBER" + '\t' + "USED_CLASS";
+      "REGION_CLASS"
+          + '\t'
+          + "REGION_MEMBER"
+          + '\t'
+          + "USED_MEMBER"
+          + '\t'
+          + "USED_CLASS"
+          + '\t'
+          + "SOURCE_TYPE";
   private static final String FILE_NAME = "field_graph.tsv";
 
   public FieldTrackerTest() {
@@ -132,6 +140,25 @@ public class FieldTrackerTest extends AnnotatorScannerBaseTest<TrackerNodeDispla
             new TrackerNodeDisplay("edu.ucr.A", "f4", "edu.ucr.C", "val"),
             new TrackerNodeDisplay("edu.ucr.A", "f4", "edu.ucr.C", "val"),
             new TrackerNodeDisplay("edu.ucr.A", "f4", "edu.ucr.B", "staticC"))
+        .doTest();
+  }
+
+  @Test
+  public void LombokGeneratedCodeDetectionTest() {
+    tester
+        .addSourceLines(
+            "lombok/Generated.java", "package lombok;", "public @interface Generated { }")
+        .addSourceLines(
+            "A.java",
+            "import lombok.Generated;",
+            "public class A {",
+            "   Object foo;",
+            "   @lombok.Generated()",
+            "   public Object bar(){",
+            "       return foo;",
+            "   }",
+            "}")
+        .setExpectedOutputs(new TrackerNodeDisplay("A", "bar()", "A", "foo", "LOMBOK"))
         .doTest();
   }
 }

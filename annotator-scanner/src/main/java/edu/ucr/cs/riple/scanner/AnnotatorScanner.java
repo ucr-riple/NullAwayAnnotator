@@ -99,7 +99,8 @@ public class AnnotatorScanner extends BugChecker
     }
     config
         .getSerializer()
-        .serializeCallGraphNode(new TrackerNode(ASTHelpers.getSymbol(tree), state.getPath()));
+        .serializeCallGraphNode(
+            new TrackerNode(config, ASTHelpers.getSymbol(tree), state.getPath()));
     return Description.NO_MATCH;
   }
 
@@ -161,7 +162,7 @@ public class AnnotatorScanner extends BugChecker
       context
           .getConfig()
           .getSerializer()
-          .serializeFieldGraphNode(new TrackerNode(symbol, state.getPath()));
+          .serializeFieldGraphNode(new TrackerNode(context.getConfig(), symbol, state.getPath()));
     }
   }
 }

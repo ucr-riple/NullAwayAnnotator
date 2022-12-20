@@ -33,9 +33,9 @@ import edu.ucr.cs.riple.scanner.SymbolUtil;
 /**
  * Detector for generated code by <a href="https://projectlombok.org">Lombok</a>. The basic
  * assumption used here is that all generated code by Lombok is inside a method annotated with <a
- * href="https://projectlombok.org/api/lombok/Generated">Generated</a> annotation. Please note that
- * {@code "lombok.addLombokGeneratedAnnotation = true"} should be set in lombok configurations while
- * building target module to add the required annotations.
+ * href="https://projectlombok.org/api/lombok/Generated">@lombok.Generated</a> annotation. Please
+ * note that {@code "lombok.addLombokGeneratedAnnotation = true"} should be set in lombok
+ * configurations while building target module to add the required annotations.
  */
 public class LombokGeneratedCodeDetector implements GeneratedCodeDetector {
 

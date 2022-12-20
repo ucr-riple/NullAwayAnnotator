@@ -30,6 +30,7 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.source.util.TreePath;
 import com.sun.tools.javac.code.Symbol;
+import edu.ucr.cs.riple.scanner.Config;
 
 /** Container class for storing regions where a node has been used. */
 public class TrackerNode {
@@ -40,8 +41,13 @@ public class TrackerNode {
   private final Symbol.ClassSymbol regionClass;
   /** Symbol of the region. */
   private final Symbol regionMember;
+  /**
+   * Denotes if the code exists in source code or is generated. If code exists in source code it
+   * will have the value {@code "SOURCE"} and if generated, it will have the name of the generator.
+   */
+  private final String source;
 
-  public TrackerNode(Symbol usedNode, TreePath path) {
+  public TrackerNode(Config config, Symbol usedNode, TreePath path) {
     this.usedNode = usedNode;
     ClassTree enclosingClass;
     MethodTree enclosingMethod;
@@ -89,6 +95,7 @@ public class TrackerNode {
       regionMember = null;
       regionClass = null;
     }
+    this.source = config.getSourceForSymbolAtPath(path);
   }
 
   @Override
@@ -102,7 +109,8 @@ public class TrackerNode {
         regionClass.flatName(),
         ((regionMember == null) ? "null" : regionMember.toString()),
         usedNode.toString(),
-        ((enclosingClass == null) ? "null" : enclosingClass.flatName()), sour);
+        ((enclosingClass == null) ? "null" : enclosingClass.flatName()),
+        source);
   }
 
   /**
@@ -111,6 +119,14 @@ public class TrackerNode {
    * @return Header of target file.
    */
   public static String header() {
-    return "REGION_CLASS" + '\t' + "REGION_MEMBER" + '\t' + "USED_MEMBER" + '\t' + "USED_CLASS" + '\t' + "SOURCE_TYPE";
+    return "REGION_CLASS"
+        + '\t'
+        + "REGION_MEMBER"
+        + '\t'
+        + "USED_MEMBER"
+        + '\t'
+        + "USED_CLASS"
+        + '\t'
+        + "SOURCE_TYPE";
   }
 }

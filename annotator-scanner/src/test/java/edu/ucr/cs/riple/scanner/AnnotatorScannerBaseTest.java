@@ -65,6 +65,7 @@ public abstract class AnnotatorScannerBaseTest<T extends Display> {
               .setClassTrackerActivation(true)
               .setFieldTrackerActivation(true)
               .setMethodTrackerActivation(true)
+              .addGeneratedCodeDetector("lombok")
               .setOutput(root);
       Files.createFile(config);
       builder.writeAsXML(config);
