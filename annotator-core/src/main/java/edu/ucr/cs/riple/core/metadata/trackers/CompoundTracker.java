@@ -51,11 +51,12 @@ public class CompoundTracker implements RegionTracker {
             new FieldRegionTracker(config, info),
             methodRegionTracker,
             new ParameterRegionTracker(tree, methodRegionTracker));
-    Set<GeneratedRegionTracker> generatedRegionTrackers = new HashSet<>();
+    ImmutableSet.Builder<GeneratedRegionTracker> generatedRegionTrackerBuilder =
+        new ImmutableSet.Builder<>();
     if (config.generatedCodeDetectors.contains(SourceType.LOMBOK)) {
-      generatedRegionTrackers.add(new LombokTracker(tree, methodRegionTracker));
+      generatedRegionTrackerBuilder.add(new LombokTracker(tree, methodRegionTracker));
     }
-    this.generatedRegionsTrackers = ImmutableSet.copyOf(generatedRegionTrackers);
+    this.generatedRegionsTrackers = generatedRegionTrackerBuilder.build();
   }
 
   @Override
