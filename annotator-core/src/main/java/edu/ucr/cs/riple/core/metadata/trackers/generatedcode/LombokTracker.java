@@ -59,7 +59,7 @@ public class LombokTracker implements GeneratedRegionTracker {
   @Override
   public Set<Region> extendWithGeneratedRegions(Set<Region> regions) {
     return regions.stream()
-        // filter regions where are created by lombok
+        // filter regions which are created by lombok
         .filter(region -> region.sourceType.equals(SourceType.LOMBOK) && region.isOnMethod())
         // find the corresponding method for the region.
         .map(region -> methodDeclarationTree.findNode(region.member, region.clazz))
