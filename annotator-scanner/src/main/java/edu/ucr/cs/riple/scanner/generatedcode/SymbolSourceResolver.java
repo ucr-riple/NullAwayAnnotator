@@ -44,6 +44,7 @@ public class SymbolSourceResolver {
       if (activatedSourceDetectors.size() == 1
           && activatedSourceDetectors.iterator().next().equals(SourceType.LOMBOK)) {
         this.generatedCodeDetectors = ImmutableSet.of(new LombokGeneratedCodeDetector());
+        return;
       }
     }
     // Useful when annotator-core is updated but still using an old version of annotator-scanner,
