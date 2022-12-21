@@ -108,7 +108,7 @@ public class ErrorProneCLIFlagsConfig implements Config {
    * @param document XML document where all configuration values are read from.
    * @return Immutable set of requested source types.
    */
-  private ImmutableSet<SourceType> extractRequestedSourceType(Document document) {
+  private ImmutableSet<SourceType> extractRequestedSourceTypes(Document document) {
     ImmutableSet.Builder<SourceType> codeDetectors = new ImmutableSet.Builder<>();
     if (XMLUtil.getValueFromAttribute(
             document, "/scanner/processor/" + SourceType.LOMBOK.name(), "active", Boolean.class)
