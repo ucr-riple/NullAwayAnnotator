@@ -48,9 +48,6 @@ public class LombokGeneratedCodeDetector implements GeneratedCodeDetector {
         path.getLeaf() instanceof MethodTree
             ? (MethodTree) path.getLeaf()
             : ASTHelpers.findEnclosingNode(path, MethodTree.class);
-    if (enclosingMethod == null && path.getLeaf() instanceof MethodTree) {
-      enclosingMethod = (MethodTree) path.getLeaf();
-    }
     if (enclosingMethod == null) {
       return false;
     }
