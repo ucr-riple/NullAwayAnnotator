@@ -39,9 +39,6 @@ import edu.ucr.cs.riple.scanner.SymbolUtil;
  */
 public class LombokGeneratedCodeDetector implements GeneratedCodeDetector {
 
-  /** Associated source type for Lombok in region serializations in <i>SOURCE_TYPE</i> column. */
-  private static final SourceType sourceType = SourceType.LOMBOK;
-
   @Override
   public boolean isGeneratedCode(TreePath path) {
     // Locate the enclosing class.
@@ -73,6 +70,6 @@ public class LombokGeneratedCodeDetector implements GeneratedCodeDetector {
 
   @Override
   public SourceType getGeneratorSourceType() {
-    return sourceType;
+    return SourceType.LOMBOK;
   }
 }
