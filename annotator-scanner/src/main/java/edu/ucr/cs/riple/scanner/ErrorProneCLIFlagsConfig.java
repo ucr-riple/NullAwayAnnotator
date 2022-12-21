@@ -98,7 +98,7 @@ public class ErrorProneCLIFlagsConfig implements Config {
     this.classTrackerIsActive =
         XMLUtil.getValueFromAttribute(document, "/scanner/class", "active", Boolean.class)
             .orElse(false);
-    this.symbolSourceResolver = new SymbolSourceResolver(extractRequestedSourceType(document));
+    this.symbolSourceResolver = new SymbolSourceResolver(extractRequestedSourceTypes(document));
     this.serializer = new Serializer(this);
   }
 

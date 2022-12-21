@@ -39,8 +39,8 @@ public interface GeneratedRegionTracker {
    * impacted as well.
    *
    * @param regions Set of potentially impacted regions.
-   * @return Set of potentially impacted regions including all known potentially impacted
-   *     generated regions by this tracker.
+   * @return Set of potentially impacted regions including all known potentially impacted generated
+   *     regions by this tracker.
    */
   Set<Region> extendWithGeneratedRegions(Set<Region> regions);
 }
