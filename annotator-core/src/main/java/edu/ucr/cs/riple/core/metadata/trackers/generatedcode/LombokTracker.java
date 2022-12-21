@@ -39,9 +39,9 @@ import java.util.stream.Stream;
  * code by <a href="https://projectlombok.org">Lombok</a>. Lombok automatically propagates
  * {@code @Nullable} annotation on fields to getter methods, therefore, extends the set of
  * potentially impacted regions to all callers of that method as well. This tracker, will include
- * all callers of any method region in lombok generated code. This will guarantee
- * that {@link edu.ucr.cs.riple.core.evaluators.graphprocessor.ParallelConflictGraphProcessor} will
- * catch any triggered errors by an annotation including all copied annotations by lombok as well.
+ * all callers of any method region in lombok generated code. This will guarantee that {@link
+ * edu.ucr.cs.riple.core.evaluators.graphprocessor.ParallelConflictGraphProcessor} will catch any
+ * triggered errors by an annotation including all copied annotations by lombok as well.
  */
 public class LombokTracker implements GeneratedRegionTracker {
 
