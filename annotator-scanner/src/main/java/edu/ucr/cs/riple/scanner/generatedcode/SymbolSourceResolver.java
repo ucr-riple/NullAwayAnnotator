@@ -40,12 +40,12 @@ public class SymbolSourceResolver {
   public SymbolSourceResolver(ImmutableSet<SourceType> activatedSourceDetectors) {
     if (activatedSourceDetectors.size() == 0) {
       this.generatedCodeDetectors = ImmutableSet.of();
-    } else {
-      if (activatedSourceDetectors.size() == 1
-          && activatedSourceDetectors.iterator().next().equals(SourceType.LOMBOK)) {
-        this.generatedCodeDetectors = ImmutableSet.of(new LombokGeneratedCodeDetector());
-        return;
-      }
+      return;
+    }
+    if (activatedSourceDetectors.size() == 1
+        && activatedSourceDetectors.iterator().next().equals(SourceType.LOMBOK)) {
+      this.generatedCodeDetectors = ImmutableSet.of(new LombokGeneratedCodeDetector());
+      return;
     }
     // Useful when annotator-core is updated but still using an old version of annotator-scanner,
     // this exception can inform the user.
