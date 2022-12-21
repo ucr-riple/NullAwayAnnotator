@@ -92,7 +92,7 @@ public class Annotator {
    */
   private void preprocess() {
     System.out.println("Preprocessing...");
-    Utility.setScannerCheckerActivation(config.target, true);
+    Utility.setScannerCheckerActivation(config, config.target, true);
     System.out.println("Making the first build...");
     Utility.buildTarget(config, true);
     config.initializeAdapter();
@@ -112,9 +112,9 @@ public class Annotator {
 
   /** Performs iterations of inference/injection until no unseen fix is suggested. */
   private void annotate() {
-    Utility.setScannerCheckerActivation(config.target, true);
+    Utility.setScannerCheckerActivation(config, config.target, true);
     Utility.buildTarget(config);
-    Utility.setScannerCheckerActivation(config.target, false);
+    Utility.setScannerCheckerActivation(config, config.target, false);
     FieldDeclarationStore fieldDeclarationStore = new FieldDeclarationStore(config, config.target);
     MethodDeclarationTree tree = new MethodDeclarationTree(config);
     // globalAnalyzer analyzes effects of all public APIs on downstream dependencies.

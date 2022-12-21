@@ -33,7 +33,6 @@ import edu.ucr.cs.riple.core.metadata.index.Factory;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.scanner.AnnotatorScanner;
 import edu.ucr.cs.riple.scanner.ScannerConfigWriter;
-import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -248,29 +247,32 @@ public class Utility {
    * Activates/Deactivates {@link AnnotatorScanner} features by updating the {@link
    * edu.ucr.cs.riple.scanner.Config} in {@code XML} format for the given modules.
    *
+   * @param config Annotator config.
    * @param modules Immutable set of modules that their configuration files need to be updated.
    * @param activation activation flag for all features of the scanner.
    */
   public static void setScannerCheckerActivation(
-      ImmutableSet<ModuleInfo> modules, boolean activation) {
-    modules.forEach(info -> setScannerCheckerActivation(info, activation));
+      Config config, ImmutableSet<ModuleInfo> modules, boolean activation) {
+    modules.forEach(info -> setScannerCheckerActivation(config, info, activation));
   }
 
   /**
    * Activates/Deactivates {@link AnnotatorScanner} features by updating the {@link
    * edu.ucr.cs.riple.scanner.Config} in {@code XML} format for the given module.
    *
+   * @param config Annotator config.
    * @param info module that its configuration file need to be updated.
    * @param activation activation flag for all features of the scanner.
    */
-  public static void setScannerCheckerActivation(ModuleInfo info, boolean activation) {
+  public static void setScannerCheckerActivation(
+      Config config, ModuleInfo info, boolean activation) {
     ScannerConfigWriter writer = new ScannerConfigWriter();
     writer
         .setCallTrackerActivation(activation)
         .setClassTrackerActivation(activation)
         .setFieldTrackerActivation(activation)
         .setMethodTrackerActivation(activation)
-        .addGeneratedCodeDetector(SourceType.LOMBOK)
+        .addGeneratedCodeDetectors(config.generatedCodeDetectors)
         .setOutput(info.dir)
         .writeAsXML(info.scannerConfig);
   }

@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.scanner;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -92,8 +93,8 @@ public class ScannerConfigWriter {
     return this;
   }
 
-  public ScannerConfigWriter addGeneratedCodeDetector(SourceType sourceType) {
-    this.activatedGeneratedCodeDetectors.add(sourceType);
+  public ScannerConfigWriter addGeneratedCodeDetectors(ImmutableSet<SourceType> sourceType) {
+    this.activatedGeneratedCodeDetectors.addAll(sourceType);
     return this;
   }
 
