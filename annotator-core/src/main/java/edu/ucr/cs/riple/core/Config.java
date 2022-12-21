@@ -309,14 +309,14 @@ public class Config {
 
     // Region detection for code generators
     // Lombok
-    Option activateRegionDetectionForLombok =
+    Option disableRegionDetectionByLombok =
         new Option(
-            "ardl",
-            "activate-region-detection-lombok",
+            "drdl",
+            "deactivate-region-detection-lombok",
             false,
-            "Activates region detection for lombok generated code");
-    activateRegionDetectionForLombok.setRequired(false);
-    options.addOption(activateRegionDetectionForLombok);
+            "Deactivates region detection for lombok generated code");
+    disableRegionDetectionByLombok.setRequired(false);
+    options.addOption(disableRegionDetectionByLombok);
 
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
@@ -414,9 +414,9 @@ public class Config {
     this.log = new Log();
     this.log.reset();
     this.generatedCodeDetectors =
-        cmd.hasOption(activateRegionDetectionForLombok)
-            ? Sets.immutableEnumSet(SourceType.LOMBOK)
-            : ImmutableSet.of();
+        cmd.hasOption(disableRegionDetectionByLombok)
+            ? ImmutableSet.of()
+            : Sets.immutableEnumSet(SourceType.LOMBOK);
   }
 
   /**
@@ -497,7 +497,7 @@ public class Config {
     boolean lombokCodeDetectorActivated =
         getValueFromKey(
                 jsonObject, "PROCESSORS:" + SourceType.LOMBOK.name() + ":ACTIVATION", Boolean.class)
-            .orElse(false);
+            .orElse(true);
     this.generatedCodeDetectors =
         lombokCodeDetectorActivated ? Sets.immutableEnumSet(SourceType.LOMBOK) : ImmutableSet.of();
     this.log = new Log();
