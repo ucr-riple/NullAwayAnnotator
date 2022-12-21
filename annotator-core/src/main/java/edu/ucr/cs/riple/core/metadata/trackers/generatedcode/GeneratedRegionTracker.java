@@ -27,7 +27,20 @@ package edu.ucr.cs.riple.core.metadata.trackers.generatedcode;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import java.util.Set;
 
+/**
+ * Interface for Trackers which can extend the set of potentially impacted regions with generated
+ * regions by a processor that do not exist in source code. (e.g. <a
+ * href="https://projectlombok.org">Lombok</a>)
+ */
 public interface GeneratedRegionTracker {
 
+  /**
+   * Extents set of received potentially impacted regions with generated regions that can be
+   * impacted as well.
+   *
+   * @param regions Set of potentially impacted regions.
+   * @return Set of potentially impacted regions including all knowing potentially impacted
+   *     generated regions by this tracker.
+   */
   Set<Region> extendWithGeneratedRegions(Set<Region> regions);
 }
