@@ -24,8 +24,7 @@
 
 package edu.ucr.cs.riple.scanner;
 
-import com.sun.source.util.TreePath;
-import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
+import edu.ucr.cs.riple.scanner.generatedcode.SymbolSourceResolver;
 import java.nio.file.Path;
 import javax.annotation.Nonnull;
 
@@ -70,7 +69,7 @@ public class DummyOptionsConfig implements Config {
   }
 
   @Override
-  public SourceType getSourceForSymbolAtPath(TreePath path) {
+  public SymbolSourceResolver getSymbolSourceResolver() {
     throw new IllegalStateException(ERROR_MESSAGE);
   }
 }

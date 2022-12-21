@@ -93,7 +93,7 @@ public class TrackerNode {
       regionMember = null;
       regionClass = null;
     }
-    this.source = config.getSourceForSymbolAtPath(path);
+    this.source = config.getSymbolSourceResolver().getSourceForSymbolAtPath(path);
   }
 
   @Override

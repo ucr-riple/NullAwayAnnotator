@@ -26,16 +26,12 @@ package edu.ucr.cs.riple.scanner;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.ErrorProneFlags;
-import com.sun.source.util.TreePath;
-import edu.ucr.cs.riple.scanner.generatedcode.GeneratedCodeDetector;
-import edu.ucr.cs.riple.scanner.generatedcode.LombokGeneratedCodeDetector;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
+import edu.ucr.cs.riple.scanner.generatedcode.SymbolSourceResolver;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -62,8 +58,8 @@ public class ErrorProneCLIFlagsConfig implements Config {
   private final boolean classTrackerIsActive;
   /** Serializing instance for writing outputs at the desired paths. */
   private final Serializer serializer;
-  /** Set of activated code generator detectors. */
-  private final ImmutableSet<GeneratedCodeDetector> generatedCodeDetectors;
+  /** Source type resolver for serialized regions. */
+  private final SymbolSourceResolver symbolSourceResolver;
 
   static final String EP_FL_NAMESPACE = "AnnotatorScanner";
   static final String FL_CONFIG_PATH = EP_FL_NAMESPACE + ":ConfigPath";
@@ -102,24 +98,24 @@ public class ErrorProneCLIFlagsConfig implements Config {
     this.classTrackerIsActive =
         XMLUtil.getValueFromAttribute(document, "/scanner/class", "active", Boolean.class)
             .orElse(false);
-    generatedCodeDetectors = initCodeGeneratedCodeDetectors(document);
+    this.symbolSourceResolver = new SymbolSourceResolver(extractRequestedSourceType(document));
     this.serializer = new Serializer(this);
   }
 
   /**
-   * Initializes list of activated generated code detectors.
+   * Extracts set of requested source types to be serialized from the given xml document.
    *
    * @param document XML document where all configuration values are read from.
-   * @return Immutable set of activated generated code detectors.
+   * @return Immutable set of requested source types.
    */
-  private ImmutableSet<GeneratedCodeDetector> initCodeGeneratedCodeDetectors(Document document) {
-    Set<GeneratedCodeDetector> codeDetectors = new HashSet<>();
+  private ImmutableSet<SourceType> extractRequestedSourceType(Document document) {
+    ImmutableSet.Builder<SourceType> codeDetectors = new ImmutableSet.Builder<>();
     if (XMLUtil.getValueFromAttribute(
             document, "/scanner/processor/" + SourceType.LOMBOK.name(), "active", Boolean.class)
         .orElse(false)) {
-      codeDetectors.add(new LombokGeneratedCodeDetector());
+      codeDetectors.add(SourceType.LOMBOK);
     }
-    return ImmutableSet.copyOf(codeDetectors);
+    return codeDetectors.build();
   }
 
   @Override
@@ -154,12 +150,7 @@ public class ErrorProneCLIFlagsConfig implements Config {
   }
 
   @Override
-  public SourceType getSourceForSymbolAtPath(TreePath path) {
-    for (GeneratedCodeDetector detector : this.generatedCodeDetectors) {
-      if (detector.isGeneratedCode(path)) {
-        return detector.getGeneratorSourceType();
-      }
-    }
-    return SourceType.SOURCE;
+  public SymbolSourceResolver getSymbolSourceResolver() {
+    return symbolSourceResolver;
   }
 }

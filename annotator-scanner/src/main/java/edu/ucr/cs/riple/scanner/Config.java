@@ -24,8 +24,7 @@
 
 package edu.ucr.cs.riple.scanner;
 
-import com.sun.source.util.TreePath;
-import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
+import edu.ucr.cs.riple.scanner.generatedcode.SymbolSourceResolver;
 import java.nio.file.Path;
 import javax.annotation.Nonnull;
 
@@ -76,12 +75,9 @@ public interface Config {
   Path getOutputDirectory();
 
   /**
-   * Returns source for the element at the given path. If the element exists in the source code
-   * {@code "SOURCE"} will be returned and otherwise the name of the code generator will be
-   * returned.
+   * Returns symbol resolver which can detect source type of elements.
    *
-   * @return Associated Source type of the generator that produced the code. If element exists in
-   *     source code and not produced by any processor, it will return {@link SourceType#SOURCE}
+   * @return Using SymbolSourceResolver instance.
    */
-  SourceType getSourceForSymbolAtPath(TreePath path);
+  SymbolSourceResolver getSymbolSourceResolver();
 }
