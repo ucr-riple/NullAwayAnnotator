@@ -29,7 +29,7 @@ import com.sun.source.util.TreePath;
 public interface GeneratedCodeDetector {
 
   /**
-   * Checks if the received path is inside a generated code.
+   * Checks if the received path is inside generated code corresponding to the generator matching this detector.
    *
    * @param path Received path.
    * @return true, if leads to a generated code.
