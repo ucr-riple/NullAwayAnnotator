@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.scanner;
 
+import edu.ucr.cs.riple.scanner.generatedcode.SymbolSourceResolver;
 import java.nio.file.Path;
 import javax.annotation.Nonnull;
 
@@ -72,4 +73,11 @@ public interface Config {
    */
   @Nonnull
   Path getOutputDirectory();
+
+  /**
+   * Returns symbol resolver which can detect source type of elements.
+   *
+   * @return Using SymbolSourceResolver instance.
+   */
+  SymbolSourceResolver getSymbolSourceResolver();
 }

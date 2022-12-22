@@ -25,9 +25,13 @@
 package edu.ucr.cs.riple.scanner;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -53,12 +57,15 @@ public class ScannerConfigWriter {
   private boolean callTrackerIsActive;
   /** Controls class info serialization. */
   private boolean classTrackerIsActive;
+  /** Set of activated generated code detectors. */
+  private final Set<SourceType> activatedGeneratedCodeDetectors;
 
   public ScannerConfigWriter() {
     this.methodTrackerIsActive = false;
     this.fieldTrackerIsActive = false;
     this.callTrackerIsActive = false;
     this.classTrackerIsActive = false;
+    this.activatedGeneratedCodeDetectors = new HashSet<>();
   }
 
   public ScannerConfigWriter setOutput(Path output) {
@@ -83,6 +90,11 @@ public class ScannerConfigWriter {
 
   public ScannerConfigWriter setClassTrackerActivation(boolean activation) {
     this.classTrackerIsActive = activation;
+    return this;
+  }
+
+  public ScannerConfigWriter addGeneratedCodeDetectors(ImmutableSet<SourceType> sourceType) {
+    this.activatedGeneratedCodeDetectors.addAll(sourceType);
     return this;
   }
 
@@ -136,6 +148,16 @@ public class ScannerConfigWriter {
       Element outputDir = doc.createElement("path");
       outputDir.setTextContent(this.outputDirectory.toString());
       rootElement.appendChild(outputDir);
+
+      // Generated code detectors
+      Element codeDetectors = doc.createElement("processor");
+      rootElement.appendChild(codeDetectors);
+      activatedGeneratedCodeDetectors.forEach(
+          detectors -> {
+            Element processorElement = doc.createElement(detectors.name());
+            processorElement.setAttribute("active", "true");
+            codeDetectors.appendChild(processorElement);
+          });
 
       // Writings
       TransformerFactory transformerFactory = TransformerFactory.newInstance();

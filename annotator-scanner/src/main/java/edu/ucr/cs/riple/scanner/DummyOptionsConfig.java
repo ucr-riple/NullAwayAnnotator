@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.scanner;
 
+import edu.ucr.cs.riple.scanner.generatedcode.SymbolSourceResolver;
 import java.nio.file.Path;
 import javax.annotation.Nonnull;
 
@@ -64,6 +65,11 @@ public class DummyOptionsConfig implements Config {
   @Nonnull
   @Override
   public Path getOutputDirectory() {
+    throw new IllegalStateException(ERROR_MESSAGE);
+  }
+
+  @Override
+  public SymbolSourceResolver getSymbolSourceResolver() {
     throw new IllegalStateException(ERROR_MESSAGE);
   }
 }

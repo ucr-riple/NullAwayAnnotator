@@ -24,6 +24,8 @@
 
 package edu.ucr.cs.riple.scanner;
 
+import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import edu.ucr.cs.riple.scanner.tools.Display;
 import edu.ucr.cs.riple.scanner.tools.DisplayFactory;
 import edu.ucr.cs.riple.scanner.tools.SerializationTestHelper;
@@ -65,6 +67,7 @@ public abstract class AnnotatorScannerBaseTest<T extends Display> {
           .setClassTrackerActivation(true)
           .setFieldTrackerActivation(true)
           .setMethodTrackerActivation(true)
+          .addGeneratedCodeDetectors(ImmutableSet.of(SourceType.LOMBOK))
           .setOutput(root)
           .writeAsXML(configPath);
     } catch (IOException ex) {
