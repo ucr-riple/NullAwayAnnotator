@@ -1,5 +1,13 @@
 ## CHANGELOG
 
+### Version 1.3.5
+- Removed Lexical Preserving flag for injector.
+- Updated injector to add annotations without indentation.
+- Update unit test templates.
+- Added infrastructure to support analysis of generated code in detecting potentially impacted regions.
+- Added support for Lombok in detecting potentially impacted regions.
+- Refactoring and code simplifications.
+
 ### Version 1.3.4
 - Added inference deactivation mode.
 - Updated injector infrastructure.
