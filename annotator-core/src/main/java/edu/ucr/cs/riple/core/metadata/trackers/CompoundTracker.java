@@ -64,7 +64,7 @@ public class CompoundTracker implements RegionTracker {
     Set<Region> regions = new HashSet<>();
     this.trackers.forEach(tracker -> tracker.getRegions(location).ifPresent(regions::addAll));
     this.generatedRegionsTrackers.forEach(
-        tracker -> regions.addAll(tracker.extendWithGeneratedRegions(regions)));
+        tracker -> regions.addAll(tracker.extendForGeneratedRegions(regions)));
     return Optional.of(regions);
   }
 }

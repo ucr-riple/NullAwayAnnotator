@@ -57,7 +57,7 @@ public class LombokTracker implements GeneratedRegionTracker {
   }
 
   @Override
-  public Set<Region> extendWithGeneratedRegions(Set<Region> regions) {
+  public Set<Region> extendForGeneratedRegions(Set<Region> regions) {
     return regions.stream()
         // filter regions which are created by lombok
         .filter(region -> region.sourceType.equals(SourceType.LOMBOK) && region.isOnMethod())
