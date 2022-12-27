@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.adapters;
 
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -102,7 +103,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
    * @param region Region where the error is reported.
    * @return Set of fixes for uninitialized fields to resolve the given error.
    */
-  protected Set<Fix> generateFixesForUninitializedFields(
+  protected ImmutableSet<Fix> generateFixesForUninitializedFields(
       String errorMessage, Region region, FieldDeclarationStore store) {
     return extractUninitializedFieldNames(errorMessage).stream()
         .map(
@@ -119,7 +120,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
                   true);
             })
         .filter(Objects::nonNull)
-        .collect(Collectors.toSet());
+        .collect(ImmutableSet.toImmutableSet());
   }
 
   /**
@@ -142,7 +143,8 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
       @Nullable Location nonnullTarget,
       FieldDeclarationStore store) {
     if (nonnullTarget == null && errorType.equals(Error.METHOD_INITIALIZER_ERROR)) {
-      Set<Fix> resolvingFixes = generateFixesForUninitializedFields(errorMessage, region, store);
+      ImmutableSet<Fix> resolvingFixes =
+          generateFixesForUninitializedFields(errorMessage, region, store);
       return new Error(errorType, errorMessage, region, offset, resolvingFixes);
     }
     if (nonnullTarget != null && nonnullTarget.isOnField()) {

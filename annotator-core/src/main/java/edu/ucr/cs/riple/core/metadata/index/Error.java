@@ -24,6 +24,7 @@
 package edu.ucr.cs.riple.core.metadata.index;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
@@ -31,7 +32,6 @@ import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Objects;
-import java.util.Set;
 import javax.annotation.Nullable;
 
 /** Represents an error reported by NullAway. */
@@ -43,7 +43,7 @@ public class Error extends Enclosed {
   /** Error message. */
   public final String message;
   /** The fixes which can resolve this error (possibly empty). */
-  private final Set<Fix> resolvingFixes;
+  private final ImmutableSet<Fix> resolvingFixes;
   /** Offset of program point in original version where error is reported. */
   private final int offset;
   /** Error type for method initialization errors from NullAway in {@code String}. */
@@ -56,11 +56,15 @@ public class Error extends Enclosed {
         message,
         region,
         offset,
-        resolvingFix == null ? Set.of() : Set.of(resolvingFix));
+        resolvingFix == null ? ImmutableSet.of() : ImmutableSet.of(resolvingFix));
   }
 
   public Error(
-      String messageType, String message, Region region, int offset, Set<Fix> resolvingFixes) {
+      String messageType,
+      String message,
+      Region region,
+      int offset,
+      ImmutableSet<Fix> resolvingFixes) {
     super(region);
     this.messageType = messageType;
     this.message = message;
