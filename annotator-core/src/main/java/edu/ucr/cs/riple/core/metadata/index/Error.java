@@ -101,7 +101,7 @@ public class Error extends Enclosed {
   }
 
   public ImmutableSet<Fix> getResolvingFixes() {
-    return ImmutableSet.copyOf(this.resolvingFixes);
+    return this.resolvingFixes;
   }
 
   /**
