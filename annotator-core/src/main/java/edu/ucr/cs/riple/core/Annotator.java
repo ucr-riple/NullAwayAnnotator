@@ -64,6 +64,9 @@ public class Annotator {
   /** Reports cache. */
   public final ReportCache cache;
 
+  private FieldDeclarationStore fieldDeclarationStore;
+  private MethodDeclarationTree methodDeclarationTree;
+
   public Annotator(Config config) {
     this.config = config;
     this.cache = new ReportCache(config);
@@ -94,7 +97,9 @@ public class Annotator {
     Utility.setScannerCheckerActivation(config, config.target, true);
     System.out.println("Making the first build...");
     Utility.buildTarget(config, true);
-    config.initializeAdapter();
+    fieldDeclarationStore = new FieldDeclarationStore(config, config.target);
+    methodDeclarationTree = new MethodDeclarationTree(config);
+    config.initializeAdapter(fieldDeclarationStore);
     Set<OnField> uninitializedFields =
         Utility.readFixesFromOutputDirectory(config.target, Fix.factory(config, null)).stream()
             .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
@@ -111,11 +116,6 @@ public class Annotator {
 
   /** Performs iterations of inference/injection until no unseen fix is suggested. */
   private void annotate() {
-    Utility.setScannerCheckerActivation(config, config.target, true);
-    Utility.buildTarget(config);
-    Utility.setScannerCheckerActivation(config, config.target, false);
-    FieldDeclarationStore fieldDeclarationStore = new FieldDeclarationStore(config, config.target);
-    MethodDeclarationTree tree = new MethodDeclarationTree(config);
     // globalAnalyzer analyzes effects of all public APIs on downstream dependencies.
     // Through iterations, since the source code for downstream dependencies does not change and the
     // computation does not depend on the changes in the target module, it will compute the same
@@ -123,14 +123,14 @@ public class Annotator {
     // iteration.
     GlobalAnalyzer globalAnalyzer =
         config.downStreamDependenciesAnalysisActivated
-            ? new GlobalAnalyzerImpl(config, tree)
+            ? new GlobalAnalyzerImpl(config, methodDeclarationTree)
             : new NoOpGlobalAnalyzer();
     globalAnalyzer.analyzeDownstreamDependencies();
 
     if (config.inferenceActivated) {
       // Outer loop starts.
       while (cache.isUpdated()) {
-        executeNextIteration(globalAnalyzer, fieldDeclarationStore);
+        executeNextIteration(globalAnalyzer);
         if (config.disableOuterLoop) {
           break;
         }
@@ -139,13 +139,13 @@ public class Annotator {
       // Perform once last iteration including all fixes.
       if (!config.disableOuterLoop) {
         cache.disable();
-        executeNextIteration(globalAnalyzer, fieldDeclarationStore);
+        executeNextIteration(globalAnalyzer);
         cache.enable();
       }
     }
 
     if (config.forceResolveActivated) {
-      forceResolveRemainingErrors(fieldDeclarationStore, tree);
+      forceResolveRemainingErrors();
     }
 
     System.out.println("\nFinished annotating.");
@@ -157,13 +157,9 @@ public class Annotator {
    *
    * @param globalAnalyzer Global analyzer instance to detect impact of fixes outside of target
    *     module.
-   * @param fieldDeclarationStore Field declaration instance to detect fixes targeting inline
-   *     multiple field declaration statements.
    */
-  private void executeNextIteration(
-      GlobalAnalyzer globalAnalyzer, FieldDeclarationStore fieldDeclarationStore) {
-    ImmutableSet<Report> latestReports =
-        processTriggeredFixes(globalAnalyzer, fieldDeclarationStore);
+  private void executeNextIteration(GlobalAnalyzer globalAnalyzer) {
+    ImmutableSet<Report> latestReports = processTriggeredFixes(globalAnalyzer);
     // Compute boundaries of effects on downstream dependencies.
     latestReports.forEach(
         report -> {
@@ -197,12 +193,9 @@ public class Annotator {
    * Processes triggered fixes.
    *
    * @param globalAnalyzer Global Analyzer instance.
-   * @param fieldDeclarationStore Field Declaration analysis to detect fixes on multiple inline
-   *     field declaration statements.
    * @return Immutable set of reports from the triggered fixes.
    */
-  private ImmutableSet<Report> processTriggeredFixes(
-      GlobalAnalyzer globalAnalyzer, FieldDeclarationStore fieldDeclarationStore) {
+  private ImmutableSet<Report> processTriggeredFixes(GlobalAnalyzer globalAnalyzer) {
     Utility.buildTarget(config);
     // Suggested fixes of target at the current state.
     ImmutableSet<Fix> fixes =
@@ -213,8 +206,8 @@ public class Annotator {
             .collect(ImmutableSet.toImmutableSet());
 
     // Initializing required evaluator instances.
-    MethodDeclarationTree tree = new MethodDeclarationTree(config);
-    TargetModuleSupplier supplier = new TargetModuleSupplier(config, globalAnalyzer, tree);
+    TargetModuleSupplier supplier =
+        new TargetModuleSupplier(config, globalAnalyzer, methodDeclarationTree);
     Evaluator evaluator =
         config.exhaustiveSearch ? new VoidEvaluator() : new BasicEvaluator(supplier);
     // Result of the iteration analysis.
@@ -232,15 +225,12 @@ public class Annotator {
    *   <li>Explicit {@code Nullable} assignments to fields will be annotated as
    *       {@code @SuppressWarnings("NullAway")}.
    * </ul>
-   *
-   * @param fieldDeclarationStore Field declaration analysis.
-   * @param tree Method Declaration analysis.
    */
-  private void forceResolveRemainingErrors(
-      FieldDeclarationStore fieldDeclarationStore, MethodDeclarationTree tree) {
+  private void forceResolveRemainingErrors() {
     // Collect regions with remaining errors.
     Utility.buildTarget(config);
-    Set<Error> remainingErrors = Utility.readErrorsFromOutputDirectory(config, config.target);
+    Set<Error> remainingErrors =
+        Utility.readErrorsFromOutputDirectory(config, config.target, fieldDeclarationStore);
     Set<Fix> remainingFixes =
         Utility.readFixesFromOutputDirectory(
             config.target, Fix.factory(config, fieldDeclarationStore));
@@ -254,16 +244,17 @@ public class Annotator {
             .map(
                 error -> {
                   if (error.getRegion().isOnMethod()) {
-                    return tree.findNode(error.encMember(), error.encClass());
+                    return methodDeclarationTree.findNode(error.encMember(), error.encClass());
                   }
                   // For methods invoked in an initialization region, where the error is that
                   // `@Nullable` is being passed as an argument, we add a `@NullUnmarked` annotation
                   // to the called method.
                   if (error.messageType.equals("PASS_NULLABLE")
-                      && error.nonnullTarget != null
-                      && error.nonnullTarget.isOnParameter()) {
-                    OnParameter nullableParameter = error.nonnullTarget.toParameter();
-                    return tree.findNode(nullableParameter.method, nullableParameter.clazz);
+                      && error.isSingleFix()
+                      && error.toResolvingLocation().isOnParameter()) {
+                    OnParameter nullableParameter = error.toResolvingParameter();
+                    return methodDeclarationTree.findNode(
+                        nullableParameter.method, nullableParameter.clazz);
                   }
                   return null;
                 })
