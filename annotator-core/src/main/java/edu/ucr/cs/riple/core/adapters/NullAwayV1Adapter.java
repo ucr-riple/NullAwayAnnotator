@@ -88,7 +88,8 @@ public class NullAwayV1Adapter extends NullAwayAdapterBaseClass {
     String errorMessage = values[1];
     String errorType = values[0];
     Region region = new Region(values[2], values[3]);
-    // since we have no information of offset, we set all to zero.
+    // since we have no information of offset, we give a unique offset error to have different
+    // instances.
     return createError(errorType, errorMessage, region, offset++, nonnullTarget, store);
   }
 
