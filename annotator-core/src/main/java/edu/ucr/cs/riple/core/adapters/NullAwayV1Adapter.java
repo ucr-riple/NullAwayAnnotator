@@ -90,7 +90,8 @@ public class NullAwayV1Adapter extends NullAwayAdapterBaseClass {
     Region region = new Region(values[2], values[3]);
     // since we have no information of offset, we give a unique offset error to have different
     // instances.
-    return createError(errorType, errorMessage, region, uniqueOffsetCounter++, nonnullTarget, store);
+    return createError(
+        errorType, errorMessage, region, uniqueOffsetCounter++, nonnullTarget, store);
   }
 
   @Override
