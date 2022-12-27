@@ -51,11 +51,8 @@ public class Error extends Enclosed {
 
   public Error(
       String messageType, String message, Region region, int offset, @Nullable Fix resolvingFix) {
-    super(region);
-    this.messageType = messageType;
-    this.message = message;
-    this.offset = offset;
-    this.resolvingFixes = resolvingFix == null ? Set.of() : Set.of(resolvingFix);
+    Set<Fix> resolvingFixes = resolvingFix == null ? Set.of() : Set.of(resolvingFix);
+    this(messageType, message, region, offset, resolvingFixes);
   }
 
   public Error(
@@ -126,8 +123,7 @@ public class Error extends Enclosed {
     }
     if (messageType.equals(METHOD_INITIALIZER_ERROR)) {
       // we do not need to compare error messages as it can be the same error with a different error
-      // message
-      // and should not be treated as a separate error.
+      // message and should not be treated as a separate error.
       return true;
     }
     return message.equals(error.message)
