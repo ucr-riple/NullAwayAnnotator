@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.metadata.trackers;
 
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Optional;
 import java.util.Set;
 
@@ -38,8 +39,8 @@ public interface RegionTracker {
    * Returns Set of regions where a fix can introduce new errors if injected. Should return {@link
    * Optional#EMPTY} if the tracker does not know anything about that fix type.
    *
-   * @param fix a Fix instance.
+   * @param location Location targeted by the fix.
    * @return Set of regions.
    */
-  Optional<Set<Region>> getRegions(Fix fix);
+  Optional<Set<Region>> getRegions(Location location);
 }

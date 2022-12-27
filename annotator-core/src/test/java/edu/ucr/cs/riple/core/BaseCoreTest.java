@@ -29,7 +29,6 @@ import edu.ucr.cs.riple.core.tools.Utility;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
@@ -45,7 +44,7 @@ public abstract class BaseCoreTest {
 
   protected final String projectTemplate;
   protected final List<String> modules;
-  protected Path projectPath;
+  protected Path unitTestProjectPath;
   protected Path outDirPath;
   protected CoreTestHelper coreTestHelper;
 
@@ -57,7 +56,7 @@ public abstract class BaseCoreTest {
   @Before
   public void setup() {
     outDirPath = Paths.get(temporaryFolder.getRoot().getAbsolutePath());
-    projectPath = outDirPath.resolve(projectTemplate);
+    unitTestProjectPath = outDirPath.resolve(projectTemplate);
     Path templates = Paths.get("templates");
     Path pathToUnitTestDir =
         Utility.getPathOfResource(templates.resolve(projectTemplate).toString());
@@ -66,27 +65,21 @@ public abstract class BaseCoreTest {
       // Create a separate library models loader to avoid races between unit tests.
       FileUtils.copyDirectory(
           repositoryDirectory.toFile(), outDirPath.resolve("Annotator").toFile());
-      FileUtils.deleteDirectory(projectPath.toFile());
-      FileUtils.copyDirectory(pathToUnitTestDir.toFile(), projectPath.toFile());
-      ProcessBuilder processBuilder = Utility.createProcessInstance();
-      processBuilder.directory(projectPath.toFile());
-      List<String> commands = new ArrayList<>();
-      commands.add("gradle");
-      commands.add("wrapper");
-      commands.add("--gradle-version");
-      commands.add("6.1");
-      commands.addAll(Utility.computeConfigPathsWithGradleArguments(outDirPath, modules));
-      commands.add(
-          "-Plibrary-model-loader-path="
-              + Utility.getPathToLibraryModel(outDirPath).resolve("build").resolve("libs"));
-      processBuilder.command(commands);
-      int success = processBuilder.start().waitFor();
-      if (success != 0) {
-        throw new RuntimeException("Unable to create Gradle Wrapper.");
-      }
-    } catch (IOException | InterruptedException e) {
+      FileUtils.deleteDirectory(unitTestProjectPath.toFile());
+      FileUtils.copyDirectory(pathToUnitTestDir.toFile(), unitTestProjectPath.toFile());
+      // Copy using gradle wrappers.
+      FileUtils.copyFile(
+          repositoryDirectory.resolve("gradlew").toFile(),
+          unitTestProjectPath.resolve("gradlew").toFile());
+      FileUtils.copyFile(
+          repositoryDirectory.resolve("gradlew.bat").toFile(),
+          unitTestProjectPath.resolve("gradlew.bat").toFile());
+      FileUtils.copyDirectory(
+          repositoryDirectory.resolve("gradle").toFile(),
+          unitTestProjectPath.resolve("gradle").toFile());
+    } catch (IOException e) {
       throw new RuntimeException("Preparation for test failed", e);
     }
-    coreTestHelper = new CoreTestHelper(projectPath, outDirPath, modules);
+    coreTestHelper = new CoreTestHelper(unitTestProjectPath, outDirPath, modules);
   }
 }

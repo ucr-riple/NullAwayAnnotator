@@ -76,9 +76,9 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
   @Override
   public void analyzeDownstreamDependencies() {
     System.out.println("Analyzing downstream dependencies...");
-    Utility.setScannerCheckerActivation(downstreamModules, true);
+    Utility.setScannerCheckerActivation(config, downstreamModules, true);
     Utility.buildDownstreamDependencies(config);
-    Utility.setScannerCheckerActivation(downstreamModules, false);
+    Utility.setScannerCheckerActivation(config, downstreamModules, false);
     // Collect callers of public APIs in module.
     MethodRegionTracker tracker = new MethodRegionTracker(config, config.downstreamInfo, tree);
     // Generate fixes corresponding methods.

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,29 +22,40 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.scanner.out;
+package edu.ucr.cs.riple.core;
 
-import com.sun.source.tree.CompilationUnitTree;
-import com.sun.tools.javac.code.Symbol;
+import edu.ucr.cs.riple.core.tools.TReport;
+import edu.ucr.cs.riple.injector.location.OnField;
+import java.util.Collections;
+import java.util.List;
+import org.junit.Test;
 
-/** Container for storing class flat name and url to source file containing class. */
-public class ClassInfo {
-  /** Containing class symbol. */
-  public final Symbol.ClassSymbol clazz;
-  /** Path to url containing this class. */
-  public final String path;
+public class LombokTest extends BaseCoreTest {
 
-  public ClassInfo(Symbol.ClassSymbol clazz, CompilationUnitTree compilationUnitTree) {
-    this.clazz = clazz;
-    this.path = compilationUnitTree.getSourceFile().toUri().getPath();
+  public LombokTest() {
+    super("lombok", List.of("unittest"));
   }
 
-  public static String header() {
-    return "class" + '\t' + "path";
-  }
-
-  @Override
-  public String toString() {
-    return clazz.flatName() + "\t" + path;
+  @Test
+  public void regionComputationOnFieldParallelProcessingEnables() {
+    coreTestHelper
+        .addInputLines(
+            "Main.java",
+            "package test;",
+            "import lombok.Data;",
+            "@Data",
+            "class Main {",
+            "   Object f;",
+            "   public Object m1(){",
+            "       return getF();", // Should be error
+            "   }",
+            "   public Object m2(){",
+            "       return getF();", // Should be error
+            "   }",
+            "}")
+        .toDepth(1)
+        .addExpectedReports(
+            new TReport(new OnField("Main.java", "test.Main", Collections.singleton("f")), 1))
+        .start();
   }
 }

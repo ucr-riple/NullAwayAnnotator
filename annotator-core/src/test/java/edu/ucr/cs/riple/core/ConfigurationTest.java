@@ -193,11 +193,12 @@ public class ConfigurationTest {
       observed.add(uuid);
     }
     observed.clear();
+    Config annotatorConfig = new Config(makeCommandLineArguments(requiredFlagsCli));
     // Test for Scanner config
     Path scannerConfig = testDir.resolve("scanner.xml");
     ModuleInfo moduleInfo = new ModuleInfo(0, testDir, nullawayConfigPath, scannerConfig);
     for (int i = 0; i < 5; i++) {
-      Utility.setScannerCheckerActivation(moduleInfo, true);
+      Utility.setScannerCheckerActivation(annotatorConfig, moduleInfo, true);
       String uuid = getValueFromTag(scannerConfig, "/scanner/uuid");
       if (observed.contains(uuid)) {
         throw new IllegalStateException(
