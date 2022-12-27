@@ -58,7 +58,7 @@ public class NullAwayV1Adapter extends NullAwayAdapterBaseClass {
   private int offset;
 
   public NullAwayV1Adapter(Config config, FieldDeclarationStore fieldDeclarationStore) {
-    super(config, fieldDeclarationStore, 0);
+    super(config, fieldDeclarationStore, 1);
     this.offset = 0;
   }
 
