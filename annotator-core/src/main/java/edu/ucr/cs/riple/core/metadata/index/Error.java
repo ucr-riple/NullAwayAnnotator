@@ -126,8 +126,7 @@ public class Error extends Enclosed {
     }
     if (messageType.equals(METHOD_INITIALIZER_ERROR)) {
       // we do not need to compare error messages as it can be the same error with a different error
-      // message
-      // and should not be treated as a separate error.
+      // message and should not be treated as a separate error.
       return true;
     }
     return message.equals(error.message)
