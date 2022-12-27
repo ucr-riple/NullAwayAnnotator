@@ -46,10 +46,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -155,6 +154,7 @@ public class Config {
   public final OffsetHandler offsetHandler;
   /** Controls if offsets in error instance should be processed. */
   public boolean offsetHandlingIsActivated;
+
   public final ImmutableSet<SourceType> generatedCodeDetectors;
 
   /**
