@@ -42,7 +42,7 @@ public class Error extends Enclosed {
   public final String messageType;
   /** Error message. */
   public final String message;
-  /** The fix which can resolve this error if such fixes exists. */
+  /** The fixes which can resolve this error (possibly empty). */
   private final Set<Fix> resolvingFixes;
   /** Offset of program point in original version where error is reported. */
   private final int offset;
