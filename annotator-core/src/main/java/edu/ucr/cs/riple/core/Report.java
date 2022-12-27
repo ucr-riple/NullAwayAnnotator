@@ -56,8 +56,8 @@ public class Report {
    * errors in downstream dependencies.
    */
   public ImmutableSet<Fix> triggeredFixesOnDownstream;
-  /** If true, this report has passed one iteration */
-  public boolean opened;
+  /** If true, this report's tree has been processed for at least one iteration */
+  public boolean hasBeenProcessedOnce;
   /**
    * Lower bound of number of errors in downstream dependencies if fix tree is applied to the target
    * module.
@@ -84,7 +84,7 @@ public class Report {
     this.localEffect = localEffect;
     this.root = root;
     this.tree = Sets.newHashSet(root);
-    this.opened = false;
+    this.hasBeenProcessedOnce = false;
     this.triggeredFixesOnDownstream = ImmutableSet.of();
     this.triggeredErrors = ImmutableSet.of();
     this.lowerBoundEffectOnDownstreamDependencies = 0;
@@ -253,7 +253,7 @@ public class Report {
    * @return true, if report needs further investigation.
    */
   public boolean isInProgress(Config config) {
-    if (!opened) {
+    if (!hasBeenProcessedOnce) {
       // report has not been processed.
       return true;
     }

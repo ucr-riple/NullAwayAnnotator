@@ -69,7 +69,7 @@ public class BasicEvaluator extends AbstractEvaluator {
               report.triggeredFixesOnDownstream =
                   ImmutableSet.copyOf(node.triggeredFixesOnDownstream);
               report.triggeredErrors = ImmutableSet.copyOf(node.triggeredErrors);
-              report.opened = true;
+              report.hasBeenProcessedOnce = true;
             });
   }
 }
