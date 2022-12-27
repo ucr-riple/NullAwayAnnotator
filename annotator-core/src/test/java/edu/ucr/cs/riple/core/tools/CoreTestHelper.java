@@ -183,7 +183,7 @@ public class CoreTestHelper {
       // Verify no error is reported in downstream dependencies.
       for (int i = 1; i < modules.size(); i++) {
         Path path = outDirPath.resolve(i + "").resolve("errors.tsv");
-        List<Error> errors = Utility.readErrorsFromOutputDirectory(config, path);
+        Set<Error> errors = Utility.readErrorsFromOutputDirectory(config, path);
         if (errors.size() != 0) {
           fail(
               "Strict mode introduced errors in downstream dependency module: "
@@ -197,7 +197,7 @@ public class CoreTestHelper {
       // Check no error will be reported in Target module
       Utility.executeCommand(config.buildCommand);
       Path path = outDirPath.resolve("0").resolve("errors.tsv");
-      List<Error> errors = Utility.readErrorsFromOutputDirectory(config, path);
+      Set<Error> errors = Utility.readErrorsFromOutputDirectory(config, path);
       if (errors.size() != 0) {
         fail(
             "Force Resolve Mode did not resolve all errors:\n"
@@ -254,7 +254,7 @@ public class CoreTestHelper {
     fail(errorMessage.toString());
   }
 
-  private void makeAnnotatorConfigFile(Path configPath) {
+  public void makeAnnotatorConfigFile(Path configPath) {
     Config.Builder builder = new Config.Builder();
     final int[] id = {0};
     builder.configPaths =

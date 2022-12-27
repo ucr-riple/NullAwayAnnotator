@@ -33,7 +33,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -66,8 +66,8 @@ public class Utility {
    * @param path Path to errors.tsv.
    * @return List of serialized errors.
    */
-  public static List<Error> readErrorsFromOutputDirectory(Config config, Path path) {
-    List<Error> errors = new ArrayList<>();
+  public static Set<Error> readErrorsFromOutputDirectory(Config config, Path path) {
+    Set<Error> errors = new HashSet<>();
     try {
       try (BufferedReader br =
           Files.newBufferedReader(path.toFile().toPath(), Charset.defaultCharset())) {

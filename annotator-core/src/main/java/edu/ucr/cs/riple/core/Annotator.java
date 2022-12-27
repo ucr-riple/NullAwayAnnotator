@@ -45,7 +45,6 @@ import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnParameter;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -241,7 +240,7 @@ public class Annotator {
       FieldDeclarationStore fieldDeclarationStore, MethodDeclarationTree tree) {
     // Collect regions with remaining errors.
     Utility.buildTarget(config);
-    List<Error> remainingErrors = Utility.readErrorsFromOutputDirectory(config, config.target);
+    Set<Error> remainingErrors = Utility.readErrorsFromOutputDirectory(config, config.target);
     Set<Fix> remainingFixes =
         Utility.readFixesFromOutputDirectory(
             config.target, Fix.factory(config, fieldDeclarationStore));

@@ -29,9 +29,12 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.adapters.NullAwayV0Adapter;
 import edu.ucr.cs.riple.core.adapters.NullAwayV1Adapter;
+import edu.ucr.cs.riple.core.adapters.NullAwayV2Adapter;
 import edu.ucr.cs.riple.core.adapters.NullAwayVersionAdapter;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.util.Utility;
+import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
+import edu.ucr.cs.riple.injector.offsets.OffsetChange;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -42,8 +45,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -144,6 +149,11 @@ public class Config {
    * NullAway serialization version.
    */
   private NullAwayVersionAdapter adapter;
+
+  /** Handler for computing the original offset of reported errors with existing changes. */
+  public final OffsetHandler offsetHandler;
+  /** Controls if offsets in error instance should be processed. */
+  public boolean offsetHandlingIsActivated;
 
   public final ImmutableSet<SourceType> generatedCodeDetectors;
 
@@ -411,6 +421,7 @@ public class Config {
             ? cmd.getOptionValue(activateForceResolveOption)
             : "org.jspecify.nullness.NullUnmarked";
     this.moduleCounterID = 0;
+    this.offsetHandler = new OffsetHandler(this);
     this.log = new Log();
     this.log.reset();
     this.generatedCodeDetectors =
@@ -501,6 +512,7 @@ public class Config {
     this.generatedCodeDetectors =
         lombokCodeDetectorActivated ? Sets.immutableEnumSet(SourceType.LOMBOK) : ImmutableSet.of();
     this.log = new Log();
+    this.offsetHandler = new OffsetHandler(this);
     log.reset();
   }
 
@@ -522,9 +534,15 @@ public class Config {
       switch (version) {
         case 0:
           this.adapter = new NullAwayV0Adapter(this);
+          this.offsetHandlingIsActivated = false;
           break;
         case 1:
           this.adapter = new NullAwayV1Adapter(this);
+          this.offsetHandlingIsActivated = false;
+          break;
+        case 2:
+          this.adapter = new NullAwayV2Adapter(this);
+          this.offsetHandlingIsActivated = true;
           break;
         default:
           throw new RuntimeException("Unrecognized NullAway serialization version: " + version);
@@ -736,6 +754,60 @@ public class Config {
       } catch (IOException e) {
         System.err.println("Error happened in writing config json: " + e);
       }
+    }
+  }
+
+  /** Responsible for handling offset changes in source file. */
+  public static class OffsetHandler {
+    /** Map of file paths to Offset stores. */
+    private final Map<Path, FileOffsetStore> contents;
+    /** Annotator config. */
+    private final Config config;
+
+    public OffsetHandler(Config config) {
+      contents = new HashMap<>();
+      this.config = config;
+    }
+
+    /**
+     * Gets the original offset according to existing offset changes if {@link
+     * Config#offsetHandlingIsActivated} is true. Otherwise, the given offset will be returned
+     * unmodified.
+     *
+     * @param path Path to source file.
+     * @param offset Given offset.
+     * @return Original offset.
+     */
+    public int getOriginalOffset(Path path, int offset) {
+      if (!config.offsetHandlingIsActivated) {
+        return offset;
+      }
+      if (!contents.containsKey(path)) {
+        return offset;
+      }
+      return OffsetChange.getOriginalOffset(offset, contents.get(path).getOffsetChanges());
+    }
+
+    /**
+     * Updates given offsets with given new offset changes.
+     *
+     * @param newOffsets Given new offset changes.
+     */
+    public void updateStateWithRecentChanges(Set<FileOffsetStore> newOffsets) {
+      if (!config.offsetHandlingIsActivated) {
+        // no need to update.
+        return;
+      }
+      newOffsets.forEach(
+          store -> {
+            if (!contents.containsKey(store.getPath())) {
+              contents.put(store.getPath(), store);
+            } else {
+              contents
+                  .get(store.getPath())
+                  .updateStateWithNewOffsetChanges(store.getOffsetChanges());
+            }
+          });
     }
   }
 }

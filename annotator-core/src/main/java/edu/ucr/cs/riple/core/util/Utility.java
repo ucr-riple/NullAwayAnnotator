@@ -43,7 +43,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -174,11 +173,11 @@ public class Utility {
    * Reads serialized errors of passed module in "errors.tsv" file in the output directory,
    *
    * @param info Module info.
-   * @return List of serialized errors.
+   * @return Set of serialized errors.
    */
-  public static List<Error> readErrorsFromOutputDirectory(Config config, ModuleInfo info) {
+  public static Set<Error> readErrorsFromOutputDirectory(Config config, ModuleInfo info) {
     Path errorsPath = info.dir.resolve("errors.tsv");
-    List<Error> errors = new ArrayList<>();
+    Set<Error> errors = new HashSet<>();
     try {
       try (BufferedReader br =
           Files.newBufferedReader(errorsPath.toFile().toPath(), Charset.defaultCharset())) {

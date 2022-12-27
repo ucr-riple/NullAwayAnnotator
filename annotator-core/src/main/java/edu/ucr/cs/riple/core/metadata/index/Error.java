@@ -43,11 +43,18 @@ public class Error extends Enclosed {
    */
   @Nullable public final Location nonnullTarget;
 
+  private final int offset;
+
   public Error(
-      String messageType, String message, Region region, @Nullable Location nonnullTargetLocation) {
+      String messageType,
+      String message,
+      Region region,
+      int offset,
+      @Nullable Location nonnullTargetLocation) {
     super(region);
     this.messageType = messageType;
     this.message = message;
+    this.offset = offset;
     this.nonnullTarget = nonnullTargetLocation;
   }
 
@@ -73,13 +80,15 @@ public class Error extends Enclosed {
     Error error = (Error) o;
     return messageType.equals(error.messageType)
         && message.equals(error.message)
+        && offset == error.offset
+        && region.equals(error.region)
         // Since nonnullTarget is @Nullable, used Objects.equal.
         && Objects.equals(nonnullTarget, error.nonnullTarget);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(messageType, message, nonnullTarget);
+    return Objects.hash(messageType, message, offset, nonnullTarget);
   }
 
   @Override
