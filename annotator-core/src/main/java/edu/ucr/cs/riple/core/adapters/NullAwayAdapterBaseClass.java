@@ -33,6 +33,7 @@ import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -105,14 +106,19 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
       String errorMessage, Region region, FieldDeclarationStore store) {
     return extractUninitializedFieldNames(errorMessage).stream()
         .map(
-            field ->
-                new Fix(
-                    new AddMarkerAnnotation(
-                        extendVariableList(store.getLocationOnField(region.clazz, field), store),
-                        config.nullableAnnot),
-                    Error.METHOD_INITIALIZER_ERROR,
-                    region,
-                    true))
+            field -> {
+              OnField locationOnField = store.getLocationOnField(region.clazz, field);
+              if (locationOnField == null) {
+                return null;
+              }
+              return new Fix(
+                  new AddMarkerAnnotation(
+                      extendVariableList(locationOnField, store), config.nullableAnnot),
+                  Error.METHOD_INITIALIZER_ERROR,
+                  region,
+                  true);
+            })
+        .filter(Objects::nonNull)
         .collect(Collectors.toSet());
   }
 

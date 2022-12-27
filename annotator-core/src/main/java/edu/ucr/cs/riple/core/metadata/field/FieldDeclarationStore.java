@@ -129,7 +129,7 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
     Set<String> fieldNames = Sets.newHashSet(field);
     if (candidate == null) {
       // field is on byte code.
-      return new OnField(clazz + ".java", clazz, fieldNames);
+      return null;
     }
     return new OnField(candidate.pathToSourceFile, candidate.clazz, fieldNames);
   }
