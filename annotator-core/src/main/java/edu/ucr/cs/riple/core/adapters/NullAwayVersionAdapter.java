@@ -77,4 +77,11 @@ public interface NullAwayVersionAdapter {
    * @return Set of regions enclosed by the passed location.
    */
   Set<Region> getFieldRegionScope(OnField onField);
+
+  /**
+   * Returns the serialization version number which this adapter is associated with.
+   *
+   * @return Serialization number.
+   */
+  int getVersionNumber();
 }

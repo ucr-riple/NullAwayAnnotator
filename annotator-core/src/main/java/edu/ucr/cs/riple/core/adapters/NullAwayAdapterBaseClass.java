@@ -42,18 +42,15 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
 
   /** Annotator config. */
   protected final Config config;
-  /** Serialization version. */
-  protected final int version;
+
   /**
    * Field declaration store instance, used to generate fixes for uninitialized fields based on
    * error message for initializers.
    */
   protected final FieldDeclarationStore fieldDeclarationStore;
 
-  public NullAwayAdapterBaseClass(
-      Config config, FieldDeclarationStore fieldDeclarationStore, int version) {
+  public NullAwayAdapterBaseClass(Config config, FieldDeclarationStore fieldDeclarationStore) {
     this.config = config;
-    this.version = version;
     this.fieldDeclarationStore = fieldDeclarationStore;
   }
 
@@ -74,7 +71,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
     if (end == -1) {
       throw new RuntimeException(
           "Error message for initializer error not recognized in version "
-              + version
+              + getVersionNumber()
               + ": "
               + errorMessage);
     }
@@ -86,7 +83,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
     if (fields.size() == 0) {
       throw new RuntimeException(
           "Could not extract any uninitialized field in message for initializer error in version "
-              + version
+              + getVersionNumber()
               + ": "
               + errorMessage);
     }

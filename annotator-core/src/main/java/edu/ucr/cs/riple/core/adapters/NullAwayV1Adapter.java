@@ -58,7 +58,7 @@ public class NullAwayV1Adapter extends NullAwayAdapterBaseClass {
   private int offset;
 
   public NullAwayV1Adapter(Config config, FieldDeclarationStore fieldDeclarationStore) {
-    super(config, fieldDeclarationStore, 1);
+    super(config, fieldDeclarationStore);
     this.offset = 0;
   }
 
@@ -108,5 +108,10 @@ public class NullAwayV1Adapter extends NullAwayAdapterBaseClass {
     return onField.variables.stream()
         .map(fieldName -> new Region(onField.clazz, fieldName))
         .collect(Collectors.toSet());
+  }
+
+  @Override
+  public int getVersionNumber() {
+    return 1;
   }
 }

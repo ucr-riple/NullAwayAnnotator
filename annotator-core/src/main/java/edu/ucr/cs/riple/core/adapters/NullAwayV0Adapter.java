@@ -58,7 +58,7 @@ public class NullAwayV0Adapter extends NullAwayAdapterBaseClass {
   private int offset;
 
   public NullAwayV0Adapter(Config config, FieldDeclarationStore fieldDeclarationStore) {
-    super(config, fieldDeclarationStore, 0);
+    super(config, fieldDeclarationStore);
     this.offset = 0;
   }
 
@@ -110,5 +110,10 @@ public class NullAwayV0Adapter extends NullAwayAdapterBaseClass {
   @Override
   public Set<Region> getFieldRegionScope(OnField onField) {
     return Collections.singleton(new Region(onField.clazz, "null"));
+  }
+
+  @Override
+  public int getVersionNumber() {
+    return 0;
   }
 }

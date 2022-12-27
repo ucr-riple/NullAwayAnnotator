@@ -33,4 +33,9 @@ public class NullAwayV2Adapter extends NullAwayV1Adapter {
         Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 6, 12)),
         fieldDeclarationStore);
   }
+
+  @Override
+  public int getVersionNumber() {
+    return 2;
+  }
 }
