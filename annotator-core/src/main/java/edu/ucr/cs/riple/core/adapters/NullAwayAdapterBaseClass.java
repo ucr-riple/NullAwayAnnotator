@@ -63,7 +63,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
    * @param errorMessage Error message.
    * @return Set of uninitialized field names.
    */
-  private Set<String> extractUnInitializedFields(String errorMessage) {
+  private Set<String> extractUninitializedFieldNames(String errorMessage) {
     String prefix = "initializer method does not guarantee @NonNull field";
     int begin = prefix.length();
     if (errorMessage.charAt(begin) == 's') {
