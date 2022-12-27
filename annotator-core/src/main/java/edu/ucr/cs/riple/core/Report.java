@@ -246,19 +246,20 @@ public class Report {
   }
 
   /**
-   * Checks if the report needs further investigation. If a fix is suggested from downstream
+   * Checks if the report requires further investigation. If a fix is suggested from downstream
    * dependencies, it should still be included the next cycle.
    *
    * @param config Annotator config instance.
    * @return true, if report needs further investigation.
    */
-  public boolean isInProgress(Config config) {
+  public boolean requiresFurtherProcess(Config config) {
     if (!hasBeenProcessedOnce) {
       // report has not been processed.
       return true;
     }
     if (triggeredFixesOnDownstream.size() != 0 && !tree.containsAll(triggeredFixesOnDownstream)) {
-      // force to processes move forward with the triggered fix in downstream dependencies.
+      // Report contains fixes from downstream dependencies, their effectiveness on target module
+      // should be investigated.
       return true;
     }
     ImmutableSet<Fix> triggeredFixes = Error.getResolvingFixesOfErrors(triggeredErrors);
