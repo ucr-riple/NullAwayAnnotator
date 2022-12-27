@@ -132,8 +132,8 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
       @Nullable Location nonnullTarget,
       FieldDeclarationStore store) {
     if (nonnullTarget == null && errorType.equals(Error.METHOD_INITIALIZER_ERROR)) {
-      Set<Fix> resolvingFix = generateFixesForUninitializedFields(errorMessage, region, store);
-      return new Error(errorType, errorMessage, region, offset, resolvingFix);
+      Set<Fix> resolvingFixes = generateFixesForUninitializedFields(errorMessage, region, store);
+      return new Error(errorType, errorMessage, region, offset, resolvingFixes);
     }
     if (nonnullTarget != null && nonnullTarget.isOnField()) {
       nonnullTarget = extendVariableList(nonnullTarget.toField(), store);
