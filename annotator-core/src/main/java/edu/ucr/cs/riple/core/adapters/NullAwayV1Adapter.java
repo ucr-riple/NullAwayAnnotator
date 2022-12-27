@@ -59,7 +59,7 @@ public class NullAwayV1Adapter extends NullAwayAdapterBaseClass {
 
   public NullAwayV1Adapter(Config config, FieldDeclarationStore fieldDeclarationStore) {
     super(config, fieldDeclarationStore);
-    this.offset = 0;
+    this.uniqueOffsetCounter = 0;
   }
 
   @Override
@@ -90,7 +90,7 @@ public class NullAwayV1Adapter extends NullAwayAdapterBaseClass {
     Region region = new Region(values[2], values[3]);
     // since we have no information of offset, we give a unique offset error to have different
     // instances.
-    return createError(errorType, errorMessage, region, offset++, nonnullTarget, store);
+    return createError(errorType, errorMessage, region, uniqueOffsetCounter++, nonnullTarget, store);
   }
 
   @Override
