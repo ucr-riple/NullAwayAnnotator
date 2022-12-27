@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.adapters;
 
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -33,6 +34,7 @@ import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -42,18 +44,15 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
 
   /** Annotator config. */
   protected final Config config;
-  /** Serialization version. */
-  protected final int version;
+
   /**
    * Field declaration store instance, used to generate fixes for uninitialized fields based on
    * error message for initializers.
    */
   protected final FieldDeclarationStore fieldDeclarationStore;
 
-  public NullAwayAdapterBaseClass(
-      Config config, FieldDeclarationStore fieldDeclarationStore, int version) {
+  public NullAwayAdapterBaseClass(Config config, FieldDeclarationStore fieldDeclarationStore) {
     this.config = config;
-    this.version = version;
     this.fieldDeclarationStore = fieldDeclarationStore;
   }
 
@@ -63,7 +62,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
    * @param errorMessage Error message.
    * @return Set of uninitialized field names.
    */
-  private Set<String> extractUnInitializedFields(String errorMessage) {
+  private Set<String> extractUninitializedFieldNames(String errorMessage) {
     String prefix = "initializer method does not guarantee @NonNull field";
     int begin = prefix.length();
     if (errorMessage.charAt(begin) == 's') {
@@ -74,19 +73,23 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
     if (end == -1) {
       throw new RuntimeException(
           "Error message for initializer error not recognized in version "
-              + version
+              + getVersionNumber()
               + ": "
               + errorMessage);
     }
     String[] fieldsData = errorMessage.substring(begin, end).split(",");
     Set<String> fields =
         Arrays.stream(fieldsData)
+            // NullAway serializes line number right after a field name starting with an open
+            // parentheses. (e.g. foo (line z)). This approach of extracting field names is
+            // extremely dependent on the format of NullAway error messages. Should be watched
+            // carefully and updated if the format is changed by NullAway (maybe regex?).
             .map(s -> s.substring(0, s.indexOf("(")).trim())
             .collect(Collectors.toSet());
     if (fields.size() == 0) {
       throw new RuntimeException(
           "Could not extract any uninitialized field in message for initializer error in version "
-              + version
+              + getVersionNumber()
               + ": "
               + errorMessage);
     }
@@ -100,18 +103,23 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
    * @param region Region where the error is reported.
    * @return Set of fixes for uninitialized fields to resolve the given error.
    */
-  protected Set<Fix> generateFixForUnInitializedFields(
+  protected ImmutableSet<Fix> generateFixesForUninitializedFields(
       String errorMessage, Region region, FieldDeclarationStore store) {
-    return extractUnInitializedFields(errorMessage).stream()
+    return extractUninitializedFieldNames(errorMessage).stream()
         .map(
-            field ->
-                new Fix(
-                    new AddMarkerAnnotation(
-                        extendVariableList(store.getLocationOnField(region.clazz, field), store),
-                        config.nullableAnnot),
-                    Error.METHOD_INITIALIZER_ERROR,
-                    true))
-        .collect(Collectors.toSet());
+            field -> {
+              OnField locationOnField = store.getLocationOnField(region.clazz, field);
+              if (locationOnField == null) {
+                return null;
+              }
+              return new Fix(
+                  new AddMarkerAnnotation(
+                      extendVariableList(locationOnField, store), config.nullableAnnot),
+                  Error.METHOD_INITIALIZER_ERROR,
+                  true);
+            })
+        .filter(Objects::nonNull)
+        .collect(ImmutableSet.toImmutableSet());
   }
 
   /**
@@ -134,8 +142,9 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
       @Nullable Location nonnullTarget,
       FieldDeclarationStore store) {
     if (nonnullTarget == null && errorType.equals(Error.METHOD_INITIALIZER_ERROR)) {
-      Set<Fix> resolvingFix = generateFixForUnInitializedFields(errorMessage, region, store);
-      return new Error(errorType, errorMessage, region, offset, resolvingFix);
+      ImmutableSet<Fix> resolvingFixes =
+          generateFixesForUninitializedFields(errorMessage, region, store);
+      return new Error(errorType, errorMessage, region, offset, resolvingFixes);
     }
     if (nonnullTarget != null && nonnullTarget.isOnField()) {
       nonnullTarget = extendVariableList(nonnullTarget.toField(), store);

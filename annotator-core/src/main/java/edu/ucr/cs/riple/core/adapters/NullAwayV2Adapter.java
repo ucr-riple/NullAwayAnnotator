@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 
 public class NullAwayV2Adapter extends NullAwayV1Adapter {
+
   public NullAwayV2Adapter(Config config, FieldDeclarationStore fieldDeclarationStore) {
     super(config, fieldDeclarationStore);
   }
@@ -32,5 +33,10 @@ public class NullAwayV2Adapter extends NullAwayV1Adapter {
         config.offsetHandler.getOriginalOffset(Paths.get(path), offset),
         Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 6, 12)),
         fieldDeclarationStore);
+  }
+
+  @Override
+  public int getVersionNumber() {
+    return 2;
   }
 }

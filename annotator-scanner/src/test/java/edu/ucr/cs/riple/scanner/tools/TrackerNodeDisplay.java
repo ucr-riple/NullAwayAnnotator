@@ -32,13 +32,24 @@ public class TrackerNodeDisplay implements Display {
   public final String regionMember;
   public final String usedClass;
   public final String usedMember;
+  public final String sourceType;
 
   public TrackerNodeDisplay(
-      String regionClass, String regionMember, String usedClass, String usedMember) {
+      String regionClass,
+      String regionMember,
+      String usedClass,
+      String usedMember,
+      String sourceType) {
     this.regionClass = regionClass;
     this.regionMember = regionMember;
     this.usedClass = usedClass;
     this.usedMember = usedMember;
+    this.sourceType = sourceType;
+  }
+
+  public TrackerNodeDisplay(
+      String regionClass, String regionMember, String usedClass, String usedMember) {
+    this(regionClass, regionMember, usedClass, usedMember, "SOURCE");
   }
 
   @Override
@@ -53,12 +64,13 @@ public class TrackerNodeDisplay implements Display {
     return regionClass.equals(that.regionClass)
         && regionMember.equals(that.regionMember)
         && usedClass.equals(that.usedClass)
-        && usedMember.equals(that.usedMember);
+        && usedMember.equals(that.usedMember)
+        && sourceType.equals(that.sourceType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(regionClass, regionMember, usedClass, usedMember);
+    return Objects.hash(regionClass, regionMember, usedClass, usedMember, sourceType);
   }
 
   @Override
@@ -74,6 +86,9 @@ public class TrackerNodeDisplay implements Display {
         + '\''
         + ", usedMember='"
         + usedMember
+        + '\''
+        + ", sourceType='"
+        + sourceType
         + '\'';
   }
 }

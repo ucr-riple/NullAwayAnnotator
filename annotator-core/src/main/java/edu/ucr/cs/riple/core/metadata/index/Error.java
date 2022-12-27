@@ -50,7 +50,7 @@ public class Error extends Enclosed {
   public final String messageType;
   /** Error message. */
   public final String message;
-  /** The fix which can resolve this error if such fixes exists. */
+  /** The fixes which can resolve this error (possibly empty). */
   private final ImmutableSet<Fix> resolvingFixes;
   /** Offset of program point in original version where error is reported. */
   private final int offset;
@@ -59,15 +59,20 @@ public class Error extends Enclosed {
 
   public Error(
       String messageType, String message, Region region, int offset, @Nullable Fix resolvingFix) {
-    super(region);
-    this.messageType = messageType;
-    this.message = message;
-    this.offset = offset;
-    this.resolvingFixes = resolvingFix == null ? ImmutableSet.of() : ImmutableSet.of(resolvingFix);
+    this(
+        messageType,
+        message,
+        region,
+        offset,
+        resolvingFix == null ? ImmutableSet.of() : ImmutableSet.of(resolvingFix));
   }
 
   public Error(
-      String messageType, String message, Region region, int offset, Set<Fix> resolvingFixes) {
+      String messageType,
+      String message,
+      Region region,
+      int offset,
+      ImmutableSet<Fix> resolvingFixes) {
     super(region);
     this.messageType = messageType;
     this.message = message;

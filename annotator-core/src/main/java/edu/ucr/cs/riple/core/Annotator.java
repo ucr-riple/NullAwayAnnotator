@@ -94,7 +94,7 @@ public class Annotator {
    */
   private void preprocess() {
     System.out.println("Preprocessing...");
-    Utility.setScannerCheckerActivation(config.target, true);
+    Utility.setScannerCheckerActivation(config, config.target, true);
     System.out.println("Making the first build...");
     Utility.buildTarget(config, true);
     fieldDeclarationStore = new FieldDeclarationStore(config, config.target);

@@ -24,6 +24,8 @@
 
 package edu.ucr.cs.riple.scanner;
 
+import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import edu.ucr.cs.riple.scanner.tools.Display;
 import edu.ucr.cs.riple.scanner.tools.DisplayFactory;
 import edu.ucr.cs.riple.scanner.tools.SerializationTestHelper;
@@ -56,18 +58,18 @@ public abstract class AnnotatorScannerBaseTest<T extends Display> {
   @Before
   public void setup() {
     root = Paths.get(temporaryFolder.getRoot().getAbsolutePath());
-    Path config = root.resolve("scanner.xml");
+    Path configPath = root.resolve("scanner.xml");
     try {
       Files.createDirectories(root);
-      ErrorProneCLIFlagsConfig.Builder builder =
-          new ErrorProneCLIFlagsConfig.Builder()
-              .setCallTrackerActivation(true)
-              .setClassTrackerActivation(true)
-              .setFieldTrackerActivation(true)
-              .setMethodTrackerActivation(true)
-              .setOutput(root);
-      Files.createFile(config);
-      builder.writeAsXML(config);
+      ScannerConfigWriter writer = new ScannerConfigWriter();
+      writer
+          .setCallTrackerActivation(true)
+          .setClassTrackerActivation(true)
+          .setFieldTrackerActivation(true)
+          .setMethodTrackerActivation(true)
+          .addGeneratedCodeDetectors(ImmutableSet.of(SourceType.LOMBOK))
+          .setOutput(root)
+          .writeAsXML(configPath);
     } catch (IOException ex) {
       throw new UncheckedIOException(ex);
     }
@@ -78,7 +80,7 @@ public abstract class AnnotatorScannerBaseTest<T extends Display> {
                     "-d",
                     temporaryFolder.getRoot().getAbsolutePath(),
                     "-Xep:AnnotatorScanner:ERROR",
-                    "-XepOpt:AnnotatorScanner:ConfigPath=" + config))
+                    "-XepOpt:AnnotatorScanner:ConfigPath=" + configPath))
             .setOutputFileNameAndHeader(fileName, header)
             .setFactory(factory);
   }

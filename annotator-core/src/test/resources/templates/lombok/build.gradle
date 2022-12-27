@@ -31,19 +31,19 @@ plugins {
 group 'org.example'
 version '1.0-SNAPSHOT'
 
-def libraryloader = project.getProperty("library-model-loader-path")
-
 repositories {
     mavenLocal()
     mavenCentral()
 }
 
 dependencies {
-    compileOnly project(":Target")
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
     annotationProcessor "com.uber.nullaway:nullaway:" + System.getenv('NULLAWAY_TEST_VERSION')
     annotationProcessor "edu.ucr.cs.riple.annotator:annotator-scanner:" + System.getenv('ANNOTATOR_VERSION')
-    annotationProcessor files(libraryloader)
 
     compileOnly "edu.ucr.cs.riple.annotator:qual:" + System.getenv('ANNOTATOR_VERSION')
 
@@ -63,13 +63,12 @@ tasks.withType(JavaCompile) {
         options.errorprone.disableAllChecks = true
         options.errorprone.disableAllWarnings = true
         options.errorprone {
-            check("NullAway", CheckSeverity.WARN)
+            check("NullAway", CheckSeverity.ERROR)
             check("AnnotatorScanner", CheckSeverity.ERROR)
             option("NullAway:AnnotatedPackages", "test")
             option("NullAway:SerializeFixMetadata", "true")
-            option("NullAway:AcknowledgeLibraryModelsOfAnnotatedCode", "true")
-            option("NullAway:FixSerializationConfigPath", project.getProperty("DepC-nullaway-config-path"))
-            option("AnnotatorScanner:ConfigPath", project.getProperty("DepC-scanner-config-path"))
+            option("NullAway:FixSerializationConfigPath", project.getProperty("unittest-nullaway-config-path"))
+            option("AnnotatorScanner:ConfigPath", project.getProperty("unittest-scanner-config-path"))
         }
     }
     options.compilerArgs << "-Xmaxerrs" << "100000"
