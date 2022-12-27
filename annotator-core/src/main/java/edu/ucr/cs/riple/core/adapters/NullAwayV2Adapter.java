@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 
 public class NullAwayV2Adapter extends NullAwayV1Adapter {
+
   public NullAwayV2Adapter(Config config, FieldDeclarationStore fieldDeclarationStore) {
     super(config, fieldDeclarationStore);
   }

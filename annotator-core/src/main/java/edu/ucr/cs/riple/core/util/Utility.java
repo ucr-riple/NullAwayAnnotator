@@ -173,7 +173,7 @@ public class Utility {
   /**
    * Reads serialized errors of passed module in "errors.tsv" file in the output directory,
    *
-   * @param info Module info.
+   * @param info Module info. <<<<<<< HEAD
    * @param fieldDeclarationStore Field Declaration store.
    * @return Set of serialized errors.
    */
