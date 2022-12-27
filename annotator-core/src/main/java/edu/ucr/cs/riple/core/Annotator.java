@@ -230,7 +230,6 @@ public class Annotator {
     Set<Error> remainingErrors =
         Utility.readErrorsFromOutputDirectory(config, config.target, fieldDeclarationStore);
     Set<Fix> remainingFixes = Utility.readFixesFromOutputDirectory(config, fieldDeclarationStore);
-
     // Collect all regions for NullUnmarked.
     // For all errors in regions which correspond to a method's body, we can add @NullUnmarked at
     // the method level.

@@ -77,7 +77,7 @@ public class Error extends Enclosed {
     this.messageType = messageType;
     this.message = message;
     this.offset = offset;
-    this.resolvingFixes = ImmutableSet.copyOf(resolvingFixes);
+    this.resolvingFixes = resolvingFixes;
   }
 
   /**
@@ -92,7 +92,7 @@ public class Error extends Enclosed {
   }
 
   /**
-   * Checks if error is resolvable.
+   * <<<<<<< HEAD Checks if error is resolvable.
    *
    * @return true if error is resolvable and false otherwise.
    */
@@ -105,7 +105,7 @@ public class Error extends Enclosed {
   }
 
   /**
-   * Checks if error is resolvable with only one fix.
+   * ======= >>>>>>> master Checks if error is resolvable with only one fix.
    *
    * @return true if error is resolvable with only one fix and false otherwise.
    */
