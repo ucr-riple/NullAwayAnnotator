@@ -24,7 +24,10 @@
 
 package edu.ucr.cs.riple.scanner;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.ErrorProneFlags;
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
+import edu.ucr.cs.riple.scanner.generatedcode.SymbolSourceResolver;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,14 +39,28 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+/**
+ * provides scanner configuration based on additional flags passed to ErrorProne via
+ * "-XepOpt:[Namespace:]FlagName[=Value]". See. <a href="http://errorprone.info/docs/flags">Error
+ * Prone flags</a>
+ */
 public class ErrorProneCLIFlagsConfig implements Config {
 
+  /** Path to output dir. */
   @Nonnull private final Path outputDirectory;
+  /** Controls method info serialization. */
   private final boolean methodTrackerIsActive;
+  /** Controls field usage serialization. */
   private final boolean fieldTrackerIsActive;
+  /** Controls method invocation serialization. */
   private final boolean callTrackerIsActive;
+  /** Controls class info serialization. */
   private final boolean classTrackerIsActive;
+  /** Serializing instance for writing outputs at the desired paths. */
   private final Serializer serializer;
+  /** Source type resolver for serialized regions. */
+  private final SymbolSourceResolver symbolSourceResolver;
+
   static final String EP_FL_NAMESPACE = "AnnotatorScanner";
   static final String FL_CONFIG_PATH = EP_FL_NAMESPACE + ":ConfigPath";
 
@@ -81,7 +98,24 @@ public class ErrorProneCLIFlagsConfig implements Config {
     this.classTrackerIsActive =
         XMLUtil.getValueFromAttribute(document, "/scanner/class", "active", Boolean.class)
             .orElse(false);
+    this.symbolSourceResolver = new SymbolSourceResolver(extractRequestedSourceTypes(document));
     this.serializer = new Serializer(this);
+  }
+
+  /**
+   * Extracts set of requested source types to be serialized from the given xml document.
+   *
+   * @param document XML document where all configuration values are read from.
+   * @return Immutable set of requested source types.
+   */
+  private ImmutableSet<SourceType> extractRequestedSourceTypes(Document document) {
+    ImmutableSet.Builder<SourceType> codeDetectors = new ImmutableSet.Builder<>();
+    if (XMLUtil.getValueFromAttribute(
+            document, "/scanner/processor/" + SourceType.LOMBOK.name(), "active", Boolean.class)
+        .orElse(false)) {
+      codeDetectors.add(SourceType.LOMBOK);
+    }
+    return codeDetectors.build();
   }
 
   @Override
@@ -113,5 +147,10 @@ public class ErrorProneCLIFlagsConfig implements Config {
   @Override
   public Path getOutputDirectory() {
     return outputDirectory;
+  }
+
+  @Override
+  public SymbolSourceResolver getSymbolSourceResolver() {
+    return symbolSourceResolver;
   }
 }

@@ -26,64 +26,39 @@ package edu.ucr.cs.riple.scanner.out;
 
 import com.google.errorprone.util.ASTHelpers;
 import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.MethodTree;
-import com.sun.source.tree.VariableTree;
 import com.sun.source.util.TreePath;
 import com.sun.tools.javac.code.Symbol;
+import edu.ucr.cs.riple.scanner.Config;
+import edu.ucr.cs.riple.scanner.SymbolUtil;
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
+import javax.annotation.Nullable;
 
+/** Container class for storing regions where a node has been used. */
 public class TrackerNode {
-  private final Symbol usedMember;
-  private final Symbol.ClassSymbol regionClass;
-  private final Symbol regionMember;
 
-  public TrackerNode(Symbol usedMember, TreePath path) {
-    this.usedMember = usedMember;
-    ClassTree enclosingClass;
-    MethodTree enclosingMethod;
-    enclosingMethod =
-        path.getLeaf() instanceof MethodTree
-            ? (MethodTree) path.getLeaf()
-            : ASTHelpers.findEnclosingNode(path, MethodTree.class);
-    enclosingClass =
+  /** Symbol of the used node. */
+  private final Symbol usedNode;
+  /** Symbol of the enclosing class of the region. */
+  @Nullable private final Symbol.ClassSymbol regionClass;
+  /** Symbol of the region. */
+  @Nullable private final Symbol regionMember;
+  /** Source type of the region. */
+  private final SourceType source;
+
+  public TrackerNode(Config config, Symbol usedNode, TreePath path) {
+    this.usedNode = usedNode;
+    ClassTree enclosingClass =
         path.getLeaf() instanceof ClassTree
             ? (ClassTree) path.getLeaf()
             : ASTHelpers.findEnclosingNode(path, ClassTree.class);
     if (enclosingClass != null) {
-      Symbol.ClassSymbol classSymbol = ASTHelpers.getSymbol(enclosingClass);
-      regionClass = classSymbol;
-      if (enclosingMethod != null) {
-        Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(enclosingMethod);
-        if (!methodSymbol.isEnclosedBy(classSymbol)) {
-          enclosingMethod = null;
-        }
-      }
-      if (enclosingMethod != null) {
-        regionMember = ASTHelpers.getSymbol(enclosingMethod);
-      } else {
-        // Node is not enclosed by any method, can be a field declaration or enclosed by it.
-        Symbol sym = ASTHelpers.getSymbol(path.getLeaf());
-        Symbol.VarSymbol fieldSymbol = null;
-        if (sym != null && sym.getKind().isField() && sym.isEnclosedBy(classSymbol)) {
-          // Directly on a field declaration.
-          fieldSymbol = (Symbol.VarSymbol) sym;
-        } else {
-          // Can be enclosed by a field declaration tree.
-          VariableTree fieldDeclTree = ASTHelpers.findEnclosingNode(path, VariableTree.class);
-          if (fieldDeclTree != null) {
-            fieldSymbol = ASTHelpers.getSymbol(fieldDeclTree);
-          }
-        }
-        if (fieldSymbol != null && fieldSymbol.isEnclosedBy(classSymbol)) {
-          regionMember = fieldSymbol;
-        } else {
-          regionMember = null;
-        }
-      }
+      this.regionClass = ASTHelpers.getSymbol(enclosingClass);
+      this.regionMember = SymbolUtil.locateRegionMemberForSymbolAtPath(path, this.regionClass);
     } else {
-      // just to make them final in declaration.
-      regionMember = null;
-      regionClass = null;
+      this.regionClass = null;
+      this.regionMember = null;
     }
+    this.source = config.getSymbolSourceResolver().getSourceForSymbolAtPath(path);
   }
 
   @Override
@@ -91,16 +66,30 @@ public class TrackerNode {
     if (regionClass == null) {
       return "";
     }
-    Symbol enclosingClass = usedMember.enclClass();
+    Symbol enclosingClass = usedNode.enclClass();
     return String.join(
         "\t",
         regionClass.flatName(),
         ((regionMember == null) ? "null" : regionMember.toString()),
-        usedMember.toString(),
-        ((enclosingClass == null) ? "null" : enclosingClass.flatName()));
+        usedNode.toString(),
+        ((enclosingClass == null) ? "null" : enclosingClass.flatName()),
+        source.name());
   }
 
+  /**
+   * Returns header of the file where all these instances will be serialized.
+   *
+   * @return Header of target file.
+   */
   public static String header() {
-    return "REGION_CLASS" + '\t' + "REGION_MEMBER" + '\t' + "USED_MEMBER" + '\t' + "USED_CLASS";
+    return "REGION_CLASS"
+        + '\t'
+        + "REGION_MEMBER"
+        + '\t'
+        + "USED_MEMBER"
+        + '\t'
+        + "USED_CLASS"
+        + '\t'
+        + "SOURCE_TYPE";
   }
 }

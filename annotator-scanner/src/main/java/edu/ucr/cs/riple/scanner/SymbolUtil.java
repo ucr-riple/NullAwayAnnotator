@@ -26,6 +26,10 @@
 
 package edu.ucr.cs.riple.scanner;
 
+import com.google.errorprone.util.ASTHelpers;
+import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.VariableTree;
+import com.sun.source.util.TreePath;
 import com.sun.tools.javac.code.Attribute;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.TargetType;
@@ -153,5 +157,49 @@ public class SymbolUtil {
       return rawTypeAttributes.filter((t) -> t.position.type.equals(TargetType.METHOD_RETURN));
     }
     return rawTypeAttributes;
+  }
+
+  /**
+   * Locates the region member for the enclosing region at the given path. A region member, can be a
+   * field, method or {@code null} if path leads to a static block initialization.
+   *
+   * @param path Path leading to region.
+   * @param enclosingClass Enclosing class of the path.
+   * @return Region member.
+   */
+  @Nullable
+  public static Symbol locateRegionMemberForSymbolAtPath(
+      TreePath path, Symbol.ClassSymbol enclosingClass) {
+    // Check if enclosed by a method.
+    MethodTree enclosingMethod =
+        path.getLeaf() instanceof MethodTree
+            ? (MethodTree) path.getLeaf()
+            : ASTHelpers.findEnclosingNode(path, MethodTree.class);
+    if (enclosingMethod != null) {
+      Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(enclosingMethod);
+      if (!methodSymbol.isEnclosedBy(enclosingClass)) {
+        enclosingMethod = null;
+      }
+    }
+    if (enclosingMethod != null) {
+      return ASTHelpers.getSymbol(enclosingMethod);
+    }
+    // Node is not enclosed by any method, can be a field declaration or enclosed by it.
+    Symbol sym = ASTHelpers.getSymbol(path.getLeaf());
+    Symbol.VarSymbol fieldSymbol = null;
+    if (sym != null && sym.getKind().isField() && sym.isEnclosedBy(enclosingClass)) {
+      // Directly on a field declaration.
+      fieldSymbol = (Symbol.VarSymbol) sym;
+    } else {
+      // Can be enclosed by a field declaration tree.
+      VariableTree fieldDeclTree = ASTHelpers.findEnclosingNode(path, VariableTree.class);
+      if (fieldDeclTree != null) {
+        fieldSymbol = ASTHelpers.getSymbol(fieldDeclTree);
+      }
+    }
+    if (fieldSymbol != null && fieldSymbol.isEnclosedBy(enclosingClass)) {
+      return fieldSymbol;
+    }
+    return null;
   }
 }
