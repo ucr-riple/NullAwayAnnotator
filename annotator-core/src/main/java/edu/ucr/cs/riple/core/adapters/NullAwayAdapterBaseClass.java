@@ -100,7 +100,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
    * @param region Region where the error is reported.
    * @return Set of fixes for uninitialized fields to resolve the given error.
    */
-  protected Set<Fix> generateFixForUnInitializedFields(
+  protected Set<Fix> generateFixesForUninitializedFields(
       String errorMessage, Region region, FieldDeclarationStore store) {
     return extractUninitializedFieldNames(errorMessage).stream()
         .map(
