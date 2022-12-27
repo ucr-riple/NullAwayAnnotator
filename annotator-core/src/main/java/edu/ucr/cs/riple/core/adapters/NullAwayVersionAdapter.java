@@ -54,6 +54,8 @@ public interface NullAwayVersionAdapter {
    * Error} instance.
    *
    * @param values Values in row of a TSV file.
+   * @param store Field declaration store to generate the set of resolving fixes for the
+   *     deserialized error.
    * @return Corresponding Error instance with the passed values.
    */
   Error deserializeError(String[] values, FieldDeclarationStore store);
