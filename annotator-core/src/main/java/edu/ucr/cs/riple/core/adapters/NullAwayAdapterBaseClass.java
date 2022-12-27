@@ -102,7 +102,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
    */
   protected Set<Fix> generateFixForUnInitializedFields(
       String errorMessage, Region region, FieldDeclarationStore store) {
-    return extractUnInitializedFields(errorMessage).stream()
+    return extractUninitializedFieldNames(errorMessage).stream()
         .map(
             field ->
                 new Fix(
