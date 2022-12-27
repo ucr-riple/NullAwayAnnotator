@@ -28,6 +28,7 @@ import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.location.Location;
 
+/** Wrapper class for {@link Error} with default values, used to create tests. */
 public class TError extends Error {
 
   public TError(Location location) {
