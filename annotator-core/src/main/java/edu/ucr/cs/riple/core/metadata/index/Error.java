@@ -51,11 +51,8 @@ public class Error extends Enclosed {
 
   public Error(
       String messageType, String message, Region region, int offset, @Nullable Fix resolvingFix) {
-    super(region);
-    this.messageType = messageType;
-    this.message = message;
-    this.offset = offset;
-    this.resolvingFixes = resolvingFix == null ? Set.of() : Set.of(resolvingFix);
+    Set<Fix> resolvingFixes = resolvingFix == null ? Set.of() : Set.of(resolvingFix);
+    this(messageType, message, region, offset, resolvingFixes);
   }
 
   public Error(
