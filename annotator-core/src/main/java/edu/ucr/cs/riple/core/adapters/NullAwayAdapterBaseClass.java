@@ -78,6 +78,10 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
     String[] fieldsData = errorMessage.substring(begin, end).split(",");
     Set<String> fields =
         Arrays.stream(fieldsData)
+            // NullAway serializes line number right after a field name starting with an open
+            // parentheses. (e.g. foo (line z)). This approach of extracting field names is
+            // extremely dependent on the format of NullAway error messages. Should be watched
+            // carefully and updated if the format is changed by NullAway (maybe regex?).
             .map(s -> s.substring(0, s.indexOf("(")).trim())
             .collect(Collectors.toSet());
     if (fields.size() == 0) {
