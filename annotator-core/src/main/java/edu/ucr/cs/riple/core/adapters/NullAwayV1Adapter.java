@@ -55,7 +55,7 @@ public class NullAwayV1Adapter extends NullAwayAdapterBaseClass {
    * unique errors among all errors. Therefore, we use this offset and increment it for each
    * serialized error to maintain this assumption.
    */
-  private int offset;
+  private int uniqueOffsetCounter;
 
   public NullAwayV1Adapter(Config config, FieldDeclarationStore fieldDeclarationStore) {
     super(config, fieldDeclarationStore);
