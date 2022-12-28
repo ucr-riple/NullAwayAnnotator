@@ -28,7 +28,11 @@ import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.location.Location;
 
-/** Wrapper class for {@link Error} used to create dummy errors (with default values) as part of {@link TReport} matchers, which in turn are used by tests to define expected reports to be matched by the actual reports produced by the test case. */
+/**
+ * Wrapper class for {@link Error} used to create dummy errors (with default values) as part of
+ * {@link TReport} matchers, which in turn are used by tests to define expected reports to be
+ * matched by the actual reports produced by the test case.
+ */
 public class TError extends Error {
 
   public TError(Location location) {
