@@ -68,7 +68,7 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
    * @param node Node in process.
    */
   protected Set<Fix> getTriggeredFixesFromDownstream(Node node) {
-    Set<Location> currentLocationTargetedByTree =
+    Set<Location> currentLocationsTargetedByTree =
         node.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
     return downstreamImpactCache.getTriggeredErrorsForCollection(node.tree).stream()
         .filter(
