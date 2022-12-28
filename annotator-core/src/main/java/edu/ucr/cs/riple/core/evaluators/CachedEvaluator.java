@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 /** This evaluator uses modeling techniques to compute effect of applying a fix tree. */
 public class CachedEvaluator extends AbstractEvaluator {
 
-  /** Model to retrieve impacts. */
+  /** Cache to retrieve impacts. */
   private final TargetModuleCache cache;
 
   public CachedEvaluator(Supplier supplier) {
