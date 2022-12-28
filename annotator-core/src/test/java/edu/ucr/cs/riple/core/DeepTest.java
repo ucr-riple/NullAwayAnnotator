@@ -88,7 +88,7 @@ public class DeepTest extends BaseCoreTest {
   }
 
   @Test
-  public void testTwoReports() {
+  public void testInitializationErrorForMultipleFields() {
     coreTestHelper
         .addInputLines(
             "Main.java",

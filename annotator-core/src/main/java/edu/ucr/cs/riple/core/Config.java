@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.adapters.NullAwayV0Adapter;
 import edu.ucr.cs.riple.core.adapters.NullAwayV1Adapter;
 import edu.ucr.cs.riple.core.adapters.NullAwayV2Adapter;
@@ -35,6 +36,7 @@ import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import edu.ucr.cs.riple.injector.offsets.OffsetChange;
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -45,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -149,11 +152,12 @@ public class Config {
    * NullAway serialization version.
    */
   private NullAwayVersionAdapter adapter;
-
   /** Handler for computing the original offset of reported errors with existing changes. */
   public final OffsetHandler offsetHandler;
   /** Controls if offsets in error instance should be processed. */
   public boolean offsetHandlingIsActivated;
+
+  public final ImmutableSet<SourceType> generatedCodeDetectors;
 
   /**
    * Builds config from command line arguments.
@@ -322,6 +326,17 @@ public class Config {
     deactivateInference.setRequired(false);
     options.addOption(deactivateInference);
 
+    // Region detection for code generators
+    // Lombok
+    Option disableRegionDetectionByLombok =
+        new Option(
+            "drdl",
+            "deactivate-region-detection-lombok",
+            false,
+            "Deactivates region detection for lombok generated code");
+    disableRegionDetectionByLombok.setRequired(false);
+    options.addOption(disableRegionDetectionByLombok);
+
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
@@ -419,6 +434,10 @@ public class Config {
     this.offsetHandler = new OffsetHandler(this);
     this.log = new Log();
     this.log.reset();
+    this.generatedCodeDetectors =
+        cmd.hasOption(disableRegionDetectionByLombok)
+            ? ImmutableSet.of()
+            : Sets.immutableEnumSet(SourceType.LOMBOK);
   }
 
   /**
@@ -499,6 +518,12 @@ public class Config {
     this.nullUnMarkedAnnotation =
         getValueFromKey(jsonObject, "ANNOTATION:NULL_UNMARKED", String.class)
             .orElse("org.jspecify.nullness.NullUnmarked");
+    boolean lombokCodeDetectorActivated =
+        getValueFromKey(
+                jsonObject, "PROCESSORS:" + SourceType.LOMBOK.name() + ":ACTIVATION", Boolean.class)
+            .orElse(true);
+    this.generatedCodeDetectors =
+        lombokCodeDetectorActivated ? Sets.immutableEnumSet(SourceType.LOMBOK) : ImmutableSet.of();
     this.log = new Log();
     this.offsetHandler = new OffsetHandler(this);
     log.reset();
@@ -667,6 +692,7 @@ public class Config {
     public String nullUnmarkedAnnotation = "org.jspecify.nullness.NullUnmarked";
     public boolean inferenceActivated = true;
     public boolean useCacheImpact = true;
+    public Set<SourceType> sourceTypes = new HashSet<>();
     public int depth = 1;
 
     @SuppressWarnings("unchecked")
@@ -727,6 +753,15 @@ public class Config {
         downstreamDependency.put("ANALYSIS_MODE", mode.name());
       }
       json.put("DOWNSTREAM_DEPENDENCY_ANALYSIS", downstreamDependency);
+
+      JSONObject processors = new JSONObject();
+      sourceTypes.forEach(
+          sourceType -> {
+            JSONObject st = new JSONObject();
+            st.put("ACTIVATION", true);
+            processors.put(sourceType.name(), st);
+          });
+      json.put("PROCESSORS", processors);
 
       try (BufferedWriter file =
           Files.newBufferedWriter(path.toFile().toPath(), Charset.defaultCharset())) {

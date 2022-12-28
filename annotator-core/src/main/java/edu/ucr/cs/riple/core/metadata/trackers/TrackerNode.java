@@ -30,19 +30,15 @@ import java.util.Objects;
 /** Container class for holding information regarding usage of class members within classes. */
 public class TrackerNode implements Hashable {
 
-  /** Fully qualified names of the caller class. */
-  public final String callerClass;
-  /** Symbol the target region. */
-  public final String callerMember;
-  /** Callee field name if field and method signature if method. */
+  /** Region where the element is used. */
+  public final Region region;
+
   public final String calleeMember;
   /** Fully qualified name of the enclosing class of callee. */
   public final String calleeClass;
 
-  public TrackerNode(
-      String callerClass, String callerMember, String calleeMember, String calleeClass) {
-    this.callerClass = callerClass;
-    this.callerMember = callerMember;
+  public TrackerNode(Region region, String calleeMember, String calleeClass) {
+    this.region = region;
     this.calleeMember = calleeMember;
     this.calleeClass = calleeClass;
   }
@@ -56,10 +52,9 @@ public class TrackerNode implements Hashable {
       return false;
     }
     TrackerNode that = (TrackerNode) o;
-    return callerClass.equals(that.callerClass)
+    return region.equals(that.region)
         && calleeMember.equals(that.calleeMember)
-        && calleeClass.equals(that.calleeClass)
-        && callerMember.equals(that.callerMember);
+        && calleeClass.equals(that.calleeClass);
   }
 
   /**

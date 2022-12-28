@@ -28,9 +28,9 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
+import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.Optional;
@@ -67,11 +67,11 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
   }
 
   @Override
-  public Optional<Set<Region>> getRegions(Fix fix) {
-    if (!fix.isOnMethod()) {
+  public Optional<Set<Region>> getRegions(Location location) {
+    if (!location.isOnMethod()) {
       return Optional.empty();
     }
-    OnMethod onMethod = fix.toMethod();
+    OnMethod onMethod = location.toMethod();
     // Add callers of method.
     Set<Region> regions = getCallersOfMethod(onMethod.clazz, onMethod.method);
     // Add method itself.
@@ -96,7 +96,7 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
             candidate ->
                 candidate.calleeClass.equals(clazz) && candidate.calleeMember.equals(method),
             TrackerNode.hash(clazz))
-        .map(node -> new Region(node.callerClass, node.callerMember))
+        .map(node -> node.region)
         .collect(Collectors.toSet());
   }
 }

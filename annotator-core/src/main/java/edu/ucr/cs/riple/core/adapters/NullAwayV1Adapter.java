@@ -32,6 +32,7 @@ import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.TrackerNode;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -52,11 +53,11 @@ public class NullAwayV1Adapter extends NullAwayAdapterBaseClass {
    * unique errors among all errors. Therefore, we use this offset and increment it for each
    * serialized error to maintain this assumption.
    */
-  private int offset;
+  private int uniqueOffsetCounter;
 
   public NullAwayV1Adapter(Config config, FieldDeclarationStore fieldDeclarationStore) {
-    super(config, fieldDeclarationStore, 0);
-    this.offset = 0;
+    super(config, fieldDeclarationStore);
+    this.uniqueOffsetCounter = 0;
   }
 
   @Override
@@ -70,17 +71,20 @@ public class NullAwayV1Adapter extends NullAwayAdapterBaseClass {
     String errorMessage = values[1];
     String errorType = values[0];
     Region region = new Region(values[2], values[3]);
-    // since we have no information of offset, we set all to zero.
-    return createError(errorType, errorMessage, region, offset++, nonnullTarget, store);
+    // since we have no information of offset, we give a unique offset error to have different
+    // instances.
+    return createError(
+        errorType, errorMessage, region, uniqueOffsetCounter++, nonnullTarget, store);
   }
 
   @Override
   public TrackerNode deserializeTrackerNode(String[] values) {
     Preconditions.checkArgument(
-        values.length == 4,
-        "Expected 4 values to create TrackerNode instance in NullAway serialization version 1 but found: "
+        values.length == 5,
+        "Expected 5 values to create TrackerNode instance in NullAway serialization version 1 but found: "
             + values.length);
-    return new TrackerNode(values[0], values[1], values[2], values[3]);
+    return new TrackerNode(
+        new Region(values[0], values[1], SourceType.valueOf(values[4])), values[2], values[3]);
   }
 
   @Override
@@ -88,5 +92,10 @@ public class NullAwayV1Adapter extends NullAwayAdapterBaseClass {
     return onField.variables.stream()
         .map(fieldName -> new Region(onField.clazz, fieldName))
         .collect(Collectors.toSet());
+  }
+
+  @Override
+  public int getVersionNumber() {
+    return 1;
   }
 }

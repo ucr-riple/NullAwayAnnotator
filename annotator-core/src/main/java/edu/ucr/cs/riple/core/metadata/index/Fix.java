@@ -24,16 +24,14 @@
 
 package edu.ucr.cs.riple.core.metadata.index;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Consumer;
 import org.json.simple.JSONObject;
 
@@ -46,7 +44,7 @@ public class Fix {
   /** Suggested change. */
   public final AddAnnotation change;
   /** Reasons this fix is suggested by NullAway in string. */
-  public final Set<String> reasons;
+  public final ImmutableSet<String> reasons;
 
   /**
    * If true, the fix is suggested due to an error in the target module, false if the fix is
@@ -57,8 +55,12 @@ public class Fix {
   public int count;
 
   public Fix(AddAnnotation change, String reason, boolean fixSourceIsInTarget) {
+    this(change, ImmutableSet.of(reason), fixSourceIsInTarget);
+  }
+
+  public Fix(AddAnnotation change, ImmutableSet<String> reasons, boolean fixSourceIsInTarget) {
     this.change = change;
-    this.reasons = reason != null ? Sets.newHashSet(reason) : new HashSet<>();
+    this.reasons = reasons;
     this.fixSourceIsInTarget = fixSourceIsInTarget;
     this.count = 1;
   }
@@ -199,5 +201,15 @@ public class Fix {
   @Override
   public String toString() {
     return change.toString();
+  }
+
+  /**
+   * Creates a duplicate instance of this fix object. The main reason is to keep properties of this
+   * class both {@code final} and immutable and create new instances with exact values.
+   *
+   * @return The
+   */
+  protected Fix duplicate() {
+    return new Fix(change, reasons, fixSourceIsInTarget);
   }
 }
