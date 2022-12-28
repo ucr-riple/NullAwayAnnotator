@@ -39,7 +39,7 @@ import javax.annotation.Nullable;
 public interface ImpactCache<T extends Impact> {
 
   /**
-   * Checks if the impacts of the given fix is stored.
+   * Checks if the impacts of the given fix are stored.
    *
    * @param fix Given fix.
    * @return True, if impacts are stored.
