@@ -44,6 +44,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
 
   /** Annotator config. */
   protected final Config config;
+
   /**
    * Field declaration store instance, used to generate fixes for uninitialized fields based on
    * error message for initializers.
