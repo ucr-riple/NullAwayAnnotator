@@ -80,7 +80,7 @@ public interface ImpactCache<T extends Impact> {
 
   /**
    * Returns Set of fixes on downstream dependencies that will be triggered if given fixes are
-   * applied to target module..
+   * applied to target module.
    *
    * @param fixes Collection of given fixes.
    * @return Immutable set of triggered fixes.
