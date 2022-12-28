@@ -44,7 +44,7 @@ import javax.annotation.Nullable;
 public abstract class BaseCache<T extends Impact, S extends Map<Location, T>>
     implements ImpactCache<T> {
 
-  /** Container holding caches entries. */
+  /** Container holding cache entries. */
   protected final S store;
   /** Annotator config. */
   protected final Config config;
