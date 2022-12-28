@@ -34,7 +34,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
-/** Wrapper class for {@link Report} with default values, used to create tests. */
+/**
+ * Wrapper class for {@link Report} used to create dummy reports (with default values) which in turn
+ * are used by tests to define expected reports to be matched by the actual reports produced by the
+ * test case.
+ */
 public class TReport extends Report {
 
   private final int expectedValue;

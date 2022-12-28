@@ -27,8 +27,11 @@ package edu.ucr.cs.riple.scanner.out;
 import com.sun.source.tree.CompilationUnitTree;
 import com.sun.tools.javac.code.Symbol;
 
+/** Container for storing class flat name and url to source file containing class. */
 public class ClassInfo {
+  /** Containing class symbol. */
   public final Symbol.ClassSymbol clazz;
+  /** Path to url containing this class. */
   public final String path;
 
   public ClassInfo(Symbol.ClassSymbol clazz, CompilationUnitTree compilationUnitTree) {

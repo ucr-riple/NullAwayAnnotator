@@ -90,7 +90,7 @@ shadowJar {
 
 // Configure test environment
 def nullawayVersionMap = [0:"0.10.4", 1:"0.10.5"]
-tasks.create("configureNullAwayVersion"){
+tasks.register("configureNullAwayVersion"){
     if(!project.hasProperty("nullaway-serialization-format-version")){
         return
     }

@@ -94,7 +94,7 @@ public class Annotator {
    */
   private void preprocess() {
     System.out.println("Preprocessing...");
-    Utility.setScannerCheckerActivation(config.target, true);
+    Utility.setScannerCheckerActivation(config, config.target, true);
     System.out.println("Making the first build...");
     Utility.buildTarget(config, true);
     fieldDeclarationStore = new FieldDeclarationStore(config, config.target);
@@ -230,7 +230,6 @@ public class Annotator {
     Set<Error> remainingErrors =
         Utility.readErrorsFromOutputDirectory(config, config.target, fieldDeclarationStore);
     Set<Fix> remainingFixes = Utility.readFixesFromOutputDirectory(config, fieldDeclarationStore);
-
     // Collect all regions for NullUnmarked.
     // For all errors in regions which correspond to a method's body, we can add @NullUnmarked at
     // the method level.

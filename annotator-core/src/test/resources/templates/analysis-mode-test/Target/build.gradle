@@ -25,7 +25,7 @@
 
 plugins {
     id 'java'
-    id("net.ltgt.errorprone") version "0.6"
+    id("net.ltgt.errorprone") version "2.0.1"
 }
 
 group 'org.example'
@@ -52,16 +52,22 @@ test {
     useJUnitPlatform()
 }
 
+import net.ltgt.gradle.errorprone.CheckSeverity
 tasks.withType(JavaCompile) {
+    // remove the if condition if you want to run NullAway on test code
     if (!name.toLowerCase().contains("test")) {
-        options.errorprone.errorproneArgs += ["-XepDisableAllChecks",
-                                              "-Xep:NullAway:WARN",
-                                              "-XepOpt:NullAway:AnnotatedPackages=test",
-                                              "-XepOpt:NullAway:SerializeFixMetadata=true",
-                                              "-XepOpt:NullAway:FixSerializationConfigPath=" + project.getProperty("Target-nullaway-config-path"),
-                                              "-Xep:AnnotatorScanner:ERROR",
-                                              "-XepOpt:AnnotatorScanner:ConfigPath=" + project.getProperty("Target-scanner-config-path"),
-                                              "-XepDisableAllWarnings"]
-        options.compilerArgs << "-Xmaxerrs" << "100000"
+        options.errorprone.disableAllChecks = true
+        options.errorprone.disableAllWarnings = true
+        options.errorprone {
+            check("NullAway", CheckSeverity.WARN)
+            check("AnnotatorScanner", CheckSeverity.WARN)
+            option("NullAway:AnnotatedPackages", "test")
+            option("NullAway:SerializeFixMetadata", "true")
+            option("NullAway:FixSerializationConfigPath", project.getProperty("Target-nullaway-config-path"))
+            option("NullAway:AcknowledgeLibraryModelsOfAnnotatedCode", "true")
+            option("AnnotatorScanner:ConfigPath", project.getProperty("Target-scanner-config-path"))
+        }
     }
+    options.compilerArgs << "-Xmaxerrs" << "100000"
+    options.compilerArgs << "-Xmaxwarns" << "100000"
 }

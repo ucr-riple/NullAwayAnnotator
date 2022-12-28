@@ -56,8 +56,8 @@ public class Report {
    * errors in downstream dependencies.
    */
   public ImmutableSet<Fix> triggeredFixesOnDownstream;
-  /** If true, this report has passed one iteration */
-  public boolean opened;
+  /** If true, this report's tree has been processed for at least one iteration */
+  public boolean hasBeenProcessedOnce;
   /**
    * Lower bound of number of errors in downstream dependencies if fix tree is applied to the target
    * module.
@@ -84,7 +84,7 @@ public class Report {
     this.localEffect = localEffect;
     this.root = root;
     this.tree = Sets.newHashSet(root);
-    this.opened = false;
+    this.hasBeenProcessedOnce = false;
     this.triggeredFixesOnDownstream = ImmutableSet.of();
     this.triggeredErrors = ImmutableSet.of();
     this.lowerBoundEffectOnDownstreamDependencies = 0;
@@ -246,19 +246,20 @@ public class Report {
   }
 
   /**
-   * Checks if the report needs further investigation. If a fix is suggested from downstream
+   * Checks if the report requires further investigation. If a fix is suggested from downstream
    * dependencies, it should still be included the next cycle.
    *
    * @param config Annotator config instance.
    * @return true, if report needs further investigation.
    */
-  public boolean isInProgress(Config config) {
-    if (!opened) {
+  public boolean requiresFurtherProcess(Config config) {
+    if (!hasBeenProcessedOnce) {
       // report has not been processed.
       return true;
     }
     if (triggeredFixesOnDownstream.size() != 0 && !tree.containsAll(triggeredFixesOnDownstream)) {
-      // force to processes move forward with the triggered fix in downstream dependencies.
+      // Report contains fixes from downstream dependencies, their effectiveness on target module
+      // should be investigated.
       return true;
     }
     ImmutableSet<Fix> triggeredFixes = Error.getResolvingFixesOfErrors(triggeredErrors);

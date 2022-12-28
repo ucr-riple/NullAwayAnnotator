@@ -50,7 +50,7 @@ public class Error {
   public final String messageType;
   /** Error message. */
   public final String message;
-  /** The fix which can resolve this error if such fixes exists. */
+  /** The fixes which can resolve this error (possibly empty). */
   private final ImmutableSet<Fix> resolvingFixes;
   /** Offset of program point in original version where error is reported. */
   private final int offset;
@@ -60,12 +60,16 @@ public class Error {
   public static final String METHOD_INITIALIZER_ERROR = "METHOD_NO_INIT";
 
   public Error(
-      String messageType, String message, Region region, int offset, Set<Fix> resolvingFixes) {
+      String messageType,
+      String message,
+      Region region,
+      int offset,
+      ImmutableSet<Fix> resolvingFixes) {
     this.region = region;
     this.messageType = messageType;
     this.message = message;
     this.offset = offset;
-    this.resolvingFixes = ImmutableSet.copyOf(resolvingFixes);
+    this.resolvingFixes = resolvingFixes;
   }
 
   public Error(
@@ -99,7 +103,7 @@ public class Error {
   }
 
   public ImmutableSet<Fix> getResolvingFixes() {
-    return ImmutableSet.copyOf(this.resolvingFixes);
+    return this.resolvingFixes;
   }
 
   /**
@@ -220,11 +224,22 @@ public class Error {
    * @return Immutable set of fixes which can resolve all given errors.
    */
   public static ImmutableSet<Fix> getResolvingFixesOfErrors(Collection<Error> errors) {
-    Map<Fix, Set<Set<String>>> m =
+    // Each error has a set of resolving fixes and each fix has a set of reasons as why the fix has
+    // been suggested. The final returned set of fixes should contain all the reasons it has been
+    // suggested across the given collection. Map below stores all the set of reasons each fix is
+    // suggested in the given collection.
+    Map<Fix, Set<Set<String>>> fixReasonMap =
         errors.stream()
             .flatMap(error -> error.resolvingFixes.stream())
             .collect(groupingBy(identity(), mapping(fix -> fix.reasons, Collectors.toSet())));
-    m.forEach((fix, sets) -> sets.forEach(fix.reasons::addAll));
-    return ImmutableSet.copyOf(m.keySet());
+
+    ImmutableSet.Builder<Fix> builder = ImmutableSet.builder();
+    for (Fix key : fixReasonMap.keySet()) {
+      // To avoid mutating fixes stored in the given collection, we create new instances.
+      ImmutableSet.Builder<String> reasons = new ImmutableSet.Builder<>();
+      fixReasonMap.get(key).forEach(reasons::addAll);
+      builder.add(new Fix(key.change, reasons.build(), key.fixSourceIsInTarget));
+    }
+    return builder.build();
   }
 }
