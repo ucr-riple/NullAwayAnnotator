@@ -195,11 +195,22 @@ public class Error extends Enclosed {
    * @return Immutable set of fixes which can resolve all given errors.
    */
   public static ImmutableSet<Fix> getResolvingFixesOfErrors(Collection<Error> errors) {
-    Map<Fix, Set<Set<String>>> m =
+    // Each error has a set of resolving fixes and each fix has a set of reasons as why the fix has
+    // been suggested. The final returned set of fixes should contain all the reasons it has been
+    // suggested across the given collection. Map below stores all the set of reasons each fix is
+    // suggested in the given collection.
+    Map<Fix, Set<Set<String>>> fixReasonMap =
         errors.stream()
             .flatMap(error -> error.resolvingFixes.stream())
             .collect(groupingBy(identity(), mapping(fix -> fix.reasons, Collectors.toSet())));
-    m.forEach((fix, sets) -> sets.forEach(fix.reasons::addAll));
-    return ImmutableSet.copyOf(m.keySet());
+
+    ImmutableSet.Builder<Fix> builder = ImmutableSet.builder();
+    for (Fix key : fixReasonMap.keySet()) {
+      // To avoid mutating fixes stored in the given collection, we create new instances.
+      ImmutableSet.Builder<String> reasons = new ImmutableSet.Builder<>();
+      fixReasonMap.get(key).forEach(reasons::addAll);
+      builder.add(new Fix(key.change, reasons.build(), key.fixSourceIsInTarget));
+    }
+    return builder.build();
   }
 }
