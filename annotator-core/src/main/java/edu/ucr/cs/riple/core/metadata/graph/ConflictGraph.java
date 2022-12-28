@@ -79,7 +79,7 @@ public class ConflictGraph {
     this.groups.clear();
     Collection<Node> allNodes = nodes.values();
     int counter = 0;
-    for (Node node: allNodes) {
+    for (Node node : allNodes) {
       node.id = counter++;
     }
     int size = allNodes.size();
