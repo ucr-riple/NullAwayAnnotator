@@ -246,7 +246,7 @@ public class Config {
     disableParallelProcessingOption.setRequired(false);
     options.addOption(disableParallelProcessingOption);
 
-    // Parallel Processing
+    // Fix impact cache
     Option disableFixCacheOption =
         new Option("dfc", "disable-fix-cache", false, "Disables fix impact caching");
     disableFixCacheOption.setRequired(false);
