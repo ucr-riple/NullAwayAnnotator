@@ -53,7 +53,7 @@ public class CachedEvaluator extends AbstractEvaluator {
   @Override
   protected void initializeFixGraph(ImmutableSet<Report> reports) {
     super.initializeFixGraph(reports);
-    // add only fixes that are not stored in model.
+    // add only fixes that are not stored in cache.
     reports.stream()
         .filter(report -> report.isInProgress(config))
         .flatMap(report -> report.getFixesForNextIteration().stream())
