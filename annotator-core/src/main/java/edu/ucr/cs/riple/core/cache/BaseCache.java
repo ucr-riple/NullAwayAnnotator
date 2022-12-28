@@ -36,7 +36,7 @@ import java.util.Objects;
 import javax.annotation.Nullable;
 
 /**
- * Base class for models.
+ * Base class for impact caches.
  *
  * @param <T> type of impacts saved in this model.
  * @param <S> type of the map used to store impacts.
