@@ -273,7 +273,7 @@ public class Report {
   }
 
   public Set<Fix> getFixesForNextIteration() {
-    if (!opened) {
+    if (!hasBeenProcessedOnce) {
       return Set.of(root);
     }
     Set<Fix> triggeredFixes = new HashSet<>(Error.getResolvingFixesOfErrors(this.triggeredErrors));

@@ -76,7 +76,7 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
                 error.isSingleFix()
                     && error.toResolvingLocation().isOnParameter()
                     && error.isFixableOnTarget(methodDeclarationTree)
-                    && !currentLocationTargetedByTree.contains(error.toResolvingLocation()))
+                    && !currentLocationsTargetedByTree.contains(error.toResolvingLocation()))
         .map(
             error ->
                 new Fix(

@@ -70,7 +70,7 @@ public class DownstreamImpactCacheImpl
                     new DownstreamImpact(
                         new Fix(
                             new AddMarkerAnnotation(methodNode.location, config.nullableAnnot),
-                            null,
+                            "null",
                             true)))
             .collect(toImmutableMap(Impact::toLocation, Function.identity())),
         tree);

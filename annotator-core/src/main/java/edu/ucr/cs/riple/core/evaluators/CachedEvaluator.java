@@ -55,7 +55,7 @@ public class CachedEvaluator extends AbstractEvaluator {
     super.initializeFixGraph(reports);
     // add only fixes that are not stored in cache.
     reports.stream()
-        .filter(report -> report.isInProgress(config))
+        .filter(report -> report.requiresFurtherProcess(config))
         .flatMap(report -> report.getFixesForNextIteration().stream())
         .filter(cache::isUnknown)
         .forEach(graph::addNodeToVertices);
@@ -75,7 +75,7 @@ public class CachedEvaluator extends AbstractEvaluator {
     // collect requested fixes for each report.
     Map<Report, Set<Fix>> reportFixMap =
         reports.stream()
-            .filter(report -> report.isInProgress(config))
+            .filter(report -> report.requiresFurtherProcess(config))
             .collect(toMap(identity(), Report::getFixesForNextIteration));
 
     // update reports state.
@@ -91,7 +91,7 @@ public class CachedEvaluator extends AbstractEvaluator {
           report.triggeredFixesOnDownstream =
               cache.getTriggeredFixesOnDownstreamForCollection(newTree);
           report.tree = newTree;
-          report.opened = true;
+          report.hasBeenProcessedOnce = true;
         });
   }
 }
