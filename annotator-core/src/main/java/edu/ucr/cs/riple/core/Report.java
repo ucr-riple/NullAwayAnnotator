@@ -272,6 +272,15 @@ public class Report {
     return !config.bailout || localEffect > 0;
   }
 
+  /**
+   * Returns the set of fixes which requires additional investigation. If report requires further
+   * processes, this method returns the set of fixes that are added to the fix tree in the most
+   * recent iteration which their impacts are unknown. This method is called within processing the
+   * fix tree at different depths. The returned set contains all resolving fixes for triggered fixes
+   * in addition to all fixes triggered from downstream dependencies.
+   *
+   * @return The set of fixes which their impact are unknown and require further investigations.
+   */
   public Set<Fix> getFixesForNextIteration() {
     if (!hasBeenProcessedOnce) {
       return Set.of(root);
