@@ -92,7 +92,7 @@ public class Error extends Enclosed {
   }
 
   /**
-   * <<<<<<< HEAD Checks if error is resolvable.
+   * Checks if error is resolvable.
    *
    * @return true if error is resolvable and false otherwise.
    */
@@ -105,7 +105,7 @@ public class Error extends Enclosed {
   }
 
   /**
-   * ======= >>>>>>> master Checks if error is resolvable with only one fix.
+   * Checks if error is resolvable with only one fix.
    *
    * @return true if error is resolvable with only one fix and false otherwise.
    */
