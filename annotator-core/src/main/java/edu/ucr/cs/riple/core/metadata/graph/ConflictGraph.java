@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 /**
@@ -78,8 +79,8 @@ public class ConflictGraph {
   public void findGroups() {
     this.groups.clear();
     Collection<Node> allNodes = nodes.values();
-    final int[] id = {0};
-    allNodes.forEach(node -> node.id = id[0]++);
+    AtomicInteger counter = new AtomicInteger();
+    allNodes.forEach(node -> node.id = counter.getAndIncrement());
     int size = allNodes.size();
     LinkedList<Integer>[] adj = new LinkedList[size];
     for (int i = 0; i < size; ++i) {
