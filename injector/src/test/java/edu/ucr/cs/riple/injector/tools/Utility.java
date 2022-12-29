@@ -25,7 +25,6 @@
 package edu.ucr.cs.riple.injector.tools;
 
 import com.google.common.base.Splitter;
-
 import java.nio.file.Path;
 
 public class Utility {
@@ -40,7 +39,8 @@ public class Utility {
    */
   public static Path pathOf(Path root, String path) {
     Path ans = root;
-    Iterable<String> dirs = Splitter.on('/').split(path);;
+    Iterable<String> dirs = Splitter.on('/').split(path);
+    ;
     for (String dir : dirs) {
       ans = ans.resolve(dir);
     }
