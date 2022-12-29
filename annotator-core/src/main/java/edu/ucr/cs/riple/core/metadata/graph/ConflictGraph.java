@@ -78,8 +78,10 @@ public class ConflictGraph {
   public void findGroups() {
     this.groups.clear();
     Collection<Node> allNodes = nodes.values();
-    final int[] id = {0};
-    allNodes.forEach(node -> node.id = id[0]++);
+    int counter = 0;
+    for (Node node : allNodes) {
+      node.id = counter++;
+    }
     int size = allNodes.size();
     LinkedList<Integer>[] adj = new LinkedList[size];
     for (int i = 0; i < size; ++i) {
