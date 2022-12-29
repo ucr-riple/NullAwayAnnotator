@@ -31,7 +31,11 @@ import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 
-/** Basic evaluator that processes each fix tree entirely with no caching strategies. */
+/**
+ * This evaluator for each fix tree computes the effectiveness by injecting the fix tree entirely to
+ * the source code. To prepare the conflict graph, each report that requires further investigation
+ * is selected and all its containing fix tree will be added to the conflict graph as a single node.
+ */
 public class BasicEvaluator extends AbstractEvaluator {
 
   public BasicEvaluator(Supplier supplier) {
