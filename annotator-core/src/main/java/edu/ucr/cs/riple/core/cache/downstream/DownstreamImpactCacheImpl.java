@@ -61,6 +61,13 @@ public class DownstreamImpactCacheImpl
   /** Set of downstream dependencies. */
   private final ImmutableSet<ModuleInfo> downstreamModules;
 
+  /**
+   * Constructor for creating downstream impact cache.
+   *
+   * @param config Annotator config.
+   * @param tree Method declaration tree for target module used to collect public methods with
+   *     non-primitive return types to compute their impacts on downstream dependencies.
+   */
   public DownstreamImpactCacheImpl(Config config, MethodDeclarationTree tree) {
     super(
         config,
