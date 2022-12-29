@@ -261,13 +261,4 @@ public class Error {
     }
     return fixes.containsAll(this.resolvingFixes);
   }
-
-  /**
-   * Checks if error is resolvable with fixes.
-   *
-   * @return true if error cannot be resolved with any fix.
-   */
-  public boolean notResolvable() {
-    return resolvingFixes.size() == 0;
-  }
 }
