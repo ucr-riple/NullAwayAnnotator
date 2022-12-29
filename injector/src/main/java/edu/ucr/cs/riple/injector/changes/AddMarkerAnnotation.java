@@ -31,7 +31,6 @@ import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Insertion;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import javax.annotation.Nullable;
-import javax.lang.model.element.ElementKind;
 
 /**
  * Used to add <a
@@ -46,7 +45,7 @@ public class AddMarkerAnnotation extends AddAnnotation {
 
   @Override
   @Nullable
-  public Modification visit(ElementKind kind, NodeWithAnnotations<?> node, Range range) {
+  public Modification visit(NodeWithAnnotations<?> node, Range range) {
     NodeList<AnnotationExpr> annotations = node.getAnnotations();
     AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationSimpleName);
 
@@ -56,7 +55,7 @@ public class AddMarkerAnnotation extends AddAnnotation {
     if (annotAlreadyExists) {
       return null;
     }
-    return new Insertion(annotationExpr.toString(), range.begin, kind);
+    return new Insertion(annotationExpr.toString(), range.begin);
   }
 
   @Override

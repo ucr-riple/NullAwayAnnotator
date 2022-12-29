@@ -57,8 +57,7 @@ public class ClassSearchTest extends BaseInjectorTest {
             "package com.test;",
             "import javax.annotation.Nullable;",
             "public @interface Main{",
-            "   @Nullable",
-            "   public String foo();",
+            "   @Nullable public String foo();",
             "}")
         .addChanges(
             new AddMarkerAnnotation(
@@ -90,8 +89,7 @@ public class ClassSearchTest extends BaseInjectorTest {
             "   public Object foo() {",
             "     class Bar {",
             "        int i = 5 * 6;",
-            "        @Nullable",
-            "        public Object get() { return null; }",
+            "        @Nullable public Object get() { return null; }",
             "     }",
             "   }",
             "}")
@@ -132,8 +130,7 @@ public class ClassSearchTest extends BaseInjectorTest {
             "        int i = 5 * 6;",
             "        public Object get() {",
             "           class Helper{",
-            "              @Nullable",
-            "              public get() { return null; }",
+            "              @Nullable public get() { return null; }",
             "           }",
             "           return null;",
             "        }",

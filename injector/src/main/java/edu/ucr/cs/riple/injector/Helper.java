@@ -159,7 +159,7 @@ public class Helper {
   }
 
   /**
-   * Locates the inner class with the given name at specific index.
+   * Locates the non-direct inner class with the given name at specific index.
    *
    * @param cursor Starting node for traversal.
    * @param name name of the inner class.
@@ -167,10 +167,16 @@ public class Helper {
    * @return inner class with the given name and index.
    * @throws TargetClassNotFound if the target class is not found.
    */
-  private static Node findInnerClass(Node cursor, String name, int index)
+  private static Node findNonDirectInnerClass(Node cursor, String name, int index)
       throws TargetClassNotFound {
     final List<Node> candidates = new ArrayList<>();
-    walk(cursor, candidates, node -> isDeclarationWithName(node, name));
+    walk(
+        cursor,
+        candidates,
+        node ->
+            isDeclarationWithName(node, name)
+                && node.getParentNode().isPresent()
+                && !node.getParentNode().get().equals(cursor));
     if (index >= candidates.size()) {
       throw new TargetClassNotFound("Non-Direct-Inner-Class", index + name, cursor);
     }
@@ -296,7 +302,7 @@ public class Helper {
         cursor =
             indexString.equals("")
                 ? findDirectInnerClass(cursor, actualName)
-                : findInnerClass(cursor, actualName, index);
+                : findNonDirectInnerClass(cursor, actualName, index);
       }
     }
     return getMembersOfNode(cursor);

@@ -128,8 +128,7 @@ public class Main {
       class InnerHelper { // injector.Main$1Helper$InnerHelper
         Object f15;
 
-        @Nullable
-        public Object foo() {
+        @Nullable public Object foo() {
           return null;
         }
       }

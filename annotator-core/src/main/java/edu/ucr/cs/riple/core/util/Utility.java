@@ -28,10 +28,12 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Factory;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.scanner.AnnotatorScanner;
+import edu.ucr.cs.riple.scanner.ScannerConfigWriter;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -42,7 +44,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -173,11 +174,13 @@ public class Utility {
    * Reads serialized errors of passed module in "errors.tsv" file in the output directory,
    *
    * @param info Module info.
-   * @return List of serialized errors.
+   * @param fieldDeclarationStore Field Declaration store.
+   * @return Set of serialized errors.
    */
-  public static List<Error> readErrorsFromOutputDirectory(Config config, ModuleInfo info) {
+  public static Set<Error> readErrorsFromOutputDirectory(
+      Config config, ModuleInfo info, FieldDeclarationStore fieldDeclarationStore) {
     Path errorsPath = info.dir.resolve("errors.tsv");
-    List<Error> errors = new ArrayList<>();
+    Set<Error> errors = new HashSet<>();
     try {
       try (BufferedReader br =
           Files.newBufferedReader(errorsPath.toFile().toPath(), Charset.defaultCharset())) {
@@ -185,7 +188,7 @@ public class Utility {
         // Skip header.
         br.readLine();
         while ((line = br.readLine()) != null) {
-          errors.add(config.getAdapter().deserializeError(line.split("\t")));
+          errors.add(config.getAdapter().deserializeError(line.split("\t"), fieldDeclarationStore));
         }
       }
     } catch (IOException e) {
@@ -246,70 +249,34 @@ public class Utility {
    * Activates/Deactivates {@link AnnotatorScanner} features by updating the {@link
    * edu.ucr.cs.riple.scanner.Config} in {@code XML} format for the given modules.
    *
+   * @param config Annotator config.
    * @param modules Immutable set of modules that their configuration files need to be updated.
    * @param activation activation flag for all features of the scanner.
    */
   public static void setScannerCheckerActivation(
-      ImmutableSet<ModuleInfo> modules, boolean activation) {
-    modules.forEach(info -> setScannerCheckerActivation(info, activation));
+      Config config, ImmutableSet<ModuleInfo> modules, boolean activation) {
+    modules.forEach(info -> setScannerCheckerActivation(config, info, activation));
   }
 
   /**
    * Activates/Deactivates {@link AnnotatorScanner} features by updating the {@link
    * edu.ucr.cs.riple.scanner.Config} in {@code XML} format for the given module.
    *
+   * @param config Annotator config.
    * @param info module that its configuration file need to be updated.
    * @param activation activation flag for all features of the scanner.
    */
-  public static void setScannerCheckerActivation(ModuleInfo info, boolean activation) {
-    DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-    try {
-      DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-      Document doc = docBuilder.newDocument();
-
-      // Root
-      Element rootElement = doc.createElement("scanner");
-      doc.appendChild(rootElement);
-
-      // Method
-      Element methodElement = doc.createElement("method");
-      methodElement.setAttribute("active", String.valueOf(activation));
-      rootElement.appendChild(methodElement);
-
-      // Field
-      Element fieldElement = doc.createElement("field");
-      fieldElement.setAttribute("active", String.valueOf(activation));
-      rootElement.appendChild(fieldElement);
-
-      // Call
-      Element callElement = doc.createElement("call");
-      callElement.setAttribute("active", String.valueOf(activation));
-      rootElement.appendChild(callElement);
-
-      // File
-      Element classElement = doc.createElement("class");
-      classElement.setAttribute("active", String.valueOf(activation));
-      rootElement.appendChild(classElement);
-
-      // Output dir
-      Element outputDir = doc.createElement("path");
-      outputDir.setTextContent(info.dir.toString());
-      rootElement.appendChild(outputDir);
-
-      // UUID
-      Element uuid = doc.createElement("uuid");
-      uuid.setTextContent(UUID.randomUUID().toString());
-      rootElement.appendChild(uuid);
-
-      // Writings
-      TransformerFactory transformerFactory = TransformerFactory.newInstance();
-      Transformer transformer = transformerFactory.newTransformer();
-      DOMSource source = new DOMSource(doc);
-      StreamResult result = new StreamResult(info.scannerConfig.toFile());
-      transformer.transform(source, result);
-    } catch (ParserConfigurationException | TransformerException e) {
-      throw new RuntimeException("Error happened in writing config.", e);
-    }
+  public static void setScannerCheckerActivation(
+      Config config, ModuleInfo info, boolean activation) {
+    ScannerConfigWriter writer = new ScannerConfigWriter();
+    writer
+        .setCallTrackerActivation(activation)
+        .setClassTrackerActivation(activation)
+        .setFieldTrackerActivation(activation)
+        .setMethodTrackerActivation(activation)
+        .addGeneratedCodeDetectors(config.generatedCodeDetectors)
+        .setOutput(info.dir)
+        .writeAsXML(info.scannerConfig);
   }
 
   /**

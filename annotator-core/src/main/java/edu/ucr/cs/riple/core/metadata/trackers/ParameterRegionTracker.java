@@ -24,8 +24,8 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
-import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Optional;
 import java.util.Set;
@@ -50,11 +50,11 @@ public class ParameterRegionTracker implements RegionTracker {
   }
 
   @Override
-  public Optional<Set<Region>> getRegions(Fix fix) {
-    if (!fix.isOnParameter()) {
+  public Optional<Set<Region>> getRegions(Location location) {
+    if (!location.isOnParameter()) {
       return Optional.empty();
     }
-    OnParameter parameter = fix.toParameter();
+    OnParameter parameter = location.toParameter();
     // Get regions which will be potentially affected by inheritance violations.
     Set<Region> regions =
         tree.getSubMethods(parameter.method, parameter.clazz, false).stream()

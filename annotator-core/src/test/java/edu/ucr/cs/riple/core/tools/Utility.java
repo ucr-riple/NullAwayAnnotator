@@ -24,16 +24,11 @@
 
 package edu.ucr.cs.riple.core.tools;
 
-import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.metadata.index.Error;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -58,30 +53,6 @@ public class Utility {
     } catch (Exception e) {
       throw new RuntimeException("Exception happened in executing command: " + command, e);
     }
-  }
-
-  /**
-   * Reads serialized errors at the given path.
-   *
-   * @param path Path to errors.tsv.
-   * @return List of serialized errors.
-   */
-  public static List<Error> readErrorsFromOutputDirectory(Config config, Path path) {
-    List<Error> errors = new ArrayList<>();
-    try {
-      try (BufferedReader br =
-          Files.newBufferedReader(path.toFile().toPath(), Charset.defaultCharset())) {
-        String line;
-        // Skip headers.
-        br.readLine();
-        while ((line = br.readLine()) != null) {
-          errors.add(config.getAdapter().deserializeError(line.split("\t")));
-        }
-      }
-    } catch (IOException e) {
-      throw new RuntimeException("Exception happened in reading errors at: " + path, e);
-    }
-    return errors;
   }
 
   public static Path getPathOfResource(String relativePath) {

@@ -26,11 +26,17 @@ package edu.ucr.cs.riple.core;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.adapters.NullAwayV0Adapter;
 import edu.ucr.cs.riple.core.adapters.NullAwayV1Adapter;
+import edu.ucr.cs.riple.core.adapters.NullAwayV2Adapter;
 import edu.ucr.cs.riple.core.adapters.NullAwayVersionAdapter;
 import edu.ucr.cs.riple.core.log.Log;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.util.Utility;
+import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
+import edu.ucr.cs.riple.injector.offsets.OffsetChange;
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -40,7 +46,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -140,6 +150,12 @@ public class Config {
    * NullAway serialization version.
    */
   private NullAwayVersionAdapter adapter;
+  /** Handler for computing the original offset of reported errors with existing changes. */
+  public final OffsetHandler offsetHandler;
+  /** Controls if offsets in error instance should be processed. */
+  public boolean offsetHandlingIsActivated;
+
+  public final ImmutableSet<SourceType> generatedCodeDetectors;
 
   /**
    * Builds config from command line arguments.
@@ -301,6 +317,17 @@ public class Config {
     deactivateInference.setRequired(false);
     options.addOption(deactivateInference);
 
+    // Region detection for code generators
+    // Lombok
+    Option disableRegionDetectionByLombok =
+        new Option(
+            "drdl",
+            "deactivate-region-detection-lombok",
+            false,
+            "Deactivates region detection for lombok generated code");
+    disableRegionDetectionByLombok.setRequired(false);
+    options.addOption(disableRegionDetectionByLombok);
+
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
@@ -394,8 +421,13 @@ public class Config {
             ? cmd.getOptionValue(activateForceResolveOption)
             : "org.jspecify.nullness.NullUnmarked";
     this.moduleCounterID = 0;
+    this.offsetHandler = new OffsetHandler(this);
     this.log = new Log();
     this.log.reset();
+    this.generatedCodeDetectors =
+        cmd.hasOption(disableRegionDetectionByLombok)
+            ? ImmutableSet.of()
+            : Sets.immutableEnumSet(SourceType.LOMBOK);
   }
 
   /**
@@ -473,12 +505,19 @@ public class Config {
     this.nullUnMarkedAnnotation =
         getValueFromKey(jsonObject, "ANNOTATION:NULL_UNMARKED", String.class)
             .orElse("org.jspecify.nullness.NullUnmarked");
+    boolean lombokCodeDetectorActivated =
+        getValueFromKey(
+                jsonObject, "PROCESSORS:" + SourceType.LOMBOK.name() + ":ACTIVATION", Boolean.class)
+            .orElse(true);
+    this.generatedCodeDetectors =
+        lombokCodeDetectorActivated ? Sets.immutableEnumSet(SourceType.LOMBOK) : ImmutableSet.of();
     this.log = new Log();
+    this.offsetHandler = new OffsetHandler(this);
     log.reset();
   }
 
   /** Initializes NullAway serialization adapter according to the serialized version. */
-  public void initializeAdapter() {
+  public void initializeAdapter(FieldDeclarationStore fieldDeclarationStore) {
     if (adapter != null) {
       // adapter is already initialized.
       return;
@@ -486,7 +525,7 @@ public class Config {
     Path serializationVersionPath = target.dir.resolve("serialization_version.txt");
     if (!serializationVersionPath.toFile().exists()) {
       // Older versions of NullAway.
-      this.adapter = new NullAwayV0Adapter(this);
+      this.adapter = new NullAwayV0Adapter(this, fieldDeclarationStore);
       return;
     }
     try {
@@ -494,10 +533,16 @@ public class Config {
       int version = Integer.parseInt(lines.get(0));
       switch (version) {
         case 0:
-          this.adapter = new NullAwayV0Adapter(this);
+          this.adapter = new NullAwayV0Adapter(this, fieldDeclarationStore);
+          this.offsetHandlingIsActivated = false;
           break;
         case 1:
-          this.adapter = new NullAwayV1Adapter(this);
+          this.adapter = new NullAwayV1Adapter(this, fieldDeclarationStore);
+          this.offsetHandlingIsActivated = false;
+          break;
+        case 2:
+          this.adapter = new NullAwayV2Adapter(this, fieldDeclarationStore);
+          this.offsetHandlingIsActivated = true;
           break;
         default:
           throw new RuntimeException("Unrecognized NullAway serialization version: " + version);
@@ -633,6 +678,7 @@ public class Config {
     public boolean forceResolveActivation = false;
     public String nullUnmarkedAnnotation = "org.jspecify.nullness.NullUnmarked";
     public boolean inferenceActivated = true;
+    public Set<SourceType> sourceTypes = new HashSet<>();
     public int depth = 1;
 
     @SuppressWarnings("unchecked")
@@ -693,12 +739,75 @@ public class Config {
       }
       json.put("DOWNSTREAM_DEPENDENCY_ANALYSIS", downstreamDependency);
 
+      JSONObject processors = new JSONObject();
+      sourceTypes.forEach(
+          sourceType -> {
+            JSONObject st = new JSONObject();
+            st.put("ACTIVATION", true);
+            processors.put(sourceType.name(), st);
+          });
+      json.put("PROCESSORS", processors);
+
       try (BufferedWriter file =
           Files.newBufferedWriter(path.toFile().toPath(), Charset.defaultCharset())) {
         file.write(json.toJSONString());
       } catch (IOException e) {
         System.err.println("Error happened in writing config json: " + e);
       }
+    }
+  }
+
+  /** Responsible for handling offset changes in source file. */
+  public static class OffsetHandler {
+    /** Map of file paths to Offset stores. */
+    private final Map<Path, FileOffsetStore> contents;
+    /** Annotator config. */
+    private final Config config;
+
+    public OffsetHandler(Config config) {
+      contents = new HashMap<>();
+      this.config = config;
+    }
+
+    /**
+     * Gets the original offset according to existing offset changes if {@link
+     * Config#offsetHandlingIsActivated} is true. Otherwise, the given offset will be returned
+     * unmodified.
+     *
+     * @param path Path to source file.
+     * @param offset Given offset.
+     * @return Original offset.
+     */
+    public int getOriginalOffset(Path path, int offset) {
+      if (!config.offsetHandlingIsActivated) {
+        return offset;
+      }
+      if (!contents.containsKey(path)) {
+        return offset;
+      }
+      return OffsetChange.getOriginalOffset(offset, contents.get(path).getOffsetChanges());
+    }
+
+    /**
+     * Updates given offsets with given new offset changes.
+     *
+     * @param newOffsets Given new offset changes.
+     */
+    public void updateStateWithRecentChanges(Set<FileOffsetStore> newOffsets) {
+      if (!config.offsetHandlingIsActivated) {
+        // no need to update.
+        return;
+      }
+      newOffsets.forEach(
+          store -> {
+            if (!contents.containsKey(store.getPath())) {
+              contents.put(store.getPath(), store);
+            } else {
+              contents
+                  .get(store.getPath())
+                  .updateStateWithNewOffsetChanges(store.getOffsetChanges());
+            }
+          });
     }
   }
 }

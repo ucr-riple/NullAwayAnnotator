@@ -30,6 +30,7 @@ import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Paths;
@@ -47,8 +48,9 @@ public class Injector {
    * Starts applying the requested changes.
    *
    * @param changes Set of changes.
+   * @return Offset changes of source file.
    */
-  public <T extends Change> void start(Set<T> changes) {
+  public <T extends Change> Set<FileOffsetStore> start(Set<T> changes) {
     // Start method does not support addition and deletion on same element. Should be split into
     // call for addition and deletion separately.
     Map<String, List<Change>> map = new HashMap<>();
@@ -63,6 +65,7 @@ public class Injector {
             map.put(path, newList);
           }
         });
+    Set<FileOffsetStore> offsets = new HashSet<>();
     map.forEach(
         (uri, changeList) -> {
           CompilationUnit tree;
@@ -95,8 +98,10 @@ public class Injector {
           Printer printer = new Printer(Paths.get(uri));
           printer.applyModifications(modifications);
           printer.addImports(tree, imports);
-          printer.write();
+          FileOffsetStore offsetStore = printer.write();
+          offsets.add(offsetStore);
         });
+    return offsets;
   }
 
   /**
@@ -123,17 +128,19 @@ public class Injector {
    * Adds the given annotations.
    *
    * @param requests Given annotations.
+   * @return Offset changes of source file.
    */
-  public void addAnnotations(Set<AddAnnotation> requests) {
-    this.start(requests);
+  public Set<FileOffsetStore> addAnnotations(Set<AddAnnotation> requests) {
+    return this.start(requests);
   }
 
   /**
    * Deletes the given annotations.
    *
    * @param requests Given annotations.
+   * @return Offset changes of source file.
    */
-  public void removeAnnotations(Set<RemoveAnnotation> requests) {
-    this.start(requests);
+  public Set<FileOffsetStore> removeAnnotations(Set<RemoveAnnotation> requests) {
+    return this.start(requests);
   }
 }

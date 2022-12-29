@@ -30,7 +30,6 @@ import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.util.Objects;
 import javax.annotation.Nullable;
-import javax.lang.model.element.ElementKind;
 import org.json.simple.JSONObject;
 
 /** Represents a change in the AST of the source code. */
@@ -68,7 +67,7 @@ public abstract class Change {
    *     will be returned.
    */
   @Nullable
-  public abstract Modification visit(ElementKind kind, NodeWithAnnotations<?> node, Range position);
+  public abstract Modification visit(NodeWithAnnotations<?> node, Range position);
 
   @Override
   public boolean equals(Object o) {

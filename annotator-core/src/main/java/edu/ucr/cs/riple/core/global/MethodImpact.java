@@ -30,10 +30,8 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.injector.location.OnParameter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,12 +43,12 @@ public class MethodImpact {
    * Map of parameters in target module that will receive {@code Nullable} value if targeted method
    * in node is annotated as {@code @Nullable} with their corresponding triggered errors.
    */
-  private final HashMap<OnParameter, List<Error>> impactedParametersMap;
+  private final HashMap<OnParameter, Set<Error>> impactedParametersMap;
   /**
    * Set of triggered errors in downstream dependencies if target method in node is annotated as
    * {@code @Nullable}.
    */
-  private List<Error> triggeredErrors;
+  private Set<Error> triggeredErrors;
   /**
    * Effect of injecting a {@code Nullable} annotation on pointing method of node on downstream
    * dependencies.
@@ -61,7 +59,7 @@ public class MethodImpact {
     this.node = node;
     this.effect = 0;
     this.impactedParametersMap = new HashMap<>();
-    this.triggeredErrors = new ArrayList<>();
+    this.triggeredErrors = new HashSet<>();
   }
 
   @Override
@@ -90,16 +88,16 @@ public class MethodImpact {
    */
   public void setStatus(Report report, Set<OnParameter> impactedParameters) {
     this.effect = report.localEffect;
-    this.triggeredErrors = new ArrayList<>(report.triggeredErrors);
+    this.triggeredErrors = new HashSet<>(report.triggeredErrors);
     // Count the number of times each parameter received a @Nullable.
     impactedParameters.forEach(
         onParameter -> {
-          List<Error> triggered =
+          Set<Error> triggered =
               triggeredErrors.stream()
                   .filter(
                       error ->
-                          error.nonnullTarget != null && error.nonnullTarget.equals(onParameter))
-                  .collect(Collectors.toList());
+                          error.isSingleFix() && error.toResolvingLocation().equals(onParameter))
+                  .collect(Collectors.toSet());
           impactedParametersMap.put(onParameter, triggered);
         });
   }
@@ -114,11 +112,11 @@ public class MethodImpact {
   }
 
   /**
-   * Returns list of triggered errors if method is {@code @Nullable} on downstream dependencies.
+   * Returns set of triggered errors if method is {@code @Nullable} on downstream dependencies.
    *
-   * @return List of errors.
+   * @return Set of errors.
    */
-  public List<Error> getTriggeredErrors() {
+  public Set<Error> getTriggeredErrors() {
     return triggeredErrors;
   }
 
@@ -147,7 +145,7 @@ public class MethodImpact {
             fix.ifOnParameter(
                 onParameter -> {
                   if (impactedParametersMap.containsKey(onParameter)) {
-                    List<Error> errors = impactedParametersMap.get(onParameter);
+                    Set<Error> errors = impactedParametersMap.get(onParameter);
                     effect -= errors.size();
                     triggeredErrors.removeAll(errors);
                     annotatedParameters.add(onParameter);

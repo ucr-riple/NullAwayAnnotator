@@ -7,8 +7,7 @@ public class Main {
   enum Type { // injector.Main$Type
     FOO;
 
-    @Nullable
-    public Object get() {
+    @Nullable public Object get() {
       return null;
     }
   }

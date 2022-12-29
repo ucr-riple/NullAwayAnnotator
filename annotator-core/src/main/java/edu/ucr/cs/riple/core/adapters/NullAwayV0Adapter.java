@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.adapters;
 
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
@@ -33,6 +34,7 @@ import edu.ucr.cs.riple.core.metadata.trackers.TrackerNode;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
@@ -45,13 +47,19 @@ import java.util.Set;
  *   <li>Type Annotator Scanner: 1.3.3 or below
  * </ul>
  */
-public class NullAwayV0Adapter implements NullAwayVersionAdapter {
+public class NullAwayV0Adapter extends NullAwayAdapterBaseClass {
 
-  /** Annotator config. */
-  private final Config config;
+  /**
+   * In this serialization version, offset of the errors is not serialized. Generally offsets are
+   * used to distinguish errors. On this version of NullAway all serialized errors are treated as
+   * unique errors among all errors. Therefore, we use this offset and increment it for each
+   * serialized error to maintain this assumption.
+   */
+  private int uniqueOffsetCounter;
 
-  public NullAwayV0Adapter(Config config) {
-    this.config = config;
+  public NullAwayV0Adapter(Config config, FieldDeclarationStore fieldDeclarationStore) {
+    super(config, fieldDeclarationStore);
+    this.uniqueOffsetCounter = 0;
   }
 
   @Override
@@ -71,31 +79,42 @@ public class NullAwayV0Adapter implements NullAwayVersionAdapter {
   }
 
   @Override
-  public Error deserializeError(String[] values) {
+  public Error deserializeError(String[] values, FieldDeclarationStore store) {
     Preconditions.checkArgument(
         values.length == 10,
         "Expected 10 values to create Error instance in NullAway serialization version 0 but found: "
             + values.length);
     String encMember = !Region.getType(values[3]).equals(Region.Type.METHOD) ? "null" : values[3];
-    return new Error(
-        values[0],
-        values[1],
-        new Region(values[2], encMember),
-        Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 4, 10)));
+    Location nonnullTarget =
+        Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 4, 10));
+    String errorType = values[0];
+    String errorMessage = values[1];
+    Region region = new Region(values[2], encMember);
+    // since we have no information of offset, we give a unique offset error to have different
+    // instances.
+    return createError(
+        errorType, errorMessage, region, uniqueOffsetCounter++, nonnullTarget, store);
   }
 
   @Override
   public TrackerNode deserializeTrackerNode(String[] values) {
     Preconditions.checkArgument(
-        values.length == 4,
-        "Expected 4 values to create TrackerNode instance in NullAway serialization version 0 but found: "
+        values.length == 5,
+        "Expected 5 values to create TrackerNode instance in NullAway serialization version 0 but found: "
             + values.length);
-    String encMember = !Region.getType(values[1]).equals(Region.Type.METHOD) ? "null" : values[1];
-    return new TrackerNode(values[0], encMember, values[2], values[3]);
+    String regionMember =
+        !Region.getType(values[1]).equals(Region.Type.METHOD) ? "null" : values[1];
+    return new TrackerNode(
+        new Region(values[0], regionMember, SourceType.valueOf(values[4])), values[2], values[3]);
   }
 
   @Override
   public Set<Region> getFieldRegionScope(OnField onField) {
     return Collections.singleton(new Region(onField.clazz, "null"));
+  }
+
+  @Override
+  public int getVersionNumber() {
+    return 0;
   }
 }

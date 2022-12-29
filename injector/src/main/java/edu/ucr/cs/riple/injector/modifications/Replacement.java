@@ -25,8 +25,8 @@
 package edu.ucr.cs.riple.injector.modifications;
 
 import com.github.javaparser.Position;
+import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.util.List;
-import javax.lang.model.element.ElementKind;
 
 /** Represents a replacement of a content in the source file. */
 public class Replacement extends Modification {
@@ -34,22 +34,17 @@ public class Replacement extends Modification {
   /** The end position of the content that should be replaced. */
   private final Position endPosition;
 
-  public Replacement(
-      String content, Position startPosition, Position endPosition, ElementKind kind) {
-    super(content, startPosition, kind);
+  public Replacement(String content, Position startPosition, Position endPosition) {
+    super(content, startPosition);
     // Position in javaparser is not 0 indexed and line and column fields are final.
     this.endPosition = new Position(endPosition.line - 1, endPosition.column - 1);
     if (content.equals("")) {
       throw new IllegalArgumentException("content cannot be empty, use Deletion instead");
     }
-    if (kind.equals(ElementKind.PARAMETER)) {
-      throw new IllegalArgumentException(
-          "Currently does not support replacement of annotation on parameters");
-    }
   }
 
   @Override
-  public void visit(List<String> lines) {
+  public void visit(List<String> lines, FileOffsetStore offsetStore) {
     StringBuilder line = new StringBuilder(lines.get(startPosition.line));
     // Since replacements are only on fields and methods, we can compute paddings based on the
     // starting line.

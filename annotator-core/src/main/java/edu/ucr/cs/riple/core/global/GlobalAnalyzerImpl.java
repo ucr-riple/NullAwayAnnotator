@@ -42,8 +42,6 @@ import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
@@ -78,9 +76,9 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
   @Override
   public void analyzeDownstreamDependencies() {
     System.out.println("Analyzing downstream dependencies...");
-    Utility.setScannerCheckerActivation(downstreamModules, true);
+    Utility.setScannerCheckerActivation(config, downstreamModules, true);
     Utility.buildDownstreamDependencies(config);
-    Utility.setScannerCheckerActivation(downstreamModules, false);
+    Utility.setScannerCheckerActivation(config, downstreamModules, false);
     // Collect callers of public APIs in module.
     MethodRegionTracker tracker = new MethodRegionTracker(config, config.downstreamInfo, tree);
     // Generate fixes corresponding methods.
@@ -157,10 +155,11 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
     int individualEffect = methodImpact.getEffect();
     // Some triggered errors might be resolved due to fixes in the tree, and we should not double
     // count them.
-    List<Error> triggeredErrors = methodImpact.getTriggeredErrors();
+    Set<Error> triggeredErrors = methodImpact.getTriggeredErrors();
     long resolvedErrors =
         triggeredErrors.stream()
-            .filter(error -> fixesLocation.contains(error.nonnullTarget))
+            .filter(
+                error -> error.isSingleFix() && fixesLocation.contains(error.toResolvingLocation()))
             .count();
     return individualEffect - (int) resolvedErrors;
   }
@@ -195,14 +194,14 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
   }
 
   @Override
-  public List<Error> getTriggeredErrors(Fix fix) {
+  public Set<Error> getTriggeredErrors(Fix fix) {
     // We currently only store impact of methods on downstream dependencies.
     if (!fix.isOnMethod()) {
-      return Collections.emptyList();
+      return Set.of();
     }
     MethodImpact impact = fetchMethodImpactForFix(fix);
     if (impact == null) {
-      return Collections.emptyList();
+      return Set.of();
     }
     return impact.getTriggeredErrors();
   }
@@ -214,11 +213,6 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
 
   @Override
   public boolean isNotFixableOnTarget(Fix fix) {
-    // For unresolvable errors, nonnullTarget is initialized with location instance which all fields
-    // are initialized to "null" string value. declaredInModule method in methodDeclarationTree
-    // will return false for these locations. Hence, both the existence of fix and fix targeting an
-    // element in target module is covered.
-    return getTriggeredErrors(fix).stream()
-        .anyMatch(error -> !tree.declaredInModule(error.nonnullTarget));
+    return getTriggeredErrors(fix).stream().anyMatch(error -> !error.isFixableOnTarget(tree));
   }
 }

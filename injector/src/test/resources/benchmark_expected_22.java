@@ -186,8 +186,7 @@ public class Main {
 }
 
 class Outer { // injector.Outer
-  @Nullable
-  public Object foo() {
+  @Nullable public Object foo() {
     return null;
   }
 }
