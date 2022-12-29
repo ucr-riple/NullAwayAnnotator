@@ -59,8 +59,8 @@ public abstract class AnnotatorScannerBaseTest<T extends Display> {
     Path config = root.resolve("scanner.xml");
     try {
       Files.createDirectories(root);
-      ErrorProneCLIFlagsConfig.Builder builder =
-          new ErrorProneCLIFlagsConfig.Builder()
+      Config.Builder builder =
+          new Config.Builder()
               .setCallTrackerActivation(true)
               .setClassTrackerActivation(true)
               .setFieldTrackerActivation(true)

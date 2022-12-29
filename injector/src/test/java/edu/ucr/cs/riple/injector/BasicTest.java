@@ -36,7 +36,7 @@ public class BasicTest extends BaseInjectorTest {
 
   @Test
   public void skip_duplicate_annotation() {
-    Change Change =
+    Change change =
         new AddMarkerAnnotation(
             new OnMethod("Super.java", "com.uber.Super", "test()"), "javax.annotation.Nullable");
     injectorTestHelper
@@ -57,7 +57,7 @@ public class BasicTest extends BaseInjectorTest {
             "       return new Object();",
             "   }",
             "}")
-        .addChanges(Change, Change.duplicate(), Change.duplicate())
+        .addChanges(change, change.duplicate(), change.duplicate())
         .start();
   }
 
