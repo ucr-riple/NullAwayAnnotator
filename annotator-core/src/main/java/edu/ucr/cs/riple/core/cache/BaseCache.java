@@ -93,7 +93,7 @@ public abstract class BaseCache<T extends Impact, S extends Map<Location, T>>
   @Override
   public ImmutableSet<Error> getTriggeredErrors(Fix fix) {
     T impact = fetchImpact(fix);
-    return impact == null ? ImmutableSet.of() : ImmutableSet.copyOf(impact.getTriggeredErrors());
+    return impact == null ? ImmutableSet.of() : impact.getTriggeredErrors();
   }
 
   @Override
