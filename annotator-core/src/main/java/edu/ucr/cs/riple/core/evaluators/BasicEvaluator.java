@@ -42,6 +42,14 @@ public class BasicEvaluator extends AbstractEvaluator {
     super(supplier);
   }
 
+  /**
+   * Prepares the conflict graph by selecting reports that are not finalized and adding the
+   * containing fix tree to the conflict graph. Each node in the prepared conflict graph contains
+   * the entire fix tree with no exclusion. (A fix can be present in multiple nodes as it can be
+   * part of multiple fix trees).
+   *
+   * @param reports The latest created reports from previous iteration.
+   */
   @Override
   protected void initializeFixGraph(ImmutableSet<Report> reports) {
     super.initializeFixGraph(reports);

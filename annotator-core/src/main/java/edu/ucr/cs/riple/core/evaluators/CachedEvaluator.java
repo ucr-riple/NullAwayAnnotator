@@ -58,9 +58,11 @@ public class CachedEvaluator extends AbstractEvaluator {
 
   /**
    * Prepares the conflict graph by selecting reports that are not finalized, and then only filing
-   * conflict graph with fixes that are not stored in the cache.
+   * conflict graph with fixes that are not stored in the cache. Each node in the prepared conflict
+   * graph contains a single fix (this fix is unique across all nodes) that is included in one more
+   * fix trees from reports.
    *
-   * @param reports The latest created reports from the fixes.
+   * @param reports The latest created reports from previous iteration.
    */
   @Override
   protected void initializeFixGraph(ImmutableSet<Report> reports) {

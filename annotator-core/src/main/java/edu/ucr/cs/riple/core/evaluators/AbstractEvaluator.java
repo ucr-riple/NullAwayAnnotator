@@ -68,13 +68,17 @@ public abstract class AbstractEvaluator implements Evaluator {
   /**
    * Initializes conflict graph for the upcoming iteration.
    *
-   * @param reports The latest created reports from the fixes.
+   * @param reports The latest created reports from previous iteration.
    */
   protected void initializeFixGraph(ImmutableSet<Report> reports) {
     this.graph.clear();
   }
 
-  /** Collects results created by the processors working on the conflict graph. */
+  /**
+   * Collects results created by the processors working on the conflict graph.
+   *
+   * @param reports The latest created reports from previous iteration.
+   */
   protected abstract void collectGraphResults(ImmutableSet<Report> reports);
 
   @Override
