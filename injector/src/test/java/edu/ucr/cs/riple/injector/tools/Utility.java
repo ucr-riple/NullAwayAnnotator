@@ -40,7 +40,6 @@ public class Utility {
   public static Path pathOf(Path root, String path) {
     Path ans = root;
     Iterable<String> dirs = Splitter.on('/').split(path);
-    ;
     for (String dir : dirs) {
       ans = ans.resolve(dir);
     }
