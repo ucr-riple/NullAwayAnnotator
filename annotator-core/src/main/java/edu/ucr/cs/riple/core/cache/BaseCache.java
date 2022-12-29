@@ -75,7 +75,7 @@ public abstract class BaseCache<T extends Impact, S extends Map<Location, T>>
         .filter(Objects::nonNull)
         .flatMap(impact -> impact.triggeredErrors.stream())
         // filter errors that will be resolved with the existing collection of fixes.
-        .filter(error -> error.notResolvable() || !error.isResolvableWith(fixes))
+        .filter(error -> !error.isResolvableWith(fixes))
         .collect(ImmutableSet.toImmutableSet());
   }
 
