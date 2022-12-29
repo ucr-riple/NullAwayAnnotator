@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 /**
- * Wrapper class for {@link Report} used to create dummy reports (with default values) which in turn
+ * Wrapper class for {@link Report} used to create dummy reports (with default values) which
  * are used by tests to define expected reports to be matched by the actual reports produced by the
  * test case.
  */
