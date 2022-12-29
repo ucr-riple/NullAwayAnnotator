@@ -62,7 +62,9 @@ public class DownstreamImpactCacheImpl
   private final ImmutableSet<ModuleInfo> downstreamModules;
 
   /**
-   * Constructor for creating downstream impact cache.
+   * Constructor for creating downstream impact cache. It initializes the cache with all the entries
+   * they can have. The corresponding values for these cache entire will be computed and once {@link
+   * DownstreamImpactCache#analyzeDownstreamDependencies()} is called.
    *
    * @param config Annotator config.
    * @param tree Method declaration tree for target module used to collect public methods with
