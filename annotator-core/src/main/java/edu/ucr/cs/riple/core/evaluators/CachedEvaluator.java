@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/** This evaluator uses modeling techniques to compute effect of applying a fix tree. */
+/** This evaluator uses caching techniques to optimize computing the effect of applying a fix tree. */
 public class CachedEvaluator extends AbstractEvaluator {
 
   /** Cache to retrieve impacts. */
