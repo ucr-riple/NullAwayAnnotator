@@ -535,7 +535,7 @@ public class Config {
               "This annotator version does not support serialization version 0, please upgrade NullAway to 0.10.6+ (with SerializeFixMetadataVersion=2) or use version 1.3.5 of Annotator.");
         case 1:
           throw new RuntimeException(
-              "This annotator version does not support serialization version 1, please upgrade NullAway or use version 1.3.5 of Annotator.");
+              "This annotator version does not support serialization version 1, please upgrade NullAway to 0.10.6+ (with SerializeFixMetadataVersion=2) or use version 1.3.5 of Annotator.");
         case 2:
           this.adapter = new NullAwayV2Adapter(this, fieldDeclarationStore);
           this.offsetHandlingIsActivated = true;
