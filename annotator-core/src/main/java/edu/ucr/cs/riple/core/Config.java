@@ -524,7 +524,7 @@ public class Config {
     if (!serializationVersionPath.toFile().exists()) {
       // Older versions of NullAway.
       throw new RuntimeException(
-          "This annotator version does not support using version of NullAway, please upgrade NullAway or use version 1.3.4 of Annotator.");
+          "This annotator version requires NullAway 0.10.6 or higher (using SerializeFixMetadataVersion=2), please upgrade NullAway or use version 1.3.4 of Annotator.");
     }
     try {
       List<String> lines = Files.readAllLines(serializationVersionPath);
