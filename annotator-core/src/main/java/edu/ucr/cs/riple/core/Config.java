@@ -27,8 +27,6 @@ package edu.ucr.cs.riple.core;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import edu.ucr.cs.riple.core.adapters.NullAwayV0Adapter;
-import edu.ucr.cs.riple.core.adapters.NullAwayV1Adapter;
 import edu.ucr.cs.riple.core.adapters.NullAwayV2Adapter;
 import edu.ucr.cs.riple.core.adapters.NullAwayVersionAdapter;
 import edu.ucr.cs.riple.core.log.Log;
@@ -525,21 +523,19 @@ public class Config {
     Path serializationVersionPath = target.dir.resolve("serialization_version.txt");
     if (!serializationVersionPath.toFile().exists()) {
       // Older versions of NullAway.
-      this.adapter = new NullAwayV0Adapter(this, fieldDeclarationStore);
-      return;
+      throw new RuntimeException(
+          "This annotator version does not support using version of NullAway, please upgrade NullAway or use version 1.3.4 of Annotator.");
     }
     try {
       List<String> lines = Files.readAllLines(serializationVersionPath);
       int version = Integer.parseInt(lines.get(0));
       switch (version) {
         case 0:
-          this.adapter = new NullAwayV0Adapter(this, fieldDeclarationStore);
-          this.offsetHandlingIsActivated = false;
-          break;
+          throw new RuntimeException(
+              "This annotator version does not support serialization version 0, please upgrade NullAway or use version 1.3.5 of Annotator.");
         case 1:
-          this.adapter = new NullAwayV1Adapter(this, fieldDeclarationStore);
-          this.offsetHandlingIsActivated = false;
-          break;
+          throw new RuntimeException(
+              "This annotator version does not support serialization version 1, please upgrade NullAway or use version 1.3.5 of Annotator.");
         case 2:
           this.adapter = new NullAwayV2Adapter(this, fieldDeclarationStore);
           this.offsetHandlingIsActivated = true;
