@@ -199,14 +199,4 @@ public class Fix {
   public String toString() {
     return change.toString();
   }
-
-  /**
-   * Creates a duplicate instance of this fix object. The main reason is to keep properties of this
-   * class both {@code final} and immutable and create new instances with exact values.
-   *
-   * @return The
-   */
-  protected Fix duplicate() {
-    return new Fix(change, reasons, fixSourceIsInTarget);
-  }
 }
