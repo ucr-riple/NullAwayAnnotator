@@ -35,9 +35,9 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 /**
- * Wrapper class for {@link Report} used to create dummy reports (with default values) which in turn
- * are used by tests to define expected reports to be matched by the actual reports produced by the
- * test case.
+ * Wrapper class for {@link Report} used to create dummy reports (with default values) which are
+ * used by tests to define expected reports to be matched by the actual reports produced by the test
+ * case.
  */
 public class TReport extends Report {
 
@@ -49,7 +49,9 @@ public class TReport extends Report {
 
   public TReport(Location root, int effect, Tag tag) {
     super(
-        new Fix(new AddMarkerAnnotation(root, "javax.annotation.Nullable"), "null", true), effect);
+        new Fix(
+            new AddMarkerAnnotation(root, "javax.annotation.Nullable"), ImmutableSet.of(), true),
+        effect);
     this.expectedValue = effect;
     if (tag != null) {
       this.tag(tag);

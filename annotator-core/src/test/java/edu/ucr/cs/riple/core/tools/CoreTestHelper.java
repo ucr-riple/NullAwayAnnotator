@@ -277,6 +277,7 @@ public class CoreTestHelper {
     builder.outputDir = outDirPath.toString();
     builder.depth = depth;
     builder.bailout = !disableBailout;
+    builder.redirectBuildOutputToStdErr = true;
     builder.chain = true;
     builder.outerLoopActivation = requestCompleteLoop;
     builder.useParallelProcessor = true;
