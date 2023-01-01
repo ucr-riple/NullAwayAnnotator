@@ -31,6 +31,7 @@ import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.SignatureMatcher;
 import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -41,15 +42,15 @@ public class OnMethod extends Location {
   public final String method;
   public final SignatureMatcher matcher;
 
-  public OnMethod(String uri, String clazz, String method) {
-    super(LocationType.METHOD, uri, clazz);
+  public OnMethod(Path path, String clazz, String method) {
+    super(LocationType.METHOD, path, clazz);
     this.method = method;
     this.matcher = new SignatureMatcher(method);
   }
 
   @Override
   public Location duplicate() {
-    return new OnMethod(uri, clazz, method);
+    return new OnMethod(path, clazz, method);
   }
 
   @SuppressWarnings("unchecked")

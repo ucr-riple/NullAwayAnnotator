@@ -33,6 +33,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import edu.ucr.cs.riple.injector.SignatureMatcher;
 import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -44,8 +45,8 @@ public class OnParameter extends Location {
   public final int index;
   private final SignatureMatcher matcher;
 
-  public OnParameter(String uri, String clazz, String method, int index) {
-    super(LocationType.PARAMETER, uri, clazz);
+  public OnParameter(Path path, String clazz, String method, int index) {
+    super(LocationType.PARAMETER, path, clazz);
     this.method = method;
     this.index = index;
     this.matcher = new SignatureMatcher(method);
@@ -53,7 +54,7 @@ public class OnParameter extends Location {
 
   @Override
   public Location duplicate() {
-    return new OnParameter(uri, clazz, method, index);
+    return new OnParameter(path, clazz, method, index);
   }
 
   @SuppressWarnings("unchecked")

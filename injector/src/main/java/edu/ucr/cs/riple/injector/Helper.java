@@ -35,9 +35,9 @@ import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -397,14 +397,19 @@ public class Helper {
   /**
    * Corrects Path starting with prefix: {@code file}
    *
-   * @param value Path to file.
+   * @param path Path to file.
    * @return The modified Path.
    */
-  public static String extractPath(String value) {
-    if (!new File(value).exists() && value.startsWith("file:")) {
-      return value.substring("file:".length());
+  public static Path extractPath(String path) {
+    if (path.startsWith("file://")) {
+      path = path.substring("file://".length());
     }
-    return value;
+    String ans = Paths.get(path).toAbsolutePath().toString();
+    int start = 0;
+    while (start + 1 < ans.length() && ans.charAt(start) == '/' && ans.charAt(start + 1) == '/') {
+      start++;
+    }
+    return Paths.get(ans.substring(start));
   }
 
   /**

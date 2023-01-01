@@ -15,8 +15,9 @@ import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.AnnotatorScanner;
-import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
@@ -67,10 +68,10 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
     // Class flat name.
     String clazz = values[0];
     // Path to class.
-    String path = values[1];
+    Path path = Helper.extractPath(values[1]);
     CompilationUnit tree;
     try {
-      tree = StaticJavaParser.parse(new File(path));
+      tree = StaticJavaParser.parse(path);
       NodeList<BodyDeclaration<?>> members;
       try {
         members = Helper.getTypeDeclarationMembersByFlatName(tree, clazz);
@@ -92,6 +93,8 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
       return info.isEmpty() ? null : info;
     } catch (FileNotFoundException e) {
       return null;
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 

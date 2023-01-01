@@ -31,9 +31,8 @@ import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.nio.file.Paths;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,10 +52,10 @@ public class Injector {
   public <T extends Change> Set<FileOffsetStore> start(Set<T> changes) {
     // Start method does not support addition and deletion on same element. Should be split into
     // call for addition and deletion separately.
-    Map<String, List<Change>> map = new HashMap<>();
+    Map<Path, List<Change>> map = new HashMap<>();
     changes.forEach(
         change -> {
-          String path = Helper.extractPath(change.location.uri);
+          Path path = change.location.path;
           if (map.containsKey(path)) {
             map.get(path).add(change);
           } else {
@@ -67,11 +66,11 @@ public class Injector {
         });
     Set<FileOffsetStore> offsets = new HashSet<>();
     map.forEach(
-        (uri, changeList) -> {
+        (path, changeList) -> {
           CompilationUnit tree;
           try {
-            tree = LexicalPreservingPrinter.setup(StaticJavaParser.parse(new File(uri)));
-          } catch (FileNotFoundException exception) {
+            tree = LexicalPreservingPrinter.setup(StaticJavaParser.parse(path));
+          } catch (IOException exception) {
             return;
           }
           Set<Modification> modifications = new HashSet<>();
@@ -95,7 +94,7 @@ public class Injector {
               System.err.println("Encountered Exception: " + ex);
             }
           }
-          Printer printer = new Printer(Paths.get(uri));
+          Printer printer = new Printer(path);
           printer.applyModifications(modifications);
           printer.addImports(tree, imports);
           FileOffsetStore offsetStore = printer.write();

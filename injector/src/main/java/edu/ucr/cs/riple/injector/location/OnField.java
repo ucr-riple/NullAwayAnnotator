@@ -30,6 +30,7 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
@@ -55,14 +56,14 @@ public class OnField extends Location {
    */
   public final Set<String> variables;
 
-  public OnField(String uri, String clazz, Set<String> variables) {
-    super(LocationType.FIELD, uri, clazz);
+  public OnField(Path path, String clazz, Set<String> variables) {
+    super(LocationType.FIELD, path, clazz);
     this.variables = variables;
   }
 
   @Override
   public Location duplicate() {
-    return new OnField(uri, clazz, new HashSet<>(variables));
+    return new OnField(path, clazz, new HashSet<>(variables));
   }
 
   @SuppressWarnings("unchecked")

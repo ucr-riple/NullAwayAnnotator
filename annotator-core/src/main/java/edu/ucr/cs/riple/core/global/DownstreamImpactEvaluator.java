@@ -85,11 +85,11 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
                         // dependencies.
                         parameters.forEach(
                             onParameter ->
-                                onParameter.uri =
+                                onParameter.path =
                                     methodDeclarationTree.findNode(
                                             onParameter.method, onParameter.clazz)
                                         .location
-                                        .uri);
+                                        .path);
                         nullableFlowMap.put(method, parameters);
                       }
                     }));
