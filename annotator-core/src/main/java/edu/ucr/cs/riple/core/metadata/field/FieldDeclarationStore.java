@@ -67,7 +67,7 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
     // Class flat name.
     String clazz = values[0];
     // Path to class.
-    String path = values[1];
+    String path = Helper.extractPath(values[1]);
     CompilationUnit tree;
     try {
       tree = StaticJavaParser.parse(new File(path));
