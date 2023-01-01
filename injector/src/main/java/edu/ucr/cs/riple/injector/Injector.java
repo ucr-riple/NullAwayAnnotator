@@ -131,7 +131,6 @@ public class Injector {
    * @return Offset changes of source file.
    */
   public Set<FileOffsetStore> removeAnnotations(Set<RemoveAnnotation> requests) {
-    System.out.println("CI TEST");
     return this.start(requests);
   }
 }
