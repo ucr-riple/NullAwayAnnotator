@@ -101,7 +101,7 @@ public class DeepTest extends BaseCoreTest {
             "     field2 = null;",
             "   }",
             "   Object getF1(){ return field1; }",
-            "   Object getF2(){ return field2;}",
+            "   Object getF2(){ return field2; }",
             "}")
         .toDepth(2)
         .disableBailOut()
