@@ -133,7 +133,7 @@ public class FileOffsetStore {
         changes.stream()
             .map(offsetChange -> offsetChange.getOffsetWithoutChanges(offsetChanges))
             .collect(Collectors.toSet()));
-    //    this.summarize();
+    this.summarize();
   }
 
   @Override
