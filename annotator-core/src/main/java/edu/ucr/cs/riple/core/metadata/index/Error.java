@@ -213,6 +213,7 @@ public class Error extends Enclosed {
     ImmutableSet.Builder<Fix> builder = ImmutableSet.builder();
     for (Fix key : fixReasonsMap.keySet()) {
       // To avoid mutating fixes stored in the given collection, we create new instances.
+      // which contain the full set of reasons.
       builder.add(
           new Fix(
               key.change, ImmutableSet.copyOf(fixReasonsMap.get(key)), key.fixSourceIsInTarget));
