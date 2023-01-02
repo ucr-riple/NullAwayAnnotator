@@ -28,10 +28,11 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import java.nio.file.Path;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -55,14 +56,13 @@ public class OnField extends Location {
    */
   public final Set<String> variables;
 
-  public OnField(String uri, String clazz, Set<String> variables) {
-    super(LocationType.FIELD, uri, clazz);
+  public OnField(Path path, String clazz, Set<String> variables) {
+    super(LocationType.FIELD, path, clazz);
     this.variables = variables;
   }
 
-  @Override
-  public Location duplicate() {
-    return new OnField(uri, clazz, new HashSet<>(variables));
+  public OnField(String path, String clazz, Set<String> variables) {
+    this(Helper.deserializePath(path), clazz, variables);
   }
 
   @SuppressWarnings("unchecked")

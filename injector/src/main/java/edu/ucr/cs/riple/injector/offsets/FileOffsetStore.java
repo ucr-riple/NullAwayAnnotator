@@ -172,6 +172,7 @@ public class FileOffsetStore {
                     new OffsetChange(
                         entry.getKey(), entry.getValue().stream().mapToInt(value -> value).sum()))
             .filter(oc -> oc.numChars != 0)
+            .sorted(OffsetChange::compareTo)
             .collect(Collectors.toCollection(TreeSet::new));
   }
 }

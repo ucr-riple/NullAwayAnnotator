@@ -41,7 +41,6 @@ import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
-import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collection;
 import java.util.OptionalInt;
@@ -105,12 +104,7 @@ public class DownstreamImpactCacheImpl
             .map(
                 downstreamImpact ->
                     new Fix(
-                        new AddMarkerAnnotation(
-                            new OnMethod(
-                                "null",
-                                downstreamImpact.toMethod().clazz,
-                                downstreamImpact.toMethod().method),
-                            config.nullableAnnot),
+                        new AddMarkerAnnotation(downstreamImpact.toMethod(), config.nullableAnnot),
                         "null",
                         false))
             .collect(ImmutableSet.toImmutableSet());

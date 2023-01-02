@@ -66,13 +66,7 @@ public class InjectorTestHelper {
     Arrays.stream(changes)
         .sequential()
         .forEach(
-            change ->
-                change.location.uri =
-                    rootPath
-                        .resolve("src")
-                        .resolve(change.location.uri)
-                        .toAbsolutePath()
-                        .toString());
+            change -> change.location.path = rootPath.resolve("src").resolve(change.location.path));
     this.changes.addAll(Arrays.asList(changes));
     return this;
   }

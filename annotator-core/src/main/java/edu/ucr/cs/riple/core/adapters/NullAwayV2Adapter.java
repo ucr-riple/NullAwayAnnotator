@@ -6,10 +6,11 @@ import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.TrackerNode;
+import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -44,7 +45,7 @@ public class NullAwayV2Adapter extends NullAwayAdapterBaseClass {
         "Expected 12 values to create Error instance in NullAway serialization version 2 but found: "
             + values.length);
     int offset = Integer.parseInt(values[4]);
-    String path = values[5].startsWith("file:/") ? values[5].substring(6) : values[5];
+    Path path = Helper.deserializePath(values[5]);
     String errorMessage = values[1];
     String errorType = values[0];
     Region region = new Region(values[2], values[3]);
@@ -52,7 +53,7 @@ public class NullAwayV2Adapter extends NullAwayAdapterBaseClass {
         errorType,
         errorMessage,
         region,
-        config.offsetHandler.getOriginalOffset(Paths.get(path), offset),
+        config.offsetHandler.getOriginalOffset(path, offset),
         Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 6, 12)),
         fieldDeclarationStore);
   }
