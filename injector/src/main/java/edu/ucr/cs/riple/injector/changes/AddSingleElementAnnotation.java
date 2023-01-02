@@ -139,11 +139,6 @@ public class AddSingleElementAnnotation extends AddAnnotation {
         singleMemberAnnotationExpr.toString(), annotRange.get().begin, annotRange.get().end);
   }
 
-  @Override
-  public Change duplicate() {
-    return new AddSingleElementAnnotation(location.duplicate(), annotation, argument, repeatable);
-  }
-
   /**
    * Translates addition of an {@link AnnotationExpr} to a {@link NodeWithAnnotations} instance with
    * the given name and arguments.

@@ -75,7 +75,7 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
                     FieldInitializationNode.hash(onField.clazz))
                 .forEach(
                     node -> {
-                      Class clazz = new Class(node.getClassName(), node.getURI());
+                      Class clazz = new Class(node.getClassName(), node.getPath());
                       classes.putIfAbsent(clazz.clazz, clazz);
                       classes.get(clazz.clazz).visit(node);
                     }));
@@ -92,19 +92,19 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
     private final HashMap<String, InitializerMethod> initializers;
     /** Fully qualified name of the class. */
     private final String clazz;
-    /** URI to file where the class exists. */
-    private final String uri;
+    /** Path to file where the class exists. */
+    private final String path;
 
     /**
      * Creates an instance.
      *
      * @param clazz Fully qualified name.
-     * @param uri URI to the file where the class exists.
+     * @param path Path to the file where the class exists.
      */
-    private Class(String clazz, String uri) {
+    private Class(String clazz, String path) {
       this.initializers = new HashMap<>();
       this.clazz = clazz;
-      this.uri = uri;
+      this.path = path;
     }
 
     @Override
@@ -116,12 +116,12 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
         return false;
       }
       Class other = (Class) o;
-      return clazz.equals(other.clazz) && uri.equals(other.uri);
+      return clazz.equals(other.clazz) && path.equals(other.path);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(clazz, uri);
+      return Objects.hash(clazz, path);
     }
 
     /**
@@ -167,7 +167,7 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
           maxMethod = m;
         }
       }
-      return maxMethod == null ? null : new OnMethod(uri, clazz, maxMethod.signature);
+      return maxMethod == null ? null : new OnMethod(path, clazz, maxMethod.signature);
     }
   }
 

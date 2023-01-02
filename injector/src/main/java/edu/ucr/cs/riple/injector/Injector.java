@@ -56,7 +56,7 @@ public class Injector {
     Map<String, List<Change>> map = new HashMap<>();
     changes.forEach(
         change -> {
-          String path = Helper.extractPath(change.location.uri);
+          String path = Helper.extractPath(change.location.path);
           if (map.containsKey(path)) {
             map.get(path).add(change);
           } else {
@@ -67,10 +67,10 @@ public class Injector {
         });
     Set<FileOffsetStore> offsets = new HashSet<>();
     map.forEach(
-        (uri, changeList) -> {
+        (path, changeList) -> {
           CompilationUnit tree;
           try {
-            tree = LexicalPreservingPrinter.setup(StaticJavaParser.parse(new File(uri)));
+            tree = LexicalPreservingPrinter.setup(StaticJavaParser.parse(new File(path)));
           } catch (FileNotFoundException exception) {
             return;
           }
@@ -95,7 +95,7 @@ public class Injector {
               System.err.println("Encountered Exception: " + ex);
             }
           }
-          Printer printer = new Printer(Paths.get(uri));
+          Printer printer = new Printer(Paths.get(path));
           printer.applyModifications(modifications);
           printer.addImports(tree, imports);
           FileOffsetStore offsetStore = printer.write();
