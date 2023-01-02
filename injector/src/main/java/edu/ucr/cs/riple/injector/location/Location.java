@@ -104,8 +104,6 @@ public abstract class Location {
     throw new RuntimeException("Cannot reach this statement, values: " + Arrays.toString(values));
   }
 
-  public abstract Location duplicate();
-
   protected abstract Modification applyToMember(NodeList<BodyDeclaration<?>> clazz, Change change);
 
   protected abstract void fillJsonInformation(JSONObject res);
