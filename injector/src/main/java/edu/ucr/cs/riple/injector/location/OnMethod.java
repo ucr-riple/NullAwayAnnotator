@@ -47,11 +47,6 @@ public class OnMethod extends Location {
     this.matcher = new SignatureMatcher(method);
   }
 
-  @Override
-  public Location duplicate() {
-    return new OnMethod(uri, clazz, method);
-  }
-
   @SuppressWarnings("unchecked")
   @Override
   protected void fillJsonInformation(JSONObject res) {
