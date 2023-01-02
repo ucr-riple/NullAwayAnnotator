@@ -41,8 +41,8 @@ public class OnMethod extends Location {
   public final String method;
   public final SignatureMatcher matcher;
 
-  public OnMethod(String uri, String clazz, String method) {
-    super(LocationType.METHOD, uri, clazz);
+  public OnMethod(String path, String clazz, String method) {
+    super(LocationType.METHOD, path, clazz);
     this.method = method;
     this.matcher = new SignatureMatcher(method);
   }

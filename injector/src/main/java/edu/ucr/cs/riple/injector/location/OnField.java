@@ -54,8 +54,8 @@ public class OnField extends Location {
    */
   public final Set<String> variables;
 
-  public OnField(String uri, String clazz, Set<String> variables) {
-    super(LocationType.FIELD, uri, clazz);
+  public OnField(String path, String clazz, Set<String> variables) {
+    super(LocationType.FIELD, path, clazz);
     this.variables = variables;
   }
 
