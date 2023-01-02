@@ -52,7 +52,7 @@ public abstract class Location {
     KIND,
     CLASS,
     PKG,
-    URI,
+    PATH,
     INJECT,
     ANNOTATION,
     INDEX
@@ -105,8 +105,6 @@ public abstract class Location {
     throw new RuntimeException("Cannot reach this statement, values: " + Arrays.toString(values));
   }
 
-  public abstract Location duplicate();
-
   protected abstract Modification applyToMember(NodeList<BodyDeclaration<?>> clazz, Change change);
 
   protected abstract void fillJsonInformation(JSONObject res);
@@ -134,7 +132,7 @@ public abstract class Location {
     JSONObject res = new JSONObject();
     res.put(KEYS.CLASS, clazz);
     res.put(KEYS.KIND, type.toString());
-    res.put(KEYS.URI, path);
+    res.put(KEYS.PATH, path);
     fillJsonInformation(res);
     return res;
   }

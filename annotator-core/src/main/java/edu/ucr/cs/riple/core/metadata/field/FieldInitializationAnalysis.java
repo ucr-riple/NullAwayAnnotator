@@ -93,14 +93,14 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
     private final HashMap<String, InitializerMethod> initializers;
     /** Fully qualified name of the class. */
     private final String clazz;
-    /** URI to file where the class exists. */
+    /** Path to file where the class exists. */
     private final Path path;
 
     /**
      * Creates an instance.
      *
      * @param clazz Fully qualified name.
-     * @param path URI to the file where the class exists.
+     * @param path Path to the file where the class exists.
      */
     private Class(String clazz, Path path) {
       this.initializers = new HashMap<>();

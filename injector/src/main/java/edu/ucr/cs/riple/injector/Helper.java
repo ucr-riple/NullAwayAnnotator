@@ -404,7 +404,7 @@ public class Helper {
     if (path.startsWith("file://")) {
       path = path.substring("file://".length());
     }
-    String ans = Paths.get(path).toAbsolutePath().toString();
+    String ans = Paths.get(path).toString();
     int start = 0;
     while (start + 1 < ans.length() && ans.charAt(start) == '/' && ans.charAt(start + 1) == '/') {
       start++;

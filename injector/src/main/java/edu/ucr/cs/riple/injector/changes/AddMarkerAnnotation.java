@@ -57,9 +57,4 @@ public class AddMarkerAnnotation extends AddAnnotation {
     }
     return new Insertion(annotationExpr.toString(), range.begin);
   }
-
-  @Override
-  public Change duplicate() {
-    return new AddMarkerAnnotation(location, annotation);
-  }
 }

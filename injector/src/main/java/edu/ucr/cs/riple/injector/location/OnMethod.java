@@ -48,9 +48,8 @@ public class OnMethod extends Location {
     this.matcher = new SignatureMatcher(method);
   }
 
-  @Override
-  public Location duplicate() {
-    return new OnMethod(path, clazz, method);
+  public OnMethod(String path, String clazz, String method) {
+    this(Helper.extractPath(path), clazz, method);
   }
 
   @SuppressWarnings("unchecked")

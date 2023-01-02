@@ -94,7 +94,7 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
                     new Fix(
                         new AddMarkerAnnotation(
                             new OnMethod(
-                                "null",
+                                methodImpact.node.location.path,
                                 methodImpact.node.location.clazz,
                                 methodImpact.node.location.method),
                             config.nullableAnnot),

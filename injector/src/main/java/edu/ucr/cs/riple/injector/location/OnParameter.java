@@ -30,6 +30,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.SignatureMatcher;
 import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.modifications.Modification;
@@ -52,9 +53,8 @@ public class OnParameter extends Location {
     this.matcher = new SignatureMatcher(method);
   }
 
-  @Override
-  public Location duplicate() {
-    return new OnParameter(path, clazz, method, index);
+  public OnParameter(String path, String clazz, String method, int index) {
+    this(Helper.extractPath(path), clazz, method, index);
   }
 
   @SuppressWarnings("unchecked")
