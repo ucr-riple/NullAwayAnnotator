@@ -28,8 +28,10 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
@@ -54,9 +56,13 @@ public class OnField extends Location {
    */
   public final Set<String> variables;
 
-  public OnField(String path, String clazz, Set<String> variables) {
+  public OnField(Path path, String clazz, Set<String> variables) {
     super(LocationType.FIELD, path, clazz);
     this.variables = variables;
+  }
+
+  public OnField(String path, String clazz, Set<String> variables) {
+    this(Helper.extractPath(path), clazz, variables);
   }
 
   @SuppressWarnings("unchecked")

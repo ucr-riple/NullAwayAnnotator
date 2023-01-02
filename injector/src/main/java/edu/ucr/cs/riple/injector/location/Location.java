@@ -33,6 +33,7 @@ import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -42,7 +43,7 @@ import org.json.simple.JSONObject;
 public abstract class Location {
   public final LocationType type;
   public final String clazz;
-  public String path;
+  public Path path;
 
   public enum KEYS {
     VARIABLES,
@@ -57,7 +58,7 @@ public abstract class Location {
     INDEX
   }
 
-  public Location(LocationType type, String path, String clazz) {
+  public Location(LocationType type, Path path, String clazz) {
     this.type = type;
     this.clazz = clazz;
     this.path = path;
@@ -91,7 +92,7 @@ public abstract class Location {
       return null;
     }
     LocationType type = LocationType.getType(values[0]);
-    String path = Helper.extractPath(values[5]);
+    Path path = Helper.extractPath(values[5]);
     String clazz = values[1];
     switch (type) {
       case FIELD:

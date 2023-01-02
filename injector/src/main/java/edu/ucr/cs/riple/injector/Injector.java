@@ -33,9 +33,8 @@ import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.nio.file.Paths;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -53,15 +52,15 @@ public class Injector {
   public <T extends Change> Set<FileOffsetStore> start(Set<T> changes) {
     // Start method does not support addition and deletion on same element. Should be split into
     // call for addition and deletion separately.
-    Map<String, List<Change>> map =
-        changes.stream().collect(groupingBy(change -> Helper.extractPath(change.location.path)));
+    Map<Path, List<Change>> map =
+        changes.stream().collect(groupingBy(change -> change.location.path));
     Set<FileOffsetStore> offsets = new HashSet<>();
     map.forEach(
         (path, changeList) -> {
           CompilationUnit tree;
           try {
-            tree = LexicalPreservingPrinter.setup(StaticJavaParser.parse(new File(path)));
-          } catch (FileNotFoundException exception) {
+            tree = LexicalPreservingPrinter.setup(StaticJavaParser.parse(path));
+          } catch (IOException exception) {
             return;
           }
           Set<Modification> modifications = new HashSet<>();
@@ -85,7 +84,7 @@ public class Injector {
               System.err.println("Encountered Exception: " + ex);
             }
           }
-          Printer printer = new Printer(Paths.get(path));
+          Printer printer = new Printer(path);
           printer.applyModifications(modifications);
           printer.addImports(tree, imports);
           FileOffsetStore offsetStore = printer.write();

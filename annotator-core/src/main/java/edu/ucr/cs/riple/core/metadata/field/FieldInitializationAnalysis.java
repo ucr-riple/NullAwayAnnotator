@@ -6,6 +6,7 @@ import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -93,7 +94,7 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
     /** Fully qualified name of the class. */
     private final String clazz;
     /** Path to file where the class exists. */
-    private final String path;
+    private final Path path;
 
     /**
      * Creates an instance.
@@ -101,7 +102,7 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
      * @param clazz Fully qualified name.
      * @param path Path to the file where the class exists.
      */
-    private Class(String clazz, String path) {
+    private Class(String clazz, Path path) {
       this.initializers = new HashMap<>();
       this.clazz = clazz;
       this.path = path;
