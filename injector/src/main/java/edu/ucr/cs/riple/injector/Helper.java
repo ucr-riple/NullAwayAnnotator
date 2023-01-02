@@ -395,15 +395,16 @@ public class Helper {
   }
 
   /**
-   * Corrects Path starting with prefix: {@code file}
+   * Deserializes a Path instance from a string.
    *
    * @param path Path to file.
    * @return The modified Path.
    */
-  public static Path extractPath(String path) {
+  public static Path deserializePath(String path) {
     if (path.startsWith("file://")) {
       path = path.substring("file://".length());
     }
+    // Keep only one occurrence of "/" from the beginning if more than one exists.
     String ans = Paths.get(path).toString();
     int start = 0;
     while (start + 1 < ans.length() && ans.charAt(start) == '/' && ans.charAt(start + 1) == '/') {

@@ -49,7 +49,7 @@ public class OnMethod extends Location {
   }
 
   public OnMethod(String path, String clazz, String method) {
-    this(Helper.extractPath(path), clazz, method);
+    this(Helper.deserializePath(path), clazz, method);
   }
 
   @SuppressWarnings("unchecked")
