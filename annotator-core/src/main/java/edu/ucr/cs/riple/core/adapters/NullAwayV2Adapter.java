@@ -45,7 +45,7 @@ public class NullAwayV2Adapter extends NullAwayAdapterBaseClass {
         "Expected 12 values to create Error instance in NullAway serialization version 2 but found: "
             + values.length);
     int offset = Integer.parseInt(values[4]);
-    Path path = Helper.extractPath(values[5]);
+    Path path = Helper.deserializePath(values[5]);
     String errorMessage = values[1];
     String errorType = values[0];
     Region region = new Region(values[2], values[3]);

@@ -62,7 +62,7 @@ public class OnField extends Location {
   }
 
   public OnField(String path, String clazz, Set<String> variables) {
-    this(Helper.extractPath(path), clazz, variables);
+    this(Helper.deserializePath(path), clazz, variables);
   }
 
   @SuppressWarnings("unchecked")

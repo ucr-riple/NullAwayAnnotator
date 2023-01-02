@@ -76,7 +76,7 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
     Integer parentId = Integer.parseInt(values[3]);
     int size = Integer.parseInt(values[4]);
     node.fillInformation(
-        new OnMethod(Helper.extractPath(values[9]), values[1], values[2]),
+        new OnMethod(Helper.deserializePath(values[9]), values[1], values[2]),
         parentId,
         size,
         Boolean.parseBoolean(values[6]),

@@ -54,7 +54,7 @@ public class OnParameter extends Location {
   }
 
   public OnParameter(String path, String clazz, String method, int index) {
-    this(Helper.extractPath(path), clazz, method, index);
+    this(Helper.deserializePath(path), clazz, method, index);
   }
 
   @SuppressWarnings("unchecked")

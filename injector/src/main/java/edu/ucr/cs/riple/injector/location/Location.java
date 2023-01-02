@@ -92,7 +92,7 @@ public abstract class Location {
       return null;
     }
     LocationType type = LocationType.getType(values[0]);
-    Path path = Helper.extractPath(values[5]);
+    Path path = Helper.deserializePath(values[5]);
     String clazz = values[1];
     switch (type) {
       case FIELD:
