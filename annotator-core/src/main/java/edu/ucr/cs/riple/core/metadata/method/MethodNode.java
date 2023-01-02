@@ -187,9 +187,4 @@ public class MethodNode implements Hashable {
   public int hashCode() {
     return hash(location.method, location.clazz);
   }
-
-  @Override
-  public String toString() {
-    return location.toString();
-  }
 }

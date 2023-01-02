@@ -80,16 +80,16 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
                               .map(Error::toResolvingParameter)
                               .collect(Collectors.toSet());
                       if (!parameters.isEmpty()) {
-                        // Update uri for each parameter. These triggered fixes does not have an
-                        // actual physical uri since they are provided as a jar file in downstream
+                        // Update path for each parameter. These triggered fixes does not have an
+                        // actual physical path since they are provided as a jar file in downstream
                         // dependencies.
                         parameters.forEach(
                             onParameter ->
-                                onParameter.uri =
+                                onParameter.path =
                                     methodDeclarationTree.findNode(
                                             onParameter.method, onParameter.clazz)
                                         .location
-                                        .uri);
+                                        .path);
                         nullableFlowMap.put(method, parameters);
                       }
                     }));

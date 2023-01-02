@@ -2,6 +2,7 @@ package edu.ucr.cs.riple.core.metadata.field;
 
 import edu.ucr.cs.riple.core.metadata.Hashable;
 import edu.ucr.cs.riple.injector.location.OnMethod;
+import java.nio.file.Path;
 import java.util.Objects;
 
 /**
@@ -52,12 +53,12 @@ public class FieldInitializationNode implements Hashable {
   }
 
   /**
-   * Gets uri to src file where the initialization happened.
+   * Gets path to src file where the initialization happened.
    *
-   * @return URI in string.
+   * @return Path in string.
    */
-  public String getURI() {
-    return initializerLocation.uri;
+  public Path getPath() {
+    return initializerLocation.path;
   }
 
   /**

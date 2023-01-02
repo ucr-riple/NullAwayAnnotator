@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.core.metadata.method;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.MetaData;
+import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.scanner.Serializer;
@@ -75,7 +76,7 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
     Integer parentId = Integer.parseInt(values[3]);
     int size = Integer.parseInt(values[4]);
     node.fillInformation(
-        new OnMethod(values[9], values[1], values[2]),
+        new OnMethod(Helper.deserializePath(values[9]), values[1], values[2]),
         parentId,
         size,
         Boolean.parseBoolean(values[6]),

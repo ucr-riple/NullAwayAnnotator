@@ -35,9 +35,9 @@ import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -395,16 +395,30 @@ public class Helper {
   }
 
   /**
-   * Corrects Path starting with prefix: {@code file}
+   * Deserializes a Path instance from a string.
    *
-   * @param value Path to file.
+   * @param serializedPath Serialized path to file.
    * @return The modified Path.
    */
-  public static String extractPath(String value) {
-    if (!new File(value).exists() && value.startsWith("file:")) {
-      return value.substring("file:".length());
+  public static Path deserializePath(String serializedPath) {
+    final String jarPrefix = "jar:";
+    final String filePrefix = "file://";
+    String path = serializedPath;
+    if (serializedPath.startsWith(jarPrefix)) {
+      path = path.substring(jarPrefix.length());
     }
-    return value;
+    if (serializedPath.startsWith(filePrefix)) {
+      path = path.substring(filePrefix.length());
+    }
+    // Keep only one occurrence of "/" from the beginning if more than one exists.
+    path = Paths.get(path).toString();
+    int start = 0;
+    while (start + 1 < path.length()
+        && path.charAt(start) == '/'
+        && path.charAt(start + 1) == '/') {
+      start++;
+    }
+    return Paths.get(path.substring(start));
   }
 
   /**

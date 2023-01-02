@@ -23,10 +23,6 @@
  */
 package edu.ucr.cs.riple.core.metadata.index;
 
-import static java.util.function.UnaryOperator.identity;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
@@ -36,10 +32,11 @@ import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 /** Represents an error reported by NullAway. */
@@ -228,17 +225,27 @@ public class Error {
     // been suggested. The final returned set of fixes should contain all the reasons it has been
     // suggested across the given collection. Map below stores all the set of reasons each fix is
     // suggested in the given collection.
-    Map<Fix, Set<Set<String>>> fixReasonMap =
-        errors.stream()
-            .flatMap(error -> error.resolvingFixes.stream())
-            .collect(groupingBy(identity(), mapping(fix -> fix.reasons, Collectors.toSet())));
+
+    // Collect all reasons each fix is suggested across the given collection.
+    Map<Fix, Set<String>> fixReasonsMap = new HashMap<>();
+    errors.stream()
+        .flatMap(error -> error.resolvingFixes.stream())
+        .forEach(
+            fix -> {
+              if (fixReasonsMap.containsKey(fix)) {
+                fixReasonsMap.get(fix).addAll(fix.reasons);
+              } else {
+                fixReasonsMap.put(fix, new HashSet<>(fix.reasons));
+              }
+            });
 
     ImmutableSet.Builder<Fix> builder = ImmutableSet.builder();
-    for (Fix key : fixReasonMap.keySet()) {
+    for (Fix key : fixReasonsMap.keySet()) {
       // To avoid mutating fixes stored in the given collection, we create new instances.
-      ImmutableSet.Builder<String> reasons = new ImmutableSet.Builder<>();
-      fixReasonMap.get(key).forEach(reasons::addAll);
-      builder.add(new Fix(key.change, reasons.build(), key.fixSourceIsInTarget));
+      // which contain the full set of reasons.
+      builder.add(
+          new Fix(
+              key.change, ImmutableSet.copyOf(fixReasonsMap.get(key)), key.fixSourceIsInTarget));
     }
     return builder.build();
   }

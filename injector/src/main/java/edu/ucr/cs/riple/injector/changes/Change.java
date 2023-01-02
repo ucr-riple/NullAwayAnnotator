@@ -94,8 +94,6 @@ public abstract class Change {
     return res;
   }
 
-  public abstract Change duplicate();
-
   @Override
   public String toString() {
     return location.toString();

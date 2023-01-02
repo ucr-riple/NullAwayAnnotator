@@ -33,6 +33,7 @@ import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -42,7 +43,7 @@ import org.json.simple.JSONObject;
 public abstract class Location {
   public final LocationType type;
   public final String clazz;
-  public String uri;
+  public Path path;
 
   public enum KEYS {
     VARIABLES,
@@ -51,16 +52,16 @@ public abstract class Location {
     KIND,
     CLASS,
     PKG,
-    URI,
+    PATH,
     INJECT,
     ANNOTATION,
     INDEX
   }
 
-  public Location(LocationType type, String uri, String clazz) {
+  public Location(LocationType type, Path path, String clazz) {
     this.type = type;
     this.clazz = clazz;
-    this.uri = uri;
+    this.path = path;
   }
 
   /**
@@ -91,20 +92,18 @@ public abstract class Location {
       return null;
     }
     LocationType type = LocationType.getType(values[0]);
-    String uri = values[5];
+    Path path = Helper.deserializePath(values[5]);
     String clazz = values[1];
     switch (type) {
       case FIELD:
-        return new OnField(uri, clazz, Sets.newHashSet(values[3]));
+        return new OnField(path, clazz, Sets.newHashSet(values[3]));
       case METHOD:
-        return new OnMethod(uri, clazz, values[2]);
+        return new OnMethod(path, clazz, values[2]);
       case PARAMETER:
-        return new OnParameter(uri, clazz, values[2], Integer.parseInt(values[4]));
+        return new OnParameter(path, clazz, values[2], Integer.parseInt(values[4]));
     }
     throw new RuntimeException("Cannot reach this statement, values: " + Arrays.toString(values));
   }
-
-  public abstract Location duplicate();
 
   protected abstract Modification applyToMember(NodeList<BodyDeclaration<?>> clazz, Change change);
 
@@ -133,7 +132,7 @@ public abstract class Location {
     JSONObject res = new JSONObject();
     res.put(KEYS.CLASS, clazz);
     res.put(KEYS.KIND, type.toString());
-    res.put(KEYS.URI, uri);
+    res.put(KEYS.PATH, path);
     fillJsonInformation(res);
     return res;
   }
@@ -158,7 +157,7 @@ public abstract class Location {
     // If location is of kind PARAMETER, toMethod will return the location of the enclosing method
     // of the parameter.
     if (this instanceof OnParameter) {
-      return new OnMethod(uri, clazz, toParameter().method);
+      return new OnMethod(path, clazz, toParameter().method);
     }
     return null;
   }
