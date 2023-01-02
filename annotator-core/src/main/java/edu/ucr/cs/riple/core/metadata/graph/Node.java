@@ -62,7 +62,7 @@ public class Node {
    * Set of triggered fixes on target module that will be triggered if fix tree is applied due to
    * errors in downstream dependencies.
    */
-  public ImmutableSet<Fix> triggeredFixesOnDownstream;
+  public ImmutableSet<Fix> triggeredFixesFromDownstreamErrors;
 
   /** Unique id of Node across all nodes. */
   public int id;
@@ -79,7 +79,7 @@ public class Node {
   public Node(Fix root) {
     this.regions = new HashSet<>();
     this.root = root;
-    this.triggeredFixesOnDownstream = ImmutableSet.of();
+    this.triggeredFixesFromDownstreamErrors = ImmutableSet.of();
     this.triggeredErrors = ImmutableSet.of();
     this.effect = 0;
     this.tree = Sets.newHashSet(root);
@@ -150,7 +150,7 @@ public class Node {
       Collection<Error> triggeredErrors,
       MethodDeclarationTree mdt) {
     // Update list of triggered fixes on downstream.
-    this.triggeredFixesOnDownstream = ImmutableSet.copyOf(triggeredFixesFromDownstream);
+    this.triggeredFixesFromDownstreamErrors = ImmutableSet.copyOf(triggeredFixesFromDownstream);
     // Update set of triggered errors.
     this.triggeredErrors = ImmutableSet.copyOf(triggeredErrors);
     // A fix in a tree, can have a super method that is not part of this node's tree but be present
@@ -191,7 +191,7 @@ public class Node {
   /** Merges triggered fixes to the tree, to prepare the analysis for the next depth. */
   public void mergeTriggered() {
     this.tree.addAll(Error.getResolvingFixesOfErrors(this.triggeredErrors));
-    this.tree.addAll(triggeredFixesOnDownstream);
+    this.tree.addAll(triggeredFixesFromDownstreamErrors);
     this.tree.forEach(fix -> fix.fixSourceIsInTarget = true);
   }
 

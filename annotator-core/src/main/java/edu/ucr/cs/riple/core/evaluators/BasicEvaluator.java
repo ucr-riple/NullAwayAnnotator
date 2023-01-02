@@ -61,8 +61,8 @@ public class BasicEvaluator extends AbstractEvaluator {
               Node node = graph.addNodeToVertices(root);
               node.setOrigins(supplier.getErrorStore());
               node.report = report;
-              node.triggeredFixesOnDownstream =
-                  ImmutableSet.copyOf(report.triggeredFixesOnDownstream);
+              node.triggeredFixesFromDownstreamErrors =
+                  ImmutableSet.copyOf(report.triggeredFixesFromDownstreamErrors);
               node.tree.addAll(Sets.newHashSet(report.tree));
               node.triggeredErrors = ImmutableSet.copyOf(report.triggeredErrors);
               node.mergeTriggered();
@@ -78,8 +78,8 @@ public class BasicEvaluator extends AbstractEvaluator {
               Report report = node.report;
               report.localEffect = node.effect;
               report.tree = Sets.newHashSet(node.tree);
-              report.triggeredFixesOnDownstream =
-                  ImmutableSet.copyOf(node.triggeredFixesOnDownstream);
+              report.triggeredFixesFromDownstreamErrors =
+                  ImmutableSet.copyOf(node.triggeredFixesFromDownstreamErrors);
               report.triggeredErrors = ImmutableSet.copyOf(node.triggeredErrors);
               report.hasBeenProcessedOnce = true;
             });

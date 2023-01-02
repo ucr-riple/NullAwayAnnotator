@@ -92,7 +92,8 @@ public class CachedEvaluator extends AbstractEvaluator {
             .getNodes()
             .map(
                 node ->
-                    new Impact(node.root, node.triggeredErrors, node.triggeredFixesOnDownstream))
+                    new Impact(
+                        node.root, node.triggeredErrors, node.triggeredFixesFromDownstreamErrors))
             .collect(Collectors.toSet()));
 
     // collect requested fixes for each report which was added to conflict graph.
@@ -114,7 +115,7 @@ public class CachedEvaluator extends AbstractEvaluator {
                   - supplier.getErrorStore().getNumberOfResolvedFixesWithCollection(newTree);
           report.triggeredErrors = ImmutableSet.copyOf(triggeredErrors);
           // get fixes triggered from downstream.
-          report.triggeredFixesOnDownstream =
+          report.triggeredFixesFromDownstreamErrors =
               cache.getTriggeredFixesOnDownstreamForCollection(newTree);
           // replace the old tree with new tree that contains triggered fixes from this iteration.
           report.tree = newTree;
