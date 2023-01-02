@@ -37,7 +37,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 public class OnParameter extends Location {
   public final String method;
@@ -51,11 +51,10 @@ public class OnParameter extends Location {
     this.matcher = new SignatureMatcher(method);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   protected void fillJsonInformation(JSONObject res) {
-    res.put(KEYS.METHOD, method);
-    res.put(KEYS.INDEX, index);
+    res.put(KEYS.METHOD.toString(), method);
+    res.put(KEYS.INDEX.toString(), index);
   }
 
   @Override

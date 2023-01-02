@@ -36,8 +36,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class OnField extends Location {
   /**
@@ -59,12 +59,11 @@ public class OnField extends Location {
     this.variables = variables;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   protected void fillJsonInformation(JSONObject res) {
     JSONArray fields = new JSONArray();
-    fields.addAll(variables);
-    res.put(KEYS.VARIABLES, fields);
+    variables.forEach(fields::put);
+    res.put(KEYS.VARIABLES.toString(), fields);
   }
 
   @Override

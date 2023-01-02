@@ -30,7 +30,7 @@ import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.util.Objects;
 import javax.annotation.Nullable;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /** Represents a change in the AST of the source code. */
 public abstract class Change {
@@ -86,7 +86,6 @@ public abstract class Change {
     return Objects.hash(location, annotation);
   }
 
-  @SuppressWarnings("unchecked")
   public JSONObject getJson() {
     JSONObject res = new JSONObject();
     res.put("LOCATION", location.getJson());

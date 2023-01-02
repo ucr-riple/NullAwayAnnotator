@@ -32,7 +32,7 @@ import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nullable;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * Used to remove <a
@@ -64,7 +64,6 @@ public class RemoveAnnotation extends Change {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public JSONObject getJson() {
     JSONObject res = super.getJson();
     res.put("INJECT", false);

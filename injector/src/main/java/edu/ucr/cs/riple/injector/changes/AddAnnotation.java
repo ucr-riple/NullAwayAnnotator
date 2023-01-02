@@ -24,7 +24,7 @@ package edu.ucr.cs.riple.injector.changes;
 
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Objects;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /** Used to add annotations on elements in source code. */
 public abstract class AddAnnotation extends Change {
@@ -34,7 +34,6 @@ public abstract class AddAnnotation extends Change {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public JSONObject getJson() {
     JSONObject res = super.getJson();
     res.put("INJECT", true);

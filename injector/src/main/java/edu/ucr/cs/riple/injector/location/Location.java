@@ -37,7 +37,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 public abstract class Location {
   public final LocationType type;
@@ -126,12 +126,11 @@ public abstract class Location {
     return applyToMember(clazz, change);
   }
 
-  @SuppressWarnings("unchecked")
   public JSONObject getJson() {
     JSONObject res = new JSONObject();
-    res.put(KEYS.CLASS, clazz);
-    res.put(KEYS.KIND, type.toString());
-    res.put(KEYS.PATH, path);
+    res.put(KEYS.CLASS.toString(), clazz);
+    res.put(KEYS.KIND.toString(), type.toString());
+    res.put(KEYS.PATH.toString(), path);
     fillJsonInformation(res);
     return res;
   }

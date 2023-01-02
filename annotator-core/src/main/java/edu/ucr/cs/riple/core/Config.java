@@ -61,9 +61,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * Config class for Annotator. Different flags can be set with either command line arguments or an
@@ -439,13 +438,11 @@ public class Config {
     Preconditions.checkNotNull(configPath);
     JSONObject jsonObject;
     try {
-      Object obj =
-          new JSONParser().parse(Files.newBufferedReader(configPath, Charset.defaultCharset()));
-      jsonObject = (JSONObject) obj;
+      jsonObject = new JSONObject(Files.readString(configPath, Charset.defaultCharset()));
     } catch (Exception e) {
       throw new RuntimeException("Error in reading/parsing config at path: " + configPath, e);
     }
-    this.depth = getValueFromKey(jsonObject, "DEPTH", Long.class).orElse((long) 1).intValue();
+    this.depth = getValueFromKey(jsonObject, "DEPTH", Integer.class).orElse(1);
     this.chain = getValueFromKey(jsonObject, "CHAIN", Boolean.class).orElse(false);
     this.redirectBuildOutputToStdErr =
         getValueFromKey(jsonObject, "REDIRECT_BUILD_OUTPUT_TO_STDERR", Boolean.class).orElse(false);
@@ -467,7 +464,7 @@ public class Config {
         getArrayValueFromKey(
                 jsonObject,
                 "CONFIG_PATHS",
-                instance -> ModuleInfo.buildFromJson(getNextModuleUniqueID(), globalDir, instance),
+                instance -> ModuleInfo.buildFromMap(getNextModuleUniqueID(), globalDir, instance),
                 ModuleInfo.class)
             .orElse(Collections.emptyList());
     this.target = moduleInfoList.get(0);
@@ -586,14 +583,14 @@ public class Config {
     try {
       ArrayList<String> keys = new ArrayList<>(Arrays.asList(key.split(":")));
       while (keys.size() != 1) {
-        if (json.containsKey(keys.get(0))) {
+        if (json.has(keys.get(0))) {
           json = (JSONObject) json.get(keys.get(0));
           keys.remove(0);
         } else {
           return new OrElse<>(null, klass);
         }
       }
-      return json.containsKey(keys.get(0))
+      return json.has(keys.get(0))
           ? new OrElse<>(json.get(keys.get(0)), klass)
           : new OrElse<>(null, klass);
     } catch (Exception e) {
@@ -601,9 +598,9 @@ public class Config {
     }
   }
 
-  @SuppressWarnings({"SameParameterValue", "unchecked"})
+  @SuppressWarnings("SameParameterValue")
   private <T> ListOrElse<T> getArrayValueFromKey(
-      JSONObject json, String key, Function<JSONObject, T> mapper, Class<T> klass) {
+      JSONObject json, String key, Function<Map<?, ?>, T> mapper, Class<T> klass) {
     if (json == null) {
       return new ListOrElse<>(null, klass);
     }
@@ -612,7 +609,9 @@ public class Config {
       return new ListOrElse<>(null, klass);
     } else {
       if (jsonValue.value instanceof JSONArray) {
-        return new ListOrElse<>(((JSONArray) jsonValue.value).stream().map(mapper), klass);
+        return new ListOrElse<>(
+            ((JSONArray) jsonValue.value).toList().stream().map(o -> mapper.apply((Map<?, ?>) o)),
+            klass);
       }
       throw new IllegalStateException(
           "Expected type to be json array, found: " + jsonValue.value.getClass());
@@ -681,7 +680,6 @@ public class Config {
     public Set<SourceType> sourceTypes = new HashSet<>();
     public int depth = 1;
 
-    @SuppressWarnings("unchecked")
     public void write(Path path) {
       Preconditions.checkNotNull(
           buildCommand, "Build command must be initialized to construct the config.");
@@ -711,16 +709,15 @@ public class Config {
       json.put("FORCE_RESOLVE", forceResolveActivation);
       json.put("INFERENCE_ACTIVATION", inferenceActivated);
       JSONArray configPathsJson = new JSONArray();
-      configPathsJson.addAll(
-          configPaths.stream()
-              .map(
-                  info -> {
-                    JSONObject res = new JSONObject();
-                    res.put("NULLAWAY", info.nullawayConfig.toString());
-                    res.put("SCANNER", info.scannerConfig.toString());
-                    return res;
-                  })
-              .collect(Collectors.toList()));
+      configPaths.stream()
+          .map(
+              info -> {
+                JSONObject res = new JSONObject();
+                res.put("NULLAWAY", info.nullawayConfig.toString());
+                res.put("SCANNER", info.scannerConfig.toString());
+                return res;
+              })
+          .forEach(configPathsJson::put);
       json.put("CONFIG_PATHS", configPathsJson);
       JSONObject downstreamDependency = new JSONObject();
       downstreamDependency.put("ACTIVATION", downStreamDependenciesAnalysisActivated);
@@ -747,10 +744,9 @@ public class Config {
             processors.put(sourceType.name(), st);
           });
       json.put("PROCESSORS", processors);
-
       try (BufferedWriter file =
           Files.newBufferedWriter(path.toFile().toPath(), Charset.defaultCharset())) {
-        file.write(json.toJSONString());
+        json.write(file);
       } catch (IOException e) {
         System.err.println("Error happened in writing config json: " + e);
       }

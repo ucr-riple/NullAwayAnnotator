@@ -40,7 +40,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * Stores information suggesting adding @Nullable on an element in source code. These suggestions

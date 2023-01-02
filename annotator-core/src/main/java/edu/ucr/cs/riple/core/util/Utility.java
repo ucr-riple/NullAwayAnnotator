@@ -44,6 +44,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -62,8 +63,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import me.tongfei.progressbar.ProgressBar;
 import me.tongfei.progressbar.ProgressBarStyle;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -100,11 +101,10 @@ public class Utility {
    * @param config Annotator config.
    * @param reports Immutable set of reports.
    */
-  @SuppressWarnings("unchecked")
   public static void writeReports(Config config, ImmutableSet<Report> reports) {
     Path reportsPath = config.globalDir.resolve("reports.json");
     JSONObject result = new JSONObject();
-    JSONArray reportsJson = new JSONArray();
+    List<JSONObject> reportsList = new ArrayList<>();
     for (Report report : reports) {
       JSONObject reportJson = report.root.getJson();
       reportJson.put("LOCAL EFFECT", report.localEffect);
@@ -115,23 +115,24 @@ public class Utility {
       JSONArray followUps = new JSONArray();
       if (config.chain && report.localEffect < 1) {
         report.tree.remove(report.root);
-        followUps.addAll(report.tree.stream().map(Fix::getJson).collect(Collectors.toList()));
+        report.tree.stream().map(Fix::getJson).forEach(followUps::put);
       }
       reportJson.put("TREE", followUps);
-      reportsJson.add(reportJson);
+      reportsList.add(reportJson);
     }
     // Sort by overall effect.
-    reportsJson.sort(
+    reportsList.sort(
         (o1, o2) -> {
-          int first = (Integer) ((JSONObject) o1).get("OVERALL EFFECT");
-          int second = (Integer) ((JSONObject) o2).get("OVERALL EFFECT");
+          int first = (Integer) o1.get("OVERALL EFFECT");
+          int second = (Integer) o2.get("OVERALL EFFECT");
           return Integer.compare(second, first);
         });
+    JSONArray reportsJson = new JSONArray();
+    reportsList.forEach(reportsJson::put);
     result.put("REPORTS", reportsJson);
     try (BufferedWriter writer =
         Files.newBufferedWriter(reportsPath.toFile().toPath(), Charset.defaultCharset())) {
-      writer.write(result.toJSONString().replace("\\/", "/").replace("\\\\\\", "\\"));
-      writer.flush();
+      result.write(writer);
     } catch (IOException e) {
       throw new RuntimeException(
           "Could not create the Annotator report json file: " + reportsPath, e);

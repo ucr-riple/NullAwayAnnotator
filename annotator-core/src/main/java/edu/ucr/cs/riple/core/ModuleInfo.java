@@ -28,8 +28,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.Objects;
-import org.json.simple.JSONObject;
 
 /** Container class to hold paths to nullaway and scanner config files. */
 public class ModuleInfo {
@@ -41,16 +41,19 @@ public class ModuleInfo {
   public final Path dir;
 
   /**
-   * Creates an instance of {@link ModuleInfo} from the given json object.
+   * Creates an instance of {@link ModuleInfo} from the given map object. This method is used in
+   * constructing {@link ModuleInfo} instances from a JSON object. Please note that array of
+   * dictionaries in json are parsed to {@link org.json.JSONArray} of maps. This method is called on
+   * each dictionary stored in the parsed collection to create the corresponding instance.
    *
    * @param id Global unique id for this module.
    * @param globalDir Global path for all Annotator/Scanner/NullAway outputs.
-   * @param jsonObject Json Object to retrieve values.
+   * @param mapFromJSON Map Object to retrieve require values.
    * @return An instance of {@link ModuleInfo}.
    */
-  public static ModuleInfo buildFromJson(int id, Path globalDir, JSONObject jsonObject) {
-    String nullawayConfigPath = (String) jsonObject.get("NULLAWAY");
-    String scannerConfigPath = (String) jsonObject.get("SCANNER");
+  public static ModuleInfo buildFromMap(int id, Path globalDir, Map<?, ?> mapFromJSON) {
+    String nullawayConfigPath = (String) mapFromJSON.get("NULLAWAY");
+    String scannerConfigPath = (String) mapFromJSON.get("SCANNER");
     if (nullawayConfigPath == null || scannerConfigPath == null) {
       throw new IllegalArgumentException(
           "Both paths to NullAway and Scanner config files must be set with NULLAWAY and SCANNER keys!");
