@@ -30,7 +30,6 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Collection;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /** Stores the set of errors which will be triggered if the containing fix is applied. */
 public class Impact {
@@ -62,10 +61,9 @@ public class Impact {
    */
   public void updateStatusAfterInjection(Collection<Fix> fixes) {
     triggeredErrors =
-        ImmutableSet.copyOf(
-            triggeredErrors.stream()
-                .filter(error -> !error.isResolvableWith(fixes))
-                .collect(Collectors.toSet()));
+        triggeredErrors.stream()
+            .filter(error -> !error.isResolvableWith(fixes))
+            .collect(ImmutableSet.toImmutableSet());
   }
 
   /**
