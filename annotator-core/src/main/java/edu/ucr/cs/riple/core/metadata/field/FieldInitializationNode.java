@@ -52,12 +52,12 @@ public class FieldInitializationNode implements Hashable {
   }
 
   /**
-   * Gets uri to src file where the initialization happened.
+   * Gets path to src file where the initialization happened.
    *
-   * @return URI in string.
+   * @return Path in string.
    */
-  public String getURI() {
-    return initializerLocation.uri;
+  public String getPath() {
+    return initializerLocation.path;
   }
 
   /**

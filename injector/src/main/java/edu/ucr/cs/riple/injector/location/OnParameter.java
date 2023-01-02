@@ -44,16 +44,11 @@ public class OnParameter extends Location {
   public final int index;
   private final SignatureMatcher matcher;
 
-  public OnParameter(String uri, String clazz, String method, int index) {
-    super(LocationType.PARAMETER, uri, clazz);
+  public OnParameter(String path, String clazz, String method, int index) {
+    super(LocationType.PARAMETER, path, clazz);
     this.method = method;
     this.index = index;
     this.matcher = new SignatureMatcher(method);
-  }
-
-  @Override
-  public Location duplicate() {
-    return new OnParameter(uri, clazz, method, index);
   }
 
   @SuppressWarnings("unchecked")

@@ -54,13 +54,13 @@ public class Injector {
     // Start method does not support addition and deletion on same element. Should be split into
     // call for addition and deletion separately.
     Map<String, List<Change>> map =
-        changes.stream().collect(groupingBy(change -> Helper.extractPath(change.location.uri)));
+        changes.stream().collect(groupingBy(change -> Helper.extractPath(change.location.path)));
     Set<FileOffsetStore> offsets = new HashSet<>();
     map.forEach(
-        (uri, changeList) -> {
+        (path, changeList) -> {
           CompilationUnit tree;
           try {
-            tree = LexicalPreservingPrinter.setup(StaticJavaParser.parse(new File(uri)));
+            tree = LexicalPreservingPrinter.setup(StaticJavaParser.parse(new File(path)));
           } catch (FileNotFoundException exception) {
             return;
           }
@@ -85,7 +85,7 @@ public class Injector {
               System.err.println("Encountered Exception: " + ex);
             }
           }
-          Printer printer = new Printer(Paths.get(uri));
+          Printer printer = new Printer(Paths.get(path));
           printer.applyModifications(modifications);
           printer.addImports(tree, imports);
           FileOffsetStore offsetStore = printer.write();
@@ -131,7 +131,6 @@ public class Injector {
    * @return Offset changes of source file.
    */
   public Set<FileOffsetStore> removeAnnotations(Set<RemoveAnnotation> requests) {
-    System.out.println("Test");
     return this.start(requests);
   }
 }
