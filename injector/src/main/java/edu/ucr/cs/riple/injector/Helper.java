@@ -401,6 +401,9 @@ public class Helper {
    * @return The modified Path.
    */
   public static Path deserializePath(String path) {
+    if (path.startsWith("file://")) {
+      path = path.substring("file://".length());
+    }
     // Keep only one occurrence of "/" from the beginning if more than one exists.
     String ans = Paths.get(path).toString();
     int start = 0;
