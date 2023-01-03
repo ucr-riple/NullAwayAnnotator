@@ -86,4 +86,9 @@ public class VoidDownstreamImpactCache implements DownstreamImpactCache {
   public ImmutableSet<Fix> getTriggeredFixesOnDownstreamForCollection(Collection<Fix> fixes) {
     return ImmutableSet.of();
   }
+
+  @Override
+  public int size() {
+    return 0;
+  }
 }

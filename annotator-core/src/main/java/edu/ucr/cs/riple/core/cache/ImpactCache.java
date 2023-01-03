@@ -86,4 +86,11 @@ public interface ImpactCache<T extends Impact> {
    * @return Immutable set of triggered fixes.
    */
   ImmutableSet<Fix> getTriggeredFixesOnDownstreamForCollection(Collection<Fix> fixes);
+
+  /**
+   * Returns number of stored entries in cache store.
+   *
+   * @return Number of entries.
+   */
+  int size();
 }

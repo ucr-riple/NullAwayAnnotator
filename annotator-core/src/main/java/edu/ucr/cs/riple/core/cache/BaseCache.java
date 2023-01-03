@@ -100,4 +100,9 @@ public abstract class BaseCache<T extends Impact, S extends Map<Location, T>>
   public void updateImpactsAfterInjection(Collection<Fix> fixes) {
     this.store.values().forEach(impact -> impact.updateStatusAfterInjection(fixes));
   }
+
+  @Override
+  public int size() {
+    return this.store.values().size();
+  }
 }

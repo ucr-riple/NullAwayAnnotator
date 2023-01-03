@@ -76,7 +76,9 @@ public class CachedEvaluator extends AbstractEvaluator {
     System.out.println(
         "Retrieved "
             + (reports.stream().mapToLong(r -> r.tree.size()).sum() - graph.getNodes().count())
-            + " impact(s) from cache");
+            + "/"
+            + cache.size()
+            + " impact(s) from cache...");
   }
 
   /**
