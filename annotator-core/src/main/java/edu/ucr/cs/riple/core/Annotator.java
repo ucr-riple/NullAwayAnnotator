@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core;
 
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.cache.TargetModuleCache;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCacheImpl;
 import edu.ucr.cs.riple.core.cache.downstream.VoidDownstreamImpactCache;
@@ -130,11 +131,12 @@ public class Annotator {
             ? new DownstreamImpactCacheImpl(config, methodDeclarationTree)
             : new VoidDownstreamImpactCache();
     downstreamImpactCache.analyzeDownstreamDependencies();
+    TargetModuleCache targetModuleCache = new TargetModuleCache(config, methodDeclarationTree);
 
     if (config.inferenceActivated) {
       // Outer loop starts.
       while (cache.isUpdated()) {
-        executeNextIteration(downstreamImpactCache);
+        executeNextIteration(targetModuleCache, downstreamImpactCache);
         if (config.disableOuterLoop) {
           break;
         }
@@ -143,7 +145,7 @@ public class Annotator {
       // Perform once last iteration including all fixes.
       if (!config.disableOuterLoop) {
         cache.disable();
-        executeNextIteration(downstreamImpactCache);
+        executeNextIteration(targetModuleCache, downstreamImpactCache);
         cache.enable();
       }
     }
@@ -159,11 +161,14 @@ public class Annotator {
   /**
    * Performs single iteration of inference/injection.
    *
+   * @param targetModuleCache Target impact cache instance.
    * @param downstreamImpactCache Downstream impact cache instance to detect impact of fixes outside
    *     of target module.
    */
-  private void executeNextIteration(DownstreamImpactCache downstreamImpactCache) {
-    ImmutableSet<Report> latestReports = processTriggeredFixes(downstreamImpactCache);
+  private void executeNextIteration(
+      TargetModuleCache targetModuleCache, DownstreamImpactCache downstreamImpactCache) {
+    ImmutableSet<Report> latestReports =
+        processTriggeredFixes(targetModuleCache, downstreamImpactCache);
     // Compute boundaries of effects on downstream dependencies.
     latestReports.forEach(
         report -> {
@@ -191,6 +196,7 @@ public class Annotator {
 
     // Update impact saved state.
     downstreamImpactCache.updateImpactsAfterInjection(selectedFixes);
+    targetModuleCache.updateImpactsAfterInjection(selectedFixes);
   }
 
   /**
@@ -199,7 +205,8 @@ public class Annotator {
    * @param downstreamImpactCache Downstream impact cache instance.
    * @return Immutable set of reports from the triggered fixes.
    */
-  private ImmutableSet<Report> processTriggeredFixes(DownstreamImpactCache downstreamImpactCache) {
+  private ImmutableSet<Report> processTriggeredFixes(
+      TargetModuleCache targetModuleCache, DownstreamImpactCache downstreamImpactCache) {
     Utility.buildTarget(config);
     // Suggested fixes of target at the current state.
     ImmutableSet<Fix> fixes =
@@ -209,7 +216,8 @@ public class Annotator {
 
     // Initializing required evaluator instances.
     TargetModuleSupplier supplier =
-        new TargetModuleSupplier(config, downstreamImpactCache, methodDeclarationTree);
+        new TargetModuleSupplier(
+            config, targetModuleCache, downstreamImpactCache, methodDeclarationTree);
     Evaluator evaluator = getEvaluator(supplier);
     // Result of the iteration analysis.
     return evaluator.evaluate(fixes);

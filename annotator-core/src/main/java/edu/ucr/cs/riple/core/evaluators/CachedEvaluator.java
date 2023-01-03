@@ -53,7 +53,7 @@ public class CachedEvaluator extends AbstractEvaluator {
 
   public CachedEvaluator(Supplier supplier) {
     super(supplier);
-    this.cache = new TargetModuleCache(supplier.getConfig(), supplier.getMethodDeclarationTree());
+    this.cache = supplier.getCache();
   }
 
   /**
@@ -73,6 +73,10 @@ public class CachedEvaluator extends AbstractEvaluator {
         .flatMap(report -> report.getFixesForNextIteration().stream())
         .filter(cache::isUnknown)
         .forEach(graph::addNodeToVertices);
+    System.out.println(
+        "Retrieved "
+            + (reports.stream().mapToLong(r -> r.tree.size()).sum() - graph.getNodes().count())
+            + " impact(s) from cache");
   }
 
   /**

@@ -1,14 +1,14 @@
 set -exu
 
-CURRENT_VERSION="annotator-core-1.3.5.jar"
+CURRENT_VERSION="annotator-core-1.3.6-SNAPSHOT.jar"
 PROJECT_ROOT=${PROJECT_ROOT:-$(git rev-parse --show-toplevel)}
 
 pushd "$PROJECT_ROOT"
    ./gradlew publishToMavenLocal --rerun-tasks
-   mv core/build/libs/"$CURRENT_VERSION" runner/jars/core.jar
+   mv annotator-core/build/libs/"$CURRENT_VERSION" runner/jars/core.jar
 
    pushd runner
-       pushd "$DIR"
+     pushd jars
          java -jar core.jar "$@"
        popd
      popd

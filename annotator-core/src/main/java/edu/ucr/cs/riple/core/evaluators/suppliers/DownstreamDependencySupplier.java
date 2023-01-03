@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.evaluators.suppliers;
 
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.cache.TargetModuleCache;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.cache.downstream.VoidDownstreamImpactCache;
 import edu.ucr.cs.riple.core.evaluators.graphprocessor.AbstractConflictGraphProcessor;
@@ -77,5 +78,11 @@ public class DownstreamDependencySupplier extends AbstractSupplier {
     return config.useParallelGraphProcessor
         ? new ParallelConflictGraphProcessor(config, runner, this, tracker)
         : new SequentialConflictGraphProcessor(config, runner, this);
+  }
+
+  @Override
+  public TargetModuleCache getCache() {
+    throw new RuntimeException(
+        "Caches are used to retrieve impacts for depths more than 1. Downstream dependency analysis happens only at depth 1.");
   }
 }

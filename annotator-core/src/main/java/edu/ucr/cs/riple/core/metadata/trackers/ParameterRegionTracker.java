@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnParameter;
@@ -42,10 +43,13 @@ public class ParameterRegionTracker implements RegionTracker {
 
   /** {@link MethodRegionTracker} instance, used to retrieve all sites. */
   private final MethodRegionTracker methodRegionTracker;
+  /** Annotator config. */
+  private final Config config;
 
   public ParameterRegionTracker(
-      MethodDeclarationTree tree, MethodRegionTracker methodRegionTracker) {
+      Config config, MethodDeclarationTree tree, MethodRegionTracker methodRegionTracker) {
     this.tree = tree;
+    this.config = config;
     this.methodRegionTracker = methodRegionTracker;
   }
 
@@ -62,8 +66,10 @@ public class ParameterRegionTracker implements RegionTracker {
             .collect(Collectors.toSet());
     // Add the method the fix is targeting.
     regions.add(new Region(parameter.clazz, parameter.method));
-    // Add all call sites.
-    regions.addAll(methodRegionTracker.getCallersOfMethod(parameter.clazz, parameter.method));
+    if (!config.useImpactCache) {
+      // Add all call sites.
+      regions.addAll(methodRegionTracker.getCallersOfMethod(parameter.clazz, parameter.method));
+    }
     return Optional.of(regions);
   }
 }
