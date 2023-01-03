@@ -226,8 +226,8 @@ public class Helper {
     if (cursor instanceof EnumDeclaration) {
       // According to java language specifics, Enum constants are first members of enums. In
       // javaparser structure, enum constants are stored after all other members of enum which does
-      // not conform to how javac assigns flat names. We should first prioritize locating enums
-      // constants.
+      // not conform to how javac assigns flat names. We should prioritize visiting enums
+      // constants first.
       NodeList<EnumConstantDeclaration> constants = ((EnumDeclaration) cursor).getEntries();
       if (index < constants.size()) {
         return constants.get(index);
