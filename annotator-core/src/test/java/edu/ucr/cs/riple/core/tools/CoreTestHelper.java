@@ -286,6 +286,9 @@ public class CoreTestHelper {
     builder.inferenceActivated = !deactivateInference;
     builder.forceResolveActivation = forceResolveActivated;
     builder.sourceTypes.add(SourceType.LOMBOK);
+    builder.cache = getModeFromEnvironment("ANNOTATOR_TEST_DISABLE_CACHING");
+    builder.useParallelProcessor =
+        getModeFromEnvironment("ANNOTATOR_TEST_DISABLE_PARALLEL_PROCESSING");
     if (downstreamDependencyAnalysisActivated) {
       builder.buildCommand =
           Utility.computeBuildCommandWithLibraryModelLoaderDependency(
@@ -309,6 +312,14 @@ public class CoreTestHelper {
           Utility.computeBuildCommand(this.projectPath, this.outDirPath, modules);
     }
     builder.write(configPath);
+  }
+
+  private boolean getModeFromEnvironment(String environmentVariableName) {
+    String value = System.getenv(environmentVariableName);
+    if (value == null || value.isEmpty()) {
+      return false;
+    }
+    return Boolean.parseBoolean(value);
   }
 
   private void createFiles() {
