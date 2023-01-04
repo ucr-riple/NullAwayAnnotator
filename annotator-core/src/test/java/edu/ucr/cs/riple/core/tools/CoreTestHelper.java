@@ -280,7 +280,6 @@ public class CoreTestHelper {
     builder.redirectBuildOutputToStdErr = true;
     builder.chain = true;
     builder.outerLoopActivation = requestCompleteLoop;
-    builder.useParallelProcessor = true;
     builder.downStreamDependenciesAnalysisActivated = downstreamDependencyAnalysisActivated;
     builder.mode = mode;
     builder.inferenceActivated = !deactivateInference;
@@ -290,6 +289,9 @@ public class CoreTestHelper {
     builder.useCacheImpact = getModeFromEnvironment("ANNOTATOR_TEST_DISABLE_CACHING");
     builder.useParallelProcessor =
         getModeFromEnvironment("ANNOTATOR_TEST_DISABLE_PARALLEL_PROCESSING");
+    if(builder.useCacheImpact && !builder.useParallelProcessor){
+      throw new RuntimeException("TEST IF CI SETUP CORRECTLY");
+    }
     if (downstreamDependencyAnalysisActivated) {
       builder.buildCommand =
           Utility.computeBuildCommandWithLibraryModelLoaderDependency(
