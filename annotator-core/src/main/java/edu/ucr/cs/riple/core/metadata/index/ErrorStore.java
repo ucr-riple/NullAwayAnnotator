@@ -27,7 +27,9 @@ package edu.ucr.cs.riple.core.metadata.index;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -69,8 +71,9 @@ public class ErrorStore {
    */
   private Result compareByList(Collection<Error> previousItems, Collection<Error> currentItems) {
     int size = currentItems.size() - previousItems.size();
-    previousItems.forEach(currentItems::remove);
-    return new Result(size, currentItems);
+    List<Error> temp = new ArrayList<>(currentItems);
+    previousItems.forEach(temp::remove);
+    return new Result(size, temp);
   }
 
   /**
