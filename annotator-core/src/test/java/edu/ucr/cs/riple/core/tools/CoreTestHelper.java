@@ -289,7 +289,7 @@ public class CoreTestHelper {
     builder.useCacheImpact = getModeFromEnvironment("ANNOTATOR_TEST_DISABLE_CACHING");
     builder.useParallelProcessor =
         getModeFromEnvironment("ANNOTATOR_TEST_DISABLE_PARALLEL_PROCESSING");
-    if(builder.useCacheImpact && !builder.useParallelProcessor){
+    if (builder.useCacheImpact && !builder.useParallelProcessor) {
       throw new RuntimeException("TEST IF CI SETUP CORRECTLY");
     }
     if (downstreamDependencyAnalysisActivated) {
