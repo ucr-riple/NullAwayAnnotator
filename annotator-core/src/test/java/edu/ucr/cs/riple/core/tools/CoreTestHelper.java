@@ -286,7 +286,8 @@ public class CoreTestHelper {
     builder.inferenceActivated = !deactivateInference;
     builder.forceResolveActivation = forceResolveActivated;
     builder.sourceTypes.add(SourceType.LOMBOK);
-    builder.cache = getModeFromEnvironment("ANNOTATOR_TEST_DISABLE_CACHING");
+    builder.cache = true;
+    builder.useCacheImpact = getModeFromEnvironment("ANNOTATOR_TEST_DISABLE_CACHING");
     builder.useParallelProcessor =
         getModeFromEnvironment("ANNOTATOR_TEST_DISABLE_PARALLEL_PROCESSING");
     if (downstreamDependencyAnalysisActivated) {
@@ -317,9 +318,9 @@ public class CoreTestHelper {
   private boolean getModeFromEnvironment(String environmentVariableName) {
     String value = System.getenv(environmentVariableName);
     if (value == null || value.isEmpty()) {
-      return false;
+      return true;
     }
-    return Boolean.parseBoolean(value);
+    return !Boolean.parseBoolean(value);
   }
 
   private void createFiles() {
