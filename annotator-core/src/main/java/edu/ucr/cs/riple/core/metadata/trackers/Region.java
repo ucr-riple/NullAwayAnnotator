@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
+import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.util.Objects;
 
@@ -50,6 +51,7 @@ public class Region {
   /** Different types of code segments for a region. */
   public enum Type {
     METHOD,
+    CONSTRUCTOR,
     FIELD,
     STATIC_BLOCK
   }
@@ -57,7 +59,7 @@ public class Region {
   public Region(String encClass, String encMember, SourceType sourceType) {
     this.clazz = encClass == null ? "null" : encClass;
     this.member = encMember == null ? "null" : encMember;
-    this.type = getType(member);
+    this.type = getType(clazz, member);
     this.sourceType = sourceType;
   }
 
@@ -68,14 +70,18 @@ public class Region {
   /**
    * Initializes {@link Region#type} based on the string representation of member.
    *
-   * @param member Symbol of the region representative.
+   * @param regionClass Symbol of the region class in string.
+   * @param member Symbol of the region representative in string.
    * @return The corresponding Type.
    */
-  public static Type getType(String member) {
+  public static Type getType(String regionClass, String member) {
     if (member.equals("null")) {
       return Type.STATIC_BLOCK;
     }
     if (member.contains("(")) {
+      if (Helper.extractCallableName(member).equals(Helper.simpleName(regionClass))) {
+        return Type.CONSTRUCTOR;
+      }
       return Type.METHOD;
     }
     return Type.FIELD;
@@ -97,6 +103,15 @@ public class Region {
    */
   public boolean isOnField() {
     return type.equals(Type.FIELD);
+  }
+
+  /**
+   * Checks if region targets a constructor.
+   *
+   * @return true, if region is targeting a constructor.
+   */
+  public boolean isOnConstructor() {
+    return type.equals(Type.CONSTRUCTOR);
   }
 
   @Override
