@@ -28,6 +28,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -93,8 +94,9 @@ public class Bank<T extends Enclosed> {
    */
   private Result<T> compareByList(Collection<T> previousItems, Collection<T> currentItems) {
     int size = currentItems.size() - previousItems.size();
-    previousItems.forEach(currentItems::remove);
-    return new Result<>(size, currentItems);
+    ArrayList<T> temp = new ArrayList<>(currentItems);
+    previousItems.forEach(temp::remove);
+    return new Result<>(size, temp);
   }
 
   /**
