@@ -70,11 +70,13 @@ public class NullAwayV0Adapter extends NullAwayAdapterBaseClass {
             + values.length);
     Preconditions.checkArgument(
         values[7].equals("nullable"), "unsupported annotation: " + values[7]);
-    String encMember = !Region.getType(values[9]).equals(Region.Type.METHOD) ? "null" : values[9];
+    String regionClass = values[8];
+    String encMember =
+        !Region.getType(regionClass, values[9]).equals(Region.Type.METHOD) ? "null" : values[9];
     return new Fix(
         new AddMarkerAnnotation(location, config.nullableAnnot),
         values[6],
-        new Region(values[8], encMember),
+        new Region(regionClass, encMember),
         true);
   }
 
@@ -84,12 +86,14 @@ public class NullAwayV0Adapter extends NullAwayAdapterBaseClass {
         values.length == 10,
         "Expected 10 values to create Error instance in NullAway serialization version 0 but found: "
             + values.length);
-    String encMember = !Region.getType(values[3]).equals(Region.Type.METHOD) ? "null" : values[3];
+    String regionClass = values[2];
+    String encMember =
+        !Region.getType(regionClass, values[3]).equals(Region.Type.METHOD) ? "null" : values[3];
     Location nonnullTarget =
         Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 4, 10));
     String errorType = values[0];
     String errorMessage = values[1];
-    Region region = new Region(values[2], encMember);
+    Region region = new Region(regionClass, encMember);
     // since we have no information of offset, we give a unique offset error to have different
     // instances.
     return createError(
@@ -102,10 +106,11 @@ public class NullAwayV0Adapter extends NullAwayAdapterBaseClass {
         values.length == 5,
         "Expected 5 values to create TrackerNode instance in NullAway serialization version 0 but found: "
             + values.length);
+    String regionClass = values[0];
     String regionMember =
-        !Region.getType(values[1]).equals(Region.Type.METHOD) ? "null" : values[1];
+        !Region.getType(regionClass, values[1]).equals(Region.Type.METHOD) ? "null" : values[1];
     return new TrackerNode(
-        new Region(values[0], regionMember, SourceType.valueOf(values[4])), values[2], values[3]);
+        new Region(regionClass, regionMember, SourceType.valueOf(values[4])), values[2], values[3]);
   }
 
   @Override

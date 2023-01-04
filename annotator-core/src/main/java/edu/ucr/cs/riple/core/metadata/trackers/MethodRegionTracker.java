@@ -74,6 +74,14 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
     OnMethod onMethod = location.toMethod();
     // Add callers of method.
     Set<Region> regions = getCallersOfMethod(onMethod.clazz, onMethod.method);
+    // Add "null" region for calls in constructors. If the target method assigns a @Nullable value
+    // to a @Nonnull field, it is possible that NullAway report an initialization error in "null"
+    // region, therefore it is a potentially impacted region.
+    regions.addAll(
+        regions.stream()
+            .filter(Region::isOnConstructor)
+            .map(region -> new Region(region.clazz, "null"))
+            .collect(Collectors.toSet()));
     // Add immediate super method.
     MethodNode parent = tree.getClosestSuperMethod(onMethod.method, onMethod.clazz);
     if (parent != null && parent.isNonTop()) {

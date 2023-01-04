@@ -279,7 +279,7 @@ public class CoreTestHelper {
     builder.bailout = !disableBailout;
     builder.chain = true;
     builder.outerLoopActivation = requestCompleteLoop;
-    builder.optimized = true;
+    builder.optimized = false;
     builder.downStreamDependenciesAnalysisActivated = downstreamDependencyAnalysisActivated;
     builder.mode = mode;
     builder.inferenceActivated = !deactivateInference;
