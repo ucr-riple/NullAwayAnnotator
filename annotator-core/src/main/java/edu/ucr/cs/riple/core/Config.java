@@ -713,7 +713,7 @@ public class Config {
       json.put("OUTPUT_DIR", outputDir);
       json.put("CHAIN", chain);
       json.put("PARALLEL_PROCESSING", useParallelProcessor);
-      json.put("USE_CACHE_IMPACT", useCacheImpact);
+      json.put("CACHE_IMPACT_ACTIVATION", useCacheImpact);
       json.put("CACHE", cache);
       json.put("BAILOUT", bailout);
       json.put("DEPTH", depth);
