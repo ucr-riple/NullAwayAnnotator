@@ -284,6 +284,7 @@ public class CoreTestHelper {
     builder.mode = mode;
     builder.inferenceActivated = !deactivateInference;
     builder.forceResolveActivation = forceResolveActivated;
+    builder.useCacheImpact = false;
     builder.sourceTypes.add(SourceType.LOMBOK);
     builder.cache = true;
     builder.useCacheImpact = getModeFromEnvironment("ANNOTATOR_TEST_DISABLE_CACHING");
