@@ -1,6 +1,6 @@
 set -exu
 
-CURRENT_VERSION="annotator-core-1.3.6-SNAPSHOT.jar"
+CURRENT_VERSION="annotator-core-1.3.6-alpha-1.jar"
 PROJECT_ROOT=${PROJECT_ROOT:-$(git rev-parse --show-toplevel)}
 
 pushd "$PROJECT_ROOT"
