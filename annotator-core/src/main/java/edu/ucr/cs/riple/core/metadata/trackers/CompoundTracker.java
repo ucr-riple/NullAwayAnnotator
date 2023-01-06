@@ -50,7 +50,7 @@ public class CompoundTracker implements RegionTracker {
         ImmutableSet.of(
             new FieldRegionTracker(config, info),
             methodRegionTracker,
-            new ParameterRegionTracker(config, tree, methodRegionTracker));
+            new ParameterRegionTracker(tree, methodRegionTracker));
     ImmutableSet.Builder<GeneratedRegionTracker> generatedRegionTrackerBuilder =
         new ImmutableSet.Builder<>();
     if (config.generatedCodeDetectors.contains(SourceType.LOMBOK)) {
