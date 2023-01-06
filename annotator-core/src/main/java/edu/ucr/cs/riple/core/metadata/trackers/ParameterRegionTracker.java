@@ -66,10 +66,9 @@ public class ParameterRegionTracker implements RegionTracker {
             .collect(Collectors.toSet());
     // Add the method the fix is targeting.
     regions.add(new Region(parameter.clazz, parameter.method));
-    if (!config.useImpactCache) {
-      // Add all call sites.
-      regions.addAll(methodRegionTracker.getCallersOfMethod(parameter.clazz, parameter.method));
-    }
+    // Add all call sites. It will also reserve call sites to prevent callees have their parameters
+    // annotated simultaneously. See test: CoreTest#nestedParameters.
+    regions.addAll(methodRegionTracker.getCallersOfMethod(parameter.clazz, parameter.method));
     return Optional.of(regions);
   }
 }
