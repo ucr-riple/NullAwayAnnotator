@@ -71,8 +71,12 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
             .map(trackerNode -> trackerNode.region)
             .collect(Collectors.toSet());
     ans.addAll(config.getAdapter().getFieldRegionScope(field));
-    // Errors of type `METHOD_NO_INIT` and `FIELD_NO_INIT` are reported in null region.
-    ans.add(new Region(location.clazz, "null"));
+    if (!config.useImpactCache) {
+      // Errors of type `METHOD_NO_INIT` and `FIELD_NO_INIT` are reported in null region that might
+      // have been resolved. Caching approach does not rely on build results to compute the set of
+      // resolved errors.
+      ans.add(new Region(location.clazz, "null"));
+    }
     return Optional.of(ans);
   }
 }
