@@ -28,6 +28,7 @@ import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -52,7 +53,7 @@ public abstract class AnnotationInjector {
     Set<RemoveAnnotation> toRemove =
         fixes.stream()
             .map(fix -> new RemoveAnnotation(fix.change.location, fix.change.annotation))
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     removeAnnotations(toRemove);
   }
 
@@ -65,7 +66,8 @@ public abstract class AnnotationInjector {
     if (fixes == null || fixes.size() == 0) {
       return;
     }
-    injectAnnotations(fixes.stream().map(fix -> fix.change).collect(Collectors.toSet()));
+    injectAnnotations(
+        fixes.stream().map(fix -> fix.change).collect(Collectors.toCollection(LinkedHashSet::new)));
   }
 
   /**

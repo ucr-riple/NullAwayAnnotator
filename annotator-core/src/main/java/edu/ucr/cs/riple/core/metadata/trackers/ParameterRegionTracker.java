@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.core.metadata.trackers;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnParameter;
+import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -59,7 +60,7 @@ public class ParameterRegionTracker implements RegionTracker {
     Set<Region> regions =
         tree.getSubMethods(parameter.method, parameter.clazz, false).stream()
             .map(node -> new Region(node.location.clazz, node.location.method))
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     // Add the method the fix is targeting.
     regions.add(new Region(parameter.clazz, parameter.method));
     // Add all call sites. It will also reserve call sites to prevent callees have their parameters

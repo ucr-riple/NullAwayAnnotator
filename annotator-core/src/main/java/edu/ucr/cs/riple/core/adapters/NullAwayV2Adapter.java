@@ -12,6 +12,7 @@ import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,7 +36,7 @@ public class NullAwayV2Adapter extends NullAwayAdapterBaseClass {
   public Set<Region> getFieldRegionScope(OnField onField) {
     return onField.variables.stream()
         .map(fieldName -> new Region(onField.clazz, fieldName))
-        .collect(Collectors.toSet());
+        .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   @Override

@@ -33,6 +33,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -74,7 +75,7 @@ public class VirtualInjector extends AnnotationInjector {
           changes.stream()
               .filter(addAnnotation -> addAnnotation.location.isOnMethod())
               .map(annot -> annot.location.clazz + "\t" + annot.location.toMethod().method + "\n")
-              .collect(Collectors.toSet());
+              .collect(Collectors.toCollection(LinkedHashSet::new));
       for (String row : rows) {
         os.write(row.getBytes(Charset.defaultCharset()), 0, row.length());
       }

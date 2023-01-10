@@ -30,7 +30,7 @@ import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.location.Location;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -46,7 +46,7 @@ public class Report {
   /** Root of fix tree associated to this report instance. */
   public Fix root;
   /** Fix tree associated to this report instance. */
-  public Set<Fix> tree;
+  public LinkedHashSet<Fix> tree;
   /**
    * Set of errors that will be triggered in target module if fix tree is applied to the source
    * code.
@@ -84,7 +84,8 @@ public class Report {
   public Report(Fix root, int localEffect) {
     this.localEffect = localEffect;
     this.root = root;
-    this.tree = Sets.newHashSet(root);
+    this.tree = Sets.newLinkedHashSet();
+    this.tree.add(root);
     this.hasBeenProcessedOnce = false;
     this.triggeredFixesFromDownstreamErrors = ImmutableSet.of();
     this.triggeredErrors = ImmutableSet.of();
@@ -167,8 +168,14 @@ public class Report {
     }
     this.tree.add(this.root);
     found.tree.add(found.root);
-    Set<Location> thisTree = this.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
-    Set<Location> otherTree = found.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
+    Set<Location> thisTree =
+        this.tree.stream()
+            .map(Fix::toLocation)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+    Set<Location> otherTree =
+        found.tree.stream()
+            .map(Fix::toLocation)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     if (!thisTree.equals(otherTree)) {
       return false;
     }
@@ -177,13 +184,13 @@ public class Report {
             .filter(Error::hasFix)
             .flatMap(error -> error.getResolvingFixes().stream())
             .map(Fix::toLocation)
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     Set<Location> otherTriggered =
         found.triggeredErrors.stream()
             .filter(Error::hasFix)
             .flatMap(error -> error.getResolvingFixes().stream())
             .map(Fix::toLocation)
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     return otherTriggered.equals(thisTriggered);
   }
 
@@ -194,7 +201,7 @@ public class Report {
         + ", "
         + root
         + ", "
-        + tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
+        + tree.stream().map(Fix::toLocation).collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   /**
@@ -286,7 +293,8 @@ public class Report {
     if (!hasBeenProcessedOnce) {
       return Set.of(root);
     }
-    Set<Fix> triggeredFixes = new HashSet<>(Error.getResolvingFixesOfErrors(this.triggeredErrors));
+    Set<Fix> triggeredFixes =
+        new LinkedHashSet<>(Error.getResolvingFixesOfErrors(this.triggeredErrors));
     triggeredFixes.addAll(triggeredFixesFromDownstreamErrors);
     return triggeredFixes;
   }

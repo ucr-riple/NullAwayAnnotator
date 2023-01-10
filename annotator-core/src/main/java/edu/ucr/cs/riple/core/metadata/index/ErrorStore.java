@@ -29,6 +29,7 @@ import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -109,7 +110,7 @@ public class ErrorStore {
   public int getNumberOfResolvedFixesWithCollection(Collection<Fix> fixes) {
     return root.values().stream()
         .filter(error -> error.isResolvableWith(fixes))
-        .collect(Collectors.toSet())
+        .collect(Collectors.toCollection(LinkedHashSet::new))
         .size();
   }
 }

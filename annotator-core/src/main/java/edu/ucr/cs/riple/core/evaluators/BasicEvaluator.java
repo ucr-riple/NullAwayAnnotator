@@ -63,7 +63,7 @@ public class BasicEvaluator extends AbstractEvaluator {
               node.report = report;
               node.triggeredFixesFromDownstreamErrors =
                   ImmutableSet.copyOf(report.triggeredFixesFromDownstreamErrors);
-              node.tree.addAll(Sets.newHashSet(report.tree));
+              node.tree.addAll(Sets.newLinkedHashSet(report.tree));
               node.triggeredErrors = ImmutableSet.copyOf(report.triggeredErrors);
               node.mergeTriggered();
             });
@@ -77,7 +77,7 @@ public class BasicEvaluator extends AbstractEvaluator {
             node -> {
               Report report = node.report;
               report.localEffect = node.effect;
-              report.tree = Sets.newHashSet(node.tree);
+              report.tree = Sets.newLinkedHashSet(node.tree);
               report.triggeredFixesFromDownstreamErrors =
                   ImmutableSet.copyOf(node.triggeredFixesFromDownstreamErrors);
               report.triggeredErrors = ImmutableSet.copyOf(node.triggeredErrors);

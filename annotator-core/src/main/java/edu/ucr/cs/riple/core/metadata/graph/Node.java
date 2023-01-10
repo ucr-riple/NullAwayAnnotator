@@ -36,7 +36,7 @@ import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -77,12 +77,13 @@ public class Node {
   private ImmutableSet<Region> origins;
 
   public Node(Fix root) {
-    this.regions = new HashSet<>();
+    this.regions = new LinkedHashSet<>();
     this.root = root;
     this.triggeredFixesFromDownstreamErrors = ImmutableSet.of();
     this.triggeredErrors = ImmutableSet.of();
     this.effect = 0;
-    this.tree = Sets.newHashSet(root);
+    this.tree = Sets.newLinkedHashSet();
+    this.tree.add(root);
     this.origins = ImmutableSet.of();
   }
 

@@ -495,4 +495,21 @@ public class CoreTest extends BaseCoreTest {
             new TReport(new OnParameter("A.java", "test.A", "f2(java.lang.Object)", 0), -1))
         .start();
   }
+
+  @Test
+  public void twoConstructors() {
+    coreTestHelper
+        .addInputLines(
+            "A.java",
+            "package test;",
+            "public class A {",
+            "   Object a;",
+            "   A(boolean a) { }",
+            "   A(int a) { }",
+            "}")
+        .toDepth(1)
+        .addExpectedReports(
+            new TReport(new OnField("A.java", "test.A", Collections.singleton("a")), -2))
+        .start();
+  }
 }

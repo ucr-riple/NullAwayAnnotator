@@ -28,6 +28,7 @@ import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -72,6 +73,6 @@ public class LombokTracker implements GeneratedRegionTracker {
               Optional<Set<Region>> ans = tracker.getRegions(onMethod);
               return ans.isPresent() ? ans.get().stream() : Stream.of();
             })
-        .collect(Collectors.toSet());
+        .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 }

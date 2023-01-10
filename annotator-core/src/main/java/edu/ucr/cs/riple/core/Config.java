@@ -44,8 +44,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -688,7 +688,7 @@ public class Config {
     public String nullUnmarkedAnnotation = "org.jspecify.nullness.NullUnmarked";
     public boolean inferenceActivated = true;
     public boolean useCacheImpact = true;
-    public Set<SourceType> sourceTypes = new HashSet<>();
+    public Set<SourceType> sourceTypes = new LinkedHashSet<>();
     public int depth = 1;
 
     @SuppressWarnings("unchecked")
@@ -776,7 +776,7 @@ public class Config {
     private final Config config;
 
     public OffsetHandler(Config config) {
-      contents = new HashMap<>();
+      contents = new LinkedHashMap<>();
       this.config = config;
     }
 

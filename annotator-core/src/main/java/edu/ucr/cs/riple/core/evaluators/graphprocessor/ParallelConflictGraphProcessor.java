@@ -35,7 +35,7 @@ import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import me.tongfei.progressbar.ProgressBar;
@@ -72,14 +72,16 @@ public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcess
     for (Set<Node> group : nonConflictingGroups) {
       pb.step();
       Set<Fix> fixes =
-          group.stream().flatMap(node -> node.tree.stream()).collect(Collectors.toSet());
+          group.stream()
+              .flatMap(node -> node.tree.stream())
+              .collect(Collectors.toCollection(LinkedHashSet::new));
       injector.injectFixes(fixes);
       compilerRunner.run();
       errorStore.saveState();
       group.forEach(
           node -> {
             int localEffect = 0;
-            Set<Error> triggeredErrors = new HashSet<>();
+            Set<Error> triggeredErrors = new LinkedHashSet<>();
             for (Region region : node.regions) {
               Result errorComparisonResult = errorStore.compareByRegion(region);
               localEffect += errorComparisonResult.size;

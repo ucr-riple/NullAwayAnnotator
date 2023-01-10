@@ -31,6 +31,7 @@ import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
+import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -69,14 +70,8 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
                         && field.isOnFieldWithName(candidate.calleeMember),
                 TrackerNode.hash(field.clazz))
             .map(trackerNode -> trackerNode.region)
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     ans.addAll(config.getAdapter().getFieldRegionScope(field));
-    if (!config.useImpactCache) {
-      // Errors of type `METHOD_NO_INIT` and `FIELD_NO_INIT` are reported in null region that might
-      // have been resolved. Caching approach does not rely on build results to compute the set of
-      // resolved errors.
-      ans.add(new Region(location.clazz, "null"));
-    }
     return Optional.of(ans);
   }
 }

@@ -129,7 +129,8 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
   public OnField getLocationOnField(String clazz, String field) {
     FieldDeclarationInfo candidate =
         findNodeWithHashHint(node -> node.clazz.equals(clazz), FieldDeclarationInfo.hash(clazz));
-    Set<String> fieldNames = Sets.newHashSet(field);
+    Set<String> fieldNames = Sets.newLinkedHashSet();
+    fieldNames.add(field);
     if (candidate == null) {
       // field is on byte code.
       return null;

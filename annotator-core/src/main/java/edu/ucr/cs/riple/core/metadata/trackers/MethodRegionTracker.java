@@ -33,6 +33,7 @@ import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.scanner.Serializer;
+import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -76,14 +77,6 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
     Set<Region> regions = getCallersOfMethod(onMethod.clazz, onMethod.method);
     // Add method itself.
     regions.add(new Region(onMethod.clazz, onMethod.method));
-    // Add "null" region for calls in constructors. If the target method assigns a @Nullable value
-    // to a @Nonnull field, it is possible that NullAway report an initialization error in "null"
-    // region, therefore it is a potentially impacted region.
-    regions.addAll(
-        regions.stream()
-            .filter(Region::isOnConstructor)
-            .map(region -> new Region(region.clazz, "null"))
-            .collect(Collectors.toSet()));
     // Add immediate super method.
     MethodNode parent = tree.getClosestSuperMethod(onMethod.method, onMethod.clazz);
     if (parent != null && parent.isNonTop()) {
@@ -105,6 +98,6 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
                 candidate.calleeClass.equals(clazz) && candidate.calleeMember.equals(method),
             TrackerNode.hash(clazz))
         .map(node -> node.region)
-        .collect(Collectors.toSet());
+        .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 }

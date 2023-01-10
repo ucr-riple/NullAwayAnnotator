@@ -8,8 +8,8 @@ import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -66,7 +66,7 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
   public Stream<OnMethod> findInitializers(Set<OnField> uninitializedFields) {
     // Set does not have a get() method, instead we use map here which can find the element
     // efficiently.
-    Map<String, Class> classes = new HashMap<>();
+    Map<String, Class> classes = new LinkedHashMap<>();
     uninitializedFields.forEach(
         onField ->
             findNodesWithHashHint(
@@ -90,7 +90,7 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
      * HashMap of initializer methods. Used HashMap for fast retrievals based on the method's
      * signature.
      */
-    private final HashMap<String, InitializerMethod> initializers;
+    private final LinkedHashMap<String, InitializerMethod> initializers;
     /** Fully qualified name of the class. */
     private final String clazz;
     /** Path to file where the class exists. */
@@ -103,7 +103,7 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
      * @param path Path to the file where the class exists.
      */
     private Class(String clazz, Path path) {
-      this.initializers = new HashMap<>();
+      this.initializers = new LinkedHashMap<>();
       this.clazz = clazz;
       this.path = path;
     }
@@ -181,7 +181,7 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
 
     private InitializerMethod(String signature) {
       this.signature = signature;
-      this.fields = new HashSet<>();
+      this.fields = new LinkedHashSet<>();
     }
 
     @Override

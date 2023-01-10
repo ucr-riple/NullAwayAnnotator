@@ -44,7 +44,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -111,9 +111,8 @@ public class Utility {
       reportJson.put("Lower Bound EFFECT", report.getLowerBoundEffectOnDownstreamDependencies());
       reportJson.put("FINISHED", !report.requiresFurtherProcess(config));
       JSONArray followUps = new JSONArray();
-      if (config.chain && report.localEffect < 1) {
-        followUps.addAll(report.tree.stream().map(Fix::getJson).collect(Collectors.toList()));
-      }
+      followUps.addAll(report.tree.stream().map(Fix::getJson).collect(Collectors.toList()));
+      followUps.remove(report.root.getJson());
       reportJson.put("TREE", followUps);
       reportsJson.add(reportJson);
     }
@@ -158,7 +157,7 @@ public class Utility {
   public static Set<Error> readErrorsFromOutputDirectory(
       Config config, ModuleInfo info, FieldDeclarationStore fieldDeclarationStore) {
     Path errorsPath = info.dir.resolve("errors.tsv");
-    Set<Error> errors = new HashSet<>();
+    Set<Error> errors = new LinkedHashSet<>();
     try {
       try (BufferedReader br =
           Files.newBufferedReader(errorsPath.toFile().toPath(), Charset.defaultCharset())) {

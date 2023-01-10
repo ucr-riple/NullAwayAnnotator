@@ -35,8 +35,8 @@ import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,7 +50,7 @@ public class DownstreamImpact extends Impact {
    * Map of parameters in target module that will receive {@code Nullable} value if targeted method
    * in node is annotated as {@code @Nullable} with their corresponding triggered errors.
    */
-  private final HashMap<OnParameter, Set<Error>> impactedParametersMap;
+  private final LinkedHashMap<OnParameter, Set<Error>> impactedParametersMap;
   /**
    * Effect of injecting a {@code Nullable} annotation on pointing method of node on downstream
    * dependencies.
@@ -61,7 +61,7 @@ public class DownstreamImpact extends Impact {
     super(fix);
     // Only store impacts of fixes targeting methods.
     Preconditions.checkArgument(fix.isOnMethod());
-    this.impactedParametersMap = new HashMap<>();
+    this.impactedParametersMap = new LinkedHashMap<>();
     this.triggeredErrors = ImmutableSet.of();
   }
 
@@ -100,7 +100,7 @@ public class DownstreamImpact extends Impact {
                   .filter(
                       error ->
                           error.isSingleFix() && error.toResolvingLocation().equals(onParameter))
-                  .collect(Collectors.toSet());
+                  .collect(Collectors.toCollection(LinkedHashSet::new));
           impactedParametersMap.put(onParameter, triggered);
         });
   }
@@ -134,7 +134,7 @@ public class DownstreamImpact extends Impact {
    */
   @Override
   public void updateStatusAfterInjection(Collection<Fix> fixes) {
-    Set<OnParameter> annotatedParameters = new HashSet<>();
+    Set<OnParameter> annotatedParameters = new LinkedHashSet<>();
     Set<Error> temp = Sets.newHashSet(triggeredErrors);
     fixes.forEach(
         fix ->

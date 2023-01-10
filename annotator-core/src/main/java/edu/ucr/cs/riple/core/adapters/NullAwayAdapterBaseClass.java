@@ -34,6 +34,7 @@ import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -85,7 +86,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
             // extremely dependent on the format of NullAway error messages. Should be watched
             // carefully and updated if the format is changed by NullAway (maybe regex?).
             .map(s -> s.substring(0, s.indexOf("(")).trim())
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     if (fields.size() == 0) {
       throw new RuntimeException(
           "Could not extract any uninitialized field in message for initializer error in version "

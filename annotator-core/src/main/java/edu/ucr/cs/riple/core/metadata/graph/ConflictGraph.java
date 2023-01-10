@@ -30,8 +30,8 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -50,11 +50,11 @@ public class ConflictGraph {
    * Please note that this is a graph coloring problem, set of groups is calculated using a greedy
    * algorithm can may not be optimal.
    */
-  private final HashMap<Integer, Set<Node>> groups;
+  private final LinkedHashMap<Integer, Set<Node>> groups;
 
   public ConflictGraph() {
     nodes = MultimapBuilder.hashKeys().arrayListValues().build();
-    groups = new HashMap<>();
+    groups = new LinkedHashMap<>();
   }
 
   /**
@@ -131,7 +131,7 @@ public class ConflictGraph {
     }
     for (int i = 0; i < result.length; i++) {
       if (!groups.containsKey(result[i])) {
-        Set<Node> newList = new HashSet<>();
+        Set<Node> newList = new LinkedHashSet<>();
         newList.add(allNodes.get(i));
         groups.put(result[i], newList);
       } else {

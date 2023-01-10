@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.scanner.generatedcode;
 
 import com.google.common.collect.ImmutableSet;
 import com.sun.source.util.TreePath;
+import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 /**
@@ -51,7 +52,9 @@ public class SymbolSourceResolver {
     // this exception can inform the user.
     throw new RuntimeException(
         "Unrecognized resource detectors are requested: "
-            + activatedSourceDetectors.stream().map(Enum::name).collect(Collectors.toSet()));
+            + activatedSourceDetectors.stream()
+                .map(Enum::name)
+                .collect(Collectors.toCollection(LinkedHashSet::new)));
   }
 
   /**

@@ -34,6 +34,7 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -69,7 +70,9 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
    */
   protected Set<Fix> getTriggeredFixesFromDownstream(Node node) {
     Set<Location> currentLocationsTargetedByTree =
-        node.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
+        node.tree.stream()
+            .map(Fix::toLocation)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     return downstreamImpactCache.getTriggeredErrorsForCollection(node.tree).stream()
         .filter(
             error ->
@@ -84,6 +87,6 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
                         error.toResolvingLocation().toParameter(), config.nullableAnnot),
                     "PASSING_NULLABLE",
                     false))
-        .collect(Collectors.toSet());
+        .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 }

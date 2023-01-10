@@ -3,7 +3,7 @@ package edu.ucr.cs.riple.core.metadata.field;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.Hashable;
 import java.nio.file.Path;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -19,7 +19,7 @@ public class FieldDeclarationInfo implements Hashable {
   public FieldDeclarationInfo(Path path, String clazz) {
     this.clazz = clazz;
     this.pathToSourceFile = path;
-    this.fields = new HashSet<>();
+    this.fields = new LinkedHashSet<>();
   }
 
   @Override

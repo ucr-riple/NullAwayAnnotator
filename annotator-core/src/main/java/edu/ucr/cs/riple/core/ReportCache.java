@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.core;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /** Reports cache. Used to detect fixes that has already been processed. */
@@ -48,7 +48,7 @@ public class ReportCache {
   private boolean stateUpdated;
 
   public ReportCache(Config config) {
-    this.store = new HashMap<>();
+    this.store = new LinkedHashMap<>();
     this.enabled = config.useCache;
     this.stateUpdated = true;
   }

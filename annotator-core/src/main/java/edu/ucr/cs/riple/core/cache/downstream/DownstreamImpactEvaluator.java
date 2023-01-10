@@ -33,7 +33,8 @@ import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -49,13 +50,13 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
    * nullable flow back to upstream module (target) from downstream dependencies, if annotated as
    * {@code @Nullable}.
    */
-  private final HashMap<OnMethod, Set<OnParameter>> nullableFlowMap;
+  private final LinkedHashMap<OnMethod, Set<OnParameter>> nullableFlowMap;
 
   private final MethodDeclarationTree methodDeclarationTree;
 
   public DownstreamImpactEvaluator(DownstreamDependencySupplier supplier) {
     super(supplier);
-    this.nullableFlowMap = new HashMap<>();
+    this.nullableFlowMap = new LinkedHashMap<>();
     this.methodDeclarationTree = supplier.getMethodDeclarationTree();
   }
 
@@ -80,7 +81,7 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
                                           && methodDeclarationTree.declaredInModule(
                                               error.toResolvingParameter()))
                               .map(Error::toResolvingParameter)
-                              .collect(Collectors.toSet());
+                              .collect(Collectors.toCollection(LinkedHashSet::new));
                       if (!parameters.isEmpty()) {
                         // Update path for each parameter. These triggered fixes does not have an
                         // actual physical path since they are provided as a jar file in downstream

@@ -30,6 +30,7 @@ import static java.util.stream.Collectors.mapping;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSortedSet;
 import java.nio.file.Path;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.SortedSet;
@@ -132,7 +133,7 @@ public class FileOffsetStore {
     this.offsetChanges.addAll(
         changes.stream()
             .map(offsetChange -> offsetChange.getOffsetWithoutChanges(offsetChanges))
-            .collect(Collectors.toSet()));
+            .collect(Collectors.toCollection(LinkedHashSet::new)));
     this.summarize();
   }
 

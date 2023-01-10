@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -113,6 +114,9 @@ public class Index {
    * @return Set of regions.
    */
   public Set<Region> getRegionsOfMatchingItems(Predicate<Error> predicate) {
-    return values().stream().filter(predicate).map(t -> t.region).collect(Collectors.toSet());
+    return values().stream()
+        .filter(predicate)
+        .map(t -> t.region)
+        .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 }

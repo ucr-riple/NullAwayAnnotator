@@ -35,7 +35,7 @@ import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,7 +54,7 @@ public class Injector {
     // call for addition and deletion separately.
     Map<Path, List<Change>> map =
         changes.stream().collect(groupingBy(change -> change.location.path));
-    Set<FileOffsetStore> offsets = new HashSet<>();
+    Set<FileOffsetStore> offsets = new LinkedHashSet<>();
     map.forEach(
         (path, changeList) -> {
           CompilationUnit tree;
@@ -63,8 +63,8 @@ public class Injector {
           } catch (IOException exception) {
             return;
           }
-          Set<Modification> modifications = new HashSet<>();
-          Set<ImportDeclaration> imports = new HashSet<>();
+          Set<Modification> modifications = new LinkedHashSet<>();
+          Set<ImportDeclaration> imports = new LinkedHashSet<>();
           for (Change change : changeList) {
             try {
               Modification modification = change.translate(tree);

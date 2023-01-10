@@ -48,6 +48,7 @@ import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnParameter;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -107,13 +108,13 @@ public class Annotator {
         Utility.readFixesFromOutputDirectory(config, fieldDeclarationStore).stream()
             .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
             .map(Fix::toField)
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     FieldInitializationAnalysis analysis = new FieldInitializationAnalysis(config);
     Set<AddAnnotation> initializers =
         analysis
             .findInitializers(uninitializedFields)
             .map(onMethod -> new AddMarkerAnnotation(onMethod, config.initializerAnnot))
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     this.injector.injectAnnotations(initializers);
   }
 
@@ -187,12 +188,14 @@ public class Annotator {
         latestReports.stream()
             .filter(Report::approved)
             .flatMap(report -> config.chain ? report.tree.stream() : Stream.of(report.root))
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     injector.injectFixes(selectedFixes);
 
     // Update log.
     config.log.updateInjectedAnnotations(
-        selectedFixes.stream().map(fix -> fix.change).collect(Collectors.toSet()));
+        selectedFixes.stream()
+            .map(fix -> fix.change)
+            .collect(Collectors.toCollection(LinkedHashSet::new)));
 
     // Update impact saved state.
     downstreamImpactCache.updateImpactsAfterInjection(selectedFixes);
@@ -283,7 +286,7 @@ public class Annotator {
             // Filter null values from map above.
             .filter(Objects::nonNull)
             .map(node -> new AddMarkerAnnotation(node.location, config.nullUnMarkedAnnotation))
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     injector.injectAnnotations(nullUnMarkedAnnotations);
     // Update log.
     config.log.updateInjectedAnnotations(nullUnMarkedAnnotations);
@@ -309,14 +312,14 @@ public class Annotator {
                     fieldDeclarationStore.getLocationOnField(
                         error.getRegion().clazz, error.getRegion().member))
             .filter(Objects::nonNull)
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
 
     Set<AddAnnotation> suppressWarningsAnnotations =
         fieldsWithSuppressWarnings.stream()
             .map(
                 onField ->
                     new AddSingleElementAnnotation(onField, "SuppressWarnings", "NullAway", false))
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     injector.injectAnnotations(suppressWarningsAnnotations);
     // Update log.
     config.log.updateInjectedAnnotations(suppressWarningsAnnotations);
@@ -335,7 +338,7 @@ public class Annotator {
                 fix ->
                     new AddSingleElementAnnotation(
                         fix.toField(), "SuppressWarnings", "NullAway.Init", false))
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     injector.injectAnnotations(initializationSuppressWarningsAnnotations);
     // Update log.
     config.log.updateInjectedAnnotations(initializationSuppressWarningsAnnotations);

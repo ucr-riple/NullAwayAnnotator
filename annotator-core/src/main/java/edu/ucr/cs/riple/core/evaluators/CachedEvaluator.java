@@ -35,6 +35,7 @@ import edu.ucr.cs.riple.core.cache.TargetModuleCache;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -100,7 +101,7 @@ public class CachedEvaluator extends AbstractEvaluator {
                 node ->
                     new Impact(
                         node.root, node.triggeredErrors, node.triggeredFixesFromDownstreamErrors))
-            .collect(Collectors.toSet()));
+            .collect(Collectors.toCollection(LinkedHashSet::new)));
 
     // collect requested fixes for each report which was added to conflict graph.
     Map<Report, Set<Fix>> reportFixMap =
@@ -112,7 +113,7 @@ public class CachedEvaluator extends AbstractEvaluator {
     reportFixMap.forEach(
         (report, processedFixes) -> {
           // update the tree with the new triggered fixes.
-          Set<Fix> newTree = Sets.newHashSet(report.tree);
+          LinkedHashSet<Fix> newTree = Sets.newLinkedHashSet(report.tree);
           newTree.addAll(processedFixes);
           // compute the set of triggered errors for the entire tree.
           Set<Error> triggeredErrors = cache.getTriggeredErrorsForCollection(newTree);

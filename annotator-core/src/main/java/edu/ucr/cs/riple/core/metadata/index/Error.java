@@ -32,8 +32,8 @@ import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -227,7 +227,7 @@ public class Error {
     // suggested in the given collection.
 
     // Collect all reasons each fix is suggested across the given collection.
-    Map<Fix, Set<String>> fixReasonsMap = new HashMap<>();
+    Map<Fix, Set<String>> fixReasonsMap = new LinkedHashMap<>();
     errors.stream()
         .flatMap(error -> error.resolvingFixes.stream())
         .forEach(
@@ -235,7 +235,7 @@ public class Error {
               if (fixReasonsMap.containsKey(fix)) {
                 fixReasonsMap.get(fix).addAll(fix.reasons);
               } else {
-                fixReasonsMap.put(fix, new HashSet<>(fix.reasons));
+                fixReasonsMap.put(fix, new LinkedHashSet<>(fix.reasons));
               }
             });
 

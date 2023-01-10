@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.core.metadata.method;
 
 import edu.ucr.cs.riple.core.metadata.Hashable;
 import edu.ucr.cs.riple.injector.location.OnMethod;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -138,7 +138,7 @@ public class MethodNode implements Hashable {
    */
   void addChild(Integer id) {
     if (children == null) {
-      children = new HashSet<>();
+      children = new LinkedHashSet<>();
     }
     children.add(id);
   }

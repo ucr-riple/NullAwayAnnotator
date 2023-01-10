@@ -31,8 +31,8 @@ import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.scanner.Serializer;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.annotation.Nullable;
 
@@ -43,10 +43,10 @@ import javax.annotation.Nullable;
 public class MethodDeclarationTree extends MetaData<MethodNode> {
 
   /** Each method has a unique id across all methods. This hashmap, maps ids to nodes. */
-  private HashMap<Integer, MethodNode> nodes;
+  private LinkedHashMap<Integer, MethodNode> nodes;
 
   /** Set of all classes flat name declared in module. */
-  private HashSet<String> classNames;
+  private LinkedHashSet<String> classNames;
 
   public MethodDeclarationTree(Config config) {
     super(config, config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
@@ -55,8 +55,8 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
   @Override
   protected void setup() {
     super.setup();
-    this.classNames = new HashSet<>();
-    this.nodes = new HashMap<>();
+    this.classNames = new LinkedHashSet<>();
+    this.nodes = new LinkedHashMap<>();
     // The root node of this tree with id: 0.
     nodes.put(MethodNode.TOP.id, MethodNode.TOP);
   }
@@ -131,10 +131,10 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
     if (node.children == null) {
       return ImmutableSet.of();
     }
-    Set<MethodNode> ans = new HashSet<>();
-    Set<Integer> workList = new HashSet<>(node.children);
+    Set<MethodNode> ans = new LinkedHashSet<>();
+    Set<Integer> workList = new LinkedHashSet<>(node.children);
     while (!workList.isEmpty()) {
-      Set<Integer> tmp = new HashSet<>();
+      Set<Integer> tmp = new LinkedHashSet<>();
       for (Integer id : workList) {
         MethodNode selected = nodes.get(id);
         if (!ans.contains(selected)) {
