@@ -24,9 +24,7 @@
 
 package edu.ucr.cs.riple.core;
 
-import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.nio.file.Paths;
-import java.util.Set;
 
 /** Starting point. */
 public class Main {
@@ -46,23 +44,5 @@ public class Main {
     }
     Annotator annotator = new Annotator(config);
     annotator.start();
-  }
-
-  public static boolean isTargetFix(Fix fix) {
-    return (fix.isOnField()
-            && fix.toField().clazz.equals("com.badlogic.gdx.graphics.glutils.VertexBufferObject")
-            && fix.toField().variables.equals(Set.of("byteBuffer")))
-        || (fix.isOnParameter()
-            && fix.toParameter().method.equals("disposeUnsafeByteBuffer(java.nio.ByteBuffer)")
-            && fix.toParameter().clazz.equals("com.badlogic.gdx.utils.BufferUtils")
-            && fix.toParameter().index == 0)
-        || (fix.isOnParameter()
-            && fix.toParameter().method.equals("copy(float[],java.nio.Buffer,int,int)")
-            && fix.toParameter().clazz.equals("com.badlogic.gdx.utils.BufferUtils")
-            && fix.toParameter().index == 1)
-        || (fix.isOnParameter()
-            && fix.toParameter().method.equals("copyJni(float[],java.nio.Buffer,int,int)")
-            && fix.toParameter().clazz.equals("com.badlogic.gdx.utils.BufferUtils")
-            && fix.toParameter().index == 1);
   }
 }
