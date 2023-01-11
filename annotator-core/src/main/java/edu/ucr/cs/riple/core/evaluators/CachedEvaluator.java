@@ -69,11 +69,13 @@ public class CachedEvaluator extends AbstractEvaluator {
   protected void initializeFixGraph(ImmutableSet<Report> reports) {
     super.initializeFixGraph(reports);
     // add only fixes that are not stored in cache.
-    reports.stream()
-        .filter(report -> report.requiresFurtherProcess(config))
-        .flatMap(report -> report.getFixesForNextIteration().stream())
-        .filter(cache::isUnknown)
-        .forEach(graph::addNodeToVertices);
+    Set<Fix> fixes =
+        reports.stream()
+            .filter(report -> report.requiresFurtherProcess(config))
+            .flatMap(report -> report.getFixesForNextIteration().stream())
+            .filter(cache::isUnknown)
+            .collect(Collectors.toSet());
+    fixes.forEach(graph::addNodeToVertices);
     System.out.println(
         "Retrieved "
             + (reports.stream().mapToLong(r -> r.tree.size()).sum() - graph.getNodes().count())
@@ -117,9 +119,9 @@ public class CachedEvaluator extends AbstractEvaluator {
           newTree.addAll(processedFixes);
           // compute the set of triggered errors for the entire tree.
           Set<Error> triggeredErrors = cache.getTriggeredErrorsForCollection(newTree);
-          report.localEffect =
-              triggeredErrors.size()
-                  - supplier.getErrorStore().getNumberOfResolvedFixesWithCollection(newTree);
+          Set<Error> resolvedErrors =
+              supplier.getErrorStore().getNumberOfResolvedFixesWithCollection(newTree);
+          report.localEffect = triggeredErrors.size() - resolvedErrors.size();
           report.triggeredErrors = ImmutableSet.copyOf(triggeredErrors);
           // get fixes triggered from downstream.
           report.triggeredFixesFromDownstreamErrors =

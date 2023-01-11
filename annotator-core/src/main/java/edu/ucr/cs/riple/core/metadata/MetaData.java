@@ -25,8 +25,7 @@
 package edu.ucr.cs.riple.core.metadata;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.LinkedHashMultimap;
 import edu.ucr.cs.riple.core.Config;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -47,9 +46,10 @@ public abstract class MetaData<T extends Hashable> {
 
   /**
    * Contents, every element is mapped to it's computed hash, note that two different items can have
-   * an identical hash, therefore it is of type {@link Multimap} (not HashMap) to hold both items.
+   * an identical hash, therefore it is of type {@link LinkedHashMultimap} (not HashMap) to hold
+   * both items.
    */
-  protected final Multimap<Integer, T> contents;
+  protected final LinkedHashMultimap<Integer, T> contents;
 
   /** Annotator config. */
   protected final Config config;
@@ -62,7 +62,7 @@ public abstract class MetaData<T extends Hashable> {
    * @param path Path to the file containing the data.
    */
   public MetaData(Config config, Path path) {
-    contents = MultimapBuilder.hashKeys().arrayListValues().build();
+    contents = LinkedHashMultimap.create();
     this.config = config;
     setup();
     try {
@@ -80,7 +80,7 @@ public abstract class MetaData<T extends Hashable> {
    * @param paths Paths to all files containing data.
    */
   public MetaData(Config config, ImmutableSet<Path> paths) {
-    contents = MultimapBuilder.hashKeys().arrayListValues().build();
+    contents = LinkedHashMultimap.create();
     this.config = config;
     setup();
     paths.forEach(

@@ -24,8 +24,7 @@
 
 package edu.ucr.cs.riple.core.metadata.graph;
 
-import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.LinkedHashMultimap;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,7 +43,7 @@ import java.util.stream.Stream;
 public class ConflictGraph {
 
   /** Nodes in this graph */
-  public final Multimap<Integer, Node> nodes;
+  public final LinkedHashMultimap<Integer, Node> nodes;
   /**
    * Groups in this graph, nodes which does not have any conflict in regions will in the same group.
    * Please note that this is a graph coloring problem, set of groups is calculated using a greedy
@@ -53,7 +52,7 @@ public class ConflictGraph {
   private final LinkedHashMap<Integer, Set<Node>> groups;
 
   public ConflictGraph() {
-    nodes = MultimapBuilder.hashKeys().arrayListValues().build();
+    nodes = LinkedHashMultimap.create();
     groups = new LinkedHashMap<>();
   }
 

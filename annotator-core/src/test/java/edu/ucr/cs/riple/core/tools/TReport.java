@@ -30,6 +30,7 @@ import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -69,7 +70,8 @@ public class TReport extends Report {
           triggered.stream().map(TError::new).collect(ImmutableSet.toImmutableSet());
     }
     if (addToTree != null) {
-      this.tree = addToTree.stream().map(TFix::new).collect(Collectors.toSet());
+      this.tree =
+          addToTree.stream().map(TFix::new).collect(Collectors.toCollection(LinkedHashSet::new));
     }
   }
 

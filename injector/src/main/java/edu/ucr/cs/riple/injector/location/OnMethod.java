@@ -120,6 +120,6 @@ public class OnMethod extends Location {
 
   @Override
   public String toString() {
-    return "OnMethod{" + "method='" + method + '\'' + ", clazz='" + clazz + '\'' + '}';
+    return "OnMethod{" + "method='" + method + ", clazz='" + clazz + ", path=" + path + '}';
   }
 }

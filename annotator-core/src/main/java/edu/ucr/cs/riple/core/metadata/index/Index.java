@@ -27,8 +27,7 @@ package edu.ucr.cs.riple.core.metadata.index;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.LinkedHashMultimap;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -47,7 +46,7 @@ import java.util.stream.Collectors;
 public class Index {
 
   /** Contents of the index. */
-  private final Multimap<Region, Error> items;
+  private final LinkedHashMultimap<Region, Error> items;
   /** Factory instance. */
   private final Factory factory;
   /** Paths to the file to load the content from. */
@@ -62,7 +61,7 @@ public class Index {
    */
   public Index(ImmutableSet<Path> paths, Factory factory) {
     this.paths = paths;
-    this.items = MultimapBuilder.hashKeys().arrayListValues().build();
+    this.items = LinkedHashMultimap.create();
     this.factory = factory;
   }
 

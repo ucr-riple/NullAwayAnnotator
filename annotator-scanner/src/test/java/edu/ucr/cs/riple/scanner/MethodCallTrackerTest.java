@@ -114,4 +114,28 @@ public class MethodCallTrackerTest extends AnnotatorScannerBaseTest<TrackerNodeD
             new TrackerNodeDisplay("edu.ucr.A", "null", "edu.ucr.B", "staticB()"))
         .doTest();
   }
+
+  @Test
+  public void constructorCallTest() {
+    tester
+        .addSourceLines(
+            "edu/ucr/A.java",
+            "package edu.ucr;",
+            "public class A {",
+            "   Object b;",
+            "   A(Object b) {",
+            "      this.b = b;",
+            "   }",
+            "}",
+            "class B {",
+            "    void run() {",
+            "        A a = new A(null);",
+            "    }",
+            "}")
+        .setExpectedOutputs(
+            new TrackerNodeDisplay("edu.ucr.B", "run()", "edu.ucr.A", "A(java.lang.Object)"),
+            new TrackerNodeDisplay(
+                "edu.ucr.A", "A(java.lang.Object)", "java.lang.Object", "Object()"))
+        .doTest();
+  }
 }

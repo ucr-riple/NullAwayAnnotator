@@ -38,6 +38,7 @@ import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.riple.scanner.out.ClassInfo;
@@ -61,7 +62,8 @@ public class AnnotatorScanner extends BugChecker
         BugChecker.MethodTreeMatcher,
         BugChecker.IdentifierTreeMatcher,
         BugChecker.VariableTreeMatcher,
-        BugChecker.ClassTreeMatcher {
+        BugChecker.ClassTreeMatcher,
+        BugChecker.NewClassTreeMatcher {
 
   /**
    * Scanner context to store the state of the checker. Could not use {@link VisitorState#context}
@@ -97,6 +99,16 @@ public class AnnotatorScanner extends BugChecker
     if (!config.callTrackerIsActive()) {
       return Description.NO_MATCH;
     }
+    config
+        .getSerializer()
+        .serializeCallGraphNode(
+            new TrackerNode(config, ASTHelpers.getSymbol(tree), state.getPath()));
+    return Description.NO_MATCH;
+  }
+
+  @Override
+  public Description matchNewClass(NewClassTree tree, VisitorState state) {
+    Config config = context.getConfig();
     config
         .getSerializer()
         .serializeCallGraphNode(

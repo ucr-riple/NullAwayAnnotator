@@ -133,6 +133,6 @@ public class OnField extends Location {
 
   @Override
   public String toString() {
-    return "OnField{" + "variables=" + variables + ", clazz='" + clazz + '\'' + '}';
+    return "OnField{" + "variables=" + variables + ", clazz=" + clazz + ", path=" + path + '}';
   }
 }

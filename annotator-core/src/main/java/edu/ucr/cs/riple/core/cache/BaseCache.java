@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.cache;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -33,6 +34,7 @@ import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 /**
@@ -70,6 +72,10 @@ public abstract class BaseCache<T extends Impact, S extends Map<Location, T>>
 
   @Override
   public ImmutableSet<Error> getTriggeredErrorsForCollection(Collection<Fix> fixes) {
+    Preconditions.checkArgument(
+        store
+            .keySet()
+            .containsAll(fixes.stream().map(Fix::toLocation).collect(Collectors.toSet())));
     return fixes.stream()
         .map(fix -> store.get(fix.toLocation()))
         .filter(Objects::nonNull)

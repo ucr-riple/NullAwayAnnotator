@@ -125,12 +125,12 @@ public class OnParameter extends Location {
     return "OnParameter{"
         + "class='"
         + clazz
-        + '\''
         + ", method='"
         + method
-        + '\''
         + ", index="
         + index
+        + ", path="
+        + path
         + '}';
   }
 }
