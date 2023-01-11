@@ -70,7 +70,9 @@ public class MethodCallTrackerTest extends AnnotatorScannerBaseTest<TrackerNodeD
             "class Other {",
             "   Object foo() { return null; };",
             "}")
-        .setExpectedOutputs(new TrackerNodeDisplay("edu.ucr.A", "bar()", "edu.ucr.Other", "foo()"))
+        .setExpectedOutputs(
+            new TrackerNodeDisplay("edu.ucr.A", "bar()", "edu.ucr.Other", "foo()"),
+            new TrackerNodeDisplay("edu.ucr.A", "bar()", "edu.ucr.Other", "Other()"))
         .doTest();
   }
 
@@ -108,10 +110,16 @@ public class MethodCallTrackerTest extends AnnotatorScannerBaseTest<TrackerNodeD
             "}")
         .setExpectedOutputs(
             new TrackerNodeDisplay("edu.ucr.A", "f0", "edu.ucr.B", "get()"),
+            new TrackerNodeDisplay("edu.ucr.A", "b", "edu.ucr.B", "B()"),
             new TrackerNodeDisplay("edu.ucr.A", "f1", "edu.ucr.B", "staticB()"),
             new TrackerNodeDisplay("edu.ucr.A", "f2", "edu.ucr.C", "get()"),
             new TrackerNodeDisplay("edu.ucr.A", "f3", "edu.ucr.C", "get()"),
-            new TrackerNodeDisplay("edu.ucr.A", "null", "edu.ucr.B", "staticB()"))
+            new TrackerNodeDisplay("edu.ucr.A", "null", "edu.ucr.B", "staticB()"),
+            new TrackerNodeDisplay("edu.ucr.B", "c", "edu.ucr.C", "C()"),
+            new TrackerNodeDisplay("edu.ucr.B", "get()", "java.lang.Object", "Object()"),
+            new TrackerNodeDisplay("edu.ucr.B", "staticB()", "java.lang.Object", "Object()"),
+            new TrackerNodeDisplay("edu.ucr.B", "staticC", "edu.ucr.C", "C()"),
+            new TrackerNodeDisplay("edu.ucr.C", "get()", "java.lang.Object", "Object()"))
         .doTest();
   }
 
