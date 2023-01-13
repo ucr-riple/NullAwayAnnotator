@@ -50,6 +50,9 @@ public class Log {
    */
   private final List<AddAnnotation> injectedAnnotations = new ArrayList<>();
 
+  /** Total number of downstream dependency builds. */
+  private long numberOfDownstreamBuilds = 0;
+
   /** Resets all log information. */
   public void reset() {
     this.nodes = 0;
@@ -57,6 +60,7 @@ public class Log {
     this.totalTime = 0;
     this.buildTime = 0;
     this.injectedAnnotations.clear();
+    this.numberOfDownstreamBuilds = 0;
   }
 
   @Override
@@ -65,6 +69,8 @@ public class Log {
         + nodes
         + "\nTotal number of Requested builds="
         + requested
+        + "\nTotal number of downstream builds="
+        + numberOfDownstreamBuilds
         + "\nTotal time="
         + totalTime
         + "\nTotal time spent on builds="
@@ -131,5 +137,9 @@ public class Log {
    */
   public List<AddAnnotation> getInjectedAnnotations() {
     return injectedAnnotations;
+  }
+
+  public void incrementDownstreamBuildRequest() {
+    this.numberOfDownstreamBuilds += 1;
   }
 }

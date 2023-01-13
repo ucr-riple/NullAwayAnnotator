@@ -273,6 +273,7 @@ public class Utility {
           nullAwayConfig.writeAsXML(module.nullawayConfig.toString());
         });
     build(config, config.downstreamDependenciesBuildCommand);
+    config.log.incrementDownstreamBuildRequest();
   }
 
   /**
@@ -298,6 +299,7 @@ public class Utility {
             .setFieldInitInfo(initSerializationEnabled);
     nullAwayConfig.writeAsXML(config.target.nullawayConfig.toString());
     build(config, config.buildCommand);
+    config.log.incrementBuildRequest();
   }
 
   /**
@@ -311,7 +313,6 @@ public class Utility {
       long timer = config.log.startTimer();
       Utility.executeCommand(config, command);
       config.log.stopTimerAndCaptureBuildTime(timer);
-      config.log.incrementBuildRequest();
     } catch (Exception e) {
       throw new RuntimeException("Could not run command: " + command);
     }
