@@ -136,6 +136,16 @@ public class ConfigurationTest {
   }
 
   @Test
+  public void testNonnullAnnotations() {
+    ImmutableSet<String> nonnullAnnotations =
+        ImmutableSet.of("com.example2.Nonnull", "com.example1.Nonnull");
+    List<CLIFlag> requiredFlags = new ArrayList<>(requiredFlagsCli);
+    requiredFlags.add(new CLIFlagWithValues("nna", nonnullAnnotations));
+    Config config = new Config(makeCommandLineArguments(requiredFlags));
+    assertEquals(nonnullAnnotations, config.nonnullAnnotations);
+  }
+
+  @Test
   public void testRequiredFlagsMissingForDownstreamDependencyAnalysisCli() {
     String expectedErrorMessage =
         "To activate downstream dependency analysis, all flags [--activate-downstream-dependencies-analysis, --downstream-dependencies-build-command (arg), --nullaway-library-model-loader-path (arg)] must be present!";
@@ -313,6 +323,22 @@ public class ConfigurationTest {
     @Override
     public Stream<String> toStream() {
       return Stream.of("-" + flag, value.toString());
+    }
+  }
+
+  /** Container class for CLI Flag with multiple value. */
+  private static class CLIFlagWithValues extends CLIFlag {
+    /** Flag Value. */
+    private final ImmutableSet<String> values;
+
+    public CLIFlagWithValues(String flag, ImmutableSet<String> values) {
+      super(flag);
+      this.values = values;
+    }
+
+    @Override
+    public Stream<String> toStream() {
+      return Stream.of("-" + flag, String.join(",", values));
     }
   }
 }

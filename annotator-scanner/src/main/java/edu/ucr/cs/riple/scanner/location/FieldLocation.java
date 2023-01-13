@@ -1,7 +1,5 @@
 /*
- * MIT License
- *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Uber Technologies, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,38 +20,34 @@
  * THE SOFTWARE.
  */
 
-import com.vanniktech.maven.publish.SonatypeHost
+package edu.ucr.cs.riple.scanner.location;
 
-buildscript {
-    repositories {
-        mavenCentral()
-        google() // For Gradle 4.0+
-    }
+import com.sun.tools.javac.code.Symbol;
+import javax.lang.model.element.ElementKind;
 
-    dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.1'
-    }
-}
+/**
+ * subtype of {@link AbstractSymbolLocation} targeting class fields. This class is copied from <a
+ * href="https://github.com/uber/NullAway">NullAway</a>.
+ */
+public class FieldLocation extends AbstractSymbolLocation {
 
-plugins {
-    id "net.ltgt.errorprone" version "2.0.1" apply false
-    id 'com.github.sherter.google-java-format' version '0.9'
-    id 'maven-publish'
-    id "com.vanniktech.maven.publish"
-}
+  /** Symbol of targeted class field */
+  protected final Symbol.VarSymbol variableSymbol;
 
-dependencies {
-    implementation deps.build.guava
-    compileOnly deps.apt.autoServiceAnnot
-    annotationProcessor deps.apt.autoService
-    compileOnly deps.build.errorProneCheckApi
+  public FieldLocation(Symbol target) {
+    super(ElementKind.FIELD, target);
+    variableSymbol = (Symbol.VarSymbol) target;
+  }
 
-    testImplementation deps.test.errorProneTestHelpers
-}
-
-publishing {
-    mavenPublishing {
-        publishToMavenCentral(SonatypeHost.S01)
-        signAllPublications()
-    }
+  @Override
+  public String tabSeparatedToString() {
+    return String.join(
+        "\t",
+        type.toString(),
+        enclosingClass.flatName(),
+        "null",
+        variableSymbol.toString(),
+        "null",
+        path != null ? path.toString() : "null");
+  }
 }

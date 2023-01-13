@@ -41,6 +41,7 @@ import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.field.FieldInitializationAnalysis;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
@@ -48,6 +49,7 @@ import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnParameter;
+import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -103,7 +105,9 @@ public class Annotator {
     Utility.buildTarget(config, true);
     fieldDeclarationStore = new FieldDeclarationStore(config, config.target);
     methodDeclarationTree = new MethodDeclarationTree(config);
-    config.initializeAdapter(fieldDeclarationStore);
+    NonnullStore nonnullStore =
+        new NonnullStore(config, config.target.dir.resolve(Serializer.NON_NULL_ELEMENTS_FILE_NAME));
+    config.initializeAdapter(fieldDeclarationStore, nonnullStore);
     Set<OnField> uninitializedFields =
         Utility.readFixesFromOutputDirectory(config, fieldDeclarationStore).stream()
             .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))

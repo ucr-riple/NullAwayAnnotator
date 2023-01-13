@@ -123,6 +123,7 @@ public class AnnotatorScanner extends BugChecker
       return Description.NO_MATCH;
     }
     Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(tree);
+    serializeSymIfNonnull(methodSymbol);
     MethodInfo methodInfo = MethodInfo.findOrCreate(methodSymbol, context);
     methodInfo.findParent(state, context);
     methodInfo.setReturnTypeAnnotation(config);
@@ -142,6 +143,7 @@ public class AnnotatorScanner extends BugChecker
       return Description.NO_MATCH;
     }
     serializeSymIfField(ASTHelpers.getSymbol(tree.getInitializer()), state);
+    serializeSymIfNonnull(ASTHelpers.getSymbol(tree));
     return Description.NO_MATCH;
   }
 
@@ -175,6 +177,29 @@ public class AnnotatorScanner extends BugChecker
           .getConfig()
           .getSerializer()
           .serializeFieldGraphNode(new TrackerNode(context.getConfig(), symbol, state.getPath()));
+    }
+  }
+
+  /**
+   * Serializes the symbol if annotated with explicit {@code @Nonnull} annotations.
+   *
+   * @param symbol Given symbol to check its annotations.
+   */
+  private void serializeSymIfNonnull(Symbol symbol) {
+    if (symbol instanceof Symbol.MethodSymbol) {
+      Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) symbol;
+      for (int i = 0; i < methodSymbol.getParameters().size(); i++) {
+        if (SymbolUtil.paramHasNonnullAnnotation(methodSymbol, i, context.getConfig())) {
+          context
+              .getConfig()
+              .getSerializer()
+              .serializeNonnullSym(methodSymbol.getParameters().get(i));
+        }
+      }
+    }
+    if ((symbol.getKind().equals(ElementKind.METHOD) || symbol.getKind().isField())
+        && SymbolUtil.hasNonnullAnnotations(symbol, context.getConfig())) {
+      context.getConfig().getSerializer().serializeNonnullSym(symbol);
     }
   }
 }

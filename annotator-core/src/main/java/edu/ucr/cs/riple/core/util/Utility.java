@@ -253,6 +253,7 @@ public class Utility {
         .setMethodTrackerActivation(activation)
         .addGeneratedCodeDetectors(config.generatedCodeDetectors)
         .setOutput(info.dir)
+        .setNonnullAnnotations(config.getNonnullAnnotations())
         .writeAsXML(info.scannerConfig);
   }
 

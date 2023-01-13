@@ -28,6 +28,7 @@ import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.singleton;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
@@ -510,6 +511,79 @@ public class CoreTest extends BaseCoreTest {
         .toDepth(1)
         .addExpectedReports(
             new TReport(new OnField("A.java", "test.A", Collections.singleton("a")), -2))
+        .start();
+  }
+
+  @Test
+  public void skipNonnullAnnotations() {
+    coreTestHelper
+        .addInputLines(
+            "edu/ucr/Base.java",
+            "package test;",
+            "import javax.annotation.Nonnull;",
+            "public class Base {",
+            "   @Nonnull",
+            "   Object a() {",
+            "        return null;",
+            "   }",
+            "   Object b() {",
+            "        return new Object();",
+            "   }",
+            "   Object c() {",
+            "        return new Object();",
+            "   }",
+            "}")
+        .addInputLines(
+            "Main.java",
+            "package test;",
+            "import javax.annotation.Nonnull;",
+            "public class Main extends Base{",
+            "   @Nonnull Object field;",
+            "   @Nonnull",
+            "   Object foo() {",
+            "       bar(null, null);",
+            "       return null;",
+            "   }",
+            "   Object bar(Object p1, @Nonnull Object p2) {",
+            "       return null;",
+            "   }",
+            "   Object bar1() {",
+            "       return bar(null, null);",
+            "   }",
+            "   @Nonnull",
+            "   Object bar2() {",
+            "       return bar1();",
+            "   }",
+            "   Object a() {",
+            "        return null;",
+            "   }",
+            "   Object b() {",
+            "        return null;",
+            "   }",
+            "   @Nonnull",
+            "   Object c() {",
+            "        return null;",
+            "   }",
+            "}")
+        .toDepth(5)
+        .disableBailOut()
+        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
+        .addExpectedReports(
+            new TReport(
+                new OnMethod("Main.java", "test.Main", "bar(java.lang.Object,java.lang.Object)"),
+                0,
+                Sets.newHashSet(new OnMethod("Main.java", "test.Main", "bar1()")),
+                Collections.emptySet()),
+            new TReport(
+                new OnParameter(
+                    "Main.java", "test.Main", "bar(java.lang.Object,java.lang.Object)", 0),
+                -2),
+            new TReport(new OnMethod("Main.java", "test.Main", "a()"), 0),
+            new TReport(
+                new OnMethod("Main.java", "test.Main", "b()"),
+                -1,
+                Sets.newHashSet(new OnMethod("Base.java", "test.Base", "b()")),
+                Collections.emptySet()))
         .start();
   }
 }

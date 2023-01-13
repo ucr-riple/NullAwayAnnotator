@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.index.Error;
+import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.TrackerNode;
 import edu.ucr.cs.riple.injector.Helper;
@@ -18,8 +19,9 @@ import java.util.stream.Collectors;
 
 public class NullAwayV2Adapter extends NullAwayAdapterBaseClass {
 
-  public NullAwayV2Adapter(Config config, FieldDeclarationStore fieldDeclarationStore) {
-    super(config, fieldDeclarationStore);
+  public NullAwayV2Adapter(
+      Config config, FieldDeclarationStore fieldDeclarationStore, NonnullStore nonnullStore) {
+    super(config, fieldDeclarationStore, nonnullStore);
   }
 
   @Override

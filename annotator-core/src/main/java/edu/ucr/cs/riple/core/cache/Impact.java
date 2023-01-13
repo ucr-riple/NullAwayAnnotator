@@ -29,6 +29,7 @@ import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Set;
 
 /** Stores the set of errors which will be triggered if the containing fix is applied. */
@@ -91,5 +92,22 @@ public class Impact {
    */
   public Location toLocation() {
     return fix.toLocation();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof Impact)) {
+      return false;
+    }
+    Impact impact = (Impact) o;
+    return fix.equals(impact.fix);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(fix);
   }
 }

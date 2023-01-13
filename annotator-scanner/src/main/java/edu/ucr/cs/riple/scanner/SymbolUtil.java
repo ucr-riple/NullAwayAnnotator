@@ -94,6 +94,32 @@ public class SymbolUtil {
   }
 
   /**
+   * Does the symbol have a {@code @Nonnull} declaration or type-use annotation?
+   *
+   * <p>NOTE: this method does not work for checking all annotations of parameters of methods from
+   * class files. For that case, use {@link #paramHasNullableAnnotation(Symbol.MethodSymbol, int,
+   * Config)}
+   */
+  public static boolean hasNonnullAnnotations(Symbol symbol, Config config) {
+    return hasNonnullAnnotations(SymbolUtil.getAllAnnotations(symbol), config);
+  }
+
+  public static boolean hasNonnullAnnotations(
+      Stream<? extends AnnotationMirror> annotations, Config config) {
+    return annotations
+        .map(anno -> anno.getAnnotationType().toString())
+        .anyMatch(anno -> isNonnullAnnotation(anno, config));
+  }
+
+  private static boolean isNonnullAnnotation(String annotName, Config config) {
+    return annotName.endsWith(".NonNull")
+        || annotName.endsWith(".NotNull")
+        || annotName.endsWith(".Nonnull")
+        || annotName.equals("androidx.annotation.RecentlyNonNull")
+        || config.isNonnullAnnotation(annotName);
+  }
+
+  /**
    * Check whether an annotation should be treated as equivalent to <code>@Nullable</code>.
    *
    * @param annotName annotation name
@@ -116,6 +142,15 @@ public class SymbolUtil {
   public static boolean paramHasNullableAnnotation(
       Symbol.MethodSymbol symbol, int paramInd, Config config) {
     return hasNullableAnnotation(getAllAnnotationsForParameter(symbol, paramInd), config);
+  }
+
+  /**
+   * Does the parameter of {@code symbol} at {@code paramInd} have a {@code @Nonnull} declaration or
+   * type-use annotation? This method works for methods defined in either source or class files.
+   */
+  public static boolean paramHasNonnullAnnotation(
+      Symbol.MethodSymbol symbol, int paramInd, Config config) {
+    return hasNonnullAnnotations(getAllAnnotationsForParameter(symbol, paramInd), config);
   }
 
   /**

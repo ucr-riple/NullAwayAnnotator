@@ -60,12 +60,16 @@ public class ScannerConfigWriter {
   /** Set of activated generated code detectors. */
   private final Set<SourceType> activatedGeneratedCodeDetectors;
 
+  /** Set of {@code @Nonnull} annotations. */
+  private ImmutableSet<String> nonnullAnnotations;
+
   public ScannerConfigWriter() {
     this.methodTrackerIsActive = false;
     this.fieldTrackerIsActive = false;
     this.callTrackerIsActive = false;
     this.classTrackerIsActive = false;
     this.activatedGeneratedCodeDetectors = new LinkedHashSet<>();
+    this.nonnullAnnotations = ImmutableSet.of();
   }
 
   public ScannerConfigWriter setOutput(Path output) {
@@ -95,6 +99,11 @@ public class ScannerConfigWriter {
 
   public ScannerConfigWriter addGeneratedCodeDetectors(ImmutableSet<SourceType> sourceType) {
     this.activatedGeneratedCodeDetectors.addAll(sourceType);
+    return this;
+  }
+
+  public ScannerConfigWriter setNonnullAnnotations(ImmutableSet<String> nonnullAnnotations) {
+    this.nonnullAnnotations = nonnullAnnotations;
     return this;
   }
 
@@ -157,6 +166,16 @@ public class ScannerConfigWriter {
             Element processorElement = doc.createElement(detectors.name());
             processorElement.setAttribute("active", "true");
             codeDetectors.appendChild(processorElement);
+          });
+
+      // Nonnull annotations
+      Element nonnullAnnotations = doc.createElement("annotations");
+      rootElement.appendChild(nonnullAnnotations);
+      this.nonnullAnnotations.forEach(
+          nonnull -> {
+            Element nonnullElements = doc.createElement("nonnull");
+            nonnullElements.setTextContent(nonnull);
+            nonnullAnnotations.appendChild(nonnullElements);
           });
 
       // Writings
