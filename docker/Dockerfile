@@ -109,7 +109,6 @@ RUN mkdir -p /var/annotator/
 COPY ./start.sh /var/annotator/start.sh
 COPY ./git.config /var/annotator/git.config
 RUN chmod +x /var/annotator/start.sh
-RUN /var/annotator/start.sh
 
 # To get the shell
 CMD ["tail", "-f", "/dev/null"]
