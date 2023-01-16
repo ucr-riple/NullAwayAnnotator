@@ -1,3 +1,4 @@
+#!/bin/bash
 set -exu
 
 CURRENT_VERSION="annotator-core-1.3.6-alpha-4-SNAPSHOT.jar"

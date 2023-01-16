@@ -13,10 +13,12 @@ git config --global pull.rebase false
 /var/lib/dpkg/info/ca-certificates-java.postinst configure
 
 pushd /tmp/ || exit
+  # Annotator
   git clone https://${USERNAME}:${KEY}@github.com/ucr-riple/NullAwayAnnotator.git
   pushd NullAwayAnnotator || exit
-    git checkout nimak/cache-temp
+    git checkout nimak/docker
   popd || exit
+  # Annotator artifact evaluation scripts.
   git clone https://${USERNAME}:${KEY}@github.com/nimakarimipour/NullAwayAnnotatorArtifactEvaluation.git
   pushd NullAwayAnnotatorArtifactEvaluation || exit
     git checkout main
