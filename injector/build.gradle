@@ -22,10 +22,6 @@
  * THE SOFTWARE.
  */
 
-plugins {
-    id 'com.github.sherter.google-java-format' version '0.9'
-}
-
 dependencies {
     implementation deps.build.guava
 
@@ -37,13 +33,4 @@ dependencies {
     implementation deps.build.progressbar
 
     testImplementation deps.build.commonsio
-}
-
-compileJava.mustRunAfter verifyGoogleJavaFormat
-
-googleJavaFormat {
-    // don't enforce formatting for generated Java code under buildSrc
-    exclude 'tests/**/*.java'
-    // tests expected output does not conform to google java format rules.
-    exclude '**/test/resources/**/*.java'
 }

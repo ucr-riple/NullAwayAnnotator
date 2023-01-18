@@ -24,10 +24,10 @@ package edu.ucr.cs.riple.injector;
 
 import static java.util.stream.Collectors.groupingBy;
 
+import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
-import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
@@ -59,7 +59,10 @@ public class Injector {
         (path, changeList) -> {
           CompilationUnit tree;
           try {
-            tree = LexicalPreservingPrinter.setup(StaticJavaParser.parse(path));
+            ParserConfiguration p = new ParserConfiguration();
+            p.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
+            StaticJavaParser.setConfiguration(p);
+            tree = StaticJavaParser.parse(path);
           } catch (IOException exception) {
             return;
           }
