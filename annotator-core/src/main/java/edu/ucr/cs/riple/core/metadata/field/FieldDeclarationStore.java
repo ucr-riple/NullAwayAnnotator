@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.metadata.field;
 
+import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
@@ -95,6 +96,9 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
     Path path = Helper.deserializePath(values[1]);
     CompilationUnit tree;
     try {
+      ParserConfiguration p = new ParserConfiguration();
+      p.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
+      StaticJavaParser.setConfiguration(p);
       tree = StaticJavaParser.parse(path);
       NodeList<BodyDeclaration<?>> members;
       try {
