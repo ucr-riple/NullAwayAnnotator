@@ -554,7 +554,7 @@ public class Config {
                     "ANNOTATION:NONNULL",
                     json -> json.get("NONNULL").toString(),
                     String.class)
-                .orElse(List.of()));
+                .orElse(new ArrayList<>()));
     log.reset();
   }
 

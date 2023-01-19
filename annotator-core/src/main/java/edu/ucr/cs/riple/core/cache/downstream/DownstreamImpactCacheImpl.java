@@ -166,7 +166,7 @@ public class DownstreamImpactCacheImpl
   public int computeLowerBoundOfNumberOfErrors(Set<Fix> tree) {
     OptionalInt lowerBoundEffectOfChainOptional =
         tree.stream().mapToInt(fix -> effectOnDownstreamDependencies(fix, tree)).max();
-    if (lowerBoundEffectOfChainOptional.isEmpty()) {
+    if (!lowerBoundEffectOfChainOptional.isPresent()) {
       return 0;
     }
     return lowerBoundEffectOfChainOptional.getAsInt();

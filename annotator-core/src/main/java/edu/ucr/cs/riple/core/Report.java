@@ -30,6 +30,8 @@ import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.location.Location;
+
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -291,7 +293,9 @@ public class Report {
    */
   public Set<Fix> getFixesForNextIteration() {
     if (!hasBeenProcessedOnce) {
-      return Set.of(root);
+      Set<Fix> f = new HashSet<>();
+      f.add(root);
+      return f;
     }
     Set<Fix> triggeredFixes =
         new LinkedHashSet<>(Error.getResolvingFixesOfErrors(this.triggeredErrors));

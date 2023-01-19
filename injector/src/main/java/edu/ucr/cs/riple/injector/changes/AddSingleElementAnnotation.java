@@ -95,7 +95,7 @@ public class AddSingleElementAnnotation extends AddAnnotation {
 
     Optional<AnnotationExpr> annotationWithSameNameExists =
         node.getAnnotationByName(annotationSimpleName);
-    if (annotationWithSameNameExists.isEmpty()) {
+    if (!annotationWithSameNameExists.isPresent()) {
       // No annotation with this name exists, add it directly.
       return addAnnotationExpressionOnNode(argumentExp, range);
     }
@@ -115,7 +115,7 @@ public class AddSingleElementAnnotation extends AddAnnotation {
     }
 
     Optional<Range> annotRange = existingAnnotation.getRange();
-    if (annotRange.isEmpty()) {
+    if (!annotRange.isPresent()) {
       return null;
     }
     SingleMemberAnnotationExpr singleMemberAnnotationExpr =

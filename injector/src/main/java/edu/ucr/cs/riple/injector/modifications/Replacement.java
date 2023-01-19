@@ -63,7 +63,7 @@ public class Replacement extends Modification {
     line.delete(0, endPosition.column + 1);
     if (!line.toString().equals("")) {
       // keep other content if exists.
-      lines.set(startPosition.line, padding + line.toString().strip());
+      lines.set(startPosition.line, padding + line.toString().trim());
     } else {
       lines.remove(startPosition.line);
     }

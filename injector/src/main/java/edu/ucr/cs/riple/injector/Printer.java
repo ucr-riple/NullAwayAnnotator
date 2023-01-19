@@ -92,7 +92,7 @@ public class Printer {
     int line = findStartOffsetForImports(tree);
     imports.forEach(
         importDec -> {
-          String toAdd = importDec.toString().strip();
+          String toAdd = importDec.toString().trim();
           offsetStore.updateOffsetWithNewLineAddition(line, toAdd.length());
           lines.add(line, toAdd);
         });
@@ -132,7 +132,7 @@ public class Printer {
     }
     // No package exists, add import under copyright header if exists, otherwise on the first line.
     for (int i = 0; i < lines.size(); i++) {
-      String line = lines.get(i).strip();
+      String line = lines.get(i).trim();
       if (line.equals("")) {
         continue;
       }

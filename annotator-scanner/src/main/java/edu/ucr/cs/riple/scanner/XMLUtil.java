@@ -89,7 +89,7 @@ public class XMLUtil {
       NodeList nodes =
           (NodeList) xPath.compile(parentKey).evaluate(document, XPathConstants.NODESET);
       for (int i = 0; i < nodes.getLength(); i++) {
-        values.add(nodes.item(i).getTextContent().strip());
+        values.add(nodes.item(i).getTextContent().trim());
       }
       return new DefaultXMLValueProvider<>(values, clazz);
     } catch (Exception e) {

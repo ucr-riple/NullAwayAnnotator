@@ -107,7 +107,7 @@ public class SignatureMatcher {
       index++;
     }
     if (signature.length() > 0 && generic_level == 0) {
-      ans.add(tmp.toString().strip());
+      ans.add(tmp.toString().trim());
     }
     return ans;
   }
