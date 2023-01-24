@@ -97,6 +97,15 @@ public class Region {
   }
 
   /**
+   * Checks if region targets a method or a constructor.
+   *
+   * @return true, if region is targeting a method or a constructor.
+   */
+  public boolean isOnCallable() {
+    return isOnMethod() || type.equals(Type.CONSTRUCTOR);
+  }
+
+  /**
    * Checks if region targets a field declaration.
    *
    * @return true, if region is targeting a field declaration.
