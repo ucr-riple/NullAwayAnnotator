@@ -89,7 +89,7 @@ public abstract class Location {
         values.length >= 6,
         "Expected at least 6 arguments to create a Location instance but found: "
             + Arrays.toString(values));
-    if (values[0] == null || values[0].equals("null")) {
+    if (values[0] == null || values[0].equals("null") || values[5] == null || values[5].equals("null")) {
       return null;
     }
     LocationType type = LocationType.getType(values[0]);

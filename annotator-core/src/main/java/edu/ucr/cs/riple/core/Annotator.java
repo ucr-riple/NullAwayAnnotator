@@ -240,9 +240,6 @@ public class Annotator {
     if (config.exhaustiveSearch) {
       return new VoidEvaluator();
     }
-    if (config.useImpactCache) {
-      return new CachedEvaluator(supplier);
-    }
     return new BasicEvaluator(supplier);
   }
 

@@ -26,7 +26,11 @@
 
 package edu.ucr.cs.riple.scanner;
 
+import com.google.common.base.Preconditions;
 import com.google.errorprone.util.ASTHelpers;
+import com.sun.source.tree.ExpressionTree;
+import com.sun.source.tree.LambdaExpressionTree;
+import com.sun.source.tree.MemberReferenceTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.source.util.TreePath;
@@ -35,6 +39,8 @@ import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.TargetType;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.Types;
+import com.sun.tools.javac.tree.JCTree;
+
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.lang.model.element.AnnotationMirror;
@@ -236,5 +242,18 @@ public class SymbolUtil {
       return fieldSymbol;
     }
     return null;
+  }
+
+  /**
+   * finds the corresponding functional interface method for a lambda expression or method reference
+   *
+   * @param tree the lambda expression or method reference
+   * @return the functional interface method
+   */
+  public static Symbol.MethodSymbol getFunctionalInterfaceMethod(ExpressionTree tree, Types types) {
+    Preconditions.checkArgument(
+            (tree instanceof LambdaExpressionTree) || (tree instanceof MemberReferenceTree));
+    Type funcInterfaceType = ((JCTree.JCFunctionalExpression) tree).type;
+    return (Symbol.MethodSymbol) types.findDescriptorSymbol(funcInterfaceType.tsym);
   }
 }

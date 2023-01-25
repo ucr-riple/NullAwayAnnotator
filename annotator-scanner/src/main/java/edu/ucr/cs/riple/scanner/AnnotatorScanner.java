@@ -35,6 +35,8 @@ import com.google.errorprone.matchers.Description;
 import com.google.errorprone.util.ASTHelpers;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.IdentifierTree;
+import com.sun.source.tree.LambdaExpressionTree;
+import com.sun.source.tree.MemberReferenceTree;
 import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.MethodTree;
@@ -63,7 +65,9 @@ public class AnnotatorScanner extends BugChecker
         BugChecker.IdentifierTreeMatcher,
         BugChecker.VariableTreeMatcher,
         BugChecker.ClassTreeMatcher,
-        BugChecker.NewClassTreeMatcher {
+        BugChecker.NewClassTreeMatcher,
+        BugChecker.LambdaExpressionTreeMatcher,
+        BugChecker.MemberReferenceTreeMatcher{
 
   /**
    * Scanner context to store the state of the checker. Could not use {@link VisitorState#context}
@@ -201,5 +205,31 @@ public class AnnotatorScanner extends BugChecker
         && SymbolUtil.hasNonnullAnnotations(symbol, context.getConfig())) {
       context.getConfig().getSerializer().serializeNonnullSym(symbol);
     }
+  }
+
+  @Override
+  @SuppressWarnings("TreeToString")
+  public Description matchLambdaExpression(LambdaExpressionTree lambdaExpressionTree, VisitorState visitorState) {
+    Config config = context.getConfig();
+    if (!config.callTrackerIsActive()) {
+      return Description.NO_MATCH;
+    }
+    Symbol.MethodSymbol methodSym = SymbolUtil.getFunctionalInterfaceMethod(lambdaExpressionTree, visitorState.getTypes());
+    config
+            .getSerializer()
+            .serializeCallGraphNode(
+                    new TrackerNode(config, methodSym, visitorState.getPath()));
+    return Description.NO_MATCH;
+  }
+
+  @Override
+  public Description matchMemberReference(MemberReferenceTree memberReferenceTree, VisitorState visitorState) {
+    Config config = context.getConfig();
+    if (!config.callTrackerIsActive()) {
+      return Description.NO_MATCH;
+    }
+    Symbol.MethodSymbol methodSym = SymbolUtil.getFunctionalInterfaceMethod(memberReferenceTree, visitorState.getTypes());
+    config.getSerializer().serializeCallGraphNode(new TrackerNode(config, methodSym, visitorState.getPath()));
+    return Description.NO_MATCH;
   }
 }

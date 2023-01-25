@@ -27,13 +27,17 @@ package edu.ucr.cs.riple.core.metadata.method;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.MetaData;
+import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.scanner.Serializer;
+
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 /**
@@ -189,5 +193,15 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
       return false;
     }
     return this.classNames.contains(location.clazz);
+  }
+
+  public ImmutableSet<MethodNode> getConstructorsForClass(String clazz) {
+    String methodName = Helper.simpleName(clazz);
+    return findNodes(new Predicate<MethodNode>() {
+      @Override
+      public boolean test(MethodNode methodNode) {
+        return methodNode.location.clazz.equals(clazz) && Helper.extractCallableName(methodNode.location.method).equals(methodName);
+      }
+    }).collect(ImmutableSet.toImmutableSet());
   }
 }

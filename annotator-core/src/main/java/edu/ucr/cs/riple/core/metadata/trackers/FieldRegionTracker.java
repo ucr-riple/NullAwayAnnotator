@@ -28,27 +28,25 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
+import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /** Tracker for Fields. */
 public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
 
-  public FieldRegionTracker(Config config, ModuleInfo info) {
-    super(config, info.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME));
-  }
+  private final MethodDeclarationTree tree;
 
-  public FieldRegionTracker(Config config, ImmutableSet<ModuleInfo> modules) {
-    super(
-        config,
-        modules.stream()
-            .map(info -> info.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME))
-            .collect(ImmutableSet.toImmutableSet()));
+  public FieldRegionTracker(Config config, ModuleInfo info, MethodDeclarationTree tree) {
+    super(config, info.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME));
+    this.tree = tree;
   }
 
   @Override
@@ -72,6 +70,11 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
             .map(trackerNode -> trackerNode.region)
             .collect(Collectors.toCollection(LinkedHashSet::new));
     ans.addAll(config.getAdapter().getFieldRegionScope(field));
+    ans.addAll(tree.getConstructorsForClass(field.clazz)
+            .stream()
+            .map(methodNode ->
+                    new Region(methodNode.location.clazz, methodNode.location.method))
+            .collect(Collectors.toSet()));
     return Optional.of(ans);
   }
 }

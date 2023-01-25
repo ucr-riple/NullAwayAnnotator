@@ -146,4 +146,26 @@ public class MethodCallTrackerTest extends AnnotatorScannerBaseTest<TrackerNodeD
                 "edu.ucr.A", "A(java.lang.Object)", "java.lang.Object", "Object()"))
         .doTest();
   }
+
+  @Test
+  public void lambda() {
+    tester
+            .addSourceLines(
+                    "edu/ucr/A.java",
+                    "package edu.ucr;",
+                    "public interface A {",
+                    "  void foo(Object field);",
+                    "}")
+            .addSourceLines("edu/ucr/B.java",
+                    "package edu.ucr;",
+                    "public class B {",
+                    "  void useA(A a) { }",
+                    "  void bar() {",
+                    "      useA(System.out::println);",
+                    "  }",
+                    "}")
+            .setExpectedOutputs(
+                    new TrackerNodeDisplay("edu.ucr.B", "bar()", "edu.ucr.A", "foo(java.lang.Object)"))
+            .doTest();
+  }
 }

@@ -24,6 +24,8 @@
 
 package edu.ucr.cs.riple.core;
 
+import edu.ucr.cs.riple.core.metadata.index.Fix;
+
 import java.nio.file.Paths;
 
 /** Starting point. */
@@ -37,12 +39,44 @@ public class Main {
    */
   public static void main(String[] args) {
     Config config;
-    if (args.length == 2 && args[0].equals("--path")) {
-      config = new Config(Paths.get(args[1]));
-    } else {
-      config = new Config(args);
-    }
+//    if (args.length == 2 && args[0].equals("--path")) {
+//      config = new Config(Paths.get(args[1]));
+//    } else {
+//      config = new Config(args);
+//    }
+    config = new Config(Paths.get("/Users/nima/Developer/NullAwayFixer/NullAwayAnnotator/runner/config.json"));
     Annotator annotator = new Annotator(config);
     annotator.start();
+  }
+
+//  public static boolean isTargetFix(Fix fix){
+//    return (fix.isOnMethod()
+//            && fix.toMethod().method.equals("getConfigurationPropertiesValidator(org.springframework.context.ApplicationContext)")
+//            && fix.toMethod().clazz.equals("org.springframework.boot.context.properties.ConfigurationPropertiesBinder"))
+//          || (fix.isOnField()
+//            && fix.toField().clazz.equals("org.springframework.boot.context.properties.ConfigurationPropertiesBinder")
+//            && fix.toField().variables.contains("binder"))
+//          || (fix.isOnField()
+//            && fix.toField().clazz.equals("org.springframework.boot.context.properties.ConfigurationPropertiesBinder")
+//            && fix.toField().variables.contains("jsr303Validator"));
+//  }
+//
+//  public static boolean isTargetFix(Fix fix){
+//    return (fix.isOnMethod()
+//            && fix.toMethod().method.equals("getConfigurationPropertiesValidator(org.springframework.context.ApplicationContext)")
+//            && fix.toMethod().clazz.equals("org.springframework.boot.context.properties.ConfigurationPropertiesBinder"));
+//  }
+//
+//
+//  public static boolean isTargetFix(Fix fix){
+//    return (fix.isOnMethod()
+//            && fix.toMethod().method.equals("getCookieHandlerFactory(io.undertow.servlet.api.Deployment)")
+//            && fix.toMethod().clazz.equals("org.springframework.boot.web.embedded.undertow.UndertowServletWebServerFactory"));
+//  }
+
+  public static boolean isTargetFix(Fix fix){
+    return (fix.isOnMethod()
+            && fix.toMethod().method.equals("getListener()")
+            && fix.toMethod().clazz.equals("org.springframework.boot.web.servlet.ServletListenerRegistrationBean"));
   }
 }

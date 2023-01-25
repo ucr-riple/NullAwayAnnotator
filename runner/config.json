@@ -1,20 +1,20 @@
 {
-  "BUILD_COMMAND": "cd /Users/nima/Developer/NullAwayFixer/Projects/libgdx && ./gradlew :gdx:compileJava",
+  "BUILD_COMMAND": "cd /Users/nima/Developer/NullAwayFixer/Projects/spring-boot && ./gradlew :spring-boot-project:spring-boot:compileJava -x :spring-boot-project:spring-boot:compileKotlin",
   "ANNOTATION": {
-    "INITIALIZER": "com.badlogic.gdx.Initializer",
+    "INITIALIZER": "org.springframework.boot.Initializer",
     "NULLABLE": "javax.annotation.Nullable",
-    "NULL_UNMARKED": "com.badlogic.gdx.NullUnmarked"
+    "NULL_UNMARKED": "org.springframework.boot.NullUnmarked"
   },
   "LEXICAL_PRESERVATION": false,
   "OUTPUT_DIR": "/tmp/NullAwayFix",
-  "CHAIN": false,
+  "CHAIN": true,
   "OPTIMIZED": true,
   "CACHE": true,
   "BAILOUT": true,
   "REDIRECT_BUILD_OUTPUT_TO_STDERR": false,
   "EXHAUSTIVE_SEARCH": false,
-  "OUTER_LOOP": false,
-  "CACHE_IMPACT_ACTIVATION": true,
+  "OUTER_LOOP": true,
+  "CACHE_IMPACT_ACTIVATION": false,
   "PARALLEL_PROCESSING": true,
   "CONFIG_PATHS": [
     {
