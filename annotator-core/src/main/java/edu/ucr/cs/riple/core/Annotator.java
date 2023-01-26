@@ -269,7 +269,9 @@ public class Annotator {
             // find the corresponding method nodes.
             .map(
                 error -> {
-                  if (error.getRegion().isOnCallable()) {
+                  if (error.getRegion().isOnMethod()
+                      || (error.getRegion().isOnConstructor()
+                          && !error.messageType.equals("METHOD_NO_INIT"))) {
                     return methodDeclarationTree.findNode(error.encMember(), error.encClass());
                   }
                   // For methods invoked in an initialization region, where the error is that
@@ -343,8 +345,8 @@ public class Annotator {
             .filter(
                 fix ->
                     fix.isOnField()
-                        && (fix.reasons.contains("METHOD_NO_INIT")
-                            || fix.reasons.contains("FIELD_NO_INIT")))
+                        && (fix.reasons.contains("FIELD_NO_INIT")
+                            || fix.reasons.contains("METHOD_NO_INIT")))
             // Filter nodes annotated with SuppressWarnings("NullAway")
             .filter(fix -> !fieldsWithSuppressWarnings.contains(fix.toField()))
             .map(
