@@ -25,8 +25,8 @@
 package edu.ucr.cs.riple.core.metadata.trackers;
 
 import edu.ucr.cs.riple.injector.Helper;
-import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnClass;
+import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.util.Objects;
 

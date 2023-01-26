@@ -37,14 +37,11 @@ public class Main {
    */
   public static void main(String[] args) {
     Config config;
-    //    if (args.length == 2 && args[0].equals("--path")) {
-    //      config = new Config(Paths.get(args[1]));
-    //    } else {
-    //      config = new Config(args);
-    //    }
-    config =
-        new Config(
-            Paths.get("/Users/nima/Developer/NullAwayFixer/NullAwayAnnotator/runner/config.json"));
+    if (args.length == 2 && args[0].equals("--path")) {
+      config = new Config(Paths.get(args[1]));
+    } else {
+      config = new Config(args);
+    }
     Annotator annotator = new Annotator(config);
     annotator.start();
   }
