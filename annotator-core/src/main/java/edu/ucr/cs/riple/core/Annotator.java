@@ -135,8 +135,26 @@ public class Annotator {
             : new VoidDownstreamImpactCache();
     downstreamImpactCache.analyzeDownstreamDependencies();
     TargetModuleCache targetModuleCache = new TargetModuleCache(config, methodDeclarationTree);
+    if (config.inferenceActivated) {
+      // Outer loop starts.
+      while (cache.isUpdated()) {
+        executeNextIteration(targetModuleCache, downstreamImpactCache);
+        if (config.disableOuterLoop) {
+          break;
+        }
+      }
 
-    forceResolveRemainingErrors();
+      // Perform once last iteration including all fixes.
+      if (!config.disableOuterLoop) {
+        cache.disable();
+        executeNextIteration(targetModuleCache, downstreamImpactCache);
+        cache.enable();
+      }
+    }
+
+    if (config.forceResolveActivated) {
+      forceResolveRemainingErrors();
+    }
 
     System.out.println("\nFinished annotating.");
     Utility.writeReports(config, cache.reports().stream().collect(ImmutableSet.toImmutableSet()));
