@@ -362,7 +362,7 @@ public class Annotator {
     Utility.buildTarget(config);
     remainingErrors =
         Utility.readErrorsFromOutputDirectory(config, config.target, fieldDeclarationStore);
-    nullUnMarkedAnnotations.addAll(
+    nullUnMarkedAnnotations =
         remainingErrors.stream()
             .filter(error -> !error.getRegion().isInAnonymousClass())
             .map(
@@ -370,7 +370,7 @@ public class Annotator {
                     new AddMarkerAnnotation(
                         fieldDeclarationStore.getLocationOnClass(error.getRegion().clazz),
                         config.nullUnMarkedAnnotation))
-            .collect(Collectors.toSet()));
+            .collect(Collectors.toSet());
     injector.injectAnnotations(nullUnMarkedAnnotations);
     // Update log.
     config.log.updateInjectedAnnotations(nullUnMarkedAnnotations);
