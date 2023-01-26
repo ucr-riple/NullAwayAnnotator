@@ -96,9 +96,8 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
     Path path = Helper.deserializePath(values[1]);
     CompilationUnit tree;
     try {
-      ParserConfiguration p = new ParserConfiguration();
-      p.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
-      StaticJavaParser.setConfiguration(p);
+      StaticJavaParser.setConfiguration(
+          new ParserConfiguration().setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17));
       tree = StaticJavaParser.parse(path);
       NodeList<BodyDeclaration<?>> members;
       try {

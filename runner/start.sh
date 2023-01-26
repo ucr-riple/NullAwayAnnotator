@@ -13,6 +13,6 @@ pushd "$PROJECT_ROOT"
    pushd runner
      pushd jars
          java -jar core.jar "$@"
-       popd
      popd
+  popd
 popd

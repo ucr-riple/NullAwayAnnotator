@@ -34,6 +34,7 @@ import com.google.errorprone.bugpatterns.BugChecker;
 import com.google.errorprone.matchers.Description;
 import com.google.errorprone.util.ASTHelpers;
 import com.sun.source.tree.ClassTree;
+import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.LambdaExpressionTree;
 import com.sun.source.tree.MemberReferenceTree;
@@ -43,6 +44,7 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.tree.JCTree;
 import edu.ucr.cs.riple.scanner.out.ClassInfo;
 import edu.ucr.cs.riple.scanner.out.MethodInfo;
 import edu.ucr.cs.riple.scanner.out.TrackerNode;
@@ -67,7 +69,7 @@ public class AnnotatorScanner extends BugChecker
         BugChecker.ClassTreeMatcher,
         BugChecker.NewClassTreeMatcher,
         BugChecker.LambdaExpressionTreeMatcher,
-        BugChecker.MemberReferenceTreeMatcher{
+        BugChecker.MemberReferenceTreeMatcher {
 
   /**
    * Scanner context to store the state of the checker. Could not use {@link VisitorState#context}
@@ -169,6 +171,37 @@ public class AnnotatorScanner extends BugChecker
     return Description.NO_MATCH;
   }
 
+  @Override
+  public Description matchLambdaExpression(
+      LambdaExpressionTree lambdaExpressionTree, VisitorState visitorState) {
+    Config config = context.getConfig();
+    if (!config.callTrackerIsActive()) {
+      return Description.NO_MATCH;
+    }
+    serializeFunctionalInterface(config, lambdaExpressionTree, visitorState);
+    return Description.NO_MATCH;
+  }
+
+  @Override
+  public Description matchMemberReference(
+      MemberReferenceTree memberReferenceTree, VisitorState visitorState) {
+    Config config = context.getConfig();
+    if (!config.callTrackerIsActive()) {
+      return Description.NO_MATCH;
+    }
+    serializeFunctionalInterface(config, memberReferenceTree, visitorState);
+    if (memberReferenceTree instanceof JCTree.JCMemberReference) {
+      Symbol calledMethod = ((JCTree.JCMemberReference) memberReferenceTree).sym;
+      if (calledMethod instanceof Symbol.MethodSymbol) {
+        context
+            .getConfig()
+            .getSerializer()
+            .serializeCallGraphNode(new TrackerNode(config, calledMethod, visitorState.getPath()));
+      }
+    }
+    return Description.NO_MATCH;
+  }
+
   /**
    * Serializes a field usage if the received symbol is a field.
    *
@@ -207,29 +240,20 @@ public class AnnotatorScanner extends BugChecker
     }
   }
 
-  @Override
-  @SuppressWarnings("TreeToString")
-  public Description matchLambdaExpression(LambdaExpressionTree lambdaExpressionTree, VisitorState visitorState) {
-    Config config = context.getConfig();
-    if (!config.callTrackerIsActive()) {
-      return Description.NO_MATCH;
+  /**
+   * Serializes the functional interface.
+   *
+   * @param tree Given tree.
+   * @param state Visitor State.
+   */
+  private static void serializeFunctionalInterface(
+      Config config, ExpressionTree tree, VisitorState state) {
+    Symbol.MethodSymbol methodSym = SymbolUtil.getFunctionalInterfaceMethod(tree, state.getTypes());
+    if (methodSym == null) {
+      return;
     }
-    Symbol.MethodSymbol methodSym = SymbolUtil.getFunctionalInterfaceMethod(lambdaExpressionTree, visitorState.getTypes());
     config
-            .getSerializer()
-            .serializeCallGraphNode(
-                    new TrackerNode(config, methodSym, visitorState.getPath()));
-    return Description.NO_MATCH;
-  }
-
-  @Override
-  public Description matchMemberReference(MemberReferenceTree memberReferenceTree, VisitorState visitorState) {
-    Config config = context.getConfig();
-    if (!config.callTrackerIsActive()) {
-      return Description.NO_MATCH;
-    }
-    Symbol.MethodSymbol methodSym = SymbolUtil.getFunctionalInterfaceMethod(memberReferenceTree, visitorState.getTypes());
-    config.getSerializer().serializeCallGraphNode(new TrackerNode(config, methodSym, visitorState.getPath()));
-    return Description.NO_MATCH;
+        .getSerializer()
+        .serializeCallGraphNode(new TrackerNode(config, methodSym, state.getPath()));
   }
 }

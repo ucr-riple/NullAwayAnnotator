@@ -25,6 +25,7 @@
 import com.vanniktech.maven.publish.SonatypeHost
 
 plugins {
+    id 'com.github.sherter.google-java-format' version '0.9'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
     id 'maven-publish'
     id 'application'
@@ -49,7 +50,7 @@ dependencies {
 }
 
 // Should be the latest supporting version of NullAway.
-def NULLAWAY_TEST = "0.10.8-SNAPSHOT"
+def NULLAWAY_TEST = "0.10.8"
 
 tasks.test.dependsOn(':annotator-scanner:publishToMavenLocal')
 tasks.test.dependsOn(':qual:publishToMavenLocal')

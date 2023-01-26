@@ -125,12 +125,10 @@ public class Annotator {
   /** Performs iterations of inference/injection until no unseen fix is suggested. */
   private void annotate() {
     // The downstream impact cache stores the impact of making all public APIs @Nullable on
-    // downstream
-    // dependencies.
-    // Through iterations, since the source code for downstream dependencies does not change and the
-    // computation does not depend on the changes in the target module, it will compute the same
-    // result in each iteration, therefore we perform the analysis only once and reuse it in each
-    // iteration.
+    // downstream dependencies. Through iterations, since the source code for downstream
+    // dependencies does not change and the computation does not depend on the changes in the target
+    // module, it will compute the same result in each iteration, therefore we perform the analysis
+    // only once and reuse it in each iteration.
     DownstreamImpactCache downstreamImpactCache =
         config.downStreamDependenciesAnalysisActivated
             ? new DownstreamImpactCacheImpl(config, methodDeclarationTree)
@@ -237,8 +235,11 @@ public class Annotator {
    * @return {@link Evaluator} corresponding to config values.
    */
   private Evaluator getEvaluator(Supplier supplier) {
-    if (config.exhaustiveSearch) {
+    if (config.exhaustiveSearch || config.depth == 0) {
       return new VoidEvaluator();
+    }
+    if (config.useImpactCache) {
+      return new CachedEvaluator(supplier);
     }
     return new BasicEvaluator(supplier);
   }

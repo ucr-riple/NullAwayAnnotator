@@ -25,7 +25,6 @@
 package edu.ucr.cs.riple.core.evaluators.graphprocessor;
 
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.Main;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.metadata.graph.ConflictGraph;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
@@ -71,11 +70,6 @@ public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcess
             + " fixes");
     ProgressBar pb = Utility.createProgressBar("Processing", nonConflictingGroups.size());
     for (Set<Node> group : nonConflictingGroups) {
-
-      if(group.stream().noneMatch(n -> Main.isTargetFix(n.root))){
-        continue;
-      }
-
       pb.step();
       Set<Fix> fixes =
           group.stream()
@@ -86,9 +80,6 @@ public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcess
       errorStore.saveState();
       group.forEach(
           node -> {
-            if(!Main.isTargetFix(node.root)){
-              return;
-            }
             int localEffect = 0;
             Set<Error> triggeredErrors = new LinkedHashSet<>();
             for (Region region : node.regions) {

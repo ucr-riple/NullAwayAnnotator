@@ -51,7 +51,7 @@ public class AddMarkerAnnotation extends AddAnnotation {
 
     // Check if annot already exists.
     boolean annotAlreadyExists =
-        annotations.stream().anyMatch(annot -> annot.equals(annotationExpr));
+        annotations.stream().anyMatch(annot -> annot.getName().equals(annotationExpr.getName()));
     if (annotAlreadyExists) {
       return null;
     }

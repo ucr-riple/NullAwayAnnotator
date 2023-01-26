@@ -515,25 +515,6 @@ public class CoreTest extends BaseCoreTest {
   }
 
   @Test
-  public void constructor() {
-    coreTestHelper
-            .addInputLines(
-                    "A.java",
-                    "package test;",
-                    "public class A {",
-                    "   Object a;",
-                    "   A() {",
-                    "      Object b = foo();",
-                    "   }",
-                    "   Object foo() {",
-                    "       return null;",
-                    "   }",
-                    "}")
-            .toDepth(1)
-            .start();
-  }
-
-  @Test
   public void skipNonnullAnnotations() {
     coreTestHelper
         .addInputLines(

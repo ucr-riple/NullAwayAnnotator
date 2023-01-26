@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.metadata.trackers;
 
 import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.util.Objects;
 
@@ -58,8 +59,9 @@ public class Region {
 
   public Region(String encClass, String encMember, SourceType sourceType) {
     this.clazz = encClass == null ? "null" : encClass;
-    this.member = encMember == null ? "null" : encMember;
-    this.type = getType(clazz, member);
+    String mem = encMember == null ? "null" : encMember;
+    this.type = getType(clazz, mem);
+    this.member = isOnMethod() ? OnMethod.removeAnnotationsFromSignature(mem) : mem;
     this.sourceType = sourceType;
   }
 

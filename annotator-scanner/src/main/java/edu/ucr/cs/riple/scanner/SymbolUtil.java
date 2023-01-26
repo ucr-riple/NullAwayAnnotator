@@ -26,7 +26,6 @@
 
 package edu.ucr.cs.riple.scanner;
 
-import com.google.common.base.Preconditions;
 import com.google.errorprone.util.ASTHelpers;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.LambdaExpressionTree;
@@ -40,7 +39,6 @@ import com.sun.tools.javac.code.TargetType;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.Types;
 import com.sun.tools.javac.tree.JCTree;
-
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.lang.model.element.AnnotationMirror;
@@ -250,10 +248,12 @@ public class SymbolUtil {
    * @param tree the lambda expression or method reference
    * @return the functional interface method
    */
+  @Nullable
   public static Symbol.MethodSymbol getFunctionalInterfaceMethod(ExpressionTree tree, Types types) {
-    Preconditions.checkArgument(
-            (tree instanceof LambdaExpressionTree) || (tree instanceof MemberReferenceTree));
-    Type funcInterfaceType = ((JCTree.JCFunctionalExpression) tree).type;
-    return (Symbol.MethodSymbol) types.findDescriptorSymbol(funcInterfaceType.tsym);
+    if ((tree instanceof LambdaExpressionTree) || (tree instanceof MemberReferenceTree)) {
+      Type funcInterfaceType = ((JCTree.JCFunctionalExpression) tree).type;
+      return (Symbol.MethodSymbol) types.findDescriptorSymbol(funcInterfaceType.tsym);
+    }
+    return null;
   }
 }

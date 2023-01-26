@@ -37,6 +37,8 @@ import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -305,8 +307,23 @@ public class Helper {
     String flatNameExcludingPackageName =
         packageName.equals("") ? flatName : flatName.substring(packageName.length() + 1);
     List<String> keys = new ArrayList<>(Arrays.asList(flatNameExcludingPackageName.split("\\$")));
-    Node cursor = findTopLevelClassDeclarationOnCompilationUnit(cu, keys.get(0));
-    keys.remove(0);
+    Node cursor = null;
+    try{
+      cursor = findTopLevelClassDeclarationOnCompilationUnit(cu, keys.get(0));
+      keys.remove(0);
+    }catch (TargetClassNotFound c){
+      if(cu.getStorage().isPresent()){
+        Path path  = cu.getStorage().get().getPath();
+        String fileNamePath = path.getFileName().toString();
+        String fileName = fileNamePath.substring(0, fileNamePath.indexOf(".java"));
+        if(flatNameExcludingPackageName.startsWith(fileName)){
+          cursor = findTopLevelClassDeclarationOnCompilationUnit(cu, fileName);
+          if (fileName.split("\\$").length > 0) {
+            keys.subList(0, fileName.split("\\$").length).clear();
+          }
+        }
+      }
+    }
     for (String key : keys) {
       String indexString = extractIntegerFromBeginningOfStringInString(key);
       String actualName = key.substring(indexString.length());

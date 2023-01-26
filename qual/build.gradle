@@ -33,5 +33,9 @@ buildscript {
     }
 }
 
+plugins {
+    id 'com.github.sherter.google-java-format' version '0.9'
+}
+
 // Need to publish it to maven local for unit tests
 apply plugin: 'com.vanniktech.maven.publish'

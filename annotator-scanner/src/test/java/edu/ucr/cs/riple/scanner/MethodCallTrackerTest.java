@@ -150,22 +150,38 @@ public class MethodCallTrackerTest extends AnnotatorScannerBaseTest<TrackerNodeD
   @Test
   public void lambda() {
     tester
-            .addSourceLines(
-                    "edu/ucr/A.java",
-                    "package edu.ucr;",
-                    "public interface A {",
-                    "  void foo(Object field);",
-                    "}")
-            .addSourceLines("edu/ucr/B.java",
-                    "package edu.ucr;",
-                    "public class B {",
-                    "  void useA(A a) { }",
-                    "  void bar() {",
-                    "      useA(System.out::println);",
-                    "  }",
-                    "}")
-            .setExpectedOutputs(
-                    new TrackerNodeDisplay("edu.ucr.B", "bar()", "edu.ucr.A", "foo(java.lang.Object)"))
-            .doTest();
+        .addSourceLines(
+            "edu/ucr/A.java",
+            "package edu.ucr;",
+            "public interface A {",
+            "  void foo(Object field);",
+            "}")
+        .addSourceLines(
+            "edu/ucr/B.java",
+            "package edu.ucr;",
+            "public class B {",
+            "  void useA(A a) { }",
+            "  void memberReference() {",
+            "      useA(System.out::println);",
+            "  }",
+            "  void lambda() {",
+            "      useA(e -> System.out.println(e));",
+            "  }",
+            "}")
+        .setExpectedOutputs(
+            new TrackerNodeDisplay(
+                "edu.ucr.B", "memberReference()", "edu.ucr.A", "foo(java.lang.Object)"),
+            new TrackerNodeDisplay(
+                "edu.ucr.B", "memberReference()", "edu.ucr.B", "useA(edu.ucr.A)"),
+            new TrackerNodeDisplay(
+                "edu.ucr.B",
+                "memberReference()",
+                "java.io.PrintStream",
+                "println(java.lang.Object)"),
+            new TrackerNodeDisplay("edu.ucr.B", "lambda()", "edu.ucr.A", "foo(java.lang.Object)"),
+            new TrackerNodeDisplay("edu.ucr.B", "lambda()", "edu.ucr.B", "useA(edu.ucr.A)"),
+            new TrackerNodeDisplay(
+                "edu.ucr.B", "lambda()", "java.io.PrintStream", "println(java.lang.Object)"))
+        .doTest();
   }
 }

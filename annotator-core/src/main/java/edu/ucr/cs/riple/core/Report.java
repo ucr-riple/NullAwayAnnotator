@@ -30,7 +30,6 @@ import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.location.Location;
-
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Objects;

@@ -44,8 +44,26 @@ public class OnMethod extends Location {
 
   public OnMethod(Path path, String clazz, String method) {
     super(LocationType.METHOD, path, clazz);
-    this.method = method;
-    this.matcher = new SignatureMatcher(method);
+    this.method = removeAnnotationsFromSignature(method);
+    this.matcher = new SignatureMatcher(this.method);
+  }
+
+  public static String removeAnnotationsFromSignature(String method){
+    StringBuilder cleaned = new StringBuilder();
+    boolean add = true;
+    for(int i = 0; i < method.length(); i++) {
+      char current = method.charAt(i);
+      if(current == '@'){
+        add = false;
+      }
+      if(!add && Character.isWhitespace(current)){
+        add = true;
+      }
+      if(add){
+        cleaned.append(current);
+      }
+    }
+    return cleaned.toString().replace(" ", "");
   }
 
   public OnMethod(String path, String clazz, String method) {

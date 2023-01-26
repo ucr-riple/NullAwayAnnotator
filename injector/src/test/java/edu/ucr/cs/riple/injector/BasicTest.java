@@ -64,7 +64,7 @@ public class BasicTest extends BaseInjectorTest {
             "       return new Object();",
             "   }",
             "}")
-        .addChanges(change1, change2, change2)
+        .addChanges(change1, change2, change3)
         .start();
   }
 

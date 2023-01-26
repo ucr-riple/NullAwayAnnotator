@@ -24,19 +24,16 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
-import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
-import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /** Tracker for Fields. */
@@ -70,10 +67,9 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
             .map(trackerNode -> trackerNode.region)
             .collect(Collectors.toCollection(LinkedHashSet::new));
     ans.addAll(config.getAdapter().getFieldRegionScope(field));
-    ans.addAll(tree.getConstructorsForClass(field.clazz)
-            .stream()
-            .map(methodNode ->
-                    new Region(methodNode.location.clazz, methodNode.location.method))
+    ans.addAll(
+        tree.getConstructorsForClass(field.clazz).stream()
+            .map(methodNode -> new Region(methodNode.location.clazz, methodNode.location.method))
             .collect(Collectors.toSet()));
     return Optional.of(ans);
   }

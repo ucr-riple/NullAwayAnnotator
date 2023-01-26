@@ -89,7 +89,7 @@ public abstract class Location {
         values.length >= 6,
         "Expected at least 6 arguments to create a Location instance but found: "
             + Arrays.toString(values));
-    if (values[0] == null || values[0].equals("null") || values[5] == null || values[5].equals("null")) {
+    if (values[0] == null || values[0].equals("null")) {
       return null;
     }
     LocationType type = LocationType.getType(values[0]);
@@ -124,6 +124,7 @@ public abstract class Location {
     try {
       clazz = Helper.getTypeDeclarationMembersByFlatName(tree, this.clazz);
     } catch (TargetClassNotFound notFound) {
+      System.err.println("Looking for class: " + this.clazz + ",Path: " + this.path);
       System.err.println(notFound.getMessage());
       return null;
     }
