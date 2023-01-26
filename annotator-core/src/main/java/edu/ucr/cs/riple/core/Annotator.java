@@ -86,6 +86,8 @@ public class Annotator {
     annotate();
     config.log.stopTimerAndCapture(timer);
     Utility.writeLog(config);
+    System.out.println("Annotator LOG:");
+    System.out.println(config.log);
   }
 
   /**
@@ -260,6 +262,8 @@ public class Annotator {
     Utility.buildTarget(config);
     Set<Error> remainingErrors =
         Utility.readErrorsFromOutputDirectory(config, config.target, fieldDeclarationStore);
+    System.out.println(
+        remainingErrors.size() + " errors remaining. Applying suppression annotations.");
     Set<Fix> remainingFixes = Utility.readFixesFromOutputDirectory(config, fieldDeclarationStore);
     // Collect all regions for NullUnmarked.
     // For all errors in regions which correspond to a method's body, we can add @NullUnmarked at
