@@ -11,7 +11,7 @@
   "OPTIMIZED": true,
   "CACHE": true,
   "BAILOUT": true,
-  "REDIRECT_BUILD_OUTPUT_TO_STDERR": false,
+  "REDIRECT_BUILD_OUTPUT_TO_STDERR": true,
   "EXHAUSTIVE_SEARCH": false,
   "OUTER_LOOP": true,
   "CACHE_IMPACT_ACTIVATION": false,

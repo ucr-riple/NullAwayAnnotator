@@ -136,26 +136,7 @@ public class Annotator {
     downstreamImpactCache.analyzeDownstreamDependencies();
     TargetModuleCache targetModuleCache = new TargetModuleCache(config, methodDeclarationTree);
 
-    if (config.inferenceActivated) {
-      // Outer loop starts.
-      while (cache.isUpdated()) {
-        executeNextIteration(targetModuleCache, downstreamImpactCache);
-        if (config.disableOuterLoop) {
-          break;
-        }
-      }
-
-      // Perform once last iteration including all fixes.
-      if (!config.disableOuterLoop) {
-        cache.disable();
-        executeNextIteration(targetModuleCache, downstreamImpactCache);
-        cache.enable();
-      }
-    }
-
-    if (config.forceResolveActivated) {
-      forceResolveRemainingErrors();
-    }
+    forceResolveRemainingErrors();
 
     System.out.println("\nFinished annotating.");
     Utility.writeReports(config, cache.reports().stream().collect(ImmutableSet.toImmutableSet()));
@@ -270,7 +251,7 @@ public class Annotator {
             // find the corresponding method nodes.
             .map(
                 error -> {
-                  if (error.getRegion().isOnMethod()) {
+                  if (error.getRegion().isOnCallable()) {
                     return methodDeclarationTree.findNode(error.encMember(), error.encClass());
                   }
                   // For methods invoked in an initialization region, where the error is that
@@ -289,6 +270,18 @@ public class Annotator {
             .filter(Objects::nonNull)
             .map(node -> new AddMarkerAnnotation(node.location, config.nullUnMarkedAnnotation))
             .collect(Collectors.toCollection(LinkedHashSet::new));
+    // Collect @NullUnmarked annotations for classes.
+    nullUnMarkedAnnotations.addAll(
+        remainingErrors.stream()
+            .filter(
+                error ->
+                    error.getRegion().isOnStaticBlock() && !error.getRegion().isInAnonymousClass())
+            .map(
+                error ->
+                    new AddMarkerAnnotation(
+                        fieldDeclarationStore.getLocationOnClass(error.getRegion().clazz),
+                        config.nullUnMarkedAnnotation))
+            .collect(Collectors.toSet()));
     injector.injectAnnotations(nullUnMarkedAnnotations);
     // Update log.
     config.log.updateInjectedAnnotations(nullUnMarkedAnnotations);

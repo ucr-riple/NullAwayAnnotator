@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.metadata.trackers;
 
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.OnMethod;
+import edu.ucr.cs.riple.injector.location.OnClass;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.util.Objects;
 
@@ -99,6 +100,15 @@ public class Region {
   }
 
   /**
+   * Checks if region targets a method or a constructor.
+   *
+   * @return true, if region is targeting a method or a constructor.
+   */
+  public boolean isOnCallable() {
+    return isOnMethod() || isOnConstructor();
+  }
+
+  /**
    * Checks if region targets a field declaration.
    *
    * @return true, if region is targeting a field declaration.
@@ -114,6 +124,24 @@ public class Region {
    */
   public boolean isOnConstructor() {
     return type.equals(Type.CONSTRUCTOR);
+  }
+
+  /**
+   * Checks if region targets a static block.
+   *
+   * @return true, if region is targeting a static block.
+   */
+  public boolean isOnStaticBlock() {
+    return type.equals(Type.STATIC_BLOCK);
+  }
+
+  /**
+   * Checks if region is inside an anonymous class.
+   *
+   * @return true, if region is inside an anonymous class.
+   */
+  public boolean isInAnonymousClass() {
+    return OnClass.isAnonymousClassFlatName(clazz);
   }
 
   @Override

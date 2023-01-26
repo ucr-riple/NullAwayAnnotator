@@ -38,6 +38,7 @@ import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
+import edu.ucr.cs.riple.injector.location.OnClass;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.AnnotatorScanner;
 import java.io.FileNotFoundException;
@@ -163,5 +164,23 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
       return null;
     }
     return new OnField(candidate.pathToSourceFile, candidate.clazz, fieldNames);
+  }
+
+  /**
+   * Creates a {@link edu.ucr.cs.riple.injector.location.OnClass} instance targeting the passed
+   * classes flat name.
+   *
+   * @param clazz Enclosing class of the field.
+   * @return {@link edu.ucr.cs.riple.injector.location.OnClass} instance targeting the passed
+   *     classes flat name.
+   */
+  public OnClass getLocationOnClass(String clazz) {
+    FieldDeclarationInfo candidate =
+        findNodeWithHashHint(node -> node.clazz.equals(clazz), FieldDeclarationInfo.hash(clazz));
+    if (candidate == null) {
+      // field is on byte code.
+      return null;
+    }
+    return new OnClass(candidate.pathToSourceFile, candidate.clazz);
   }
 }
