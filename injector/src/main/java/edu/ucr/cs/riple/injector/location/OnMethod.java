@@ -55,15 +55,17 @@ public class OnMethod extends Location {
       char current = method.charAt(i);
       if(current == '@'){
         add = false;
+        continue;
       }
       if(!add && Character.isWhitespace(current)){
         add = true;
+        continue;
       }
       if(add){
         cleaned.append(current);
       }
     }
-    return cleaned.toString().replace(" ", "");
+    return cleaned.toString();
   }
 
   public OnMethod(String path, String clazz, String method) {

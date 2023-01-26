@@ -323,6 +323,9 @@ public class Helper {
           }
         }
       }
+      if(cursor == null){
+        throw c;
+      }
     }
     for (String key : keys) {
       String indexString = extractIntegerFromBeginningOfStringInString(key);
