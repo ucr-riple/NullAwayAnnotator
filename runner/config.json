@@ -1,9 +1,9 @@
 {
-  "BUILD_COMMAND": "cd /Users/nima/Developer/NullAwayFixer/Projects/libgdx && ./gradlew :gdx:compileJava",
+  "BUILD_COMMAND": "cd /Users/nima/Developer/NullAwayFixer/Projects/retrofit && ./gradlew compileJava",
   "ANNOTATION": {
-    "INITIALIZER": "com.badlogic.gdx.Initializer",
+    "INITIALIZER": "retrofit2.Initializer",
     "NULLABLE": "javax.annotation.Nullable",
-    "NULL_UNMARKED": "com.badlogic.gdx.NullUnmarked"
+    "NULL_UNMARKED": "retrofit2.NullUnmarked"
   },
   "LEXICAL_PRESERVATION": false,
   "OUTPUT_DIR": "/tmp/NullAwayFix",
@@ -11,7 +11,7 @@
   "OPTIMIZED": true,
   "CACHE": true,
   "BAILOUT": true,
-  "REDIRECT_BUILD_OUTPUT_TO_STDERR": false,
+  "REDIRECT_BUILD_OUTPUT_TO_STDERR": true,
   "EXHAUSTIVE_SEARCH": false,
   "OUTER_LOOP": false,
   "CACHE_IMPACT_ACTIVATION": true,
