@@ -109,8 +109,6 @@ RUN chmod +x /opt/license_acceptor.sh && /opt/license_acceptor.sh $ANDROID_SDK_R
 RUN mkdir -p /var/annotator/
 COPY ./start.sh /var/annotator/start.sh
 COPY ./git.config /var/annotator/git.config
-RUN mkdir -p /var/annotator/NullAwayAnnotator
-ADD ./NullAwayAnnotator/ /var/annotator/NullAwayAnnotator
 RUN chmod +x /var/annotator/start.sh
 
 # To get the shell
