@@ -3,27 +3,30 @@ FROM ubuntu:16.04
 LABEL Nima Karimipour <karimipour.nima@gmail.com>
 
 # Install basic software support
-# update
 RUN apt-get update -y
-RUN apt-get install --yes software-properties-common
+RUN apt-get update && \
+    apt-get install --yes software-properties-common
 
 # Install Java 8, 11, 17
-RUN apt-get install -y --no-install-recommends software-properties-common curl
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends software-properties-common curl
 
 RUN add-apt-repository -y ppa:openjdk-r/ppa
 
-# 8
-RUN apt-get install -y openjdk-8-jdk
-# 11
-RUN apt-get install -y openjdk-11-jdk
-# 17
-RUN apt-get install -y openjdk-17-jdk
+RUN apt-get update && \
+    apt-get install -y openjdk-8-jdk
 
-RUN apt-get install ca-certificates-java && \
+RUN apt-get update && \
+    apt-get install -y openjdk-11-jdk
+
+RUN apt-get update && \
+    apt-get install -y openjdk-17-jdk
+
+RUN apt-get update && \
+    apt-get install ca-certificates-java && \
     apt-get clean && \
     update-ca-certificates -f;
 
-# Default to java 11.
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
 RUN export JAVA_HOME
 
@@ -32,7 +35,8 @@ RUN apt install curl -y
 RUN apt install zip -y
 RUN apt install wget -y
 RUN apt install vim -y
-RUN apt install git -y
+# must use apt-get for git.
+RUN apt-get install git -y
 
 # Install Maven
 ARG MAVEN_VERSION=3.6.3
@@ -110,5 +114,5 @@ COPY ./start.sh /var/annotator/start.sh
 COPY ./git.config /var/annotator/git.config
 RUN chmod +x /var/annotator/start.sh
 
-# To get the shell and keep container alive.
+# To force container to be alive and access it's shell.
 CMD ["tail", "-f", "/dev/null"]
