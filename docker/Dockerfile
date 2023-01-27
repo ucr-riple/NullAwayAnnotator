@@ -3,31 +3,36 @@ FROM ubuntu:16.04
 LABEL Nima Karimipour <karimipour.nima@gmail.com>
 
 # Install basic software support
-RUN apt-get update && \
-    apt-get install --yes software-properties-common
+# update
+RUN apt-get update -y
+RUN apt-get install --yes software-properties-common
 
-# Install Java 11
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends software-properties-common curl
+# Install Java 8, 11, 17
+RUN apt-get install -y --no-install-recommends software-properties-common curl
 
 RUN add-apt-repository -y ppa:openjdk-r/ppa
 
-RUN apt-get update && \
-    apt-get install -y openjdk-11-jdk
+# 8
+RUN apt-get install -y openjdk-8-jdk
+# 11
+RUN apt-get install -y openjdk-11-jdk
+# 17
+RUN apt-get install -y openjdk-17-jdk
 
-RUN apt-get update && \
-    apt-get install ca-certificates-java && \
+RUN apt-get install ca-certificates-java && \
     apt-get clean && \
     update-ca-certificates -f;
 
+# Default to java 11.
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
 RUN export JAVA_HOME
 
 # Install required softwares (curl & zip & wget)
-RUN apt install curl
+RUN apt install curl -y
 RUN apt install zip -y
 RUN apt install wget -y
 RUN apt install vim -y
+RUN apt install git -y
 
 # Install Maven
 ARG MAVEN_VERSION=3.6.3
@@ -75,15 +80,9 @@ ENV GRADLE_USER_HOME /cache
 ENV PATH $PATH:$GRADLE_HOME/bin
 VOLUME $GRADLE_USER_HOME
 
-# update
-RUN apt-get update -y
-
 # Install python
 RUN apt-get install -y python && \
     apt-get -y install python3-pip
-
-# Install git
-RUN apt-get install -y git
 
 #Install Android SDK
 ARG ANDROID_SDK_VERSION=6858069
@@ -111,5 +110,5 @@ COPY ./start.sh /var/annotator/start.sh
 COPY ./git.config /var/annotator/git.config
 RUN chmod +x /var/annotator/start.sh
 
-# To get the shell
+# To get the shell and keep container alive.
 CMD ["tail", "-f", "/dev/null"]
