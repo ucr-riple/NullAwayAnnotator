@@ -154,9 +154,7 @@ public class Annotator {
       }
     }
 
-    if (config.forceResolveActivated) {
-      forceResolveRemainingErrors();
-    }
+    forceResolveRemainingErrors();
 
     System.out.println("\nFinished annotating.");
     Utility.writeReports(config, cache.reports().stream().collect(ImmutableSet.toImmutableSet()));
