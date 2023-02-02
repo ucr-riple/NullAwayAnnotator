@@ -1,0 +1,86 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2020 anonymous
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+package com.example.tool.core.injectors;
+
+import com.example.tool.core.Config;
+import com.example.tool.core.metadata.index.Fix;
+import com.example.tool.injector.changes.AddAnnotation;
+import com.example.tool.injector.changes.RemoveAnnotation;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/** Wrapper tool used to inject annotations to the source code. */
+public abstract class AnnotationInjector {
+  /** Core config. */
+  protected final Config config;
+
+  public AnnotationInjector(Config config) {
+    this.config = config;
+  }
+
+  /**
+   * Removes fixes from source code.
+   *
+   * @param fixes List of fixes to remove.
+   */
+  public void removeFixes(Set<Fix> fixes) {
+    if (fixes == null || fixes.size() == 0) {
+      return;
+    }
+    Set<RemoveAnnotation> toRemove =
+        fixes.stream()
+            .map(fix -> new RemoveAnnotation(fix.change.location, fix.change.annotation))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+    removeAnnotations(toRemove);
+  }
+
+  /**
+   * Applies fixes to the source code.
+   *
+   * @param fixes Set of fixes to apply.
+   */
+  public void injectFixes(Set<Fix> fixes) {
+    if (fixes == null || fixes.size() == 0) {
+      return;
+    }
+    injectAnnotations(
+        fixes.stream().map(fix -> fix.change).collect(Collectors.toCollection(LinkedHashSet::new)));
+  }
+
+  /**
+   * Removes annotation from the source code.
+   *
+   * @param changes Set of annotations to remove.
+   */
+  public abstract void removeAnnotations(Set<RemoveAnnotation> changes);
+
+  /**
+   * Injects annotations to the source code.
+   *
+   * @param changes Set of annotations to inject.
+   */
+  public abstract void injectAnnotations(Set<AddAnnotation> changes);
+}

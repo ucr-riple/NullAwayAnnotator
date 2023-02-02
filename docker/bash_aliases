@@ -1,4 +1,0 @@
-# Java
-alias java_8="export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/ && update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java"
-alias java_11="export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/ && update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java"
-alias java_17="export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64/ && update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java"
