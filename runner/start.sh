@@ -1,13 +1,12 @@
 #!/bin/bash
 set -exu
 
-CURRENT_VERSION="annotator-core-1.3.6-alpha-4-SNAPSHOT.jar"
-PROJECT_ROOT=${PROJECT_ROOT:-$(git rev-parse --show-toplevel)}
+CURRENT_VERSION="annotator-core-0.0.1.jar"
 
-pushd "$PROJECT_ROOT"
+pushd "/tmp/NullAwayAnnotator/"
    rm -rvf runner/jars
    mkdir runner/jars
-   ./gradlew publishToMavenLocal --rerun-tasks
+   ./gradlew publishToMavenLocal -x signMavenPublication -x signShadowPublication--rerun-tasks
    mv annotator-core/build/libs/"$CURRENT_VERSION" runner/jars/core.jar
 
    pushd runner

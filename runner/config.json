@@ -1,5 +1,5 @@
 {
-  "BUILD_COMMAND": "cd /Users/nima/Developer/NullAwayFixer/Projects/spring-boot && ./gradlew :spring-boot-project:spring-boot:compileJava -x :spring-boot-project:spring-boot:compileKotlin",
+  "BUILD_COMMAND": "cd /Users/anonymous/Developer/NullAwayFixer/Projects/spring-boot && ./gradlew :spring-boot-project:spring-boot:compileJava -x :spring-boot-project:spring-boot:compileKotlin",
   "ANNOTATION": {
     "INITIALIZER": "org.springframework.boot.Initializer",
     "NULLABLE": "javax.annotation.Nullable",
