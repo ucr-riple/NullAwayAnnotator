@@ -111,7 +111,7 @@ RUN chmod +x /opt/license_acceptor.sh && /opt/license_acceptor.sh $ANDROID_SDK_R
 # Script to run
 RUN mkdir -p /var/annotator/
 COPY ./start.sh /var/annotator/start.sh
-COPY ./git.config /var/annotator/git.config
+COPY ./bash_aliases /root/.bash_aliases
 RUN chmod +x /var/annotator/start.sh
 
 # To force container to be alive and access it's shell.
