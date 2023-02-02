@@ -532,8 +532,7 @@ public class Config {
 
     this.downstreamInfo = ImmutableSet.copyOf(moduleInfoList);
     this.moduleCounterID = 0;
-    this.forceResolveActivated =
-        getValueFromKey(jsonObject, "FORCE_RESOLVE", Boolean.class).orElse(false);
+    this.forceResolveActivated = true;
     this.inferenceActivated =
         getValueFromKey(jsonObject, "INFERENCE_ACTIVATION", Boolean.class).orElse(true);
     this.nullUnMarkedAnnotation =
