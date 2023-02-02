@@ -37,7 +37,6 @@ buildscript {
 
 plugins {
     id "net.ltgt.errorprone" version "2.0.1" apply false
-    id 'com.github.sherter.google-java-format' version '0.9'
     id 'maven-publish'
     id "com.vanniktech.maven.publish"
 }

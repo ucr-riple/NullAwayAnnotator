@@ -27,7 +27,5 @@ include 'annotator-core'
 include 'annotator-scanner'
 include 'injector'
 include 'library-model-loader'
-include 'checks'
-include 'checks:ban-mutable-static'
 include 'qual'
 
