@@ -61,6 +61,7 @@ public class DownstreamImpact extends Impact {
     super(fix);
     // Only store impacts of fixes targeting methods.
     Preconditions.checkArgument(fix.isOnMethod());
+    this.effect = 0;
     this.impactedParametersMap = new HashMap<>();
     this.triggeredErrors = ImmutableSet.of();
   }

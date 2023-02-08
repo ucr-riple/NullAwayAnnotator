@@ -205,11 +205,4 @@ public class DownstreamImpactCacheImpl
     }
     return ImmutableSet.copyOf(impact.getTriggeredErrors());
   }
-
-  @Override
-  public void updateImpactsAfterInjection(Collection<Fix> fixes) {
-    this.store
-        .values()
-        .forEach(downstreamImpact -> downstreamImpact.updateStatusAfterInjection(fixes));
-  }
 }
