@@ -120,8 +120,8 @@ public class Annotator {
   /** Performs iterations of inference/injection until no unseen fix is suggested. */
   private void annotate() {
     // The downstream impact cache stores the impact of making all public APIs @Nullable on
-    // downstream
-    // dependencies.
+    // downstream dependencies.
+    // downstreamImpactCache analyzes effects of all public APIs on downstream dependencies.
     // Through iterations, since the source code for downstream dependencies does not change and the
     // computation does not depend on the changes in the target module, it will compute the same
     // result in each iteration, therefore we perform the analysis only once and reuse it in each
@@ -160,6 +160,8 @@ public class Annotator {
 
   /**
    * Performs single iteration of inference/injection.
+   *
+   * <p><<<<<<< HEAD
    *
    * @param targetModuleCache Target impact cache instance.
    * @param downstreamImpactCache Downstream impact cache instance to detect impact of fixes outside
@@ -203,6 +205,7 @@ public class Annotator {
    * Processes triggered fixes.
    *
    * @param downstreamImpactCache Downstream impact cache instance.
+   * @param targetModuleCache Target impact cache instance.
    * @return Immutable set of reports from the triggered fixes.
    */
   private ImmutableSet<Report> processTriggeredFixes(

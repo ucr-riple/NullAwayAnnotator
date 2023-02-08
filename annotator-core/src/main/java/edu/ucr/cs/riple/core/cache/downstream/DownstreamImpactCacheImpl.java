@@ -59,7 +59,6 @@ public class DownstreamImpactCacheImpl
 
   /** Set of downstream dependencies. */
   private final ImmutableSet<ModuleInfo> downstreamModules;
-
   /**
    * Constructor for creating downstream impact cache. It initializes the cache with all the entries
    * they can have. The corresponding values for these cache entire will be computed and once {@link

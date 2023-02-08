@@ -75,7 +75,7 @@ public interface Supplier {
   /**
    * Getter for {@link DownstreamImpactCache} instance.
    *
-   * @return GlobalAnalyzer instance.
+   * @return DownstreamImpactCache instance.
    */
   DownstreamImpactCache getDownstreamImpactCache();
 
