@@ -30,7 +30,6 @@ import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.Factory;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.scanner.AnnotatorScanner;
 import edu.ucr.cs.riple.scanner.ScannerConfigWriter;
@@ -47,7 +46,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -111,10 +109,9 @@ public class Utility {
       reportJson.put("OVERALL EFFECT", report.getOverallEffect(config));
       reportJson.put("Upper Bound EFFECT", report.getUpperBoundEffectOnDownstreamDependencies());
       reportJson.put("Lower Bound EFFECT", report.getLowerBoundEffectOnDownstreamDependencies());
-      reportJson.put("FINISHED", report.finished);
+      reportJson.put("FINISHED", !report.requiresFurtherProcess(config));
       JSONArray followUps = new JSONArray();
       if (config.chain && report.localEffect < 1) {
-        report.tree.remove(report.root);
         followUps.addAll(report.tree.stream().map(Fix::getJson).collect(Collectors.toList()));
       }
       reportJson.put("TREE", followUps);
@@ -139,35 +136,16 @@ public class Utility {
   }
 
   /**
-   * Reads serialized suggested fixes of passed module in "fixes.tsv" file in the output directory,
+   * Reads serialized errors "errors.tsv" file in the output directory, and returns the collected
+   * set of resolving fixes for read errors.
    *
-   * @param info Module info.
-   * @param factory Fix factory to create {@link Fix} instance from array of values.
-   * @return Set of serialized fixes.
+   * @param config Annotator config.
+   * @param store Field Declaration store.
+   * @return Set of collected fixes.
    */
-  public static Set<Fix> readFixesFromOutputDirectory(ModuleInfo info, Factory<Fix> factory) {
-    Path fixesPath = info.dir.resolve("fixes.tsv");
-    Set<Fix> fixes = new HashSet<>();
-    try {
-      try (BufferedReader br =
-          Files.newBufferedReader(fixesPath.toFile().toPath(), Charset.defaultCharset())) {
-        String line;
-        // Skip header.
-        br.readLine();
-        while ((line = br.readLine()) != null) {
-          Fix fix = factory.build(line.split("\t"));
-          Optional<Fix> existing = fixes.stream().filter(other -> other.equals(fix)).findAny();
-          if (existing.isPresent()) {
-            existing.get().reasons.addAll(fix.reasons);
-          } else {
-            fixes.add(fix);
-          }
-        }
-      }
-    } catch (IOException e) {
-      throw new RuntimeException("Exception happened in reading fixes at: " + fixesPath, e);
-    }
-    return fixes;
+  public static Set<Fix> readFixesFromOutputDirectory(Config config, FieldDeclarationStore store) {
+    Set<Error> errors = readErrorsFromOutputDirectory(config, config.target, store);
+    return Error.getResolvingFixesOfErrors(errors);
   }
 
   /**

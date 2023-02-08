@@ -101,7 +101,7 @@ public class Annotator {
     methodDeclarationTree = new MethodDeclarationTree(config);
     config.initializeAdapter(fieldDeclarationStore);
     Set<OnField> uninitializedFields =
-        Utility.readFixesFromOutputDirectory(config.target, Fix.factory(config, null)).stream()
+        Utility.readFixesFromOutputDirectory(config, fieldDeclarationStore).stream()
             .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
             .map(Fix::toField)
             .collect(Collectors.toSet());
@@ -199,9 +199,7 @@ public class Annotator {
     Utility.buildTarget(config);
     // Suggested fixes of target at the current state.
     ImmutableSet<Fix> fixes =
-        Utility.readFixesFromOutputDirectory(
-                config.target, Fix.factory(config, fieldDeclarationStore))
-            .stream()
+        Utility.readFixesFromOutputDirectory(config, fieldDeclarationStore).stream()
             .filter(fix -> !cache.processedFix(fix))
             .collect(ImmutableSet.toImmutableSet());
 
@@ -231,10 +229,7 @@ public class Annotator {
     Utility.buildTarget(config);
     Set<Error> remainingErrors =
         Utility.readErrorsFromOutputDirectory(config, config.target, fieldDeclarationStore);
-    Set<Fix> remainingFixes =
-        Utility.readFixesFromOutputDirectory(
-            config.target, Fix.factory(config, fieldDeclarationStore));
-
+    Set<Fix> remainingFixes = Utility.readFixesFromOutputDirectory(config, fieldDeclarationStore);
     // Collect all regions for NullUnmarked.
     // For all errors in regions which correspond to a method's body, we can add @NullUnmarked at
     // the method level.

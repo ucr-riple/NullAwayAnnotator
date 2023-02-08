@@ -47,16 +47,17 @@ public class Report {
   /** Fix tree associated to this report instance. */
   public Set<Fix> tree;
   /**
-   * Set of fixes that will be triggered in target module if fix tree is applied to the source code.
-   */
-  public ImmutableSet<Fix> triggeredFixes;
-  /**
    * Set of errors that will be triggered in target module if fix tree is applied to the source
    * code.
    */
   public ImmutableSet<Error> triggeredErrors;
-  /** If true, all leaves of fix tree are not resolvable by any {@code @Nullable} annotation. */
-  public boolean finished;
+  /**
+   * Set of triggered fixes on target module that will be triggered if fix tree is applied due to
+   * errors in downstream dependencies.
+   */
+  public ImmutableSet<Fix> triggeredFixesOnDownstream;
+  /** If true, this report's tree has been processed for at least one iteration */
+  public boolean hasBeenProcessedOnce;
   /**
    * Lower bound of number of errors in downstream dependencies if fix tree is applied to the target
    * module.
@@ -83,8 +84,8 @@ public class Report {
     this.localEffect = localEffect;
     this.root = root;
     this.tree = Sets.newHashSet(root);
-    this.finished = false;
-    this.triggeredFixes = ImmutableSet.of();
+    this.hasBeenProcessedOnce = false;
+    this.triggeredFixesOnDownstream = ImmutableSet.of();
     this.triggeredErrors = ImmutableSet.of();
     this.lowerBoundEffectOnDownstreamDependencies = 0;
     this.upperBoundEffectOnDownstreamDependencies = 0;
@@ -153,27 +154,35 @@ public class Report {
    * locations are compared in trees.
    *
    * @param config Annotator Config instance.
-   * @param other Other report, mainly coming from tests.
+   * @param found Produced report, mainly coming from tests.
    * @return true, if two reports are equal (same effectiveness and all locations)
    */
-  public boolean testEquals(Config config, Report other) {
-    if (!this.root.equals(other.root)) {
+  public boolean testEquals(Config config, Report found) {
+    if (!this.root.equals(found.root)) {
       return false;
     }
-    if (this.getOverallEffect(config) != other.getOverallEffect(config)) {
+    if (this.getOverallEffect(config) != found.getOverallEffect(config)) {
       return false;
     }
     this.tree.add(this.root);
-    other.tree.add(other.root);
+    found.tree.add(found.root);
     Set<Location> thisTree = this.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
-    Set<Location> otherTree = other.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
+    Set<Location> otherTree = found.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
     if (!thisTree.equals(otherTree)) {
       return false;
     }
     Set<Location> thisTriggered =
-        this.triggeredFixes.stream().map(Fix::toLocation).collect(Collectors.toSet());
+        this.triggeredErrors.stream()
+            .filter(Error::hasFix)
+            .flatMap(error -> error.getResolvingFixes().stream())
+            .map(Fix::toLocation)
+            .collect(Collectors.toSet());
     Set<Location> otherTriggered =
-        other.triggeredFixes.stream().map(Fix::toLocation).collect(Collectors.toSet());
+        found.triggeredErrors.stream()
+            .filter(Error::hasFix)
+            .flatMap(error -> error.getResolvingFixes().stream())
+            .map(Fix::toLocation)
+            .collect(Collectors.toSet());
     return otherTriggered.equals(thisTriggered);
   }
 
@@ -237,14 +246,27 @@ public class Report {
   }
 
   /**
-   * Checks if the report needs further investigation. If a fix is suggested from downstream
+   * Checks if the report requires further investigation. If a fix is suggested from downstream
    * dependencies, it should still be included the next cycle.
    *
    * @param config Annotator config instance.
    * @return true, if report needs further investigation.
    */
-  public boolean isInProgress(Config config) {
-    return (!finished && (!config.bailout || localEffect > 0))
-        || triggeredFixes.stream().anyMatch(input -> !input.fixSourceIsInTarget);
+  public boolean requiresFurtherProcess(Config config) {
+    if (!hasBeenProcessedOnce) {
+      // report has not been processed.
+      return true;
+    }
+    if (triggeredFixesOnDownstream.size() != 0 && !tree.containsAll(triggeredFixesOnDownstream)) {
+      // Report contains fixes from downstream dependencies, their effectiveness on target module
+      // should be investigated.
+      return true;
+    }
+    ImmutableSet<Fix> triggeredFixes = Error.getResolvingFixesOfErrors(triggeredErrors);
+    if (tree.containsAll(triggeredFixes)) {
+      // no change in the tree structure.
+      return false;
+    }
+    return !config.bailout || localEffect > 0;
   }
 }

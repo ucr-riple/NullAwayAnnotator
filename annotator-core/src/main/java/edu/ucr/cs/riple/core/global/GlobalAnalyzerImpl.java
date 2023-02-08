@@ -36,7 +36,6 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
-import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -94,12 +93,11 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
                     new Fix(
                         new AddMarkerAnnotation(
                             new OnMethod(
-                                "null",
+                                methodImpact.node.location.path,
                                 methodImpact.node.location.clazz,
                                 methodImpact.node.location.method),
                             config.nullableAnnot),
                         "null",
-                        new Region("null", "null"),
                         false))
             .collect(ImmutableSet.toImmutableSet());
     DownstreamImpactEvaluator analyzer =

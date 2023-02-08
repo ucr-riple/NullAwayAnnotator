@@ -29,27 +29,19 @@ import edu.ucr.cs.riple.core.evaluators.AbstractEvaluator;
 import edu.ucr.cs.riple.core.evaluators.graphprocessor.ConflictGraphProcessor;
 import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
-import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 
 /** Supplier for initializing an {@link AbstractEvaluator} instance. */
 public interface Supplier {
 
   /**
-   * Getter for {@link Bank} of {@link Fix} instances.
+   * Getter for {@link ErrorStore} of {@link Error} instance.
    *
-   * @return Fix Bank instance.
+   * @return Error Store instance.
    */
-  Bank<Fix> getFixBank();
-
-  /**
-   * Getter for {@link Bank} of {@link Error} instance.
-   *
-   * @return Error Bank instance.
-   */
-  Bank<Error> getErrorBank();
+  ErrorStore getErrorStore();
 
   /**
    * Getter for {@link AnnotationInjector} instance.

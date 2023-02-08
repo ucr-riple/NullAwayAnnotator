@@ -30,9 +30,11 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.SignatureMatcher;
 import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -44,11 +46,15 @@ public class OnParameter extends Location {
   public final int index;
   private final SignatureMatcher matcher;
 
-  public OnParameter(String path, String clazz, String method, int index) {
+  public OnParameter(Path path, String clazz, String method, int index) {
     super(LocationType.PARAMETER, path, clazz);
     this.method = method;
     this.index = index;
     this.matcher = new SignatureMatcher(method);
+  }
+
+  public OnParameter(String path, String clazz, String method, int index) {
+    this(Helper.deserializePath(path), clazz, method, index);
   }
 
   @SuppressWarnings("unchecked")

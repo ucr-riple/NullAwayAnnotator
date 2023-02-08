@@ -27,8 +27,8 @@ package edu.ucr.cs.riple.core.metadata.graph;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
+import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
@@ -55,23 +55,20 @@ public class Node {
   /** Set of potentially impacted by any node in tree. */
   public final Set<Region> regions;
 
-  /** Set of triggered fixes if tree is applied. */
-  public Set<Fix> triggeredFixes;
-
-  /** Set of triggered errors if tree is applied. */
+  /** Set of triggered errors if tree is applied on target module. */
   public ImmutableSet<Error> triggeredErrors;
+
+  /**
+   * Set of triggered fixes on target module that will be triggered if fix tree is applied due to
+   * errors in downstream dependencies.
+   */
+  public ImmutableSet<Fix> triggeredFixesOnDownstream;
 
   /** Unique id of Node across all nodes. */
   public int id;
 
   /** Effect of applying containing change */
   public int effect;
-
-  /**
-   * if <code>true</code>, set of triggered fixes has been updated, and the node still needs further
-   * process.
-   */
-  public boolean changed;
 
   /** Corresponding report of processing root. */
   public Report report;
@@ -82,20 +79,21 @@ public class Node {
   public Node(Fix root) {
     this.regions = new HashSet<>();
     this.root = root;
-    this.triggeredFixes = new HashSet<>();
+    this.triggeredFixesOnDownstream = ImmutableSet.of();
     this.triggeredErrors = ImmutableSet.of();
     this.effect = 0;
     this.tree = Sets.newHashSet(root);
-    this.changed = false;
   }
 
   /**
-   * Initializes rootSource. Collects all regions where error reported from {@link Bank}
+   * Initializes rootSource. Collects all regions where error reported from {@link ErrorStore}
    *
-   * @param fixBank {@link Bank} instance.
+   * @param errorStore {@link ErrorStore} instance.
    */
-  public void setOrigins(Bank<Fix> fixBank) {
-    this.origins = fixBank.getRegionsForFixes(fix -> fix.equals(root));
+  public void setOrigins(ErrorStore errorStore) {
+    this.origins =
+        errorStore.getRegionsForElements(
+            error -> error.isSingleFix() && error.getResolvingFixes().contains(root));
   }
 
   /**
@@ -139,18 +137,18 @@ public class Node {
    *
    * @param localEffect Local effect calculated based on the number of errors in impacted regions.
    * @param fixesInOneRound All fixes applied simultaneously to the source code.
-   * @param triggeredFixes Triggered fixes collected from impacted regions.
+   * @param triggeredFixesFromDownstream Triggered fixes from downstream dependencies.
    * @param triggeredErrors Triggered Errors collected from impacted regions.
    * @param mdt Method declaration tree instance.
    */
   public void updateStatus(
       int localEffect,
       Set<Fix> fixesInOneRound,
-      Collection<Fix> triggeredFixes,
+      Collection<Fix> triggeredFixesFromDownstream,
       Collection<Error> triggeredErrors,
       MethodDeclarationTree mdt) {
-    // Update list of triggered fixes.
-    this.updateTriggered(triggeredFixes);
+    // Update list of triggered fixes on downstream.
+    this.triggeredFixesOnDownstream = ImmutableSet.copyOf(triggeredFixesFromDownstream);
     // Update set of triggered errors.
     this.triggeredErrors = ImmutableSet.copyOf(triggeredErrors);
     // A fix in a tree, can have a super method that is not part of this node's tree but be present
@@ -188,23 +186,11 @@ public class Node {
     this.effect = localEffect + numberOfSuperMethodsAnnotatedOutsideTree[0];
   }
 
-  /**
-   * Updated the triggered sets and the status of node.
-   *
-   * @param fixes Collection of triggered fixes.
-   */
-  public void updateTriggered(Collection<Fix> fixes) {
-    int sizeBefore = this.triggeredFixes.size();
-    this.triggeredFixes.addAll(fixes);
-    int sizeAfter = this.triggeredFixes.size();
-    this.changed = (sizeAfter != sizeBefore);
-  }
-
   /** Merges triggered fixes to the tree, to prepare the analysis for the next depth. */
   public void mergeTriggered() {
-    this.tree.addAll(this.triggeredFixes);
+    this.tree.addAll(Error.getResolvingFixesOfErrors(this.triggeredErrors));
+    this.tree.addAll(triggeredFixesOnDownstream);
     this.tree.forEach(fix -> fix.fixSourceIsInTarget = true);
-    this.triggeredFixes.clear();
   }
 
   @Override

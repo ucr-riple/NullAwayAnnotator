@@ -29,18 +29,15 @@ import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
-import edu.ucr.cs.riple.core.metadata.index.Bank;
 import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 
 /** Base class for all instances of {@link Supplier}. */
 public abstract class AbstractSupplier implements Supplier {
 
-  /** Fix bank instance. */
-  protected final Bank<Fix> fixBank;
-  /** Error Bank instance. */
-  protected final Bank<Error> errorBank;
+  /** Error Store instance. */
+  protected final ErrorStore errorStore;
   /** Injector instance. */
   protected final AnnotationInjector injector;
   /** Method declaration tree instance. */
@@ -57,8 +54,7 @@ public abstract class AbstractSupplier implements Supplier {
     this.config = config;
     this.fieldDeclarationStore = new FieldDeclarationStore(config, modules);
     this.tree = tree;
-    this.fixBank = initializeFixBank(modules);
-    this.errorBank = initializeErrorBank(modules);
+    this.errorStore = initializeErrorStore(modules);
     this.injector = initializeInjector();
     this.depth = initializeDepth();
   }
@@ -78,41 +74,22 @@ public abstract class AbstractSupplier implements Supplier {
   protected abstract int initializeDepth();
 
   /**
-   * Initializer for errorBank.
+   * Initializer for error store.
    *
    * @param modules Set of modules involved in the analysis.
-   * @return {@link Bank} of {@link Error} instances.
+   * @return {@link ErrorStore} of {@link Error} instances.
    */
-  protected Bank<Error> initializeErrorBank(ImmutableSet<ModuleInfo> modules) {
-    return new Bank<>(
+  protected ErrorStore initializeErrorStore(ImmutableSet<ModuleInfo> modules) {
+    return new ErrorStore(
         modules.stream()
             .map(info -> info.dir.resolve("errors.tsv"))
             .collect(ImmutableSet.toImmutableSet()),
         Error.factory(config, fieldDeclarationStore));
   }
 
-  /**
-   * Initializer for fixBank.
-   *
-   * @param modules Set of modules involved in the analysis.
-   * @return {@link Bank} of {@link Fix} instances.
-   */
-  protected Bank<Fix> initializeFixBank(ImmutableSet<ModuleInfo> modules) {
-    return new Bank<>(
-        modules.stream()
-            .map(info -> info.dir.resolve("fixes.tsv"))
-            .collect(ImmutableSet.toImmutableSet()),
-        Fix.factory(config, fieldDeclarationStore));
-  }
-
   @Override
-  public Bank<Fix> getFixBank() {
-    return fixBank;
-  }
-
-  @Override
-  public Bank<Error> getErrorBank() {
-    return errorBank;
+  public ErrorStore getErrorStore() {
+    return errorStore;
   }
 
   @Override
