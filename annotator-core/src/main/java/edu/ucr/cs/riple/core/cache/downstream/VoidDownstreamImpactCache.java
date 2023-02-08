@@ -33,14 +33,8 @@ import javax.annotation.Nullable;
 
 /**
  * This downstream impact cache does not have any information regarding the impact of changes in
- * <<<<<<<
- * HEAD:annotator-core/src/main/java/edu/ucr/cs/riple/core/cache/downstream/VoidDownstreamImpactCache.java
- * target module in dependencies, the main purpose of this class is to avoid initializing downstream
- * impact cache instances to {@code null} when impact on dependencies is not considered. =======
- * target module in dependencies, the main purpose of this class is to avoid initializing
+ * target module on downstream dependencies. The main purpose of this class is to avoid initializing
  * DownstreamImpactCache instances to {@code null} when impact on dependencies is not considered.
- * >>>>>>>
- * master:annotator-core/src/main/java/edu/ucr/cs/riple/core/global/VoidDownstreamImpactCache.java
  */
 public class VoidDownstreamImpactCache implements DownstreamImpactCache {
 
