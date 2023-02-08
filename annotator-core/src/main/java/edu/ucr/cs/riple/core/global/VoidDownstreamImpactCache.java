@@ -32,7 +32,7 @@ import java.util.Set;
 
 /**
  * This downstream impact cache does not have any information regarding the impact of changes in
- * target module in dependencies, the main purpose of this class is to avoid initializing
+ * target module on downstream dependencies. The main purpose of this class is to avoid initializing
  * DownstreamImpactCache instances to {@code null} when impact on dependencies is not considered.
  */
 public class VoidDownstreamImpactCache implements DownstreamImpactCache {
