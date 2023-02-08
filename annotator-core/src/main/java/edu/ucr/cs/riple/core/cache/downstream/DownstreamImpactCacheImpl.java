@@ -116,7 +116,7 @@ public class DownstreamImpactCacheImpl
         .forEach(
             method -> {
               Set<OnParameter> impactedParameters =
-                  evaluator.getImpactedParameters(method.fix.toMethod());
+                  evaluator.getImpactedParameters(method.toMethod());
               reports.stream()
                   .filter(input -> input.root.toMethod().equals(method.toMethod()))
                   .findAny()

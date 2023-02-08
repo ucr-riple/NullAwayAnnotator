@@ -163,9 +163,11 @@ public class Annotator {
    *
    * <p><<<<<<< HEAD
    *
+   * <p><<<<<<< HEAD
+   *
    * @param targetModuleCache Target impact cache instance.
-   * @param downstreamImpactCache Downstream impact cache instance to detect impact of fixes outside
-   *     of target module.
+   * @param downstreamImpactCache Downstream impact cache instance to retrieve impact of fixes on
+   *     downstream dependencies.
    */
   private void executeNextIteration(
       TargetModuleCache targetModuleCache, DownstreamImpactCache downstreamImpactCache) {
