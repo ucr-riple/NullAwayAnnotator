@@ -30,7 +30,6 @@ import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.AnnotationDeclaration;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.EnumConstantDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
@@ -213,27 +212,15 @@ public class Helper {
   }
 
   /**
-   * Locates an anonymous class or enum constant at specific index.
+   * Locates an anonymous class at specific index.
    *
    * @param cursor Starting node for traversal.
    * @param index index.
-   * @return anonymous class or enum constant at specific index.
+   * @return anonymous class at specific index.
    * @throws TargetClassNotFound if the target class is not found.
    */
-  private static Node findAnonymousClassOrEnumConstant(Node cursor, int index)
-      throws TargetClassNotFound {
+  private static Node findAnonymousClass(Node cursor, int index) throws TargetClassNotFound {
     final List<Node> candidates = new ArrayList<>();
-    if (cursor instanceof EnumDeclaration) {
-      // According to java language specifics, Enum constants are first members of enums. In
-      // javaparser structure, enum constants are stored after all other members of enum which does
-      // not conform to how javac assigns flat names. We should prioritize visiting enums
-      // constants first.
-      NodeList<EnumConstantDeclaration> constants = ((EnumDeclaration) cursor).getEntries();
-      if (index < constants.size()) {
-        return constants.get(index);
-      }
-      index -= constants.size();
-    }
     walk(
         cursor,
         candidates,
@@ -270,9 +257,6 @@ public class Helper {
     }
     if (node instanceof ObjectCreationExpr) {
       return ((ObjectCreationExpr) node).getAnonymousClassBody().orElse(null);
-    }
-    if (node instanceof EnumConstantDeclaration) {
-      return ((EnumConstantDeclaration) node).getClassBody();
     }
     return null;
   }
@@ -313,7 +297,7 @@ public class Helper {
       int index = indexString.equals("") ? 0 : Integer.parseInt(indexString) - 1;
       Preconditions.checkNotNull(cursor);
       if (key.matches("\\d+")) {
-        cursor = findAnonymousClassOrEnumConstant(cursor, index);
+        cursor = findAnonymousClass(cursor, index);
       } else {
         cursor =
             indexString.equals("")
