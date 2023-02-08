@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.core.evaluators.graphprocessor;
 
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
-import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
+import edu.ucr.cs.riple.core.global.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
@@ -46,8 +46,8 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
   protected final AnnotationInjector injector;
   /** Error store instance to store state of fixes before and after of injections. */
   protected final ErrorStore errorStore;
-  /** Global analyzer to retrieve impacts of fixes globally. */
-  protected final GlobalAnalyzer globalAnalyzer;
+  /** Downstream impact cache to retrieve impacts of fixes globally. */
+  protected final DownstreamImpactCache downstreamImpactCache;
   /** Annotator config. */
   protected final Config config;
   /** Handler to re-run compiler. */
@@ -58,7 +58,7 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
     this.methodDeclarationTree = supplier.getMethodDeclarationTree();
     this.injector = supplier.getInjector();
     this.errorStore = supplier.getErrorStore();
-    this.globalAnalyzer = supplier.getGlobalAnalyzer();
+    this.downstreamImpactCache = supplier.getDownstreamImpactCache();
     this.compilerRunner = runner;
   }
 
@@ -70,7 +70,7 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
   protected Set<Fix> getTriggeredFixesFromDownstream(Node node) {
     Set<Location> currentLocationTargetedByTree =
         node.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
-    return globalAnalyzer.getImpactedParameters(node.tree).stream()
+    return downstreamImpactCache.getImpactedParameters(node.tree).stream()
         .filter(input -> !currentLocationTargetedByTree.contains(input))
         .map(
             onParameter ->

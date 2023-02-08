@@ -31,11 +31,11 @@ import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Set;
 
 /**
- * This global analyzer does not have any information regarding the impact of changes in target
- * module in dependencies, the main purpose of this class is to avoid initializing GlobalAnalyzer
- * instances to {@code null} when impact on dependencies is not considered.
+ * This downstream impact cache does not have any information regarding the impact of changes in
+ * target module in dependencies, the main purpose of this class is to avoid initializing
+ * DownstreamImpactCache instances to {@code null} when impact on dependencies is not considered.
  */
-public class NoOpGlobalAnalyzer implements GlobalAnalyzer {
+public class VoidDownstreamImpactCache implements DownstreamImpactCache {
 
   @Override
   public void analyzeDownstreamDependencies() {

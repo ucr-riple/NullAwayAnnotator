@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.core;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
+import edu.ucr.cs.riple.core.global.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -55,7 +55,7 @@ public class Report {
    * Set of triggered fixes on target module that will be triggered if fix tree is applied due to
    * errors in downstream dependencies.
    */
-  public ImmutableSet<Fix> triggeredFixesOnDownstream;
+  public ImmutableSet<Fix> triggeredFixesFromDownstream;
   /** If true, this report's tree has been processed for at least one iteration */
   public boolean hasBeenProcessedOnce;
   /**
@@ -85,7 +85,7 @@ public class Report {
     this.root = root;
     this.tree = Sets.newHashSet(root);
     this.hasBeenProcessedOnce = false;
-    this.triggeredFixesOnDownstream = ImmutableSet.of();
+    this.triggeredFixesFromDownstream = ImmutableSet.of();
     this.triggeredErrors = ImmutableSet.of();
     this.lowerBoundEffectOnDownstreamDependencies = 0;
     this.upperBoundEffectOnDownstreamDependencies = 0;
@@ -100,7 +100,7 @@ public class Report {
    * @return true, if report contains a fix which will trigger an unresolvable error in downstream
    *     dependency.
    */
-  public boolean containsDestructiveMethod(GlobalAnalyzer analyzer) {
+  public boolean containsDestructiveMethod(DownstreamImpactCache analyzer) {
     return this.tree.stream().anyMatch(analyzer::isNotFixableOnTarget);
   }
 
@@ -202,7 +202,8 @@ public class Report {
    *
    * @param analyzer Downstream dependency analyzer instance.
    */
-  public void computeBoundariesOfEffectivenessOnDownstreamDependencies(GlobalAnalyzer analyzer) {
+  public void computeBoundariesOfEffectivenessOnDownstreamDependencies(
+      DownstreamImpactCache analyzer) {
     this.lowerBoundEffectOnDownstreamDependencies =
         analyzer.computeLowerBoundOfNumberOfErrors(tree);
     this.upperBoundEffectOnDownstreamDependencies =
@@ -257,7 +258,8 @@ public class Report {
       // report has not been processed.
       return true;
     }
-    if (triggeredFixesOnDownstream.size() != 0 && !tree.containsAll(triggeredFixesOnDownstream)) {
+    if (triggeredFixesFromDownstream.size() != 0
+        && !tree.containsAll(triggeredFixesFromDownstream)) {
       // Report contains fixes from downstream dependencies, their effectiveness on target module
       // should be investigated.
       return true;
