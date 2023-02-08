@@ -257,7 +257,8 @@ public class Report {
       // report has not been processed.
       return true;
     }
-    if (triggeredFixesFromDownstream.size() != 0 && !tree.containsAll(triggeredFixesFromDownstream)) {
+    if (triggeredFixesFromDownstream.size() != 0
+        && !tree.containsAll(triggeredFixesFromDownstream)) {
       // Report contains fixes from downstream dependencies, their effectiveness on target module
       // should be investigated.
       return true;
