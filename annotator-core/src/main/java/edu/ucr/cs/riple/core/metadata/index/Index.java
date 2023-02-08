@@ -35,50 +35,34 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * Indexes contents of type {@link Enclosed} based on the computed hash for fast retrieval. This
- * data structure loads its data from a file at the given path.
+ * Indexes {@link Error} instances based on the enclosing region. This data structure loads its data
+ * from a file at the given path.
  */
-public class Index<T extends Enclosed> {
+public class Index {
 
-  /**
-   * Contents of the index. Items can have a duplicate hashes, therefore a {@link Multimap} is used.
-   */
-  private final Multimap<Integer, T> items;
+  /** Contents of the index. */
+  private final Multimap<Region, Error> items;
   /** Factory instance. */
-  private final Factory<T> factory;
+  private final Factory factory;
   /** Paths to the file to load the content from. */
   private final ImmutableSet<Path> paths;
-  /** Type of index. Used to compute hash. */
-  private final Index.Type type;
-  /** Total number of items. */
-  private int total;
-
-  /** Index type. */
-  public enum Type {
-    BY_MEMBER,
-    BY_CLASS
-  }
 
   /**
    * Creates an instance of Index. Contents are accumulated from multiple sources.
    *
    * @param paths ImmutableSet of paths to load the data from. Each file is a TSV file containing
-   *     information to create an instance of {@link Enclosed}.
-   * @param type Type of index.
+   *     information to create an instance of {@link Error}.
    * @param factory Factory to create instances from file lines.
    */
-  public Index(ImmutableSet<Path> paths, Index.Type type, Factory<T> factory) {
-    this.type = type;
+  public Index(ImmutableSet<Path> paths, Factory factory) {
     this.paths = paths;
     this.items = MultimapBuilder.hashKeys().arrayListValues().build();
     this.factory = factory;
-    this.total = 0;
   }
 
   /** Starts the reading and index process. */
@@ -93,15 +77,8 @@ public class Index<T extends Enclosed> {
               line = br.readLine();
             }
             while (line != null) {
-              T item = factory.build(line.split("\t"));
-              total++;
-              int hash;
-              if (type.equals(Type.BY_CLASS)) {
-                hash = Objects.hash(item.encClass());
-              } else {
-                hash = Objects.hash(item.encClass(), item.encMember());
-              }
-              items.put(hash, item);
+              Error error = factory.build(line.split("\t"));
+              items.put(error.getRegion(), error);
               line = br.readLine();
             }
           } catch (IOException e) {
@@ -111,28 +88,13 @@ public class Index<T extends Enclosed> {
   }
 
   /**
-   * Returns all contents which are enclosed by the given class.
+   * Returns all contents which are enclosed by the given region.
    *
-   * @param clazz Fully qualified name of the class.
-   * @return Stored contents that are enclosed by the given class.
+   * @param region Enclosing region.
+   * @return Stored contents that are enclosed by the given region.
    */
-  public Collection<T> getByClass(String clazz) {
-    return items.get(Objects.hash(clazz)).stream()
-        .filter(item -> item.encClass().equals(clazz))
-        .collect(Collectors.toList());
-  }
-
-  /**
-   * Returns all contents which are enclosed by the given class and member.
-   *
-   * @param clazz Fully qualified name of the class.
-   * @param member member symbol.
-   * @return Stored contents that are enclosed by the given class and member.
-   */
-  public Collection<T> getByMember(String clazz, String member) {
-    return items.get(Objects.hash(clazz, member)).stream()
-        .filter(item -> item.encClass().equals(clazz) && item.encMember().equals(member))
-        .collect(Collectors.toList());
+  public Collection<Error> get(Region region) {
+    return items.get(region);
   }
 
   /**
@@ -140,7 +102,7 @@ public class Index<T extends Enclosed> {
    *
    * @return Collection of all values.
    */
-  public Collection<T> values() {
+  public Collection<Error> values() {
     return items.values();
   }
 
@@ -150,16 +112,7 @@ public class Index<T extends Enclosed> {
    * @param predicate Predicate provided by caller.
    * @return Set of regions.
    */
-  public Set<Region> getRegionsOfMatchingItems(Predicate<T> predicate) {
+  public Set<Region> getRegionsOfMatchingItems(Predicate<Error> predicate) {
     return values().stream().filter(predicate).map(t -> t.region).collect(Collectors.toSet());
-  }
-
-  /**
-   * Get total number of items in this index.
-   *
-   * @return Total number of items.
-   */
-  public int getTotal() {
-    return total;
   }
 }
