@@ -100,16 +100,16 @@ public class DownstreamImpactCacheImpl implements DownstreamImpactCache {
                         "null",
                         false))
             .collect(ImmutableSet.toImmutableSet());
-    DownstreamImpactEvaluator analyzer =
+    DownstreamImpactEvaluator evaluator =
         new DownstreamImpactEvaluator(new DownstreamDependencySupplier(config, tracker, tree));
-    ImmutableSet<Report> reports = analyzer.evaluate(fixes);
+    ImmutableSet<Report> reports = evaluator.evaluate(fixes);
     // Update method status based on the results.
     methods
         .values()
         .forEach(
             method -> {
               MethodNode node = method.node;
-              Set<OnParameter> impactedParameters = analyzer.getImpactedParameters(node.location);
+              Set<OnParameter> impactedParameters = evaluator.getImpactedParameters(node.location);
               reports.stream()
                   .filter(input -> input.root.toMethod().equals(node.location))
                   .findAny()
@@ -142,10 +142,10 @@ public class DownstreamImpactCacheImpl implements DownstreamImpactCache {
    * Returns the effect of applying a fix on the target on downstream dependencies.
    *
    * @param fix Fix targeting an element in target.
-   * @param fixesLocation Location in target that will be annotated as {@code @Nullable}.
+   * @param fixTree Location in target that will be annotated as {@code @Nullable}.
    * @return Effect on downstream dependencies.
    */
-  private int effectOnDownstreamDependencies(Fix fix, Set<Location> fixesLocation) {
+  private int effectOnDownstreamDependencies(Fix fix, Set<Location> fixTree) {
     MethodImpact methodImpact = fetchMethodImpactForFix(fix);
     if (methodImpact == null) {
       return 0;
@@ -156,17 +156,16 @@ public class DownstreamImpactCacheImpl implements DownstreamImpactCache {
     Set<Error> triggeredErrors = methodImpact.getTriggeredErrors();
     long resolvedErrors =
         triggeredErrors.stream()
-            .filter(
-                error -> error.isSingleFix() && fixesLocation.contains(error.toResolvingLocation()))
+            .filter(error -> error.isSingleFix() && fixTree.contains(error.toResolvingLocation()))
             .count();
     return individualEffect - (int) resolvedErrors;
   }
 
   @Override
   public int computeLowerBoundOfNumberOfErrors(Set<Fix> tree) {
-    Set<Location> fixLocations = tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
+    Set<Location> fixTree = tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
     OptionalInt lowerBoundEffectOfChainOptional =
-        tree.stream().mapToInt(fix -> effectOnDownstreamDependencies(fix, fixLocations)).max();
+        tree.stream().mapToInt(fix -> effectOnDownstreamDependencies(fix, fixTree)).max();
     if (lowerBoundEffectOfChainOptional.isEmpty()) {
       return 0;
     }

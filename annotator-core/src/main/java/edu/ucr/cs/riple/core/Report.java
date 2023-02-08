@@ -55,7 +55,7 @@ public class Report {
    * Set of triggered fixes on target module that will be triggered if fix tree is applied due to
    * errors in downstream dependencies.
    */
-  public ImmutableSet<Fix> triggeredFixesFromDownstream;
+  public ImmutableSet<Fix> triggeredFixesFromDownstreamErrors;
   /** If true, this report's tree has been processed for at least one iteration */
   public boolean hasBeenProcessedOnce;
   /**
@@ -85,7 +85,7 @@ public class Report {
     this.root = root;
     this.tree = Sets.newHashSet(root);
     this.hasBeenProcessedOnce = false;
-    this.triggeredFixesFromDownstream = ImmutableSet.of();
+    this.triggeredFixesFromDownstreamErrors = ImmutableSet.of();
     this.triggeredErrors = ImmutableSet.of();
     this.lowerBoundEffectOnDownstreamDependencies = 0;
     this.upperBoundEffectOnDownstreamDependencies = 0;
@@ -96,12 +96,12 @@ public class Report {
    * Checks if any of the fix in tree, will trigger an unresolvable error in downstream
    * dependencies.
    *
-   * @param analyzer Analyzer to check impact of method.
+   * @param cache Downstream cache to check impact of method on downstream dependencies.
    * @return true, if report contains a fix which will trigger an unresolvable error in downstream
    *     dependency.
    */
-  public boolean containsDestructiveMethod(DownstreamImpactCache analyzer) {
-    return this.tree.stream().anyMatch(analyzer::isNotFixableOnTarget);
+  public boolean containsDestructiveMethod(DownstreamImpactCache cache) {
+    return this.tree.stream().anyMatch(cache::isNotFixableOnTarget);
   }
 
   /**
@@ -200,14 +200,14 @@ public class Report {
    * Computes the boundaries of effectiveness of applying the fix tree to target module on
    * downstream dependencies.
    *
-   * @param analyzer Downstream dependency analyzer instance.
+   * @param downstreamImpactCache Downstream impact cache instance.
    */
   public void computeBoundariesOfEffectivenessOnDownstreamDependencies(
-      DownstreamImpactCache analyzer) {
+      DownstreamImpactCache downstreamImpactCache) {
     this.lowerBoundEffectOnDownstreamDependencies =
-        analyzer.computeLowerBoundOfNumberOfErrors(tree);
+        downstreamImpactCache.computeLowerBoundOfNumberOfErrors(tree);
     this.upperBoundEffectOnDownstreamDependencies =
-        analyzer.computeUpperBoundOfNumberOfErrors(tree);
+        downstreamImpactCache.computeUpperBoundOfNumberOfErrors(tree);
   }
 
   /**
@@ -258,8 +258,8 @@ public class Report {
       // report has not been processed.
       return true;
     }
-    if (triggeredFixesFromDownstream.size() != 0
-        && !tree.containsAll(triggeredFixesFromDownstream)) {
+    if (triggeredFixesFromDownstreamErrors.size() != 0
+        && !tree.containsAll(triggeredFixesFromDownstreamErrors)) {
       // Report contains fixes from downstream dependencies, their effectiveness on target module
       // should be investigated.
       return true;

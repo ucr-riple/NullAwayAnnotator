@@ -155,8 +155,8 @@ public class Annotator {
   /**
    * Performs single iteration of inference/injection.
    *
-   * @param downstreamImpactCache Global analyzer instance to detect impact of fixes outside of
-   *     target module.
+   * @param downstreamImpactCache Downstream impact cache instance to retrieve impact of fixes on
+   *     downstream dependencies.
    */
   private void executeNextIteration(DownstreamImpactCache downstreamImpactCache) {
     ImmutableSet<Report> latestReports = processTriggeredFixes(downstreamImpactCache);
