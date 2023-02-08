@@ -48,8 +48,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
-/** Implementation for {@link GlobalAnalyzer} interface. */
-public class GlobalAnalyzerImpl implements GlobalAnalyzer {
+/** Implementation for {@link DownstreamImpactCache} interface. */
+public class DownstreamImpactCacheImpl implements DownstreamImpactCache {
 
   /** Set of downstream dependencies. */
   private final ImmutableSet<ModuleInfo> downstreamModules;
@@ -60,7 +60,7 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
   /** Method declaration tree instance. */
   private final MethodDeclarationTree tree;
 
-  public GlobalAnalyzerImpl(Config config, MethodDeclarationTree tree) {
+  public DownstreamImpactCacheImpl(Config config, MethodDeclarationTree tree) {
     this.config = config;
     this.downstreamModules = config.downstreamInfo;
     this.tree = tree;

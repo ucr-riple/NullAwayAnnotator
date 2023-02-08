@@ -28,7 +28,7 @@ import static edu.ucr.cs.riple.core.Report.Tag.APPROVE;
 import static edu.ucr.cs.riple.core.Report.Tag.REJECT;
 
 import com.google.common.base.Preconditions;
-import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
+import edu.ucr.cs.riple.core.global.DownstreamImpactCache;
 import java.util.Collection;
 
 /** Analysis mode in making inference decisions. */
@@ -39,7 +39,7 @@ public enum AnalysisMode {
    */
   LOCAL {
     @Override
-    public void tag(Config config, GlobalAnalyzer analyzer, Collection<Report> reports) {
+    public void tag(Config config, DownstreamImpactCache analyzer, Collection<Report> reports) {
       reports.forEach(
           report -> {
             if (report.localEffect < 1) {
@@ -57,7 +57,7 @@ public enum AnalysisMode {
    */
   STRICT {
     @Override
-    public void tag(Config config, GlobalAnalyzer analyzer, Collection<Report> reports) {
+    public void tag(Config config, DownstreamImpactCache analyzer, Collection<Report> reports) {
       reports.forEach(
           report -> {
             // Check for destructive methods.
@@ -83,7 +83,7 @@ public enum AnalysisMode {
    */
   UPPER_BOUND {
     @Override
-    public void tag(Config config, GlobalAnalyzer analyzer, Collection<Report> reports) {
+    public void tag(Config config, DownstreamImpactCache analyzer, Collection<Report> reports) {
       reports.forEach(
           report -> {
             if (report.localEffect + report.getUpperBoundEffectOnDownstreamDependencies() < 1) {
@@ -101,7 +101,7 @@ public enum AnalysisMode {
    */
   LOWER_BOUND {
     @Override
-    public void tag(Config config, GlobalAnalyzer analyzer, Collection<Report> reports) {
+    public void tag(Config config, DownstreamImpactCache analyzer, Collection<Report> reports) {
       reports.forEach(
           report -> {
             if (report.localEffect + report.getLowerBoundEffectOnDownstreamDependencies() < 1) {
@@ -120,7 +120,8 @@ public enum AnalysisMode {
    * @param analyzer Downstream dependency instance.
    * @param reports Reports to be processed.
    */
-  public abstract void tag(Config config, GlobalAnalyzer analyzer, Collection<Report> reports);
+  public abstract void tag(
+      Config config, DownstreamImpactCache analyzer, Collection<Report> reports);
 
   /**
    * Parses the received option and returns the corresponding {@link AnalysisMode}. Can only be one

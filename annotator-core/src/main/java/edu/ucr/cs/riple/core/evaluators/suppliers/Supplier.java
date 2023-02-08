@@ -27,7 +27,7 @@ package edu.ucr.cs.riple.core.evaluators.suppliers;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.evaluators.AbstractEvaluator;
 import edu.ucr.cs.riple.core.evaluators.graphprocessor.ConflictGraphProcessor;
-import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
+import edu.ucr.cs.riple.core.global.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
@@ -72,11 +72,11 @@ public interface Supplier {
   Config getConfig();
 
   /**
-   * Getter for {@link GlobalAnalyzer} instance.
+   * Getter for {@link DownstreamImpactCache} instance.
    *
-   * @return GlobalAnalyzer instance.
+   * @return DownstreamImpactCache instance.
    */
-  GlobalAnalyzer getGlobalAnalyzer();
+  DownstreamImpactCache getDownstreamImpactCache();
 
   /**
    * Getter for {@link ConflictGraphProcessor}.
