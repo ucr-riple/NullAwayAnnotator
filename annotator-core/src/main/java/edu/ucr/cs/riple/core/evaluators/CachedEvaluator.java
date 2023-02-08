@@ -53,7 +53,7 @@ public class CachedEvaluator extends AbstractEvaluator {
 
   public CachedEvaluator(Supplier supplier) {
     super(supplier);
-    this.cache = supplier.getCache();
+    this.cache = supplier.getTargetModuleCache();
   }
 
   /**

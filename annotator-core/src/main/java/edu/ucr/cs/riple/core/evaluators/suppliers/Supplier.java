@@ -91,5 +91,5 @@ public interface Supplier {
    *
    * @return Target module cache instance.
    */
-  TargetModuleCache getCache();
+  TargetModuleCache getTargetModuleCache();
 }

@@ -81,7 +81,7 @@ public class DownstreamDependencySupplier extends AbstractSupplier {
   }
 
   @Override
-  public TargetModuleCache getCache() {
+  public TargetModuleCache getTargetModuleCache() {
     throw new RuntimeException(
         "Caches are used to retrieve impacts for depths more than 1. Downstream dependency analysis happens only at depth 1.");
   }

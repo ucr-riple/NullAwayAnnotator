@@ -97,7 +97,7 @@ public class TargetModuleSupplier extends AbstractSupplier {
   }
 
   @Override
-  public TargetModuleCache getCache() {
+  public TargetModuleCache getTargetModuleCache() {
     return targetModuleCache;
   }
 }
