@@ -72,18 +72,6 @@ public class DownstreamImpact extends Impact {
   }
 
   /**
-   * Calculates hash. This method is used outside this class to calculate the expected hash based on
-   * instance's properties value if the actual instance is not available.
-   *
-   * @param method Method signature.
-   * @param clazz Fully qualified name of the containing class.
-   * @return Expected hash.
-   */
-  public static int hash(String method, String clazz) {
-    return MethodNode.hash(method, clazz);
-  }
-
-  /**
    * Updates the status of methods impact on downstream dependencies.
    *
    * @param report Result of applying making method in node {@code @Nullable} in downstream
@@ -104,6 +92,18 @@ public class DownstreamImpact extends Impact {
                   .collect(Collectors.toSet());
           impactedParametersMap.put(onParameter, triggered);
         });
+  }
+
+  /**
+   * Calculates hash. This method is used outside this class to calculate the expected hash based on
+   * instance's properties value if the actual instance is not available.
+   *
+   * @param method Method signature.
+   * @param clazz Fully qualified name of the containing class.
+   * @return Expected hash.
+   */
+  public static int hash(String method, String clazz) {
+    return MethodNode.hash(method, clazz);
   }
 
   /**
