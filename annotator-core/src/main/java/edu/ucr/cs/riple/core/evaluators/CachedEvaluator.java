@@ -68,11 +68,13 @@ public class CachedEvaluator extends AbstractEvaluator {
   protected void initializeFixGraph(ImmutableSet<Report> reports) {
     super.initializeFixGraph(reports);
     // add only fixes that are not stored in cache.
-    reports.stream()
-        .filter(report -> report.requiresFurtherProcess(config))
-        .flatMap(report -> report.getFixesForNextIteration().stream())
-        .filter(cache::isUnknown)
-        .forEach(graph::addNodeToVertices);
+    Set<Fix> fixes =
+        reports.stream()
+            .filter(report -> report.requiresFurtherProcess(config))
+            .flatMap(report -> report.getFixesForNextIteration().stream())
+            .filter(cache::isUnknown)
+            .collect(Collectors.toSet());
+    fixes.forEach(graph::addNodeToVertices);
     System.out.println(
         "Retrieved "
             + (reports.stream().mapToLong(r -> r.tree.size()).sum() - graph.getNodes().count())
