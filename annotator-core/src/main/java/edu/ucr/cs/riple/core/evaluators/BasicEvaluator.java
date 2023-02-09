@@ -31,13 +31,25 @@ import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 
-/** Basic evaluator that processes each fix tree entirely with no caching strategies. */
+/**
+ * This evaluator for each fix tree computes the effectiveness by injecting the fix tree entirely to
+ * the source code. To prepare the conflict graph, each report that requires further investigation
+ * is selected and all its containing fix tree will be added to the conflict graph as a single node.
+ */
 public class BasicEvaluator extends AbstractEvaluator {
 
   public BasicEvaluator(Supplier supplier) {
     super(supplier);
   }
 
+  /**
+   * Prepares the conflict graph by selecting reports that are not finalized and adding the
+   * containing fix tree to the conflict graph. Each node in the prepared conflict graph contains
+   * the entire fix tree with no exclusion. (A fix can be present in multiple nodes as it can be
+   * part of multiple fix trees).
+   *
+   * @param reports The latest created reports from previous iteration.
+   */
   @Override
   protected void initializeFixGraph(ImmutableSet<Report> reports) {
     super.initializeFixGraph(reports);
