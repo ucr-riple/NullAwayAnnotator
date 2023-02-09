@@ -34,12 +34,17 @@ import com.google.errorprone.bugpatterns.BugChecker;
 import com.google.errorprone.matchers.Description;
 import com.google.errorprone.util.ASTHelpers;
 import com.sun.source.tree.ClassTree;
+import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.IdentifierTree;
+import com.sun.source.tree.LambdaExpressionTree;
+import com.sun.source.tree.MemberReferenceTree;
 import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.tree.JCTree;
 import edu.ucr.cs.riple.scanner.out.ClassInfo;
 import edu.ucr.cs.riple.scanner.out.MethodInfo;
 import edu.ucr.cs.riple.scanner.out.TrackerNode;
@@ -61,7 +66,10 @@ public class AnnotatorScanner extends BugChecker
         BugChecker.MethodTreeMatcher,
         BugChecker.IdentifierTreeMatcher,
         BugChecker.VariableTreeMatcher,
-        BugChecker.ClassTreeMatcher {
+        BugChecker.NewClassTreeMatcher,
+        BugChecker.ClassTreeMatcher,
+        BugChecker.LambdaExpressionTreeMatcher,
+        BugChecker.MemberReferenceTreeMatcher {
 
   /**
    * Scanner context to store the state of the checker. Could not use {@link VisitorState#context}
@@ -97,6 +105,16 @@ public class AnnotatorScanner extends BugChecker
     if (!config.callTrackerIsActive()) {
       return Description.NO_MATCH;
     }
+    config
+        .getSerializer()
+        .serializeCallGraphNode(
+            new TrackerNode(config, ASTHelpers.getSymbol(tree), state.getPath()));
+    return Description.NO_MATCH;
+  }
+
+  @Override
+  public Description matchNewClass(NewClassTree tree, VisitorState state) {
+    Config config = context.getConfig();
     config
         .getSerializer()
         .serializeCallGraphNode(
@@ -151,6 +169,37 @@ public class AnnotatorScanner extends BugChecker
     return Description.NO_MATCH;
   }
 
+  @Override
+  public Description matchLambdaExpression(
+      LambdaExpressionTree lambdaExpressionTree, VisitorState visitorState) {
+    Config config = context.getConfig();
+    if (!config.callTrackerIsActive()) {
+      return Description.NO_MATCH;
+    }
+    serializeFunctionalInterface(config, lambdaExpressionTree, visitorState);
+    return Description.NO_MATCH;
+  }
+
+  @Override
+  public Description matchMemberReference(
+      MemberReferenceTree memberReferenceTree, VisitorState visitorState) {
+    Config config = context.getConfig();
+    if (!config.callTrackerIsActive()) {
+      return Description.NO_MATCH;
+    }
+    serializeFunctionalInterface(config, memberReferenceTree, visitorState);
+    if (memberReferenceTree instanceof JCTree.JCMemberReference) {
+      Symbol calledMethod = ((JCTree.JCMemberReference) memberReferenceTree).sym;
+      if (calledMethod instanceof Symbol.MethodSymbol) {
+        context
+            .getConfig()
+            .getSerializer()
+            .serializeCallGraphNode(new TrackerNode(config, calledMethod, visitorState.getPath()));
+      }
+    }
+    return Description.NO_MATCH;
+  }
+
   /**
    * Serializes a field usage if the received symbol is a field.
    *
@@ -164,5 +213,22 @@ public class AnnotatorScanner extends BugChecker
           .getSerializer()
           .serializeFieldGraphNode(new TrackerNode(context.getConfig(), symbol, state.getPath()));
     }
+  }
+
+  /**
+   * Serializes the functional interface.
+   *
+   * @param tree Given tree.
+   * @param state Visitor State.
+   */
+  private static void serializeFunctionalInterface(
+      Config config, ExpressionTree tree, VisitorState state) {
+    Symbol.MethodSymbol methodSym = SymbolUtil.getFunctionalInterfaceMethod(tree, state.getTypes());
+    if (methodSym == null) {
+      return;
+    }
+    config
+        .getSerializer()
+        .serializeCallGraphNode(new TrackerNode(config, methodSym, state.getPath()));
   }
 }
