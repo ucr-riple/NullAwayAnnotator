@@ -161,8 +161,6 @@ public class Annotator {
   /**
    * Performs single iteration of inference/injection.
    *
-   * <p><<<<<<< HEAD
-   *
    * @param targetModuleCache Target impact cache instance. ======= >>>>>>> master
    * @param downstreamImpactCache Downstream impact cache instance to retrieve impact of fixes on
    *     downstream dependencies.
