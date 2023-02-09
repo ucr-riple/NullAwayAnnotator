@@ -31,13 +31,25 @@ import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 
-/** Basic evaluator that processes each fix tree entirely with no caching strategies. */
+/**
+ * This evaluator for each fix tree computes the effectiveness by injecting the fix tree entirely to
+ * the source code. To prepare the conflict graph, each report that requires further investigation
+ * is selected and all its containing fix tree will be added to the conflict graph as a single node.
+ */
 public class BasicEvaluator extends AbstractEvaluator {
 
   public BasicEvaluator(Supplier supplier) {
     super(supplier);
   }
 
+  /**
+   * Prepares the conflict graph by selecting reports that are not finalized and adding the
+   * containing fix tree to the conflict graph. Each node in the prepared conflict graph contains
+   * the entire fix tree with no exclusion. (A fix can be present in multiple nodes as it can be
+   * part of multiple fix trees).
+   *
+   * @param reports The latest created reports from previous iteration.
+   */
   @Override
   protected void initializeFixGraph(ImmutableSet<Report> reports) {
     super.initializeFixGraph(reports);
@@ -49,8 +61,8 @@ public class BasicEvaluator extends AbstractEvaluator {
               Node node = graph.addNodeToVertices(root);
               node.setOrigins(supplier.getErrorStore());
               node.report = report;
-              node.triggeredFixesFromDownstream =
-                  ImmutableSet.copyOf(report.triggeredFixesFromDownstream);
+              node.triggeredFixesFromDownstreamErrors =
+                  ImmutableSet.copyOf(report.triggeredFixesFromDownstreamErrors);
               node.tree.addAll(Sets.newHashSet(report.tree));
               node.triggeredErrors = ImmutableSet.copyOf(report.triggeredErrors);
               node.mergeTriggered();
@@ -66,8 +78,8 @@ public class BasicEvaluator extends AbstractEvaluator {
               Report report = node.report;
               report.localEffect = node.effect;
               report.tree = Sets.newHashSet(node.tree);
-              report.triggeredFixesFromDownstream =
-                  ImmutableSet.copyOf(node.triggeredFixesFromDownstream);
+              report.triggeredFixesFromDownstreamErrors =
+                  ImmutableSet.copyOf(node.triggeredFixesFromDownstreamErrors);
               report.triggeredErrors = ImmutableSet.copyOf(node.triggeredErrors);
               report.hasBeenProcessedOnce = true;
             });

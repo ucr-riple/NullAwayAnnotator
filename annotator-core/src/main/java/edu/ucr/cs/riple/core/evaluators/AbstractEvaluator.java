@@ -32,7 +32,18 @@ import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.metadata.graph.ConflictGraph;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 
-/** Abstract class for evaluators. */
+/**
+ * Abstract class for evaluators. Subclasses of this evaluator, computes the effectiveness of fix
+ * trees by inserting annotations to the source code and then rerunning the analysis as an oracle to
+ * computes the effectiveness based on the number of triggered errors. The investigation process, is
+ * an iterative process where at each iteration, the fix tree is analyzed at the next depth. At each
+ * iteration, set of fixes (each node in conflict graph can contain a single or a group of fixes)
+ * that requires to be injected are collected by {@link AbstractEvaluator#initializeFixGraph} and
+ * fills the conflict graph. The resulting conflict graph is processed by the using {@link
+ * AbstractEvaluator#processor} which computes the set of triggered errors for each node. Finally
+ * {@link AbstractEvaluator#collectGraphResults} is called which reads the result from the graph and
+ * creates the corresponding reports.
+ */
 public abstract class AbstractEvaluator implements Evaluator {
 
   /** Annotator config. */
@@ -57,7 +68,7 @@ public abstract class AbstractEvaluator implements Evaluator {
   /**
    * Initializes conflict graph for the upcoming iteration.
    *
-   * @param reports The latest created reports from the fixes.
+   * @param reports The latest created reports from previous iteration.
    */
   protected void initializeFixGraph(ImmutableSet<Report> reports) {
     this.graph.clear();

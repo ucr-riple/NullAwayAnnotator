@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.global;
+package edu.ucr.cs.riple.core.cache.downstream;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -32,7 +32,7 @@ import java.util.Set;
 
 /**
  * This downstream impact cache does not have any information regarding the impact of changes in
- * target module in dependencies, the main purpose of this class is to avoid initializing
+ * target module on downstream dependencies. The main purpose of this class is to avoid initializing
  * DownstreamImpactCache instances to {@code null} when impact on dependencies is not considered.
  */
 public class VoidDownstreamImpactCache implements DownstreamImpactCache {

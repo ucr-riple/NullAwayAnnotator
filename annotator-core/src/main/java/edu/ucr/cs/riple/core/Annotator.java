@@ -25,13 +25,13 @@
 package edu.ucr.cs.riple.core;
 
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
+import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCacheImpl;
+import edu.ucr.cs.riple.core.cache.downstream.VoidDownstreamImpactCache;
 import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
 import edu.ucr.cs.riple.core.evaluators.Evaluator;
 import edu.ucr.cs.riple.core.evaluators.VoidEvaluator;
 import edu.ucr.cs.riple.core.evaluators.suppliers.TargetModuleSupplier;
-import edu.ucr.cs.riple.core.global.DownstreamImpactCache;
-import edu.ucr.cs.riple.core.global.DownstreamImpactCacheImpl;
-import edu.ucr.cs.riple.core.global.VoidDownstreamImpactCache;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
@@ -155,8 +155,8 @@ public class Annotator {
   /**
    * Performs single iteration of inference/injection.
    *
-   * @param downstreamImpactCache Global analyzer instance to detect impact of fixes outside of
-   *     target module.
+   * @param downstreamImpactCache Downstream impact cache instance to retrieve impact of fixes on
+   *     downstream dependencies.
    */
   private void executeNextIteration(DownstreamImpactCache downstreamImpactCache) {
     ImmutableSet<Report> latestReports = processTriggeredFixes(downstreamImpactCache);

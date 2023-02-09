@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.global;
+package edu.ucr.cs.riple.core.cache.downstream;
 
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -36,7 +36,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /** Container class for storing overall effect of each method. */
-public class MethodImpact {
+public class DownstreamImpact {
   /** Node in {@link MethodDeclarationTree} corresponding to a public method. */
   final MethodNode node;
   /**
@@ -55,7 +55,7 @@ public class MethodImpact {
    */
   private int effect;
 
-  public MethodImpact(MethodNode node) {
+  public DownstreamImpact(MethodNode node) {
     this.node = node;
     this.effect = 0;
     this.impactedParametersMap = new HashMap<>();
