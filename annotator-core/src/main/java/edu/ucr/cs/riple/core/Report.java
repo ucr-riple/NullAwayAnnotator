@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.core;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import edu.ucr.cs.riple.core.global.DownstreamImpactCache;
+import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.location.Location;

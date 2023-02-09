@@ -28,7 +28,7 @@ import static edu.ucr.cs.riple.core.Report.Tag.APPROVE;
 import static edu.ucr.cs.riple.core.Report.Tag.REJECT;
 
 import com.google.common.base.Preconditions;
-import edu.ucr.cs.riple.core.global.DownstreamImpactCache;
+import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import java.util.Collection;
 
 /** Analysis mode in making inference decisions. */

@@ -25,8 +25,8 @@
 package edu.ucr.cs.riple.core.evaluators.graphprocessor;
 
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
-import edu.ucr.cs.riple.core.global.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
 import edu.ucr.cs.riple.core.metadata.index.ErrorStore;

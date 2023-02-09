@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.global;
+package edu.ucr.cs.riple.core.cache.downstream;
 
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Error;

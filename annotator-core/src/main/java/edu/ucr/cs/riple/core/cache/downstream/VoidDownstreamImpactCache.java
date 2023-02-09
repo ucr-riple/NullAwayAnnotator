@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.global;
+package edu.ucr.cs.riple.core.cache.downstream;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.index.Error;
