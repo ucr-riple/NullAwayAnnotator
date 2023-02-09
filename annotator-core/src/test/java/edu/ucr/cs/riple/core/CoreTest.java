@@ -436,4 +436,40 @@ public class CoreTest extends BaseCoreTest {
         .enableForceResolve()
         .start();
   }
+
+  @Test
+  public void impactedLambdaAndMemberReferenceTest() {
+    coreTestHelper
+        .addInputLines(
+            "Main.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Main {",
+            "   public void f(Foo r){ }",
+            "   public void baz1(){",
+            "     f(new Foo(){",
+            "       @Override",
+            "       public void bar(Object o){",
+            "         take(o);",
+            "       }",
+            "     });",
+            "   }",
+            "   public void baz2() {",
+            "       f(e -> take(e));",
+            "   }",
+            "   public void baz3() {",
+            "       f(this::take);",
+            "   }",
+            "   public void take(Object o){}",
+            "   public void passNull(Foo foo) {",
+            "       foo.bar(null);",
+            "   }",
+            "}")
+        .addInputLines(
+            "Foo.java", "package test;", "public interface Foo{", "     void bar(Object o);", "}")
+        .addExpectedReports(
+            new TReport(new OnParameter("Foo.java", "test.Foo", "bar(java.lang.Object)", 0), 2))
+        .toDepth(1)
+        .start();
+  }
 }

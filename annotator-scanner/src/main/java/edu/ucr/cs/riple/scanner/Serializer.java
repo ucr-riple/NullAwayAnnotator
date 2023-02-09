@@ -42,8 +42,8 @@ public class Serializer {
 
   /** Path to write field graph. */
   private final Path fieldGraphPath;
-  /** Path to write method call graph. */
-  private final Path callGraphPath;
+  /** Path to write impacted regions for changes on methods */
+  private final Path methodImpactedRegion;
   /** Path to write method info metadata. */
   private final Path methodInfoPath;
   /** Path to write class info data. */
@@ -51,8 +51,8 @@ public class Serializer {
 
   /** File name where all field usage data has been stored. */
   public static final String FIELD_GRAPH_FILE_NAME = "field_graph.tsv";
-  /** File name where all method invocations data has been stored. */
-  public static final String CALL_GRAPH_FILE_NAME = "call_graph.tsv";
+  /** File name where all impacted regions for changes on methods are serialized. */
+  public static final String METHOD_IMPACTED_REGION_FILE_NAME = "impacted_region.tsv";
   /** File name where all method data has been stored. */
   public static final String METHOD_INFO_FILE_NAME = "method_info.tsv";
   /** File name where all class data has been stored. */
@@ -61,19 +61,21 @@ public class Serializer {
   public Serializer(Config config) {
     Path outputDirectory = config.getOutputDirectory();
     this.fieldGraphPath = outputDirectory.resolve(FIELD_GRAPH_FILE_NAME);
-    this.callGraphPath = outputDirectory.resolve(CALL_GRAPH_FILE_NAME);
+    this.methodImpactedRegion = outputDirectory.resolve(METHOD_IMPACTED_REGION_FILE_NAME);
     this.methodInfoPath = outputDirectory.resolve(METHOD_INFO_FILE_NAME);
     this.classInfoPath = outputDirectory.resolve(CLASS_INFO_FILE_NAME);
     initializeOutputFiles(config);
   }
 
   /**
-   * Appends the string representation of the {@link TrackerNode} corresponding to a call graph.
+   * Appends the string representation of the {@link TrackerNode} corresponding to method impacted
+   * region.
    *
-   * @param callGraphNode TrackerNode instance.
+   * @param methodImpactedRegion TrackerNode instance which is an impacted region for a method
+   *     change.
    */
-  public void serializeCallGraphNode(TrackerNode callGraphNode) {
-    appendToFile(callGraphNode.toString(), this.callGraphPath);
+  public void serializeImpactedRegionByMethod(TrackerNode methodImpactedRegion) {
+    appendToFile(methodImpactedRegion.toString(), this.methodImpactedRegion);
   }
 
   /**
@@ -125,7 +127,7 @@ public class Serializer {
     try {
       Files.createDirectories(config.getOutputDirectory());
       if (config.callTrackerIsActive()) {
-        initializeFile(callGraphPath, TrackerNode.header());
+        initializeFile(methodImpactedRegion, TrackerNode.header());
       }
       if (config.fieldTrackerIsActive()) {
         initializeFile(fieldGraphPath, TrackerNode.header());

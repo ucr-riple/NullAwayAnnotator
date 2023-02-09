@@ -32,7 +32,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class MethodCallTrackerTest extends AnnotatorScannerBaseTest<TrackerNodeDisplay> {
+public class MethodImpactedRegionTest extends AnnotatorScannerBaseTest<TrackerNodeDisplay> {
 
   private static final DisplayFactory<TrackerNodeDisplay> METHOD_TRACKER_DISPLAY_FACTORY =
       values -> {
@@ -51,7 +51,7 @@ public class MethodCallTrackerTest extends AnnotatorScannerBaseTest<TrackerNodeD
           + "SOURCE_TYPE";
   private static final String FILE_NAME = "call_graph.tsv";
 
-  public MethodCallTrackerTest() {
+  public MethodImpactedRegionTest() {
     super(METHOD_TRACKER_DISPLAY_FACTORY, HEADER, FILE_NAME);
   }
 

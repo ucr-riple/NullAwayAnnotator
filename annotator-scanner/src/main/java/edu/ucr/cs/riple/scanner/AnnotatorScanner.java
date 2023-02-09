@@ -107,7 +107,7 @@ public class AnnotatorScanner extends BugChecker
     }
     config
         .getSerializer()
-        .serializeCallGraphNode(
+        .serializeImpactedRegionByMethod(
             new TrackerNode(config, ASTHelpers.getSymbol(tree), state.getPath()));
     return Description.NO_MATCH;
   }
@@ -117,7 +117,7 @@ public class AnnotatorScanner extends BugChecker
     Config config = context.getConfig();
     config
         .getSerializer()
-        .serializeCallGraphNode(
+        .serializeImpactedRegionByMethod(
             new TrackerNode(config, ASTHelpers.getSymbol(tree), state.getPath()));
     return Description.NO_MATCH;
   }
@@ -194,7 +194,8 @@ public class AnnotatorScanner extends BugChecker
         context
             .getConfig()
             .getSerializer()
-            .serializeCallGraphNode(new TrackerNode(config, calledMethod, visitorState.getPath()));
+            .serializeImpactedRegionByMethod(
+                new TrackerNode(config, calledMethod, visitorState.getPath()));
       }
     }
     return Description.NO_MATCH;
@@ -229,6 +230,6 @@ public class AnnotatorScanner extends BugChecker
     }
     config
         .getSerializer()
-        .serializeCallGraphNode(new TrackerNode(config, methodSym, state.getPath()));
+        .serializeImpactedRegionByMethod(new TrackerNode(config, methodSym, state.getPath()));
   }
 }
