@@ -119,7 +119,7 @@ public class Annotator {
 
   /** Performs iterations of inference/injection until no unseen fix is suggested. */
   private void annotate() {
-    // The downstream impact cache stores the impact of making all public APIs @Nullable on
+    // The downstream impact cache stores the impact of making each public API @Nullable on
     // downstream dependencies.
     // downstreamImpactCache analyzes effects of all public APIs on downstream dependencies.
     // Through iterations, since the source code for downstream dependencies does not change and the
