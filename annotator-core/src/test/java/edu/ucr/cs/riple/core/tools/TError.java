@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,47 +22,20 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.index;
+package edu.ucr.cs.riple.core.tools;
 
+import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.injector.location.Location;
 
 /**
- * Subtypes of this class are outputs of analysis at program points (code locations). This class,
- * stores the containing {@link Region} info of that program point.
+ * Wrapper class for {@link Error} used to create dummy errors (with default values) as part of
+ * {@link TReport} matchers, which in turn are used by tests to define expected reports to be
+ * matched by the actual reports produced by the test case.
  */
-public abstract class Enclosed {
+public class TError extends Error {
 
-  /** Containing region. */
-  protected final Region region;
-
-  public Enclosed(Region region) {
-    this.region = region;
-  }
-
-  /**
-   * Fully qualified name of the containing region.
-   *
-   * @return Fully qualified name the class.
-   */
-  public String encClass() {
-    return this.region.clazz;
-  }
-
-  /**
-   * Representative member of the containing region as {@code String}.
-   *
-   * @return Member symbol in {@code String}.
-   */
-  public String encMember() {
-    return this.region.member;
-  }
-
-  /**
-   * Getter for region.
-   *
-   * @return region instance.
-   */
-  public Region getRegion() {
-    return this.region;
+  public TError(Location location) {
+    super("null", "null", new Region("null", "null"), 0, new TFix(location));
   }
 }
