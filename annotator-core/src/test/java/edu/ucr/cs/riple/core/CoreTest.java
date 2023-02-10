@@ -460,7 +460,7 @@ public class CoreTest extends BaseCoreTest {
             "   public void baz3() {",
             "       f(this::take);",
             "   }",
-            "   public void take(Object o){}",
+            "   public Object take(Object o){ return null; }",
             "   public void passNull(Foo foo) {",
             "       foo.bar(null);",
             "   }",
@@ -468,7 +468,8 @@ public class CoreTest extends BaseCoreTest {
         .addInputLines(
             "Foo.java", "package test;", "public interface Foo{", "     void bar(Object o);", "}")
         .addExpectedReports(
-            new TReport(new OnParameter("Foo.java", "test.Foo", "bar(java.lang.Object)", 0), 2))
+            new TReport(new OnParameter("Foo.java", "test.Foo", "bar(java.lang.Object)", 0), 2),
+            new TReport(new OnMethod("Main.java", "test.Main", "take(java.lang.Object)"), 0))
         .toDepth(1)
         .start();
   }
