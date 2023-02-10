@@ -187,10 +187,15 @@ public class AnnotatorScanner extends BugChecker
     if (!config.callTrackerIsActive()) {
       return Description.NO_MATCH;
     }
+    // for Foo::bar, which is shorthand for e -> Foo.bar(e), assume that method "baz()" has been
+    // overridden. We need to serialize the region (leaf of path in visitor state) in visitor state
+    // for both "baz()" and the called method "bar() as an impacted region".
+    // serialize the overridden method: "baz()"
     serializeImpactedRegionForFunctionalInterface(config, memberReferenceTree, visitorState);
     if (memberReferenceTree instanceof JCTree.JCMemberReference) {
       Symbol calledMethod = ((JCTree.JCMemberReference) memberReferenceTree).sym;
       if (calledMethod instanceof Symbol.MethodSymbol) {
+        // serialize the called method: "bar()"
         context
             .getConfig()
             .getSerializer()
