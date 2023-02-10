@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.global;
+package edu.ucr.cs.riple.core.cache.downstream;
 
 import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
 import edu.ucr.cs.riple.core.evaluators.suppliers.DownstreamDependencySupplier;
@@ -36,9 +36,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Evaluator for analyzing downstream dependencies. Used by {@link GlobalAnalyzerImpl} to compute
- * the effects of changes in upstream on downstream dependencies. This evaluator cannot be used to
- * compute the effects in target module.
+ * Evaluator for analyzing downstream dependencies. Used by {@link DownstreamImpactCacheImpl} to
+ * compute the effects of changes in upstream on downstream dependencies. This evaluator cannot be
+ * used to compute the effects in target module.
  */
 class DownstreamImpactEvaluator extends BasicEvaluator {
 

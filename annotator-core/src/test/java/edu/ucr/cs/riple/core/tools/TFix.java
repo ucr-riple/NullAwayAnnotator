@@ -24,15 +24,18 @@
 
 package edu.ucr.cs.riple.core.tools;
 
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.trackers.Region;
-import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.location.Location;
 
-/** Wrapper class for {@link Change} with default values, used to create tests. */
+/**
+ * Wrapper class for {@link Fix} used to create dummy fixes (with default values) as part of {@link
+ * TReport} matchers, which in turn are used by tests to define expected reports to be matched by
+ * the actual reports produced by the test case.
+ */
 public class TFix extends Fix {
 
   public TFix(Location location) {
-    super(new DefaultAnnotation(location), null, new Region("null", "null"), true);
+    super(new DefaultAnnotation(location), ImmutableSet.of(), true);
   }
 }

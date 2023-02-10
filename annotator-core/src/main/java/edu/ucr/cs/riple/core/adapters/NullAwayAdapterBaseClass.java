@@ -116,7 +116,6 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
                   new AddMarkerAnnotation(
                       extendVariableList(locationOnField, store), config.nullableAnnot),
                   Error.METHOD_INITIALIZER_ERROR,
-                  region,
                   true);
             })
         .filter(Objects::nonNull)
@@ -154,10 +153,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
         nonnullTarget == null
             ? null
             : new Fix(
-                new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot),
-                errorType,
-                region,
-                true);
+                new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot), errorType, true);
     return new Error(errorType, errorMessage, region, offset, resolvingFix);
   }
 

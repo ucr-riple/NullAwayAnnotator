@@ -28,15 +28,17 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
-/** Wrapper class for {@link Report} with default values, used to create tests. */
+/**
+ * Wrapper class for {@link Report} used to create dummy reports (with default values) which are
+ * used by tests to define expected reports to be matched by the actual reports produced by the test
+ * case.
+ */
 public class TReport extends Report {
 
   private final int expectedValue;
@@ -46,16 +48,9 @@ public class TReport extends Report {
   }
 
   public TReport(Location root, int effect, Tag tag) {
-    this(root, effect, "", "", tag);
-  }
-
-  public TReport(Location root, int effect, String encClass, String encMember, Tag tag) {
     super(
         new Fix(
-            new AddMarkerAnnotation(root, "javax.annotation.Nullable"),
-            null,
-            new Region(encClass, encMember),
-            true),
+            new AddMarkerAnnotation(root, "javax.annotation.Nullable"), ImmutableSet.of(), true),
         effect);
     this.expectedValue = effect;
     if (tag != null) {
@@ -70,14 +65,11 @@ public class TReport extends Report {
       @Nullable Set<Location> triggered) {
     this(root, effect);
     if (triggered != null) {
-      this.triggeredFixes =
-          triggered.stream()
-              .map((Function<Location, Fix>) TFix::new)
-              .collect(ImmutableSet.toImmutableSet());
+      this.triggeredErrors =
+          triggered.stream().map(TError::new).collect(ImmutableSet.toImmutableSet());
     }
     if (addToTree != null) {
-      this.tree.addAll(
-          addToTree.stream().map((Function<Location, Fix>) TFix::new).collect(Collectors.toSet()));
+      this.tree = addToTree.stream().map(TFix::new).collect(Collectors.toSet());
     }
   }
 

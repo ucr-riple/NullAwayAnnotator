@@ -22,6 +22,8 @@
 
 package edu.ucr.cs.riple.injector;
 
+import static java.util.stream.Collectors.groupingBy;
+
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
@@ -33,8 +35,6 @@ import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -52,18 +52,8 @@ public class Injector {
   public <T extends Change> Set<FileOffsetStore> start(Set<T> changes) {
     // Start method does not support addition and deletion on same element. Should be split into
     // call for addition and deletion separately.
-    Map<Path, List<Change>> map = new HashMap<>();
-    changes.forEach(
-        change -> {
-          Path path = change.location.path;
-          if (map.containsKey(path)) {
-            map.get(path).add(change);
-          } else {
-            List<Change> newList = new ArrayList<>();
-            newList.add(change);
-            map.put(path, newList);
-          }
-        });
+    Map<Path, List<Change>> map =
+        changes.stream().collect(groupingBy(change -> change.location.path));
     Set<FileOffsetStore> offsets = new HashSet<>();
     map.forEach(
         (path, changeList) -> {
