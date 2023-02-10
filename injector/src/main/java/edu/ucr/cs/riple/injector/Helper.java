@@ -224,7 +224,7 @@ public class Helper {
       throws TargetClassNotFound {
     final List<Node> candidates = new ArrayList<>();
     if (cursor instanceof EnumDeclaration) {
-      // According to java language specifics, Enum constants are first members of enums. In
+      // According to the Java language specification, enum constants are the first members of enums. In
       // javaparser structure, enum constants are stored after all other members of enum which does
       // not conform to how javac assigns flat names. We should prioritize visiting enums
       // constants first.
