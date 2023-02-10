@@ -51,6 +51,7 @@ public class Region {
   public enum Type {
     METHOD,
     FIELD,
+    CONSTRUCTOR,
     STATIC_BLOCK
   }
 
@@ -88,6 +89,24 @@ public class Region {
    */
   public boolean isOnMethod() {
     return type.equals(Type.METHOD);
+  }
+
+  /**
+   * Checks if region targets a constructor body.
+   *
+   * @return true, if region is targeting a constructor body.
+   */
+  public boolean isOnConstructor() {
+    return type.equals(Type.CONSTRUCTOR);
+  }
+
+  /**
+   * Checks if region targets a method or constructor body.
+   *
+   * @return true, if region is targeting a method or constructor body.
+   */
+  public boolean isOnCallable() {
+    return isOnConstructor() || isOnMethod();
   }
 
   /**

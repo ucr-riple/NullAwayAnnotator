@@ -229,6 +229,8 @@ public class Annotator {
     Utility.buildTarget(config);
     Set<Error> remainingErrors =
         Utility.readErrorsFromOutputDirectory(config, config.target, fieldDeclarationStore);
+    System.out.println(
+        remainingErrors.size() + " errors remaining. Applying suppression annotations.");
     Set<Fix> remainingFixes = Utility.readFixesFromOutputDirectory(config, fieldDeclarationStore);
     // Collect all regions for NullUnmarked.
     // For all errors in regions which correspond to a method's body, we can add @NullUnmarked at
@@ -238,7 +240,7 @@ public class Annotator {
             // find the corresponding method nodes.
             .map(
                 error -> {
-                  if (error.getRegion().isOnMethod()) {
+                  if (error.getRegion().isOnCallable()) {
                     return methodDeclarationTree.findNode(error.encMember(), error.encClass());
                   }
                   // For methods invoked in an initialization region, where the error is that
@@ -300,8 +302,8 @@ public class Annotator {
             .filter(
                 fix ->
                     fix.isOnField()
-                        && (fix.reasons.contains("METHOD_NO_INIT")
-                            || fix.reasons.contains("FIELD_NO_INIT")))
+                        && (fix.reasons.contains("FIELD_NO_INIT")
+                            || fix.reasons.contains("METHOD_NO_INIT")))
             // Filter nodes annotated with SuppressWarnings("NullAway")
             .filter(fix -> !fieldsWithSuppressWarnings.contains(fix.toField()))
             .map(
