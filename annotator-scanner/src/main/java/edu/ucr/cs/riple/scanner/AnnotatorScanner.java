@@ -224,8 +224,9 @@ public class AnnotatorScanner extends BugChecker
   }
 
   /**
-   * Serializes the impacted region for a functional interface. The serialized region might be
-   * impacted by any change on the passed tree.
+   * Serializes the impacted region for a functional interface. This method locates the overriden
+   * method from the passed functional interface tree and serializes the impacted region for that
+   * method.
    *
    * @param tree Given tree.
    * @param state Visitor State.
