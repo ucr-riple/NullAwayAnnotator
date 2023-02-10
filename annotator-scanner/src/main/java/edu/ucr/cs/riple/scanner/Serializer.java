@@ -52,7 +52,7 @@ public class Serializer {
   /** File name where all field usage data has been stored. */
   public static final String FIELD_GRAPH_FILE_NAME = "field_graph.tsv";
   /** File name where all impacted regions for changes on methods are serialized. */
-  public static final String METHOD_IMPACTED_REGION_FILE_NAME = "impacted_region.tsv";
+  public static final String METHOD_IMPACTED_REGION_FILE_NAME = "method_impacted_region_map.tsv";
   /** File name where all method data has been stored. */
   public static final String METHOD_INFO_FILE_NAME = "method_info.tsv";
   /** File name where all class data has been stored. */

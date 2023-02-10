@@ -176,7 +176,7 @@ public class AnnotatorScanner extends BugChecker
     if (!config.callTrackerIsActive()) {
       return Description.NO_MATCH;
     }
-    serializeFunctionalInterface(config, lambdaExpressionTree, visitorState);
+    serializeImpactedRegionForFunctionalInterface(config, lambdaExpressionTree, visitorState);
     return Description.NO_MATCH;
   }
 
@@ -187,7 +187,7 @@ public class AnnotatorScanner extends BugChecker
     if (!config.callTrackerIsActive()) {
       return Description.NO_MATCH;
     }
-    serializeFunctionalInterface(config, memberReferenceTree, visitorState);
+    serializeImpactedRegionForFunctionalInterface(config, memberReferenceTree, visitorState);
     if (memberReferenceTree instanceof JCTree.JCMemberReference) {
       Symbol calledMethod = ((JCTree.JCMemberReference) memberReferenceTree).sym;
       if (calledMethod instanceof Symbol.MethodSymbol) {
@@ -217,12 +217,13 @@ public class AnnotatorScanner extends BugChecker
   }
 
   /**
-   * Serializes the functional interface.
+   * Serializes the impacted region for a functional interface. The serialized region might be
+   * impacted by any change on the passed tree.
    *
    * @param tree Given tree.
    * @param state Visitor State.
    */
-  private static void serializeFunctionalInterface(
+  private static void serializeImpactedRegionForFunctionalInterface(
       Config config, ExpressionTree tree, VisitorState state) {
     Symbol.MethodSymbol methodSym = SymbolUtil.getFunctionalInterfaceMethod(tree, state.getTypes());
     if (methodSym == null) {

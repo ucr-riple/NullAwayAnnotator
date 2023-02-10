@@ -49,7 +49,7 @@ public class MethodImpactedRegionTest extends AnnotatorScannerBaseTest<TrackerNo
           + "USED_CLASS"
           + '\t'
           + "SOURCE_TYPE";
-  private static final String FILE_NAME = "call_graph.tsv";
+  private static final String FILE_NAME = "method_impacted_region_map.tsv";
 
   public MethodImpactedRegionTest() {
     super(METHOD_TRACKER_DISPLAY_FACTORY, HEADER, FILE_NAME);
