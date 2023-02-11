@@ -98,6 +98,15 @@ public class Region {
   }
 
   /**
+   * Checks if region targets a constructor.
+   *
+   * @return true, if region is targeting a constructor.
+   */
+  public boolean isOnConstructor() {
+    return type.equals(Type.CONSTRUCTOR);
+  }
+
+  /**
    * Checks if region targets a method or constructor body.
    *
    * @return true, if region is targeting a method or constructor body.
@@ -113,15 +122,6 @@ public class Region {
    */
   public boolean isOnField() {
     return type.equals(Type.FIELD);
-  }
-
-  /**
-   * Checks if region targets a constructor.
-   *
-   * @return true, if region is targeting a constructor.
-   */
-  public boolean isOnConstructor() {
-    return type.equals(Type.CONSTRUCTOR);
   }
 
   /**
