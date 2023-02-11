@@ -69,21 +69,20 @@ public class Region {
   }
 
   /**
-   * Initializes {@link Region#type} based on the string representation of member.
+   * Initializes {@link Region#type} based on the string representation of regionMember.
    *
    * @param regionClass Symbol of the region class in string.
-   * @param member Symbol of the region representative in string.
+   * @param regionMember Symbol of the region representative in string.
    * @return The corresponding Type.
    */
-  public static Type getType(String regionClass, String member) {
-    if (member.equals("null")) {
+  public static Type getType(String regionClass, String regionMember) {
+    if (regionMember.equals("null")) {
       return Type.STATIC_BLOCK;
     }
-    if (member.contains("(")) {
-      if (Helper.extractCallableName(member).equals(Helper.simpleName(regionClass))) {
-        return Type.CONSTRUCTOR;
-      }
-      return Type.METHOD;
+    if (regionMember.contains("(")) {
+      return Helper.extractCallableName(regionMember).equals(Helper.simpleName(regionClass))
+          ? Type.CONSTRUCTOR
+          : Type.METHOD;
     }
     return Type.FIELD;
   }
