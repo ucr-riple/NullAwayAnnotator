@@ -97,9 +97,9 @@ public class Region {
   }
 
   /**
-   * Checks if region targets a constructor.
+   * Checks if region targets a constructor body.
    *
-   * @return true, if region is targeting a constructor.
+   * @return true, if region is targeting a constructor body.
    */
   public boolean isOnConstructor() {
     return type.equals(Type.CONSTRUCTOR);
