@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.metadata.trackers;
 
 import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.location.OnClass;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.util.Objects;
 
@@ -51,15 +52,15 @@ public class Region {
   /** Different types of code segments for a region. */
   public enum Type {
     METHOD,
-    FIELD,
     CONSTRUCTOR,
+    FIELD,
     STATIC_BLOCK
   }
 
   public Region(String encClass, String encMember, SourceType sourceType) {
     this.clazz = encClass == null ? "null" : encClass;
     this.member = encMember == null ? "null" : encMember;
-    this.type = getType(encClass, member);
+    this.type = getType(clazz, member);
     this.sourceType = sourceType;
   }
 
@@ -68,19 +69,21 @@ public class Region {
   }
 
   /**
-   * Initializes {@link Region#type} based on the string representation of regionMember.
+   * Initializes {@link Region#type} based on the string representation of member.
    *
-   * @param regionMember Symbol of the region representative.
+   * @param regionClass Symbol of the region class in string.
+   * @param member Symbol of the region representative in string.
    * @return The corresponding Type.
    */
-  public static Type getType(String regionClass, String regionMember) {
-    if (regionMember.equals("null")) {
+  public static Type getType(String regionClass, String member) {
+    if (member.equals("null")) {
       return Type.STATIC_BLOCK;
     }
-    if (regionMember.contains("(")) {
-      return Helper.extractCallableName(regionMember).equals(Helper.simpleName(regionClass))
-          ? Type.CONSTRUCTOR
-          : Type.METHOD;
+    if (member.contains("(")) {
+      if (Helper.extractCallableName(member).equals(Helper.simpleName(regionClass))) {
+        return Type.CONSTRUCTOR;
+      }
+      return Type.METHOD;
     }
     return Type.FIELD;
   }
@@ -95,21 +98,12 @@ public class Region {
   }
 
   /**
-   * Checks if region targets a constructor body.
+   * Checks if region targets a method or a constructor.
    *
-   * @return true, if region is targeting a constructor body.
-   */
-  public boolean isOnConstructor() {
-    return type.equals(Type.CONSTRUCTOR);
-  }
-
-  /**
-   * Checks if region targets a method or constructor body.
-   *
-   * @return true, if region is targeting a method or constructor body.
+   * @return true, if region is targeting a method or a constructor.
    */
   public boolean isOnCallable() {
-    return isOnConstructor() || isOnMethod();
+    return isOnMethod() || isOnConstructor();
   }
 
   /**
@@ -119,6 +113,33 @@ public class Region {
    */
   public boolean isOnField() {
     return type.equals(Type.FIELD);
+  }
+
+  /**
+   * Checks if region targets a constructor.
+   *
+   * @return true, if region is targeting a constructor.
+   */
+  public boolean isOnConstructor() {
+    return type.equals(Type.CONSTRUCTOR);
+  }
+
+  /**
+   * Checks if region targets a static block.
+   *
+   * @return true, if region is targeting a static block.
+   */
+  public boolean isOnStaticBlock() {
+    return type.equals(Type.STATIC_BLOCK);
+  }
+
+  /**
+   * Checks if region is inside an anonymous class.
+   *
+   * @return true, if region is inside an anonymous class.
+   */
+  public boolean isInAnonymousClass() {
+    return OnClass.isAnonymousClassFlatName(clazz);
   }
 
   @Override
