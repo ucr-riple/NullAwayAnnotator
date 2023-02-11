@@ -98,12 +98,12 @@ public class Region {
   }
 
   /**
-   * Checks if region targets a method or a constructor.
+   * Checks if region targets a method or constructor body.
    *
-   * @return true, if region is targeting a method or a constructor.
+   * @return true, if region is targeting a method or constructor body.
    */
   public boolean isOnCallable() {
-    return isOnMethod() || isOnConstructor();
+    return isOnConstructor() || isOnMethod();
   }
 
   /**
