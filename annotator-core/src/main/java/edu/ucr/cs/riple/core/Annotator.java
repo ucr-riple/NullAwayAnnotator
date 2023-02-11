@@ -302,8 +302,8 @@ public class Annotator {
             .filter(
                 fix ->
                     fix.isOnField()
-                        && (fix.reasons.contains("FIELD_NO_INIT")
-                            || fix.reasons.contains("METHOD_NO_INIT")))
+                        && (fix.reasons.contains("METHOD_NO_INIT")
+                            || fix.reasons.contains("FIELD_NO_INIT")))
             // Filter nodes annotated with SuppressWarnings("NullAway")
             .filter(fix -> !fieldsWithSuppressWarnings.contains(fix.toField()))
             .map(
