@@ -263,7 +263,7 @@ public class Annotator {
     // Update log.
     config.log.updateInjectedAnnotations(nullUnMarkedAnnotations);
 
-    // Collect @NullUnmarked annotations for classes.
+    // Collect @NullUnmarked annotations for classes for errors in static initialization blocks.
     nullUnMarkedAnnotations.addAll(
         remainingErrors.stream()
             .filter(

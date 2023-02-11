@@ -52,15 +52,15 @@ public class Region {
   /** Different types of code segments for a region. */
   public enum Type {
     METHOD,
-    CONSTRUCTOR,
     FIELD,
+    CONSTRUCTOR,
     STATIC_BLOCK
   }
 
   public Region(String encClass, String encMember, SourceType sourceType) {
     this.clazz = encClass == null ? "null" : encClass;
     this.member = encMember == null ? "null" : encMember;
-    this.type = getType(clazz, member);
+    this.type = getType(encClass, member);
     this.sourceType = sourceType;
   }
 
