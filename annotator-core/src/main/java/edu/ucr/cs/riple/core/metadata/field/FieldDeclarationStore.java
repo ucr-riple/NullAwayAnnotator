@@ -91,7 +91,10 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
                             .map(NodeWithSimpleName::getNameAsString)
                             .collect(ImmutableSet.toImmutableSet()));
                   }));
-      return info.isEmpty() ? null : info;
+      // We still want to keep the information about the class even if it has no field declarations,
+      // so we can retrieve tha path to the file from the given class flat name. This information is
+      // used in adding suppression annotations on class level.
+      return info;
     } catch (FileNotFoundException e) {
       return null;
     } catch (IOException e) {
