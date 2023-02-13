@@ -25,8 +25,8 @@
 package edu.ucr.cs.riple.scanner;
 
 import edu.ucr.cs.riple.scanner.out.ClassInfo;
-import edu.ucr.cs.riple.scanner.out.MethodInfo;
 import edu.ucr.cs.riple.scanner.out.ImpactedRegion;
+import edu.ucr.cs.riple.scanner.out.MethodInfo;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;

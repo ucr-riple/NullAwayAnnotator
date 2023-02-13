@@ -47,10 +47,11 @@ public class ImpactedRegion {
 
   /**
    * Construct an ImpactedRegion
+   *
    * @param config scanner configuration
    * @param memberSymbol symbol for the class member
-   * @param path path to the AST node that uses or overrides the member; the impacted region information is computed
-   *             from the leaf of this path
+   * @param path path to the AST node that uses or overrides the member; the impacted region
+   *     information is computed from the leaf of this path
    */
   public ImpactedRegion(Config config, Symbol memberSymbol, TreePath path) {
     this.memberSymbol = memberSymbol;

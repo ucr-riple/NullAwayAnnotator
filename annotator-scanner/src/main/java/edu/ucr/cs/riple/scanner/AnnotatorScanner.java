@@ -41,8 +41,8 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.riple.scanner.out.ClassInfo;
-import edu.ucr.cs.riple.scanner.out.MethodInfo;
 import edu.ucr.cs.riple.scanner.out.ImpactedRegion;
+import edu.ucr.cs.riple.scanner.out.MethodInfo;
 import java.util.ArrayList;
 import java.util.List;
 import javax.lang.model.element.ElementKind;
@@ -162,7 +162,8 @@ public class AnnotatorScanner extends BugChecker
       context
           .getConfig()
           .getSerializer()
-          .serializeFieldGraphNode(new ImpactedRegion(context.getConfig(), symbol, state.getPath()));
+          .serializeFieldGraphNode(
+              new ImpactedRegion(context.getConfig(), symbol, state.getPath()));
     }
   }
 }
