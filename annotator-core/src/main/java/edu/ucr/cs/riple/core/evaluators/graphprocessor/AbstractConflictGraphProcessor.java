@@ -57,8 +57,8 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
     this.config = config;
     this.methodDeclarationTree = supplier.getMethodDeclarationTree();
     this.injector = supplier.getInjector();
-    this.errorStore = supplier.getErrorStore();
     this.downstreamImpactCache = supplier.getDownstreamImpactCache();
+    this.errorStore = supplier.getErrorStore();
     this.compilerRunner = runner;
   }
 
@@ -68,14 +68,20 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
    * @param node Node in process.
    */
   protected Set<Fix> getTriggeredFixesFromDownstream(Node node) {
-    Set<Location> currentLocationTargetedByTree =
+    Set<Location> currentLocationsTargetedByTree =
         node.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
-    return downstreamImpactCache.getImpactedParameters(node.tree).stream()
-        .filter(input -> !currentLocationTargetedByTree.contains(input))
+    return downstreamImpactCache.getTriggeredErrorsForCollection(node.tree).stream()
+        .filter(
+            error ->
+                error.isSingleFix()
+                    && error.toResolvingLocation().isOnParameter()
+                    && error.isFixableOnTarget(methodDeclarationTree)
+                    && !currentLocationsTargetedByTree.contains(error.toResolvingLocation()))
         .map(
-            onParameter ->
+            error ->
                 new Fix(
-                    new AddMarkerAnnotation(onParameter, config.nullableAnnot),
+                    new AddMarkerAnnotation(
+                        error.toResolvingLocation().toParameter(), config.nullableAnnot),
                     "PASSING_NULLABLE",
                     false))
         .collect(Collectors.toSet());

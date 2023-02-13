@@ -70,7 +70,7 @@ public class BasicEvaluator extends AbstractEvaluator {
   }
 
   @Override
-  protected void collectGraphResults() {
+  protected void collectGraphResults(ImmutableSet<Report> reports) {
     graph
         .getNodes()
         .forEach(

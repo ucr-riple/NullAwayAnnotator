@@ -249,4 +249,17 @@ public class Error {
     }
     return builder.build();
   }
+
+  /**
+   * Checks if this error is resolvable with the given collection of fixes.
+   *
+   * @param fixes Collection fixes.
+   * @return true, if this error is resolvable.
+   */
+  public boolean isResolvableWith(Collection<Fix> fixes) {
+    if (resolvingFixes.size() == 0) {
+      return false;
+    }
+    return fixes.containsAll(this.resolvingFixes);
+  }
 }
