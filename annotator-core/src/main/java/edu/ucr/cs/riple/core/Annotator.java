@@ -238,7 +238,7 @@ public class Annotator {
             // find the corresponding method nodes.
             .map(
                 error -> {
-                  if (error.getRegion().isOnCallable()) {
+                  if (!error.isInitializationError() && error.getRegion().isOnCallable()) {
                     return methodDeclarationTree.findNode(error.encMember(), error.encClass());
                   }
                   // For methods invoked in an initialization region, where the error is that
@@ -274,8 +274,7 @@ public class Annotator {
                     return false;
                   }
                   // We can silence them by SuppressWarnings("NullAway.Init")
-                  return !error.messageType.equals("METHOD_NO_INIT")
-                      && !error.messageType.equals("FIELD_NO_INIT");
+                  return !error.isInitializationError();
                 })
             .map(
                 error ->
