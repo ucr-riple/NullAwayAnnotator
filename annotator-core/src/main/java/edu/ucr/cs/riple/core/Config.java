@@ -245,10 +245,10 @@ public class Config {
     options.addOption(disableParallelProcessingOption);
 
     // Fix impact cache
-    Option disableFixCacheOption =
-        new Option("dfc", "disable-fix-cache", false, "Disables fix impact caching");
-    disableFixCacheOption.setRequired(false);
-    options.addOption(disableFixCacheOption);
+    Option enableFixImpactCacheOption =
+        new Option("eic", "enable-impact-cache", false, "Enables fix impact cache");
+    enableFixImpactCacheOption.setRequired(false);
+    options.addOption(enableFixImpactCacheOption);
 
     // Exhaustive
     Option exhaustiveSearchOption =
@@ -400,7 +400,7 @@ public class Config {
     this.useCache = !cmd.hasOption(disableCacheOption.getLongOpt());
     this.disableOuterLoop = cmd.hasOption(disableOuterLoopOption.getLongOpt());
     this.useParallelGraphProcessor = !cmd.hasOption(disableParallelProcessingOption.getLongOpt());
-    this.useImpactCache = !cmd.hasOption(disableFixCacheOption.getLongOpt());
+    this.useImpactCache = cmd.hasOption(enableFixImpactCacheOption.getLongOpt());
     this.exhaustiveSearch = cmd.hasOption(exhaustiveSearchOption.getLongOpt());
     this.downStreamDependenciesAnalysisActivated =
         cmd.hasOption(downstreamDependenciesActivationOption.getLongOpt());
@@ -461,7 +461,7 @@ public class Config {
     this.useParallelGraphProcessor =
         getValueFromKey(jsonObject, "PARALLEL_PROCESSING", Boolean.class).orElse(true);
     this.useImpactCache =
-        getValueFromKey(jsonObject, "CACHE_IMPACT_ACTIVATION", Boolean.class).orElse(true);
+        getValueFromKey(jsonObject, "CACHE_IMPACT_ACTIVATION", Boolean.class).orElse(false);
     this.exhaustiveSearch =
         getValueFromKey(jsonObject, "EXHAUSTIVE_SEARCH", Boolean.class).orElse(true);
     this.disableOuterLoop = !getValueFromKey(jsonObject, "OUTER_LOOP", Boolean.class).orElse(false);
@@ -687,7 +687,7 @@ public class Config {
     public boolean forceResolveActivation = false;
     public String nullUnmarkedAnnotation = "org.jspecify.nullness.NullUnmarked";
     public boolean inferenceActivated = true;
-    public boolean useCacheImpact = true;
+    public boolean useCacheImpact = false;
     public Set<SourceType> sourceTypes = new HashSet<>();
     public int depth = 1;
 
