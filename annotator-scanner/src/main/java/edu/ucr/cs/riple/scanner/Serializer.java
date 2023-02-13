@@ -25,8 +25,8 @@
 package edu.ucr.cs.riple.scanner;
 
 import edu.ucr.cs.riple.scanner.out.ClassInfo;
+import edu.ucr.cs.riple.scanner.out.ImpactedRegion;
 import edu.ucr.cs.riple.scanner.out.MethodInfo;
-import edu.ucr.cs.riple.scanner.out.TrackerNode;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -68,22 +68,22 @@ public class Serializer {
   }
 
   /**
-   * Appends the string representation of the {@link TrackerNode} corresponding to method impacted
-   * region.
+   * Appends the string representation of the {@link ImpactedRegion} corresponding to method
+   * impacted region.
    *
    * @param methodImpactedRegion TrackerNode instance which is an impacted region for a method
    *     change.
    */
-  public void serializeImpactedRegionByMethod(TrackerNode methodImpactedRegion) {
+  public void serializeImpactedRegionByMethod(ImpactedRegion methodImpactedRegion) {
     appendToFile(methodImpactedRegion.toString(), this.methodImpactedRegion);
   }
 
   /**
-   * Appends the string representation of the {@link TrackerNode} corresponding to a field graph.
+   * Appends the string representation of the {@link ImpactedRegion} corresponding to a field graph.
    *
    * @param fieldGraphNode TrackerNode instance.
    */
-  public void serializeFieldGraphNode(TrackerNode fieldGraphNode) {
+  public void serializeFieldGraphNode(ImpactedRegion fieldGraphNode) {
     appendToFile(fieldGraphNode.toString(), this.fieldGraphPath);
   }
 
@@ -127,10 +127,10 @@ public class Serializer {
     try {
       Files.createDirectories(config.getOutputDirectory());
       if (config.callTrackerIsActive()) {
-        initializeFile(methodImpactedRegion, TrackerNode.header());
+        initializeFile(methodImpactedRegion, ImpactedRegion.header());
       }
       if (config.fieldTrackerIsActive()) {
-        initializeFile(fieldGraphPath, TrackerNode.header());
+        initializeFile(fieldGraphPath, ImpactedRegion.header());
       }
       if (config.methodTrackerIsActive()) {
         initializeFile(methodInfoPath, MethodInfo.header());

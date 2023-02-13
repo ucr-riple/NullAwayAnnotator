@@ -46,8 +46,8 @@ import com.sun.source.tree.VariableTree;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.tree.JCTree;
 import edu.ucr.cs.riple.scanner.out.ClassInfo;
+import edu.ucr.cs.riple.scanner.out.ImpactedRegion;
 import edu.ucr.cs.riple.scanner.out.MethodInfo;
-import edu.ucr.cs.riple.scanner.out.TrackerNode;
 import java.util.ArrayList;
 import java.util.List;
 import javax.lang.model.element.ElementKind;
@@ -108,7 +108,7 @@ public class AnnotatorScanner extends BugChecker
     config
         .getSerializer()
         .serializeImpactedRegionByMethod(
-            new TrackerNode(config, ASTHelpers.getSymbol(tree), state.getPath()));
+            new ImpactedRegion(config, ASTHelpers.getSymbol(tree), state.getPath()));
     return Description.NO_MATCH;
   }
 
@@ -118,7 +118,7 @@ public class AnnotatorScanner extends BugChecker
     config
         .getSerializer()
         .serializeImpactedRegionByMethod(
-            new TrackerNode(config, ASTHelpers.getSymbol(tree), state.getPath()));
+            new ImpactedRegion(config, ASTHelpers.getSymbol(tree), state.getPath()));
     return Description.NO_MATCH;
   }
 
@@ -202,7 +202,7 @@ public class AnnotatorScanner extends BugChecker
             .getConfig()
             .getSerializer()
             .serializeImpactedRegionByMethod(
-                new TrackerNode(config, calledMethod, visitorState.getPath()));
+                new ImpactedRegion(config, calledMethod, visitorState.getPath()));
       }
     }
     return Description.NO_MATCH;
@@ -219,7 +219,8 @@ public class AnnotatorScanner extends BugChecker
       context
           .getConfig()
           .getSerializer()
-          .serializeFieldGraphNode(new TrackerNode(context.getConfig(), symbol, state.getPath()));
+          .serializeFieldGraphNode(
+              new ImpactedRegion(context.getConfig(), symbol, state.getPath()));
     }
   }
 
@@ -239,6 +240,6 @@ public class AnnotatorScanner extends BugChecker
     }
     config
         .getSerializer()
-        .serializeImpactedRegionByMethod(new TrackerNode(config, methodSym, state.getPath()));
+        .serializeImpactedRegionByMethod(new ImpactedRegion(config, methodSym, state.getPath()));
   }
 }
