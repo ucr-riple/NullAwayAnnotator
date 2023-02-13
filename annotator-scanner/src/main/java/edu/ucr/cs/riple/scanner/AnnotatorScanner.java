@@ -236,6 +236,12 @@ public class AnnotatorScanner extends BugChecker
       Config config, ExpressionTree tree, VisitorState state) {
     Symbol.MethodSymbol methodSym = SymbolUtil.getFunctionalInterfaceMethod(tree, state.getTypes());
     if (methodSym == null) {
+      System.err.println(
+          "Expected a nonnull method symbol for functional interface:"
+              + state.getSourceForNode(tree)
+              + ", at path: "
+              + state.getPath().getCompilationUnit().getSourceFile().toUri()
+              + ", but received null.");
       return;
     }
     config
