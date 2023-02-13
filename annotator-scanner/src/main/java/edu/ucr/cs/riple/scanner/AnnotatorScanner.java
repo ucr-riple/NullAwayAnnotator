@@ -176,8 +176,9 @@ public class AnnotatorScanner extends BugChecker
     if (!config.callTrackerIsActive()) {
       return Description.NO_MATCH;
     }
-    // for e -> Foo.bar(e), assume that method "baz()" has been overridden. We need to serialize the
-    // region (leaf of path in visitor state) for "baz()".
+    // for e -> Foo.bar(e), assume that method "baz()" has been overridden. Then the containing
+    // method for this lambda is an impacted region for "baz()".  The call to "Foo.bar" is handled
+    // when scanning the body of the lambda.
     serializeImpactedRegionForFunctionalInterface(config, lambdaExpressionTree, visitorState);
     return Description.NO_MATCH;
   }
