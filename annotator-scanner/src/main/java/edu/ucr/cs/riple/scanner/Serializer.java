@@ -25,8 +25,8 @@
 package edu.ucr.cs.riple.scanner;
 
 import edu.ucr.cs.riple.scanner.out.ClassInfo;
+import edu.ucr.cs.riple.scanner.out.ImpactedRegion;
 import edu.ucr.cs.riple.scanner.out.MethodInfo;
-import edu.ucr.cs.riple.scanner.out.TrackerNode;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -68,20 +68,20 @@ public class Serializer {
   }
 
   /**
-   * Appends the string representation of the {@link TrackerNode} corresponding to a call graph.
+   * Appends the string representation of the {@link ImpactedRegion} corresponding to a call graph.
    *
    * @param callGraphNode TrackerNode instance.
    */
-  public void serializeCallGraphNode(TrackerNode callGraphNode) {
+  public void serializeCallGraphNode(ImpactedRegion callGraphNode) {
     appendToFile(callGraphNode.toString(), this.callGraphPath);
   }
 
   /**
-   * Appends the string representation of the {@link TrackerNode} corresponding to a field graph.
+   * Appends the string representation of the {@link ImpactedRegion} corresponding to a field graph.
    *
    * @param fieldGraphNode TrackerNode instance.
    */
-  public void serializeFieldGraphNode(TrackerNode fieldGraphNode) {
+  public void serializeFieldGraphNode(ImpactedRegion fieldGraphNode) {
     appendToFile(fieldGraphNode.toString(), this.fieldGraphPath);
   }
 
@@ -125,10 +125,10 @@ public class Serializer {
     try {
       Files.createDirectories(config.getOutputDirectory());
       if (config.callTrackerIsActive()) {
-        initializeFile(callGraphPath, TrackerNode.header());
+        initializeFile(callGraphPath, ImpactedRegion.header());
       }
       if (config.fieldTrackerIsActive()) {
-        initializeFile(fieldGraphPath, TrackerNode.header());
+        initializeFile(fieldGraphPath, ImpactedRegion.header());
       }
       if (config.methodTrackerIsActive()) {
         initializeFile(methodInfoPath, MethodInfo.header());
