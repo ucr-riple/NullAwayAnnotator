@@ -25,7 +25,6 @@
 package edu.ucr.cs.riple.core.evaluators.suppliers;
 
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.cache.TargetModuleCache;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.evaluators.AbstractEvaluator;
 import edu.ucr.cs.riple.core.evaluators.graphprocessor.ConflictGraphProcessor;
@@ -75,7 +74,7 @@ public interface Supplier {
   /**
    * Getter for {@link DownstreamImpactCache} instance.
    *
-   * @return GlobalAnalyzer instance.
+   * @return DownstreamImpactCache instance.
    */
   DownstreamImpactCache getDownstreamImpactCache();
 
@@ -85,11 +84,4 @@ public interface Supplier {
    * @return Graph processor instance.
    */
   ConflictGraphProcessor getGraphProcessor();
-
-  /**
-   * Getter for {@link TargetModuleCache}.
-   *
-   * @return Target module cache instance.
-   */
-  TargetModuleCache getCache();
 }

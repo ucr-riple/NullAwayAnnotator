@@ -73,10 +73,8 @@ public class Config {
    * zero or less.
    */
   public final boolean bailout;
-  /** If activated, impact of fixes will be computed in parallel. */
-  public final boolean useParallelGraphProcessor;
-  /** If activated, impact of fixes will be cached. */
-  public final boolean useImpactCache;
+  /** If activated, all optimization techniques will be applied through all searches. */
+  public final boolean optimized;
   /**
    * If activated, all suggested fixes from NullAway will be applied to the source code regardless
    * of their effectiveness.
@@ -237,18 +235,11 @@ public class Config {
     chainOption.setRequired(false);
     options.addOption(chainOption);
 
-    // Parallel Processing
-    Option disableParallelProcessingOption =
-        new Option(
-            "dpp", "disable-parallel-processing", false, "Disables parallel processing of fixes");
-    disableParallelProcessingOption.setRequired(false);
-    options.addOption(disableParallelProcessingOption);
-
-    // Fix impact cache
-    Option disableFixCacheOption =
-        new Option("dfc", "disable-fix-cache", false, "Disables fix impact caching");
-    disableFixCacheOption.setRequired(false);
-    options.addOption(disableFixCacheOption);
+    // Optimized
+    Option disableOptimizationOption =
+        new Option("do", "disable-optimization", false, "Disables optimizations");
+    disableOptimizationOption.setRequired(false);
+    options.addOption(disableOptimizationOption);
 
     // Exhaustive
     Option exhaustiveSearchOption =
@@ -399,8 +390,7 @@ public class Config {
     this.bailout = !cmd.hasOption(disableBailoutOption.getLongOpt());
     this.useCache = !cmd.hasOption(disableCacheOption.getLongOpt());
     this.disableOuterLoop = cmd.hasOption(disableOuterLoopOption.getLongOpt());
-    this.useParallelGraphProcessor = !cmd.hasOption(disableParallelProcessingOption.getLongOpt());
-    this.useImpactCache = !cmd.hasOption(disableFixCacheOption.getLongOpt());
+    this.optimized = !cmd.hasOption(disableOptimizationOption.getLongOpt());
     this.exhaustiveSearch = cmd.hasOption(exhaustiveSearchOption.getLongOpt());
     this.downStreamDependenciesAnalysisActivated =
         cmd.hasOption(downstreamDependenciesActivationOption.getLongOpt());
@@ -458,10 +448,7 @@ public class Config {
     this.redirectBuildOutputToStdErr =
         getValueFromKey(jsonObject, "REDIRECT_BUILD_OUTPUT_TO_STDERR", Boolean.class).orElse(false);
     this.useCache = getValueFromKey(jsonObject, "CACHE", Boolean.class).orElse(true);
-    this.useParallelGraphProcessor =
-        getValueFromKey(jsonObject, "PARALLEL_PROCESSING", Boolean.class).orElse(true);
-    this.useImpactCache =
-        getValueFromKey(jsonObject, "CACHE_IMPACT_ACTIVATION", Boolean.class).orElse(true);
+    this.optimized = getValueFromKey(jsonObject, "OPTIMIZED", Boolean.class).orElse(true);
     this.exhaustiveSearch =
         getValueFromKey(jsonObject, "EXHAUSTIVE_SEARCH", Boolean.class).orElse(true);
     this.disableOuterLoop = !getValueFromKey(jsonObject, "OUTER_LOOP", Boolean.class).orElse(false);
@@ -673,7 +660,7 @@ public class Config {
     public List<ModuleInfo> configPaths;
 
     public boolean chain = false;
-    public boolean useParallelProcessor = true;
+    public boolean optimized = true;
     public boolean exhaustiveSearch = false;
     public boolean cache = true;
     public boolean bailout = true;
@@ -687,7 +674,6 @@ public class Config {
     public boolean forceResolveActivation = false;
     public String nullUnmarkedAnnotation = "org.jspecify.nullness.NullUnmarked";
     public boolean inferenceActivated = true;
-    public boolean useCacheImpact = true;
     public Set<SourceType> sourceTypes = new HashSet<>();
     public int depth = 1;
 
@@ -712,8 +698,7 @@ public class Config {
       json.put("OUTER_LOOP", outerLoopActivation);
       json.put("OUTPUT_DIR", outputDir);
       json.put("CHAIN", chain);
-      json.put("PARALLEL_PROCESSING", useParallelProcessor);
-      json.put("CACHE_IMPACT_ACTIVATION", useCacheImpact);
+      json.put("OPTIMIZED", optimized);
       json.put("CACHE", cache);
       json.put("BAILOUT", bailout);
       json.put("DEPTH", depth);

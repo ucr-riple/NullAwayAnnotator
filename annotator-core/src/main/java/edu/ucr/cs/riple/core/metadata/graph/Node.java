@@ -74,7 +74,7 @@ public class Node {
   public Report report;
 
   /** Regions where original errors reported and NullAway suggested root for that. */
-  private ImmutableSet<Region> origins;
+  private Set<Region> origins;
 
   public Node(Fix root) {
     this.regions = new HashSet<>();
@@ -83,7 +83,6 @@ public class Node {
     this.triggeredErrors = ImmutableSet.of();
     this.effect = 0;
     this.tree = Sets.newHashSet(root);
-    this.origins = ImmutableSet.of();
   }
 
   /**
@@ -93,9 +92,8 @@ public class Node {
    */
   public void setOrigins(ErrorStore errorStore) {
     this.origins =
-        ImmutableSet.copyOf(
-            errorStore.getRegionsForElements(
-                error -> error.isSingleFix() && error.getResolvingFixes().contains(root)));
+        errorStore.getRegionsForElements(
+            error -> error.isSingleFix() && error.getResolvingFixes().contains(root));
   }
 
   /**
@@ -139,18 +137,19 @@ public class Node {
    *
    * @param localEffect Local effect calculated based on the number of errors in impacted regions.
    * @param fixesInOneRound All fixes applied simultaneously to the source code.
-   * @param triggeredFixesFromDownstream Triggered fixes from downstream dependencies.
+   * @param triggeredFixesFromDownstreamErrors Triggered fixes from downstream dependencies.
    * @param triggeredErrors Triggered Errors collected from impacted regions.
    * @param mdt Method declaration tree instance.
    */
   public void updateStatus(
       int localEffect,
       Set<Fix> fixesInOneRound,
-      Collection<Fix> triggeredFixesFromDownstream,
+      Collection<Fix> triggeredFixesFromDownstreamErrors,
       Collection<Error> triggeredErrors,
       MethodDeclarationTree mdt) {
     // Update list of triggered fixes on downstream.
-    this.triggeredFixesFromDownstreamErrors = ImmutableSet.copyOf(triggeredFixesFromDownstream);
+    this.triggeredFixesFromDownstreamErrors =
+        ImmutableSet.copyOf(triggeredFixesFromDownstreamErrors);
     // Update set of triggered errors.
     this.triggeredErrors = ImmutableSet.copyOf(triggeredErrors);
     // A fix in a tree, can have a super method that is not part of this node's tree but be present

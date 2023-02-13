@@ -30,7 +30,6 @@ import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.location.Location;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -102,7 +101,7 @@ public class Report {
    *     dependency.
    */
   public boolean containsDestructiveMethod(DownstreamImpactCache cache) {
-    return this.tree.stream().anyMatch(cache::triggersUnresolvableErrorsOnDownstream);
+    return this.tree.stream().anyMatch(cache::isNotFixableOnTarget);
   }
 
   /**
@@ -271,23 +270,5 @@ public class Report {
       return false;
     }
     return !config.bailout || localEffect > 0;
-  }
-
-  /**
-   * Returns the set of fixes which requires additional investigation. If report requires further
-   * processes, this method returns the set of fixes that are added to the fix tree in the most
-   * recent iteration which their impacts are unknown. This method is called within processing the
-   * fix tree at different depths. The returned set contains all resolving fixes for triggered fixes
-   * in addition to all fixes triggered from downstream dependencies.
-   *
-   * @return The set of fixes which their impact are unknown and require further investigations.
-   */
-  public Set<Fix> getFixesForNextIteration() {
-    if (!hasBeenProcessedOnce) {
-      return Set.of(root);
-    }
-    Set<Fix> triggeredFixes = new HashSet<>(Error.getResolvingFixesOfErrors(this.triggeredErrors));
-    triggeredFixes.addAll(triggeredFixesFromDownstreamErrors);
-    return triggeredFixes;
   }
 }

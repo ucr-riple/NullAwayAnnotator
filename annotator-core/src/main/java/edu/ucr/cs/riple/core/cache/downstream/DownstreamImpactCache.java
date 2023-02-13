@@ -24,8 +24,10 @@
 
 package edu.ucr.cs.riple.core.cache.downstream;
 
-import edu.ucr.cs.riple.core.cache.ImpactCache;
+import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Set;
 
 /**
@@ -37,7 +39,7 @@ import java.util.Set;
  * of additional errors) of each such change, by summing across all downstream dependencies. This
  * data then be fed to the Annotator main process in the decision process.
  */
-public interface DownstreamImpactCache extends ImpactCache<DownstreamImpact> {
+public interface DownstreamImpactCache {
 
   /** Analyzes effects of changes in public methods in downstream dependencies. */
   void analyzeDownstreamDependencies();
@@ -61,12 +63,38 @@ public interface DownstreamImpactCache extends ImpactCache<DownstreamImpact> {
   int computeUpperBoundOfNumberOfErrors(Set<Fix> tree);
 
   /**
-   * Checks if fix triggers any unresolvable error. Unresolvable errors are errors that either no
-   * annotation can resolve them, or the corresponding fix is targeting an element outside the
-   * target module.
+   * Returns set of parameters that will receive {@code @Nullable}, if any of the methods in the
+   * fixTree are annotated as {@code @Nullable}.
+   *
+   * @param fixTree Fix tree.
+   * @return Immutable set of impacted parameters.
+   */
+  ImmutableSet<OnParameter> getImpactedParameters(Set<Fix> fixTree);
+
+  /**
+   * Set of triggered errors in downstream dependencies if fix is applied in the target module. It
+   * also includes triggered errors that can be resolved via an annotation in target (upstream)
+   * module.
+   *
+   * @param fix Fix instance to be applied in the target module.
+   * @return Set of triggered errors.
+   */
+  Set<Error> getTriggeredErrors(Fix fix);
+
+  /**
+   * Updates state of methods after injection of fixes in target module.
+   *
+   * @param fixes Set of injected fixes.
+   */
+  void updateImpactsAfterInjection(Set<Fix> fixes);
+
+  /**
+   * Checks if fix triggers any unresolvable error in downstream dependencies. Unresolvable errors
+   * are errors that either no annotation can resolve them, or the corresponding fix is targeting an
+   * element outside the target module.
    *
    * @param fix Fix to apply
-   * @return true if the method triggers an unresolvable error.
+   * @return true if the method triggers an unresolvable error in downstream dependencies.
    */
-  boolean triggersUnresolvableErrorsOnDownstream(Fix fix);
+  boolean isNotFixableOnTarget(Fix fix);
 }
