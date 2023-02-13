@@ -238,7 +238,12 @@ public class Annotator {
             // find the corresponding method nodes.
             .map(
                 error -> {
-                  if (!error.isInitializationError() && error.getRegion().isOnCallable()) {
+                  if (error.getRegion().isOnCallable()
+                      &&
+                      // We suppress initialization errors reported on constructors using
+                      // @SuppressWarnings("NullAway.Init"). We add @NullUnmarked on constructors
+                      // only for errors in the body of the constructor.
+                      !error.isInitializationError()) {
                     return methodDeclarationTree.findNode(error.encMember(), error.encClass());
                   }
                   // For methods invoked in an initialization region, where the error is that
