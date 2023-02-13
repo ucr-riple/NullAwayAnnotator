@@ -285,7 +285,7 @@ public class CoreTestHelper {
     builder.mode = mode;
     builder.inferenceActivated = !deactivateInference;
     builder.forceResolveActivation = forceResolveActivated;
-    builder.useCacheImpact = false;
+    builder.useCacheImpact = true;
     builder.sourceTypes.add(SourceType.LOMBOK);
     if (downstreamDependencyAnalysisActivated) {
       builder.buildCommand =
