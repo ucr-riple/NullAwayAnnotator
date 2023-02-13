@@ -68,14 +68,13 @@ public class Serializer {
   }
 
   /**
-   * Appends the string representation of the {@link ImpactedRegion} corresponding to method
-   * impacted region.
+   * Appends the string representation of the {@link ImpactedRegion} which is a region (field,
+   * method or a static initialization block) that is impacted by a change on a method.
    *
-   * @param methodImpactedRegion TrackerNode instance which is an impacted region for a method
-   *     change.
+   * @param impactedRegion ImpactedRegion instance which will be serialized to output.
    */
-  public void serializeImpactedRegionByMethod(ImpactedRegion methodImpactedRegion) {
-    appendToFile(methodImpactedRegion.toString(), this.methodImpactedRegion);
+  public void serializeImpactedRegionForMethod(ImpactedRegion impactedRegion) {
+    appendToFile(impactedRegion.toString(), this.methodImpactedRegion);
   }
 
   /**
