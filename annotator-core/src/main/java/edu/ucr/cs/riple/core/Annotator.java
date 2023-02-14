@@ -266,7 +266,9 @@ public class Annotator {
             // find the corresponding method nodes.
             .map(
                 error -> {
-                  if (error.getRegion().isOnMethod()) {
+                  if (error.getRegion().isOnMethod()
+                      && !(error.messageType.equals("METHOD_NO_INIT")
+                          || error.messageType.equals("FIELD_NO_INIT"))) {
                     return methodDeclarationTree.findNode(error.encMember(), error.encClass());
                   }
                   // For methods invoked in an initialization region, where the error is that

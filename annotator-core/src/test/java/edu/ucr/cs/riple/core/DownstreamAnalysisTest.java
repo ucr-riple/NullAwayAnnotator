@@ -40,8 +40,8 @@ public class DownstreamAnalysisTest extends BaseCoreTest {
     coreTestHelper
         .addExpectedReports(
             // Change reduces errors on target by -4, but increases them in downstream dependency
-            // DepA by 3, DepB by 4 and DepC by 2. Hence, the total effect is: 5.
-            new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int)"), 5),
+            // DepA by 3, DepB by 4 and DepC by 3. Hence, the total effect is: 5.
+            new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int)"), 6),
             // Change reduces errors on target by -5, but increases them in downstream dependency
             // DepA by 0, DepB by 1 and DepC by 0. Hence, the total effect is: -4.
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableGood(int)"), -4),
@@ -78,7 +78,7 @@ public class DownstreamAnalysisTest extends BaseCoreTest {
   public void lowerBoundComputationTest() {
     coreTestHelper
         .addExpectedReports(
-            // Only returnNullableBad triggers new errors in this fix chain (+9), lower bound is 9.
+            // Only returnNullableBad triggers new errors in this fix chain (+10), lower bound is 10.
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int)"), 9),
             // Only returnNullableGood triggers new errors in this fix chain (+1), lower bound is 1.
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableGood(int)"), 1),
@@ -101,8 +101,8 @@ public class DownstreamAnalysisTest extends BaseCoreTest {
     coreTestHelper
         .addExpectedReports(
             // Only returnNullableBad triggers new errors in this fix chain (+9) and upper bound
-            // should be 9
-            new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int)"), 9),
+            // should be 10
+            new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int)"), 10),
             // Only returnNullableGood triggers new errors in this fix chain (+1) and upper bound
             // should be 1
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableGood(int)"), 1),
