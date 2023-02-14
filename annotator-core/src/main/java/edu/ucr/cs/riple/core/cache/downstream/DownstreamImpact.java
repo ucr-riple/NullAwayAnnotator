@@ -60,7 +60,9 @@ public class DownstreamImpact extends Impact {
   public DownstreamImpact(Fix fix) {
     super(fix);
     // Only store impacts of fixes targeting methods.
-    Preconditions.checkArgument(fix.isOnMethod(), "Unexpected Fix instance. Only impacts of fixes on methods should be tracked for downstream dependencies");
+    Preconditions.checkArgument(
+        fix.isOnMethod(),
+        "Unexpected Fix instance. Only impacts of fixes on methods should be tracked for downstream dependencies");
     this.effect = 0;
     this.impactedParametersMap = new HashMap<>();
     this.triggeredErrors = ImmutableSet.of();
