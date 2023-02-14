@@ -78,7 +78,8 @@ public class DownstreamAnalysisTest extends BaseCoreTest {
   public void lowerBoundComputationTest() {
     coreTestHelper
         .addExpectedReports(
-            // Only returnNullableBad triggers new errors in this fix chain (+10), lower bound is 10.
+            // Only returnNullableBad triggers new errors in this fix chain (+10), lower bound is
+            // 10.
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int)"), 9),
             // Only returnNullableGood triggers new errors in this fix chain (+1), lower bound is 1.
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableGood(int)"), 1),
