@@ -29,6 +29,7 @@ public class DepC {
   Foo foo = new Foo();
   Object f;
 
+  // We get 2 errros here, assign_field_nullable and method_no_init for assigning nullable to f;
   DepC() {
     f = foo.returnNullableBad(0);
   }
