@@ -41,8 +41,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Container class for storing overall effect of fix in downstream dependencies. At this moment,
- * only impact of public methods with non-primitive return are stored.
+ * Container class for storing overall impact of a fix applied in target module on downstream
+ * dependencies. At this moment, only impact of public methods with non-primitive return are stored.
  */
 public class DownstreamImpact extends Impact {
 
