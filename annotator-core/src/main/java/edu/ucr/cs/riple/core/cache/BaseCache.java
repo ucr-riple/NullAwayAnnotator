@@ -65,7 +65,7 @@ public abstract class BaseCache<T extends Impact, S extends Map<Location, T>>
   @Nullable
   @Override
   public T fetchImpact(Fix fix) {
-    return store.getOrDefault(fix.toLocation(), null);
+    return store.get(fix.toLocation());
   }
 
   @Override
