@@ -120,7 +120,9 @@ public class CachedEvaluator extends AbstractEvaluator {
           Set<Error> triggeredErrors = cache.getTriggeredErrorsForCollection(newTree);
           report.localEffect =
               triggeredErrors.size()
-                  - supplier.getErrorStore().getNumberOfResolvedFixesWithCollection(newTree);
+                  - supplier
+                      .getErrorStore()
+                      .getNumberOfErrorsResolvedByAllFixesWithinCollection(newTree);
           report.triggeredErrors = ImmutableSet.copyOf(triggeredErrors);
           // get fixes triggered from downstream.
           report.triggeredFixesFromDownstreamErrors =
