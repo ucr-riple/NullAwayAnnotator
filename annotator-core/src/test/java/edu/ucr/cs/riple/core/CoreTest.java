@@ -422,7 +422,7 @@ public class CoreTest extends BaseCoreTest {
   }
 
   @Test
-  public void staticBlockLocalVariableInitializationTest() {
+  public void staticAndInstanceInitializerBlockTest() {
     coreTestHelper
         .addInputLines(
             "A.java",
