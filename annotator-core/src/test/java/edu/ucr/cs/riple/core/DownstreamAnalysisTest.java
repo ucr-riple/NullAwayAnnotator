@@ -40,8 +40,8 @@ public class DownstreamAnalysisTest extends BaseCoreTest {
     coreTestHelper
         .addExpectedReports(
             // Change reduces errors on target by -4, but increases them in downstream dependency
-            // DepA by 3, DepB by 4 and DepC by 2. Hence, the total effect is: 5.
-            new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int)"), 5),
+            // DepA by 3, DepB by 4 and DepC by 3. Hence, the total effect is: 6.
+            new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int)"), 6),
             // Change reduces errors on target by -5, but increases them in downstream dependency
             // DepA by 0, DepB by 1 and DepC by 0. Hence, the total effect is: -4.
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableGood(int)"), -4),
