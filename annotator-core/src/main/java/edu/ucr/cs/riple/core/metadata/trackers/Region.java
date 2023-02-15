@@ -126,7 +126,7 @@ public class Region {
   /**
    * Checks if region targets a static or instance initialization block.
    *
-   * @return true, if region is targeting a static initialization block.
+   * @return true, if region is targeting an initialization block.
    */
   public boolean isOnInitializationBlock() {
     return type.equals(Type.INIT_BLOCK);
