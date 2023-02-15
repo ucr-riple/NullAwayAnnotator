@@ -61,6 +61,38 @@ public class OnClassInjectionTest extends BaseInjectorTest {
   }
 
   @Test
+  public void onInnerClassTest() {
+    injectorTestHelper
+        .addInput(
+            "Super.java",
+            "package com.uber;",
+            "public class Super {",
+            "   static class Inner { }",
+            "   public void test() {",
+            "       class InnerMethod { }",
+            "   }",
+            "}")
+        .expectOutput(
+            "package com.uber;",
+            "import edu.custom.NullUnmarked;",
+            "@NullUnmarked public class Super {",
+            "   @NullUnmarked static class Inner { }",
+            "   public void test() {",
+            "       @NullUnmarked class InnerMethod { }",
+            "   }",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnClass("Super.java", "com.uber.Super"), "edu.custom.NullUnmarked"),
+            new AddMarkerAnnotation(
+                new OnClass("Super.java", "com.uber.Super$Inner"), "edu.custom.NullUnmarked"),
+            new AddMarkerAnnotation(
+                new OnClass("Super.java", "com.uber.Super$1InnerMethod"),
+                "edu.custom.NullUnmarked"))
+        .start();
+  }
+
+  @Test
   public void skipOnAnonymousClassTest() {
     injectorTestHelper
         .addInput(
