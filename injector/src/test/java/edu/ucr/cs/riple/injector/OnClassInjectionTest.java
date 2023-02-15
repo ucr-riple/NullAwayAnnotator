@@ -66,7 +66,6 @@ public class OnClassInjectionTest extends BaseInjectorTest {
         .addInput(
             "Test.java",
             "package edu.ucr;",
-            "import edu.custom.NullUnmarked;",
             "public class Test {",
             "   public void test() {",
             "       I i = new I() {",
@@ -80,7 +79,6 @@ public class OnClassInjectionTest extends BaseInjectorTest {
             "}")
         .expectOutput(
             "package edu.ucr;",
-            "import edu.custom.NullUnmarked;",
             "public class Test {",
             "   public void test() {",
             "       I i = new I() {",
