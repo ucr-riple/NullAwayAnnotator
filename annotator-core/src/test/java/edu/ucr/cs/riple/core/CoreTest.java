@@ -452,4 +452,62 @@ public class CoreTest extends BaseCoreTest {
         .enableForceResolve()
         .start();
   }
+
+  @Test
+  public void fieldNoInitialization() {
+    coreTestHelper
+        .addInputLines(
+            "A.java",
+            "package test;",
+            "import java.util.Objects;",
+            "public class A {",
+            "   Object f;",
+            "   A() { }",
+            "   void run() {",
+            "       this.f = foo();",
+            "   }",
+            "   Object foo() {",
+            "        return null;",
+            "   }",
+            "}")
+        .toDepth(5)
+        .disableBailOut()
+        .addExpectedReports(
+            new TReport(
+                new OnMethod("A.java", "test.A", "foo()"),
+                -2,
+                Set.of(new OnField("A.java", "test.A", Collections.singleton("f"))),
+                Collections.emptySet()),
+            new TReport(new OnField("A.java", "test.A", Collections.singleton("f")), -1))
+        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
+        .start();
+  }
+
+  @Test
+  public void nestedParameters() {
+    coreTestHelper
+        .addInputLines(
+            "A.java",
+            "package test;",
+            "import java.util.Objects;",
+            "public class A {",
+            "   public void c1() {",
+            "      f1(null);",
+            "   }",
+            "   public void c2() {",
+            "      f2(null);",
+            "   }",
+            "   public void f1(Object p1) {",
+            "      f2(p1);",
+            "   }",
+            "   public void f2(Object p2) {",
+            "      ",
+            "   }",
+            "}")
+        .toDepth(1)
+        .addExpectedReports(
+            new TReport(new OnParameter("A.java", "test.A", "f1(java.lang.Object)", 0), 0),
+            new TReport(new OnParameter("A.java", "test.A", "f2(java.lang.Object)", 0), -1))
+        .start();
+  }
 }
