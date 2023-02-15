@@ -39,7 +39,6 @@ public class OnClassInjectionTest extends BaseInjectorTest {
         .addInput(
             "Super.java",
             "package com.uber;",
-            "import edu.custom.NullUnmarked;",
             "public class Super {",
             "   Object h = new Object();",
             "   public void test(Object f) {",
