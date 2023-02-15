@@ -38,6 +38,7 @@ import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.field.FieldInitializationAnalysis;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
@@ -99,7 +100,8 @@ public class Annotator {
     Utility.buildTarget(config, true);
     fieldDeclarationStore = new FieldDeclarationStore(config, config.target);
     methodDeclarationTree = new MethodDeclarationTree(config);
-    config.initializeAdapter(fieldDeclarationStore);
+    NonnullStore nonnullStore = new NonnullStore(config);
+    config.initializeAdapter(fieldDeclarationStore, nonnullStore);
     Set<OnField> uninitializedFields =
         Utility.readFixesFromOutputDirectory(config, fieldDeclarationStore).stream()
             .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))

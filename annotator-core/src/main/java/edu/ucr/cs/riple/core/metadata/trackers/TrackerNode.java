@@ -24,11 +24,10 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
-import edu.ucr.cs.riple.core.metadata.Hashable;
 import java.util.Objects;
 
 /** Container class for holding information regarding usage of class members within classes. */
-public class TrackerNode implements Hashable {
+public class TrackerNode {
 
   /** Region where the element is used. */
   public final Region region;

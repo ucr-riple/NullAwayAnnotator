@@ -24,14 +24,13 @@
 
 package edu.ucr.cs.riple.core.metadata.method;
 
-import edu.ucr.cs.riple.core.metadata.Hashable;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
 /** Container class to store method's information in {@link MethodDeclarationTree} tree. */
-public class MethodNode implements Hashable {
+public class MethodNode {
 
   /** Set of children's id. */
   public Set<Integer> children;
