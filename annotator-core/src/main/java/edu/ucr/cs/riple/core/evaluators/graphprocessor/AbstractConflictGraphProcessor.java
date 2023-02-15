@@ -63,11 +63,11 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
   }
 
   /**
-   * Get set of triggered fixes from downstream dependencies.
+   * Gets the set of triggered fixes on target module from downstream errors.
    *
    * @param node Node in process.
    */
-  protected Set<Fix> getTriggeredFixesFromDownstream(Node node) {
+  protected Set<Fix> getTriggeredFixesFromDownstreamErrors(Node node) {
     Set<Location> currentLocationsTargetedByTree =
         node.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
     return downstreamImpactCache.getTriggeredErrorsForCollection(node.tree).stream()

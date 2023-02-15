@@ -38,19 +38,23 @@ public class Impact {
   public final Fix fix;
   /** Set of triggered errors, if this fix is applied to source code. */
   protected ImmutableSet<Error> triggeredErrors;
-  /** Set of triggered fixes on downstream dependencies if containing fix is applied. */
-  protected ImmutableSet<Fix> triggeredFixesOnDownstream;
+  /**
+   * Set of triggered fixes on the target module from downstream dependencies errors if containing
+   * fix is applied.
+   */
+  protected ImmutableSet<Fix> triggeredFixesFromDownstreamErrors;
 
   public Impact(Fix fix) {
     this.fix = fix;
     this.triggeredErrors = ImmutableSet.of();
-    this.triggeredFixesOnDownstream = ImmutableSet.of();
+    this.triggeredFixesFromDownstreamErrors = ImmutableSet.of();
   }
 
-  public Impact(Fix fix, Set<Error> triggeredErrors, Set<Fix> triggeredFixesOnDownstream) {
+  public Impact(Fix fix, Set<Error> triggeredErrors, Set<Fix> triggeredFixesFromDownstreamErrors) {
     this.fix = fix;
     this.triggeredErrors = ImmutableSet.copyOf(triggeredErrors);
-    this.triggeredFixesOnDownstream = ImmutableSet.copyOf(triggeredFixesOnDownstream);
+    this.triggeredFixesFromDownstreamErrors =
+        ImmutableSet.copyOf(triggeredFixesFromDownstreamErrors);
   }
 
   /**
@@ -76,12 +80,13 @@ public class Impact {
   }
 
   /**
-   * Returns list of triggered fixes on downstream dependencies if this fix is applied.
+   * Returns list of triggered fixes on target module from downstream errors if this fix is applied
+   * on target module.
    *
-   * @return Immutable Set of fixes.
+   * @return Immutable Set of fixes to be applied on target module.
    */
-  public ImmutableSet<Fix> getTriggeredFixesOnDownstream() {
-    return triggeredFixesOnDownstream;
+  public ImmutableSet<Fix> getTriggeredFixesFromDownstreamErrors() {
+    return triggeredFixesFromDownstreamErrors;
   }
 
   /**
