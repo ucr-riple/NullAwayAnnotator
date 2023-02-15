@@ -124,7 +124,7 @@ public class Region {
   }
 
   /**
-   * Checks if region targets a static initialization block.
+   * Checks if region targets a static or instance initialization block.
    *
    * @return true, if region is targeting a static initialization block.
    */
