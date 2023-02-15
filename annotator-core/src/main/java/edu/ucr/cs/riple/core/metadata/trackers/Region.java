@@ -54,7 +54,7 @@ public class Region {
     METHOD,
     FIELD,
     CONSTRUCTOR,
-    STATIC_BLOCK
+    INIT_BLOCK
   }
 
   public Region(String encClass, String encMember, SourceType sourceType) {
@@ -77,7 +77,7 @@ public class Region {
    */
   public static Type getType(String regionClass, String regionMember) {
     if (regionMember.equals("null")) {
-      return Type.STATIC_BLOCK;
+      return Type.INIT_BLOCK;
     }
     if (regionMember.contains("(")) {
       return Helper.extractCallableName(regionMember).equals(Helper.simpleName(regionClass))
@@ -124,12 +124,12 @@ public class Region {
   }
 
   /**
-   * Checks if region targets a static block.
+   * Checks if region targets a static initialization block.
    *
-   * @return true, if region is targeting a static block.
+   * @return true, if region is targeting a static initialization block.
    */
-  public boolean isOnStaticBlock() {
-    return type.equals(Type.STATIC_BLOCK);
+  public boolean isOnInitializationBlock() {
+    return type.equals(Type.INIT_BLOCK);
   }
 
   /**

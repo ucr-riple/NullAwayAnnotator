@@ -269,7 +269,8 @@ public class Annotator {
         remainingErrors.stream()
             .filter(
                 error ->
-                    error.getRegion().isOnStaticBlock() && !error.getRegion().isInAnonymousClass())
+                    error.getRegion().isOnInitializationBlock()
+                        && !error.getRegion().isInAnonymousClass())
             .map(
                 error ->
                     new AddMarkerAnnotation(
