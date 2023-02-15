@@ -262,9 +262,6 @@ public class Annotator {
             .filter(Objects::nonNull)
             .map(node -> new AddMarkerAnnotation(node.location, config.nullUnMarkedAnnotation))
             .collect(Collectors.toSet());
-    injector.injectAnnotations(nullUnMarkedAnnotations);
-    // Update log.
-    config.log.updateInjectedAnnotations(nullUnMarkedAnnotations);
 
     // For errors within static initialization blocks, add a @NullUnmarked annotation on the
     // enclosing class
