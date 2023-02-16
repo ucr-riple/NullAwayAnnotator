@@ -43,7 +43,6 @@ public class SequentialConflictGraphProcessor extends AbstractConflictGraphProce
   @Override
   public void process(ConflictGraph graph) {
     int count = (int) graph.getNodes().count();
-    System.out.println("Scheduling for: " + count + " runs.");
     ProgressBar pb = Utility.createProgressBar("Processing", count);
     graph
         .getNodes()

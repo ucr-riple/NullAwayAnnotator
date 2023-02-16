@@ -74,7 +74,6 @@ public class DownstreamImpactCacheImpl implements DownstreamImpactCache {
 
   @Override
   public void analyzeDownstreamDependencies() {
-    System.out.println("Analyzing downstream dependencies...");
     Utility.setScannerCheckerActivation(config, downstreamModules, true);
     Utility.buildDownstreamDependencies(config);
     Utility.setScannerCheckerActivation(config, downstreamModules, false);
@@ -115,7 +114,6 @@ public class DownstreamImpactCacheImpl implements DownstreamImpactCache {
                   .findAny()
                   .ifPresent(report -> method.setStatus(report, impactedParameters));
             });
-    System.out.println("Analyzing downstream dependencies completed!");
   }
 
   /**

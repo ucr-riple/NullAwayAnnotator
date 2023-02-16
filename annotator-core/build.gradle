@@ -110,3 +110,11 @@ tasks.register("configureNullAwayVersion"){
     }
 }
 tasks.test.dependsOn("configureNullAwayVersion")
+
+test{
+    testLogging {
+        exceptionFormat = 'full'
+        events 'passed', 'skipped', 'failed'
+        showStandardStreams = true
+    }
+}

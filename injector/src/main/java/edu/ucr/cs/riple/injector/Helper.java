@@ -434,7 +434,9 @@ public class Helper {
         && path.charAt(start + 1) == '/') {
       start++;
     }
-    return Paths.get(path.substring(start));
+    Path p = Paths.get(path.substring(start));
+    System.err.println("For path: " + serializedPath + " deserialized: " + p);
+    return p;
   }
 
   /**

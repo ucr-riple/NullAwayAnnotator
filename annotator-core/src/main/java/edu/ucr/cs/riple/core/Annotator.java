@@ -93,9 +93,7 @@ public class Annotator {
    * </ul>
    */
   private void preprocess() {
-    System.out.println("Preprocessing...");
     Utility.setScannerCheckerActivation(config, config.target, true);
-    System.out.println("Making the first build...");
     Utility.buildTarget(config, true);
     fieldDeclarationStore = new FieldDeclarationStore(config, config.target);
     methodDeclarationTree = new MethodDeclarationTree(config);
@@ -148,7 +146,6 @@ public class Annotator {
       forceResolveRemainingErrors();
     }
 
-    System.out.println("\nFinished annotating.");
     Utility.writeReports(config, cache.reports().stream().collect(ImmutableSet.toImmutableSet()));
   }
 

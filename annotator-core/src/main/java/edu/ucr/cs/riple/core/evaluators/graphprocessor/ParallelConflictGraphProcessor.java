@@ -62,12 +62,6 @@ public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcess
     // find non-conflicting groups.
     graph.findGroups();
     Collection<Set<Node>> nonConflictingGroups = graph.getGroups();
-    System.out.println(
-        "Scheduling for: "
-            + nonConflictingGroups.size()
-            + " builds for: "
-            + graph.getNodes().count()
-            + " fixes");
     ProgressBar pb = Utility.createProgressBar("Processing", nonConflictingGroups.size());
     for (Set<Node> group : nonConflictingGroups) {
       pb.step();
