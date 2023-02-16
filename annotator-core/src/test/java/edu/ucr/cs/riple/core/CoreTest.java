@@ -160,10 +160,15 @@ public class CoreTest extends BaseCoreTest {
         .addInputLines(
             "Main.java",
             "package test;",
+            "import javax.annotation.Nullable;",
             "public class Main {",
             "   Object f;",
             "   Main(Object f) {",
             "     this.f = f;",
+            "   }",
+            "   Main(Object f, @Nullable Object o) {",
+            "     this.f = f;",
+            "     Integer h = o.hashCode();",
             "   }",
             "}",
             "class C {",
@@ -174,6 +179,16 @@ public class CoreTest extends BaseCoreTest {
             new TReport(new OnParameter("Main.java", "test.Main", "Main(java.lang.Object)", 0), 1))
         .enableForceResolve()
         .start();
+    List<AddAnnotation> expectedAnnotations =
+        List.of(
+            new AddMarkerAnnotation(
+                new OnMethod("Main.java", "test.Main", "Main(java.lang.Object)"),
+                "org.jspecify.nullness.NullUnmarked"),
+            new AddMarkerAnnotation(
+                new OnMethod("Main.java", "test.Main", "Main(java.lang.Object,java.lang.Object)"),
+                "org.jspecify.nullness.NullUnmarked"));
+    Assert.assertEquals(
+        expectedAnnotations, coreTestHelper.getConfig().log.getInjectedAnnotations());
   }
 
   @Test

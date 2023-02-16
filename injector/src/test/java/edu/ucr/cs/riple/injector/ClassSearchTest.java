@@ -482,4 +482,37 @@ public class ClassSearchTest extends BaseInjectorTest {
             () -> Helper.getTypeDeclarationMembersByFlatName(tree, "com.test.NotIncluded"));
     assertTrue(thrown.getMessage().contains(expectedErrorMessage));
   }
+
+  @Test
+  public void enumConstantSearch1() {
+    injectorTestHelper
+        .addInputSourceFile("Main.java", "enum_search.java")
+        .expectOutputFile("enum_search_expected_1.java")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnMethod("Main.java", "injector.Main$1", "bar()"), "javax.annotation.Nullable"))
+        .start();
+  }
+
+  @Test
+  public void enumConstantSearch2() {
+    injectorTestHelper
+        .addInputSourceFile("Main.java", "enum_search.java")
+        .expectOutputFile("enum_search_expected_2.java")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnMethod("Main.java", "injector.Main$2", "bar()"), "javax.annotation.Nullable"))
+        .start();
+  }
+
+  @Test
+  public void enumConstantSearch3() {
+    injectorTestHelper
+        .addInputSourceFile("Main.java", "enum_search.java")
+        .expectOutputFile("enum_search_expected_3.java")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnMethod("Main.java", "injector.Main$3", "bar()"), "javax.annotation.Nullable"))
+        .start();
+  }
 }
