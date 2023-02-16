@@ -99,6 +99,12 @@ public class AnnotatorScanner extends BugChecker
     if (!config.callTrackerIsActive()) {
       return Description.NO_MATCH;
     }
+    Symbol.MethodSymbol calledMethod = ASTHelpers.getSymbol(tree);
+    if (calledMethod != null
+        && calledMethod.isConstructor()
+        && calledMethod.getParameters().size() == 0) {
+      return Description.NO_MATCH;
+    }
     config
         .getSerializer()
         .serializeCallGraphNode(
