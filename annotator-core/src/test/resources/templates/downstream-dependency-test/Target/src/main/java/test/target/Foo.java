@@ -25,9 +25,9 @@ package test.target;
 public class Foo {
   Object field = new Object();
 
-  // Making this method will resolve 5 errors here and will introduce 1 new error here and 8 new
+  // Making this method return type @Nullable will resolve 5 errors here and will introduce 1 new
+  // error here and 10 new
   // errors on downstream dependencies.
-  // dependencies.
   public Object returnNullableBad(int i) {
     // Just to create 5 places where it returns nullable, so making this method @Nullable will
     // resolve 5 NullAway errors
