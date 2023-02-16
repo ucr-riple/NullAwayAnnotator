@@ -75,7 +75,31 @@ public class MethodCallTrackerTest extends AnnotatorScannerBaseTest<TrackerNodeD
   }
 
   @Test
-  public void fieldDeclaredRegionComputationAllCases() {
+  public void callableTests() {
+    tester
+        .addSourceLines(
+            "edu/ucr/A.java",
+            "package edu.ucr;",
+            "public class A {",
+            "   A a = new A();",
+            "   A b = new A(0);",
+            "   A() { }",
+            "   A(int i) { }",
+            "   void bar() {",
+            "       A a = new A();",
+            "   }",
+            "}")
+        .setExpectedOutputs(
+            new TrackerNodeDisplay("edu.ucr.A", "a", "edu.ucr.A", "A()"),
+            new TrackerNodeDisplay("edu.ucr.A", "b", "edu.ucr.A", "A(int)"),
+            new TrackerNodeDisplay("edu.ucr.A", "bar()", "edu.ucr.A", "A()"),
+            new TrackerNodeDisplay("edu.ucr.A", "A()", "java.lang.Object", "Object()"),
+            new TrackerNodeDisplay("edu.ucr.A", "A(int)", "java.lang.Object", "Object()"))
+        .doTest();
+  }
+
+  @Test
+  public void fieldDeclaredRegionComputationAllCasesCallables() {
     tester
         .addSourceLines(
             "edu/ucr/A.java",
