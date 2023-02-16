@@ -93,6 +93,7 @@ public class MethodCallTrackerTest extends AnnotatorScannerBaseTest<TrackerNodeD
             new TrackerNodeDisplay("edu.ucr.A", "a", "edu.ucr.A", "A()"),
             new TrackerNodeDisplay("edu.ucr.A", "b", "edu.ucr.A", "A(int)"),
             new TrackerNodeDisplay("edu.ucr.A", "bar()", "edu.ucr.A", "A()"),
+            // for calls to super in constructors.
             new TrackerNodeDisplay("edu.ucr.A", "A()", "java.lang.Object", "Object()"),
             new TrackerNodeDisplay("edu.ucr.A", "A(int)", "java.lang.Object", "Object()"))
         .doTest();
