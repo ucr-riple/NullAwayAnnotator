@@ -26,6 +26,8 @@ package edu.ucr.cs.riple.scanner.out;
 
 import com.sun.source.tree.CompilationUnitTree;
 import com.sun.tools.javac.code.Symbol;
+import edu.ucr.cs.riple.scanner.Serializer;
+import java.util.Objects;
 
 /** Container for storing class flat name and url to source file containing class. */
 public class ClassInfo {
@@ -36,7 +38,10 @@ public class ClassInfo {
 
   public ClassInfo(Symbol.ClassSymbol clazz, CompilationUnitTree compilationUnitTree) {
     this.clazz = clazz;
-    this.path = compilationUnitTree.getSourceFile().toUri().getPath();
+    this.path =
+        Objects.requireNonNull(
+                Serializer.pathToSourceFileFromURI(compilationUnitTree.getSourceFile().toUri()))
+            .toString();
   }
 
   public static String header() {
