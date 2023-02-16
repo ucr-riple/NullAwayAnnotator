@@ -179,8 +179,8 @@ public class CoreTest extends BaseCoreTest {
             new TReport(new OnParameter("Main.java", "test.Main", "Main(java.lang.Object)", 0), 1))
         .enableForceResolve()
         .start();
-    List<AddAnnotation> expectedAnnotations =
-        List.of(
+    Set<AddAnnotation> expectedAnnotations =
+        Set.of(
             new AddMarkerAnnotation(
                 new OnMethod("Main.java", "test.Main", "Main(java.lang.Object)"),
                 "org.jspecify.nullness.NullUnmarked"),
@@ -188,7 +188,7 @@ public class CoreTest extends BaseCoreTest {
                 new OnMethod("Main.java", "test.Main", "Main(java.lang.Object,java.lang.Object)"),
                 "org.jspecify.nullness.NullUnmarked"));
     Assert.assertEquals(
-        expectedAnnotations, coreTestHelper.getConfig().log.getInjectedAnnotations());
+        expectedAnnotations, Set.copyOf(coreTestHelper.getConfig().log.getInjectedAnnotations()));
   }
 
   @Test
