@@ -775,6 +775,9 @@ public class Config {
      * @return Original offset.
      */
     public int getOriginalOffset(Path path, int offset) {
+      System.err.println("ASK FOR PATH: " + path);
+      System.err.println(
+          "CONTENT: " + contents.keySet().stream().map(Path::toString).collect(Collectors.toSet()));
       if (!config.offsetHandlingIsActivated) {
         return offset;
       }

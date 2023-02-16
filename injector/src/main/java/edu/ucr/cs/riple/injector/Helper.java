@@ -435,7 +435,6 @@ public class Helper {
       start++;
     }
     Path p = Paths.get(path.substring(start));
-    System.err.println("For path: " + serializedPath + " deserialized: " + p);
     return p;
   }
 
