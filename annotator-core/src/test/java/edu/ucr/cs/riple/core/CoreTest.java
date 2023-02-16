@@ -453,7 +453,7 @@ public class CoreTest extends BaseCoreTest {
   }
 
   @Test
-  public void impactedLambdaAndMemberReferenceTest() {
+  public void impactedLambdaAndMemberReferenceParameterNullableTest() {
     coreTestHelper
         .addInputLines(
             "Main.java",
@@ -475,7 +475,7 @@ public class CoreTest extends BaseCoreTest {
             "   public void baz3() {",
             "       f(this::take);",
             "   }",
-            "   public Object take(Object o){ return null; }",
+            "   public void take(Object o){ }",
             "   public void passNull(Foo foo) {",
             "       foo.bar(null);",
             "   }",
@@ -483,8 +483,34 @@ public class CoreTest extends BaseCoreTest {
         .addInputLines(
             "Foo.java", "package test;", "public interface Foo{", "     void bar(Object o);", "}")
         .addExpectedReports(
-            new TReport(new OnParameter("Foo.java", "test.Foo", "bar(java.lang.Object)", 0), 2),
-            new TReport(new OnMethod("Main.java", "test.Main", "take(java.lang.Object)"), 0))
+            new TReport(new OnParameter("Foo.java", "test.Foo", "bar(java.lang.Object)", 0), 2))
+        .toDepth(1)
+        .start();
+  }
+
+  @Test
+  public void impactedLambdaAndMemberReferenceReturnNullableTest() {
+    coreTestHelper
+        .addInputLines(
+            "Main.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Main {",
+            "   public void f(Foo r){ }",
+            "   public void baz1() {",
+            "       f(e -> bar(e));",
+            "   }",
+            "   public void baz2() {",
+            "       f(this::bar);",
+            "   }",
+            "   public Object bar(Object o){",
+            "       return null;",
+            "   }",
+            "}")
+        .addInputLines(
+            "Foo.java", "package test;", "public interface Foo{", "     Object m(Object o);", "}")
+        .addExpectedReports(
+            new TReport(new OnMethod("Foo.java", "test.Main", "bar(java.lang.Object)"), 1))
         .toDepth(1)
         .start();
   }
