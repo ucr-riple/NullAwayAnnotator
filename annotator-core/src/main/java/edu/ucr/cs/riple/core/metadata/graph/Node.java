@@ -92,8 +92,7 @@ public class Node {
    */
   public void setOrigins(ErrorStore errorStore) {
     this.origins =
-        errorStore.getRegionsForElements(
-            error -> error.isSingleFix() && error.getResolvingFixes().contains(root));
+        errorStore.getRegionsForElements(error -> error.getResolvingFixes().contains(root));
   }
 
   /**
