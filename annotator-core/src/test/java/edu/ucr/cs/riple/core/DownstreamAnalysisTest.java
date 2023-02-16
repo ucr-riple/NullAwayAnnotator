@@ -109,8 +109,7 @@ public class DownstreamAnalysisTest extends BaseCoreTest {
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableGood(int)"), 1),
             // Root fix triggers 1 error on downstream dependency and returnNullableBad is
             // present in the fix tree and triggers 10 errors on downstream dependency, therefore
-            // the
-            // upper bound effect for the tree should be 11.
+            // the upper bound effect for the tree should be 11.
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "bar()"), 11))
         .setPredicate(
             (expected, found) ->
