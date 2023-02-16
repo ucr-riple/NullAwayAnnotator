@@ -96,6 +96,6 @@ public abstract class Change {
 
   @Override
   public String toString() {
-    return location.toString();
+    return location.toString() + " " + annotation;
   }
 }
