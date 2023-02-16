@@ -208,6 +208,7 @@ public class Report {
         downstreamImpactCache.computeLowerBoundOfNumberOfErrors(tree);
     this.upperBoundEffectOnDownstreamDependencies =
         downstreamImpactCache.computeUpperBoundOfNumberOfErrors(tree);
+    boolean a = false;
   }
 
   /**
