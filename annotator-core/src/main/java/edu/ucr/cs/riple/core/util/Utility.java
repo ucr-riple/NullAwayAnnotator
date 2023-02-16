@@ -41,8 +41,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -58,8 +56,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import me.tongfei.progressbar.ProgressBar;
-import me.tongfei.progressbar.ProgressBarStyle;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.w3c.dom.Document;
@@ -315,29 +311,6 @@ public class Utility {
     } catch (Exception e) {
       throw new RuntimeException("Could not run command: " + command);
     }
-  }
-
-  /**
-   * Returns a progress bar with the given task name.
-   *
-   * @param taskName Task name.
-   * @param steps Number of total steps to show in the progress bar.
-   * @return Progress bar instance.
-   */
-  public static ProgressBar createProgressBar(String taskName, int steps) {
-    return new ProgressBar(
-        taskName,
-        steps,
-        1000,
-        System.out,
-        ProgressBarStyle.ASCII,
-        "",
-        1,
-        false,
-        null,
-        ChronoUnit.SECONDS,
-        0L,
-        Duration.ZERO);
   }
 
   /**
