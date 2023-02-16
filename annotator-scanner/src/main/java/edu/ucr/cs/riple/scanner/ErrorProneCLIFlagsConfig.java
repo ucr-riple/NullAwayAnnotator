@@ -83,7 +83,7 @@ public class ErrorProneCLIFlagsConfig implements Config {
     }
     String outputDirectoryPathInString =
         XMLUtil.getValueFromTag(document, "/scanner/path", String.class).orElse("");
-    if (outputDirectoryPathInString == null || outputDirectoryPathInString.equals("")) {
+    if (outputDirectoryPathInString == null) {
       throw new IllegalArgumentException(
           "Output path cannot be null, should be set it in config file within <path> tag");
     }

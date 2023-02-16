@@ -30,7 +30,7 @@ import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import javax.xml.parsers.DocumentBuilder;
@@ -68,7 +68,7 @@ public class ScannerConfigWriter {
     this.fieldTrackerIsActive = false;
     this.callTrackerIsActive = false;
     this.classTrackerIsActive = false;
-    this.activatedGeneratedCodeDetectors = new LinkedHashSet<>();
+    this.activatedGeneratedCodeDetectors = new HashSet<>();
     this.nonnullAnnotations = ImmutableSet.of();
   }
 
