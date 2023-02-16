@@ -32,7 +32,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * Responsible for tracking status of generated outputs. It indexes outputs, can save states and
@@ -106,10 +105,13 @@ public class ErrorStore {
     return root.getRegionsOfMatchingItems(predicate);
   }
 
-  public int getNumberOfResolvedFixesWithCollection(Collection<Fix> fixes) {
-    return root.values().stream()
-        .filter(error -> error.isResolvableWith(fixes))
-        .collect(Collectors.toSet())
-        .size();
+  /**
+   * Returns the number of resolved errors from base (initial set of errors) by the given fixes.
+   *
+   * @param fixes The given fixes.
+   * @return Number of resolved errors.
+   */
+  public int getNumberOfErrorsResolvedByAllFixesWithinCollection(Collection<Fix> fixes) {
+    return (int) root.values().stream().filter(error -> error.isResolvableWith(fixes)).count();
   }
 }

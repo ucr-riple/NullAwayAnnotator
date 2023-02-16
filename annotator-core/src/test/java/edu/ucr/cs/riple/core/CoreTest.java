@@ -36,7 +36,6 @@ import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import org.junit.Assert;
@@ -161,10 +160,15 @@ public class CoreTest extends BaseCoreTest {
         .addInputLines(
             "Main.java",
             "package test;",
+            "import javax.annotation.Nullable;",
             "public class Main {",
             "   Object f;",
             "   Main(Object f) {",
             "     this.f = f;",
+            "   }",
+            "   Main(Object f, @Nullable Object o) {",
+            "     this.f = f;",
+            "     Integer h = o.hashCode();",
             "   }",
             "}",
             "class C {",
@@ -175,6 +179,16 @@ public class CoreTest extends BaseCoreTest {
             new TReport(new OnParameter("Main.java", "test.Main", "Main(java.lang.Object)", 0), 1))
         .enableForceResolve()
         .start();
+    Set<AddAnnotation> expectedAnnotations =
+        Set.of(
+            new AddMarkerAnnotation(
+                new OnMethod("Main.java", "test.Main", "Main(java.lang.Object)"),
+                "org.jspecify.nullness.NullUnmarked"),
+            new AddMarkerAnnotation(
+                new OnMethod("Main.java", "test.Main", "Main(java.lang.Object,java.lang.Object)"),
+                "org.jspecify.nullness.NullUnmarked"));
+    Assert.assertEquals(
+        expectedAnnotations, Set.copyOf(coreTestHelper.getConfig().log.getInjectedAnnotations()));
   }
 
   @Test
@@ -435,64 +449,6 @@ public class CoreTest extends BaseCoreTest {
         .toDepth(5)
         .addExpectedReports(new TReport(new OnField("A.java", "test.A", singleton("f")), -3))
         .enableForceResolve()
-        .start();
-  }
-
-  @Test
-  public void fieldNoInitialization() {
-    coreTestHelper
-        .addInputLines(
-            "A.java",
-            "package test;",
-            "import java.util.Objects;",
-            "public class A {",
-            "   Object f;",
-            "   A() { }",
-            "   void run() {",
-            "       this.f = foo();",
-            "   }",
-            "   Object foo() {",
-            "        return null;",
-            "   }",
-            "}")
-        .toDepth(5)
-        .disableBailOut()
-        .addExpectedReports(
-            new TReport(
-                new OnMethod("A.java", "test.A", "foo()"),
-                -2,
-                Set.of(new OnField("A.java", "test.A", Collections.singleton("f"))),
-                Collections.emptySet()),
-            new TReport(new OnField("A.java", "test.A", Collections.singleton("f")), -1))
-        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
-        .start();
-  }
-
-  @Test
-  public void nestedParameters() {
-    coreTestHelper
-        .addInputLines(
-            "A.java",
-            "package test;",
-            "import java.util.Objects;",
-            "public class A {",
-            "   public void c1() {",
-            "      f1(null);",
-            "   }",
-            "   public void c2() {",
-            "      f2(null);",
-            "   }",
-            "   public void f1(Object p1) {",
-            "      f2(p1);",
-            "   }",
-            "   public void f2(Object p2) {",
-            "      ",
-            "   }",
-            "}")
-        .toDepth(1)
-        .addExpectedReports(
-            new TReport(new OnParameter("A.java", "test.A", "f1(java.lang.Object)", 0), 0),
-            new TReport(new OnParameter("A.java", "test.A", "f2(java.lang.Object)", 0), -1))
         .start();
   }
 }

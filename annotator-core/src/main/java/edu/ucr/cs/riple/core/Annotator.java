@@ -161,7 +161,7 @@ public class Annotator {
   /**
    * Performs single iteration of inference/injection.
    *
-   * @param targetModuleCache Target impact cache instance. ======= >>>>>>> master
+   * @param targetModuleCache Target impact cache instance.
    * @param downstreamImpactCache Downstream impact cache instance to retrieve impact of fixes on
    *     downstream dependencies.
    */
@@ -266,7 +266,12 @@ public class Annotator {
             // find the corresponding method nodes.
             .map(
                 error -> {
-                  if (error.getRegion().isOnMethod()) {
+                  if (error.getRegion().isOnCallable()
+                      &&
+                      // We suppress initialization errors reported on constructors using
+                      // @SuppressWarnings("NullAway.Init"). We add @NullUnmarked on constructors
+                      // only for errors in the body of the constructor.
+                      !error.isInitializationError()) {
                     return methodDeclarationTree.findNode(error.encMember(), error.encClass());
                   }
                   // For methods invoked in an initialization region, where the error is that
@@ -302,8 +307,7 @@ public class Annotator {
                     return false;
                   }
                   // We can silence them by SuppressWarnings("NullAway.Init")
-                  return !error.messageType.equals("METHOD_NO_INIT")
-                      && !error.messageType.equals("FIELD_NO_INIT");
+                  return !error.isInitializationError();
                 })
             .map(
                 error ->

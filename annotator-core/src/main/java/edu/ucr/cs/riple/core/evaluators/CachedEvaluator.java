@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Nima Karimipour
+ * Copyright (c) 2023 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -120,7 +120,9 @@ public class CachedEvaluator extends AbstractEvaluator {
           Set<Error> triggeredErrors = cache.getTriggeredErrorsForCollection(newTree);
           report.localEffect =
               triggeredErrors.size()
-                  - supplier.getErrorStore().getNumberOfResolvedFixesWithCollection(newTree);
+                  - supplier
+                      .getErrorStore()
+                      .getNumberOfErrorsResolvedByAllFixesWithinCollection(newTree);
           report.triggeredErrors = ImmutableSet.copyOf(triggeredErrors);
           // get fixes triggered from downstream.
           report.triggeredFixesFromDownstreamErrors =

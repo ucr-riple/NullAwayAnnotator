@@ -88,7 +88,7 @@ public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcess
             node.updateStatus(
                 localEffect,
                 fixes,
-                getTriggeredFixesFromDownstream(node),
+                getTriggeredFixesFromDownstreamErrors(node),
                 triggeredErrors,
                 methodDeclarationTree);
           });

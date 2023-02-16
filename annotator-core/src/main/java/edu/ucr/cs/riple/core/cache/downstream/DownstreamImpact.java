@@ -41,8 +41,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Container class for storing overall effect of fix in downstream dependencies. At this moment,
- * only impact of public methods with non-primitive return are stored.
+ * Container class for storing overall impact of a fix applied in target module on downstream
+ * dependencies. At this moment, only impact of public methods with non-primitive return are stored.
  */
 public class DownstreamImpact extends Impact {
 
@@ -60,7 +60,9 @@ public class DownstreamImpact extends Impact {
   public DownstreamImpact(Fix fix) {
     super(fix);
     // Only store impacts of fixes targeting methods.
-    Preconditions.checkArgument(fix.isOnMethod());
+    Preconditions.checkArgument(
+        fix.isOnMethod(),
+        "Unexpected Fix instance. Only impacts of fixes on methods should be tracked for downstream dependencies");
     this.effect = 0;
     this.impactedParametersMap = new HashMap<>();
     this.triggeredErrors = ImmutableSet.of();

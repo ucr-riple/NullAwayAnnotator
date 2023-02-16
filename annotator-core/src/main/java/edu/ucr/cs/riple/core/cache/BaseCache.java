@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Nima Karimipour
+ * Copyright (c) 2023 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -65,7 +65,7 @@ public abstract class BaseCache<T extends Impact, S extends Map<Location, T>>
   @Nullable
   @Override
   public T fetchImpact(Fix fix) {
-    return store.getOrDefault(fix.toLocation(), null);
+    return store.get(fix.toLocation());
   }
 
   @Override
@@ -84,7 +84,7 @@ public abstract class BaseCache<T extends Impact, S extends Map<Location, T>>
     return fixTree.stream()
         .map(fix -> store.get(fix.toLocation()))
         .filter(Objects::nonNull)
-        .flatMap(impact -> impact.getTriggeredFixesOnDownstream().stream())
+        .flatMap(impact -> impact.getTriggeredFixesFromDownstreamErrors().stream())
         // filter fixes that are already inside tree.
         .filter(fix -> !fixTree.contains(fix))
         .collect(ImmutableSet.toImmutableSet());
