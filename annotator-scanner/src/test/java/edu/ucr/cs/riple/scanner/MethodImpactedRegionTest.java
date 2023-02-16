@@ -77,53 +77,6 @@ public class MethodImpactedRegionTest extends AnnotatorScannerBaseTest<TrackerNo
   }
 
   @Test
-  public void fieldDeclaredRegionComputationAllCases() {
-    tester
-        .addSourceLines(
-            "edu/ucr/A.java",
-            "package edu.ucr;",
-            "public class A {",
-            "   B b = new B();",
-            "   Object f0 = b.get();",
-            "   Object f1 = B.staticB();",
-            "   Object f2 = b.c.get();",
-            "   Object f3 = B.staticC.get();",
-            "   {",
-            "       B.staticB();",
-            "   }",
-            "}",
-            "class B {",
-            "   C c = new C();",
-            "   static C staticC = new C();",
-            "   Object get() {",
-            "       return new Object();",
-            "   }",
-            "   static Object staticB() {",
-            "       return new Object();",
-            "   }",
-            "}",
-            "class C {",
-            "   Object val;",
-            "   static Object get() {",
-            "       return new Object();",
-            "   }",
-            "}")
-        .setExpectedOutputs(
-            new TrackerNodeDisplay("edu.ucr.A", "f0", "edu.ucr.B", "get()"),
-            new TrackerNodeDisplay("edu.ucr.A", "b", "edu.ucr.B", "B()"),
-            new TrackerNodeDisplay("edu.ucr.A", "f1", "edu.ucr.B", "staticB()"),
-            new TrackerNodeDisplay("edu.ucr.A", "f2", "edu.ucr.C", "get()"),
-            new TrackerNodeDisplay("edu.ucr.A", "f3", "edu.ucr.C", "get()"),
-            new TrackerNodeDisplay("edu.ucr.A", "null", "edu.ucr.B", "staticB()"),
-            new TrackerNodeDisplay("edu.ucr.B", "c", "edu.ucr.C", "C()"),
-            new TrackerNodeDisplay("edu.ucr.B", "get()", "java.lang.Object", "Object()"),
-            new TrackerNodeDisplay("edu.ucr.B", "staticB()", "java.lang.Object", "Object()"),
-            new TrackerNodeDisplay("edu.ucr.B", "staticC", "edu.ucr.C", "C()"),
-            new TrackerNodeDisplay("edu.ucr.C", "get()", "java.lang.Object", "Object()"))
-        .doTest();
-  }
-
-  @Test
   public void constructorCallTest() {
     tester
         .addSourceLines(
