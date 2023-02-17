@@ -74,8 +74,12 @@ public abstract class AbstractEvaluator implements Evaluator {
     this.graph.clear();
   }
 
-  /** Collects results created by the processors working on the conflict graph. */
-  protected abstract void collectGraphResults();
+  /**
+   * Collects results created by the processors working on the conflict graph.
+   *
+   * @param reports The latest created reports from previous iteration.
+   */
+  protected abstract void collectGraphResults(ImmutableSet<Report> reports);
 
   @Override
   public ImmutableSet<Report> evaluate(ImmutableSet<Fix> fixes) {
@@ -83,15 +87,13 @@ public abstract class AbstractEvaluator implements Evaluator {
         fixes.stream().map(fix -> new Report(fix, 1)).collect(ImmutableSet.toImmutableSet());
     System.out.println("Max Depth level: " + this.depth);
     for (int i = 0; i < this.depth; i++) {
-      System.out.print("Analyzing at level " + (i + 1) + ", ");
       initializeFixGraph(reports);
       config.log.updateNodeNumber(graph.getNodes().count());
-      if (graph.isEmpty()) {
-        System.out.println("Analysis finished at this iteration.");
-        break;
+      if (!graph.isEmpty()) {
+        System.out.print("Analyzing at level " + (i + 1) + ", ");
+        processor.process(graph);
       }
-      processor.process(graph);
-      collectGraphResults();
+      collectGraphResults(reports);
     }
     return reports;
   }

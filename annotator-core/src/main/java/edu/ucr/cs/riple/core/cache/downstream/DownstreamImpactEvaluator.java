@@ -24,6 +24,8 @@
 
 package edu.ucr.cs.riple.core.cache.downstream;
 
+import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
 import edu.ucr.cs.riple.core.evaluators.suppliers.DownstreamDependencySupplier;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -58,8 +60,8 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
   }
 
   @Override
-  protected void collectGraphResults() {
-    super.collectGraphResults();
+  protected void collectGraphResults(ImmutableSet<Report> reports) {
+    super.collectGraphResults(reports);
     // Collect impacted parameters in target module by downstream dependencies.
     this.graph
         .getNodes()

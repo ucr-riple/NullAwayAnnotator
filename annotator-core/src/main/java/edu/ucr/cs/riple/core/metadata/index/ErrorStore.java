@@ -104,4 +104,14 @@ public class ErrorStore {
   public Set<Region> getRegionsForElements(Predicate<Error> predicate) {
     return root.getRegionsOfMatchingItems(predicate);
   }
+
+  /**
+   * Returns the number of resolved errors from base (initial set of errors) by the given fixes.
+   *
+   * @param fixes The given fixes.
+   * @return Number of resolved errors.
+   */
+  public int getNumberOfErrorsResolvedByAllFixesWithinCollection(Collection<Fix> fixes) {
+    return (int) root.values().stream().filter(error -> error.isResolvableWith(fixes)).count();
+  }
 }

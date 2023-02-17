@@ -280,11 +280,12 @@ public class CoreTestHelper {
     builder.redirectBuildOutputToStdErr = true;
     builder.chain = true;
     builder.outerLoopActivation = requestCompleteLoop;
-    builder.optimized = true;
+    builder.useParallelProcessor = true;
     builder.downStreamDependenciesAnalysisActivated = downstreamDependencyAnalysisActivated;
     builder.mode = mode;
     builder.inferenceActivated = !deactivateInference;
     builder.forceResolveActivation = forceResolveActivated;
+    builder.useCacheImpact = true;
     builder.sourceTypes.add(SourceType.LOMBOK);
     if (downstreamDependencyAnalysisActivated) {
       builder.buildCommand =

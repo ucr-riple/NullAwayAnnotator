@@ -253,6 +253,18 @@ public class Error {
   }
 
   /**
+   * Checks if this error is resolvable with the given collection of fixes.
+   *
+   * @param fixes Collection fixes.
+   * @return true, if this error is resolvable.
+   */
+  public boolean isResolvableWith(Collection<Fix> fixes) {
+    if (resolvingFixes.size() == 0) {
+      return false;
+    }
+    return fixes.containsAll(this.resolvingFixes);
+  }
+  /**
    * Returns true if the error is an initialization error ({@code METHOD_NO_INIT} or {@code
    * FIELD_NO_INIT}).
    *
