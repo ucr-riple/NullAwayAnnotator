@@ -228,7 +228,7 @@ public class AnnotatorScanner extends BugChecker
   }
 
   /**
-   * <<<<<<< HEAD Serializes the symbol if annotated with explicit {@code @Nonnull} annotations.
+   * Serializes the symbol if annotated with explicit {@code @Nonnull} annotations.
    *
    * @param symbol Given symbol to check its annotations.
    */
