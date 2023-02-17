@@ -105,7 +105,7 @@ public class MethodImpactedRegionTest extends AnnotatorScannerBaseTest<TrackerNo
             new TrackerNodeDisplay("edu.ucr.A", "a", "edu.ucr.A", "A()"),
             new TrackerNodeDisplay("edu.ucr.A", "b", "edu.ucr.A", "A(int)"),
             new TrackerNodeDisplay("edu.ucr.A", "bar()", "edu.ucr.A", "A()"),
-            new TrackerNodeDisplay("edu.ucr.B", "run()", "edu.ucr.A", "A(java.lang.Object)"),
+            new TrackerNodeDisplay("edu.ucr.B", "run()", "edu.ucr.A", "A()"),
             new TrackerNodeDisplay("edu.ucr.B", "b", "edu.ucr.B", "B()"))
         .doTest();
   }
