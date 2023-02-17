@@ -68,7 +68,7 @@ jobs:
           distribution: 'temurin'
       - name: Build with Gradle
         env:
-          ANNOTATOR_TEST_ENABLE_PARALLEL_PROCESSING: "true"
+          ANNOTATOR_TEST_ENABLE_PARALLEL_PROCESSING: "false"
           ANNOTATOR_TEST_ENABLE_CACHING: "false"
         run: ./gradlew build --rerun-tasks --scan
   parallel-processing-disabled-caching-disabled:
