@@ -62,7 +62,7 @@ public class DownstreamImpactCacheImpl
 
   /**
    * Constructor for creating downstream impact cache. It populates the store with a downstream
-   * impact listing 0 triggered errors and 0 downstream fixes for the result of adding @Nullable to
+   * impact listing 0 triggered errors and 0 downstream fixes for the result of adding {@code @Nullable} to
    * each method in the target being annotated. The actual impacts, will be computed once {@link
    * #analyzeDownstreamDependencies()} is called.
    *
