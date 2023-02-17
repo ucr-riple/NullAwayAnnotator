@@ -153,7 +153,7 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
     FieldDeclarationInfo candidate =
         findNodeWithHashHint(node -> node.clazz.equals(clazz), FieldDeclarationInfo.hash(clazz));
     if (candidate == null) {
-      // field is on byte code.
+      // class not observed in source code.
       return null;
     }
     return new OnClass(candidate.pathToSourceFile, candidate.clazz);
