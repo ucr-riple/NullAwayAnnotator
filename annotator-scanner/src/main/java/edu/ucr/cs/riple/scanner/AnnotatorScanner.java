@@ -34,13 +34,17 @@ import com.google.errorprone.bugpatterns.BugChecker;
 import com.google.errorprone.matchers.Description;
 import com.google.errorprone.util.ASTHelpers;
 import com.sun.source.tree.ClassTree;
+import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.IdentifierTree;
+import com.sun.source.tree.LambdaExpressionTree;
+import com.sun.source.tree.MemberReferenceTree;
 import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.tree.JCTree;
 import edu.ucr.cs.riple.scanner.out.ClassInfo;
 import edu.ucr.cs.riple.scanner.out.ImpactedRegion;
 import edu.ucr.cs.riple.scanner.out.MethodInfo;
@@ -62,8 +66,10 @@ public class AnnotatorScanner extends BugChecker
         BugChecker.MethodTreeMatcher,
         BugChecker.IdentifierTreeMatcher,
         BugChecker.VariableTreeMatcher,
+        BugChecker.NewClassTreeMatcher,
         BugChecker.ClassTreeMatcher,
-        BugChecker.NewClassTreeMatcher {
+        BugChecker.LambdaExpressionTreeMatcher,
+        BugChecker.MemberReferenceTreeMatcher {
 
   /**
    * Scanner context to store the state of the checker. Could not use {@link VisitorState#context}
@@ -109,21 +115,18 @@ public class AnnotatorScanner extends BugChecker
     }
     config
         .getSerializer()
-        .serializeCallGraphNode(
+        .serializeImpactedRegionForMethod(
             new ImpactedRegion(config, ASTHelpers.getSymbol(tree), state.getPath()));
     return Description.NO_MATCH;
   }
 
   @Override
-  public Description matchNewClass(NewClassTree newClassTree, VisitorState state) {
+  public Description matchNewClass(NewClassTree tree, VisitorState state) {
     Config config = context.getConfig();
-    if (!config.callTrackerIsActive()) {
-      return Description.NO_MATCH;
-    }
     config
         .getSerializer()
-        .serializeCallGraphNode(
-            new ImpactedRegion(config, ASTHelpers.getSymbol(newClassTree), state.getPath()));
+        .serializeImpactedRegionForMethod(
+            new ImpactedRegion(config, ASTHelpers.getSymbol(tree), state.getPath()));
     return Description.NO_MATCH;
   }
 
@@ -174,6 +177,46 @@ public class AnnotatorScanner extends BugChecker
     return Description.NO_MATCH;
   }
 
+  @Override
+  public Description matchLambdaExpression(
+      LambdaExpressionTree lambdaExpressionTree, VisitorState visitorState) {
+    Config config = context.getConfig();
+    if (!config.callTrackerIsActive()) {
+      return Description.NO_MATCH;
+    }
+    // for e -> Foo.bar(e), assume that method "baz()" has been overridden. Then the containing
+    // method for this lambda is an impacted region for "baz()".  The call to "Foo.bar" is handled
+    // when scanning the body of the lambda.
+    serializeImpactedRegionForFunctionalInterface(config, lambdaExpressionTree, visitorState);
+    return Description.NO_MATCH;
+  }
+
+  @Override
+  public Description matchMemberReference(
+      MemberReferenceTree memberReferenceTree, VisitorState visitorState) {
+    Config config = context.getConfig();
+    if (!config.callTrackerIsActive()) {
+      return Description.NO_MATCH;
+    }
+    // for Foo::bar, which is shorthand for e -> Foo.bar(e), assume that method "baz()" has been
+    // overridden. We need to serialize the impacted region (leaf of path in visitor state)
+    // for both "baz()" and also the called method "bar()".
+    // serialize the overridden method: "baz()"
+    serializeImpactedRegionForFunctionalInterface(config, memberReferenceTree, visitorState);
+    if (memberReferenceTree instanceof JCTree.JCMemberReference) {
+      Symbol calledMethod = ((JCTree.JCMemberReference) memberReferenceTree).sym;
+      if (calledMethod instanceof Symbol.MethodSymbol) {
+        // serialize the called method: "bar()"
+        context
+            .getConfig()
+            .getSerializer()
+            .serializeImpactedRegionForMethod(
+                new ImpactedRegion(config, calledMethod, visitorState.getPath()));
+      }
+    }
+    return Description.NO_MATCH;
+  }
+
   /**
    * Serializes a field usage if the received symbol is a field.
    *
@@ -188,5 +231,30 @@ public class AnnotatorScanner extends BugChecker
           .serializeFieldGraphNode(
               new ImpactedRegion(context.getConfig(), symbol, state.getPath()));
     }
+  }
+
+  /**
+   * Serializes the impacted region for a functional interface. This method locates the overriden
+   * method from the passed functional interface tree and serializes the impacted region for that
+   * method.
+   *
+   * @param tree Given tree.
+   * @param state Visitor State.
+   */
+  private static void serializeImpactedRegionForFunctionalInterface(
+      Config config, ExpressionTree tree, VisitorState state) {
+    Symbol.MethodSymbol methodSym = SymbolUtil.getFunctionalInterfaceMethod(tree, state.getTypes());
+    if (methodSym == null) {
+      System.err.println(
+          "Expected a nonnull method symbol for functional interface:"
+              + state.getSourceForNode(tree)
+              + ", at path: "
+              + state.getPath().getCompilationUnit().getSourceFile().toUri()
+              + ", but received null.");
+      return;
+    }
+    config
+        .getSerializer()
+        .serializeImpactedRegionForMethod(new ImpactedRegion(config, methodSym, state.getPath()));
   }
 }
