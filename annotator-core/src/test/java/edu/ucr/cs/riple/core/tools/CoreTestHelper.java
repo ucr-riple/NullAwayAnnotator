@@ -316,6 +316,16 @@ public class CoreTestHelper {
     builder.write(configPath);
   }
 
+  /**
+   * Returns true, if the environment variable is not set, or negate of the variable if set. The
+   * reason this method is acting in reverse, is because the default configuration when running the
+   * tests is to activate both cache and parallel processing in an arbitrary environment where these
+   * environment variables are not set. Variable names are `ANNOTATOR_TEST_DISABLE_CACHING` and
+   * `ANNOTATOR_TEST_DISABLE_PARALLEL_PROCESSING` which both disables their corresponding features.
+   *
+   * @param environmentVariableName environment variable name.
+   * @return true if the environment variable is not set, or negate of the variable if set.
+   */
   private boolean getModeFromEnvironment(String environmentVariableName) {
     String value = System.getenv(environmentVariableName);
     if (value == null || value.isEmpty()) {
