@@ -154,7 +154,7 @@ public class ConfigurationTest {
                     "-XepOpt:AnnotatorScanner:ConfigPath=" + config))
             .addSourceFile("SampleClassForTest.java");
     compilationTestHelper.doTest();
-    // Verify there is no output files.
+    // Verify there are no output files.
     Assert.assertFalse(root.resolve(Serializer.CLASS_INFO_FILE_NAME).toFile().exists());
     Assert.assertFalse(root.resolve(Serializer.METHOD_IMPACTED_REGION_FILE_NAME).toFile().exists());
     Assert.assertFalse(root.resolve(Serializer.FIELD_GRAPH_FILE_NAME).toFile().exists());
