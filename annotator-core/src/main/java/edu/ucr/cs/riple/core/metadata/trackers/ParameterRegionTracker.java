@@ -62,8 +62,19 @@ public class ParameterRegionTracker implements RegionTracker {
             .collect(Collectors.toSet());
     // Add the method the fix is targeting.
     regions.add(new Region(parameter.clazz, parameter.method));
-    // Add all call sites. It will also reserve call sites to prevent callees have their parameters
-    // annotated simultaneously. See test: CoreTest#nestedParameters.
+    // Add all call sites. It will also reserve call sites to prevent callers pass @Nullable
+    // simultaneously while investigating parameters impact.
+    // See example below:
+    // void foo(Object o) {
+    //   bar(o);
+    // }
+    // void bar(Object o)
+    //
+    // We need to make sure that while investigating impact of `@Nullable` on bar#o, other callers
+    // are not passing `@Nullable` to bar#o. Since the corresponding error will not be triggered
+    // (passing `@Nullable` to `@Nonnull` parameter) as bar#o is temporarily annotated as @Nullable
+    // to compute its impact.
+    // See test: CoreTest#nestedParameters.
     regions.addAll(methodRegionTracker.getCallersOfMethod(parameter.clazz, parameter.method));
     return Optional.of(regions);
   }
