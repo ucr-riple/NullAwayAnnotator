@@ -32,6 +32,7 @@ import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
+import edu.ucr.cs.riple.injector.location.OnClass;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
@@ -421,7 +422,7 @@ public class CoreTest extends BaseCoreTest {
   }
 
   @Test
-  public void staticBlockLocalVariableInitializationTest() {
+  public void staticAndInstanceInitializerBlockTest() {
     coreTestHelper
         .addInputLines(
             "A.java",
@@ -441,6 +442,9 @@ public class CoreTest extends BaseCoreTest {
             "   }",
             "}",
             "class B {",
+            "   {",
+            "      foo().hashCode();",
+            "   }",
             "   @Nullable",
             "   public static Object foo() { return null; }",
             "   @Nullable",
@@ -450,6 +454,19 @@ public class CoreTest extends BaseCoreTest {
         .addExpectedReports(new TReport(new OnField("A.java", "test.A", singleton("f")), -3))
         .enableForceResolve()
         .start();
+    List<AddAnnotation> expectedAnnotations =
+        List.of(
+            new AddMarkerAnnotation(
+                new OnField(
+                    coreTestHelper.getSourceRoot().resolve("A.java").toString(),
+                    "test.A",
+                    Set.of("f")),
+                "javax.annotation.Nullable"),
+            new AddMarkerAnnotation(
+                new OnClass(coreTestHelper.getSourceRoot().resolve("A.java").toString(), "test.B"),
+                "org.jspecify.nullness.NullUnmarked"));
+    Assert.assertEquals(
+        expectedAnnotations, coreTestHelper.getConfig().log.getInjectedAnnotations());
   }
 
   @Test

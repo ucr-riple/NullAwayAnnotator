@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.metadata.trackers;
 
 import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.location.OnClass;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.util.Objects;
 
@@ -53,7 +54,7 @@ public class Region {
     METHOD,
     FIELD,
     CONSTRUCTOR,
-    STATIC_BLOCK
+    INIT_BLOCK
   }
 
   public Region(String encClass, String encMember, SourceType sourceType) {
@@ -70,12 +71,13 @@ public class Region {
   /**
    * Initializes {@link Region#type} based on the string representation of regionMember.
    *
-   * @param regionMember Symbol of the region representative.
+   * @param regionClass Symbol of the region class in string.
+   * @param regionMember Symbol of the region representative in string.
    * @return The corresponding Type.
    */
   public static Type getType(String regionClass, String regionMember) {
     if (regionMember.equals("null")) {
-      return Type.STATIC_BLOCK;
+      return Type.INIT_BLOCK;
     }
     if (regionMember.contains("(")) {
       return Helper.extractCallableName(regionMember).equals(Helper.simpleName(regionClass))
@@ -119,6 +121,24 @@ public class Region {
    */
   public boolean isOnField() {
     return type.equals(Type.FIELD);
+  }
+
+  /**
+   * Checks if region targets a static or instance initialization block.
+   *
+   * @return true, if region is targeting an initialization block.
+   */
+  public boolean isOnInitializationBlock() {
+    return type.equals(Type.INIT_BLOCK);
+  }
+
+  /**
+   * Checks if region is inside an anonymous class.
+   *
+   * @return true, if region is inside an anonymous class.
+   */
+  public boolean isInAnonymousClass() {
+    return OnClass.isAnonymousClassFlatName(clazz);
   }
 
   @Override
