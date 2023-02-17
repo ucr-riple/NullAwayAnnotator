@@ -1,6 +1,5 @@
 package edu.ucr.cs.riple.core.metadata.field;
 
-import edu.ucr.cs.riple.core.metadata.Hashable;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -10,7 +9,7 @@ import java.util.Objects;
  * initialized field, and the initializer method information. The initializer method writes a {@code
  * Nonnull} value to the field and guarantees the field be nonnull at all exit points in method.
  */
-public class FieldInitializationNode implements Hashable {
+public class FieldInitializationNode {
 
   /** Location of the initializer method. */
   private final OnMethod initializerLocation;

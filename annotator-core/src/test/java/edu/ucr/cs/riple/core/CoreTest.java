@@ -32,6 +32,7 @@ import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
+import edu.ucr.cs.riple.injector.location.OnClass;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
@@ -180,8 +181,8 @@ public class CoreTest extends BaseCoreTest {
             new TReport(new OnParameter("Main.java", "test.Main", "Main(java.lang.Object)", 0), 1))
         .enableForceResolve()
         .start();
-    List<AddAnnotation> expectedAnnotations =
-        List.of(
+    Set<AddAnnotation> expectedAnnotations =
+        Set.of(
             new AddMarkerAnnotation(
                 new OnMethod("Main.java", "test.Main", "Main(java.lang.Object)"),
                 "org.jspecify.nullness.NullUnmarked"),
@@ -189,7 +190,7 @@ public class CoreTest extends BaseCoreTest {
                 new OnMethod("Main.java", "test.Main", "Main(java.lang.Object,java.lang.Object)"),
                 "org.jspecify.nullness.NullUnmarked"));
     Assert.assertEquals(
-        expectedAnnotations, coreTestHelper.getConfig().log.getInjectedAnnotations());
+        expectedAnnotations, Set.copyOf(coreTestHelper.getConfig().log.getInjectedAnnotations()));
   }
 
   @Test
@@ -422,7 +423,7 @@ public class CoreTest extends BaseCoreTest {
   }
 
   @Test
-  public void staticBlockLocalVariableInitializationTest() {
+  public void staticAndInstanceInitializerBlockTest() {
     coreTestHelper
         .addInputLines(
             "A.java",
@@ -442,6 +443,9 @@ public class CoreTest extends BaseCoreTest {
             "   }",
             "}",
             "class B {",
+            "   {",
+            "      foo().hashCode();",
+            "   }",
             "   @Nullable",
             "   public static Object foo() { return null; }",
             "   @Nullable",
@@ -450,6 +454,105 @@ public class CoreTest extends BaseCoreTest {
         .toDepth(5)
         .addExpectedReports(new TReport(new OnField("A.java", "test.A", singleton("f")), -3))
         .enableForceResolve()
+        .start();
+    List<AddAnnotation> expectedAnnotations =
+        List.of(
+            new AddMarkerAnnotation(
+                new OnField(
+                    coreTestHelper.getSourceRoot().resolve("A.java").toString(),
+                    "test.A",
+                    Set.of("f")),
+                "javax.annotation.Nullable"),
+            new AddMarkerAnnotation(
+                new OnClass(coreTestHelper.getSourceRoot().resolve("A.java").toString(), "test.B"),
+                "org.jspecify.nullness.NullUnmarked"));
+    Assert.assertEquals(
+        expectedAnnotations, coreTestHelper.getConfig().log.getInjectedAnnotations());
+  }
+
+  @Test
+  public void acknowledgeNonnullAnnotations() {
+    coreTestHelper
+        .addInputLines(
+            "A.java",
+            "package test;",
+            "import javax.annotation.Nonnull;",
+            "public class A {",
+            "   @Nonnull private Object field;",
+            "   @Nonnull Object foo(@Nonnull Object param) {",
+            "       return null;",
+            "   }",
+            "   void bar() {",
+            "      foo(null);",
+            "   }",
+            "}")
+        .toDepth(5)
+        .start();
+    // No annotation should be added, since they are annotated as @Nonnull although each can reduce
+    // the number of errors.
+    Assert.assertEquals(coreTestHelper.getConfig().log.getInjectedAnnotations().size(), 0);
+  }
+
+  @Test
+  public void impactedLambdaAndMemberReferenceParameterNullableTest() {
+    coreTestHelper
+        .addInputLines(
+            "Main.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Main {",
+            "   public void f(Foo r){ }",
+            "   public void baz1(){",
+            "     f(new Foo(){",
+            "       @Override",
+            "       public void bar(Object o){",
+            "         take(o);",
+            "       }",
+            "     });",
+            "   }",
+            "   public void baz2() {",
+            "       f(e -> take(e));",
+            "   }",
+            "   public void baz3() {",
+            "       f(this::take);",
+            "   }",
+            "   public void take(Object o){ }",
+            "   public void passNull(Foo foo) {",
+            "       foo.bar(null);",
+            "   }",
+            "}")
+        .addInputLines(
+            "Foo.java", "package test;", "public interface Foo{", "     void bar(Object o);", "}")
+        .addExpectedReports(
+            new TReport(new OnParameter("Foo.java", "test.Foo", "bar(java.lang.Object)", 0), 2))
+        .toDepth(1)
+        .start();
+  }
+
+  @Test
+  public void impactedLambdaAndMemberReferenceReturnNullableTest() {
+    coreTestHelper
+        .addInputLines(
+            "Main.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Main {",
+            "   public void f(Foo r){ }",
+            "   public void baz1() {",
+            "       f(e -> bar(e));",
+            "   }",
+            "   public void baz2() {",
+            "       f(this::bar);",
+            "   }",
+            "   public Object bar(Object o){",
+            "       return null;",
+            "   }",
+            "}")
+        .addInputLines(
+            "Foo.java", "package test;", "public interface Foo{", "     Object m(Object o);", "}")
+        .addExpectedReports(
+            new TReport(new OnMethod("Foo.java", "test.Main", "bar(java.lang.Object)"), 1))
+        .toDepth(1)
         .start();
   }
 

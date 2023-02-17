@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.injector.location;
 
 public enum LocationType {
+  CLASS,
   FIELD,
   METHOD,
   PARAMETER;
@@ -38,6 +39,9 @@ public enum LocationType {
     }
     if (type.equalsIgnoreCase("parameter")) {
       return PARAMETER;
+    }
+    if (type.equalsIgnoreCase("class")) {
+      return CLASS;
     }
     throw new UnsupportedOperationException("Cannot detect type: " + type);
   }

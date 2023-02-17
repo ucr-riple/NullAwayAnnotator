@@ -31,6 +31,7 @@ import edu.ucr.cs.riple.core.adapters.NullAwayV2Adapter;
 import edu.ucr.cs.riple.core.adapters.NullAwayVersionAdapter;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
+import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import edu.ucr.cs.riple.injector.offsets.OffsetChange;
@@ -134,6 +135,13 @@ public class Config {
 
   /** Fully qualified NullUnmarked annotation. */
   public final String nullUnMarkedAnnotation;
+
+  /**
+   * Set of {@code @Nonnull} annotations to be acknowledged by Annotator. If an element is annotated
+   * with these annotations along any other annotation ending with {@code "nonnull"}, Annotator will
+   * acknowledge the annotation and will not add any {@code @Nullable} annotation to the element.
+   */
+  public final ImmutableSet<String> nonnullAnnotations;
 
   public final Log log;
   public final int depth;
@@ -335,6 +343,17 @@ public class Config {
     disableRegionDetectionByLombok.setRequired(false);
     options.addOption(disableRegionDetectionByLombok);
 
+    // Nonnull annotations.
+    Option nonnullAnnotationsOption =
+        new Option(
+            "nna",
+            "nonnull-annotations",
+            true,
+            "Adds a list of nonnull annotations separated by comma to be acknowledged by Annotator (e.g. com.example1.Nonnull,com.example2.Nonnull)");
+    nonnullAnnotationsOption.setRequired(false);
+    nonnullAnnotationsOption.setValueSeparator(',');
+    options.addOption(nonnullAnnotationsOption);
+
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
@@ -436,6 +455,10 @@ public class Config {
         cmd.hasOption(disableRegionDetectionByLombok)
             ? ImmutableSet.of()
             : Sets.immutableEnumSet(SourceType.LOMBOK);
+    this.nonnullAnnotations =
+        !cmd.hasOption(nonnullAnnotationsOption)
+            ? ImmutableSet.of()
+            : ImmutableSet.copyOf(cmd.getOptionValue(nonnullAnnotationsOption).split(","));
   }
 
   /**
@@ -524,11 +547,27 @@ public class Config {
         lombokCodeDetectorActivated ? Sets.immutableEnumSet(SourceType.LOMBOK) : ImmutableSet.of();
     this.log = new Log();
     this.offsetHandler = new OffsetHandler(this);
+    this.nonnullAnnotations =
+        ImmutableSet.copyOf(
+            getArrayValueFromKey(
+                    jsonObject,
+                    "ANNOTATION:NONNULL",
+                    json -> json.get("NONNULL").toString(),
+                    String.class)
+                .orElse(List.of()));
     log.reset();
   }
 
-  /** Initializes NullAway serialization adapter according to the serialized version. */
-  public void initializeAdapter(FieldDeclarationStore fieldDeclarationStore) {
+  /**
+   * Initializes NullAway serialization adapter according to the serialized version.
+   *
+   * @param fieldDeclarationStore Field declaration store, used to create fixes for initialization
+   *     errors.
+   * @param nonnullStore Nonnull store used to prevent annotator from generating fixes for elements
+   *     with {@code @Nonnull} annotations.
+   */
+  public void initializeAdapter(
+      FieldDeclarationStore fieldDeclarationStore, NonnullStore nonnullStore) {
     if (adapter != null) {
       // adapter is already initialized.
       return;
@@ -550,7 +589,7 @@ public class Config {
           throw new RuntimeException(
               "This annotator version does not support serialization version 1, please upgrade NullAway to 0.10.6+ (with SerializeFixMetadataVersion=2) or use version 1.3.5 of Annotator.");
         case 2:
-          this.adapter = new NullAwayV2Adapter(this, fieldDeclarationStore);
+          this.adapter = new NullAwayV2Adapter(this, fieldDeclarationStore, nonnullStore);
           this.offsetHandlingIsActivated = true;
           break;
         default:
@@ -572,6 +611,15 @@ public class Config {
       throw new IllegalStateException("Adapter is not initialized.");
     }
     return adapter;
+  }
+
+  /**
+   * Getter for nonnull annotations.
+   *
+   * @return Immutable set of fully qualified name of nonnull annotations.
+   */
+  public ImmutableSet<String> getNonnullAnnotations() {
+    return nonnullAnnotations;
   }
 
   /**

@@ -1,7 +1,5 @@
 /*
- * MIT License
- *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Uber Technologies, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,32 +20,34 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.scanner.out;
+package edu.ucr.cs.riple.scanner.location;
 
-import com.sun.source.tree.CompilationUnitTree;
 import com.sun.tools.javac.code.Symbol;
-import edu.ucr.cs.riple.scanner.Serializer;
-import java.nio.file.Path;
-import javax.annotation.Nullable;
+import javax.lang.model.element.ElementKind;
 
-/** Container for storing class flat name and url to source file containing class. */
-public class ClassInfo {
-  /** Containing class symbol. */
-  public final Symbol.ClassSymbol clazz;
-  /** Path to url containing this class. */
-  @Nullable public final Path path;
+/**
+ * subtype of {@link AbstractSymbolLocation} targeting class fields. This class is copied from <a
+ * href="https://github.com/uber/NullAway">NullAway</a>.
+ */
+public class FieldLocation extends AbstractSymbolLocation {
 
-  public ClassInfo(Symbol.ClassSymbol clazz, CompilationUnitTree compilationUnitTree) {
-    this.clazz = clazz;
-    this.path = Serializer.pathToSourceFileFromURI(compilationUnitTree.getSourceFile().toUri());
-  }
+  /** Symbol of targeted class field */
+  protected final Symbol.VarSymbol variableSymbol;
 
-  public static String header() {
-    return "class" + '\t' + "path";
+  public FieldLocation(Symbol target) {
+    super(ElementKind.FIELD, target);
+    variableSymbol = (Symbol.VarSymbol) target;
   }
 
   @Override
-  public String toString() {
-    return clazz.flatName() + "\t" + ((path == null) ? "null" : path);
+  public String tabSeparatedToString() {
+    return String.join(
+        "\t",
+        type.toString(),
+        enclosingClass.flatName(),
+        "null",
+        variableSymbol.toString(),
+        "null",
+        path != null ? path.toString() : "null");
   }
 }
