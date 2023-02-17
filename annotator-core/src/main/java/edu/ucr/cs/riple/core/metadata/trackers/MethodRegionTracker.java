@@ -47,7 +47,7 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
   private final MethodDeclarationTree tree;
 
   public MethodRegionTracker(Config config, ModuleInfo info, MethodDeclarationTree tree) {
-    super(config, info.dir.resolve(Serializer.CALL_GRAPH_FILE_NAME));
+    super(config, info.dir.resolve(Serializer.METHOD_IMPACTED_REGION_FILE_NAME));
     this.tree = tree;
   }
 
@@ -56,7 +56,7 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
     super(
         config,
         modules.stream()
-            .map(info -> info.dir.resolve(Serializer.CALL_GRAPH_FILE_NAME))
+            .map(info -> info.dir.resolve(Serializer.METHOD_IMPACTED_REGION_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));
     this.tree = tree;
   }

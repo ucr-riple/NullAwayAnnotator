@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2023 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,32 +22,36 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.scanner.out;
+package edu.ucr.cs.riple.core.metadata.index;
 
-import com.sun.source.tree.CompilationUnitTree;
-import com.sun.tools.javac.code.Symbol;
+import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.metadata.MetaData;
+import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.scanner.Serializer;
-import java.nio.file.Path;
-import javax.annotation.Nullable;
 
-/** Container for storing class flat name and url to source file containing class. */
-public class ClassInfo {
-  /** Containing class symbol. */
-  public final Symbol.ClassSymbol clazz;
-  /** Path to url containing this class. */
-  @Nullable public final Path path;
+/**
+ * Structure for storing location of elements with explicit {@code @Nonnull} annotations. Used to
+ * acknowledge these annotations and prevent annotator from annotating such elements with
+ * {@code @Nullable} annotations.
+ */
+public class NonnullStore extends MetaData<Location> {
 
-  public ClassInfo(Symbol.ClassSymbol clazz, CompilationUnitTree compilationUnitTree) {
-    this.clazz = clazz;
-    this.path = Serializer.pathToSourceFileFromURI(compilationUnitTree.getSourceFile().toUri());
-  }
-
-  public static String header() {
-    return "class" + '\t' + "path";
+  public NonnullStore(Config config) {
+    super(config, config.target.dir.resolve(Serializer.NON_NULL_ELEMENTS_FILE_NAME));
   }
 
   @Override
-  public String toString() {
-    return clazz.flatName() + "\t" + ((path == null) ? "null" : path);
+  protected Location addNodeByLine(String[] values) {
+    return Location.createLocationFromArrayInfo(values);
+  }
+
+  /**
+   * Returns true if the element at the given location has an explicit {@code @Nonnull} annotation.
+   *
+   * @param location Location of the given element.
+   * @return true, if the element at the given location has an explicit {@code @Nonnull} annotation.
+   */
+  public boolean hasExplicitNonnullAnnotation(Location location) {
+    return contents.values().stream().anyMatch(l -> l.equals(location));
   }
 }

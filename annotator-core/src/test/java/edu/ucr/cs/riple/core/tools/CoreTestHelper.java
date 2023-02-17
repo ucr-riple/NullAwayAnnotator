@@ -280,6 +280,7 @@ public class CoreTestHelper {
     builder.redirectBuildOutputToStdErr = true;
     builder.chain = true;
     builder.outerLoopActivation = requestCompleteLoop;
+    builder.useParallelProcessor = true;
     builder.downStreamDependenciesAnalysisActivated = downstreamDependencyAnalysisActivated;
     builder.mode = mode;
     builder.inferenceActivated = !deactivateInference;

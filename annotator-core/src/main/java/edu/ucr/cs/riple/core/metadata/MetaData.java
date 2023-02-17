@@ -40,10 +40,8 @@ import java.util.stream.Stream;
  * Container class which loads its content from a file in TSV format. For faster retrieval, it uses
  * hashing techniques to store data. For faster retrieval, the anticipated hash must be passed to
  * search methods.
- *
- * @param <T> Any class which implements {@link Hashable}.
  */
-public abstract class MetaData<T extends Hashable> {
+public abstract class MetaData<T> {
 
   /**
    * Contents, every element is mapped to it's computed hash, note that two different items can have

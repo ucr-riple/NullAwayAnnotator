@@ -13,6 +13,7 @@ import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
+import edu.ucr.cs.riple.injector.location.OnClass;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.AnnotatorScanner;
 import java.io.FileNotFoundException;
@@ -90,7 +91,10 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
                             .map(NodeWithSimpleName::getNameAsString)
                             .collect(ImmutableSet.toImmutableSet()));
                   }));
-      return info.isEmpty() ? null : info;
+      // We still want to keep the information about the class even if it has no field declarations,
+      // so we can retrieve tha path to the file from the given class flat name. This information is
+      // used in adding suppression annotations on class level.
+      return info;
     } catch (FileNotFoundException e) {
       return null;
     } catch (IOException e) {
@@ -135,5 +139,23 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
       return null;
     }
     return new OnField(candidate.pathToSourceFile, candidate.clazz, fieldNames);
+  }
+
+  /**
+   * Creates a {@link edu.ucr.cs.riple.injector.location.OnClass} instance targeting the passed
+   * classes flat name.
+   *
+   * @param clazz Enclosing class of the field.
+   * @return {@link edu.ucr.cs.riple.injector.location.OnClass} instance targeting the passed
+   *     classes flat name.
+   */
+  public OnClass getLocationOnClass(String clazz) {
+    FieldDeclarationInfo candidate =
+        findNodeWithHashHint(node -> node.clazz.equals(clazz), FieldDeclarationInfo.hash(clazz));
+    if (candidate == null) {
+      // class not observed in source code.
+      return null;
+    }
+    return new OnClass(candidate.pathToSourceFile, candidate.clazz);
   }
 }
