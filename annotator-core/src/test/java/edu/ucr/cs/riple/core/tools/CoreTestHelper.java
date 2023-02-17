@@ -288,9 +288,9 @@ public class CoreTestHelper {
     builder.useCacheImpact = true;
     builder.sourceTypes.add(SourceType.LOMBOK);
     builder.cache = true;
-    builder.useCacheImpact = getModeFromEnvironment("ANNOTATOR_TEST_DISABLE_CACHING");
+    builder.useCacheImpact = getModeFromEnvironment("ANNOTATOR_TEST_ENABLE_CACHING");
     builder.useParallelProcessor =
-        getModeFromEnvironment("ANNOTATOR_TEST_DISABLE_PARALLEL_PROCESSING");
+        getModeFromEnvironment("ANNOTATOR_TEST_ENABLE_PARALLEL_PROCESSING");
     if (downstreamDependencyAnalysisActivated) {
       builder.buildCommand =
           Utility.computeBuildCommandWithLibraryModelLoaderDependency(
@@ -316,12 +316,18 @@ public class CoreTestHelper {
     builder.write(configPath);
   }
 
+  /**
+   * Returns true if the environment variable is set to true, false otherwise.
+   *
+   * @param environmentVariableName
+   * @return
+   */
   private boolean getModeFromEnvironment(String environmentVariableName) {
     String value = System.getenv(environmentVariableName);
     if (value == null || value.isEmpty()) {
-      return true;
+      return false;
     }
-    return !Boolean.parseBoolean(value);
+    return Boolean.parseBoolean(value);
   }
 
   private void createFiles() {
