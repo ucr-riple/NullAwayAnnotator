@@ -453,6 +453,29 @@ public class CoreTest extends BaseCoreTest {
   }
 
   @Test
+  public void acknowledgeNonnullAnnotations() {
+    coreTestHelper
+        .addInputLines(
+            "A.java",
+            "package test;",
+            "import javax.annotation.Nonnull;",
+            "public class A {",
+            "   @Nonnull private Object field;",
+            "   @Nonnull Object foo(@Nonnull Object param) {",
+            "       return null;",
+            "   }",
+            "   void bar() {",
+            "      foo(null);",
+            "   }",
+            "}")
+        .toDepth(5)
+        .start();
+    // No annotation should be added, since they are annotated as @Nonnull although each can reduce
+    // the number of errors.
+    Assert.assertEquals(coreTestHelper.getConfig().log.getInjectedAnnotations().size(), 0);
+  }
+
+  @Test
   public void impactedLambdaAndMemberReferenceParameterNullableTest() {
     coreTestHelper
         .addInputLines(

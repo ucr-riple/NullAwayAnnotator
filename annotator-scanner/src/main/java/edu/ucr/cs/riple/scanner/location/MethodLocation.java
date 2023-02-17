@@ -1,7 +1,5 @@
 /*
- * MIT License
- *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Uber Technologies, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +20,34 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata;
+package edu.ucr.cs.riple.scanner.location;
 
-/** Marker interface for defining expected type for {@link MetaData}. */
-public interface Hashable {}
+import com.sun.tools.javac.code.Symbol;
+import javax.lang.model.element.ElementKind;
+
+/**
+ * subtype of {@link AbstractSymbolLocation} targeting methods. This class is copied from <a
+ * href="https://github.com/uber/NullAway">NullAway</a>.
+ */
+public class MethodLocation extends AbstractSymbolLocation {
+
+  /** Symbol of the targeted method. */
+  protected final Symbol.MethodSymbol enclosingMethod;
+
+  public MethodLocation(Symbol target) {
+    super(ElementKind.METHOD, target);
+    enclosingMethod = (Symbol.MethodSymbol) target;
+  }
+
+  @Override
+  public String tabSeparatedToString() {
+    return String.join(
+        "\t",
+        type.toString(),
+        enclosingClass.flatName(),
+        enclosingMethod.toString(),
+        "null",
+        "null",
+        path != null ? path.toString() : "null");
+  }
+}

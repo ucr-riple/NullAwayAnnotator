@@ -60,6 +60,14 @@ public interface Config {
   boolean classTrackerIsActive();
 
   /**
+   * Checks if the passed name is a {@code @Nonnull} annotation.
+   *
+   * @param annotName Given annotation name.
+   * @return true, if the given name is name of an {@code @Nonnull} annotation.
+   */
+  boolean isNonnullAnnotation(String annotName);
+
+  /**
    * Returns the using serializer.
    *
    * @return Using serializer.

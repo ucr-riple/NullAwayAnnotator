@@ -24,15 +24,20 @@
 
 package edu.ucr.cs.riple.scanner;
 
+import com.sun.tools.javac.code.Symbol;
+import edu.ucr.cs.riple.scanner.location.SymbolLocation;
 import edu.ucr.cs.riple.scanner.out.ClassInfo;
 import edu.ucr.cs.riple.scanner.out.ImpactedRegion;
 import edu.ucr.cs.riple.scanner.out.MethodInfo;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import javax.annotation.Nullable;
 
 /**
  * Serializer class where all generated files in Fix Serialization package is created through APIs
@@ -48,6 +53,8 @@ public class Serializer {
   private final Path methodInfoPath;
   /** Path to write class info data. */
   private final Path classInfoPath;
+  /** Path to write location of elements with explicit {@code @Nonnull} annotation. */
+  private final Path nonnullInfoPath;
 
   /** File name where all field usage data has been stored. */
   public static final String FIELD_GRAPH_FILE_NAME = "field_graph.tsv";
@@ -57,6 +64,8 @@ public class Serializer {
   public static final String METHOD_INFO_FILE_NAME = "method_info.tsv";
   /** File name where all class data has been stored. */
   public static final String CLASS_INFO_FILE_NAME = "class_info.tsv";
+  /** File name where location of elements explicitly annotated as {@code @Nonnull}. */
+  public static final String NON_NULL_ELEMENTS_FILE_NAME = "nonnull_elements.tsv";
 
   public Serializer(Config config) {
     Path outputDirectory = config.getOutputDirectory();
@@ -64,6 +73,7 @@ public class Serializer {
     this.methodImpactedRegion = outputDirectory.resolve(METHOD_IMPACTED_REGION_FILE_NAME);
     this.methodInfoPath = outputDirectory.resolve(METHOD_INFO_FILE_NAME);
     this.classInfoPath = outputDirectory.resolve(CLASS_INFO_FILE_NAME);
+    this.nonnullInfoPath = outputDirectory.resolve(NON_NULL_ELEMENTS_FILE_NAME);
     initializeOutputFiles(config);
   }
 
@@ -105,6 +115,17 @@ public class Serializer {
     appendToFile(methodInfo.toString(), this.methodInfoPath);
   }
 
+  /**
+   * Serializes the symbol as an element with explicit {@code @Nonnull} annotations.
+   *
+   * @param symbol Symbol of the node with {@code @Nonnull} annotations.
+   */
+  public void serializeNonnullSym(Symbol symbol) {
+    appendToFile(
+        SymbolLocation.createLocationFromSymbol(symbol).tabSeparatedToString(),
+        this.nonnullInfoPath);
+  }
+
   /** Cleared the content of the file if exists and writes the header in the first line. */
   private void initializeFile(Path path, String header) {
     try {
@@ -137,8 +158,39 @@ public class Serializer {
       if (config.classTrackerIsActive()) {
         initializeFile(classInfoPath, ClassInfo.header());
       }
+      initializeFile(nonnullInfoPath, SymbolLocation.header());
     } catch (IOException e) {
       throw new RuntimeException("Could not finish resetting serializer", e);
+    }
+  }
+
+  /**
+   * Converts the given uri to the real path. Note, in NullAway CI tests, source files exists in
+   * memory and there is no real path leading to those files. Instead, we just serialize the path
+   * from uri as the full paths are not checked in tests.
+   *
+   * @param uri Given uri.
+   * @return Real path for the give uri.
+   */
+  @Nullable
+  public static Path pathToSourceFileFromURI(@Nullable URI uri) {
+    if (uri == null) {
+      return null;
+    }
+    if ("jimfs".equals(uri.getScheme())) {
+      // In Scanner unit tests, files are stored in memory and have this scheme.
+      return Paths.get(uri);
+    }
+    if (!"file".equals(uri.getScheme())) {
+      return null;
+    }
+    Path path = Paths.get(uri);
+    try {
+      return path.toRealPath();
+    } catch (IOException e) {
+      // In this case, we still would like to continue the serialization instead of returning null
+      // and not serializing anything.
+      return path;
     }
   }
 

@@ -58,6 +58,11 @@ public class DummyOptionsConfig implements Config {
   }
 
   @Override
+  public boolean isNonnullAnnotation(String annotName) {
+    throw new IllegalStateException(ERROR_MESSAGE);
+  }
+
+  @Override
   public Serializer getSerializer() {
     throw new IllegalStateException(ERROR_MESSAGE);
   }
