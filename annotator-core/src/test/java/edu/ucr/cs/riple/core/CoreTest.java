@@ -451,4 +451,67 @@ public class CoreTest extends BaseCoreTest {
         .enableForceResolve()
         .start();
   }
+
+  @Test
+  public void impactedLambdaAndMemberReferenceParameterNullableTest() {
+    coreTestHelper
+        .addInputLines(
+            "Main.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Main {",
+            "   public void f(Foo r){ }",
+            "   public void baz1(){",
+            "     f(new Foo(){",
+            "       @Override",
+            "       public void bar(Object o){",
+            "         take(o);",
+            "       }",
+            "     });",
+            "   }",
+            "   public void baz2() {",
+            "       f(e -> take(e));",
+            "   }",
+            "   public void baz3() {",
+            "       f(this::take);",
+            "   }",
+            "   public void take(Object o){ }",
+            "   public void passNull(Foo foo) {",
+            "       foo.bar(null);",
+            "   }",
+            "}")
+        .addInputLines(
+            "Foo.java", "package test;", "public interface Foo{", "     void bar(Object o);", "}")
+        .addExpectedReports(
+            new TReport(new OnParameter("Foo.java", "test.Foo", "bar(java.lang.Object)", 0), 2))
+        .toDepth(1)
+        .start();
+  }
+
+  @Test
+  public void impactedLambdaAndMemberReferenceReturnNullableTest() {
+    coreTestHelper
+        .addInputLines(
+            "Main.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Main {",
+            "   public void f(Foo r){ }",
+            "   public void baz1() {",
+            "       f(e -> bar(e));",
+            "   }",
+            "   public void baz2() {",
+            "       f(this::bar);",
+            "   }",
+            "   public Object bar(Object o){",
+            "       return null;",
+            "   }",
+            "}")
+        .addInputLines(
+            "Foo.java", "package test;", "public interface Foo{", "     Object m(Object o);", "}")
+        .addExpectedReports(
+            new TReport(new OnMethod("Foo.java", "test.Main", "bar(java.lang.Object)"), 1))
+        .toDepth(1)
+        .start();
+  }
 }
