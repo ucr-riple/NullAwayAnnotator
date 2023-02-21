@@ -62,7 +62,7 @@ public class ParameterRegionTracker implements RegionTracker {
             .collect(Collectors.toSet());
     // Add the method the fix is targeting.
     regions.add(new Region(parameter.clazz, parameter.method));
-    // Add all call sites. It will also reserve call sites to prevent callers pass @Nullable
+    // Add all call sites. It will also reserve call sites to prevent callers from passing @Nullable
     // simultaneously while investigating parameters impact.
     // See example below:
     // void foo(Object o) {
