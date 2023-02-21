@@ -288,9 +288,9 @@ public class CoreTestHelper {
     builder.useCacheImpact = true;
     builder.sourceTypes.add(SourceType.LOMBOK);
     builder.cache = true;
-    builder.useCacheImpact = getModeFromEnvironment("ANNOTATOR_TEST_DISABLE_CACHING");
+    builder.useCacheImpact = !getEnvironmentVariable("ANNOTATOR_TEST_DISABLE_CACHING");
     builder.useParallelProcessor =
-        getModeFromEnvironment("ANNOTATOR_TEST_DISABLE_PARALLEL_PROCESSING");
+        !getEnvironmentVariable("ANNOTATOR_TEST_DISABLE_PARALLEL_PROCESSING");
     if (downstreamDependencyAnalysisActivated) {
       builder.buildCommand =
           Utility.computeBuildCommandWithLibraryModelLoaderDependency(
@@ -317,21 +317,17 @@ public class CoreTestHelper {
   }
 
   /**
-   * Returns true, if the environment variable is not set, or negate of the variable if set. The
-   * reason this method is acting in reverse, is because the default configuration when running the
-   * tests is to activate both cache and parallel processing in an arbitrary environment where these
-   * environment variables are not set. Variable names are `ANNOTATOR_TEST_DISABLE_CACHING` and
-   * `ANNOTATOR_TEST_DISABLE_PARALLEL_PROCESSING` which both disables their corresponding features.
+   * Gets the mode from environment variable. If the environment variable is not set, returns false.
    *
    * @param environmentVariableName environment variable name.
-   * @return true if the environment variable is not set, or negate of the variable if set.
+   * @return true if the environment variable is set and is true, false otherwise.
    */
-  private boolean getModeFromEnvironment(String environmentVariableName) {
+  private boolean getEnvironmentVariable(String environmentVariableName) {
     String value = System.getenv(environmentVariableName);
     if (value == null || value.isEmpty()) {
-      return true;
+      return false;
     }
-    return !Boolean.parseBoolean(value);
+    return Boolean.parseBoolean(value);
   }
 
   private void createFiles() {
