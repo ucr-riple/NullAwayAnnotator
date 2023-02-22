@@ -197,4 +197,13 @@ public abstract class Location {
   public int hashCode() {
     return Objects.hash(type, clazz);
   }
+
+  /**
+   * Returns the fully qualified class name of the target element.
+   *
+   * @return Fully qualified class name of the target element.
+   */
+  public String getClazz() {
+    return clazz;
+  }
 }
