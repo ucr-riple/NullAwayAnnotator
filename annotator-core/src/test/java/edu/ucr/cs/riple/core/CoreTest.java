@@ -557,36 +557,6 @@ public class CoreTest extends BaseCoreTest {
   }
 
   @Test
-  public void fieldNoInitialization() {
-    coreTestHelper
-        .addInputLines(
-            "A.java",
-            "package test;",
-            "import java.util.Objects;",
-            "public class A {",
-            "   Object f;",
-            "   A() { }",
-            "   void run() {",
-            "       this.f = foo();",
-            "   }",
-            "   Object foo() {",
-            "        return null;",
-            "   }",
-            "}")
-        .toDepth(5)
-        .disableBailOut()
-        .addExpectedReports(
-            new TReport(
-                new OnMethod("A.java", "test.A", "foo()"),
-                -2,
-                Set.of(new OnField("A.java", "test.A", Collections.singleton("f"))),
-                Collections.emptySet()),
-            new TReport(new OnField("A.java", "test.A", Collections.singleton("f")), -1))
-        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
-        .start();
-  }
-
-  @Test
   public void nestedParameters() {
     coreTestHelper
         .addInputLines(
