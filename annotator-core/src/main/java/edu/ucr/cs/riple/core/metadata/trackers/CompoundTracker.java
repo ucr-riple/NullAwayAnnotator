@@ -48,18 +48,20 @@ public class CompoundTracker implements RegionTracker {
   public CompoundTracker(
       Config config,
       ModuleInfo info,
-      MethodDeclarationTree tree,
+      MethodDeclarationTree methodDeclarationTree,
       FieldDeclarationStore fieldDeclarationStore) {
-    MethodRegionTracker methodRegionTracker = new MethodRegionTracker(config, info, tree);
+    MethodRegionTracker methodRegionTracker =
+        new MethodRegionTracker(config, info, methodDeclarationTree);
     this.trackers =
         ImmutableSet.of(
-            new FieldRegionTracker(config, info, fieldDeclarationStore, tree),
+            new FieldRegionTracker(config, info, fieldDeclarationStore, methodDeclarationTree),
             methodRegionTracker,
-            new ParameterRegionTracker(tree, methodRegionTracker));
+            new ParameterRegionTracker(methodDeclarationTree, methodRegionTracker));
     ImmutableSet.Builder<GeneratedRegionTracker> generatedRegionTrackerBuilder =
         new ImmutableSet.Builder<>();
     if (config.generatedCodeDetectors.contains(SourceType.LOMBOK)) {
-      generatedRegionTrackerBuilder.add(new LombokTracker(tree, methodRegionTracker));
+      generatedRegionTrackerBuilder.add(
+          new LombokTracker(methodDeclarationTree, methodRegionTracker));
     }
     this.generatedRegionsTrackers = generatedRegionTrackerBuilder.build();
   }
