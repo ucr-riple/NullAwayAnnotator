@@ -44,7 +44,7 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
 
   /**
    * A map from class flat name to a set of field names that are declared in that class but not
-   * initialized.
+   * initialized at declaration.
    */
   private Map<String, Set<String>> uninitializedFields;
 
