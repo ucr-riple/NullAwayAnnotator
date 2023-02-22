@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.core.metadata.trackers;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.core.metadata.trackers.generatedcode.GeneratedRegionTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.generatedcode.LombokTracker;
@@ -44,11 +45,15 @@ public class CompoundTracker implements RegionTracker {
 
   private final ImmutableSet<GeneratedRegionTracker> generatedRegionsTrackers;
 
-  public CompoundTracker(Config config, ModuleInfo info, MethodDeclarationTree tree) {
+  public CompoundTracker(
+      Config config,
+      ModuleInfo info,
+      MethodDeclarationTree tree,
+      FieldDeclarationStore fieldDeclarationStore) {
     MethodRegionTracker methodRegionTracker = new MethodRegionTracker(config, info, tree);
     this.trackers =
         ImmutableSet.of(
-            new FieldRegionTracker(config, info),
+            new FieldRegionTracker(config, info, fieldDeclarationStore, tree),
             methodRegionTracker,
             new ParameterRegionTracker(tree, methodRegionTracker));
     ImmutableSet.Builder<GeneratedRegionTracker> generatedRegionTrackerBuilder =

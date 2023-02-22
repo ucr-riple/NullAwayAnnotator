@@ -46,7 +46,7 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
   private HashMap<Integer, MethodNode> nodes;
 
   /** Set of all classes flat name declared in module. */
-  private HashSet<String> classNames;
+  private HashMap<String, Set<MethodNode>> classConstructorMap;
 
   public MethodDeclarationTree(Config config) {
     super(config, config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
@@ -55,7 +55,7 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
   @Override
   protected void setup() {
     super.setup();
-    this.classNames = new HashSet<>();
+    this.classConstructorMap = new HashMap<>();
     this.nodes = new HashMap<>();
     // The root node of this tree with id: 0.
     nodes.put(MethodNode.TOP.id, MethodNode.TOP);
@@ -74,6 +74,9 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
     }
     // Fill nodes information.
     Integer parentId = Integer.parseInt(values[3]);
+    OnMethod location = new OnMethod(Helper.deserializePath(values[9]), values[1], values[2]);
+    boolean isConstructor =
+        Helper.extractCallableName(location.method).equals(Helper.simpleName(location.clazz));
     int size = Integer.parseInt(values[4]);
     node.fillInformation(
         new OnMethod(Helper.deserializePath(values[9]), values[1], values[2]),
@@ -81,7 +84,8 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
         size,
         Boolean.parseBoolean(values[6]),
         values[7],
-        Boolean.parseBoolean(values[8]));
+        Boolean.parseBoolean(values[8]),
+        isConstructor);
     // If node has a non-top parent.
     if (parentId > 0) {
       MethodNode parent = nodes.get(parentId);
@@ -94,7 +98,11 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
       parent.addChild(id);
     }
     // Update list of all declared classes.
-    this.classNames.add(node.location.clazz);
+    classConstructorMap.putIfAbsent(node.location.clazz, new HashSet<>());
+    // If node is a constructor, add it to the list of constructors of its class.
+    if (node.isConstructor) {
+      classConstructorMap.get(node.location.clazz).add(node);
+    }
     return node;
   }
 
@@ -178,6 +186,18 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
   }
 
   /**
+   * Returns ImmutableSet of all constructors declared in the target module for the given class.
+   *
+   * @param clazz Flat name of the class.
+   * @return ImmutableSet of all constructors declared in the target module for the given class.
+   */
+  public ImmutableSet<OnMethod> getConstructorsForClass(String clazz) {
+    return classConstructorMap.getOrDefault(clazz, ImmutableSet.of()).stream()
+        .map(node -> node.location)
+        .collect(ImmutableSet.toImmutableSet());
+  }
+
+  /**
    * Checks if the passed location is targeting an element declared in the target module.
    *
    * @param location Location of the element.
@@ -188,6 +208,6 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
     if (location == null || location.clazz.equals("null")) {
       return false;
     }
-    return this.classNames.contains(location.clazz);
+    return this.classConstructorMap.containsKey(location.clazz);
   }
 }

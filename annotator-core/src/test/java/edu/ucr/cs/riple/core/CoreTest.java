@@ -37,6 +37,7 @@ import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import org.junit.Assert;
@@ -419,6 +420,35 @@ public class CoreTest extends BaseCoreTest {
                 false));
     Assert.assertEquals(
         expectedAnnotations, Set.copyOf(coreTestHelper.getConfig().log.getInjectedAnnotations()));
+  }
+
+  @Test
+  public void fieldNoInitialization() {
+    coreTestHelper
+        .addInputLines(
+            "A.java",
+            "package test;",
+            "import java.util.Objects;",
+            "public class A {",
+            "   Object f;",
+            "   A() { }",
+            "   void run() {",
+            "       this.f = foo();",
+            "   }",
+            "   Object foo() {",
+            "        return null;",
+            "   }",
+            "}")
+        .toDepth(5)
+        .disableBailOut()
+        .addExpectedReports(
+            new TReport(
+                new OnMethod("A.java", "test.A", "foo()"),
+                -2,
+                Set.of(new OnField("A.java", "test.A", Collections.singleton("f"))),
+                Collections.emptySet()),
+            new TReport(new OnField("A.java", "test.A", Collections.singleton("f")), -1))
+        .start();
   }
 
   @Test

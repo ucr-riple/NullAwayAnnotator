@@ -20,6 +20,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -41,6 +43,12 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
   public static final String FILE_NAME = "class_info.tsv";
 
   /**
+   * A map from class flat name to a set of field names that are declared in that class but not
+   * initialized.
+   */
+  private Map<String, Set<String>> uninitializedFields;
+
+  /**
    * Constructor for {@link FieldDeclarationStore}.
    *
    * @param config Annotator config.
@@ -48,6 +56,12 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
    */
   public FieldDeclarationStore(Config config, ModuleInfo module) {
     super(config, module.dir.resolve(FILE_NAME));
+  }
+
+  @Override
+  protected void setup() {
+    super.setup();
+    this.uninitializedFields = new HashMap<>();
   }
 
   /**
@@ -90,6 +104,16 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
                         vars.stream()
                             .map(NodeWithSimpleName::getNameAsString)
                             .collect(ImmutableSet.toImmutableSet()));
+                    // Collect uninitialized fields at declaration.
+                    vars.forEach(
+                        variableDeclarator -> {
+                          String fieldName = variableDeclarator.getNameAsString();
+                          if (variableDeclarator.getInitializer().isEmpty()) {
+                            uninitializedFields
+                                .computeIfAbsent(clazz, k -> Sets.newHashSet())
+                                .add(fieldName);
+                          }
+                        });
                   }));
       // We still want to keep the information about the class even if it has no field declarations,
       // so we can retrieve tha path to the file from the given class flat name. This information is
@@ -121,6 +145,22 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
     Optional<ImmutableSet<String>> inLineGroupFieldDeclaration =
         candidate.fields.stream().filter(group -> !Collections.disjoint(group, fields)).findFirst();
     return inLineGroupFieldDeclaration.orElse(ImmutableSet.copyOf(fields));
+  }
+
+  /**
+   * Returns true if the given field is declared in the given class but not initialized at
+   * declaration. A field declaration can contain multiple inline field declarations. This method
+   * will return true if any of the declared fields is not initialized.
+   *
+   * @param field Location of field to check.
+   * @return True if at least on of the given declarations at the given location is not not
+   *     initialized.
+   */
+  public boolean isUninitializedField(OnField field) {
+    if (!uninitializedFields.containsKey(field.clazz)) {
+      return false;
+    }
+    return !Collections.disjoint(uninitializedFields.get(field.clazz), field.variables);
   }
 
   /**
