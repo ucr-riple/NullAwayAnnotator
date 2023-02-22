@@ -71,8 +71,6 @@ public class Annotator {
   private FieldDeclarationStore fieldDeclarationStore;
   private MethodDeclarationTree methodDeclarationTree;
 
-  private FieldInitializationStore fieldInitializationStore;
-
   public Annotator(Config config) {
     this.config = config;
     this.cache = new ReportCache(config);
@@ -112,7 +110,7 @@ public class Annotator {
             .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
             .map(Fix::toField)
             .collect(Collectors.toSet());
-    fieldInitializationStore = new FieldInitializationStore(config);
+    FieldInitializationStore fieldInitializationStore = new FieldInitializationStore(config);
     Set<AddAnnotation> initializers =
         fieldInitializationStore.findInitializers(uninitializedFields).stream()
             .map(onMethod -> new AddMarkerAnnotation(onMethod, config.initializerAnnot))
