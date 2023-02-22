@@ -109,10 +109,7 @@ public class Annotator {
     config.initializeAdapter(fieldDeclarationStore, nonnullStore);
     Set<OnField> uninitializedFields =
         Utility.readFixesFromOutputDirectory(config, fieldDeclarationStore).stream()
-            .filter(
-                fix ->
-                    fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT")
-                        || fix.reasons.contains("METHOD_NO_INIT"))
+            .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
             .map(Fix::toField)
             .collect(Collectors.toSet());
     fieldInitializationStore = new FieldInitializationStore(config);
