@@ -175,7 +175,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
                 new OnParameter(
                     "ModRef.java",
                     "com.uber.ModRef",
-                    "computeMod(com.ibm.wala.ipa.callgraph.CallGraph,com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis<T>,com.ibm.wala.ipa.slicer.HeapExclusions)",
+                    "computeMod(com.ibm.wala.ipa.callgraph.CallGraph,com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis,com.ibm.wala.ipa.slicer.HeapExclusions)",
                     2),
                 "javax.annotation.Nullable"))
         .start();
@@ -235,7 +235,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
                 new OnParameter(
                     "ModRef.java",
                     "com.uber.ModRef",
-                    "ModRef(com.ibm.wala.classLoader.IMethod,com.ibm.wala.ipa.callgraph.Context,com.ibm.wala.cfg.AbstractCFG<?,?>,com.ibm.wala.ssa.SSAInstruction[],com.ibm.wala.ssa.SSAOptions,java.util.Map<java.lang.Integer,com.ibm.wala.ssa.ConstantValue>)",
+                    "ModRef(com.ibm.wala.classLoader.IMethod,com.ibm.wala.ipa.callgraph.Context,com.ibm.wala.cfg.AbstractCFG,com.ibm.wala.ssa.SSAInstruction[],com.ibm.wala.ssa.SSAOptions,java.util.Map)",
                     5),
                 "javax.annotation.Nullable"))
         .start();
@@ -269,7 +269,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
                 new OnParameter(
                     "WeakKeyReference.java",
                     "com.uber.WeakKeyReference",
-                    "WeakKeyReference(@org.checkerframework.checker.nullness.qual.Nullable K,java.lang.ref.ReferenceQueue<K>)",
+                    "WeakKeyReference(K,java.lang.ref.ReferenceQueue)",
                     1),
                 "javax.annotation.Nullable"))
         .start();
@@ -317,10 +317,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
         .addChanges(
             new AddMarkerAnnotation(
                 new OnParameter(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)",
-                    0),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 0),
                 "javax.annotation.Nullable"))
         .start();
   }
@@ -367,10 +364,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
         .addChanges(
             new AddMarkerAnnotation(
                 new OnParameter(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)",
-                    1),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 1),
                 "javax.annotation.Nullable"))
         .start();
   }
@@ -417,10 +411,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
         .addChanges(
             new AddMarkerAnnotation(
                 new OnParameter(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)",
-                    4),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 4),
                 "javax.annotation.Nullable"))
         .start();
   }
@@ -464,10 +455,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
         .addChanges(
             new AddMarkerAnnotation(
                 new OnParameter(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)",
-                    1),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 1),
                 "javax.annotation.Nullable"))
         .start();
   }
@@ -511,10 +499,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
         .addChanges(
             new AddMarkerAnnotation(
                 new OnParameter(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)",
-                    4),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 4),
                 "javax.annotation.Nullable"))
         .start();
   }
@@ -558,10 +543,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
         .addChanges(
             new RemoveAnnotation(
                 new OnParameter(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)",
-                    0),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 0),
                 "javax.annotation.Nullable"))
         .start();
   }
@@ -605,10 +587,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
         .addChanges(
             new RemoveAnnotation(
                 new OnParameter(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)",
-                    4),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 4),
                 "javax.annotation.Nullable"))
         .start();
   }
@@ -652,38 +631,23 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
         .addChanges(
             new AddMarkerAnnotation(
                 new OnParameter(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)",
-                    0),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 0),
                 "javax.annotation.Nullable"),
             new AddMarkerAnnotation(
                 new OnParameter(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)",
-                    1),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 1),
                 "javax.annotation.Nullable"),
             new AddMarkerAnnotation(
                 new OnParameter(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)",
-                    2),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 2),
                 "javax.annotation.Nullable"),
             new AddMarkerAnnotation(
                 new OnParameter(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)",
-                    3),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 3),
                 "javax.annotation.Nullable"),
             new AddMarkerAnnotation(
                 new OnParameter(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)",
-                    4),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 4),
                 "javax.annotation.Nullable"))
         .start();
   }
@@ -727,38 +691,23 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
         .addChanges(
             new RemoveAnnotation(
                 new OnParameter(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)",
-                    0),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 0),
                 "javax.annotation.Nullable"),
             new RemoveAnnotation(
                 new OnParameter(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)",
-                    1),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 1),
                 "javax.annotation.Nullable"),
             new RemoveAnnotation(
                 new OnParameter(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)",
-                    2),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 2),
                 "javax.annotation.Nullable"),
             new RemoveAnnotation(
                 new OnParameter(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)",
-                    3),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 3),
                 "javax.annotation.Nullable"),
             new RemoveAnnotation(
                 new OnParameter(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)",
-                    4),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 4),
                 "javax.annotation.Nullable"))
         .start();
   }

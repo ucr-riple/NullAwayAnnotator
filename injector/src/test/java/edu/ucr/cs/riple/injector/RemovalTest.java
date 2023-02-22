@@ -58,10 +58,7 @@ public class RemovalTest extends BaseInjectorTest {
             "}")
         .addChanges(
             new RemoveAnnotation(
-                new OnMethod(
-                    "Super.java",
-                    "com.uber.Super",
-                    "test(@javax.annotation.Nullable java.lang.Object)"),
+                new OnMethod("Super.java", "com.uber.Super", "test(java.lang.Object)"),
                 "javax.annotation.Nullable"))
         .start();
   }
@@ -86,11 +83,7 @@ public class RemovalTest extends BaseInjectorTest {
             "}")
         .addChanges(
             new RemoveAnnotation(
-                new OnParameter(
-                    "Super.java",
-                    "com.uber.Super",
-                    "test(@javax.annotation.Nullable java.lang.Object)",
-                    0),
+                new OnParameter("Super.java", "com.uber.Super", "test(java.lang.Object)", 0),
                 "javax.annotation.Nullable"))
         .start();
   }
@@ -118,11 +111,7 @@ public class RemovalTest extends BaseInjectorTest {
             "}")
         .addChanges(
             new RemoveAnnotation(
-                new OnParameter(
-                    "Super.java",
-                    "com.uber.Super",
-                    "test(@javax.annotation.Nullable java.lang.Object)",
-                    0),
+                new OnParameter("Super.java", "com.uber.Super", "test(java.lang.Object)", 0),
                 "javax.annotation.Nullable"));
     assertThrows(AssertionError.class, () -> injectorTestHelper.start());
   }
