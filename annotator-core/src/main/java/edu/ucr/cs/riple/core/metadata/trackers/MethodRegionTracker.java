@@ -44,21 +44,24 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
    * {@link MethodDeclarationTree} instance, used to retrieve regions that will be affected due to
    * inheritance violations.
    */
-  private final MethodDeclarationTree tree;
+  private final MethodDeclarationTree methodDeclarationTree;
 
-  public MethodRegionTracker(Config config, ModuleInfo info, MethodDeclarationTree tree) {
+  public MethodRegionTracker(
+      Config config, ModuleInfo info, MethodDeclarationTree methodDeclarationTree) {
     super(config, info.dir.resolve(Serializer.METHOD_IMPACTED_REGION_FILE_NAME));
-    this.tree = tree;
+    this.methodDeclarationTree = methodDeclarationTree;
   }
 
   public MethodRegionTracker(
-      Config config, ImmutableSet<ModuleInfo> modules, MethodDeclarationTree tree) {
+      Config config,
+      ImmutableSet<ModuleInfo> modules,
+      MethodDeclarationTree methodDeclarationTree) {
     super(
         config,
         modules.stream()
             .map(info -> info.dir.resolve(Serializer.METHOD_IMPACTED_REGION_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));
-    this.tree = tree;
+    this.methodDeclarationTree = methodDeclarationTree;
   }
 
   @Override
@@ -77,7 +80,8 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
     // Add method itself.
     regions.add(new Region(onMethod.clazz, onMethod.method));
     // Add immediate super method.
-    MethodNode parent = tree.getClosestSuperMethod(onMethod.method, onMethod.clazz);
+    MethodNode parent =
+        methodDeclarationTree.getClosestSuperMethod(onMethod.method, onMethod.clazz);
     if (parent != null && parent.isNonTop()) {
       regions.add(new Region(parent.location.clazz, parent.location.method));
     }

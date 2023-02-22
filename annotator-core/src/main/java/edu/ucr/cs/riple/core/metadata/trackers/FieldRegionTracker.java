@@ -24,7 +24,6 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
-import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
@@ -40,14 +39,6 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
 
   public FieldRegionTracker(Config config, ModuleInfo info) {
     super(config, info.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME));
-  }
-
-  public FieldRegionTracker(Config config, ImmutableSet<ModuleInfo> modules) {
-    super(
-        config,
-        modules.stream()
-            .map(info -> info.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME))
-            .collect(ImmutableSet.toImmutableSet()));
   }
 
   @Override
