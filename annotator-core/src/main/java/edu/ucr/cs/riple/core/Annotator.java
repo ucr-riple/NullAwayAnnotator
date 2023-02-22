@@ -38,7 +38,7 @@ import edu.ucr.cs.riple.core.evaluators.suppliers.TargetModuleSupplier;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
-import edu.ucr.cs.riple.core.metadata.field.FieldInitializationAnalysis;
+import edu.ucr.cs.riple.core.metadata.field.FieldInitializationStore;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
@@ -70,6 +70,8 @@ public class Annotator {
 
   private FieldDeclarationStore fieldDeclarationStore;
   private MethodDeclarationTree methodDeclarationTree;
+
+  private FieldInitializationStore fieldInitializationStore;
 
   public Annotator(Config config) {
     this.config = config;
@@ -107,13 +109,15 @@ public class Annotator {
     config.initializeAdapter(fieldDeclarationStore, nonnullStore);
     Set<OnField> uninitializedFields =
         Utility.readFixesFromOutputDirectory(config, fieldDeclarationStore).stream()
-            .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
+            .filter(
+                fix ->
+                    fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT")
+                        || fix.reasons.contains("METHOD_NO_INIT"))
             .map(Fix::toField)
             .collect(Collectors.toSet());
-    FieldInitializationAnalysis analysis = new FieldInitializationAnalysis(config);
+    fieldInitializationStore = new FieldInitializationStore(config);
     Set<AddAnnotation> initializers =
-        analysis
-            .findInitializers(uninitializedFields)
+        fieldInitializationStore.findInitializers(uninitializedFields).stream()
             .map(onMethod -> new AddMarkerAnnotation(onMethod, config.initializerAnnot))
             .collect(Collectors.toSet());
     this.injector.injectAnnotations(initializers);
