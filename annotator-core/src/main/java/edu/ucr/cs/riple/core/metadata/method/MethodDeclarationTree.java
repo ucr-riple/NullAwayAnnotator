@@ -49,12 +49,9 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
 
   /** Set of all classes flat name declared in module. */
   private Multimap<String, MethodNode> classConstructorMap;
-  /** Set of all classes flat name declared in module. */
-  private final Set<String> declaredClasses;
 
   public MethodDeclarationTree(Config config) {
     super(config, config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
-    this.declaredClasses = new HashSet<>();
   }
 
   @Override
@@ -102,8 +99,9 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
       // Parent is already visited.
       parent.addChild(id);
     }
-    // Update list of all declared classes.
-    declaredClasses.add(node.location.clazz);
+    // Update list of all declared classes. We use key set of this structure to maintain the set of
+    // all declared classes in module.
+    classConstructorMap.asMap().putIfAbsent(node.location.clazz, new HashSet<>());
     // If node is a constructor, add it to the list of constructors of its class.
     if (node.isConstructor) {
       classConstructorMap.put(node.location.clazz, node);
