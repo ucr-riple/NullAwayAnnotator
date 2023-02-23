@@ -83,20 +83,30 @@ public class MethodImpactedRegionTest extends AnnotatorScannerBaseTest<TrackerNo
             "edu/ucr/A.java",
             "package edu.ucr;",
             "public class A {",
-            "   Object b;",
-            "   A(Object b) {",
-            "      this.b = b;",
+            "   A a = new A();",
+            "   A b = new A(0);",
+            "   A() { }",
+            "   A(int i) { }",
+            "   void bar() {",
+            "       A a = new A();",
             "   }",
-            "}",
-            "class B {",
-            "    void run() {",
-            "        A a = new A(null);",
-            "    }",
+            "}")
+        .addSourceLines(
+            "edu/ucr/B.java",
+            "package edu.ucr;",
+            "public class B extends A {",
+            "   B b = new B();",
+            "   B() { }",
+            "   void run() {",
+            "       A a = new A();",
+            "   }",
             "}")
         .setExpectedOutputs(
-            new TrackerNodeDisplay("edu.ucr.B", "run()", "edu.ucr.A", "A(java.lang.Object)"),
-            new TrackerNodeDisplay(
-                "edu.ucr.A", "A(java.lang.Object)", "java.lang.Object", "Object()"))
+            new TrackerNodeDisplay("edu.ucr.A", "a", "edu.ucr.A", "A()"),
+            new TrackerNodeDisplay("edu.ucr.A", "b", "edu.ucr.A", "A(int)"),
+            new TrackerNodeDisplay("edu.ucr.A", "bar()", "edu.ucr.A", "A()"),
+            new TrackerNodeDisplay("edu.ucr.B", "run()", "edu.ucr.A", "A()"),
+            new TrackerNodeDisplay("edu.ucr.B", "b", "edu.ucr.B", "B()"))
         .doTest();
   }
 

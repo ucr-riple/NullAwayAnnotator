@@ -105,6 +105,14 @@ public class AnnotatorScanner extends BugChecker
     if (!config.callTrackerIsActive()) {
       return Description.NO_MATCH;
     }
+    Symbol.MethodSymbol calledMethod = ASTHelpers.getSymbol(tree);
+    if (calledMethod != null
+        && calledMethod.isConstructor()
+        && calledMethod.getParameters().size() == 0) {
+      // to avoid serializing the default generated constructors. They cannot have any impact on the
+      // region.
+      return Description.NO_MATCH;
+    }
     config
         .getSerializer()
         .serializeImpactedRegionForMethod(
