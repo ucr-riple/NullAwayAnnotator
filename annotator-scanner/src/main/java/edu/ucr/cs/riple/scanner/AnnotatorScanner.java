@@ -115,6 +115,9 @@ public class AnnotatorScanner extends BugChecker
   @Override
   public Description matchNewClass(NewClassTree tree, VisitorState state) {
     Config config = context.getConfig();
+    if (!config.callTrackerIsActive()) {
+      return Description.NO_MATCH;
+    }
     Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(tree);
     if (methodSymbol == null) {
       throw new RuntimeException("not expecting unresolved method here");
@@ -122,7 +125,7 @@ public class AnnotatorScanner extends BugChecker
     if (methodSymbol.owner.enclClass().getSimpleName().isEmpty()) {
       // An anonymous class cannot declare its own constructors, so we do not need to serialize it.
       return Description.NO_MATCH;
-    }
+    }  
     config
         .getSerializer()
         .serializeImpactedRegionForMethod(
