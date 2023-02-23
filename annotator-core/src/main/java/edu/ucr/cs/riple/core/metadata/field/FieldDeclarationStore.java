@@ -7,6 +7,8 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
@@ -20,8 +22,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -46,7 +46,7 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
    * A map from class flat name to a set of field names that are declared in that class but not
    * initialized at declaration.
    */
-  private Map<String, Set<String>> uninitializedFields;
+  private Multimap<String, String> uninitializedFields;
 
   /**
    * Constructor for {@link FieldDeclarationStore}.
@@ -61,7 +61,7 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
   @Override
   protected void setup() {
     super.setup();
-    this.uninitializedFields = new HashMap<>();
+    this.uninitializedFields = MultimapBuilder.hashKeys().hashSetValues().build();
   }
 
   /**
@@ -109,9 +109,7 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
                         variableDeclarator -> {
                           String fieldName = variableDeclarator.getNameAsString();
                           if (variableDeclarator.getInitializer().isEmpty()) {
-                            uninitializedFields
-                                .computeIfAbsent(clazz, k -> Sets.newHashSet())
-                                .add(fieldName);
+                            uninitializedFields.put(clazz, fieldName);
                           }
                         });
                   }));
@@ -157,9 +155,8 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
    *     initialized.
    */
   public boolean isUninitializedField(OnField field) {
-    if (!uninitializedFields.containsKey(field.clazz)) {
-      return false;
-    }
+    // According to javadoc, map.get() returns an empty collection if key is not found, therefore,
+    // we do not need to check for key existence.
     return !Collections.disjoint(uninitializedFields.get(field.clazz), field.variables);
   }
 
