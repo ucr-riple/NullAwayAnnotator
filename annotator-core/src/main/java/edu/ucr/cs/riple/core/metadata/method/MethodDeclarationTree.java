@@ -25,6 +25,8 @@
 package edu.ucr.cs.riple.core.metadata.method;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.injector.Helper;
@@ -46,7 +48,7 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
   private HashMap<Integer, MethodNode> nodes;
 
   /** Set of all classes flat name declared in module. */
-  private HashMap<String, Set<MethodNode>> classConstructorMap;
+  private Multimap<String, MethodNode> classConstructorMap;
 
   public MethodDeclarationTree(Config config) {
     super(config, config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
@@ -55,7 +57,7 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
   @Override
   protected void setup() {
     super.setup();
-    this.classConstructorMap = new HashMap<>();
+    this.classConstructorMap = MultimapBuilder.hashKeys().hashSetValues().build();
     this.nodes = new HashMap<>();
     // The root node of this tree with id: 0.
     nodes.put(MethodNode.TOP.id, MethodNode.TOP);
@@ -97,11 +99,12 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
       // Parent is already visited.
       parent.addChild(id);
     }
-    // Update list of all declared classes.
-    classConstructorMap.putIfAbsent(node.location.clazz, new HashSet<>());
+    // Update list of all declared classes. We use key set of this structure to maintain the set of
+    // all declared classes in module.
+    classConstructorMap.asMap().putIfAbsent(node.location.clazz, new HashSet<>());
     // If node is a constructor, add it to the list of constructors of its class.
     if (node.isConstructor) {
-      classConstructorMap.get(node.location.clazz).add(node);
+      classConstructorMap.put(node.location.clazz, node);
     }
     return node;
   }
@@ -192,7 +195,7 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
    * @return ImmutableSet of all constructors declared in the target module for the given class.
    */
   public ImmutableSet<OnMethod> getConstructorsForClass(String clazz) {
-    return classConstructorMap.getOrDefault(clazz, ImmutableSet.of()).stream()
+    return classConstructorMap.get(clazz).stream()
         .map(node -> node.location)
         .collect(ImmutableSet.toImmutableSet());
   }
