@@ -49,7 +49,7 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
 
   /** Set of all classes flat name declared in module. */
   private Multimap<String, MethodNode> classConstructorMap;
-
+  /** Set of all classes flat name declared in module. */
   private Set<String> declaredClasses;
 
   public MethodDeclarationTree(Config config) {
