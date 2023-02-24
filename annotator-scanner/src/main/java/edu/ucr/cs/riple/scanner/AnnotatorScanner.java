@@ -115,6 +115,9 @@ public class AnnotatorScanner extends BugChecker
   @Override
   public Description matchNewClass(NewClassTree tree, VisitorState state) {
     Config config = context.getConfig();
+    if (!config.callTrackerIsActive()) {
+      return Description.NO_MATCH;
+    }
     config
         .getSerializer()
         .serializeImpactedRegionForMethod(
