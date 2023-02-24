@@ -156,8 +156,7 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
    */
   public boolean isUninitializedField(OnField field) {
     // According to javadoc, Multimap.get() returns an empty collection if key is not found,
-    // therefore,
-    // we do not need to check for key existence.
+    // therefore we do not need to check for key existence.
     return !Collections.disjoint(uninitializedFields.get(field.clazz), field.variables);
   }
 
