@@ -47,7 +47,10 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
   /** Each method has a unique id across all methods. This hashmap, maps ids to nodes. */
   private HashMap<Integer, MethodNode> nodes;
 
-  /** Set of all classes flat name declared in module. */
+  /**
+   * A map from class flat name to a set of field names that are declared in that class but not
+   * initialized at declaration.
+   */
   private Multimap<String, MethodNode> classConstructorMap;
   /** Set of all classes flat name declared in module. */
   private Set<String> declaredClasses;
