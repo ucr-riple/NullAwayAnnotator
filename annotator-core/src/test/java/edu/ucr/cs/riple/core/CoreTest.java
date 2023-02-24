@@ -37,6 +37,7 @@ import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import org.junit.Assert;
@@ -419,6 +420,44 @@ public class CoreTest extends BaseCoreTest {
                 false));
     Assert.assertEquals(
         expectedAnnotations, Set.copyOf(coreTestHelper.getConfig().log.getInjectedAnnotations()));
+  }
+
+  @Test
+  public void fieldNoInitialization() {
+    coreTestHelper
+        .addInputLines(
+            "A.java",
+            "package test;",
+            "import java.util.Objects;",
+            "public class A {",
+            "   Object f;",
+            "   A() { }",
+            "   void run() {",
+            "       this.f = foo();",
+            "   }",
+            "   Object foo() {",
+            "        return null;",
+            "   }",
+            "}")
+        .toDepth(5)
+        .disableBailOut()
+        .addExpectedReports(
+            new TReport(
+                // adding @Nullable on foo() will trigger a fix on making field f @Nullable, so far,
+                // effect is -1 + 1 (triggered error on this.f = foo()) = 0.
+                new OnMethod("A.java", "test.A", "foo()"),
+                -2,
+                // adding @Nullable on f will resolve the triggered error by foo() and also resolves
+                // the initialization error on A() as well.
+                // Therefore, the combined effect is -1 + (-1) = -2. It resolves all existing
+                // errors.
+                Set.of(new OnField("A.java", "test.A", Collections.singleton("f"))),
+                Collections.emptySet()),
+            new TReport(
+                // Adding @Nullable on f will resolve the initialization error and does not trigger
+                // any error, effect is -1.
+                new OnField("A.java", "test.A", Collections.singleton("f")), -1))
+        .start();
   }
 
   @Test

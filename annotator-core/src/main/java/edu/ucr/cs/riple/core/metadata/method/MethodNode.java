@@ -49,6 +49,9 @@ public class MethodNode {
   /** Is true if the method has non-primitive return. */
   public boolean hasNonPrimitiveReturn;
 
+  /** Is true if the method is a constructor. */
+  public boolean isConstructor;
+
   public static final MethodNode TOP = top();
 
   /** Visibility of method. */
@@ -90,7 +93,7 @@ public class MethodNode {
   private static MethodNode top() {
     if (TOP == null) {
       MethodNode node = new MethodNode(0);
-      node.fillInformation(null, -1, 0, false, "private", false);
+      node.fillInformation(null, -1, 0, false, "private", false, false);
       return node;
     }
     return TOP;
@@ -114,6 +117,7 @@ public class MethodNode {
    * @param hasNullableAnnotation True, if it has Nullable Annotation.
    * @param visibility Visibility of this method.
    * @param hasNonPrimitiveReturn True, if it has a non-primitive return.
+   * @param isConstructor True, if it is a constructor.
    */
   void fillInformation(
       OnMethod location,
@@ -121,13 +125,15 @@ public class MethodNode {
       int numberOfParameters,
       boolean hasNullableAnnotation,
       String visibility,
-      boolean hasNonPrimitiveReturn) {
+      boolean hasNonPrimitiveReturn,
+      boolean isConstructor) {
     this.parent = parent;
     this.location = location;
     this.numberOfParameters = numberOfParameters;
     this.hasNullableAnnotation = hasNullableAnnotation;
     this.visibility = Visibility.parse(visibility);
     this.hasNonPrimitiveReturn = hasNonPrimitiveReturn;
+    this.isConstructor = isConstructor;
   }
 
   /**

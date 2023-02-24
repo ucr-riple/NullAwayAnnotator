@@ -7,6 +7,8 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
@@ -41,6 +43,12 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
   public static final String FILE_NAME = "class_info.tsv";
 
   /**
+   * A map from class flat name to a set of field names that are declared in that class but not
+   * initialized at declaration.
+   */
+  private Multimap<String, String> uninitializedFields;
+
+  /**
    * Constructor for {@link FieldDeclarationStore}.
    *
    * @param config Annotator config.
@@ -48,6 +56,12 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
    */
   public FieldDeclarationStore(Config config, ModuleInfo module) {
     super(config, module.dir.resolve(FILE_NAME));
+  }
+
+  @Override
+  protected void setup() {
+    super.setup();
+    this.uninitializedFields = MultimapBuilder.hashKeys().hashSetValues().build();
   }
 
   /**
@@ -90,6 +104,14 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
                         vars.stream()
                             .map(NodeWithSimpleName::getNameAsString)
                             .collect(ImmutableSet.toImmutableSet()));
+                    // Collect uninitialized fields at declaration.
+                    vars.forEach(
+                        variableDeclarator -> {
+                          String fieldName = variableDeclarator.getNameAsString();
+                          if (variableDeclarator.getInitializer().isEmpty()) {
+                            uninitializedFields.put(clazz, fieldName);
+                          }
+                        });
                   }));
       // We still want to keep the information about the class even if it has no field declarations,
       // so we can retrieve tha path to the file from the given class flat name. This information is
@@ -121,6 +143,21 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
     Optional<ImmutableSet<String>> inLineGroupFieldDeclaration =
         candidate.fields.stream().filter(group -> !Collections.disjoint(group, fields)).findFirst();
     return inLineGroupFieldDeclaration.orElse(ImmutableSet.copyOf(fields));
+  }
+
+  /**
+   * Returns true if the given field is declared in the given class but not initialized at
+   * declaration. A field declaration can contain multiple inline field declarations. This method
+   * will return true if any of the declared fields is not initialized.
+   *
+   * @param field Location of field to check.
+   * @return True if at least on of the given declarations at the given location is not not
+   *     initialized.
+   */
+  public boolean isUninitializedField(OnField field) {
+    // According to javadoc, Multimap.get() returns an empty collection if key is not found,
+    // therefore we do not need to check for key existence.
+    return !Collections.disjoint(uninitializedFields.get(field.clazz), field.variables);
   }
 
   /**

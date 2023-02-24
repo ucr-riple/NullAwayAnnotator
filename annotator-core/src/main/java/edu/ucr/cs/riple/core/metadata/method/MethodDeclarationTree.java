@@ -25,6 +25,8 @@
 package edu.ucr.cs.riple.core.metadata.method;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.injector.Helper;
@@ -45,8 +47,10 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
   /** Each method has a unique id across all methods. This hashmap, maps ids to nodes. */
   private HashMap<Integer, MethodNode> nodes;
 
+  /** A map from class flat name to its declared constructors */
+  private Multimap<String, MethodNode> classConstructorMap;
   /** Set of all classes flat name declared in module. */
-  private HashSet<String> classNames;
+  private Set<String> declaredClasses;
 
   public MethodDeclarationTree(Config config) {
     super(config, config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
@@ -55,7 +59,8 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
   @Override
   protected void setup() {
     super.setup();
-    this.classNames = new HashSet<>();
+    this.declaredClasses = new HashSet<>();
+    this.classConstructorMap = MultimapBuilder.hashKeys().hashSetValues().build();
     this.nodes = new HashMap<>();
     // The root node of this tree with id: 0.
     nodes.put(MethodNode.TOP.id, MethodNode.TOP);
@@ -74,6 +79,9 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
     }
     // Fill nodes information.
     Integer parentId = Integer.parseInt(values[3]);
+    OnMethod location = new OnMethod(Helper.deserializePath(values[9]), values[1], values[2]);
+    boolean isConstructor =
+        Helper.extractCallableName(location.method).equals(Helper.simpleName(location.clazz));
     int size = Integer.parseInt(values[4]);
     node.fillInformation(
         new OnMethod(Helper.deserializePath(values[9]), values[1], values[2]),
@@ -81,7 +89,8 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
         size,
         Boolean.parseBoolean(values[6]),
         values[7],
-        Boolean.parseBoolean(values[8]));
+        Boolean.parseBoolean(values[8]),
+        isConstructor);
     // If node has a non-top parent.
     if (parentId > 0) {
       MethodNode parent = nodes.get(parentId);
@@ -94,7 +103,11 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
       parent.addChild(id);
     }
     // Update list of all declared classes.
-    this.classNames.add(node.location.clazz);
+    declaredClasses.add(node.location.clazz);
+    // If node is a constructor, add it to the list of constructors of its class.
+    if (node.isConstructor) {
+      classConstructorMap.put(node.location.clazz, node);
+    }
     return node;
   }
 
@@ -178,6 +191,18 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
   }
 
   /**
+   * Returns ImmutableSet of all constructors declared in the target module for the given class.
+   *
+   * @param clazz Flat name of the class.
+   * @return ImmutableSet of all constructors declared in the target module for the given class.
+   */
+  public ImmutableSet<OnMethod> getConstructorsForClass(String clazz) {
+    return classConstructorMap.get(clazz).stream()
+        .map(node -> node.location)
+        .collect(ImmutableSet.toImmutableSet());
+  }
+
+  /**
    * Checks if the passed location is targeting an element declared in the target module.
    *
    * @param location Location of the element.
@@ -188,6 +213,6 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
     if (location == null || location.clazz.equals("null")) {
       return false;
     }
-    return this.classNames.contains(location.clazz);
+    return this.declaredClasses.contains(location.clazz);
   }
 }
