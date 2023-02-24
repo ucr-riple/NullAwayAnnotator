@@ -27,6 +27,8 @@ package edu.ucr.cs.riple.core.metadata.trackers;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
+import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
+import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
@@ -37,8 +39,22 @@ import java.util.stream.Collectors;
 /** Tracker for Fields. */
 public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
 
-  public FieldRegionTracker(Config config, ModuleInfo info) {
+  /**
+   * Store for field declarations. This is used to determine if a field is initialized at
+   * declaration.
+   */
+  private final FieldDeclarationStore fieldDeclarationStore;
+  /** The method declaration tree. Used to retrieve constructors for a class */
+  private final MethodDeclarationTree methodDeclarationTree;
+
+  public FieldRegionTracker(
+      Config config,
+      ModuleInfo info,
+      FieldDeclarationStore fieldDeclarationStore,
+      MethodDeclarationTree methodDeclarationTree) {
     super(config, info.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME));
+    this.fieldDeclarationStore = fieldDeclarationStore;
+    this.methodDeclarationTree = methodDeclarationTree;
   }
 
   @Override
@@ -62,6 +78,14 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
             .map(trackerNode -> trackerNode.region)
             .collect(Collectors.toSet());
     ans.addAll(config.getAdapter().getFieldRegionScope(field));
+    // Check if field is initialized at declaration.
+    if (fieldDeclarationStore.isUninitializedField(field)) {
+      // If not, add all constructors for the class.
+      ans.addAll(
+          methodDeclarationTree.getConstructorsForClass(field.clazz).stream()
+              .map(onMethod -> new Region(onMethod.clazz, onMethod.method))
+              .collect(Collectors.toSet()));
+    }
     return Optional.of(ans);
   }
 }
