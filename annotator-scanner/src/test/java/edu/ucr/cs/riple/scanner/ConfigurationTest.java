@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.scanner;
 
+import com.google.errorprone.CompilationTestHelper;
 import edu.ucr.cs.riple.scanner.tools.ClassInfoDisplay;
 import edu.ucr.cs.riple.scanner.tools.Display;
 import edu.ucr.cs.riple.scanner.tools.DisplayFactory;
@@ -42,6 +43,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -123,5 +125,39 @@ public class ConfigurationTest {
     tester.doTestWithExpectingError(
         IllegalArgumentException.class,
         "Output path cannot be null, should be set it in config file within <path> tag");
+  }
+
+  @Test
+  public void checkNoOutputIsSerializedWithAllFlagsOff() {
+    Path config = root.resolve("scanner.xml");
+    try {
+      Files.createDirectories(root);
+      Files.createFile(config);
+      ScannerConfigWriter writer =
+          new ScannerConfigWriter()
+              .setOutput(root)
+              .setMethodTrackerActivation(false)
+              .setClassTrackerActivation(false)
+              .setCallTrackerActivation(false)
+              .setFieldTrackerActivation(false);
+      writer.writeAsXML(config);
+    } catch (IOException ex) {
+      throw new UncheckedIOException(ex);
+    }
+    CompilationTestHelper compilationTestHelper =
+        CompilationTestHelper.newInstance(AnnotatorScanner.class, getClass())
+            .setArgs(
+                Arrays.asList(
+                    "-d",
+                    temporaryFolder.getRoot().getAbsolutePath(),
+                    "-Xep:AnnotatorScanner:ERROR",
+                    "-XepOpt:AnnotatorScanner:ConfigPath=" + config))
+            .addSourceFile("SampleClassForTest.java");
+    compilationTestHelper.doTest();
+    // Verify there are no output files.
+    Assert.assertFalse(root.resolve(Serializer.CLASS_INFO_FILE_NAME).toFile().exists());
+    Assert.assertFalse(root.resolve(Serializer.METHOD_IMPACTED_REGION_FILE_NAME).toFile().exists());
+    Assert.assertFalse(root.resolve(Serializer.FIELD_GRAPH_FILE_NAME).toFile().exists());
+    Assert.assertFalse(root.resolve(Serializer.METHOD_INFO_FILE_NAME).toFile().exists());
   }
 }
