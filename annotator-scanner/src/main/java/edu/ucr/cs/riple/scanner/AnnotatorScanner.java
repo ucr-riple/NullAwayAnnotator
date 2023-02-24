@@ -125,7 +125,7 @@ public class AnnotatorScanner extends BugChecker
     if (methodSymbol.owner.enclClass().getSimpleName().isEmpty()) {
       // An anonymous class cannot declare its own constructors, so we do not need to serialize it.
       return Description.NO_MATCH;
-    }  
+    }
     config
         .getSerializer()
         .serializeImpactedRegionForMethod(

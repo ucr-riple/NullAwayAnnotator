@@ -1,3 +1,27 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023 Nima Karimipour
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 package edu.ucr.cs.riple.core.adapters;
 
 import com.google.common.base.Preconditions;
@@ -16,9 +40,22 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class NullAwayV2Adapter extends NullAwayAdapterBaseClass {
+/**
+ * NullAway serialization adapter for version 3.
+ *
+ * <p>Updates to previous version (version 1):
+ *
+ * <ul>
+ *   <li>Serialized errors contain an extra column indicating the offset of the program point where
+ *       the error is reported.
+ *   <li>Serialized errors contain an extra column indicating the path to the containing source file
+ *       where the error is reported
+ *   <li>Type arguments and Type use annotations are excluded from the serialized method signatures.
+ * </ul>
+ */
+public class NullAwayV3Adapter extends NullAwayAdapterBaseClass {
 
-  public NullAwayV2Adapter(
+  public NullAwayV3Adapter(
       Config config, FieldDeclarationStore fieldDeclarationStore, NonnullStore nonnullStore) {
     super(config, fieldDeclarationStore, nonnullStore);
   }
@@ -27,7 +64,7 @@ public class NullAwayV2Adapter extends NullAwayAdapterBaseClass {
   public TrackerNode deserializeTrackerNode(String[] values) {
     Preconditions.checkArgument(
         values.length == 5,
-        "Expected 5 values to create TrackerNode instance in NullAway serialization version 1 but found: "
+        "Expected 5 values to create TrackerNode instance in NullAway serialization version 3 but found: "
             + values.length);
     return new TrackerNode(
         new Region(values[0], values[1], SourceType.valueOf(values[4])), values[2], values[3]);
@@ -62,6 +99,6 @@ public class NullAwayV2Adapter extends NullAwayAdapterBaseClass {
 
   @Override
   public int getVersionNumber() {
-    return 2;
+    return 3;
   }
 }
