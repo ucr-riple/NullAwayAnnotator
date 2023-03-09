@@ -79,20 +79,12 @@ class Test{
 Annotator is also capable of processing modules within monorepos considering modules public APIs and the impacts of annotations on downstream dependencies for better results.
 
 ## Installation
-
-Follow the steps below:
-
-* [TypeAnnotatorScanner](type-annotator-scanner/README.md) module should be installed in the ```local maven``` repository.
-    * To install it, run `./gradlew publishToMavenLocal`
-
-* Jar file of [Core](core/README.md) module should be located at `runner/jars`.
-    * To create the jar file run: `./gradlew publishToMavenLocal`
-
-A script is provided which executes all installation tasks above.
-It installs `TypeAnnotatorScanner` checker in `maven local` and creates the jar file of `core` module and moves it to the correct path. To run it, execute the command below:
-
-`cd runner/ && ./update.sh`
+No installation is required, annotator jar file is provided via maven central repository. Find the artifact id below:
+```
+GROUP: edu.ucr.cs.riple.annotator
+ID: annotator-core
+```
 
 ## Running Annotator
 
-After following the installation instruction above, read the instruction [here](runner/README.md) to run the annotator.
+Please read the instruction [here](runner/README.md) to run the annotator.
