@@ -2,112 +2,81 @@
 ```NullAwayAnnotator``` or simply (Annotator) is a tool that can automatically infer types in source code and injects the 
 corresponding annotations to pass [NullAway](https://github.com/uber/NullAway) checks.
 
-```Annotator``` is fast, it benefits from a huge parallelization technique to deliver the final product. On average, 
-it is capable of reducing the number of warnings reported by ```NullAway``` down to 30%. Annotations are directly injected to the source code, 
-and it preserves the code style.
+Applying NullAway to build systems is a tedious task. It requires a lot of manual work to annotate the source code. 
+Even if a code free of nullability errors, it is still required to annotate the code to pass NullAway checks. 
+A tool that can automatically infer types in source code and injects the corresponding annotations to pass NullAway checks, can significantly reduce the effort of applying NullAway to build systems.
+
+```Annotator``` minimizes the number nullaway reported errors by inferring nullability types of elements in the source code and injects 
+the corresponding annotations. For errors that are not resolvable with any annotations, annotator injects appropriate suppression annotations.
+The final output of Annotator, is a source code that passes NullAway checks leaving no errors.
 
 ## Code Example
 
-In the code below, ```NullAway``` will generate three warnings
+In the code below, ```NullAway``` will report five warnings.
 
 ```java
-public class Test{
-    Object bar = new Object();
-    Object nullableFoo; //warning: "nullableFoo" is not initialized
-    Object nonnullFoo; //warning: "nonnullFoo" is not initialized
+class Test{
+    Object f1 = null; // warning: assigning @Nullable expression to @NonNull field
+    Object f2 = null; // warning: assigning @Nullable expression to @NonNull field
+    Object f3 = null; // warning: assigning @Nullable expression to @NonNull field
+    Object f4 = null; // warning: assigning @Nullable expression to @NonNull field
+    Object f5 = f4;
+    Object f6 = new Object();
     
-    public Object run(boolean check){
-        if(check){
-            return new Object();
-        }
-        return null; //warning: returning nullable from nonNull method
+    String m1(){
+        return f1 != null ? f1.toString() : f2.toString() + f6.toString();
     }
     
-    public void display(){
-        if(nullableFoo != null){
-            String name = nullableFoo.toString();
-            Class<?> clazz = nullableFoo.getClass();
-        }
-        String name = nonnullFoo.toString();
-        Class<?> clazz = nonnullFoo.getClass();
+    int m2(){
+        return f3 != null ? f3.hashCode() : f2.hashCode() + f6.hashCode();
+    }
+    
+    Object m3(){
+        return f5;
+    }
+    
+    void m4(){
+         f6 = null; // warning: assigning @Nullable expression to @NonNull field
     }
 }
 ```
 
-```Annotator``` can automatically infer ```nullableFoo``` to be ```@Nullable``` and ```nonnullFoo``` to be ```@Nonnull```.
-Therefore, it makes ```nullableFoo```, ```@Nullable``` and leave ```nonnullFoo``` untouched.
-
-Below is the output of running Annotator on the code above:
+```Annotator``` can infer the nullable types in the code above and injects the corresponding annotations. For unresolved errors, suppression annotations are injected.
+The output below is the result of running ```Annotator``` on the code above.
 
 ```java
-import javax.annotation.Nullable;
+import javax.annotation.Nullable; // added by Annotator
+import org.jspecify.annotations.NullUnmarked; // added by Annotator
 
-public class Test {
-    Object bar = new Object();
-    @Nullable Object nullableFoo; // resolved by Annotator
-    Object nonnullFoo; //warning: "nonnullFoo" is not initialized (Annotator will not make it Nullable since the usage of this onField demonstrates the programmer assumed it is @Nonnull).
-
-    public @Nullable Object run(boolean check) {
-        if (check) {
-            return new Object();
-        }
-        return null; // resolved by Annotator
+class Test{
+    @Nullable Object f1 = null;
+    @SuppressWarnings("NullAway") Object f2 = null; // inferred to be @Nonnull, and null assignment is suppressed.
+    @Nullable Object f3 = null;
+    @Nullable Object f4 = null;
+    @Nullable Object f5 = f4;
+    Object f6 = new Object();  // inferred to be @Nonnull
+    
+    String m1(){
+        return f1 != null ? f1.toString() : f2.toString() + f6.toString();
     }
-
-    public void display() {
-        if (nullableFoo != null) {
-            String name = nullableFoo.toString();
-            Class<?> clazz = nullableFoo.getClass();
-        }
-        String name = nonnullFoo.toString();
-        Class<?> clazz = nonnullFoo.getClass();
+    
+    int m2(){
+        return f3 != null ? f3.hashCode() : f2.hashCode() + f6.hashCode();
+    }
+    
+    @Nullable Object m3(){ // inferred to be @Nullable as a result of f5 being @Nullable.
+        return f5;
+    }
+    
+    @NullUnmarked //f6 is inferred to be @Nonnull, but it is assigned to null. The error is suppressed by @NullUnmarked.
+    void m4(){
+         f6 = null; 
     }
 }
 ```
 
 ```Annotator``` propagates effects of a change through the entire module and injects several followups annotations to fully resolve one specific warning.
-In the example below, making ```foo```, ```@Nullable``` requires two more ```@Nullable``` injections and ```Annotator``` automatically handles it.
-
-```java
-public class Test{
-    Object foo; //warning: "nullableFoo" is not initialized
-
-    public Object run(){
-        bar(foo); // if foo was @Nullable, we would have seen the warning: passing nullable to nonnull param
-        return foo; // if foo was @Nullable, we would have seen the warning: returning nullable from non-null method
-    }
-    
-    public void bar(Object foo){
-        if(foo != null){
-            String name = foo.toString(); 
-        }
-    }
-}
-```
-
-```Annotator``` automatically follows the chain of warnings and finds the best solution using it's ```deep search``` technique. 
-Below is the output of running ```Annotator``` in one run:
-
-```java
-import javax.annotation.Nullable;
-
-public class Test {
-    @Nullable
-    Object foo; //warning: resolved
-
-    @Nullable
-    public Object run() {
-        bar(foo); //warning: resolved
-        return foo; //warning: resolved
-    }
-
-    public void bar(@Nullable Object foo) {
-        if (foo != null) {
-            String name = foo.toString();
-        }
-    }
-}
-```
+Annotator is also capable of processing modules within monorepos considering modules public APIs and the impacts of annotations on downstream dependencies for better results.
 
 ## Installation
 
@@ -119,7 +88,7 @@ Follow the steps below:
 * Jar file of [Core](core/README.md) module should be located at `runner/jars`.
     * To create the jar file run: `./gradlew publishToMavenLocal`
 
-A script is provided which executes all installation tasks above. 
+A script is provided which executes all installation tasks above.
 It installs `TypeAnnotatorScanner` checker in `maven local` and creates the jar file of `core` module and moves it to the correct path. To run it, execute the command below:
 
 `cd runner/ && ./update.sh`
