@@ -132,7 +132,7 @@ public class MethodInfo {
         "\t",
         String.valueOf(id),
         (clazz != null ? clazz.flatName() : "null"),
-        symbol.toString(),
+        Serializer.serializeSymbol(symbol),
         String.valueOf(parentID),
         String.valueOf(symbol.getParameters().size()),
         Arrays.toString(parameterAnnotationFlags),

@@ -88,10 +88,7 @@ public class BasicTest extends BaseInjectorTest {
             "}")
         .addChanges(
             new AddMarkerAnnotation(
-                new OnMethod(
-                    "Super.java",
-                    "com.uber.Super",
-                    "test(@javax.annotation.Nullable java.lang.Object)"),
+                new OnMethod("Super.java", "com.uber.Super", "test(java.lang.Object)"),
                 "javax.annotation.Nullable"))
         .start();
   }

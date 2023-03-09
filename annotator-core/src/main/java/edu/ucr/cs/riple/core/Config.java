@@ -27,7 +27,7 @@ package edu.ucr.cs.riple.core;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import edu.ucr.cs.riple.core.adapters.NullAwayV2Adapter;
+import edu.ucr.cs.riple.core.adapters.NullAwayV3Adapter;
 import edu.ucr.cs.riple.core.adapters.NullAwayVersionAdapter;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
@@ -589,7 +589,10 @@ public class Config {
           throw new RuntimeException(
               "This annotator version does not support serialization version 1, please upgrade NullAway to 0.10.6+ (with SerializeFixMetadataVersion=2) or use version 1.3.5 of Annotator.");
         case 2:
-          this.adapter = new NullAwayV2Adapter(this, fieldDeclarationStore, nonnullStore);
+          throw new RuntimeException(
+              "This annotator version does not support serialization version 2, please upgrade NullAway to 0.10.10+. Serialization version v2 is skipped and was used for an alpha version of the Annotator.");
+        case 3:
+          this.adapter = new NullAwayV3Adapter(this, fieldDeclarationStore, nonnullStore);
           this.offsetHandlingIsActivated = true;
           break;
         default:

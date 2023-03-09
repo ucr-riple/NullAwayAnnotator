@@ -29,6 +29,7 @@ import com.sun.source.tree.ClassTree;
 import com.sun.source.util.TreePath;
 import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.riple.scanner.Config;
+import edu.ucr.cs.riple.scanner.Serializer;
 import edu.ucr.cs.riple.scanner.SymbolUtil;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import javax.annotation.Nullable;
@@ -77,10 +78,10 @@ public class ImpactedRegion {
     Symbol enclosingClass = memberSymbol.enclClass();
     return String.join(
         "\t",
-        regionClass.flatName(),
-        ((regionMember == null) ? "null" : regionMember.toString()),
-        memberSymbol.toString(),
-        ((enclosingClass == null) ? "null" : enclosingClass.flatName()),
+        Serializer.serializeSymbol(regionClass),
+        Serializer.serializeSymbol(regionMember),
+        Serializer.serializeSymbol(memberSymbol),
+        Serializer.serializeSymbol(enclosingClass),
         source.name());
   }
 

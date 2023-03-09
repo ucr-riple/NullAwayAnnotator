@@ -52,7 +52,7 @@ public class OnMethodSearchTest extends BaseInjectorTest {
         .addChanges(
             new AddMarkerAnnotation(
                 new OnMethod(
-                    "Main.java", "com.uber.Main", "Main(java.lang.String,java.lang.Object...)"),
+                    "Main.java", "com.uber.Main", "Main(java.lang.String,java.lang.Object[])"),
                 "javax.annotation.Initializer"))
         .start();
   }
