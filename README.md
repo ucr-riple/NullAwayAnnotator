@@ -142,11 +142,8 @@ At this moment, the target project is ready for the Annotator to process.
 We need to inform the `Annotator` about `path_to_nullaway_config.xml` and `path_to_scanner_config.xml` (number 2 and 3 in the next section), please read the section below.
 
 ### Running Annotator
-`Annotator` is delivered via a `jar` file. To run the `jar` file simply run the command below:
-```shell
-cd jars && java -jar core.jar
-```
-`Annotator` requires certain flag values to be able to run successfully. We can pass these values via command line arguments or config files, we will describe each approach in next sections.
+
+`Annotator` requires certain flag values to be able to run successfully. We can pass these values via command line arguments or a config file, we will describe each approach in next sections.
 #### Use Command Line Arguments
 
 In order to run `Annotator` on target project `P`, arguments below **must** be passed to `Annotator`:
