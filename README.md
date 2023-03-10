@@ -2,7 +2,7 @@
 ```NullAwayAnnotator``` or simply (Annotator) is a tool that can automatically infer types in source code and injects the 
 corresponding annotations to pass [NullAway](https://github.com/uber/NullAway) checks.
 
-Applying NullAway to build systems is a tedious task. It requires a lot of manual work to annotate the source code. 
+Applying NullAway to build systems will require manual effort of applying annotations to source code. It requires a lot of manual work to annotate the source code. 
 Even if a code free of nullability errors, it is still required to annotate the code to pass NullAway checks. 
 A tool that can automatically infer types in source code and injects the corresponding annotations to pass NullAway checks, can significantly reduce the effort of applying NullAway to build systems.
 
