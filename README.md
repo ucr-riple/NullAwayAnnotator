@@ -1,14 +1,14 @@
 ## NullAwayAnnotator  ![Build Status](https://github.com/nimakarimipour/NullAwayAnnotator/actions/workflows/continuous-integration.yml/badge.svg)
-```NullAwayAnnotator``` or simply (Annotator) is a tool that can automatically infer types in source code and injects the 
+```NullAwayAnnotator``` or simply (Annotator) is a tool that can automatically infer nullability types in the given source code and injects the 
 corresponding annotations to pass [NullAway](https://github.com/uber/NullAway) checks.
 
-Applying NullAway to build systems will require manual effort of applying annotations to source code. It requires a lot of manual work to annotate the source code. 
-Even if a code free of nullability errors, it is still required to annotate the code to pass NullAway checks. 
-A tool that can automatically infer types in source code and injects the corresponding annotations to pass NullAway checks, can significantly reduce the effort of applying NullAway to build systems.
+Applying NullAway to build systems will require manual effort of applying annotations to source code.
+Even if a code is free of nullability errors, it is still required to annotate the code to pass NullAway checks. 
+A tool that can automatically infer types in the source code and inject the corresponding annotations to pass NullAway checks, can significantly reduce the effort of applying NullAway to build systems.
 
-```Annotator``` minimizes the number nullaway reported errors by inferring nullability types of elements in the source code and injects 
+```Annotator``` minimizes the number of reported nullaway errors by inferring nullability types of elements in the source code and injecting 
 the corresponding annotations. For errors that are not resolvable with any annotations, annotator injects appropriate suppression annotations.
-The final output of Annotator, is a source code that passes NullAway checks leaving no errors.
+The final output of Annotator, is a source code that passes NullAway checks leaving no remaining errors.
 
 ## Code Example
 
