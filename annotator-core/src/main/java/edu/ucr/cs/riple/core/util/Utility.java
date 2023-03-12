@@ -248,10 +248,7 @@ public class Utility {
       Config config, ModuleInfo info, boolean activation) {
     ScannerConfigWriter writer = new ScannerConfigWriter();
     writer
-        .setCallTrackerActivation(activation)
-        .setClassTrackerActivation(activation)
-        .setFieldTrackerActivation(activation)
-        .setMethodTrackerActivation(activation)
+        .setSerializationActivation(activation)
         .addGeneratedCodeDetectors(config.generatedCodeDetectors)
         .setOutput(info.dir)
         .setNonnullAnnotations(config.getNonnullAnnotations())
