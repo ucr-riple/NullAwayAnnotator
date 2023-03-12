@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.evaluators.suppliers;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.cache.TargetModuleCache;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.evaluators.graphprocessor.CompilerRunner;
 import edu.ucr.cs.riple.core.evaluators.graphprocessor.ConflictGraphProcessor;
@@ -50,18 +51,24 @@ import edu.ucr.cs.riple.core.util.Utility;
 public class TargetModuleSupplier extends AbstractSupplier {
 
   protected final DownstreamImpactCache downstreamImpactCache;
+  protected final TargetModuleCache targetModuleCache;
 
   /**
    * Constructor for target module supplier instance.
    *
    * @param config Annotator config instance.
-   * @param downstreamImpactCache Global analyzer instance.
+   * @param targetModuleCache Target module impact cache instance.
+   * @param downstreamImpactCache Downstream impact cache instance.
    * @param tree Method declaration tree for methods in target module.
    */
   public TargetModuleSupplier(
-      Config config, DownstreamImpactCache downstreamImpactCache, MethodDeclarationTree tree) {
+      Config config,
+      TargetModuleCache targetModuleCache,
+      DownstreamImpactCache downstreamImpactCache,
+      MethodDeclarationTree tree) {
     super(ImmutableSet.of(config.target), config, tree);
     this.downstreamImpactCache = downstreamImpactCache;
+    this.targetModuleCache = targetModuleCache;
   }
 
   @Override
@@ -82,10 +89,16 @@ public class TargetModuleSupplier extends AbstractSupplier {
   @Override
   public ConflictGraphProcessor getGraphProcessor() {
     CompilerRunner runner = () -> Utility.buildTarget(config);
-    if (config.optimized) {
-      RegionTracker tracker = new CompoundTracker(config, config.target, tree);
+    if (config.useParallelGraphProcessor) {
+      RegionTracker tracker =
+          new CompoundTracker(config, config.target, tree, fieldDeclarationStore);
       return new ParallelConflictGraphProcessor(config, runner, this, tracker);
     }
     return new SequentialConflictGraphProcessor(config, runner, this);
+  }
+
+  @Override
+  public TargetModuleCache getTargetModuleCache() {
+    return targetModuleCache;
   }
 }

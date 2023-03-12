@@ -29,24 +29,33 @@ import com.sun.source.tree.ClassTree;
 import com.sun.source.util.TreePath;
 import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.riple.scanner.Config;
+import edu.ucr.cs.riple.scanner.Serializer;
 import edu.ucr.cs.riple.scanner.SymbolUtil;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import javax.annotation.Nullable;
 
-/** Container class for storing regions where a node has been used. */
-public class TrackerNode {
+/** Represents an impacted region for some class member (a field or a method). */
+public class ImpactedRegion {
 
-  /** Symbol of the used node. */
-  private final Symbol usedNode;
-  /** Symbol of the enclosing class of the region. */
+  /** Symbol of the member. */
+  private final Symbol memberSymbol;
+  /** Symbol of the enclosing class of the impacted region. */
   @Nullable private final Symbol.ClassSymbol regionClass;
-  /** Symbol of the region. */
+  /** Symbol of the impacted region. */
   @Nullable private final Symbol regionMember;
-  /** Source type of the region. */
+  /** Source type of the impacted region. */
   private final SourceType source;
 
-  public TrackerNode(Config config, Symbol usedNode, TreePath path) {
-    this.usedNode = usedNode;
+  /**
+   * Construct an ImpactedRegion
+   *
+   * @param config scanner configuration
+   * @param memberSymbol symbol for the class member
+   * @param path path to the AST node that uses or overrides the member; the impacted region
+   *     information is computed from the leaf of this path
+   */
+  public ImpactedRegion(Config config, Symbol memberSymbol, TreePath path) {
+    this.memberSymbol = memberSymbol;
     ClassTree enclosingClass =
         path.getLeaf() instanceof ClassTree
             ? (ClassTree) path.getLeaf()
@@ -66,13 +75,13 @@ public class TrackerNode {
     if (regionClass == null) {
       return "";
     }
-    Symbol enclosingClass = usedNode.enclClass();
+    Symbol enclosingClass = memberSymbol.enclClass();
     return String.join(
         "\t",
-        regionClass.flatName(),
-        ((regionMember == null) ? "null" : regionMember.toString()),
-        usedNode.toString(),
-        ((enclosingClass == null) ? "null" : enclosingClass.flatName()),
+        Serializer.serializeSymbol(regionClass),
+        Serializer.serializeSymbol(regionMember),
+        Serializer.serializeSymbol(memberSymbol),
+        Serializer.serializeSymbol(enclosingClass),
         source.name());
   }
 

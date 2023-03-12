@@ -27,8 +27,9 @@ package edu.ucr.cs.riple.core.cache.downstream;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.injector.location.OnParameter;
+import java.util.Collection;
 import java.util.Set;
+import javax.annotation.Nullable;
 
 /**
  * This downstream impact cache does not have any information regarding the impact of changes in
@@ -53,22 +54,41 @@ public class VoidDownstreamImpactCache implements DownstreamImpactCache {
   }
 
   @Override
-  public ImmutableSet<OnParameter> getImpactedParameters(Set<Fix> fixTree) {
+  public boolean triggersUnresolvableErrorsOnDownstream(Fix fix) {
+    return false;
+  }
+
+  @Override
+  public boolean isUnknown(Fix fix) {
+    return true;
+  }
+
+  @Override
+  public ImmutableSet<Error> getTriggeredErrors(Fix fix) {
     return ImmutableSet.of();
   }
 
   @Override
-  public Set<Error> getTriggeredErrors(Fix fix) {
-    return Set.of();
+  public void updateImpactsAfterInjection(Collection<Fix> fixes) {}
+
+  @Nullable
+  @Override
+  public DownstreamImpact fetchImpact(Fix fix) {
+    return null;
   }
 
   @Override
-  public void updateImpactsAfterInjection(Set<Fix> fixes) {
-    // No operation needed.
+  public ImmutableSet<Error> getTriggeredErrorsForCollection(Collection<Fix> fixes) {
+    return ImmutableSet.of();
   }
 
   @Override
-  public boolean isNotFixableOnTarget(Fix fix) {
-    return false;
+  public ImmutableSet<Fix> getTriggeredFixesOnDownstreamForCollection(Collection<Fix> fixes) {
+    return ImmutableSet.of();
+  }
+
+  @Override
+  public int size() {
+    return 0;
   }
 }

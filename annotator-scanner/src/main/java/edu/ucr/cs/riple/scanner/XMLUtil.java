@@ -6,12 +6,9 @@
 
 package edu.ucr.cs.riple.scanner;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import com.google.common.collect.ImmutableSet;
+import java.util.HashSet;
+import java.util.Set;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -19,7 +16,7 @@ import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
+import org.w3c.dom.NodeList;
 
 /** Helper for class for parsing/writing xml files. */
 public class XMLUtil {
@@ -75,61 +72,90 @@ public class XMLUtil {
   }
 
   /**
-   * Helper method for reading value of a node located at /key_1/key_2/.../key_n (in the form of
-   * {@code Xpath} query) from a {@link Document}.
+   * Helper method for reading array values of nodes located at /key_1/key_2/.../key_n (in the form
+   * of {@code Xpath} query) from a {@link Document}.
    *
-   * @param path Path to the XML file.
-   * @param key Key to locate the value, can be nested in the form of {@code Xpath} query (e.g.
-   *     /key1/key2/.../key_n).
-   * @param klass Class type of the value in doc.
+   * @param document XML object to read values from.
+   * @param parentKey Key to locate the value, can be nested in the form of {@code Xpath} query
+   *     (e.g. /key1/key2/.../key_n).
+   * @param clazz Class type of the value in doc.
    * @return The value in the specified keychain cast to the class type given in parameter.
    */
-  public static <T> DefaultXMLValueProvider<T> getValueFromTag(
-      Path path, String key, Class<T> klass) {
-    Document document;
+  public static <T> DefaultXMLValueProvider<T> getArrayValueFromTag(
+      Document document, String parentKey, Class<T> clazz) {
     try {
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      DocumentBuilder builder = factory.newDocumentBuilder();
-      document = builder.parse(Files.newInputStream(path));
-      document.normalize();
-    } catch (IOException | SAXException | ParserConfigurationException e) {
-      throw new RuntimeException("Error in reading/parsing config at path: " + path, e);
+      Set<String> values = new HashSet<>();
+      XPath xPath = XPathFactory.newInstance().newXPath();
+      NodeList nodes =
+          (NodeList) xPath.compile(parentKey).evaluate(document, XPathConstants.NODESET);
+      for (int i = 0; i < nodes.getLength(); i++) {
+        values.add(nodes.item(i).getTextContent().strip());
+      }
+      return new DefaultXMLValueProvider<>(values, clazz);
+    } catch (Exception e) {
+      return new DefaultXMLValueProvider<>(null, clazz);
     }
-    return getValueFromTag(document, key, klass);
   }
 
   /** Helper class for setting default values when the key is not found. */
   public static class DefaultXMLValueProvider<T> {
-    final Object value;
+    final ImmutableSet<Object> value;
     final Class<T> klass;
 
-    public DefaultXMLValueProvider(Object value, Class<T> klass) {
-      this.klass = klass;
+    public DefaultXMLValueProvider(Object value, Class<T> clazz) {
+      this.klass = clazz;
       if (value == null) {
         this.value = null;
       } else {
-        String content = value.toString();
-        switch (klass.getSimpleName()) {
-          case "Integer":
-            this.value = Integer.valueOf(content);
-            break;
-          case "Boolean":
-            this.value = Boolean.valueOf(content);
-            break;
-          case "String":
-            this.value = String.valueOf(content);
-            break;
-          default:
-            throw new IllegalArgumentException(
-                "Cannot extract values of type: "
-                    + klass
-                    + ", only Double|Boolean|String accepted.");
-        }
+        this.value = ImmutableSet.of(parseValue(value, clazz));
+      }
+    }
+
+    public DefaultXMLValueProvider(Set<String> values, Class<T> clazz) {
+      this.klass = clazz;
+      if (values == null) {
+        this.value = null;
+      } else {
+        this.value =
+            values.stream()
+                .map(value -> parseValue(value, clazz))
+                .collect(ImmutableSet.toImmutableSet());
+      }
+    }
+
+    /**
+     * Parses the given value to the requested type.
+     *
+     * @param value Given value.
+     * @param clazz Expected class of the parsed value.
+     * @return The parsed value parsed to the expected type.
+     * @param <T> Expected type of the parsed value.
+     */
+    private static <T> Object parseValue(Object value, Class<T> clazz) {
+      String content = value.toString();
+      switch (clazz.getSimpleName()) {
+        case "Integer":
+          return Integer.valueOf(content);
+        case "Boolean":
+          return Boolean.valueOf(content);
+        case "String":
+          return String.valueOf(content);
+        default:
+          throw new IllegalArgumentException(
+              "Cannot extract values of type: "
+                  + clazz
+                  + ", only Integer|Boolean|String accepted.");
       }
     }
 
     public T orElse(T other) {
-      return value == null ? other : klass.cast(this.value);
+      return value == null ? other : klass.cast(this.value.iterator().next());
+    }
+
+    public ImmutableSet<T> orElse(ImmutableSet<T> other) {
+      return value == null
+          ? other
+          : this.value.stream().map(klass::cast).collect(ImmutableSet.toImmutableSet());
     }
   }
 }

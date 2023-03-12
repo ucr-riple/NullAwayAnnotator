@@ -55,6 +55,8 @@ public class Error {
   protected final Region region;
   /** Error type for method initialization errors from NullAway in {@code String}. */
   public static final String METHOD_INITIALIZER_ERROR = "METHOD_NO_INIT";
+  /** Error type for field initialization errors from NullAway in {@code String}. */
+  public static final String FIELD_INITIALIZER_ERROR = "FIELD_NO_INIT";
 
   public Error(
       String messageType,
@@ -248,5 +250,28 @@ public class Error {
               key.change, ImmutableSet.copyOf(fixReasonsMap.get(key)), key.fixSourceIsInTarget));
     }
     return builder.build();
+  }
+
+  /**
+   * Checks if this error is resolvable with the given collection of fixes.
+   *
+   * @param fixes Collection fixes.
+   * @return true, if this error is resolvable.
+   */
+  public boolean isResolvableWith(Collection<Fix> fixes) {
+    if (resolvingFixes.size() == 0) {
+      return false;
+    }
+    return fixes.containsAll(this.resolvingFixes);
+  }
+  /**
+   * Returns true if the error is an initialization error ({@code METHOD_NO_INIT} or {@code
+   * FIELD_NO_INIT}).
+   *
+   * @return true, if the error is an initialization error.
+   */
+  public boolean isInitializationError() {
+    return this.messageType.equals(METHOD_INITIALIZER_ERROR)
+        || this.messageType.equals(FIELD_INITIALIZER_ERROR);
   }
 }

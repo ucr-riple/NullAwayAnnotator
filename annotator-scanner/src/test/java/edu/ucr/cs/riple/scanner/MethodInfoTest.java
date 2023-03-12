@@ -62,7 +62,7 @@ public class MethodInfoTest extends AnnotatorScannerBaseTest<MethodInfoDisplay> 
           "nullable",
           "visibility",
           "non-primitive-return",
-          "uri");
+          "path");
 
   private static final String FILE_NAME = "method_info.tsv";
 

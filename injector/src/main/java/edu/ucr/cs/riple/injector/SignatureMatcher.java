@@ -25,7 +25,7 @@
 package edu.ucr.cs.riple.injector;
 
 import com.github.javaparser.ast.body.CallableDeclaration;
-import java.util.ArrayList;
+import com.github.javaparser.ast.type.Type;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -58,58 +58,13 @@ public class SignatureMatcher {
   private static List<String> extractParameterTypesFromSignature(String signature) {
     signature = signature.substring(signature.indexOf("("));
     signature = signature.substring(1, signature.length() - 1);
-    int index = 0;
-    int generic_level = 0;
-    List<String> ans = new ArrayList<>();
-    StringBuilder tmp = new StringBuilder();
-    while (index < signature.length()) {
-      char c = signature.charAt(index);
-      switch (c) {
-        case '@':
-          while (signature.charAt(index + 1) == ' ' && index + 1 < signature.length()) {
-            index++;
-          }
-          int annot_level = 0;
-          boolean finished = false;
-          while (!finished && index < signature.length()) {
-            if (signature.charAt(index) == '(') {
-              ++annot_level;
-            }
-            if (signature.charAt(index) == ')') {
-              --annot_level;
-            }
-            if (signature.charAt(index) == ' ' && annot_level == 0) {
-              finished = true;
-            }
-            index++;
-          }
-          index--;
-          break;
-        case '<':
-          generic_level++;
-          tmp.append(c);
-          break;
-        case '>':
-          generic_level--;
-          tmp.append(c);
-          break;
-        case ',':
-          if (generic_level == 0) {
-            ans.add(tmp.toString());
-            tmp = new StringBuilder();
-          } else {
-            tmp.append(c);
-          }
-          break;
-        default:
-          tmp.append(c);
-      }
-      index++;
+    if (signature.isEmpty()) {
+      return List.of();
     }
-    if (signature.length() > 0 && generic_level == 0) {
-      ans.add(tmp.toString().strip());
+    if (!signature.contains(",")) {
+      return List.of(signature);
     }
-    return ans;
+    return List.of(signature.split(","));
   }
 
   /**
@@ -122,11 +77,27 @@ public class SignatureMatcher {
       CallableDeclaration<?> callableDec) {
     return callableDec.getParameters().stream()
         .map(
-            parameter -> {
-              String type = parameter.getType().asString();
-              return parameter.isVarArgs() ? type + "..." : type;
-            })
+            parameter ->
+                parameter.isVarArgs()
+                    ? getTypeName(parameter.getType()) + "[]"
+                    : getTypeName(parameter.getType()))
         .collect(Collectors.toList());
+  }
+
+  /**
+   * Returns type name as string.
+   *
+   * @param type type to extract name from.
+   * @return type name as string.
+   */
+  private static String getTypeName(Type type) {
+    if (type.isPrimitiveType()) {
+      return type.asPrimitiveType().asString();
+    }
+    if (type.isClassOrInterfaceType()) {
+      return type.asClassOrInterfaceType().getNameAsString();
+    }
+    return type.asString();
   }
 
   /**
@@ -141,15 +112,15 @@ public class SignatureMatcher {
       return false;
     }
     // match parameter types.
-    List<String> paramTypesFromCallableSignature =
+    List<String> paramTypesFromCallableDeclaration =
         extractParameterTypesFromCallableDeclaration(callableDec);
-    if (parameterTypes.size() != paramTypesFromCallableSignature.size()) {
+    if (parameterTypes.size() != paramTypesFromCallableDeclaration.size()) {
       return false;
     }
     int size = parameterTypes.size();
     for (int i = 0; i < size; i++) {
       String callableType = parameterTypes.get(i);
-      String signatureType = paramTypesFromCallableSignature.get(i);
+      String signatureType = paramTypesFromCallableDeclaration.get(i);
       if (signatureType.equals(callableType)) {
         continue;
       }
