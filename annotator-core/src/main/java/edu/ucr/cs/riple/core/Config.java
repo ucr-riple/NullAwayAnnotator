@@ -27,12 +27,11 @@ package edu.ucr.cs.riple.core;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import edu.ucr.cs.riple.core.adapters.NullAwayV0Adapter;
-import edu.ucr.cs.riple.core.adapters.NullAwayV1Adapter;
-import edu.ucr.cs.riple.core.adapters.NullAwayV2Adapter;
+import edu.ucr.cs.riple.core.adapters.NullAwayV3Adapter;
 import edu.ucr.cs.riple.core.adapters.NullAwayVersionAdapter;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
+import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import edu.ucr.cs.riple.injector.offsets.OffsetChange;
@@ -75,8 +74,10 @@ public class Config {
    * zero or less.
    */
   public final boolean bailout;
-  /** If activated, all optimization techniques will be applied through all searches. */
-  public final boolean optimized;
+  /** If activated, impact of fixes will be computed in parallel. */
+  public final boolean useParallelGraphProcessor;
+  /** If activated, impact of fixes will be cached. */
+  public final boolean useImpactCache;
   /**
    * If activated, all suggested fixes from NullAway will be applied to the source code regardless
    * of their effectiveness.
@@ -134,6 +135,13 @@ public class Config {
 
   /** Fully qualified NullUnmarked annotation. */
   public final String nullUnMarkedAnnotation;
+
+  /**
+   * Set of {@code @Nonnull} annotations to be acknowledged by Annotator. If an element is annotated
+   * with these annotations along any other annotation ending with {@code "nonnull"}, Annotator will
+   * acknowledge the annotation and will not add any {@code @Nullable} annotation to the element.
+   */
+  public final ImmutableSet<String> nonnullAnnotations;
 
   public final Log log;
   public final int depth;
@@ -237,11 +245,18 @@ public class Config {
     chainOption.setRequired(false);
     options.addOption(chainOption);
 
-    // Optimized
-    Option disableOptimizationOption =
-        new Option("do", "disable-optimization", false, "Disables optimizations");
-    disableOptimizationOption.setRequired(false);
-    options.addOption(disableOptimizationOption);
+    // Parallel Processing
+    Option disableParallelProcessingOption =
+        new Option(
+            "dpp", "disable-parallel-processing", false, "Disables parallel processing of fixes");
+    disableParallelProcessingOption.setRequired(false);
+    options.addOption(disableParallelProcessingOption);
+
+    // Fix impact cache
+    Option enableFixImpactCacheOption =
+        new Option("eic", "enable-impact-cache", false, "Enables fix impact cache");
+    enableFixImpactCacheOption.setRequired(false);
+    options.addOption(enableFixImpactCacheOption);
 
     // Exhaustive
     Option exhaustiveSearchOption =
@@ -328,6 +343,17 @@ public class Config {
     disableRegionDetectionByLombok.setRequired(false);
     options.addOption(disableRegionDetectionByLombok);
 
+    // Nonnull annotations.
+    Option nonnullAnnotationsOption =
+        new Option(
+            "nna",
+            "nonnull-annotations",
+            true,
+            "Adds a list of nonnull annotations separated by comma to be acknowledged by Annotator (e.g. com.example1.Nonnull,com.example2.Nonnull)");
+    nonnullAnnotationsOption.setRequired(false);
+    nonnullAnnotationsOption.setValueSeparator(',');
+    options.addOption(nonnullAnnotationsOption);
+
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
@@ -392,7 +418,8 @@ public class Config {
     this.bailout = !cmd.hasOption(disableBailoutOption.getLongOpt());
     this.useCache = !cmd.hasOption(disableCacheOption.getLongOpt());
     this.disableOuterLoop = cmd.hasOption(disableOuterLoopOption.getLongOpt());
-    this.optimized = !cmd.hasOption(disableOptimizationOption.getLongOpt());
+    this.useParallelGraphProcessor = !cmd.hasOption(disableParallelProcessingOption.getLongOpt());
+    this.useImpactCache = cmd.hasOption(enableFixImpactCacheOption.getLongOpt());
     this.exhaustiveSearch = cmd.hasOption(exhaustiveSearchOption.getLongOpt());
     this.downStreamDependenciesAnalysisActivated =
         cmd.hasOption(downstreamDependenciesActivationOption.getLongOpt());
@@ -428,6 +455,10 @@ public class Config {
         cmd.hasOption(disableRegionDetectionByLombok)
             ? ImmutableSet.of()
             : Sets.immutableEnumSet(SourceType.LOMBOK);
+    this.nonnullAnnotations =
+        !cmd.hasOption(nonnullAnnotationsOption)
+            ? ImmutableSet.of()
+            : ImmutableSet.copyOf(cmd.getOptionValue(nonnullAnnotationsOption).split(","));
   }
 
   /**
@@ -450,7 +481,10 @@ public class Config {
     this.redirectBuildOutputToStdErr =
         getValueFromKey(jsonObject, "REDIRECT_BUILD_OUTPUT_TO_STDERR", Boolean.class).orElse(false);
     this.useCache = getValueFromKey(jsonObject, "CACHE", Boolean.class).orElse(true);
-    this.optimized = getValueFromKey(jsonObject, "OPTIMIZED", Boolean.class).orElse(true);
+    this.useParallelGraphProcessor =
+        getValueFromKey(jsonObject, "PARALLEL_PROCESSING", Boolean.class).orElse(true);
+    this.useImpactCache =
+        getValueFromKey(jsonObject, "CACHE_IMPACT_ACTIVATION", Boolean.class).orElse(false);
     this.exhaustiveSearch =
         getValueFromKey(jsonObject, "EXHAUSTIVE_SEARCH", Boolean.class).orElse(true);
     this.disableOuterLoop = !getValueFromKey(jsonObject, "OUTER_LOOP", Boolean.class).orElse(false);
@@ -513,11 +547,27 @@ public class Config {
         lombokCodeDetectorActivated ? Sets.immutableEnumSet(SourceType.LOMBOK) : ImmutableSet.of();
     this.log = new Log();
     this.offsetHandler = new OffsetHandler(this);
+    this.nonnullAnnotations =
+        ImmutableSet.copyOf(
+            getArrayValueFromKey(
+                    jsonObject,
+                    "ANNOTATION:NONNULL",
+                    json -> json.get("NONNULL").toString(),
+                    String.class)
+                .orElse(List.of()));
     log.reset();
   }
 
-  /** Initializes NullAway serialization adapter according to the serialized version. */
-  public void initializeAdapter(FieldDeclarationStore fieldDeclarationStore) {
+  /**
+   * Initializes NullAway serialization adapter according to the serialized version.
+   *
+   * @param fieldDeclarationStore Field declaration store, used to create fixes for initialization
+   *     errors.
+   * @param nonnullStore Nonnull store used to prevent annotator from generating fixes for elements
+   *     with {@code @Nonnull} annotations.
+   */
+  public void initializeAdapter(
+      FieldDeclarationStore fieldDeclarationStore, NonnullStore nonnullStore) {
     if (adapter != null) {
       // adapter is already initialized.
       return;
@@ -525,23 +575,24 @@ public class Config {
     Path serializationVersionPath = target.dir.resolve("serialization_version.txt");
     if (!serializationVersionPath.toFile().exists()) {
       // Older versions of NullAway.
-      this.adapter = new NullAwayV0Adapter(this, fieldDeclarationStore);
-      return;
+      throw new RuntimeException(
+          "This annotator version requires NullAway 0.10.6 or higher (using SerializeFixMetadataVersion=2), please upgrade NullAway or use version 1.3.4 of Annotator.");
     }
     try {
       List<String> lines = Files.readAllLines(serializationVersionPath);
       int version = Integer.parseInt(lines.get(0));
       switch (version) {
         case 0:
-          this.adapter = new NullAwayV0Adapter(this, fieldDeclarationStore);
-          this.offsetHandlingIsActivated = false;
-          break;
+          throw new RuntimeException(
+              "This annotator version does not support serialization version 0, please upgrade NullAway to 0.10.6+ (with SerializeFixMetadataVersion=2) or use version 1.3.5 of Annotator.");
         case 1:
-          this.adapter = new NullAwayV1Adapter(this, fieldDeclarationStore);
-          this.offsetHandlingIsActivated = false;
-          break;
+          throw new RuntimeException(
+              "This annotator version does not support serialization version 1, please upgrade NullAway to 0.10.6+ (with SerializeFixMetadataVersion=2) or use version 1.3.5 of Annotator.");
         case 2:
-          this.adapter = new NullAwayV2Adapter(this, fieldDeclarationStore);
+          throw new RuntimeException(
+              "This annotator version does not support serialization version 2, please upgrade NullAway to 0.10.10+. Serialization version v2 is skipped and was used for an alpha version of the Annotator.");
+        case 3:
+          this.adapter = new NullAwayV3Adapter(this, fieldDeclarationStore, nonnullStore);
           this.offsetHandlingIsActivated = true;
           break;
         default:
@@ -563,6 +614,15 @@ public class Config {
       throw new IllegalStateException("Adapter is not initialized.");
     }
     return adapter;
+  }
+
+  /**
+   * Getter for nonnull annotations.
+   *
+   * @return Immutable set of fully qualified name of nonnull annotations.
+   */
+  public ImmutableSet<String> getNonnullAnnotations() {
+    return nonnullAnnotations;
   }
 
   /**
@@ -664,7 +724,7 @@ public class Config {
     public List<ModuleInfo> configPaths;
 
     public boolean chain = false;
-    public boolean optimized = true;
+    public boolean useParallelProcessor = true;
     public boolean exhaustiveSearch = false;
     public boolean cache = true;
     public boolean bailout = true;
@@ -678,6 +738,7 @@ public class Config {
     public boolean forceResolveActivation = false;
     public String nullUnmarkedAnnotation = "org.jspecify.nullness.NullUnmarked";
     public boolean inferenceActivated = true;
+    public boolean useCacheImpact = false;
     public Set<SourceType> sourceTypes = new HashSet<>();
     public int depth = 1;
 
@@ -702,7 +763,8 @@ public class Config {
       json.put("OUTER_LOOP", outerLoopActivation);
       json.put("OUTPUT_DIR", outputDir);
       json.put("CHAIN", chain);
-      json.put("OPTIMIZED", optimized);
+      json.put("PARALLEL_PROCESSING", useParallelProcessor);
+      json.put("CACHE_IMPACT_ACTIVATION", useCacheImpact);
       json.put("CACHE", cache);
       json.put("BAILOUT", bailout);
       json.put("DEPTH", depth);

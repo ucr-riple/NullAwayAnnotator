@@ -22,55 +22,68 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.global;
+package edu.ucr.cs.riple.core.cache.downstream;
 
-import com.google.common.collect.ImmutableMultimap;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
+
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimaps;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.cache.BaseCache;
+import edu.ucr.cs.riple.core.cache.Impact;
 import edu.ucr.cs.riple.core.evaluators.suppliers.DownstreamDependencySupplier;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
-import edu.ucr.cs.riple.core.metadata.method.MethodNode;
 import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
-import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
-import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
-import java.util.Optional;
+import java.util.Collection;
 import java.util.OptionalInt;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
-/** Implementation for {@link GlobalAnalyzer} interface. */
-public class GlobalAnalyzerImpl implements GlobalAnalyzer {
+/**
+ * Implementation for {@link DownstreamImpactCache} interface. This cache state is immutable and
+ * once created, cannot be updated.
+ */
+public class DownstreamImpactCacheImpl
+    extends BaseCache<DownstreamImpact, ImmutableMap<Location, DownstreamImpact>>
+    implements DownstreamImpactCache {
 
   /** Set of downstream dependencies. */
   private final ImmutableSet<ModuleInfo> downstreamModules;
-  /** Public APIs in the target modules that have a non-primitive return value. */
-  private final ImmutableMultimap<Integer, MethodImpact> methods;
-  /** Annotator Config. */
-  private final Config config;
-  /** Method declaration tree instance. */
-  private final MethodDeclarationTree tree;
 
-  public GlobalAnalyzerImpl(Config config, MethodDeclarationTree tree) {
-    this.config = config;
+  /**
+   * Constructor for creating downstream impact cache. It populates the store with a downstream
+   * impact listing 0 triggered errors and 0 downstream fixes for the result of adding
+   * {@code @Nullable} to each method in the target being annotated. The actual impacts, will be
+   * computed once {@link #analyzeDownstreamDependencies()} is called.
+   *
+   * @param config Annotator config.
+   * @param tree Method declaration tree for target module used to collect public methods with
+   *     non-primitive return types to compute their impacts on downstream dependencies.
+   */
+  public DownstreamImpactCacheImpl(Config config, MethodDeclarationTree tree) {
+    super(
+        config,
+        tree.getPublicMethodsWithNonPrimitivesReturn().stream()
+            .map(
+                methodNode ->
+                    new DownstreamImpact(
+                        new Fix(
+                            new AddMarkerAnnotation(methodNode.location, config.nullableAnnot),
+                            "null",
+                            true)))
+            .collect(toImmutableMap(Impact::toLocation, Function.identity())),
+        tree);
     this.downstreamModules = config.downstreamInfo;
-    this.tree = tree;
-    this.methods =
-        Multimaps.index(
-            tree.getPublicMethodsWithNonPrimitivesReturn().stream()
-                .map(MethodImpact::new)
-                .collect(ImmutableSet.toImmutableSet()),
-            MethodImpact::hashCode);
   }
 
   @Override
@@ -83,37 +96,31 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
     MethodRegionTracker tracker = new MethodRegionTracker(config, config.downstreamInfo, tree);
     // Generate fixes corresponding methods.
     ImmutableSet<Fix> fixes =
-        methods.values().stream()
+        store.values().stream()
             .filter(
                 input ->
                     !tracker
-                        .getCallersOfMethod(input.node.location.clazz, input.node.location.method)
+                        .getCallersOfMethod(input.toMethod().clazz, input.toMethod().method)
                         .isEmpty()) // skip methods that are not called anywhere.
             .map(
-                methodImpact ->
+                downstreamImpact ->
                     new Fix(
-                        new AddMarkerAnnotation(
-                            new OnMethod(
-                                "null",
-                                methodImpact.node.location.clazz,
-                                methodImpact.node.location.method),
-                            config.nullableAnnot),
+                        new AddMarkerAnnotation(downstreamImpact.toMethod(), config.nullableAnnot),
                         "null",
-                        new Region("null", "null"),
                         false))
             .collect(ImmutableSet.toImmutableSet());
-    DownstreamImpactEvaluator analyzer =
+    DownstreamImpactEvaluator evaluator =
         new DownstreamImpactEvaluator(new DownstreamDependencySupplier(config, tracker, tree));
-    ImmutableSet<Report> reports = analyzer.evaluate(fixes);
+    ImmutableSet<Report> reports = evaluator.evaluate(fixes);
     // Update method status based on the results.
-    methods
+    this.store
         .values()
         .forEach(
             method -> {
-              MethodNode node = method.node;
-              Set<OnParameter> impactedParameters = analyzer.getImpactedParameters(node.location);
+              Set<OnParameter> impactedParameters =
+                  evaluator.getImpactedParameters(method.toMethod());
               reports.stream()
-                  .filter(input -> input.root.toMethod().equals(node.location))
+                  .filter(input -> input.root.toMethod().equals(method.toMethod()))
                   .findAny()
                   .ifPresent(report -> method.setStatus(report, impactedParameters));
             });
@@ -121,54 +128,45 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
   }
 
   /**
-   * Retrieves the corresponding {@link MethodImpact} to a fix.
+   * Retrieves the corresponding {@link DownstreamImpact} to a fix.
    *
    * @param fix Target fix.
-   * @return Corresponding {@link MethodImpact}, null if not located.
+   * @return Corresponding {@link DownstreamImpact}, null if not located.
    */
   @Nullable
-  private MethodImpact fetchMethodImpactForFix(Fix fix) {
+  @Override
+  public DownstreamImpact fetchImpact(Fix fix) {
     if (!fix.isOnMethod()) {
+      // we currently store only impacts of fixes for methods on downstream dependencies.
       return null;
     }
-    OnMethod onMethod = fix.toMethod();
-    int predictedHash = MethodImpact.hash(onMethod.method, onMethod.clazz);
-    Optional<MethodImpact> optional =
-        this.methods.get(predictedHash).stream()
-            .filter(m -> m.node.location.equals(onMethod))
-            .findAny();
-    return optional.orElse(null);
+    return super.fetchImpact(fix);
   }
 
   /**
    * Returns the effect of applying a fix on the target on downstream dependencies.
    *
    * @param fix Fix targeting an element in target.
-   * @param fixesLocation Location in target that will be annotated as {@code @Nullable}.
+   * @param fixTree Fix tree in target that will be annotated as {@code @Nullable}.
    * @return Effect on downstream dependencies.
    */
-  private int effectOnDownstreamDependencies(Fix fix, Set<Location> fixesLocation) {
-    MethodImpact methodImpact = fetchMethodImpactForFix(fix);
-    if (methodImpact == null) {
+  private int effectOnDownstreamDependencies(Fix fix, Set<Fix> fixTree) {
+    DownstreamImpact downstreamImpact = fetchImpact(fix);
+    if (downstreamImpact == null) {
       return 0;
     }
-    int individualEffect = methodImpact.getEffect();
     // Some triggered errors might be resolved due to fixes in the tree, and we should not double
     // count them.
-    Set<Error> triggeredErrors = methodImpact.getTriggeredErrors();
+    Set<Error> triggeredErrors = downstreamImpact.getTriggeredErrors();
     long resolvedErrors =
-        triggeredErrors.stream()
-            .filter(
-                error -> error.isSingleFix() && fixesLocation.contains(error.toResolvingLocation()))
-            .count();
-    return individualEffect - (int) resolvedErrors;
+        triggeredErrors.stream().filter(error -> error.isResolvableWith(fixTree)).count();
+    return triggeredErrors.size() - (int) resolvedErrors;
   }
 
   @Override
   public int computeLowerBoundOfNumberOfErrors(Set<Fix> tree) {
-    Set<Location> fixLocations = tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
     OptionalInt lowerBoundEffectOfChainOptional =
-        tree.stream().mapToInt(fix -> effectOnDownstreamDependencies(fix, fixLocations)).max();
+        tree.stream().mapToInt(fix -> effectOnDownstreamDependencies(fix, tree)).max();
     if (lowerBoundEffectOfChainOptional.isEmpty()) {
       return 0;
     }
@@ -177,42 +175,36 @@ public class GlobalAnalyzerImpl implements GlobalAnalyzer {
 
   @Override
   public int computeUpperBoundOfNumberOfErrors(Set<Fix> tree) {
-    Set<Location> fixesLocation = tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
-    return tree.stream().mapToInt(fix -> effectOnDownstreamDependencies(fix, fixesLocation)).sum();
+    return tree.stream().mapToInt(fix -> effectOnDownstreamDependencies(fix, tree)).sum();
   }
 
   @Override
-  public ImmutableSet<OnParameter> getImpactedParameters(Set<Fix> fixTree) {
+  public boolean triggersUnresolvableErrorsOnDownstream(Fix fix) {
+    return getTriggeredErrors(fix).stream().anyMatch(error -> !error.isFixableOnTarget(tree));
+  }
+
+  @Override
+  public ImmutableSet<Error> getTriggeredErrorsForCollection(Collection<Fix> fixTree) {
     return fixTree.stream()
         .filter(Fix::isOnMethod)
         .flatMap(
             fix -> {
-              MethodImpact impact = fetchMethodImpactForFix(fix);
-              return impact == null ? Stream.of() : impact.getImpactedParameters().stream();
+              DownstreamImpact impact = fetchImpact(fix);
+              return impact == null ? Stream.of() : impact.getTriggeredErrors().stream();
             })
         .collect(ImmutableSet.toImmutableSet());
   }
 
   @Override
-  public Set<Error> getTriggeredErrors(Fix fix) {
+  public ImmutableSet<Error> getTriggeredErrors(Fix fix) {
     // We currently only store impact of methods on downstream dependencies.
     if (!fix.isOnMethod()) {
-      return Set.of();
+      return ImmutableSet.of();
     }
-    MethodImpact impact = fetchMethodImpactForFix(fix);
+    DownstreamImpact impact = fetchImpact(fix);
     if (impact == null) {
-      return Set.of();
+      return ImmutableSet.of();
     }
-    return impact.getTriggeredErrors();
-  }
-
-  @Override
-  public void updateImpactsAfterInjection(Set<Fix> fixes) {
-    this.methods.values().forEach(methodImpact -> methodImpact.updateStatus(fixes));
-  }
-
-  @Override
-  public boolean isNotFixableOnTarget(Fix fix) {
-    return getTriggeredErrors(fix).stream().anyMatch(error -> !error.isFixableOnTarget(tree));
+    return ImmutableSet.copyOf(impact.getTriggeredErrors());
   }
 }

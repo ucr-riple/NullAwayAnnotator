@@ -282,7 +282,7 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
                 new OnMethod(
                     "Super.java",
                     "com.uber.Super",
-                    "computeResult(com.ibm.wala.ipa.slicer.Statement,java.util.Map<com.ibm.wala.ipa.callgraph.propagation.PointerKey,com.ibm.wala.util.intset.MutableIntSet>,com.ibm.wala.dataflow.graph.BitVectorSolver<? extends com.ibm.wala.ssa.ISSABasicBlock>,com.ibm.wala.util.intset.OrdinalSetMapping<com.ibm.wala.ipa.slicer.Statement>,com.ibm.wala.ipa.callgraph.CGNode,com.ibm.wala.ipa.modref.ExtendedHeapModel,com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis<T>,java.util.Map<com.ibm.wala.ipa.callgraph.CGNode,com.ibm.wala.util.intset.OrdinalSet<com.ibm.wala.ipa.callgraph.propagation.PointerKey>>,com.ibm.wala.ssa.analysis.ExplodedControlFlowGraph,java.util.Map<java.lang.Integer,com.ibm.wala.ipa.slicer.NormalStatement>)"),
+                    "computeResult(com.ibm.wala.ipa.slicer.Statement,java.util.Map,com.ibm.wala.dataflow.graph.BitVectorSolver,com.ibm.wala.util.intset.OrdinalSetMapping,com.ibm.wala.ipa.callgraph.CGNode,com.ibm.wala.ipa.modref.ExtendedHeapModel,com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis,java.util.Map,com.ibm.wala.ssa.analysis.ExplodedControlFlowGraph,java.util.Map)"),
                 "javax.annotation.Nullable"))
         .start();
   }
@@ -342,7 +342,7 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
                 new OnMethod(
                     "Super.java",
                     "com.uber.Super",
-                    "<T>getReader(com.ibm.wala.shrikeCT.ClassReader.AttrIterator,java.lang.String,com.ibm.wala.classLoader.ShrikeClass.GetReader<T>)"),
+                    "<T>getReader(com.ibm.wala.shrikeCT.ClassReader.AttrIterator,java.lang.String,com.ibm.wala.classLoader.ShrikeClass.GetReader)"),
                 "javax.annotation.Nullable"))
         .start();
   }
@@ -367,7 +367,7 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
         .addChanges(
             new AddMarkerAnnotation(
                 new OnMethod(
-                    "Main.java", "com.uber.Main", "format(java.lang.String,java.lang.Object...)"),
+                    "Main.java", "com.uber.Main", "format(java.lang.String,java.lang.Object[])"),
                 "javax.annotation.Initializer"))
         .start();
   }
@@ -414,9 +414,7 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
         .addChanges(
             new AddMarkerAnnotation(
                 new OnMethod(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)"),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)"),
                 "javax.annotation.Nullable"))
         .start();
   }

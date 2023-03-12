@@ -319,44 +319,27 @@ public class ComprehensiveTest extends BaseInjectorTest {
         .addChanges(
             new RemoveAnnotation(
                 new OnMethod(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)"),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)"),
                 "javax.annotation.Nullable"),
             new RemoveAnnotation(
                 new OnParameter(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)",
-                    0),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 0),
                 "javax.annotation.Nullable"),
             new AddMarkerAnnotation(
                 new OnParameter(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)",
-                    1),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 1),
                 "javax.annotation.Nullable"),
             new RemoveAnnotation(
                 new OnParameter(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)",
-                    2),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 2),
                 "javax.annotation.Nullable"),
             new AddMarkerAnnotation(
                 new OnParameter(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)",
-                    3),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 3),
                 "javax.annotation.Nullable"),
             new RemoveAnnotation(
                 new OnParameter(
-                    "Main.java",
-                    "edu.ucr.Main",
-                    "foo6(Map<String, Object>, Object, Object, Object, Object)",
-                    4),
+                    "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 4),
                 "javax.annotation.Nullable"))
         .start();
   }

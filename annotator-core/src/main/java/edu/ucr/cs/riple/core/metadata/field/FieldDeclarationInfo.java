@@ -1,21 +1,21 @@
 package edu.ucr.cs.riple.core.metadata.field;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.metadata.Hashable;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
 /** Used to store information regarding multiple field declaration statements in classes. */
-public class FieldDeclarationInfo implements Hashable {
+public class FieldDeclarationInfo {
   /** Set of al fields declared within one statement. */
   public final Set<ImmutableSet<String>> fields;
   /** Flat name of the containing class. */
   public final String clazz;
   /** Path to source file containing this class. */
-  public final String pathToSourceFile;
+  public final Path pathToSourceFile;
 
-  public FieldDeclarationInfo(String path, String clazz) {
+  public FieldDeclarationInfo(Path path, String clazz) {
     this.clazz = clazz;
     this.pathToSourceFile = path;
     this.fields = new HashSet<>();

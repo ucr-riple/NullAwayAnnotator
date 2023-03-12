@@ -60,6 +60,8 @@ public class ErrorProneCLIFlagsConfig implements Config {
   private final Serializer serializer;
   /** Source type resolver for serialized regions. */
   private final SymbolSourceResolver symbolSourceResolver;
+  /** Immutable set of fully qualified name of {@code @Nonnull} annotations. */
+  private final ImmutableSet<String> nonnullAnnotations;
 
   static final String EP_FL_NAMESPACE = "AnnotatorScanner";
   static final String FL_CONFIG_PATH = EP_FL_NAMESPACE + ":ConfigPath";
@@ -80,8 +82,8 @@ public class ErrorProneCLIFlagsConfig implements Config {
       throw new RuntimeException("Error in reading/parsing config at path: " + configFilePath, e);
     }
     String outputDirectoryPathInString =
-        XMLUtil.getValueFromTag(document, "/scanner/path", String.class).orElse(null);
-    if (outputDirectoryPathInString == null) {
+        XMLUtil.getValueFromTag(document, "/scanner/path", String.class).orElse("");
+    if (outputDirectoryPathInString == null || outputDirectoryPathInString.isEmpty()) {
       throw new IllegalArgumentException(
           "Output path cannot be null, should be set it in config file within <path> tag");
     }
@@ -99,6 +101,9 @@ public class ErrorProneCLIFlagsConfig implements Config {
         XMLUtil.getValueFromAttribute(document, "/scanner/class", "active", Boolean.class)
             .orElse(false);
     this.symbolSourceResolver = new SymbolSourceResolver(extractRequestedSourceTypes(document));
+    this.nonnullAnnotations =
+        XMLUtil.getArrayValueFromTag(document, "/scanner/annotations/nonnull", String.class)
+            .orElse(ImmutableSet.of());
     this.serializer = new Serializer(this);
   }
 
@@ -136,6 +141,11 @@ public class ErrorProneCLIFlagsConfig implements Config {
   @Override
   public boolean classTrackerIsActive() {
     return classTrackerIsActive;
+  }
+
+  @Override
+  public boolean isNonnullAnnotation(String annotName) {
+    return nonnullAnnotations.contains(annotName);
   }
 
   @Override

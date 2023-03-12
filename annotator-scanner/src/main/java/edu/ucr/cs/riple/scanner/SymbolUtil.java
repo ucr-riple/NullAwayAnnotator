@@ -26,7 +26,11 @@
 
 package edu.ucr.cs.riple.scanner;
 
+import com.google.common.base.Preconditions;
 import com.google.errorprone.util.ASTHelpers;
+import com.sun.source.tree.ExpressionTree;
+import com.sun.source.tree.LambdaExpressionTree;
+import com.sun.source.tree.MemberReferenceTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.source.util.TreePath;
@@ -35,6 +39,7 @@ import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.TargetType;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.Types;
+import com.sun.tools.javac.tree.JCTree;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.lang.model.element.AnnotationMirror;
@@ -94,6 +99,32 @@ public class SymbolUtil {
   }
 
   /**
+   * Does the symbol have a {@code @Nonnull} declaration or type-use annotation?
+   *
+   * <p>NOTE: this method does not work for checking all annotations of parameters of methods from
+   * class files. For that case, use {@link #paramHasNullableAnnotation(Symbol.MethodSymbol, int,
+   * Config)}
+   */
+  public static boolean hasNonnullAnnotations(Symbol symbol, Config config) {
+    return hasNonnullAnnotations(SymbolUtil.getAllAnnotations(symbol), config);
+  }
+
+  public static boolean hasNonnullAnnotations(
+      Stream<? extends AnnotationMirror> annotations, Config config) {
+    return annotations
+        .map(anno -> anno.getAnnotationType().toString())
+        .anyMatch(anno -> isNonnullAnnotation(anno, config));
+  }
+
+  private static boolean isNonnullAnnotation(String annotName, Config config) {
+    return annotName.endsWith(".NonNull")
+        || annotName.endsWith(".NotNull")
+        || annotName.endsWith(".Nonnull")
+        || annotName.equals("androidx.annotation.RecentlyNonNull")
+        || config.isNonnullAnnotation(annotName);
+  }
+
+  /**
    * Check whether an annotation should be treated as equivalent to <code>@Nullable</code>.
    *
    * @param annotName annotation name
@@ -116,6 +147,15 @@ public class SymbolUtil {
   public static boolean paramHasNullableAnnotation(
       Symbol.MethodSymbol symbol, int paramInd, Config config) {
     return hasNullableAnnotation(getAllAnnotationsForParameter(symbol, paramInd), config);
+  }
+
+  /**
+   * Does the parameter of {@code symbol} at {@code paramInd} have a {@code @Nonnull} declaration or
+   * type-use annotation? This method works for methods defined in either source or class files.
+   */
+  public static boolean paramHasNonnullAnnotation(
+      Symbol.MethodSymbol symbol, int paramInd, Config config) {
+    return hasNonnullAnnotations(getAllAnnotationsForParameter(symbol, paramInd), config);
   }
 
   /**
@@ -201,5 +241,19 @@ public class SymbolUtil {
       return fieldSymbol;
     }
     return null;
+  }
+
+  /**
+   * finds the corresponding functional interface method for a lambda expression or a method
+   * reference
+   *
+   * @param tree the lambda expression or method reference
+   * @return the functional interface method
+   */
+  public static Symbol.MethodSymbol getFunctionalInterfaceMethod(ExpressionTree tree, Types types) {
+    Preconditions.checkArgument(
+        (tree instanceof LambdaExpressionTree) || (tree instanceof MemberReferenceTree));
+    Type funcInterfaceType = ((JCTree.JCFunctionalExpression) tree).type;
+    return (Symbol.MethodSymbol) types.findDescriptorSymbol(funcInterfaceType.tsym);
   }
 }

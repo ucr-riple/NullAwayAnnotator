@@ -24,64 +24,41 @@
 
 package edu.ucr.cs.riple.core.metadata.index;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
 /**
  * Responsible for tracking status of generated outputs. It indexes outputs, can save states and
  * compute the difference between states.
- *
- * @param <T> Extends Enclosed.
  */
-public class Bank<T extends Enclosed> {
+public class ErrorStore {
 
-  /** Initial state indexed by enclosing class. */
-  private final Index<T> rootInClass;
   /** Initial state indexed by enclosing class and method. */
-  private final Index<T> rootInMember;
-  /** Current state indexed by enclosing class. */
-  private Index<T> currentInClass;
+  private final Index root;
   /** Current state indexed by enclosing class and method. */
-  private Index<T> currentInMember;
+  private Index current;
   /** Factory instance to parse outputs. */
-  private final Factory<T> factory;
+  private final Factory factory;
   /** Path to file where outputs are stored. */
   private final ImmutableSet<Path> paths;
 
-  public Bank(ImmutableSet<Path> paths, Factory<T> factory) {
+  public ErrorStore(ImmutableSet<Path> paths, Factory factory) {
     this.factory = factory;
     this.paths = paths;
-    rootInClass = new Index<>(this.paths, Index.Type.BY_CLASS, factory);
-    rootInMember = new Index<>(this.paths, Index.Type.BY_MEMBER, factory);
-    rootInMember.index();
-    rootInClass.index();
-    Preconditions.checkArgument(rootInClass.getTotal() == rootInMember.getTotal());
+    root = new Index(this.paths, factory);
+    root.index();
   }
 
-  public Bank(Path path, Factory<T> factory) {
-    this(ImmutableSet.of(path), factory);
-  }
-
-  /**
-   * Overwrites the current state with the new generated output,
-   *
-   * @param saveClass If true, current index by class will be updated.
-   * @param saveMember if true, current index by class and member will be updated.
-   */
-  public void saveState(boolean saveClass, boolean saveMember) {
-    if (saveClass) {
-      currentInClass = new Index<>(paths, Index.Type.BY_CLASS, factory);
-      currentInClass.index();
-    }
-    if (saveMember) {
-      currentInMember = new Index<>(paths, Index.Type.BY_MEMBER, factory);
-      currentInMember.index();
-    }
+  /** Overwrites the current state with the new generated output, */
+  public void saveState() {
+    current = new Index(paths, factory);
+    current.index();
   }
 
   /**
@@ -91,25 +68,22 @@ public class Bank<T extends Enclosed> {
    * @param currentItems A.
    * @return Corresponding {@link Result} instance storing result of (A - B).
    */
-  private Result<T> compareByList(Collection<T> previousItems, Collection<T> currentItems) {
+  private Result compareByList(Collection<Error> previousItems, Collection<Error> currentItems) {
     int size = currentItems.size() - previousItems.size();
-    previousItems.forEach(currentItems::remove);
-    return new Result<>(size, currentItems);
+    List<Error> temp = new ArrayList<>(currentItems);
+    previousItems.forEach(temp::remove);
+    return new Result(size, temp);
   }
 
   /**
    * Computes the difference in items enclosed by the given enclosing class and member in current
    * state and root state.
    *
-   * @param encClass Enclosing fully qualified class name.
-   * @param encMember Enclosing member symbol.
+   * @param region Enclosing region
    * @return Corresponding {@link Result}.
    */
-  public Result<T> compareByMember(String encClass, String encMember, boolean fresh) {
-    saveState(false, fresh);
-    return compareByList(
-        rootInMember.getByMember(encClass, encMember),
-        currentInMember.getByMember(encClass, encMember));
+  public Result compareByRegion(Region region) {
+    return compareByList(root.get(region), current.get(region));
   }
 
   /**
@@ -117,8 +91,8 @@ public class Bank<T extends Enclosed> {
    *
    * @return Corresponding {@link Result} instance.
    */
-  public Result<T> compare() {
-    return compareByList(rootInMember.values(), currentInMember.values());
+  public Result compare() {
+    return compareByList(root.values(), current.values());
   }
 
   /**
@@ -127,7 +101,17 @@ public class Bank<T extends Enclosed> {
    * @param predicate Predicate provided by caller.
    * @return Set of regions.
    */
-  public Set<Region> getRegionsForFixes(Predicate<T> predicate) {
-    return rootInClass.getRegionsOfMatchingItems(predicate);
+  public Set<Region> getRegionsForElements(Predicate<Error> predicate) {
+    return root.getRegionsOfMatchingItems(predicate);
+  }
+
+  /**
+   * Returns the number of resolved errors from base (initial set of errors) by the given fixes.
+   *
+   * @param fixes The given fixes.
+   * @return Number of resolved errors.
+   */
+  public int getNumberOfErrorsResolvedByAllFixesWithinCollection(Collection<Fix> fixes) {
+    return (int) root.values().stream().filter(error -> error.isResolvableWith(fixes)).count();
   }
 }

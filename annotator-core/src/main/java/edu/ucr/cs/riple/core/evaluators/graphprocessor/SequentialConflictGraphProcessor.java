@@ -27,11 +27,9 @@ package edu.ucr.cs.riple.core.evaluators.graphprocessor;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.metadata.graph.ConflictGraph;
-import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.Result;
 import edu.ucr.cs.riple.core.util.Utility;
-import java.util.Collection;
 import java.util.Set;
 import me.tongfei.progressbar.ProgressBar;
 
@@ -55,16 +53,13 @@ public class SequentialConflictGraphProcessor extends AbstractConflictGraphProce
               Set<Fix> fixes = node.tree;
               injector.injectFixes(fixes);
               compilerRunner.run();
-              errorBank.saveState(false, true);
-              fixBank.saveState(false, true);
-              Result<Error> errorComparisonResult = errorBank.compare();
+              errorStore.saveState();
+              Result errorComparisonResult = errorStore.compare();
               node.effect = errorComparisonResult.size;
-              Collection<Fix> fixComparisonResultDif = fixBank.compare().dif;
-              addTriggeredFixesFromDownstream(node, fixComparisonResultDif);
               node.updateStatus(
                   errorComparisonResult.size,
                   fixes,
-                  fixComparisonResultDif,
+                  getTriggeredFixesFromDownstreamErrors(node),
                   errorComparisonResult.dif,
                   methodDeclarationTree);
               injector.removeFixes(fixes);

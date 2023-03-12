@@ -38,14 +38,14 @@ public class ParameterRegionTracker implements RegionTracker {
    * {@link MethodDeclarationTree} instance, used to retrieve regions that will be affected due to
    * inheritance violations.
    */
-  private final MethodDeclarationTree tree;
+  private final MethodDeclarationTree methodDeclarationTree;
 
   /** {@link MethodRegionTracker} instance, used to retrieve all sites. */
   private final MethodRegionTracker methodRegionTracker;
 
   public ParameterRegionTracker(
-      MethodDeclarationTree tree, MethodRegionTracker methodRegionTracker) {
-    this.tree = tree;
+      MethodDeclarationTree methodDeclarationTree, MethodRegionTracker methodRegionTracker) {
+    this.methodDeclarationTree = methodDeclarationTree;
     this.methodRegionTracker = methodRegionTracker;
   }
 
@@ -57,12 +57,24 @@ public class ParameterRegionTracker implements RegionTracker {
     OnParameter parameter = location.toParameter();
     // Get regions which will be potentially affected by inheritance violations.
     Set<Region> regions =
-        tree.getSubMethods(parameter.method, parameter.clazz, false).stream()
+        methodDeclarationTree.getSubMethods(parameter.method, parameter.clazz, false).stream()
             .map(node -> new Region(node.location.clazz, node.location.method))
             .collect(Collectors.toSet());
     // Add the method the fix is targeting.
     regions.add(new Region(parameter.clazz, parameter.method));
-    // Add all call sites.
+    // Add all call sites. It will also reserve call sites to prevent callers from passing @Nullable
+    // simultaneously while investigating parameters impact.
+    // See example below:
+    // void foo(Object o) {
+    //   bar(o);
+    // }
+    // void bar(Object o)
+    //
+    // We need to make sure that while investigating impact of `@Nullable` on bar#o, other callers
+    // are not passing `@Nullable` to bar#o. Since the corresponding error will not be triggered
+    // (passing `@Nullable` to `@Nonnull` parameter) as bar#o is temporarily annotated as @Nullable
+    // to compute its impact.
+    // See test: CoreTest#nestedParameters.
     regions.addAll(methodRegionTracker.getCallersOfMethod(parameter.clazz, parameter.method));
     return Optional.of(regions);
   }

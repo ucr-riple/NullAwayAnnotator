@@ -30,8 +30,10 @@ import com.sun.source.tree.CompilationUnitTree;
 import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.riple.scanner.Config;
 import edu.ucr.cs.riple.scanner.ScannerContext;
+import edu.ucr.cs.riple.scanner.Serializer;
 import edu.ucr.cs.riple.scanner.SymbolUtil;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -125,11 +127,12 @@ public class MethodInfo {
   @Override
   public String toString() {
     Preconditions.checkArgument(symbol != null, "Should not be null at this point.");
+    Path path = Serializer.pathToSourceFileFromURI(uri);
     return String.join(
         "\t",
         String.valueOf(id),
         (clazz != null ? clazz.flatName() : "null"),
-        symbol.toString(),
+        Serializer.serializeSymbol(symbol),
         String.valueOf(parentID),
         String.valueOf(symbol.getParameters().size()),
         Arrays.toString(parameterAnnotationFlags),
@@ -137,7 +140,7 @@ public class MethodInfo {
         getVisibilityOfMethod(),
         String.valueOf(!symbol.getReturnType().isPrimitiveOrVoid()),
         // for build systems that might return null for bytecodes.
-        (uri != null ? uri.toString() : "null"));
+        (path != null ? path.toString() : "null"));
   }
 
   /**
@@ -157,7 +160,7 @@ public class MethodInfo {
         "nullable",
         "visibility",
         "non-primitive-return",
-        "uri");
+        "path");
   }
 
   /**

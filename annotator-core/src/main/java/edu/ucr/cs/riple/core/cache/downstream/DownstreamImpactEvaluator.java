@@ -22,8 +22,10 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.global;
+package edu.ucr.cs.riple.core.cache.downstream;
 
+import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
 import edu.ucr.cs.riple.core.evaluators.suppliers.DownstreamDependencySupplier;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -36,9 +38,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Evaluator for analyzing downstream dependencies. Used by {@link GlobalAnalyzerImpl} to compute
- * the effects of changes in upstream on downstream dependencies. This evaluator cannot be used to
- * compute the effects in target module.
+ * Evaluator for analyzing downstream dependencies. Used by {@link DownstreamImpactCacheImpl} to
+ * compute the effects of changes in upstream on downstream dependencies. This evaluator cannot be
+ * used to compute the effects in target module.
  */
 class DownstreamImpactEvaluator extends BasicEvaluator {
 
@@ -58,8 +60,8 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
   }
 
   @Override
-  protected void collectGraphResults() {
-    super.collectGraphResults();
+  protected void collectGraphResults(ImmutableSet<Report> reports) {
+    super.collectGraphResults(reports);
     // Collect impacted parameters in target module by downstream dependencies.
     this.graph
         .getNodes()

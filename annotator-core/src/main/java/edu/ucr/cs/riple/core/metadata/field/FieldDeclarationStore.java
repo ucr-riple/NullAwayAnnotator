@@ -7,16 +7,20 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
+import edu.ucr.cs.riple.injector.location.OnClass;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.AnnotatorScanner;
-import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
@@ -39,6 +43,12 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
   public static final String FILE_NAME = "class_info.tsv";
 
   /**
+   * A map from class flat name to a set of field names that are declared in that class but not
+   * initialized at declaration.
+   */
+  private Multimap<String, String> uninitializedFields;
+
+  /**
    * Constructor for {@link FieldDeclarationStore}.
    *
    * @param config Annotator config.
@@ -46,6 +56,12 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
    */
   public FieldDeclarationStore(Config config, ModuleInfo module) {
     super(config, module.dir.resolve(FILE_NAME));
+  }
+
+  @Override
+  protected void setup() {
+    super.setup();
+    this.uninitializedFields = MultimapBuilder.hashKeys().hashSetValues().build();
   }
 
   /**
@@ -67,10 +83,10 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
     // Class flat name.
     String clazz = values[0];
     // Path to class.
-    String path = values[1];
+    Path path = Helper.deserializePath(values[1]);
     CompilationUnit tree;
     try {
-      tree = StaticJavaParser.parse(new File(path));
+      tree = StaticJavaParser.parse(path);
       NodeList<BodyDeclaration<?>> members;
       try {
         members = Helper.getTypeDeclarationMembersByFlatName(tree, clazz);
@@ -88,10 +104,23 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
                         vars.stream()
                             .map(NodeWithSimpleName::getNameAsString)
                             .collect(ImmutableSet.toImmutableSet()));
+                    // Collect uninitialized fields at declaration.
+                    vars.forEach(
+                        variableDeclarator -> {
+                          String fieldName = variableDeclarator.getNameAsString();
+                          if (variableDeclarator.getInitializer().isEmpty()) {
+                            uninitializedFields.put(clazz, fieldName);
+                          }
+                        });
                   }));
-      return info.isEmpty() ? null : info;
+      // We still want to keep the information about the class even if it has no field declarations,
+      // so we can retrieve tha path to the file from the given class flat name. This information is
+      // used in adding suppression annotations on class level.
+      return info;
     } catch (FileNotFoundException e) {
       return null;
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -117,6 +146,21 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
   }
 
   /**
+   * Returns true if the given field is declared in the given class but not initialized at
+   * declaration. A field declaration can contain multiple inline field declarations. This method
+   * will return true if any of the declared fields is not initialized.
+   *
+   * @param field Location of field to check.
+   * @return True if at least on of the given declarations at the given location is not not
+   *     initialized.
+   */
+  public boolean isUninitializedField(OnField field) {
+    // According to javadoc, Multimap.get() returns an empty collection if key is not found,
+    // therefore we do not need to check for key existence.
+    return !Collections.disjoint(uninitializedFields.get(field.clazz), field.variables);
+  }
+
+  /**
    * Creates a {@link OnField} instance targeting the passed field and class.
    *
    * @param clazz Enclosing class of the field.
@@ -132,5 +176,23 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
       return null;
     }
     return new OnField(candidate.pathToSourceFile, candidate.clazz, fieldNames);
+  }
+
+  /**
+   * Creates a {@link edu.ucr.cs.riple.injector.location.OnClass} instance targeting the passed
+   * classes flat name.
+   *
+   * @param clazz Enclosing class of the field.
+   * @return {@link edu.ucr.cs.riple.injector.location.OnClass} instance targeting the passed
+   *     classes flat name.
+   */
+  public OnClass getLocationOnClass(String clazz) {
+    FieldDeclarationInfo candidate =
+        findNodeWithHashHint(node -> node.clazz.equals(clazz), FieldDeclarationInfo.hash(clazz));
+    if (candidate == null) {
+      // class not observed in source code.
+      return null;
+    }
+    return new OnClass(candidate.pathToSourceFile, candidate.clazz);
   }
 }

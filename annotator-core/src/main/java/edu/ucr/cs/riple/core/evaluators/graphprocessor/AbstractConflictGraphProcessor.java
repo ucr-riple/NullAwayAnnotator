@@ -25,18 +25,15 @@
 package edu.ucr.cs.riple.core.evaluators.graphprocessor;
 
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
-import edu.ucr.cs.riple.core.global.GlobalAnalyzer;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.graph.Node;
-import edu.ucr.cs.riple.core.metadata.index.Bank;
-import edu.ucr.cs.riple.core.metadata.index.Error;
+import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
-import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
-import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -47,12 +44,10 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
   protected final MethodDeclarationTree methodDeclarationTree;
   /** Injector used in the processor to inject / remove fixes. */
   protected final AnnotationInjector injector;
-  /** Fix bank instance to store state of fixes before and after of injections. */
-  protected final Bank<Fix> fixBank;
-  /** Error bank instance to store state of fixes before and after of injections. */
-  protected final Bank<Error> errorBank;
-  /** Global analyzer to retrieve impacts of fixes globally. */
-  protected final GlobalAnalyzer globalAnalyzer;
+  /** Error store instance to store state of fixes before and after of injections. */
+  protected final ErrorStore errorStore;
+  /** Downstream impact cache to retrieve impacts of fixes globally. */
+  protected final DownstreamImpactCache downstreamImpactCache;
   /** Annotator config. */
   protected final Config config;
   /** Handler to re-run compiler. */
@@ -62,31 +57,33 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
     this.config = config;
     this.methodDeclarationTree = supplier.getMethodDeclarationTree();
     this.injector = supplier.getInjector();
-    this.fixBank = supplier.getFixBank();
-    this.errorBank = supplier.getErrorBank();
-    this.globalAnalyzer = supplier.getGlobalAnalyzer();
+    this.downstreamImpactCache = supplier.getDownstreamImpactCache();
+    this.errorStore = supplier.getErrorStore();
     this.compilerRunner = runner;
   }
 
   /**
-   * Updates list of triggered fixes with fixes triggered from downstream dependencies.
+   * Gets the set of triggered fixes on target module from downstream errors.
    *
    * @param node Node in process.
-   * @param localTriggeredFixes Collection of triggered fixes locally.
    */
-  protected void addTriggeredFixesFromDownstream(Node node, Collection<Fix> localTriggeredFixes) {
-    Set<Location> currentLocationTargetedByTree =
+  protected Set<Fix> getTriggeredFixesFromDownstreamErrors(Node node) {
+    Set<Location> currentLocationsTargetedByTree =
         node.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
-    localTriggeredFixes.addAll(
-        globalAnalyzer.getImpactedParameters(node.tree).stream()
-            .filter(input -> !currentLocationTargetedByTree.contains(input))
-            .map(
-                onParameter ->
-                    new Fix(
-                        new AddMarkerAnnotation(onParameter, config.nullableAnnot),
-                        "PASSING_NULLABLE",
-                        new Region(onParameter.clazz, onParameter.method),
-                        false))
-            .collect(Collectors.toList()));
+    return downstreamImpactCache.getTriggeredErrorsForCollection(node.tree).stream()
+        .filter(
+            error ->
+                error.isSingleFix()
+                    && error.toResolvingLocation().isOnParameter()
+                    && error.isFixableOnTarget(methodDeclarationTree)
+                    && !currentLocationsTargetedByTree.contains(error.toResolvingLocation()))
+        .map(
+            error ->
+                new Fix(
+                    new AddMarkerAnnotation(
+                        error.toResolvingLocation().toParameter(), config.nullableAnnot),
+                    "PASSING_NULLABLE",
+                    false))
+        .collect(Collectors.toSet());
   }
 }

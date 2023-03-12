@@ -29,6 +29,7 @@ import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -51,9 +52,17 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
    */
   protected final FieldDeclarationStore fieldDeclarationStore;
 
-  public NullAwayAdapterBaseClass(Config config, FieldDeclarationStore fieldDeclarationStore) {
+  /**
+   * Nonnull store used to prevent Annotator from generating fixes for elements with explicit
+   * {@code @Nonnull} annotations.
+   */
+  private final NonnullStore nonnullStore;
+
+  public NullAwayAdapterBaseClass(
+      Config config, FieldDeclarationStore fieldDeclarationStore, NonnullStore nonnullStore) {
     this.config = config;
     this.fieldDeclarationStore = fieldDeclarationStore;
+    this.nonnullStore = nonnullStore;
   }
 
   /**
@@ -116,7 +125,6 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
                   new AddMarkerAnnotation(
                       extendVariableList(locationOnField, store), config.nullableAnnot),
                   Error.METHOD_INITIALIZER_ERROR,
-                  region,
                   true);
             })
         .filter(Objects::nonNull)
@@ -144,7 +152,9 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
       FieldDeclarationStore store) {
     if (nonnullTarget == null && errorType.equals(Error.METHOD_INITIALIZER_ERROR)) {
       ImmutableSet<Fix> resolvingFixes =
-          generateFixesForUninitializedFields(errorMessage, region, store);
+          generateFixesForUninitializedFields(errorMessage, region, store).stream()
+              .filter(fix -> !nonnullStore.hasExplicitNonnullAnnotation(fix.toLocation()))
+              .collect(ImmutableSet.toImmutableSet());
       return new Error(errorType, errorMessage, region, offset, resolvingFixes);
     }
     if (nonnullTarget != null && nonnullTarget.isOnField()) {
@@ -153,11 +163,11 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
     Fix resolvingFix =
         nonnullTarget == null
             ? null
-            : new Fix(
-                new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot),
-                errorType,
-                region,
-                true);
+            : (nonnullStore.hasExplicitNonnullAnnotation(nonnullTarget)
+                // skip if element has explicit nonnull annotation.
+                ? null
+                : new Fix(
+                    new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot), errorType, true));
     return new Error(errorType, errorMessage, region, offset, resolvingFix);
   }
 

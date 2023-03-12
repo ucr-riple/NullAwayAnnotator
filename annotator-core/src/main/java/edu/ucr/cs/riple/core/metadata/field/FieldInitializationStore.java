@@ -6,19 +6,20 @@ import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 /**
  * Detects initializer methods in source code. Reads field initialization info serialized by
  * NullAway and uses a heuristic to detect them.
  */
-public class FieldInitializationAnalysis extends MetaData<FieldInitializationNode> {
+public class FieldInitializationStore extends MetaData<FieldInitializationNode> {
 
   /**
    * Output file name. It contains information about initializations of fields via methods. On each
@@ -29,12 +30,12 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
   public static final String FILE_NAME = "field_init.tsv";
 
   /**
-   * Constructs an {@link FieldInitializationAnalysis} instance. After this call, all serialized
+   * Constructs an {@link FieldInitializationStore} instance. After this call, all serialized
    * information from NullAway has been processed.
    *
    * @param config Annotator config.
    */
-  public FieldInitializationAnalysis(Config config) {
+  public FieldInitializationStore(Config config) {
     super(config, config.target.dir.resolve(FILE_NAME));
   }
 
@@ -62,7 +63,7 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
    * @param uninitializedFields Set of uninitialized fields.
    * @return Location of initializers.
    */
-  public Stream<OnMethod> findInitializers(Set<OnField> uninitializedFields) {
+  public Set<OnMethod> findInitializers(Set<OnField> uninitializedFields) {
     // Set does not have a get() method, instead we use map here which can find the element
     // efficiently.
     Map<String, Class> classes = new HashMap<>();
@@ -79,7 +80,10 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
                       classes.putIfAbsent(clazz.clazz, clazz);
                       classes.get(clazz.clazz).visit(node);
                     }));
-    return classes.values().stream().map(Class::findInitializer).filter(Objects::nonNull);
+    return classes.values().stream()
+        .map(Class::findInitializer)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toSet());
   }
 
   /** Stores class field / method initialization status. */
@@ -93,7 +97,7 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
     /** Fully qualified name of the class. */
     private final String clazz;
     /** Path to file where the class exists. */
-    private final String path;
+    private final Path path;
 
     /**
      * Creates an instance.
@@ -101,7 +105,7 @@ public class FieldInitializationAnalysis extends MetaData<FieldInitializationNod
      * @param clazz Fully qualified name.
      * @param path Path to the file where the class exists.
      */
-    private Class(String clazz, String path) {
+    private Class(String clazz, Path path) {
       this.initializers = new HashMap<>();
       this.clazz = clazz;
       this.path = path;

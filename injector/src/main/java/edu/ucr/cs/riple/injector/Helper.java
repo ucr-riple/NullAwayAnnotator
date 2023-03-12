@@ -30,14 +30,15 @@ import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.AnnotationDeclaration;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.EnumConstantDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -212,15 +213,27 @@ public class Helper {
   }
 
   /**
-   * Locates an anonymous class at specific index.
+   * Locates an anonymous class or enum constant at specific index.
    *
    * @param cursor Starting node for traversal.
    * @param index index.
-   * @return anonymous class at specific index.
+   * @return anonymous class or enum constant at specific index.
    * @throws TargetClassNotFound if the target class is not found.
    */
-  private static Node findAnonymousClass(Node cursor, int index) throws TargetClassNotFound {
+  private static Node findAnonymousClassOrEnumConstant(Node cursor, int index)
+      throws TargetClassNotFound {
     final List<Node> candidates = new ArrayList<>();
+    if (cursor instanceof EnumDeclaration) {
+      // According to the Java language specification, enum constants are the first members of
+      // enums. In JavaParser's data structures, enum constants are stored after all other members
+      // of the enum which does not conform to how javac assigns flat names. We prioritize visiting
+      // enum constants first.
+      NodeList<EnumConstantDeclaration> constants = ((EnumDeclaration) cursor).getEntries();
+      if (index < constants.size()) {
+        return constants.get(index);
+      }
+      index -= constants.size();
+    }
     walk(
         cursor,
         candidates,
@@ -257,6 +270,9 @@ public class Helper {
     }
     if (node instanceof ObjectCreationExpr) {
       return ((ObjectCreationExpr) node).getAnonymousClassBody().orElse(null);
+    }
+    if (node instanceof EnumConstantDeclaration) {
+      return ((EnumConstantDeclaration) node).getClassBody();
     }
     return null;
   }
@@ -297,7 +313,7 @@ public class Helper {
       int index = indexString.equals("") ? 0 : Integer.parseInt(indexString) - 1;
       Preconditions.checkNotNull(cursor);
       if (key.matches("\\d+")) {
-        cursor = findAnonymousClass(cursor, index);
+        cursor = findAnonymousClassOrEnumConstant(cursor, index);
       } else {
         cursor =
             indexString.equals("")
@@ -395,16 +411,30 @@ public class Helper {
   }
 
   /**
-   * Corrects Path starting with prefix: {@code file}
+   * Deserializes a Path instance from a string.
    *
-   * @param value Path to file.
+   * @param serializedPath Serialized path to file.
    * @return The modified Path.
    */
-  public static String extractPath(String value) {
-    if (!new File(value).exists() && value.startsWith("file:")) {
-      return value.substring("file:".length());
+  public static Path deserializePath(String serializedPath) {
+    final String jarPrefix = "jar:";
+    final String filePrefix = "file://";
+    String path = serializedPath;
+    if (serializedPath.startsWith(jarPrefix)) {
+      path = path.substring(jarPrefix.length());
     }
-    return value;
+    if (serializedPath.startsWith(filePrefix)) {
+      path = path.substring(filePrefix.length());
+    }
+    // Keep only one occurrence of "/" from the beginning if more than one exists.
+    path = Paths.get(path).toString();
+    int start = 0;
+    while (start + 1 < path.length()
+        && path.charAt(start) == '/'
+        && path.charAt(start + 1) == '/') {
+      start++;
+    }
+    return Paths.get(path.substring(start));
   }
 
   /**
