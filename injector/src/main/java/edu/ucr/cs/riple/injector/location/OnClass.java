@@ -35,7 +35,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 public class OnClass extends Location {
 
@@ -67,6 +67,9 @@ public class OnClass extends Location {
     return ans.get();
   }
 
+  @Override
+  protected void fillJsonInformation(JSONObject res) {}
+
   /**
    * Checks if flat name is for an anonymous class.
    *
@@ -74,11 +77,6 @@ public class OnClass extends Location {
    */
   public static boolean isAnonymousClassFlatName(String flatName) {
     return anonymousClassPattern.matcher(flatName).matches();
-  }
-
-  @Override
-  protected void fillJsonInformation(JSONObject res) {
-    // no op
   }
 
   @Override
