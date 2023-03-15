@@ -56,20 +56,26 @@ public class Utility {
     }
   }
 
+  /**
+   * Gets the path of a resource from the given relative path.
+   *
+   * @param relativePath The relative path of the resource.
+   * @return The path of the resource.
+   */
   public static Path getPathOfResource(String relativePath) {
     return Paths.get(
         Objects.requireNonNull(Utility.class.getClassLoader().getResource(relativePath)).getFile());
   }
 
+  /**
+   * Creates the command to change directory to the given path.
+   *
+   * @param path The path to change directory to.
+   * @return The command to change directory to the given path.
+   */
   public static String changeDirCommand(Path path) {
     String os = System.getProperty("os.name").toLowerCase();
     return (os.startsWith("windows") ? "dir" : "cd") + " " + path;
-  }
-
-  public static ProcessBuilder createProcessInstance() {
-    ProcessBuilder pb = new ProcessBuilder();
-    String os = System.getProperty("os.name").toLowerCase();
-    return os.startsWith("windows") ? pb.command("cmd.exe", "/c") : pb.command("bash", "-c");
   }
 
   /**
