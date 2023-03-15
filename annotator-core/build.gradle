@@ -53,7 +53,6 @@ dependencies {
 def NULLAWAY_TEST = "0.10.10"
 
 tasks.test.dependsOn(':annotator-scanner:publishToMavenLocal')
-tasks.test.dependsOn(':qual:publishToMavenLocal')
 
 // Set up environment variables for test configuration tu run with the latest development version.
 tasks.test.doFirst {

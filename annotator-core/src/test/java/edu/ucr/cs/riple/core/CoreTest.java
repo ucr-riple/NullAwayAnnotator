@@ -185,10 +185,10 @@ public class CoreTest extends BaseCoreTest {
         Set.of(
             new AddMarkerAnnotation(
                 new OnMethod("Main.java", "test.Main", "Main(java.lang.Object)"),
-                "org.jspecify.nullness.NullUnmarked"),
+                "org.jspecify.annotations.NullUnmarked"),
             new AddMarkerAnnotation(
                 new OnMethod("Main.java", "test.Main", "Main(java.lang.Object,java.lang.Object)"),
-                "org.jspecify.nullness.NullUnmarked"));
+                "org.jspecify.annotations.NullUnmarked"));
     Assert.assertEquals(
         expectedAnnotations, Set.copyOf(coreTestHelper.getConfig().log.getInjectedAnnotations()));
   }
@@ -317,7 +317,7 @@ public class CoreTest extends BaseCoreTest {
             .getInjectedAnnotations()
             .get(0)
             .annotation
-            .equals("org.jspecify.nullness.NullUnmarked"));
+            .equals("org.jspecify.annotations.NullUnmarked"));
   }
 
   @Test
@@ -345,7 +345,7 @@ public class CoreTest extends BaseCoreTest {
                     srcRoot.resolve("Bar.java").toString(),
                     "test.Bar",
                     "process(java.lang.Object)"),
-                "org.jspecify.nullness.NullUnmarked"),
+                "org.jspecify.annotations.NullUnmarked"),
             new AddSingleElementAnnotation(
                 new OnField(srcRoot.resolve("Foo.java").toString(), "test.Foo", Set.of("f4")),
                 "SuppressWarnings",
@@ -503,7 +503,7 @@ public class CoreTest extends BaseCoreTest {
                 "javax.annotation.Nullable"),
             new AddMarkerAnnotation(
                 new OnClass(coreTestHelper.getSourceRoot().resolve("A.java").toString(), "test.B"),
-                "org.jspecify.nullness.NullUnmarked"));
+                "org.jspecify.annotations.NullUnmarked"));
     Assert.assertEquals(
         expectedAnnotations, coreTestHelper.getConfig().log.getInjectedAnnotations());
   }

@@ -45,7 +45,7 @@ dependencies {
     annotationProcessor "com.uber.nullaway:nullaway:" + System.getenv('NULLAWAY_TEST_VERSION')
     annotationProcessor "edu.ucr.cs.riple.annotator:annotator-scanner:" + System.getenv('ANNOTATOR_VERSION')
 
-    compileOnly "edu.ucr.cs.riple.annotator:qual:" + System.getenv('ANNOTATOR_VERSION')
+    compileOnly "org.jspecify:jspecify:0.3.0"
 
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
     errorprone "com.google.errorprone:error_prone_core:2.3.2"
