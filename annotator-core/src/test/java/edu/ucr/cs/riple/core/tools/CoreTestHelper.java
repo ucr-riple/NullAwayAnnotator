@@ -450,7 +450,10 @@ public class CoreTestHelper {
         .resolve("test");
   }
 
-  /** Default predicate for comparing expected and actual reports. */
+  /**
+   * Default predicate for comparing expected and actual reports. The Default predicate only checks
+   * if the expected effect is computed for the root fix along its tree.
+   */
   static class DEFAULT_PREDICATE implements BiPredicate<TReport, Report> {
 
     /** The config. */
