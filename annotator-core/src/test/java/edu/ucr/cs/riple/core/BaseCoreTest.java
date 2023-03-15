@@ -37,15 +37,21 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+/** Base class for all core tests. */
 @RunWith(JUnit4.class)
 public abstract class BaseCoreTest {
 
+  /** Temporary folder for each test. */
   @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
-
+  /** Name of the used project template */
   protected final String projectTemplate;
+  /** List of modules to be tested */
   protected final List<String> modules;
+  /** Path to the unit test project */
   protected Path unitTestProjectPath;
+  /** Path to the output directory */
   protected Path outDirPath;
+  /** Helper class for core tests */
   protected CoreTestHelper coreTestHelper;
 
   public BaseCoreTest(String projectTemplate, List<String> modules) {
