@@ -33,17 +33,17 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class OnMethodSearchTest extends BaseInjectorTest {
   @Test
-  public void initializer_constructor() {
+  public void initializerConstructor() {
     injectorTestHelper
         .addInput(
             "Main.java",
-            "package com.uber;",
+            "package test;",
             "public class Main {",
             "   public Main(String type, Object... objs) {",
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Initializer;",
             "public class Main {",
             "   @Initializer public Main(String type, Object... objs) {",
@@ -51,37 +51,36 @@ public class OnMethodSearchTest extends BaseInjectorTest {
             "}")
         .addChanges(
             new AddMarkerAnnotation(
-                new OnMethod(
-                    "Main.java", "com.uber.Main", "Main(java.lang.String,java.lang.Object[])"),
+                new OnMethod("Main.java", "test.Main", "Main(java.lang.String,java.lang.Object[])"),
                 "javax.annotation.Initializer"))
         .start();
   }
 
   @Test
-  public void empty_PARAMETER_pick() {
+  public void emptyParameterPick() {
     injectorTestHelper
         .addInput(
-            "Super.java",
-            "package com.uber;",
+            "Foo.java",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   Object test() {",
             "       return new Object();",
             "   }",
-            "   class SuperInner {",
+            "   class FooInner {",
             "       Object bar(@Nullable Object foo) {",
             "           return foo;",
             "       }",
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable Object test() {",
             "       return new Object();",
             "   }",
-            "   class SuperInner {",
+            "   class FooInner {",
             "       Object bar(@Nullable Object foo) {",
             "           return foo;",
             "       }",
@@ -89,8 +88,7 @@ public class OnMethodSearchTest extends BaseInjectorTest {
             "}")
         .addChanges(
             new AddMarkerAnnotation(
-                new OnMethod("Super.java", "com.uber.Super", "test()"),
-                "javax.annotation.Nullable"))
+                new OnMethod("Foo.java", "test.Foo", "test()"), "javax.annotation.Nullable"))
         .start();
   }
 }

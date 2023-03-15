@@ -41,7 +41,7 @@ public class InheritanceTest extends BaseCoreTest {
   }
 
   @Test
-  public void basic_method() {
+  public void returnNullableInheritanceTest() {
     coreTestHelper
         .addInputLines(
             "Base.java",
@@ -68,7 +68,7 @@ public class InheritanceTest extends BaseCoreTest {
   }
 
   @Test
-  public void builder() {
+  public void builderTest() {
     coreTestHelper
         .addInputDirectory("test", "builder")
         .requestCompleteLoop()
@@ -108,7 +108,7 @@ public class InheritanceTest extends BaseCoreTest {
   }
 
   @Test
-  public void parameter_track() {
+  public void parameterImpactedRegionInSubclassesTest() {
     coreTestHelper
         .addInputDirectory("test", "parametertrack")
         .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
@@ -129,7 +129,7 @@ public class InheritanceTest extends BaseCoreTest {
   }
 
   @Test
-  public void method_track() {
+  public void methodImpactedRegionInSuperClassTest() {
     coreTestHelper
         .addInputDirectory("test", "methodtrack")
         .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))

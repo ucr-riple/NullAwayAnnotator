@@ -45,7 +45,7 @@ public class DeepTest extends BaseCoreTest {
   }
 
   @Test
-  public void field_assign_nullable_bailout_enabled() {
+  public void fieldAssignNullableBailoutEnabled() {
     coreTestHelper
         .addInputLines(
             "Main.java",
@@ -64,7 +64,7 @@ public class DeepTest extends BaseCoreTest {
   }
 
   @Test
-  public void field_assign_nullable_bailout_disabled() {
+  public void fieldAssignNullableBailoutDisabled() {
     coreTestHelper
         .addInputLines(
             "Main.java",
@@ -121,7 +121,7 @@ public class DeepTest extends BaseCoreTest {
   }
 
   @Test
-  public void param_pass_test() {
+  public void paramPassTest() {
     coreTestHelper
         .addInputDirectory("test", "parampass")
         .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))

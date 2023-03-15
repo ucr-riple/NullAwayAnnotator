@@ -96,7 +96,7 @@ public class CoreTest extends BaseCoreTest {
   }
 
   @Test
-  public void param_complete() {
+  public void paramComplete() {
     coreTestHelper
         .addInputLines(
             "Main.java",
@@ -117,7 +117,7 @@ public class CoreTest extends BaseCoreTest {
   }
 
   @Test
-  public void field_assign_nullable() {
+  public void fieldAssignNullable() {
     coreTestHelper
         .addInputLines(
             "Main.java",
@@ -222,7 +222,7 @@ public class CoreTest extends BaseCoreTest {
   }
 
   @Test
-  public void inner_class() {
+  public void innerClass() {
     coreTestHelper
         .addInputDirectory("test", "innerclass")
         .addExpectedReports(
@@ -234,7 +234,7 @@ public class CoreTest extends BaseCoreTest {
   }
 
   @Test
-  public void multiple_return_nullable() {
+  public void multipleReturnNullable() {
     coreTestHelper
         .toDepth(4)
         .addInputDirectory("test", "multiplereturnnullable")
@@ -259,7 +259,7 @@ public class CoreTest extends BaseCoreTest {
   }
 
   @Test
-  public void multiple_return_nullable_recursive() {
+  public void multipleReturnNullableRecursive() {
     coreTestHelper
         .addInputDirectory("test", "multiplereturnnullablerecursive")
         .addExpectedReports(
