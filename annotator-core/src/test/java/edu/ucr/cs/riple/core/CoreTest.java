@@ -109,7 +109,7 @@ public class CoreTest extends BaseCoreTest {
             "     run(null);",
             "   }",
             "}")
-        .requestCompleteLoop()
+        .activateOuterLoop()
         .addExpectedReports(
             new TReport(new OnParameter("Main.java", "test.Main", "run(java.lang.Object)", 0), 0),
             new TReport(new OnMethod("Main.java", "test.Main", "run(java.lang.Object)"), -1))
@@ -179,7 +179,7 @@ public class CoreTest extends BaseCoreTest {
         .toDepth(1)
         .addExpectedReports(
             new TReport(new OnParameter("Main.java", "test.Main", "Main(java.lang.Object)", 0), 1))
-        .enableForceResolve()
+        .suppressRemainingErrors()
         .start();
     Set<AddAnnotation> expectedAnnotations =
         Set.of(
@@ -217,7 +217,7 @@ public class CoreTest extends BaseCoreTest {
             new TReport(new OnField("Main.java", "test.Main", singleton("f5")), 1))
         .toDepth(1)
         // This causes the test to report a failure if any errors remain when building the target.
-        .enableForceResolve()
+        .suppressRemainingErrors()
         .start();
   }
 
@@ -332,7 +332,7 @@ public class CoreTest extends BaseCoreTest {
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f4")), 1),
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f5")), 0))
         .toDepth(1)
-        .enableForceResolve()
+        .suppressRemainingErrors()
         .start();
     Path srcRoot = coreTestHelper.getSourceRoot();
     Set<AddAnnotation> expectedAnnotations =
@@ -399,7 +399,7 @@ public class CoreTest extends BaseCoreTest {
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f3")), 2),
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f4")), 1))
         .toDepth(1)
-        .enableForceResolve()
+        .suppressRemainingErrors()
         .start();
     String pathToFoo = coreTestHelper.getSourceRoot().resolve("Foo.java").toString();
     Set<AddAnnotation> expectedAnnotations =
@@ -491,7 +491,7 @@ public class CoreTest extends BaseCoreTest {
             "}")
         .toDepth(5)
         .addExpectedReports(new TReport(new OnField("A.java", "test.A", singleton("f")), -3))
-        .enableForceResolve()
+        .suppressRemainingErrors()
         .start();
     List<AddAnnotation> expectedAnnotations =
         List.of(
