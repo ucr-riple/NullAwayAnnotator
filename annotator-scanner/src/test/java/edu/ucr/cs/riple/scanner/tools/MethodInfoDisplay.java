@@ -32,7 +32,6 @@ public class MethodInfoDisplay implements Display {
   public final String clazz;
   public final String symbol;
   public final String parent;
-  public final String size;
   public final String flags;
   public final String hasNullableAnnotation;
   public final String visibility;
@@ -44,7 +43,6 @@ public class MethodInfoDisplay implements Display {
       String clazz,
       String symbol,
       String parent,
-      String size,
       String flags,
       String hasNullableAnnotation,
       String visibility,
@@ -54,7 +52,6 @@ public class MethodInfoDisplay implements Display {
     this.clazz = clazz;
     this.symbol = symbol;
     this.parent = parent;
-    this.size = size;
     this.flags = flags;
     this.hasNullableAnnotation = hasNullableAnnotation;
     this.visibility = visibility;
@@ -74,7 +71,6 @@ public class MethodInfoDisplay implements Display {
     return Objects.equals(clazz, that.clazz)
         && Objects.equals(symbol, that.symbol)
         && Objects.equals(parent, that.parent)
-        && Objects.equals(size, that.size)
         && Objects.equals(flags, that.flags)
         && Objects.equals(hasNullableAnnotation, that.hasNullableAnnotation)
         && Objects.equals(visibility, that.visibility)
@@ -88,7 +84,6 @@ public class MethodInfoDisplay implements Display {
         clazz,
         symbol,
         parent,
-        size,
         flags,
         hasNullableAnnotation,
         visibility,
@@ -109,9 +104,6 @@ public class MethodInfoDisplay implements Display {
         + '\''
         + ", parent='"
         + parent
-        + '\''
-        + ", size='"
-        + size
         + '\''
         + ", flags='"
         + flags

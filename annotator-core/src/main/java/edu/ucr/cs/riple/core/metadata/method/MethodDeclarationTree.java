@@ -79,17 +79,15 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
     }
     // Fill nodes information.
     Integer parentId = Integer.parseInt(values[3]);
-    OnMethod location = new OnMethod(Helper.deserializePath(values[9]), values[1], values[2]);
+    OnMethod location = new OnMethod(Helper.deserializePath(values[8]), values[1], values[2]);
     boolean isConstructor =
         Helper.extractCallableName(location.method).equals(Helper.simpleName(location.clazz));
-    int size = Integer.parseInt(values[4]);
     node.fillInformation(
-        new OnMethod(Helper.deserializePath(values[9]), values[1], values[2]),
+        new OnMethod(Helper.deserializePath(values[8]), values[1], values[2]),
         parentId,
-        size,
-        Boolean.parseBoolean(values[6]),
-        values[7],
-        Boolean.parseBoolean(values[8]),
+        Boolean.parseBoolean(values[5]),
+        values[6],
+        Boolean.parseBoolean(values[7]),
         isConstructor);
     // If node has a non-top parent.
     if (parentId > 0) {
