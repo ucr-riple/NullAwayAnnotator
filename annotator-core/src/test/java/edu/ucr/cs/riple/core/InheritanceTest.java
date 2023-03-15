@@ -71,7 +71,7 @@ public class InheritanceTest extends BaseCoreTest {
   public void builderTest() {
     coreTestHelper
         .addInputDirectory("test", "builder")
-        .requestCompleteLoop()
+        .activateOuterLoop()
         .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
         .addExpectedReports(
             new TReport(new OnField("A.java", "test.A", singleton("arg3")), -1),

@@ -133,7 +133,7 @@ public class AnalysisModeTest extends BaseCoreTest {
         .disableBailOut()
         .enableDownstreamDependencyAnalysis(STRICT)
         // This causes the test to report a failure if any errors remain when building the target.
-        .enableForceResolve()
+        .suppressRemainingErrors()
         .start();
   }
 }

@@ -93,7 +93,7 @@ public class DownstreamAnalysisTest extends BaseCoreTest {
                         == found.getLowerBoundEffectOnDownstreamDependencies())
         .toDepth(5)
         .enableDownstreamDependencyAnalysis()
-        .requestCompleteLoop()
+        .activateOuterLoop()
         .start();
   }
 
@@ -118,7 +118,7 @@ public class DownstreamAnalysisTest extends BaseCoreTest {
                         == found.getUpperBoundEffectOnDownstreamDependencies())
         .toDepth(5)
         .enableDownstreamDependencyAnalysis()
-        .requestCompleteLoop()
+        .activateOuterLoop()
         .start();
   }
 }
