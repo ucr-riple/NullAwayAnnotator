@@ -31,30 +31,31 @@ import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
-import java.util.List;
 import org.junit.Test;
 
-public class InheritanceTest extends BaseCoreTest {
+public class InheritanceTest extends AnnotatorBaseCoreTest {
 
   public InheritanceTest() {
-    super("unittest", List.of("unittest"));
+    super("unittest");
   }
 
   @Test
   public void returnNullableInheritanceTest() {
     coreTestHelper
-        .addInputLines(
+        .onTarget()
+        .withSourceLines(
             "Base.java",
             "package test;",
             "public class Base {",
             "   public Object foo(){ return null; }",
             "}")
-        .addInputLines(
+        .withSourceLines(
             "Child.java",
             "package test;",
             "public class Child extends Base {",
             "   public Object foo(){ return null; }",
             "}")
+        .build()
         .disableBailOut()
         .toDepth(2)
         .addExpectedReports(
@@ -70,7 +71,9 @@ public class InheritanceTest extends BaseCoreTest {
   @Test
   public void builderTest() {
     coreTestHelper
-        .addInputDirectory("test", "builder")
+        .onTarget()
+        .withSourceDirectory("test", "builder")
+        .build()
         .activateOuterLoop()
         .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
         .addExpectedReports(
@@ -110,7 +113,9 @@ public class InheritanceTest extends BaseCoreTest {
   @Test
   public void parameterImpactedRegionInSubclassesTest() {
     coreTestHelper
-        .addInputDirectory("test", "parametertrack")
+        .onTarget()
+        .withSourceDirectory("test", "parametertrack")
+        .build()
         .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
         .disableBailOut()
         .toDepth(10)
@@ -131,7 +136,9 @@ public class InheritanceTest extends BaseCoreTest {
   @Test
   public void methodImpactedRegionInSuperClassTest() {
     coreTestHelper
-        .addInputDirectory("test", "methodtrack")
+        .onTarget()
+        .withSourceDirectory("test", "methodtrack")
+        .build()
         .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
         .disableBailOut()
         .toDepth(10)

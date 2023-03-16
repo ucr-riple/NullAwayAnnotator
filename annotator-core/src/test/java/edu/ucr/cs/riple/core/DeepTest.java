@@ -32,22 +32,22 @@ import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collections;
-import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class DeepTest extends BaseCoreTest {
+public class DeepTest extends AnnotatorBaseCoreTest {
 
   public DeepTest() {
-    super("unittest", List.of("unittest"));
+    super("unittest");
   }
 
   @Test
   public void fieldAssignNullableBailoutEnabled() {
     coreTestHelper
-        .addInputLines(
+        .onTarget()
+        .withSourceLines(
             "Main.java",
             "package test;",
             "public class Main {",
@@ -57,6 +57,7 @@ public class DeepTest extends BaseCoreTest {
             "   }",
             "   Object getF(){ return field;}",
             "}")
+        .build()
         .toDepth(2)
         .addExpectedReports(
             new TReport(new OnField("Main.java", "test.Main", Collections.singleton("field")), -1))
@@ -66,7 +67,8 @@ public class DeepTest extends BaseCoreTest {
   @Test
   public void fieldAssignNullableBailoutDisabled() {
     coreTestHelper
-        .addInputLines(
+        .onTarget()
+        .withSourceLines(
             "Main.java",
             "package test;",
             "public class Main {",
@@ -76,6 +78,7 @@ public class DeepTest extends BaseCoreTest {
             "   }",
             "   Object getF(){ return field;}",
             "}")
+        .build()
         .toDepth(2)
         .disableBailOut()
         .addExpectedReports(
@@ -90,7 +93,8 @@ public class DeepTest extends BaseCoreTest {
   @Test
   public void testInitializationErrorForMultipleFields() {
     coreTestHelper
-        .addInputLines(
+        .onTarget()
+        .withSourceLines(
             "Main.java",
             "package test;",
             "public class Main {",
@@ -103,6 +107,7 @@ public class DeepTest extends BaseCoreTest {
             "   Object getF1(){ return field1; }",
             "   Object getF2(){ return field2; }",
             "}")
+        .build()
         .toDepth(2)
         .disableBailOut()
         .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
@@ -123,7 +128,9 @@ public class DeepTest extends BaseCoreTest {
   @Test
   public void paramPassTest() {
     coreTestHelper
-        .addInputDirectory("test", "parampass")
+        .onTarget()
+        .withSourceDirectory("test", "parampass")
+        .build()
         .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
         .toDepth(10)
         .addExpectedReports(

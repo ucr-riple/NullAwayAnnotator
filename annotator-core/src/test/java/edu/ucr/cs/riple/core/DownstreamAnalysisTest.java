@@ -26,18 +26,26 @@ package edu.ucr.cs.riple.core;
 
 import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.injector.location.OnMethod;
-import java.util.List;
 import org.junit.Test;
 
-public class DownstreamAnalysisTest extends BaseCoreTest {
+public class DownstreamAnalysisTest extends AnnotatorBaseCoreTest {
 
   public DownstreamAnalysisTest() {
-    super("downstream-dependency-test", List.of("Target", "DepA", "DepB", "DepC"));
+    super("unittest");
   }
 
   @Test
   public void publicMethodWithDownstreamDependencyEnabled() {
     coreTestHelper
+        .onTarget()
+        .withSourceFile("Foo.java", "downstreamdependency/Foo.java")
+        .withDependency("DepA")
+        .withSourceFile("DepA.java", "downstreamdependency/DepA.java")
+        .withDependency("DepB")
+        .withSourceFile("DepB.java", "downstreamdependency/DepB.java")
+        .withDependency("DepC")
+        .withSourceFile("DepC.java", "downstreamdependency/DepC.java")
+        .build()
         .addExpectedReports(
             // Change reduces errors on target by -4, but increases them in downstream dependency
             // DepA by 3, DepB by 4 and DepC by 3. Hence, the total effect is: 6.
@@ -61,6 +69,15 @@ public class DownstreamAnalysisTest extends BaseCoreTest {
   @Test
   public void publicMethodWithDownstreamDependencyDisabled() {
     coreTestHelper
+        .onTarget()
+        .withSourceFile("Foo.java", "downstreamdependency/Foo.java")
+        .withDependency("DepA")
+        .withSourceFile("DepA.java", "downstreamdependency/DepA.java")
+        .withDependency("DepB")
+        .withSourceFile("DepB.java", "downstreamdependency/DepB.java")
+        .withDependency("DepC")
+        .withSourceFile("DepC.java", "downstreamdependency/DepC.java")
+        .build()
         .addExpectedReports(
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int)"), -4),
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableGood(int)"), -5),
@@ -77,6 +94,15 @@ public class DownstreamAnalysisTest extends BaseCoreTest {
   @Test
   public void lowerBoundComputationTest() {
     coreTestHelper
+        .onTarget()
+        .withSourceFile("Foo.java", "downstreamdependency/Foo.java")
+        .withDependency("DepA")
+        .withSourceFile("DepA.java", "downstreamdependency/DepA.java")
+        .withDependency("DepB")
+        .withSourceFile("DepB.java", "downstreamdependency/DepB.java")
+        .withDependency("DepC")
+        .withSourceFile("DepC.java", "downstreamdependency/DepC.java")
+        .build()
         .addExpectedReports(
             // Only returnNullableBad triggers new errors in this fix chain (+10), lower bound is
             // 10.
@@ -100,6 +126,15 @@ public class DownstreamAnalysisTest extends BaseCoreTest {
   @Test
   public void upperBoundComputationTest() {
     coreTestHelper
+        .onTarget()
+        .withSourceFile("Foo.java", "downstreamdependency/Foo.java")
+        .withDependency("DepA")
+        .withSourceFile("DepA.java", "downstreamdependency/DepA.java")
+        .withDependency("DepB")
+        .withSourceFile("DepB.java", "downstreamdependency/DepB.java")
+        .withDependency("DepC")
+        .withSourceFile("DepC.java", "downstreamdependency/DepC.java")
+        .build()
         .addExpectedReports(
             // Only returnNullableBad triggers new errors in this fix chain (+10) and upper bound
             // should be 10

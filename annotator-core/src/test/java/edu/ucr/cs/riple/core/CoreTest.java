@@ -46,16 +46,17 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class CoreTest extends BaseCoreTest {
+public class CoreTest extends AnnotatorBaseCoreTest {
 
   public CoreTest() {
-    super("unittest", List.of("unittest"));
+    super("unittest");
   }
 
   @Test
   public void field() {
     coreTestHelper
-        .addInputLines("Main.java", "package test;", "public class Main {", "Object field;", "}")
+        .onTarget()
+        .withSourceLines("Main.java", "package test;", "public class Main {", "Object field;", "}")
         .addExpectedReports(
             new TReport(new OnField("Main.java", "test.Main", singleton("field")), -1))
         .start();
@@ -64,7 +65,8 @@ public class CoreTest extends BaseCoreTest {
   @Test
   public void method() {
     coreTestHelper
-        .addInputLines(
+        .onTarget()
+        .withSourceLines(
             "Main.java",
             "package test;",
             "public class Main {",
@@ -79,7 +81,8 @@ public class CoreTest extends BaseCoreTest {
   @Test
   public void param() {
     coreTestHelper
-        .addInputLines(
+        .onTarget()
+        .withSourceLines(
             "Main.java",
             "package test;",
             "public class Main {",
@@ -90,6 +93,7 @@ public class CoreTest extends BaseCoreTest {
             "     run(null);",
             "   }",
             "}")
+        .build()
         .addExpectedReports(
             new TReport(new OnParameter("Main.java", "test.Main", "run(java.lang.Object)", 0), 0))
         .start();
@@ -98,7 +102,8 @@ public class CoreTest extends BaseCoreTest {
   @Test
   public void paramComplete() {
     coreTestHelper
-        .addInputLines(
+        .onTarget()
+        .withSourceLines(
             "Main.java",
             "package test;",
             "public class Main {",
@@ -109,6 +114,7 @@ public class CoreTest extends BaseCoreTest {
             "     run(null);",
             "   }",
             "}")
+        .build()
         .activateOuterLoop()
         .addExpectedReports(
             new TReport(new OnParameter("Main.java", "test.Main", "run(java.lang.Object)", 0), 0),
@@ -119,7 +125,8 @@ public class CoreTest extends BaseCoreTest {
   @Test
   public void fieldAssignNullable() {
     coreTestHelper
-        .addInputLines(
+        .onTarget()
+        .withSourceLines(
             "Main.java",
             "package test;",
             "public class Main {",
@@ -129,6 +136,7 @@ public class CoreTest extends BaseCoreTest {
             "   }",
             "   Object getF(){ return field; }",
             "}")
+        .build()
         .toDepth(1)
         .addExpectedReports(
             new TReport(new OnField("Main.java", "test.Main", singleton("field")), -1))
@@ -138,7 +146,8 @@ public class CoreTest extends BaseCoreTest {
   @Test
   public void fieldAssignNullableConstructor() {
     coreTestHelper
-        .addInputLines(
+        .onTarget()
+        .withSourceLines(
             "Main.java",
             "package test;",
             "public class Main {",
@@ -150,6 +159,7 @@ public class CoreTest extends BaseCoreTest {
             "class C {",
             "   Main main = new Main(null);",
             "}")
+        .build()
         .toDepth(1)
         .addExpectedReports(
             new TReport(new OnParameter("Main.java", "test.Main", "Main(java.lang.Object)", 0), 1))
@@ -159,7 +169,8 @@ public class CoreTest extends BaseCoreTest {
   @Test
   public void fieldAssignNullableConstructorForceResolveEnabled() {
     coreTestHelper
-        .addInputLines(
+        .onTarget()
+        .withSourceLines(
             "Main.java",
             "package test;",
             "import javax.annotation.Nullable;",
@@ -176,6 +187,7 @@ public class CoreTest extends BaseCoreTest {
             "class C {",
             "   Main main = new Main(null);",
             "}")
+        .build()
         .toDepth(1)
         .addExpectedReports(
             new TReport(new OnParameter("Main.java", "test.Main", "Main(java.lang.Object)", 0), 1))
@@ -196,7 +208,9 @@ public class CoreTest extends BaseCoreTest {
   @Test
   public void multipleFieldDeclarationTest() {
     coreTestHelper
-        .addInputDirectory("test", "multiplefielddeclration")
+        .onTarget()
+        .withSourceDirectory("test", "multiplefielddeclration")
+        .build()
         .disableBailOut()
         .addExpectedReports(
             new TReport(
@@ -209,7 +223,9 @@ public class CoreTest extends BaseCoreTest {
   @Test
   public void multipleFieldDeclarationTestForceResolveEnabled() {
     coreTestHelper
-        .addInputDirectory("test", "multiplefielddeclration")
+        .onTarget()
+        .withSourceDirectory("test", "multiplefielddeclration")
+        .build()
         .disableBailOut()
         .addExpectedReports(
             new TReport(
@@ -224,7 +240,9 @@ public class CoreTest extends BaseCoreTest {
   @Test
   public void innerClass() {
     coreTestHelper
-        .addInputDirectory("test", "innerclass")
+        .onTarget()
+        .withSourceDirectory("test", "innerclass")
+        .build()
         .addExpectedReports(
             new TReport(new OnMethod("Main.java", "test.Main$1", "bar(java.lang.Object)"), 0),
             new TReport(new OnMethod("Main.java", "test.Main$1Child", "exec()"), 0),
@@ -237,7 +255,9 @@ public class CoreTest extends BaseCoreTest {
   public void multipleReturnNullable() {
     coreTestHelper
         .toDepth(4)
-        .addInputDirectory("test", "multiplereturnnullable")
+        .onTarget()
+        .withSourceDirectory("test", "multiplereturnnullable")
+        .build()
         .disableBailOut()
         .addExpectedReports(
             new TReport(
@@ -261,7 +281,9 @@ public class CoreTest extends BaseCoreTest {
   @Test
   public void multipleReturnNullableRecursive() {
     coreTestHelper
-        .addInputDirectory("test", "multiplereturnnullablerecursive")
+        .onTarget()
+        .withSourceDirectory("test", "multiplereturnnullablerecursive")
+        .build()
         .addExpectedReports(
             new TReport(new OnField("Main.java", "test.Main", singleton("field")), -6),
             new TReport(new OnMethod("Main.java", "test.Main", "returnNullableRecursive()"), -6),
@@ -272,7 +294,8 @@ public class CoreTest extends BaseCoreTest {
   @Test
   public void overrideMethodDeclaredOutsideModuleTest() {
     coreTestHelper
-        .addInputLines(
+        .onTarget()
+        .withSourceLines(
             "Main.java",
             "package test;",
             "import java.util.function.Function;",
@@ -287,6 +310,7 @@ public class CoreTest extends BaseCoreTest {
             "     });",
             "   }",
             "}")
+        .build()
         .toDepth(1)
         .addExpectedReports(
             new TReport(new OnMethod("Main.java", "test.Main$1", "apply(java.lang.Object)"), -1))
@@ -296,7 +320,8 @@ public class CoreTest extends BaseCoreTest {
   @Test
   public void deactivateInferenceTest() {
     coreTestHelper
-        .addInputLines(
+        .onTarget()
+        .withSourceLines(
             "Main.java",
             "package test;",
             "public class Main {",
@@ -304,6 +329,7 @@ public class CoreTest extends BaseCoreTest {
             "     return null;",
             "   }",
             "}")
+        .build()
         .toDepth(1)
         .deactivateInference()
         .start();
@@ -323,7 +349,9 @@ public class CoreTest extends BaseCoreTest {
   @Test
   public void errorInFieldDeclarationForceResolveTest() {
     coreTestHelper
-        .addInputDirectory("test", "fielderrorregion")
+        .onTarget()
+        .withSourceDirectory("test", "fielderrorregion")
+        .build()
         .addExpectedReports(
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f1")), 2),
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f2", "f3")), 2),
@@ -373,7 +401,8 @@ public class CoreTest extends BaseCoreTest {
   @Test
   public void initializationErrorWithMultipleConstructors() {
     coreTestHelper
-        .addInputLines(
+        .onTarget()
+        .withSourceLines(
             "Foo.java",
             "package test;",
             "public class Foo {",
@@ -393,6 +422,7 @@ public class CoreTest extends BaseCoreTest {
             "     f4.hashCode();",
             "   }",
             "}")
+        .build()
         .addExpectedReports(
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f1")), 0),
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f2")), 0),
@@ -425,7 +455,8 @@ public class CoreTest extends BaseCoreTest {
   @Test
   public void fieldNoInitialization() {
     coreTestHelper
-        .addInputLines(
+        .onTarget()
+        .withSourceLines(
             "A.java",
             "package test;",
             "import java.util.Objects;",
@@ -439,6 +470,7 @@ public class CoreTest extends BaseCoreTest {
             "        return null;",
             "   }",
             "}")
+        .build()
         .toDepth(5)
         .disableBailOut()
         .addExpectedReports(
@@ -463,7 +495,8 @@ public class CoreTest extends BaseCoreTest {
   @Test
   public void staticAndInstanceInitializerBlockTest() {
     coreTestHelper
-        .addInputLines(
+        .onTarget()
+        .withSourceLines(
             "A.java",
             "package test;",
             "import javax.annotation.Nullable;",
@@ -489,6 +522,7 @@ public class CoreTest extends BaseCoreTest {
             "   @Nullable",
             "   public static Object bar() { return null; }",
             "}")
+        .build()
         .toDepth(5)
         .addExpectedReports(new TReport(new OnField("A.java", "test.A", singleton("f")), -3))
         .suppressRemainingErrors()
@@ -511,7 +545,8 @@ public class CoreTest extends BaseCoreTest {
   @Test
   public void acknowledgeNonnullAnnotations() {
     coreTestHelper
-        .addInputLines(
+        .onTarget()
+        .withSourceLines(
             "A.java",
             "package test;",
             "import javax.annotation.Nonnull;",
@@ -524,6 +559,7 @@ public class CoreTest extends BaseCoreTest {
             "      foo(null);",
             "   }",
             "}")
+        .build()
         .toDepth(5)
         .start();
     // No annotation should be added, since they are annotated as @Nonnull although each can reduce
@@ -534,7 +570,8 @@ public class CoreTest extends BaseCoreTest {
   @Test
   public void impactedLambdaAndMemberReferenceParameterNullableTest() {
     coreTestHelper
-        .addInputLines(
+        .onTarget()
+        .withSourceLines(
             "Main.java",
             "package test;",
             "import javax.annotation.Nullable;",
@@ -559,8 +596,9 @@ public class CoreTest extends BaseCoreTest {
             "       foo.bar(null);",
             "   }",
             "}")
-        .addInputLines(
+        .withSourceLines(
             "Foo.java", "package test;", "public interface Foo{", "     void bar(Object o);", "}")
+        .build()
         .addExpectedReports(
             new TReport(new OnParameter("Foo.java", "test.Foo", "bar(java.lang.Object)", 0), 2))
         .toDepth(1)
@@ -570,7 +608,8 @@ public class CoreTest extends BaseCoreTest {
   @Test
   public void impactedLambdaAndMemberReferenceReturnNullableTest() {
     coreTestHelper
-        .addInputLines(
+        .onTarget()
+        .withSourceLines(
             "Main.java",
             "package test;",
             "import javax.annotation.Nullable;",
@@ -586,8 +625,9 @@ public class CoreTest extends BaseCoreTest {
             "       return null;",
             "   }",
             "}")
-        .addInputLines(
+        .withSourceLines(
             "Foo.java", "package test;", "public interface Foo{", "     Object m(Object o);", "}")
+        .build()
         .addExpectedReports(
             new TReport(new OnMethod("Foo.java", "test.Main", "bar(java.lang.Object)"), 1))
         .toDepth(1)
@@ -597,7 +637,8 @@ public class CoreTest extends BaseCoreTest {
   @Test
   public void nestedParameters() {
     coreTestHelper
-        .addInputLines(
+        .onTarget()
+        .withSourceLines(
             "A.java",
             "package test;",
             "import java.util.Objects;",
@@ -615,6 +656,7 @@ public class CoreTest extends BaseCoreTest {
             "      ",
             "   }",
             "}")
+        .build()
         .toDepth(1)
         .addExpectedReports(
             new TReport(new OnParameter("A.java", "test.A", "f1(java.lang.Object)", 0), 0),

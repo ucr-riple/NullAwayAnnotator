@@ -30,18 +30,26 @@ import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collections;
-import java.util.List;
 import org.junit.Test;
 
-public class ArgumentNullableFlowTest extends BaseCoreTest {
+public class ArgumentNullableFlowTest extends AnnotatorBaseCoreTest {
 
   public ArgumentNullableFlowTest() {
-    super("nullable-flow-test", List.of("Target", "DepA", "DepB", "DepC"));
+    super("unittest");
   }
 
   @Test
   public void nullableFlowDetectionEnabledTest() {
     coreTestHelper
+        .onTarget()
+        .withSourceFile("Foo.java", "nullableflow/Foo.java")
+        .withDependency("DepA")
+        .withSourceFile("DepA.java", "nullableflow/DepA.java")
+        .withDependency("DepB")
+        .withSourceFile("DepB.java", "nullableflow/DepB.java")
+        .withDependency("DepC")
+        .withSourceFile("DepC.java", "nullableflow/DepC.java")
+        .build()
         .addExpectedReports(
             // Change reduces errors on target by -5, but increases them in downstream dependency
             // DepA by 1 (Resolvable), DepB by 0 and DepC by 2 (1 resolvable).
@@ -86,6 +94,15 @@ public class ArgumentNullableFlowTest extends BaseCoreTest {
   @Test
   public void nullableFlowDetectionDisabledTest() {
     coreTestHelper
+        .onTarget()
+        .withSourceFile("Foo.java", "nullableflow/Foo.java")
+        .withDependency("DepA")
+        .withSourceFile("DepA.java", "nullableflow/DepA.java")
+        .withDependency("DepB")
+        .withSourceFile("DepB.java", "nullableflow/DepB.java")
+        .withDependency("DepC")
+        .withSourceFile("DepC.java", "nullableflow/DepC.java")
+        .build()
         .addExpectedReports(
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullable(int)"), -5),
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "getNull()"), -1))

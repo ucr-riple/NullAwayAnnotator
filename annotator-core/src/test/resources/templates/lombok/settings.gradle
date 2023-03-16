@@ -22,5 +22,5 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'unittest'
+rootProject.name = 'lombok'
 

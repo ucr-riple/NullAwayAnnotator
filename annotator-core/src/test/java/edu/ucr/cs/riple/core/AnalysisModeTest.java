@@ -32,19 +32,23 @@ import static edu.ucr.cs.riple.core.Report.Tag.REJECT;
 
 import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.injector.location.OnMethod;
-import java.util.List;
 import java.util.Objects;
 import org.junit.Test;
 
-public class AnalysisModeTest extends BaseCoreTest {
+public class AnalysisModeTest extends AnnotatorBaseCoreTest {
 
   public AnalysisModeTest() {
-    super("analysis-mode-test", List.of("Target", "Dep"));
+    super("unittest");
   }
 
   @Test
   public void strictModeTest() {
     coreTestHelper
+        .onTarget()
+        .withSourceFile("Foo.java", "analysismode/Foo.java")
+        .withDependency("Dep")
+        .withSourceFile("Dep.java", "analysismode/Dep.java")
+        .build()
         .addExpectedReports(
             // Resolves 6 errors locally and all errors on downstream dependencies can be resolved
             // with no new triggered error, therefore the effect is -6. The fix triggers no error
@@ -70,6 +74,11 @@ public class AnalysisModeTest extends BaseCoreTest {
   @Test
   public void lowerBoundModeTest() {
     coreTestHelper
+        .onTarget()
+        .withSourceFile("Foo.java", "analysismode/Foo.java")
+        .withDependency("Dep")
+        .withSourceFile("Dep.java", "analysismode/Dep.java")
+        .build()
         .addExpectedReports(
             new TReport(
                 new OnMethod("Foo.java", "test.target.Foo", "returnNullGood()"), -6, APPROVE),
@@ -90,6 +99,11 @@ public class AnalysisModeTest extends BaseCoreTest {
   @Test
   public void upperBoundModeTest() {
     coreTestHelper
+        .onTarget()
+        .withSourceFile("Foo.java", "analysismode/Foo.java")
+        .withDependency("Dep")
+        .withSourceFile("Dep.java", "analysismode/Dep.java")
+        .build()
         .addExpectedReports(
             new TReport(
                 new OnMethod("Foo.java", "test.target.Foo", "returnNullGood()"), -6, APPROVE),
@@ -113,6 +127,11 @@ public class AnalysisModeTest extends BaseCoreTest {
   @Test
   public void strictModeWithForceResolveTest() {
     coreTestHelper
+        .onTarget()
+        .withSourceFile("Foo.java", "analysismode/Foo.java")
+        .withDependency("Dep")
+        .withSourceFile("Dep.java", "analysismode/Dep.java")
+        .build()
         .addExpectedReports(
             // Resolves 6 errors locally and all errors on downstream dependencies can be resolved
             // with no new triggered error, therefore the effect is -6. The fix triggers no error
