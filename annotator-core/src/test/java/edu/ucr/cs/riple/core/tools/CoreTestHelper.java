@@ -42,6 +42,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
@@ -77,6 +78,10 @@ public class CoreTestHelper {
   private AnalysisMode mode = AnalysisMode.LOCAL;
   /** Annotator config. */
   private Config config;
+  /**
+   * Path to the expected output directory. If null, changes on source files will not be checked.
+   */
+  private Path expectedOutputPath;
   /** Project builder. */
   private final ProjectBuilder projectBuilder;
 
@@ -194,6 +199,18 @@ public class CoreTestHelper {
     return enableDownstreamDependencyAnalysis(AnalysisMode.LOWER_BOUND);
   }
 
+  /**
+   * Checks if the changes on source files are as expected.
+   *
+   * @param expectedOutputPath Path to the expected output directory from resources. All files
+   *     relative the root directory of the project and the given path will be compared.
+   * @return This instance of {@link CoreTestHelper}.
+   */
+  public CoreTestHelper checkOutExpectedOutput(String expectedOutputPath) {
+    this.expectedOutputPath = Utility.getPathOfResource(expectedOutputPath);
+    return this;
+  }
+
   /** Starts the test process. */
   public void start() {
     Path configPath = outDirPath.resolve("config.json");
@@ -207,6 +224,7 @@ public class CoreTestHelper {
     }
     compare(new ArrayList<>(annotator.cache.reports()));
     checkBuildsStatus();
+    checkExpectedOutput();
   }
 
   /** Checks if there is any build error including NullAway errors after the analysis. */
@@ -244,6 +262,49 @@ public class CoreTestHelper {
       } catch (IOException e) {
         throw new RuntimeException("Exception happened while reading file at: " + path);
       }
+    }
+  }
+
+  /** Checks if the output is as expected. */
+  private void checkExpectedOutput() {
+    if (expectedOutputPath == null) {
+      // Output will not be checked.
+      return;
+    }
+    try (Stream<Path> walk =
+        Files.walk(expectedOutputPath)
+            .filter(path -> path.toFile().isFile() && path.toString().endsWith(".java"))) {
+      walk.forEach(
+          path -> {
+            Path relativePath = expectedOutputPath.relativize(path);
+            Path actualPath = projectPath.resolve(relativePath);
+            if (!actualPath.toFile().exists()) {
+              throw new RuntimeException("Expected output file does not exist: " + actualPath);
+            }
+            try {
+              List<String> expectedLines = Files.readAllLines(path);
+              List<String> actualLines = Files.readAllLines(actualPath);
+              if (!expectedLines.equals(actualLines)) {
+                String errorMessage =
+                    "Output is not as expected, expected:"
+                        + "\n"
+                        + expectedLines.stream()
+                            .map(Objects::toString)
+                            .collect(Collectors.joining("\n"))
+                        + "\n"
+                        + "actual:"
+                        + "\n"
+                        + actualLines.stream()
+                            .map(Objects::toString)
+                            .collect(Collectors.joining("\n"));
+                fail(errorMessage);
+              }
+            } catch (IOException e) {
+              throw new RuntimeException("Exception happened while reading file at: " + path, e);
+            }
+          });
+    } catch (IOException e) {
+      throw new RuntimeException("Error happened in processing src under: " + projectPath, e);
     }
   }
 
@@ -386,21 +447,6 @@ public class CoreTestHelper {
           "Config has not been initialized yet, can only access it after a call of start method.");
     }
     return config;
-  }
-
-  /**
-   * Returns path to src directory where all test inputs exist.
-   *
-   * @return Path to root src directory.
-   */
-  public Path getSourceRoot() {
-    return getConfig()
-        .globalDir
-        .resolve("nullable-multi-modular")
-        .resolve("src")
-        .resolve("main")
-        .resolve("java")
-        .resolve("test");
   }
 
   /**
