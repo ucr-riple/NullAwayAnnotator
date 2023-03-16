@@ -53,10 +53,9 @@ public class LombokTest extends AnnotatorBaseCoreTest {
             "       return getF();", // Should be error
             "   }",
             "}")
-        .build()
-        .toDepth(1)
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(new OnField("Main.java", "test.Main", Collections.singleton("f")), 1))
+        .toDepth(1)
         .start();
   }
 }

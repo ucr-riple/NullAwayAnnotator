@@ -48,8 +48,7 @@ public class AnalysisModeTest extends AnnotatorBaseCoreTest {
         .withSourceFile("Foo.java", "analysismode/Foo.java")
         .withDependency("Dep")
         .withSourceFile("Dep.java", "analysismode/Dep.java")
-        .build()
-        .addExpectedReports(
+        .withExpectedReports(
             // Resolves 6 errors locally and all errors on downstream dependencies can be resolved
             // with no new triggered error, therefore the effect is -6. The fix triggers no error
             // in downstream dependencies, should be approved.
@@ -78,8 +77,7 @@ public class AnalysisModeTest extends AnnotatorBaseCoreTest {
         .withSourceFile("Foo.java", "analysismode/Foo.java")
         .withDependency("Dep")
         .withSourceFile("Dep.java", "analysismode/Dep.java")
-        .build()
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(
                 new OnMethod("Foo.java", "test.target.Foo", "returnNullGood()"), -6, APPROVE),
             new TReport(
@@ -103,8 +101,7 @@ public class AnalysisModeTest extends AnnotatorBaseCoreTest {
         .withSourceFile("Foo.java", "analysismode/Foo.java")
         .withDependency("Dep")
         .withSourceFile("Dep.java", "analysismode/Dep.java")
-        .build()
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(
                 new OnMethod("Foo.java", "test.target.Foo", "returnNullGood()"), -6, APPROVE),
             // Resolves 6 errors locally but creates 1 error on downstream dependencies that cannot
@@ -131,8 +128,7 @@ public class AnalysisModeTest extends AnnotatorBaseCoreTest {
         .withSourceFile("Foo.java", "analysismode/Foo.java")
         .withDependency("Dep")
         .withSourceFile("Dep.java", "analysismode/Dep.java")
-        .build()
-        .addExpectedReports(
+        .withExpectedReports(
             // Resolves 6 errors locally and all errors on downstream dependencies can be resolved
             // with no new triggered error, therefore the effect is -6. The fix triggers no error
             // in downstream dependencies, should be approved.

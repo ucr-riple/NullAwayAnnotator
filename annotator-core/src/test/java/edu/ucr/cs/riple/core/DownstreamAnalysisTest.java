@@ -45,8 +45,7 @@ public class DownstreamAnalysisTest extends AnnotatorBaseCoreTest {
         .withSourceFile("DepB.java", "downstreamdependency/DepB.java")
         .withDependency("DepC")
         .withSourceFile("DepC.java", "downstreamdependency/DepC.java")
-        .build()
-        .addExpectedReports(
+        .withExpectedReports(
             // Change reduces errors on target by -4, but increases them in downstream dependency
             // DepA by 3, DepB by 4 and DepC by 3. Hence, the total effect is: 6.
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int)"), 6),
@@ -77,8 +76,7 @@ public class DownstreamAnalysisTest extends AnnotatorBaseCoreTest {
         .withSourceFile("DepB.java", "downstreamdependency/DepB.java")
         .withDependency("DepC")
         .withSourceFile("DepC.java", "downstreamdependency/DepC.java")
-        .build()
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int)"), -4),
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableGood(int)"), -5),
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "bar()"), 1))
@@ -102,8 +100,7 @@ public class DownstreamAnalysisTest extends AnnotatorBaseCoreTest {
         .withSourceFile("DepB.java", "downstreamdependency/DepB.java")
         .withDependency("DepC")
         .withSourceFile("DepC.java", "downstreamdependency/DepC.java")
-        .build()
-        .addExpectedReports(
+        .withExpectedReports(
             // Only returnNullableBad triggers new errors in this fix chain (+10), lower bound is
             // 10.
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int)"), 10),
@@ -134,8 +131,7 @@ public class DownstreamAnalysisTest extends AnnotatorBaseCoreTest {
         .withSourceFile("DepB.java", "downstreamdependency/DepB.java")
         .withDependency("DepC")
         .withSourceFile("DepC.java", "downstreamdependency/DepC.java")
-        .build()
-        .addExpectedReports(
+        .withExpectedReports(
             // Only returnNullableBad triggers new errors in this fix chain (+10) and upper bound
             // should be 10
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int)"), 10),

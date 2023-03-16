@@ -49,8 +49,7 @@ public class ArgumentNullableFlowTest extends AnnotatorBaseCoreTest {
         .withSourceFile("DepB.java", "nullableflow/DepB.java")
         .withDependency("DepC")
         .withSourceFile("DepC.java", "nullableflow/DepC.java")
-        .build()
-        .addExpectedReports(
+        .withExpectedReports(
             // Change reduces errors on target by -5, but increases them in downstream dependency
             // DepA by 1 (Resolvable), DepB by 0 and DepC by 2 (1 resolvable).
             // Parameters param1 and param2 in bar1 and bar2 will receive Nullable from downstream
@@ -102,8 +101,7 @@ public class ArgumentNullableFlowTest extends AnnotatorBaseCoreTest {
         .withSourceFile("DepB.java", "nullableflow/DepB.java")
         .withDependency("DepC")
         .withSourceFile("DepC.java", "nullableflow/DepC.java")
-        .build()
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullable(int)"), -5),
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "getNull()"), -1))
         .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))

@@ -90,7 +90,8 @@ public class ProjectBuilder {
     return modules;
   }
 
-  CoreTestHelper build() {
+  /** Finalizes the project creation and returns the control back to {@link CoreTestHelper}. */
+  CoreTestHelper exitProjectConstruction() {
     return coreTestHelper;
   }
 

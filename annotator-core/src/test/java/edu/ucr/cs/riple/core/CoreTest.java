@@ -57,7 +57,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
     coreTestHelper
         .onTarget()
         .withSourceLines("Main.java", "package test;", "public class Main {", "Object field;", "}")
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(new OnField("Main.java", "test.Main", singleton("field")), -1))
         .start();
   }
@@ -74,7 +74,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             "     return null;",
             "   }",
             "}")
-        .addExpectedReports(new TReport(new OnMethod("Main.java", "test.Main", "run()"), -1))
+        .withExpectedReports(new TReport(new OnMethod("Main.java", "test.Main", "run()"), -1))
         .start();
   }
 
@@ -93,8 +93,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             "     run(null);",
             "   }",
             "}")
-        .build()
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(new OnParameter("Main.java", "test.Main", "run(java.lang.Object)", 0), 0))
         .start();
   }
@@ -114,11 +113,10 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             "     run(null);",
             "   }",
             "}")
-        .build()
-        .activateOuterLoop()
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(new OnParameter("Main.java", "test.Main", "run(java.lang.Object)", 0), 0),
             new TReport(new OnMethod("Main.java", "test.Main", "run(java.lang.Object)"), -1))
+        .activateOuterLoop()
         .start();
   }
 
@@ -136,10 +134,9 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             "   }",
             "   Object getF(){ return field; }",
             "}")
-        .build()
-        .toDepth(1)
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(new OnField("Main.java", "test.Main", singleton("field")), -1))
+        .toDepth(1)
         .start();
   }
 
@@ -159,10 +156,9 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             "class C {",
             "   Main main = new Main(null);",
             "}")
-        .build()
-        .toDepth(1)
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(new OnParameter("Main.java", "test.Main", "Main(java.lang.Object)", 0), 1))
+        .toDepth(1)
         .start();
   }
 
@@ -187,10 +183,9 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             "class C {",
             "   Main main = new Main(null);",
             "}")
-        .build()
-        .toDepth(1)
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(new OnParameter("Main.java", "test.Main", "Main(java.lang.Object)", 0), 1))
+        .toDepth(1)
         .suppressRemainingErrors()
         .start();
     Set<AddAnnotation> expectedAnnotations =
@@ -210,12 +205,11 @@ public class CoreTest extends AnnotatorBaseCoreTest {
     coreTestHelper
         .onTarget()
         .withSourceDirectory("test", "multiplefielddeclration")
-        .build()
-        .disableBailOut()
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(
                 new OnField("Main.java", "test.Main", newHashSet("f1", "f2", "f3", "f4")), 9),
             new TReport(new OnField("Main.java", "test.Main", singleton("f5")), 1))
+        .disableBailOut()
         .toDepth(1)
         .start();
   }
@@ -225,12 +219,11 @@ public class CoreTest extends AnnotatorBaseCoreTest {
     coreTestHelper
         .onTarget()
         .withSourceDirectory("test", "multiplefielddeclration")
-        .build()
-        .disableBailOut()
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(
                 new OnField("Main.java", "test.Main", newHashSet("f1", "f2", "f3", "f4")), 9),
             new TReport(new OnField("Main.java", "test.Main", singleton("f5")), 1))
+        .disableBailOut()
         .toDepth(1)
         // This causes the test to report a failure if any errors remain when building the target.
         .suppressRemainingErrors()
@@ -242,8 +235,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
     coreTestHelper
         .onTarget()
         .withSourceDirectory("test", "innerclass")
-        .build()
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(new OnMethod("Main.java", "test.Main$1", "bar(java.lang.Object)"), 0),
             new TReport(new OnMethod("Main.java", "test.Main$1Child", "exec()"), 0),
             new TReport(new OnMethod("Main.java", "test.Main$1Child$1Bar", "returnsNull()"), -1),
@@ -257,9 +249,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
         .toDepth(4)
         .onTarget()
         .withSourceDirectory("test", "multiplereturnnullable")
-        .build()
-        .disableBailOut()
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(
                 new OnParameter("A.java", "test.A", "helper(java.lang.Object)", 0),
                 -5,
@@ -275,6 +265,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
                     new OnMethod("B.java", "test.B", "run(java.lang.Object)"),
                     new OnField("B.java", "test.B", singleton("field"))),
                 null))
+        .disableBailOut()
         .start();
   }
 
@@ -283,8 +274,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
     coreTestHelper
         .onTarget()
         .withSourceDirectory("test", "multiplereturnnullablerecursive")
-        .build()
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(new OnField("Main.java", "test.Main", singleton("field")), -6),
             new TReport(new OnMethod("Main.java", "test.Main", "returnNullableRecursive()"), -6),
             new TReport(new OnMethod("Main.java", "test.Main", "returnNullable()"), -6))
@@ -310,10 +300,9 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             "     });",
             "   }",
             "}")
-        .build()
-        .toDepth(1)
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(new OnMethod("Main.java", "test.Main$1", "apply(java.lang.Object)"), -1))
+        .toDepth(1)
         .start();
   }
 
@@ -329,8 +318,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             "     return null;",
             "   }",
             "}")
-        .build()
-        .toDepth(1)
+        .expectNoReport()
         .deactivateInference()
         .start();
     // Verify that only one @NullUnmarked annotation is injected (No @Nullable injection).
@@ -351,8 +339,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
     coreTestHelper
         .onTarget()
         .withSourceDirectory("test", "fielderrorregion")
-        .build()
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f1")), 2),
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f2", "f3")), 2),
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f0")), -1),
@@ -422,8 +409,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             "     f4.hashCode();",
             "   }",
             "}")
-        .build()
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f1")), 0),
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f2")), 0),
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f3")), 2),
@@ -470,10 +456,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             "        return null;",
             "   }",
             "}")
-        .build()
-        .toDepth(5)
-        .disableBailOut()
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(
                 // adding @Nullable on foo() will trigger a fix on making field f @Nullable, so far,
                 // effect is -1 + 1 (triggered error on this.f = foo()) = 0.
@@ -489,6 +472,8 @@ public class CoreTest extends AnnotatorBaseCoreTest {
                 // Adding @Nullable on f will resolve the initialization error and does not trigger
                 // any error, effect is -1.
                 new OnField("A.java", "test.A", Collections.singleton("f")), -1))
+        .toDepth(5)
+        .disableBailOut()
         .start();
   }
 
@@ -522,9 +507,8 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             "   @Nullable",
             "   public static Object bar() { return null; }",
             "}")
-        .build()
+        .withExpectedReports(new TReport(new OnField("A.java", "test.A", singleton("f")), -3))
         .toDepth(5)
-        .addExpectedReports(new TReport(new OnField("A.java", "test.A", singleton("f")), -3))
         .suppressRemainingErrors()
         .start();
     List<AddAnnotation> expectedAnnotations =
@@ -559,7 +543,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             "      foo(null);",
             "   }",
             "}")
-        .build()
+        .expectNoReport()
         .toDepth(5)
         .start();
     // No annotation should be added, since they are annotated as @Nonnull although each can reduce
@@ -598,8 +582,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             "}")
         .withSourceLines(
             "Foo.java", "package test;", "public interface Foo{", "     void bar(Object o);", "}")
-        .build()
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(new OnParameter("Foo.java", "test.Foo", "bar(java.lang.Object)", 0), 2))
         .toDepth(1)
         .start();
@@ -627,8 +610,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             "}")
         .withSourceLines(
             "Foo.java", "package test;", "public interface Foo{", "     Object m(Object o);", "}")
-        .build()
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(new OnMethod("Foo.java", "test.Main", "bar(java.lang.Object)"), 1))
         .toDepth(1)
         .start();
@@ -656,11 +638,10 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             "      ",
             "   }",
             "}")
-        .build()
-        .toDepth(1)
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(new OnParameter("A.java", "test.A", "f1(java.lang.Object)", 0), 0),
             new TReport(new OnParameter("A.java", "test.A", "f2(java.lang.Object)", 0), -1))
+        .toDepth(1)
         .start();
   }
 }

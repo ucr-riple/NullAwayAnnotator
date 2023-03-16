@@ -57,10 +57,9 @@ public class DeepTest extends AnnotatorBaseCoreTest {
             "   }",
             "   Object getF(){ return field;}",
             "}")
-        .build()
-        .toDepth(2)
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(new OnField("Main.java", "test.Main", Collections.singleton("field")), -1))
+        .toDepth(2)
         .start();
   }
 
@@ -78,15 +77,14 @@ public class DeepTest extends AnnotatorBaseCoreTest {
             "   }",
             "   Object getF(){ return field;}",
             "}")
-        .build()
-        .toDepth(2)
-        .disableBailOut()
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(
                 new OnField("Main.java", "test.Main", Collections.singleton("field")),
                 -2,
                 null,
                 singleton(new OnMethod("Main.java", "test.Main", "getF()"))))
+        .toDepth(2)
+        .disableBailOut()
         .start();
   }
 
@@ -107,11 +105,7 @@ public class DeepTest extends AnnotatorBaseCoreTest {
             "   Object getF1(){ return field1; }",
             "   Object getF2(){ return field2; }",
             "}")
-        .build()
-        .toDepth(2)
-        .disableBailOut()
-        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(
                 new OnField("Main.java", "test.Main", Collections.singleton("field1")),
                 -1,
@@ -122,6 +116,9 @@ public class DeepTest extends AnnotatorBaseCoreTest {
                 -1,
                 singleton(new OnMethod("Main.java", "test.Main", "getF2()")),
                 null))
+        .toDepth(2)
+        .disableBailOut()
+        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
         .start();
   }
 
@@ -130,10 +127,7 @@ public class DeepTest extends AnnotatorBaseCoreTest {
     coreTestHelper
         .onTarget()
         .withSourceDirectory("test", "parampass")
-        .build()
-        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
-        .toDepth(10)
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(
                 new OnField("Main.java", "test.Main", singleton("f")),
                 -1,
@@ -578,6 +572,8 @@ public class DeepTest extends AnnotatorBaseCoreTest {
                         "d_param6(java.lang.Object,java.lang.Object,java.lang.Object)",
                         2)),
                 null))
+        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
+        .toDepth(10)
         .start();
   }
 }

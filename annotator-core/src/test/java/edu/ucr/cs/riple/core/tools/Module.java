@@ -95,8 +95,16 @@ public class Module {
   }
 
   /** Finalizes the module construction and returns the control to {@link ProjectBuilder}. */
-  public CoreTestHelper addExpectedReports(TReport... reports){
-    return projectBuilder.build().addExpectedReports(reports);
+  public CoreTestHelper withExpectedReports(TReport... reports) {
+    return projectBuilder.exitProjectConstruction().addExpectedReports(reports);
+  }
+
+  /**
+   * Finalizes the module construction and returns the control to {@link ProjectBuilder} with no
+   * reports.
+   */
+  public CoreTestHelper expectNoReport() {
+    return projectBuilder.exitProjectConstruction().addExpectedReports();
   }
 
   /**

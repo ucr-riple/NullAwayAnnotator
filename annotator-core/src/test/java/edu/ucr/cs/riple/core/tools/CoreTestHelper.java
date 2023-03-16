@@ -96,7 +96,7 @@ public class CoreTestHelper {
    * used to test features that do not require a project.
    */
   public CoreTestHelper onEmptyProject() {
-    return projectBuilder.onEmptyProject().build();
+    return projectBuilder.onEmptyProject().withExpectedReports();
   }
 
   /**
