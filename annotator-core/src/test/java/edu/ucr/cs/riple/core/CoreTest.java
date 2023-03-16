@@ -29,16 +29,10 @@ import static java.util.Collections.singleton;
 
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.tools.TReport;
-import edu.ucr.cs.riple.injector.changes.AddAnnotation;
-import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
-import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
-import edu.ucr.cs.riple.injector.location.OnClass;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
-import java.nio.file.Path;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
@@ -187,17 +181,8 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             new TReport(new OnParameter("Main.java", "test.Main", "Main(java.lang.Object)", 0), 1))
         .toDepth(1)
         .suppressRemainingErrors()
+        .checkOutExpectedOutput("fieldAssignNullableConstructorForceResolveEnabled/expected")
         .start();
-    Set<AddAnnotation> expectedAnnotations =
-        Set.of(
-            new AddMarkerAnnotation(
-                new OnMethod("Main.java", "test.Main", "Main(java.lang.Object)"),
-                "org.jspecify.annotations.NullUnmarked"),
-            new AddMarkerAnnotation(
-                new OnMethod("Main.java", "test.Main", "Main(java.lang.Object,java.lang.Object)"),
-                "org.jspecify.annotations.NullUnmarked"));
-    Assert.assertEquals(
-        expectedAnnotations, Set.copyOf(coreTestHelper.getConfig().log.getInjectedAnnotations()));
   }
 
   @Test
@@ -338,7 +323,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
   public void errorInFieldDeclarationForceResolveTest() {
     coreTestHelper
         .onTarget()
-        .withSourceDirectory("test", "fielderrorregion")
+        .withSourceDirectory("test", "fielderrorregion/input")
         .withExpectedReports(
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f1")), 2),
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f2", "f3")), 2),
@@ -348,41 +333,8 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f5")), 0))
         .toDepth(1)
         .suppressRemainingErrors()
+        .checkOutExpectedOutput("fielderrorregion/expected")
         .start();
-    Path srcRoot = coreTestHelper.getSourceRoot();
-    Set<AddAnnotation> expectedAnnotations =
-        Set.of(
-            new AddMarkerAnnotation(
-                new OnField(srcRoot.resolve("Foo.java").toString(), "test.Foo", Set.of("f0")),
-                "javax.annotation.Nullable"),
-            new AddMarkerAnnotation(
-                new OnMethod(
-                    srcRoot.resolve("Bar.java").toString(),
-                    "test.Bar",
-                    "process(java.lang.Object)"),
-                "org.jspecify.annotations.NullUnmarked"),
-            new AddSingleElementAnnotation(
-                new OnField(srcRoot.resolve("Foo.java").toString(), "test.Foo", Set.of("f4")),
-                "SuppressWarnings",
-                "NullAway",
-                false),
-            new AddSingleElementAnnotation(
-                new OnField(srcRoot.resolve("Foo.java").toString(), "test.Foo", Set.of("f2", "f3")),
-                "SuppressWarnings",
-                "NullAway.Init",
-                false),
-            new AddSingleElementAnnotation(
-                new OnField(srcRoot.resolve("Foo.java").toString(), "test.Foo", Set.of("f1")),
-                "SuppressWarnings",
-                "NullAway.Init",
-                false),
-            new AddMarkerAnnotation(
-                new OnField(srcRoot.resolve("Foo.java").toString(), "test.Foo", Set.of("f5")),
-                "javax.annotation.Nullable"));
-    // todo: change test infrastructure to do the expected added annotations comparison internally
-    // in the upcoming refactoring cycle.
-    Assert.assertEquals(
-        expectedAnnotations, Set.copyOf(coreTestHelper.getConfig().log.getInjectedAnnotations()));
   }
 
   @Test
@@ -416,26 +368,8 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f4")), 1))
         .toDepth(1)
         .suppressRemainingErrors()
+        .checkOutExpectedOutput("initializationErrorWithMultipleConstructors/expected")
         .start();
-    String pathToFoo = coreTestHelper.getSourceRoot().resolve("Foo.java").toString();
-    Set<AddAnnotation> expectedAnnotations =
-        Set.of(
-            new AddMarkerAnnotation(
-                new OnField(pathToFoo, "test.Foo", Set.of("f1")), "javax.annotation.Nullable"),
-            new AddMarkerAnnotation(
-                new OnField(pathToFoo, "test.Foo", Set.of("f2")), "javax.annotation.Nullable"),
-            new AddSingleElementAnnotation(
-                new OnField(pathToFoo, "test.Foo", Set.of("f3")),
-                "SuppressWarnings",
-                "NullAway.Init",
-                false),
-            new AddSingleElementAnnotation(
-                new OnField(pathToFoo, "test.Foo", Set.of("f4")),
-                "SuppressWarnings",
-                "NullAway",
-                false));
-    Assert.assertEquals(
-        expectedAnnotations, Set.copyOf(coreTestHelper.getConfig().log.getInjectedAnnotations()));
   }
 
   @Test
@@ -510,20 +444,8 @@ public class CoreTest extends AnnotatorBaseCoreTest {
         .withExpectedReports(new TReport(new OnField("A.java", "test.A", singleton("f")), -3))
         .toDepth(5)
         .suppressRemainingErrors()
+        .checkOutExpectedOutput("staticAndInstanceInitializerBlockTest/expected")
         .start();
-    List<AddAnnotation> expectedAnnotations =
-        List.of(
-            new AddMarkerAnnotation(
-                new OnField(
-                    coreTestHelper.getSourceRoot().resolve("A.java").toString(),
-                    "test.A",
-                    Set.of("f")),
-                "javax.annotation.Nullable"),
-            new AddMarkerAnnotation(
-                new OnClass(coreTestHelper.getSourceRoot().resolve("A.java").toString(), "test.B"),
-                "org.jspecify.annotations.NullUnmarked"));
-    Assert.assertEquals(
-        expectedAnnotations, coreTestHelper.getConfig().log.getInjectedAnnotations());
   }
 
   @Test
