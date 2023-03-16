@@ -167,11 +167,11 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             "public class Main {",
             "   Object f;",
             "   Main(Object f) {",
-            "     this.f = f;",
+            "      this.f = f;",
             "   }",
             "   Main(Object f, @Nullable Object o) {",
-            "     this.f = f;",
-            "     Integer h = o.hashCode();",
+            "      this.f = f;",
+            "      Integer h = o.hashCode();",
             "   }",
             "}",
             "class C {",
@@ -323,7 +323,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
   public void errorInFieldDeclarationForceResolveTest() {
     coreTestHelper
         .onTarget()
-        .withSourceDirectory("test", "fielderrorregion/input")
+        .withSourceDirectory("test", "errorInFieldDeclarationForceResolveTest/input")
         .withExpectedReports(
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f1")), 2),
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f2", "f3")), 2),
@@ -333,7 +333,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f5")), 0))
         .toDepth(1)
         .suppressRemainingErrors()
-        .checkOutExpectedOutput("fielderrorregion/expected")
+        .checkOutExpectedOutput("errorInFieldDeclarationForceResolveTest/expected")
         .start();
   }
 
@@ -349,9 +349,9 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             "   Object f2;",
             "   Object f3;",
             "   Object f4 = null;",
-            "   Foo() { }",
-            "   Foo(int i) { }",
-            "   Foo(int i, int j) { }",
+            "   Foo() {}",
+            "   Foo(int i) {}",
+            "   Foo(int i, int j) {}",
             "   void bar1() {",
             "     f3.hashCode();",
             "     f4.hashCode();",
@@ -426,9 +426,9 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             "      Object a = B.foo();",
             "      Object b = B.bar();",
             "      if (Objects.hashCode(a) > Objects.hashCode(b)) {",
-            "          f = a;",
+            "         f = a;",
             "      } else {",
-            "          f = b;",
+            "         f = b;",
             "      }",
             "   }",
             "}",

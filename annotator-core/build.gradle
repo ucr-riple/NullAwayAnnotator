@@ -49,6 +49,11 @@ dependencies {
     testImplementation 'junit:junit:4.13.1'
 }
 
+// Exclude formatting files under resources
+googleJavaFormat {
+    exclude 'src/test/resources/**/*.java'
+}
+
 // Should be the latest supporting version of NullAway.
 def NULLAWAY_TEST = "0.10.10"
 
