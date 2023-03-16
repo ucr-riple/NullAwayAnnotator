@@ -31,49 +31,48 @@ import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
-import java.util.List;
 import org.junit.Test;
 
-public class InheritanceTest extends BaseCoreTest {
+public class InheritanceTest extends AnnotatorBaseCoreTest {
 
   public InheritanceTest() {
-    super("unittest", List.of("unittest"));
+    super("nullable-multi-modular");
   }
 
   @Test
   public void returnNullableInheritanceTest() {
     coreTestHelper
-        .addInputLines(
+        .onTarget()
+        .withSourceLines(
             "Base.java",
             "package test;",
             "public class Base {",
             "   public Object foo(){ return null; }",
             "}")
-        .addInputLines(
+        .withSourceLines(
             "Child.java",
             "package test;",
             "public class Child extends Base {",
             "   public Object foo(){ return null; }",
             "}")
-        .disableBailOut()
-        .toDepth(2)
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(
                 new OnMethod("Child.java", "test.Child", "foo()"),
                 -2,
                 newHashSet(new OnMethod("Base.java", "test.Base", "foo()")),
                 null),
             new TReport(new OnMethod("Base.java", "test.Base", "foo()"), -1))
+        .disableBailOut()
+        .toDepth(2)
         .start();
   }
 
   @Test
   public void builderTest() {
     coreTestHelper
-        .addInputDirectory("test", "builder")
-        .activateOuterLoop()
-        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
-        .addExpectedReports(
+        .onTarget()
+        .withSourceDirectory("test", "builder")
+        .withExpectedReports(
             new TReport(new OnField("A.java", "test.A", singleton("arg3")), -1),
             new TReport(new OnField("A.java", "test.A", singleton("arg2")), -1),
             new TReport(new OnField("B.java", "test.B", singleton("body")), -1),
@@ -104,17 +103,17 @@ public class InheritanceTest extends BaseCoreTest {
                     new OnField("A.java", "test.A", singleton("arg2"))),
                 null))
         .toDepth(5)
+        .activateOuterLoop()
+        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
         .start();
   }
 
   @Test
   public void parameterImpactedRegionInSubclassesTest() {
     coreTestHelper
-        .addInputDirectory("test", "parametertrack")
-        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
-        .disableBailOut()
-        .toDepth(10)
-        .addExpectedReports(
+        .onTarget()
+        .withSourceDirectory("test", "parametertrack")
+        .withExpectedReports(
             new TReport(
                 new OnParameter("Base.java", "test.Base", "run(java.lang.Object)", 0),
                 0,
@@ -125,17 +124,18 @@ public class InheritanceTest extends BaseCoreTest {
                     new OnParameter(
                         "GrandChild.java", "test.GrandChild", "run(java.lang.Object)", 0)),
                 null))
+        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
+        .disableBailOut()
+        .toDepth(10)
         .start();
   }
 
   @Test
   public void methodImpactedRegionInSuperClassTest() {
     coreTestHelper
-        .addInputDirectory("test", "methodtrack")
-        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
-        .disableBailOut()
-        .toDepth(10)
-        .addExpectedReports(
+        .onTarget()
+        .withSourceDirectory("test", "methodtrack")
+        .withExpectedReports(
             new TReport(
                 new OnParameter("B.java", "test.B", "helper(java.lang.Object)", 0),
                 -1,
@@ -153,6 +153,9 @@ public class InheritanceTest extends BaseCoreTest {
                     new OnParameter("E.java", "test.E", "run(java.lang.Object)", 0),
                     new OnMethod("E.java", "test.E", "run(java.lang.Object)")),
                 null))
+        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
+        .disableBailOut()
+        .toDepth(10)
         .start();
   }
 }

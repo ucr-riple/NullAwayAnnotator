@@ -29,7 +29,6 @@ import edu.ucr.cs.riple.core.tools.Utility;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
@@ -39,14 +38,12 @@ import org.junit.runners.JUnit4;
 
 /** Base class for all core tests. */
 @RunWith(JUnit4.class)
-public abstract class BaseCoreTest {
+public abstract class AnnotatorBaseCoreTest {
 
   /** Temporary folder for each test. */
   @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
   /** Name of the used project template */
   protected final String projectTemplate;
-  /** List of modules to be tested */
-  protected final List<String> modules;
   /** Path to the unit test project */
   protected Path unitTestProjectPath;
   /** Path to the output directory */
@@ -54,9 +51,8 @@ public abstract class BaseCoreTest {
   /** Helper class for core tests */
   protected CoreTestHelper coreTestHelper;
 
-  public BaseCoreTest(String projectTemplate, List<String> modules) {
+  public AnnotatorBaseCoreTest(String projectTemplate) {
     this.projectTemplate = projectTemplate;
-    this.modules = modules;
   }
 
   @Before
@@ -86,6 +82,6 @@ public abstract class BaseCoreTest {
     } catch (IOException e) {
       throw new RuntimeException("Preparation for test failed", e);
     }
-    coreTestHelper = new CoreTestHelper(unitTestProjectPath, outDirPath, modules);
+    coreTestHelper = new CoreTestHelper(unitTestProjectPath, outDirPath);
   }
 }

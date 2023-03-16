@@ -22,9 +22,4 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'downstream-dependency-test'
-include 'Target'
-include 'DepA'
-include 'DepB'
-include 'DepC'
-
+rootProject.name = 'nullable-multi-modular'

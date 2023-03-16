@@ -41,7 +41,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.junit.Assert;
@@ -71,7 +70,7 @@ public class OffsetChangeHandlingTest {
   @Before
   public void init() {
     root = temporaryFolder.getRoot().toPath();
-    CoreTestHelper helper = new CoreTestHelper(root, root, List.of("sample"));
+    CoreTestHelper helper = new CoreTestHelper(root, root).onEmptyProject();
     Path configPath = root.resolve("config.json");
     helper.makeAnnotatorConfigFile(configPath);
     config = new Config(configPath);

@@ -34,7 +34,6 @@ import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -47,7 +46,6 @@ import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.io.FileUtils;
 
 /** Helper class for testing the core module. */
 public class CoreTestHelper {
@@ -56,13 +54,6 @@ public class CoreTestHelper {
   private final Set<TReport> expectedReports;
   /** Path to the project. */
   private final Path projectPath;
-  /** Path to source directory of target project. */
-  private final Path srcSet;
-  /**
-   * List of modules to be analyzed. Module at index {@code 0} is the target module and all others
-   * depend on it.
-   */
-  private final List<String> modules;
   /** Path to root directory where all output exists including the project. */
   private final Path outDirPath;
   /**
@@ -86,29 +77,26 @@ public class CoreTestHelper {
   private AnalysisMode mode = AnalysisMode.LOCAL;
   /** Annotator config. */
   private Config config;
+  /** Project builder. */
+  private final ProjectBuilder projectBuilder;
 
-  public CoreTestHelper(Path projectPath, Path outDirPath, List<String> modules) {
+  public CoreTestHelper(Path projectPath, Path outDirPath) {
     this.projectPath = projectPath;
     this.outDirPath = outDirPath;
     this.expectedReports = new HashSet<>();
-    this.srcSet = this.projectPath.resolve("src").resolve("main").resolve("java").resolve("test");
-    this.modules = modules;
+    this.projectBuilder = new ProjectBuilder(this, projectPath);
+  }
+
+  public Module onTarget() {
+    return projectBuilder.onTarget();
   }
 
   /**
-   * Adds source code received as lines at the given output path.
-   *
-   * @param path Relative path to the file to be created from root source directory.
-   * @param lines Lines of source code to be written.
-   * @return This instance of {@link CoreTestHelper}.
+   * Runs the tests on an empty project. Sine all unit tests require a project to execute, this is
+   * used to test features that do not require a project.
    */
-  public CoreTestHelper addInputLines(String path, String... lines) {
-    try {
-      FileUtils.writeLines(srcSet.resolve(path).toFile(), Arrays.asList(lines));
-    } catch (IOException e) {
-      throw new RuntimeException("Failed to write line at: " + path, e);
-    }
-    return this;
+  public CoreTestHelper onEmptyProject() {
+    return projectBuilder.onEmptyProject().withExpectedReports();
   }
 
   /**
@@ -124,24 +112,6 @@ public class CoreTestHelper {
   }
 
   /**
-   * Adds source code which is read from resources at the given output path.
-   *
-   * @param path Relative path to the file to be created from root source directory.
-   * @param inputFilePath Path to the file in resources.
-   * @return This instance of {@link CoreTestHelper}.
-   */
-  public CoreTestHelper addInputSourceFile(String path, String inputFilePath) {
-    try {
-      return addInputLines(
-          path,
-          FileUtils.readFileToString(
-              Utility.getPathOfResource(inputFilePath).toFile(), Charset.defaultCharset()));
-    } catch (IOException e) {
-      throw new RuntimeException("Failed to add source input", e);
-    }
-  }
-
-  /**
    * Disables bailout.
    *
    * @return This instance of {@link CoreTestHelper}.
@@ -152,29 +122,12 @@ public class CoreTestHelper {
   }
 
   /**
-   * Adds source code which is read from a directory resources at the given output path.
-   *
-   * @param path Relative path to the directory to be created from root source directory.
-   * @param inputDirectoryPath Path to the directory in resources.
-   * @return This instance of {@link CoreTestHelper}.
-   */
-  public CoreTestHelper addInputDirectory(String path, String inputDirectoryPath) {
-    Path dir = Utility.getPathOfResource(inputDirectoryPath);
-    try {
-      FileUtils.copyDirectory(dir.toFile(), srcSet.getParent().resolve(path).toFile());
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-    return this;
-  }
-
-  /**
    * Adds expected reports to be compared with computed reports when test process is finished.
    *
    * @param reports Expected Reports.
    * @return This instance of {@link CoreTestHelper}.
    */
-  public CoreTestHelper addExpectedReports(TReport... reports) {
+  CoreTestHelper addExpectedReports(TReport... reports) {
     this.expectedReports.addAll(Arrays.asList(reports));
     return this;
   }
@@ -258,6 +211,7 @@ public class CoreTestHelper {
 
   /** Checks if there is any build error including NullAway errors after the analysis. */
   private void checkBuildsStatus() {
+    List<Module> modules = projectBuilder.getModules();
     if (mode.equals(AnalysisMode.STRICT) && modules.size() > 1) {
       // Build downstream dependencies.
       Utility.executeCommand(config.downstreamDependenciesBuildCommand);
@@ -355,7 +309,7 @@ public class CoreTestHelper {
     Config.Builder builder = new Config.Builder();
     final int[] id = {0};
     builder.configPaths =
-        modules.stream()
+        projectBuilder.getModules().stream()
             .map(
                 name ->
                     new ModuleInfo(
@@ -365,7 +319,8 @@ public class CoreTestHelper {
                         outDirPath.resolve(name + "-scanner.xml")))
             .collect(Collectors.toList());
     builder.nullableAnnotation = "javax.annotation.Nullable";
-    builder.initializerAnnotation = "test.Initializer";
+    // In tests, we use NullAway @Initializer annotation.
+    builder.initializerAnnotation = "com.uber.nullaway.annotations.Initializer";
     builder.outputDir = outDirPath.toString();
     builder.depth = depth;
     builder.bailout = !disableBailout;
@@ -385,8 +340,7 @@ public class CoreTestHelper {
         !getEnvironmentVariable("ANNOTATOR_TEST_DISABLE_PARALLEL_PROCESSING");
     if (downstreamDependencyAnalysisActivated) {
       builder.buildCommand =
-          Utility.computeBuildCommandWithLibraryModelLoaderDependency(
-              this.projectPath, this.outDirPath, modules);
+          projectBuilder.computeBuildCommandWithLibraryModelLoaderDependency(this.outDirPath);
       builder.downstreamBuildCommand = builder.buildCommand;
       builder.nullawayLibraryModelLoaderPath =
           Utility.getPathToLibraryModel(outDirPath)
@@ -402,8 +356,7 @@ public class CoreTestHelper {
                       "librarymodel",
                       "nullable-methods.tsv"));
     } else {
-      builder.buildCommand =
-          Utility.computeBuildCommand(this.projectPath, this.outDirPath, modules);
+      builder.buildCommand = projectBuilder.computeBuildCommand(this.outDirPath);
     }
     builder.write(configPath);
   }
@@ -443,7 +396,7 @@ public class CoreTestHelper {
   public Path getSourceRoot() {
     return getConfig()
         .globalDir
-        .resolve("unittest")
+        .resolve("nullable-multi-modular")
         .resolve("src")
         .resolve("main")
         .resolve("java")

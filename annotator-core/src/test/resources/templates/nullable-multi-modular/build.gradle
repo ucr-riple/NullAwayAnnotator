@@ -46,11 +46,13 @@ subprojects {
     dependencies {
         if(project.name != "Target"){
             compileOnly project(":Target")
+            annotationProcessor files(libraryloader)
         }
         annotationProcessor "com.uber.nullaway:nullaway:" + System.getenv('NULLAWAY_TEST_VERSION')
         annotationProcessor "edu.ucr.cs.riple.annotator:annotator-scanner:" + System.getenv('ANNOTATOR_VERSION')
-        annotationProcessor files(libraryloader)
 
+        // to add @Initializer
+        compileOnly 'com.uber.nullaway:nullaway-annotations:0.10.10'
         compileOnly "org.jspecify:jspecify:0.3.0"
         compileOnly "com.google.code.findbugs:jsr305:3.0.2"
         errorprone "com.google.errorprone:error_prone_core:2.3.2"
