@@ -36,7 +36,7 @@ import org.junit.Test;
 public class InheritanceTest extends AnnotatorBaseCoreTest {
 
   public InheritanceTest() {
-    super("unittest");
+    super("nullable-multi-modular");
   }
 
   @Test

@@ -396,7 +396,7 @@ public class CoreTestHelper {
   public Path getSourceRoot() {
     return getConfig()
         .globalDir
-        .resolve("unittest")
+        .resolve("nullable-multi-modular")
         .resolve("src")
         .resolve("main")
         .resolve("java")

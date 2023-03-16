@@ -35,7 +35,7 @@ import org.junit.Test;
 public class ArgumentNullableFlowTest extends AnnotatorBaseCoreTest {
 
   public ArgumentNullableFlowTest() {
-    super("unittest");
+    super("nullable-multi-modular");
   }
 
   @Test

@@ -49,7 +49,7 @@ import org.junit.runners.JUnit4;
 public class CoreTest extends AnnotatorBaseCoreTest {
 
   public CoreTest() {
-    super("unittest");
+    super("nullable-multi-modular");
   }
 
   @Test

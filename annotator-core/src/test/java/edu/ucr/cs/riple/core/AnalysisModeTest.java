@@ -38,7 +38,7 @@ import org.junit.Test;
 public class AnalysisModeTest extends AnnotatorBaseCoreTest {
 
   public AnalysisModeTest() {
-    super("unittest");
+    super("nullable-multi-modular");
   }
 
   @Test

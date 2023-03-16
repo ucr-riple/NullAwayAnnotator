@@ -40,7 +40,7 @@ import org.junit.runners.JUnit4;
 public class DeepTest extends AnnotatorBaseCoreTest {
 
   public DeepTest() {
-    super("unittest");
+    super("nullable-multi-modular");
   }
 
   @Test

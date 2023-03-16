@@ -31,7 +31,7 @@ import org.junit.Test;
 public class DownstreamAnalysisTest extends AnnotatorBaseCoreTest {
 
   public DownstreamAnalysisTest() {
-    super("unittest");
+    super("nullable-multi-modular");
   }
 
   @Test
