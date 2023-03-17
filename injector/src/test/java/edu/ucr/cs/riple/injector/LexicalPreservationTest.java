@@ -35,11 +35,11 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class LexicalPreservationTest extends BaseInjectorTest {
   @Test
-  public void save_imports() {
+  public void saveImports() {
     injectorTestHelper
         .addInput(
-            "Super.java",
-            "package com.uber;",
+            "Foo.java",
+            "package test;",
             "import static com.ibm.wala.types.TypeName.ArrayMask;",
             "import static com.ibm.wala.types.TypeName.ElementBits;",
             "import static com.ibm.wala.types.TypeName.PrimitiveMask;",
@@ -47,13 +47,13 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "import com.ibm.wala.util.collections.HashMapFactory;",
             "import java.io.Serializable;",
             "import java.util.Map;",
-            "public class Super {",
+            "public class Foo {",
             "   Object test() {",
             "       return new Object();",
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import static com.ibm.wala.types.TypeName.ArrayMask;",
             "import static com.ibm.wala.types.TypeName.ElementBits;",
             "import static com.ibm.wala.types.TypeName.PrimitiveMask;",
@@ -62,24 +62,23 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "import java.io.Serializable;",
             "import java.util.Map;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable Object test() {",
             "       return new Object();",
             "   }",
             "}")
         .addChanges(
             new AddMarkerAnnotation(
-                new OnMethod("Super.java", "com.uber.Super", "test()"),
-                "javax.annotation.Nullable"))
+                new OnMethod("Foo.java", "test.Foo", "test()"), "javax.annotation.Nullable"))
         .start();
   }
 
   @Test
-  public void save_imports_asterisk() {
+  public void saveImportsAsterisk() {
     injectorTestHelper
         .addInput(
-            "Super.java",
-            "package com.uber;",
+            "Foo.java",
+            "package test;",
             "import static com.ibm.wala.types.A;",
             "import static com.ibm.wala.types.B;",
             "import static com.ibm.wala.types.C;",
@@ -120,7 +119,7 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "import com.ibm.wala.util.Z;",
             "import com.ibm.wala.util.AA;",
             "import com.ibm.wala.util.AB;",
-            "public class Super {",
+            "public class Foo {",
             "   A a = new A();",
             "   B b = new B();",
             "   C c = new C();",
@@ -153,7 +152,7 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import static com.ibm.wala.types.A;",
             "import static com.ibm.wala.types.B;",
             "import static com.ibm.wala.types.C;",
@@ -195,7 +194,7 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "import com.ibm.wala.util.AA;",
             "import com.ibm.wala.util.AB;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   A a = new A();",
             "   B b = new B();",
             "   C c = new C();",
@@ -229,18 +228,17 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "}")
         .addChanges(
             new AddMarkerAnnotation(
-                new OnMethod("Super.java", "com.uber.Super", "test()"),
-                "javax.annotation.Nullable"))
+                new OnMethod("Foo.java", "test.Foo", "test()"), "javax.annotation.Nullable"))
         .start();
   }
 
   @Test
-  public void remove_redundant_new_keyword() {
+  public void removeRedundantNewKeyword() {
     injectorTestHelper
         .addInput(
-            "Super.java",
-            "package com.uber;",
-            "public class Super {",
+            "Foo.java",
+            "package test;",
+            "public class Foo {",
             "   Object test() {",
             "       init(this.new NodeVisitor(), this.new EdgeVisitor());",
             "       return foo(this.new Bar(), this.new Foo(), getBuilder().new Foo());",
@@ -252,9 +250,9 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "   class Bar{ }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable Object test() {",
             "       init(this.new NodeVisitor(), this.new EdgeVisitor());",
             "       return foo(this.new Bar(), this.new Foo(), getBuilder().new Foo());",
@@ -267,36 +265,35 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "}")
         .addChanges(
             new AddMarkerAnnotation(
-                new OnMethod("Super.java", "com.uber.Super", "test()"),
-                "javax.annotation.Nullable"))
+                new OnMethod("Foo.java", "test.Foo", "test()"), "javax.annotation.Nullable"))
         .start();
   }
 
   @Test
-  public void simple_array_bracket_preservation() {
+  public void simpleArrayBracketPreservation() {
     injectorTestHelper
         .addInput(
-            "A.java", "package com.uber;", "public class A {", "   private Object[] allTest;", "}")
+            "A.java", "package test;", "public class A {", "   private Object[] allTest;", "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
             "public class A {",
             "   @Nullable private Object[] allTest;",
             "}")
         .addInput(
-            "B.java", "package com.uber;", "public class B {", "   private Object allTest[];", "}")
+            "B.java", "package test;", "public class B {", "   private Object allTest[];", "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
             "public class B {",
             "   @Nullable private Object allTest[];",
             "}")
         .addChanges(
             new AddMarkerAnnotation(
-                new OnField("B.java", "com.uber.B", Collections.singleton("allTest")),
+                new OnField("B.java", "test.B", Collections.singleton("allTest")),
                 "javax.annotation.Nullable"),
             new AddMarkerAnnotation(
-                new OnField("A.java", "com.uber.A", Collections.singleton("allTest")),
+                new OnField("A.java", "test.A", Collections.singleton("allTest")),
                 "javax.annotation.Nullable"))
         .start();
   }

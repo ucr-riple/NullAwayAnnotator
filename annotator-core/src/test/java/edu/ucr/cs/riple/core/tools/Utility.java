@@ -25,16 +25,20 @@
 package edu.ucr.cs.riple.core.tools;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/** Utility class for tests. */
 public class Utility {
 
   /**
@@ -55,20 +59,26 @@ public class Utility {
     }
   }
 
+  /**
+   * Gets the path of a resource from the given relative path.
+   *
+   * @param relativePath The relative path of the resource.
+   * @return The path of the resource.
+   */
   public static Path getPathOfResource(String relativePath) {
     return Paths.get(
         Objects.requireNonNull(Utility.class.getClassLoader().getResource(relativePath)).getFile());
   }
 
+  /**
+   * Creates the command to change directory to the given path.
+   *
+   * @param path The path to change directory to.
+   * @return The command to change directory to the given path.
+   */
   public static String changeDirCommand(Path path) {
     String os = System.getProperty("os.name").toLowerCase();
     return (os.startsWith("windows") ? "dir" : "cd") + " " + path;
-  }
-
-  public static ProcessBuilder createProcessInstance() {
-    ProcessBuilder pb = new ProcessBuilder();
-    String os = System.getProperty("os.name").toLowerCase();
-    return os.startsWith("windows") ? pb.command("cmd.exe", "/c") : pb.command("bash", "-c");
   }
 
   /**
@@ -81,61 +91,21 @@ public class Utility {
    * @return Gradle command line values with flags.
    */
   public static Set<String> computeConfigPathsWithGradleArguments(
-      Path outDirPath, List<String> modules) {
+      Path outDirPath, List<Module> modules) {
     return modules.stream()
         .flatMap(
-            name -> {
-              String nullawayConfigName = name + "-nullaway.xml";
-              String scannerConfigName = name + "-scanner.xml";
+            module -> {
+              String nullawayConfigName = module + "-nullaway.xml";
+              String scannerConfigName = module + "-scanner.xml";
               return Stream.of(
                   String.format(
-                      "-P%s-nullaway-config-path=%s", name, outDirPath.resolve(nullawayConfigName)),
+                      "-P%s-nullaway-config-path=%s",
+                      module, outDirPath.resolve(nullawayConfigName)),
                   String.format(
-                      "-P%s-scanner-config-path=%s", name, outDirPath.resolve(scannerConfigName)));
+                      "-P%s-scanner-config-path=%s",
+                      module, outDirPath.resolve(scannerConfigName)));
             })
         .collect(Collectors.toSet());
-  }
-
-  /**
-   * Computes the build command for the project template. It includes, changing directory command
-   * from root to project root dir, command to compile the project, and the computed paths to config
-   * files which will be passed through gradle command line arguments.
-   *
-   * @param projectPath Path to project directory.
-   * @param outDirPath Path to serialization output directory,
-   * @param modules Set of names of the modules in the template.
-   * @return The command to build the project including the command line arguments, this command can
-   *     * be executed from any directory.
-   */
-  public static String computeBuildCommand(
-      Path projectPath, Path outDirPath, List<String> modules) {
-    return String.format(
-        "%s && ./gradlew compileJava %s -Plibrary-model-loader-path=%s --rerun-tasks",
-        Utility.changeDirCommand(projectPath),
-        String.join(" ", computeConfigPathsWithGradleArguments(outDirPath, modules)),
-        getPathToLibraryModel(outDirPath).resolve(Paths.get("build", "libs", "librarymodel.jar")));
-  }
-
-  /**
-   * Computes the build command for the project template. It includes, changing directory command
-   * from root to project root dir, command to compile the project, command to update library model
-   * loader jar and the computed paths to config files which will be passed through gradle command
-   * line arguments.
-   *
-   * @param projectPath Path to project directory.
-   * @param outDirPath Path to serialization output directory,
-   * @param modules Set of names of the modules in the template.
-   * @return The command to build the project including the command line arguments, this command can
-   *     * be executed from any directory.
-   */
-  public static String computeBuildCommandWithLibraryModelLoaderDependency(
-      Path projectPath, Path outDirPath, List<String> modules) {
-    return String.format(
-        "%s && ./gradlew library-model-loader:jar --rerun-tasks && %s && ./gradlew compileJava %s -Plibrary-model-loader-path=%s --rerun-tasks",
-        Utility.changeDirCommand(outDirPath.resolve("Annotator")),
-        Utility.changeDirCommand(projectPath),
-        String.join(" ", computeConfigPathsWithGradleArguments(outDirPath, modules)),
-        getPathToLibraryModel(outDirPath).resolve(Paths.get("build", "libs", "librarymodel.jar")));
   }
 
   /**
@@ -147,5 +117,19 @@ public class Utility {
    */
   public static Path getPathToLibraryModel(Path unittestDir) {
     return unittestDir.resolve("Annotator").resolve(Paths.get("library-model-loader"));
+  }
+
+  /**
+   * Appends the given content to the given file.
+   *
+   * @param file The file to append to.
+   * @param content The content to append.
+   */
+  public static void appendToFile(Path file, String content) {
+    try {
+      Files.writeString(file, content, Charset.defaultCharset(), StandardOpenOption.APPEND);
+    } catch (IOException e) {
+      throw new RuntimeException("Exception happened in appending to file: " + file, e);
+    }
   }
 }

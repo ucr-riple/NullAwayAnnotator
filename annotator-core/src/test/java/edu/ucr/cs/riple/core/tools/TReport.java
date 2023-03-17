@@ -41,6 +41,7 @@ import javax.annotation.Nullable;
  */
 public class TReport extends Report {
 
+  /** The expected effect value for a root fix along its tree. */
   private final int expectedValue;
 
   public TReport(Location root, int effect) {

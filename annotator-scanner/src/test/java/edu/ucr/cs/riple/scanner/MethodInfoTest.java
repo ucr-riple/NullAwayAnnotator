@@ -38,15 +38,15 @@ public class MethodInfoTest extends AnnotatorScannerBaseTest<MethodInfoDisplay> 
   private static final DisplayFactory<MethodInfoDisplay> METHOD_DISPLAY_FACTORY =
       values -> {
         Preconditions.checkArgument(
-            values.length == 10,
-            "Expected to find 10 values on each line, but found: "
+            values.length == 9,
+            "Expected to find 9 values on each line, but found: "
                 + values.length
                 + ", "
                 + Arrays.toString(values));
         MethodInfoDisplay display =
             new MethodInfoDisplay(
                 values[0], values[1], values[2], values[3], values[4], values[5], values[6],
-                values[7], values[8], values[9]);
+                values[7], values[8]);
         display.uri = display.uri.substring(display.uri.indexOf("edu/ucr/"));
         return display;
       };
@@ -57,7 +57,6 @@ public class MethodInfoTest extends AnnotatorScannerBaseTest<MethodInfoDisplay> 
           "class",
           "method",
           "parent",
-          "size",
           "flags",
           "nullable",
           "visibility",
@@ -86,7 +85,6 @@ public class MethodInfoTest extends AnnotatorScannerBaseTest<MethodInfoDisplay> 
                 "1",
                 "edu.ucr.A",
                 "returnNonNull()",
-                "0",
                 "0",
                 "[]",
                 "false",
@@ -121,7 +119,6 @@ public class MethodInfoTest extends AnnotatorScannerBaseTest<MethodInfoDisplay> 
                 "edu.ucr.A",
                 "returnNonNull()",
                 "0",
-                "0",
                 "[]",
                 "false",
                 "public",
@@ -132,7 +129,6 @@ public class MethodInfoTest extends AnnotatorScannerBaseTest<MethodInfoDisplay> 
                 "edu.ucr.B",
                 "returnNonNull()",
                 "1",
-                "0",
                 "[]",
                 "false",
                 "public",
@@ -167,7 +163,6 @@ public class MethodInfoTest extends AnnotatorScannerBaseTest<MethodInfoDisplay> 
                 "edu.ucr.A",
                 "publicMethod()",
                 "0",
-                "0",
                 "[]",
                 "false",
                 "public",
@@ -177,7 +172,6 @@ public class MethodInfoTest extends AnnotatorScannerBaseTest<MethodInfoDisplay> 
                 "2",
                 "edu.ucr.A",
                 "privateMethod()",
-                "0",
                 "0",
                 "[]",
                 "false",
@@ -189,7 +183,6 @@ public class MethodInfoTest extends AnnotatorScannerBaseTest<MethodInfoDisplay> 
                 "edu.ucr.A",
                 "protectedMethod()",
                 "0",
-                "0",
                 "[]",
                 "false",
                 "protected",
@@ -199,7 +192,6 @@ public class MethodInfoTest extends AnnotatorScannerBaseTest<MethodInfoDisplay> 
                 "4",
                 "edu.ucr.A",
                 "packageMethod()",
-                "0",
                 "0",
                 "[]",
                 "false",
@@ -238,7 +230,6 @@ public class MethodInfoTest extends AnnotatorScannerBaseTest<MethodInfoDisplay> 
                 "edu.ucr.A",
                 "publicMethod()",
                 "0",
-                "0",
                 "[]",
                 "false",
                 "package",
@@ -249,34 +240,15 @@ public class MethodInfoTest extends AnnotatorScannerBaseTest<MethodInfoDisplay> 
                 "edu.ucr.A",
                 "publicAbstractMethod()",
                 "0",
-                "0",
                 "[]",
                 "false",
                 "public",
                 "true",
                 "edu/ucr/A.java"),
             new MethodInfoDisplay(
-                "3",
-                "edu.ucr.B",
-                "foo()",
-                "0",
-                "0",
-                "[]",
-                "false",
-                "public",
-                "false",
-                "edu/ucr/B.java"),
+                "3", "edu.ucr.B", "foo()", "0", "[]", "false", "public", "false", "edu/ucr/B.java"),
             new MethodInfoDisplay(
-                "4",
-                "edu.ucr.B",
-                "run()",
-                "0",
-                "0",
-                "[]",
-                "true",
-                "public",
-                "true",
-                "edu/ucr/B.java"))
+                "4", "edu.ucr.B", "run()", "0", "[]", "true", "public", "true", "edu/ucr/B.java"))
         .doTest();
   }
 }

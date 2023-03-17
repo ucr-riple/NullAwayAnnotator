@@ -35,56 +35,55 @@ import org.junit.runners.JUnit4;
 public class OnMethodInjectionTest extends BaseInjectorTest {
 
   @Test
-  public void method_nullable_simple() {
+  public void methodNullableSimple() {
     injectorTestHelper
         .addInput(
-            "Super.java",
-            "package com.uber;",
-            "public class Super {",
+            "Foo.java",
+            "package test;",
+            "public class Foo {",
             "   Object test(boolean flag) {",
             "       return new Object();",
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable Object test(boolean flag) {",
             "       return new Object();",
             "   }",
             "}")
         .addInput(
-            "test/Superb.java",
-            "package com.uber.test;",
-            "public class Superb extends Super {",
+            "test/Foob.java",
+            "package test.test;",
+            "public class Foob extends Foo {",
             "   Object test(boolean flag) {",
             "       return new Object();",
             "   }",
             "}")
         .expectOutput(
-            "package com.uber.test;",
+            "package test.test;",
             "import javax.annotation.Nullable;",
-            "public class Superb extends Super {",
+            "public class Foob extends Foo {",
             "   @Nullable Object test(boolean flag) {",
             "       return new Object();",
             "   }",
             "}")
         .addChanges(
             new AddMarkerAnnotation(
-                new OnMethod("Super.java", "com.uber.Super", "test(boolean)"),
-                "javax.annotation.Nullable"),
+                new OnMethod("Foo.java", "test.Foo", "test(boolean)"), "javax.annotation.Nullable"),
             new AddMarkerAnnotation(
-                new OnMethod("test/Superb.java", "com.uber.test.Superb", "test(boolean)"),
+                new OnMethod("test/Foob.java", "test.test.Foob", "test(boolean)"),
                 "javax.annotation.Nullable"))
         .start();
   }
 
   @Test
-  public void method_nullable_enum_simple() {
+  public void methodNullableEnumSimple() {
     injectorTestHelper
         .addInput(
             "Main.java",
-            "package com.uber;",
+            "package test;",
             "public class Main {",
             "   public enum Test{",
             "     CLASSIC;",
@@ -94,7 +93,7 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
             "public class Main {",
             "   public enum Test{",
@@ -106,38 +105,37 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
             "}")
         .addChanges(
             new AddMarkerAnnotation(
-                new OnMethod("Main.java", "com.uber.Main$Test", "run()"),
-                "javax.annotation.Nullable"))
+                new OnMethod("Main.java", "test.Main$Test", "run()"), "javax.annotation.Nullable"))
         .start();
   }
 
   @Test
-  public void method_nullable_inner_class() {
+  public void methodNullableInnerClass() {
     injectorTestHelper
         .addInput(
-            "Super.java",
-            "package com.uber;",
+            "Foo.java",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable",
             "   Object test(boolean flag) {",
             "       return new Object();",
             "   }",
-            "   class SuperInner {",
+            "   class FooInner {",
             "       Object bar(@Nullable Object foo) {",
             "           return foo;",
             "       }",
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable",
             "   Object test(boolean flag) {",
             "       return new Object();",
             "   }",
-            "   class SuperInner {",
+            "   class FooInner {",
             "       @Nullable Object bar(@Nullable Object foo) {",
             "           return foo;",
             "       }",
@@ -145,17 +143,17 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
             "}")
         .addChanges(
             new AddMarkerAnnotation(
-                new OnMethod("Super.java", "com.uber.Super$SuperInner", "bar(java.lang.Object)"),
+                new OnMethod("Foo.java", "test.Foo$FooInner", "bar(java.lang.Object)"),
                 "javax.annotation.Nullable"))
         .start();
   }
 
   @Test
-  public void method_nullable_class_decl_in_method() {
+  public void methodNullableClassDeclInMethod() {
     injectorTestHelper
         .addInput(
             "Main.java",
-            "package com.uber;",
+            "package test;",
             "public class Main {",
             "   void run() {",
             "       class Helper {",
@@ -164,7 +162,7 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
             "public class Main {",
             "   void run() {",
@@ -175,18 +173,18 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
             "}")
         .addChanges(
             new AddMarkerAnnotation(
-                new OnMethod("Main.java", "com.uber.Main$1Helper", "run()"),
+                new OnMethod("Main.java", "test.Main$1Helper", "run()"),
                 "javax.annotation.Nullable"))
         .start();
   }
 
   @Test
-  public void method_nullable_signature_duplicate_type() {
+  public void methodNullableSignatureDuplicateType() {
     injectorTestHelper
         .addInput(
-            "Super.java",
-            "package com.uber;",
-            "public class Super {",
+            "Foo.java",
+            "package test;",
+            "public class Foo {",
             "   Object test(Object flag, String name, String lastname) {",
             "       if(flag == null) {",
             "           return new Object();",
@@ -201,9 +199,9 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable Object test(Object flag, String name, String lastname) {",
             "       if(flag == null) {",
             "           return new Object();",
@@ -219,21 +217,21 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
             "}")
         .addChanges(
             new AddMarkerAnnotation(
-                new OnMethod("Super.java", "com.uber.Super", "test(Object, String, String)"),
+                new OnMethod("Foo.java", "test.Foo", "test(Object, String, String)"),
                 "javax.annotation.Nullable"),
             new AddMarkerAnnotation(
-                new OnParameter("Super.java", "com.uber.Super", "test(Object, Object, String)", 1),
+                new OnParameter("Foo.java", "test.Foo", "test(Object, Object, String)", 1),
                 "javax.annotation.Nullable"))
         .start();
   }
 
   @Test
-  public void method_nullable_single_generic_method_pick() {
+  public void methodNullableSingleGenericMethodPick() {
     injectorTestHelper
         .addInput(
-            "Super.java",
-            "package com.uber;",
-            "public class Super {",
+            "Foo.java",
+            "package test;",
+            "public class Foo {",
             "   public IntSet getPredNodeNumbers(T node) throws UnimplementedError {",
             "       Assertions.UNREACHABLE();",
             "       return null;",
@@ -253,9 +251,9 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable public IntSet getPredNodeNumbers(T node) throws UnimplementedError {",
             "       Assertions.UNREACHABLE();",
             "       return null;",
@@ -276,33 +274,33 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
             "}")
         .addChanges(
             new AddMarkerAnnotation(
-                new OnMethod("Super.java", "com.uber.Super", "getPredNodeNumbers(T)"),
+                new OnMethod("Foo.java", "test.Foo", "getPredNodeNumbers(T)"),
                 "javax.annotation.Nullable"),
             new AddMarkerAnnotation(
                 new OnMethod(
-                    "Super.java",
-                    "com.uber.Super",
+                    "Foo.java",
+                    "test.Foo",
                     "computeResult(com.ibm.wala.ipa.slicer.Statement,java.util.Map,com.ibm.wala.dataflow.graph.BitVectorSolver,com.ibm.wala.util.intset.OrdinalSetMapping,com.ibm.wala.ipa.callgraph.CGNode,com.ibm.wala.ipa.modref.ExtendedHeapModel,com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis,java.util.Map,com.ibm.wala.ssa.analysis.ExplodedControlFlowGraph,java.util.Map)"),
                 "javax.annotation.Nullable"))
         .start();
   }
 
   @Test
-  public void method_nullable_signature_array_brackets() {
+  public void methodNullableSignatureArrayBrackets() {
     injectorTestHelper
         .addInput(
-            "Super.java",
-            "package com.uber;",
-            "public class Super {",
+            "Foo.java",
+            "package test;",
+            "public class Foo {",
             "   protected CGNode getTargetForCall(",
             "     CGNode caller[], CallSiteReference[][][] site, IClass recv, InstanceKey[][] iKey) {",
             "     return null;",
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable protected CGNode getTargetForCall(",
             "     CGNode caller[], CallSiteReference[][][] site, IClass recv, InstanceKey[][] iKey) {",
             "     return null;",
@@ -311,28 +309,28 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
         .addChanges(
             new AddMarkerAnnotation(
                 new OnMethod(
-                    "Super.java",
-                    "com.uber.Super",
+                    "Foo.java",
+                    "test.Foo",
                     "getTargetForCall(com.ibm.wala.ipa.callgraph.CGNode[],com.ibm.wala.classLoader.CallSiteReference[][][],com.ibm.wala.classLoader.IClass,com.ibm.wala.ipa.callgraph.propagation.InstanceKey[][])"),
                 "javax.annotation.Nullable"))
         .start();
   }
 
   @Test
-  public void method_nullable_signature_generic_method_name() {
+  public void methodNullableSignatureGenericMethodName() {
     injectorTestHelper
         .addInput(
-            "Super.java",
-            "package com.uber;",
-            "public class Super {",
+            "Foo.java",
+            "package test;",
+            "public class Foo {",
             "   static <T> T getReader(ClassReader.AttrIterator iter, String attrName, GetReader<T> reader) {",
             "     return null;",
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable static <T> T getReader(ClassReader.AttrIterator iter, String attrName, GetReader<T> reader) {",
             "     return null;",
             "   }",
@@ -340,25 +338,25 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
         .addChanges(
             new AddMarkerAnnotation(
                 new OnMethod(
-                    "Super.java",
-                    "com.uber.Super",
+                    "Foo.java",
+                    "test.Foo",
                     "<T>getReader(com.ibm.wala.shrikeCT.ClassReader.AttrIterator,java.lang.String,com.ibm.wala.classLoader.ShrikeClass.GetReader)"),
                 "javax.annotation.Nullable"))
         .start();
   }
 
   @Test
-  public void method_nullable_dot_array() {
+  public void methodNullableDotArray() {
     injectorTestHelper
         .addInput(
             "Main.java",
-            "package com.uber;",
+            "package test;",
             "public class Main {",
             "   public void format(String type,Object... objs) {",
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Initializer;",
             "public class Main {",
             "   @Initializer public void format(String type,Object... objs) {",
@@ -367,7 +365,7 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
         .addChanges(
             new AddMarkerAnnotation(
                 new OnMethod(
-                    "Main.java", "com.uber.Main", "format(java.lang.String,java.lang.Object[])"),
+                    "Main.java", "test.Main", "format(java.lang.String,java.lang.Object[])"),
                 "javax.annotation.Initializer"))
         .start();
   }

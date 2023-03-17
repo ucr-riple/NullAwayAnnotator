@@ -35,60 +35,60 @@ import org.junit.runners.JUnit4;
 public class BasicTest extends BaseInjectorTest {
 
   @Test
-  public void skip_duplicate_annotation() {
+  public void skipDuplicateAnnotation() {
     Change change1 =
         new AddMarkerAnnotation(
-            new OnMethod("Super.java", "com.uber.Super", "test()"), "javax.annotation.Nullable");
+            new OnMethod("Foo.java", "test.Foo", "test()"), "javax.annotation.Nullable");
     Change change2 =
         new AddMarkerAnnotation(
-            new OnMethod("Super.java", "com.uber.Super", "test()"), "javax.annotation.Nullable");
+            new OnMethod("Foo.java", "test.Foo", "test()"), "javax.annotation.Nullable");
     Change change3 =
         new AddMarkerAnnotation(
-            new OnMethod("Super.java", "com.uber.Super", "test()"), "javax.annotation.Nullable");
+            new OnMethod("Foo.java", "test.Foo", "test()"), "javax.annotation.Nullable");
 
     injectorTestHelper
         .addInput(
-            "Super.java",
-            "package com.uber;",
+            "Foo.java",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable Object test() {",
             "       return new Object();",
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable Object test() {",
             "       return new Object();",
             "   }",
             "}")
-        .addChanges(change1, change2, change2)
+        .addChanges(change1, change2, change3)
         .start();
   }
 
   @Test
-  public void skip_existing_annotations() {
+  public void skipExistingAnnotations() {
     injectorTestHelper
         .addInput(
-            "Super.java",
-            "package com.uber;",
+            "Foo.java",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   Object test(@javax.annotation.Nullable Object o) {",
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable Object test(@javax.annotation.Nullable Object o) {",
             "   }",
             "}")
         .addChanges(
             new AddMarkerAnnotation(
-                new OnMethod("Super.java", "com.uber.Super", "test(java.lang.Object)"),
+                new OnMethod("Foo.java", "test.Foo", "test(java.lang.Object)"),
                 "javax.annotation.Nullable"))
         .start();
   }

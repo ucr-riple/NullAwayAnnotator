@@ -27,19 +27,19 @@ package edu.ucr.cs.riple.core;
 import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Collections;
-import java.util.List;
 import org.junit.Test;
 
-public class LombokTest extends BaseCoreTest {
+public class LombokTest extends AnnotatorBaseCoreTest {
 
   public LombokTest() {
-    super("lombok", List.of("unittest"));
+    super("lombok");
   }
 
   @Test
   public void regionComputationOnFieldParallelProcessingEnables() {
     coreTestHelper
-        .addInputLines(
+        .onTarget()
+        .withSourceLines(
             "Main.java",
             "package test;",
             "import lombok.Data;",
@@ -53,9 +53,9 @@ public class LombokTest extends BaseCoreTest {
             "       return getF();", // Should be error
             "   }",
             "}")
-        .toDepth(1)
-        .addExpectedReports(
+        .withExpectedReports(
             new TReport(new OnField("Main.java", "test.Main", Collections.singleton("f")), 1))
+        .toDepth(1)
         .start();
   }
 }

@@ -37,26 +37,25 @@ public class OnClassInjectionTest extends BaseInjectorTest {
   public void onClassBasicTest() {
     injectorTestHelper
         .addInput(
-            "Super.java",
-            "package com.uber;",
-            "public class Super {",
+            "Foo.java",
+            "package test;",
+            "public class Foo {",
             "   Object h = new Object();",
             "   public void test(Object f) {",
             "      h = f;",
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import edu.custom.NullUnmarked;",
-            "@NullUnmarked public class Super {",
+            "@NullUnmarked public class Foo {",
             "   Object h = new Object();",
             "   public void test(Object f) {",
             "      h = f;",
             "   }",
             "}")
         .addChanges(
-            new AddMarkerAnnotation(
-                new OnClass("Super.java", "com.uber.Super"), "edu.custom.NullUnmarked"))
+            new AddMarkerAnnotation(new OnClass("Foo.java", "test.Foo"), "edu.custom.NullUnmarked"))
         .start();
   }
 
@@ -64,31 +63,29 @@ public class OnClassInjectionTest extends BaseInjectorTest {
   public void onInnerClassTest() {
     injectorTestHelper
         .addInput(
-            "Super.java",
-            "package com.uber;",
-            "public class Super {",
+            "Foo.java",
+            "package test;",
+            "public class Foo {",
             "   class Inner { }",
             "   public void test() {",
             "       class InnerMethod { }",
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import edu.custom.NullUnmarked;",
-            "@NullUnmarked public class Super {",
+            "@NullUnmarked public class Foo {",
             "   @NullUnmarked class Inner { }",
             "   public void test() {",
             "       @NullUnmarked class InnerMethod { }",
             "   }",
             "}")
         .addChanges(
+            new AddMarkerAnnotation(new OnClass("Foo.java", "test.Foo"), "edu.custom.NullUnmarked"),
             new AddMarkerAnnotation(
-                new OnClass("Super.java", "com.uber.Super"), "edu.custom.NullUnmarked"),
+                new OnClass("Foo.java", "test.Foo$Inner"), "edu.custom.NullUnmarked"),
             new AddMarkerAnnotation(
-                new OnClass("Super.java", "com.uber.Super$Inner"), "edu.custom.NullUnmarked"),
-            new AddMarkerAnnotation(
-                new OnClass("Super.java", "com.uber.Super$1InnerMethod"),
-                "edu.custom.NullUnmarked"))
+                new OnClass("Foo.java", "test.Foo$1InnerMethod"), "edu.custom.NullUnmarked"))
         .start();
   }
 
