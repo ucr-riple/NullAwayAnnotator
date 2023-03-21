@@ -24,13 +24,20 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-public enum LocationType {
+/** Represents the type of the location. */
+public enum LocationKind {
   CLASS,
   FIELD,
   METHOD,
   PARAMETER;
 
-  public static LocationType getType(String type) {
+  /**
+   * Returns the type of the location based on the string representation.
+   *
+   * @param type the string representation of the type.
+   * @return the type of the location.
+   */
+  public static LocationKind getType(String type) {
     if (type.equalsIgnoreCase("field")) {
       return FIELD;
     }

@@ -41,7 +41,11 @@ import java.util.function.Consumer;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+/**
+ * Represents a location for field element. This location is used to apply changes to a class field.
+ */
 public class OnField extends Location {
+
   /**
    * Set of field names. It is a set to support inline multiple field declarations. Please see the
    * example below:
@@ -57,7 +61,7 @@ public class OnField extends Location {
   public final Set<String> variables;
 
   public OnField(Path path, String clazz, Set<String> variables) {
-    super(LocationType.FIELD, path, clazz);
+    super(LocationKind.FIELD, path, clazz);
     this.variables = variables;
   }
 
@@ -74,9 +78,9 @@ public class OnField extends Location {
   }
 
   @Override
-  protected Modification applyToMember(NodeList<BodyDeclaration<?>> clazz, Change change) {
+  protected Modification applyToMember(NodeList<BodyDeclaration<?>> members, Change change) {
     final AtomicReference<Modification> ans = new AtomicReference<>();
-    clazz.forEach(
+    members.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifFieldDeclaration(
                 fieldDeclaration -> {

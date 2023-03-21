@@ -37,6 +37,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import org.json.simple.JSONObject;
 
+/** Represents a location for class element. This location is used to apply changes to a class. */
 public class OnClass extends Location {
 
   /**
@@ -46,7 +47,7 @@ public class OnClass extends Location {
   public static final Pattern anonymousClassPattern = Pattern.compile(".*\\$\\d+$");
 
   public OnClass(Path path, String clazz) {
-    super(LocationType.CLASS, path, clazz);
+    super(LocationKind.CLASS, path, clazz);
   }
 
   public OnClass(String path, String clazz) {
@@ -54,12 +55,12 @@ public class OnClass extends Location {
   }
 
   @Override
-  protected Modification applyToMember(NodeList<BodyDeclaration<?>> declarations, Change change) {
+  protected Modification applyToMember(NodeList<BodyDeclaration<?>> members, Change change) {
     if (isAnonymousClassFlatName(change.location.clazz)) {
       return null;
     }
     final AtomicReference<Modification> ans = new AtomicReference<>();
-    Optional<Node> clazz = declarations.getParentNode();
+    Optional<Node> clazz = members.getParentNode();
     clazz.ifPresent(
         node ->
             node.getRange()

@@ -38,12 +38,19 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import org.json.simple.JSONObject;
 
+/** Represents a location for method element. This location is used to apply changes to a method. */
 public class OnMethod extends Location {
+
+  /** Method signature of the target element. */
   public final String method;
+  /**
+   * Matcher for the method signature. Method signature is given as a string, this matcher is used
+   * to match the target.
+   */
   public final SignatureMatcher matcher;
 
   public OnMethod(Path path, String clazz, String method) {
-    super(LocationType.METHOD, path, clazz);
+    super(LocationKind.METHOD, path, clazz);
     this.method = method;
     this.matcher = new SignatureMatcher(method);
   }
@@ -59,9 +66,9 @@ public class OnMethod extends Location {
   }
 
   @Override
-  protected Modification applyToMember(NodeList<BodyDeclaration<?>> clazz, Change change) {
+  protected Modification applyToMember(NodeList<BodyDeclaration<?>> members, Change change) {
     final AtomicReference<Modification> ans = new AtomicReference<>();
-    clazz.forEach(
+    members.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifCallableDeclaration(
                 callableDeclaration -> {
@@ -75,7 +82,7 @@ public class OnMethod extends Location {
                   }
                 }));
     if (ans.get() == null) {
-      clazz.forEach(
+      members.forEach(
           bodyDeclaration ->
               bodyDeclaration.ifAnnotationMemberDeclaration(
                   annotationMemberDeclaration -> {

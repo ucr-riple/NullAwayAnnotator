@@ -41,13 +41,24 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import org.json.simple.JSONObject;
 
+/**
+ * Represents a location for parameter element. This location is used to apply changes to a
+ * parameter.
+ */
 public class OnParameter extends Location {
+
+  /** Method signature of the enclosing method. */
   public final String method;
+  /** Index of the parameter in the method signature. */
   public final int index;
+  /**
+   * Matcher for the method signature. Method signature is given as a string, this matcher is used
+   * to match the target.
+   */
   private final SignatureMatcher matcher;
 
   public OnParameter(Path path, String clazz, String method, int index) {
-    super(LocationType.PARAMETER, path, clazz);
+    super(LocationKind.PARAMETER, path, clazz);
     this.method = method;
     this.index = index;
     this.matcher = new SignatureMatcher(method);
