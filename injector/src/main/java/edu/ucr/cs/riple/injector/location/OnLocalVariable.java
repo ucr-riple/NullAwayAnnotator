@@ -1,6 +1,6 @@
 package edu.ucr.cs.riple.injector.location;
 
-import com.github.javaparser.Range;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
@@ -11,9 +11,9 @@ import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.SignatureMatcher;
 import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import edu.ucr.cs.riple.injector.modifications.MultiPositionModification;
 import java.nio.file.Path;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -56,7 +56,7 @@ public class OnLocalVariable extends Location {
 
   @Override
   protected Modification applyToMember(NodeList<BodyDeclaration<?>> members, Change change) {
-    final AtomicReference<List<Modification>> ans = new AtomicReference<>();
+    final AtomicReference<Modification> ans = new AtomicReference<>();
     members.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifCallableDeclaration(
@@ -74,6 +74,9 @@ public class OnLocalVariable extends Location {
                               }
                               VariableDeclarationExpr varDeclaration =
                                   (VariableDeclarationExpr) node;
+                              if (varDeclaration.getRange().isEmpty()) {
+                                return;
+                              }
                               varDeclaration
                                   .getVariables()
                                   .forEach(
@@ -82,16 +85,24 @@ public class OnLocalVariable extends Location {
                                             .getName()
                                             .toString()
                                             .equals(varName)) {
-                                          Set<Range> ranges =
+                                          // Located the variable.
+                                          Set<Modification> modifications = new HashSet<>();
+                                          // Process the declaration statement.
+                                          modifications.add(
+                                              change.visit(
+                                                  varDeclaration, varDeclaration.getRange().get()));
+                                          // Process the declarator type arguments.
+                                          modifications.addAll(
                                               variableDeclarator
                                                   .getType()
-                                                  .accept(TYPE_ARGUMENT_VISITOR, null);
+                                                  .accept(TYPE_ARGUMENT_VISITOR, change));
+                                          ans.set(new MultiPositionModification(modifications));
                                         }
                                       });
                             });
                   }
                 }));
-    return ans.get().get(0);
+    return ans.get();
   }
 
   @Override
@@ -133,30 +144,44 @@ public class OnLocalVariable extends Location {
         + '}';
   }
 
-  static class TypeArgumentVisitor extends GenericVisitorWithDefaults<Set<Range>, Void> {
+  static class TypeArgumentVisitor extends GenericVisitorWithDefaults<Set<Modification>, Change> {
 
     @Override
-    public Set<Range> visit(PrimitiveType n, Void unused) {
-      if (n.getRange().isEmpty()) {
-        return Set.of();
+    public Set<Modification> visit(PrimitiveType n, Change change) {
+      if (n.getRange().isPresent()) {
+        Modification modification = change.visit(n, n.getRange().get());
+        return modification == null ? Set.of() : Set.of(modification);
       }
-      return Set.of(n.getRange().get());
+      return Set.of();
     }
 
     @Override
-    public Set<Range> visit(ClassOrInterfaceType classOrInterfaceType, Void unused) {
-      if (classOrInterfaceType.getRange().isEmpty()) {
-        return Set.of();
+    public Set<Modification> visit(ClassOrInterfaceType classOrInterfaceType, Change change) {
+      Set<Modification> result = new HashSet<>();
+      if (classOrInterfaceType.getRange().isPresent()) {
+        Modification modification =
+            change.visit(classOrInterfaceType, classOrInterfaceType.getRange().get());
+        if (modification != null) {
+          result.add(modification);
+        }
       }
-      Set<Range> result = new HashSet<>();
-      result.add(classOrInterfaceType.getRange().get());
       if (classOrInterfaceType.getTypeArguments().isPresent()) {
         classOrInterfaceType
             .getTypeArguments()
             .get()
-            .forEach(e -> result.addAll(e.accept(this, null)));
+            .forEach(e -> result.addAll(e.accept(this, change)));
       }
       return result;
+    }
+
+    @Override
+    public Set<Modification> defaultAction(NodeList n, Change arg) {
+      throw new RuntimeException("Not implemented yet: " + n.getClass().getName());
+    }
+
+    @Override
+    public Set<Modification> defaultAction(Node n, Change arg) {
+      throw new RuntimeException("Not implemented yet: " + n.getClass().getName());
     }
   }
 }

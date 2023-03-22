@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Nima Karimipour
+ * Copyright (c) 2023 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,31 +26,37 @@ package edu.ucr.cs.riple.injector.modifications;
 
 import com.github.javaparser.Position;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
-/**
- * Represents a text modification in the source file which are translation of {@link
- * edu.ucr.cs.riple.injector.changes.Change} instances.
- */
-public interface Modification extends Comparable<Modification> {
+/** Represents a composite modification that consists of multiple modifications. */
+public class MultiPositionModification implements Modification {
 
-  /** Comparator to sort a collection of modifications based on their start line and column. */
-  Comparator<Modification> COMPARATOR = Comparator.comparing(Modification::getStartingPosition);
+  /** The modifications that should be applied to the source file in the reverse order. */
+  final SortedSet<Modification> modifications;
 
-  /**
-   * Visits the source file as list of lines and applies its modification to it.
-   *
-   * @param lines List of lines of the target source code.
-   * @param offsetStore Offset change info of the original version.
-   */
-  void visit(List<String> lines, FileOffsetStore offsetStore);
+  public MultiPositionModification(Set<Modification> modifications) {
+    // Modification are sorted to start from the last position, to make the changes ineffective to
+    // current computed offsets.
+    this.modifications = new TreeSet<>(Collections.reverseOrder());
+    this.modifications.addAll(modifications);
+  }
 
-  /**
-   * Returns the starting position of the modification on the source file. Required to sort a
-   * collection of modifications.
-   *
-   * @return Starting position of the modification on the source file.
-   */
-  Position getStartingPosition();
+  @Override
+  public void visit(List<String> lines, FileOffsetStore offsetStore) {
+    this.modifications.forEach(modification -> modification.visit(lines, offsetStore));
+  }
+
+  @Override
+  public Position getStartingPosition() {
+    return modifications.last().getStartingPosition();
+  }
+
+  @Override
+  public int compareTo(Modification o) {
+    return COMPARATOR.compare(this, o);
+  }
 }

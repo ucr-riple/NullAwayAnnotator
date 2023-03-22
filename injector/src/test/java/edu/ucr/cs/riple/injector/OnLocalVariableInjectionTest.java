@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.injector;
 
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
+import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import edu.ucr.cs.riple.injector.location.OnLocalVariable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,37 +33,71 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class OnLocalVariableInjectionTest extends BaseInjectorTest {
+
   @Test
-  public void baseTest() {
+  public void additionTest() {
     injectorTestHelper
         .addInput(
             "Foo.java",
             "package test;",
-            "import javax.annotation.Nullable;",
             "public class Foo {",
-            "   Object h = new Object();",
             "   public void foo() {",
-            "      Bar<String, Integer, Baz<String, Integer>> f0;",
-            "      String f1;",
-            "      h = f;",
+            "      int f0;",
+            "      Bar<String, Integer, Baz<String, Integer>> f1;",
+            "      String f2;",
             "   }",
             "}")
         .expectOutput(
             "package test;",
-            "import javax.annotation.Nullable;",
+            "import edu.ucr.UnTainted;",
             "public class Foo {",
-            "   @Nullable Object h = new Object();",
-            "   public void foo(@Nullable Object f) {",
-            "      h = f;",
+            "   public void foo() {",
+            "      @UnTainted int f0;",
+            "      @UnTainted Bar<@UnTainted String, @UnTainted Integer, @UnTainted Baz<@UnTainted String, @UnTainted Integer>> f1;",
+            "      @UnTainted String f2;",
             "   }",
             "}")
         .addChanges(
             new AddMarkerAnnotation(
-                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"),
-                "javax.annotation.Nullable"),
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"),
             new AddMarkerAnnotation(
-                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"),
-                "javax.annotation.Nullable"))
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"), "edu.ucr.UnTainted"),
+            new AddMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
+        .start();
+  }
+
+  @Test
+  public void deletionTest() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "   public void foo() {",
+            "      @UnTainted int f0;",
+            "      @UnTainted Bar<@UnTainted String, @UnTainted Integer, @UnTainted Baz<@UnTainted String, @UnTainted Integer>> f1;",
+            "      @UnTainted String f2;",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "   public void foo() {",
+            "      int f0;",
+            "      Bar<String, Integer, Baz<String, Integer>> f1;",
+            "      String f2;",
+            "   }",
+            "}")
+        .addChanges(
+            new RemoveAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"),
+            new RemoveAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"), "edu.ucr.UnTainted"),
+            new RemoveAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
         .start();
   }
 }
