@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.injector.location;
 
 /** Represents the type of the location. */
 public enum LocationKind {
+  LOCAL_VARIABLE,
   CLASS,
   FIELD,
   METHOD,
@@ -38,6 +39,9 @@ public enum LocationKind {
    * @return the type of the location.
    */
   public static LocationKind getType(String type) {
+    if (type.equalsIgnoreCase("local_variable")) {
+      return LOCAL_VARIABLE;
+    }
     if (type.equalsIgnoreCase("field")) {
       return FIELD;
     }
