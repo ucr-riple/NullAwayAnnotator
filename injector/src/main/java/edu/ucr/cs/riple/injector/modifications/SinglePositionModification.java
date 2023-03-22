@@ -62,31 +62,18 @@ public abstract class SinglePositionModification implements Modification {
   }
 
   @Override
-  public int getStartLine() {
-    return startPosition.line;
-  }
-
-  @Override
-  public int getStarColumn() {
-    return startPosition.column;
+  public Position getStartingPosition() {
+    return startPosition;
   }
 
   @Override
   public int compareTo(Modification o) {
-    if (startPosition.line < o.getStartLine()) {
-      return -1;
-    }
-    if (startPosition.line > o.getStartLine()) {
-      return 1;
-    }
-    if (startPosition.column < o.getStarColumn()) {
-      return -1;
-    }
-    if (startPosition.column > o.getStarColumn()) {
-      return 1;
+    int value = COMPARATOR.compare(this, o);
+    if (value != 0) {
+      return value;
     }
     if (o instanceof SinglePositionModification) {
-      // to produce deterministic results in unit tests to avoid flaky CI issues. In practice, the
+      // to produce deterministic results in unit tests and avoid flaky CI issues. In practice, the
       // order is not important anymore and will not cause any problem.
       return content.compareTo(((SinglePositionModification) o).content);
     }
