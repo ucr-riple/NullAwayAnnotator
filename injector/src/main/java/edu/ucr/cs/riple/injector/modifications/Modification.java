@@ -24,27 +24,14 @@
 
 package edu.ucr.cs.riple.injector.modifications;
 
-import com.github.javaparser.Position;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Represents a text modification in the source file which are translation of {@link
  * edu.ucr.cs.riple.injector.changes.Change} instances.
  */
-public abstract class Modification {
-
-  /** Starting position where the modification should be applied in the source file. */
-  public final Position startPosition;
-  /** Content of modification. */
-  public final String content;
-
-  public Modification(String content, Position startPosition) {
-    // Position in javaparser is not 0 indexed and line and column fields are final.
-    this.startPosition = new Position(startPosition.line - 1, startPosition.column - 1);
-    this.content = content;
-  }
+public interface Modification extends Comparable<Modification> {
 
   /**
    * Visits the source file as list of lines and applies its modification to it.
@@ -52,22 +39,21 @@ public abstract class Modification {
    * @param lines List of lines of the target source code.
    * @param offsetStore Offset change info of the original version.
    */
-  public abstract void visit(List<String> lines, FileOffsetStore offsetStore);
+  void visit(List<String> lines, FileOffsetStore offsetStore);
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof Modification)) {
-      return false;
-    }
-    Modification that = (Modification) o;
-    return startPosition.equals(that.startPosition) && content.equals(that.content);
-  }
+  /**
+   * Returns the line number of the beginning of the modification on the source file. Required to
+   * sort a collection of modifications.
+   *
+   * @return Tine line number of the beginning of the modification on the source file.
+   */
+  int getStartLine();
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(startPosition, content);
-  }
+  /**
+   * Returns the column number of the beginning of the modification on the source file. Required to
+   * sort a collection of modifications.
+   *
+   * @return Tine column number of the beginning of the modification on the source file.
+   */
+  int getStarColumn();
 }
