@@ -137,7 +137,7 @@ public abstract class Location {
    *
    * @param tree CompilationUnit Tree to locate the target element.
    * @param change Change to be applied on the target element.
-   * @return true, if the change applied successfully.
+   * @return The modification that should be applied on the source file.
    */
   public Modification apply(CompilationUnit tree, Change change) {
     NodeList<BodyDeclaration<?>> clazz;

@@ -24,7 +24,9 @@
 
 package edu.ucr.cs.riple.injector.modifications;
 
+import com.github.javaparser.Position;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -32,6 +34,9 @@ import java.util.List;
  * edu.ucr.cs.riple.injector.changes.Change} instances.
  */
 public interface Modification extends Comparable<Modification> {
+
+  /** Comparator to sort a collection of modifications based on their start line and column. */
+  Comparator<Modification> COMPARATOR = Comparator.comparing(Modification::getStartingPosition);
 
   /**
    * Visits the source file as list of lines and applies its modification to it.
@@ -42,18 +47,10 @@ public interface Modification extends Comparable<Modification> {
   void visit(List<String> lines, FileOffsetStore offsetStore);
 
   /**
-   * Returns the line number of the beginning of the modification on the source file. Required to
-   * sort a collection of modifications.
+   * Returns the starting position of the modification on the source file. Required to sort a
+   * collection of modifications.
    *
-   * @return Tine line number of the beginning of the modification on the source file.
+   * @return Starting position of the modification on the source file.
    */
-  int getStartLine();
-
-  /**
-   * Returns the column number of the beginning of the modification on the source file. Required to
-   * sort a collection of modifications.
-   *
-   * @return Tine column number of the beginning of the modification on the source file.
-   */
-  int getStarColumn();
+  Position getStartingPosition();
 }
