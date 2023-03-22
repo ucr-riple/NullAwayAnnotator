@@ -30,7 +30,7 @@ import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.util.List;
 
 /** Represents a deletion of a content in the source file. */
-public class Deletion extends Modification {
+public class Deletion extends SinglePositionModification {
 
   /** The end position of content which should be removed. */
   private final Position endPosition;
