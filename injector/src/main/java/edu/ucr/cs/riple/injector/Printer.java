@@ -32,7 +32,6 @@ import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -169,16 +168,5 @@ public class Printer {
       throw new RuntimeException(e);
     }
     return offsetStore;
-  }
-
-  public static void main(String[] args) {
-    // Create a sorted set of integers
-    Set<Integer> set = new TreeSet<>(Arrays.asList(5, 3, 8, 1, 9, 2, 7));
-    System.out.println("Original Set: " + set);
-
-    // Create a reversed sorted set
-    Set<Integer> reversedSet = new TreeSet<>(Collections.reverseOrder());
-    reversedSet.addAll(set);
-    System.out.println("Reversed Set: " + reversedSet);
   }
 }
