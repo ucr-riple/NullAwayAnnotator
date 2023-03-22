@@ -1,17 +1,14 @@
 package edu.ucr.cs.riple.injector.location;
 
-import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
-import com.github.javaparser.ast.type.PrimitiveType;
-import com.github.javaparser.ast.visitor.GenericVisitorWithDefaults;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.SignatureMatcher;
 import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.modifications.MultiPositionModification;
+import edu.ucr.cs.riple.injector.modifications.TypeArgumentVisitor;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Objects;
@@ -36,6 +33,7 @@ public class OnLocalVariable extends Location {
   /** Name of the local variable. */
   public final String varName;
 
+  /** Visitor for applying changes on type arguments of the target element's type */
   public static final TypeArgumentVisitor TYPE_ARGUMENT_VISITOR = new TypeArgumentVisitor();
 
   public OnLocalVariable(Path path, String clazz, String encMethod, String varName) {
@@ -142,46 +140,5 @@ public class OnLocalVariable extends Location {
         + "varName='"
         + varName
         + '}';
-  }
-
-  static class TypeArgumentVisitor extends GenericVisitorWithDefaults<Set<Modification>, Change> {
-
-    @Override
-    public Set<Modification> visit(PrimitiveType n, Change change) {
-      if (n.getRange().isPresent()) {
-        Modification modification = change.visit(n, n.getRange().get());
-        return modification == null ? Set.of() : Set.of(modification);
-      }
-      return Set.of();
-    }
-
-    @Override
-    public Set<Modification> visit(ClassOrInterfaceType classOrInterfaceType, Change change) {
-      Set<Modification> result = new HashSet<>();
-      if (classOrInterfaceType.getRange().isPresent()) {
-        Modification modification =
-            change.visit(classOrInterfaceType, classOrInterfaceType.getRange().get());
-        if (modification != null) {
-          result.add(modification);
-        }
-      }
-      if (classOrInterfaceType.getTypeArguments().isPresent()) {
-        classOrInterfaceType
-            .getTypeArguments()
-            .get()
-            .forEach(e -> result.addAll(e.accept(this, change)));
-      }
-      return result;
-    }
-
-    @Override
-    public Set<Modification> defaultAction(NodeList n, Change arg) {
-      throw new RuntimeException("Not implemented yet: " + n.getClass().getName());
-    }
-
-    @Override
-    public Set<Modification> defaultAction(Node n, Change arg) {
-      throw new RuntimeException("Not implemented yet: " + n.getClass().getName());
-    }
   }
 }
