@@ -62,13 +62,8 @@ public abstract class SinglePositionModification implements Modification {
   }
 
   @Override
-  public int getStartLine() {
-    return startPosition.line;
-  }
-
-  @Override
-  public int getStarColumn() {
-    return startPosition.column;
+  public Position getStartingPosition() {
+    return startPosition;
   }
 
   @Override
