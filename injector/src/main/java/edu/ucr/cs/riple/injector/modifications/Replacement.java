@@ -29,7 +29,7 @@ import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.util.List;
 
 /** Represents a replacement of a content in the source file. */
-public class Replacement extends Modification {
+public class Replacement extends SinglePositionModification {
 
   /** The end position of the content that should be replaced. */
   private final Position endPosition;
