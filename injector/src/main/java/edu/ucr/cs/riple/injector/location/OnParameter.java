@@ -24,19 +24,16 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-import com.github.javaparser.Range;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.SignatureMatcher;
 import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.nio.file.Path;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import org.json.simple.JSONObject;
@@ -89,11 +86,11 @@ public class OnParameter extends Location {
                   if (matcher.matchesCallableDeclaration(callableDeclaration)) {
                     NodeList<?> params = callableDeclaration.getParameters();
                     if (index < params.size()) {
-                      if (params.get(index) instanceof Parameter) {
+                      if (params.get(index) != null) {
                         Node param = params.get(index);
-                        Optional<Range> range = param.getRange();
-                        range.ifPresent(
-                            value -> ans.set(change.visit((NodeWithAnnotations<?>) param, value)));
+                        if (param instanceof Parameter) {
+                          ans.set(change.visit((Parameter) param));
+                        }
                       }
                     }
                   }
