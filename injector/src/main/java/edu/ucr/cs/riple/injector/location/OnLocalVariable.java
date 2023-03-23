@@ -8,7 +8,7 @@ import edu.ucr.cs.riple.injector.SignatureMatcher;
 import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.modifications.MultiPositionModification;
-import edu.ucr.cs.riple.injector.modifications.TypeArgumentVisitor;
+import edu.ucr.cs.riple.injector.modifications.TypeChangeVisitor;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Objects;
@@ -33,8 +33,8 @@ public class OnLocalVariable extends Location {
   /** Name of the local variable. */
   public final String varName;
 
-  /** Visitor for applying changes on type arguments of the target element's type */
-  public static final TypeArgumentVisitor TYPE_ARGUMENT_VISITOR = new TypeArgumentVisitor();
+  /** Visitor for applying changes on the internal structure of the target element's type */
+  public static final TypeChangeVisitor TYPE_CHANGE_VISITOR = new TypeChangeVisitor();
 
   public OnLocalVariable(Path path, String clazz, String encMethod, String varName) {
     super(LocationKind.LOCAL_VARIABLE, path, clazz);
@@ -93,7 +93,7 @@ public class OnLocalVariable extends Location {
                                           modifications.addAll(
                                               variableDeclarator
                                                   .getType()
-                                                  .accept(TYPE_ARGUMENT_VISITOR, change));
+                                                  .accept(TYPE_CHANGE_VISITOR, change));
                                           ans.set(new MultiPositionModification(modifications));
                                         }
                                       });
