@@ -49,14 +49,8 @@ public class ScannerConfigWriter {
 
   /** Path to output directory. */
   private Path outputDirectory;
-  /** Controls method info serialization. */
-  private boolean methodTrackerIsActive;
-  /** Controls field usage info serialization. */
-  private boolean fieldTrackerIsActive;
-  /** Controls method invocation serialization. */
-  private boolean callTrackerIsActive;
-  /** Controls class info serialization. */
-  private boolean classTrackerIsActive;
+  /** Controls serialization services activation. */
+  private boolean serializationActivation;
   /** Set of activated generated code detectors. */
   private final Set<SourceType> activatedGeneratedCodeDetectors;
 
@@ -64,10 +58,7 @@ public class ScannerConfigWriter {
   private ImmutableSet<String> nonnullAnnotations;
 
   public ScannerConfigWriter() {
-    this.methodTrackerIsActive = false;
-    this.fieldTrackerIsActive = false;
-    this.callTrackerIsActive = false;
-    this.classTrackerIsActive = false;
+    this.serializationActivation = false;
     this.activatedGeneratedCodeDetectors = new HashSet<>();
     this.nonnullAnnotations = ImmutableSet.of();
   }
@@ -77,23 +68,8 @@ public class ScannerConfigWriter {
     return this;
   }
 
-  public ScannerConfigWriter setMethodTrackerActivation(boolean activation) {
-    this.methodTrackerIsActive = activation;
-    return this;
-  }
-
-  public ScannerConfigWriter setFieldTrackerActivation(boolean activation) {
-    this.fieldTrackerIsActive = activation;
-    return this;
-  }
-
-  public ScannerConfigWriter setCallTrackerActivation(boolean activation) {
-    this.callTrackerIsActive = activation;
-    return this;
-  }
-
-  public ScannerConfigWriter setClassTrackerActivation(boolean activation) {
-    this.classTrackerIsActive = activation;
+  public ScannerConfigWriter setSerializationActivation(boolean activation) {
+    this.serializationActivation = activation;
     return this;
   }
 
@@ -128,25 +104,10 @@ public class ScannerConfigWriter {
       Element rootElement = doc.createElement("scanner");
       doc.appendChild(rootElement);
 
-      // Method
-      Element methodElement = doc.createElement("method");
-      methodElement.setAttribute("active", String.valueOf(methodTrackerIsActive));
+      // Serialization Activation
+      Element methodElement = doc.createElement("serialization");
+      methodElement.setAttribute("active", String.valueOf(serializationActivation));
       rootElement.appendChild(methodElement);
-
-      // Field
-      Element fieldElement = doc.createElement("field");
-      fieldElement.setAttribute("active", String.valueOf(fieldTrackerIsActive));
-      rootElement.appendChild(fieldElement);
-
-      // Call
-      Element callElement = doc.createElement("call");
-      callElement.setAttribute("active", String.valueOf(callTrackerIsActive));
-      rootElement.appendChild(callElement);
-
-      // File
-      Element classElement = doc.createElement("class");
-      classElement.setAttribute("active", String.valueOf(classTrackerIsActive));
-      rootElement.appendChild(classElement);
 
       // UUID
       Element uuid = doc.createElement("uuid");
