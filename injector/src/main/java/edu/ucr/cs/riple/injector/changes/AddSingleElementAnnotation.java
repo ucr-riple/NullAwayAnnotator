@@ -31,6 +31,7 @@ import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Insertion;
@@ -67,8 +68,11 @@ public class AddSingleElementAnnotation extends AddAnnotation {
 
   @Override
   @Nullable
-  public Modification visit(NodeWithAnnotations<?> node, Range range) {
-
+  public <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Modification visit(T node) {
+    if (node.getRange().isEmpty()) {
+      return null;
+    }
+    Range range = node.getRange().get();
     StringLiteralExpr argumentExp = new StringLiteralExpr(argument);
     // Check all existing annotations with arguments.
     boolean argumentExists =

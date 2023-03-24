@@ -24,7 +24,6 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-import com.github.javaparser.Range;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import edu.ucr.cs.riple.injector.Helper;
@@ -33,7 +32,6 @@ import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.nio.file.Path;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
@@ -79,8 +77,7 @@ public class OnMethod extends Location {
                     return;
                   }
                   if (this.matcher.matchesCallableDeclaration(callableDeclaration)) {
-                    Optional<Range> range = callableDeclaration.getRange();
-                    range.ifPresent(value -> ans.set(change.visit(callableDeclaration, value)));
+                    ans.set(change.visit(callableDeclaration));
                   }
                 }));
     if (ans.get() == null) {
@@ -91,9 +88,7 @@ public class OnMethod extends Location {
                     if (annotationMemberDeclaration
                         .getNameAsString()
                         .equals(Helper.extractCallableName(method))) {
-                      Optional<Range> range = annotationMemberDeclaration.getRange();
-                      range.ifPresent(
-                          value -> ans.set(change.visit(annotationMemberDeclaration, value)));
+                      ans.set(change.visit(annotationMemberDeclaration));
                     }
                   }));
     }

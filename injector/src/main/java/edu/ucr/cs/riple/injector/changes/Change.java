@@ -22,9 +22,9 @@
 
 package edu.ucr.cs.riple.injector.changes;
 
-import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Modification;
@@ -67,7 +67,7 @@ public abstract class Change {
    *     will be returned.
    */
   @Nullable
-  public abstract Modification visit(NodeWithAnnotations<?> node, Range position);
+  public abstract <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Modification visit(T node);
 
   @Override
   public boolean equals(Object o) {

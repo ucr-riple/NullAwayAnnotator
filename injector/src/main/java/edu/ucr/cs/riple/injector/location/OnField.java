@@ -24,7 +24,6 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-import com.github.javaparser.Range;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -34,7 +33,6 @@ import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -94,8 +92,7 @@ public class OnField extends Location {
                       fieldDeclaration.asFieldDeclaration().getVariables();
                   for (VariableDeclarator v : vars) {
                     if (variables.contains(v.getName().toString())) {
-                      Optional<Range> range = fieldDeclaration.getRange();
-                      range.ifPresent(value -> ans.set(change.visit(fieldDeclaration, value)));
+                      ans.set(change.visit(fieldDeclaration));
                       break;
                     }
                   }

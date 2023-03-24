@@ -27,6 +27,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Insertion;
 import edu.ucr.cs.riple.injector.modifications.Modification;
@@ -45,7 +46,11 @@ public class AddMarkerAnnotation extends AddAnnotation {
 
   @Override
   @Nullable
-  public Modification visit(NodeWithAnnotations<?> node, Range range) {
+  public <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Modification visit(T node) {
+    if (node.getRange().isEmpty()) {
+      return null;
+    }
+    Range range = node.getRange().get();
     NodeList<AnnotationExpr> annotations = node.getAnnotations();
     AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationSimpleName);
 

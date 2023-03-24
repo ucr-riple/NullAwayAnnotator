@@ -27,13 +27,11 @@ package edu.ucr.cs.riple.injector.location;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import org.json.simple.JSONObject;
@@ -61,13 +59,12 @@ public class OnClass extends Location {
     if (isAnonymousClassFlatName(change.location.clazz)) {
       return null;
     }
-    final AtomicReference<Modification> ans = new AtomicReference<>();
-    Optional<Node> clazz = members.getParentNode();
-    clazz.ifPresent(
-        node ->
-            node.getRange()
-                .ifPresent(range -> ans.set(change.visit((NodeWithAnnotations<?>) node, range))));
-    return ans.get();
+    // Get the enclosing class of the members
+    Optional<Node> optionalClass = members.getParentNode();
+    if (optionalClass.isEmpty() || !(optionalClass.get() instanceof BodyDeclaration<?>)) {
+      return null;
+    }
+    return change.visit(((BodyDeclaration<?>) optionalClass.get()));
   }
 
   /**
