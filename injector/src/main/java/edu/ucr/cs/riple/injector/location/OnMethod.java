@@ -78,7 +78,7 @@ public class OnMethod extends Location {
                   }
                   if (this.matcher.matchesCallableDeclaration(callableDeclaration)) {
                     Optional<Range> range = callableDeclaration.getRange();
-                    range.ifPresent(value -> ans.set(change.visit(callableDeclaration, value)));
+                    range.ifPresent(value -> ans.set(change.visit(callableDeclaration)));
                   }
                 }));
     if (ans.get() == null) {
@@ -89,9 +89,7 @@ public class OnMethod extends Location {
                     if (annotationMemberDeclaration
                         .getNameAsString()
                         .equals(Helper.extractCallableName(method))) {
-                      Optional<Range> range = annotationMemberDeclaration.getRange();
-                      range.ifPresent(
-                          value -> ans.set(change.visit(annotationMemberDeclaration, value)));
+                      ans.set(change.visit(annotationMemberDeclaration));
                     }
                   }));
     }

@@ -122,6 +122,7 @@ public abstract class Location {
    * @param change The change to be applied on the target element.
    * @return The modification that should be applied on the source file.
    */
+  @Nullable
   protected abstract Modification applyToMember(
       NodeList<BodyDeclaration<?>> members, Change change);
 
@@ -139,6 +140,7 @@ public abstract class Location {
    * @param change Change to be applied on the target element.
    * @return The modification that should be applied on the source file.
    */
+  @Nullable
   public Modification apply(CompilationUnit tree, Change change) {
     NodeList<BodyDeclaration<?>> clazz;
     try {
