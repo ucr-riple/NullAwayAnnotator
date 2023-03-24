@@ -24,7 +24,6 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-import com.github.javaparser.Range;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import edu.ucr.cs.riple.injector.Helper;
@@ -33,9 +32,9 @@ import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.nio.file.Path;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
 import org.json.simple.JSONObject;
 
 /** Represents a location for method element. This location is used to apply changes to a method. */
@@ -66,6 +65,7 @@ public class OnMethod extends Location {
   }
 
   @Override
+  @Nullable
   protected Modification applyToMember(NodeList<BodyDeclaration<?>> members, Change change) {
     final AtomicReference<Modification> ans = new AtomicReference<>();
     members.forEach(
@@ -77,8 +77,7 @@ public class OnMethod extends Location {
                     return;
                   }
                   if (this.matcher.matchesCallableDeclaration(callableDeclaration)) {
-                    Optional<Range> range = callableDeclaration.getRange();
-                    range.ifPresent(value -> ans.set(change.visit(callableDeclaration)));
+                    ans.set(change.visit(callableDeclaration));
                   }
                 }));
     if (ans.get() == null) {

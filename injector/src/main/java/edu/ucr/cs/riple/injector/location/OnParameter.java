@@ -36,6 +36,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
 import org.json.simple.JSONObject;
 
 /**
@@ -73,6 +74,7 @@ public class OnParameter extends Location {
   }
 
   @Override
+  @Nullable
   protected Modification applyToMember(NodeList<BodyDeclaration<?>> members, Change change) {
     final AtomicReference<Modification> ans = new AtomicReference<>();
     members.forEach(
