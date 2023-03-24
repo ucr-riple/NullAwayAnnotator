@@ -86,9 +86,7 @@ public class OnLocalVariable extends Location {
                                           // Located the variable.
                                           Set<Modification> modifications = new HashSet<>();
                                           // Process the declaration statement.
-                                          modifications.add(
-                                              change.visit(
-                                                  varDeclaration, varDeclaration.getRange().get()));
+                                          modifications.add(change.visit(varDeclaration));
                                           // Process the declarator type arguments.
                                           modifications.addAll(
                                               variableDeclarator

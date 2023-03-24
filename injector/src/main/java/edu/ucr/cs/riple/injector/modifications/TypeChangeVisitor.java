@@ -26,8 +26,6 @@ package edu.ucr.cs.riple.injector.modifications;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
-import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.WildcardType;
@@ -35,7 +33,6 @@ import com.github.javaparser.ast.visitor.GenericVisitorWithDefaults;
 import edu.ucr.cs.riple.injector.changes.Change;
 import java.util.HashSet;
 import java.util.Set;
-import javax.annotation.Nullable;
 
 /** Visitor for making changes on the type and all of its type arguments. */
 public class TypeChangeVisitor extends GenericVisitorWithDefaults<Set<Modification>, Change> {
@@ -45,18 +42,17 @@ public class TypeChangeVisitor extends GenericVisitorWithDefaults<Set<Modificati
     if (n.getRange().isEmpty()) {
       return Set.of();
     }
-    Modification modification = change.visit(n, n.getRange().get());
+    Modification modification = change.visit(n);
     return modification == null ? Set.of() : Set.of(modification);
   }
 
   @Override
   public Set<Modification> visit(ClassOrInterfaceType classOrInterfaceType, Change change) {
-    Modification modification = applyChangeOnType(classOrInterfaceType, change);
-    if (modification == null) {
-      return Set.of();
-    }
     Set<Modification> result = new HashSet<>();
-    result.add(modification);
+    Modification modification = change.visit(classOrInterfaceType);
+    if (modification != null) {
+      result.add(modification);
+    }
     if (classOrInterfaceType.getTypeArguments().isPresent()) {
       classOrInterfaceType
           .getTypeArguments()
@@ -68,12 +64,11 @@ public class TypeChangeVisitor extends GenericVisitorWithDefaults<Set<Modificati
 
   @Override
   public Set<Modification> visit(WildcardType type, Change change) {
-    Modification modification = applyChangeOnType(type, change);
-    if (modification == null) {
-      return Set.of();
-    }
     Set<Modification> result = new HashSet<>();
-    result.add(modification);
+    Modification modification = change.visit(type);
+    if (modification != null) {
+      result.add(modification);
+    }
     if (type.getExtendedType().isPresent()) {
       result.addAll(type.getExtendedType().get().accept(this, change));
     }
@@ -81,22 +76,6 @@ public class TypeChangeVisitor extends GenericVisitorWithDefaults<Set<Modificati
       result.addAll(type.getSuperType().get().accept(this, change));
     }
     return result;
-  }
-
-  /**
-   * Applies the change on the type and returns the modification if the type has a range.
-   *
-   * @param type the type to apply the change on.
-   * @param change the change to apply.
-   * @return the modification if the type has a range, null otherwise.
-   */
-  @Nullable
-  private static <T extends NodeWithAnnotations<?> & NodeWithRange<?>>
-      Modification applyChangeOnType(T type, Change change) {
-    if (type.getRange().isEmpty()) {
-      return null;
-    }
-    return change.visit(type, type.getRange().get());
   }
 
   @Override
