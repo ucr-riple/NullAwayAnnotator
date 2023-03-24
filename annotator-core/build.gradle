@@ -55,7 +55,7 @@ googleJavaFormat {
 }
 
 // Should be the latest supporting version of NullAway.
-def NULLAWAY_TEST = "0.10.10"
+def NULLAWAY_TEST = "0.10.11-SNAPSHOT"
 
 tasks.test.dependsOn(':annotator-scanner:publishToMavenLocal')
 
