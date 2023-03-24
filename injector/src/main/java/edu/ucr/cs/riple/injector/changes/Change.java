@@ -60,7 +60,7 @@ public abstract class Change {
   }
 
   /**
-   * Visits the given node and translates the change.
+   * Visits the given node and translates the change to a text modification.
    *
    * @param node Given node.
    * @return A text modification instance if the translation is successful, otherwise {@code null}
