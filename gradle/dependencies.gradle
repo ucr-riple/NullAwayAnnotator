@@ -36,7 +36,7 @@ def versions = [
         errorProneApi          : project.hasProperty("epApiVersion") ? epApiVersion : oldestErrorProneApi,
         autoService            : "1.0-rc7",
         javaparser             : "3.24.0",
-        json                   : "1.1.1",
+        json                   : "20220924",
         guava                  : "31.0.1-jre",
         cli                    : "1.5.0",
         commonsio              : "2.11.0",
@@ -52,7 +52,7 @@ def apt = [
 
 def build = [
         guava                   : "com.google.guava:guava:${versions.guava}",
-        json                    : "com.googlecode.json-simple:json-simple:${versions.json}",
+        json                    : "org.json:json:${versions.json}",
         progressbar             : "me.tongfei:progressbar:${versions.progressbar}",
         javaparser              : "com.github.javaparser:javaparser-core:${versions.javaparser}",
         commonscli              : "commons-cli:commons-cli:${versions.cli}",

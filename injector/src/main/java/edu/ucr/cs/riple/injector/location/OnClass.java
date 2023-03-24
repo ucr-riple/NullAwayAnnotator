@@ -34,7 +34,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /** Represents a location for class element. This location is used to apply changes to a class. */
 public class OnClass extends Location {
@@ -67,6 +67,9 @@ public class OnClass extends Location {
     return change.visit(((BodyDeclaration<?>) optionalClass.get()));
   }
 
+  @Override
+  protected void fillJsonInformation(JSONObject res) {}
+
   /**
    * Checks if flat name is for an anonymous class.
    *
@@ -74,11 +77,6 @@ public class OnClass extends Location {
    */
   public static boolean isAnonymousClassFlatName(String flatName) {
     return anonymousClassPattern.matcher(flatName).matches();
-  }
-
-  @Override
-  protected void fillJsonInformation(JSONObject res) {
-    // no op
   }
 
   @Override

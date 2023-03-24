@@ -35,7 +35,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /** Represents a location for method element. This location is used to apply changes to a method. */
 public class OnMethod extends Location {
@@ -58,10 +58,9 @@ public class OnMethod extends Location {
     this(Helper.deserializePath(path), clazz, method);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   protected void fillJsonInformation(JSONObject res) {
-    res.put(KEYS.METHOD, method);
+    res.put(KEYS.METHOD.toString(), method);
   }
 
   @Override

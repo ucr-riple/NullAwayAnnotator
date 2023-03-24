@@ -34,7 +34,7 @@ import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Objects;
 import java.util.function.Consumer;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * Stores information suggesting adding @Nullable on an element in source code. These suggestions

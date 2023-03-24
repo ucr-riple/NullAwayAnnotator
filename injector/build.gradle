@@ -37,6 +37,7 @@ dependencies {
     implementation deps.build.progressbar
 
     testImplementation deps.build.commonsio
+    testImplementation 'junit:junit:4.13.1'
 }
 
 compileJava.mustRunAfter verifyGoogleJavaFormat
