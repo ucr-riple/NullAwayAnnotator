@@ -37,7 +37,6 @@ public class OnLocalVariable extends Location {
   public final SignatureMatcher matcher;
   /** Name of the local variable. */
   public final String varName;
-
   /** Visitor for applying changes on the internal structure of the target element's type */
   public static final TypeChangeVisitor TYPE_CHANGE_VISITOR = new TypeChangeVisitor();
 
