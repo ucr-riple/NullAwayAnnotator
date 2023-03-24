@@ -20,6 +20,11 @@ import org.json.simple.JSONObject;
 /**
  * Represents a location for local variable element. This location is used to apply changes to a
  * local variable.
+ *
+ * <p>Annotations on local variables will be applied on the declaration and all its type arguments
+ * if exists. For instance: {@code Foo<Bar, Map<Bar, Bar>> baz}
+ *
+ * <p>Will be annotated as: {@code @Annot Foo<@Annot Bar, @Annot Map<@Annot Bar, @Annot Bar>> baz}
  */
 public class OnLocalVariable extends Location {
 
