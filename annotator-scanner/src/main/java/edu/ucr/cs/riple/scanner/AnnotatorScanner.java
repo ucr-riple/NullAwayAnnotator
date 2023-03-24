@@ -87,7 +87,7 @@ public class AnnotatorScanner extends BugChecker
 
   @Override
   public Description matchClass(ClassTree classTree, VisitorState visitorState) {
-    if (!context.getConfig().classTrackerIsActive()) {
+    if (!context.getConfig().isActive()) {
       return Description.NO_MATCH;
     }
     context
@@ -102,7 +102,7 @@ public class AnnotatorScanner extends BugChecker
   @Override
   public Description matchMethodInvocation(MethodInvocationTree tree, VisitorState state) {
     Config config = context.getConfig();
-    if (!config.callTrackerIsActive()) {
+    if (!config.isActive()) {
       return Description.NO_MATCH;
     }
     config
@@ -115,7 +115,7 @@ public class AnnotatorScanner extends BugChecker
   @Override
   public Description matchNewClass(NewClassTree tree, VisitorState state) {
     Config config = context.getConfig();
-    if (!config.callTrackerIsActive()) {
+    if (!config.isActive()) {
       return Description.NO_MATCH;
     }
     Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(tree);
@@ -136,7 +136,7 @@ public class AnnotatorScanner extends BugChecker
   @Override
   public Description matchMethod(MethodTree tree, VisitorState state) {
     Config config = context.getConfig();
-    if (!config.methodTrackerIsActive()) {
+    if (!context.getConfig().isActive()) {
       return Description.NO_MATCH;
     }
     Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(tree);
@@ -156,7 +156,7 @@ public class AnnotatorScanner extends BugChecker
 
   @Override
   public Description matchVariable(VariableTree tree, VisitorState state) {
-    if (!context.getConfig().fieldTrackerIsActive()) {
+    if (!context.getConfig().isActive()) {
       return Description.NO_MATCH;
     }
     serializeSymIfField(ASTHelpers.getSymbol(tree.getInitializer()), state);
@@ -166,7 +166,7 @@ public class AnnotatorScanner extends BugChecker
 
   @Override
   public Description matchIdentifier(IdentifierTree tree, VisitorState state) {
-    if (!context.getConfig().fieldTrackerIsActive()) {
+    if (!context.getConfig().isActive()) {
       return Description.NO_MATCH;
     }
     serializeSymIfField(ASTHelpers.getSymbol(tree), state);
@@ -175,7 +175,7 @@ public class AnnotatorScanner extends BugChecker
 
   @Override
   public Description matchMemberSelect(MemberSelectTree tree, VisitorState state) {
-    if (!context.getConfig().fieldTrackerIsActive()) {
+    if (!context.getConfig().isActive()) {
       return Description.NO_MATCH;
     }
     serializeSymIfField(ASTHelpers.getSymbol(tree), state);
@@ -186,7 +186,7 @@ public class AnnotatorScanner extends BugChecker
   public Description matchLambdaExpression(
       LambdaExpressionTree lambdaExpressionTree, VisitorState visitorState) {
     Config config = context.getConfig();
-    if (!config.callTrackerIsActive()) {
+    if (!config.isActive()) {
       return Description.NO_MATCH;
     }
     // for e -> Foo.bar(e), assume that method "baz()" has been overridden. Then the containing
@@ -200,7 +200,7 @@ public class AnnotatorScanner extends BugChecker
   public Description matchMemberReference(
       MemberReferenceTree memberReferenceTree, VisitorState visitorState) {
     Config config = context.getConfig();
-    if (!config.callTrackerIsActive()) {
+    if (!config.isActive()) {
       return Description.NO_MATCH;
     }
     // for Foo::bar, which is shorthand for e -> Foo.bar(e), assume that method "baz()" has been

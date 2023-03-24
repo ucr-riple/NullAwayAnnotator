@@ -24,7 +24,6 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-import com.github.javaparser.Range;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -34,14 +33,18 @@ import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+/**
+ * Represents a location for field element. This location is used to apply changes to a class field.
+ */
 public class OnField extends Location {
+
   /**
    * Set of field names. It is a set to support inline multiple field declarations. Please see the
    * example below:
@@ -57,7 +60,7 @@ public class OnField extends Location {
   public final Set<String> variables;
 
   public OnField(Path path, String clazz, Set<String> variables) {
-    super(LocationType.FIELD, path, clazz);
+    super(LocationKind.FIELD, path, clazz);
     this.variables = variables;
   }
 
@@ -74,9 +77,10 @@ public class OnField extends Location {
   }
 
   @Override
-  protected Modification applyToMember(NodeList<BodyDeclaration<?>> clazz, Change change) {
+  @Nullable
+  protected Modification applyToMember(NodeList<BodyDeclaration<?>> members, Change change) {
     final AtomicReference<Modification> ans = new AtomicReference<>();
-    clazz.forEach(
+    members.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifFieldDeclaration(
                 fieldDeclaration -> {
@@ -88,8 +92,7 @@ public class OnField extends Location {
                       fieldDeclaration.asFieldDeclaration().getVariables();
                   for (VariableDeclarator v : vars) {
                     if (variables.contains(v.getName().toString())) {
-                      Optional<Range> range = fieldDeclaration.getRange();
-                      range.ifPresent(value -> ans.set(change.visit(fieldDeclaration, value)));
+                      ans.set(change.visit(fieldDeclaration));
                       break;
                     }
                   }

@@ -32,32 +32,11 @@ import javax.annotation.Nonnull;
 public interface Config {
 
   /**
-   * If true, all method calls invocations data will be serialized.
+   * If true, serialization services are activated.
    *
-   * @return true, if activated.
+   * @return true, if activated, false otherwise.
    */
-  boolean callTrackerIsActive();
-
-  /**
-   * If true, all field usages data will be serialized.
-   *
-   * @return true, if activated.
-   */
-  boolean fieldTrackerIsActive();
-
-  /**
-   * If true, all methods information will be serialized.
-   *
-   * @return true, if activated.
-   */
-  boolean methodTrackerIsActive();
-
-  /**
-   * If true, all class data will be serialized.
-   *
-   * @return true, if activated.
-   */
-  boolean classTrackerIsActive();
+  boolean isActive();
 
   /**
    * Checks if the passed name is a {@code @Nonnull} annotation.

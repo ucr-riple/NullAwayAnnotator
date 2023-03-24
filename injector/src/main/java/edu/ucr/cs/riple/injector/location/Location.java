@@ -40,25 +40,35 @@ import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import org.json.simple.JSONObject;
 
+/** Represents a location of an element in the source code. */
 public abstract class Location {
-  public final LocationType type;
+
+  /** The type of the element. */
+  public final LocationKind type;
+  /** The flat name of enclosing class of the element. */
   public final String clazz;
+  /** The path to the file containing the element. */
   public Path path;
 
+  /** The Keys used to represent a location in JSON format */
   public enum KEYS {
     VARIABLES,
-    PARAMETER,
     METHOD,
     KIND,
     CLASS,
-    PKG,
     PATH,
-    INJECT,
-    ANNOTATION,
     INDEX
   }
 
-  public Location(LocationType type, Path path, String clazz) {
+  /**
+   * Creates an instance of {@link Location} for a given type, path and class. This constructor is a
+   * base class for all subclasses and must provide these values upon instantiation.
+   *
+   * @param type The type of the element.
+   * @param path The path to the file containing the element.
+   * @param clazz The flat name of the enclosing class of the element.
+   */
+  public Location(LocationKind type, Path path, String clazz) {
     this.type = type;
     this.clazz = clazz;
     this.path = path;
@@ -91,7 +101,7 @@ public abstract class Location {
     if (values[0] == null || values[0].equals("null")) {
       return null;
     }
-    LocationType type = LocationType.getType(values[0]);
+    LocationKind type = LocationKind.getType(values[0]);
     Path path = Helper.deserializePath(values[5]);
     String clazz = values[1];
     switch (type) {
@@ -107,8 +117,22 @@ public abstract class Location {
     }
   }
 
-  protected abstract Modification applyToMember(NodeList<BodyDeclaration<?>> clazz, Change change);
+  /**
+   * Applies the change to the element in this location.
+   *
+   * @param members The list of members of the enclosing class of the target element.
+   * @param change The change to be applied on the target element.
+   * @return The modification that should be applied on the source file.
+   */
+  @Nullable
+  protected abstract Modification applyToMember(
+      NodeList<BodyDeclaration<?>> members, Change change);
 
+  /**
+   * Fills the given JSON object with the information of this location.
+   *
+   * @param res The JSON object to be filled.
+   */
   protected abstract void fillJsonInformation(JSONObject res);
 
   /**
@@ -116,8 +140,9 @@ public abstract class Location {
    *
    * @param tree CompilationUnit Tree to locate the target element.
    * @param change Change to be applied on the target element.
-   * @return true, if the change applied successfully.
+   * @return The modification that should be applied on the source file.
    */
+  @Nullable
   public Modification apply(CompilationUnit tree, Change change) {
     NodeList<BodyDeclaration<?>> clazz;
     try {
@@ -139,12 +164,33 @@ public abstract class Location {
     return res;
   }
 
+  /**
+   * If this location is of kind {@link LocationKind#METHOD}, calls the consumer on the location.
+   *
+   * @param consumer The consumer to be called.
+   */
   public void ifMethod(Consumer<OnMethod> consumer) {}
 
+  /**
+   * If this location is of kind {@link LocationKind#PARAMETER}, calls the consumer on the location.
+   *
+   * @param consumer The consumer to be called.
+   */
   public void ifParameter(Consumer<OnParameter> consumer) {}
-
+  /**
+   * If this location is of kind {@link LocationKind#FIELD}, calls the consumer on the location.
+   *
+   * @param consumer The consumer to be called.
+   */
   public void ifField(Consumer<OnField> consumer) {}
 
+  /**
+   * Returns downcast of this instance to {@link OnField} if this location is of kind {@link
+   * LocationKind#FIELD}, Otherwise, returns null.
+   *
+   * @return The {@link OnField} instance of this location if it is of kind {@link
+   *     LocationKind#FIELD}, null otherwise.
+   */
   public OnField toField() {
     if (this instanceof OnField) {
       return (OnField) this;
@@ -152,6 +198,13 @@ public abstract class Location {
     return null;
   }
 
+  /**
+   * Returns downcast of this instance to {@link OnMethod} if this location is of kind {@link
+   * LocationKind#METHOD}, Otherwise, returns null.
+   *
+   * @return The {@link OnMethod} instance of this location if it is of kind {@link
+   *     LocationKind#METHOD}, null otherwise.
+   */
   public OnMethod toMethod() {
     if (this instanceof OnMethod) {
       return (OnMethod) this;
@@ -164,6 +217,13 @@ public abstract class Location {
     return null;
   }
 
+  /**
+   * Returns downcast of this instance to {@link OnParameter} if this location is of kind {@link
+   * LocationKind#PARAMETER}, Otherwise, returns null.
+   *
+   * @return The {@link OnParameter} instance of this location if it is of kind {@link
+   *     LocationKind#PARAMETER}, null otherwise.
+   */
   public OnParameter toParameter() {
     if (this instanceof OnParameter) {
       return (OnParameter) this;
@@ -171,14 +231,29 @@ public abstract class Location {
     return null;
   }
 
+  /**
+   * Returns true if this location is of kind {@link LocationKind#METHOD}.
+   *
+   * @return true if this location is of kind {@link LocationKind#METHOD}.
+   */
   public boolean isOnMethod() {
     return false;
   }
 
+  /**
+   * Returns true if this location is of kind {@link LocationKind#FIELD}.
+   *
+   * @return true if this location is of kind {@link LocationKind#FIELD}.
+   */
   public boolean isOnField() {
     return false;
   }
 
+  /**
+   * Returns true if this location is of kind {@link LocationKind#PARAMETER}.
+   *
+   * @return true if this location is of kind {@link LocationKind#PARAMETER}.
+   */
   public boolean isOnParameter() {
     return false;
   }

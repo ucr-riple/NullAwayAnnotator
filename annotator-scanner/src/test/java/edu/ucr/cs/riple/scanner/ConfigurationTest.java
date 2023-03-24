@@ -134,12 +134,7 @@ public class ConfigurationTest {
       Files.createDirectories(root);
       Files.createFile(config);
       ScannerConfigWriter writer =
-          new ScannerConfigWriter()
-              .setOutput(root)
-              .setMethodTrackerActivation(false)
-              .setClassTrackerActivation(false)
-              .setCallTrackerActivation(false)
-              .setFieldTrackerActivation(false);
+          new ScannerConfigWriter().setOutput(root).setSerializationActivation(false);
       writer.writeAsXML(config);
     } catch (IOException ex) {
       throw new UncheckedIOException(ex);

@@ -34,13 +34,13 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class OnParameterInjectionTest extends BaseInjectorTest {
   @Test
-  public void parameter_nullable_simple() {
+  public void parameterNullableSimple() {
     injectorTestHelper
         .addInput(
-            "Super.java",
-            "package com.uber;",
+            "Foo.java",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable Object test(Object flag) {",
             "       if(flag == null) {",
             "           return new Object();",
@@ -49,9 +49,9 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable Object test(@Nullable Object flag) {",
             "       if(flag == null) {",
             "           return new Object();",
@@ -61,19 +61,19 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             "}")
         .addChanges(
             new AddMarkerAnnotation(
-                new OnParameter("Super.java", "com.uber.Super", "test(java.lang.Object)", 0),
+                new OnParameter("Foo.java", "test.Foo", "test(java.lang.Object)", 0),
                 "javax.annotation.Nullable"))
         .start();
   }
 
   @Test
-  public void parameter_nullable_signature_incomplete() {
+  public void parameterNullableSignatureIncomplete() {
     injectorTestHelper
         .addInput(
-            "Super.java",
-            "package com.uber;",
+            "Foo.java",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable Object test(Object flag) {",
             "       if(flag == null) {",
             "           return new Object();",
@@ -82,9 +82,9 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable Object test(@Nullable Object flag) {",
             "       if(flag == null) {",
             "           return new Object();",
@@ -94,17 +94,17 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             "}")
         .addChanges(
             new AddMarkerAnnotation(
-                new OnParameter("Super.java", "com.uber.Super", "test(Object)", 0),
+                new OnParameter("Foo.java", "test.Foo", "test(Object)", 0),
                 "javax.annotation.Nullable"))
         .start();
   }
 
   @Test
-  public void parameter_nullable_interface() {
+  public void parameterNullableInterface() {
     injectorTestHelper
         .addInput(
             "SSAInstructionFactory.java",
-            "package com.uber;",
+            "package test;",
             "public interface SSAInstructionFactory {",
             "SSAAbstractInvokeInstruction InvokeInstruction(",
             "   int index,",
@@ -117,7 +117,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             "   int index, int[] params, int exception, CallSiteReference site, BootstrapMethod bootstrap);",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
             "public interface SSAInstructionFactory {",
             "SSAAbstractInvokeInstruction InvokeInstruction(",
@@ -134,7 +134,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnParameter(
                     "SSAInstructionFactory.java",
-                    "com.uber.SSAInstructionFactory",
+                    "test.SSAInstructionFactory",
                     "InvokeInstruction(int,int,int[],int,com.ibm.wala.classLoader.CallSiteReference,com.ibm.wala.shrikeCT.BootstrapMethodsReader.BootstrapMethod)",
                     5),
                 "javax.annotation.Nullable"))
@@ -142,11 +142,11 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
   }
 
   @Test
-  public void parameter_nullable_generics_simple() {
+  public void parameterNullableGenericsSimple() {
     injectorTestHelper
         .addInput(
             "ModRef.java",
-            "package com.uber;",
+            "package test;",
             "public class ModRef<T extends InstanceKey> {",
             "   public Map<CGNode, OrdinalSet<PointerKey>> computeMod(",
             "     CallGraph cg, PointerAnalysis<T> pa, HeapExclusions heapExclude) {",
@@ -158,7 +158,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
             "public class ModRef<T extends InstanceKey> {",
             "   public Map<CGNode, OrdinalSet<PointerKey>> computeMod(",
@@ -174,7 +174,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnParameter(
                     "ModRef.java",
-                    "com.uber.ModRef",
+                    "test.ModRef",
                     "computeMod(com.ibm.wala.ipa.callgraph.CallGraph,com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis,com.ibm.wala.ipa.slicer.HeapExclusions)",
                     2),
                 "javax.annotation.Nullable"))
@@ -182,11 +182,11 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
   }
 
   @Test
-  public void parameter_nullable_generics_multiple() {
+  public void parameterNullableGenericsMultiple() {
     injectorTestHelper
         .addInput(
             "ModRef.java",
-            "package com.uber;",
+            "package test;",
             "public class ModRef {",
             "   public ModRef(",
             "       IMethod method,",
@@ -196,7 +196,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             "       SSAOptions options,",
             "       Map<Integer, ConstantValue> constants)",
             "       throws AssertionError {",
-            "           super(",
+            "           Foo(",
             "               method, ",
             "               instructions,",
             "               makeSymbolTable(method, instructions, constants, cfg),",
@@ -208,7 +208,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             "    }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
             "public class ModRef {",
             "   public ModRef(",
@@ -219,7 +219,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             "       SSAOptions options,",
             "       @Nullable Map<Integer, ConstantValue> constants)",
             "       throws AssertionError {",
-            "           super(",
+            "           Foo(",
             "               method, ",
             "               instructions,",
             "               makeSymbolTable(method, instructions, constants, cfg),",
@@ -234,7 +234,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnParameter(
                     "ModRef.java",
-                    "com.uber.ModRef",
+                    "test.ModRef",
                     "ModRef(com.ibm.wala.classLoader.IMethod,com.ibm.wala.ipa.callgraph.Context,com.ibm.wala.cfg.AbstractCFG,com.ibm.wala.ssa.SSAInstruction[],com.ibm.wala.ssa.SSAOptions,java.util.Map)",
                     5),
                 "javax.annotation.Nullable"))
@@ -242,25 +242,25 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
   }
 
   @Test
-  public void parameter_nullable_with_annotation() {
+  public void parameterNullableWithAnnotation() {
     injectorTestHelper
         .addInput(
             "WeakKeyReference.java",
-            "package com.uber;",
+            "package test;",
             "class WeakKeyReference<K> extends WeakReference<K> implements InternalReference<K> {",
             "   private final int hashCode;",
             "   public WeakKeyReference(@Nullable K key, ReferenceQueue<K> queue) {",
-            "     super(key, queue);",
+            "     Foo(key, queue);",
             "     hashCode = System.identityHashCode(key);",
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
             "class WeakKeyReference<K> extends WeakReference<K> implements InternalReference<K> {",
             "   private final int hashCode;",
             "   public WeakKeyReference(@Nullable K key, @Nullable ReferenceQueue<K> queue) {",
-            "     super(key, queue);",
+            "     Foo(key, queue);",
             "     hashCode = System.identityHashCode(key);",
             "   }",
             "}")
@@ -268,7 +268,7 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnParameter(
                     "WeakKeyReference.java",
-                    "com.uber.WeakKeyReference",
+                    "test.WeakKeyReference",
                     "WeakKeyReference(K,java.lang.ref.ReferenceQueue)",
                     1),
                 "javax.annotation.Nullable"))

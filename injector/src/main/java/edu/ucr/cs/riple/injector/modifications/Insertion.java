@@ -29,7 +29,7 @@ import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.util.List;
 
 /** Represents an insertion of a content in the source file. */
-public class Insertion extends Modification {
+public class Insertion extends SinglePositionModification {
 
   public Insertion(String content, Position position) {
     super(content, position);

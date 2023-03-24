@@ -34,104 +34,136 @@ import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.io.FileUtils;
 
+/** Helper class for testing the core module. */
 public class CoreTestHelper {
 
+  /** The expected reports which gets compared with computed reports when process is finished. */
   private final Set<TReport> expectedReports;
+  /** Path to the project. */
   private final Path projectPath;
-  private final Path srcSet;
-  private final List<String> modules;
+  /** Path to root directory where all output exists including the project. */
   private final Path outDirPath;
-  private final Map<String, String[]> fileMap;
+  /**
+   * Predicate to be used for comparing reports. If not set by the user, {@link DEFAULT_PREDICATE}
+   * will be used.
+   */
   private BiPredicate<TReport, Report> predicate;
+  /** Depth of the analysis. */
   private int depth = 1;
-  private boolean requestCompleteLoop = false;
+  /** Outer loop activation. Deactivated by default */
+  private boolean outerLoopActivated = false;
+  /** Bailout activation. Deactivated by default */
   private boolean disableBailout = false;
-  private boolean forceResolveActivated = false;
+  /** Force resolve activation. Deactivated by default */
+  private boolean suppressRemainingErrors = false;
+  /** Downstream dependency analysis activation. Deactivated by default */
   private boolean downstreamDependencyAnalysisActivated = false;
+  /** Inference activation. Activated by default */
   private boolean deactivateInference = false;
+  /** Analysis mode. */
   private AnalysisMode mode = AnalysisMode.LOCAL;
+  /** Annotator config. */
   private Config config;
+  /**
+   * Path to the expected output directory. If null, changes on source files will not be checked.
+   */
+  private Path expectedOutputPath;
+  /** Project builder. */
+  private final ProjectBuilder projectBuilder;
 
-  public CoreTestHelper(Path projectPath, Path outDirPath, List<String> modules) {
+  public CoreTestHelper(Path projectPath, Path outDirPath) {
     this.projectPath = projectPath;
     this.outDirPath = outDirPath;
     this.expectedReports = new HashSet<>();
-    this.fileMap = new HashMap<>();
-    this.srcSet = this.projectPath.resolve("src").resolve("main").resolve("java").resolve("test");
-    this.modules = modules;
+    this.projectBuilder = new ProjectBuilder(this, projectPath);
   }
 
-  public CoreTestHelper addInputLines(String path, String... lines) {
-    if (fileMap.containsKey(path)) {
-      throw new IllegalArgumentException("File at path: " + path + " already exists.");
-    }
-    fileMap.put(path, lines);
-    return this;
+  public Module onTarget() {
+    return projectBuilder.onTarget();
   }
 
+  /**
+   * Runs the tests on an empty project. Sine all unit tests require a project to execute, this is
+   * used to test features that do not require a project.
+   */
+  public CoreTestHelper onEmptyProject() {
+    return projectBuilder.onEmptyProject().withExpectedReports();
+  }
+
+  /**
+   * Sets the predicate to be used for comparing reports. If not set by the user, {@link
+   * DEFAULT_PREDICATE} will be used.
+   *
+   * @param predicate Predicate to be used for comparing reports.
+   * @return This instance of {@link CoreTestHelper}.
+   */
   public CoreTestHelper setPredicate(BiPredicate<TReport, Report> predicate) {
     this.predicate = predicate;
     return this;
   }
 
-  public CoreTestHelper addInputSourceFile(String path, String inputFilePath) {
-    try {
-      return addInputLines(
-          path,
-          FileUtils.readFileToString(
-              Utility.getPathOfResource(inputFilePath).toFile(), Charset.defaultCharset()));
-    } catch (IOException e) {
-      throw new RuntimeException("Failed to add source input", e);
-    }
-  }
-
+  /**
+   * Disables bailout.
+   *
+   * @return This instance of {@link CoreTestHelper}.
+   */
   public CoreTestHelper disableBailOut() {
     disableBailout = true;
     return this;
   }
 
-  public CoreTestHelper addInputDirectory(String path, String inputDirectoryPath) {
-    Path dir = Utility.getPathOfResource(inputDirectoryPath);
-    try {
-      FileUtils.copyDirectory(dir.toFile(), srcSet.getParent().resolve(path).toFile());
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-    return this;
-  }
-
-  public CoreTestHelper addExpectedReports(TReport... reports) {
+  /**
+   * Adds expected reports to be compared with computed reports when test process is finished.
+   *
+   * @param reports Expected Reports.
+   * @return This instance of {@link CoreTestHelper}.
+   */
+  CoreTestHelper addExpectedReports(TReport... reports) {
     this.expectedReports.addAll(Arrays.asList(reports));
     return this;
   }
 
+  /**
+   * Defines the depth of the analysis.
+   *
+   * @param depth Depth of the analysis.
+   * @return This instance of {@link CoreTestHelper}.
+   */
   public CoreTestHelper toDepth(int depth) {
     this.depth = depth;
     return this;
   }
 
-  public CoreTestHelper requestCompleteLoop() {
-    this.requestCompleteLoop = true;
+  /**
+   * Activates outer loop.
+   *
+   * @return This instance of {@link CoreTestHelper}.
+   */
+  public CoreTestHelper activateOuterLoop() {
+    this.outerLoopActivated = true;
     return this;
   }
 
+  /**
+   * Activates downstream dependency analysis.
+   *
+   * @param mode Analysis mode.
+   * @return This instance of {@link CoreTestHelper}.
+   */
   public CoreTestHelper enableDownstreamDependencyAnalysis(AnalysisMode mode) {
     this.downstreamDependencyAnalysisActivated = true;
     if (mode.equals(AnalysisMode.LOCAL)) {
@@ -142,40 +174,62 @@ public class CoreTestHelper {
     return this;
   }
 
-  public CoreTestHelper enableForceResolve() {
-    this.forceResolveActivated = true;
+  /**
+   * Suppresses remaining errors.
+   *
+   * @return This instance of {@link CoreTestHelper}.
+   */
+  public CoreTestHelper suppressRemainingErrors() {
+    this.suppressRemainingErrors = true;
     return this;
   }
 
   public CoreTestHelper deactivateInference() {
     this.deactivateInference = true;
-    this.forceResolveActivated = true;
+    this.suppressRemainingErrors = true;
     return this;
   }
 
+  /**
+   * Activates downstream dependency analysis with default mode.
+   *
+   * @return This instance of {@link CoreTestHelper}.
+   */
   public CoreTestHelper enableDownstreamDependencyAnalysis() {
     return enableDownstreamDependencyAnalysis(AnalysisMode.LOWER_BOUND);
   }
 
+  /**
+   * Checks if the changes on source files are as expected.
+   *
+   * @param expectedOutputPath Path to the expected output directory from resources. All files
+   *     relative the root directory of the project and the given path will be compared.
+   * @return This instance of {@link CoreTestHelper}.
+   */
+  public CoreTestHelper checkOutExpectedOutput(String expectedOutputPath) {
+    this.expectedOutputPath = Utility.getPathOfResource(expectedOutputPath);
+    return this;
+  }
+
+  /** Starts the test process. */
   public void start() {
     Path configPath = outDirPath.resolve("config.json");
-    createFiles();
     checkSourcePackages();
     makeAnnotatorConfigFile(configPath);
     config = new Config(configPath);
     Annotator annotator = new Annotator(config);
     annotator.start();
     if (predicate == null) {
-      predicate =
-          (expected, found) ->
-              expected.root.change.location.equals(found.root.change.location)
-                  && expected.getExpectedValue() == found.getOverallEffect(config);
+      predicate = DEFAULT_PREDICATE.create(config);
     }
     compare(new ArrayList<>(annotator.cache.reports()));
     checkBuildsStatus();
+    checkExpectedOutput();
   }
 
+  /** Checks if there is any build error including NullAway errors after the analysis. */
   private void checkBuildsStatus() {
+    List<Module> modules = projectBuilder.getModules();
     if (mode.equals(AnalysisMode.STRICT) && modules.size() > 1) {
       // Build downstream dependencies.
       Utility.executeCommand(config.downstreamDependenciesBuildCommand);
@@ -196,7 +250,7 @@ public class CoreTestHelper {
         }
       }
     }
-    if (forceResolveActivated) {
+    if (suppressRemainingErrors) {
       // Check no error will be reported in Target module
       Utility.executeCommand(config.buildCommand);
       Path path = outDirPath.resolve("0").resolve("errors.tsv");
@@ -208,6 +262,49 @@ public class CoreTestHelper {
       } catch (IOException e) {
         throw new RuntimeException("Exception happened while reading file at: " + path);
       }
+    }
+  }
+
+  /** Checks if the output is as expected. */
+  private void checkExpectedOutput() {
+    if (expectedOutputPath == null) {
+      // Output will not be checked.
+      return;
+    }
+    try (Stream<Path> walk =
+        Files.walk(expectedOutputPath)
+            .filter(path -> path.toFile().isFile() && path.toString().endsWith(".java"))) {
+      walk.forEach(
+          path -> {
+            Path relativePath = expectedOutputPath.relativize(path);
+            Path actualPath = projectPath.resolve(relativePath);
+            if (!actualPath.toFile().exists()) {
+              throw new RuntimeException("Expected output file does not exist: " + actualPath);
+            }
+            try {
+              List<String> expectedLines = Files.readAllLines(path);
+              List<String> actualLines = Files.readAllLines(actualPath);
+              if (!expectedLines.equals(actualLines)) {
+                String errorMessage =
+                    "Output is not as expected, expected:"
+                        + "\n"
+                        + expectedLines.stream()
+                            .map(Objects::toString)
+                            .collect(Collectors.joining("\n"))
+                        + "\n"
+                        + "actual:"
+                        + "\n"
+                        + actualLines.stream()
+                            .map(Objects::toString)
+                            .collect(Collectors.joining("\n"));
+                fail(errorMessage);
+              }
+            } catch (IOException e) {
+              throw new RuntimeException("Exception happened while reading file at: " + path, e);
+            }
+          });
+    } catch (IOException e) {
+      throw new RuntimeException("Error happened in processing src under: " + projectPath, e);
     }
   }
 
@@ -227,6 +324,11 @@ public class CoreTestHelper {
     }
   }
 
+  /**
+   * Compares expected reports with actual reports.
+   *
+   * @param actualOutput Actual reports.
+   */
   private void compare(Collection<Report> actualOutput) {
     List<Report> notFound = new ArrayList<>();
     for (TReport expected : expectedReports) {
@@ -259,11 +361,16 @@ public class CoreTestHelper {
     fail(errorMessage.toString());
   }
 
+  /**
+   * Creates a config file for annotator.
+   *
+   * @param configPath Path to the config file.
+   */
   public void makeAnnotatorConfigFile(Path configPath) {
     Config.Builder builder = new Config.Builder();
     final int[] id = {0};
     builder.configPaths =
-        modules.stream()
+        projectBuilder.getModules().stream()
             .map(
                 name ->
                     new ModuleInfo(
@@ -273,18 +380,19 @@ public class CoreTestHelper {
                         outDirPath.resolve(name + "-scanner.xml")))
             .collect(Collectors.toList());
     builder.nullableAnnotation = "javax.annotation.Nullable";
-    builder.initializerAnnotation = "test.Initializer";
+    // In tests, we use NullAway @Initializer annotation.
+    builder.initializerAnnotation = "com.uber.nullaway.annotations.Initializer";
     builder.outputDir = outDirPath.toString();
     builder.depth = depth;
     builder.bailout = !disableBailout;
     builder.redirectBuildOutputToStdErr = true;
     builder.chain = true;
-    builder.outerLoopActivation = requestCompleteLoop;
+    builder.outerLoopActivation = outerLoopActivated;
     builder.useParallelProcessor = true;
     builder.downStreamDependenciesAnalysisActivated = downstreamDependencyAnalysisActivated;
     builder.mode = mode;
     builder.inferenceActivated = !deactivateInference;
-    builder.forceResolveActivation = forceResolveActivated;
+    builder.forceResolveActivation = suppressRemainingErrors;
     builder.useCacheImpact = true;
     builder.sourceTypes.add(SourceType.LOMBOK);
     builder.cache = true;
@@ -293,8 +401,7 @@ public class CoreTestHelper {
         !getEnvironmentVariable("ANNOTATOR_TEST_DISABLE_PARALLEL_PROCESSING");
     if (downstreamDependencyAnalysisActivated) {
       builder.buildCommand =
-          Utility.computeBuildCommandWithLibraryModelLoaderDependency(
-              this.projectPath, this.outDirPath, modules);
+          projectBuilder.computeBuildCommandWithLibraryModelLoaderDependency(this.outDirPath);
       builder.downstreamBuildCommand = builder.buildCommand;
       builder.nullawayLibraryModelLoaderPath =
           Utility.getPathToLibraryModel(outDirPath)
@@ -310,8 +417,7 @@ public class CoreTestHelper {
                       "librarymodel",
                       "nullable-methods.tsv"));
     } else {
-      builder.buildCommand =
-          Utility.computeBuildCommand(this.projectPath, this.outDirPath, modules);
+      builder.buildCommand = projectBuilder.computeBuildCommand(this.outDirPath);
     }
     builder.write(configPath);
   }
@@ -330,17 +436,11 @@ public class CoreTestHelper {
     return Boolean.parseBoolean(value);
   }
 
-  private void createFiles() {
-    fileMap.forEach(
-        (key, value) -> {
-          try {
-            FileUtils.writeLines(srcSet.resolve(key).toFile(), Arrays.asList(value));
-          } catch (IOException e) {
-            throw new RuntimeException("Failed to write line at: " + key, e);
-          }
-        });
-  }
-
+  /**
+   * Getter for config.
+   *
+   * @return Config instance.
+   */
   public Config getConfig() {
     if (config == null) {
       throw new IllegalStateException(
@@ -350,17 +450,32 @@ public class CoreTestHelper {
   }
 
   /**
-   * Returns path to src directory where all test inputs exist.
-   *
-   * @return Path to root src directory.
+   * Default predicate for comparing expected and actual reports. The Default predicate only checks
+   * if the expected effect is computed for the root fix along its tree.
    */
-  public Path getSourceRoot() {
-    return getConfig()
-        .globalDir
-        .resolve("unittest")
-        .resolve("src")
-        .resolve("main")
-        .resolve("java")
-        .resolve("test");
+  static class DEFAULT_PREDICATE implements BiPredicate<TReport, Report> {
+
+    /** The config. */
+    private final Config config;
+
+    private DEFAULT_PREDICATE(Config config) {
+      this.config = config;
+    }
+
+    @Override
+    public boolean test(TReport expected, Report found) {
+      return expected.root.change.location.equals(found.root.change.location)
+          && expected.getExpectedValue() == found.getOverallEffect(config);
+    }
+
+    /**
+     * Creates a new instance of {@link DEFAULT_PREDICATE}.
+     *
+     * @param config the config
+     * @return the default predicate
+     */
+    public static DEFAULT_PREDICATE create(Config config) {
+      return new DEFAULT_PREDICATE(config);
+    }
   }
 }

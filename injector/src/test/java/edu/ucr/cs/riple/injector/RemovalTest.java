@@ -39,106 +39,106 @@ import org.junit.runners.JUnit4;
 public class RemovalTest extends BaseInjectorTest {
 
   @Test
-  public void remove_annot_return_nullable() {
+  public void removeAnnotReturnNullable() {
     injectorTestHelper
         .addInput(
-            "Super.java",
-            "package com.uber;",
+            "Foo.java",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable Object test(@javax.annotation.Nullable Object o) {",
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   Object test(@javax.annotation.Nullable Object o) {",
             "   }",
             "}")
         .addChanges(
             new RemoveAnnotation(
-                new OnMethod("Super.java", "com.uber.Super", "test(java.lang.Object)"),
+                new OnMethod("Foo.java", "test.Foo", "test(java.lang.Object)"),
                 "javax.annotation.Nullable"))
         .start();
   }
 
   @Test
-  public void remove_annot_param() {
+  public void removeAnnotParam() {
     injectorTestHelper
         .addInput(
-            "Super.java",
-            "package com.uber;",
+            "Foo.java",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable Object test(@Nullable Object o) {",
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable Object test(Object o) {",
             "   }",
             "}")
         .addChanges(
             new RemoveAnnotation(
-                new OnParameter("Super.java", "com.uber.Super", "test(java.lang.Object)", 0),
+                new OnParameter("Foo.java", "test.Foo", "test(java.lang.Object)", 0),
                 "javax.annotation.Nullable"))
         .start();
   }
 
   @Test
-  public void remove_annot_param_full_name() {
+  public void removeAnnotParamFullName() {
     // Injector should not remove annotations that are present with fully qualified name. This test
     // is designed to alert us if we decide we would like injector to remove these too in the
     // future.
     injectorTestHelper
         .addInput(
-            "Super.java",
-            "package com.uber;",
+            "Foo.java",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable Object test(@javax.annotation.Nullable Object o) {",
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable Object test(Object o) {",
             "   }",
             "}")
         .addChanges(
             new RemoveAnnotation(
-                new OnParameter("Super.java", "com.uber.Super", "test(java.lang.Object)", 0),
+                new OnParameter("Foo.java", "test.Foo", "test(java.lang.Object)", 0),
                 "javax.annotation.Nullable"));
     assertThrows(AssertionError.class, () -> injectorTestHelper.start());
   }
 
   @Test
-  public void remove_annot_field() {
+  public void removeAnnotField() {
     injectorTestHelper
         .addInput(
-            "Super.java",
-            "package com.uber;",
+            "Foo.java",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable Object f;",
             "   @Nullable Object test(@javax.annotation.Nullable Object o) {",
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   Object f;",
             "   @Nullable Object test(@javax.annotation.Nullable Object o) {",
             "   }",
             "}")
         .addChanges(
             new RemoveAnnotation(
-                new OnField("Super.java", "com.uber.Super", Collections.singleton("f")),
+                new OnField("Foo.java", "test.Foo", Collections.singleton("f")),
                 "javax.annotation.Nullable"))
         .start();
   }

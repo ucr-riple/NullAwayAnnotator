@@ -45,7 +45,7 @@ import org.junit.runners.JUnit4;
 public class ClassSearchTest extends BaseInjectorTest {
 
   @Test
-  public void annotation_declaration() {
+  public void annotationDeclaration() {
     injectorTestHelper
         .addInput(
             "Main.java",
@@ -67,7 +67,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_declaration_in_method_body_level_1() {
+  public void classSearchDeclarationInMethodBodyLevel1() {
     injectorTestHelper
         .addInput(
             "Main.java",
@@ -101,7 +101,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_declaration_in_method_body_level_2() {
+  public void classSearchDeclarationInMethodBodyLevel2() {
     injectorTestHelper
         .addInput(
             "Main.java",
@@ -145,7 +145,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_simple_1() {
+  public void classSearchSimple1() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "simple.java")
         .expectOutputFile("simple_expected_1.java")
@@ -157,7 +157,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_simple_2() {
+  public void classSearchSimple2() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "simple.java")
         .expectOutputFile("simple_expected_2.java")
@@ -169,7 +169,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_simple_3() {
+  public void classSearchSimple3() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "simple.java")
         .expectOutputFile("simple_expected_3.java")
@@ -181,7 +181,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_benchmark_1() {
+  public void classSearchBenchmark1() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("benchmark_expected_1.java")
@@ -193,7 +193,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_benchmark_2() {
+  public void classSearchBenchmark2() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("benchmark_expected_2.java")
@@ -205,7 +205,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_benchmark_3() {
+  public void classSearchBenchmark3() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("benchmark_expected_3.java")
@@ -217,7 +217,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_benchmark_4() {
+  public void classSearchBenchmark4() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("benchmark_expected_4.java")
@@ -229,7 +229,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_benchmark_5() {
+  public void classSearchBenchmark5() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("benchmark_expected_5.java")
@@ -241,7 +241,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_benchmark_6() {
+  public void classSearchBenchmark6() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("benchmark_expected_6.java")
@@ -253,7 +253,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_benchmark_7() {
+  public void classSearchBenchmark7() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("benchmark_expected_7.java")
@@ -266,7 +266,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_benchmark_8() {
+  public void classSearchBenchmark8() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("benchmark_expected_8.java")
@@ -279,7 +279,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_benchmark_9() {
+  public void classSearchBenchmark9() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("benchmark_expected_9.java")
@@ -292,7 +292,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_benchmark_10() {
+  public void classSearchBenchmark10() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("benchmark_expected_10.java")
@@ -305,7 +305,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_benchmark_11() {
+  public void classSearchBenchmark11() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("benchmark_expected_11.java")
@@ -317,7 +317,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_benchmark_12() {
+  public void classSearchBenchmark12() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("benchmark_expected_12.java")
@@ -330,7 +330,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_benchmark_13() {
+  public void classSearchBenchmark13() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("benchmark_expected_13.java")
@@ -342,7 +342,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_benchmark_14() {
+  public void classSearchBenchmark14() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("benchmark_expected_14.java")
@@ -355,7 +355,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_benchmark_15() {
+  public void classSearchBenchmark15() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("benchmark_expected_15.java")
@@ -367,7 +367,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_benchmark_16() {
+  public void classSearchBenchmark16() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("benchmark_expected_16.java")
@@ -379,7 +379,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_benchmark_17() {
+  public void classSearchBenchmark17() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("benchmark_expected_17.java")
@@ -391,7 +391,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_benchmark_18() {
+  public void classSearchBenchmark18() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("benchmark_expected_18.java")
@@ -403,7 +403,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_benchmark_19() {
+  public void classSearchBenchmark19() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("benchmark_expected_19.java")
@@ -415,7 +415,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_benchmark_20() {
+  public void classSearchBenchmark20() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("benchmark_expected_20.java")
@@ -427,7 +427,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_benchmark_21() {
+  public void classSearchBenchmark21() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("benchmark_expected_21.java")
@@ -439,7 +439,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void class_search_benchmark_22() {
+  public void classSearchBenchmark22() {
     injectorTestHelper
         .addInputSourceFile("Main.java", "benchmark.java")
         .expectOutputFile("benchmark_expected_22.java")
@@ -450,7 +450,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void proper_report_in_err_std_for_class_not_found_test() {
+  public void properReportInErrStdForClassNotFoundTest() {
     String expectedErrorMessage = "Could not find class of type: Top-Level with name: NotIncluded";
     String[] clazzLines =
         new String[] {
@@ -470,7 +470,7 @@ public class ClassSearchTest extends BaseInjectorTest {
   }
 
   @Test
-  public void proper_exception_check_for_class_not_found_test() {
+  public void properExceptionCheckForClassNotFoundTest() {
     String expectedErrorMessage = "Could not find class of type: Top-Level with name: NotIncluded";
     String[] clazzLines =
         new String[] {

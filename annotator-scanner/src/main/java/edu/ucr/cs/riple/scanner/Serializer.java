@@ -150,19 +150,13 @@ public class Serializer {
   private void initializeOutputFiles(Config config) {
     try {
       Files.createDirectories(config.getOutputDirectory());
-      if (config.callTrackerIsActive()) {
+      if (config.isActive()) {
         initializeFile(methodImpactedRegion, ImpactedRegion.header());
-      }
-      if (config.fieldTrackerIsActive()) {
         initializeFile(fieldGraphPath, ImpactedRegion.header());
-      }
-      if (config.methodTrackerIsActive()) {
         initializeFile(methodInfoPath, MethodInfo.header());
-      }
-      if (config.classTrackerIsActive()) {
         initializeFile(classInfoPath, ClassInfo.header());
+        initializeFile(nonnullInfoPath, SymbolLocation.header());
       }
-      initializeFile(nonnullInfoPath, SymbolLocation.header());
     } catch (IOException e) {
       throw new RuntimeException("Could not finish resetting serializer", e);
     }
