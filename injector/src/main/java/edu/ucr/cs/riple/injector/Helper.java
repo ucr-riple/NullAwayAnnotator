@@ -29,6 +29,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.AnnotationDeclaration;
 import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumConstantDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
@@ -322,6 +323,27 @@ public class Helper {
       }
     }
     return getMembersOfNode(cursor);
+  }
+
+  /**
+   * Checks if the first enclosing method of the given element, is the given method.
+   *
+   * @param node the node to check.
+   * @param enclosingMethod the enclosing method.
+   * @return true if the node is enclosed directly by the given method.
+   */
+  public static boolean checkNodeEnclosedDirectlyByMethod(
+      Node node, CallableDeclaration<?> enclosingMethod) {
+    Optional<CallableDeclaration<?>> callables =
+        node.findFirst(
+            Node.TreeTraversal.PARENTS,
+            parent -> {
+              if (parent instanceof CallableDeclaration<?>) {
+                return Optional.of((CallableDeclaration<?>) parent);
+              }
+              return Optional.empty();
+            });
+    return callables.isPresent() && callables.get().equals(enclosingMethod);
   }
 
   /**
