@@ -48,8 +48,10 @@ public class OnLocalVariable extends Location {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   protected void fillJsonInformation(JSONObject res) {
-    throw new RuntimeException("Not implemented yet");
+    res.put(KEYS.METHOD, this.encMethod);
+    res.put(KEYS.VARIABLES, this.varName);
   }
 
   @Override
