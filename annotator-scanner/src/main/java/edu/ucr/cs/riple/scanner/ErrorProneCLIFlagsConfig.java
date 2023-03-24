@@ -48,14 +48,8 @@ public class ErrorProneCLIFlagsConfig implements Config {
 
   /** Path to output dir. */
   @Nonnull private final Path outputDirectory;
-  /** Controls method info serialization. */
-  private final boolean methodTrackerIsActive;
-  /** Controls field usage serialization. */
-  private final boolean fieldTrackerIsActive;
-  /** Controls method invocation serialization. */
-  private final boolean callTrackerIsActive;
-  /** Controls class info serialization. */
-  private final boolean classTrackerIsActive;
+  /** Controls serialization services activation. */
+  private final boolean serializationIsActive;
   /** Serializing instance for writing outputs at the desired paths. */
   private final Serializer serializer;
   /** Source type resolver for serialized regions. */
@@ -88,17 +82,8 @@ public class ErrorProneCLIFlagsConfig implements Config {
           "Output path cannot be null, should be set it in config file within <path> tag");
     }
     this.outputDirectory = Paths.get(outputDirectoryPathInString);
-    this.methodTrackerIsActive =
-        XMLUtil.getValueFromAttribute(document, "/scanner/method", "active", Boolean.class)
-            .orElse(false);
-    this.fieldTrackerIsActive =
-        XMLUtil.getValueFromAttribute(document, "/scanner/field", "active", Boolean.class)
-            .orElse(false);
-    this.callTrackerIsActive =
-        XMLUtil.getValueFromAttribute(document, "/scanner/call", "active", Boolean.class)
-            .orElse(false);
-    this.classTrackerIsActive =
-        XMLUtil.getValueFromAttribute(document, "/scanner/class", "active", Boolean.class)
+    this.serializationIsActive =
+        XMLUtil.getValueFromAttribute(document, "/scanner/serialization", "active", Boolean.class)
             .orElse(false);
     this.symbolSourceResolver = new SymbolSourceResolver(extractRequestedSourceTypes(document));
     this.nonnullAnnotations =
@@ -124,23 +109,8 @@ public class ErrorProneCLIFlagsConfig implements Config {
   }
 
   @Override
-  public boolean callTrackerIsActive() {
-    return callTrackerIsActive;
-  }
-
-  @Override
-  public boolean fieldTrackerIsActive() {
-    return fieldTrackerIsActive;
-  }
-
-  @Override
-  public boolean methodTrackerIsActive() {
-    return methodTrackerIsActive;
-  }
-
-  @Override
-  public boolean classTrackerIsActive() {
-    return classTrackerIsActive;
+  public boolean isActive() {
+    return serializationIsActive;
   }
 
   @Override

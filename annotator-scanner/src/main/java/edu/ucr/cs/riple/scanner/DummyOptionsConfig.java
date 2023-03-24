@@ -38,22 +38,7 @@ public class DummyOptionsConfig implements Config {
       "Error in configuring Scanner Checker, a path must be passed via Error Prone Flag (-XepOpt:AnnotatorScanner:ConfigPath) where output directory is in XML format.";
 
   @Override
-  public boolean callTrackerIsActive() {
-    throw new IllegalStateException(ERROR_MESSAGE);
-  }
-
-  @Override
-  public boolean fieldTrackerIsActive() {
-    throw new IllegalStateException(ERROR_MESSAGE);
-  }
-
-  @Override
-  public boolean methodTrackerIsActive() {
-    throw new IllegalStateException(ERROR_MESSAGE);
-  }
-
-  @Override
-  public boolean classTrackerIsActive() {
+  public boolean isActive() {
     throw new IllegalStateException(ERROR_MESSAGE);
   }
 
