@@ -82,7 +82,7 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
                               .map(Error::toResolvingParameter)
                               .collect(Collectors.toSet());
                       if (!parameters.isEmpty()) {
-                        // Update path for each parameter. These triggered fixes does not have an
+                        // Update path for each parameter. These triggered fixes do not have an
                         // actual physical path since they are provided as a jar file in downstream
                         // dependencies.
                         parameters.forEach(
