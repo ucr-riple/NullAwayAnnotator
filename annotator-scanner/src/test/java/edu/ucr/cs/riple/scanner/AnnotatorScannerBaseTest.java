@@ -63,10 +63,7 @@ public abstract class AnnotatorScannerBaseTest<T extends Display> {
       Files.createDirectories(root);
       ScannerConfigWriter writer = new ScannerConfigWriter();
       writer
-          .setCallTrackerActivation(true)
-          .setClassTrackerActivation(true)
-          .setFieldTrackerActivation(true)
-          .setMethodTrackerActivation(true)
+          .setSerializationActivation(true)
           .addGeneratedCodeDetectors(ImmutableSet.of(SourceType.LOMBOK))
           .setOutput(root)
           .writeAsXML(configPath);

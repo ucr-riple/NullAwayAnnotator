@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
+import edu.ucr.cs.riple.injector.location.LocationKind;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
@@ -90,8 +91,7 @@ public class Fix {
   }
 
   /**
-   * Visit this fix if it is targeting an element of kind {@link
-   * edu.ucr.cs.riple.injector.location.LocationType#METHOD}
+   * Visit this fix if it is targeting an element of kind {@link LocationKind#METHOD}
    *
    * @param consumer Consumer instance.
    */
@@ -118,8 +118,7 @@ public class Fix {
   }
 
   /**
-   * Visit this fix if it is targeting an element of kind {@link
-   * edu.ucr.cs.riple.injector.location.LocationType#PARAMETER}
+   * Visit this fix if it is targeting an element of kind {@link LocationKind#PARAMETER}
    *
    * @param consumer Consumer instance.
    */
@@ -146,8 +145,7 @@ public class Fix {
   }
 
   /**
-   * Visit this fix if it is targeting an element of kind {@link
-   * edu.ucr.cs.riple.injector.location.LocationType#FIELD}
+   * Visit this fix if it is targeting an element of kind {@link LocationKind#FIELD}
    *
    * @param consumer Consumer instance.
    */

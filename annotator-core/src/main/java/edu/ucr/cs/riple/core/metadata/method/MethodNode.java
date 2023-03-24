@@ -40,8 +40,6 @@ public class MethodNode {
   public Integer id;
   /** Location of the containing method. */
   public OnMethod location;
-  /** Number of parameters. */
-  public int numberOfParameters;
   /** Is true if the method is already annotated with {@code Nullable} annotation. */
   public boolean hasNullableAnnotation;
   /** Visibility of the method. */
@@ -93,7 +91,7 @@ public class MethodNode {
   private static MethodNode top() {
     if (TOP == null) {
       MethodNode node = new MethodNode(0);
-      node.fillInformation(null, -1, 0, false, "private", false, false);
+      node.fillInformation(null, -1, false, "private", false, false);
       return node;
     }
     return TOP;
@@ -113,7 +111,6 @@ public class MethodNode {
    *
    * @param location Location of containing method.
    * @param parent Parent's id.
-   * @param numberOfParameters Number of parameters.
    * @param hasNullableAnnotation True, if it has Nullable Annotation.
    * @param visibility Visibility of this method.
    * @param hasNonPrimitiveReturn True, if it has a non-primitive return.
@@ -122,14 +119,12 @@ public class MethodNode {
   void fillInformation(
       OnMethod location,
       Integer parent,
-      int numberOfParameters,
       boolean hasNullableAnnotation,
       String visibility,
       boolean hasNonPrimitiveReturn,
       boolean isConstructor) {
     this.parent = parent;
     this.location = location;
-    this.numberOfParameters = numberOfParameters;
     this.hasNullableAnnotation = hasNullableAnnotation;
     this.visibility = Visibility.parse(visibility);
     this.hasNonPrimitiveReturn = hasNonPrimitiveReturn;

@@ -30,19 +30,26 @@ import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collections;
-import java.util.List;
 import org.junit.Test;
 
-public class ArgumentNullableFlowTest extends BaseCoreTest {
+public class ArgumentNullableFlowTest extends AnnotatorBaseCoreTest {
 
   public ArgumentNullableFlowTest() {
-    super("nullable-flow-test", List.of("Target", "DepA", "DepB", "DepC"));
+    super("nullable-multi-modular");
   }
 
   @Test
   public void nullableFlowDetectionEnabledTest() {
     coreTestHelper
-        .addExpectedReports(
+        .onTarget()
+        .withSourceFile("Foo.java", "nullableflow/Foo.java")
+        .withDependency("DepA")
+        .withSourceFile("DepA.java", "nullableflow/DepA.java")
+        .withDependency("DepB")
+        .withSourceFile("DepB.java", "nullableflow/DepB.java")
+        .withDependency("DepC")
+        .withSourceFile("DepC.java", "nullableflow/DepC.java")
+        .withExpectedReports(
             // Change reduces errors on target by -5, but increases them in downstream dependency
             // DepA by 1 (Resolvable), DepB by 0 and DepC by 2 (1 resolvable).
             // Parameters param1 and param2 in bar1 and bar2 will receive Nullable from downstream
@@ -86,7 +93,15 @@ public class ArgumentNullableFlowTest extends BaseCoreTest {
   @Test
   public void nullableFlowDetectionDisabledTest() {
     coreTestHelper
-        .addExpectedReports(
+        .onTarget()
+        .withSourceFile("Foo.java", "nullableflow/Foo.java")
+        .withDependency("DepA")
+        .withSourceFile("DepA.java", "nullableflow/DepA.java")
+        .withDependency("DepB")
+        .withSourceFile("DepB.java", "nullableflow/DepB.java")
+        .withDependency("DepC")
+        .withSourceFile("DepC.java", "nullableflow/DepC.java")
+        .withExpectedReports(
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullable(int)"), -5),
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "getNull()"), -1))
         .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))

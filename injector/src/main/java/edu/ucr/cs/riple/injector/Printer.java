@@ -32,10 +32,12 @@ import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * Applies the text modification instances to source file. Text modifications are applied according
@@ -47,7 +49,6 @@ public class Printer {
   private final Path path;
   /** Lines of source file. */
   private final List<String> lines;
-
   /** Offset store for recording changes in source code. */
   private final FileOffsetStore offsetStore;
 
@@ -69,14 +70,9 @@ public class Printer {
   public void applyModifications(Set<Modification> modifications) {
     // Modification are sorted to start from the last position, to make the changes ineffective to
     // current computed offsets.
-    modifications.stream()
-        .sorted(
-            Comparator.comparingInt((Modification o) -> o.startPosition.line)
-                .thenComparingInt(o -> o.startPosition.column)
-                // To make the tests produce deterministic results.
-                .thenComparing(o -> o.content)
-                .reversed())
-        .forEach(modification -> modification.visit(lines, offsetStore));
+    SortedSet<Modification> reversedSortedSet = new TreeSet<>(Collections.reverseOrder());
+    reversedSortedSet.addAll(modifications);
+    reversedSortedSet.forEach(modification -> modification.visit(lines, offsetStore));
   }
 
   /**

@@ -445,7 +445,7 @@ public class Config {
     this.nullUnMarkedAnnotation =
         this.forceResolveActivated
             ? cmd.getOptionValue(activateForceResolveOption)
-            : "org.jspecify.nullness.NullUnmarked";
+            : "org.jspecify.annotations.NullUnmarked";
     this.moduleCounterID = 0;
     this.offsetHandler = new OffsetHandler(this);
     this.log = new Log();
@@ -535,7 +535,7 @@ public class Config {
         getValueFromKey(jsonObject, "INFERENCE_ACTIVATION", Boolean.class).orElse(true);
     this.nullUnMarkedAnnotation =
         getValueFromKey(jsonObject, "ANNOTATION:NULL_UNMARKED", String.class)
-            .orElse("org.jspecify.nullness.NullUnmarked");
+            .orElse("org.jspecify.annotations.NullUnmarked");
     boolean lombokCodeDetectorActivated =
         getValueFromKey(
                 jsonObject, "PROCESSORS:" + SourceType.LOMBOK.name() + ":ACTIVATION", Boolean.class)
@@ -735,7 +735,7 @@ public class Config {
     public String downstreamBuildCommand;
 
     public boolean forceResolveActivation = false;
-    public String nullUnmarkedAnnotation = "org.jspecify.nullness.NullUnmarked";
+    public String nullUnmarkedAnnotation = "org.jspecify.annotations.NullUnmarked";
     public boolean inferenceActivated = true;
     public boolean useCacheImpact = false;
     public Set<SourceType> sourceTypes = new HashSet<>();

@@ -24,30 +24,39 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-import com.github.javaparser.Range;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.SignatureMatcher;
 import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.nio.file.Path;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
 import org.json.JSONObject;
 
+/**
+ * Represents a location for parameter element. This location is used to apply changes to a
+ * parameter.
+ */
 public class OnParameter extends Location {
+
+  /** Method signature of the enclosing method. */
   public final String method;
+  /** Index of the parameter in the method signature. */
   public final int index;
+  /**
+   * Matcher for the method signature. Method signature is given as a string, this matcher is used
+   * to match the target.
+   */
   private final SignatureMatcher matcher;
 
   public OnParameter(Path path, String clazz, String method, int index) {
-    super(LocationType.PARAMETER, path, clazz);
+    super(LocationKind.PARAMETER, path, clazz);
     this.method = method;
     this.index = index;
     this.matcher = new SignatureMatcher(method);
@@ -64,6 +73,7 @@ public class OnParameter extends Location {
   }
 
   @Override
+  @Nullable
   protected Modification applyToMember(NodeList<BodyDeclaration<?>> members, Change change) {
     final AtomicReference<Modification> ans = new AtomicReference<>();
     members.forEach(
@@ -77,11 +87,11 @@ public class OnParameter extends Location {
                   if (matcher.matchesCallableDeclaration(callableDeclaration)) {
                     NodeList<?> params = callableDeclaration.getParameters();
                     if (index < params.size()) {
-                      if (params.get(index) instanceof Parameter) {
+                      if (params.get(index) != null) {
                         Node param = params.get(index);
-                        Optional<Range> range = param.getRange();
-                        range.ifPresent(
-                            value -> ans.set(change.visit((NodeWithAnnotations<?>) param, value)));
+                        if (param instanceof Parameter) {
+                          ans.set(change.visit((Parameter) param));
+                        }
                       }
                     }
                   }

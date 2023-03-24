@@ -34,22 +34,22 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class OnFieldInjectionTest extends BaseInjectorTest {
   @Test
-  public void field_nullable_simple() {
+  public void fieldNullableSimple() {
     injectorTestHelper
         .addInput(
-            "Super.java",
-            "package com.uber;",
+            "Foo.java",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   Object h = new Object();",
             "   public void test(@Nullable Object f) {",
             "      h = f;",
             "   }",
             "}")
         .expectOutput(
-            "package com.uber;",
+            "package test;",
             "import javax.annotation.Nullable;",
-            "public class Super {",
+            "public class Foo {",
             "   @Nullable Object h = new Object();",
             "   public void test(@Nullable Object f) {",
             "      h = f;",
@@ -57,7 +57,7 @@ public class OnFieldInjectionTest extends BaseInjectorTest {
             "}")
         .addChanges(
             new AddMarkerAnnotation(
-                new OnField("Super.java", "com.uber.Super", Collections.singleton("h")),
+                new OnField("Foo.java", "test.Foo", Collections.singleton("h")),
                 "javax.annotation.Nullable"))
         .start();
   }
@@ -90,7 +90,7 @@ public class OnFieldInjectionTest extends BaseInjectorTest {
   public void fieldMultipleAnnotations() {
     injectorTestHelper
         .addInput(
-            "Super.java",
+            "Foo.java",
             "package edu.ucr;",
             "import javax.annotation.Nullable;",
             "public class Test {",
@@ -111,13 +111,13 @@ public class OnFieldInjectionTest extends BaseInjectorTest {
             "}")
         .addChanges(
             new AddMarkerAnnotation(
-                new OnField("Super.java", "edu.ucr.Test", Collections.singleton("h")),
+                new OnField("Foo.java", "edu.ucr.Test", Collections.singleton("h")),
                 "javax.annotation.Nullable"),
             new AddMarkerAnnotation(
-                new OnField("Super.java", "edu.ucr.Test", Collections.singleton("h")),
+                new OnField("Foo.java", "edu.ucr.Test", Collections.singleton("h")),
                 "edu.ucr.Tainted"),
             new AddMarkerAnnotation(
-                new OnField("Super.java", "edu.ucr.Test", Collections.singleton("h")),
+                new OnField("Foo.java", "edu.ucr.Test", Collections.singleton("h")),
                 "javax.annotation.Nullable"))
         .start();
   }
