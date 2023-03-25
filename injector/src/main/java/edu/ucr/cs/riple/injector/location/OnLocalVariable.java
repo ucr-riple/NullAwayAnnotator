@@ -1,7 +1,5 @@
 package edu.ucr.cs.riple.injector.location;
 
-import static edu.ucr.cs.riple.injector.Helper.checkNodeEnclosedDirectlyByMethod;
-
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
@@ -13,7 +11,6 @@ import edu.ucr.cs.riple.injector.modifications.MultiPositionModification;
 import edu.ucr.cs.riple.injector.modifications.TypeChangeVisitor;
 import java.nio.file.Path;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -73,38 +70,29 @@ public class OnLocalVariable extends Location {
                     return;
                   }
                   if (matcher.matchesCallableDeclaration(callableDeclaration)) {
-                    // Find all variable declarations in the callable declaration.
-                    List<VariableDeclarationExpr> localVariableDeclarations =
-                        callableDeclaration.findAll(
-                            VariableDeclarationExpr.class,
-                            variableDeclarationExpr ->
-                                variableDeclarationExpr.getRange().isPresent()
-                                    // Check if the variable declaration is enclosed directly by the
-                                    // method.
-                                    && checkNodeEnclosedDirectlyByMethod(
-                                        variableDeclarationExpr, callableDeclaration));
-                    if (localVariableDeclarations.isEmpty()) {
+                    // Find variable declaration in the callable declaration with the variable name.
+                    VariableDeclarationExpr variableDeclarationExpr =
+                        Helper.locateVariableDeclarationExpr(callableDeclaration, varName);
+                    if (variableDeclarationExpr == null) {
                       return;
                     }
-                    localVariableDeclarations.forEach(
-                        variableDeclarationExpr ->
-                            variableDeclarationExpr
-                                .getVariables()
-                                .forEach(
-                                    variableDeclarator -> {
-                                      if (variableDeclarator.getName().toString().equals(varName)) {
-                                        // Located the variable.
-                                        Set<Modification> modifications = new HashSet<>();
-                                        // Process the declaration statement.
-                                        modifications.add(change.visit(variableDeclarationExpr));
-                                        // Process the declarator type arguments.
-                                        modifications.addAll(
-                                            variableDeclarator
-                                                .getType()
-                                                .accept(TYPE_CHANGE_VISITOR, change));
-                                        ans.set(new MultiPositionModification(modifications));
-                                      }
-                                    }));
+                    variableDeclarationExpr
+                        .getVariables()
+                        .forEach(
+                            variableDeclarator -> {
+                              if (variableDeclarator.getName().toString().equals(varName)) {
+                                // Located the variable.
+                                Set<Modification> modifications = new HashSet<>();
+                                // Process the declaration statement.
+                                modifications.add(change.visit(variableDeclarationExpr));
+                                // Process the declarator type arguments.
+                                modifications.addAll(
+                                    variableDeclarator
+                                        .getType()
+                                        .accept(TYPE_CHANGE_VISITOR, change));
+                                ans.set(new MultiPositionModification(modifications));
+                              }
+                            });
                   }
                 }));
     return ans.get();

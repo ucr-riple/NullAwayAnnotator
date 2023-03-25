@@ -35,6 +35,7 @@ import com.github.javaparser.ast.body.EnumConstantDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import java.io.FileNotFoundException;
@@ -42,10 +43,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Stack;
 import java.util.function.Predicate;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /** A utility class. */
 public class Helper {
@@ -326,24 +330,28 @@ public class Helper {
   }
 
   /**
-   * Checks if the first enclosing method of the given element, is the given method.
+   * Locates a variable declaration expression in the tree of a {@link CallableDeclaration} with the
+   * given name.
    *
-   * @param node the node to check.
-   * @param enclosingMethod the enclosing method.
-   * @return true if the node is enclosed directly by the given method.
+   * @param encMethod The enclosing method which the variable is declared in.
+   * @param varName The name of the variable.
+   * @return The variable declaration expression, or null if it is not found.
    */
-  public static boolean checkNodeEnclosedDirectlyByMethod(
-      Node node, CallableDeclaration<?> enclosingMethod) {
-    Optional<CallableDeclaration<?>> callables =
-        node.findFirst(
-            Node.TreeTraversal.PARENTS,
-            parent -> {
-              if (parent instanceof CallableDeclaration<?>) {
-                return Optional.of((CallableDeclaration<?>) parent);
-              }
-              return Optional.empty();
-            });
-    return callables.isPresent() && callables.get().equals(enclosingMethod);
+  @Nullable
+  public static VariableDeclarationExpr locateVariableDeclarationExpr(
+      CallableDeclaration<?> encMethod, String varName) {
+    Iterator<Node> treeIterator = new DirectMethodParentIterator(encMethod);
+    while (treeIterator.hasNext()) {
+      Node n = treeIterator.next();
+      if (n instanceof VariableDeclarationExpr) {
+        VariableDeclarationExpr v = (VariableDeclarationExpr) n;
+        if (v.getVariables().stream()
+            .anyMatch(variableDeclarator -> variableDeclarator.getNameAsString().equals(varName))) {
+          return v;
+        }
+      }
+    }
+    return null;
   }
 
   /**
@@ -475,6 +483,37 @@ public class Helper {
           .orElse(false);
     } catch (FileNotFoundException e) {
       throw new IllegalArgumentException("File not found: " + path, e);
+    }
+  }
+
+  /**
+   * Iterates over children of a {@link CallableDeclaration} in a depth-first manner, skipping over
+   * any {@link BodyDeclaration}.
+   */
+  public static final class DirectMethodParentIterator implements Iterator<Node> {
+    private final Stack<Node> stack = new Stack<>();
+
+    public DirectMethodParentIterator(CallableDeclaration<?> node) {
+      stack.add(node);
+    }
+
+    @Override
+    public boolean hasNext() {
+      return !stack.isEmpty();
+    }
+
+    @Override
+    public Node next() {
+      Node next = stack.pop();
+      List<Node> children = next.getChildNodes();
+      for (int i = children.size() - 1; i >= 0; i--) {
+        Node child = children.get(i);
+        if (!(child instanceof BodyDeclaration<?>)) {
+          // Skip over any CallableDeclaration.
+          stack.add(children.get(i));
+        }
+      }
+      return next;
     }
   }
 }

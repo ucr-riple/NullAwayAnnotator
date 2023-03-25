@@ -100,4 +100,72 @@ public class OnLocalVariableInjectionTest extends BaseInjectorTest {
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
         .start();
   }
+
+  @Test
+  public void onLocalVariableWithIdenticalExistingInnerClassField() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "   public void foo() {",
+            "       class InnerFoo {",
+            "          Object f0;",
+            "       }",
+            "       Object f0;",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "   public void foo() {",
+            "       class InnerFoo {",
+            "          Object f0;",
+            "       }",
+            "       @UnTainted Object f0;",
+            "   }",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"))
+        .start();
+  }
+
+  @Test
+  public void onLocalVariableWithIdenticalExistingInnerMethodLocalVariable() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "   public void foo() {",
+            "       class InnerFoo {",
+            "          public void foo() {",
+            "              Object f0;",
+            "          }",
+            "       }",
+            "       Object f0;",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "   public void foo() {",
+            "       class InnerFoo {",
+            "          public void foo() {",
+            "              Object f0;",
+            "          }",
+            "       }",
+            "       @UnTainted Object f0;",
+            "   }",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"))
+        .start();
+  }
 }
