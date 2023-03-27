@@ -48,6 +48,9 @@ subprojects { proj ->
     proj.dependencies {
         errorprone deps.build.errorProneCore
         errorproneJavac deps.build.errorProneJavac
+        // just to prevent javac warnings, we currently pass "-Werror" as compiler arguments,
+        // all warnings must be resolved.
+        compileOnly deps.build.errorProneCoreOld
         if(proj.name != "ban-mutable-static"){
             annotationProcessor project(":checks:ban-mutable-static")
         }
@@ -66,6 +69,7 @@ subprojects { proj ->
                 }
             }
         }
+        options.compilerArgs += '-Werror'
     }
 
     repositories {

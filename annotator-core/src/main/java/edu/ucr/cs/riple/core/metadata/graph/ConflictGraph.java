@@ -32,7 +32,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -73,8 +72,6 @@ public class ConflictGraph {
    * Colors the graph based on edges, no two vertices which there is an edge connecting them will be
    * in the same group. A greedy algorithm is used to find the solution.
    */
-  // TODO: Remove SuppressWarnings below later.
-  @SuppressWarnings("JdkObsolete")
   public void findGroups() {
     this.groups.clear();
     Collection<Node> allNodes = nodes.values();
@@ -83,9 +80,9 @@ public class ConflictGraph {
       node.id = counter++;
     }
     int size = allNodes.size();
-    LinkedList<Integer>[] adj = new LinkedList[size];
+    List<List<Integer>> adj = new ArrayList<>();
     for (int i = 0; i < size; ++i) {
-      adj[i] = new LinkedList<>();
+      adj.add(i, new ArrayList<>());
     }
     for (Node node : allNodes) {
       for (Node other : allNodes) {
@@ -93,7 +90,7 @@ public class ConflictGraph {
           continue;
         }
         if (node.hasConflictInRegions(other)) {
-          adj[node.id].add(other.id);
+          adj.get(node.id).add(other.id);
         }
       }
     }
@@ -106,7 +103,7 @@ public class ConflictGraph {
    * @param adj Martic of adjancey.
    * @param nodes Nodes in the graph.
    */
-  private void colorGraph(LinkedList<Integer>[] adj, Collection<Node> nodes) {
+  private void colorGraph(List<List<Integer>> adj, Collection<Node> nodes) {
     int v = nodes.size();
     List<Node> allNodes = new ArrayList<>(nodes);
     int[] result = new int[v];
@@ -115,7 +112,7 @@ public class ConflictGraph {
     boolean[] available = new boolean[v];
     Arrays.fill(available, true);
     for (int u = 1; u < v; u++) {
-      for (int i : adj[u]) {
+      for (int i : adj.get(u)) {
         if (result[i] != -1) {
           available[result[i]] = false;
         }
