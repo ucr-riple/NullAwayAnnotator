@@ -56,7 +56,7 @@ public abstract class Change {
    */
   @Nullable
   public Modification translate(CompilationUnit tree) {
-    return this.location.apply(tree, this);
+    return new ChangeVisitor(tree).visit(this);
   }
 
   /**
