@@ -118,7 +118,7 @@ public class OnMethod extends Location {
   }
 
   @Override
-  <R, P> R accept(LocationVisitor<R, P> v, P p) {
+  public <R, P> R accept(LocationVisitor<R, P> v, P p) {
     return v.visitMethod(this, p);
   }
 

@@ -277,7 +277,7 @@ public abstract class Location {
    * @param p additional parameter to the visitor
    * @return a visitor-specified result
    */
-  abstract <R, P> R accept(LocationVisitor<R, P> v, P p);
+  public abstract <R, P> R accept(LocationVisitor<R, P> v, P p);
 
   @Override
   public int hashCode() {
