@@ -59,6 +59,12 @@ public class OnMethod extends Location {
     res.put(KEYS.METHOD, method);
   }
 
+  /**
+   * Checks if the given method matches the method signature of this location.
+   *
+   * @param method method to check.
+   * @return true, if the given method matches the method signature of this location.
+   */
   public boolean matchesCallableDeclaration(CallableDeclaration<?> method) {
     return this.matcher.matchesCallableDeclaration(method);
   }

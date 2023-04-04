@@ -91,6 +91,12 @@ public class OnParameter extends Location {
     return super.equals(other) && method.equals(other.method) && index == other.index;
   }
 
+  /**
+   * Checks if the given method matches the method signature of this location.
+   *
+   * @param method method to check.
+   * @return true if the method matches the method signature of this location.
+   */
   public boolean matchesCallableDeclaration(CallableDeclaration<?> method) {
     return this.matcher.matchesCallableDeclaration(method);
   }
