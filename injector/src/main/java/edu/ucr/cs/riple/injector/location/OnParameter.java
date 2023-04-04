@@ -126,6 +126,11 @@ public class OnParameter extends Location {
   }
 
   @Override
+  <R, P> R accept(LocationVisitor<R, P> v, P p) {
+    return v.visitParameter(this, p);
+  }
+
+  @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), method, index);
   }
