@@ -90,7 +90,7 @@ public abstract class Change {
   @SuppressWarnings("unchecked")
   public JSONObject getJson() {
     JSONObject res = new JSONObject();
-    res.put("LOCATION", new LocationToJsonVisitor().visit(location));
+    res.put("LOCATION", LocationToJsonVisitor.INSTANCE.visit(location));
     res.put("ANNOTATION", annotation);
     return res;
   }
