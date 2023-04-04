@@ -70,4 +70,14 @@ public class LocationToJsonVisitor implements LocationVisitor<JSONObject, Void> 
   public JSONObject visitClass(OnClass onClass, Void unused) {
     return defaultAction(onClass);
   }
+
+  /**
+   * Visits a location and returns a JSON object.
+   *
+   * @param location the location to visit
+   * @return a JSON object representing the location
+   */
+  public JSONObject visit(Location location) {
+    return location.accept(this, null);
+  }
 }
