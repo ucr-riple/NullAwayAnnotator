@@ -130,7 +130,7 @@ public class OnField extends Location {
   }
 
   @Override
-  <R, P> R accept(LocationVisitor<R, P> v, P p) {
+  public <R, P> R accept(LocationVisitor<R, P> v, P p) {
     return v.visitField(this, p);
   }
 
