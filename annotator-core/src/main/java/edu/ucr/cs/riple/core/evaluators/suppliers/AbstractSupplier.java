@@ -31,7 +31,7 @@ import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
-import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 
 /** Base class for all instances of {@link Supplier}. */
 public abstract class AbstractSupplier implements Supplier {
@@ -41,7 +41,7 @@ public abstract class AbstractSupplier implements Supplier {
   /** Injector instance. */
   protected final AnnotationInjector injector;
   /** Method declaration tree instance. */
-  protected final MethodDeclarationTree tree;
+  protected final MethodRegistry methodRegistry;
   /** Depth of analysis. */
   protected final int depth;
   /** Field declaration analysis to detect fixes on inline multiple field declaration statements. */
@@ -50,10 +50,10 @@ public abstract class AbstractSupplier implements Supplier {
   protected final Config config;
 
   public AbstractSupplier(
-      ImmutableSet<ModuleInfo> modules, Config config, MethodDeclarationTree tree) {
+      ImmutableSet<ModuleInfo> modules, Config config, MethodRegistry registry) {
     this.config = config;
     this.fieldDeclarationStore = new FieldDeclarationStore(config, modules);
-    this.tree = tree;
+    this.methodRegistry = registry;
     this.errorStore = initializeErrorStore(modules);
     this.injector = initializeInjector();
     this.depth = initializeDepth();
@@ -98,8 +98,8 @@ public abstract class AbstractSupplier implements Supplier {
   }
 
   @Override
-  public MethodDeclarationTree getMethodDeclarationTree() {
-    return tree;
+  public MethodRegistry getMethodRegistry() {
+    return methodRegistry;
   }
 
   @Override

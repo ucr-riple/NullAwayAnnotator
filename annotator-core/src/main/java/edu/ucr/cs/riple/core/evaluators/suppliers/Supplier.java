@@ -32,7 +32,7 @@ import edu.ucr.cs.riple.core.evaluators.graphprocessor.ConflictGraphProcessor;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
-import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 
 /** Supplier for initializing an {@link AbstractEvaluator} instance. */
 public interface Supplier {
@@ -52,11 +52,11 @@ public interface Supplier {
   AnnotationInjector getInjector();
 
   /**
-   * Getter for {@link MethodDeclarationTree} instance.
+   * Getter for {@link MethodRegistry} instance.
    *
-   * @return MethodDeclarationTree instance.
+   * @return MethodRegistry instance.
    */
-  MethodDeclarationTree getMethodDeclarationTree();
+  MethodRegistry getMethodRegistry();
 
   /**
    * Getter for depth of analysis.

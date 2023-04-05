@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers.generatedcode;
 
-import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
@@ -48,11 +48,10 @@ public class LombokTracker implements GeneratedRegionTracker {
   /** Method region tracker to get potentially impacted regions of a method. */
   private final MethodRegionTracker tracker;
   /** Method declaration tree instance. */
-  private final MethodDeclarationTree methodDeclarationTree;
+  private final MethodRegistry methodRegistry;
 
-  public LombokTracker(
-      MethodDeclarationTree methodDeclarationTree, MethodRegionTracker methodRegionTracker) {
-    this.methodDeclarationTree = methodDeclarationTree;
+  public LombokTracker(MethodRegistry methodRegistry, MethodRegionTracker methodRegionTracker) {
+    this.methodRegistry = methodRegistry;
     this.tracker = methodRegionTracker;
   }
 
@@ -62,7 +61,7 @@ public class LombokTracker implements GeneratedRegionTracker {
         // filter regions which are created by lombok
         .filter(region -> region.sourceType.equals(SourceType.LOMBOK) && region.isOnMethod())
         // find the corresponding method for the region.
-        .map(region -> methodDeclarationTree.findNode(region.member, region.clazz))
+        .map(region -> methodRegistry.findNode(region.member, region.clazz))
         .filter(Objects::nonNull)
         // get method location.
         .map(methodNode -> methodNode.location)

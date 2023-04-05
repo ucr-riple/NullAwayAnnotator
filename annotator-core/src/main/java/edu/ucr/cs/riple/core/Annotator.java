@@ -42,7 +42,7 @@ import edu.ucr.cs.riple.core.metadata.field.FieldInitializationStore;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
-import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
@@ -69,7 +69,7 @@ public class Annotator {
   public final ReportCache cache;
 
   private FieldDeclarationStore fieldDeclarationStore;
-  private MethodDeclarationTree methodDeclarationTree;
+  private MethodRegistry methodRegistry;
 
   public Annotator(Config config) {
     this.config = config;
@@ -102,7 +102,7 @@ public class Annotator {
     System.out.println("Making the first build...");
     Utility.buildTarget(config, true);
     fieldDeclarationStore = new FieldDeclarationStore(config, config.target);
-    methodDeclarationTree = new MethodDeclarationTree(config);
+    methodRegistry = new MethodRegistry(config);
     NonnullStore nonnullStore = new NonnullStore(config);
     config.initializeAdapter(fieldDeclarationStore, nonnullStore);
     Set<OnField> uninitializedFields =
@@ -129,10 +129,10 @@ public class Annotator {
     // iteration.
     DownstreamImpactCache downstreamImpactCache =
         config.downStreamDependenciesAnalysisActivated
-            ? new DownstreamImpactCacheImpl(config, methodDeclarationTree)
+            ? new DownstreamImpactCacheImpl(config, methodRegistry)
             : new VoidDownstreamImpactCache();
     downstreamImpactCache.analyzeDownstreamDependencies();
-    TargetModuleCache targetModuleCache = new TargetModuleCache(config, methodDeclarationTree);
+    TargetModuleCache targetModuleCache = new TargetModuleCache(config, methodRegistry);
 
     if (config.inferenceActivated) {
       // Outer loop starts.
@@ -218,8 +218,7 @@ public class Annotator {
 
     // Initializing required evaluator instances.
     TargetModuleSupplier supplier =
-        new TargetModuleSupplier(
-            config, targetModuleCache, downstreamImpactCache, methodDeclarationTree);
+        new TargetModuleSupplier(config, targetModuleCache, downstreamImpactCache, methodRegistry);
     Evaluator evaluator = getEvaluator(supplier);
     // Result of the iteration analysis.
     return evaluator.evaluate(fixes);
@@ -273,7 +272,7 @@ public class Annotator {
                       // @SuppressWarnings("NullAway.Init"). We add @NullUnmarked on constructors
                       // only for errors in the body of the constructor.
                       !error.isInitializationError()) {
-                    return methodDeclarationTree.findNode(error.encMember(), error.encClass());
+                    return methodRegistry.findNode(error.encMember(), error.encClass());
                   }
                   // For methods invoked in an initialization region, where the error is that
                   // `@Nullable` is being passed as an argument, we add a `@NullUnmarked` annotation
@@ -282,7 +281,7 @@ public class Annotator {
                       && error.isSingleFix()
                       && error.toResolvingLocation().isOnParameter()) {
                     OnParameter nullableParameter = error.toResolvingParameter();
-                    return methodDeclarationTree.findNode(
+                    return methodRegistry.findNode(
                         nullableParameter.method, nullableParameter.clazz);
                   }
                   return null;

@@ -36,7 +36,7 @@ import edu.ucr.cs.riple.core.cache.Impact;
 import edu.ucr.cs.riple.core.evaluators.suppliers.DownstreamDependencySupplier;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
@@ -61,19 +61,19 @@ public class DownstreamImpactCacheImpl
   private final ImmutableSet<ModuleInfo> downstreamModules;
 
   /**
-   * Constructor for creating downstream impact cache. It populates the store with a downstream
+   * Constructor for creating downstream impact cache. It populates the registry with a downstream
    * impact listing 0 triggered errors and 0 downstream fixes for the result of adding
    * {@code @Nullable} to each method in the target being annotated. The actual impacts, will be
    * computed once {@link #analyzeDownstreamDependencies()} is called.
    *
    * @param config Annotator config.
-   * @param tree Method declaration tree for target module used to collect public methods with
-   *     non-primitive return types to compute their impacts on downstream dependencies.
+   * @param registry Method declaration registry for target module used to collect public methods
+   *     with non-primitive return types to compute their impacts on downstream dependencies.
    */
-  public DownstreamImpactCacheImpl(Config config, MethodDeclarationTree tree) {
+  public DownstreamImpactCacheImpl(Config config, MethodRegistry registry) {
     super(
         config,
-        tree.getPublicMethodsWithNonPrimitivesReturn().stream()
+        registry.getPublicMethodsWithNonPrimitivesReturn().stream()
             .map(
                 methodNode ->
                     new DownstreamImpact(
@@ -82,7 +82,7 @@ public class DownstreamImpactCacheImpl
                             "null",
                             true)))
             .collect(toImmutableMap(Impact::toLocation, Function.identity())),
-        tree);
+        registry);
     this.downstreamModules = config.downstreamInfo;
   }
 
@@ -93,7 +93,8 @@ public class DownstreamImpactCacheImpl
     Utility.buildDownstreamDependencies(config);
     Utility.setScannerCheckerActivation(config, downstreamModules, false);
     // Collect callers of public APIs in module.
-    MethodRegionTracker tracker = new MethodRegionTracker(config, config.downstreamInfo, tree);
+    MethodRegionTracker tracker =
+        new MethodRegionTracker(config, config.downstreamInfo, methodRegistry);
     // Generate fixes corresponding methods.
     ImmutableSet<Fix> fixes =
         store.values().stream()
@@ -110,7 +111,8 @@ public class DownstreamImpactCacheImpl
                         false))
             .collect(ImmutableSet.toImmutableSet());
     DownstreamImpactEvaluator evaluator =
-        new DownstreamImpactEvaluator(new DownstreamDependencySupplier(config, tracker, tree));
+        new DownstreamImpactEvaluator(
+            new DownstreamDependencySupplier(config, tracker, methodRegistry));
     ImmutableSet<Report> reports = evaluator.evaluate(fixes);
     // Update method status based on the results.
     this.store
@@ -180,7 +182,8 @@ public class DownstreamImpactCacheImpl
 
   @Override
   public boolean triggersUnresolvableErrorsOnDownstream(Fix fix) {
-    return getTriggeredErrors(fix).stream().anyMatch(error -> !error.isFixableOnTarget(tree));
+    return getTriggeredErrors(fix).stream()
+        .anyMatch(error -> !error.isFixableOnTarget(methodRegistry));
   }
 
   @Override

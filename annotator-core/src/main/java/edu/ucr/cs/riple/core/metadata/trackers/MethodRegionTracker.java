@@ -28,8 +28,8 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
-import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
-import edu.ucr.cs.riple.core.metadata.method.MethodNode;
+import edu.ucr.cs.riple.core.metadata.method.MethodRecord;
+import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.scanner.Serializer;
@@ -41,27 +41,24 @@ import java.util.stream.Collectors;
 public class MethodRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
 
   /**
-   * {@link MethodDeclarationTree} instance, used to retrieve regions that will be affected due to
+   * {@link MethodRegistry} instance, used to retrieve regions that will be affected due to
    * inheritance violations.
    */
-  private final MethodDeclarationTree methodDeclarationTree;
+  private final MethodRegistry methodRegistry;
 
-  public MethodRegionTracker(
-      Config config, ModuleInfo info, MethodDeclarationTree methodDeclarationTree) {
+  public MethodRegionTracker(Config config, ModuleInfo info, MethodRegistry methodRegistry) {
     super(config, info.dir.resolve(Serializer.METHOD_IMPACTED_REGION_FILE_NAME));
-    this.methodDeclarationTree = methodDeclarationTree;
+    this.methodRegistry = methodRegistry;
   }
 
   public MethodRegionTracker(
-      Config config,
-      ImmutableSet<ModuleInfo> modules,
-      MethodDeclarationTree methodDeclarationTree) {
+      Config config, ImmutableSet<ModuleInfo> modules, MethodRegistry methodRegistry) {
     super(
         config,
         modules.stream()
             .map(info -> info.dir.resolve(Serializer.METHOD_IMPACTED_REGION_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));
-    this.methodDeclarationTree = methodDeclarationTree;
+    this.methodRegistry = methodRegistry;
   }
 
   @Override
@@ -80,8 +77,7 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
     // Add method itself.
     regions.add(new Region(onMethod.clazz, onMethod.method));
     // Add immediate super method.
-    MethodNode parent =
-        methodDeclarationTree.getClosestSuperMethod(onMethod.method, onMethod.clazz);
+    MethodRecord parent = methodRegistry.getClosestSuperMethod(onMethod.method, onMethod.clazz);
     if (parent != null && parent.isNonTop()) {
       regions.add(new Region(parent.location.clazz, parent.location.method));
     }

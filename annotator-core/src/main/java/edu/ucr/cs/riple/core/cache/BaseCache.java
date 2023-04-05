@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Collection;
 import java.util.Map;
@@ -49,12 +49,12 @@ public abstract class BaseCache<T extends Impact, S extends Map<Location, T>>
   /** Annotator config. */
   protected final Config config;
   /** Method declaration tree to store target module structure. */
-  protected final MethodDeclarationTree tree;
+  protected final MethodRegistry methodRegistry;
 
-  public BaseCache(Config config, S store, MethodDeclarationTree tree) {
+  public BaseCache(Config config, S store, MethodRegistry methodRegistry) {
     this.store = store;
     this.config = config;
-    this.tree = tree;
+    this.methodRegistry = methodRegistry;
   }
 
   @Override
