@@ -34,7 +34,7 @@ import edu.ucr.cs.riple.core.evaluators.graphprocessor.ParallelConflictGraphProc
 import edu.ucr.cs.riple.core.evaluators.graphprocessor.SequentialConflictGraphProcessor;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
-import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -59,14 +59,14 @@ public class TargetModuleSupplier extends AbstractSupplier {
    * @param config Annotator config instance.
    * @param targetModuleCache Target module impact cache instance.
    * @param downstreamImpactCache Downstream impact cache instance.
-   * @param tree Method declaration tree for methods in target module.
+   * @param registry Method registry for methods in target module.
    */
   public TargetModuleSupplier(
       Config config,
       TargetModuleCache targetModuleCache,
       DownstreamImpactCache downstreamImpactCache,
-      MethodDeclarationTree tree) {
-    super(ImmutableSet.of(config.target), config, tree);
+      MethodRegistry registry) {
+    super(ImmutableSet.of(config.target), config, registry);
     this.downstreamImpactCache = downstreamImpactCache;
     this.targetModuleCache = targetModuleCache;
   }
@@ -91,7 +91,7 @@ public class TargetModuleSupplier extends AbstractSupplier {
     CompilerRunner runner = () -> Utility.buildTarget(config);
     if (config.useParallelGraphProcessor) {
       RegionTracker tracker =
-          new CompoundTracker(config, config.target, tree, fieldDeclarationStore);
+          new CompoundTracker(config, config.target, methodRegistry, fieldDeclarationStore);
       return new ParallelConflictGraphProcessor(config, runner, this, tracker);
     }
     return new SequentialConflictGraphProcessor(config, runner, this);

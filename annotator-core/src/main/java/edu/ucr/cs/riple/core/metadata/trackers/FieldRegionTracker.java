@@ -28,7 +28,7 @@ import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
-import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
@@ -44,17 +44,17 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
    * declaration.
    */
   private final FieldDeclarationStore fieldDeclarationStore;
-  /** The method declaration tree. Used to retrieve constructors for a class */
-  private final MethodDeclarationTree methodDeclarationTree;
+  /** The method registry. Used to retrieve constructors for a class */
+  private final MethodRegistry methodRegistry;
 
   public FieldRegionTracker(
       Config config,
       ModuleInfo info,
       FieldDeclarationStore fieldDeclarationStore,
-      MethodDeclarationTree methodDeclarationTree) {
+      MethodRegistry methodRegistry) {
     super(config, info.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME));
     this.fieldDeclarationStore = fieldDeclarationStore;
-    this.methodDeclarationTree = methodDeclarationTree;
+    this.methodRegistry = methodRegistry;
   }
 
   @Override
@@ -82,7 +82,7 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
     if (fieldDeclarationStore.isUninitializedField(field)) {
       // If not, add all constructors for the class.
       ans.addAll(
-          methodDeclarationTree.getConstructorsForClass(field.clazz).stream()
+          methodRegistry.getConstructorsForClass(field.clazz).stream()
               .map(onMethod -> new Region(onMethod.clazz, onMethod.method))
               .collect(Collectors.toSet()));
     }

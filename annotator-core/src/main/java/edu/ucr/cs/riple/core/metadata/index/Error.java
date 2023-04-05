@@ -27,7 +27,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
-import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnParameter;
@@ -192,12 +192,13 @@ public class Error {
    * Checks if error is resolvable and all suggested fixes must be applied to an element in target
    * module.
    *
-   * @param tree Method declaration tree to check if elements on are on target.
+   * @param registry Method registry to check if elements on are on target.
    * @return true, if error is resolvable via fixes on target module.
    */
-  public boolean isFixableOnTarget(MethodDeclarationTree tree) {
+  public boolean isFixableOnTarget(MethodRegistry registry) {
     return resolvingFixes.size() > 0
-        && this.resolvingFixes.stream().allMatch(fix -> tree.declaredInModule(fix.toLocation()));
+        && this.resolvingFixes.stream()
+            .allMatch(fix -> registry.declaredInModule(fix.toLocation()));
   }
 
   @Override
