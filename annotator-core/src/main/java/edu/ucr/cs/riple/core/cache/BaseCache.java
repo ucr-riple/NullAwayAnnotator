@@ -48,7 +48,7 @@ public abstract class BaseCache<T extends Impact, S extends Map<Location, T>>
   protected final S store;
   /** Annotator config. */
   protected final Config config;
-  /** Method declaration tree to store target module structure. */
+  /** Method registry to store records of declared methods in target module. */
   protected final MethodRegistry methodRegistry;
 
   public BaseCache(Config config, S store, MethodRegistry methodRegistry) {

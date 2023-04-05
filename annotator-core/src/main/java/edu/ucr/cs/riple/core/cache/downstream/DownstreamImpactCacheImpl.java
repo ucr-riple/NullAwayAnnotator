@@ -67,8 +67,8 @@ public class DownstreamImpactCacheImpl
    * computed once {@link #analyzeDownstreamDependencies()} is called.
    *
    * @param config Annotator config.
-   * @param registry Method declaration registry for target module used to collect public methods
-   *     with non-primitive return types to compute their impacts on downstream dependencies.
+   * @param registry Method registry for target module used to collect public methods with
+   *     non-primitive return types to compute their impacts on downstream dependencies.
    */
   public DownstreamImpactCacheImpl(Config config, MethodRegistry registry) {
     super(

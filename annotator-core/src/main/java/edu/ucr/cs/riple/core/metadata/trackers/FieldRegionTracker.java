@@ -44,7 +44,7 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
    * declaration.
    */
   private final FieldDeclarationStore fieldDeclarationStore;
-  /** The method declaration tree. Used to retrieve constructors for a class */
+  /** The method registry. Used to retrieve constructors for a class */
   private final MethodRegistry methodRegistry;
 
   public FieldRegionTracker(

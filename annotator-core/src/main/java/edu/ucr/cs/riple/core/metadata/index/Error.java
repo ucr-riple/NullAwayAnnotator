@@ -192,7 +192,7 @@ public class Error {
    * Checks if error is resolvable and all suggested fixes must be applied to an element in target
    * module.
    *
-   * @param registry Method declaration registry to check if elements on are on target.
+   * @param registry Method registry to check if elements on are on target.
    * @return true, if error is resolvable via fixes on target module.
    */
   public boolean isFixableOnTarget(MethodRegistry registry) {

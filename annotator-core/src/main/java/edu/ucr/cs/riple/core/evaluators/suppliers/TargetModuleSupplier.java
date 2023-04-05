@@ -59,7 +59,7 @@ public class TargetModuleSupplier extends AbstractSupplier {
    * @param config Annotator config instance.
    * @param targetModuleCache Target module impact cache instance.
    * @param downstreamImpactCache Downstream impact cache instance.
-   * @param registry Method declaration registry for methods in target module.
+   * @param registry Method registry for methods in target module.
    */
   public TargetModuleSupplier(
       Config config,

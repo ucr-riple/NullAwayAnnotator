@@ -40,7 +40,7 @@ public abstract class AbstractSupplier implements Supplier {
   protected final ErrorStore errorStore;
   /** Injector instance. */
   protected final AnnotationInjector injector;
-  /** Method declaration tree instance. */
+  /** Method registry instance. */
   protected final MethodRegistry methodRegistry;
   /** Depth of analysis. */
   protected final int depth;
