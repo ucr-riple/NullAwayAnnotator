@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.core.adapters;
 
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
+import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
@@ -55,9 +55,8 @@ import java.util.stream.Collectors;
  */
 public class NullAwayV3Adapter extends NullAwayAdapterBaseClass {
 
-  public NullAwayV3Adapter(
-      Config config, FieldDeclarationStore fieldDeclarationStore, NonnullStore nonnullStore) {
-    super(config, fieldDeclarationStore, nonnullStore);
+  public NullAwayV3Adapter(Config config, FieldRegistry fieldRegistry, NonnullStore nonnullStore) {
+    super(config, fieldRegistry, nonnullStore);
   }
 
   @Override
@@ -78,7 +77,7 @@ public class NullAwayV3Adapter extends NullAwayAdapterBaseClass {
   }
 
   @Override
-  public Error deserializeError(String[] values, FieldDeclarationStore store) {
+  public Error deserializeError(String[] values, FieldRegistry registry) {
     Preconditions.checkArgument(
         values.length == 12,
         "Expected 12 values to create Error instance in NullAway serialization version 2 but found: "
@@ -94,7 +93,7 @@ public class NullAwayV3Adapter extends NullAwayAdapterBaseClass {
         region,
         config.offsetHandler.getOriginalOffset(path, offset),
         Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 6, 12)),
-        fieldDeclarationStore);
+        fieldRegistry);
   }
 
   @Override

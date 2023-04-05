@@ -33,7 +33,7 @@ import java.util.Set;
  * j; and a Fix suggesting f to be {@code Nullable}, this class will replace that fix with a fix
  * suggesting f, i, and j be {@code Nullable}.)
  */
-public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
+public class FieldRegistry extends MetaData<FieldRecord> {
 
   /**
    * Output file name. It contains information about all classes existing in source code. Each line
@@ -49,12 +49,12 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
   private Multimap<String, String> uninitializedFields;
 
   /**
-   * Constructor for {@link FieldDeclarationStore}.
+   * Constructor for {@link FieldRegistry}.
    *
    * @param config Annotator config.
    * @param module Information of the target module.
    */
-  public FieldDeclarationStore(Config config, ModuleInfo module) {
+  public FieldRegistry(Config config, ModuleInfo module) {
     super(config, module.dir.resolve(FILE_NAME));
   }
 
@@ -65,12 +65,12 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
   }
 
   /**
-   * Constructor for {@link FieldDeclarationStore}. Contents are accumulated from multiple sources.
+   * Constructor for {@link FieldRegistry}. Contents are accumulated from multiple sources.
    *
    * @param config Annotator config.
    * @param modules Information of set of modules.
    */
-  public FieldDeclarationStore(Config config, ImmutableSet<ModuleInfo> modules) {
+  public FieldRegistry(Config config, ImmutableSet<ModuleInfo> modules) {
     super(
         config,
         modules.stream()
@@ -79,7 +79,7 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
   }
 
   @Override
-  protected FieldDeclarationInfo addNodeByLine(String[] values) {
+  protected FieldRecord addNodeByLine(String[] values) {
     // Class flat name.
     String clazz = values[0];
     // Path to class.
@@ -94,7 +94,7 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
         System.err.println(notFound.getMessage());
         return null;
       }
-      FieldDeclarationInfo info = new FieldDeclarationInfo(path, clazz);
+      FieldRecord info = new FieldRecord(path, clazz);
       members.forEach(
           bodyDeclaration ->
               bodyDeclaration.ifFieldDeclaration(
@@ -134,8 +134,8 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
    */
   public ImmutableSet<String> getInLineMultipleFieldDeclarationsOnField(
       String clazz, Set<String> fields) {
-    FieldDeclarationInfo candidate =
-        findNodeWithHashHint(node -> node.clazz.equals(clazz), FieldDeclarationInfo.hash(clazz));
+    FieldRecord candidate =
+        findNodeWithHashHint(node -> node.clazz.equals(clazz), FieldRecord.hash(clazz));
     if (candidate == null) {
       // No inline multiple field declarations.
       return ImmutableSet.copyOf(fields);
@@ -168,8 +168,8 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
    * @return {@link OnField} instance targeting the passed field and class.
    */
   public OnField getLocationOnField(String clazz, String field) {
-    FieldDeclarationInfo candidate =
-        findNodeWithHashHint(node -> node.clazz.equals(clazz), FieldDeclarationInfo.hash(clazz));
+    FieldRecord candidate =
+        findNodeWithHashHint(node -> node.clazz.equals(clazz), FieldRecord.hash(clazz));
     Set<String> fieldNames = Sets.newHashSet(field);
     if (candidate == null) {
       // field is on byte code.
@@ -187,8 +187,8 @@ public class FieldDeclarationStore extends MetaData<FieldDeclarationInfo> {
    *     classes flat name.
    */
   public OnClass getLocationOnClass(String clazz) {
-    FieldDeclarationInfo candidate =
-        findNodeWithHashHint(node -> node.clazz.equals(clazz), FieldDeclarationInfo.hash(clazz));
+    FieldRecord candidate =
+        findNodeWithHashHint(node -> node.clazz.equals(clazz), FieldRecord.hash(clazz));
     if (candidate == null) {
       // class not observed in source code.
       return null;

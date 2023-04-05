@@ -27,7 +27,7 @@ package edu.ucr.cs.riple.core.metadata.trackers;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
-import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
+import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
@@ -43,17 +43,14 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
    * Store for field declarations. This is used to determine if a field is initialized at
    * declaration.
    */
-  private final FieldDeclarationStore fieldDeclarationStore;
+  private final FieldRegistry fieldRegistry;
   /** The method registry. Used to retrieve constructors for a class */
   private final MethodRegistry methodRegistry;
 
   public FieldRegionTracker(
-      Config config,
-      ModuleInfo info,
-      FieldDeclarationStore fieldDeclarationStore,
-      MethodRegistry methodRegistry) {
+      Config config, ModuleInfo info, FieldRegistry fieldRegistry, MethodRegistry methodRegistry) {
     super(config, info.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME));
-    this.fieldDeclarationStore = fieldDeclarationStore;
+    this.fieldRegistry = fieldRegistry;
     this.methodRegistry = methodRegistry;
   }
 
@@ -79,7 +76,7 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
             .collect(Collectors.toSet());
     ans.addAll(config.getAdapter().getFieldRegionScope(field));
     // Check if field is initialized at declaration.
-    if (fieldDeclarationStore.isUninitializedField(field)) {
+    if (fieldRegistry.isUninitializedField(field)) {
       // If not, add all constructors for the class.
       ans.addAll(
           methodRegistry.getConstructorsForClass(field.clazz).stream()
