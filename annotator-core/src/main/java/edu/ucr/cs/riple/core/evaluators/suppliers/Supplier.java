@@ -28,7 +28,7 @@ import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.cache.TargetModuleCache;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.evaluators.AbstractEvaluator;
-import edu.ucr.cs.riple.core.evaluators.graphprocessor.ConflictGraphProcessor;
+import edu.ucr.cs.riple.core.evaluators.graph.processors.ConflictGraphProcessor;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.ErrorStore;

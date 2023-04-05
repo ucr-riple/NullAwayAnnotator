@@ -22,9 +22,9 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.evaluators.graphprocessor;
+package edu.ucr.cs.riple.core.evaluators.graph.processors;
 
-import edu.ucr.cs.riple.core.metadata.graph.ConflictGraph;
+import edu.ucr.cs.riple.core.evaluators.graph.ConflictGraph;
 
 /**
  * Interface for conflict-graph processors. Subclasses of this type, can compute the impacts of a

@@ -22,11 +22,11 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.evaluators.graphprocessor;
+package edu.ucr.cs.riple.core.evaluators.graph.processors;
 
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.evaluators.graph.ConflictGraph;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
-import edu.ucr.cs.riple.core.metadata.graph.ConflictGraph;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.Result;
 import edu.ucr.cs.riple.core.util.Utility;
