@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 /** Base class for conflict graph processors. */
 public abstract class AbstractConflictGraphProcessor implements ConflictGraphProcessor {
 
-  /** Method declaration tree. */
+  /** Method registry used to keep records of declared methods in target module. */
   protected final MethodRegistry methodRegistry;
   /** Injector used in the processor to inject / remove fixes. */
   protected final AnnotationInjector injector;

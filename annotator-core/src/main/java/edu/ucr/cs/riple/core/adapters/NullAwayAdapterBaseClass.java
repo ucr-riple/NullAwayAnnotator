@@ -47,8 +47,8 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
   protected final Config config;
 
   /**
-   * Field declaration store instance, used to generate fixes for uninitialized fields based on
-   * error message for initializers.
+   * Field registry instance, used to generate fixes for uninitialized fields based on error message
+   * for initializers.
    */
   protected final FieldRegistry fieldRegistry;
 
@@ -176,12 +176,12 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
    * statement.
    *
    * @param onField Location of the field.
-   * @param store Field Declaration Store instance.
+   * @param registry Field registry instance.
    * @return The updated given location.
    */
-  private static OnField extendVariableList(OnField onField, FieldRegistry store) {
+  private static OnField extendVariableList(OnField onField, FieldRegistry registry) {
     Set<String> variables =
-        store.getInLineMultipleFieldDeclarationsOnField(onField.clazz, onField.variables);
+        registry.getInLineMultipleFieldDeclarationsOnField(onField.clazz, onField.variables);
     onField.variables.addAll(variables);
     return onField;
   }

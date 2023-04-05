@@ -140,7 +140,7 @@ public class Node {
    * @param fixesInOneRound All fixes applied simultaneously to the source code.
    * @param triggeredFixesFromDownstreamErrors Triggered fixes from downstream dependencies.
    * @param triggeredErrors Triggered Errors collected from impacted regions.
-   * @param registry Method declaration tree instance.
+   * @param registry Method registry instance.
    */
   public void updateStatus(
       int localEffect,

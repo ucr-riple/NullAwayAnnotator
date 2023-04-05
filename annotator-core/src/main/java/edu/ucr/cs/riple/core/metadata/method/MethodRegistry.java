@@ -131,7 +131,8 @@ public class MethodRegistry extends MetaData<MethodRecord> {
    *
    * @param method Method signature of input.
    * @param clazz Fully qualified name of the input method.
-   * @param recursive If ture, it will travers the declaration tree recursively.
+   * @param recursive If ture, it will traverse the registry recursively will include all overriding
+   *     methods.
    * @return ImmutableSet of overriding methods.
    */
   public ImmutableSet<MethodRecord> getSubMethods(String method, String clazz, boolean recursive) {

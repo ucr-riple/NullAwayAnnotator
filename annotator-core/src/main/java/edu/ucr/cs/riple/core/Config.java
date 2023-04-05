@@ -561,7 +561,7 @@ public class Config {
   /**
    * Initializes NullAway serialization adapter according to the serialized version.
    *
-   * @param fieldRegistry Field declaration store, used to create fixes for initialization errors.
+   * @param fieldRegistry Field registry, used to create fixes for initialization errors.
    * @param nonnullStore Nonnull store used to prevent annotator from generating fixes for elements
    *     with {@code @Nonnull} annotations.
    */
