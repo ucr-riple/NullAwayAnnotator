@@ -25,13 +25,13 @@
 package edu.ucr.cs.riple.core.evaluators.graph.processors;
 
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.evaluators.graph.Node;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Set;
@@ -40,8 +40,6 @@ import java.util.stream.Collectors;
 /** Base class for conflict graph processors. */
 public abstract class AbstractConflictGraphProcessor implements ConflictGraphProcessor {
 
-  /** Method registry used to keep records of declared methods in target module. */
-  protected final MethodRegistry methodRegistry;
   /** Injector used in the processor to inject / remove fixes. */
   protected final AnnotationInjector injector;
   /** Error store instance to store state of fixes before and after of injections. */
@@ -53,9 +51,11 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
   /** Handler to re-run compiler. */
   protected final CompilerRunner compilerRunner;
 
+  Context context;
+
   public AbstractConflictGraphProcessor(Config config, CompilerRunner runner, Supplier supplier) {
     this.config = config;
-    this.methodRegistry = supplier.getMethodRegistry();
+    this.context = supplier.getContext();
     this.injector = supplier.getInjector();
     this.downstreamImpactCache = supplier.getDownstreamImpactCache();
     this.errorStore = supplier.getErrorStore();
@@ -75,7 +75,7 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
             error ->
                 error.isSingleFix()
                     && error.toResolvingLocation().isOnParameter()
-                    && error.isFixableOnTarget(methodRegistry)
+                    && error.isFixableOnTarget(context)
                     && !currentLocationsTargetedByTree.contains(error.toResolvingLocation()))
         .map(
             error ->

@@ -38,11 +38,8 @@ import edu.ucr.cs.riple.core.evaluators.suppliers.TargetModuleSupplier;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
 import edu.ucr.cs.riple.core.metadata.field.FieldInitializationStore;
-import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
-import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
@@ -64,12 +61,8 @@ public class Annotator {
   private final AnnotationInjector injector;
   /** Annotator config. */
   private final Config config;
-
   /** Reports cache. */
   public final ReportCache cache;
-
-  private FieldRegistry fieldRegistry;
-  private MethodRegistry methodRegistry;
 
   public Annotator(Config config) {
     this.config = config;
@@ -101,10 +94,8 @@ public class Annotator {
     Utility.setScannerCheckerActivation(config, config.target, true);
     System.out.println("Making the first build...");
     Utility.buildTarget(config, true);
-    fieldRegistry = new FieldRegistry(config, config.target);
-    methodRegistry = new MethodRegistry(config);
-    NonnullStore nonnullStore = new NonnullStore(config);
-    config.initializeAdapter(fieldRegistry, nonnullStore);
+    config.targetModuleContext = new Context(config, config.target, config.buildCommand);
+    config.initializeAdapter();
     Set<OnField> uninitializedFields =
         Utility.readFixesFromOutputDirectory(config, null).stream()
             .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
@@ -129,10 +120,10 @@ public class Annotator {
     // iteration.
     DownstreamImpactCache downstreamImpactCache =
         config.downStreamDependenciesAnalysisActivated
-            ? new DownstreamImpactCacheImpl(config, methodRegistry)
+            ? new DownstreamImpactCacheImpl(config, config.downstreamDepenedenciesContext)
             : new VoidDownstreamImpactCache();
     downstreamImpactCache.analyzeDownstreamDependencies();
-    TargetModuleCache targetModuleCache = new TargetModuleCache(config, methodRegistry);
+    TargetModuleCache targetModuleCache = new TargetModuleCache(config);
 
     if (config.inferenceActivated) {
       // Outer loop starts.
@@ -271,7 +262,10 @@ public class Annotator {
                       // @SuppressWarnings("NullAway.Init"). We add @NullUnmarked on constructors
                       // only for errors in the body of the constructor.
                       !error.isInitializationError()) {
-                    return methodRegistry.findNode(error.encMember(), error.encClass());
+                    return config
+                        .targetModuleContext
+                        .getMethodRegistry()
+                        .findNode(error.encMember(), error.encClass());
                   }
                   // For methods invoked in an initialization region, where the error is that
                   // `@Nullable` is being passed as an argument, we add a `@NullUnmarked` annotation
@@ -280,8 +274,10 @@ public class Annotator {
                       && error.isSingleFix()
                       && error.toResolvingLocation().isOnParameter()) {
                     OnParameter nullableParameter = error.toResolvingParameter();
-                    return methodRegistry.findNode(
-                        nullableParameter.method, nullableParameter.clazz);
+                    return config
+                        .targetModuleContext
+                        .getMethodRegistry()
+                        .findNode(nullableParameter.method, nullableParameter.clazz);
                   }
                   return null;
                 })
@@ -301,7 +297,10 @@ public class Annotator {
             .map(
                 error ->
                     new AddMarkerAnnotation(
-                        fieldRegistry.getLocationOnClass(error.getRegion().clazz),
+                        config
+                            .targetModuleContext
+                            .getFieldRegistry()
+                            .getLocationOnClass(error.getRegion().clazz),
                         config.nullUnMarkedAnnotation))
             .collect(Collectors.toSet()));
     injector.injectAnnotations(nullUnMarkedAnnotations);
@@ -325,8 +324,10 @@ public class Annotator {
                 })
             .map(
                 error ->
-                    fieldRegistry.getLocationOnField(
-                        error.getRegion().clazz, error.getRegion().member))
+                    config
+                        .targetModuleContext
+                        .getFieldRegistry()
+                        .getLocationOnField(error.getRegion().clazz, error.getRegion().member))
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
 
@@ -367,7 +368,10 @@ public class Annotator {
             .map(
                 error ->
                     new AddMarkerAnnotation(
-                        fieldRegistry.getLocationOnClass(error.getRegion().clazz),
+                        config
+                            .targetModuleContext
+                            .getFieldRegistry()
+                            .getLocationOnClass(error.getRegion().clazz),
                         config.nullUnMarkedAnnotation))
             .collect(Collectors.toSet());
     injector.injectAnnotations(nullUnMarkedAnnotations);

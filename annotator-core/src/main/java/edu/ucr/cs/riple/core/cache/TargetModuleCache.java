@@ -25,7 +25,6 @@
 package edu.ucr.cs.riple.core.cache;
 
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.HashMap;
 import java.util.Set;
@@ -36,8 +35,8 @@ import java.util.Set;
  */
 public class TargetModuleCache extends BaseCache<Impact, HashMap<Location, Impact>> {
 
-  public TargetModuleCache(Config config, MethodRegistry registry) {
-    super(config, new HashMap<>(), registry);
+  public TargetModuleCache(Config config) {
+    super(config, new HashMap<>());
   }
 
   /**

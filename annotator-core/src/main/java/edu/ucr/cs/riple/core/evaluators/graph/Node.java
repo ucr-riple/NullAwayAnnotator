@@ -26,11 +26,11 @@ package edu.ucr.cs.riple.core.evaluators.graph;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -147,7 +147,7 @@ public class Node {
       Set<Fix> fixesInOneRound,
       Collection<Fix> triggeredFixesFromDownstreamErrors,
       Collection<Error> triggeredErrors,
-      MethodRegistry registry) {
+      Context context) {
     // Update list of triggered fixes on downstream.
     this.triggeredFixesFromDownstreamErrors =
         ImmutableSet.copyOf(triggeredFixesFromDownstreamErrors);
@@ -162,7 +162,9 @@ public class Node {
         .map(
             fix -> {
               OnMethod onMethod = fix.toMethod();
-              return registry.getClosestSuperMethod(onMethod.method, onMethod.clazz);
+              return context
+                  .getMethodRegistry()
+                  .getClosestSuperMethod(onMethod.method, onMethod.clazz);
             }) // Collection of super methods of all fixes in tree.
         .filter(
             node ->

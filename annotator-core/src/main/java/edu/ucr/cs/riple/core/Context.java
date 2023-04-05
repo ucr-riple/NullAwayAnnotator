@@ -8,6 +8,7 @@ import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
 import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.core.util.FixSerializationConfig;
 import edu.ucr.cs.riple.core.util.Utility;
+import edu.ucr.cs.riple.injector.location.OnParameter;
 
 public class Context {
 
@@ -52,5 +53,9 @@ public class Context {
 
   public ImmutableSet<ModuleInfo> getModules() {
     return modules;
+  }
+
+  public boolean declaredInModule(OnParameter resolvingParameter) {
+    return methodRegistry.declaredInModule(resolvingParameter);
   }
 }

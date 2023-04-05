@@ -29,7 +29,6 @@ import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
-import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 
 /** Base class for all instances of {@link Supplier}. */
 public abstract class AbstractSupplier implements Supplier {
@@ -84,11 +83,6 @@ public abstract class AbstractSupplier implements Supplier {
   @Override
   public AnnotationInjector getInjector() {
     return injector;
-  }
-
-  @Override
-  public MethodRegistry getMethodRegistry() {
-    return context.getMethodRegistry();
   }
 
   @Override

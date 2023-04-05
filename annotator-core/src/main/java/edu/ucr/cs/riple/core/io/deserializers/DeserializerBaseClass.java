@@ -27,18 +27,11 @@ package edu.ucr.cs.riple.core.io.deserializers;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
-import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
-import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
-import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
-import java.util.Arrays;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
 /** Base class for all NullAway serialization deserializers. */
 public abstract class DeserializerBaseClass implements CheckerDeserializer {
@@ -54,81 +47,12 @@ public abstract class DeserializerBaseClass implements CheckerDeserializer {
   }
 
   /**
-   * Extracts uninitialized field names from the given error message.
-   *
-   * @param errorMessage Error message.
-   * @return Set of uninitialized field names.
-   */
-  private Set<String> extractUninitializedFieldNames(String errorMessage) {
-    String prefix = "initializer method does not guarantee @NonNull field";
-    int begin = prefix.length();
-    if (errorMessage.charAt(begin) == 's') {
-      begin += 1;
-    }
-    int end = errorMessage.indexOf(" is initialized along");
-    end = end == -1 ? errorMessage.indexOf(" are initialized along ") : end;
-    if (end == -1) {
-      throw new RuntimeException(
-          "Error message for initializer error not recognized in version "
-              + getVersionNumber()
-              + ": "
-              + errorMessage);
-    }
-    String[] fieldsData = errorMessage.substring(begin, end).split(",");
-    Set<String> fields =
-        Arrays.stream(fieldsData)
-            // NullAway serializes line number right after a field name starting with an open
-            // parentheses. (e.g. foo (line z)). This approach of extracting field names is
-            // extremely dependent on the format of NullAway error messages. Should be watched
-            // carefully and updated if the format is changed by NullAway (maybe regex?).
-            .map(s -> s.substring(0, s.indexOf("(")).trim())
-            .collect(Collectors.toSet());
-    if (fields.size() == 0) {
-      throw new RuntimeException(
-          "Could not extract any uninitialized field in message for initializer error in version "
-              + getVersionNumber()
-              + ": "
-              + errorMessage);
-    }
-    return fields;
-  }
-
-  /**
-   * Generates a set of fixes for uninitialized fields from the given error message.
-   *
-   * @param errorMessage Given error message.
-   * @param region Region where the error is reported.
-   * @return Set of fixes for uninitialized fields to resolve the given error.
-   */
-  protected ImmutableSet<Fix> generateFixesForUninitializedFields(
-      String errorMessage, Region region, FieldRegistry registry) {
-    return extractUninitializedFieldNames(errorMessage).stream()
-        .map(
-            field -> {
-              OnField locationOnField = registry.getLocationOnField(region.clazz, field);
-              if (locationOnField == null) {
-                return null;
-              }
-              return new Fix(
-                  new AddMarkerAnnotation(
-                      extendVariableList(locationOnField, registry), config.nullableAnnot),
-                  Error.METHOD_INITIALIZER_ERROR,
-                  true);
-            })
-        .filter(Objects::nonNull)
-        .collect(ImmutableSet.toImmutableSet());
-  }
-
-  /**
    * Creates an {@link Error} instance.
    *
    * @param errorType Error type.
    * @param errorMessage Error message.
    * @param region Region where the error is reported,
    * @param offset offset of program point in original version where error is reported.
-   * @param nonnullTarget If {@code @Nonnull}, this error involved a pseudo-assignment of
-   *     a @Nullable expression into a @NonNull target, and this field is the Symbol for that
-   *     target.
    * @return The corresponding error.
    */
   protected Error createError(
@@ -136,29 +60,13 @@ public abstract class DeserializerBaseClass implements CheckerDeserializer {
       String errorMessage,
       Region region,
       int offset,
-      @Nullable Location nonnullTarget,
+      ImmutableSet<Fix> resolvingFixes,
       Context context) {
-    if (nonnullTarget == null && errorType.equals(Error.METHOD_INITIALIZER_ERROR)) {
-      ImmutableSet<Fix> resolvingFixes =
-          generateFixesForUninitializedFields(errorMessage, region, context.getFieldRegistry())
-              .stream()
-              .filter(
-                  fix -> !context.getNonnullStore().hasExplicitNonnullAnnotation(fix.toLocation()))
-              .collect(ImmutableSet.toImmutableSet());
-      return new Error(errorType, errorMessage, region, offset, resolvingFixes);
-    }
-    if (nonnullTarget != null && nonnullTarget.isOnField()) {
-      nonnullTarget = extendVariableList(nonnullTarget.toField(), context.getFieldRegistry());
-    }
-    Fix resolvingFix =
-        nonnullTarget == null
-            ? null
-            : (context.getNonnullStore().hasExplicitNonnullAnnotation(nonnullTarget)
-                // skip if element has explicit nonnull annotation.
-                ? null
-                : new Fix(
-                    new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot), errorType, true));
-    return new Error(errorType, errorMessage, region, offset, resolvingFix);
+    ImmutableSet<Fix> fixes =
+        resolvingFixes.stream()
+            .filter(f -> !context.getNonnullStore().hasExplicitNonnullAnnotation(f.toLocation()))
+            .collect(ImmutableSet.toImmutableSet());
+    return new Error(errorType, errorMessage, region, offset, fixes);
   }
 
   /**
@@ -169,9 +77,11 @@ public abstract class DeserializerBaseClass implements CheckerDeserializer {
    * @param registry Field registry instance.
    * @return The updated given location.
    */
-  protected static OnField extendVariableList(OnField onField, FieldRegistry registry) {
+  protected OnField extendVariableList(OnField onField) {
     Set<String> variables =
-        registry.getInLineMultipleFieldDeclarationsOnField(onField.clazz, onField.variables);
+        context
+            .getFieldRegistry()
+            .getInLineMultipleFieldDeclarationsOnField(onField.clazz, onField.variables);
     onField.variables.addAll(variables);
     return onField;
   }

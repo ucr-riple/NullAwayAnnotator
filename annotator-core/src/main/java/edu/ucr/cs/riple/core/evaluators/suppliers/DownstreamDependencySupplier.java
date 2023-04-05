@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.evaluators.suppliers;
 
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.cache.TargetModuleCache;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.cache.downstream.VoidDownstreamImpactCache;
@@ -82,5 +83,10 @@ public class DownstreamDependencySupplier extends AbstractSupplier {
   public TargetModuleCache getTargetModuleCache() {
     throw new RuntimeException(
         "Caches are used to retrieve impacts for depths more than 1. Downstream dependency analysis happens only at depth 1.");
+  }
+
+  @Override
+  public Context getContext() {
+    return config.downstreamDepenedenciesContext;
   }
 }

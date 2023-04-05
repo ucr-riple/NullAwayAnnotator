@@ -30,8 +30,6 @@ import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.io.deserializers.CheckerDeserializer;
 import edu.ucr.cs.riple.core.io.deserializers.nullaway.NullAwayV3Deserializer;
 import edu.ucr.cs.riple.core.log.Log;
-import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
-import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import edu.ucr.cs.riple.injector.offsets.OffsetChange;
@@ -568,7 +566,7 @@ public class Config {
    * @param nonnullStore Nonnull store used to prevent annotator from generating fixes for elements
    *     with {@code @Nonnull} annotations.
    */
-  public void initializeAdapter(FieldRegistry fieldRegistry, NonnullStore nonnullStore) {
+  public void initializeAdapter() {
     if (adapter != null) {
       // adapter is already initialized.
       return;

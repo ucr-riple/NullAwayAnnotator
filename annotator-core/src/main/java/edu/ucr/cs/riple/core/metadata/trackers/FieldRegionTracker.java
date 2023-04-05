@@ -25,10 +25,9 @@
 package edu.ucr.cs.riple.core.metadata.trackers;
 
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
-import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
-import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
@@ -39,19 +38,11 @@ import java.util.stream.Collectors;
 /** Tracker for Fields. */
 public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
 
-  /**
-   * Store for field declarations. This is used to determine if a field is initialized at
-   * declaration.
-   */
-  private final FieldRegistry fieldRegistry;
-  /** The method registry. Used to retrieve constructors for a class */
-  private final MethodRegistry methodRegistry;
+  private final Context context;
 
-  public FieldRegionTracker(
-      Config config, ModuleInfo info, FieldRegistry fieldRegistry, MethodRegistry methodRegistry) {
+  public FieldRegionTracker(Config config, ModuleInfo info, Context context) {
     super(config, info.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME));
-    this.fieldRegistry = fieldRegistry;
-    this.methodRegistry = methodRegistry;
+    this.context = context;
   }
 
   @Override
@@ -80,10 +71,10 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
             .map(fieldName -> new Region(field.clazz, fieldName))
             .collect(Collectors.toSet()));
     // Check if field is initialized at declaration.
-    if (fieldRegistry.isUninitializedField(field)) {
+    if (context.getFieldRegistry().isUninitializedField(field)) {
       // If not, add all constructors for the class.
       ans.addAll(
-          methodRegistry.getConstructorsForClass(field.clazz).stream()
+          context.getMethodRegistry().getConstructorsForClass(field.clazz).stream()
               .map(onMethod -> new Region(onMethod.clazz, onMethod.method))
               .collect(Collectors.toSet()));
     }
