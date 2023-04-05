@@ -34,7 +34,6 @@ import edu.ucr.cs.riple.core.evaluators.graph.processors.ParallelConflictGraphPr
 import edu.ucr.cs.riple.core.evaluators.graph.processors.SequentialConflictGraphProcessor;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.VirtualInjector;
-import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
 
@@ -51,9 +50,8 @@ public class DownstreamDependencySupplier extends AbstractSupplier {
 
   private final RegionTracker tracker;
 
-  public DownstreamDependencySupplier(
-      Config config, RegionTracker tracker, MethodRegistry registry) {
-    super(config.downstreamInfo, config, registry);
+  public DownstreamDependencySupplier(Config config, RegionTracker tracker) {
+    super(config, null);
     this.tracker = tracker;
   }
 

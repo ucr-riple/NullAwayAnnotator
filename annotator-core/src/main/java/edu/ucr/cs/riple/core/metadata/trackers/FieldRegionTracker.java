@@ -74,7 +74,11 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
                 TrackerNode.hash(field.clazz))
             .map(trackerNode -> trackerNode.region)
             .collect(Collectors.toSet());
-    ans.addAll(config.getAdapter().getFieldRegionScope(field));
+    // Add each a region for each field variable declared in the declaration statement.
+    ans.addAll(
+        field.variables.stream()
+            .map(fieldName -> new Region(field.clazz, fieldName))
+            .collect(Collectors.toSet()));
     // Check if field is initialized at declaration.
     if (fieldRegistry.isUninitializedField(field)) {
       // If not, add all constructors for the class.

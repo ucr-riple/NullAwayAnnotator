@@ -24,7 +24,9 @@
 
 package edu.ucr.cs.riple.core.metadata.index;
 
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.scanner.Serializer;
@@ -37,7 +39,15 @@ import edu.ucr.cs.riple.scanner.Serializer;
 public class NonnullStore extends MetaData<Location> {
 
   public NonnullStore(Config config) {
-    super(config, config.target.dir.resolve(Serializer.NON_NULL_ELEMENTS_FILE_NAME));
+    this(config, ImmutableSet.of(config.target));
+  }
+
+  public NonnullStore(Config config, ImmutableSet<ModuleInfo> modules) {
+    super(
+        config,
+        modules.stream()
+            .map(moduleInfo -> moduleInfo.dir.resolve(Serializer.NON_NULL_ELEMENTS_FILE_NAME))
+            .collect(ImmutableSet.toImmutableSet()));
   }
 
   @Override

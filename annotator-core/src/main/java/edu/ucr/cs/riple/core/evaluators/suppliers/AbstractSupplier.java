@@ -24,11 +24,9 @@
 
 package edu.ucr.cs.riple.core.evaluators.suppliers;
 
-import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.ModuleInfo;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
-import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
 import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
@@ -40,21 +38,17 @@ public abstract class AbstractSupplier implements Supplier {
   protected final ErrorStore errorStore;
   /** Injector instance. */
   protected final AnnotationInjector injector;
-  /** Method registry instance. */
-  protected final MethodRegistry methodRegistry;
+
+  protected final Context context;
   /** Depth of analysis. */
   protected final int depth;
-  /** Field declaration analysis to detect fixes on inline multiple field declaration statements. */
-  protected final FieldRegistry fieldRegistry;
   /** Annotator config. */
   protected final Config config;
 
-  public AbstractSupplier(
-      ImmutableSet<ModuleInfo> modules, Config config, MethodRegistry registry) {
+  public AbstractSupplier(Config config, Context context) {
     this.config = config;
-    this.fieldRegistry = new FieldRegistry(config, modules);
-    this.methodRegistry = registry;
-    this.errorStore = initializeErrorStore(modules);
+    this.context = context;
+    this.errorStore = initializeErrorStore();
     this.injector = initializeInjector();
     this.depth = initializeDepth();
   }
@@ -76,15 +70,10 @@ public abstract class AbstractSupplier implements Supplier {
   /**
    * Initializer for error store.
    *
-   * @param modules Set of modules involved in the analysis.
    * @return {@link ErrorStore} of {@link Error} instances.
    */
-  protected ErrorStore initializeErrorStore(ImmutableSet<ModuleInfo> modules) {
-    return new ErrorStore(
-        modules.stream()
-            .map(info -> info.dir.resolve("errors.tsv"))
-            .collect(ImmutableSet.toImmutableSet()),
-        Error.factory(config, fieldRegistry));
+  protected ErrorStore initializeErrorStore() {
+    return new ErrorStore(context, config.getAdapter());
   }
 
   @Override
@@ -99,7 +88,7 @@ public abstract class AbstractSupplier implements Supplier {
 
   @Override
   public MethodRegistry getMethodRegistry() {
-    return methodRegistry;
+    return context.getMethodRegistry();
   }
 
   @Override

@@ -111,8 +111,7 @@ public class DownstreamImpactCacheImpl
                         false))
             .collect(ImmutableSet.toImmutableSet());
     DownstreamImpactEvaluator evaluator =
-        new DownstreamImpactEvaluator(
-            new DownstreamDependencySupplier(config, tracker, methodRegistry));
+        new DownstreamImpactEvaluator(new DownstreamDependencySupplier(config, tracker));
     ImmutableSet<Report> reports = evaluator.evaluate(fixes);
     // Update method status based on the results.
     this.store

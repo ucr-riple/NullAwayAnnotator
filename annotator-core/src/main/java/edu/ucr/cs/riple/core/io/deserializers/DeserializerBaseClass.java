@@ -22,14 +22,14 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.adapters;
+package edu.ucr.cs.riple.core.io.deserializers;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -40,29 +40,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
-/** Base class for all NullAway serialization adapters. */
-public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter {
+/** Base class for all NullAway serialization deserializers. */
+public abstract class DeserializerBaseClass implements CheckerDeserializer {
 
   /** Annotator config. */
   protected final Config config;
+  /** Module context. */
+  protected final Context context;
 
-  /**
-   * Field registry instance, used to generate fixes for uninitialized fields based on error message
-   * for initializers.
-   */
-  protected final FieldRegistry fieldRegistry;
-
-  /**
-   * Nonnull store used to prevent Annotator from generating fixes for elements with explicit
-   * {@code @Nonnull} annotations.
-   */
-  private final NonnullStore nonnullStore;
-
-  public NullAwayAdapterBaseClass(
-      Config config, FieldRegistry fieldRegistry, NonnullStore nonnullStore) {
+  public DeserializerBaseClass(Config config, Context context) {
     this.config = config;
-    this.fieldRegistry = fieldRegistry;
-    this.nonnullStore = nonnullStore;
+    this.context = context;
   }
 
   /**
@@ -149,21 +137,23 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
       Region region,
       int offset,
       @Nullable Location nonnullTarget,
-      FieldRegistry registry) {
+      Context context) {
     if (nonnullTarget == null && errorType.equals(Error.METHOD_INITIALIZER_ERROR)) {
       ImmutableSet<Fix> resolvingFixes =
-          generateFixesForUninitializedFields(errorMessage, region, registry).stream()
-              .filter(fix -> !nonnullStore.hasExplicitNonnullAnnotation(fix.toLocation()))
+          generateFixesForUninitializedFields(errorMessage, region, context.getFieldRegistry())
+              .stream()
+              .filter(
+                  fix -> !context.getNonnullStore().hasExplicitNonnullAnnotation(fix.toLocation()))
               .collect(ImmutableSet.toImmutableSet());
       return new Error(errorType, errorMessage, region, offset, resolvingFixes);
     }
     if (nonnullTarget != null && nonnullTarget.isOnField()) {
-      nonnullTarget = extendVariableList(nonnullTarget.toField(), registry);
+      nonnullTarget = extendVariableList(nonnullTarget.toField(), context.getFieldRegistry());
     }
     Fix resolvingFix =
         nonnullTarget == null
             ? null
-            : (nonnullStore.hasExplicitNonnullAnnotation(nonnullTarget)
+            : (context.getNonnullStore().hasExplicitNonnullAnnotation(nonnullTarget)
                 // skip if element has explicit nonnull annotation.
                 ? null
                 : new Fix(
@@ -179,7 +169,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
    * @param registry Field registry instance.
    * @return The updated given location.
    */
-  private static OnField extendVariableList(OnField onField, FieldRegistry registry) {
+  protected static OnField extendVariableList(OnField onField, FieldRegistry registry) {
     Set<String> variables =
         registry.getInLineMultipleFieldDeclarationsOnField(onField.clazz, onField.variables);
     onField.variables.addAll(variables);

@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -53,7 +54,15 @@ public class MethodRegistry extends MetaData<MethodRecord> {
   private Set<String> declaredClasses;
 
   public MethodRegistry(Config config) {
-    super(config, config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
+    this(config, ImmutableSet.of(config.target));
+  }
+
+  public MethodRegistry(Config config, ImmutableSet<ModuleInfo> modules) {
+    super(
+        config,
+        modules.stream()
+            .map(moduleInfo -> moduleInfo.dir.resolve(Serializer.METHOD_INFO_FILE_NAME))
+            .collect(ImmutableSet.toImmutableSet()));
   }
 
   @Override

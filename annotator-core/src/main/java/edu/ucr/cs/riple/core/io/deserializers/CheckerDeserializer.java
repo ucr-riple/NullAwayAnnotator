@@ -22,20 +22,18 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.adapters;
+package edu.ucr.cs.riple.core.io.deserializers;
 
-import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.TrackerNode;
-import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Set;
 
 /**
  * Responsible for performing tasks related to NullAway / Type Annotator Scanner serialization
  * features.
  */
-public interface NullAwayVersionAdapter {
+public interface CheckerDeserializer {
 
   /**
    * Deserializes values produced by NullAway in a tsv file and creates a corresponding {@link
@@ -46,7 +44,7 @@ public interface NullAwayVersionAdapter {
    *     deserialized error.
    * @return Corresponding Error instance with the passed values.
    */
-  Error deserializeError(String[] values, FieldRegistry registry);
+  Set<Error> deserializeErrors(Context context);
 
   /**
    * Deserializes values produced by Type Annotator Scanner in a tsv file and creates a
@@ -56,15 +54,6 @@ public interface NullAwayVersionAdapter {
    * @return Corresponding TrackerNode instance with the passed values.
    */
   TrackerNode deserializeTrackerNode(String[] values);
-
-  /**
-   * Returns a set of regions enclosed by a field. Returns a set since there can multiple inline
-   * field declarations.
-   *
-   * @param onField The target field.
-   * @return Set of regions enclosed by the passed location.
-   */
-  Set<Region> getFieldRegionScope(OnField onField);
 
   /**
    * Returns the serialization version number which this adapter is associated with.

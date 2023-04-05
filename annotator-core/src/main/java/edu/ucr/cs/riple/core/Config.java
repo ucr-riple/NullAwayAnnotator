@@ -27,8 +27,8 @@ package edu.ucr.cs.riple.core;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import edu.ucr.cs.riple.core.adapters.NullAwayV3Adapter;
-import edu.ucr.cs.riple.core.adapters.NullAwayVersionAdapter;
+import edu.ucr.cs.riple.core.io.deserializers.CheckerDeserializer;
+import edu.ucr.cs.riple.core.io.deserializers.nullaway.NullAwayV3Deserializer;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
@@ -157,13 +157,16 @@ public class Config {
    * This adapter is initialized lazily as it requires build of target to serialize its using
    * NullAway serialization version.
    */
-  private NullAwayVersionAdapter adapter;
+  private CheckerDeserializer adapter;
   /** Handler for computing the original offset of reported errors with existing changes. */
   public final OffsetHandler offsetHandler;
   /** Controls if offsets in error instance should be processed. */
   public boolean offsetHandlingIsActivated;
 
   public final ImmutableSet<SourceType> generatedCodeDetectors;
+
+  public Context targetModuleContext;
+  public Context downstreamDepenedenciesContext;
 
   /**
    * Builds config from command line arguments.
@@ -590,7 +593,7 @@ public class Config {
           throw new RuntimeException(
               "This annotator version does not support serialization version 2, please upgrade NullAway to 0.10.10+. Serialization version v2 is skipped and was used for an alpha version of the Annotator.");
         case 3:
-          this.adapter = new NullAwayV3Adapter(this, fieldRegistry, nonnullStore);
+          this.adapter = new NullAwayV3Deserializer(null, new Context(null, null, null));
           this.offsetHandlingIsActivated = true;
           break;
         default:
@@ -607,7 +610,7 @@ public class Config {
    *
    * @return adapter.
    */
-  public NullAwayVersionAdapter getAdapter() {
+  public CheckerDeserializer getAdapter() {
     if (adapter == null) {
       throw new IllegalStateException("Adapter is not initialized.");
     }

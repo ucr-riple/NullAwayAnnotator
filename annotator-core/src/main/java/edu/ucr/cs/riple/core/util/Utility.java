@@ -26,9 +26,9 @@ package edu.ucr.cs.riple.core.util;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.scanner.AnnotatorScanner;
@@ -44,7 +44,6 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -144,8 +143,8 @@ public class Utility {
    *     inline field declarations.
    * @return Set of collected fixes.
    */
-  public static Set<Fix> readFixesFromOutputDirectory(Config config, FieldRegistry registry) {
-    Set<Error> errors = readErrorsFromOutputDirectory(config, config.target, registry);
+  public static Set<Fix> readFixesFromOutputDirectory(Config config, Context context) {
+    Set<Error> errors = readErrorsFromOutputDirectory(config, context);
     return Error.getResolvingFixesOfErrors(errors);
   }
 
@@ -157,24 +156,8 @@ public class Utility {
    *     multiple inline field declarations.
    * @return Set of serialized errors.
    */
-  public static Set<Error> readErrorsFromOutputDirectory(
-      Config config, ModuleInfo info, FieldRegistry fieldRegistry) {
-    Path errorsPath = info.dir.resolve("errors.tsv");
-    Set<Error> errors = new HashSet<>();
-    try {
-      try (BufferedReader br =
-          Files.newBufferedReader(errorsPath.toFile().toPath(), Charset.defaultCharset())) {
-        String line;
-        // Skip header.
-        br.readLine();
-        while ((line = br.readLine()) != null) {
-          errors.add(config.getAdapter().deserializeError(line.split("\t"), fieldRegistry));
-        }
-      }
-    } catch (IOException e) {
-      throw new RuntimeException("Exception happened in reading errors at: " + errorsPath, e);
-    }
-    return errors;
+  public static Set<Error> readErrorsFromOutputDirectory(Config config, Context context) {
+    return config.getAdapter().deserializeErrors(context);
   }
 
   /**
@@ -306,7 +289,7 @@ public class Utility {
    * @param config Annotator config.
    * @param command Command to run to build module(s).
    */
-  private static void build(Config config, String command) {
+  public static void build(Config config, String command) {
     try {
       long timer = config.log.startTimer();
       Utility.executeCommand(config, command);

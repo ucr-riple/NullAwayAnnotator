@@ -24,16 +24,11 @@
 
 package edu.ucr.cs.riple.core.metadata.index;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+import edu.ucr.cs.riple.core.Context;
+import edu.ucr.cs.riple.core.io.deserializers.CheckerDeserializer;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -48,43 +43,25 @@ public class Index {
   /** Contents of the index. */
   private final Multimap<Region, Error> items;
   /** Factory instance. */
-  private final Factory factory;
-  /** Paths to the file to load the content from. */
-  private final ImmutableSet<Path> paths;
+  private final CheckerDeserializer deserializer;
+
+  private final Context context;
 
   /**
    * Creates an instance of Index. Contents are accumulated from multiple sources.
    *
-   * @param paths ImmutableSet of paths to load the data from. Each file is a TSV file containing
-   *     information to create an instance of {@link Error}.
-   * @param factory Factory to create instances from file lines.
+   * @param deserializer deserializer instance to parse the data.
    */
-  public Index(ImmutableSet<Path> paths, Factory factory) {
-    this.paths = paths;
+  public Index(Context context, CheckerDeserializer deserializer) {
+    this.context = context;
     this.items = MultimapBuilder.hashKeys().arrayListValues().build();
-    this.factory = factory;
+    this.deserializer = deserializer;
   }
 
   /** Starts the reading and index process. */
   public void index() {
     items.clear();
-    paths.forEach(
-        path -> {
-          try (BufferedReader br = Files.newBufferedReader(path, UTF_8)) {
-            String line = br.readLine();
-            // Skip TSV header.
-            if (line != null) {
-              line = br.readLine();
-            }
-            while (line != null) {
-              Error error = factory.build(line.split("\t"));
-              items.put(error.getRegion(), error);
-              line = br.readLine();
-            }
-          } catch (IOException e) {
-            throw new RuntimeException("Error happened in indexing", e);
-          }
-        });
+    deserializer.deserializeErrors(context).forEach(error -> items.put(error.getRegion(), error));
   }
 
   /**

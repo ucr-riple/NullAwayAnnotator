@@ -24,9 +24,9 @@
 
 package edu.ucr.cs.riple.core.metadata.index;
 
-import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Context;
+import edu.ucr.cs.riple.core.io.deserializers.CheckerDeserializer;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -43,21 +43,21 @@ public class ErrorStore {
   private final Index root;
   /** Current state indexed by enclosing class and method. */
   private Index current;
-  /** Factory instance to parse outputs. */
-  private final Factory factory;
-  /** Path to file where outputs are stored. */
-  private final ImmutableSet<Path> paths;
+  /** Deserializer instance to parse outputs. */
+  private final CheckerDeserializer deserializer;
 
-  public ErrorStore(ImmutableSet<Path> paths, Factory factory) {
-    this.factory = factory;
-    this.paths = paths;
-    root = new Index(this.paths, factory);
+  private final Context context;
+
+  public ErrorStore(Context context, CheckerDeserializer deserializer) {
+    this.context = context;
+    this.deserializer = deserializer;
+    root = new Index(context, deserializer);
     root.index();
   }
 
   /** Overwrites the current state with the new generated output, */
   public void saveState() {
-    current = new Index(paths, factory);
+    current = new Index(context, deserializer);
     current.index();
   }
 

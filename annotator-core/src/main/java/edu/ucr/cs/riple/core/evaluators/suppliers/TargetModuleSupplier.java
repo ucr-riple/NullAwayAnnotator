@@ -24,7 +24,6 @@
 
 package edu.ucr.cs.riple.core.evaluators.suppliers;
 
-import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.cache.TargetModuleCache;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
@@ -34,7 +33,6 @@ import edu.ucr.cs.riple.core.evaluators.graph.processors.ParallelConflictGraphPr
 import edu.ucr.cs.riple.core.evaluators.graph.processors.SequentialConflictGraphProcessor;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
-import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -59,14 +57,12 @@ public class TargetModuleSupplier extends AbstractSupplier {
    * @param config Annotator config instance.
    * @param targetModuleCache Target module impact cache instance.
    * @param downstreamImpactCache Downstream impact cache instance.
-   * @param registry Method registry for methods in target module.
    */
   public TargetModuleSupplier(
       Config config,
       TargetModuleCache targetModuleCache,
-      DownstreamImpactCache downstreamImpactCache,
-      MethodRegistry registry) {
-    super(ImmutableSet.of(config.target), config, registry);
+      DownstreamImpactCache downstreamImpactCache) {
+    super(config, null);
     this.downstreamImpactCache = downstreamImpactCache;
     this.targetModuleCache = targetModuleCache;
   }
@@ -91,7 +87,8 @@ public class TargetModuleSupplier extends AbstractSupplier {
     CompilerRunner runner = () -> Utility.buildTarget(config);
     if (config.useParallelGraphProcessor) {
       RegionTracker tracker =
-          new CompoundTracker(config, config.target, methodRegistry, fieldRegistry);
+          new CompoundTracker(
+              config, config.target, context.getMethodRegistry(), context.getFieldRegistry());
       return new ParallelConflictGraphProcessor(config, runner, this, tracker);
     }
     return new SequentialConflictGraphProcessor(config, runner, this);
