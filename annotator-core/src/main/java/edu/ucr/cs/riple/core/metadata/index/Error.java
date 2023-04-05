@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.core.metadata.index;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
+import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -88,8 +88,8 @@ public class Error {
    * @param config Config instance.
    * @return Factory instance.
    */
-  public static Factory factory(Config config, FieldDeclarationStore store) {
-    return values -> config.getAdapter().deserializeError(values, store);
+  public static Factory factory(Config config, FieldRegistry registry) {
+    return values -> config.getAdapter().deserializeError(values, registry);
   }
 
   /**

@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.core.adapters;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
+import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
@@ -50,7 +50,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
    * Field declaration store instance, used to generate fixes for uninitialized fields based on
    * error message for initializers.
    */
-  protected final FieldDeclarationStore fieldDeclarationStore;
+  protected final FieldRegistry fieldRegistry;
 
   /**
    * Nonnull store used to prevent Annotator from generating fixes for elements with explicit
@@ -59,9 +59,9 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
   private final NonnullStore nonnullStore;
 
   public NullAwayAdapterBaseClass(
-      Config config, FieldDeclarationStore fieldDeclarationStore, NonnullStore nonnullStore) {
+      Config config, FieldRegistry fieldRegistry, NonnullStore nonnullStore) {
     this.config = config;
-    this.fieldDeclarationStore = fieldDeclarationStore;
+    this.fieldRegistry = fieldRegistry;
     this.nonnullStore = nonnullStore;
   }
 
@@ -113,17 +113,17 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
    * @return Set of fixes for uninitialized fields to resolve the given error.
    */
   protected ImmutableSet<Fix> generateFixesForUninitializedFields(
-      String errorMessage, Region region, FieldDeclarationStore store) {
+      String errorMessage, Region region, FieldRegistry registry) {
     return extractUninitializedFieldNames(errorMessage).stream()
         .map(
             field -> {
-              OnField locationOnField = store.getLocationOnField(region.clazz, field);
+              OnField locationOnField = registry.getLocationOnField(region.clazz, field);
               if (locationOnField == null) {
                 return null;
               }
               return new Fix(
                   new AddMarkerAnnotation(
-                      extendVariableList(locationOnField, store), config.nullableAnnot),
+                      extendVariableList(locationOnField, registry), config.nullableAnnot),
                   Error.METHOD_INITIALIZER_ERROR,
                   true);
             })
@@ -149,16 +149,16 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
       Region region,
       int offset,
       @Nullable Location nonnullTarget,
-      FieldDeclarationStore store) {
+      FieldRegistry registry) {
     if (nonnullTarget == null && errorType.equals(Error.METHOD_INITIALIZER_ERROR)) {
       ImmutableSet<Fix> resolvingFixes =
-          generateFixesForUninitializedFields(errorMessage, region, store).stream()
+          generateFixesForUninitializedFields(errorMessage, region, registry).stream()
               .filter(fix -> !nonnullStore.hasExplicitNonnullAnnotation(fix.toLocation()))
               .collect(ImmutableSet.toImmutableSet());
       return new Error(errorType, errorMessage, region, offset, resolvingFixes);
     }
     if (nonnullTarget != null && nonnullTarget.isOnField()) {
-      nonnullTarget = extendVariableList(nonnullTarget.toField(), store);
+      nonnullTarget = extendVariableList(nonnullTarget.toField(), registry);
     }
     Fix resolvingFix =
         nonnullTarget == null
@@ -179,7 +179,7 @@ public abstract class NullAwayAdapterBaseClass implements NullAwayVersionAdapter
    * @param store Field Declaration Store instance.
    * @return The updated given location.
    */
-  private static OnField extendVariableList(OnField onField, FieldDeclarationStore store) {
+  private static OnField extendVariableList(OnField onField, FieldRegistry store) {
     Set<String> variables =
         store.getInLineMultipleFieldDeclarationsOnField(onField.clazz, onField.variables);
     onField.variables.addAll(variables);

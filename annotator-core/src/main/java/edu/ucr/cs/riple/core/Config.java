@@ -30,7 +30,7 @@ import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.adapters.NullAwayV3Adapter;
 import edu.ucr.cs.riple.core.adapters.NullAwayVersionAdapter;
 import edu.ucr.cs.riple.core.log.Log;
-import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
+import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
@@ -561,13 +561,11 @@ public class Config {
   /**
    * Initializes NullAway serialization adapter according to the serialized version.
    *
-   * @param fieldDeclarationStore Field declaration store, used to create fixes for initialization
-   *     errors.
+   * @param fieldRegistry Field declaration store, used to create fixes for initialization errors.
    * @param nonnullStore Nonnull store used to prevent annotator from generating fixes for elements
    *     with {@code @Nonnull} annotations.
    */
-  public void initializeAdapter(
-      FieldDeclarationStore fieldDeclarationStore, NonnullStore nonnullStore) {
+  public void initializeAdapter(FieldRegistry fieldRegistry, NonnullStore nonnullStore) {
     if (adapter != null) {
       // adapter is already initialized.
       return;
@@ -592,7 +590,7 @@ public class Config {
           throw new RuntimeException(
               "This annotator version does not support serialization version 2, please upgrade NullAway to 0.10.10+. Serialization version v2 is skipped and was used for an alpha version of the Annotator.");
         case 3:
-          this.adapter = new NullAwayV3Adapter(this, fieldDeclarationStore, nonnullStore);
+          this.adapter = new NullAwayV3Adapter(this, fieldRegistry, nonnullStore);
           this.offsetHandlingIsActivated = true;
           break;
         default:

@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core.adapters;
 
-import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
+import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.TrackerNode;
@@ -42,11 +42,11 @@ public interface NullAwayVersionAdapter {
    * Error} instance.
    *
    * @param values Values in row of a TSV file.
-   * @param store Field declaration store to generate the set of resolving fixes for the
+   * @param registry Field declaration registry to generate the set of resolving fixes for the
    *     deserialized error.
    * @return Corresponding Error instance with the passed values.
    */
-  Error deserializeError(String[] values, FieldDeclarationStore store);
+  Error deserializeError(String[] values, FieldRegistry registry);
 
   /**
    * Deserializes values produced by Type Annotator Scanner in a tsv file and creates a
