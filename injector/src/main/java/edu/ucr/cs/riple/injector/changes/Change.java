@@ -22,7 +22,6 @@
 
 package edu.ucr.cs.riple.injector.changes;
 
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import edu.ucr.cs.riple.injector.Helper;
@@ -45,18 +44,6 @@ public abstract class Change {
     this.annotation = annotation;
     this.location = location;
     this.annotationSimpleName = Helper.simpleName(annotation);
-  }
-
-  /**
-   * Translate the change to a text modification in the source file.
-   *
-   * @param tree Compilation unit tree instance.
-   * @return A text modification instance if the translation is successful, otherwise {@code null}
-   *     will be returned.
-   */
-  @Nullable
-  public Modification translate(CompilationUnit tree) {
-    return new ChangeVisitor(tree).visit(this);
   }
 
   /**
