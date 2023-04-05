@@ -33,6 +33,16 @@ import org.json.simple.JSONObject;
  */
 public class LocationToJsonVisitor implements LocationVisitor<JSONObject, Void> {
 
+  /** The Keys used to represent a location in JSON format */
+  public enum KEYS {
+    VARIABLES,
+    METHOD,
+    KIND,
+    CLASS,
+    PATH,
+    INDEX
+  }
+
   /** A singleton instance of this visitor. */
   public static final LocationToJsonVisitor INSTANCE = new LocationToJsonVisitor();
 
@@ -43,9 +53,9 @@ public class LocationToJsonVisitor implements LocationVisitor<JSONObject, Void> 
   @SuppressWarnings("unchecked")
   private JSONObject defaultAction(Location location) {
     JSONObject res = new JSONObject();
-    res.put(Location.KEYS.CLASS, location.clazz);
-    res.put(Location.KEYS.KIND, location.type.toString());
-    res.put(Location.KEYS.PATH, location.path);
+    res.put(KEYS.CLASS, location.clazz);
+    res.put(KEYS.KIND, location.type.toString());
+    res.put(KEYS.PATH, location.path);
     return res;
   }
 
@@ -53,7 +63,7 @@ public class LocationToJsonVisitor implements LocationVisitor<JSONObject, Void> 
   @Override
   public JSONObject visitMethod(OnMethod onMethod, Void unused) {
     JSONObject res = defaultAction(onMethod);
-    res.put(Location.KEYS.METHOD, onMethod.method);
+    res.put(KEYS.METHOD, onMethod.method);
     return res;
   }
 
@@ -63,7 +73,7 @@ public class LocationToJsonVisitor implements LocationVisitor<JSONObject, Void> 
     JSONObject res = defaultAction(onField);
     JSONArray fields = new JSONArray();
     fields.addAll(onField.variables);
-    res.put(Location.KEYS.VARIABLES, fields);
+    res.put(KEYS.VARIABLES, fields);
     return res;
   }
 
@@ -71,8 +81,8 @@ public class LocationToJsonVisitor implements LocationVisitor<JSONObject, Void> 
   @Override
   public JSONObject visitParameter(OnParameter onParameter, Void unused) {
     JSONObject res = defaultAction(onParameter);
-    res.put(Location.KEYS.METHOD, onParameter.method);
-    res.put(Location.KEYS.INDEX, onParameter.index);
+    res.put(KEYS.METHOD, onParameter.method);
+    res.put(KEYS.INDEX, onParameter.index);
     return res;
   }
 

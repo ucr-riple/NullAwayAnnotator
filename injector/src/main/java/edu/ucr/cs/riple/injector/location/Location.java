@@ -49,16 +49,6 @@ public abstract class Location {
   /** The path to the file containing the element. */
   public Path path;
 
-  /** The Keys used to represent a location in JSON format */
-  public enum KEYS {
-    VARIABLES,
-    METHOD,
-    KIND,
-    CLASS,
-    PATH,
-    INDEX
-  }
-
   /**
    * Creates an instance of {@link Location} for a given type, path and class. This constructor is a
    * base class for all subclasses and must provide these values upon instantiation.
