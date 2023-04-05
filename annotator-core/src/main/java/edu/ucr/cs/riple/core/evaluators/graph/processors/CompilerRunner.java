@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.evaluators.graphprocessor;
+package edu.ucr.cs.riple.core.evaluators.graph.processors;
 
 /** Interface for rerunning the analysis/compiler. */
 public interface CompilerRunner {
