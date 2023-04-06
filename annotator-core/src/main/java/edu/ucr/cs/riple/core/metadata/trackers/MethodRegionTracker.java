@@ -27,7 +27,6 @@ package edu.ucr.cs.riple.core.metadata.trackers;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
-import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.method.MethodRecord;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -42,15 +41,14 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
 
   private final Context context;
 
-  public MethodRegionTracker(Config config, ModuleInfo info, Context context) {
-    super(config, info.dir.resolve(Serializer.METHOD_IMPACTED_REGION_FILE_NAME));
-    this.context = context;
+  public MethodRegionTracker(Config config) {
+    this(config, config.targetModuleContext);
   }
 
-  public MethodRegionTracker(Config config, ImmutableSet<ModuleInfo> modules, Context context) {
+  public MethodRegionTracker(Config config, Context context) {
     super(
         config,
-        modules.stream()
+        context.getModules().stream()
             .map(info -> info.dir.resolve(Serializer.METHOD_IMPACTED_REGION_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));
     this.context = context;
@@ -58,7 +56,7 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
 
   @Override
   protected TrackerNode addNodeByLine(String[] values) {
-    return config.getAdapter().deserializeTrackerNode(values);
+    return config.deserializer.deserializeTrackerNode(values);
   }
 
   @Override

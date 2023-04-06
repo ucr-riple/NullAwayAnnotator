@@ -26,9 +26,10 @@ package edu.ucr.cs.riple.core.metadata.index;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
-import edu.ucr.cs.riple.core.io.deserializers.CheckerDeserializer;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.core.util.Utility;
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -42,26 +43,22 @@ public class Index {
 
   /** Contents of the index. */
   private final Multimap<Region, Error> items;
-  /** Factory instance. */
-  private final CheckerDeserializer deserializer;
 
   private final Context context;
+  private final Config config;
 
-  /**
-   * Creates an instance of Index. Contents are accumulated from multiple sources.
-   *
-   * @param deserializer deserializer instance to parse the data.
-   */
-  public Index(Context context, CheckerDeserializer deserializer) {
+  /** Creates an instance of Index. Contents are accumulated from multiple sources. */
+  public Index(Config config, Context context) {
+    this.config = config;
     this.context = context;
     this.items = MultimapBuilder.hashKeys().arrayListValues().build();
-    this.deserializer = deserializer;
   }
 
   /** Starts the reading and index process. */
   public void index() {
     items.clear();
-    deserializer.deserializeErrors(context).forEach(error -> items.put(error.getRegion(), error));
+    Utility.readErrorsFromOutputDirectory(config, context)
+        .forEach(error -> items.put(error.getRegion(), error));
   }
 
   /**

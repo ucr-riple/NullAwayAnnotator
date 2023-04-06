@@ -47,7 +47,7 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
 
   @Override
   protected TrackerNode addNodeByLine(String[] values) {
-    return config.getAdapter().deserializeTrackerNode(values);
+    return config.deserializer.deserializeTrackerNode(values);
   }
 
   @Override

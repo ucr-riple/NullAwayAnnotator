@@ -64,8 +64,8 @@ import java.util.stream.Collectors;
  */
 public class NullAwayV3Deserializer extends DeserializerBaseClass {
 
-  public NullAwayV3Deserializer(Config config, Context context) {
-    super(config, context);
+  public NullAwayV3Deserializer(Config config) {
+    super(config);
   }
 
   @Override
@@ -93,7 +93,7 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
               // Skip header.
               br.readLine();
               while ((line = br.readLine()) != null) {
-                errors.add(dd(line.split("\t")));
+                errors.add(dd(context, line.split("\t")));
               }
             }
           } catch (IOException e) {
@@ -103,7 +103,7 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
     return errors;
   }
 
-  private Error dd(String[] values) {
+  private Error dd(Context context, String[] values) {
     Preconditions.checkArgument(
         values.length == 12,
         "Expected 12 values to create Error instance in NullAway serialization version 2 but found: "
@@ -130,7 +130,7 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
           context);
     }
     if (nonnullTarget != null && nonnullTarget.isOnField()) {
-      nonnullTarget = extendVariableList(nonnullTarget.toField());
+      nonnullTarget = extendVariableList(nonnullTarget.toField(), context);
     }
     Fix resolvingFix =
         nonnullTarget == null
@@ -213,7 +213,7 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
               }
               return new Fix(
                   new AddMarkerAnnotation(
-                      extendVariableList(locationOnField), config.nullableAnnot),
+                      extendVariableList(locationOnField, context), config.nullableAnnot),
                   Error.METHOD_INITIALIZER_ERROR,
                   true);
             })

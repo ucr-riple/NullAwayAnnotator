@@ -157,7 +157,7 @@ public class Utility {
    * @return Set of serialized errors.
    */
   public static Set<Error> readErrorsFromOutputDirectory(Config config, Context context) {
-    return config.getAdapter().deserializeErrors(context);
+    return config.deserializer.deserializeErrors(context);
   }
 
   /**

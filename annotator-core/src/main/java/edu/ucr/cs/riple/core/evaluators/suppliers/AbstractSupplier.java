@@ -72,7 +72,7 @@ public abstract class AbstractSupplier implements Supplier {
    * @return {@link ErrorStore} of {@link Error} instances.
    */
   protected ErrorStore initializeErrorStore() {
-    return new ErrorStore(context, config.getAdapter());
+    return new ErrorStore(config, context);
   }
 
   @Override

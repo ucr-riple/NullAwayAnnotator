@@ -24,8 +24,8 @@
 
 package edu.ucr.cs.riple.core.metadata.index;
 
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
-import edu.ucr.cs.riple.core.io.deserializers.CheckerDeserializer;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,21 +43,20 @@ public class ErrorStore {
   private final Index root;
   /** Current state indexed by enclosing class and method. */
   private Index current;
-  /** Deserializer instance to parse outputs. */
-  private final CheckerDeserializer deserializer;
 
   private final Context context;
+  private final Config config;
 
-  public ErrorStore(Context context, CheckerDeserializer deserializer) {
+  public ErrorStore(Config config, Context context) {
     this.context = context;
-    this.deserializer = deserializer;
-    root = new Index(context, deserializer);
+    this.config = config;
+    root = new Index(config, context);
     root.index();
   }
 
   /** Overwrites the current state with the new generated output, */
   public void saveState() {
-    current = new Index(context, deserializer);
+    current = new Index(config, context);
     current.index();
   }
 

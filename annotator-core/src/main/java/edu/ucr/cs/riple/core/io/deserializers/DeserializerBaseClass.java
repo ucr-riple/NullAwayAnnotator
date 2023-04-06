@@ -38,12 +38,9 @@ public abstract class DeserializerBaseClass implements CheckerDeserializer {
 
   /** Annotator config. */
   protected final Config config;
-  /** Module context. */
-  protected final Context context;
 
-  public DeserializerBaseClass(Config config, Context context) {
+  public DeserializerBaseClass(Config config) {
     this.config = config;
-    this.context = context;
   }
 
   /**
@@ -74,10 +71,9 @@ public abstract class DeserializerBaseClass implements CheckerDeserializer {
    * statement.
    *
    * @param onField Location of the field.
-   * @param registry Field registry instance.
    * @return The updated given location.
    */
-  protected OnField extendVariableList(OnField onField) {
+  protected OnField extendVariableList(OnField onField, Context context) {
     Set<String> variables =
         context
             .getFieldRegistry()

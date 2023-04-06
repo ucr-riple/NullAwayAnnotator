@@ -77,6 +77,9 @@ public class Annotator {
     annotate();
     config.log.stopTimerAndCapture(timer);
     Utility.writeLog(config);
+    if (1 < 0) {
+      System.out.println();
+    }
   }
 
   /**
@@ -95,9 +98,8 @@ public class Annotator {
     System.out.println("Making the first build...");
     Utility.buildTarget(config, true);
     config.targetModuleContext = new Context(config, config.target, config.buildCommand);
-    config.initializeAdapter();
     Set<OnField> uninitializedFields =
-        Utility.readFixesFromOutputDirectory(config, null).stream()
+        Utility.readFixesFromOutputDirectory(config, config.targetModuleContext).stream()
             .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
             .map(Fix::toField)
             .collect(Collectors.toSet());
@@ -120,7 +122,7 @@ public class Annotator {
     // iteration.
     DownstreamImpactCache downstreamImpactCache =
         config.downStreamDependenciesAnalysisActivated
-            ? new DownstreamImpactCacheImpl(config, config.downstreamDepenedenciesContext)
+            ? new DownstreamImpactCacheImpl(config)
             : new VoidDownstreamImpactCache();
     downstreamImpactCache.analyzeDownstreamDependencies();
     TargetModuleCache targetModuleCache = new TargetModuleCache(config);
@@ -203,7 +205,7 @@ public class Annotator {
     Utility.buildTarget(config);
     // Suggested fixes of target at the current state.
     ImmutableSet<Fix> fixes =
-        Utility.readFixesFromOutputDirectory(config, null).stream()
+        Utility.readFixesFromOutputDirectory(config, config.targetModuleContext).stream()
             .filter(fix -> !cache.processedFix(fix))
             .collect(ImmutableSet.toImmutableSet());
 
@@ -246,8 +248,10 @@ public class Annotator {
   private void forceResolveRemainingErrors() {
     // Collect regions with remaining errors.
     Utility.buildTarget(config);
-    Set<Error> remainingErrors = Utility.readErrorsFromOutputDirectory(config, null);
-    Set<Fix> remainingFixes = Utility.readFixesFromOutputDirectory(config, null);
+    Set<Error> remainingErrors =
+        Utility.readErrorsFromOutputDirectory(config, config.targetModuleContext);
+    Set<Fix> remainingFixes =
+        Utility.readFixesFromOutputDirectory(config, config.targetModuleContext);
     // Collect all regions for NullUnmarked.
     // For all errors in regions which correspond to a method's body, we can add @NullUnmarked at
     // the method level.
@@ -361,7 +365,7 @@ public class Annotator {
     config.log.updateInjectedAnnotations(initializationSuppressWarningsAnnotations);
     // Collect @NullUnmarked annotations on classes for any remaining error.
     Utility.buildTarget(config);
-    remainingErrors = Utility.readErrorsFromOutputDirectory(config, null);
+    remainingErrors = Utility.readErrorsFromOutputDirectory(config, config.targetModuleContext);
     nullUnMarkedAnnotations =
         remainingErrors.stream()
             .filter(error -> !error.getRegion().isInAnonymousClass())

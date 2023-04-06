@@ -63,7 +63,7 @@ public class TargetModuleSupplier extends AbstractSupplier {
       Config config,
       TargetModuleCache targetModuleCache,
       DownstreamImpactCache downstreamImpactCache) {
-    super(config, null);
+    super(config, config.targetModuleContext);
     this.downstreamImpactCache = downstreamImpactCache;
     this.targetModuleCache = targetModuleCache;
   }

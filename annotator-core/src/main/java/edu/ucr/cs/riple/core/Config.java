@@ -150,12 +150,6 @@ public class Config {
    * {@code true} in production.
    */
   public final boolean inferenceActivated;
-
-  /**
-   * This adapter is initialized lazily as it requires build of target to serialize its using
-   * NullAway serialization version.
-   */
-  private CheckerDeserializer adapter;
   /** Handler for computing the original offset of reported errors with existing changes. */
   public final OffsetHandler offsetHandler;
   /** Controls if offsets in error instance should be processed. */
@@ -165,6 +159,8 @@ public class Config {
 
   public Context targetModuleContext;
   public Context downstreamDepenedenciesContext;
+
+  public CheckerDeserializer deserializer = new NullAwayV3Deserializer(this);
 
   /**
    * Builds config from command line arguments.
@@ -557,62 +553,6 @@ public class Config {
                     String.class)
                 .orElse(List.of()));
     log.reset();
-  }
-
-  /**
-   * Initializes NullAway serialization adapter according to the serialized version.
-   *
-   * @param fieldRegistry Field registry, used to create fixes for initialization errors.
-   * @param nonnullStore Nonnull store used to prevent annotator from generating fixes for elements
-   *     with {@code @Nonnull} annotations.
-   */
-  public void initializeAdapter() {
-    if (adapter != null) {
-      // adapter is already initialized.
-      return;
-    }
-    Path serializationVersionPath = target.dir.resolve("serialization_version.txt");
-    if (!serializationVersionPath.toFile().exists()) {
-      // Older versions of NullAway.
-      throw new RuntimeException(
-          "This annotator version requires NullAway 0.10.6 or higher (using SerializeFixMetadataVersion=2), please upgrade NullAway or use version 1.3.4 of Annotator.");
-    }
-    try {
-      List<String> lines = Files.readAllLines(serializationVersionPath);
-      int version = Integer.parseInt(lines.get(0));
-      switch (version) {
-        case 0:
-          throw new RuntimeException(
-              "This annotator version does not support serialization version 0, please upgrade NullAway to 0.10.6+ (with SerializeFixMetadataVersion=2) or use version 1.3.5 of Annotator.");
-        case 1:
-          throw new RuntimeException(
-              "This annotator version does not support serialization version 1, please upgrade NullAway to 0.10.6+ (with SerializeFixMetadataVersion=2) or use version 1.3.5 of Annotator.");
-        case 2:
-          throw new RuntimeException(
-              "This annotator version does not support serialization version 2, please upgrade NullAway to 0.10.10+. Serialization version v2 is skipped and was used for an alpha version of the Annotator.");
-        case 3:
-          this.adapter = new NullAwayV3Deserializer(null, new Context(null, null, null));
-          this.offsetHandlingIsActivated = true;
-          break;
-        default:
-          throw new RuntimeException("Unrecognized NullAway serialization version: " + version);
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(
-          "Could not read serialization version at path: " + serializationVersionPath, e);
-    }
-  }
-
-  /**
-   * Getter for adapter.
-   *
-   * @return adapter.
-   */
-  public CheckerDeserializer getAdapter() {
-    if (adapter == null) {
-      throw new IllegalStateException("Adapter is not initialized.");
-    }
-    return adapter;
   }
 
   /**

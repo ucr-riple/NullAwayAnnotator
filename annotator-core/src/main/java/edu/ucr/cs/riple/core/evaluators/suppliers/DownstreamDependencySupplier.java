@@ -52,7 +52,7 @@ public class DownstreamDependencySupplier extends AbstractSupplier {
   private final RegionTracker tracker;
 
   public DownstreamDependencySupplier(Config config, RegionTracker tracker) {
-    super(config, null);
+    super(config, config.downstreamDepenedenciesContext);
     this.tracker = tracker;
   }
 

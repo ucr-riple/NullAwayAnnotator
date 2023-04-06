@@ -68,10 +68,14 @@ public class DownstreamImpactCacheImpl
    *
    * @param config Annotator config.
    */
-  public DownstreamImpactCacheImpl(Config config, Context context) {
+  public DownstreamImpactCacheImpl(Config config) {
     super(
         config,
-        context.getMethodRegistry().getPublicMethodsWithNonPrimitivesReturn().stream()
+        config
+            .targetModuleContext
+            .getMethodRegistry()
+            .getPublicMethodsWithNonPrimitivesReturn()
+            .stream()
             .map(
                 methodNode ->
                     new DownstreamImpact(
@@ -86,13 +90,14 @@ public class DownstreamImpactCacheImpl
   @Override
   public void analyzeDownstreamDependencies() {
     System.out.println("Analyzing downstream dependencies...");
+    config.downstreamDepenedenciesContext =
+        new Context(config, config.downstreamInfo, config.downstreamDependenciesBuildCommand);
     Utility.setScannerCheckerActivation(config, downstreamModules, true);
     Utility.buildDownstreamDependencies(config);
     Utility.setScannerCheckerActivation(config, downstreamModules, false);
     // Collect callers of public APIs in module.
     MethodRegionTracker tracker =
-        new MethodRegionTracker(
-            config, config.downstreamInfo, config.downstreamDepenedenciesContext);
+        new MethodRegionTracker(config, config.downstreamDepenedenciesContext);
     // Generate fixes corresponding methods.
     ImmutableSet<Fix> fixes =
         store.values().stream()
