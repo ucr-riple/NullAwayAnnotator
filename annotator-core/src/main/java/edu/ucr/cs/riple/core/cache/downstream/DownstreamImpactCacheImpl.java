@@ -29,7 +29,6 @@ import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.cache.BaseCache;
 import edu.ucr.cs.riple.core.cache.Impact;
@@ -55,9 +54,6 @@ public class DownstreamImpactCacheImpl
     extends BaseCache<DownstreamImpact, ImmutableMap<Location, DownstreamImpact>>
     implements DownstreamImpactCache {
 
-  /** Set of downstream dependencies. */
-  private final ImmutableSet<ModuleInfo> downstreamModules;
-
   /**
    * Constructor for creating downstream impact cache. It populates the registry with a downstream
    * impact listing 0 triggered errors and 0 downstream fixes for the result of adding
@@ -82,15 +78,14 @@ public class DownstreamImpactCacheImpl
                             "null",
                             true)))
             .collect(toImmutableMap(Impact::toLocation, Function.identity())));
-    this.downstreamModules = config.downstreamInfo;
   }
 
   @Override
   public void analyzeDownstreamDependencies() {
     System.out.println("Analyzing downstream dependencies...");
+    DownstreamDependencySupplier supplier = new DownstreamDependencySupplier(config);
     // Collect callers of public APIs in module.
-    MethodRegionTracker tracker =
-        new MethodRegionTracker(config, config.downstreamDepenedenciesContext);
+    MethodRegionTracker tracker = new MethodRegionTracker(config, supplier.getContext());
     // Generate fixes corresponding methods.
     ImmutableSet<Fix> fixes =
         store.values().stream()
@@ -106,8 +101,7 @@ public class DownstreamImpactCacheImpl
                         "null",
                         false))
             .collect(ImmutableSet.toImmutableSet());
-    DownstreamImpactEvaluator evaluator =
-        new DownstreamImpactEvaluator(new DownstreamDependencySupplier(config, tracker));
+    DownstreamImpactEvaluator evaluator = new DownstreamImpactEvaluator(supplier);
     ImmutableSet<Report> reports = evaluator.evaluate(fixes);
     // Update method status based on the results.
     this.store
