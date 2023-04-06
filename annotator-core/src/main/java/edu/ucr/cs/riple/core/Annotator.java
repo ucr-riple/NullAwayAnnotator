@@ -77,9 +77,6 @@ public class Annotator {
     annotate();
     config.log.stopTimerAndCapture(timer);
     Utility.writeLog(config);
-    if (1 < 0) {
-      System.out.println();
-    }
   }
 
   /**
