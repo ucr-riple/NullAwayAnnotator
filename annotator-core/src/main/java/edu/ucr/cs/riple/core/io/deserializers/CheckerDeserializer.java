@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.io.deserializers;
 
+import edu.ucr.cs.riple.core.Checker;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.trackers.TrackerNode;
@@ -65,7 +66,7 @@ public interface CheckerDeserializer {
   /**
    * Returns the name of the checker that this deserializer is associated with.
    *
-   * @return Checker name.
+   * @return Associated checker.
    */
-  String getCheckerName();
+  Checker getAssociatedChecker();
 }

@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.io.deserializers;
 
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Checker;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -38,14 +39,14 @@ public abstract class DeserializerBaseClass implements CheckerDeserializer {
 
   /** Annotator config. */
   protected final Config config;
-  /** The name of the checker that this deserializer is associated with. */
-  protected final String checkerName;
+  /** The checker that this deserializer is supporting. */
+  protected final Checker checker;
   /** The supporting serialization version of this deserializer. */
   protected final int version;
 
-  public DeserializerBaseClass(Config config, String checkerName, int version) {
+  public DeserializerBaseClass(Config config, Checker checker, int version) {
     this.config = config;
-    this.checkerName = checkerName;
+    this.checker = checker;
     this.version = version;
   }
 
@@ -94,7 +95,7 @@ public abstract class DeserializerBaseClass implements CheckerDeserializer {
   }
 
   @Override
-  public String getCheckerName() {
-    return checkerName;
+  public Checker getAssociatedChecker() {
+    return checker;
   }
 }

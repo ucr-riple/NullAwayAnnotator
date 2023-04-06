@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.io.deserializers.nullaway;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Checker;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.io.deserializers.DeserializerBaseClass;
@@ -65,7 +66,7 @@ import java.util.stream.Collectors;
 public class NullAwayV3Deserializer extends DeserializerBaseClass {
 
   public NullAwayV3Deserializer(Config config) {
-    super(config, "NullAway", 3);
+    super(config, Checker.NULLAWAY, 3);
   }
 
   @Override

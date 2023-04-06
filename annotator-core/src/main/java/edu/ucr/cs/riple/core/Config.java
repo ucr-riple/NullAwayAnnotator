@@ -28,7 +28,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.io.deserializers.CheckerDeserializer;
-import edu.ucr.cs.riple.core.io.deserializers.nullaway.NullAwayV3Deserializer;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
@@ -160,8 +159,8 @@ public class Config {
   public Context targetModuleContext;
   /** Deserializer for reading the output of the checker. */
   public final CheckerDeserializer deserializer;
-  /** Name of the checker. */
-  public final String checkerName;
+  /** Using Checker instance which used to determine the impact of a fix on the target module. */
+  public final Checker checker;
 
   /**
    * Builds config from command line arguments.
@@ -394,7 +393,7 @@ public class Config {
         cmd.hasOption(nullableOption.getLongOpt())
             ? cmd.getOptionValue(nullableOption.getLongOpt())
             : "javax.annotation.Nullable";
-    this.checkerName = cmd.getOptionValue(checkerNameOption);
+    this.checker = Checker.getCheckerByName(cmd.getOptionValue(checkerNameOption));
     this.initializerAnnot = cmd.getOptionValue(initializerOption.getLongOpt());
     this.depth =
         Integer.parseInt(
@@ -464,7 +463,7 @@ public class Config {
         !cmd.hasOption(nonnullAnnotationsOption)
             ? ImmutableSet.of()
             : ImmutableSet.copyOf(cmd.getOptionValue(nonnullAnnotationsOption).split(","));
-    this.deserializer = intializedCheckerDeserializer();
+    this.deserializer = intializeCheckerDeserializer();
   }
 
   /**
@@ -482,10 +481,8 @@ public class Config {
     } catch (Exception e) {
       throw new RuntimeException("Error in reading/parsing config at path: " + configPath, e);
     }
-    this.checkerName = getValueFromKey(jsonObject, "CHECKER_NAME", String.class).orElse(null);
-    if (this.checkerName == null) {
-      throw new RuntimeException("Checker name not found in config file.");
-    }
+    this.checker =
+        Checker.getCheckerByName(getValueFromKey(jsonObject, "CHECKER", String.class).orElse(null));
     this.depth = getValueFromKey(jsonObject, "DEPTH", Long.class).orElse((long) 1).intValue();
     this.chain = getValueFromKey(jsonObject, "CHAIN", Boolean.class).orElse(false);
     this.redirectBuildOutputToStdErr =
@@ -566,7 +563,7 @@ public class Config {
                     String.class)
                 .orElse(List.of()));
     this.log.reset();
-    this.deserializer = intializedCheckerDeserializer();
+    this.deserializer = intializeCheckerDeserializer();
   }
 
   /**
@@ -574,7 +571,8 @@ public class Config {
    *
    * @return the checker deserializer associated with the requested checker name and version.
    */
-  private CheckerDeserializer intializedCheckerDeserializer() {
+  private CheckerDeserializer intializeCheckerDeserializer() {
+    Utility.buildTarget(this);
     Path serializationVersionPath = target.dir.resolve("serialization_version.txt");
     if (!serializationVersionPath.toFile().exists()) {
       // Older versions of checkers
@@ -588,20 +586,12 @@ public class Config {
       throw new RuntimeException(e);
     }
     int version = Integer.parseInt(lines.get(0));
-    switch (checkerName) {
-      case "NullAway":
-        NullAwayV3Deserializer deserializer = new NullAwayV3Deserializer(this);
-        Preconditions.checkArgument(
-            version == deserializer.getVersionNumber(),
-            "Version number: "
-                + version
-                + " does not match the expected version number: "
-                + deserializer.getVersionNumber());
-        return deserializer;
-      case "UCRTaint":
-        throw new RuntimeException("Not implemented yet.");
-      default:
-        throw new RuntimeException("Unsupported checker name: " + checkerName);
+    CheckerDeserializer deserializer = checker.getDeserializer(this);
+    if (deserializer.getVersionNumber() == version) {
+      return deserializer;
+    } else {
+      throw new RuntimeException(
+          "Serialization version mismatch. Upgrade new versions of checkers.");
     }
   }
 
@@ -706,6 +696,7 @@ public class Config {
     public String initializerAnnotation;
     public String nullableAnnotation;
     public String outputDir;
+    public Checker checker;
     /**
      * List of modules, did not use {@link java.util.Set} to preserve order. First project is the
      * target project.
@@ -723,7 +714,6 @@ public class Config {
     public Path nullawayLibraryModelLoaderPath;
     public AnalysisMode mode = AnalysisMode.LOCAL;
     public String downstreamBuildCommand;
-
     public boolean forceResolveActivation = false;
     public String nullUnmarkedAnnotation = "org.jspecify.annotations.NullUnmarked";
     public boolean inferenceActivated = true;
@@ -744,6 +734,7 @@ public class Config {
           nullableAnnotation, "Nullable Annotation must be initialized to construct the config.");
       JSONObject json = new JSONObject();
       json.put("BUILD_COMMAND", buildCommand);
+      json.put("CHECKER", checker.name());
       JSONObject annotation = new JSONObject();
       annotation.put("INITIALIZER", initializerAnnotation);
       annotation.put("NULLABLE", nullableAnnotation);
