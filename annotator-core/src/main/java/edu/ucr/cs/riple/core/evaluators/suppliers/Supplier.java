@@ -86,5 +86,10 @@ public interface Supplier {
    */
   TargetModuleCache getTargetModuleCache();
 
+  /**
+   * Getter for {@link Context} instance.
+   *
+   * @return Context instance.
+   */
   Context getContext();
 }

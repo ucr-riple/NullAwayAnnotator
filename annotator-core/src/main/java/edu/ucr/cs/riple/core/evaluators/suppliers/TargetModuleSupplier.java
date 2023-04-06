@@ -100,6 +100,6 @@ public class TargetModuleSupplier extends AbstractSupplier {
 
   @Override
   public Context getContext() {
-    return config.targetModuleContext;
+    return context;
   }
 }

@@ -156,7 +156,7 @@ public class Config {
   public final ImmutableSet<SourceType> generatedCodeDetectors;
 
   /** The context of target module. */
-  public final Context targetModuleContext;
+  public Context targetModuleContext;
 
   public CheckerDeserializer deserializer = new NullAwayV3Deserializer(this);
 
@@ -454,7 +454,6 @@ public class Config {
         !cmd.hasOption(nonnullAnnotationsOption)
             ? ImmutableSet.of()
             : ImmutableSet.copyOf(cmd.getOptionValue(nonnullAnnotationsOption).split(","));
-    this.targetModuleContext = new Context(this, target, buildCommand);
   }
 
   /**
@@ -552,7 +551,6 @@ public class Config {
                     String.class)
                 .orElse(List.of()));
     log.reset();
-    this.targetModuleContext = new Context(this, target, buildCommand);
   }
 
   /**

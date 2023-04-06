@@ -139,8 +139,7 @@ public class Utility {
    * set of resolving fixes for read errors.
    *
    * @param config Annotator config.
-   * @param registry Field declaration registry, used to detect fixes on declarations with multiple
-   *     inline field declarations.
+   * @param context Context of the module which fixes are created for.
    * @return Set of collected fixes.
    */
   public static Set<Fix> readFixesFromOutputDirectory(Config config, Context context) {
@@ -151,9 +150,8 @@ public class Utility {
   /**
    * Reads serialized errors of passed module in "errors.tsv" file in the output directory,
    *
-   * @param info Module info.
-   * @param fieldRegistry Field registry instance, used to detect fixes on declarations with
-   *     multiple inline field declarations.
+   * @param config Annotation config.
+   * @param context Context of the module which errors are created for.
    * @return Set of serialized errors.
    */
   public static Set<Error> readErrorsFromOutputDirectory(Config config, Context context) {
