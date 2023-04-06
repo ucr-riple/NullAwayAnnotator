@@ -91,10 +91,11 @@ public class Annotator {
    */
   private void preprocess() {
     System.out.println("Preprocessing...");
-    Utility.setScannerCheckerActivation(config, config.target, true);
-    System.out.println("Making the first build...");
-    Utility.buildTarget(config, true);
     config.targetModuleContext = new Context(config, config.target, config.buildCommand);
+    if (config.downStreamDependenciesAnalysisActivated) {
+      config.downstreamDepenedenciesContext =
+          new Context(config, config.downstreamInfo, config.buildCommand);
+    }
     Set<OnField> uninitializedFields =
         Utility.readFixesFromOutputDirectory(config, config.targetModuleContext).stream()
             .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))

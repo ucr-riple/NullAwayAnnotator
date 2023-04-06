@@ -152,8 +152,6 @@ public class Config {
   public final boolean inferenceActivated;
   /** Handler for computing the original offset of reported errors with existing changes. */
   public final OffsetHandler offsetHandler;
-  /** Controls if offsets in error instance should be processed. */
-  public boolean offsetHandlingIsActivated;
 
   public final ImmutableSet<SourceType> generatedCodeDetectors;
 
@@ -445,7 +443,7 @@ public class Config {
             ? cmd.getOptionValue(activateForceResolveOption)
             : "org.jspecify.annotations.NullUnmarked";
     this.moduleCounterID = 0;
-    this.offsetHandler = new OffsetHandler(this);
+    this.offsetHandler = new OffsetHandler();
     this.log = new Log();
     this.log.reset();
     this.generatedCodeDetectors =
@@ -543,7 +541,7 @@ public class Config {
     this.generatedCodeDetectors =
         lombokCodeDetectorActivated ? Sets.immutableEnumSet(SourceType.LOMBOK) : ImmutableSet.of();
     this.log = new Log();
-    this.offsetHandler = new OffsetHandler(this);
+    this.offsetHandler = new OffsetHandler();
     this.nonnullAnnotations =
         ImmutableSet.copyOf(
             getArrayValueFromKey(
@@ -762,27 +760,19 @@ public class Config {
   public static class OffsetHandler {
     /** Map of file paths to Offset stores. */
     private final Map<Path, FileOffsetStore> contents;
-    /** Annotator config. */
-    private final Config config;
 
-    public OffsetHandler(Config config) {
-      contents = new HashMap<>();
-      this.config = config;
+    public OffsetHandler() {
+      this.contents = new HashMap<>();
     }
 
     /**
-     * Gets the original offset according to existing offset changes if {@link
-     * Config#offsetHandlingIsActivated} is true. Otherwise, the given offset will be returned
-     * unmodified.
+     * Gets the original offset according to existing offset changes.
      *
      * @param path Path to source file.
      * @param offset Given offset.
      * @return Original offset.
      */
     public int getOriginalOffset(Path path, int offset) {
-      if (!config.offsetHandlingIsActivated) {
-        return offset;
-      }
       if (!contents.containsKey(path)) {
         return offset;
       }
@@ -795,10 +785,6 @@ public class Config {
      * @param newOffsets Given new offset changes.
      */
     public void updateStateWithRecentChanges(Set<FileOffsetStore> newOffsets) {
-      if (!config.offsetHandlingIsActivated) {
-        // no need to update.
-        return;
-      }
       newOffsets.forEach(
           store -> {
             if (!contents.containsKey(store.getPath())) {

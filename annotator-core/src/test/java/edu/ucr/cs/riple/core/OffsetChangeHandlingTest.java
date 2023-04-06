@@ -74,7 +74,6 @@ public class OffsetChangeHandlingTest {
     Path configPath = root.resolve("config.json");
     helper.makeAnnotatorConfigFile(configPath);
     config = new Config(configPath);
-    config.offsetHandlingIsActivated = true;
     injector = new PhysicalInjector(config);
     try {
       Files.copy(inputPath, root.resolve("benchmark.java"));

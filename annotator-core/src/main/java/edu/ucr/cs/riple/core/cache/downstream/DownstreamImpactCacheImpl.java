@@ -29,7 +29,6 @@ import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.cache.BaseCache;
@@ -38,7 +37,6 @@ import edu.ucr.cs.riple.core.evaluators.suppliers.DownstreamDependencySupplier;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
-import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnParameter;
@@ -90,11 +88,6 @@ public class DownstreamImpactCacheImpl
   @Override
   public void analyzeDownstreamDependencies() {
     System.out.println("Analyzing downstream dependencies...");
-    config.downstreamDepenedenciesContext =
-        new Context(config, config.downstreamInfo, config.downstreamDependenciesBuildCommand);
-    Utility.setScannerCheckerActivation(config, downstreamModules, true);
-    Utility.buildDownstreamDependencies(config);
-    Utility.setScannerCheckerActivation(config, downstreamModules, false);
     // Collect callers of public APIs in module.
     MethodRegionTracker tracker =
         new MethodRegionTracker(config, config.downstreamDepenedenciesContext);

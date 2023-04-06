@@ -27,7 +27,7 @@ public class Context {
               new FixSerializationConfig.Builder()
                   .setSuggest(true, true)
                   .setOutputDirectory(module.dir.toString())
-                  .setFieldInitInfo(false);
+                  .setFieldInitInfo(true);
           nullAwayConfig.writeAsXML(module.nullawayConfig.toString());
         });
     Utility.build(config, buildCommand);
