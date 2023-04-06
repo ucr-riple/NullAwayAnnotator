@@ -65,7 +65,7 @@ import java.util.stream.Collectors;
 public class NullAwayV3Deserializer extends DeserializerBaseClass {
 
   public NullAwayV3Deserializer(Config config) {
-    super(config);
+    super(config, "NullAway", 3);
   }
 
   @Override
@@ -93,7 +93,7 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
               // Skip header.
               br.readLine();
               while ((line = br.readLine()) != null) {
-                errors.add(dd(context, line.split("\t")));
+                errors.add(deserializeErrorFromTSVLine(context, line));
               }
             }
           } catch (IOException e) {
@@ -103,7 +103,15 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
     return errors;
   }
 
-  private Error dd(Context context, String[] values) {
+  /**
+   * Deserializes an error from a TSV line.
+   *
+   * @param context the context of the module which the error is reported in.
+   * @param line Given TSV line.
+   * @return the deserialized error corresponding to the values in the given tsv line.
+   */
+  private Error deserializeErrorFromTSVLine(Context context, String line) {
+    String[] values = line.split("\t");
     Preconditions.checkArgument(
         values.length == 12,
         "Expected 12 values to create Error instance in NullAway serialization version 2 but found: "
@@ -147,11 +155,6 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
         config.offsetHandler.getOriginalOffset(path, offset),
         resolvingFix == null ? ImmutableSet.of() : ImmutableSet.of(resolvingFix),
         context);
-  }
-
-  @Override
-  public int getVersionNumber() {
-    return 3;
   }
 
   /**

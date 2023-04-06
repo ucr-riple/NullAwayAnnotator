@@ -38,9 +38,15 @@ public abstract class DeserializerBaseClass implements CheckerDeserializer {
 
   /** Annotator config. */
   protected final Config config;
+  /** The name of the checker that this deserializer is associated with. */
+  protected final String checkerName;
+  /** The supporting serialization version of this deserializer. */
+  protected final int version;
 
-  public DeserializerBaseClass(Config config) {
+  public DeserializerBaseClass(Config config, String checkerName, int version) {
     this.config = config;
+    this.checkerName = checkerName;
+    this.version = version;
   }
 
   /**
@@ -80,5 +86,15 @@ public abstract class DeserializerBaseClass implements CheckerDeserializer {
             .getInLineMultipleFieldDeclarationsOnField(onField.clazz, onField.variables);
     onField.variables.addAll(variables);
     return onField;
+  }
+
+  @Override
+  public int getVersionNumber() {
+    return version;
+  }
+
+  @Override
+  public String getCheckerName() {
+    return checkerName;
   }
 }

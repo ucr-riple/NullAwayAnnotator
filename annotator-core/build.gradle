@@ -45,11 +45,8 @@ dependencies {
     implementation deps.build.progressbar
     implementation deps.build.javaparser
     implementation deps.build.commonscli
-    implementation deps.build.commonsio
+    testImplementation deps.build.commonsio
     testImplementation 'junit:junit:4.13.1'
-
-    // https://mvnrepository.com/artifact/org.mockito/mockito-core
-    testImplementation 'org.mockito:mockito-core:5.2.0'
 }
 
 // Exclude formatting files under resources

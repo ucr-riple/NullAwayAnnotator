@@ -61,4 +61,11 @@ public interface CheckerDeserializer {
    * @return Serialization number.
    */
   int getVersionNumber();
+
+  /**
+   * Returns the name of the checker that this deserializer is associated with.
+   *
+   * @return Checker name.
+   */
+  String getCheckerName();
 }
