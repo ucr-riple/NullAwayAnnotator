@@ -184,8 +184,7 @@ public class Error {
    */
   public boolean isFixableOnTarget(Context context) {
     return resolvingFixes.size() > 0
-        && this.resolvingFixes.stream()
-            .allMatch(fix -> context.getMethodRegistry().declaredInModule(fix.toLocation()));
+        && this.resolvingFixes.stream().allMatch(fix -> context.declaredInModule(fix.toLocation()));
   }
 
   @Override

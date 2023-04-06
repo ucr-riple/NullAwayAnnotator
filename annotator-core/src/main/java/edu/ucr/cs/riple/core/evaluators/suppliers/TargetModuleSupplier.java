@@ -87,7 +87,7 @@ public class TargetModuleSupplier extends AbstractSupplier {
   public ConflictGraphProcessor getGraphProcessor() {
     CompilerRunner runner = () -> Utility.buildTarget(config);
     if (config.useParallelGraphProcessor) {
-      RegionTracker tracker = new CompoundTracker(config, config.target, context);
+      RegionTracker tracker = new CompoundTracker(config, context);
       return new ParallelConflictGraphProcessor(config, runner, this, tracker);
     }
     return new SequentialConflictGraphProcessor(config, runner, this);

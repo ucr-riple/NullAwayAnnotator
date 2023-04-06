@@ -6,7 +6,7 @@ import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
 import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.core.util.FixSerializationConfig;
 import edu.ucr.cs.riple.core.util.Utility;
-import edu.ucr.cs.riple.injector.location.OnParameter;
+import edu.ucr.cs.riple.injector.location.Location;
 
 public class Context {
 
@@ -54,7 +54,7 @@ public class Context {
     return modules;
   }
 
-  public boolean declaredInModule(OnParameter resolvingParameter) {
-    return methodRegistry.declaredInModule(resolvingParameter);
+  public boolean declaredInModule(Location location) {
+    return methodRegistry.declaredInModule(location);
   }
 }

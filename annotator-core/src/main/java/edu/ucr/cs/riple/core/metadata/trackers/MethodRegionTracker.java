@@ -41,10 +41,6 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
 
   private final Context context;
 
-  public MethodRegionTracker(Config config) {
-    this(config, config.targetModuleContext);
-  }
-
   public MethodRegionTracker(Config config, Context context) {
     super(
         config,
