@@ -136,28 +136,6 @@ public class ConfigurationTest {
     }
   }
 
-  private void runTestWithMockedBuild(Runnable runnable) {
-    try (MockedStatic<Utility> utilMock = Mockito.mockStatic(Utility.class)) {
-      utilMock
-          .when(() -> Utility.buildTarget(Mockito.any()))
-          .thenAnswer(
-              invocation -> {
-                Stream.of(
-                        Serializer.NON_NULL_ELEMENTS_FILE_NAME,
-                        Serializer.CLASS_INFO_FILE_NAME,
-                        Serializer.METHOD_INFO_FILE_NAME)
-                    .forEach(
-                        fileName ->
-                            createAFileWithContent(
-                                testDir.resolve("0").resolve(fileName), "HEADER\n"));
-                createAFileWithContent(
-                    testDir.resolve("0").resolve("serialization_version.txt"), "3");
-                return null;
-              });
-      runnable.run();
-    }
-  }
-
   @Test
   public void testRequiredFlagsCli() {
     runTestWithMockedBuild(
@@ -312,8 +290,28 @@ public class ConfigurationTest {
         });
   }
 
+  /**
+   * Helper method for creating a {@link Config} object with the given flags. Before creating the
+   * config file, it cleans up the existing module output directories.
+   *
+   * @param flags Flags to create the config object.
+   * @return Config instance.
+   */
   private Config makeConfigWithFlags(String[] flags) {
-    deleteModuleOutputDirs();
+    IntStream.of(0, 5)
+        .forEach(
+            id -> {
+              try {
+                Path path = testDir.resolve(String.valueOf(id));
+                if (!path.toFile().exists()) {
+                  return;
+                }
+                FileUtils.cleanDirectory(path.toFile());
+                FileUtils.deleteDirectory(path.toFile());
+              } catch (IOException e) {
+                throw new RuntimeException(e);
+              }
+            });
     return new Config(flags);
   }
 
@@ -343,6 +341,34 @@ public class ConfigurationTest {
   }
 
   /**
+   * Helper method for running a test with mocked build process. Used to run unit tests which
+   * requires a build of the target module to retrieve Scanner outputs.
+   *
+   * @param runnable Runnable which contains the test logic.
+   */
+  private void runTestWithMockedBuild(Runnable runnable) {
+    try (MockedStatic<Utility> utilMock = Mockito.mockStatic(Utility.class)) {
+      utilMock
+          .when(() -> Utility.buildTarget(Mockito.any()))
+          .thenAnswer(
+              invocation -> {
+                Stream.of(
+                        Serializer.NON_NULL_ELEMENTS_FILE_NAME,
+                        Serializer.CLASS_INFO_FILE_NAME,
+                        Serializer.METHOD_INFO_FILE_NAME)
+                    .forEach(
+                        fileName ->
+                            createAFileWithContent(
+                                testDir.resolve("0").resolve(fileName), "HEADER\n"));
+                createAFileWithContent(
+                    testDir.resolve("0").resolve("serialization_version.txt"), "3");
+                return null;
+              });
+      runnable.run();
+    }
+  }
+
+  /**
    * Helper method for creating a file with the given content.
    *
    * @param path Path to file.
@@ -354,23 +380,6 @@ public class ConfigurationTest {
     } catch (IOException e) {
       throw new RuntimeException("Could not create file: " + path, e);
     }
-  }
-
-  private void deleteModuleOutputDirs() {
-    IntStream.of(0, 5)
-        .forEach(
-            id -> {
-              try {
-                Path path = testDir.resolve(String.valueOf(id));
-                if (!path.toFile().exists()) {
-                  return;
-                }
-                FileUtils.cleanDirectory(path.toFile());
-                FileUtils.deleteDirectory(path.toFile());
-              } catch (IOException e) {
-                throw new RuntimeException(e);
-              }
-            });
   }
 
   /** Container class for CLI Flag. */

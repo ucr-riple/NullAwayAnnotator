@@ -47,9 +47,7 @@ dependencies {
     implementation deps.build.commonscli
     testImplementation deps.build.commonsio
     testImplementation 'junit:junit:4.13.1'
-
-    // https://mvnrepository.com/artifact/org.mockito/mockito-core
-    testImplementation 'org.mockito:mockito-core:5.2.0'
+    testImplementation deps.test.mockito
 
 }
 
