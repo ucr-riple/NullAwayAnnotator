@@ -47,6 +47,8 @@ dependencies {
     implementation deps.build.commonscli
     testImplementation deps.build.commonsio
     testImplementation 'junit:junit:4.13.1'
+    testImplementation deps.test.mockito
+
 }
 
 // Exclude formatting files under resources

@@ -32,7 +32,6 @@ import edu.ucr.cs.riple.core.adapters.NullAwayVersionAdapter;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
-import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import edu.ucr.cs.riple.injector.offsets.OffsetChange;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
@@ -160,8 +159,6 @@ public class Config {
   private NullAwayVersionAdapter adapter;
   /** Handler for computing the original offset of reported errors with existing changes. */
   public final OffsetHandler offsetHandler;
-  /** Controls if offsets in error instance should be processed. */
-  public boolean offsetHandlingIsActivated;
 
   public final ImmutableSet<SourceType> generatedCodeDetectors;
 
@@ -397,18 +394,25 @@ public class Config {
                 ? cmd.getOptionValue(depthOption.getLongOpt())
                 : "5");
     this.globalDir = Paths.get(cmd.getOptionValue(dirOption.getLongOpt()));
-    List<ModuleInfo> moduleInfoList =
-        Utility.readFileLines(Paths.get(cmd.getOptionValue(configPathsOption))).stream()
-            .map(
-                line -> {
-                  String[] info = line.split("\\t");
-                  return new ModuleInfo(
-                      getNextModuleUniqueID(),
-                      this.globalDir,
-                      Paths.get(info[0]),
-                      Paths.get(info[1]));
-                })
-            .collect(Collectors.toList());
+    List<ModuleInfo> moduleInfoList;
+    try {
+      moduleInfoList =
+          Files.readAllLines(
+                  Paths.get(cmd.getOptionValue(configPathsOption)), Charset.defaultCharset())
+              .stream()
+              .map(
+                  line -> {
+                    String[] info = line.split("\\t");
+                    return new ModuleInfo(
+                        getNextModuleUniqueID(),
+                        this.globalDir,
+                        Paths.get(info[0]),
+                        Paths.get(info[1]));
+                  })
+              .collect(Collectors.toList());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
     Preconditions.checkArgument(moduleInfoList.size() > 0, "Target module config paths not found.");
     // First line is information for the target module.
     this.target = moduleInfoList.get(0);
@@ -448,7 +452,7 @@ public class Config {
             ? cmd.getOptionValue(activateForceResolveOption)
             : "org.jspecify.annotations.NullUnmarked";
     this.moduleCounterID = 0;
-    this.offsetHandler = new OffsetHandler(this);
+    this.offsetHandler = new OffsetHandler();
     this.log = new Log();
     this.log.reset();
     this.generatedCodeDetectors =
@@ -546,7 +550,7 @@ public class Config {
     this.generatedCodeDetectors =
         lombokCodeDetectorActivated ? Sets.immutableEnumSet(SourceType.LOMBOK) : ImmutableSet.of();
     this.log = new Log();
-    this.offsetHandler = new OffsetHandler(this);
+    this.offsetHandler = new OffsetHandler();
     this.nonnullAnnotations =
         ImmutableSet.copyOf(
             getArrayValueFromKey(
@@ -591,7 +595,6 @@ public class Config {
               "This annotator version does not support serialization version 2, please upgrade NullAway to 0.10.10+. Serialization version v2 is skipped and was used for an alpha version of the Annotator.");
         case 3:
           this.adapter = new NullAwayV3Adapter(this, fieldRegistry, nonnullStore);
-          this.offsetHandlingIsActivated = true;
           break;
         default:
           throw new RuntimeException("Unrecognized NullAway serialization version: " + version);
@@ -821,27 +824,19 @@ public class Config {
   public static class OffsetHandler {
     /** Map of file paths to Offset stores. */
     private final Map<Path, FileOffsetStore> contents;
-    /** Annotator config. */
-    private final Config config;
 
-    public OffsetHandler(Config config) {
+    public OffsetHandler() {
       contents = new HashMap<>();
-      this.config = config;
     }
 
     /**
-     * Gets the original offset according to existing offset changes if {@link
-     * Config#offsetHandlingIsActivated} is true. Otherwise, the given offset will be returned
-     * unmodified.
+     * Gets the original offset according to existing offset changes.
      *
      * @param path Path to source file.
      * @param offset Given offset.
      * @return Original offset.
      */
     public int getOriginalOffset(Path path, int offset) {
-      if (!config.offsetHandlingIsActivated) {
-        return offset;
-      }
       if (!contents.containsKey(path)) {
         return offset;
       }
@@ -854,10 +849,6 @@ public class Config {
      * @param newOffsets Given new offset changes.
      */
     public void updateStateWithRecentChanges(Set<FileOffsetStore> newOffsets) {
-      if (!config.offsetHandlingIsActivated) {
-        // no need to update.
-        return;
-      }
       newOffsets.forEach(
           store -> {
             if (!contents.containsKey(store.getPath())) {
