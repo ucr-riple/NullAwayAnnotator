@@ -109,17 +109,6 @@ public class ConfigurationTest {
                 new CLIFlagWithValue("ddbc", "./gradlew :dep:compileJava")));
   }
 
-  /**
-   * Converts list of {@link CLIFlag} to array of string where each entry is flag name followed by
-   * its value.
-   *
-   * @param flags List of flags.
-   * @return Array of string consisting flags name and values.
-   */
-  private static String[] makeCommandLineArguments(List<CLIFlag> flags) {
-    return flags.stream().flatMap(CLIFlag::toStream).toArray(String[]::new);
-  }
-
   @Test
   public void testRequiredFlagsMissingCli() {
     // Check if each is missed.
@@ -128,9 +117,7 @@ public class ConfigurationTest {
       CLIFlag missingFlag = incompleteFlags.remove(i);
       String expectedErrorMessage = "Missing required option: " + missingFlag.flag;
       IllegalArgumentException ex =
-          assertThrows(
-              IllegalArgumentException.class,
-              () -> makeConfigWithFlags(makeCommandLineArguments(incompleteFlags)));
+          assertThrows(IllegalArgumentException.class, () -> makeConfigWithFlags(incompleteFlags));
       // Check the error message.
       assertTrue(ex.getMessage().contains(expectedErrorMessage));
     }
@@ -140,7 +127,7 @@ public class ConfigurationTest {
   public void testRequiredFlagsCli() {
     runTestWithMockedBuild(
         () -> {
-          Config config = makeConfigWithFlags(makeCommandLineArguments(requiredFlagsCli));
+          Config config = makeConfigWithFlags(requiredFlagsCli);
           assertEquals("./gradlew compileJava", config.buildCommand);
           assertEquals(testDir, config.globalDir);
           assertEquals("edu.ucr.Initializer", config.initializerAnnot);
@@ -160,9 +147,7 @@ public class ConfigurationTest {
       List<CLIFlag> flags = new ArrayList<>(requiredFlagsCli);
       flags.addAll(incompleteFlags);
       IllegalArgumentException ex =
-          assertThrows(
-              IllegalArgumentException.class,
-              () -> makeConfigWithFlags(makeCommandLineArguments(flags)));
+          assertThrows(IllegalArgumentException.class, () -> makeConfigWithFlags(flags));
       // Check the error message.
       assertTrue(ex.getMessage().contains(expectedErrorMessage));
     }
@@ -174,7 +159,7 @@ public class ConfigurationTest {
         () -> {
           List<CLIFlag> flags = new ArrayList<>(requiredFlagsCli);
           flags.addAll(requiredDownsStreamDependencyFlagsCli);
-          Config config = makeConfigWithFlags(makeCommandLineArguments(flags));
+          Config config = makeConfigWithFlags(flags);
           assertEquals("./gradlew compileJava", config.buildCommand);
           assertEquals(testDir, config.globalDir);
           assertEquals("edu.ucr.Initializer", config.initializerAnnot);
@@ -237,14 +222,14 @@ public class ConfigurationTest {
         () -> {
           Config config;
           // Check mode downstream dependency off.
-          config = makeConfigWithFlags(makeCommandLineArguments(requiredFlagsCli));
+          config = makeConfigWithFlags(requiredFlagsCli);
           assertEquals(AnalysisMode.LOCAL, config.mode);
 
           List<CLIFlag> baseFlags = new ArrayList<>(requiredFlagsCli);
           baseFlags.addAll(requiredDownsStreamDependencyFlagsCli);
 
           // Check default mode downstream dependency on.
-          config = makeConfigWithFlags(makeCommandLineArguments(baseFlags));
+          config = makeConfigWithFlags(baseFlags);
           assertEquals(AnalysisMode.LOWER_BOUND, config.mode);
 
           Map<String, AnalysisMode> modes =
@@ -263,7 +248,7 @@ public class ConfigurationTest {
                 CLIFlag flag = new CLIFlagWithValue("am", flagValue);
                 ArrayList<CLIFlag> flags = new ArrayList<>(baseFlags);
                 flags.add(flag);
-                Config c = makeConfigWithFlags(makeCommandLineArguments(flags));
+                Config c = makeConfigWithFlags(flags);
                 assertEquals(expectedMode, c.mode);
               });
         });
@@ -279,12 +264,12 @@ public class ConfigurationTest {
           baseFlags.addAll(requiredDownsStreamDependencyFlagsCli);
 
           // Check default mode.
-          config = makeConfigWithFlags(makeCommandLineArguments(baseFlags));
+          config = makeConfigWithFlags(baseFlags);
           assertFalse(config.forceResolveActivated);
 
           CLIFlag flag = new CLIFlagWithValue("fr", "edu.ucr.example.NullUnmarked");
           baseFlags.add(flag);
-          config = makeConfigWithFlags(makeCommandLineArguments(baseFlags));
+          config = makeConfigWithFlags(baseFlags);
           assertTrue(config.forceResolveActivated);
           assertEquals(config.nullUnMarkedAnnotation, "edu.ucr.example.NullUnmarked");
         });
@@ -297,7 +282,7 @@ public class ConfigurationTest {
    * @param flags Flags to create the config object.
    * @return Config instance.
    */
-  private Config makeConfigWithFlags(String[] flags) {
+  private Config makeConfigWithFlags(List<CLIFlag> flags) {
     IntStream.of(0, 5)
         .forEach(
             id -> {
@@ -312,7 +297,7 @@ public class ConfigurationTest {
                 throw new RuntimeException(e);
               }
             });
-    return new Config(flags);
+    return new Config(flags.stream().flatMap(CLIFlag::toStream).toArray(String[]::new));
   }
 
   /**
