@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core;
 
+import static edu.ucr.cs.riple.core.tools.Utility.runTestWithMockedBuild;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -34,7 +35,6 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.util.FixSerializationConfig;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.scanner.ScannerConfigWriter;
-import edu.ucr.cs.riple.scanner.Serializer;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -61,8 +61,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
@@ -126,6 +124,7 @@ public class ConfigurationTest {
   @Test
   public void testRequiredFlagsCli() {
     runTestWithMockedBuild(
+        testDir,
         () -> {
           Config config = makeConfigWithFlags(requiredFlagsCli);
           assertEquals("./gradlew compileJava", config.buildCommand);
@@ -156,6 +155,7 @@ public class ConfigurationTest {
   @Test
   public void testRequiredFlagsForDownstreamDependencyAnalysisCli() {
     runTestWithMockedBuild(
+        testDir,
         () -> {
           List<CLIFlag> flags = new ArrayList<>(requiredFlagsCli);
           flags.addAll(requiredDownsStreamDependencyFlagsCli);
@@ -219,6 +219,7 @@ public class ConfigurationTest {
   @Test
   public void testAnalysisModeFlags() {
     runTestWithMockedBuild(
+        testDir,
         () -> {
           Config config;
           // Check mode downstream dependency off.
@@ -257,6 +258,7 @@ public class ConfigurationTest {
   @Test
   public void testForceResolveFlag() {
     runTestWithMockedBuild(
+        testDir,
         () -> {
           Config config;
 
@@ -322,48 +324,6 @@ public class ConfigurationTest {
         | IOException
         | SAXException ex) {
       throw new RuntimeException("Could not extract value from tag: " + key, ex);
-    }
-  }
-
-  /**
-   * Helper method for running a test with mocked build process. Used to run unit tests which
-   * requires a build of the target module to retrieve Scanner outputs.
-   *
-   * @param runnable Runnable which contains the test logic.
-   */
-  private void runTestWithMockedBuild(Runnable runnable) {
-    try (MockedStatic<Utility> utilMock = Mockito.mockStatic(Utility.class)) {
-      utilMock
-          .when(() -> Utility.buildTarget(Mockito.any()))
-          .thenAnswer(
-              invocation -> {
-                Stream.of(
-                        Serializer.NON_NULL_ELEMENTS_FILE_NAME,
-                        Serializer.CLASS_INFO_FILE_NAME,
-                        Serializer.METHOD_INFO_FILE_NAME)
-                    .forEach(
-                        fileName ->
-                            createAFileWithContent(
-                                testDir.resolve("0").resolve(fileName), "HEADER\n"));
-                createAFileWithContent(
-                    testDir.resolve("0").resolve("serialization_version.txt"), "3");
-                return null;
-              });
-      runnable.run();
-    }
-  }
-
-  /**
-   * Helper method for creating a file with the given content.
-   *
-   * @param path Path to file.
-   * @param content Content of file.
-   */
-  private void createAFileWithContent(Path path, String content) {
-    try {
-      Files.write(path, content.getBytes());
-    } catch (IOException e) {
-      throw new RuntimeException("Could not create file: " + path, e);
     }
   }
 
