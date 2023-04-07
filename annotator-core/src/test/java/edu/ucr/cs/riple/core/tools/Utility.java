@@ -145,7 +145,7 @@ public class Utility {
    */
   public static void runTestWithMockedBuild(Path testDir, Runnable runnable) {
     try (MockedStatic<edu.ucr.cs.riple.core.util.Utility> utilMock =
-        Mockito.mockStatic(edu.ucr.cs.riple.core.util.Utility.class)) {
+        Mockito.mockStatic(edu.ucr.cs.riple.core.util.Utility.class, Mockito.CALLS_REAL_METHODS)) {
       utilMock
           .when(() -> edu.ucr.cs.riple.core.util.Utility.buildTarget(Mockito.any()))
           .thenAnswer(
