@@ -32,7 +32,6 @@ import edu.ucr.cs.riple.core.adapters.NullAwayVersionAdapter;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
-import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import edu.ucr.cs.riple.injector.offsets.OffsetChange;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
@@ -396,18 +395,25 @@ public class Config {
                 ? cmd.getOptionValue(depthOption.getLongOpt())
                 : "5");
     this.globalDir = Paths.get(cmd.getOptionValue(dirOption.getLongOpt()));
-    List<ModuleInfo> moduleInfoList =
-        Utility.readFileLines(Paths.get(cmd.getOptionValue(configPathsOption))).stream()
-            .map(
-                line -> {
-                  String[] info = line.split("\\t");
-                  return new ModuleInfo(
-                      getNextModuleUniqueID(),
-                      this.globalDir,
-                      Paths.get(info[0]),
-                      Paths.get(info[1]));
-                })
-            .collect(Collectors.toList());
+    List<ModuleInfo> moduleInfoList;
+    try {
+      moduleInfoList =
+          Files.readAllLines(
+                  Paths.get(cmd.getOptionValue(configPathsOption)), Charset.defaultCharset())
+              .stream()
+              .map(
+                  line -> {
+                    String[] info = line.split("\\t");
+                    return new ModuleInfo(
+                        getNextModuleUniqueID(),
+                        this.globalDir,
+                        Paths.get(info[0]),
+                        Paths.get(info[1]));
+                  })
+              .collect(Collectors.toList());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
     Preconditions.checkArgument(moduleInfoList.size() > 0, "Target module config paths not found.");
     // First line is information for the target module.
     this.target = moduleInfoList.get(0);
