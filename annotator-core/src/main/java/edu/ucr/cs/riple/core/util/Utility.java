@@ -362,7 +362,7 @@ public class Utility {
    * @return The lines from the file as a Stream.
    */
   public static List<String> readFileLines(Path path) {
-    try (Stream<String> stream = Files.lines(path)) {
+    try (Stream<String> stream = Files.lines(path, Charset.defaultCharset())) {
       return stream.collect(Collectors.toList());
     } catch (IOException e) {
       throw new RuntimeException("Exception while reading file: " + path, e);

@@ -32,6 +32,7 @@ import edu.ucr.cs.riple.core.adapters.NullAwayVersionAdapter;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
+import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import edu.ucr.cs.riple.injector.offsets.OffsetChange;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
@@ -396,24 +397,18 @@ public class Config {
                 : "5");
     this.globalDir = Paths.get(cmd.getOptionValue(dirOption.getLongOpt()));
     List<ModuleInfo> moduleInfoList;
-    try {
-      moduleInfoList =
-          Files.readAllLines(
-                  Paths.get(cmd.getOptionValue(configPathsOption)), Charset.defaultCharset())
-              .stream()
-              .map(
-                  line -> {
-                    String[] info = line.split("\\t");
-                    return new ModuleInfo(
-                        getNextModuleUniqueID(),
-                        this.globalDir,
-                        Paths.get(info[0]),
-                        Paths.get(info[1]));
-                  })
-              .collect(Collectors.toList());
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    moduleInfoList =
+        Utility.readFileLines(Paths.get(cmd.getOptionValue(configPathsOption))).stream()
+            .map(
+                line -> {
+                  String[] info = line.split("\\t");
+                  return new ModuleInfo(
+                      getNextModuleUniqueID(),
+                      this.globalDir,
+                      Paths.get(info[0]),
+                      Paths.get(info[1]));
+                })
+            .collect(Collectors.toList());
     Preconditions.checkArgument(moduleInfoList.size() > 0, "Target module config paths not found.");
     // First line is information for the target module.
     this.target = moduleInfoList.get(0);
@@ -581,28 +576,23 @@ public class Config {
       throw new RuntimeException(
           "This annotator version requires NullAway 0.10.6 or higher (using SerializeFixMetadataVersion=2), please upgrade NullAway or use version 1.3.4 of Annotator.");
     }
-    try {
-      List<String> lines = Files.readAllLines(serializationVersionPath);
-      int version = Integer.parseInt(lines.get(0));
-      switch (version) {
-        case 0:
-          throw new RuntimeException(
-              "This annotator version does not support serialization version 0, please upgrade NullAway to 0.10.6+ (with SerializeFixMetadataVersion=2) or use version 1.3.5 of Annotator.");
-        case 1:
-          throw new RuntimeException(
-              "This annotator version does not support serialization version 1, please upgrade NullAway to 0.10.6+ (with SerializeFixMetadataVersion=2) or use version 1.3.5 of Annotator.");
-        case 2:
-          throw new RuntimeException(
-              "This annotator version does not support serialization version 2, please upgrade NullAway to 0.10.10+. Serialization version v2 is skipped and was used for an alpha version of the Annotator.");
-        case 3:
-          this.adapter = new NullAwayV3Adapter(this, fieldRegistry, nonnullStore);
-          break;
-        default:
-          throw new RuntimeException("Unrecognized NullAway serialization version: " + version);
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(
-          "Could not read serialization version at path: " + serializationVersionPath, e);
+    List<String> lines = Utility.readFileLines(serializationVersionPath);
+    int version = Integer.parseInt(lines.get(0));
+    switch (version) {
+      case 0:
+        throw new RuntimeException(
+            "This annotator version does not support serialization version 0, please upgrade NullAway to 0.10.6+ (with SerializeFixMetadataVersion=2) or use version 1.3.5 of Annotator.");
+      case 1:
+        throw new RuntimeException(
+            "This annotator version does not support serialization version 1, please upgrade NullAway to 0.10.6+ (with SerializeFixMetadataVersion=2) or use version 1.3.5 of Annotator.");
+      case 2:
+        throw new RuntimeException(
+            "This annotator version does not support serialization version 2, please upgrade NullAway to 0.10.10+. Serialization version v2 is skipped and was used for an alpha version of the Annotator.");
+      case 3:
+        this.adapter = new NullAwayV3Adapter(this, fieldRegistry, nonnullStore);
+        break;
+      default:
+        throw new RuntimeException("Unrecognized NullAway serialization version: " + version);
     }
   }
 

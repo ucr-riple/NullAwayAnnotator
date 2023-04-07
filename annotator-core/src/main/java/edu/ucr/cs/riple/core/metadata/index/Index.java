@@ -24,14 +24,13 @@
 
 package edu.ucr.cs.riple.core.metadata.index;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -70,7 +69,7 @@ public class Index {
     items.clear();
     paths.forEach(
         path -> {
-          try (BufferedReader br = Files.newBufferedReader(path, UTF_8)) {
+          try (BufferedReader br = Files.newBufferedReader(path, Charset.defaultCharset())) {
             String line = br.readLine();
             // Skip TSV header.
             if (line != null) {
