@@ -174,7 +174,7 @@ public class Utility {
    */
   public static void createAFileWithContent(Path path, String content) {
     try {
-      Files.write(path, content.getBytes());
+      Files.write(path, content.getBytes(Charset.defaultCharset()));
     } catch (IOException e) {
       throw new RuntimeException("Could not create file: " + path, e);
     }
