@@ -402,24 +402,18 @@ public class Config {
                 : "5");
     this.globalDir = Paths.get(cmd.getOptionValue(dirOption.getLongOpt()));
     List<ModuleInfo> moduleInfoList;
-    try {
-      moduleInfoList =
-          Files.readAllLines(
-                  Paths.get(cmd.getOptionValue(configPathsOption)), Charset.defaultCharset())
-              .stream()
-              .map(
-                  line -> {
-                    String[] info = line.split("\\t");
-                    return new ModuleInfo(
-                        getNextModuleUniqueID(),
-                        this.globalDir,
-                        Paths.get(info[0]),
-                        Paths.get(info[1]));
-                  })
-              .collect(Collectors.toList());
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    moduleInfoList =
+        Utility.readFileLines(Paths.get(cmd.getOptionValue(configPathsOption))).stream()
+            .map(
+                line -> {
+                  String[] info = line.split("\\t");
+                  return new ModuleInfo(
+                      getNextModuleUniqueID(),
+                      this.globalDir,
+                      Paths.get(info[0]),
+                      Paths.get(info[1]));
+                })
+            .collect(Collectors.toList());
     Preconditions.checkArgument(moduleInfoList.size() > 0, "Target module config paths not found.");
     // First line is information for the target module.
     this.target = moduleInfoList.get(0);
@@ -588,12 +582,7 @@ public class Config {
       throw new RuntimeException(
           "Serialization version not found. Upgrade new versions of checkers.");
     }
-    List<String> lines;
-    try {
-      lines = Files.readAllLines(serializationVersionPath);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    List<String> lines = Utility.readFileLines(serializationVersionPath);
     int version = Integer.parseInt(lines.get(0));
     CheckerDeserializer deserializer = checker.getDeserializer(this);
     if (deserializer.getVersionNumber() == version) {
