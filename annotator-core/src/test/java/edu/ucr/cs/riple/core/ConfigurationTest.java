@@ -29,9 +29,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.github.javaparser.utils.Pair;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.util.FixSerializationConfig;
 import edu.ucr.cs.riple.core.util.Utility;
+import edu.ucr.cs.riple.scanner.ScannerConfigWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -130,9 +132,8 @@ public class ConfigurationTest {
     assertEquals("./gradlew compileJava", config.buildCommand);
     assertEquals(testDir, config.globalDir);
     assertEquals("edu.ucr.Initializer", config.initializerAnnot);
-    assertEquals(
-        new ModuleInfo(0, testDir, Paths.get("0nullaway.xml"), Paths.get("0scanner.xml")),
-        config.target);
+    assertEquals(Paths.get("0nullaway.xml"), config.target.nullawayConfig);
+    assertEquals(Paths.get("0scanner.xml"), config.target.scannerConfig);
   }
 
   @Test
@@ -167,14 +168,19 @@ public class ConfigurationTest {
     assertEquals(testDir.resolve("library-model.tsv"), config.nullawayLibraryModelLoaderPath);
     assertTrue(config.downStreamDependenciesAnalysisActivated);
     assertEquals("./gradlew :dep:compileJava", config.downstreamDependenciesBuildCommand);
-    ImmutableSet<ModuleInfo> downstreamInfo =
+    // Compute expected downstream config paths for nullaway and scanner config file paths for
+    // downstream dependencies.
+    ImmutableSet<Pair<Path, Path>> expectedDownstreamConfigPaths =
         IntStream.range(1, 5)
-            .mapToObj(
-                i ->
-                    new ModuleInfo(
-                        i, testDir, Paths.get(i + "nullaway.xml"), Paths.get(i + "scanner.xml")))
+            .mapToObj(i -> new Pair<>(Paths.get(i + "nullaway.xml"), Paths.get(i + "scanner.xml")))
             .collect(ImmutableSet.toImmutableSet());
-    assertEquals(downstreamInfo, config.downstreamInfo);
+    // Retrieve actual downstream config paths for nullaway and scanner config file paths for
+    // downstream dependencies.
+    ImmutableSet<Pair<Path, Path>> actualDownstreamConfigPaths =
+        config.downstreamInfo.stream()
+            .map(moduleInfo -> new Pair<>(moduleInfo.nullawayConfig, moduleInfo.scannerConfig))
+            .collect(ImmutableSet.toImmutableSet());
+    assertEquals(actualDownstreamConfigPaths, expectedDownstreamConfigPaths);
   }
 
   @Test
@@ -193,12 +199,11 @@ public class ConfigurationTest {
       observed.add(uuid);
     }
     observed.clear();
-    Config annotatorConfig = new Config(makeCommandLineArguments(requiredFlagsCli));
     // Test for Scanner config
     Path scannerConfig = testDir.resolve("scanner.xml");
-    ModuleInfo moduleInfo = new ModuleInfo(0, testDir, nullawayConfigPath, scannerConfig);
     for (int i = 0; i < 5; i++) {
-      Utility.setScannerCheckerActivation(annotatorConfig, moduleInfo, true);
+      ScannerConfigWriter writer = new ScannerConfigWriter();
+      writer.setOutput(testDir).writeAsXML(scannerConfig);
       String uuid = getValueFromTag(scannerConfig, "/scanner/uuid");
       if (observed.contains(uuid)) {
         throw new IllegalStateException(
