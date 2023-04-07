@@ -156,7 +156,7 @@ public class Config {
    */
   public final ImmutableSet<SourceType> generatedCodeDetectors;
   /** The context of target module. */
-  public Context targetModuleContext;
+  public final Context targetModuleContext;
   /** Deserializer for reading the output of the checker. */
   public final CheckerDeserializer deserializer;
   /** Using Checker instance which used to determine the impact of a fix on the target module. */
@@ -401,18 +401,25 @@ public class Config {
                 ? cmd.getOptionValue(depthOption.getLongOpt())
                 : "5");
     this.globalDir = Paths.get(cmd.getOptionValue(dirOption.getLongOpt()));
-    List<ModuleInfo> moduleInfoList =
-        Utility.readFileLines(Paths.get(cmd.getOptionValue(configPathsOption))).stream()
-            .map(
-                line -> {
-                  String[] info = line.split("\\t");
-                  return new ModuleInfo(
-                      getNextModuleUniqueID(),
-                      this.globalDir,
-                      Paths.get(info[0]),
-                      Paths.get(info[1]));
-                })
-            .collect(Collectors.toList());
+    List<ModuleInfo> moduleInfoList;
+    try {
+      moduleInfoList =
+          Files.readAllLines(
+                  Paths.get(cmd.getOptionValue(configPathsOption)), Charset.defaultCharset())
+              .stream()
+              .map(
+                  line -> {
+                    String[] info = line.split("\\t");
+                    return new ModuleInfo(
+                        getNextModuleUniqueID(),
+                        this.globalDir,
+                        Paths.get(info[0]),
+                        Paths.get(info[1]));
+                  })
+              .collect(Collectors.toList());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
     Preconditions.checkArgument(moduleInfoList.size() > 0, "Target module config paths not found.");
     // First line is information for the target module.
     this.target = moduleInfoList.get(0);
@@ -464,6 +471,7 @@ public class Config {
             ? ImmutableSet.of()
             : ImmutableSet.copyOf(cmd.getOptionValue(nonnullAnnotationsOption).split(","));
     this.deserializer = intializeCheckerDeserializer();
+    this.targetModuleContext = new Context(this, this.target, this.buildCommand);
   }
 
   /**
@@ -564,6 +572,7 @@ public class Config {
                 .orElse(List.of()));
     this.log.reset();
     this.deserializer = intializeCheckerDeserializer();
+    this.targetModuleContext = new Context(this, this.target, this.buildCommand);
   }
 
   /**

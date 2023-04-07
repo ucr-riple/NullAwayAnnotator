@@ -91,7 +91,6 @@ public class Annotator {
    */
   private void preprocess() {
     System.out.println("Preprocessing...");
-    config.targetModuleContext = new Context(config, config.target, config.buildCommand);
     Set<OnField> uninitializedFields =
         Utility.readFixesFromOutputDirectory(config, config.targetModuleContext).stream()
             .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))

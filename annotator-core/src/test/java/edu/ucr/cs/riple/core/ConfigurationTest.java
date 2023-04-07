@@ -34,6 +34,7 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.util.FixSerializationConfig;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.scanner.ScannerConfigWriter;
+import edu.ucr.cs.riple.scanner.Serializer;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -55,10 +56,13 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
@@ -84,13 +88,19 @@ public class ConfigurationTest {
       throw new RuntimeException(
           "Error happened for writing at file: " + testDir.resolve("paths.tsv"), e);
     }
+    try {
+      Files.createDirectory(testDir.resolve("0"));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
     requiredFlagsCli =
         new ArrayList<>(
             List.of(
                 new CLIFlagWithValue("bc", "./gradlew compileJava"),
                 new CLIFlagWithValue("cp", testDir.resolve("paths.tsv")),
                 new CLIFlagWithValue("i", "edu.ucr.Initializer"),
-                new CLIFlagWithValue("d", testDir)));
+                new CLIFlagWithValue("d", testDir),
+                new CLIFlagWithValue("cn", Checker.NULLAWAY.name())));
     requiredDownsStreamDependencyFlagsCli =
         new ArrayList<>(
             List.of(
@@ -120,20 +130,45 @@ public class ConfigurationTest {
       IllegalArgumentException ex =
           assertThrows(
               IllegalArgumentException.class,
-              () -> new Config(makeCommandLineArguments(incompleteFlags)));
+              () -> makeConfigWithFlags(makeCommandLineArguments(incompleteFlags)));
       // Check the error message.
       assertTrue(ex.getMessage().contains(expectedErrorMessage));
     }
   }
 
+  private void runTestWithMockedBuild(Runnable runnable) {
+    try (MockedStatic<Utility> utilMock = Mockito.mockStatic(Utility.class)) {
+      utilMock
+          .when(() -> Utility.buildTarget(Mockito.any()))
+          .thenAnswer(
+              invocation -> {
+                Stream.of(
+                        Serializer.NON_NULL_ELEMENTS_FILE_NAME,
+                        Serializer.CLASS_INFO_FILE_NAME,
+                        Serializer.METHOD_INFO_FILE_NAME)
+                    .forEach(
+                        fileName ->
+                            createAFileWithContent(
+                                testDir.resolve("0").resolve(fileName), "HEADER\n"));
+                createAFileWithContent(
+                    testDir.resolve("0").resolve("serialization_version.txt"), "3");
+                return null;
+              });
+      runnable.run();
+    }
+  }
+
   @Test
   public void testRequiredFlagsCli() {
-    Config config = new Config(makeCommandLineArguments(requiredFlagsCli));
-    assertEquals("./gradlew compileJava", config.buildCommand);
-    assertEquals(testDir, config.globalDir);
-    assertEquals("edu.ucr.Initializer", config.initializerAnnot);
-    assertEquals(Paths.get("0nullaway.xml"), config.target.nullawayConfig);
-    assertEquals(Paths.get("0scanner.xml"), config.target.scannerConfig);
+    runTestWithMockedBuild(
+        () -> {
+          Config config = makeConfigWithFlags(makeCommandLineArguments(requiredFlagsCli));
+          assertEquals("./gradlew compileJava", config.buildCommand);
+          assertEquals(testDir, config.globalDir);
+          assertEquals("edu.ucr.Initializer", config.initializerAnnot);
+          assertEquals(Paths.get("0nullaway.xml"), config.target.nullawayConfig);
+          assertEquals(Paths.get("0scanner.xml"), config.target.scannerConfig);
+        });
   }
 
   @Test
@@ -148,7 +183,8 @@ public class ConfigurationTest {
       flags.addAll(incompleteFlags);
       IllegalArgumentException ex =
           assertThrows(
-              IllegalArgumentException.class, () -> new Config(makeCommandLineArguments(flags)));
+              IllegalArgumentException.class,
+              () -> makeConfigWithFlags(makeCommandLineArguments(flags)));
       // Check the error message.
       assertTrue(ex.getMessage().contains(expectedErrorMessage));
     }
@@ -156,31 +192,35 @@ public class ConfigurationTest {
 
   @Test
   public void testRequiredFlagsForDownstreamDependencyAnalysisCli() {
-    List<CLIFlag> flags = new ArrayList<>(requiredFlagsCli);
-    flags.addAll(requiredDownsStreamDependencyFlagsCli);
-    Config config = new Config(makeCommandLineArguments(flags));
-    assertEquals("./gradlew compileJava", config.buildCommand);
-    assertEquals(testDir, config.globalDir);
-    assertEquals("edu.ucr.Initializer", config.initializerAnnot);
-    assertEquals(
-        new ModuleInfo(0, testDir, Paths.get("0nullaway.xml"), Paths.get("0scanner.xml")),
-        config.target);
-    assertEquals(testDir.resolve("library-model.tsv"), config.nullawayLibraryModelLoaderPath);
-    assertTrue(config.downStreamDependenciesAnalysisActivated);
-    assertEquals("./gradlew :dep:compileJava", config.downstreamDependenciesBuildCommand);
-    // Compute expected downstream config paths for nullaway and scanner config file paths for
-    // downstream dependencies.
-    ImmutableSet<Pair<Path, Path>> expectedDownstreamConfigPaths =
-        IntStream.range(1, 5)
-            .mapToObj(i -> new Pair<>(Paths.get(i + "nullaway.xml"), Paths.get(i + "scanner.xml")))
-            .collect(ImmutableSet.toImmutableSet());
-    // Retrieve actual downstream config paths for nullaway and scanner config file paths for
-    // downstream dependencies.
-    ImmutableSet<Pair<Path, Path>> actualDownstreamConfigPaths =
-        config.downstreamInfo.stream()
-            .map(moduleInfo -> new Pair<>(moduleInfo.nullawayConfig, moduleInfo.scannerConfig))
-            .collect(ImmutableSet.toImmutableSet());
-    assertEquals(actualDownstreamConfigPaths, expectedDownstreamConfigPaths);
+    runTestWithMockedBuild(
+        () -> {
+          List<CLIFlag> flags = new ArrayList<>(requiredFlagsCli);
+          flags.addAll(requiredDownsStreamDependencyFlagsCli);
+          Config config = makeConfigWithFlags(makeCommandLineArguments(flags));
+          assertEquals("./gradlew compileJava", config.buildCommand);
+          assertEquals(testDir, config.globalDir);
+          assertEquals("edu.ucr.Initializer", config.initializerAnnot);
+          assertEquals(Paths.get("0nullaway.xml"), config.target.nullawayConfig);
+          assertEquals(Paths.get("0scanner.xml"), config.target.scannerConfig);
+          assertEquals(testDir.resolve("library-model.tsv"), config.nullawayLibraryModelLoaderPath);
+          assertTrue(config.downStreamDependenciesAnalysisActivated);
+          assertEquals("./gradlew :dep:compileJava", config.downstreamDependenciesBuildCommand);
+          // Compute expected downstream config paths for nullaway and scanner config file paths for
+          // downstream dependencies.
+          ImmutableSet<Pair<Path, Path>> expectedDownstreamConfigPaths =
+              IntStream.range(1, 5)
+                  .mapToObj(
+                      i -> new Pair<>(Paths.get(i + "nullaway.xml"), Paths.get(i + "scanner.xml")))
+                  .collect(ImmutableSet.toImmutableSet());
+          // Retrieve actual downstream config paths for nullaway and scanner config file paths for
+          // downstream dependencies.
+          ImmutableSet<Pair<Path, Path>> actualDownstreamConfigPaths =
+              config.downstreamInfo.stream()
+                  .map(
+                      moduleInfo -> new Pair<>(moduleInfo.nullawayConfig, moduleInfo.scannerConfig))
+                  .collect(ImmutableSet.toImmutableSet());
+          assertEquals(actualDownstreamConfigPaths, expectedDownstreamConfigPaths);
+        });
   }
 
   @Test
@@ -215,55 +255,66 @@ public class ConfigurationTest {
 
   @Test
   public void testAnalysisModeFlags() {
-    Config config;
-    // Check mode downstream dependency off.
-    config = new Config(makeCommandLineArguments(requiredFlagsCli));
-    assertEquals(AnalysisMode.LOCAL, config.mode);
+    runTestWithMockedBuild(
+        () -> {
+          Config config;
+          // Check mode downstream dependency off.
+          config = makeConfigWithFlags(makeCommandLineArguments(requiredFlagsCli));
+          assertEquals(AnalysisMode.LOCAL, config.mode);
 
-    List<CLIFlag> baseFlags = new ArrayList<>(requiredFlagsCli);
-    baseFlags.addAll(requiredDownsStreamDependencyFlagsCli);
+          List<CLIFlag> baseFlags = new ArrayList<>(requiredFlagsCli);
+          baseFlags.addAll(requiredDownsStreamDependencyFlagsCli);
 
-    // Check default mode downstream dependency on.
-    config = new Config(makeCommandLineArguments(baseFlags));
-    assertEquals(AnalysisMode.LOWER_BOUND, config.mode);
+          // Check default mode downstream dependency on.
+          config = makeConfigWithFlags(makeCommandLineArguments(baseFlags));
+          assertEquals(AnalysisMode.LOWER_BOUND, config.mode);
 
-    Map<String, AnalysisMode> modes =
-        Map.of(
-            "upper_bound",
-            AnalysisMode.UPPER_BOUND,
-            "lower_bound",
-            AnalysisMode.LOWER_BOUND,
-            "default",
-            AnalysisMode.LOWER_BOUND,
-            "strict",
-            AnalysisMode.STRICT);
+          Map<String, AnalysisMode> modes =
+              Map.of(
+                  "upper_bound",
+                  AnalysisMode.UPPER_BOUND,
+                  "lower_bound",
+                  AnalysisMode.LOWER_BOUND,
+                  "default",
+                  AnalysisMode.LOWER_BOUND,
+                  "strict",
+                  AnalysisMode.STRICT);
 
-    modes.forEach(
-        (flagValue, expectedMode) -> {
-          CLIFlag flag = new CLIFlagWithValue("am", flagValue);
-          ArrayList<CLIFlag> flags = new ArrayList<>(baseFlags);
-          flags.add(flag);
-          Config c = new Config(makeCommandLineArguments(flags));
-          assertEquals(expectedMode, c.mode);
+          modes.forEach(
+              (flagValue, expectedMode) -> {
+                CLIFlag flag = new CLIFlagWithValue("am", flagValue);
+                ArrayList<CLIFlag> flags = new ArrayList<>(baseFlags);
+                flags.add(flag);
+                Config c = makeConfigWithFlags(makeCommandLineArguments(flags));
+                assertEquals(expectedMode, c.mode);
+              });
         });
   }
 
   @Test
   public void testForceResolveFlag() {
-    Config config;
+    runTestWithMockedBuild(
+        () -> {
+          Config config;
 
-    List<CLIFlag> baseFlags = new ArrayList<>(requiredFlagsCli);
-    baseFlags.addAll(requiredDownsStreamDependencyFlagsCli);
+          List<CLIFlag> baseFlags = new ArrayList<>(requiredFlagsCli);
+          baseFlags.addAll(requiredDownsStreamDependencyFlagsCli);
 
-    // Check default mode.
-    config = new Config(makeCommandLineArguments(baseFlags));
-    assertFalse(config.forceResolveActivated);
+          // Check default mode.
+          config = makeConfigWithFlags(makeCommandLineArguments(baseFlags));
+          assertFalse(config.forceResolveActivated);
 
-    CLIFlag flag = new CLIFlagWithValue("fr", "edu.ucr.example.NullUnmarked");
-    baseFlags.add(flag);
-    config = new Config(makeCommandLineArguments(baseFlags));
-    assertTrue(config.forceResolveActivated);
-    assertEquals(config.nullUnMarkedAnnotation, "edu.ucr.example.NullUnmarked");
+          CLIFlag flag = new CLIFlagWithValue("fr", "edu.ucr.example.NullUnmarked");
+          baseFlags.add(flag);
+          config = makeConfigWithFlags(makeCommandLineArguments(baseFlags));
+          assertTrue(config.forceResolveActivated);
+          assertEquals(config.nullUnMarkedAnnotation, "edu.ucr.example.NullUnmarked");
+        });
+  }
+
+  private Config makeConfigWithFlags(String[] flags) {
+    deleteModuleOutputDirs();
+    return new Config(flags);
   }
 
   /**
@@ -289,6 +340,37 @@ public class ConfigurationTest {
         | SAXException ex) {
       throw new RuntimeException("Could not extract value from tag: " + key, ex);
     }
+  }
+
+  /**
+   * Helper method for creating a file with the given content.
+   *
+   * @param path Path to file.
+   * @param content Content of file.
+   */
+  private void createAFileWithContent(Path path, String content) {
+    try {
+      Files.write(path, content.getBytes());
+    } catch (IOException e) {
+      throw new RuntimeException("Could not create file: " + path, e);
+    }
+  }
+
+  private void deleteModuleOutputDirs() {
+    IntStream.of(0, 5)
+        .forEach(
+            id -> {
+              try {
+                Path path = testDir.resolve(String.valueOf(id));
+                if (!path.toFile().exists()) {
+                  return;
+                }
+                FileUtils.cleanDirectory(path.toFile());
+                FileUtils.deleteDirectory(path.toFile());
+              } catch (IOException e) {
+                throw new RuntimeException(e);
+              }
+            });
   }
 
   /** Container class for CLI Flag. */
