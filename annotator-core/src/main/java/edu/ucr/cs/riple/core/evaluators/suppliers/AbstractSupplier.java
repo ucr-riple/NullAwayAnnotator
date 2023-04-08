@@ -47,7 +47,7 @@ public abstract class AbstractSupplier implements Supplier {
   public AbstractSupplier(Config config, Context context) {
     this.config = config;
     this.context = context;
-    this.errorStore = initializeErrorStore();
+    this.errorStore = new ErrorStore(config, context);
     this.injector = initializeInjector();
     this.depth = initializeDepth();
   }
@@ -71,10 +71,6 @@ public abstract class AbstractSupplier implements Supplier {
    *
    * @return {@link ErrorStore} of {@link Error} instances.
    */
-  protected ErrorStore initializeErrorStore() {
-    return new ErrorStore(config, context);
-  }
-
   @Override
   public ErrorStore getErrorStore() {
     return errorStore;

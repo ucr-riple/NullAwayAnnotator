@@ -36,8 +36,7 @@ import java.util.Set;
 public interface CheckerDeserializer {
 
   /**
-   * Deserializes values produced by NullAway in a tsv file and creates a corresponding {@link
-   * Error} instance.
+   * Deserialized errors reported by the checker on the passed modules.
    *
    * @param context Context of the module where errors are reported.
    * @return Corresponding Error instance with the passed values.

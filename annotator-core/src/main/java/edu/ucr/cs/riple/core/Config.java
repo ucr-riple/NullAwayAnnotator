@@ -582,7 +582,8 @@ public class Config {
     if (!serializationVersionPath.toFile().exists()) {
       // Older versions of checkers
       throw new RuntimeException(
-          "Serialization version not found. Upgrade new versions of checkers.");
+          "Serialization version not found. Upgrade to newer versions of the checkers: "
+              + checker.name());
     }
     List<String> lines = Utility.readFileLines(serializationVersionPath);
     int version = Integer.parseInt(lines.get(0));
