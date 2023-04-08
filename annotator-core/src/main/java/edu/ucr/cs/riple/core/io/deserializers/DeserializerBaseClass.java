@@ -58,6 +58,7 @@ public abstract class DeserializerBaseClass implements CheckerDeserializer {
    * @param region Region where the error is reported,
    * @param offset offset of program point in original version where error is reported.
    * @param resolvingFixes Set of fixes that resolve the error.
+   * @param context Context of the modules which errors are reported on.
    * @return The corresponding error.
    */
   protected Error createError(

@@ -160,6 +160,7 @@ public class Config {
   public final Context targetModuleContext;
   /** Deserializer for reading the output of the checker. */
   public final CheckerDeserializer deserializer;
+
   /** Checker enum to retrieve checker specific instances. (e.g. {@link CheckerDeserializer}) */
   public final Checker checker;
 
@@ -465,7 +466,7 @@ public class Config {
         !cmd.hasOption(nonnullAnnotationsOption)
             ? ImmutableSet.of()
             : ImmutableSet.copyOf(cmd.getOptionValue(nonnullAnnotationsOption).split(","));
-    this.deserializer = intializeCheckerDeserializer();
+    this.deserializer = initializeCheckerDeserializer();
     this.targetModuleContext = new Context(this, this.target, this.buildCommand);
   }
 
@@ -566,7 +567,7 @@ public class Config {
                     String.class)
                 .orElse(List.of()));
     this.log.reset();
-    this.deserializer = intializeCheckerDeserializer();
+    this.deserializer = initializeCheckerDeserializer();
     this.targetModuleContext = new Context(this, this.target, this.buildCommand);
   }
 
@@ -575,7 +576,7 @@ public class Config {
    *
    * @return the checker deserializer associated with the requested checker name and version.
    */
-  private CheckerDeserializer intializeCheckerDeserializer() {
+  public CheckerDeserializer initializeCheckerDeserializer() {
     // To retrieve the serialization version, we need to build the target first.
     Utility.buildTarget(this);
     Path serializationVersionPath = target.dir.resolve("serialization_version.txt");
