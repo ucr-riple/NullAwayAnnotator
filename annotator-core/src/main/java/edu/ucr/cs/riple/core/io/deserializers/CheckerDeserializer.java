@@ -22,49 +22,29 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.adapters;
+package edu.ucr.cs.riple.core.io.deserializers;
 
+import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Checker;
+import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.trackers.Region;
-import edu.ucr.cs.riple.core.metadata.trackers.TrackerNode;
-import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Set;
 
 /**
  * Responsible for performing tasks related to NullAway / Type Annotator Scanner serialization
  * features.
  */
-public interface NullAwayVersionAdapter {
+public interface CheckerDeserializer {
 
   /**
-   * Deserializes values produced by NullAway in a tsv file and creates a corresponding {@link
-   * Error} instance.
+   * Deserialized errors reported by the checker on the passed modules.
    *
-   * @param values Values in row of a TSV file.
-   * @param registry Field declaration registry to generate the set of resolving fixes for the
-   *     deserialized error.
+   * @param modules Context of the module where errors are reported.
+   * @param fieldRegistry Registry of fields in the project.
    * @return Corresponding Error instance with the passed values.
    */
-  Error deserializeError(String[] values, FieldRegistry registry);
-
-  /**
-   * Deserializes values produced by Type Annotator Scanner in a tsv file and creates a
-   * corresponding {@link TrackerNode} instance.
-   *
-   * @param values Values in row of a TSV file.
-   * @return Corresponding TrackerNode instance with the passed values.
-   */
-  TrackerNode deserializeTrackerNode(String[] values);
-
-  /**
-   * Returns a set of regions enclosed by a field. Returns a set since there can multiple inline
-   * field declarations.
-   *
-   * @param onField The target field.
-   * @return Set of regions enclosed by the passed location.
-   */
-  Set<Region> getFieldRegionScope(OnField onField);
+  Set<Error> deserializeErrors(ImmutableSet<ModuleInfo> modules, FieldRegistry fieldRegistry);
 
   /**
    * Returns the serialization version number which this adapter is associated with.
@@ -72,4 +52,11 @@ public interface NullAwayVersionAdapter {
    * @return Serialization number.
    */
   int getVersionNumber();
+
+  /**
+   * Returns the name of the checker that this deserializer is associated with.
+   *
+   * @return Associated checker.
+   */
+  Checker getAssociatedChecker();
 }

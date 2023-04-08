@@ -104,9 +104,10 @@ public class Annotator {
     fieldRegistry = new FieldRegistry(config, config.target);
     methodRegistry = new MethodRegistry(config);
     NonnullStore nonnullStore = new NonnullStore(config);
-    config.initializeAdapter(fieldRegistry, nonnullStore);
+    config.initializeCheckerDeserializer(nonnullStore);
     Set<OnField> uninitializedFields =
-        Utility.readFixesFromOutputDirectory(config, fieldRegistry).stream()
+        Utility.readFixesFromOutputDirectory(config, ImmutableSet.of(config.target), fieldRegistry)
+            .stream()
             .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
             .map(Fix::toField)
             .collect(Collectors.toSet());
@@ -212,7 +213,8 @@ public class Annotator {
     Utility.buildTarget(config);
     // Suggested fixes of target at the current state.
     ImmutableSet<Fix> fixes =
-        Utility.readFixesFromOutputDirectory(config, fieldRegistry).stream()
+        Utility.readFixesFromOutputDirectory(config, ImmutableSet.of(config.target), fieldRegistry)
+            .stream()
             .filter(fix -> !cache.processedFix(fix))
             .collect(ImmutableSet.toImmutableSet());
 
@@ -256,8 +258,10 @@ public class Annotator {
     // Collect regions with remaining errors.
     Utility.buildTarget(config);
     Set<Error> remainingErrors =
-        Utility.readErrorsFromOutputDirectory(config, config.target, fieldRegistry);
-    Set<Fix> remainingFixes = Utility.readFixesFromOutputDirectory(config, fieldRegistry);
+        Utility.readErrorsFromOutputDirectory(
+            config, ImmutableSet.of(config.target), fieldRegistry);
+    Set<Fix> remainingFixes =
+        Utility.readFixesFromOutputDirectory(config, ImmutableSet.of(config.target), fieldRegistry);
     // Collect all regions for NullUnmarked.
     // For all errors in regions which correspond to a method's body, we can add @NullUnmarked at
     // the method level.
@@ -361,7 +365,9 @@ public class Annotator {
     config.log.updateInjectedAnnotations(initializationSuppressWarningsAnnotations);
     // Collect @NullUnmarked annotations on classes for any remaining error.
     Utility.buildTarget(config);
-    remainingErrors = Utility.readErrorsFromOutputDirectory(config, config.target, fieldRegistry);
+    remainingErrors =
+        Utility.readErrorsFromOutputDirectory(
+            config, ImmutableSet.of(config.target), fieldRegistry);
     nullUnMarkedAnnotations =
         remainingErrors.stream()
             .filter(error -> !error.getRegion().isInAnonymousClass())
