@@ -25,7 +25,7 @@
 package edu.ucr.cs.riple.core.metadata.index;
 
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.Context;
+import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import java.util.ArrayList;
 import java.util.Collection;

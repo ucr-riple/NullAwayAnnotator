@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.io.deserializers.CheckerDeserializer;
 import edu.ucr.cs.riple.core.log.Log;
+import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import edu.ucr.cs.riple.injector.offsets.OffsetChange;

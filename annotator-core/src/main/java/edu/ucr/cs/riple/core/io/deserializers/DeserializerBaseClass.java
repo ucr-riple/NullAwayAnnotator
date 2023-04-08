@@ -27,7 +27,7 @@ package edu.ucr.cs.riple.core.io.deserializers;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Checker;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.Context;
+import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;

@@ -26,8 +26,8 @@ package edu.ucr.cs.riple.core.evaluators.graph;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
 import edu.ucr.cs.riple.core.metadata.index.Fix;

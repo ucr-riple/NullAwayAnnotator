@@ -25,11 +25,11 @@
 package edu.ucr.cs.riple.core.evaluators.graph.processors;
 
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.evaluators.graph.Node;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
+import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;

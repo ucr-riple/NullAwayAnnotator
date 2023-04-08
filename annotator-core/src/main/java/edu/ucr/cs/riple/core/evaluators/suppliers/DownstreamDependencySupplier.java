@@ -25,7 +25,6 @@
 package edu.ucr.cs.riple.core.evaluators.suppliers;
 
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.cache.TargetModuleCache;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.cache.downstream.VoidDownstreamImpactCache;
@@ -35,6 +34,7 @@ import edu.ucr.cs.riple.core.evaluators.graph.processors.ParallelConflictGraphPr
 import edu.ucr.cs.riple.core.evaluators.graph.processors.SequentialConflictGraphProcessor;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.VirtualInjector;
+import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.util.Utility;

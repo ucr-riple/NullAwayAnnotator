@@ -27,7 +27,7 @@ package edu.ucr.cs.riple.core.metadata.index;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.Context;
+import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.util.Collection;

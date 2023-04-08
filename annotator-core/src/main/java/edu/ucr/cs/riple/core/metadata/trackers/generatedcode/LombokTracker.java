@@ -24,8 +24,8 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers.generatedcode;
 
-import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.evaluators.graph.processors.ParallelConflictGraphProcessor;
+import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;

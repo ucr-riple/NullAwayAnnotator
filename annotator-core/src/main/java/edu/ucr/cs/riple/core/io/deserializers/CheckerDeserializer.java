@@ -25,7 +25,7 @@
 package edu.ucr.cs.riple.core.io.deserializers;
 
 import edu.ucr.cs.riple.core.Checker;
-import edu.ucr.cs.riple.core.Context;
+import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import java.util.Set;
 

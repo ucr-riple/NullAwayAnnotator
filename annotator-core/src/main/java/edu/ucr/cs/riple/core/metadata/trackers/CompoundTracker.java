@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.core.metadata.trackers;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.Context;
+import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.trackers.generatedcode.GeneratedRegionTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.generatedcode.LombokTracker;
 import edu.ucr.cs.riple.injector.location.Location;

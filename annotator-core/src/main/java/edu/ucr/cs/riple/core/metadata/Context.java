@@ -22,9 +22,11 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core;
+package edu.ucr.cs.riple.core.metadata;
 
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
 import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
