@@ -24,16 +24,14 @@
 
 package edu.ucr.cs.riple.core.metadata.index;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.ModuleInfo;
+import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import edu.ucr.cs.riple.core.util.Utility;
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -47,44 +45,34 @@ public class Index {
 
   /** Contents of the index. */
   private final Multimap<Region, Error> items;
-  /** Factory instance. */
-  private final Factory factory;
+  /**
+   * Annotator config. Used to retrieve the using {@link
+   * edu.ucr.cs.riple.core.io.deserializers.CheckerDeserializer} corresponding checker.
+   */
+  private final Config config;
   /** Paths to the file to load the content from. */
-  private final ImmutableSet<Path> paths;
+  private final ImmutableSet<ModuleInfo> modules;
+  /** Field registry, */
+  private final FieldRegistry fieldRegistry;
 
   /**
    * Creates an instance of Index. Contents are accumulated from multiple sources.
    *
-   * @param paths ImmutableSet of paths to load the data from. Each file is a TSV file containing
-   *     information to create an instance of {@link Error}.
-   * @param factory Factory to create instances from file lines.
+   * @param config Annotator config.
+   * @param modules Modules where the errors are reported on.
    */
-  public Index(ImmutableSet<Path> paths, Factory factory) {
-    this.paths = paths;
+  public Index(Config config, ImmutableSet<ModuleInfo> modules, FieldRegistry fieldRegistry) {
+    this.config = config;
+    this.modules = modules;
+    this.fieldRegistry = fieldRegistry;
     this.items = MultimapBuilder.hashKeys().arrayListValues().build();
-    this.factory = factory;
   }
 
   /** Starts the reading and index process. */
   public void index() {
     items.clear();
-    paths.forEach(
-        path -> {
-          try (BufferedReader br = Files.newBufferedReader(path, UTF_8)) {
-            String line = br.readLine();
-            // Skip TSV header.
-            if (line != null) {
-              line = br.readLine();
-            }
-            while (line != null) {
-              Error error = factory.build(line.split("\t"));
-              items.put(error.getRegion(), error);
-              line = br.readLine();
-            }
-          } catch (IOException e) {
-            throw new RuntimeException("Error happened in indexing", e);
-          }
-        });
+    Utility.readErrorsFromOutputDirectory(config, modules, fieldRegistry)
+        .forEach(e -> items.put(e.getRegion(), e));
   }
 
   /**

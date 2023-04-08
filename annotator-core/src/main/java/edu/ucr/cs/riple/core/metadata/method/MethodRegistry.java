@@ -35,6 +35,7 @@ import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
 
@@ -42,17 +43,16 @@ import javax.annotation.Nullable;
  * The top-down tree structure of methods in the target module, where each method's parent node, is
  * their immediate overriding method.
  */
-public class MethodDeclarationTree extends MetaData<MethodNode> {
+public class MethodRegistry extends MetaData<MethodRecord> {
 
   /** Each method has a unique id across all methods. This hashmap, maps ids to nodes. */
-  private HashMap<Integer, MethodNode> nodes;
-
+  private HashMap<Integer, MethodRecord> nodes;
   /** A map from class flat name to its declared constructors */
-  private Multimap<String, MethodNode> classConstructorMap;
+  private Multimap<String, MethodRecord> classConstructorMap;
   /** Set of all classes flat name declared in module. */
   private Set<String> declaredClasses;
 
-  public MethodDeclarationTree(Config config) {
+  public MethodRegistry(Config config) {
     super(config, config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
   }
 
@@ -63,18 +63,18 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
     this.classConstructorMap = MultimapBuilder.hashKeys().hashSetValues().build();
     this.nodes = new HashMap<>();
     // The root node of this tree with id: 0.
-    nodes.put(MethodNode.TOP.id, MethodNode.TOP);
+    nodes.put(MethodRecord.TOP.id, MethodRecord.TOP);
   }
 
   @Override
-  protected MethodNode addNodeByLine(String[] values) {
+  protected MethodRecord addNodeByLine(String[] values) {
     // Nodes unique id.
     Integer id = Integer.parseInt(values[0]);
-    MethodNode node;
+    MethodRecord node;
     if (nodes.containsKey(id)) {
       node = nodes.get(id);
     } else {
-      node = new MethodNode(id);
+      node = new MethodRecord(id);
       nodes.put(id, node);
     }
     // Fill nodes information.
@@ -91,10 +91,10 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
         isConstructor);
     // If node has a non-top parent.
     if (parentId > 0) {
-      MethodNode parent = nodes.get(parentId);
+      MethodRecord parent = nodes.get(parentId);
       // If parent has not been seen visited before.
       if (parent == null) {
-        parent = new MethodNode(parentId);
+        parent = new MethodRecord(parentId);
         nodes.put(parentId, parent);
       }
       // Parent is already visited.
@@ -110,72 +110,53 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
   }
 
   /**
-   * Locates the immediate super method of input method declared in module.
+   * Returns the immediate super method of the given method.
    *
-   * @param method Method signature of input.
-   * @param clazz Fully qualified name of the input method.
-   * @return Corresponding node of the overridden method, null if method has no parent.
+   * @param onMethod Method to find its super method.
+   * @return Immediate super method of the given method, null if method has no super method.
    */
   @Nullable
-  public MethodNode getClosestSuperMethod(String method, String clazz) {
-    MethodNode node = findNode(method, clazz);
+  public MethodRecord getImmediateSuperMethod(OnMethod onMethod) {
+    MethodRecord node = findMethodByName(onMethod.clazz, onMethod.method);
     if (node == null) {
       return null;
     }
-    MethodNode parent = nodes.get(node.parent);
+    MethodRecord parent = nodes.get(node.parent);
     return (parent.isNonTop() && parent.location != null) ? parent : null;
   }
 
   /**
-   * Locates the overriding methods of input method.
+   * Returns the set of the immediate sub methods of the given method.
    *
-   * @param method Method signature of input.
-   * @param clazz Fully qualified name of the input method.
-   * @param recursive If ture, it will travers the declaration tree recursively.
-   * @return ImmutableSet of overriding methods.
+   * @param onMethod Method to find its sub methods.
+   * @return Immediate sub methods of the given method.
    */
-  public ImmutableSet<MethodNode> getSubMethods(String method, String clazz, boolean recursive) {
-    MethodNode node = findNode(method, clazz);
+  public ImmutableSet<MethodRecord> getImmediateSubMethods(OnMethod onMethod) {
+    MethodRecord node = findMethodByName(onMethod.clazz, onMethod.method);
     if (node == null) {
       return ImmutableSet.of();
     }
     if (node.children == null) {
       return ImmutableSet.of();
     }
-    Set<MethodNode> ans = new HashSet<>();
-    Set<Integer> workList = new HashSet<>(node.children);
-    while (!workList.isEmpty()) {
-      Set<Integer> tmp = new HashSet<>();
-      for (Integer id : workList) {
-        MethodNode selected = nodes.get(id);
-        if (!ans.contains(selected)) {
-          ans.add(selected);
-          if (selected.children != null) {
-            tmp.addAll(selected.children);
-          }
-        }
-      }
-      if (!recursive) {
-        break;
-      }
-      workList.clear();
-      workList.addAll(tmp);
-    }
-    return ImmutableSet.copyOf(ans);
+    return node.children.stream()
+        .map(nodes::get)
+        .filter(Objects::nonNull)
+        .collect(ImmutableSet.toImmutableSet());
   }
 
   /**
-   * Locates a node based on the method signature and fully qualified class name.
+   * Returns the method corresponding to the given signature and class.
    *
+   * @param encClass Fully Qualified name of the class.
    * @param method Method signature.
-   * @param clazz Fully Qualified name of the class.
-   * @return Corresponding node.
+   * @return Corresponding method.
    */
-  public MethodNode findNode(String method, String clazz) {
+  public MethodRecord findMethodByName(String encClass, String method) {
     return findNodeWithHashHint(
         candidate ->
-            candidate.location.clazz.equals(clazz) && candidate.location.method.equals(method),
-        MethodNode.hash(method, clazz));
+            candidate.location.clazz.equals(encClass) && candidate.location.method.equals(method),
+        MethodRecord.hash(method, encClass));
   }
 
   /**
@@ -183,8 +164,8 @@ public class MethodDeclarationTree extends MetaData<MethodNode> {
    *
    * @return ImmutableSet of method nodes.
    */
-  public ImmutableSet<MethodNode> getPublicMethodsWithNonPrimitivesReturn() {
-    return findNodes(MethodNode::isPublicMethodWithNonPrimitiveReturnType)
+  public ImmutableSet<MethodRecord> getPublicMethodsWithNonPrimitivesReturn() {
+    return findNodes(MethodRecord::isPublicMethodWithNonPrimitiveReturnType)
         .collect(ImmutableSet.toImmutableSet());
   }
 

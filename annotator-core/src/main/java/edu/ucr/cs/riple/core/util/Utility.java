@@ -24,15 +24,19 @@
 
 package edu.ucr.cs.riple.core.util;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
+import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.core.metadata.trackers.TrackerNode;
 import edu.ucr.cs.riple.scanner.AnnotatorScanner;
 import edu.ucr.cs.riple.scanner.ScannerConfigWriter;
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -44,7 +48,6 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -140,39 +143,29 @@ public class Utility {
    * set of resolving fixes for read errors.
    *
    * @param config Annotator config.
-   * @param store Field Declaration store.
+   * @param modules Set of modules which the generated fixes belong to.
+   * @param registry Field declaration registry, used to detect fixes on declarations with multiple
+   *     inline field declarations.
    * @return Set of collected fixes.
    */
-  public static Set<Fix> readFixesFromOutputDirectory(Config config, FieldDeclarationStore store) {
-    Set<Error> errors = readErrorsFromOutputDirectory(config, config.target, store);
+  public static Set<Fix> readFixesFromOutputDirectory(
+      Config config, ImmutableSet<ModuleInfo> modules, FieldRegistry registry) {
+    Set<Error> errors = readErrorsFromOutputDirectory(config, modules, registry);
     return Error.getResolvingFixesOfErrors(errors);
   }
 
   /**
    * Reads serialized errors of passed module in "errors.tsv" file in the output directory,
    *
-   * @param info Module info.
-   * @param fieldDeclarationStore Field Declaration store.
+   * @param config Annotator config, used to retrieve the correct deserializer.
+   * @param modules Module info.
+   * @param fieldRegistry Field registry instance, used to detect fixes on declarations with
+   *     multiple inline field declarations.
    * @return Set of serialized errors.
    */
   public static Set<Error> readErrorsFromOutputDirectory(
-      Config config, ModuleInfo info, FieldDeclarationStore fieldDeclarationStore) {
-    Path errorsPath = info.dir.resolve("errors.tsv");
-    Set<Error> errors = new HashSet<>();
-    try {
-      try (BufferedReader br =
-          Files.newBufferedReader(errorsPath.toFile().toPath(), Charset.defaultCharset())) {
-        String line;
-        // Skip header.
-        br.readLine();
-        while ((line = br.readLine()) != null) {
-          errors.add(config.getAdapter().deserializeError(line.split("\t"), fieldDeclarationStore));
-        }
-      }
-    } catch (IOException e) {
-      throw new RuntimeException("Exception happened in reading errors at: " + errorsPath, e);
-    }
-    return errors;
+      Config config, ImmutableSet<ModuleInfo> modules, FieldRegistry fieldRegistry) {
+    return config.deserializer.deserializeErrors(modules, fieldRegistry);
   }
 
   /**
@@ -253,6 +246,21 @@ public class Utility {
         .setOutput(info.dir)
         .setNonnullAnnotations(config.getNonnullAnnotations())
         .writeAsXML(info.scannerConfig);
+  }
+
+  /**
+   * Deserializes a {@link TrackerNode} corresponding to values stored in a string array.
+   *
+   * @param values String array of values.
+   * @return Deserialized {@link TrackerNode} instance corresponding to the given values.
+   */
+  public static TrackerNode deserializeTrackerNode(String[] values) {
+    Preconditions.checkArgument(
+        values.length == 5,
+        "Expected 5 values to create TrackerNode instance in NullAway serialization version 3 but found: "
+            + values.length);
+    return new TrackerNode(
+        new Region(values[0], values[1], SourceType.valueOf(values[4])), values[2], values[3]);
   }
 
   /**
@@ -360,7 +368,7 @@ public class Utility {
    * @return The lines from the file as a Stream.
    */
   public static List<String> readFileLines(Path path) {
-    try (Stream<String> stream = Files.lines(path)) {
+    try (Stream<String> stream = Files.lines(path, Charset.defaultCharset())) {
       return stream.collect(Collectors.toList());
     } catch (IOException e) {
       throw new RuntimeException("Exception while reading file: " + path, e);

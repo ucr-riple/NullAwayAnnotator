@@ -24,7 +24,8 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers.generatedcode;
 
-import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+import edu.ucr.cs.riple.core.evaluators.graph.processors.ParallelConflictGraphProcessor;
+import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
@@ -40,19 +41,18 @@ import java.util.stream.Stream;
  * {@code @Nullable} annotation on fields to getter methods, therefore, extends the set of
  * potentially impacted regions to all callers of that method as well. This tracker, will include
  * all callers of any method region in lombok generated code. This will guarantee that {@link
- * edu.ucr.cs.riple.core.evaluators.graphprocessor.ParallelConflictGraphProcessor} will catch any
- * triggered errors by an annotation including all copied annotations by lombok as well.
+ * ParallelConflictGraphProcessor} will catch any triggered errors by an annotation including all
+ * copied annotations by lombok as well.
  */
 public class LombokTracker implements GeneratedRegionTracker {
 
   /** Method region tracker to get potentially impacted regions of a method. */
   private final MethodRegionTracker tracker;
-  /** Method declaration tree instance. */
-  private final MethodDeclarationTree methodDeclarationTree;
+  /** Method registry instance. */
+  private final MethodRegistry methodRegistry;
 
-  public LombokTracker(
-      MethodDeclarationTree methodDeclarationTree, MethodRegionTracker methodRegionTracker) {
-    this.methodDeclarationTree = methodDeclarationTree;
+  public LombokTracker(MethodRegistry methodRegistry, MethodRegionTracker methodRegionTracker) {
+    this.methodRegistry = methodRegistry;
     this.tracker = methodRegionTracker;
   }
 
@@ -62,7 +62,7 @@ public class LombokTracker implements GeneratedRegionTracker {
         // filter regions which are created by lombok
         .filter(region -> region.sourceType.equals(SourceType.LOMBOK) && region.isOnMethod())
         // find the corresponding method for the region.
-        .map(region -> methodDeclarationTree.findNode(region.member, region.clazz))
+        .map(region -> methodRegistry.findMethodByName(region.clazz, region.member))
         .filter(Objects::nonNull)
         // get method location.
         .map(methodNode -> methodNode.location)

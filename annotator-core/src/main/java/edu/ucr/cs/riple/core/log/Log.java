@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.log;
 
+import edu.ucr.cs.riple.core.evaluators.graph.ConflictGraph;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,10 +33,7 @@ import java.util.Set;
 /** Log information for Annotator. */
 public class Log {
 
-  /**
-   * Sum of number of nodes constructed in each {@link
-   * edu.ucr.cs.riple.core.metadata.graph.ConflictGraph}.
-   */
+  /** Sum of number of nodes constructed in each {@link ConflictGraph}. */
   private long nodes;
   /** Number of build requests. */
   private long requested;
@@ -108,8 +106,7 @@ public class Log {
   /**
    * Adds the passed parameter to the number of {@link Log#nodes}.
    *
-   * @param numberOfNewNodesCreated Number of new nodes created in {@link
-   *     edu.ucr.cs.riple.core.metadata.graph.ConflictGraph}.
+   * @param numberOfNewNodesCreated Number of new nodes created in {@link ConflictGraph}.
    */
   public void updateNodeNumber(long numberOfNewNodesCreated) {
     this.nodes += numberOfNewNodesCreated;

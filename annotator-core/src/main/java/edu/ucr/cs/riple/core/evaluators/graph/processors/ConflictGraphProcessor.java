@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2022 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,19 +22,20 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.index;
+package edu.ucr.cs.riple.core.evaluators.graph.processors;
+
+import edu.ucr.cs.riple.core.evaluators.graph.ConflictGraph;
 
 /**
- * Factory class to enable {@link Index} to create a new instance from values written in string at
- * each line of output files.
+ * Interface for conflict-graph processors. Subclasses of this type, can compute the impacts of a
+ * set of fixes given in a conflict graph.
  */
-public interface Factory {
+public interface ConflictGraphProcessor {
 
   /**
-   * Creates an instance of {@link Error} from values in string.
+   * Processes the given conflict graph and computes the impact of including nodes.
    *
-   * @param values values of instance {@code T} in string.
-   * @return instance of T.
+   * @param graph Conflict graph containing the target fixes.
    */
-  Error build(String[] values);
+  void process(ConflictGraph graph);
 }

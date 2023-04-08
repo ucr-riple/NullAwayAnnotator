@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.tools;
 
+import edu.ucr.cs.riple.scanner.Serializer;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -37,6 +38,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 /** Utility class for tests. */
 public class Utility {
@@ -130,6 +133,50 @@ public class Utility {
       Files.writeString(file, content, Charset.defaultCharset(), StandardOpenOption.APPEND);
     } catch (IOException e) {
       throw new RuntimeException("Exception happened in appending to file: " + file, e);
+    }
+  }
+
+  /**
+   * Helper method for running a test with mocked build process. Used to run unit tests which
+   * requires a build of the target module to retrieve Scanner outputs.
+   *
+   * @param testDir Path to the test directory.
+   * @param runnable Runnable which contains the test logic.
+   */
+  public static void runTestWithMockedBuild(Path testDir, Runnable runnable) {
+    try (MockedStatic<edu.ucr.cs.riple.core.util.Utility> utilMock =
+        Mockito.mockStatic(edu.ucr.cs.riple.core.util.Utility.class, Mockito.CALLS_REAL_METHODS)) {
+      utilMock
+          .when(() -> edu.ucr.cs.riple.core.util.Utility.buildTarget(Mockito.any()))
+          .thenAnswer(
+              invocation -> {
+                Stream.of(
+                        Serializer.NON_NULL_ELEMENTS_FILE_NAME,
+                        Serializer.CLASS_INFO_FILE_NAME,
+                        Serializer.METHOD_INFO_FILE_NAME)
+                    .forEach(
+                        fileName ->
+                            createAFileWithContent(
+                                testDir.resolve("0").resolve(fileName), "HEADER\n"));
+                createAFileWithContent(
+                    testDir.resolve("0").resolve("serialization_version.txt"), "3");
+                return null;
+              });
+      runnable.run();
+    }
+  }
+
+  /**
+   * Helper method for creating a file with the given content.
+   *
+   * @param path Path to file.
+   * @param content Content of file.
+   */
+  public static void createAFileWithContent(Path path, String content) {
+    try {
+      Files.write(path, content.getBytes(Charset.defaultCharset()));
+    } catch (IOException e) {
+      throw new RuntimeException("Could not create file: " + path, e);
     }
   }
 }
