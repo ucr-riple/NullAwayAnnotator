@@ -7,7 +7,8 @@ import java.util.Objects;
 import java.util.Set;
 
 /** Used to store information regarding multiple field declaration statements in classes. */
-public class FieldDeclarationInfo {
+public class FieldRecord {
+
   /** Set of al fields declared within one statement. */
   public final Set<ImmutableSet<String>> fields;
   /** Flat name of the containing class. */
@@ -15,7 +16,7 @@ public class FieldDeclarationInfo {
   /** Path to source file containing this class. */
   public final Path pathToSourceFile;
 
-  public FieldDeclarationInfo(Path path, String clazz) {
+  public FieldRecord(Path path, String clazz) {
     this.clazz = clazz;
     this.pathToSourceFile = path;
     this.fields = new HashSet<>();
@@ -26,10 +27,10 @@ public class FieldDeclarationInfo {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof FieldDeclarationInfo)) {
+    if (!(o instanceof FieldRecord)) {
       return false;
     }
-    FieldDeclarationInfo other = (FieldDeclarationInfo) o;
+    FieldRecord other = (FieldRecord) o;
     return clazz.equals(other.clazz);
   }
 

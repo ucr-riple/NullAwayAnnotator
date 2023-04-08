@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
-import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Optional;
@@ -35,17 +35,17 @@ import java.util.stream.Collectors;
 public class ParameterRegionTracker implements RegionTracker {
 
   /**
-   * {@link MethodDeclarationTree} instance, used to retrieve regions that will be affected due to
+   * {@link MethodRegistry} instance, used to retrieve regions that will be affected due to
    * inheritance violations.
    */
-  private final MethodDeclarationTree methodDeclarationTree;
+  private final MethodRegistry methodRegistry;
 
   /** {@link MethodRegionTracker} instance, used to retrieve all sites. */
   private final MethodRegionTracker methodRegionTracker;
 
   public ParameterRegionTracker(
-      MethodDeclarationTree methodDeclarationTree, MethodRegionTracker methodRegionTracker) {
-    this.methodDeclarationTree = methodDeclarationTree;
+      MethodRegistry methodRegistry, MethodRegionTracker methodRegionTracker) {
+    this.methodRegistry = methodRegistry;
     this.methodRegionTracker = methodRegionTracker;
   }
 
@@ -57,7 +57,7 @@ public class ParameterRegionTracker implements RegionTracker {
     OnParameter parameter = location.toParameter();
     // Get regions which will be potentially affected by inheritance violations.
     Set<Region> regions =
-        methodDeclarationTree.getSubMethods(parameter.method, parameter.clazz, false).stream()
+        methodRegistry.getImmediateSubMethods(parameter.toMethod()).stream()
             .map(node -> new Region(node.location.clazz, node.location.method))
             .collect(Collectors.toSet());
     // Add the method the fix is targeting.

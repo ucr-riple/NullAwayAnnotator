@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.graph;
+package edu.ucr.cs.riple.core.evaluators.graph;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;

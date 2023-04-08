@@ -29,7 +29,7 @@ import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
 import edu.ucr.cs.riple.core.evaluators.suppliers.DownstreamDependencySupplier;
 import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collections;
@@ -51,12 +51,12 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
    */
   private final HashMap<OnMethod, Set<OnParameter>> nullableFlowMap;
 
-  private final MethodDeclarationTree methodDeclarationTree;
+  private final MethodRegistry methodRegistry;
 
   public DownstreamImpactEvaluator(DownstreamDependencySupplier supplier) {
     super(supplier);
     this.nullableFlowMap = new HashMap<>();
-    this.methodDeclarationTree = supplier.getMethodDeclarationTree();
+    this.methodRegistry = supplier.getMethodRegistry();
   }
 
   @Override
@@ -77,7 +77,7 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
                                       error.isSingleFix()
                                           && error.toResolvingLocation().isOnParameter()
                                           // Method is declared in the target module.
-                                          && methodDeclarationTree.declaredInModule(
+                                          && methodRegistry.declaredInModule(
                                               error.toResolvingParameter()))
                               .map(Error::toResolvingParameter)
                               .collect(Collectors.toSet());
@@ -88,8 +88,8 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
                         parameters.forEach(
                             onParameter ->
                                 onParameter.path =
-                                    methodDeclarationTree.findNode(
-                                            onParameter.method, onParameter.clazz)
+                                    methodRegistry.findMethodByName(
+                                            onParameter.clazz, onParameter.method)
                                         .location
                                         .path);
                         nullableFlowMap.put(method, parameters);

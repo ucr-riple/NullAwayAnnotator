@@ -22,20 +22,41 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.evaluators.graphprocessor;
+package edu.ucr.cs.riple.core.io.deserializers;
 
-import edu.ucr.cs.riple.core.metadata.graph.ConflictGraph;
+import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Checker;
+import edu.ucr.cs.riple.core.ModuleInfo;
+import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
+import edu.ucr.cs.riple.core.metadata.index.Error;
+import java.util.Set;
 
 /**
- * Interface for conflict-graph processors. Subclasses of this type, can compute the impacts of a
- * set of fixes given in a conflict graph.
+ * Responsible for performing tasks related to NullAway / Type Annotator Scanner serialization
+ * features.
  */
-public interface ConflictGraphProcessor {
+public interface CheckerDeserializer {
 
   /**
-   * Processes the given conflict graph and computes the impact of including nodes.
+   * Deserialized errors reported by the checker on the passed modules.
    *
-   * @param graph Conflict graph containing the target fixes.
+   * @param modules Context of the module where errors are reported.
+   * @param fieldRegistry Registry of fields in the project.
+   * @return Corresponding Error instance with the passed values.
    */
-  void process(ConflictGraph graph);
+  Set<Error> deserializeErrors(ImmutableSet<ModuleInfo> modules, FieldRegistry fieldRegistry);
+
+  /**
+   * Returns the serialization version number which this adapter is associated with.
+   *
+   * @return Serialization number.
+   */
+  int getVersionNumber();
+
+  /**
+   * Returns the name of the checker that this deserializer is associated with.
+   *
+   * @return Associated checker.
+   */
+  Checker getAssociatedChecker();
 }
