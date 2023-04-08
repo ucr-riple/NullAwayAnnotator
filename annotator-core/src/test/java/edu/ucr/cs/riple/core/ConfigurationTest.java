@@ -97,7 +97,8 @@ public class ConfigurationTest {
                 new CLIFlagWithValue("bc", "./gradlew compileJava"),
                 new CLIFlagWithValue("cp", testDir.resolve("paths.tsv")),
                 new CLIFlagWithValue("i", "edu.ucr.Initializer"),
-                new CLIFlagWithValue("d", testDir)));
+                new CLIFlagWithValue("d", testDir),
+                new CLIFlagWithValue("cn", Checker.NULLAWAY.name())));
     requiredDownsStreamDependencyFlagsCli =
         new ArrayList<>(
             List.of(

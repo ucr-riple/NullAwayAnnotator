@@ -80,11 +80,7 @@ public abstract class AbstractSupplier implements Supplier {
    * @return {@link ErrorStore} of {@link Error} instances.
    */
   protected ErrorStore initializeErrorStore(ImmutableSet<ModuleInfo> modules) {
-    return new ErrorStore(
-        modules.stream()
-            .map(info -> info.dir.resolve("errors.tsv"))
-            .collect(ImmutableSet.toImmutableSet()),
-        Error.factory(config, fieldRegistry));
+    return new ErrorStore(config, modules, fieldRegistry);
   }
 
   @Override

@@ -29,6 +29,7 @@ import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
+import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
@@ -56,7 +57,7 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
 
   @Override
   protected TrackerNode addNodeByLine(String[] values) {
-    return config.getAdapter().deserializeTrackerNode(values);
+    return Utility.deserializeTrackerNode(values);
   }
 
   @Override
@@ -74,7 +75,11 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
                 TrackerNode.hash(field.clazz))
             .map(trackerNode -> trackerNode.region)
             .collect(Collectors.toSet());
-    ans.addAll(config.getAdapter().getFieldRegionScope(field));
+    // Add each a region for each field variable declared in the declaration statement.
+    ans.addAll(
+        field.variables.stream()
+            .map(fieldName -> new Region(field.clazz, fieldName))
+            .collect(Collectors.toSet()));
     // Check if field is initialized at declaration.
     if (fieldRegistry.isUninitializedField(field)) {
       // If not, add all constructors for the class.
