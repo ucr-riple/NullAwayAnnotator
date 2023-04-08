@@ -87,7 +87,7 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
                                     config
                                         .targetModuleContext
                                         .getMethodRegistry()
-                                        .findNode(onParameter.method, onParameter.clazz)
+                                        .findMethodByName(onParameter.clazz, onParameter.method)
                                         .location
                                         .path);
                         nullableFlowMap.put(method, parameters);

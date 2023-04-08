@@ -140,7 +140,7 @@ public class Node {
    * @param fixesInOneRound All fixes applied simultaneously to the source code.
    * @param triggeredFixesFromDownstreamErrors Triggered fixes from downstream dependencies.
    * @param triggeredErrors Triggered Errors collected from impacted regions.
-   * @param registry Method registry instance.
+   * @param context {@link Context} instance.
    */
   public void updateStatus(
       int localEffect,
@@ -162,9 +162,7 @@ public class Node {
         .map(
             fix -> {
               OnMethod onMethod = fix.toMethod();
-              return context
-                  .getMethodRegistry()
-                  .getClosestSuperMethod(onMethod.method, onMethod.clazz);
+              return context.getMethodRegistry().getImmediateSuperMethod(onMethod);
             }) // Collection of super methods of all fixes in tree.
         .filter(
             node ->

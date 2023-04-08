@@ -262,7 +262,7 @@ public class Annotator {
                     return config
                         .targetModuleContext
                         .getMethodRegistry()
-                        .findNode(error.encMember(), error.encClass());
+                        .findMethodByName(error.encClass(), error.encMember());
                   }
                   // For methods invoked in an initialization region, where the error is that
                   // `@Nullable` is being passed as an argument, we add a `@NullUnmarked` annotation
@@ -274,7 +274,7 @@ public class Annotator {
                     return config
                         .targetModuleContext
                         .getMethodRegistry()
-                        .findNode(nullableParameter.method, nullableParameter.clazz);
+                        .findMethodByName(nullableParameter.clazz, nullableParameter.method);
                   }
                   return null;
                 })

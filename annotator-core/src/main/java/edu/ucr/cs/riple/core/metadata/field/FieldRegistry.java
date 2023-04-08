@@ -40,7 +40,6 @@ public class FieldRegistry extends MetaData<FieldRecord> {
    * initialized at declaration.
    */
   private Multimap<String, String> uninitializedFields;
-
   /**
    * Constructor for {@link FieldRegistry}.
    *
@@ -49,12 +48,6 @@ public class FieldRegistry extends MetaData<FieldRecord> {
    */
   public FieldRegistry(Config config, ModuleInfo module) {
     this(config, ImmutableSet.of(module));
-  }
-
-  @Override
-  protected void setup() {
-    super.setup();
-    this.uninitializedFields = MultimapBuilder.hashKeys().hashSetValues().build();
   }
 
   /**
@@ -69,6 +62,12 @@ public class FieldRegistry extends MetaData<FieldRecord> {
         modules.stream()
             .map(info -> info.dir.resolve(Serializer.CLASS_INFO_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));
+  }
+
+  @Override
+  protected void setup() {
+    super.setup();
+    this.uninitializedFields = MultimapBuilder.hashKeys().hashSetValues().build();
   }
 
   @Override
@@ -144,8 +143,7 @@ public class FieldRegistry extends MetaData<FieldRecord> {
    * will return true if any of the declared fields is not initialized.
    *
    * @param field Location of field to check.
-   * @return True if at least on of the given declarations at the given location is not not
-   *     initialized.
+   * @return True if at least on of the given declarations at the given location is not initialized.
    */
   public boolean isUninitializedField(OnField field) {
     // According to javadoc, Multimap.get() returns an empty collection if key is not found,

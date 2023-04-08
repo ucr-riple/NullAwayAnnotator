@@ -51,7 +51,7 @@ public class ParameterRegionTracker implements RegionTracker {
     OnParameter parameter = location.toParameter();
     // Get regions which will be potentially affected by inheritance violations.
     Set<Region> regions =
-        context.getMethodRegistry().getSubMethods(parameter.method, parameter.clazz, false).stream()
+        context.getMethodRegistry().getImmediateSubMethods(parameter.toMethod()).stream()
             .map(node -> new Region(node.location.clazz, node.location.method))
             .collect(Collectors.toSet());
     // Add the method the fix is targeting.

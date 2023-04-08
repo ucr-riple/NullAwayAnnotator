@@ -66,8 +66,7 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
     // Add method itself.
     regions.add(new Region(onMethod.clazz, onMethod.method));
     // Add immediate super method.
-    MethodRecord parent =
-        context.getMethodRegistry().getClosestSuperMethod(onMethod.method, onMethod.clazz);
+    MethodRecord parent = context.getMethodRegistry().getImmediateSuperMethod(onMethod);
     if (parent != null && parent.isNonTop()) {
       regions.add(new Region(parent.location.clazz, parent.location.method));
     }
