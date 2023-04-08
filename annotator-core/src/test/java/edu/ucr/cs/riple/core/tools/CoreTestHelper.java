@@ -28,6 +28,7 @@ import static org.junit.Assert.fail;
 
 import edu.ucr.cs.riple.core.AnalysisMode;
 import edu.ucr.cs.riple.core.Annotator;
+import edu.ucr.cs.riple.core.Checker;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
@@ -379,6 +380,7 @@ public class CoreTestHelper {
                         outDirPath.resolve(name + "-nullaway.xml"),
                         outDirPath.resolve(name + "-scanner.xml")))
             .collect(Collectors.toList());
+    builder.checker = Checker.NULLAWAY;
     builder.nullableAnnotation = "javax.annotation.Nullable";
     // In tests, we use NullAway @Initializer annotation.
     builder.initializerAnnotation = "com.uber.nullaway.annotations.Initializer";

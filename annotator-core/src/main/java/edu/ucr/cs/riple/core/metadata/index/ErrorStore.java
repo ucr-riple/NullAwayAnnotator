@@ -25,8 +25,10 @@
 package edu.ucr.cs.riple.core.metadata.index;
 
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.ModuleInfo;
+import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -43,21 +45,27 @@ public class ErrorStore {
   private final Index root;
   /** Current state indexed by enclosing class and method. */
   private Index current;
-  /** Factory instance to parse outputs. */
-  private final Factory factory;
-  /** Path to file where outputs are stored. */
-  private final ImmutableSet<Path> paths;
+  /** Set of modules that the indexed errors are reported on. */
+  private final ImmutableSet<ModuleInfo> modules;
+  /**
+   * Field registry. Used to detect if a field is initialized, or if the fix is on a statement with
+   * multiple inline field declarations
+   */
+  private final FieldRegistry fieldRegistry;
+  /** Annotator config. */
+  private final Config config;
 
-  public ErrorStore(ImmutableSet<Path> paths, Factory factory) {
-    this.factory = factory;
-    this.paths = paths;
-    root = new Index(this.paths, factory);
+  public ErrorStore(Config config, ImmutableSet<ModuleInfo> modules, FieldRegistry fieldRegistry) {
+    this.modules = modules;
+    this.config = config;
+    this.fieldRegistry = fieldRegistry;
+    root = new Index(config, modules, fieldRegistry);
     root.index();
   }
 
   /** Overwrites the current state with the new generated output, */
   public void saveState() {
-    current = new Index(paths, factory);
+    current = new Index(config, modules, fieldRegistry);
     current.index();
   }
 

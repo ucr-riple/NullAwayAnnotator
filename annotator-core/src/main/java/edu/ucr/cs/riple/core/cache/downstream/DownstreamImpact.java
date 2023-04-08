@@ -31,7 +31,7 @@ import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.cache.Impact;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.method.MethodNode;
+import edu.ucr.cs.riple.core.metadata.method.MethodRecord;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collection;
@@ -105,7 +105,7 @@ public class DownstreamImpact extends Impact {
    * @return Expected hash.
    */
   public static int hash(String method, String clazz) {
-    return MethodNode.hash(method, clazz);
+    return MethodRecord.hash(method, clazz);
   }
 
   /**
