@@ -24,19 +24,12 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
 import edu.ucr.cs.riple.injector.Helper;
-import edu.ucr.cs.riple.injector.changes.Change;
-import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import javax.annotation.Nullable;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -77,30 +70,6 @@ public class OnField extends Location {
   }
 
   @Override
-  @Nullable
-  protected Modification applyToMember(NodeList<BodyDeclaration<?>> members, Change change) {
-    final AtomicReference<Modification> ans = new AtomicReference<>();
-    members.forEach(
-        bodyDeclaration ->
-            bodyDeclaration.ifFieldDeclaration(
-                fieldDeclaration -> {
-                  if (ans.get() != null) {
-                    // already found the member.
-                    return;
-                  }
-                  NodeList<VariableDeclarator> vars =
-                      fieldDeclaration.asFieldDeclaration().getVariables();
-                  for (VariableDeclarator v : vars) {
-                    if (variables.contains(v.getName().toString())) {
-                      ans.set(change.visit(fieldDeclaration));
-                      break;
-                    }
-                  }
-                }));
-    return ans.get();
-  }
-
-  @Override
   public void ifField(Consumer<OnField> consumer) {
     consumer.accept(this);
   }
@@ -127,6 +96,11 @@ public class OnField extends Location {
     }
     OnField other = (OnField) o;
     return super.equals(other) && !Collections.disjoint(variables, other.variables);
+  }
+
+  @Override
+  public <R, P> R accept(LocationVisitor<R, P> v, P p) {
+    return v.visitField(this, p);
   }
 
   @Override

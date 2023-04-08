@@ -24,15 +24,9 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.BodyDeclaration;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.injector.Helper;
-import edu.ucr.cs.riple.injector.changes.Change;
-import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
-import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
@@ -116,41 +110,11 @@ public abstract class Location {
   }
 
   /**
-   * Applies the change to the element in this location.
-   *
-   * @param members The list of members of the enclosing class of the target element.
-   * @param change The change to be applied on the target element.
-   * @return The modification that should be applied on the source file.
-   */
-  @Nullable
-  protected abstract Modification applyToMember(
-      NodeList<BodyDeclaration<?>> members, Change change);
-
-  /**
    * Fills the given JSON object with the information of this location.
    *
    * @param res The JSON object to be filled.
    */
   protected abstract void fillJsonInformation(JSONObject res);
-
-  /**
-   * Applies the change to the target element on the given compilation unit tree.
-   *
-   * @param tree CompilationUnit Tree to locate the target element.
-   * @param change Change to be applied on the target element.
-   * @return The modification that should be applied on the source file.
-   */
-  @Nullable
-  public Modification apply(CompilationUnit tree, Change change) {
-    NodeList<BodyDeclaration<?>> clazz;
-    try {
-      clazz = Helper.getTypeDeclarationMembersByFlatName(tree, this.clazz);
-    } catch (TargetClassNotFound notFound) {
-      System.err.println(notFound.getMessage());
-      return null;
-    }
-    return applyToMember(clazz, change);
-  }
 
   @SuppressWarnings("unchecked")
   public JSONObject getJson() {
@@ -298,6 +262,17 @@ public abstract class Location {
     Location other = (Location) o;
     return type == other.type && clazz.equals(other.clazz);
   }
+
+  /**
+   * Applies a visitor to this location.
+   *
+   * @param <R> the return type of the visitor's methods
+   * @param <P> the type of the additional parameter to the visitor's methods
+   * @param v the visitor operating on this type
+   * @param p additional parameter to the visitor
+   * @return a visitor-specified result
+   */
+  public abstract <R, P> R accept(LocationVisitor<R, P> v, P p);
 
   @Override
   public int hashCode() {

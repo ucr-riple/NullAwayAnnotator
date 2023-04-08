@@ -24,16 +24,9 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.BodyDeclaration;
 import edu.ucr.cs.riple.injector.Helper;
-import edu.ucr.cs.riple.injector.changes.Change;
-import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.regex.Pattern;
-import javax.annotation.Nullable;
 import org.json.simple.JSONObject;
 
 /** Represents a location for class element. This location is used to apply changes to a class. */
@@ -53,20 +46,6 @@ public class OnClass extends Location {
     this(Helper.deserializePath(path), clazz);
   }
 
-  @Override
-  @Nullable
-  protected Modification applyToMember(NodeList<BodyDeclaration<?>> members, Change change) {
-    if (isAnonymousClassFlatName(change.location.clazz)) {
-      return null;
-    }
-    // Get the enclosing class of the members
-    Optional<Node> optionalClass = members.getParentNode();
-    if (optionalClass.isEmpty() || !(optionalClass.get() instanceof BodyDeclaration<?>)) {
-      return null;
-    }
-    return change.visit(((BodyDeclaration<?>) optionalClass.get()));
-  }
-
   /**
    * Checks if flat name is for an anonymous class.
    *
@@ -79,6 +58,11 @@ public class OnClass extends Location {
   @Override
   protected void fillJsonInformation(JSONObject res) {
     // no op
+  }
+
+  @Override
+  public <R, P> R accept(LocationVisitor<R, P> v, P p) {
+    return v.visitClass(this, p);
   }
 
   @Override
