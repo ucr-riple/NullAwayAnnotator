@@ -1,21 +1,11 @@
 package edu.ucr.cs.riple.injector.location;
 
-import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.body.CallableDeclaration;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.SignatureMatcher;
-import edu.ucr.cs.riple.injector.changes.Change;
-import edu.ucr.cs.riple.injector.modifications.Modification;
-import edu.ucr.cs.riple.injector.modifications.MultiPositionModification;
-import edu.ucr.cs.riple.injector.modifications.TypeChangeVisitor;
 import java.nio.file.Path;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import org.json.simple.JSONObject;
 
 /**
  * Represents a location for local variable element. This location is used to apply changes to a
@@ -37,8 +27,6 @@ public class OnLocalVariable extends Location {
   public final SignatureMatcher matcher;
   /** Name of the local variable. */
   public final String varName;
-  /** Visitor for applying changes on the internal structure of the target element's type */
-  public static final TypeChangeVisitor TYPE_CHANGE_VISITOR = new TypeChangeVisitor();
 
   public OnLocalVariable(Path path, String clazz, String encMethod, String varName) {
     super(LocationKind.LOCAL_VARIABLE, path, clazz);
@@ -49,53 +37,6 @@ public class OnLocalVariable extends Location {
 
   public OnLocalVariable(String path, String clazz, String encMethod, String varName) {
     this(Helper.deserializePath(path), clazz, encMethod, varName);
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  protected void fillJsonInformation(JSONObject res) {
-    res.put(KEYS.METHOD, this.encMethod);
-    res.put(KEYS.VARIABLES, this.varName);
-  }
-
-  @Override
-  protected Modification applyToMember(NodeList<BodyDeclaration<?>> members, Change change) {
-    final AtomicReference<Modification> ans = new AtomicReference<>();
-    members.forEach(
-        bodyDeclaration ->
-            bodyDeclaration.ifCallableDeclaration(
-                callableDeclaration -> {
-                  if (ans.get() != null) {
-                    // already found the member.
-                    return;
-                  }
-                  if (matcher.matchesCallableDeclaration(callableDeclaration)) {
-                    // Find variable declaration in the callable declaration with the variable name.
-                    VariableDeclarationExpr variableDeclarationExpr =
-                        Helper.locateVariableDeclarationExpr(callableDeclaration, varName);
-                    if (variableDeclarationExpr == null) {
-                      return;
-                    }
-                    variableDeclarationExpr
-                        .getVariables()
-                        .forEach(
-                            variableDeclarator -> {
-                              if (variableDeclarator.getName().toString().equals(varName)) {
-                                // Located the variable.
-                                Set<Modification> modifications = new HashSet<>();
-                                // Process the declaration statement.
-                                modifications.add(change.visit(variableDeclarationExpr));
-                                // Process the declarator type arguments.
-                                modifications.addAll(
-                                    variableDeclarator
-                                        .getType()
-                                        .accept(TYPE_CHANGE_VISITOR, change));
-                                ans.set(new MultiPositionModification(modifications));
-                              }
-                            });
-                  }
-                }));
-    return ans.get();
   }
 
   @Override
@@ -119,6 +60,11 @@ public class OnLocalVariable extends Location {
   }
 
   @Override
+  public <R, P> R accept(LocationVisitor<R, P> v, P p) {
+    return v.visitLocalVariable(this, p);
+  }
+
+  @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), encMethod, varName);
   }
@@ -135,5 +81,15 @@ public class OnLocalVariable extends Location {
         + "varName='"
         + varName
         + '}';
+  }
+
+  /**
+   * Checks if the given method matches the method signature of this location.
+   *
+   * @param method method to check.
+   * @return true, if the given method matches the method signature of this location.
+   */
+  public boolean matchesCallableDeclaration(CallableDeclaration<?> method) {
+    return this.matcher.matchesCallableDeclaration(method);
   }
 }
