@@ -88,7 +88,8 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
                         parameters.forEach(
                             onParameter ->
                                 onParameter.path =
-                                    methodRegistry.findNode(onParameter.method, onParameter.clazz)
+                                    methodRegistry.findMethodByName(
+                                            onParameter.clazz, onParameter.method)
                                         .location
                                         .path);
                         nullableFlowMap.put(method, parameters);

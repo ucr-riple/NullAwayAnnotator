@@ -35,6 +35,7 @@ import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
 
@@ -46,7 +47,6 @@ public class MethodRegistry extends MetaData<MethodRecord> {
 
   /** Each method has a unique id across all methods. This hashmap, maps ids to nodes. */
   private HashMap<Integer, MethodRecord> nodes;
-
   /** A map from class flat name to its declared constructors */
   private Multimap<String, MethodRecord> classConstructorMap;
   /** Set of all classes flat name declared in module. */
@@ -110,15 +110,14 @@ public class MethodRegistry extends MetaData<MethodRecord> {
   }
 
   /**
-   * Locates the immediate super method of input method declared in module.
+   * Returns the immediate super method of the given method.
    *
-   * @param method Method signature of input.
-   * @param clazz Fully qualified name of the input method.
-   * @return Corresponding node of the overridden method, null if method has no parent.
+   * @param onMethod Method to find its super method.
+   * @return Immediate super method of the given method, null if method has no super method.
    */
   @Nullable
-  public MethodRecord getClosestSuperMethod(String method, String clazz) {
-    MethodRecord node = findNode(method, clazz);
+  public MethodRecord getImmediateSuperMethod(OnMethod onMethod) {
+    MethodRecord node = findMethodByName(onMethod.clazz, onMethod.method);
     if (node == null) {
       return null;
     }
@@ -127,56 +126,37 @@ public class MethodRegistry extends MetaData<MethodRecord> {
   }
 
   /**
-   * Locates the overriding methods of input method.
+   * Returns the set of the immediate sub methods of the given method.
    *
-   * @param method Method signature of input.
-   * @param clazz Fully qualified name of the input method.
-   * @param recursive If ture, it will traverse the registry recursively will include all overriding
-   *     methods.
-   * @return ImmutableSet of overriding methods.
+   * @param onMethod Method to find its sub methods.
+   * @return Immediate sub methods of the given method.
    */
-  public ImmutableSet<MethodRecord> getSubMethods(String method, String clazz, boolean recursive) {
-    MethodRecord node = findNode(method, clazz);
+  public ImmutableSet<MethodRecord> getImmediateSubMethods(OnMethod onMethod) {
+    MethodRecord node = findMethodByName(onMethod.clazz, onMethod.method);
     if (node == null) {
       return ImmutableSet.of();
     }
     if (node.children == null) {
       return ImmutableSet.of();
     }
-    Set<MethodRecord> ans = new HashSet<>();
-    Set<Integer> workList = new HashSet<>(node.children);
-    while (!workList.isEmpty()) {
-      Set<Integer> tmp = new HashSet<>();
-      for (Integer id : workList) {
-        MethodRecord selected = nodes.get(id);
-        if (!ans.contains(selected)) {
-          ans.add(selected);
-          if (selected.children != null) {
-            tmp.addAll(selected.children);
-          }
-        }
-      }
-      if (!recursive) {
-        break;
-      }
-      workList.clear();
-      workList.addAll(tmp);
-    }
-    return ImmutableSet.copyOf(ans);
+    return node.children.stream()
+        .map(nodes::get)
+        .filter(Objects::nonNull)
+        .collect(ImmutableSet.toImmutableSet());
   }
 
   /**
-   * Locates a node based on the method signature and fully qualified class name.
+   * Returns the method corresponding to the given signature and class.
    *
+   * @param encClass Fully Qualified name of the class.
    * @param method Method signature.
-   * @param clazz Fully Qualified name of the class.
-   * @return Corresponding node.
+   * @return Corresponding method.
    */
-  public MethodRecord findNode(String method, String clazz) {
+  public MethodRecord findMethodByName(String encClass, String method) {
     return findNodeWithHashHint(
         candidate ->
-            candidate.location.clazz.equals(clazz) && candidate.location.method.equals(method),
-        MethodRecord.hash(method, clazz));
+            candidate.location.clazz.equals(encClass) && candidate.location.method.equals(method),
+        MethodRecord.hash(method, encClass));
   }
 
   /**
