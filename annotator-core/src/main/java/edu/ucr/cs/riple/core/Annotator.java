@@ -272,7 +272,7 @@ public class Annotator {
                       // @SuppressWarnings("NullAway.Init"). We add @NullUnmarked on constructors
                       // only for errors in the body of the constructor.
                       !error.isInitializationError()) {
-                    return methodRegistry.findNode(error.encMember(), error.encClass());
+                    return methodRegistry.findMethodByName(error.encClass(), error.encMember());
                   }
                   // For methods invoked in an initialization region, where the error is that
                   // `@Nullable` is being passed as an argument, we add a `@NullUnmarked` annotation
@@ -281,8 +281,8 @@ public class Annotator {
                       && error.isSingleFix()
                       && error.toResolvingLocation().isOnParameter()) {
                     OnParameter nullableParameter = error.toResolvingParameter();
-                    return methodRegistry.findNode(
-                        nullableParameter.method, nullableParameter.clazz);
+                    return methodRegistry.findMethodByName(
+                        nullableParameter.clazz, nullableParameter.method);
                   }
                   return null;
                 })

@@ -62,7 +62,7 @@ public class LombokTracker implements GeneratedRegionTracker {
         // filter regions which are created by lombok
         .filter(region -> region.sourceType.equals(SourceType.LOMBOK) && region.isOnMethod())
         // find the corresponding method for the region.
-        .map(region -> methodRegistry.findNode(region.member, region.clazz))
+        .map(region -> methodRegistry.findMethodByName(region.clazz, region.member))
         .filter(Objects::nonNull)
         // get method location.
         .map(methodNode -> methodNode.location)

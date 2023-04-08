@@ -162,7 +162,7 @@ public class Node {
         .map(
             fix -> {
               OnMethod onMethod = fix.toMethod();
-              return registry.getClosestSuperMethod(onMethod.method, onMethod.clazz);
+              return registry.getImmediateSuperMethod(onMethod);
             }) // Collection of super methods of all fixes in tree.
         .filter(
             node ->

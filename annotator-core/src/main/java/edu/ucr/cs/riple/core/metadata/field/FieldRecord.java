@@ -8,6 +8,7 @@ import java.util.Set;
 
 /** Used to store information regarding multiple field declaration statements in classes. */
 public class FieldRecord {
+
   /** Set of al fields declared within one statement. */
   public final Set<ImmutableSet<String>> fields;
   /** Flat name of the containing class. */
