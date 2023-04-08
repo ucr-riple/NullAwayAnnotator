@@ -160,7 +160,7 @@ public class Config {
   public final Context targetModuleContext;
   /** Deserializer for reading the output of the checker. */
   public final CheckerDeserializer deserializer;
-  /** Using Checker instance which used to determine the impact of a fix on the target module. */
+  /** Checker enum to retrieve checker specific instances. (e.g. {@link CheckerDeserializer}) */
   public final Checker checker;
 
   /**
