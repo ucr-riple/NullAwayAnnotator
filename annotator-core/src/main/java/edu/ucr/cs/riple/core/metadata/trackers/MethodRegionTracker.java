@@ -30,6 +30,7 @@ import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.method.MethodRecord;
 import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
+import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.scanner.Serializer;
@@ -63,7 +64,7 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
 
   @Override
   protected TrackerNode addNodeByLine(String[] values) {
-    return config.getAdapter().deserializeTrackerNode(values);
+    return Utility.deserializeTrackerNode(values);
   }
 
   @Override
