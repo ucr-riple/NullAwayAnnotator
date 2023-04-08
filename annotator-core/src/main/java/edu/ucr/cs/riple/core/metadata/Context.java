@@ -33,6 +33,7 @@ import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.core.util.FixSerializationConfig;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
+import edu.ucr.cs.riple.injector.location.OnClass;
 
 /** This class is used to store the code structural information about the module. */
 public class Context {
@@ -128,5 +129,17 @@ public class Context {
    */
   public boolean declaredInModule(Location location) {
     return methodRegistry.declaredInModule(location);
+  }
+
+  /**
+   * Creates a {@link edu.ucr.cs.riple.injector.location.OnClass} instance targeting the passed
+   * classes flat name.
+   *
+   * @param clazz Enclosing class of the field.
+   * @return {@link edu.ucr.cs.riple.injector.location.OnClass} instance targeting the passed
+   *     classes flat name.
+   */
+  public OnClass getLocationOnClass(String clazz) {
+    return fieldRegistry.getLocationOnClass(clazz);
   }
 }

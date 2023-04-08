@@ -294,10 +294,7 @@ public class Annotator {
             .map(
                 error ->
                     new AddMarkerAnnotation(
-                        config
-                            .targetModuleContext
-                            .getFieldRegistry()
-                            .getLocationOnClass(error.getRegion().clazz),
+                        config.targetModuleContext.getLocationOnClass(error.getRegion().clazz),
                         config.nullUnMarkedAnnotation))
             .collect(Collectors.toSet()));
     injector.injectAnnotations(nullUnMarkedAnnotations);
@@ -365,10 +362,7 @@ public class Annotator {
             .map(
                 error ->
                     new AddMarkerAnnotation(
-                        config
-                            .targetModuleContext
-                            .getFieldRegistry()
-                            .getLocationOnClass(error.getRegion().clazz),
+                        config.targetModuleContext.getLocationOnClass(error.getRegion().clazz),
                         config.nullUnMarkedAnnotation))
             .collect(Collectors.toSet());
     injector.injectAnnotations(nullUnMarkedAnnotations);
