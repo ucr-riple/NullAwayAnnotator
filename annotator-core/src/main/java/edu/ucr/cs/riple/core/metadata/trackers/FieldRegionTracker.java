@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.metadata.MetaData;
+import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
@@ -38,6 +39,7 @@ import java.util.stream.Collectors;
 /** Tracker for Fields. */
 public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
 
+  /** Context of the module which usages of fields are stored. */
   private final Context context;
 
   public FieldRegionTracker(Config config, Context context) {
@@ -51,7 +53,7 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
 
   @Override
   protected TrackerNode addNodeByLine(String[] values) {
-    return config.deserializer.deserializeTrackerNode(values);
+    return Utility.deserializeTrackerNode(values);
   }
 
   @Override

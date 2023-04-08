@@ -43,8 +43,9 @@ public class Index {
 
   /** Contents of the index. */
   private final Multimap<Region, Error> items;
-
+  /** Context of the module which indexed errors are reported on. */
   private final Context context;
+  /** Annotator config. */
   private final Config config;
 
   /** Creates an instance of Index. Contents are accumulated from multiple sources. */

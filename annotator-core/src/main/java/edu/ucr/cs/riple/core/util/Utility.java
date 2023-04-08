@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.util;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
@@ -31,8 +32,11 @@ import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.core.metadata.trackers.TrackerNode;
 import edu.ucr.cs.riple.scanner.AnnotatorScanner;
 import edu.ucr.cs.riple.scanner.ScannerConfigWriter;
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -236,6 +240,21 @@ public class Utility {
         .setOutput(info.dir)
         .setNonnullAnnotations(config.getNonnullAnnotations())
         .writeAsXML(info.scannerConfig);
+  }
+
+  /**
+   * Deserializes a {@link TrackerNode} corresponding to values stored in a string array.
+   *
+   * @param values String array of values.
+   * @return Deserialized {@link TrackerNode} instance corresponding to the given values.
+   */
+  public static TrackerNode deserializeTrackerNode(String[] values) {
+    Preconditions.checkArgument(
+        values.length == 5,
+        "Expected 5 values to create TrackerNode instance in NullAway serialization version 3 but found: "
+            + values.length);
+    return new TrackerNode(
+        new Region(values[0], values[1], SourceType.valueOf(values[4])), values[2], values[3]);
   }
 
   /**

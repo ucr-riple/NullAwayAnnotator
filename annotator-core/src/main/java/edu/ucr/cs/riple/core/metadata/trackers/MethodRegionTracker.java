@@ -29,6 +29,7 @@ import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.metadata.MetaData;
 import edu.ucr.cs.riple.core.metadata.method.MethodRecord;
+import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.scanner.Serializer;
@@ -39,6 +40,7 @@ import java.util.stream.Collectors;
 /** Tracker for Methods. */
 public class MethodRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
 
+  /** Context of the module which usage of methods are stored. */
   private final Context context;
 
   public MethodRegionTracker(Config config, Context context) {
@@ -52,7 +54,7 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
 
   @Override
   protected TrackerNode addNodeByLine(String[] values) {
-    return config.deserializer.deserializeTrackerNode(values);
+    return Utility.deserializeTrackerNode(values);
   }
 
   @Override

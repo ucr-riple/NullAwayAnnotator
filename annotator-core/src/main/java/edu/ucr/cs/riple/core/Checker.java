@@ -28,6 +28,7 @@ import edu.ucr.cs.riple.core.io.deserializers.CheckerDeserializer;
 import edu.ucr.cs.riple.core.io.deserializers.nullaway.NullAwayV3Deserializer;
 import javax.annotation.Nullable;
 
+/** Enum class to represent the supported checkers. */
 public enum Checker {
   NULLAWAY() {
     @Override

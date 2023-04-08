@@ -171,8 +171,7 @@ public class DownstreamImpactCacheImpl
 
   @Override
   public boolean triggersUnresolvableErrorsOnDownstream(Fix fix) {
-    return getTriggeredErrors(fix).stream()
-        .anyMatch(error -> !error.isFixableOnTarget(config.targetModuleContext));
+    return getTriggeredErrors(fix).stream().anyMatch(error -> !error.isFixableOnTarget(config));
   }
 
   @Override

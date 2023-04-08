@@ -48,7 +48,7 @@ public class LombokTracker implements GeneratedRegionTracker {
 
   /** Method region tracker to get potentially impacted regions of a method. */
   private final MethodRegionTracker tracker;
-
+  /** Context of the module which its generated regions by this processor are stored. */
   private final Context context;
 
   public LombokTracker(Context context, MethodRegionTracker methodRegionTracker) {

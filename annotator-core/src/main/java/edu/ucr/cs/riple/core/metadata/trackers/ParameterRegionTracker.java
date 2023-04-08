@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 /** Tracker for Method Parameters. */
 public class ParameterRegionTracker implements RegionTracker {
 
+  /** Context of the module which usage of parameters are stored. */
   private final Context context;
   /** {@link MethodRegionTracker} instance, used to retrieve all sites. */
   private final MethodRegionTracker methodRegionTracker;

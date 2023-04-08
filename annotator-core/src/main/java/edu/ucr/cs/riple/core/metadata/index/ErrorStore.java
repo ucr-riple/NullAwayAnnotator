@@ -43,8 +43,9 @@ public class ErrorStore {
   private final Index root;
   /** Current state indexed by enclosing class and method. */
   private Index current;
-
+  /** Context of the module which indexed errors are reported on. */
   private final Context context;
+  /** Annotator config. */
   private final Config config;
 
   public ErrorStore(Config config, Context context) {

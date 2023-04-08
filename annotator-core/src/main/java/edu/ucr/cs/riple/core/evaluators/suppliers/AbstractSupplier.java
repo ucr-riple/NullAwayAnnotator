@@ -37,7 +37,7 @@ public abstract class AbstractSupplier implements Supplier {
   protected final ErrorStore errorStore;
   /** Injector instance. */
   protected final AnnotationInjector injector;
-
+  /** Context of the module which the impact of fixes are computed on. */
   protected final Context context;
   /** Depth of analysis. */
   protected final int depth;

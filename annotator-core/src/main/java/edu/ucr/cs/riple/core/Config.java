@@ -575,6 +575,7 @@ public class Config {
    * @return the checker deserializer associated with the requested checker name and version.
    */
   private CheckerDeserializer intializeCheckerDeserializer() {
+    // To retrieve the serialization version, we need to build the target first.
     Utility.buildTarget(this);
     Path serializationVersionPath = target.dir.resolve("serialization_version.txt");
     if (!serializationVersionPath.toFile().exists()) {

@@ -50,8 +50,8 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
   protected final Config config;
   /** Handler to re-run compiler. */
   protected final CompilerRunner compilerRunner;
-
-  Context context;
+  /** Context of the input module which the impact of fixes are computed on. */
+  protected final Context context;
 
   public AbstractConflictGraphProcessor(Config config, CompilerRunner runner, Supplier supplier) {
     this.config = config;
@@ -75,7 +75,7 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
             error ->
                 error.isSingleFix()
                     && error.toResolvingLocation().isOnParameter()
-                    && error.isFixableOnTarget(context)
+                    && error.isFixableOnTarget(config)
                     && !currentLocationsTargetedByTree.contains(error.toResolvingLocation()))
         .map(
             error ->

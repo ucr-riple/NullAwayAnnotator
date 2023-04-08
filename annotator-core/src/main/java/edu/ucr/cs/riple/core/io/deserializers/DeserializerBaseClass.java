@@ -34,7 +34,7 @@ import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Set;
 
-/** Base class for all NullAway serialization deserializers. */
+/** Base class for all checker deserializers. */
 public abstract class DeserializerBaseClass implements CheckerDeserializer {
 
   /** Annotator config. */

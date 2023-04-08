@@ -33,12 +33,10 @@ import edu.ucr.cs.riple.core.io.deserializers.DeserializerBaseClass;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
-import edu.ucr.cs.riple.core.metadata.trackers.TrackerNode;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
-import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -67,16 +65,6 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
 
   public NullAwayV3Deserializer(Config config) {
     super(config, Checker.NULLAWAY, 3);
-  }
-
-  @Override
-  public TrackerNode deserializeTrackerNode(String[] values) {
-    Preconditions.checkArgument(
-        values.length == 5,
-        "Expected 5 values to create TrackerNode instance in NullAway serialization version 3 but found: "
-            + values.length);
-    return new TrackerNode(
-        new Region(values[0], values[1], SourceType.valueOf(values[4])), values[2], values[3]);
   }
 
   @Override

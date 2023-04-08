@@ -27,7 +27,6 @@ package edu.ucr.cs.riple.core.io.deserializers;
 import edu.ucr.cs.riple.core.Checker;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.trackers.TrackerNode;
 import java.util.Set;
 
 /**
@@ -40,21 +39,10 @@ public interface CheckerDeserializer {
    * Deserializes values produced by NullAway in a tsv file and creates a corresponding {@link
    * Error} instance.
    *
-   * @param values Values in row of a TSV file.
-   * @param registry Field declaration registry to generate the set of resolving fixes for the
-   *     deserialized error.
+   * @param context Context of the module where errors are reported.
    * @return Corresponding Error instance with the passed values.
    */
   Set<Error> deserializeErrors(Context context);
-
-  /**
-   * Deserializes values produced by Type Annotator Scanner in a tsv file and creates a
-   * corresponding {@link TrackerNode} instance.
-   *
-   * @param values Values in row of a TSV file.
-   * @return Corresponding TrackerNode instance with the passed values.
-   */
-  TrackerNode deserializeTrackerNode(String[] values);
 
   /**
    * Returns the serialization version number which this adapter is associated with.
