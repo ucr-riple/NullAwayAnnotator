@@ -29,8 +29,8 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-/** Container class to store method's information in {@link MethodDeclarationTree} tree. */
-public class MethodNode {
+/** Container class to store method's information in {@link MethodRegistry} tree. */
+public class MethodRecord {
 
   /** Set of children's id. */
   public Set<Integer> children;
@@ -50,7 +50,7 @@ public class MethodNode {
   /** Is true if the method is a constructor. */
   public boolean isConstructor;
 
-  public static final MethodNode TOP = top();
+  public static final MethodRecord TOP = top();
 
   /** Visibility of method. */
   public enum Visibility {
@@ -65,17 +65,17 @@ public class MethodNode {
      * @param value Visibility value in string.
      * @return Corresponding visibility instance.
      */
-    public static MethodNode.Visibility parse(String value) {
+    public static MethodRecord.Visibility parse(String value) {
       String toLower = value.toLowerCase();
       switch (toLower) {
         case "public":
-          return MethodNode.Visibility.PUBLIC;
+          return MethodRecord.Visibility.PUBLIC;
         case "private":
-          return MethodNode.Visibility.PRIVATE;
+          return MethodRecord.Visibility.PRIVATE;
         case "protected":
-          return MethodNode.Visibility.PROTECTED;
+          return MethodRecord.Visibility.PROTECTED;
         case "package":
-          return MethodNode.Visibility.PACKAGE;
+          return MethodRecord.Visibility.PACKAGE;
         default:
           throw new IllegalArgumentException("Unknown visibility type: " + value);
       }
@@ -83,14 +83,13 @@ public class MethodNode {
   }
 
   /**
-   * Creates a singleton instance of top object. Top is root of the {@link MethodDeclarationTree}
-   * tree.
+   * Creates a singleton instance of top object. Top is root of the {@link MethodRegistry} tree.
    *
    * @return The top Node.
    */
-  private static MethodNode top() {
+  private static MethodRecord top() {
     if (TOP == null) {
-      MethodNode node = new MethodNode(0);
+      MethodRecord node = new MethodRecord(0);
       node.fillInformation(null, -1, false, "private", false, false);
       return node;
     }
@@ -98,11 +97,11 @@ public class MethodNode {
   }
 
   /**
-   * Creates a MethodNode with a unique id.
+   * Creates a MethodRecord with a unique id.
    *
    * @param id A unique id.
    */
-  public MethodNode(int id) {
+  public MethodRecord(int id) {
     this.id = id;
   }
 
@@ -153,7 +152,7 @@ public class MethodNode {
    * @return true if method is public with non-primitive return type and false otherwise.
    */
   public boolean isPublicMethodWithNonPrimitiveReturnType() {
-    return hasNonPrimitiveReturn && visibility.equals(MethodNode.Visibility.PUBLIC);
+    return hasNonPrimitiveReturn && visibility.equals(MethodRecord.Visibility.PUBLIC);
   }
 
   @Override
@@ -161,10 +160,10 @@ public class MethodNode {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof MethodNode)) {
+    if (!(o instanceof MethodRecord)) {
       return false;
     }
-    MethodNode that = (MethodNode) o;
+    MethodRecord that = (MethodRecord) o;
     return Objects.equals(children, that.children)
         && Objects.equals(parent, that.parent)
         && Objects.equals(id, that.id)

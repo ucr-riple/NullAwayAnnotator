@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
+import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.scanner.AnnotatorScanner;
@@ -140,11 +140,12 @@ public class Utility {
    * set of resolving fixes for read errors.
    *
    * @param config Annotator config.
-   * @param store Field Declaration store.
+   * @param registry Field declaration registry, used to detect fixes on declarations with multiple
+   *     inline field declarations.
    * @return Set of collected fixes.
    */
-  public static Set<Fix> readFixesFromOutputDirectory(Config config, FieldDeclarationStore store) {
-    Set<Error> errors = readErrorsFromOutputDirectory(config, config.target, store);
+  public static Set<Fix> readFixesFromOutputDirectory(Config config, FieldRegistry registry) {
+    Set<Error> errors = readErrorsFromOutputDirectory(config, config.target, registry);
     return Error.getResolvingFixesOfErrors(errors);
   }
 
@@ -152,11 +153,12 @@ public class Utility {
    * Reads serialized errors of passed module in "errors.tsv" file in the output directory,
    *
    * @param info Module info.
-   * @param fieldDeclarationStore Field Declaration store.
+   * @param fieldRegistry Field registry instance, used to detect fixes on declarations with
+   *     multiple inline field declarations.
    * @return Set of serialized errors.
    */
   public static Set<Error> readErrorsFromOutputDirectory(
-      Config config, ModuleInfo info, FieldDeclarationStore fieldDeclarationStore) {
+      Config config, ModuleInfo info, FieldRegistry fieldRegistry) {
     Path errorsPath = info.dir.resolve("errors.tsv");
     Set<Error> errors = new HashSet<>();
     try {
@@ -166,7 +168,7 @@ public class Utility {
         // Skip header.
         br.readLine();
         while ((line = br.readLine()) != null) {
-          errors.add(config.getAdapter().deserializeError(line.split("\t"), fieldDeclarationStore));
+          errors.add(config.getAdapter().deserializeError(line.split("\t"), fieldRegistry));
         }
       }
     } catch (IOException e) {
@@ -360,7 +362,7 @@ public class Utility {
    * @return The lines from the file as a Stream.
    */
   public static List<String> readFileLines(Path path) {
-    try (Stream<String> stream = Files.lines(path)) {
+    try (Stream<String> stream = Files.lines(path, Charset.defaultCharset())) {
       return stream.collect(Collectors.toList());
     } catch (IOException e) {
       throw new RuntimeException("Exception while reading file: " + path, e);

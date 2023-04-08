@@ -27,8 +27,8 @@ package edu.ucr.cs.riple.core.metadata.trackers;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.MetaData;
-import edu.ucr.cs.riple.core.metadata.field.FieldDeclarationStore;
-import edu.ucr.cs.riple.core.metadata.method.MethodDeclarationTree;
+import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
+import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
@@ -43,18 +43,15 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
    * Store for field declarations. This is used to determine if a field is initialized at
    * declaration.
    */
-  private final FieldDeclarationStore fieldDeclarationStore;
-  /** The method declaration tree. Used to retrieve constructors for a class */
-  private final MethodDeclarationTree methodDeclarationTree;
+  private final FieldRegistry fieldRegistry;
+  /** The method registry. Used to retrieve constructors for a class */
+  private final MethodRegistry methodRegistry;
 
   public FieldRegionTracker(
-      Config config,
-      ModuleInfo info,
-      FieldDeclarationStore fieldDeclarationStore,
-      MethodDeclarationTree methodDeclarationTree) {
+      Config config, ModuleInfo info, FieldRegistry fieldRegistry, MethodRegistry methodRegistry) {
     super(config, info.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME));
-    this.fieldDeclarationStore = fieldDeclarationStore;
-    this.methodDeclarationTree = methodDeclarationTree;
+    this.fieldRegistry = fieldRegistry;
+    this.methodRegistry = methodRegistry;
   }
 
   @Override
@@ -79,10 +76,10 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
             .collect(Collectors.toSet());
     ans.addAll(config.getAdapter().getFieldRegionScope(field));
     // Check if field is initialized at declaration.
-    if (fieldDeclarationStore.isUninitializedField(field)) {
+    if (fieldRegistry.isUninitializedField(field)) {
       // If not, add all constructors for the class.
       ans.addAll(
-          methodDeclarationTree.getConstructorsForClass(field.clazz).stream()
+          methodRegistry.getConstructorsForClass(field.clazz).stream()
               .map(onMethod -> new Region(onMethod.clazz, onMethod.method))
               .collect(Collectors.toSet()));
     }

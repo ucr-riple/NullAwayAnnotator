@@ -27,7 +27,6 @@ import static java.util.stream.Collectors.groupingBy;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
-import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
@@ -59,7 +58,7 @@ public class Injector {
         (path, changeList) -> {
           CompilationUnit tree;
           try {
-            tree = LexicalPreservingPrinter.setup(StaticJavaParser.parse(path));
+            tree = StaticJavaParser.parse(path);
           } catch (IOException exception) {
             return;
           }

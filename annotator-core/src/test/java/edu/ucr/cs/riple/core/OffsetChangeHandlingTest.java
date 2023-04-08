@@ -73,14 +73,17 @@ public class OffsetChangeHandlingTest {
     CoreTestHelper helper = new CoreTestHelper(root, root).onEmptyProject();
     Path configPath = root.resolve("config.json");
     helper.makeAnnotatorConfigFile(configPath);
-    config = new Config(configPath);
-    config.offsetHandlingIsActivated = true;
-    injector = new PhysicalInjector(config);
-    try {
-      Files.copy(inputPath, root.resolve("benchmark.java"));
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    Utility.runTestWithMockedBuild(
+        root,
+        () -> {
+          config = new Config(configPath);
+          injector = new PhysicalInjector(config);
+          try {
+            Files.copy(inputPath, root.resolve("benchmark.java"));
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          }
+        });
   }
 
   public OffsetChangeHandlingTest() {
