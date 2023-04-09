@@ -268,6 +268,17 @@ public abstract class Location {
     return type == other.type && clazz.equals(other.clazz);
   }
 
+  /**
+   * Applies a visitor to this location.
+   *
+   * @param <R> the return type of the visitor's methods
+   * @param <P> the type of the additional parameter to the visitor's methods
+   * @param v the visitor operating on this type
+   * @param p additional parameter to the visitor
+   * @return a visitor-specified result
+   */
+  public abstract <R, P> R accept(LocationVisitor<R, P> v, P p);
+
   @Override
   public int hashCode() {
     return Objects.hash(type, clazz);
