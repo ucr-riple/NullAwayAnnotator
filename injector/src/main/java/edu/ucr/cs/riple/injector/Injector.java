@@ -29,6 +29,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.Change;
+import edu.ucr.cs.riple.injector.changes.ChangeVisitor;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
@@ -62,11 +63,12 @@ public class Injector {
           } catch (IOException exception) {
             return;
           }
+          ChangeVisitor visitor = new ChangeVisitor(tree);
           Set<Modification> modifications = new HashSet<>();
           Set<ImportDeclaration> imports = new HashSet<>();
           for (Change change : changeList) {
             try {
-              Modification modification = change.translate(tree);
+              Modification modification = visitor.visit(change);
               if (modification != null) {
                 modifications.add(modification);
                 if (change instanceof AddAnnotation) {

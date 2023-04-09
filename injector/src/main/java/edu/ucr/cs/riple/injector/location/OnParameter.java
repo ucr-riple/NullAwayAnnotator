@@ -24,19 +24,12 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.body.CallableDeclaration;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.SignatureMatcher;
-import edu.ucr.cs.riple.injector.changes.Change;
-import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.nio.file.Path;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import javax.annotation.Nullable;
 import org.json.simple.JSONObject;
 
 /**
@@ -74,33 +67,6 @@ public class OnParameter extends Location {
   }
 
   @Override
-  @Nullable
-  protected Modification applyToMember(NodeList<BodyDeclaration<?>> members, Change change) {
-    final AtomicReference<Modification> ans = new AtomicReference<>();
-    members.forEach(
-        bodyDeclaration ->
-            bodyDeclaration.ifCallableDeclaration(
-                callableDeclaration -> {
-                  if (ans.get() != null) {
-                    // already found the member.
-                    return;
-                  }
-                  if (matcher.matchesCallableDeclaration(callableDeclaration)) {
-                    NodeList<?> params = callableDeclaration.getParameters();
-                    if (index < params.size()) {
-                      if (params.get(index) != null) {
-                        Node param = params.get(index);
-                        if (param instanceof Parameter) {
-                          ans.set(change.visit((Parameter) param));
-                        }
-                      }
-                    }
-                  }
-                }));
-    return ans.get();
-  }
-
-  @Override
   public void ifParameter(Consumer<OnParameter> consumer) {
     consumer.accept(this);
   }
@@ -123,6 +89,16 @@ public class OnParameter extends Location {
     }
     OnParameter other = (OnParameter) o;
     return super.equals(other) && method.equals(other.method) && index == other.index;
+  }
+
+  /**
+   * Checks if the given method matches the method signature of this location.
+   *
+   * @param method method to check.
+   * @return true if the method matches the method signature of this location.
+   */
+  public boolean matchesCallableDeclaration(CallableDeclaration<?> method) {
+    return this.matcher.matchesCallableDeclaration(method);
   }
 
   @Override

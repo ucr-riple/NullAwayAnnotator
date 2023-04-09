@@ -24,17 +24,12 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.CallableDeclaration;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.SignatureMatcher;
-import edu.ucr.cs.riple.injector.changes.Change;
-import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.nio.file.Path;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import javax.annotation.Nullable;
 import org.json.simple.JSONObject;
 
 /** Represents a location for method element. This location is used to apply changes to a method. */
@@ -64,35 +59,14 @@ public class OnMethod extends Location {
     res.put(KEYS.METHOD, method);
   }
 
-  @Override
-  @Nullable
-  protected Modification applyToMember(NodeList<BodyDeclaration<?>> members, Change change) {
-    final AtomicReference<Modification> ans = new AtomicReference<>();
-    members.forEach(
-        bodyDeclaration ->
-            bodyDeclaration.ifCallableDeclaration(
-                callableDeclaration -> {
-                  if (ans.get() != null) {
-                    // already found the member.
-                    return;
-                  }
-                  if (this.matcher.matchesCallableDeclaration(callableDeclaration)) {
-                    ans.set(change.visit(callableDeclaration));
-                  }
-                }));
-    if (ans.get() == null) {
-      members.forEach(
-          bodyDeclaration ->
-              bodyDeclaration.ifAnnotationMemberDeclaration(
-                  annotationMemberDeclaration -> {
-                    if (annotationMemberDeclaration
-                        .getNameAsString()
-                        .equals(Helper.extractCallableName(method))) {
-                      ans.set(change.visit(annotationMemberDeclaration));
-                    }
-                  }));
-    }
-    return ans.get();
+  /**
+   * Checks if the given method matches the method signature of this location.
+   *
+   * @param method method to check.
+   * @return true, if the given method matches the method signature of this location.
+   */
+  public boolean matchesCallableDeclaration(CallableDeclaration<?> method) {
+    return this.matcher.matchesCallableDeclaration(method);
   }
 
   @Override
