@@ -25,9 +25,9 @@
 package edu.ucr.cs.riple.injector.visitors;
 
 import edu.ucr.cs.riple.injector.location.Location;
-import edu.ucr.cs.riple.injector.location.LocationVisitor;
 import edu.ucr.cs.riple.injector.location.OnClass;
 import edu.ucr.cs.riple.injector.location.OnField;
+import edu.ucr.cs.riple.injector.location.OnLocalVariable;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import org.json.simple.JSONArray;
@@ -95,6 +95,16 @@ public class LocationToJSONVisitor implements LocationVisitor<JSONObject, Void> 
   @Override
   public JSONObject visitClass(OnClass onClass, Void unused) {
     return defaultAction(onClass);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public JSONObject visitLocalVariable(OnLocalVariable onLocalVariable, Void unused) {
+    JSONObject res = defaultAction(onLocalVariable);
+    JSONArray fields = new JSONArray();
+    fields.add(onLocalVariable.varName);
+    res.put(KEYS.VARIABLES, fields);
+    return res;
   }
 
   /**

@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.injector.location;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.visitors.LocationVisitor;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
@@ -42,16 +43,6 @@ public abstract class Location {
   public final String clazz;
   /** The path to the file containing the element. */
   public Path path;
-
-  /** The Keys used to represent a location in JSON format */
-  public enum KEYS {
-    VARIABLES,
-    METHOD,
-    KIND,
-    CLASS,
-    PATH,
-    INDEX
-  }
 
   /**
    * Creates an instance of {@link Location} for a given type, path and class. This constructor is a
@@ -104,6 +95,8 @@ public abstract class Location {
         return new OnMethod(path, clazz, values[2]);
       case PARAMETER:
         return new OnParameter(path, clazz, values[2], Integer.parseInt(values[4]));
+      case LOCAL_VARIABLE:
+        return new OnLocalVariable(path, clazz, values[2], values[3]);
     }
     throw new RuntimeException("Cannot reach this statement, values: " + Arrays.toString(values));
   }
@@ -127,6 +120,14 @@ public abstract class Location {
    * @param consumer The consumer to be called.
    */
   public void ifField(Consumer<OnField> consumer) {}
+
+  /**
+   * If this location is of kind {@link LocationKind#LOCAL_VARIABLE}, calls the consumer on the
+   * location.
+   *
+   * @param consumer The consumer to be called.
+   */
+  public void ifLocalVariable(Consumer<OnLocalVariable> consumer) {}
 
   /**
    * Returns downcast of this instance to {@link OnField} if this location is of kind {@link
@@ -176,6 +177,20 @@ public abstract class Location {
   }
 
   /**
+   * Returns downcast of this instance to {@link OnLocalVariable} if this location is of kind {@link
+   * LocationKind#LOCAL_VARIABLE}, Otherwise, returns null.
+   *
+   * @return The {@link OnLocalVariable} instance of this location if it is of kind {@link
+   *     LocationKind#LOCAL_VARIABLE}, null otherwise.
+   */
+  public OnLocalVariable toLocalVariable() {
+    if (this instanceof OnLocalVariable) {
+      return (OnLocalVariable) this;
+    }
+    return null;
+  }
+
+  /**
    * Returns true if this location is of kind {@link LocationKind#METHOD}.
    *
    * @return true if this location is of kind {@link LocationKind#METHOD}.
@@ -199,6 +214,15 @@ public abstract class Location {
    * @return true if this location is of kind {@link LocationKind#PARAMETER}.
    */
   public boolean isOnParameter() {
+    return false;
+  }
+
+  /**
+   * Returns true if this location is of kind {@link LocationKind#LOCAL_VARIABLE}.
+   *
+   * @return true if this location is of kind {@link LocationKind#LOCAL_VARIABLE}.
+   */
+  public boolean isOnLocalVariable() {
     return false;
   }
 

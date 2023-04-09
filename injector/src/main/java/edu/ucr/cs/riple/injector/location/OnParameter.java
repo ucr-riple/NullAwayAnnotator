@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.injector.location;
 import com.github.javaparser.ast.body.CallableDeclaration;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.SignatureMatcher;
+import edu.ucr.cs.riple.injector.visitors.LocationVisitor;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.function.Consumer;

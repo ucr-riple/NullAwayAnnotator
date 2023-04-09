@@ -22,7 +22,14 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.injector.location;
+package edu.ucr.cs.riple.injector.visitors;
+
+import edu.ucr.cs.riple.injector.location.Location;
+import edu.ucr.cs.riple.injector.location.OnClass;
+import edu.ucr.cs.riple.injector.location.OnField;
+import edu.ucr.cs.riple.injector.location.OnLocalVariable;
+import edu.ucr.cs.riple.injector.location.OnMethod;
+import edu.ucr.cs.riple.injector.location.OnParameter;
 
 /**
  * A visitor of types, in the style of the visitor design pattern. When a visitor is passed to a
@@ -66,4 +73,13 @@ public interface LocationVisitor<R, P> {
    * @return a visitor-specified result
    */
   R visitClass(OnClass onClass, P p);
+
+  /**
+   * Visits a location for a local variable.
+   *
+   * @param onLocalVariable the location for a local variable
+   * @param p a visitor-specified parameter
+   * @return a visitor-specified result
+   */
+  R visitLocalVariable(OnLocalVariable onLocalVariable, P p);
 }

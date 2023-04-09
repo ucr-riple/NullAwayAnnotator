@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.injector.location;
 
 import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.visitors.LocationVisitor;
 import java.nio.file.Path;
 import java.util.regex.Pattern;
 
