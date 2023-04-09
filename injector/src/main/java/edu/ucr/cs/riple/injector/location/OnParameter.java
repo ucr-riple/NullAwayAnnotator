@@ -30,7 +30,6 @@ import edu.ucr.cs.riple.injector.SignatureMatcher;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.function.Consumer;
-import org.json.simple.JSONObject;
 
 /**
  * Represents a location for parameter element. This location is used to apply changes to a
@@ -57,13 +56,6 @@ public class OnParameter extends Location {
 
   public OnParameter(String path, String clazz, String method, int index) {
     this(Helper.deserializePath(path), clazz, method, index);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  protected void fillJsonInformation(JSONObject res) {
-    res.put(KEYS.METHOD, method);
-    res.put(KEYS.INDEX, index);
   }
 
   @Override

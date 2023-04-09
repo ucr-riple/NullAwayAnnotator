@@ -27,6 +27,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import edu.ucr.cs.riple.injector.visitors.LocationToJSONVisitor;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import org.json.simple.JSONObject;
@@ -76,7 +77,7 @@ public abstract class Change {
   @SuppressWarnings("unchecked")
   public JSONObject getJson() {
     JSONObject res = new JSONObject();
-    res.put("LOCATION", location.getJson());
+    res.put("LOCATION", LocationToJSONVisitor.INSTANCE.visit(location));
     res.put("ANNOTATION", annotation);
     return res;
   }
