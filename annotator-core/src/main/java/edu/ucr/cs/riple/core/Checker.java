@@ -25,7 +25,8 @@
 package edu.ucr.cs.riple.core;
 
 import edu.ucr.cs.riple.core.checkers.CheckerDeserializer;
-import edu.ucr.cs.riple.core.checkers.deserializers.nullaway.NullAwayV3Deserializer;
+import edu.ucr.cs.riple.core.checkers.nullaway.deserializers.NullAwayV3Deserializer;
+
 import javax.annotation.Nullable;
 
 /** Enum class to represent the supported checkers. */

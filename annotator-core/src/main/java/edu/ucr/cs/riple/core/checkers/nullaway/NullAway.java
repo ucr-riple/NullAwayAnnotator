@@ -22,11 +22,12 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.checkers.deserializers.nullaway;
+package edu.ucr.cs.riple.core.checkers.nullaway;
 
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.checkers.Checker;
 import edu.ucr.cs.riple.core.checkers.CheckerDeserializer;
+import edu.ucr.cs.riple.core.checkers.nullaway.deserializers.NullAwayV3Deserializer;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.util.Utility;

@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.checkers.deserializers.nullaway;
+package edu.ucr.cs.riple.core.checkers.nullaway.deserializers;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
