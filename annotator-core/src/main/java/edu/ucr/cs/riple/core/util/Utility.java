@@ -270,7 +270,7 @@ public class Utility {
                   .setSuggest(true, true)
                   .setOutputDirectory(module.dir.toString())
                   .setFieldInitInfo(false);
-          nullAwayConfig.writeAsXML(module.nullawayConfig.toString());
+          nullAwayConfig.writeAsXML(module.checkerConfig.toString());
         });
     build(config, config.downstreamDependenciesBuildCommand);
   }
@@ -296,7 +296,7 @@ public class Utility {
             .setSuggest(true, true)
             .setOutputDirectory(config.target.dir.toString())
             .setFieldInitInfo(initSerializationEnabled);
-    nullAwayConfig.writeAsXML(config.target.nullawayConfig.toString());
+    nullAwayConfig.writeAsXML(config.target.checkerConfig.toString());
     build(config, config.buildCommand);
   }
 

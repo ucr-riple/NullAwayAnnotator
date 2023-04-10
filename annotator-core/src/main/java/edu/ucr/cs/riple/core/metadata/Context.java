@@ -75,7 +75,7 @@ public class Context {
                   .setSuggest(true, true)
                   .setOutputDirectory(module.dir.toString())
                   .setFieldInitInfo(true);
-          nullAwayConfig.writeAsXML(module.nullawayConfig.toString());
+          nullAwayConfig.writeAsXML(module.checkerConfig.toString());
         });
     Utility.build(config, buildCommand);
     Utility.setScannerCheckerActivation(config, modules, false);

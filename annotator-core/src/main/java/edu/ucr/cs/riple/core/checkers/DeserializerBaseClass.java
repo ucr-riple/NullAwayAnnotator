@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.io.deserializers;
+package edu.ucr.cs.riple.core.checkers;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Checker;

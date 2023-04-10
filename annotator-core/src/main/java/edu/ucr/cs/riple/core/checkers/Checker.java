@@ -22,38 +22,19 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.io.deserializers;
+package edu.ucr.cs.riple.core.checkers;
 
-import edu.ucr.cs.riple.core.Checker;
-import edu.ucr.cs.riple.core.metadata.Context;
-import edu.ucr.cs.riple.core.metadata.index.Error;
+import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import java.util.Set;
 
-/**
- * Responsible for performing tasks related to NullAway / Type Annotator Scanner serialization
- * features.
- */
-public interface CheckerDeserializer {
+public interface Checker {
 
-  /**
-   * Deserialized errors reported by the checker on the passed modules.
-   *
-   * @param context Context of the module where errors are reported.
-   * @return Corresponding Error instance with the passed values.
-   */
-  Set<Error> deserializeErrors(Context context);
+  CheckerDeserializer getDeserializer(Config config);
 
-  /**
-   * Returns the serialization version number which this adapter is associated with.
-   *
-   * @return Serialization number.
-   */
-  int getVersionNumber();
+  Set<AddAnnotation> getSuppressionAnnotations(Config config);
 
-  /**
-   * Returns the name of the checker that this deserializer is associated with.
-   *
-   * @return Associated checker.
-   */
-  Checker getAssociatedChecker();
+  String getDefaultAnnotation();
+
+  String getCheckerName();
 }

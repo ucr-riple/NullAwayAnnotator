@@ -22,13 +22,13 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.io.deserializers.nullaway;
+package edu.ucr.cs.riple.core.checkers.deserializers.nullaway;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Checker;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.io.deserializers.DeserializerBaseClass;
+import edu.ucr.cs.riple.core.checkers.DeserializerBaseClass;
 import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;

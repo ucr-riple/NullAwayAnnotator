@@ -27,7 +27,7 @@ package edu.ucr.cs.riple.core;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import edu.ucr.cs.riple.core.io.deserializers.CheckerDeserializer;
+import edu.ucr.cs.riple.core.checkers.CheckerDeserializer;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -78,8 +78,8 @@ public class Config {
   /** If activated, impact of fixes will be cached. */
   public final boolean useImpactCache;
   /**
-   * If activated, all suggested fixes from NullAway will be applied to the source code regardless
-   * of their effectiveness.
+   * If activated, all suggested fixes from the checker will be applied to the source code
+   * regardless of their effectiveness.
    */
   public final boolean exhaustiveSearch;
   /**
@@ -98,7 +98,7 @@ public class Config {
   public final boolean disableOuterLoop;
   /** Info of target module. */
   public final ModuleInfo target;
-  /** Path to directory where all outputs of nullaway and scanner checker is located. */
+  /** Path to directory where all outputs of checker and scanner checker is located. */
   public final Path globalDir;
   /** Command to build the target module. */
   public final String buildCommand;
@@ -125,11 +125,11 @@ public class Config {
   /** Global counter for assigning unique id for each instance. */
   public int moduleCounterID;
   /**
-   * If activated, AutoAnnotator will try to resolve all remaining errors by marking the enclosing
-   * method as {@code NullUnMarked}. It will also mark uninitialized fields with
-   * {@code @SuppressWarning("NullAway.Init")}
+   * If activated, Annotator will try to resolve all remaining errors by adding suppression
+   * annotations. The set of suppression annotations will be computed by calling {@link
+   * edu.ucr.cs.riple.core.checkers.Checker#getSuppressionAnnotations}.
    */
-  public final boolean forceResolveActivated;
+  public final boolean suppressRemainingErrors;
   /** Fully qualified NullUnmarked annotation. */
   public final String nullUnMarkedAnnotation;
   /**
@@ -201,7 +201,7 @@ public class Config {
             "cp",
             "config-paths",
             true,
-            "Path to tsv file containing path to nullaway and scanner config files.");
+            "Path to tsv file containing paths to checker and scanner config files.");
     configPathsOption.setRequired(true);
     options.addOption(configPathsOption);
 
@@ -448,10 +448,10 @@ public class Config {
       this.downstreamDependenciesBuildCommand = null;
     }
     this.inferenceActivated = !cmd.hasOption(deactivateInference);
-    this.forceResolveActivated =
+    this.suppressRemainingErrors =
         !this.inferenceActivated || cmd.hasOption(activateForceResolveOption);
     this.nullUnMarkedAnnotation =
-        this.forceResolveActivated
+        this.suppressRemainingErrors
             ? cmd.getOptionValue(activateForceResolveOption)
             : "org.jspecify.annotations.NullUnmarked";
     this.moduleCounterID = 0;
@@ -543,7 +543,7 @@ public class Config {
 
     this.downstreamInfo = ImmutableSet.copyOf(moduleInfoList);
     this.moduleCounterID = 0;
-    this.forceResolveActivated =
+    this.suppressRemainingErrors =
         getValueFromKey(jsonObject, "FORCE_RESOLVE", Boolean.class).orElse(false);
     this.inferenceActivated =
         getValueFromKey(jsonObject, "INFERENCE_ACTIVATION", Boolean.class).orElse(true);
@@ -760,7 +760,7 @@ public class Config {
               .map(
                   info -> {
                     JSONObject res = new JSONObject();
-                    res.put("NULLAWAY", info.nullawayConfig.toString());
+                    res.put("CHECKER", info.checkerConfig.toString());
                     res.put("SCANNER", info.scannerConfig.toString());
                     return res;
                   })
