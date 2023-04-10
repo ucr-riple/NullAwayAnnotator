@@ -25,14 +25,13 @@
 package edu.ucr.cs.riple.core.checkers;
 
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.injector.changes.AddAnnotation;
-import java.util.Set;
+import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 
 public interface Checker {
 
   CheckerDeserializer getDeserializer(Config config);
 
-  Set<AddAnnotation> getSuppressionAnnotations(Config config);
+  void suppressRemainingAnnotations(Config config, AnnotationInjector injector);
 
   String getDefaultAnnotation();
 

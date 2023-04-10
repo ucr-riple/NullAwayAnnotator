@@ -236,8 +236,6 @@ public class Annotator {
    * </ul>
    */
   private void suppressRemainingErrors() {
-    Set<AddAnnotation> suppressionAnnotations = new NullAway().getSuppressionAnnotations(config);
-    config.log.updateInjectedAnnotations(suppressionAnnotations);
-    this.injector.injectAnnotations(suppressionAnnotations);
+    new NullAway().suppressRemainingAnnotations(config, injector);
   }
 }

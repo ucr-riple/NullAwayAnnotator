@@ -127,7 +127,7 @@ public class Config {
   /**
    * If activated, Annotator will try to resolve all remaining errors by adding suppression
    * annotations. The set of suppression annotations will be computed by calling {@link
-   * edu.ucr.cs.riple.core.checkers.Checker#getSuppressionAnnotations}.
+   * edu.ucr.cs.riple.core.checkers.Checker#suppressRemainingAnnotations}.
    */
   public final boolean suppressRemainingErrors;
   /** Fully qualified NullUnmarked annotation. */

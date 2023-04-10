@@ -28,6 +28,7 @@ import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.checkers.Checker;
 import edu.ucr.cs.riple.core.checkers.CheckerDeserializer;
 import edu.ucr.cs.riple.core.checkers.nullaway.deserializers.NullAwayV3Deserializer;
+import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -49,7 +50,7 @@ public class NullAway implements Checker {
   }
 
   @Override
-  public Set<AddAnnotation> getSuppressionAnnotations(Config config) {
+  public void suppressRemainingAnnotations(Config config, AnnotationInjector injector) {
     // Collect regions with remaining errors.
     Utility.buildTarget(config);
     Set<Error> remainingErrors =
@@ -158,6 +159,9 @@ public class NullAway implements Checker {
                         fix.toField(), "SuppressWarnings", "NullAway.Init", false))
             .collect(Collectors.toSet());
     result.addAll(initializationSuppressWarningsAnnotations);
+    injector.injectAnnotations(result);
+    // update log
+    config.log.updateInjectedAnnotations(result);
     // Collect @NullUnmarked annotations on classes for any remaining error.
     Utility.buildTarget(config);
     remainingErrors = Utility.readErrorsFromOutputDirectory(config, config.targetModuleContext);
@@ -170,8 +174,9 @@ public class NullAway implements Checker {
                         config.targetModuleContext.getLocationOnClass(error.getRegion().clazz),
                         config.nullUnMarkedAnnotation))
             .collect(Collectors.toSet());
-    result.addAll(nullUnMarkedAnnotations);
-    return result;
+    injector.injectAnnotations(nullUnMarkedAnnotations);
+    // update log
+    config.log.updateInjectedAnnotations(nullUnMarkedAnnotations);
   }
 
   @Override
