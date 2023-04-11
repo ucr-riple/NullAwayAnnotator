@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.checkers;
 
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.Context;
@@ -43,7 +44,11 @@ public interface Checker<T extends Error> {
   String getCheckerName();
 
   T createErrorFactory(
-      String errorType, String errorMessage, Region region, int offset, Set<Fix> resolvingFixes);
+      String errorType,
+      String errorMessage,
+      Region region,
+      int offset,
+      ImmutableSet<Fix> resolvingFixes);
 
   int getVersion();
 }

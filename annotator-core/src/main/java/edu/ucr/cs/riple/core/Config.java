@@ -668,7 +668,7 @@ public class Config {
     public String initializerAnnotation;
     public String nullableAnnotation;
     public String outputDir;
-    public Checker<?> checker;
+    public String checker;
     /**
      * List of modules, did not use {@link java.util.Set} to preserve order. First project is the
      * target project.
@@ -706,7 +706,7 @@ public class Config {
           nullableAnnotation, "Nullable Annotation must be initialized to construct the config.");
       JSONObject json = new JSONObject();
       json.put("BUILD_COMMAND", buildCommand);
-      json.put("CHECKER", checker.getCheckerName());
+      json.put("CHECKER", checker);
       JSONObject annotation = new JSONObject();
       annotation.put("INITIALIZER", initializerAnnotation);
       annotation.put("NULLABLE", nullableAnnotation);

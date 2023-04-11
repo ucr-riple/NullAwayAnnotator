@@ -346,8 +346,12 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
 
   @Override
   public NullAwayError createErrorFactory(
-      String errorType, String errorMessage, Region region, int offset, Set<Fix> resolvingFixes) {
-    return null;
+      String errorType,
+      String errorMessage,
+      Region region,
+      int offset,
+      ImmutableSet<Fix> resolvingFixes) {
+    return new NullAwayError(errorType, errorMessage, region, offset, resolvingFixes);
   }
 
   @Override
