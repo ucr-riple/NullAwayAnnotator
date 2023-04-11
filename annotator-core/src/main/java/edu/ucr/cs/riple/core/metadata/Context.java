@@ -30,7 +30,6 @@ import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
 import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
-import edu.ucr.cs.riple.core.util.FixSerializationConfig;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnClass;
@@ -66,20 +65,12 @@ public class Context {
    * @param buildCommand The command to build the passed modules.
    */
   public Context(Config config, ImmutableSet<ModuleInfo> modules, String buildCommand) {
+    this.modules = modules;
     // Build with scanner checker activated to generate required files to create the context.
     Utility.setScannerCheckerActivation(config, modules, true);
-    modules.forEach(
-        module -> {
-          FixSerializationConfig.Builder nullAwayConfig =
-              new FixSerializationConfig.Builder()
-                  .setSuggest(true, true)
-                  .setOutputDirectory(module.dir.toString())
-                  .setFieldInitInfo(true);
-          nullAwayConfig.writeAsXML(module.checkerConfig.toString());
-        });
+    config.checker.prepareConfigFilesForBuild(this);
     Utility.build(config, buildCommand);
     Utility.setScannerCheckerActivation(config, modules, false);
-    this.modules = modules;
     this.nonnullStore = new NonnullStore(config, modules);
     this.fieldRegistry = new FieldRegistry(config, modules);
     this.methodRegistry = new MethodRegistry(config);

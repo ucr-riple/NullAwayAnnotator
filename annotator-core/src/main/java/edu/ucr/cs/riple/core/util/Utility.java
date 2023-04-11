@@ -39,7 +39,6 @@ import edu.ucr.cs.riple.scanner.ScannerConfigWriter;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
@@ -50,23 +49,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import me.tongfei.progressbar.ProgressBar;
 import me.tongfei.progressbar.ProgressBarStyle;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 /** Utility class. */
 public class Utility {
@@ -152,54 +140,6 @@ public class Utility {
   }
 
   /**
-   * Writes the {@link FixSerializationConfig} in {@code XML} format.
-   *
-   * @param config Config file to write.
-   * @param path Path to write the config at.
-   */
-  public static void writeNullAwayConfigInXMLFormat(FixSerializationConfig config, String path) {
-    DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-    try {
-      DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-      Document doc = docBuilder.newDocument();
-
-      // Root
-      Element rootElement = doc.createElement("serialization");
-      doc.appendChild(rootElement);
-
-      // Suggest
-      Element suggestElement = doc.createElement("suggest");
-      suggestElement.setAttribute("active", String.valueOf(config.suggestEnabled));
-      suggestElement.setAttribute("enclosing", String.valueOf(config.suggestEnclosing));
-      rootElement.appendChild(suggestElement);
-
-      // Field Initialization
-      Element fieldInitInfoEnabled = doc.createElement("fieldInitInfo");
-      fieldInitInfoEnabled.setAttribute("active", String.valueOf(config.fieldInitInfoEnabled));
-      rootElement.appendChild(fieldInitInfoEnabled);
-
-      // Output dir
-      Element outputDir = doc.createElement("path");
-      outputDir.setTextContent(config.outputDirectory);
-      rootElement.appendChild(outputDir);
-
-      // UUID
-      Element uuid = doc.createElement("uuid");
-      uuid.setTextContent(UUID.randomUUID().toString());
-      rootElement.appendChild(uuid);
-
-      // Writings
-      TransformerFactory transformerFactory = TransformerFactory.newInstance();
-      Transformer transformer = transformerFactory.newTransformer();
-      DOMSource source = new DOMSource(doc);
-      StreamResult result = new StreamResult(new File(path));
-      transformer.transform(source, result);
-    } catch (ParserConfigurationException | TransformerException e) {
-      throw new RuntimeException("Error happened in writing config.", e);
-    }
-  }
-
-  /**
    * Activates/Deactivates {@link AnnotatorScanner} features by updating the {@link
    * edu.ucr.cs.riple.scanner.Config} in {@code XML} format for the given modules.
    *
@@ -240,8 +180,9 @@ public class Utility {
   public static TrackerNode deserializeTrackerNode(String[] values) {
     Preconditions.checkArgument(
         values.length == 5,
-        "Expected 5 values to create TrackerNode instance in NullAway serialization version 3 but found: "
-            + values.length);
+        "Expected 5 values to create TrackerNode instance in this annotator-scanner serialization version, but found: "
+            + values.length
+            + ", Please use the exact same version of annotator-core and annotator-scanner.");
     return new TrackerNode(
         new Region(values[0], values[1], SourceType.valueOf(values[4])), values[2], values[3]);
   }
@@ -251,16 +192,8 @@ public class Utility {
    *
    * @param config Annotator config.
    */
-  public static void buildDownstreamDependencies(Config config) {
-    config.downstreamInfo.forEach(
-        module -> {
-          FixSerializationConfig.Builder nullAwayConfig =
-              new FixSerializationConfig.Builder()
-                  .setSuggest(true, true)
-                  .setOutputDirectory(module.dir.toString())
-                  .setFieldInitInfo(false);
-          nullAwayConfig.writeAsXML(module.checkerConfig.toString());
-        });
+  public static void buildDownstreamDependencies(Config config, Context context) {
+    config.checker.prepareConfigFilesForBuild(context);
     build(config, config.downstreamDependenciesBuildCommand);
   }
 
@@ -270,22 +203,7 @@ public class Utility {
    * @param config Annotator config.
    */
   public static void buildTarget(Config config) {
-    buildTarget(config, false);
-  }
-
-  /**
-   * Builds target with control on field initialization serialization.
-   *
-   * @param config Annotator config.
-   * @param initSerializationEnabled Activation flag for field initialization serialization.
-   */
-  public static void buildTarget(Config config, boolean initSerializationEnabled) {
-    FixSerializationConfig.Builder nullAwayConfig =
-        new FixSerializationConfig.Builder()
-            .setSuggest(true, true)
-            .setOutputDirectory(config.target.dir.toString())
-            .setFieldInitInfo(initSerializationEnabled);
-    nullAwayConfig.writeAsXML(config.target.checkerConfig.toString());
+    config.checker.prepareConfigFilesForBuild(config.targetModuleContext);
     build(config, config.buildCommand);
   }
 

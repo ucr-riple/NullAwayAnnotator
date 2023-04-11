@@ -80,4 +80,6 @@ public interface Checker<T extends Error> {
    * @param version The version of the actual running checker.
    */
   void verifyCheckerCompatibility(int version);
+
+  void prepareConfigFilesForBuild(Context context);
 }

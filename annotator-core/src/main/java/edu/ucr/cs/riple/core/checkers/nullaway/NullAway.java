@@ -211,6 +211,21 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
         .collect(ImmutableSet.toImmutableSet());
   }
 
+  /**
+   * Suppresses remaining errors by following steps below:
+   *
+   * <ul>
+   *   <li>Enclosing method of triggered errors will be marked with {@code @NullUnmarked}
+   *       annotation.
+   *   <li>Uninitialized fields (inline or by constructor) will be annotated as
+   *       {@code @SuppressWarnings("NullAway.Init")}.
+   *   <li>Explicit {@code Nullable} assignments to fields will be annotated as
+   *       {@code @SuppressWarnings("NullAway")}.
+   * </ul>
+   *
+   * @param config Annotator config.
+   * @param injector Annotation injector to inject selected annotations.
+   */
   @Override
   public void suppressRemainingAnnotations(Config config, AnnotationInjector injector) {
     // Collect regions with remaining errors.
@@ -359,5 +374,20 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
             + ", but found: "
             + version
             + ", Please update Annotator or NullAway accordingly.");
+  }
+
+  @Override
+  public void prepareConfigFilesForBuild(Context context) {
+    context
+        .getModules()
+        .forEach(
+            module -> {
+              FixSerializationConfig.Builder nullAwayConfig =
+                  new FixSerializationConfig.Builder()
+                      .setSuggest(true, true)
+                      .setOutputDirectory(module.dir.toString())
+                      .setFieldInitInfo(true);
+              nullAwayConfig.writeAsXML(module.checkerConfig.toString());
+            });
   }
 }

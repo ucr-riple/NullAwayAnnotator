@@ -223,16 +223,9 @@ public class Annotator {
   }
 
   /**
-   * Resolves all remaining errors in target module by following steps below:
-   *
-   * <ul>
-   *   <li>Enclosing method of triggered errors will be marked with {@code @NullUnmarked}
-   *       annotation.
-   *   <li>Uninitialized fields (inline or by constructor) will be annotated as
-   *       {@code @SuppressWarnings("NullAway.Init")}.
-   *   <li>Explicit {@code Nullable} assignments to fields will be annotated as
-   *       {@code @SuppressWarnings("NullAway")}.
-   * </ul>
+   * Resolves all remaining errors in target module by adding suppression annotations. Please check
+   * the using {@link edu.ucr.cs.riple.core.checkers.Checker#suppressRemainingAnnotations} for a
+   * detailed description of the suppression process.
    */
   private void suppressRemainingErrors() {
     config.checker.suppressRemainingAnnotations(config, injector);

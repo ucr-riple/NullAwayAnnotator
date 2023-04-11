@@ -73,7 +73,9 @@ public class Node {
   /** Corresponding report of processing root. */
   public Report report;
 
-  /** Regions where original errors reported and NullAway suggested root for that. */
+  /**
+   * Regions where original error is reported by the checker and suggested the root fix for that.
+   */
   private ImmutableSet<Region> origins;
 
   public Node(Fix root) {

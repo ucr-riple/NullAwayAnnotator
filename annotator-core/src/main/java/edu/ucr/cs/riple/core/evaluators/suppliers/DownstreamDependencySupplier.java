@@ -74,7 +74,7 @@ public class DownstreamDependencySupplier extends AbstractSupplier {
 
   @Override
   public AbstractConflictGraphProcessor getGraphProcessor() {
-    CompilerRunner runner = () -> Utility.buildDownstreamDependencies(config);
+    CompilerRunner runner = () -> Utility.buildDownstreamDependencies(config, context);
     return config.useParallelGraphProcessor
         ? new ParallelConflictGraphProcessor(config, runner, this, tracker)
         : new SequentialConflictGraphProcessor(config, runner, this);
