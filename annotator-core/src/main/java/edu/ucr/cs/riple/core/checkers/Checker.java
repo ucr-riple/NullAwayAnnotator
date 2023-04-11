@@ -26,14 +26,24 @@ package edu.ucr.cs.riple.core.checkers;
 
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
+import edu.ucr.cs.riple.core.metadata.Context;
+import edu.ucr.cs.riple.core.metadata.index.Error;
+import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import java.util.Set;
 
-public interface Checker {
+public interface Checker<T extends Error> {
 
-  CheckerDeserializer getDeserializer(Config config);
+  Set<T> deserializeErrors(Context context);
 
   void suppressRemainingAnnotations(Config config, AnnotationInjector injector);
 
   String getDefaultAnnotation();
 
   String getCheckerName();
+
+  T createErrorFactory(
+      String errorType, String errorMessage, Region region, int offset, Set<Fix> resolvingFixes);
+
+  int getVersion();
 }

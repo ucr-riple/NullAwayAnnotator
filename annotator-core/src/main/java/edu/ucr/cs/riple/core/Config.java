@@ -27,7 +27,8 @@ package edu.ucr.cs.riple.core;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import edu.ucr.cs.riple.core.checkers.CheckerDeserializer;
+import edu.ucr.cs.riple.core.checkers.Checker;
+import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -158,11 +159,9 @@ public class Config {
   public final ImmutableSet<SourceType> generatedCodeDetectors;
   /** The context of target module. */
   public final Context targetModuleContext;
-  /** Deserializer for reading the output of the checker. */
-  public final CheckerDeserializer deserializer;
 
   /** Checker enum to retrieve checker specific instances. (e.g. {@link CheckerDeserializer}) */
-  public final Checker checker;
+  public final Checker<?> checker;
 
   /**
    * Builds config from command line arguments.
@@ -395,7 +394,7 @@ public class Config {
         cmd.hasOption(nullableOption.getLongOpt())
             ? cmd.getOptionValue(nullableOption.getLongOpt())
             : "javax.annotation.Nullable";
-    this.checker = Checker.getCheckerByName(cmd.getOptionValue(checkerNameOption));
+    this.checker = new NullAway(this);
     this.initializerAnnot = cmd.getOptionValue(initializerOption.getLongOpt());
     this.depth =
         Integer.parseInt(
@@ -466,7 +465,6 @@ public class Config {
         !cmd.hasOption(nonnullAnnotationsOption)
             ? ImmutableSet.of()
             : ImmutableSet.copyOf(cmd.getOptionValue(nonnullAnnotationsOption).split(","));
-    this.deserializer = initializeCheckerDeserializer();
     this.targetModuleContext = new Context(this, this.target, this.buildCommand);
   }
 
@@ -485,8 +483,7 @@ public class Config {
     } catch (Exception e) {
       throw new RuntimeException("Error in reading/parsing config at path: " + configPath, e);
     }
-    this.checker =
-        Checker.getCheckerByName(getValueFromKey(jsonObject, "CHECKER", String.class).orElse(null));
+    this.checker = new NullAway(this);
     this.depth = getValueFromKey(jsonObject, "DEPTH", Long.class).orElse((long) 1).intValue();
     this.chain = getValueFromKey(jsonObject, "CHAIN", Boolean.class).orElse(false);
     this.redirectBuildOutputToStdErr =
@@ -567,34 +564,7 @@ public class Config {
                     String.class)
                 .orElse(List.of()));
     this.log.reset();
-    this.deserializer = initializeCheckerDeserializer();
     this.targetModuleContext = new Context(this, this.target, this.buildCommand);
-  }
-
-  /**
-   * Initializes the checker deserializer based on the checker name and the serialization version.
-   *
-   * @return the checker deserializer associated with the requested checker name and version.
-   */
-  public CheckerDeserializer initializeCheckerDeserializer() {
-    // To retrieve the serialization version, we need to build the target first.
-    Utility.buildTarget(this);
-    Path serializationVersionPath = target.dir.resolve("serialization_version.txt");
-    if (!serializationVersionPath.toFile().exists()) {
-      // Older versions of checkers
-      throw new RuntimeException(
-          "Serialization version not found. Upgrade to newer versions of the checkers: "
-              + checker.name());
-    }
-    List<String> lines = Utility.readFileLines(serializationVersionPath);
-    int version = Integer.parseInt(lines.get(0));
-    CheckerDeserializer deserializer = checker.getDeserializer(this);
-    if (deserializer.getVersionNumber() == version) {
-      return deserializer;
-    } else {
-      throw new RuntimeException(
-          "Serialization version mismatch. Upgrade new versions of checkers.");
-    }
   }
 
   /**
@@ -698,7 +668,7 @@ public class Config {
     public String initializerAnnotation;
     public String nullableAnnotation;
     public String outputDir;
-    public Checker checker;
+    public Checker<?> checker;
     /**
      * List of modules, did not use {@link java.util.Set} to preserve order. First project is the
      * target project.
@@ -736,7 +706,7 @@ public class Config {
           nullableAnnotation, "Nullable Annotation must be initialized to construct the config.");
       JSONObject json = new JSONObject();
       json.put("BUILD_COMMAND", buildCommand);
-      json.put("CHECKER", checker.name());
+      json.put("CHECKER", checker.getCheckerName());
       JSONObject annotation = new JSONObject();
       annotation.put("INITIALIZER", initializerAnnotation);
       annotation.put("NULLABLE", nullableAnnotation);

@@ -29,7 +29,6 @@ import com.google.common.collect.MultimapBuilder;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
-import edu.ucr.cs.riple.core.util.Utility;
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -58,8 +57,7 @@ public class Index {
   /** Starts the reading and index process. */
   public void index() {
     items.clear();
-    Utility.readErrorsFromOutputDirectory(config, context)
-        .forEach(error -> items.put(error.getRegion(), error));
+    config.checker.deserializeErrors(context).forEach(error -> items.put(error.getRegion(), error));
   }
 
   /**

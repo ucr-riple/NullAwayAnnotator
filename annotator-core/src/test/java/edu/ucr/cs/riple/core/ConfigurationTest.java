@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.javaparser.utils.Pair;
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.util.FixSerializationConfig;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.scanner.ScannerConfigWriter;
@@ -98,7 +99,7 @@ public class ConfigurationTest {
                 new CLIFlagWithValue("cp", testDir.resolve("paths.tsv")),
                 new CLIFlagWithValue("i", "edu.ucr.Initializer"),
                 new CLIFlagWithValue("d", testDir),
-                new CLIFlagWithValue("cn", Checker.NULLAWAY.name())));
+                new CLIFlagWithValue("cn", NullAway.NAME)));
     requiredDownsStreamDependencyFlagsCli =
         new ArrayList<>(
             List.of(

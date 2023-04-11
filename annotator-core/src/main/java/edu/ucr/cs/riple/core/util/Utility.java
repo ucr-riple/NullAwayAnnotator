@@ -146,20 +146,9 @@ public class Utility {
    * @param context Context of the module which fixes are created for.
    * @return Set of collected fixes.
    */
-  public static Set<Fix> readFixesFromOutputDirectory(Config config, Context context) {
-    Set<Error> errors = readErrorsFromOutputDirectory(config, context);
-    return Error.getResolvingFixesOfErrors(errors);
-  }
-
-  /**
-   * Reads serialized errors of passed module in "errors.tsv" file in the output directory,
-   *
-   * @param config Annotation config.
-   * @param context Context of the module which errors are created for.
-   * @return Set of serialized errors.
-   */
-  public static Set<Error> readErrorsFromOutputDirectory(Config config, Context context) {
-    return config.deserializer.deserializeErrors(context);
+  public static <T extends Error> Set<Fix> readFixesFromOutputDirectory(
+      Config config, Context context) {
+    return Error.getResolvingFixesOfErrors(config.checker.deserializeErrors(context));
   }
 
   /**

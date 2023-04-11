@@ -236,6 +236,6 @@ public class Annotator {
    * </ul>
    */
   private void suppressRemainingErrors() {
-    new NullAway().suppressRemainingAnnotations(config, injector);
+    new NullAway(config).suppressRemainingAnnotations(config, injector);
   }
 }
