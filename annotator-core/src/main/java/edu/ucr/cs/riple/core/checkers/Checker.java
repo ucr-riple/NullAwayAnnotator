@@ -33,16 +33,39 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import java.util.Set;
 
+/**
+ * Represents a checker that is running on the target module.
+ *
+ * @param <T> Type of errors reported by the checker.
+ */
 public interface Checker<T extends Error> {
 
+  /**
+   * Deserializes errors reported by the checker from the output using the given context.
+   *
+   * @param context Context of the modules which errors are reported on.
+   * @return Set of errors reported by the checker.
+   */
   Set<T> deserializeErrors(Context context);
 
+  /**
+   * Suppresses remaining errors reported by the checker.
+   *
+   * @param config Annotator config.
+   * @param injector Annotation injector to inject selected annotations.
+   */
   void suppressRemainingAnnotations(Config config, AnnotationInjector injector);
 
-  String getDefaultAnnotation();
-
-  String getCheckerName();
-
+  /**
+   * Creates an {@link Error} instance from the given parameters.
+   *
+   * @param errorType Error type.
+   * @param errorMessage Error message.
+   * @param region Region where the error is reported,
+   * @param offset offset of program point in original version where error is reported.
+   * @param resolvingFixes Set of fixes that resolve the error.
+   * @return The corresponding error.
+   */
   T createErrorFactory(
       String errorType,
       String errorMessage,
@@ -50,5 +73,11 @@ public interface Checker<T extends Error> {
       int offset,
       ImmutableSet<Fix> resolvingFixes);
 
-  int getVersion();
+  /**
+   * Verifies that the checker representation in Annotator is compatible with the actual running
+   * checker on the target module.
+   *
+   * @param version The version of the actual running checker.
+   */
+  void verifyCheckerCompatibility(int version);
 }

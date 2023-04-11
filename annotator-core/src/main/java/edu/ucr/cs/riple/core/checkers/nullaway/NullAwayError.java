@@ -1,3 +1,27 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2022 Nima Karimipour
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 package edu.ucr.cs.riple.core.checkers.nullaway;
 
 import com.google.common.collect.ImmutableSet;
@@ -6,6 +30,7 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import java.util.Objects;
 
+/** Represents an error reported by {@link NullAway}. */
 public class NullAwayError extends Error {
 
   /** Error type for method initialization errors from NullAway in {@code String}. */
@@ -27,10 +52,10 @@ public class NullAwayError extends Error {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof Error)) {
+    if (!(o instanceof NullAwayError)) {
       return false;
     }
-    Error error = (Error) o;
+    NullAwayError error = (NullAwayError) o;
     if (!messageType.equals(error.messageType)) {
       return false;
     }
@@ -64,8 +89,8 @@ public class NullAwayError extends Error {
    *
    * @return true, if the error is an initialization error.
    */
-  public boolean isInitializationError() {
-    return this.messageType.equals(METHOD_INITIALIZER_ERROR)
-        || this.messageType.equals(FIELD_INITIALIZER_ERROR);
+  public boolean isNonInitializationError() {
+    return !this.messageType.equals(METHOD_INITIALIZER_ERROR)
+        && !this.messageType.equals(FIELD_INITIALIZER_ERROR);
   }
 }

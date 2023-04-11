@@ -28,7 +28,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.checkers.Checker;
-import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
+import edu.ucr.cs.riple.core.checkers.CheckerBaseClass;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -394,7 +394,8 @@ public class Config {
         cmd.hasOption(nullableOption.getLongOpt())
             ? cmd.getOptionValue(nullableOption.getLongOpt())
             : "javax.annotation.Nullable";
-    this.checker = new NullAway(this);
+    this.checker =
+        CheckerBaseClass.getCheckerByName(cmd.getOptionValue(checkerNameOption.getLongOpt()), this);
     this.initializerAnnot = cmd.getOptionValue(initializerOption.getLongOpt());
     this.depth =
         Integer.parseInt(
@@ -466,6 +467,25 @@ public class Config {
             ? ImmutableSet.of()
             : ImmutableSet.copyOf(cmd.getOptionValue(nonnullAnnotationsOption).split(","));
     this.targetModuleContext = new Context(this, this.target, this.buildCommand);
+    verifyCheckerCompatibility();
+  }
+
+  private void verifyCheckerCompatibility() {
+    Utility.buildTarget(this);
+    // read version from serialization.txt
+    Path serializationPath =
+        this.targetModuleContext
+            .getModules()
+            .iterator()
+            .next()
+            .dir
+            .resolve("serialization_version.txt");
+    try {
+      int version = Integer.parseInt(Files.readAllLines(serializationPath).get(0));
+      checker.verifyCheckerCompatibility(version);
+    } catch (IOException e) {
+      throw new RuntimeException("Error in reading serialization.txt", e);
+    }
   }
 
   /**
@@ -483,7 +503,9 @@ public class Config {
     } catch (Exception e) {
       throw new RuntimeException("Error in reading/parsing config at path: " + configPath, e);
     }
-    this.checker = new NullAway(this);
+    this.checker =
+        CheckerBaseClass.getCheckerByName(
+            getValueFromKey(jsonObject, "CHECKER", String.class).orElse(null), this);
     this.depth = getValueFromKey(jsonObject, "DEPTH", Long.class).orElse((long) 1).intValue();
     this.chain = getValueFromKey(jsonObject, "CHAIN", Boolean.class).orElse(false);
     this.redirectBuildOutputToStdErr =
@@ -565,6 +587,7 @@ public class Config {
                 .orElse(List.of()));
     this.log.reset();
     this.targetModuleContext = new Context(this, this.target, this.buildCommand);
+    verifyCheckerCompatibility();
   }
 
   /**

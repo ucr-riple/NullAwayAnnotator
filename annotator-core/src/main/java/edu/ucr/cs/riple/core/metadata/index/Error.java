@@ -33,13 +33,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
 
-/** Represents an error reported by NullAway. */
+/** Base class for an error reported by the Checker. */
 @SuppressWarnings("JavaLangClash")
-public class Error {
+public abstract class Error {
 
   /** Error Type. */
   public final String messageType;
@@ -146,26 +145,6 @@ public class Error {
     return this.region;
   }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof Error)) {
-      return false;
-    }
-    Error error = (Error) o;
-    if (!messageType.equals(error.messageType)) {
-      return false;
-    }
-    if (!region.equals(error.region)) {
-      return false;
-    }
-    return message.equals(error.message)
-        && resolvingFixes.equals(error.resolvingFixes)
-        && offset == error.offset;
-  }
-
   /**
    * Checks if error is resolvable and all suggested fixes must be applied to an element in target
    * module.
@@ -177,11 +156,6 @@ public class Error {
     return resolvingFixes.size() > 0
         && this.resolvingFixes.stream()
             .allMatch(fix -> config.targetModuleContext.declaredInModule(fix.toLocation()));
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(messageType, message, region, resolvingFixes, offset);
   }
 
   @Override

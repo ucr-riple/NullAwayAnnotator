@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.checkers;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
@@ -33,7 +34,7 @@ import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Set;
 
-/** Base class for all checker deserializers. */
+/** Base class for all checker representations. */
 public abstract class CheckerBaseClass<T extends Error> implements Checker<T> {
 
   /** Annotator config. */
@@ -87,8 +88,22 @@ public abstract class CheckerBaseClass<T extends Error> implements Checker<T> {
     return onField;
   }
 
-  @Override
-  public int getVersion() {
-    return version;
+  /**
+   * Returns the checker instance by its name.
+   *
+   * @param name name of the checker.
+   * @param config annotator config.
+   * @return the checker instance with the given name.
+   */
+  public static Checker<?> getCheckerByName(String name, Config config) {
+    if (name == null) {
+      throw new RuntimeException("Checker name is null");
+    }
+    switch (name) {
+      case NullAway.NAME:
+        return new NullAway(config);
+      default:
+        throw new RuntimeException("Unknown checker name: " + name);
+    }
   }
 }

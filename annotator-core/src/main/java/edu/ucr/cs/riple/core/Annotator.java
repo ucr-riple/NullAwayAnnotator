@@ -29,7 +29,6 @@ import edu.ucr.cs.riple.core.cache.TargetModuleCache;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCacheImpl;
 import edu.ucr.cs.riple.core.cache.downstream.VoidDownstreamImpactCache;
-import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
 import edu.ucr.cs.riple.core.evaluators.CachedEvaluator;
 import edu.ucr.cs.riple.core.evaluators.Evaluator;
@@ -236,6 +235,6 @@ public class Annotator {
    * </ul>
    */
   private void suppressRemainingErrors() {
-    new NullAway(config).suppressRemainingAnnotations(config, injector);
+    config.checker.suppressRemainingAnnotations(config, injector);
   }
 }

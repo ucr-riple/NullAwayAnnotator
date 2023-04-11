@@ -51,9 +51,15 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/** Represents <a href="https://github.com/uber/NullAway">NullAway</a> checker in Annotator. */
 public class NullAway extends CheckerBaseClass<NullAwayError> {
 
+  /**
+   * The name of the checker. To select this checker, this name must be used in the configurations.
+   */
   public static final String NAME = "NULLAWAY";
+  /** Supported version of NullAway serialization. */
+  public static final int VERSION = 3;
 
   public NullAway(Config config) {
     super(config, 3);
@@ -225,7 +231,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       // We suppress initialization errors reported on constructors using
                       // @SuppressWarnings("NullAway.Init"). We add @NullUnmarked on constructors
                       // only for errors in the body of the constructor.
-                      !error.isInitializationError()) {
+                      error.isNonInitializationError()) {
                     return config
                         .targetModuleContext
                         .getMethodRegistry()
@@ -279,7 +285,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                     return false;
                   }
                   // We can silence them by SuppressWarnings("NullAway.Init")
-                  return !error.isInitializationError();
+                  return error.isNonInitializationError();
                 })
             .map(
                 error ->
@@ -335,16 +341,6 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
   }
 
   @Override
-  public String getDefaultAnnotation() {
-    return null;
-  }
-
-  @Override
-  public String getCheckerName() {
-    return null;
-  }
-
-  @Override
   public NullAwayError createErrorFactory(
       String errorType,
       String errorMessage,
@@ -355,7 +351,13 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
   }
 
   @Override
-  public int getVersion() {
-    return 0;
+  public void verifyCheckerCompatibility(int version) {
+    Preconditions.checkArgument(
+        version == VERSION,
+        "This Annotator version only supports NullAway serialization version "
+            + VERSION
+            + ", but found: "
+            + version
+            + ", Please update Annotator or NullAway accordingly.");
   }
 }
