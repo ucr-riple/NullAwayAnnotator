@@ -28,6 +28,7 @@ import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.visitors.LocationVisitor;
 import java.nio.file.Path;
 import java.util.regex.Pattern;
+import org.json.simple.JSONObject;
 
 /** Represents a location for class element. This location is used to apply changes to a class. */
 public class OnClass extends Location {
@@ -44,6 +45,10 @@ public class OnClass extends Location {
 
   public OnClass(String path, String clazz) {
     this(Helper.deserializePath(path), clazz);
+  }
+
+  public OnClass(JSONObject json) {
+    super(LocationKind.CLASS, json);
   }
 
   /**

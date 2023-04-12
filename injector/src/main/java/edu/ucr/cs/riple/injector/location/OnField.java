@@ -28,9 +28,11 @@ import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.visitors.LocationVisitor;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import org.json.simple.JSONObject;
 
 /**
  * Represents a location for field element. This location is used to apply changes to a class field.
@@ -58,6 +60,11 @@ public class OnField extends Location {
 
   public OnField(String path, String clazz, Set<String> variables) {
     this(Helper.deserializePath(path), clazz, variables);
+  }
+
+  public OnField(JSONObject json) {
+    super(LocationKind.FIELD, json);
+    this.variables = new HashSet<>(Collections.singletonList((String) json.get("variables")));
   }
 
   @Override

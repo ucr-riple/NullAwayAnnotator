@@ -31,7 +31,18 @@ import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
+import edu.ucr.cs.riple.injector.location.Location;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.Set;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  * Represents <a href="https://github.com/kanaksad/UCRTaintingChecker">UCRTaint</a> checker in
@@ -48,7 +59,42 @@ public class UCRTaint extends CheckerBaseClass<TaintError> {
 
   @Override
   public Set<TaintError> deserializeErrors(Context context) {
-    return null;
+    ImmutableSet<Path> paths =
+        context.getModules().stream()
+            .map(moduleInfo -> moduleInfo.dir.resolve("errors.json"))
+            .collect(ImmutableSet.toImmutableSet());
+    Set<TaintError> errors = new HashSet<>();
+    paths.forEach(
+        path -> {
+          try {
+            String content = Files.readString(path, Charset.defaultCharset());
+            content = "{ \"errors\": [" + content.substring(0, content.length() - 1) + "]}";
+            JSONObject jsonObject = (JSONObject) new JSONParser().parse(content);
+            JSONArray errorsJson = (JSONArray) jsonObject.get("errors");
+            errorsJson.forEach(o -> errors.add(deserializeErrorFromJSON((JSONObject) o, context)));
+          } catch (IOException | ParseException e) {
+            throw new RuntimeException(e);
+          }
+        });
+    return errors;
+  }
+
+  private TaintError deserializeErrorFromJSON(JSONObject errorsJson, Context context) {
+    String errorType = (String) errorsJson.get("messageKey");
+    int offset = (int) errorsJson.get("offset");
+    Region region =
+        new Region(
+            (String) ((JSONObject) errorsJson.get("region")).get("member"),
+            (String) ((JSONObject) errorsJson.get("region")).get("class"));
+    ImmutableSet.Builder<Fix> builder = ImmutableSet.builder();
+    ((JSONArray) errorsJson.get("fixes"))
+        .forEach(
+            o -> {
+              JSONObject fixJson = (JSONObject) o;
+              Location location = Location.fromJSON((JSONObject) fixJson.get("location"));
+              builder.add(new Fix(new AddMarkerAnnotation(location, "Untained"), errorType, true));
+            });
+    return new TaintError(errorType, "", region, offset, builder.build());
   }
 
   @Override
@@ -78,6 +124,6 @@ public class UCRTaint extends CheckerBaseClass<TaintError> {
       Region region,
       int offset,
       ImmutableSet<Fix> resolvingFixes) {
-    return null;
+    return new TaintError(errorType, errorMessage, region, offset, resolvingFixes);
   }
 }

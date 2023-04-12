@@ -29,10 +29,12 @@ import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.visitors.LocationVisitor;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
+import org.json.simple.JSONObject;
 
 /** Represents a location of an element in the source code. */
 public abstract class Location {
@@ -56,6 +58,12 @@ public abstract class Location {
     this.type = type;
     this.clazz = clazz;
     this.path = path;
+  }
+
+  public Location(LocationKind type, JSONObject json) {
+    this.type = type;
+    this.clazz = (String) json.get("class");
+    this.path = Paths.get((String) json.get("path"));
   }
 
   /**
@@ -261,5 +269,23 @@ public abstract class Location {
    */
   public String getClazz() {
     return clazz;
+  }
+
+  public static Location fromJSON(JSONObject json) {
+    String kind = (String) json.get("kind");
+    switch (kind) {
+      case "METHOD":
+        return new OnMethod(json);
+      case "FIELD":
+        return new OnField(json);
+      case "PARAMETER":
+        return new OnParameter(json);
+      case "LOCAL_VARIABLE":
+        return new OnLocalVariable(json);
+      case "CLASS":
+        return new OnClass(json);
+      default:
+        throw new RuntimeException("Cannot reach this statement, kind: " + kind);
+    }
   }
 }
