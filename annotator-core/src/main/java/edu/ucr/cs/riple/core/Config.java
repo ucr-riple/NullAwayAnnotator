@@ -159,8 +159,7 @@ public class Config {
   public final ImmutableSet<SourceType> generatedCodeDetectors;
   /** The context of target module. */
   public final Context targetModuleContext;
-
-  /** Checker enum to retrieve checker specific instances. (e.g. {@link CheckerDeserializer}) */
+  /** The checker representation to be used for the analysis. */
   public final Checker<?> checker;
 
   /**

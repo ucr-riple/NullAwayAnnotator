@@ -81,5 +81,10 @@ public interface Checker<T extends Error> {
    */
   void verifyCheckerCompatibility(int version);
 
+  /**
+   * Prepares the config files for the checker to run on the target module.
+   *
+   * @param context Context of the target module.
+   */
   void prepareConfigFilesForBuild(Context context);
 }
