@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.core.checkers;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
+import edu.ucr.cs.riple.core.checkers.ucrtaint.UCRTaint;
 import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
@@ -102,6 +103,8 @@ public abstract class CheckerBaseClass<T extends Error> implements Checker<T> {
     switch (name) {
       case NullAway.NAME:
         return new NullAway(config);
+      case UCRTaint.NAME:
+        return new UCRTaint(config);
       default:
         throw new RuntimeException("Unknown checker name: " + name);
     }
