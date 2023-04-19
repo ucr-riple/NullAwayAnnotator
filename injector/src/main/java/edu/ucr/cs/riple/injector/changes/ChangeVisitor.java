@@ -164,7 +164,8 @@ public class ChangeVisitor
   }
 
   /**
-   * Applies the change to the compilation unit.
+   * Computes the required {@link Modification} that should be applied to the compilation unit for
+   * the given change.
    *
    * @param change the change to apply.
    * @return the modification that should be applied.
