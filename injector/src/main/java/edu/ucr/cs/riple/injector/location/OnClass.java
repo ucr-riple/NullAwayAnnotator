@@ -81,6 +81,11 @@ public class OnClass extends Location {
   }
 
   @Override
+  public <R, P> R accept(LocationVisitor<R, P> v, P p) {
+    return v.visitClass(this, p);
+  }
+
+  @Override
   public String toString() {
     return "OnClass{" + "type=" + type + ", clazz='" + clazz + '\'' + ", path=" + path + '}';
   }
