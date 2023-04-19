@@ -118,6 +118,11 @@ public class OnMethod extends Location {
   }
 
   @Override
+  public <R, P> R accept(LocationVisitor<R, P> v, P p) {
+    return v.visitMethod(this, p);
+  }
+
+  @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), method);
   }
