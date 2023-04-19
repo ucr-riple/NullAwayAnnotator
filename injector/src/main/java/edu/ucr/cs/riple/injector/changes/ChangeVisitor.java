@@ -167,7 +167,7 @@ public class ChangeVisitor
    * @return the modification that should be applied.
    */
   @Nullable
-  public Modification visit(Change change) {
+  public Modification computeModification(Change change) {
     NodeList<BodyDeclaration<?>> members;
     try {
       members = Helper.getTypeDeclarationMembersByFlatName(cu, change.location.clazz);

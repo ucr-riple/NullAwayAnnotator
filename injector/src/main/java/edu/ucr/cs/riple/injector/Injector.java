@@ -68,7 +68,7 @@ public class Injector {
           Set<ImportDeclaration> imports = new HashSet<>();
           for (Change change : changeList) {
             try {
-              Modification modification = visitor.visit(change);
+              Modification modification = visitor.computeModification(change);
               if (modification != null) {
                 modifications.add(modification);
                 if (change instanceof AddAnnotation) {
