@@ -38,7 +38,6 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
-import org.json.simple.JSONObject;
 
 /** Represents a location of an element in the source code. */
 public abstract class Location {
@@ -49,16 +48,6 @@ public abstract class Location {
   public final String clazz;
   /** The path to the file containing the element. */
   public Path path;
-
-  /** The Keys used to represent a location in JSON format */
-  public enum KEYS {
-    VARIABLES,
-    METHOD,
-    KIND,
-    CLASS,
-    PATH,
-    INDEX
-  }
 
   /**
    * Creates an instance of {@link Location} for a given type, path and class. This constructor is a
@@ -127,13 +116,6 @@ public abstract class Location {
       NodeList<BodyDeclaration<?>> members, Change change);
 
   /**
-   * Fills the given JSON object with the information of this location.
-   *
-   * @param res The JSON object to be filled.
-   */
-  protected abstract void fillJsonInformation(JSONObject res);
-
-  /**
    * Applies the change to the target element on the given compilation unit tree.
    *
    * @param tree CompilationUnit Tree to locate the target element.
@@ -150,16 +132,6 @@ public abstract class Location {
       return null;
     }
     return applyToMember(clazz, change);
-  }
-
-  @SuppressWarnings("unchecked")
-  public JSONObject getJson() {
-    JSONObject res = new JSONObject();
-    res.put(KEYS.CLASS, clazz);
-    res.put(KEYS.KIND, type.toString());
-    res.put(KEYS.PATH, path);
-    fillJsonInformation(res);
-    return res;
   }
 
   /**
