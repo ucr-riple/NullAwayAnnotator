@@ -27,10 +27,7 @@ package edu.ucr.cs.riple.injector.location;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-/**
- * A visitor that converts a location to a JSON object. This visitor is singleton and for all
- * methods {@link LocationToJsonVisitor#INSTANCE} should be used.
- */
+/** A visitor that converts a location to a JSON object. */
 public class LocationToJsonVisitor implements LocationVisitor<JSONObject, Void> {
 
   /** The Keys used to represent a location in JSON format */
@@ -41,13 +38,6 @@ public class LocationToJsonVisitor implements LocationVisitor<JSONObject, Void> 
     CLASS,
     PATH,
     INDEX
-  }
-
-  /** A singleton instance of this visitor. */
-  public static final LocationToJsonVisitor INSTANCE = new LocationToJsonVisitor();
-
-  private LocationToJsonVisitor() {
-    // Singleton instance.
   }
 
   @SuppressWarnings("unchecked")
