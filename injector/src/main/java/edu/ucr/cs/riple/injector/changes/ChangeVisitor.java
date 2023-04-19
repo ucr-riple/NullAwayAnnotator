@@ -43,7 +43,10 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 
-/** A visitor for applying changes to a compilation unit on a specified location. */
+/**
+ * A visitor for computing the required {@link Modification} to a compilation unit on a specified
+ * location for the requested change.
+ */
 public class ChangeVisitor
     implements LocationVisitor<Modification, Pair<NodeList<BodyDeclaration<?>>, Change>> {
 
