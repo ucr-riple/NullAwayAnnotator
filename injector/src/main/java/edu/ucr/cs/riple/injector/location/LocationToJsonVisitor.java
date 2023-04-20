@@ -22,19 +22,13 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.injector.visitors;
+package edu.ucr.cs.riple.injector.location;
 
-import edu.ucr.cs.riple.injector.location.Location;
-import edu.ucr.cs.riple.injector.location.OnClass;
-import edu.ucr.cs.riple.injector.location.OnField;
-import edu.ucr.cs.riple.injector.location.OnLocalVariable;
-import edu.ucr.cs.riple.injector.location.OnMethod;
-import edu.ucr.cs.riple.injector.location.OnParameter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 /** A visitor that converts a location to a JSON object. */
-public class LocationToJSONVisitor implements LocationVisitor<JSONObject, Void> {
+public class LocationToJsonVisitor implements LocationVisitor<JSONObject, Void> {
 
   /** The Keys used to represent a location in JSON format */
   public enum KEYS {
@@ -85,25 +79,5 @@ public class LocationToJSONVisitor implements LocationVisitor<JSONObject, Void> 
   @Override
   public JSONObject visitClass(OnClass onClass, Void unused) {
     return defaultAction(onClass);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public JSONObject visitLocalVariable(OnLocalVariable onLocalVariable, Void unused) {
-    JSONObject res = defaultAction(onLocalVariable);
-    JSONArray fields = new JSONArray();
-    fields.add(onLocalVariable.varName);
-    res.put(KEYS.VARIABLES, fields);
-    return res;
-  }
-
-  /**
-   * Visits a location and returns a JSON object.
-   *
-   * @param location the location to visit
-   * @return a JSON object representing the location
-   */
-  public JSONObject visit(Location location) {
-    return location.accept(this, null);
   }
 }
