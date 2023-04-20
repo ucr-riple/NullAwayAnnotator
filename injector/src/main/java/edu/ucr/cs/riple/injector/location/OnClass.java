@@ -34,7 +34,6 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
-import org.json.simple.JSONObject;
 
 /** Represents a location for class element. This location is used to apply changes to a class. */
 public class OnClass extends Location {
@@ -77,8 +76,8 @@ public class OnClass extends Location {
   }
 
   @Override
-  protected void fillJsonInformation(JSONObject res) {
-    // no op
+  public <R, P> R accept(LocationVisitor<R, P> v, P p) {
+    return v.visitClass(this, p);
   }
 
   @Override

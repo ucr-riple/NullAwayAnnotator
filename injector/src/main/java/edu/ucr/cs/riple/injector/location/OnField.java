@@ -37,8 +37,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 /**
  * Represents a location for field element. This location is used to apply changes to a class field.
@@ -66,14 +64,6 @@ public class OnField extends Location {
 
   public OnField(String path, String clazz, Set<String> variables) {
     this(Helper.deserializePath(path), clazz, variables);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  protected void fillJsonInformation(JSONObject res) {
-    JSONArray fields = new JSONArray();
-    fields.addAll(variables);
-    res.put(KEYS.VARIABLES, fields);
   }
 
   @Override
@@ -127,6 +117,11 @@ public class OnField extends Location {
     }
     OnField other = (OnField) o;
     return super.equals(other) && !Collections.disjoint(variables, other.variables);
+  }
+
+  @Override
+  public <R, P> R accept(LocationVisitor<R, P> v, P p) {
+    return v.visitField(this, p);
   }
 
   @Override
