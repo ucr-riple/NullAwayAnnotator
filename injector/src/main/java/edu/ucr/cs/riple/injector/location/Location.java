@@ -24,15 +24,9 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.BodyDeclaration;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.injector.Helper;
-import edu.ucr.cs.riple.injector.changes.Change;
-import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
-import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
@@ -105,36 +99,6 @@ public abstract class Location {
   }
 
   /**
-   * Applies the change to the element in this location.
-   *
-   * @param members The list of members of the enclosing class of the target element.
-   * @param change The change to be applied on the target element.
-   * @return The modification that should be applied on the source file.
-   */
-  @Nullable
-  protected abstract Modification applyToMember(
-      NodeList<BodyDeclaration<?>> members, Change change);
-
-  /**
-   * Applies the change to the target element on the given compilation unit tree.
-   *
-   * @param tree CompilationUnit Tree to locate the target element.
-   * @param change Change to be applied on the target element.
-   * @return The modification that should be applied on the source file.
-   */
-  @Nullable
-  public Modification apply(CompilationUnit tree, Change change) {
-    NodeList<BodyDeclaration<?>> clazz;
-    try {
-      clazz = Helper.getTypeDeclarationMembersByFlatName(tree, this.clazz);
-    } catch (TargetClassNotFound notFound) {
-      System.err.println(notFound.getMessage());
-      return null;
-    }
-    return applyToMember(clazz, change);
-  }
-
-  /**
    * If this location is of kind {@link LocationKind#METHOD}, calls the consumer on the location.
    *
    * @param consumer The consumer to be called.
@@ -153,6 +117,14 @@ public abstract class Location {
    * @param consumer The consumer to be called.
    */
   public void ifField(Consumer<OnField> consumer) {}
+
+  /**
+   * If this location is of kind {@link LocationKind#LOCAL_VARIABLE}, calls the consumer on the
+   * location.
+   *
+   * @param consumer The consumer to be called.
+   */
+  public void ifLocalVariable(Consumer<OnLocalVariable> consumer) {}
 
   /**
    * Returns downcast of this instance to {@link OnField} if this location is of kind {@link
@@ -202,6 +174,20 @@ public abstract class Location {
   }
 
   /**
+   * Returns downcast of this instance to {@link OnLocalVariable} if this location is of kind {@link
+   * LocationKind#LOCAL_VARIABLE}, Otherwise, returns null.
+   *
+   * @return The {@link OnLocalVariable} instance of this location if it is of kind {@link
+   *     LocationKind#LOCAL_VARIABLE}, null otherwise.
+   */
+  public OnLocalVariable toLocalVariable() {
+    if (this instanceof OnLocalVariable) {
+      return (OnLocalVariable) this;
+    }
+    return null;
+  }
+
+  /**
    * Returns true if this location is of kind {@link LocationKind#METHOD}.
    *
    * @return true if this location is of kind {@link LocationKind#METHOD}.
@@ -225,6 +211,15 @@ public abstract class Location {
    * @return true if this location is of kind {@link LocationKind#PARAMETER}.
    */
   public boolean isOnParameter() {
+    return false;
+  }
+
+  /**
+   * Returns true if this location is of kind {@link LocationKind#LOCAL_VARIABLE}.
+   *
+   * @return true if this location is of kind {@link LocationKind#LOCAL_VARIABLE}.
+   */
+  public boolean isOnLocalVariable() {
     return false;
   }
 
