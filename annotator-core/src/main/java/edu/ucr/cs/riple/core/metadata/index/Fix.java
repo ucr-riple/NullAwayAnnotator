@@ -188,7 +188,8 @@ public class Fix {
     if (isOnField()) {
       return false;
     }
-    String methodSignature = isOnMethod() ? toMethod().method : toParameter().method;
+    String methodSignature =
+        isOnMethod() ? toMethod().method : toParameter().enclosingMethod.method;
     return Helper.extractCallableName(methodSignature)
         .equals(Helper.simpleName(change.location.clazz));
   }
