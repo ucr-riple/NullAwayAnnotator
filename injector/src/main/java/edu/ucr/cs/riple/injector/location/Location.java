@@ -24,15 +24,9 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.BodyDeclaration;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.injector.Helper;
-import edu.ucr.cs.riple.injector.changes.Change;
-import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
-import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
@@ -102,36 +96,6 @@ public abstract class Location {
         return new OnParameter(path, clazz, values[2], Integer.parseInt(values[4]));
     }
     throw new RuntimeException("Cannot reach this statement, values: " + Arrays.toString(values));
-  }
-
-  /**
-   * Applies the change to the element in this location.
-   *
-   * @param members The list of members of the enclosing class of the target element.
-   * @param change The change to be applied on the target element.
-   * @return The modification that should be applied on the source file.
-   */
-  @Nullable
-  protected abstract Modification applyToMember(
-      NodeList<BodyDeclaration<?>> members, Change change);
-
-  /**
-   * Applies the change to the target element on the given compilation unit tree.
-   *
-   * @param tree CompilationUnit Tree to locate the target element.
-   * @param change Change to be applied on the target element.
-   * @return The modification that should be applied on the source file.
-   */
-  @Nullable
-  public Modification apply(CompilationUnit tree, Change change) {
-    NodeList<BodyDeclaration<?>> clazz;
-    try {
-      clazz = Helper.getTypeDeclarationMembersByFlatName(tree, this.clazz);
-    } catch (TargetClassNotFound notFound) {
-      System.err.println(notFound.getMessage());
-      return null;
-    }
-    return applyToMember(clazz, change);
   }
 
   /**
