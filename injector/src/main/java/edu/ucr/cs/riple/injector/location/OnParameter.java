@@ -24,18 +24,10 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.body.Parameter;
 import edu.ucr.cs.riple.injector.Helper;
-import edu.ucr.cs.riple.injector.changes.Change;
-import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.nio.file.Path;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import javax.annotation.Nullable;
 
 /**
  * Represents a location for parameter element. This location is used to apply changes to a
@@ -58,34 +50,6 @@ public class OnParameter extends Location {
     this(Helper.deserializePath(path), clazz, method, index);
   }
 
-  @Override
-  @Nullable
-  protected Modification applyToMember(NodeList<BodyDeclaration<?>> members, Change change) {
-    final AtomicReference<Modification> ans = new AtomicReference<>();
-    members.forEach(
-        bodyDeclaration ->
-            bodyDeclaration.ifCallableDeclaration(
-                callableDeclaration -> {
-                  if (ans.get() != null) {
-                    // already found the member.
-                    return;
-                  }
-                  if (enclosingMethod.matcher.matchesCallableDeclaration(callableDeclaration)) {
-                    NodeList<?> params = callableDeclaration.getParameters();
-                    if (index < params.size()) {
-                      if (params.get(index) != null) {
-                        Node param = params.get(index);
-                        if (param instanceof Parameter) {
-                          ans.set(change.visit((Parameter) param));
-                        }
-                      }
-                    }
-                  }
-                }));
-    return ans.get();
-  }
-
-  @Override
   public void ifParameter(Consumer<OnParameter> consumer) {
     consumer.accept(this);
   }
