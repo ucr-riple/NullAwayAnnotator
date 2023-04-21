@@ -274,7 +274,8 @@ public class Annotator {
                     return config
                         .targetModuleContext
                         .getMethodRegistry()
-                        .findMethodByName(nullableParameter.clazz, nullableParameter.method);
+                        .findMethodByName(
+                            nullableParameter.clazz, nullableParameter.enclosingMethod.method);
                   }
                   return null;
                 })

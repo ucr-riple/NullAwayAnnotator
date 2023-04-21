@@ -134,7 +134,8 @@ public abstract class Location {
 
   /**
    * Returns downcast of this instance to {@link OnMethod} if this location is of kind {@link
-   * LocationKind#METHOD}, Otherwise, returns null.
+   * LocationKind#METHOD} and the enclosing method if of kind {@link LocationKind#PARAMETER},
+   * Otherwise, returns null.
    *
    * @return The {@link OnMethod} instance of this location if it is of kind {@link
    *     LocationKind#METHOD}, null otherwise.
@@ -146,7 +147,7 @@ public abstract class Location {
     // If location is of kind PARAMETER, toMethod will return the location of the enclosing method
     // of the parameter.
     if (this instanceof OnParameter) {
-      return new OnMethod(path, clazz, toParameter().method);
+      return ((OnParameter) this).enclosingMethod;
     }
     return null;
   }

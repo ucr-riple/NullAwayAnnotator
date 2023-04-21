@@ -56,7 +56,7 @@ public class ParameterRegionTracker implements RegionTracker {
             .map(node -> new Region(node.location.clazz, node.location.method))
             .collect(Collectors.toSet());
     // Add the method the fix is targeting.
-    regions.add(new Region(parameter.clazz, parameter.method));
+    regions.add(new Region(parameter.clazz, parameter.enclosingMethod.method));
     // Add all call sites. It will also reserve call sites to prevent callers from passing @Nullable
     // simultaneously while investigating parameters impact.
     // See example below:
@@ -70,7 +70,8 @@ public class ParameterRegionTracker implements RegionTracker {
     // (passing `@Nullable` to `@Nonnull` parameter) as bar#o is temporarily annotated as @Nullable
     // to compute its impact.
     // See test: CoreTest#nestedParameters.
-    regions.addAll(methodRegionTracker.getCallersOfMethod(parameter.clazz, parameter.method));
+    regions.addAll(
+        methodRegionTracker.getCallersOfMethod(parameter.clazz, parameter.enclosingMethod.method));
     return Optional.of(regions);
   }
 }
