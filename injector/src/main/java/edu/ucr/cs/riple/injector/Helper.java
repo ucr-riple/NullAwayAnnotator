@@ -340,6 +340,9 @@ public class Helper {
   @Nullable
   public static VariableDeclarationExpr locateVariableDeclarationExpr(
       CallableDeclaration<?> encMethod, String varName) {
+    // Should not visit inner nodes of inner methods in the given method, since the given
+    // method should be the closest enclosing method of the target local variable. Therefore, we
+    // use DirectMethodParentIterator to skip inner methods.
     Iterator<Node> treeIterator = new DirectMethodParentIterator(encMethod);
     while (treeIterator.hasNext()) {
       Node n = treeIterator.next();
@@ -491,26 +494,26 @@ public class Helper {
    * any {@link BodyDeclaration}.
    */
   public static final class DirectMethodParentIterator implements Iterator<Node> {
-    private final ArrayDeque<Node> stack = new ArrayDeque<>();
+    private final ArrayDeque<Node> deque = new ArrayDeque<>();
 
     public DirectMethodParentIterator(CallableDeclaration<?> node) {
-      stack.add(node);
+      deque.add(node);
     }
 
     @Override
     public boolean hasNext() {
-      return !stack.isEmpty();
+      return !deque.isEmpty();
     }
 
     @Override
     public Node next() {
-      Node next = stack.removeFirst();
+      Node next = deque.removeFirst();
       List<Node> children = next.getChildNodes();
       for (int i = children.size() - 1; i >= 0; i--) {
         Node child = children.get(i);
         if (!(child instanceof BodyDeclaration<?>)) {
           // Skip over any CallableDeclaration.
-          stack.add(children.get(i));
+          deque.add(children.get(i));
         }
       }
       return next;
