@@ -183,7 +183,7 @@ public class ChangeVisitor
                     // already found the member.
                     return;
                   }
-                  if (onLocalVariable.matchesCallableDeclaration(callableDeclaration)) {
+                  if (onLocalVariable.encMethod.matchesCallableDeclaration(callableDeclaration)) {
                     // Find variable declaration in the callable declaration with the variable name.
                     VariableDeclarationExpr variableDeclarationExpr =
                         Helper.locateVariableDeclarationExpr(

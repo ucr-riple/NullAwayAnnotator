@@ -24,9 +24,7 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-import com.github.javaparser.ast.body.CallableDeclaration;
 import edu.ucr.cs.riple.injector.Helper;
-import edu.ucr.cs.riple.injector.SignatureMatcher;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -42,20 +40,14 @@ import java.util.function.Consumer;
  */
 public class OnLocalVariable extends Location {
 
-  /** Enclosing method signature of the target local variable. */
-  public final String encMethod;
-  /**
-   * Matcher for the method signature. Method signature is given as a string, this matcher is used
-   * to match the target.
-   */
-  public final SignatureMatcher matcher;
+  /** Enclosing method of the target local variable. */
+  public final OnMethod encMethod;
   /** Name of the local variable. */
   public final String varName;
 
   public OnLocalVariable(Path path, String clazz, String encMethod, String varName) {
     super(LocationKind.LOCAL_VARIABLE, path, clazz);
-    this.encMethod = encMethod;
-    this.matcher = new SignatureMatcher(encMethod);
+    this.encMethod = new OnMethod(path, clazz, encMethod);
     this.varName = varName;
   }
 
@@ -105,15 +97,5 @@ public class OnLocalVariable extends Location {
         + "varName='"
         + varName
         + '}';
-  }
-
-  /**
-   * Checks if the given method matches the method signature of this location.
-   *
-   * @param method method to check.
-   * @return true, if the given method matches the method signature of this location.
-   */
-  public boolean matchesCallableDeclaration(CallableDeclaration<?> method) {
-    return this.matcher.matchesCallableDeclaration(method);
   }
 }
