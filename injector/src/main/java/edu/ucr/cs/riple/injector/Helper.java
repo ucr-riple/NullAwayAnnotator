@@ -494,6 +494,7 @@ public class Helper {
    * any {@link BodyDeclaration}.
    */
   public static final class DirectMethodParentIterator implements Iterator<Node> {
+
     private final ArrayDeque<Node> deque = new ArrayDeque<>();
 
     public DirectMethodParentIterator(CallableDeclaration<?> node) {
