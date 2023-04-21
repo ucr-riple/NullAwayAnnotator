@@ -41,12 +41,12 @@ import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.Stack;
 import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -491,7 +491,7 @@ public class Helper {
    * any {@link BodyDeclaration}.
    */
   public static final class DirectMethodParentIterator implements Iterator<Node> {
-    private final Stack<Node> stack = new Stack<>();
+    private final ArrayDeque<Node> stack = new ArrayDeque<>();
 
     public DirectMethodParentIterator(CallableDeclaration<?> node) {
       stack.add(node);
@@ -504,7 +504,7 @@ public class Helper {
 
     @Override
     public Node next() {
-      Node next = stack.pop();
+      Node next = stack.removeFirst();
       List<Node> children = next.getChildNodes();
       for (int i = children.size() - 1; i >= 0; i--) {
         Node child = children.get(i);
