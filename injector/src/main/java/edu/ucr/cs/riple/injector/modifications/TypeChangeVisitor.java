@@ -30,7 +30,13 @@ import edu.ucr.cs.riple.injector.changes.Change;
 import java.util.HashSet;
 import java.util.Set;
 
-/** Visitor for making changes on the type and all of its type arguments. */
+/**
+ * Visitor for computing the required set of {@link Modification} instances for the given {@link
+ * Change} request on the type and all of its type arguments. This visitor will assume that the
+ * requested change, should be applied to the type and all containing type parameters if exists. For
+ * instance, an annotation addition on type {@code Foo<Bar, Map<Bar, Bar>>} will be treated as the
+ * output should be {@code @Annot Foo<@Annot Bar, @Annot Map<@Annot Bar, @Annot Bar>>}.
+ */
 public class TypeChangeVisitor extends GenericVisitorWithDefaults<Set<Modification>, Change> {
 
   @Override
