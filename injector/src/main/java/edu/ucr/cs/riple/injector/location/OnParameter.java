@@ -24,9 +24,7 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-import com.github.javaparser.ast.body.CallableDeclaration;
 import edu.ucr.cs.riple.injector.Helper;
-import edu.ucr.cs.riple.injector.SignatureMatcher;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -37,28 +35,21 @@ import java.util.function.Consumer;
  */
 public class OnParameter extends Location {
 
-  /** Method signature of the enclosing method. */
-  public final String method;
+  /** Enclosing Method location of the parameter. */
+  public final OnMethod enclosingMethod;
   /** Index of the parameter in the method signature. */
   public final int index;
-  /**
-   * Matcher for the method signature. Method signature is given as a string, this matcher is used
-   * to match the target.
-   */
-  private final SignatureMatcher matcher;
 
   public OnParameter(Path path, String clazz, String method, int index) {
     super(LocationKind.PARAMETER, path, clazz);
-    this.method = method;
+    this.enclosingMethod = new OnMethod(path, clazz, method);
     this.index = index;
-    this.matcher = new SignatureMatcher(method);
   }
 
   public OnParameter(String path, String clazz, String method, int index) {
     this(Helper.deserializePath(path), clazz, method, index);
   }
 
-  @Override
   public void ifParameter(Consumer<OnParameter> consumer) {
     consumer.accept(this);
   }
@@ -80,17 +71,9 @@ public class OnParameter extends Location {
       return false;
     }
     OnParameter other = (OnParameter) o;
-    return super.equals(other) && method.equals(other.method) && index == other.index;
-  }
-
-  /**
-   * Checks if the given method matches the method signature of this location.
-   *
-   * @param method method to check.
-   * @return true if the method matches the method signature of this location.
-   */
-  public boolean matchesCallableDeclaration(CallableDeclaration<?> method) {
-    return this.matcher.matchesCallableDeclaration(method);
+    return super.equals(other)
+        && enclosingMethod.equals(other.enclosingMethod)
+        && index == other.index;
   }
 
   @Override
@@ -100,7 +83,7 @@ public class OnParameter extends Location {
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), method, index);
+    return Objects.hash(super.hashCode(), enclosingMethod, index);
   }
 
   @Override
@@ -110,7 +93,7 @@ public class OnParameter extends Location {
         + clazz
         + '\''
         + ", method='"
-        + method
+        + enclosingMethod
         + '\''
         + ", index="
         + index

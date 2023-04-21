@@ -67,7 +67,6 @@ public abstract class AnnotatorBaseCoreTest {
       // Create a separate library models loader to avoid races between unit tests.
       FileUtils.copyDirectory(
           repositoryDirectory.toFile(), outDirPath.resolve("Annotator").toFile());
-      FileUtils.deleteDirectory(unitTestProjectPath.toFile());
       FileUtils.copyDirectory(pathToUnitTestDir.toFile(), unitTestProjectPath.toFile());
       // Copy using gradle wrappers.
       FileUtils.copyFile(
@@ -80,7 +79,7 @@ public abstract class AnnotatorBaseCoreTest {
           repositoryDirectory.resolve("gradle").toFile(),
           unitTestProjectPath.resolve("gradle").toFile());
     } catch (IOException e) {
-      throw new RuntimeException("Preparation for test failed", e);
+      throw new RuntimeException("Preparation for test failed: " + e.getMessage(), e);
     }
     coreTestHelper = new CoreTestHelper(unitTestProjectPath, outDirPath);
   }

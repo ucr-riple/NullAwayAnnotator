@@ -138,7 +138,7 @@ public class ChangeVisitor
                     // already found the member.
                     return;
                   }
-                  if (onParameter.matchesCallableDeclaration(callableDeclaration)) {
+                  if (onParameter.enclosingMethod.matchesCallableDeclaration(callableDeclaration)) {
                     NodeList<?> params = callableDeclaration.getParameters();
                     if (onParameter.index < params.size()) {
                       if (params.get(onParameter.index) != null) {

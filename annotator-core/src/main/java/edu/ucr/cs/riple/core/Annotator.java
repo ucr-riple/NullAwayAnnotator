@@ -286,7 +286,7 @@ public class Annotator {
                       && error.toResolvingLocation().isOnParameter()) {
                     OnParameter nullableParameter = error.toResolvingParameter();
                     return methodRegistry.findMethodByName(
-                        nullableParameter.clazz, nullableParameter.method);
+                        nullableParameter.clazz, nullableParameter.enclosingMethod.method);
                   }
                   return null;
                 })
