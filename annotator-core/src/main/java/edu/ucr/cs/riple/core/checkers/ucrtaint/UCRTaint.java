@@ -92,7 +92,12 @@ public class UCRTaint extends CheckerBaseClass<TaintError> {
             o -> {
               JSONObject fixJson = (JSONObject) o;
               Location location = Location.fromJSON((JSONObject) fixJson.get("location"));
-              builder.add(new Fix(new AddMarkerAnnotation(location, "Untained"), errorType, true));
+              builder.add(
+                  new Fix(
+                      new AddMarkerAnnotation(
+                          location, "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted"),
+                      errorType,
+                      true));
             });
     return new TaintError(errorType, "", region, offset, builder.build());
   }

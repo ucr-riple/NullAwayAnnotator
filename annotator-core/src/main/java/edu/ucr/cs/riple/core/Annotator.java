@@ -68,7 +68,7 @@ public class Annotator {
 
   /** Starts the annotating process consist of preprocess followed by the "annotate" phase. */
   public void start() {
-    preprocess();
+    //    preprocess();
     long timer = config.log.startTimer();
     annotate();
     config.log.stopTimerAndCapture(timer);
