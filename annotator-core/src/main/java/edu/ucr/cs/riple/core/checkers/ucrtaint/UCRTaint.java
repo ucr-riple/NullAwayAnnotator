@@ -81,7 +81,7 @@ public class UCRTaint extends CheckerBaseClass<TaintError> {
 
   private TaintError deserializeErrorFromJSON(JSONObject errorsJson, Context context) {
     String errorType = (String) errorsJson.get("messageKey");
-    int offset = (int) errorsJson.get("offset");
+    int offset = ((Long) errorsJson.get("offset")).intValue();
     Region region =
         new Region(
             (String) ((JSONObject) errorsJson.get("region")).get("member"),
