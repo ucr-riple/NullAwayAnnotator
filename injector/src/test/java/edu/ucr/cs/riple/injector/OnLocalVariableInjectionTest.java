@@ -168,4 +168,37 @@ public class OnLocalVariableInjectionTest extends BaseInjectorTest {
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"))
         .start();
   }
+
+  @Test
+  public void onArrayType() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "public class Foo<T> {",
+            "   public void foo() {",
+            "      Map<String, T[]>[] f0;",
+            "      T[] f1;",
+            "      String[] f2;",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo<T> {",
+            "   public void foo() {",
+            "      @UnTainted Map<@UnTainted String, @UnTainted T[]>[] f0;",
+            "      @UnTainted T[] f1;",
+            "      @UnTainted String[] f2;",
+            "   }",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"),
+            new AddMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"), "edu.ucr.UnTainted"),
+            new AddMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
+        .start();
+  }
 }
