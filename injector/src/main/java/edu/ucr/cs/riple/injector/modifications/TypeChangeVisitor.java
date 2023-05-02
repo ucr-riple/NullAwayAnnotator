@@ -22,6 +22,7 @@ package edu.ucr.cs.riple.injector.modifications;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.WildcardType;
@@ -76,6 +77,16 @@ public class TypeChangeVisitor extends GenericVisitorWithDefaults<Set<Modificati
     }
     if (type.getSuperType().isPresent()) {
       result.addAll(type.getSuperType().get().accept(this, change));
+    }
+    return result;
+  }
+
+  @Override
+  public Set<Modification> visit(ArrayType type, Change change) {
+    Set<Modification> result = new HashSet<>(type.getComponentType().accept(this, change));
+    Modification modification = change.visit(type);
+    if (modification != null) {
+      result.add(modification);
     }
     return result;
   }
