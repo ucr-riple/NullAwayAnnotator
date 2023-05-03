@@ -41,6 +41,7 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
@@ -440,6 +441,9 @@ public class Helper {
     }
     if (node instanceof VariableDeclarator) {
       return ((VariableDeclarator) node).getType();
+    }
+    if (node instanceof ClassOrInterfaceType) {
+      return ((ClassOrInterfaceType) node);
     }
     throw new RuntimeException("Unknown node type: " + node.getClass());
   }

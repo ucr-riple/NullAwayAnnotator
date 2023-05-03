@@ -22,17 +22,13 @@
 
 package edu.ucr.cs.riple.injector.changes;
 
-import com.github.javaparser.Range;
-import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.expr.AnnotationExpr;
-import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
+import com.github.javaparser.ast.type.Type;
+import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
-import edu.ucr.cs.riple.injector.modifications.Deletion;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.util.Objects;
-import java.util.Optional;
 import javax.annotation.Nullable;
 import org.json.simple.JSONObject;
 
@@ -41,8 +37,8 @@ import org.json.simple.JSONObject;
  * href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-9.html#jls-MarkerAnnotation">Marker
  * Annotation</a> on elements in source code.
  */
-public class RemoveAnnotation extends Change {
-  public RemoveAnnotation(Location location, String annotation) {
+public class RemoveTypeUseAnnotation extends RemoveAnnotation {
+  public RemoveTypeUseAnnotation(Location location, String annotation) {
     super(location, annotation);
   }
 
@@ -50,25 +46,8 @@ public class RemoveAnnotation extends Change {
   @Nullable
   public <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Modification computeModificationOn(
       T node) {
-    // We only insert annotations with their simple name, therefore, we should only remove
-    // the annotation if it matches with the simple name (otherwise, the annotation was not injected
-    // by the core module request and should not be touched). Also, we currently require removing
-    // only MarkerAnnotations, removal of other types of annotations are not supported yet.
-    return computeAnnotationRemovalModificationFrom(node.getAnnotations());
-  }
-
-  protected Modification computeAnnotationRemovalModificationFrom(
-      NodeList<AnnotationExpr> annotations) {
-    AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationSimpleName);
-    for (AnnotationExpr expr : annotations) {
-      if (expr.equals(annotationExpr)) {
-        Optional<Range> annotRange = expr.getRange();
-        return annotRange
-            .map(value -> new Deletion(expr.toString(), value.begin, value.end))
-            .orElse(null);
-      }
-    }
-    return null;
+    Type type = Helper.getType(node);
+    return computeAnnotationRemovalModificationFrom(type.getAnnotations());
   }
 
   @Override

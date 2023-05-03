@@ -50,7 +50,6 @@ public class AddTypeUseMarkerAnnotation extends AddMarkerAnnotation {
     if (node.getRange().isEmpty()) {
       return null;
     }
-    Range range = node.getRange().get();
     NodeList<AnnotationExpr> annotations = node.getAnnotations();
     AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationSimpleName);
 
@@ -64,9 +63,14 @@ public class AddTypeUseMarkerAnnotation extends AddMarkerAnnotation {
     if (type.getRange().isEmpty()) {
       return null;
     }
+    Range typeRange = type.getRange().get();
     if (type instanceof ClassOrInterfaceType) {
       ClassOrInterfaceType classOrInterfaceType = (ClassOrInterfaceType) type;
+      if (classOrInterfaceType.getName().getRange().isEmpty()) {
+        return null;
+      }
+      typeRange = classOrInterfaceType.getName().getRange().get();
     }
-    return new Insertion(annotationExpr.toString(), range.begin);
+    return new Insertion(annotationExpr.toString(), typeRange.begin);
   }
 }
