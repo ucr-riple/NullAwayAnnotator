@@ -25,8 +25,13 @@
 package edu.ucr.cs.riple.injector;
 
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddTypeUseMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.Change;
+import edu.ucr.cs.riple.injector.location.OnField;
+import edu.ucr.cs.riple.injector.location.OnLocalVariable;
 import edu.ucr.cs.riple.injector.location.OnMethod;
+import edu.ucr.cs.riple.injector.location.OnParameter;
+import java.util.Set;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -90,6 +95,44 @@ public class BasicTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnMethod("Foo.java", "test.Foo", "test(java.lang.Object)"),
                 "javax.annotation.Nullable"))
+        .start();
+  }
+
+  @Test
+  public void annotateOnClassSimpleNameInFullyQualifiedNames() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "public class Foo {",
+            "   java.lang.Object bar;",
+            "   java.lang.Object baz(java.lang.Object param) {;",
+            "       java.lang.Object localVar;",
+            "       return new Object();",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import custom.example.Untainted;",
+            "public class Foo {",
+            "   java.lang.@Untainted Object bar;",
+            "   java.lang.@Untainted Object baz(java.lang.@Untainted Object param) {;",
+            "       java.lang.@Untainted Object localVar;",
+            "       return new Object();",
+            "   }",
+            "}")
+        .addChanges(
+            new AddTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("bar")), "custom.example.Untainted"),
+            new AddTypeUseMarkerAnnotation(
+                new OnMethod("Foo.java", "test.Foo", "baz(java.lang.Object)"),
+                "custom.example.Untainted"),
+            new AddTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "baz(java.lang.Object)", "localVar"),
+                "custom.example.Untainted"),
+            new AddTypeUseMarkerAnnotation(
+                new OnParameter("Foo.java", "test.Foo", "baz(java.lang.Object)", 0),
+                "custom.example.Untainted"))
         .start();
   }
 }

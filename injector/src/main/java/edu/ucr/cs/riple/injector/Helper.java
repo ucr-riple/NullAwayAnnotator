@@ -33,9 +33,15 @@ import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumConstantDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import com.github.javaparser.ast.type.Type;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import java.io.FileNotFoundException;
@@ -409,6 +415,34 @@ public class Helper {
     return ans.toString().replaceAll(" ", "");
   }
 
+  /**
+   * Extracts the type of the given node.
+   *
+   * @param node the node.
+   * @return the type of the node.
+   */
+  public static Type getType(NodeWithAnnotations<?> node) {
+    if (node instanceof MethodDeclaration) {
+      return ((MethodDeclaration) node).getType();
+    }
+    if (node instanceof FieldDeclaration) {
+      return ((FieldDeclaration) node).getElementType();
+    }
+    if (node instanceof VariableDeclarationExpr) {
+      NodeList<VariableDeclarator> decls = ((VariableDeclarationExpr) node).getVariables();
+      for (VariableDeclarator v : decls) {
+        // TODO: may need to check if the name matches.
+          return v.getType();
+      }
+    }
+    if(node instanceof Parameter){
+        return ((Parameter) node).getType();
+    }
+    if (node instanceof VariableDeclarator) {
+      return ((VariableDeclarator) node).getType();
+    }
+    throw new RuntimeException("Unknown node type: " + node.getClass());
+  }
   /**
    * Extracts the package name from fully qualified name. (e.g. for "{@code a.c.b.Foo<a.b.Bar,
    * a.c.b.Foo>}" will return "{@code a.c.b}").

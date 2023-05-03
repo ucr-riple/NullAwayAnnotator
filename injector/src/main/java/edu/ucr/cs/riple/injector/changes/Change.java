@@ -24,6 +24,7 @@ package edu.ucr.cs.riple.injector.changes;
 
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
+import com.github.javaparser.ast.nodeTypes.NodeWithType;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Modification;
@@ -55,7 +56,7 @@ public abstract class Change {
    *     will be returned.
    */
   @Nullable
-  public abstract <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Modification visit(T node);
+  public abstract <T extends NodeWithAnnotations<?> & NodeWithType<?, ?>> Modification visit(T node);
 
   @Override
   public boolean equals(Object o) {
