@@ -27,7 +27,6 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
-import com.github.javaparser.ast.nodeTypes.NodeWithType;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Deletion;
 import edu.ucr.cs.riple.injector.modifications.Modification;
@@ -48,7 +47,8 @@ public class RemoveAnnotation extends Change {
 
   @Override
   @Nullable
-  public <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Modification visit(T node) {
+  public <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Modification computeModificationOn(
+      T node) {
     // We only insert annotations with their simple name, therefore, we should only remove
     // the annotation if it matches with the simple name (otherwise, the annotation was not injected
     // by the core module request and should not be touched). Also, we currently require removing

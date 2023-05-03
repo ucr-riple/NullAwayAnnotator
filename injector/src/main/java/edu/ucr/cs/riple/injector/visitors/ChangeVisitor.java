@@ -78,7 +78,7 @@ public class ChangeVisitor
                     return;
                   }
                   if (onMethod.matchesCallableDeclaration(callableDeclaration)) {
-                    ans.set(change.visit(callableDeclaration));
+                    ans.set(change.computeModificationOn(callableDeclaration));
                   }
                 }));
     if (ans.get() == null) {
@@ -89,7 +89,7 @@ public class ChangeVisitor
                     if (annotationMemberDeclaration
                         .getNameAsString()
                         .equals(Helper.extractCallableName(onMethod.method))) {
-                      ans.set(change.visit(annotationMemberDeclaration));
+                      ans.set(change.computeModificationOn(annotationMemberDeclaration));
                     }
                   }));
     }
@@ -114,7 +114,7 @@ public class ChangeVisitor
                       fieldDeclaration.asFieldDeclaration().getVariables();
                   for (VariableDeclarator v : vars) {
                     if (onField.variables.contains(v.getName().toString())) {
-                      ans.set(change.visit(fieldDeclaration));
+                      ans.set(change.computeModificationOn(fieldDeclaration));
                       break;
                     }
                   }
@@ -143,7 +143,7 @@ public class ChangeVisitor
                       if (params.get(onParameter.index) != null) {
                         Node param = params.get(onParameter.index);
                         if (param instanceof Parameter) {
-                          ans.set(change.visit((Parameter) param));
+                          ans.set(change.computeModificationOn((Parameter) param));
                         }
                       }
                     }
@@ -165,7 +165,7 @@ public class ChangeVisitor
     if (optionalClass.isEmpty() || !(optionalClass.get() instanceof BodyDeclaration<?>)) {
       return null;
     }
-    return change.visit(((BodyDeclaration<?>) optionalClass.get()));
+    return change.computeModificationOn(((BodyDeclaration<?>) optionalClass.get()));
   }
 
   @Override
@@ -201,7 +201,8 @@ public class ChangeVisitor
                                 // Located the variable.
                                 Set<Modification> modifications = new HashSet<>();
                                 // Process the declaration statement.
-                                modifications.add(change.visit(variableDeclarationExpr));
+                                modifications.add(
+                                    change.computeModificationOn(variableDeclarationExpr));
                                 // Process the declarator type arguments.
                                 modifications.addAll(
                                     variableDeclarator

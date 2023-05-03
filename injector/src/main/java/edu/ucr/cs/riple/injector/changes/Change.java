@@ -24,7 +24,6 @@ package edu.ucr.cs.riple.injector.changes;
 
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
-import com.github.javaparser.ast.nodeTypes.NodeWithType;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Modification;
@@ -35,6 +34,7 @@ import org.json.simple.JSONObject;
 
 /** Represents a change in the AST of the source code. */
 public abstract class Change {
+
   /** Target location. */
   public final Location location;
   /** Annotation full name. */
@@ -49,14 +49,15 @@ public abstract class Change {
   }
 
   /**
-   * Visits the given node and translates the change to a text modification.
+   * Computes the text modification that should be applied based on the given node.
    *
    * @param node Given node.
    * @return A text modification instance if the translation is successful, otherwise {@code null}
    *     will be returned.
    */
   @Nullable
-  public abstract <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Modification visit(T node);
+  public abstract <T extends NodeWithAnnotations<?> & NodeWithRange<?>>
+      Modification computeModificationOn(T node);
 
   @Override
   public boolean equals(Object o) {

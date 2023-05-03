@@ -45,7 +45,8 @@ public class AddTypeUseMarkerAnnotation extends AddMarkerAnnotation {
 
   @Override
   @Nullable
-  public <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Modification visit(T node) {
+  public <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Modification computeModificationOn(
+      T node) {
     if (node.getRange().isEmpty()) {
       return null;
     }
@@ -60,10 +61,10 @@ public class AddTypeUseMarkerAnnotation extends AddMarkerAnnotation {
       return null;
     }
     Type type = Helper.getType(node);
-    if(type.getRange().isEmpty()){
+    if (type.getRange().isEmpty()) {
       return null;
     }
-    if(type instanceof ClassOrInterfaceType){
+    if (type instanceof ClassOrInterfaceType) {
       ClassOrInterfaceType classOrInterfaceType = (ClassOrInterfaceType) type;
     }
     return new Insertion(annotationExpr.toString(), range.begin);

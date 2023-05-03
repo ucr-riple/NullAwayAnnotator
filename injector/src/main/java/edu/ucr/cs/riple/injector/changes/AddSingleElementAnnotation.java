@@ -68,7 +68,8 @@ public class AddSingleElementAnnotation extends AddAnnotation {
 
   @Override
   @Nullable
-  public <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Modification visit(T node) {
+  public <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Modification computeModificationOn(
+      T node) {
     if (node.getRange().isEmpty()) {
       return null;
     }

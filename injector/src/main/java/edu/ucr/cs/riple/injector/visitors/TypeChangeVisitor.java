@@ -44,14 +44,14 @@ public class TypeChangeVisitor extends GenericVisitorWithDefaults<Set<Modificati
     if (n.getRange().isEmpty()) {
       return Set.of();
     }
-    Modification modification = change.visit(n);
+    Modification modification = change.computeModificationOn(n);
     return modification == null ? Set.of() : Set.of(modification);
   }
 
   @Override
   public Set<Modification> visit(ClassOrInterfaceType classOrInterfaceType, Change change) {
     Set<Modification> result = new HashSet<>();
-    Modification modification = change.visit(classOrInterfaceType);
+    Modification modification = change.computeModificationOn(classOrInterfaceType);
     if (modification != null) {
       result.add(modification);
     }
@@ -67,7 +67,7 @@ public class TypeChangeVisitor extends GenericVisitorWithDefaults<Set<Modificati
   @Override
   public Set<Modification> visit(WildcardType type, Change change) {
     Set<Modification> result = new HashSet<>();
-    Modification modification = change.visit(type);
+    Modification modification = change.computeModificationOn(type);
     if (modification != null) {
       result.add(modification);
     }
@@ -83,7 +83,7 @@ public class TypeChangeVisitor extends GenericVisitorWithDefaults<Set<Modificati
   @Override
   public Set<Modification> visit(ArrayType type, Change change) {
     Set<Modification> result = new HashSet<>(type.getComponentType().accept(this, change));
-    Modification modification = change.visit(type);
+    Modification modification = change.computeModificationOn(type);
     if (modification != null) {
       result.add(modification);
     }

@@ -432,11 +432,11 @@ public class Helper {
       NodeList<VariableDeclarator> decls = ((VariableDeclarationExpr) node).getVariables();
       for (VariableDeclarator v : decls) {
         // TODO: may need to check if the name matches.
-          return v.getType();
+        return v.getType();
       }
     }
-    if(node instanceof Parameter){
-        return ((Parameter) node).getType();
+    if (node instanceof Parameter) {
+      return ((Parameter) node).getType();
     }
     if (node instanceof VariableDeclarator) {
       return ((VariableDeclarator) node).getType();
