@@ -65,7 +65,6 @@ public class AddTypeUseMarkerAnnotation extends AddMarkerAnnotation {
     }
     if(type instanceof ClassOrInterfaceType){
       ClassOrInterfaceType classOrInterfaceType = (ClassOrInterfaceType) type;
-      classOrInterfaceType.getS
     }
     return new Insertion(annotationExpr.toString(), range.begin);
   }

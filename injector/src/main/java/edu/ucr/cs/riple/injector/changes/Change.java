@@ -56,7 +56,7 @@ public abstract class Change {
    *     will be returned.
    */
   @Nullable
-  public abstract <T extends NodeWithAnnotations<?> & NodeWithType<?, ?>> Modification visit(T node);
+  public abstract <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Modification visit(T node);
 
   @Override
   public boolean equals(Object o) {

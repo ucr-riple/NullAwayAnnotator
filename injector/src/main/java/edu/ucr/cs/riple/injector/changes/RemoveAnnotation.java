@@ -48,7 +48,7 @@ public class RemoveAnnotation extends Change {
 
   @Override
   @Nullable
-  public <T extends NodeWithAnnotations<?> & NodeWithType<?, ?>> Modification visit(T node) {
+  public <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Modification visit(T node) {
     // We only insert annotations with their simple name, therefore, we should only remove
     // the annotation if it matches with the simple name (otherwise, the annotation was not injected
     // by the core module request and should not be touched). Also, we currently require removing
