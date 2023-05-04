@@ -31,7 +31,7 @@ import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
-import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddTypeUseMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -94,7 +94,7 @@ public class UCRTaint extends CheckerBaseClass<TaintError> {
               Location location = Location.fromJSON((JSONObject) fixJson.get("location"));
               builder.add(
                   new Fix(
-                      new AddMarkerAnnotation(
+                      new AddTypeUseMarkerAnnotation(
                           location, "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted"),
                       errorType,
                       true));

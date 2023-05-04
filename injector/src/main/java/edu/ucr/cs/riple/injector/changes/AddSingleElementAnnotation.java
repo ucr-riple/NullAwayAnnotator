@@ -156,4 +156,10 @@ public class AddSingleElementAnnotation extends AddAnnotation {
         new SingleMemberAnnotationExpr(new Name(annotationSimpleName), argument);
     return new Insertion(annotationExpr.toString(), range.begin);
   }
+
+  @Override
+  public RemoveAnnotation getRemoveAnnotation() {
+    throw new UnsupportedOperationException(
+        "Remove annotation is not supported for AddSingleElementAnnotation.");
+  }
 }

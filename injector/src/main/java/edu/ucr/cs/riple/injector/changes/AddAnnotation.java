@@ -54,4 +54,11 @@ public abstract class AddAnnotation extends Change {
   public int hashCode() {
     return Objects.hash("Add", super.hashCode());
   }
+
+  /**
+   * Returns the corresponding {@link RemoveAnnotation} for this {@link AddAnnotation}.
+   *
+   * @return the corresponding {@link RemoveAnnotation} for this {@link AddAnnotation}.
+   */
+  public abstract RemoveAnnotation getRemoveAnnotation();
 }

@@ -73,4 +73,9 @@ public class AddTypeUseMarkerAnnotation extends AddMarkerAnnotation {
     }
     return new Insertion(annotationExpr.toString(), typeRange.begin);
   }
+
+  @Override
+  public RemoveAnnotation getRemoveAnnotation() {
+    return new RemoveTypeUseAnnotation(location, annotation);
+  }
 }
