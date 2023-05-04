@@ -41,7 +41,6 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
@@ -442,10 +441,10 @@ public class Helper {
     if (node instanceof VariableDeclarator) {
       return ((VariableDeclarator) node).getType();
     }
-    if (node instanceof ClassOrInterfaceType) {
-      return ((ClassOrInterfaceType) node);
+    if (node instanceof Type) {
+      return ((Type) node);
     }
-    throw new RuntimeException("Unknown node type: " + node.getClass());
+    throw new RuntimeException("Unknown node type: code 2: " + node.getClass());
   }
   /**
    * Extracts the package name from fully qualified name. (e.g. for "{@code a.c.b.Foo<a.b.Bar,

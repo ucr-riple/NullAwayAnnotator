@@ -82,7 +82,7 @@ public class Injector {
                 }
               }
             } catch (Exception ex) {
-              System.err.println("Encountered Exception: " + ex);
+              System.err.println("Encountered Exception: code 1: " + ex);
             }
           }
           Printer printer = new Printer(path);
