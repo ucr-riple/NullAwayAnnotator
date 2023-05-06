@@ -25,7 +25,8 @@
 package edu.ucr.cs.riple.injector;
 
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
-import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddTypeUseMarkerAnnotation;
+import edu.ucr.cs.riple.injector.changes.RemoveTypeUseAnnotation;
 import edu.ucr.cs.riple.injector.location.OnLocalVariable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,11 +59,11 @@ public class OnLocalVariableInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddMarkerAnnotation(
+            new AddTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"),
-            new AddMarkerAnnotation(
+            new AddTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"), "edu.ucr.UnTainted"),
-            new AddMarkerAnnotation(
+            new AddTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
         .start();
   }
@@ -92,11 +93,11 @@ public class OnLocalVariableInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new RemoveAnnotation(
+            new RemoveTypeUseAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"),
-            new RemoveAnnotation(
+            new RemoveTypeUseAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"), "edu.ucr.UnTainted"),
-            new RemoveAnnotation(
+            new RemoveTypeUseAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
         .start();
   }
@@ -177,7 +178,7 @@ public class OnLocalVariableInjectionTest extends BaseInjectorTest {
             "package test;",
             "public class Foo<T> {",
             "   public void foo() {",
-            "      Map<String, T[]>[] f0;",
+            "      Map<String, T[]> f0;",
             "      T[] f1;",
             "      String[] f2;",
             "   }",
@@ -187,17 +188,17 @@ public class OnLocalVariableInjectionTest extends BaseInjectorTest {
             "import edu.ucr.UnTainted;",
             "public class Foo<T> {",
             "   public void foo() {",
-            "      @UnTainted Map<@UnTainted String, @UnTainted T[]>[] f0;",
+            "      @UnTainted Map<@UnTainted String, @UnTainted T[]> f0;",
             "      @UnTainted T[] f1;",
             "      @UnTainted String[] f2;",
             "   }",
             "}")
         .addChanges(
-            new AddMarkerAnnotation(
+            new AddTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"),
-            new AddMarkerAnnotation(
+            new AddTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"), "edu.ucr.UnTainted"),
-            new AddMarkerAnnotation(
+            new AddTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
         .start();
   }

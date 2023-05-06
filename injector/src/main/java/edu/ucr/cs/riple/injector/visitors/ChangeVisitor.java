@@ -41,19 +41,13 @@ import edu.ucr.cs.riple.injector.location.OnLocalVariable;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import edu.ucr.cs.riple.injector.modifications.Modification;
-import edu.ucr.cs.riple.injector.modifications.MultiPositionModification;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 
 /** A visitor for applying changes to a compilation unit on a specified location. */
 public class ChangeVisitor
     implements LocationVisitor<Modification, Pair<NodeList<BodyDeclaration<?>>, Change>> {
-
-  /** Visitor for applying changes on the internal structure of the target element's type */
-  public static final TypeChangeVisitor TYPE_CHANGE_VISITOR = new TypeChangeVisitor();
 
   /** Compilation unit which the changes will be applied. */
   private final CompilationUnit cu;
@@ -198,17 +192,12 @@ public class ChangeVisitor
                                   .getName()
                                   .toString()
                                   .equals(onLocalVariable.varName)) {
-                                // Located the variable.
-                                Set<Modification> modifications = new HashSet<>();
-                                // Process the declaration statement.
-                                modifications.add(
-                                    change.computeModificationOn(variableDeclarationExpr));
-                                // Process the declarator type arguments.
-                                modifications.addAll(
-                                    variableDeclarator
-                                        .getType()
-                                        .accept(TYPE_CHANGE_VISITOR, change));
-                                ans.set(new MultiPositionModification(modifications));
+                                // Located the variable, process the declaration statement.
+                                Modification onDeclaration =
+                                    change.computeModificationOn(variableDeclarationExpr);
+                                if (onDeclaration != null) {
+                                  ans.set(onDeclaration);
+                                }
                               }
                             });
                   }

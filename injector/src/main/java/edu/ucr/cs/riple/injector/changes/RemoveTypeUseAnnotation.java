@@ -22,13 +22,22 @@
 
 package edu.ucr.cs.riple.injector.changes;
 
+import com.github.javaparser.Range;
+import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
+import edu.ucr.cs.riple.injector.modifications.Deletion;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import edu.ucr.cs.riple.injector.modifications.MultiPositionModification;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import javax.annotation.Nullable;
 import org.json.simple.JSONObject;
 
@@ -46,8 +55,34 @@ public class RemoveTypeUseAnnotation extends RemoveAnnotation {
   @Nullable
   public <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Modification computeModificationOn(
       T node) {
+    AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationSimpleName);
+    Set<Modification> modifications = new HashSet<>();
+    for (AnnotationExpr expr : node.getAnnotations()) {
+      if (expr.equals(annotationExpr)) {
+        Optional<Range> annotRange = expr.getRange();
+        annotRange
+            .map(value -> new Deletion(expr.toString(), value.begin, value.end))
+            .ifPresent(modifications::add);
+      }
+    }
     Type type = Helper.getType(node);
-    return computeAnnotationRemovalModificationFrom(type.getAnnotations());
+    if (type instanceof ClassOrInterfaceType) {
+      ClassOrInterfaceType classOrInterfaceType = (ClassOrInterfaceType) type;
+      if (classOrInterfaceType.getTypeArguments().isPresent()) {
+        classOrInterfaceType
+            .getTypeArguments()
+            .get()
+            .forEach(
+                typeArg -> {
+                  Modification onType =
+                      computeModificationOn((NodeWithAnnotations<?> & NodeWithRange<?>) typeArg);
+                  if (onType != null) {
+                    modifications.add(onType);
+                  }
+                });
+      }
+    }
+    return modifications.isEmpty() ? null : new MultiPositionModification(modifications);
   }
 
   @Override

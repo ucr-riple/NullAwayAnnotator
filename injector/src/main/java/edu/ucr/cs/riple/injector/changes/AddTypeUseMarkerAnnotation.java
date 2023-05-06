@@ -34,6 +34,9 @@ import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Insertion;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import edu.ucr.cs.riple.injector.modifications.MultiPositionModification;
+import java.util.HashSet;
+import java.util.Set;
 import javax.annotation.Nullable;
 
 /** Used to add type-use marker annotations on elements in source code. */
@@ -50,28 +53,40 @@ public class AddTypeUseMarkerAnnotation extends AddMarkerAnnotation {
     if (node.getRange().isEmpty()) {
       return null;
     }
+    Range range = node.getRange().get();
     NodeList<AnnotationExpr> annotations = node.getAnnotations();
     AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationSimpleName);
+
+    Set<Modification> modifications = new HashSet<>();
 
     // Check if annot already exists.
     boolean annotAlreadyExists =
         annotations.stream().anyMatch(annot -> annot.equals(annotationExpr));
-    if (annotAlreadyExists) {
-      return null;
+    if (!annotAlreadyExists) {
+      // Declaration might have an annotation initially but still need to annotate type-use
+      // parameters if exists. Hence, we don't return here.
+      modifications.add(new Insertion(annotationExpr.toString(), range.begin));
     }
     Type type = Helper.getType(node);
-    if (type.getRange().isEmpty()) {
-      return null;
-    }
-    Range typeRange = type.getRange().get();
+    // Note: We currently do not annotate Map<K, V>[] as @Annot Map<@Annot K, @Annot V>[] and will
+    // leave it as @Annot Map<K, V>[]
     if (type instanceof ClassOrInterfaceType) {
       ClassOrInterfaceType classOrInterfaceType = (ClassOrInterfaceType) type;
-      if (classOrInterfaceType.getName().getRange().isEmpty()) {
-        return null;
+      if (classOrInterfaceType.getTypeArguments().isPresent()) {
+        classOrInterfaceType
+            .getTypeArguments()
+            .get()
+            .forEach(
+                typeArg -> {
+                  Modification onType =
+                      computeModificationOn((NodeWithAnnotations<?> & NodeWithRange<?>) typeArg);
+                  if (onType != null) {
+                    modifications.add(onType);
+                  }
+                });
       }
-      typeRange = classOrInterfaceType.getName().getRange().get();
     }
-    return new Insertion(annotationExpr.toString(), typeRange.begin);
+    return modifications.isEmpty() ? null : new MultiPositionModification(modifications);
   }
 
   @Override

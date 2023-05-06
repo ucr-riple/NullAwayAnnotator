@@ -23,7 +23,6 @@
 package edu.ucr.cs.riple.injector.changes;
 
 import com.github.javaparser.Range;
-import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
@@ -54,13 +53,8 @@ public class RemoveAnnotation extends Change {
     // the annotation if it matches with the simple name (otherwise, the annotation was not injected
     // by the core module request and should not be touched). Also, we currently require removing
     // only MarkerAnnotations, removal of other types of annotations are not supported yet.
-    return computeAnnotationRemovalModificationFrom(node.getAnnotations());
-  }
-
-  protected Modification computeAnnotationRemovalModificationFrom(
-      NodeList<AnnotationExpr> annotations) {
     AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationSimpleName);
-    for (AnnotationExpr expr : annotations) {
+    for (AnnotationExpr expr : node.getAnnotations()) {
       if (expr.equals(annotationExpr)) {
         Optional<Range> annotRange = expr.getRange();
         return annotRange
