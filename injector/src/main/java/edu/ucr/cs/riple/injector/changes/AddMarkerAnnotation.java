@@ -31,6 +31,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Insertion;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import java.util.Objects;
 import javax.annotation.Nullable;
 
 /**
@@ -67,5 +68,22 @@ public class AddMarkerAnnotation extends AnnotationChange implements AddAnnotati
   @Override
   public RemoveAnnotation getReverse() {
     return new RemoveMarkerAnnotation(location, annotationName.fullName);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof AddMarkerAnnotation)) {
+      return false;
+    }
+    AddMarkerAnnotation that = (AddMarkerAnnotation) o;
+    return location.equals(that.location) && annotationName.equals(that.annotationName);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash("ADD", location, annotationName);
   }
 }

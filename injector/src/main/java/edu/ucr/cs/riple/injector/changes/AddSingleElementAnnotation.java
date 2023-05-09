@@ -36,6 +36,7 @@ import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Insertion;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.modifications.Replacement;
+import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
@@ -162,5 +163,23 @@ public class AddSingleElementAnnotation extends AnnotationChange implements AddA
   public RemoveAnnotation getReverse() {
     throw new UnsupportedOperationException(
         "Annotation deletion for single element annotations is not supported yet.");
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof AddSingleElementAnnotation)) {
+      return false;
+    }
+    if (!super.equals(o)) return false;
+    AddSingleElementAnnotation that = (AddSingleElementAnnotation) o;
+    return repeatable == that.repeatable && Objects.equals(argument, that.argument);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), argument, repeatable);
   }
 }
