@@ -29,6 +29,7 @@ import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.LocationKind;
+import edu.ucr.cs.riple.injector.location.LocationToJsonVisitor;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
@@ -176,7 +177,7 @@ public class Fix {
    * @return Json instance.
    */
   public JSONObject getJson() {
-    return change.getJson();
+    return change.location.accept(new LocationToJsonVisitor(), null);
   }
 
   /**

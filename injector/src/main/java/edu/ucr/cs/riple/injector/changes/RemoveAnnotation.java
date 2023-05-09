@@ -33,7 +33,6 @@ import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nullable;
-import org.json.simple.JSONObject;
 
 /**
  * Used to remove <a
@@ -51,8 +50,7 @@ public class RemoveAnnotation extends ASTChange {
       Modification computeTextModificationOn(T node) {
     // We only insert annotations with their simple name, therefore, we should only remove
     // the annotation if it matches with the simple name (otherwise, the annotation was not injected
-    // by the core module request and should not be touched). Also, we currently require removing
-    // only MarkerAnnotations, removal of other types of annotations are not supported yet.
+    // by the core module request and should not be touched).
     AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationSimpleName);
     for (AnnotationExpr expr : node.getAnnotations()) {
       if (expr.equals(annotationExpr)) {
@@ -63,13 +61,6 @@ public class RemoveAnnotation extends ASTChange {
       }
     }
     return null;
-  }
-
-  @Override
-  public JSONObject getJson() {
-    JSONObject res = super.getJson();
-    res.put("INJECT", false);
-    return res;
   }
 
   @Override

@@ -63,4 +63,9 @@ public class AddMarkerAnnotation extends AddAnnotation {
     }
     return new Insertion(annotationExpr.toString(), range.begin);
   }
+
+  @Override
+  public RemoveAnnotation getReverse() {
+    return new RemoveAnnotation(location, annotation);
+  }
 }

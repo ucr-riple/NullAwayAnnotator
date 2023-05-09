@@ -47,6 +47,7 @@ import javax.annotation.Nullable;
  * already exists, it can be collapsed into a single annotation with multiple elements if requested.
  */
 public class AddSingleElementAnnotation extends AddAnnotation {
+
   /** Argument of the annotation. */
   private final String argument;
 
@@ -155,5 +156,11 @@ public class AddSingleElementAnnotation extends AddAnnotation {
     AnnotationExpr annotationExpr =
         new SingleMemberAnnotationExpr(new Name(annotationSimpleName), argument);
     return new Insertion(annotationExpr.toString(), range.begin);
+  }
+
+  @Override
+  public RemoveAnnotation getReverse() {
+    throw new UnsupportedOperationException(
+        "Annotation deletion for single element annotations is not supported yet.");
   }
 }

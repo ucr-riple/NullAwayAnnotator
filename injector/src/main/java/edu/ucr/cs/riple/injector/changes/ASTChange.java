@@ -26,14 +26,13 @@ import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
-import edu.ucr.cs.riple.injector.location.LocationToJsonVisitor;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.util.Objects;
 import javax.annotation.Nullable;
-import org.json.simple.JSONObject;
 
 /** Represents a change in the AST of the source code. */
 public abstract class ASTChange {
+
   /** Target location. */
   public final Location location;
   /** Annotation full name. */
@@ -73,14 +72,6 @@ public abstract class ASTChange {
   @Override
   public int hashCode() {
     return Objects.hash(location, annotation);
-  }
-
-  @SuppressWarnings("unchecked")
-  public JSONObject getJson() {
-    JSONObject res = new JSONObject();
-    res.put("LOCATION", location.accept(new LocationToJsonVisitor(), null));
-    res.put("ANNOTATION", annotation);
-    return res;
   }
 
   @Override

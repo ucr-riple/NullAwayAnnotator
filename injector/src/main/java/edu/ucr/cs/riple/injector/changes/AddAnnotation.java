@@ -24,21 +24,12 @@ package edu.ucr.cs.riple.injector.changes;
 
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Objects;
-import org.json.simple.JSONObject;
 
 /** Used to add annotations on elements in source code. */
 public abstract class AddAnnotation extends ASTChange {
 
   public AddAnnotation(Location location, String annotation) {
     super(location, annotation);
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public JSONObject getJson() {
-    JSONObject res = super.getJson();
-    res.put("INJECT", true);
-    return res;
   }
 
   @Override
@@ -54,4 +45,12 @@ public abstract class AddAnnotation extends ASTChange {
   public int hashCode() {
     return Objects.hash("Add", super.hashCode());
   }
+
+  /**
+   * Returns the reverse change of this change. Can be used to undo this change by making a
+   * corresponding {@link RemoveAnnotation} change.
+   *
+   * @return The reverse change of this annotation injection.
+   */
+  public abstract RemoveAnnotation getReverse();
 }
