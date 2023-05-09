@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 University of California, Riverside.
+ * Copyright (c) 2023 University of California, Riverside.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,14 +22,36 @@
 
 package edu.ucr.cs.riple.injector.changes;
 
-/** Marker interface for changes that add annotations to elements in source code. */
-public interface AddAnnotation extends ASTChange {
+import edu.ucr.cs.riple.injector.Helper;
+import java.util.Objects;
 
-  /**
-   * Returns the reverse change of this change. Can be used to undo this change by making a
-   * corresponding {@link RemoveAnnotation} change.
-   *
-   * @return The reverse change of this annotation injection.
-   */
-  RemoveAnnotation getReverse();
+/** A name that may consist of multiple identifiers. */
+public class Name {
+
+  /** The simple name of the name, i.e., the last identifier. */
+  public final String simpleName;
+  /** The full name of the name, i.e., all identifiers. */
+  public final String fullName;
+
+  public Name(String fullName) {
+    this.fullName = fullName;
+    this.simpleName = Helper.simpleName(fullName);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof Name)) {
+      return false;
+    }
+    Name name = (Name) o;
+    return Objects.equals(simpleName, name.simpleName) && Objects.equals(fullName, name.fullName);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(simpleName, fullName);
+  }
 }
