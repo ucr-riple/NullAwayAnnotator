@@ -29,6 +29,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import edu.ucr.cs.riple.injector.changes.ASTChange;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.changes.AnnotationChange;
 import edu.ucr.cs.riple.injector.changes.ChangeVisitor;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import edu.ucr.cs.riple.injector.modifications.Modification;
@@ -53,7 +54,7 @@ public class Injector {
     // Start method does not support addition and deletion on same element. Should be split into
     // call for addition and deletion separately.
     Map<Path, List<ASTChange>> map =
-        changes.stream().collect(groupingBy(change -> change.location.path));
+        changes.stream().collect(groupingBy(change -> change.getLocation().path));
     Set<FileOffsetStore> offsets = new HashSet<>();
     map.forEach(
         (path, changeList) -> {
@@ -72,10 +73,12 @@ public class Injector {
               if (modification != null) {
                 modifications.add(modification);
                 if (change instanceof AddAnnotation) {
-                  if (Helper.getPackageName(change.annotation) != null) {
+                  String annotationFullName = ((AnnotationChange) change).annotationName.fullName;
+                  if (Helper.getPackageName(annotationFullName) != null) {
                     ImportDeclaration importDeclaration =
-                        StaticJavaParser.parseImport("import " + change.annotation + ";");
-                    if (treeRequiresImportDeclaration(tree, importDeclaration, change.annotation)) {
+                        StaticJavaParser.parseImport("import " + annotationFullName + ";");
+                    if (treeRequiresImportDeclaration(
+                        tree, importDeclaration, annotationFullName)) {
                       imports.add(importDeclaration);
                     }
                   }

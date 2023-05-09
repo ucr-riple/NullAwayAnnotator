@@ -70,7 +70,7 @@ public class Fix {
    * @return Location information.
    */
   public Location toLocation() {
-    return change.location;
+    return change.getLocation();
   }
 
   /**
@@ -79,7 +79,7 @@ public class Fix {
    * @return true, if fix is targeting a method.
    */
   public boolean isOnMethod() {
-    return change.location.isOnMethod();
+    return change.getLocation().isOnMethod();
   }
 
   /**
@@ -88,7 +88,7 @@ public class Fix {
    * @return Target method information.
    */
   public OnMethod toMethod() {
-    return change.location.toMethod();
+    return change.getLocation().toMethod();
   }
 
   /**
@@ -97,7 +97,7 @@ public class Fix {
    * @param consumer Consumer instance.
    */
   public void ifOnMethod(Consumer<OnMethod> consumer) {
-    change.location.ifMethod(consumer);
+    change.getLocation().ifMethod(consumer);
   }
 
   /**
@@ -106,7 +106,7 @@ public class Fix {
    * @return true, if fix is targeting a parameter.
    */
   public boolean isOnParameter() {
-    return change.location.isOnParameter();
+    return change.getLocation().isOnParameter();
   }
 
   /**
@@ -115,7 +115,7 @@ public class Fix {
    * @return Target method parameter.
    */
   public OnParameter toParameter() {
-    return change.location.toParameter();
+    return change.getLocation().toParameter();
   }
 
   /**
@@ -124,7 +124,7 @@ public class Fix {
    * @param consumer Consumer instance.
    */
   public void ifOnParameter(Consumer<OnParameter> consumer) {
-    change.location.ifParameter(consumer);
+    change.getLocation().ifParameter(consumer);
   }
 
   /**
@@ -133,7 +133,7 @@ public class Fix {
    * @return true, if fix is targeting a field.
    */
   public boolean isOnField() {
-    return change.location.isOnField();
+    return change.getLocation().isOnField();
   }
 
   /**
@@ -142,7 +142,7 @@ public class Fix {
    * @return Target field information.
    */
   public OnField toField() {
-    return change.location.toField();
+    return change.getLocation().toField();
   }
 
   /**
@@ -151,7 +151,7 @@ public class Fix {
    * @param consumer Consumer instance.
    */
   public void ifOnField(Consumer<OnField> consumer) {
-    change.location.ifField(consumer);
+    change.getLocation().ifField(consumer);
   }
 
   @Override
@@ -177,7 +177,7 @@ public class Fix {
    * @return Json instance.
    */
   public JSONObject getJson() {
-    return change.location.accept(new LocationToJsonVisitor(), null);
+    return change.getLocation().accept(new LocationToJsonVisitor(), null);
   }
 
   /**
@@ -192,7 +192,7 @@ public class Fix {
     String methodSignature =
         isOnMethod() ? toMethod().method : toParameter().enclosingMethod.method;
     return Helper.extractCallableName(methodSignature)
-        .equals(Helper.simpleName(change.location.clazz));
+        .equals(Helper.simpleName(change.getLocation().clazz));
   }
 
   @Override

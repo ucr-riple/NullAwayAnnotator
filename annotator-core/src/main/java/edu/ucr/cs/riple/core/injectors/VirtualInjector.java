@@ -72,8 +72,13 @@ public class VirtualInjector extends AnnotationInjector {
         new BufferedOutputStream(new FileOutputStream(libraryModelPath.toFile()))) {
       Set<String> rows =
           changes.stream()
-              .filter(addAnnotation -> addAnnotation.location.isOnMethod())
-              .map(annot -> annot.location.clazz + "\t" + annot.location.toMethod().method + "\n")
+              .filter(addAnnotation -> addAnnotation.getLocation().isOnMethod())
+              .map(
+                  annot ->
+                      annot.getLocation().clazz
+                          + "\t"
+                          + annot.getLocation().toMethod().method
+                          + "\n")
               .collect(Collectors.toSet());
       for (String row : rows) {
         os.write(row.getBytes(Charset.defaultCharset()), 0, row.length());

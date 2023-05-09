@@ -154,7 +154,7 @@ public class ChangeVisitor
       OnClass onClass, Pair<NodeList<BodyDeclaration<?>>, ASTChange> pair) {
     final NodeList<BodyDeclaration<?>> members = pair.a;
     final ASTChange change = pair.b;
-    if (isAnonymousClassFlatName(change.location.clazz)) {
+    if (isAnonymousClassFlatName(change.getLocation().clazz)) {
       return null;
     }
     // Get the enclosing class of the members
@@ -176,11 +176,11 @@ public class ChangeVisitor
   public Modification computeModification(ASTChange change) {
     NodeList<BodyDeclaration<?>> members;
     try {
-      members = Helper.getTypeDeclarationMembersByFlatName(cu, change.location.clazz);
+      members = Helper.getTypeDeclarationMembersByFlatName(cu, change.getLocation().clazz);
       if (members == null) {
         return null;
       }
-      return change.location.accept(this, new Pair<>(members, change));
+      return change.getLocation().accept(this, new Pair<>(members, change));
     } catch (TargetClassNotFound notFound) {
       System.err.println(notFound.getMessage());
       return null;

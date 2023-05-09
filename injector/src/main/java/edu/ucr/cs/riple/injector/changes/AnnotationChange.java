@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 University of California, Riverside.
+ * Copyright (c) 2023 University of California, Riverside.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,30 +22,47 @@
 
 package edu.ucr.cs.riple.injector.changes;
 
-import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
-import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import edu.ucr.cs.riple.injector.location.Location;
-import edu.ucr.cs.riple.injector.modifications.Modification;
-import javax.annotation.Nullable;
+import java.util.Objects;
 
-/** Represents a change in the AST of the source code. */
-public interface ASTChange {
+/** Marker interface for changes regarding annotations on elements in source code. */
+public abstract class AnnotationChange implements ASTChange {
 
-  /**
-   * Visits the given node and translates the change to a text modification.
-   *
-   * @param node Given node.
-   * @return A text modification instance if the translation is successful, otherwise {@code null}
-   *     will be returned.
-   */
-  @Nullable
-  <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Modification computeTextModificationOn(
-      T node);
+  /** Location of the element which its annotations should be changed. */
+  public final Location location;
+  /** Annotation name. */
+  public final Name annotationName;
 
-  /**
-   * Returns the location of the change.
-   *
-   * @return The location of the change.
-   */
-  Location getLocation();
+  public AnnotationChange(Location location, Name annotation) {
+    this.location = location;
+    this.annotationName = annotation;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof AnnotationChange)) {
+      return false;
+    }
+    AnnotationChange other = (AnnotationChange) o;
+    return Objects.equals(location, other.location)
+        && Objects.equals(annotationName, other.annotationName);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(location, annotationName);
+  }
+
+  @Override
+  public String toString() {
+    return location.toString();
+  }
+
+  @Override
+  public Location getLocation() {
+    return location;
+  }
 }
