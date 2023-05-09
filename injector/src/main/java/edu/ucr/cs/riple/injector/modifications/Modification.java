@@ -25,13 +25,14 @@
 package edu.ucr.cs.riple.injector.modifications;
 
 import com.github.javaparser.Position;
+import edu.ucr.cs.riple.injector.changes.ASTChange;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.util.Comparator;
 import java.util.List;
 
 /**
- * Represents a text modification in the source file which are translation of {@link
- * edu.ucr.cs.riple.injector.changes.Change} instances.
+ * Represents a text modification in the source file which are translation of {@link ASTChange}
+ * instances.
  */
 public interface Modification extends Comparable<Modification> {
 

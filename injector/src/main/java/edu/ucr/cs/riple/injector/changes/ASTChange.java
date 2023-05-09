@@ -33,7 +33,7 @@ import javax.annotation.Nullable;
 import org.json.simple.JSONObject;
 
 /** Represents a change in the AST of the source code. */
-public abstract class Change {
+public abstract class ASTChange {
   /** Target location. */
   public final Location location;
   /** Annotation full name. */
@@ -41,7 +41,7 @@ public abstract class Change {
   /** Annotation simple name. */
   public final String annotationSimpleName;
 
-  public Change(Location location, String annotation) {
+  public ASTChange(Location location, String annotation) {
     this.annotation = annotation;
     this.location = location;
     this.annotationSimpleName = Helper.simpleName(annotation);
@@ -55,17 +55,18 @@ public abstract class Change {
    *     will be returned.
    */
   @Nullable
-  public abstract <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Modification visit(T node);
+  public abstract <T extends NodeWithAnnotations<?> & NodeWithRange<?>>
+      Modification computeTextModificationOn(T node);
 
   @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof Change)) {
+    if (!(o instanceof ASTChange)) {
       return false;
     }
-    Change other = (Change) o;
+    ASTChange other = (ASTChange) o;
     return Objects.equals(location, other.location) && Objects.equals(annotation, other.annotation);
   }
 

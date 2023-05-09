@@ -27,7 +27,7 @@ import java.util.Objects;
 import org.json.simple.JSONObject;
 
 /** Used to add annotations on elements in source code. */
-public abstract class AddAnnotation extends Change {
+public abstract class AddAnnotation extends ASTChange {
 
   public AddAnnotation(Location location, String annotation) {
     super(location, annotation);

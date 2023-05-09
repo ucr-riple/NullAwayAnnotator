@@ -28,7 +28,7 @@ import static edu.ucr.cs.riple.injector.tools.Utility.pathOf;
 import static org.junit.Assert.fail;
 
 import edu.ucr.cs.riple.injector.Injector;
-import edu.ucr.cs.riple.injector.changes.Change;
+import edu.ucr.cs.riple.injector.changes.ASTChange;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 
 public class InjectorTestHelper {
-  private final List<Change> changes;
+  private final List<ASTChange> changes;
   private final List<String> files;
   private final Path rootPath;
 
@@ -62,7 +62,7 @@ public class InjectorTestHelper {
     return new InjectorTestHelperOutput(this, rootPath, path);
   }
 
-  public InjectorTestHelper addChanges(Change... changes) {
+  public InjectorTestHelper addChanges(ASTChange... changes) {
     Arrays.stream(changes)
         .sequential()
         .forEach(

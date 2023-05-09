@@ -40,14 +40,15 @@ import org.json.simple.JSONObject;
  * href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-9.html#jls-MarkerAnnotation">Marker
  * Annotation</a> on elements in source code.
  */
-public class RemoveAnnotation extends Change {
+public class RemoveAnnotation extends ASTChange {
   public RemoveAnnotation(Location location, String annotation) {
     super(location, annotation);
   }
 
   @Override
   @Nullable
-  public <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Modification visit(T node) {
+  public <T extends NodeWithAnnotations<?> & NodeWithRange<?>>
+      Modification computeTextModificationOn(T node) {
     // We only insert annotations with their simple name, therefore, we should only remove
     // the annotation if it matches with the simple name (otherwise, the annotation was not injected
     // by the core module request and should not be touched). Also, we currently require removing
