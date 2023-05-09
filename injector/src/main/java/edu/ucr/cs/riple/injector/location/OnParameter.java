@@ -50,6 +50,7 @@ public class OnParameter extends Location {
     this(Helper.deserializePath(path), clazz, method, index);
   }
 
+  @Override
   public void ifParameter(Consumer<OnParameter> consumer) {
     consumer.accept(this);
   }

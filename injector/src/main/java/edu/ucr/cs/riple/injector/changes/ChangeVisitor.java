@@ -50,7 +50,7 @@ import javax.annotation.Nullable;
  * location for the requested change.
  */
 public class ChangeVisitor
-    implements LocationVisitor<Modification, Pair<NodeList<BodyDeclaration<?>>, Change>> {
+    implements LocationVisitor<Modification, Pair<NodeList<BodyDeclaration<?>>, ASTChange>> {
 
   /** Compilation unit which the changes will be applied. */
   private final CompilationUnit cu;
@@ -62,10 +62,10 @@ public class ChangeVisitor
   @Override
   @Nullable
   public Modification visitMethod(
-      OnMethod onMethod, Pair<NodeList<BodyDeclaration<?>>, Change> pair) {
+      OnMethod onMethod, Pair<NodeList<BodyDeclaration<?>>, ASTChange> pair) {
     final AtomicReference<Modification> ans = new AtomicReference<>();
     final NodeList<BodyDeclaration<?>> members = pair.a;
-    final Change change = pair.b;
+    final ASTChange change = pair.b;
     members.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifCallableDeclaration(
@@ -75,7 +75,7 @@ public class ChangeVisitor
                     return;
                   }
                   if (onMethod.matchesCallableDeclaration(callableDeclaration)) {
-                    ans.set(change.visit(callableDeclaration));
+                    ans.set(change.computeTextModificationOn(callableDeclaration));
                   }
                 }));
     if (ans.get() == null) {
@@ -86,7 +86,7 @@ public class ChangeVisitor
                     if (annotationMemberDeclaration
                         .getNameAsString()
                         .equals(Helper.extractCallableName(onMethod.method))) {
-                      ans.set(change.visit(annotationMemberDeclaration));
+                      ans.set(change.computeTextModificationOn(annotationMemberDeclaration));
                     }
                   }));
     }
@@ -95,10 +95,11 @@ public class ChangeVisitor
 
   @Override
   @Nullable
-  public Modification visitField(OnField onField, Pair<NodeList<BodyDeclaration<?>>, Change> pair) {
+  public Modification visitField(
+      OnField onField, Pair<NodeList<BodyDeclaration<?>>, ASTChange> pair) {
     final AtomicReference<Modification> ans = new AtomicReference<>();
     final NodeList<BodyDeclaration<?>> members = pair.a;
-    final Change change = pair.b;
+    final ASTChange change = pair.b;
     members.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifFieldDeclaration(
@@ -111,7 +112,7 @@ public class ChangeVisitor
                       fieldDeclaration.asFieldDeclaration().getVariables();
                   for (VariableDeclarator v : vars) {
                     if (onField.variables.contains(v.getName().toString())) {
-                      ans.set(change.visit(fieldDeclaration));
+                      ans.set(change.computeTextModificationOn(fieldDeclaration));
                       break;
                     }
                   }
@@ -122,10 +123,10 @@ public class ChangeVisitor
   @Override
   @Nullable
   public Modification visitParameter(
-      OnParameter onParameter, Pair<NodeList<BodyDeclaration<?>>, Change> pair) {
+      OnParameter onParameter, Pair<NodeList<BodyDeclaration<?>>, ASTChange> pair) {
     final AtomicReference<Modification> ans = new AtomicReference<>();
     final NodeList<BodyDeclaration<?>> members = pair.a;
-    final Change change = pair.b;
+    final ASTChange change = pair.b;
     members.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifCallableDeclaration(
@@ -140,7 +141,7 @@ public class ChangeVisitor
                       if (params.get(onParameter.index) != null) {
                         Node param = params.get(onParameter.index);
                         if (param instanceof Parameter) {
-                          ans.set(change.visit((Parameter) param));
+                          ans.set(change.computeTextModificationOn((Parameter) param));
                         }
                       }
                     }
@@ -151,10 +152,11 @@ public class ChangeVisitor
 
   @Override
   @Nullable
-  public Modification visitClass(OnClass onClass, Pair<NodeList<BodyDeclaration<?>>, Change> pair) {
+  public Modification visitClass(
+      OnClass onClass, Pair<NodeList<BodyDeclaration<?>>, ASTChange> pair) {
     final NodeList<BodyDeclaration<?>> members = pair.a;
-    final Change change = pair.b;
-    if (isAnonymousClassFlatName(change.location.clazz)) {
+    final ASTChange change = pair.b;
+    if (isAnonymousClassFlatName(change.getLocation().clazz)) {
       return null;
     }
     // Get the enclosing class of the members
@@ -162,7 +164,7 @@ public class ChangeVisitor
     if (optionalClass.isEmpty() || !(optionalClass.get() instanceof BodyDeclaration<?>)) {
       return null;
     }
-    return change.visit(((BodyDeclaration<?>) optionalClass.get()));
+    return change.computeTextModificationOn(((BodyDeclaration<?>) optionalClass.get()));
   }
 
   @Override
@@ -212,14 +214,14 @@ public class ChangeVisitor
    * @return the modification that should be applied.
    */
   @Nullable
-  public Modification computeModification(Change change) {
+  public Modification computeModification(ASTChange change) {
     NodeList<BodyDeclaration<?>> members;
     try {
-      members = Helper.getTypeDeclarationMembersByFlatName(cu, change.location.clazz);
+      members = Helper.getTypeDeclarationMembersByFlatName(cu, change.getLocation().clazz);
       if (members == null) {
         return null;
       }
-      return change.location.accept(this, new Pair<>(members, change));
+      return change.getLocation().accept(this, new Pair<>(members, change));
     } catch (TargetClassNotFound notFound) {
       System.err.println(notFound.getMessage());
       return null;

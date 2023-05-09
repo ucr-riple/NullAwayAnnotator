@@ -24,8 +24,8 @@
 
 package edu.ucr.cs.riple.injector;
 
+import edu.ucr.cs.riple.injector.changes.ASTChange;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
-import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,13 +36,13 @@ public class BasicTest extends BaseInjectorTest {
 
   @Test
   public void skipDuplicateAnnotation() {
-    Change change1 =
+    ASTChange change1 =
         new AddMarkerAnnotation(
             new OnMethod("Foo.java", "test.Foo", "test()"), "javax.annotation.Nullable");
-    Change change2 =
+    ASTChange change2 =
         new AddMarkerAnnotation(
             new OnMethod("Foo.java", "test.Foo", "test()"), "javax.annotation.Nullable");
-    Change change3 =
+    ASTChange change3 =
         new AddMarkerAnnotation(
             new OnMethod("Foo.java", "test.Foo", "test()"), "javax.annotation.Nullable");
 
