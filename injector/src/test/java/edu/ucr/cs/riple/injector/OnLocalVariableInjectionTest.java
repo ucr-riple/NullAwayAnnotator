@@ -25,7 +25,7 @@
 package edu.ucr.cs.riple.injector;
 
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
-import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
+import edu.ucr.cs.riple.injector.changes.RemoveMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.OnLocalVariable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -92,11 +92,11 @@ public class OnLocalVariableInjectionTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"),
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"), "edu.ucr.UnTainted"),
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
         .start();
   }

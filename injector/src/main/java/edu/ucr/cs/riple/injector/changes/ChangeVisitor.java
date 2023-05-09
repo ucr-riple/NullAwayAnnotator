@@ -169,9 +169,9 @@ public class ChangeVisitor
 
   @Override
   public Modification visitLocalVariable(
-      OnLocalVariable onLocalVariable, Pair<NodeList<BodyDeclaration<?>>, Change> pair) {
+      OnLocalVariable onLocalVariable, Pair<NodeList<BodyDeclaration<?>>, ASTChange> pair) {
     final NodeList<BodyDeclaration<?>> members = pair.a;
-    final Change change = pair.b;
+    final ASTChange change = pair.b;
     final AtomicReference<Modification> ans = new AtomicReference<>();
     members.forEach(
         bodyDeclaration ->
@@ -198,7 +198,7 @@ public class ChangeVisitor
                                   .toString()
                                   .equals(onLocalVariable.varName)) {
                                 // Located the variable.
-                                ans.set(change.visit(variableDeclarationExpr));
+                                ans.set(change.computeTextModificationOn(variableDeclarationExpr));
                               }
                             });
                   }
