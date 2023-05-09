@@ -35,7 +35,7 @@ import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
 import edu.ucr.cs.riple.core.tools.CoreTestHelper;
 import edu.ucr.cs.riple.core.tools.Utility;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
-import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
+import edu.ucr.cs.riple.injector.changes.RemoveMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -198,7 +198,7 @@ public class OffsetChangeHandlingTest {
         Arrays.stream(fields)
             .map(
                 field ->
-                    new RemoveAnnotation(
+                    new RemoveMarkerAnnotation(
                         new OnField(
                             root.resolve("benchmark.java").toString(),
                             fieldClassMap.get(field),

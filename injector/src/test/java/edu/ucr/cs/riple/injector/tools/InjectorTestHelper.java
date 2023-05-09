@@ -66,7 +66,9 @@ public class InjectorTestHelper {
     Arrays.stream(changes)
         .sequential()
         .forEach(
-            change -> change.location.path = rootPath.resolve("src").resolve(change.location.path));
+            change ->
+                change.getLocation().path =
+                    rootPath.resolve("src").resolve(change.getLocation().path));
     this.changes.addAll(Arrays.asList(changes));
     return this;
   }
