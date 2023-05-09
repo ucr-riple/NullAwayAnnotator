@@ -53,7 +53,7 @@ public class OnLocalVariableInjectionTest extends BaseInjectorTest {
             "public class Foo {",
             "   public void foo() {",
             "      @UnTainted int f0;",
-            "      @UnTainted Bar<@UnTainted String, @UnTainted Integer, @UnTainted Baz<@UnTainted String, @UnTainted Integer>> f1;",
+            "      @UnTainted Bar<String, Integer, Baz<String, Integer>> f1;",
             "      @UnTainted String f2;",
             "   }",
             "}")
@@ -77,7 +77,7 @@ public class OnLocalVariableInjectionTest extends BaseInjectorTest {
             "public class Foo {",
             "   public void foo() {",
             "      @UnTainted int f0;",
-            "      @UnTainted Bar<@UnTainted String, @UnTainted Integer, @UnTainted Baz<@UnTainted String, @UnTainted Integer>> f1;",
+            "      @UnTainted Bar<String, Integer, Baz<String, Integer>> f1;",
             "      @UnTainted String f2;",
             "   }",
             "}")
@@ -187,7 +187,7 @@ public class OnLocalVariableInjectionTest extends BaseInjectorTest {
             "import edu.ucr.UnTainted;",
             "public class Foo<T> {",
             "   public void foo() {",
-            "      @UnTainted Map<@UnTainted String, @UnTainted T[]>[] f0;",
+            "      @UnTainted Map<String, T[]>[] f0;",
             "      @UnTainted T[] f1;",
             "      @UnTainted String[] f2;",
             "   }",

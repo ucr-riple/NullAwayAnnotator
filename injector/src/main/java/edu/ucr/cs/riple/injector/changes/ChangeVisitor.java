@@ -41,11 +41,7 @@ import edu.ucr.cs.riple.injector.location.OnLocalVariable;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import edu.ucr.cs.riple.injector.modifications.Modification;
-import edu.ucr.cs.riple.injector.modifications.MultiPositionModification;
-import edu.ucr.cs.riple.injector.modifications.TypeChangeVisitor;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 
@@ -200,15 +196,7 @@ public class ChangeVisitor
                                   .toString()
                                   .equals(onLocalVariable.varName)) {
                                 // Located the variable.
-                                Set<Modification> modifications = new HashSet<>();
-                                // Process the declaration statement.
-                                modifications.add(change.visit(variableDeclarationExpr));
-                                // Process the declarator type arguments.
-                                modifications.addAll(
-                                    variableDeclarator
-                                        .getType()
-                                        .accept(new TypeChangeVisitor(), change));
-                                ans.set(new MultiPositionModification(modifications));
+                                ans.set(change.visit(variableDeclarationExpr));
                               }
                             });
                   }
