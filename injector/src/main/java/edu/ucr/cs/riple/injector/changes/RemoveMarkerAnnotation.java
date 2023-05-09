@@ -30,6 +30,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Deletion;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
@@ -61,5 +62,23 @@ public class RemoveMarkerAnnotation extends AnnotationChange implements RemoveAn
       }
     }
     return null;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof RemoveMarkerAnnotation)) {
+      return false;
+    }
+    RemoveMarkerAnnotation other = (RemoveMarkerAnnotation) o;
+    return Objects.equals(location, other.location)
+        && Objects.equals(annotationName, other.annotationName);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash("REMOVE-MARKER", location, annotationName);
   }
 }

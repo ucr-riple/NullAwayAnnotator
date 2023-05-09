@@ -35,28 +35,28 @@ import java.util.TreeSet;
 /** Represents a composite modification that consists of multiple modifications. */
 public class MultiPositionModification implements Modification {
 
-    /** The modifications that should be applied to the source file in the reverse order. */
-    final SortedSet<Modification> modifications;
+  /** The modifications that should be applied to the source file in the reverse order. */
+  final SortedSet<Modification> modifications;
 
-    public MultiPositionModification(Set<Modification> modifications) {
-        // Modification are sorted to start from the last position, to make the changes ineffective to
-        // current computed offsets.
-        this.modifications = new TreeSet<>(Collections.reverseOrder());
-        this.modifications.addAll(modifications);
-    }
+  public MultiPositionModification(Set<Modification> modifications) {
+    // Modification are sorted to start from the last position, to make the changes ineffective to
+    // current computed offsets.
+    this.modifications = new TreeSet<>(Collections.reverseOrder());
+    this.modifications.addAll(modifications);
+  }
 
-    @Override
-    public void visit(List<String> lines, FileOffsetStore offsetStore) {
-        this.modifications.forEach(modification -> modification.visit(lines, offsetStore));
-    }
+  @Override
+  public void visit(List<String> lines, FileOffsetStore offsetStore) {
+    this.modifications.forEach(modification -> modification.visit(lines, offsetStore));
+  }
 
-    @Override
-    public Position getStartingPosition() {
-        return modifications.last().getStartingPosition();
-    }
+  @Override
+  public Position getStartingPosition() {
+    return modifications.last().getStartingPosition();
+  }
 
-    @Override
-    public int compareTo(Modification o) {
-        return COMPARATOR.compare(this, o);
-    }
+  @Override
+  public int compareTo(Modification o) {
+    return COMPARATOR.compare(this, o);
+  }
 }
