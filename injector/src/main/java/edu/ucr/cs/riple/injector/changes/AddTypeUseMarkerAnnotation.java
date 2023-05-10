@@ -103,6 +103,26 @@ public class AddTypeUseMarkerAnnotation extends AddMarkerAnnotation {
     return new RemoveTypeUseMarkerAnnotation(location, annotationName.fullName);
   }
 
+  @Override
+  public boolean equals(Object other) {
+    if (this == other) {
+      return true;
+    }
+    if (!(other instanceof AddTypeUseMarkerAnnotation)) {
+      return false;
+    }
+    AddTypeUseMarkerAnnotation otherAdd = (AddTypeUseMarkerAnnotation) other;
+    return this.location.equals(otherAdd.location)
+        && this.annotationName.equals(otherAdd.annotationName);
+  }
+
+  /**
+   * Find the range of the given type in source code. This is used to insert the annotation before
+   * the type.
+   *
+   * @param type the type to find its range
+   * @return the range of the type or null if the type does not have a range.
+   */
   private static Range findTypeRange(Type type) {
     if (type instanceof ClassOrInterfaceType) {
       ClassOrInterfaceType classOrInterfaceType = (ClassOrInterfaceType) type;
@@ -122,18 +142,5 @@ public class AddTypeUseMarkerAnnotation extends AddMarkerAnnotation {
     }
     throw new RuntimeException(
         "Unexpected type to get range from: " + type + " : " + type.getClass());
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (this == other) {
-      return true;
-    }
-    if (!(other instanceof AddTypeUseMarkerAnnotation)) {
-      return false;
-    }
-    AddTypeUseMarkerAnnotation otherAdd = (AddTypeUseMarkerAnnotation) other;
-    return this.location.equals(otherAdd.location)
-        && this.annotationName.equals(otherAdd.annotationName);
   }
 }

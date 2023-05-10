@@ -173,7 +173,9 @@ public class AddSingleElementAnnotation extends AnnotationChange implements AddA
     if (!(o instanceof AddSingleElementAnnotation)) {
       return false;
     }
-    if (!super.equals(o)) return false;
+    if (!super.equals(o)) {
+      return false;
+    }
     AddSingleElementAnnotation that = (AddSingleElementAnnotation) o;
     return repeatable == that.repeatable && Objects.equals(argument, that.argument);
   }
