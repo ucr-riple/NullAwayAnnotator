@@ -40,7 +40,15 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Nullable;
 
-/** Used to add type-use marker annotations on elements in source code. */
+/**
+ * Adds a type-use marker annotation to a node in the source code. It will add the annotation to
+ * both the declaration and all type arguments.
+ *
+ * <p>For instance, for the node: {@code java.util.Map<String, java.lang.String> list;} It will add
+ * the {@code @Nullable} annotation to the type {@code Map} and all the type arguments. The final
+ * output will be: {@code java.util.@Nullable Map<@Nullable String, java.lang.@Nullable String>
+ * list;}
+ */
 public class AddTypeUseMarkerAnnotation extends AddMarkerAnnotation {
 
   public AddTypeUseMarkerAnnotation(Location location, String annotation) {

@@ -39,6 +39,15 @@ import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nullable;
 
+/**
+ * Removes a type-use marker annotation from a node in the source code. It will remove the
+ * annotation both from the declaration and all type arguments.
+ *
+ * <p>For instance, for the node: {@code java.util.@Nullable Map<@Nullable String,
+ * java.lang.@Nullable String> list;} It will remove the {@code @Nullable} annotation from the type
+ * {@code Map} and all the type arguments. The final output will be: {@code java.util.Map<String,
+ * java.lang.String> list;}
+ */
 public class RemoveTypeUseMarkerAnnotation extends RemoveMarkerAnnotation {
 
   public RemoveTypeUseMarkerAnnotation(Location location, String annotation) {
