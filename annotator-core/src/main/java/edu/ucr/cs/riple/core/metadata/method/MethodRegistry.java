@@ -67,46 +67,48 @@ public class MethodRegistry extends Registry<MethodRecord> {
   }
 
   @Override
-  protected MethodRecord addNodeByLine(String[] values) {
-    // Nodes unique id.
-    Integer id = Integer.parseInt(values[0]);
-    MethodRecord node;
-    if (nodes.containsKey(id)) {
-      node = nodes.get(id);
-    } else {
-      node = new MethodRecord(id);
-      nodes.put(id, node);
-    }
-    // Fill nodes information.
-    Integer parentId = Integer.parseInt(values[3]);
-    OnMethod location = new OnMethod(Helper.deserializePath(values[8]), values[1], values[2]);
-    boolean isConstructor =
-        Helper.extractCallableName(location.method).equals(Helper.simpleName(location.clazz));
-    node.fillInformation(
-        new OnMethod(Helper.deserializePath(values[8]), values[1], values[2]),
-        parentId,
-        Boolean.parseBoolean(values[5]),
-        values[6],
-        Boolean.parseBoolean(values[7]),
-        isConstructor);
-    // If node has a non-top parent.
-    if (parentId > 0) {
-      MethodRecord parent = nodes.get(parentId);
-      // If parent has not been seen visited before.
-      if (parent == null) {
-        parent = new MethodRecord(parentId);
-        nodes.put(parentId, parent);
+  protected Builder<MethodRecord> getBuilder() {
+    return values -> {
+      // Nodes unique id.
+      Integer id = Integer.parseInt(values[0]);
+      MethodRecord node;
+      if (nodes.containsKey(id)) {
+        node = nodes.get(id);
+      } else {
+        node = new MethodRecord(id);
+        nodes.put(id, node);
       }
-      // Parent is already visited.
-      parent.addChild(id);
-    }
-    // Update list of all declared classes.
-    declaredClasses.add(node.location.clazz);
-    // If node is a constructor, add it to the list of constructors of its class.
-    if (node.isConstructor) {
-      classConstructorMap.put(node.location.clazz, node);
-    }
-    return node;
+      // Fill nodes information.
+      Integer parentId = Integer.parseInt(values[3]);
+      OnMethod location = new OnMethod(Helper.deserializePath(values[8]), values[1], values[2]);
+      boolean isConstructor =
+          Helper.extractCallableName(location.method).equals(Helper.simpleName(location.clazz));
+      node.fillInformation(
+          new OnMethod(Helper.deserializePath(values[8]), values[1], values[2]),
+          parentId,
+          Boolean.parseBoolean(values[5]),
+          values[6],
+          Boolean.parseBoolean(values[7]),
+          isConstructor);
+      // If node has a non-top parent.
+      if (parentId > 0) {
+        MethodRecord parent = nodes.get(parentId);
+        // If parent has not been seen visited before.
+        if (parent == null) {
+          parent = new MethodRecord(parentId);
+          nodes.put(parentId, parent);
+        }
+        // Parent is already visited.
+        parent.addChild(id);
+      }
+      // Update list of all declared classes.
+      declaredClasses.add(node.location.clazz);
+      // If node is a constructor, add it to the list of constructors of its class.
+      if (node.isConstructor) {
+        classConstructorMap.put(node.location.clazz, node);
+      }
+      return node;
+    };
   }
 
   /**

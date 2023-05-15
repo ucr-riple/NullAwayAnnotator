@@ -39,16 +39,6 @@ public class FieldInitializationStore extends Registry<FieldInitializationNode> 
     super(config, config.target.dir.resolve(FILE_NAME));
   }
 
-  @Override
-  protected FieldInitializationNode addNodeByLine(String[] values) {
-    Location location = Location.createLocationFromArrayInfo(values);
-    Preconditions.checkNotNull(
-        location, "Field Location cannot be null: " + Arrays.toString(values));
-    return location.isOnMethod()
-        ? new FieldInitializationNode(location.toMethod(), values[6])
-        : null;
-  }
-
   /**
    * Processes all uninitialized fields and method initializers and chooses the initializers with
    * the heuristic below:
@@ -84,6 +74,18 @@ public class FieldInitializationStore extends Registry<FieldInitializationNode> 
         .map(Class::findInitializer)
         .filter(Objects::nonNull)
         .collect(Collectors.toSet());
+  }
+
+  @Override
+  protected Builder<FieldInitializationNode> getBuilder() {
+    return values -> {
+      Location location = Location.createLocationFromArrayInfo(values);
+      Preconditions.checkNotNull(
+          location, "Field Location cannot be null: " + Arrays.toString(values));
+      return location.isOnMethod()
+          ? new FieldInitializationNode(location.toMethod(), values[6])
+          : null;
+    };
   }
 
   /** Stores class field / method initialization status. */

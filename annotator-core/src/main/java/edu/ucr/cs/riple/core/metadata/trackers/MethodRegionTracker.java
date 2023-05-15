@@ -63,8 +63,8 @@ public class MethodRegionTracker extends Registry<TrackerNode> implements Region
   }
 
   @Override
-  protected TrackerNode addNodeByLine(String[] values) {
-    return Utility.deserializeTrackerNode(values);
+  protected Builder<TrackerNode> getBuilder() {
+    return Utility::deserializeTrackerNode;
   }
 
   @Override

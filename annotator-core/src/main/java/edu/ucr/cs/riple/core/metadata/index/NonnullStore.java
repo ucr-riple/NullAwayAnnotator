@@ -41,8 +41,8 @@ public class NonnullStore extends Registry<Location> {
   }
 
   @Override
-  protected Location addNodeByLine(String[] values) {
-    return Location.createLocationFromArrayInfo(values);
+  protected Builder<Location> getBuilder() {
+    return Location::createLocationFromArrayInfo;
   }
 
   /**

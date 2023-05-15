@@ -66,7 +66,7 @@ public abstract class Registry<T> {
     ImmutableMultimap.Builder<Integer, T> builder = ImmutableMultimap.builder();
     setup();
     try {
-      fillNodes(path, builder);
+      populateContent(path, builder);
     } catch (IOException e) {
       throw new RuntimeException("Error happened while loading content of file: " + path, e);
     }
@@ -87,7 +87,7 @@ public abstract class Registry<T> {
     paths.forEach(
         path -> {
           try {
-            fillNodes(path, builder);
+            populateContent(path, builder);
           } catch (IOException e) {
             throw new RuntimeException("Error happened while loading content of file: " + path, e);
           }
@@ -107,16 +107,17 @@ public abstract class Registry<T> {
    * @param path Path to the file containing data.
    * @throws IOException if file not is found.
    */
-  protected void fillNodes(Path path, ImmutableMultimap.Builder<Integer, T> builder)
+  protected void populateContent(Path path, ImmutableMultimap.Builder<Integer, T> builder)
       throws IOException {
     try (BufferedReader reader =
         Files.newBufferedReader(path.toFile().toPath(), Charset.defaultCharset())) {
+      Builder<T> recordBuilder = getBuilder();
       String line = reader.readLine();
       if (line != null) {
         line = reader.readLine();
       }
       while (line != null) {
-        T node = addNodeByLine(line.split("\t"));
+        T node = recordBuilder.build(line.split("\t"));
         if (node != null) {
           builder.put(node.hashCode(), node);
         }
@@ -126,13 +127,12 @@ public abstract class Registry<T> {
   }
 
   /**
-   * Creates an instance of {@code T} corresponding to the values in a row. This method is called on
-   * every row of the loaded file.
+   * Returns the corresponding {@link Builder} for this registry which can make a record instance of
+   * type {@link T} from a row in the given TSV file.
    *
-   * @param values Values in a row.
-   * @return Instance of {@code T}.
+   * @return {@link Builder} for this registry.
    */
-  protected abstract T addNodeByLine(String[] values);
+  protected abstract Builder<T> getBuilder();
 
   /**
    * Retrieves node which holds the passed predicate. It uses the given hash for faster retrieval.
@@ -166,5 +166,21 @@ public abstract class Registry<T> {
    */
   protected Stream<T> findNodes(Predicate<T> c) {
     return contents.values().stream().filter(c);
+  }
+
+  /**
+   * Builder interface for creating {@link Registry} items. Builders with this interface can make a
+   * registry record of type {@link T} from a row of a TSV file.
+   *
+   * @param <T> Type of the registry record.
+   */
+  public interface Builder<T> {
+    /**
+     * Builds a registry record of type {@link T} from a row of a TSV file.
+     *
+     * @param values Row of a TSV file.
+     * @return Registry record of type {@link T}.
+     */
+    T build(String[] values);
   }
 }

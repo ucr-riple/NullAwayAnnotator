@@ -56,8 +56,8 @@ public class FieldRegionTracker extends Registry<TrackerNode> implements RegionT
   }
 
   @Override
-  protected TrackerNode addNodeByLine(String[] values) {
-    return Utility.deserializeTrackerNode(values);
+  protected Builder<TrackerNode> getBuilder() {
+    return Utility::deserializeTrackerNode;
   }
 
   @Override
