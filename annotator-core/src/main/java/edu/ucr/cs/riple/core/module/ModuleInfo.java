@@ -80,8 +80,8 @@ public class ModuleInfo {
     Utility.build(config, buildCommand);
     Utility.setScannerCheckerActivation(config, configurations, false);
     this.configurations = configurations;
-    this.nonnullStore = new NonnullStore(config, configurations);
-    this.fieldRegistry = new FieldRegistry(config, configurations);
+    this.nonnullStore = new NonnullStore(configurations);
+    this.fieldRegistry = new FieldRegistry(configurations);
     this.methodRegistry = new MethodRegistry(config);
   }
 

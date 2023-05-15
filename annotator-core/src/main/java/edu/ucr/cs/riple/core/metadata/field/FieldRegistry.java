@@ -10,7 +10,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Sets;
-import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.Registry;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.injector.Helper;
@@ -43,22 +42,19 @@ public class FieldRegistry extends Registry<FieldRecord> {
   /**
    * Constructor for {@link FieldRegistry}.
    *
-   * @param config Annotator config.
    * @param module Information of the target module.
    */
-  public FieldRegistry(Config config, ModuleConfiguration module) {
-    this(config, ImmutableSet.of(module));
+  public FieldRegistry(ModuleConfiguration module) {
+    this(ImmutableSet.of(module));
   }
 
   /**
    * Constructor for {@link FieldRegistry}. Contents are accumulated from multiple sources.
    *
-   * @param config Annotator config.
    * @param modules Information of set of modules.
    */
-  public FieldRegistry(Config config, ImmutableSet<ModuleConfiguration> modules) {
+  public FieldRegistry(ImmutableSet<ModuleConfiguration> modules) {
     super(
-        config,
         modules.stream()
             .map(info -> info.dir.resolve(Serializer.CLASS_INFO_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));

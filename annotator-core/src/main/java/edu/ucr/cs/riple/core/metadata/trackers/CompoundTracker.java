@@ -47,7 +47,7 @@ public class CompoundTracker implements RegionTracker {
     MethodRegionTracker methodRegionTracker = new MethodRegionTracker(config, moduleInfo);
     this.trackers =
         ImmutableSet.of(
-            new FieldRegionTracker(config, moduleInfo),
+            new FieldRegionTracker(moduleInfo),
             methodRegionTracker,
             new ParameterRegionTracker(moduleInfo, methodRegionTracker));
     ImmutableSet.Builder<GeneratedRegionTracker> generatedRegionTrackerBuilder =

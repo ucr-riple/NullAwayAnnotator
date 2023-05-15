@@ -45,7 +45,6 @@ public class MethodRegionTracker extends Registry<TrackerNode> implements Region
 
   public MethodRegionTracker(Config config, ModuleInfo moduleInfo) {
     super(
-        config,
         moduleInfo.getModuleConfigurations().stream()
             .map(info -> info.dir.resolve(Serializer.METHOD_IMPACTED_REGION_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));

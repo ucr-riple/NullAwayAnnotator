@@ -36,7 +36,7 @@ public class FieldInitializationStore extends Registry<FieldInitializationNode> 
    * @param config Annotator config.
    */
   public FieldInitializationStore(Config config) {
-    super(config, config.target.dir.resolve(FILE_NAME));
+    super(config.target.dir.resolve(FILE_NAME));
   }
 
   /**

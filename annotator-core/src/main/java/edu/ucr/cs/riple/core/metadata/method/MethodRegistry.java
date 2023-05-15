@@ -54,12 +54,11 @@ public class MethodRegistry extends Registry<MethodRecord> {
   private Set<String> declaredClasses;
 
   public MethodRegistry(Config config) {
-    this(config, ImmutableSet.of(config.target));
+    this(ImmutableSet.of(config.target));
   }
 
-  public MethodRegistry(Config config, ImmutableSet<ModuleConfiguration> modules) {
+  public MethodRegistry(ImmutableSet<ModuleConfiguration> modules) {
     super(
-        config,
         modules.stream()
             .map(moduleInfo -> moduleInfo.dir.resolve(Serializer.METHOD_INFO_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));

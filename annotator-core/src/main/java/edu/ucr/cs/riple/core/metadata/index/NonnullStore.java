@@ -39,12 +39,11 @@ import edu.ucr.cs.riple.scanner.Serializer;
 public class NonnullStore extends Registry<Location> {
 
   public NonnullStore(Config config) {
-    this(config, ImmutableSet.of(config.target));
+    this(ImmutableSet.of(config.target));
   }
 
-  public NonnullStore(Config config, ImmutableSet<ModuleConfiguration> modules) {
+  public NonnullStore(ImmutableSet<ModuleConfiguration> modules) {
     super(
-        config,
         modules.stream()
             .map(moduleInfo -> moduleInfo.dir.resolve(Serializer.NON_NULL_ELEMENTS_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));
