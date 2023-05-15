@@ -155,7 +155,7 @@ public class MethodRegistry extends Registry<MethodRecord> {
    * @return Corresponding method.
    */
   public MethodRecord findMethodByName(String encClass, String method) {
-    return findNodeWithHashHint(
+    return findRecordWithHashHint(
         candidate ->
             candidate.location.clazz.equals(encClass) && candidate.location.method.equals(method),
         MethodRecord.hash(method, encClass));
@@ -167,7 +167,7 @@ public class MethodRegistry extends Registry<MethodRecord> {
    * @return ImmutableSet of method nodes.
    */
   public ImmutableSet<MethodRecord> getPublicMethodsWithNonPrimitivesReturn() {
-    return findNodes(MethodRecord::isPublicMethodWithNonPrimitiveReturnType)
+    return findRecords(MethodRecord::isPublicMethodWithNonPrimitiveReturnType)
         .collect(ImmutableSet.toImmutableSet());
   }
 

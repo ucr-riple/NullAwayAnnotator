@@ -39,8 +39,8 @@ import java.util.stream.Stream;
  * Container class which loads its content from a file in TSV format. For faster retrieval, it
  * stores its content in a {@link com.google.common.collect.ImmutableMultimap} where the key is the
  * hash of the item and the value is the item itself. For faster retrieval, if the anticipated hash
- * is known, {@link Registry#findNodesWithHashHint} can be used, otherwise use {@link
- * Registry#findNodes}. If subclasses need to initialize some data before loading the file, they
+ * is known, {@link Registry#findRecordsWithHashHint} can be used, otherwise use {@link
+ * Registry#findRecords}. If subclasses need to initialize some data before loading the file, they
  * must call {@link Registry#setup()}. Please note that this class anticipates that the file exits
  * at the given paths and does not attempt to create it. Before creating an instance, please make
  * sure that the file exists.
@@ -120,9 +120,9 @@ public abstract class Registry<T> {
         line = reader.readLine();
       }
       while (line != null) {
-        T node = recordBuilder.build(line.split("\t"));
-        if (node != null) {
-          builder.put(node.hashCode(), node);
+        T record = recordBuilder.build(line.split("\t"));
+        if (record != null) {
+          builder.put(record.hashCode(), record);
         }
         line = reader.readLine();
       }
@@ -138,37 +138,37 @@ public abstract class Registry<T> {
   protected abstract Builder<T> getBuilder();
 
   /**
-   * Retrieves node which holds the passed predicate. It uses the given hash for faster retrieval.
+   * Retrieves record which holds the passed predicate. It uses the given hash for faster retrieval.
    *
    * @param c Predicate.
    * @param hash Expected hash
    * @return Corresponding {@code T}.
    */
-  protected T findNodeWithHashHint(Predicate<T> c, int hash) {
-    return findNodesWithHashHint(c, hash).findFirst().orElse(null);
+  protected T findRecordWithHashHint(Predicate<T> c, int hash) {
+    return findRecordsWithHashHint(c, hash).findFirst().orElse(null);
   }
 
   /**
-   * Retrieves stream of nodes which holds the passed predicate. It uses the given hash for faster
+   * Retrieves stream of records which holds the passed predicate. It uses the given hash for faster
    * retrieval.
    *
    * @param c Predicate.
    * @param hash Expected hash
    * @return Corresponding stream of {@code T}.
    */
-  protected Stream<T> findNodesWithHashHint(Predicate<T> c, int hash) {
+  protected Stream<T> findRecordsWithHashHint(Predicate<T> c, int hash) {
     return contents.get(hash).stream().filter(c);
   }
 
   /**
-   * Retrieves stream of nodes which holds the passed predicate. This method is expected to be
-   * significantly slower than {@link Registry#findNodesWithHashHint}, if the anticipated hash is
-   * known, please use {@link Registry#findNodesWithHashHint}.
+   * Retrieves stream of records which holds the passed predicate. This method is expected to be
+   * significantly slower than {@link Registry#findRecordsWithHashHint}, if the anticipated hash is
+   * known, please use {@link Registry#findRecordsWithHashHint}.
    *
    * @param c Predicate.
    * @return Corresponding stream of {@code T}.
    */
-  protected Stream<T> findNodes(Predicate<T> c) {
+  protected Stream<T> findRecords(Predicate<T> c) {
     return contents.values().stream().filter(c);
   }
 

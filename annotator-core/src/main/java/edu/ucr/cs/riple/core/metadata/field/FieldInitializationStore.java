@@ -59,7 +59,7 @@ public class FieldInitializationStore extends Registry<FieldInitializationNode> 
     Map<String, Class> classes = new HashMap<>();
     uninitializedFields.forEach(
         onField ->
-            findNodesWithHashHint(
+            findRecordsWithHashHint(
                     candidate ->
                         onField.isOnFieldWithName(candidate.getFieldName())
                             && candidate.getClassName().equals(onField.clazz),

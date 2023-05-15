@@ -131,7 +131,7 @@ public class FieldRegistry extends Registry<FieldRecord> {
   public ImmutableSet<String> getInLineMultipleFieldDeclarationsOnField(
       String clazz, Set<String> fields) {
     FieldRecord candidate =
-        findNodeWithHashHint(node -> node.clazz.equals(clazz), FieldRecord.hash(clazz));
+        findRecordWithHashHint(node -> node.clazz.equals(clazz), FieldRecord.hash(clazz));
     if (candidate == null) {
       // No inline multiple field declarations.
       return ImmutableSet.copyOf(fields);
@@ -164,7 +164,7 @@ public class FieldRegistry extends Registry<FieldRecord> {
    */
   public OnField getLocationOnField(String clazz, String field) {
     FieldRecord candidate =
-        findNodeWithHashHint(node -> node.clazz.equals(clazz), FieldRecord.hash(clazz));
+        findRecordWithHashHint(node -> node.clazz.equals(clazz), FieldRecord.hash(clazz));
     Set<String> fieldNames = Sets.newHashSet(field);
     if (candidate == null) {
       // field is on byte code.
@@ -183,7 +183,7 @@ public class FieldRegistry extends Registry<FieldRecord> {
    */
   public OnClass getLocationOnClass(String clazz) {
     FieldRecord candidate =
-        findNodeWithHashHint(node -> node.clazz.equals(clazz), FieldRecord.hash(clazz));
+        findRecordWithHashHint(node -> node.clazz.equals(clazz), FieldRecord.hash(clazz));
     if (candidate == null) {
       // class not observed in source code.
       return null;

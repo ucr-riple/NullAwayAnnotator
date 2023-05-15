@@ -68,7 +68,7 @@ public class FieldRegionTracker extends Registry<TrackerNode> implements RegionT
     OnField field = location.toField();
     // Add all regions where the field is assigned a new value or read.
     Set<Region> ans =
-        findNodesWithHashHint(
+        findRecordsWithHashHint(
                 candidate ->
                     candidate.calleeClass.equals(field.clazz)
                         && field.isOnFieldWithName(candidate.calleeMember),

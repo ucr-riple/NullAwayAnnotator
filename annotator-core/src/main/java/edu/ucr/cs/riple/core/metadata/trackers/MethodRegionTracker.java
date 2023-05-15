@@ -93,7 +93,7 @@ public class MethodRegionTracker extends Registry<TrackerNode> implements Region
    * @return Set of regions where target method is called.
    */
   public Set<Region> getCallersOfMethod(String clazz, String method) {
-    return findNodesWithHashHint(
+    return findRecordsWithHashHint(
             candidate ->
                 candidate.calleeClass.equals(clazz) && candidate.calleeMember.equals(method),
             TrackerNode.hash(clazz))
