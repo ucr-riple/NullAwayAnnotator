@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.metadata.MetaData;
+import edu.ucr.cs.riple.core.metadata.Registry;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -43,7 +43,7 @@ import javax.annotation.Nullable;
  * The top-down tree structure of methods in the target module, where each method's parent node, is
  * their immediate overriding method.
  */
-public class MethodRegistry extends MetaData<MethodRecord> {
+public class MethodRegistry extends Registry<MethodRecord> {
 
   /** Each method has a unique id across all methods. This hashmap, maps ids to nodes. */
   private HashMap<Integer, MethodRecord> nodes;

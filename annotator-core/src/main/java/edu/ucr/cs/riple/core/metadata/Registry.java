@@ -24,9 +24,9 @@
 
 package edu.ucr.cs.riple.core.metadata;
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
 import edu.ucr.cs.riple.core.Config;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -37,18 +37,20 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
- * Container class which loads its content from a file in TSV format. For faster retrieval, it uses
- * hashing techniques to store data. For faster retrieval, the anticipated hash must be passed to
- * search methods.
+ * Container class which loads its content from a file in TSV format. For faster retrieval, it
+ * stores its content in a {@link com.google.common.collect.ImmutableMultimap} where the key is the
+ * hash of the item and the value is the item itself. For faster retrieval, if the anticipated hash
+ * is known, {@link Registry#findNodesWithHashHint} can be used, otherwise use {@link
+ * Registry#findNodes}. If subclasses need to initialize some data before loading the file, they
+ * must call {@link Registry#setup()}.
  */
-public abstract class MetaData<T> {
+public abstract class Registry<T> {
 
   /**
    * Contents, every element is mapped to it's computed hash, note that two different items can have
    * an identical hash, therefore it is of type {@link Multimap} (not HashMap) to hold both items.
    */
   protected final Multimap<Integer, T> contents;
-
   /** Annotator config. */
   protected final Config config;
 
@@ -59,15 +61,16 @@ public abstract class MetaData<T> {
    * @param config Annotator config.
    * @param path Path to the file containing the data.
    */
-  public MetaData(Config config, Path path) {
-    contents = MultimapBuilder.hashKeys().arrayListValues().build();
+  public Registry(Config config, Path path) {
     this.config = config;
+    ImmutableMultimap.Builder<Integer, T> builder = ImmutableMultimap.builder();
     setup();
     try {
-      fillNodes(path);
+      fillNodes(path, builder);
     } catch (IOException e) {
       throw new RuntimeException("Error happened while loading content of file: " + path, e);
     }
+    this.contents = builder.build();
   }
 
   /**
@@ -77,18 +80,19 @@ public abstract class MetaData<T> {
    * @param config Annotator config.
    * @param paths Paths to all files containing data.
    */
-  public MetaData(Config config, ImmutableSet<Path> paths) {
-    contents = MultimapBuilder.hashKeys().arrayListValues().build();
+  public Registry(Config config, ImmutableSet<Path> paths) {
     this.config = config;
+    ImmutableMultimap.Builder<Integer, T> builder = ImmutableMultimap.builder();
     setup();
     paths.forEach(
         path -> {
           try {
-            fillNodes(path);
+            fillNodes(path, builder);
           } catch (IOException e) {
             throw new RuntimeException("Error happened while loading content of file: " + path, e);
           }
         });
+    this.contents = builder.build();
   }
 
   /**
@@ -103,7 +107,8 @@ public abstract class MetaData<T> {
    * @param path Path to the file containing data.
    * @throws IOException if file not is found.
    */
-  protected void fillNodes(Path path) throws IOException {
+  protected void fillNodes(Path path, ImmutableMultimap.Builder<Integer, T> builder)
+      throws IOException {
     try (BufferedReader reader =
         Files.newBufferedReader(path.toFile().toPath(), Charset.defaultCharset())) {
       String line = reader.readLine();
@@ -113,7 +118,7 @@ public abstract class MetaData<T> {
       while (line != null) {
         T node = addNodeByLine(line.split("\t"));
         if (node != null) {
-          contents.put(node.hashCode(), node);
+          builder.put(node.hashCode(), node);
         }
         line = reader.readLine();
       }
@@ -154,7 +159,7 @@ public abstract class MetaData<T> {
 
   /**
    * Retrieves stream of nodes which holds the passed predicate. This method does not hash and is
-   * significantly slower than {@link MetaData#findNodesWithHashHint(Predicate, int)};
+   * significantly slower than {@link Registry#findNodesWithHashHint(Predicate, int)};
    *
    * @param c Predicate.
    * @return Corresponding stream of {@code T}.

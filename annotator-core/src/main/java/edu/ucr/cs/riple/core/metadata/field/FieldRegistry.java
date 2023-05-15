@@ -12,7 +12,7 @@ import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
-import edu.ucr.cs.riple.core.metadata.MetaData;
+import edu.ucr.cs.riple.core.metadata.Registry;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import edu.ucr.cs.riple.injector.location.OnClass;
@@ -33,7 +33,7 @@ import java.util.Set;
  * j; and a Fix suggesting f to be {@code Nullable}, this class will replace that fix with a fix
  * suggesting f, i, and j be {@code Nullable}.)
  */
-public class FieldRegistry extends MetaData<FieldRecord> {
+public class FieldRegistry extends Registry<FieldRecord> {
 
   /**
    * A map from class flat name to a set of field names that are declared in that class but not

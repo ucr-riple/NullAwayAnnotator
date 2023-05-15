@@ -2,7 +2,7 @@ package edu.ucr.cs.riple.core.metadata.field;
 
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.metadata.MetaData;
+import edu.ucr.cs.riple.core.metadata.Registry;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * Detects initializer methods in source code. Reads field initialization info serialized by
  * NullAway and uses a heuristic to detect them.
  */
-public class FieldInitializationStore extends MetaData<FieldInitializationNode> {
+public class FieldInitializationStore extends Registry<FieldInitializationNode> {
 
   /**
    * Output file name. It contains information about initializations of fields via methods. On each

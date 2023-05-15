@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.core.metadata.trackers;
 
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
-import edu.ucr.cs.riple.core.metadata.MetaData;
+import edu.ucr.cs.riple.core.metadata.Registry;
 import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -38,7 +38,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /** Tracker for Fields. */
-public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
+public class FieldRegionTracker extends Registry<TrackerNode> implements RegionTracker {
 
   /**
    * Store for field declarations. This is used to determine if a field is initialized at

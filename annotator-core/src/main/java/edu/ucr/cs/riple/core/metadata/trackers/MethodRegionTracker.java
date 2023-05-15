@@ -27,7 +27,7 @@ package edu.ucr.cs.riple.core.metadata.trackers;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
-import edu.ucr.cs.riple.core.metadata.MetaData;
+import edu.ucr.cs.riple.core.metadata.Registry;
 import edu.ucr.cs.riple.core.metadata.method.MethodRecord;
 import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -39,7 +39,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /** Tracker for Methods. */
-public class MethodRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
+public class MethodRegionTracker extends Registry<TrackerNode> implements RegionTracker {
 
   /**
    * {@link MethodRegistry} instance, used to retrieve regions that will be affected due to

@@ -25,7 +25,7 @@
 package edu.ucr.cs.riple.core.metadata.index;
 
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.metadata.MetaData;
+import edu.ucr.cs.riple.core.metadata.Registry;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.scanner.Serializer;
 
@@ -34,7 +34,7 @@ import edu.ucr.cs.riple.scanner.Serializer;
  * acknowledge these annotations and prevent annotator from annotating such elements with
  * {@code @Nullable} annotations.
  */
-public class NonnullStore extends MetaData<Location> {
+public class NonnullStore extends Registry<Location> {
 
   public NonnullStore(Config config) {
     super(config, config.target.dir.resolve(Serializer.NON_NULL_ELEMENTS_FILE_NAME));
