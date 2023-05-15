@@ -26,7 +26,6 @@ package edu.ucr.cs.riple.core.metadata;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
 import edu.ucr.cs.riple.core.Config;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -42,15 +41,18 @@ import java.util.stream.Stream;
  * hash of the item and the value is the item itself. For faster retrieval, if the anticipated hash
  * is known, {@link Registry#findNodesWithHashHint} can be used, otherwise use {@link
  * Registry#findNodes}. If subclasses need to initialize some data before loading the file, they
- * must call {@link Registry#setup()}.
+ * must call {@link Registry#setup()}. Please note that this class anticipates that the file exits
+ * at the given paths and does not attempt to create it. Before creating an instance, please make
+ * sure that the file exists.
  */
 public abstract class Registry<T> {
 
   /**
    * Contents, every element is mapped to it's computed hash, note that two different items can have
-   * an identical hash, therefore it is of type {@link Multimap} (not HashMap) to hold both items.
+   * an identical hash, therefore it is of type {@link ImmutableMultimap} ({@link
+   * java.util.HashMap}) to hold both items.
    */
-  protected final Multimap<Integer, T> contents;
+  protected final ImmutableMultimap<Integer, T> contents;
   /** Annotator config. */
   protected final Config config;
 
@@ -96,13 +98,13 @@ public abstract class Registry<T> {
   }
 
   /**
-   * Subclasses can override this method to perform eny initialization before loading data from the
+   * Subclasses can override this method to perform any initialization before loading data from the
    * file.
    */
   protected void setup() {}
 
   /**
-   * Loads data to contents.
+   * Loads data existing in the given path, to the given builder.
    *
    * @param path Path to the file containing data.
    * @throws IOException if file not is found.
