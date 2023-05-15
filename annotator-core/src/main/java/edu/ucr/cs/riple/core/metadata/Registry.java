@@ -34,6 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 
 /**
  * Container class which loads its content from a file in TSV format. For faster retrieval, it
@@ -144,6 +145,7 @@ public abstract class Registry<T> {
    * @param hash Expected hash
    * @return Corresponding {@code T}.
    */
+  @Nullable
   protected T findRecordWithHashHint(Predicate<T> c, int hash) {
     return findRecordsWithHashHint(c, hash).findFirst().orElse(null);
   }
@@ -157,6 +159,9 @@ public abstract class Registry<T> {
    * @return Corresponding stream of {@code T}.
    */
   protected Stream<T> findRecordsWithHashHint(Predicate<T> c, int hash) {
+    if (!contents.containsKey(hash)) {
+      return Stream.of();
+    }
     return contents.get(hash).stream().filter(c);
   }
 

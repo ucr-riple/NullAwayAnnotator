@@ -48,10 +48,10 @@ public class NonnullStore extends Registry<Location> {
   /**
    * Returns true if the element at the given location has an explicit {@code @Nonnull} annotation.
    *
-   * @param location Location of the given element.
+   * @param target Location of the given element.
    * @return true, if the element at the given location has an explicit {@code @Nonnull} annotation.
    */
-  public boolean hasExplicitNonnullAnnotation(Location location) {
-    return contents.values().stream().anyMatch(l -> l.equals(location));
+  public boolean hasExplicitNonnullAnnotation(Location target) {
+    return findRecordWithHashHint(location -> location.equals(target), target.hashCode()) != null;
   }
 }
