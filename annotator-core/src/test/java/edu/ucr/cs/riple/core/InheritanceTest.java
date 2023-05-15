@@ -104,8 +104,7 @@ public class InheritanceTest extends AnnotatorBaseCoreTest {
                 null))
         .toDepth(5)
         .activateOuterLoop()
-        .setPredicate(
-            (expected, found) -> expected.testEquals(coreTestHelper.getConfig().cli, found))
+        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
         .start();
   }
 
@@ -125,8 +124,7 @@ public class InheritanceTest extends AnnotatorBaseCoreTest {
                     new OnParameter(
                         "GrandChild.java", "test.GrandChild", "run(java.lang.Object)", 0)),
                 null))
-        .setPredicate(
-            (expected, found) -> expected.testEquals(coreTestHelper.getConfig().cli, found))
+        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
         .disableBailOut()
         .toDepth(10)
         .start();
@@ -155,8 +153,7 @@ public class InheritanceTest extends AnnotatorBaseCoreTest {
                     new OnParameter("E.java", "test.E", "run(java.lang.Object)", 0),
                     new OnMethod("E.java", "test.E", "run(java.lang.Object)")),
                 null))
-        .setPredicate(
-            (expected, found) -> expected.testEquals(coreTestHelper.getConfig().cli, found))
+        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
         .disableBailOut()
         .toDepth(10)
         .start();

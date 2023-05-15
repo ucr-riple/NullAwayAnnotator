@@ -28,6 +28,7 @@ import static org.junit.Assert.fail;
 
 import edu.ucr.cs.riple.core.AnalysisMode;
 import edu.ucr.cs.riple.core.Annotator;
+import edu.ucr.cs.riple.core.CLI;
 import edu.ucr.cs.riple.core.Checker;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.Report;
@@ -443,12 +444,12 @@ public class CoreTestHelper {
    *
    * @return Context instance.
    */
-  public Context getConfig() {
+  public CLI getConfig() {
     if (context == null) {
       throw new IllegalStateException(
           "Context has not been initialized yet, can only access it after a call of start method.");
     }
-    return context;
+    return context.cli;
   }
 
   /**

@@ -118,8 +118,7 @@ public class DeepTest extends AnnotatorBaseCoreTest {
                 null))
         .toDepth(2)
         .disableBailOut()
-        .setPredicate(
-            (expected, found) -> expected.testEquals(coreTestHelper.getConfig().cli, found))
+        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
         .start();
   }
 
@@ -573,8 +572,7 @@ public class DeepTest extends AnnotatorBaseCoreTest {
                         "d_param6(java.lang.Object,java.lang.Object,java.lang.Object)",
                         2)),
                 null))
-        .setPredicate(
-            (expected, found) -> expected.testEquals(coreTestHelper.getConfig().cli, found))
+        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
         .toDepth(10)
         .start();
   }
