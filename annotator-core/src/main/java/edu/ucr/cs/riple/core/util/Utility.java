@@ -314,7 +314,7 @@ public class Utility {
       context.log.stopTimerAndCaptureBuildTime(timer);
       context.log.incrementBuildRequest();
     } catch (Exception e) {
-      throw new RuntimeException("Could not run command: " + command);
+      throw new RuntimeException("Could not run command: " + command, e);
     }
   }
 

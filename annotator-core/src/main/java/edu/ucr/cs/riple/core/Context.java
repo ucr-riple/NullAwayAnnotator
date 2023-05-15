@@ -69,7 +69,7 @@ import org.json.simple.parser.JSONParser;
  */
 public class Context {
 
-  public CLI cli;
+  public final CLI cli;
 
   /**
    * If activated, annotator will bail out from the search tree as soon as the effectiveness gets
@@ -470,6 +470,7 @@ public class Context {
         !cmd.hasOption(nonnullAnnotationsOption)
             ? ImmutableSet.of()
             : ImmutableSet.copyOf(cmd.getOptionValue(nonnullAnnotationsOption).split(","));
+    this.cli = new CLI(args);
     this.deserializer = initializeCheckerDeserializer();
     this.targetModuleInfo = new ModuleInfo(this, this.target, this.buildCommand);
   }
@@ -572,6 +573,7 @@ public class Context {
                     String.class)
                 .orElse(List.of()));
     this.log.reset();
+    this.cli = new CLI(configPath);
     this.deserializer = initializeCheckerDeserializer();
     this.targetModuleInfo = new ModuleInfo(this, this.target, this.buildCommand);
   }
