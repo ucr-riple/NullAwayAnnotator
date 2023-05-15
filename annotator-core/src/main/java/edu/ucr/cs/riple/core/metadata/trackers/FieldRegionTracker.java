@@ -27,7 +27,7 @@ package edu.ucr.cs.riple.core.metadata.trackers;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.Context;
-import edu.ucr.cs.riple.core.metadata.MetaData;
+import edu.ucr.cs.riple.core.metadata.Registry;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
@@ -37,7 +37,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /** Tracker for Fields. */
-public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
+public class FieldRegionTracker extends Registry<TrackerNode> implements RegionTracker {
 
   /** Context of the module which usages of fields are stored. */
   private final Context context;
@@ -52,8 +52,8 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
   }
 
   @Override
-  protected TrackerNode addNodeByLine(String[] values) {
-    return Utility.deserializeTrackerNode(values);
+  protected Builder<TrackerNode> getBuilder() {
+    return Utility::deserializeTrackerNode;
   }
 
   @Override
@@ -64,7 +64,7 @@ public class FieldRegionTracker extends MetaData<TrackerNode> implements RegionT
     OnField field = location.toField();
     // Add all regions where the field is assigned a new value or read.
     Set<Region> ans =
-        findNodesWithHashHint(
+        findRecordsWithHashHint(
                 candidate ->
                     candidate.calleeClass.equals(field.clazz)
                         && field.isOnFieldWithName(candidate.calleeMember),

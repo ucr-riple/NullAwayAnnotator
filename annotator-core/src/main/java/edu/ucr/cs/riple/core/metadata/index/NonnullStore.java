@@ -27,7 +27,7 @@ package edu.ucr.cs.riple.core.metadata.index;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
-import edu.ucr.cs.riple.core.metadata.MetaData;
+import edu.ucr.cs.riple.core.metadata.Registry;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.scanner.Serializer;
 
@@ -36,7 +36,7 @@ import edu.ucr.cs.riple.scanner.Serializer;
  * acknowledge these annotations and prevent annotator from annotating such elements with
  * {@code @Nullable} annotations.
  */
-public class NonnullStore extends MetaData<Location> {
+public class NonnullStore extends Registry<Location> {
 
   public NonnullStore(Config config) {
     this(config, ImmutableSet.of(config.target));
@@ -51,17 +51,17 @@ public class NonnullStore extends MetaData<Location> {
   }
 
   @Override
-  protected Location addNodeByLine(String[] values) {
-    return Location.createLocationFromArrayInfo(values);
+  protected Builder<Location> getBuilder() {
+    return Location::createLocationFromArrayInfo;
   }
 
   /**
    * Returns true if the element at the given location has an explicit {@code @Nonnull} annotation.
    *
-   * @param location Location of the given element.
+   * @param target Location of the given element.
    * @return true, if the element at the given location has an explicit {@code @Nonnull} annotation.
    */
-  public boolean hasExplicitNonnullAnnotation(Location location) {
-    return contents.values().stream().anyMatch(l -> l.equals(location));
+  public boolean hasExplicitNonnullAnnotation(Location target) {
+    return findRecordWithHashHint(location -> location.equals(target), target.hashCode()) != null;
   }
 }
