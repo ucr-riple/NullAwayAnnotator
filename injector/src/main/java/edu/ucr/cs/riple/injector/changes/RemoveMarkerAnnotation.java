@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 University of California, Riverside.
+ * Copyright (c) 2023 University of California, Riverside.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,25 +23,25 @@
 package edu.ucr.cs.riple.injector.changes;
 
 import com.github.javaparser.Range;
-import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import edu.ucr.cs.riple.injector.location.Location;
-import edu.ucr.cs.riple.injector.modifications.Insertion;
+import edu.ucr.cs.riple.injector.modifications.Deletion;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.util.Objects;
+import java.util.Optional;
 import javax.annotation.Nullable;
 
 /**
- * Used to add <a
+ * Used to remove <a
  * href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-9.html#jls-MarkerAnnotation">Marker
  * Annotation</a> on elements in source code.
  */
-public class AddMarkerAnnotation extends AnnotationChange implements AddAnnotation {
+public class RemoveMarkerAnnotation extends AnnotationChange implements RemoveAnnotation {
 
-  public AddMarkerAnnotation(Location location, String annotation) {
+  public RemoveMarkerAnnotation(Location location, String annotation) {
     super(location, new Name(annotation));
   }
 
@@ -49,25 +49,19 @@ public class AddMarkerAnnotation extends AnnotationChange implements AddAnnotati
   @Nullable
   public <T extends NodeWithAnnotations<?> & NodeWithRange<?>>
       Modification computeTextModificationOn(T node) {
-    if (node.getRange().isEmpty()) {
-      return null;
-    }
-    Range range = node.getRange().get();
-    NodeList<AnnotationExpr> annotations = node.getAnnotations();
+    // We only insert annotations with their simple name, therefore, we should only remove
+    // the annotation if it matches with the simple name (otherwise, the annotation was not injected
+    // by the core module request and should not be touched).
     AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationName.simpleName);
-
-    // Check if annot already exists.
-    boolean annotAlreadyExists =
-        annotations.stream().anyMatch(annot -> annot.equals(annotationExpr));
-    if (annotAlreadyExists) {
-      return null;
+    for (AnnotationExpr expr : node.getAnnotations()) {
+      if (expr.equals(annotationExpr)) {
+        Optional<Range> annotRange = expr.getRange();
+        return annotRange
+            .map(value -> new Deletion(expr.toString(), value.begin, value.end))
+            .orElse(null);
+      }
     }
-    return new Insertion(annotationExpr.toString(), range.begin);
-  }
-
-  @Override
-  public RemoveAnnotation getReverse() {
-    return new RemoveMarkerAnnotation(location, annotationName.fullName);
+    return null;
   }
 
   @Override
@@ -75,15 +69,16 @@ public class AddMarkerAnnotation extends AnnotationChange implements AddAnnotati
     if (this == o) {
       return true;
     }
-    if (!(o instanceof AddMarkerAnnotation)) {
+    if (!(o instanceof RemoveMarkerAnnotation)) {
       return false;
     }
-    AddMarkerAnnotation that = (AddMarkerAnnotation) o;
-    return location.equals(that.location) && annotationName.equals(that.annotationName);
+    RemoveMarkerAnnotation other = (RemoveMarkerAnnotation) o;
+    return Objects.equals(location, other.location)
+        && Objects.equals(annotationName, other.annotationName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash("ADD", location, annotationName);
+    return Objects.hash("REMOVE-MARKER", location, annotationName);
   }
 }

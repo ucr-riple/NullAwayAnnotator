@@ -119,7 +119,7 @@ public class Node {
     // Add class initialization region, if a fix is modifying a parameter on constructor.
     this.tree.stream()
         .filter(fix -> fix.isOnParameter() && fix.isModifyingConstructor())
-        .forEach(fix -> regions.add(new Region(fix.change.location.clazz, "null")));
+        .forEach(fix -> regions.add(new Region(fix.change.getLocation().clazz, "null")));
   }
 
   /**

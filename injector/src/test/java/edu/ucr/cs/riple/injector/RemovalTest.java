@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.injector;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
+import edu.ucr.cs.riple.injector.changes.RemoveMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
@@ -57,7 +57,7 @@ public class RemovalTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnMethod("Foo.java", "test.Foo", "test(java.lang.Object)"),
                 "javax.annotation.Nullable"))
         .start();
@@ -82,7 +82,7 @@ public class RemovalTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnParameter("Foo.java", "test.Foo", "test(java.lang.Object)", 0),
                 "javax.annotation.Nullable"))
         .start();
@@ -110,7 +110,7 @@ public class RemovalTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnParameter("Foo.java", "test.Foo", "test(java.lang.Object)", 0),
                 "javax.annotation.Nullable"));
     assertThrows(AssertionError.class, () -> injectorTestHelper.start());
@@ -137,7 +137,7 @@ public class RemovalTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnField("Foo.java", "test.Foo", Collections.singleton("f")),
                 "javax.annotation.Nullable"))
         .start();
@@ -162,7 +162,7 @@ public class RemovalTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnMethod("Test.java", "edu.ucr.Test", "test()"), "edu.custom.Annot"))
         .start();
   }
@@ -186,7 +186,7 @@ public class RemovalTest extends BaseInjectorTest {
             "   public void foo(@AnnotationWithNonAlphanumericSuffix$$$$_ Object o) { }",
             "}")
         .addChanges(
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnParameter("Test.java", "edu.ucr.Test", "foo(java.lang.Object)", 0),
                 "javax.annotation.Nullable"))
         .start();

@@ -27,7 +27,6 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.ArrayInitializerExpr;
 import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
@@ -37,6 +36,7 @@ import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Insertion;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.modifications.Replacement;
+import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
@@ -46,7 +46,8 @@ import javax.annotation.Nullable;
  * Element Annotations</a> with only one member on elements in source code. If the annotation
  * already exists, it can be collapsed into a single annotation with multiple elements if requested.
  */
-public class AddSingleElementAnnotation extends AddAnnotation {
+public class AddSingleElementAnnotation extends AnnotationChange implements AddAnnotation {
+
   /** Argument of the annotation. */
   private final String argument;
 
@@ -58,7 +59,7 @@ public class AddSingleElementAnnotation extends AddAnnotation {
 
   public AddSingleElementAnnotation(
       Location location, String annotation, String argument, boolean repeatable) {
-    super(location, annotation);
+    super(location, new Name(annotation));
     Preconditions.checkArgument(
         argument != null && !argument.equals(""),
         "argument cannot be null or empty, use AddAnnotation instead.");
@@ -68,7 +69,8 @@ public class AddSingleElementAnnotation extends AddAnnotation {
 
   @Override
   @Nullable
-  public <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Modification visit(T node) {
+  public <T extends NodeWithAnnotations<?> & NodeWithRange<?>>
+      Modification computeTextModificationOn(T node) {
     if (node.getRange().isEmpty()) {
       return null;
     }
@@ -79,8 +81,8 @@ public class AddSingleElementAnnotation extends AddAnnotation {
         node.getAnnotations().stream()
             .anyMatch(
                 annot -> {
-                  if (!(annot.getNameAsString().equals(annotation)
-                      || annot.getNameAsString().equals(annotationSimpleName))) {
+                  if (!(annot.getNameAsString().equals(annotationName.fullName)
+                      || annot.getNameAsString().equals(annotationName.simpleName))) {
                     return false;
                   }
                   if (!(annot instanceof SingleMemberAnnotationExpr)) {
@@ -98,7 +100,7 @@ public class AddSingleElementAnnotation extends AddAnnotation {
     }
 
     Optional<AnnotationExpr> annotationWithSameNameExists =
-        node.getAnnotationByName(annotationSimpleName);
+        node.getAnnotationByName(annotationName.simpleName);
     if (annotationWithSameNameExists.isEmpty()) {
       // No annotation with this name exists, add it directly.
       return addAnnotationExpressionOnNode(argumentExp, range);
@@ -152,7 +154,34 @@ public class AddSingleElementAnnotation extends AddAnnotation {
    */
   private Insertion addAnnotationExpressionOnNode(Expression argument, Range range) {
     AnnotationExpr annotationExpr =
-        new SingleMemberAnnotationExpr(new Name(annotationSimpleName), argument);
+        new SingleMemberAnnotationExpr(
+            new com.github.javaparser.ast.expr.Name(annotationName.simpleName), argument);
     return new Insertion(annotationExpr.toString(), range.begin);
+  }
+
+  @Override
+  public RemoveAnnotation getReverse() {
+    throw new UnsupportedOperationException(
+        "Annotation deletion for single element annotations is not supported yet.");
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof AddSingleElementAnnotation)) {
+      return false;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
+    AddSingleElementAnnotation that = (AddSingleElementAnnotation) o;
+    return repeatable == that.repeatable && Objects.equals(argument, that.argument);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), argument, repeatable);
   }
 }

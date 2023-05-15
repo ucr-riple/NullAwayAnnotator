@@ -27,8 +27,9 @@ import static java.util.stream.Collectors.groupingBy;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
+import edu.ucr.cs.riple.injector.changes.ASTChange;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
-import edu.ucr.cs.riple.injector.changes.Change;
+import edu.ucr.cs.riple.injector.changes.AnnotationChange;
 import edu.ucr.cs.riple.injector.changes.ChangeVisitor;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import edu.ucr.cs.riple.injector.modifications.Modification;
@@ -49,11 +50,11 @@ public class Injector {
    * @param changes Set of changes.
    * @return Offset changes of source file.
    */
-  public <T extends Change> Set<FileOffsetStore> start(Set<T> changes) {
+  public <T extends ASTChange> Set<FileOffsetStore> start(Set<T> changes) {
     // Start method does not support addition and deletion on same element. Should be split into
     // call for addition and deletion separately.
-    Map<Path, List<Change>> map =
-        changes.stream().collect(groupingBy(change -> change.location.path));
+    Map<Path, List<ASTChange>> map =
+        changes.stream().collect(groupingBy(change -> change.getLocation().path));
     Set<FileOffsetStore> offsets = new HashSet<>();
     map.forEach(
         (path, changeList) -> {
@@ -66,16 +67,18 @@ public class Injector {
           ChangeVisitor visitor = new ChangeVisitor(tree);
           Set<Modification> modifications = new HashSet<>();
           Set<ImportDeclaration> imports = new HashSet<>();
-          for (Change change : changeList) {
+          for (ASTChange change : changeList) {
             try {
               Modification modification = visitor.computeModification(change);
               if (modification != null) {
                 modifications.add(modification);
                 if (change instanceof AddAnnotation) {
-                  if (Helper.getPackageName(change.annotation) != null) {
+                  String annotationFullName = ((AnnotationChange) change).annotationName.fullName;
+                  if (Helper.getPackageName(annotationFullName) != null) {
                     ImportDeclaration importDeclaration =
-                        StaticJavaParser.parseImport("import " + change.annotation + ";");
-                    if (treeRequiresImportDeclaration(tree, importDeclaration, change.annotation)) {
+                        StaticJavaParser.parseImport("import " + annotationFullName + ";");
+                    if (treeRequiresImportDeclaration(
+                        tree, importDeclaration, annotationFullName)) {
                       imports.add(importDeclaration);
                     }
                   }
