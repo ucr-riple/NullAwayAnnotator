@@ -54,7 +54,7 @@ public class BasicEvaluator extends AbstractEvaluator {
   protected void initializeFixGraph(ImmutableSet<Report> reports) {
     super.initializeFixGraph(reports);
     reports.stream()
-        .filter(input -> input.requiresFurtherProcess(context.cli))
+        .filter(input -> input.requiresFurtherProcess(context.config))
         .forEach(
             report -> {
               Fix root = report.root;

@@ -28,9 +28,8 @@ import static org.junit.Assert.fail;
 
 import edu.ucr.cs.riple.core.AnalysisMode;
 import edu.ucr.cs.riple.core.Annotator;
-import edu.ucr.cs.riple.core.CLI;
 import edu.ucr.cs.riple.core.Checker;
-import edu.ucr.cs.riple.core.Context;
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.injector.Helper;
@@ -79,7 +78,7 @@ public class CoreTestHelper {
   /** Analysis mode. */
   private AnalysisMode mode = AnalysisMode.LOCAL;
   /** Annotator context. */
-  private Context context;
+  private Config config;
   /**
    * Path to the expected output directory. If null, changes on source files will not be checked.
    */
@@ -218,11 +217,11 @@ public class CoreTestHelper {
     Path configPath = outDirPath.resolve("context.json");
     checkSourcePackages();
     makeAnnotatorConfigFile(configPath);
-    context = new Context(configPath);
-    Annotator annotator = new Annotator(context);
+    Config config = new Config(configPath);
+    Annotator annotator = new Annotator(config);
     annotator.start();
     if (predicate == null) {
-      predicate = DEFAULT_PREDICATE.create(context);
+      predicate = DEFAULT_PREDICATE.create(config);
     }
     compare(new ArrayList<>(annotator.cache.reports()));
     checkBuildsStatus();
@@ -234,7 +233,7 @@ public class CoreTestHelper {
     List<Module> modules = projectBuilder.getModules();
     if (mode.equals(AnalysisMode.STRICT) && modules.size() > 1) {
       // Build downstream dependencies.
-      Utility.executeCommand(context.downstreamDependenciesBuildCommand);
+      Utility.executeCommand(config.downstreamDependenciesBuildCommand);
       // Verify no error is reported in downstream dependencies.
       for (int i = 1; i < modules.size(); i++) {
         Path path = outDirPath.resolve(i + "").resolve("errors.tsv");
@@ -254,7 +253,7 @@ public class CoreTestHelper {
     }
     if (suppressRemainingErrors) {
       // Check no error will be reported in Target module
-      Utility.executeCommand(context.buildCommand);
+      Utility.executeCommand(config.buildCommand);
       Path path = outDirPath.resolve("0").resolve("errors.tsv");
       try {
         List<String> lines = Files.readAllLines(path);
@@ -369,7 +368,7 @@ public class CoreTestHelper {
    * @param configPath Path to the context file.
    */
   public void makeAnnotatorConfigFile(Path configPath) {
-    Context.Builder builder = new Context.Builder();
+    Config.Builder builder = new Config.Builder();
     final int[] id = {0};
     builder.configPaths =
         projectBuilder.getModules().stream()
@@ -444,12 +443,12 @@ public class CoreTestHelper {
    *
    * @return Context instance.
    */
-  public CLI getConfig() {
-    if (context == null) {
+  public Config getConfig() {
+    if (config == null) {
       throw new IllegalStateException(
           "Context has not been initialized yet, can only access it after a call of start method.");
     }
-    return context.cli;
+    return config;
   }
 
   /**
@@ -459,26 +458,26 @@ public class CoreTestHelper {
   static class DEFAULT_PREDICATE implements BiPredicate<TReport, Report> {
 
     /** The context. */
-    private final Context context;
+    private final Config config;
 
-    private DEFAULT_PREDICATE(Context context) {
-      this.context = context;
+    private DEFAULT_PREDICATE(Config config) {
+      this.config = config;
     }
 
     @Override
     public boolean test(TReport expected, Report found) {
       return expected.root.change.getLocation().equals(found.root.change.getLocation())
-          && expected.getExpectedValue() == found.getOverallEffect(context.cli);
+          && expected.getExpectedValue() == found.getOverallEffect(config);
     }
 
     /**
      * Creates a new instance of {@link DEFAULT_PREDICATE}.
      *
-     * @param context the context
+     * @param config Annotator config.
      * @return the default predicate
      */
-    public static DEFAULT_PREDICATE create(Context context) {
-      return new DEFAULT_PREDICATE(context);
+    public static DEFAULT_PREDICATE create(Config config) {
+      return new DEFAULT_PREDICATE(config);
     }
   }
 }

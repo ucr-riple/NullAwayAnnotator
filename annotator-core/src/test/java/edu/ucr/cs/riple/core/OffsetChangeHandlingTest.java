@@ -76,7 +76,8 @@ public class OffsetChangeHandlingTest {
     Utility.runTestWithMockedBuild(
         root,
         () -> {
-          context = new Context(configPath);
+          Config config = new Config(configPath);
+          context = new Context(config);
           injector = new PhysicalInjector(context);
           try {
             Files.copy(inputPath, root.resolve("benchmark.java"));

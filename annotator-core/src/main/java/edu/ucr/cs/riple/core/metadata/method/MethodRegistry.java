@@ -54,7 +54,7 @@ public class MethodRegistry extends Registry<MethodRecord> {
   private Set<String> declaredClasses;
 
   public MethodRegistry(Context context) {
-    this(ImmutableSet.of(context.target));
+    this(ImmutableSet.of(context.config.target));
   }
 
   public MethodRegistry(ImmutableSet<ModuleConfiguration> modules) {

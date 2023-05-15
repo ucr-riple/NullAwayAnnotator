@@ -126,12 +126,12 @@ public class ConfigurationTest {
     runTestWithMockedBuild(
         testDir,
         () -> {
-          Context context = makeConfigWithFlags(requiredFlagsCli);
-          assertEquals("./gradlew compileJava", context.buildCommand);
-          assertEquals(testDir, context.globalDir);
-          assertEquals("edu.ucr.Initializer", context.initializerAnnot);
-          assertEquals(Paths.get("0nullaway.xml"), context.target.nullawayConfig);
-          assertEquals(Paths.get("0scanner.xml"), context.target.scannerConfig);
+          Config config = makeConfigWithFlags(requiredFlagsCli);
+          assertEquals("./gradlew compileJava", config.buildCommand);
+          assertEquals(testDir, config.globalDir);
+          assertEquals("edu.ucr.Initializer", config.initializerAnnot);
+          assertEquals(Paths.get("0nullaway.xml"), config.target.nullawayConfig);
+          assertEquals(Paths.get("0scanner.xml"), config.target.scannerConfig);
         });
   }
 
@@ -159,16 +159,15 @@ public class ConfigurationTest {
         () -> {
           List<CLIFlag> flags = new ArrayList<>(requiredFlagsCli);
           flags.addAll(requiredDownsStreamDependencyFlagsCli);
-          Context context = makeConfigWithFlags(flags);
-          assertEquals("./gradlew compileJava", context.buildCommand);
-          assertEquals(testDir, context.globalDir);
-          assertEquals("edu.ucr.Initializer", context.initializerAnnot);
-          assertEquals(Paths.get("0nullaway.xml"), context.target.nullawayConfig);
-          assertEquals(Paths.get("0scanner.xml"), context.target.scannerConfig);
-          assertEquals(
-              testDir.resolve("library-model.tsv"), context.nullawayLibraryModelLoaderPath);
-          assertTrue(context.downStreamDependenciesAnalysisActivated);
-          assertEquals("./gradlew :dep:compileJava", context.downstreamDependenciesBuildCommand);
+          Config config = makeConfigWithFlags(flags);
+          assertEquals("./gradlew compileJava", config.buildCommand);
+          assertEquals(testDir, config.globalDir);
+          assertEquals("edu.ucr.Initializer", config.initializerAnnot);
+          assertEquals(Paths.get("0nullaway.xml"), config.target.nullawayConfig);
+          assertEquals(Paths.get("0scanner.xml"), config.target.scannerConfig);
+          assertEquals(testDir.resolve("library-model.tsv"), config.nullawayLibraryModelLoaderPath);
+          assertTrue(config.downStreamDependenciesAnalysisActivated);
+          assertEquals("./gradlew :dep:compileJava", config.downstreamDependenciesBuildCommand);
           // Compute expected downstream context paths for nullaway and scanner context file paths
           // for
           // downstream dependencies.
@@ -181,7 +180,7 @@ public class ConfigurationTest {
           // for
           // downstream dependencies.
           ImmutableSet<Pair<Path, Path>> actualDownstreamConfigPaths =
-              context.downstreamInfo.stream()
+              config.downstreamInfo.stream()
                   .map(
                       moduleInfo -> new Pair<>(moduleInfo.nullawayConfig, moduleInfo.scannerConfig))
                   .collect(ImmutableSet.toImmutableSet());
@@ -224,17 +223,17 @@ public class ConfigurationTest {
     runTestWithMockedBuild(
         testDir,
         () -> {
-          Context context;
+          Config config;
           // Check mode downstream dependency off.
-          context = makeConfigWithFlags(requiredFlagsCli);
-          assertEquals(AnalysisMode.LOCAL, context.mode);
+          config = makeConfigWithFlags(requiredFlagsCli);
+          assertEquals(AnalysisMode.LOCAL, config.mode);
 
           List<CLIFlag> baseFlags = new ArrayList<>(requiredFlagsCli);
           baseFlags.addAll(requiredDownsStreamDependencyFlagsCli);
 
           // Check default mode downstream dependency on.
-          context = makeConfigWithFlags(baseFlags);
-          assertEquals(AnalysisMode.LOWER_BOUND, context.mode);
+          config = makeConfigWithFlags(baseFlags);
+          assertEquals(AnalysisMode.LOWER_BOUND, config.mode);
 
           Map<String, AnalysisMode> modes =
               Map.of(
@@ -252,7 +251,7 @@ public class ConfigurationTest {
                 CLIFlag flag = new CLIFlagWithValue("am", flagValue);
                 ArrayList<CLIFlag> flags = new ArrayList<>(baseFlags);
                 flags.add(flag);
-                Context c = makeConfigWithFlags(flags);
+                Config c = makeConfigWithFlags(flags);
                 assertEquals(expectedMode, c.mode);
               });
         });
@@ -263,7 +262,7 @@ public class ConfigurationTest {
     runTestWithMockedBuild(
         testDir,
         () -> {
-          Context context;
+          Config context;
 
           List<CLIFlag> baseFlags = new ArrayList<>(requiredFlagsCli);
           baseFlags.addAll(requiredDownsStreamDependencyFlagsCli);
@@ -287,7 +286,7 @@ public class ConfigurationTest {
    * @param flags Flags to create the context object.
    * @return Context instance.
    */
-  private Context makeConfigWithFlags(List<CLIFlag> flags) {
+  private Config makeConfigWithFlags(List<CLIFlag> flags) {
     IntStream.of(0, 5)
         .forEach(
             id -> {
@@ -302,7 +301,7 @@ public class ConfigurationTest {
                 throw new RuntimeException(e);
               }
             });
-    return new Context(flags.stream().flatMap(CLIFlag::toStream).toArray(String[]::new));
+    return new Config(flags.stream().flatMap(CLIFlag::toStream).toArray(String[]::new));
   }
 
   /**
@@ -330,7 +329,7 @@ public class ConfigurationTest {
     }
   }
 
-  /** Container class for CLI Flag. */
+  /** Container class for Config Flag. */
   private static class CLIFlag {
     /** Flag name; */
     protected final String flag;
@@ -344,7 +343,7 @@ public class ConfigurationTest {
     }
   }
 
-  /** Container class for CLI Flag with value. */
+  /** Container class for Config Flag with value. */
   private static class CLIFlagWithValue extends CLIFlag {
     /** Flag Value. */
     private final Object value;

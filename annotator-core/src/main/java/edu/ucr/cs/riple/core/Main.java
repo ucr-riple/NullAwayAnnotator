@@ -33,16 +33,16 @@ public class Main {
    * Starting point.
    *
    * @param args if flag '--path' is found, all configurations will be set up based on the given
-   *     json file, otherwise they will be set up according to the set of received cli arguments.
+   *     json file, otherwise they will be set up according to the set of received config arguments.
    */
   public static void main(String[] args) {
-    Context context;
+    Config config;
     if (args.length == 2 && args[0].equals("--path")) {
-      context = new Context(Paths.get(args[1]));
+      config = new Config(Paths.get(args[1]));
     } else {
-      context = new Context(args);
+      config = new Config(args);
     }
-    Annotator annotator = new Annotator(context);
+    Annotator annotator = new Annotator(config);
     annotator.start();
   }
 }

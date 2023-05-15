@@ -75,7 +75,8 @@ public class DownstreamImpactCacheImpl
                 methodNode ->
                     new DownstreamImpact(
                         new Fix(
-                            new AddMarkerAnnotation(methodNode.location, context.cli.nullableAnnot),
+                            new AddMarkerAnnotation(
+                                methodNode.location, context.config.nullableAnnot),
                             "null",
                             true)))
             .collect(toImmutableMap(Impact::toLocation, Function.identity())));
@@ -99,7 +100,8 @@ public class DownstreamImpactCacheImpl
             .map(
                 downstreamImpact ->
                     new Fix(
-                        new AddMarkerAnnotation(downstreamImpact.toMethod(), context.nullableAnnot),
+                        new AddMarkerAnnotation(
+                            downstreamImpact.toMethod(), context.config.nullableAnnot),
                         "null",
                         false))
             .collect(ImmutableSet.toImmutableSet());

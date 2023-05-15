@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.core.util;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.CLI;
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Error;
@@ -73,20 +73,20 @@ import org.w3c.dom.Element;
 public class Utility {
 
   /**
-   * Executes a shell command in a subprocess. If {@link Context#redirectBuildOutputToStdErr} is
+   * Executes a shell command in a subprocess. If {@link Config#redirectBuildOutputToStdErr} is
    * activated, it will write the command's output in std error.
    *
-   * @param cli Annotator configuration.
+   * @param config Annotator configuration.
    * @param command The shell command to run.
    */
-  public static void executeCommand(CLI cli, String command) {
+  public static void executeCommand(Config config, String command) {
     try {
       Process p = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
       BufferedReader reader =
           new BufferedReader(new InputStreamReader(p.getErrorStream(), Charset.defaultCharset()));
       String line;
       while ((line = reader.readLine()) != null) {
-        if (cli.redirectBuildOutputToStdErr) {
+        if (config.redirectBuildOutputToStdErr) {
           System.err.println(line);
         }
       }
@@ -104,18 +104,18 @@ public class Utility {
    */
   @SuppressWarnings("unchecked")
   public static void writeReports(Context context, ImmutableSet<Report> reports) {
-    Path reportsPath = context.globalDir.resolve("reports.json");
+    Path reportsPath = context.config.globalDir.resolve("reports.json");
     JSONObject result = new JSONObject();
     JSONArray reportsJson = new JSONArray();
     for (Report report : reports) {
       JSONObject reportJson = report.root.getJson();
       reportJson.put("LOCAL EFFECT", report.localEffect);
-      reportJson.put("OVERALL EFFECT", report.getOverallEffect(context.cli));
+      reportJson.put("OVERALL EFFECT", report.getOverallEffect(context.config));
       reportJson.put("Upper Bound EFFECT", report.getUpperBoundEffectOnDownstreamDependencies());
       reportJson.put("Lower Bound EFFECT", report.getLowerBoundEffectOnDownstreamDependencies());
-      reportJson.put("FINISHED", !report.requiresFurtherProcess(context.cli));
+      reportJson.put("FINISHED", !report.requiresFurtherProcess(context.config));
       JSONArray followUps = new JSONArray();
-      if (context.chain && report.localEffect < 1) {
+      if (context.config.chain && report.localEffect < 1) {
         followUps.addAll(report.tree.stream().map(Fix::getJson).collect(Collectors.toList()));
       }
       reportJson.put("TREE", followUps);
@@ -215,31 +215,31 @@ public class Utility {
    * Activates/Deactivates {@link AnnotatorScanner} features by updating the {@link
    * edu.ucr.cs.riple.scanner.Config} in {@code XML} format for the given modules.
    *
-   * @param cli Annotator configuration.
+   * @param config Annotator configuration.
    * @param modules Immutable set of modules that their configuration files need to be updated.
    * @param activation activation flag for all features of the scanner.
    */
   public static void setScannerCheckerActivation(
-      CLI cli, ImmutableSet<ModuleConfiguration> modules, boolean activation) {
-    modules.forEach(info -> setScannerCheckerActivation(cli, info, activation));
+      Config config, ImmutableSet<ModuleConfiguration> modules, boolean activation) {
+    modules.forEach(info -> setScannerCheckerActivation(config, info, activation));
   }
 
   /**
    * Activates/Deactivates {@link AnnotatorScanner} features by updating the {@link
    * edu.ucr.cs.riple.scanner.Config} in {@code XML} format for the given module.
    *
-   * @param cli Annotator configuration.
+   * @param config Annotator configuration.
    * @param info module that its configuration file need to be updated.
    * @param activation activation flag for all features of the scanner.
    */
   public static void setScannerCheckerActivation(
-      CLI cli, ModuleConfiguration info, boolean activation) {
+      Config config, ModuleConfiguration info, boolean activation) {
     ScannerConfigWriter writer = new ScannerConfigWriter();
     writer
         .setSerializationActivation(activation)
-        .addGeneratedCodeDetectors(cli.generatedCodeDetectors)
+        .addGeneratedCodeDetectors(config.generatedCodeDetectors)
         .setOutput(info.dir)
-        .setNonnullAnnotations(cli.getNonnullAnnotations())
+        .setNonnullAnnotations(config.getNonnullAnnotations())
         .writeAsXML(info.scannerConfig);
   }
 
@@ -264,7 +264,7 @@ public class Utility {
    * @param context Annotator context.
    */
   public static void buildDownstreamDependencies(Context context) {
-    context.downstreamInfo.forEach(
+    context.config.downstreamInfo.forEach(
         module -> {
           FixSerializationConfig.Builder nullAwayConfig =
               new FixSerializationConfig.Builder()
@@ -273,7 +273,7 @@ public class Utility {
                   .setFieldInitInfo(false);
           nullAwayConfig.writeAsXML(module.nullawayConfig.toString());
         });
-    build(context, context.cli.downstreamDependenciesBuildCommand);
+    build(context, context.config.downstreamDependenciesBuildCommand);
   }
 
   /**
@@ -298,7 +298,7 @@ public class Utility {
             .setOutputDirectory(context.target.dir.toString())
             .setFieldInitInfo(initSerializationEnabled);
     nullAwayConfig.writeAsXML(context.target.nullawayConfig.toString());
-    build(context, context.buildCommand);
+    build(context, context.config.buildCommand);
   }
 
   /**
@@ -310,7 +310,7 @@ public class Utility {
   public static void build(Context context, String command) {
     try {
       long timer = context.log.startTimer();
-      Utility.executeCommand(context.cli, command);
+      Utility.executeCommand(context.config, command);
       context.log.stopTimerAndCaptureBuildTime(timer);
       context.log.incrementBuildRequest();
     } catch (Exception e) {
@@ -347,7 +347,7 @@ public class Utility {
    * @param context Annotator context.
    */
   public static void writeLog(Context context) {
-    Path path = context.globalDir.resolve("log.txt");
+    Path path = context.config.globalDir.resolve("log.txt");
     try {
       Files.write(path, Collections.singleton(context.log.toString()), Charset.defaultCharset());
     } catch (IOException exception) {

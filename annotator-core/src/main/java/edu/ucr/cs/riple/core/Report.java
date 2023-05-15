@@ -154,15 +154,15 @@ public class Report {
    * effectiveness with all the corresponding fixes to reach that effectiveness, therefore only the
    * locations are compared in trees.
    *
-   * @param cli Annotator Configuration instance.
+   * @param config Annotator Configuration instance.
    * @param found Produced report, mainly coming from tests.
    * @return true, if two reports are equal (same effectiveness and all locations)
    */
-  public boolean testEquals(CLI cli, Report found) {
+  public boolean testEquals(Config config, Report found) {
     if (!this.root.equals(found.root)) {
       return false;
     }
-    if (this.getOverallEffect(cli) != found.getOverallEffect(cli)) {
+    if (this.getOverallEffect(config) != found.getOverallEffect(config)) {
       return false;
     }
     this.tree.add(this.root);
@@ -215,11 +215,11 @@ public class Report {
    * Returns the overall effect of applying fix tree associated to this report according to {@link
    * AnalysisMode}.
    *
-   * @param cli Annotator configuration instance.
+   * @param config Annotator configuration instance.
    * @return Overall effect ot applying the fix tree.
    */
-  public int getOverallEffect(CLI cli) {
-    AnalysisMode mode = cli.mode;
+  public int getOverallEffect(Config config) {
+    AnalysisMode mode = config.mode;
     if (mode.equals(AnalysisMode.LOCAL)) {
       return this.localEffect;
     }
@@ -251,10 +251,10 @@ public class Report {
    * Checks if the report requires further investigation. If a fix is suggested from downstream
    * dependencies, it should still be included the next cycle.
    *
-   * @param cli Annotator Configuration instance.
+   * @param config Annotator Configuration instance.
    * @return true, if report needs further investigation.
    */
-  public boolean requiresFurtherProcess(CLI cli) {
+  public boolean requiresFurtherProcess(Config config) {
     if (!hasBeenProcessedOnce) {
       // report has not been processed.
       return true;
@@ -270,7 +270,7 @@ public class Report {
       // no change in the tree structure.
       return false;
     }
-    return !cli.bailout || localEffect > 0;
+    return !config.bailout || localEffect > 0;
   }
 
   /**

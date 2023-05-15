@@ -25,7 +25,7 @@
 package edu.ucr.cs.riple.core.metadata.trackers;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.CLI;
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.trackers.generatedcode.GeneratedRegionTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.generatedcode.LombokTracker;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
@@ -43,7 +43,7 @@ public class CompoundTracker implements RegionTracker {
 
   private final ImmutableSet<GeneratedRegionTracker> generatedRegionsTrackers;
 
-  public CompoundTracker(CLI cli, ModuleInfo moduleInfo) {
+  public CompoundTracker(Config config, ModuleInfo moduleInfo) {
     MethodRegionTracker methodRegionTracker = new MethodRegionTracker(moduleInfo);
     this.trackers =
         ImmutableSet.of(
@@ -52,7 +52,7 @@ public class CompoundTracker implements RegionTracker {
             new ParameterRegionTracker(moduleInfo, methodRegionTracker));
     ImmutableSet.Builder<GeneratedRegionTracker> generatedRegionTrackerBuilder =
         new ImmutableSet.Builder<>();
-    if (cli.generatedCodeDetectors.contains(SourceType.LOMBOK)) {
+    if (config.generatedCodeDetectors.contains(SourceType.LOMBOK)) {
       generatedRegionTrackerBuilder.add(new LombokTracker(moduleInfo, methodRegionTracker));
     }
     this.generatedRegionsTrackers = generatedRegionTrackerBuilder.build();

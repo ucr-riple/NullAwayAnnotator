@@ -53,7 +53,9 @@ public class DownstreamDependencySupplier extends AbstractSupplier {
   private final RegionTracker tracker;
 
   public DownstreamDependencySupplier(Context context) {
-    super(context, new ModuleInfo(context, context.downstreamInfo, context.buildCommand));
+    super(
+        context,
+        new ModuleInfo(context, context.config.downstreamInfo, context.config.buildCommand));
     this.tracker = new MethodRegionTracker(moduleInfo);
   }
 
@@ -75,7 +77,7 @@ public class DownstreamDependencySupplier extends AbstractSupplier {
   @Override
   public AbstractConflictGraphProcessor getGraphProcessor() {
     CompilerRunner runner = () -> Utility.buildDownstreamDependencies(context);
-    return context.useParallelGraphProcessor
+    return context.config.useParallelGraphProcessor
         ? new ParallelConflictGraphProcessor(context, runner, this, tracker)
         : new SequentialConflictGraphProcessor(context, runner, this);
   }

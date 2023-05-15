@@ -25,7 +25,7 @@
 package edu.ucr.cs.riple.core.tools;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.CLI;
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
@@ -84,7 +84,7 @@ public class TReport extends Report {
   }
 
   @Override
-  public int getOverallEffect(CLI cli) {
+  public int getOverallEffect(Config config) {
     return expectedValue;
   }
 }

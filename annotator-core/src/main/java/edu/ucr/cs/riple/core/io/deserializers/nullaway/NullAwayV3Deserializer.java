@@ -137,7 +137,7 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
                 // skip if element has explicit nonnull annotation.
                 ? null
                 : new Fix(
-                    new AddMarkerAnnotation(nonnullTarget, context.nullableAnnot),
+                    new AddMarkerAnnotation(nonnullTarget, context.config.nullableAnnot),
                     errorType,
                     true));
     return createError(
@@ -208,7 +208,8 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
               }
               return new Fix(
                   new AddMarkerAnnotation(
-                      extendVariableList(locationOnField, moduleInfo), context.nullableAnnot),
+                      extendVariableList(locationOnField, moduleInfo),
+                      context.config.nullableAnnot),
                   Error.METHOD_INITIALIZER_ERROR,
                   true);
             })

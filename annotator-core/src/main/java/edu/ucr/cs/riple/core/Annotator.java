@@ -64,9 +64,12 @@ public class Annotator {
   /** Reports cache. */
   public final ReportCache cache;
 
-  public Annotator(Context context) {
-    this.context = context;
-    this.cache = new ReportCache(context.cli);
+  public final Config config;
+
+  public Annotator(Config config) {
+    this.config = config;
+    this.context = new Context(config);
+    this.cache = new ReportCache(config);
     this.injector = new PhysicalInjector(context);
   }
 
@@ -99,7 +102,7 @@ public class Annotator {
     FieldInitializationStore fieldInitializationStore = new FieldInitializationStore(context);
     Set<AddAnnotation> initializers =
         fieldInitializationStore.findInitializers(uninitializedFields).stream()
-            .map(onMethod -> new AddMarkerAnnotation(onMethod, context.initializerAnnot))
+            .map(onMethod -> new AddMarkerAnnotation(onMethod, context.config.initializerAnnot))
             .collect(Collectors.toSet());
     this.injector.injectAnnotations(initializers);
   }
@@ -114,30 +117,30 @@ public class Annotator {
     // result in each iteration, therefore we perform the analysis only once and reuse it in each
     // iteration.
     DownstreamImpactCache downstreamImpactCache =
-        context.downStreamDependenciesAnalysisActivated
+        config.downStreamDependenciesAnalysisActivated
             ? new DownstreamImpactCacheImpl(context)
             : new VoidDownstreamImpactCache();
     downstreamImpactCache.analyzeDownstreamDependencies();
     TargetModuleCache targetModuleCache = new TargetModuleCache();
 
-    if (context.inferenceActivated) {
+    if (config.inferenceActivated) {
       // Outer loop starts.
       while (cache.isUpdated()) {
         executeNextIteration(targetModuleCache, downstreamImpactCache);
-        if (context.disableOuterLoop) {
+        if (config.disableOuterLoop) {
           break;
         }
       }
 
       // Perform once last iteration including all fixes.
-      if (!context.disableOuterLoop) {
+      if (!config.disableOuterLoop) {
         cache.disable();
         executeNextIteration(targetModuleCache, downstreamImpactCache);
         cache.enable();
       }
     }
 
-    if (context.forceResolveActivated) {
+    if (config.forceResolveActivated) {
       forceResolveRemainingErrors();
     }
 
@@ -159,7 +162,7 @@ public class Annotator {
     // Compute boundaries of effects on downstream dependencies.
     latestReports.forEach(
         report -> {
-          if (context.downStreamDependenciesAnalysisActivated) {
+          if (config.downStreamDependenciesAnalysisActivated) {
             report.computeBoundariesOfEffectivenessOnDownstreamDependencies(downstreamImpactCache);
           }
         });
@@ -167,13 +170,13 @@ public class Annotator {
     cache.update(latestReports);
 
     // Tag reports according to selected analysis mode.
-    context.mode.tag(downstreamImpactCache, latestReports);
+    config.mode.tag(downstreamImpactCache, latestReports);
 
     // Inject approved fixes.
     Set<Fix> selectedFixes =
         latestReports.stream()
             .filter(Report::approved)
-            .flatMap(report -> context.chain ? report.tree.stream() : Stream.of(report.root))
+            .flatMap(report -> config.chain ? report.tree.stream() : Stream.of(report.root))
             .collect(Collectors.toSet());
     injector.injectFixes(selectedFixes);
 
@@ -217,10 +220,10 @@ public class Annotator {
    * @return {@link Evaluator} corresponding to context values.
    */
   private Evaluator getEvaluator(Supplier supplier) {
-    if (context.exhaustiveSearch) {
+    if (config.exhaustiveSearch) {
       return new VoidEvaluator();
     }
-    if (context.useImpactCache) {
+    if (config.useImpactCache) {
       return new CachedEvaluator(supplier);
     }
     return new BasicEvaluator(supplier);
@@ -281,7 +284,7 @@ public class Annotator {
                 })
             // Filter null values from map above.
             .filter(Objects::nonNull)
-            .map(node -> new AddMarkerAnnotation(node.location, context.nullUnMarkedAnnotation))
+            .map(node -> new AddMarkerAnnotation(node.location, config.nullUnMarkedAnnotation))
             .collect(Collectors.toSet());
 
     // For errors within static initialization blocks, add a @NullUnmarked annotation on the
@@ -296,7 +299,7 @@ public class Annotator {
                 error ->
                     new AddMarkerAnnotation(
                         context.targetModuleInfo.getLocationOnClass(error.getRegion().clazz),
-                        context.nullUnMarkedAnnotation))
+                        config.nullUnMarkedAnnotation))
             .collect(Collectors.toSet()));
     injector.injectAnnotations(nullUnMarkedAnnotations);
     // Update log.
@@ -364,7 +367,7 @@ public class Annotator {
                 error ->
                     new AddMarkerAnnotation(
                         context.targetModuleInfo.getLocationOnClass(error.getRegion().clazz),
-                        context.nullUnMarkedAnnotation))
+                        config.nullUnMarkedAnnotation))
             .collect(Collectors.toSet());
     injector.injectAnnotations(nullUnMarkedAnnotations);
     // Update log.

@@ -75,7 +75,7 @@ public class TargetModuleSupplier extends AbstractSupplier {
 
   @Override
   protected int initializeDepth() {
-    return context.depth;
+    return context.config.depth;
   }
 
   @Override
@@ -86,8 +86,8 @@ public class TargetModuleSupplier extends AbstractSupplier {
   @Override
   public ConflictGraphProcessor getGraphProcessor() {
     CompilerRunner runner = () -> Utility.buildTarget(context);
-    if (context.useParallelGraphProcessor) {
-      RegionTracker tracker = new CompoundTracker(context.cli, moduleInfo);
+    if (context.config.useParallelGraphProcessor) {
+      RegionTracker tracker = new CompoundTracker(context.config, moduleInfo);
       return new ParallelConflictGraphProcessor(context, runner, this, tracker);
     }
     return new SequentialConflictGraphProcessor(context, runner, this);

@@ -67,7 +67,7 @@ public class ModuleInfo {
   public ModuleInfo(
       Context context, ImmutableSet<ModuleConfiguration> configurations, String buildCommand) {
     // Build with scanner checker activated to generate required files to create the moduleInfo.
-    Utility.setScannerCheckerActivation(context.cli, configurations, true);
+    Utility.setScannerCheckerActivation(context.config, configurations, true);
     configurations.forEach(
         module -> {
           FixSerializationConfig.Builder nullAwayConfig =
@@ -78,7 +78,7 @@ public class ModuleInfo {
           nullAwayConfig.writeAsXML(module.nullawayConfig.toString());
         });
     Utility.build(context, buildCommand);
-    Utility.setScannerCheckerActivation(context.cli, configurations, false);
+    Utility.setScannerCheckerActivation(context.config, configurations, false);
     this.configurations = configurations;
     this.nonnullStore = new NonnullStore(configurations);
     this.fieldRegistry = new FieldRegistry(configurations);
