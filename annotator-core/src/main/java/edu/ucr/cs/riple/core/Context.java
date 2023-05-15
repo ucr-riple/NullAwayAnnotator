@@ -64,10 +64,12 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 /**
- * Config class for Annotator. Different flags can be set with either command line arguments or an
+ * Context class for Annotator. Different flags can be set with either command line arguments or an
  * input json file.
  */
-public class Config {
+public class Context {
+
+  public CLI cli;
 
   /**
    * If activated, annotator will bail out from the search tree as soon as the effectiveness gets
@@ -109,7 +111,7 @@ public class Config {
   public final String initializerAnnot;
   /** If enabled, effects of public API on downstream dependencies will be considered. */
   public final boolean downStreamDependenciesAnalysisActivated;
-  /** Sets of config path information for all downstream dependencies. */
+  /** Sets of context path information for all downstream dependencies. */
   public final ImmutableSet<ModuleConfiguration> downstreamInfo;
   /**
    * Path to nullaway library model loader, which enables the communication between annotator and
@@ -166,11 +168,11 @@ public class Config {
   public final Checker checker;
 
   /**
-   * Builds config from command line arguments.
+   * Builds context from command line arguments.
    *
    * @param args arguments.
    */
-  public Config(String[] args) {
+  public Context(String[] args) {
 
     Options options = new Options();
 
@@ -189,20 +191,20 @@ public class Config {
     buildCommandOption.setRequired(true);
     options.addOption(buildCommandOption);
 
-    // Config Path
+    // Context Path
     Option configPath =
         new Option(
-            "p", "path", true, "Path to config file containing all flags values in json format");
+            "p", "path", true, "Path to context file containing all flags values in json format");
     configPath.setRequired(false);
     options.addOption(configPath);
 
-    // Config Paths
+    // Context Paths
     Option configPathsOption =
         new Option(
             "cp",
-            "config-paths",
+            "context-paths",
             true,
-            "Path to tsv file containing path to nullaway and scanner config files.");
+            "Path to tsv file containing path to nullaway and scanner context files.");
     configPathsOption.setRequired(true);
     options.addOption(configPathsOption);
 
@@ -374,7 +376,7 @@ public class Config {
       cmd = parser.parse(options, args);
     } catch (ParseException e) {
       showHelp(formatter, options);
-      throw new IllegalArgumentException("Error in reading config flags: " + e.getMessage(), e);
+      throw new IllegalArgumentException("Error in reading context flags: " + e.getMessage(), e);
     }
 
     // Check if either all flags are available or none is present
@@ -418,7 +420,7 @@ public class Config {
                 })
             .collect(Collectors.toList());
     Preconditions.checkArgument(
-        moduleConfigurationList.size() > 0, "Target module config paths not found.");
+        moduleConfigurationList.size() > 0, "Target module context paths not found.");
     // First line is information for the target module.
     this.target = moduleConfigurationList.get(0);
     this.chain = cmd.hasOption(chainOption.getLongOpt());
@@ -473,11 +475,11 @@ public class Config {
   }
 
   /**
-   * Builds config from json config file.
+   * Builds context from json context file.
    *
-   * @param configPath path to config file.
+   * @param configPath path to context file.
    */
-  public Config(Path configPath) {
+  public Context(Path configPath) {
     Preconditions.checkNotNull(configPath);
     JSONObject jsonObject;
     try {
@@ -485,7 +487,7 @@ public class Config {
           new JSONParser().parse(Files.newBufferedReader(configPath, Charset.defaultCharset()));
       jsonObject = (JSONObject) obj;
     } catch (Exception e) {
-      throw new RuntimeException("Error in reading/parsing config at path: " + configPath, e);
+      throw new RuntimeException("Error in reading/parsing context at path: " + configPath, e);
     }
     this.checker =
         Checker.getCheckerByName(getValueFromKey(jsonObject, "CHECKER", String.class).orElse(null));
@@ -620,7 +622,7 @@ public class Config {
   }
 
   private static void showHelp(HelpFormatter formatter, Options options) {
-    formatter.printHelp("Annotator config Flags", options);
+    formatter.printHelp("Annotator context Flags", options);
   }
 
   private <T> OrElse<T> getValueFromKey(JSONObject json, String key, Class<T> klass) {
@@ -729,14 +731,14 @@ public class Config {
     @SuppressWarnings("unchecked")
     public void write(Path path) {
       Preconditions.checkNotNull(
-          buildCommand, "Build command must be initialized to construct the config.");
+          buildCommand, "Build command must be initialized to construct the context.");
       Preconditions.checkNotNull(
           initializerAnnotation,
-          "Initializer Annotation must be initialized to construct the config.");
+          "Initializer Annotation must be initialized to construct the context.");
       Preconditions.checkNotNull(
-          outputDir, "Output Directory must be initialized to construct the config.");
+          outputDir, "Output Directory must be initialized to construct the context.");
       Preconditions.checkNotNull(
-          nullableAnnotation, "Nullable Annotation must be initialized to construct the config.");
+          nullableAnnotation, "Nullable Annotation must be initialized to construct the context.");
       JSONObject json = new JSONObject();
       json.put("BUILD_COMMAND", buildCommand);
       json.put("CHECKER", checker.name());
@@ -799,7 +801,7 @@ public class Config {
           Files.newBufferedWriter(path.toFile().toPath(), Charset.defaultCharset())) {
         file.write(json.toJSONString());
       } catch (IOException e) {
-        System.err.println("Error happened in writing config json: " + e);
+        System.err.println("Error happened in writing context json: " + e);
       }
     }
   }

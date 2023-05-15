@@ -58,8 +58,8 @@ public class DownstreamAnalysisTest extends AnnotatorBaseCoreTest {
         .setPredicate(
             (expected, found) ->
                 expected.root.equals(found.root)
-                    && expected.getOverallEffect(coreTestHelper.getConfig())
-                        == found.getOverallEffect(coreTestHelper.getConfig()))
+                    && expected.getOverallEffect(coreTestHelper.getConfig().cli)
+                        == found.getOverallEffect(coreTestHelper.getConfig().cli))
         .toDepth(1)
         .enableDownstreamDependencyAnalysis()
         .start();
@@ -83,8 +83,8 @@ public class DownstreamAnalysisTest extends AnnotatorBaseCoreTest {
         .setPredicate(
             (expected, found) ->
                 expected.root.equals(found.root)
-                    && expected.getOverallEffect(coreTestHelper.getConfig())
-                        == found.getOverallEffect(coreTestHelper.getConfig()))
+                    && expected.getOverallEffect(coreTestHelper.getConfig().cli)
+                        == found.getOverallEffect(coreTestHelper.getConfig().cli))
         .toDepth(1)
         .start();
   }

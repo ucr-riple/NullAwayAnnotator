@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core.metadata.index;
 
-import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import java.util.ArrayList;
@@ -45,19 +45,19 @@ public class ErrorStore {
   private Index current;
   /** ModuleInfo of the module which indexed errors are reported on. */
   private final ModuleInfo moduleInfo;
-  /** Annotator config. */
-  private final Config config;
+  /** Annotator context. */
+  private final Context context;
 
-  public ErrorStore(Config config, ModuleInfo moduleInfo) {
+  public ErrorStore(Context context, ModuleInfo moduleInfo) {
     this.moduleInfo = moduleInfo;
-    this.config = config;
-    root = new Index(config, moduleInfo);
+    this.context = context;
+    root = new Index(context, moduleInfo);
     root.index();
   }
 
   /** Overwrites the current state with the new generated output, */
   public void saveState() {
-    current = new Index(config, moduleInfo);
+    current = new Index(context, moduleInfo);
     current.index();
   }
 

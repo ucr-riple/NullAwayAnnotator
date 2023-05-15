@@ -25,7 +25,7 @@
 package edu.ucr.cs.riple.core.module;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
 import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
@@ -49,25 +49,25 @@ public class ModuleInfo {
   /**
    * This constructor is used to create a moduleInfo for a single module.
    *
-   * @param config Annotator config.
+   * @param context Annotator context.
    * @param moduleConfiguration The module info.
    * @param buildCommand The command to build the passed module.
    */
-  public ModuleInfo(Config config, ModuleConfiguration moduleConfiguration, String buildCommand) {
-    this(config, ImmutableSet.of(moduleConfiguration), buildCommand);
+  public ModuleInfo(Context context, ModuleConfiguration moduleConfiguration, String buildCommand) {
+    this(context, ImmutableSet.of(moduleConfiguration), buildCommand);
   }
 
   /**
    * This constructor is used to create a moduleInfo for a set of modules.
    *
-   * @param config Annotator config.
+   * @param context Annotator context.
    * @param configurations The set of modules.
    * @param buildCommand The command to build the passed modules.
    */
   public ModuleInfo(
-      Config config, ImmutableSet<ModuleConfiguration> configurations, String buildCommand) {
+      Context context, ImmutableSet<ModuleConfiguration> configurations, String buildCommand) {
     // Build with scanner checker activated to generate required files to create the moduleInfo.
-    Utility.setScannerCheckerActivation(config, configurations, true);
+    Utility.setScannerCheckerActivation(context.cli, configurations, true);
     configurations.forEach(
         module -> {
           FixSerializationConfig.Builder nullAwayConfig =
@@ -77,12 +77,12 @@ public class ModuleInfo {
                   .setFieldInitInfo(true);
           nullAwayConfig.writeAsXML(module.nullawayConfig.toString());
         });
-    Utility.build(config, buildCommand);
-    Utility.setScannerCheckerActivation(config, configurations, false);
+    Utility.build(context, buildCommand);
+    Utility.setScannerCheckerActivation(context.cli, configurations, false);
     this.configurations = configurations;
     this.nonnullStore = new NonnullStore(configurations);
     this.fieldRegistry = new FieldRegistry(configurations);
-    this.methodRegistry = new MethodRegistry(config);
+    this.methodRegistry = new MethodRegistry(context);
   }
 
   /**

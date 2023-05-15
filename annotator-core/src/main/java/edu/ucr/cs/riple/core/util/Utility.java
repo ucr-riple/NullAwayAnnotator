@@ -26,7 +26,8 @@ package edu.ucr.cs.riple.core.util;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.CLI;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
@@ -72,20 +73,20 @@ import org.w3c.dom.Element;
 public class Utility {
 
   /**
-   * Executes a shell command in a subprocess. If {@link Config#redirectBuildOutputToStdErr} is
+   * Executes a shell command in a subprocess. If {@link Context#redirectBuildOutputToStdErr} is
    * activated, it will write the command's output in std error.
    *
-   * @param config Annotator config.
+   * @param cli Annotator configuration.
    * @param command The shell command to run.
    */
-  public static void executeCommand(Config config, String command) {
+  public static void executeCommand(CLI cli, String command) {
     try {
       Process p = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
       BufferedReader reader =
           new BufferedReader(new InputStreamReader(p.getErrorStream(), Charset.defaultCharset()));
       String line;
       while ((line = reader.readLine()) != null) {
-        if (config.redirectBuildOutputToStdErr) {
+        if (cli.redirectBuildOutputToStdErr) {
           System.err.println(line);
         }
       }
@@ -98,23 +99,23 @@ public class Utility {
   /**
    * Writes reports content in json format in reports.json file in the output directory.
    *
-   * @param config Annotator config.
+   * @param context Annotator context.
    * @param reports Immutable set of reports.
    */
   @SuppressWarnings("unchecked")
-  public static void writeReports(Config config, ImmutableSet<Report> reports) {
-    Path reportsPath = config.globalDir.resolve("reports.json");
+  public static void writeReports(Context context, ImmutableSet<Report> reports) {
+    Path reportsPath = context.globalDir.resolve("reports.json");
     JSONObject result = new JSONObject();
     JSONArray reportsJson = new JSONArray();
     for (Report report : reports) {
       JSONObject reportJson = report.root.getJson();
       reportJson.put("LOCAL EFFECT", report.localEffect);
-      reportJson.put("OVERALL EFFECT", report.getOverallEffect(config));
+      reportJson.put("OVERALL EFFECT", report.getOverallEffect(context.cli));
       reportJson.put("Upper Bound EFFECT", report.getUpperBoundEffectOnDownstreamDependencies());
       reportJson.put("Lower Bound EFFECT", report.getLowerBoundEffectOnDownstreamDependencies());
-      reportJson.put("FINISHED", !report.requiresFurtherProcess(config));
+      reportJson.put("FINISHED", !report.requiresFurtherProcess(context.cli));
       JSONArray followUps = new JSONArray();
-      if (config.chain && report.localEffect < 1) {
+      if (context.chain && report.localEffect < 1) {
         followUps.addAll(report.tree.stream().map(Fix::getJson).collect(Collectors.toList()));
       }
       reportJson.put("TREE", followUps);
@@ -142,31 +143,31 @@ public class Utility {
    * Reads serialized errors "errors.tsv" file in the output directory, and returns the collected
    * set of resolving fixes for read errors.
    *
-   * @param config Annotator config.
+   * @param context Annotator context.
    * @param moduleInfo ModuleInfo of the module which fixes are created for.
    * @return Set of collected fixes.
    */
-  public static Set<Fix> readFixesFromOutputDirectory(Config config, ModuleInfo moduleInfo) {
-    Set<Error> errors = readErrorsFromOutputDirectory(config, moduleInfo);
+  public static Set<Fix> readFixesFromOutputDirectory(Context context, ModuleInfo moduleInfo) {
+    Set<Error> errors = readErrorsFromOutputDirectory(context, moduleInfo);
     return Error.getResolvingFixesOfErrors(errors);
   }
 
   /**
    * Reads serialized errors of passed module in "errors.tsv" file in the output directory,
    *
-   * @param config Annotation config.
+   * @param context Annotation context.
    * @param moduleInfo ModuleInfo of the module which errors are created for.
    * @return Set of serialized errors.
    */
-  public static Set<Error> readErrorsFromOutputDirectory(Config config, ModuleInfo moduleInfo) {
-    return config.deserializer.deserializeErrors(moduleInfo);
+  public static Set<Error> readErrorsFromOutputDirectory(Context context, ModuleInfo moduleInfo) {
+    return context.deserializer.deserializeErrors(moduleInfo);
   }
 
   /**
    * Writes the {@link FixSerializationConfig} in {@code XML} format.
    *
-   * @param config Config file to write.
-   * @param path Path to write the config at.
+   * @param config Context file to write.
+   * @param path Path to write the context at.
    */
   public static void writeNullAwayConfigInXMLFormat(FixSerializationConfig config, String path) {
     DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -214,31 +215,31 @@ public class Utility {
    * Activates/Deactivates {@link AnnotatorScanner} features by updating the {@link
    * edu.ucr.cs.riple.scanner.Config} in {@code XML} format for the given modules.
    *
-   * @param config Annotator config.
+   * @param cli Annotator configuration.
    * @param modules Immutable set of modules that their configuration files need to be updated.
    * @param activation activation flag for all features of the scanner.
    */
   public static void setScannerCheckerActivation(
-      Config config, ImmutableSet<ModuleConfiguration> modules, boolean activation) {
-    modules.forEach(info -> setScannerCheckerActivation(config, info, activation));
+      CLI cli, ImmutableSet<ModuleConfiguration> modules, boolean activation) {
+    modules.forEach(info -> setScannerCheckerActivation(cli, info, activation));
   }
 
   /**
    * Activates/Deactivates {@link AnnotatorScanner} features by updating the {@link
    * edu.ucr.cs.riple.scanner.Config} in {@code XML} format for the given module.
    *
-   * @param config Annotator config.
+   * @param cli Annotator configuration.
    * @param info module that its configuration file need to be updated.
    * @param activation activation flag for all features of the scanner.
    */
   public static void setScannerCheckerActivation(
-      Config config, ModuleConfiguration info, boolean activation) {
+      CLI cli, ModuleConfiguration info, boolean activation) {
     ScannerConfigWriter writer = new ScannerConfigWriter();
     writer
         .setSerializationActivation(activation)
-        .addGeneratedCodeDetectors(config.generatedCodeDetectors)
+        .addGeneratedCodeDetectors(cli.generatedCodeDetectors)
         .setOutput(info.dir)
-        .setNonnullAnnotations(config.getNonnullAnnotations())
+        .setNonnullAnnotations(cli.getNonnullAnnotations())
         .writeAsXML(info.scannerConfig);
   }
 
@@ -260,10 +261,10 @@ public class Utility {
   /**
    * Builds all downstream dependencies.
    *
-   * @param config Annotator config.
+   * @param context Annotator context.
    */
-  public static void buildDownstreamDependencies(Config config) {
-    config.downstreamInfo.forEach(
+  public static void buildDownstreamDependencies(Context context) {
+    context.downstreamInfo.forEach(
         module -> {
           FixSerializationConfig.Builder nullAwayConfig =
               new FixSerializationConfig.Builder()
@@ -272,46 +273,46 @@ public class Utility {
                   .setFieldInitInfo(false);
           nullAwayConfig.writeAsXML(module.nullawayConfig.toString());
         });
-    build(config, config.downstreamDependenciesBuildCommand);
+    build(context, context.cli.downstreamDependenciesBuildCommand);
   }
 
   /**
    * Builds target.
    *
-   * @param config Annotator config.
+   * @param context Annotator context.
    */
-  public static void buildTarget(Config config) {
-    buildTarget(config, false);
+  public static void buildTarget(Context context) {
+    buildTarget(context, false);
   }
 
   /**
    * Builds target with control on field initialization serialization.
    *
-   * @param config Annotator config.
+   * @param context Annotator context.
    * @param initSerializationEnabled Activation flag for field initialization serialization.
    */
-  public static void buildTarget(Config config, boolean initSerializationEnabled) {
+  public static void buildTarget(Context context, boolean initSerializationEnabled) {
     FixSerializationConfig.Builder nullAwayConfig =
         new FixSerializationConfig.Builder()
             .setSuggest(true, true)
-            .setOutputDirectory(config.target.dir.toString())
+            .setOutputDirectory(context.target.dir.toString())
             .setFieldInitInfo(initSerializationEnabled);
-    nullAwayConfig.writeAsXML(config.target.nullawayConfig.toString());
-    build(config, config.buildCommand);
+    nullAwayConfig.writeAsXML(context.target.nullawayConfig.toString());
+    build(context, context.buildCommand);
   }
 
   /**
    * Builds module(s).
    *
-   * @param config Annotator config.
+   * @param context Annotator context.
    * @param command Command to run to build module(s).
    */
-  public static void build(Config config, String command) {
+  public static void build(Context context, String command) {
     try {
-      long timer = config.log.startTimer();
-      Utility.executeCommand(config, command);
-      config.log.stopTimerAndCaptureBuildTime(timer);
-      config.log.incrementBuildRequest();
+      long timer = context.log.startTimer();
+      Utility.executeCommand(context.cli, command);
+      context.log.stopTimerAndCaptureBuildTime(timer);
+      context.log.incrementBuildRequest();
     } catch (Exception e) {
       throw new RuntimeException("Could not run command: " + command);
     }
@@ -343,15 +344,15 @@ public class Utility {
   /**
    * Writes log in the `log.txt` file at the output directory.
    *
-   * @param config Annotator config.
+   * @param context Annotator context.
    */
-  public static void writeLog(Config config) {
-    Path path = config.globalDir.resolve("log.txt");
+  public static void writeLog(Context context) {
+    Path path = context.globalDir.resolve("log.txt");
     try {
-      Files.write(path, Collections.singleton(config.log.toString()), Charset.defaultCharset());
+      Files.write(path, Collections.singleton(context.log.toString()), Charset.defaultCharset());
     } catch (IOException exception) {
       System.err.println("Could not write log to: " + path);
-      System.err.println("Writing in STD Error:\n" + config.log);
+      System.err.println("Writing in STD Error:\n" + context.log);
     }
   }
 

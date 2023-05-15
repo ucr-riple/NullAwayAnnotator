@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core.injectors;
 
-import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
@@ -35,20 +35,20 @@ import java.util.Set;
 public class PhysicalInjector extends AnnotationInjector {
   private final Injector injector;
 
-  public PhysicalInjector(Config config) {
-    super(config);
+  public PhysicalInjector(Context context) {
+    super(context);
     this.injector = new Injector();
   }
 
   @Override
   public void removeAnnotations(Set<RemoveAnnotation> changes) {
     Set<FileOffsetStore> offsetStores = injector.removeAnnotations(changes);
-    config.offsetHandler.updateStateWithRecentChanges(offsetStores);
+    context.offsetHandler.updateStateWithRecentChanges(offsetStores);
   }
 
   @Override
   public void injectAnnotations(Set<AddAnnotation> changes) {
     Set<FileOffsetStore> offsetStores = injector.addAnnotations(changes);
-    config.offsetHandler.updateStateWithRecentChanges(offsetStores);
+    context.offsetHandler.updateStateWithRecentChanges(offsetStores);
   }
 }

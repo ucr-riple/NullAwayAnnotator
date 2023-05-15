@@ -27,7 +27,7 @@ package edu.ucr.cs.riple.core.io.deserializers.nullaway;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Checker;
-import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.io.deserializers.DeserializerBaseClass;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
@@ -63,8 +63,8 @@ import java.util.stream.Collectors;
  */
 public class NullAwayV3Deserializer extends DeserializerBaseClass {
 
-  public NullAwayV3Deserializer(Config config) {
-    super(config, Checker.NULLAWAY, 3);
+  public NullAwayV3Deserializer(Context context) {
+    super(context, Checker.NULLAWAY, 3);
   }
 
   @Override
@@ -123,7 +123,7 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
           errorType,
           errorMessage,
           region,
-          config.offsetHandler.getOriginalOffset(path, offset),
+          context.offsetHandler.getOriginalOffset(path, offset),
           resolvingFixes,
           moduleInfo);
     }
@@ -137,12 +137,14 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
                 // skip if element has explicit nonnull annotation.
                 ? null
                 : new Fix(
-                    new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot), errorType, true));
+                    new AddMarkerAnnotation(nonnullTarget, context.nullableAnnot),
+                    errorType,
+                    true));
     return createError(
         errorType,
         errorMessage,
         region,
-        config.offsetHandler.getOriginalOffset(path, offset),
+        context.offsetHandler.getOriginalOffset(path, offset),
         resolvingFix == null ? ImmutableSet.of() : ImmutableSet.of(resolvingFix),
         moduleInfo);
   }
@@ -206,7 +208,7 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
               }
               return new Fix(
                   new AddMarkerAnnotation(
-                      extendVariableList(locationOnField, moduleInfo), config.nullableAnnot),
+                      extendVariableList(locationOnField, moduleInfo), context.nullableAnnot),
                   Error.METHOD_INITIALIZER_ERROR,
                   true);
             })

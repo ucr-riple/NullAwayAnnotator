@@ -62,7 +62,7 @@ public class AnalysisModeTest extends AnnotatorBaseCoreTest {
             (expected, found) ->
                 expected.root.equals(found.root)
                     && expected.getExpectedValue()
-                        == found.getOverallEffect(coreTestHelper.getConfig())
+                        == found.getOverallEffect(coreTestHelper.getConfig().cli)
                     && Objects.equals(expected.getTag(), found.getTag()))
         .toDepth(5)
         .disableBailOut()
@@ -86,7 +86,7 @@ public class AnalysisModeTest extends AnnotatorBaseCoreTest {
             (expected, found) ->
                 expected.root.equals(found.root)
                     && expected.getExpectedValue()
-                        == found.getOverallEffect(coreTestHelper.getConfig())
+                        == found.getOverallEffect(coreTestHelper.getConfig().cli)
                     && Objects.equals(expected.getTag(), found.getTag()))
         .toDepth(5)
         .disableBailOut()
@@ -113,7 +113,7 @@ public class AnalysisModeTest extends AnnotatorBaseCoreTest {
             (expected, found) ->
                 expected.root.equals(found.root)
                     && expected.getExpectedValue()
-                        == found.getOverallEffect(coreTestHelper.getConfig())
+                        == found.getOverallEffect(coreTestHelper.getConfig().cli)
                     && Objects.equals(expected.getTag(), found.getTag()))
         .toDepth(5)
         .disableBailOut()
@@ -142,7 +142,7 @@ public class AnalysisModeTest extends AnnotatorBaseCoreTest {
             (expected, found) ->
                 expected.root.equals(found.root)
                     && expected.getExpectedValue()
-                        == found.getOverallEffect(coreTestHelper.getConfig())
+                        == found.getOverallEffect(coreTestHelper.getConfig().cli)
                     && Objects.equals(expected.getTag(), found.getTag()))
         .toDepth(5)
         .disableBailOut()

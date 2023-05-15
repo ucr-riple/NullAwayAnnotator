@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core.evaluators.suppliers;
 
-import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.cache.TargetModuleCache;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.evaluators.AbstractEvaluator;
@@ -59,11 +59,11 @@ public interface Supplier {
   int depth();
 
   /**
-   * Getter for {@link Config} instance.
+   * Getter for {@link Context} instance.
    *
-   * @return Config instance.
+   * @return Context instance.
    */
-  Config getConfig();
+  Context getContext();
 
   /**
    * Getter for {@link DownstreamImpactCache} instance.

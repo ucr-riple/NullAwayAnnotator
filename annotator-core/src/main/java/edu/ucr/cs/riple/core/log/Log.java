@@ -41,7 +41,6 @@ public class Log {
   private long totalTime;
   /** Total time spent in building targets. */
   private long buildTime = 0;
-
   /**
    * Set of approved and injected annotations. These annotations are evaluated and approved and will
    * not get removed from the source code.

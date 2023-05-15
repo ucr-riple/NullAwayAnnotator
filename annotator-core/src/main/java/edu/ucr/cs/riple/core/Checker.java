@@ -32,18 +32,18 @@ import javax.annotation.Nullable;
 public enum Checker {
   NULLAWAY() {
     @Override
-    public CheckerDeserializer getDeserializer(Config config) {
-      return new NullAwayV3Deserializer(config);
+    public CheckerDeserializer getDeserializer(Context context) {
+      return new NullAwayV3Deserializer(context);
     }
   };
 
   /**
    * Returns the deserializer for the checker.
    *
-   * @param config Annotator config.
+   * @param context Annotator context.
    * @return The corresponding deserializer.
    */
-  public abstract CheckerDeserializer getDeserializer(Config config);
+  public abstract CheckerDeserializer getDeserializer(Context context);
 
   /**
    * Returns the checker enum value corresponding to the given checker name.

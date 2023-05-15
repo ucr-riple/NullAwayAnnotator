@@ -25,7 +25,7 @@
 package edu.ucr.cs.riple.core.injectors;
 
 import com.google.common.base.Preconditions;
-import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import java.io.BufferedOutputStream;
@@ -46,10 +46,10 @@ public class VirtualInjector extends AnnotationInjector {
   /** Path to library model loader */
   private final Path libraryModelPath;
 
-  public VirtualInjector(Config config) {
-    super(config);
-    this.libraryModelPath = config.nullawayLibraryModelLoaderPath;
-    if (config.downStreamDependenciesAnalysisActivated) {
+  public VirtualInjector(Context context) {
+    super(context);
+    this.libraryModelPath = context.nullawayLibraryModelLoaderPath;
+    if (context.downStreamDependenciesAnalysisActivated) {
       Preconditions.checkNotNull(
           libraryModelPath,
           "NullawayLibraryModelLoaderPath cannot be null while downstream dependencies analysis is activated.");
@@ -64,7 +64,7 @@ public class VirtualInjector extends AnnotationInjector {
 
   @Override
   public void injectAnnotations(Set<AddAnnotation> changes) {
-    if (!config.downStreamDependenciesAnalysisActivated) {
+    if (!context.cli.downStreamDependenciesAnalysisActivated) {
       throw new IllegalStateException(
           "Downstream dependencies analysis not activated, cannot inject annotations virtually!");
     }

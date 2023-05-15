@@ -36,13 +36,13 @@ public class Main {
    *     json file, otherwise they will be set up according to the set of received cli arguments.
    */
   public static void main(String[] args) {
-    Config config;
+    Context context;
     if (args.length == 2 && args[0].equals("--path")) {
-      config = new Config(Paths.get(args[1]));
+      context = new Context(Paths.get(args[1]));
     } else {
-      config = new Config(args);
+      context = new Context(args);
     }
-    Annotator annotator = new Annotator(config);
+    Annotator annotator = new Annotator(context);
     annotator.start();
   }
 }

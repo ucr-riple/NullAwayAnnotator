@@ -97,7 +97,7 @@ public class ProjectBuilder {
 
   /**
    * Computes the build command for the project template. It includes, changing directory command
-   * from root to project root dir, command to compile the project and the computed paths to config
+   * from root to project root dir, command to compile the project and the computed paths to context
    * files which will be passed through gradle command line arguments.
    *
    * @param outDirPath Path to serialization output directory,
@@ -116,7 +116,7 @@ public class ProjectBuilder {
   /**
    * Computes the build command for the project template. It includes, changing directory command
    * from root to project root dir, command to compile the project, command to update library model
-   * loader jar and the computed paths to config files which will be passed through gradle command
+   * loader jar and the computed paths to context files which will be passed through gradle command
    * line arguments.
    *
    * @param outDirPath Path to serialization output directory,

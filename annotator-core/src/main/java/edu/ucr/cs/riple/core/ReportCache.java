@@ -47,9 +47,9 @@ public class ReportCache {
    */
   private boolean stateUpdated;
 
-  public ReportCache(Config config) {
+  public ReportCache(CLI cli) {
     this.store = new HashMap<>();
-    this.enabled = config.useCache;
+    this.enabled = cli.useCache;
     this.stateUpdated = true;
   }
 

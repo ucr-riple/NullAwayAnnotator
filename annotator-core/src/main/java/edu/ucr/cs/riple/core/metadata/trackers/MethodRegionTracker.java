@@ -25,7 +25,6 @@
 package edu.ucr.cs.riple.core.metadata.trackers;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.Registry;
 import edu.ucr.cs.riple.core.metadata.method.MethodRecord;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
@@ -43,7 +42,7 @@ public class MethodRegionTracker extends Registry<TrackerNode> implements Region
   /** ModuleInfo of the module which usage of methods are stored. */
   private final ModuleInfo moduleInfo;
 
-  public MethodRegionTracker(Config config, ModuleInfo moduleInfo) {
+  public MethodRegionTracker(ModuleInfo moduleInfo) {
     super(
         moduleInfo.getModuleConfigurations().stream()
             .map(info -> info.dir.resolve(Serializer.METHOD_IMPACTED_REGION_FILE_NAME))

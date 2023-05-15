@@ -41,12 +41,12 @@ public class FieldRegionTracker extends Registry<TrackerNode> implements RegionT
   /** ModuleInfo of the module which usages of fields are stored. */
   private final ModuleInfo moduleInfo;
 
-  public FieldRegionTracker(ModuleInfo context) {
+  public FieldRegionTracker(ModuleInfo moduleInfo) {
     super(
-        context.getModuleConfigurations().stream()
-            .map(moduleInfo -> moduleInfo.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME))
+        moduleInfo.getModuleConfigurations().stream()
+            .map(configuration -> configuration.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));
-    this.moduleInfo = context;
+    this.moduleInfo = moduleInfo;
   }
 
   @Override

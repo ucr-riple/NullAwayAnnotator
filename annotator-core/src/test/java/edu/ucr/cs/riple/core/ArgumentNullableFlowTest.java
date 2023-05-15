@@ -83,7 +83,8 @@ public class ArgumentNullableFlowTest extends AnnotatorBaseCoreTest {
                     new OnParameter(
                         "Foo.java", "test.target.Foo", "takeNull(java.lang.Object)", 0)),
                 Collections.emptySet()))
-        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
+        .setPredicate(
+            (expected, found) -> expected.testEquals(coreTestHelper.getConfig().cli, found))
         .toDepth(5)
         .disableBailOut()
         .enableDownstreamDependencyAnalysis()
@@ -104,7 +105,8 @@ public class ArgumentNullableFlowTest extends AnnotatorBaseCoreTest {
         .withExpectedReports(
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullable(int)"), -5),
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "getNull()"), -1))
-        .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
+        .setPredicate(
+            (expected, found) -> expected.testEquals(coreTestHelper.getConfig().cli, found))
         .toDepth(5)
         .disableBailOut()
         .start();

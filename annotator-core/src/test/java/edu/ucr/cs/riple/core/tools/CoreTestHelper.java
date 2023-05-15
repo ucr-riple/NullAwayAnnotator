@@ -29,7 +29,7 @@ import static org.junit.Assert.fail;
 import edu.ucr.cs.riple.core.AnalysisMode;
 import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Checker;
-import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.injector.Helper;
@@ -77,8 +77,8 @@ public class CoreTestHelper {
   private boolean deactivateInference = false;
   /** Analysis mode. */
   private AnalysisMode mode = AnalysisMode.LOCAL;
-  /** Annotator config. */
-  private Config config;
+  /** Annotator context. */
+  private Context context;
   /**
    * Path to the expected output directory. If null, changes on source files will not be checked.
    */
@@ -214,14 +214,14 @@ public class CoreTestHelper {
 
   /** Starts the test process. */
   public void start() {
-    Path configPath = outDirPath.resolve("config.json");
+    Path configPath = outDirPath.resolve("context.json");
     checkSourcePackages();
     makeAnnotatorConfigFile(configPath);
-    config = new Config(configPath);
-    Annotator annotator = new Annotator(config);
+    context = new Context(configPath);
+    Annotator annotator = new Annotator(context);
     annotator.start();
     if (predicate == null) {
-      predicate = DEFAULT_PREDICATE.create(config);
+      predicate = DEFAULT_PREDICATE.create(context);
     }
     compare(new ArrayList<>(annotator.cache.reports()));
     checkBuildsStatus();
@@ -233,7 +233,7 @@ public class CoreTestHelper {
     List<Module> modules = projectBuilder.getModules();
     if (mode.equals(AnalysisMode.STRICT) && modules.size() > 1) {
       // Build downstream dependencies.
-      Utility.executeCommand(config.downstreamDependenciesBuildCommand);
+      Utility.executeCommand(context.downstreamDependenciesBuildCommand);
       // Verify no error is reported in downstream dependencies.
       for (int i = 1; i < modules.size(); i++) {
         Path path = outDirPath.resolve(i + "").resolve("errors.tsv");
@@ -253,7 +253,7 @@ public class CoreTestHelper {
     }
     if (suppressRemainingErrors) {
       // Check no error will be reported in Target module
-      Utility.executeCommand(config.buildCommand);
+      Utility.executeCommand(context.buildCommand);
       Path path = outDirPath.resolve("0").resolve("errors.tsv");
       try {
         List<String> lines = Files.readAllLines(path);
@@ -363,12 +363,12 @@ public class CoreTestHelper {
   }
 
   /**
-   * Creates a config file for annotator.
+   * Creates a context file for annotator.
    *
-   * @param configPath Path to the config file.
+   * @param configPath Path to the context file.
    */
   public void makeAnnotatorConfigFile(Path configPath) {
-    Config.Builder builder = new Config.Builder();
+    Context.Builder builder = new Context.Builder();
     final int[] id = {0};
     builder.configPaths =
         projectBuilder.getModules().stream()
@@ -439,16 +439,16 @@ public class CoreTestHelper {
   }
 
   /**
-   * Getter for config.
+   * Getter for context.
    *
-   * @return Config instance.
+   * @return Context instance.
    */
-  public Config getConfig() {
-    if (config == null) {
+  public Context getConfig() {
+    if (context == null) {
       throw new IllegalStateException(
-          "Config has not been initialized yet, can only access it after a call of start method.");
+          "Context has not been initialized yet, can only access it after a call of start method.");
     }
-    return config;
+    return context;
   }
 
   /**
@@ -457,27 +457,27 @@ public class CoreTestHelper {
    */
   static class DEFAULT_PREDICATE implements BiPredicate<TReport, Report> {
 
-    /** The config. */
-    private final Config config;
+    /** The context. */
+    private final Context context;
 
-    private DEFAULT_PREDICATE(Config config) {
-      this.config = config;
+    private DEFAULT_PREDICATE(Context context) {
+      this.context = context;
     }
 
     @Override
     public boolean test(TReport expected, Report found) {
       return expected.root.change.getLocation().equals(found.root.change.getLocation())
-          && expected.getExpectedValue() == found.getOverallEffect(config);
+          && expected.getExpectedValue() == found.getOverallEffect(context.cli);
     }
 
     /**
      * Creates a new instance of {@link DEFAULT_PREDICATE}.
      *
-     * @param config the config
+     * @param context the context
      * @return the default predicate
      */
-    public static DEFAULT_PREDICATE create(Config config) {
-      return new DEFAULT_PREDICATE(config);
+    public static DEFAULT_PREDICATE create(Context context) {
+      return new DEFAULT_PREDICATE(context);
     }
   }
 }

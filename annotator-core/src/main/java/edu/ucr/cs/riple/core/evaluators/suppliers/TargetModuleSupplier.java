@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core.evaluators.suppliers;
 
-import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.cache.TargetModuleCache;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.evaluators.graph.processors.CompilerRunner;
@@ -43,8 +43,8 @@ import edu.ucr.cs.riple.core.util.Utility;
  *
  * <ul>
  *   <li>Annotations are physically injected on target module.
- *   <li>Analysis is performed to depth set in config.
- *   <li>Depending on the config, global impact of annotations can be considered.
+ *   <li>Analysis is performed to depth set in context.
+ *   <li>Depending on the context, global impact of annotations can be considered.
  * </ul>
  */
 public class TargetModuleSupplier extends AbstractSupplier {
@@ -55,27 +55,27 @@ public class TargetModuleSupplier extends AbstractSupplier {
   /**
    * Constructor for target module supplier instance.
    *
-   * @param config Annotator config instance.
+   * @param context Annotator context instance.
    * @param targetModuleCache Target module impact cache instance.
    * @param downstreamImpactCache Downstream impact cache instance.
    */
   public TargetModuleSupplier(
-      Config config,
+      Context context,
       TargetModuleCache targetModuleCache,
       DownstreamImpactCache downstreamImpactCache) {
-    super(config, config.targetModuleInfo);
+    super(context, context.targetModuleInfo);
     this.downstreamImpactCache = downstreamImpactCache;
     this.targetModuleCache = targetModuleCache;
   }
 
   @Override
   protected AnnotationInjector initializeInjector() {
-    return new PhysicalInjector(config);
+    return new PhysicalInjector(context);
   }
 
   @Override
   protected int initializeDepth() {
-    return config.depth;
+    return context.depth;
   }
 
   @Override
@@ -85,12 +85,12 @@ public class TargetModuleSupplier extends AbstractSupplier {
 
   @Override
   public ConflictGraphProcessor getGraphProcessor() {
-    CompilerRunner runner = () -> Utility.buildTarget(config);
-    if (config.useParallelGraphProcessor) {
-      RegionTracker tracker = new CompoundTracker(config, moduleInfo);
-      return new ParallelConflictGraphProcessor(config, runner, this, tracker);
+    CompilerRunner runner = () -> Utility.buildTarget(context);
+    if (context.useParallelGraphProcessor) {
+      RegionTracker tracker = new CompoundTracker(context.cli, moduleInfo);
+      return new ParallelConflictGraphProcessor(context, runner, this, tracker);
     }
-    return new SequentialConflictGraphProcessor(config, runner, this);
+    return new SequentialConflictGraphProcessor(context, runner, this);
   }
 
   @Override

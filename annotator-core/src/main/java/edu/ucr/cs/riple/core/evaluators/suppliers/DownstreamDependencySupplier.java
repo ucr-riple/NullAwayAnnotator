@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core.evaluators.suppliers;
 
-import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.cache.TargetModuleCache;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.cache.downstream.VoidDownstreamImpactCache;
@@ -52,14 +52,14 @@ public class DownstreamDependencySupplier extends AbstractSupplier {
 
   private final RegionTracker tracker;
 
-  public DownstreamDependencySupplier(Config config) {
-    super(config, new ModuleInfo(config, config.downstreamInfo, config.buildCommand));
-    this.tracker = new MethodRegionTracker(config, moduleInfo);
+  public DownstreamDependencySupplier(Context context) {
+    super(context, new ModuleInfo(context, context.downstreamInfo, context.buildCommand));
+    this.tracker = new MethodRegionTracker(moduleInfo);
   }
 
   @Override
   protected AnnotationInjector initializeInjector() {
-    return new VirtualInjector(config);
+    return new VirtualInjector(context);
   }
 
   @Override
@@ -74,10 +74,10 @@ public class DownstreamDependencySupplier extends AbstractSupplier {
 
   @Override
   public AbstractConflictGraphProcessor getGraphProcessor() {
-    CompilerRunner runner = () -> Utility.buildDownstreamDependencies(config);
-    return config.useParallelGraphProcessor
-        ? new ParallelConflictGraphProcessor(config, runner, this, tracker)
-        : new SequentialConflictGraphProcessor(config, runner, this);
+    CompilerRunner runner = () -> Utility.buildDownstreamDependencies(context);
+    return context.useParallelGraphProcessor
+        ? new ParallelConflictGraphProcessor(context, runner, this, tracker)
+        : new SequentialConflictGraphProcessor(context, runner, this);
   }
 
   @Override

@@ -1,7 +1,7 @@
 package edu.ucr.cs.riple.core.metadata.field;
 
 import com.google.common.base.Preconditions;
-import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.metadata.Registry;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
@@ -33,10 +33,10 @@ public class FieldInitializationStore extends Registry<FieldInitializationNode> 
    * Constructs an {@link FieldInitializationStore} instance. After this call, all serialized
    * information from NullAway has been processed.
    *
-   * @param config Annotator config.
+   * @param context Annotator context.
    */
-  public FieldInitializationStore(Config config) {
-    super(config.target.dir.resolve(FILE_NAME));
+  public FieldInitializationStore(Context context) {
+    super(context.target.dir.resolve(FILE_NAME));
   }
 
   /**

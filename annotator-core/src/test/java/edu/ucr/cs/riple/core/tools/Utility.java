@@ -85,7 +85,7 @@ public class Utility {
   }
 
   /**
-   * Creates the gradle command line arguments. Project names are used as a prefix for config files
+   * Creates the gradle command line arguments. Project names are used as a prefix for context files
    * names and output paths.
    *
    * @param outDirPath Root output path.
@@ -102,10 +102,10 @@ public class Utility {
               String scannerConfigName = module + "-scanner.xml";
               return Stream.of(
                   String.format(
-                      "-P%s-nullaway-config-path=%s",
+                      "-P%s-nullaway-context-path=%s",
                       module, outDirPath.resolve(nullawayConfigName)),
                   String.format(
-                      "-P%s-scanner-config-path=%s",
+                      "-P%s-scanner-context-path=%s",
                       module, outDirPath.resolve(scannerConfigName)));
             })
         .collect(Collectors.toSet());
