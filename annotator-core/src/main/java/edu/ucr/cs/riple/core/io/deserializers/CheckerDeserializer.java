@@ -25,8 +25,8 @@
 package edu.ucr.cs.riple.core.io.deserializers;
 
 import edu.ucr.cs.riple.core.Checker;
-import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.index.Error;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import java.util.Set;
 
 /**
@@ -38,10 +38,10 @@ public interface CheckerDeserializer {
   /**
    * Deserialized errors reported by the checker on the passed modules.
    *
-   * @param context Context of the module where errors are reported.
+   * @param moduleInfo ModuleInfo of the module where errors are reported.
    * @return Corresponding Error instance with the passed values.
    */
-  Set<Error> deserializeErrors(Context context);
+  Set<Error> deserializeErrors(ModuleInfo moduleInfo);
 
   /**
    * Returns the serialization version number which this adapter is associated with.

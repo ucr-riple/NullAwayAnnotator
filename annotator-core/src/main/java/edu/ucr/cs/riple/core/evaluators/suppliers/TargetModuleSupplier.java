@@ -33,9 +33,9 @@ import edu.ucr.cs.riple.core.evaluators.graph.processors.ParallelConflictGraphPr
 import edu.ucr.cs.riple.core.evaluators.graph.processors.SequentialConflictGraphProcessor;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
-import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.util.Utility;
 
 /**
@@ -63,7 +63,7 @@ public class TargetModuleSupplier extends AbstractSupplier {
       Config config,
       TargetModuleCache targetModuleCache,
       DownstreamImpactCache downstreamImpactCache) {
-    super(config, config.targetModuleContext);
+    super(config, config.targetModuleInfo);
     this.downstreamImpactCache = downstreamImpactCache;
     this.targetModuleCache = targetModuleCache;
   }
@@ -87,7 +87,7 @@ public class TargetModuleSupplier extends AbstractSupplier {
   public ConflictGraphProcessor getGraphProcessor() {
     CompilerRunner runner = () -> Utility.buildTarget(config);
     if (config.useParallelGraphProcessor) {
-      RegionTracker tracker = new CompoundTracker(config, context);
+      RegionTracker tracker = new CompoundTracker(config, moduleInfo);
       return new ParallelConflictGraphProcessor(config, runner, this, tracker);
     }
     return new SequentialConflictGraphProcessor(config, runner, this);
@@ -99,7 +99,7 @@ public class TargetModuleSupplier extends AbstractSupplier {
   }
 
   @Override
-  public Context getContext() {
-    return context;
+  public ModuleInfo getModuleInfo() {
+    return moduleInfo;
   }
 }

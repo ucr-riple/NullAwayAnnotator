@@ -25,8 +25,8 @@
 package edu.ucr.cs.riple.core.metadata.index;
 
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -43,21 +43,21 @@ public class ErrorStore {
   private final Index root;
   /** Current state indexed by enclosing class and method. */
   private Index current;
-  /** Context of the module which indexed errors are reported on. */
-  private final Context context;
+  /** ModuleInfo of the module which indexed errors are reported on. */
+  private final ModuleInfo moduleInfo;
   /** Annotator config. */
   private final Config config;
 
-  public ErrorStore(Config config, Context context) {
-    this.context = context;
+  public ErrorStore(Config config, ModuleInfo moduleInfo) {
+    this.moduleInfo = moduleInfo;
     this.config = config;
-    root = new Index(config, context);
+    root = new Index(config, moduleInfo);
     root.index();
   }
 
   /** Overwrites the current state with the new generated output, */
   public void saveState() {
-    current = new Index(config, context);
+    current = new Index(config, moduleInfo);
     current.index();
   }
 

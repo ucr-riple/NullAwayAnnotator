@@ -30,9 +30,9 @@ import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.evaluators.AbstractEvaluator;
 import edu.ucr.cs.riple.core.evaluators.graph.processors.ConflictGraphProcessor;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
-import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 
 /** Supplier for initializing an {@link AbstractEvaluator} instance. */
 public interface Supplier {
@@ -87,9 +87,9 @@ public interface Supplier {
   TargetModuleCache getTargetModuleCache();
 
   /**
-   * Getter for {@link Context} instance.
+   * Getter for {@link ModuleInfo} instance.
    *
-   * @return Context instance.
+   * @return ModuleInfo instance.
    */
-  Context getContext();
+  ModuleInfo getModuleInfo();
 }

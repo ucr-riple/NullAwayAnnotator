@@ -61,7 +61,7 @@ public class SequentialConflictGraphProcessor extends AbstractConflictGraphProce
                   fixes,
                   getTriggeredFixesFromDownstreamErrors(node),
                   errorComparisonResult.dif,
-                  context);
+                  moduleInfo);
               injector.removeFixes(fixes);
             });
     pb.close();

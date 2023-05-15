@@ -27,10 +27,10 @@ package edu.ucr.cs.riple.core.io.deserializers;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Checker;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Set;
 
@@ -58,7 +58,7 @@ public abstract class DeserializerBaseClass implements CheckerDeserializer {
    * @param region Region where the error is reported,
    * @param offset offset of program point in original version where error is reported.
    * @param resolvingFixes Set of fixes that resolve the error.
-   * @param context Context of the modules which errors are reported on.
+   * @param moduleInfo ModuleInfo of the modules which errors are reported on.
    * @return The corresponding error.
    */
   protected Error createError(
@@ -67,10 +67,10 @@ public abstract class DeserializerBaseClass implements CheckerDeserializer {
       Region region,
       int offset,
       ImmutableSet<Fix> resolvingFixes,
-      Context context) {
+      ModuleInfo moduleInfo) {
     ImmutableSet<Fix> fixes =
         resolvingFixes.stream()
-            .filter(f -> !context.getNonnullStore().hasExplicitNonnullAnnotation(f.toLocation()))
+            .filter(f -> !moduleInfo.getNonnullStore().hasExplicitNonnullAnnotation(f.toLocation()))
             .collect(ImmutableSet.toImmutableSet());
     return new Error(errorType, errorMessage, region, offset, fixes);
   }
@@ -82,9 +82,9 @@ public abstract class DeserializerBaseClass implements CheckerDeserializer {
    * @param onField Location of the field.
    * @return The updated given location.
    */
-  protected OnField extendVariableList(OnField onField, Context context) {
+  protected OnField extendVariableList(OnField onField, ModuleInfo moduleInfo) {
     Set<String> variables =
-        context
+        moduleInfo
             .getFieldRegistry()
             .getInLineMultipleFieldDeclarationsOnField(onField.clazz, onField.variables);
     onField.variables.addAll(variables);

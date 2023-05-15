@@ -27,13 +27,13 @@ package edu.ucr.cs.riple.core.util;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.TrackerNode;
+import edu.ucr.cs.riple.core.module.ModuleConfiguration;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.scanner.AnnotatorScanner;
 import edu.ucr.cs.riple.scanner.ScannerConfigWriter;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
@@ -143,11 +143,11 @@ public class Utility {
    * set of resolving fixes for read errors.
    *
    * @param config Annotator config.
-   * @param context Context of the module which fixes are created for.
+   * @param moduleInfo ModuleInfo of the module which fixes are created for.
    * @return Set of collected fixes.
    */
-  public static Set<Fix> readFixesFromOutputDirectory(Config config, Context context) {
-    Set<Error> errors = readErrorsFromOutputDirectory(config, context);
+  public static Set<Fix> readFixesFromOutputDirectory(Config config, ModuleInfo moduleInfo) {
+    Set<Error> errors = readErrorsFromOutputDirectory(config, moduleInfo);
     return Error.getResolvingFixesOfErrors(errors);
   }
 
@@ -155,11 +155,11 @@ public class Utility {
    * Reads serialized errors of passed module in "errors.tsv" file in the output directory,
    *
    * @param config Annotation config.
-   * @param context Context of the module which errors are created for.
+   * @param moduleInfo ModuleInfo of the module which errors are created for.
    * @return Set of serialized errors.
    */
-  public static Set<Error> readErrorsFromOutputDirectory(Config config, Context context) {
-    return config.deserializer.deserializeErrors(context);
+  public static Set<Error> readErrorsFromOutputDirectory(Config config, ModuleInfo moduleInfo) {
+    return config.deserializer.deserializeErrors(moduleInfo);
   }
 
   /**
@@ -219,7 +219,7 @@ public class Utility {
    * @param activation activation flag for all features of the scanner.
    */
   public static void setScannerCheckerActivation(
-      Config config, ImmutableSet<ModuleInfo> modules, boolean activation) {
+      Config config, ImmutableSet<ModuleConfiguration> modules, boolean activation) {
     modules.forEach(info -> setScannerCheckerActivation(config, info, activation));
   }
 
@@ -232,7 +232,7 @@ public class Utility {
    * @param activation activation flag for all features of the scanner.
    */
   public static void setScannerCheckerActivation(
-      Config config, ModuleInfo info, boolean activation) {
+      Config config, ModuleConfiguration info, boolean activation) {
     ScannerConfigWriter writer = new ScannerConfigWriter();
     writer
         .setSerializationActivation(activation)

@@ -28,8 +28,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.Registry;
+import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -57,7 +57,7 @@ public class MethodRegistry extends Registry<MethodRecord> {
     this(config, ImmutableSet.of(config.target));
   }
 
-  public MethodRegistry(Config config, ImmutableSet<ModuleInfo> modules) {
+  public MethodRegistry(Config config, ImmutableSet<ModuleConfiguration> modules) {
     super(
         config,
         modules.stream()

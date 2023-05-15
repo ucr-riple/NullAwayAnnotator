@@ -29,10 +29,10 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Checker;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.io.deserializers.DeserializerBaseClass;
-import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -68,10 +68,10 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
   }
 
   @Override
-  public Set<Error> deserializeErrors(Context context) {
+  public Set<Error> deserializeErrors(ModuleInfo moduleInfo) {
     ImmutableSet<Path> paths =
-        context.getModules().stream()
-            .map(moduleInfo -> moduleInfo.dir.resolve("errors.tsv"))
+        moduleInfo.getModuleConfigurations().stream()
+            .map(config -> config.dir.resolve("errors.tsv"))
             .collect(ImmutableSet.toImmutableSet());
     Set<Error> errors = new HashSet<>();
     paths.forEach(
@@ -82,7 +82,7 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
               // Skip header.
               br.readLine();
               while ((line = br.readLine()) != null) {
-                errors.add(deserializeErrorFromTSVLine(context, line));
+                errors.add(deserializeErrorFromTSVLine(moduleInfo, line));
               }
             }
           } catch (IOException e) {
@@ -95,11 +95,11 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
   /**
    * Deserializes an error from a TSV line.
    *
-   * @param context the context of the module which the error is reported in.
+   * @param moduleInfo the moduleInfo of the module which the error is reported in.
    * @param line Given TSV line.
    * @return the deserialized error corresponding to the values in the given tsv line.
    */
-  private Error deserializeErrorFromTSVLine(Context context, String line) {
+  private Error deserializeErrorFromTSVLine(ModuleInfo moduleInfo, String line) {
     String[] values = line.split("\t");
     Preconditions.checkArgument(
         values.length == 12,
@@ -114,9 +114,10 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
         Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 6, 12));
     if (nonnullTarget == null && errorType.equals(Error.METHOD_INITIALIZER_ERROR)) {
       ImmutableSet<Fix> resolvingFixes =
-          generateFixesForUninitializedFields(errorMessage, region, context).stream()
+          generateFixesForUninitializedFields(errorMessage, region, moduleInfo).stream()
               .filter(
-                  fix -> !context.getNonnullStore().hasExplicitNonnullAnnotation(fix.toLocation()))
+                  fix ->
+                      !moduleInfo.getNonnullStore().hasExplicitNonnullAnnotation(fix.toLocation()))
               .collect(ImmutableSet.toImmutableSet());
       return createError(
           errorType,
@@ -124,15 +125,15 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
           region,
           config.offsetHandler.getOriginalOffset(path, offset),
           resolvingFixes,
-          context);
+          moduleInfo);
     }
     if (nonnullTarget != null && nonnullTarget.isOnField()) {
-      nonnullTarget = extendVariableList(nonnullTarget.toField(), context);
+      nonnullTarget = extendVariableList(nonnullTarget.toField(), moduleInfo);
     }
     Fix resolvingFix =
         nonnullTarget == null
             ? null
-            : (context.getNonnullStore().hasExplicitNonnullAnnotation(nonnullTarget)
+            : (moduleInfo.getNonnullStore().hasExplicitNonnullAnnotation(nonnullTarget)
                 // skip if element has explicit nonnull annotation.
                 ? null
                 : new Fix(
@@ -143,7 +144,7 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
         region,
         config.offsetHandler.getOriginalOffset(path, offset),
         resolvingFix == null ? ImmutableSet.of() : ImmutableSet.of(resolvingFix),
-        context);
+        moduleInfo);
   }
 
   /**
@@ -194,18 +195,18 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
    * @return Set of fixes for uninitialized fields to resolve the given error.
    */
   protected ImmutableSet<Fix> generateFixesForUninitializedFields(
-      String errorMessage, Region region, Context context) {
+      String errorMessage, Region region, ModuleInfo moduleInfo) {
     return extractUninitializedFieldNames(errorMessage).stream()
         .map(
             field -> {
               OnField locationOnField =
-                  context.getFieldRegistry().getLocationOnField(region.clazz, field);
+                  moduleInfo.getFieldRegistry().getLocationOnField(region.clazz, field);
               if (locationOnField == null) {
                 return null;
               }
               return new Fix(
                   new AddMarkerAnnotation(
-                      extendVariableList(locationOnField, context), config.nullableAnnot),
+                      extendVariableList(locationOnField, moduleInfo), config.nullableAnnot),
                   Error.METHOD_INITIALIZER_ERROR,
                   true);
             })

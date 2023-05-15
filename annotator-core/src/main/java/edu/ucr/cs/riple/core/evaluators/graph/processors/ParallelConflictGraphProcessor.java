@@ -90,7 +90,7 @@ public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcess
                 fixes,
                 getTriggeredFixesFromDownstreamErrors(node),
                 triggeredErrors,
-                context);
+                moduleInfo);
           });
       injector.removeFixes(fixes);
     }

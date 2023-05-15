@@ -26,9 +26,9 @@ package edu.ucr.cs.riple.core.evaluators.suppliers;
 
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
-import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 
 /** Base class for all instances of {@link Supplier}. */
 public abstract class AbstractSupplier implements Supplier {
@@ -37,17 +37,17 @@ public abstract class AbstractSupplier implements Supplier {
   protected final ErrorStore errorStore;
   /** Injector instance. */
   protected final AnnotationInjector injector;
-  /** Context of the module which the impact of fixes are computed on. */
-  protected final Context context;
+  /** ModuleInfo of the module which the impact of fixes are computed on. */
+  protected final ModuleInfo moduleInfo;
   /** Depth of analysis. */
   protected final int depth;
   /** Annotator config. */
   protected final Config config;
 
-  public AbstractSupplier(Config config, Context context) {
+  public AbstractSupplier(Config config, ModuleInfo moduleInfo) {
     this.config = config;
-    this.context = context;
-    this.errorStore = new ErrorStore(config, context);
+    this.moduleInfo = moduleInfo;
+    this.errorStore = new ErrorStore(config, moduleInfo);
     this.injector = initializeInjector();
     this.depth = initializeDepth();
   }

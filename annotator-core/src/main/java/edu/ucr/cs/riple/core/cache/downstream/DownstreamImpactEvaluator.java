@@ -73,7 +73,7 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
                                       error.isSingleFix()
                                           && error.toResolvingLocation().isOnParameter()
                                           // Method is declared in the target module.
-                                          && config.targetModuleContext.declaredInModule(
+                                          && config.targetModuleInfo.declaredInModule(
                                               error.toResolvingParameter()))
                               .map(Error::toResolvingParameter)
                               .collect(Collectors.toSet());
@@ -85,7 +85,7 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
                             onParameter ->
                                 onParameter.path =
                                     config
-                                        .targetModuleContext
+                                        .targetModuleInfo
                                         .getMethodRegistry()
                                         .findMethodByName(
                                             onParameter.clazz, onParameter.enclosingMethod.method)

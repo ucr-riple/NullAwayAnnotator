@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
-import edu.ucr.cs.riple.core.metadata.Context;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Optional;
@@ -34,13 +34,13 @@ import java.util.stream.Collectors;
 /** Tracker for Method Parameters. */
 public class ParameterRegionTracker implements RegionTracker {
 
-  /** Context of the module which usage of parameters are stored. */
-  private final Context context;
+  /** ModuleInfo of the module which usage of parameters are stored. */
+  private final ModuleInfo moduleInfo;
   /** {@link MethodRegionTracker} instance, used to retrieve all sites. */
   private final MethodRegionTracker methodRegionTracker;
 
-  public ParameterRegionTracker(Context context, MethodRegionTracker methodRegionTracker) {
-    this.context = context;
+  public ParameterRegionTracker(ModuleInfo moduleInfo, MethodRegionTracker methodRegionTracker) {
+    this.moduleInfo = moduleInfo;
     this.methodRegionTracker = methodRegionTracker;
   }
 
@@ -52,7 +52,7 @@ public class ParameterRegionTracker implements RegionTracker {
     OnParameter parameter = location.toParameter();
     // Get regions which will be potentially affected by inheritance violations.
     Set<Region> regions =
-        context.getMethodRegistry().getImmediateSubMethods(parameter.toMethod()).stream()
+        moduleInfo.getMethodRegistry().getImmediateSubMethods(parameter.toMethod()).stream()
             .map(node -> new Region(node.location.clazz, node.location.method))
             .collect(Collectors.toSet());
     // Add the method the fix is targeting.

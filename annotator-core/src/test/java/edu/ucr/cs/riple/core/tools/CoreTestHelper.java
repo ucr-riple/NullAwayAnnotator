@@ -30,8 +30,8 @@ import edu.ucr.cs.riple.core.AnalysisMode;
 import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Checker;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.IOException;
@@ -374,7 +374,7 @@ public class CoreTestHelper {
         projectBuilder.getModules().stream()
             .map(
                 name ->
-                    new ModuleInfo(
+                    new ModuleConfiguration(
                         id[0]++,
                         outDirPath,
                         outDirPath.resolve(name + "-nullaway.xml"),

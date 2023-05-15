@@ -34,9 +34,9 @@ import edu.ucr.cs.riple.core.evaluators.graph.processors.ParallelConflictGraphPr
 import edu.ucr.cs.riple.core.evaluators.graph.processors.SequentialConflictGraphProcessor;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.VirtualInjector;
-import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.util.Utility;
 
 /**
@@ -53,8 +53,8 @@ public class DownstreamDependencySupplier extends AbstractSupplier {
   private final RegionTracker tracker;
 
   public DownstreamDependencySupplier(Config config) {
-    super(config, new Context(config, config.downstreamInfo, config.buildCommand));
-    this.tracker = new MethodRegionTracker(config, context);
+    super(config, new ModuleInfo(config, config.downstreamInfo, config.buildCommand));
+    this.tracker = new MethodRegionTracker(config, moduleInfo);
   }
 
   @Override
@@ -87,7 +87,7 @@ public class DownstreamDependencySupplier extends AbstractSupplier {
   }
 
   @Override
-  public Context getContext() {
-    return context;
+  public ModuleInfo getModuleInfo() {
+    return moduleInfo;
   }
 }

@@ -25,9 +25,9 @@
 package edu.ucr.cs.riple.core.metadata.trackers.generatedcode;
 
 import edu.ucr.cs.riple.core.evaluators.graph.processors.ParallelConflictGraphProcessor;
-import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.util.Objects;
 import java.util.Optional;
@@ -48,11 +48,11 @@ public class LombokTracker implements GeneratedRegionTracker {
 
   /** Method region tracker to get potentially impacted regions of a method. */
   private final MethodRegionTracker tracker;
-  /** Context of the module which its generated regions by this processor are stored. */
-  private final Context context;
+  /** ModuleInfo of the module which its generated regions by this processor are stored. */
+  private final ModuleInfo moduleInfo;
 
-  public LombokTracker(Context context, MethodRegionTracker methodRegionTracker) {
-    this.context = context;
+  public LombokTracker(ModuleInfo moduleInfo, MethodRegionTracker methodRegionTracker) {
+    this.moduleInfo = moduleInfo;
     this.tracker = methodRegionTracker;
   }
 
@@ -62,7 +62,7 @@ public class LombokTracker implements GeneratedRegionTracker {
         // filter regions which are created by lombok
         .filter(region -> region.sourceType.equals(SourceType.LOMBOK) && region.isOnMethod())
         // find the corresponding method for the region.
-        .map(region -> context.getMethodRegistry().findMethodByName(region.clazz, region.member))
+        .map(region -> moduleInfo.getMethodRegistry().findMethodByName(region.clazz, region.member))
         .filter(Objects::nonNull)
         // get method location.
         .map(methodNode -> methodNode.location)

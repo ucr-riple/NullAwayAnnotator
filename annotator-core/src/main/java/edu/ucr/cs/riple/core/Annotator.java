@@ -92,7 +92,7 @@ public class Annotator {
   private void preprocess() {
     System.out.println("Preprocessing...");
     Set<OnField> uninitializedFields =
-        Utility.readFixesFromOutputDirectory(config, config.targetModuleContext).stream()
+        Utility.readFixesFromOutputDirectory(config, config.targetModuleInfo).stream()
             .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
             .map(Fix::toField)
             .collect(Collectors.toSet());
@@ -198,7 +198,7 @@ public class Annotator {
     Utility.buildTarget(config);
     // Suggested fixes of target at the current state.
     ImmutableSet<Fix> fixes =
-        Utility.readFixesFromOutputDirectory(config, config.targetModuleContext).stream()
+        Utility.readFixesFromOutputDirectory(config, config.targetModuleInfo).stream()
             .filter(fix -> !cache.processedFix(fix))
             .collect(ImmutableSet.toImmutableSet());
 
@@ -242,9 +242,8 @@ public class Annotator {
     // Collect regions with remaining errors.
     Utility.buildTarget(config);
     Set<Error> remainingErrors =
-        Utility.readErrorsFromOutputDirectory(config, config.targetModuleContext);
-    Set<Fix> remainingFixes =
-        Utility.readFixesFromOutputDirectory(config, config.targetModuleContext);
+        Utility.readErrorsFromOutputDirectory(config, config.targetModuleInfo);
+    Set<Fix> remainingFixes = Utility.readFixesFromOutputDirectory(config, config.targetModuleInfo);
     // Collect all regions for NullUnmarked.
     // For all errors in regions which correspond to a method's body, we can add @NullUnmarked at
     // the method level.
@@ -260,7 +259,7 @@ public class Annotator {
                       // only for errors in the body of the constructor.
                       !error.isInitializationError()) {
                     return config
-                        .targetModuleContext
+                        .targetModuleInfo
                         .getMethodRegistry()
                         .findMethodByName(error.encClass(), error.encMember());
                   }
@@ -272,7 +271,7 @@ public class Annotator {
                       && error.toResolvingLocation().isOnParameter()) {
                     OnParameter nullableParameter = error.toResolvingParameter();
                     return config
-                        .targetModuleContext
+                        .targetModuleInfo
                         .getMethodRegistry()
                         .findMethodByName(
                             nullableParameter.clazz, nullableParameter.enclosingMethod.method);
@@ -295,7 +294,7 @@ public class Annotator {
             .map(
                 error ->
                     new AddMarkerAnnotation(
-                        config.targetModuleContext.getLocationOnClass(error.getRegion().clazz),
+                        config.targetModuleInfo.getLocationOnClass(error.getRegion().clazz),
                         config.nullUnMarkedAnnotation))
             .collect(Collectors.toSet()));
     injector.injectAnnotations(nullUnMarkedAnnotations);
@@ -320,7 +319,7 @@ public class Annotator {
             .map(
                 error ->
                     config
-                        .targetModuleContext
+                        .targetModuleInfo
                         .getFieldRegistry()
                         .getLocationOnField(error.getRegion().clazz, error.getRegion().member))
             .filter(Objects::nonNull)
@@ -356,14 +355,14 @@ public class Annotator {
     config.log.updateInjectedAnnotations(initializationSuppressWarningsAnnotations);
     // Collect @NullUnmarked annotations on classes for any remaining error.
     Utility.buildTarget(config);
-    remainingErrors = Utility.readErrorsFromOutputDirectory(config, config.targetModuleContext);
+    remainingErrors = Utility.readErrorsFromOutputDirectory(config, config.targetModuleInfo);
     nullUnMarkedAnnotations =
         remainingErrors.stream()
             .filter(error -> !error.getRegion().isInAnonymousClass())
             .map(
                 error ->
                     new AddMarkerAnnotation(
-                        config.targetModuleContext.getLocationOnClass(error.getRegion().clazz),
+                        config.targetModuleInfo.getLocationOnClass(error.getRegion().clazz),
                         config.nullUnMarkedAnnotation))
             .collect(Collectors.toSet());
     injector.injectAnnotations(nullUnMarkedAnnotations);

@@ -26,8 +26,8 @@ package edu.ucr.cs.riple.core.metadata.trackers;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.Registry;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
@@ -39,16 +39,16 @@ import java.util.stream.Collectors;
 /** Tracker for Fields. */
 public class FieldRegionTracker extends Registry<TrackerNode> implements RegionTracker {
 
-  /** Context of the module which usages of fields are stored. */
-  private final Context context;
+  /** ModuleInfo of the module which usages of fields are stored. */
+  private final ModuleInfo moduleInfo;
 
-  public FieldRegionTracker(Config config, Context context) {
+  public FieldRegionTracker(Config config, ModuleInfo context) {
     super(
         config,
-        context.getModules().stream()
+        context.getModuleConfigurations().stream()
             .map(moduleInfo -> moduleInfo.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));
-    this.context = context;
+    this.moduleInfo = context;
   }
 
   @Override
@@ -77,10 +77,10 @@ public class FieldRegionTracker extends Registry<TrackerNode> implements RegionT
             .map(fieldName -> new Region(field.clazz, fieldName))
             .collect(Collectors.toSet()));
     // Check if field is initialized at declaration.
-    if (context.getFieldRegistry().isUninitializedField(field)) {
+    if (moduleInfo.getFieldRegistry().isUninitializedField(field)) {
       // If not, add all constructors for the class.
       ans.addAll(
-          context.getMethodRegistry().getConstructorsForClass(field.clazz).stream()
+          moduleInfo.getMethodRegistry().getConstructorsForClass(field.clazz).stream()
               .map(onMethod -> new Region(onMethod.clazz, onMethod.method))
               .collect(Collectors.toSet()));
     }

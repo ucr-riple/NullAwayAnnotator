@@ -11,8 +11,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.metadata.Registry;
+import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import edu.ucr.cs.riple.injector.location.OnClass;
@@ -46,7 +46,7 @@ public class FieldRegistry extends Registry<FieldRecord> {
    * @param config Annotator config.
    * @param module Information of the target module.
    */
-  public FieldRegistry(Config config, ModuleInfo module) {
+  public FieldRegistry(Config config, ModuleConfiguration module) {
     this(config, ImmutableSet.of(module));
   }
 
@@ -56,7 +56,7 @@ public class FieldRegistry extends Registry<FieldRecord> {
    * @param config Annotator config.
    * @param modules Information of set of modules.
    */
-  public FieldRegistry(Config config, ImmutableSet<ModuleInfo> modules) {
+  public FieldRegistry(Config config, ImmutableSet<ModuleConfiguration> modules) {
     super(
         config,
         modules.stream()

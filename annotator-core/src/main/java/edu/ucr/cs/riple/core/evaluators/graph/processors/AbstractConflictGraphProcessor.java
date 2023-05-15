@@ -29,9 +29,9 @@ import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.evaluators.graph.Node;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
-import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Set;
@@ -50,12 +50,12 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
   protected final Config config;
   /** Handler to re-run compiler. */
   protected final CompilerRunner compilerRunner;
-  /** Context of the input module which the impact of fixes are computed on. */
-  protected final Context context;
+  /** ModuleInfo of the input module which the impact of fixes are computed on. */
+  protected final ModuleInfo moduleInfo;
 
   public AbstractConflictGraphProcessor(Config config, CompilerRunner runner, Supplier supplier) {
     this.config = config;
-    this.context = supplier.getContext();
+    this.moduleInfo = supplier.getModuleInfo();
     this.injector = supplier.getInjector();
     this.downstreamImpactCache = supplier.getDownstreamImpactCache();
     this.errorStore = supplier.getErrorStore();

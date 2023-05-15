@@ -66,7 +66,7 @@ public class DownstreamImpactCacheImpl
     super(
         config,
         config
-            .targetModuleContext
+            .targetModuleInfo
             .getMethodRegistry()
             .getPublicMethodsWithNonPrimitivesReturn()
             .stream()
@@ -85,7 +85,7 @@ public class DownstreamImpactCacheImpl
     System.out.println("Analyzing downstream dependencies...");
     DownstreamDependencySupplier supplier = new DownstreamDependencySupplier(config);
     // Collect callers of public APIs in module.
-    MethodRegionTracker tracker = new MethodRegionTracker(config, supplier.getContext());
+    MethodRegionTracker tracker = new MethodRegionTracker(config, supplier.getModuleInfo());
     // Generate fixes corresponding methods.
     ImmutableSet<Fix> fixes =
         store.values().stream()
