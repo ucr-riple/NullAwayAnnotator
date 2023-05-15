@@ -24,9 +24,8 @@
 
 package edu.ucr.cs.riple.core.metadata;
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
 import edu.ucr.cs.riple.core.Config;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -35,20 +34,26 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 
 /**
- * Container class which loads its content from a file in TSV format. For faster retrieval, it uses
- * hashing techniques to store data. For faster retrieval, the anticipated hash must be passed to
- * search methods.
+ * Container class which loads its content from a file in TSV format. For faster retrieval, it
+ * stores its content in a {@link com.google.common.collect.ImmutableMultimap} where the key is the
+ * hash of the item and the value is the item itself. For faster retrieval, if the anticipated hash
+ * is known, {@link Registry#findRecordsWithHashHint} can be used, otherwise use {@link
+ * Registry#findRecords}. If subclasses need to initialize some data before loading the file, they
+ * must call {@link Registry#setup()}. Please note that this class anticipates that the file exits
+ * at the given paths and does not attempt to create it. Before creating an instance, please make
+ * sure that the file exists.
  */
-public abstract class MetaData<T> {
+public abstract class Registry<T> {
 
   /**
    * Contents, every element is mapped to it's computed hash, note that two different items can have
-   * an identical hash, therefore it is of type {@link Multimap} (not HashMap) to hold both items.
+   * an identical hash, therefore it is of type {@link ImmutableMultimap} ({@link
+   * java.util.HashMap}) to hold both items.
    */
-  protected final Multimap<Integer, T> contents;
-
+  protected final ImmutableMultimap<Integer, T> contents;
   /** Annotator config. */
   protected final Config config;
 
@@ -59,15 +64,16 @@ public abstract class MetaData<T> {
    * @param config Annotator config.
    * @param path Path to the file containing the data.
    */
-  public MetaData(Config config, Path path) {
-    contents = MultimapBuilder.hashKeys().arrayListValues().build();
+  public Registry(Config config, Path path) {
     this.config = config;
+    ImmutableMultimap.Builder<Integer, T> builder = ImmutableMultimap.builder();
     setup();
     try {
-      fillNodes(path);
+      populateContent(path, builder);
     } catch (IOException e) {
       throw new RuntimeException("Error happened while loading content of file: " + path, e);
     }
+    this.contents = builder.build();
   }
 
   /**
@@ -77,43 +83,47 @@ public abstract class MetaData<T> {
    * @param config Annotator config.
    * @param paths Paths to all files containing data.
    */
-  public MetaData(Config config, ImmutableSet<Path> paths) {
-    contents = MultimapBuilder.hashKeys().arrayListValues().build();
+  public Registry(Config config, ImmutableSet<Path> paths) {
     this.config = config;
+    ImmutableMultimap.Builder<Integer, T> builder = ImmutableMultimap.builder();
     setup();
     paths.forEach(
         path -> {
           try {
-            fillNodes(path);
+            populateContent(path, builder);
           } catch (IOException e) {
             throw new RuntimeException("Error happened while loading content of file: " + path, e);
           }
         });
+    this.contents = builder.build();
   }
 
   /**
-   * Subclasses can override this method to perform eny initialization before loading data from the
+   * Subclasses can override this method to perform any initialization before loading data from the
    * file.
    */
   protected void setup() {}
 
   /**
-   * Loads data to contents.
+   * Loads data existing in the given path, to the given builder.
    *
    * @param path Path to the file containing data.
    * @throws IOException if file not is found.
    */
-  protected void fillNodes(Path path) throws IOException {
+  protected void populateContent(Path path, ImmutableMultimap.Builder<Integer, T> builder)
+      throws IOException {
     try (BufferedReader reader =
         Files.newBufferedReader(path.toFile().toPath(), Charset.defaultCharset())) {
+      Builder<T> recordBuilder = getBuilder();
       String line = reader.readLine();
       if (line != null) {
+        // Skip header
         line = reader.readLine();
       }
       while (line != null) {
-        T node = addNodeByLine(line.split("\t"));
-        if (node != null) {
-          contents.put(node.hashCode(), node);
+        T record = recordBuilder.build(line.split("\t"));
+        if (record != null) {
+          builder.put(record.hashCode(), record);
         }
         line = reader.readLine();
       }
@@ -121,45 +131,65 @@ public abstract class MetaData<T> {
   }
 
   /**
-   * Creates an instance of {@code T} corresponding to the values in a row. This method is called on
-   * every row of the loaded file.
+   * Returns the corresponding {@link Builder} for this registry which can make a record instance of
+   * type {@link T} from a row in the given TSV file.
    *
-   * @param values Values in a row.
-   * @return Instance of {@code T}.
+   * @return {@link Builder} for this registry.
    */
-  protected abstract T addNodeByLine(String[] values);
+  protected abstract Builder<T> getBuilder();
 
   /**
-   * Retrieves node which holds the passed predicate. It uses the given hash for faster retrieval.
+   * Retrieves record which holds the passed predicate. It uses the given hash for faster retrieval.
    *
    * @param c Predicate.
    * @param hash Expected hash
    * @return Corresponding {@code T}.
    */
-  protected T findNodeWithHashHint(Predicate<T> c, int hash) {
-    return findNodesWithHashHint(c, hash).findFirst().orElse(null);
+  @Nullable
+  protected T findRecordWithHashHint(Predicate<T> c, int hash) {
+    return findRecordsWithHashHint(c, hash).findFirst().orElse(null);
   }
 
   /**
-   * Retrieves stream of nodes which holds the passed predicate. It uses the given hash for faster
+   * Retrieves stream of records which holds the passed predicate. It uses the given hash for faster
    * retrieval.
    *
    * @param c Predicate.
    * @param hash Expected hash
    * @return Corresponding stream of {@code T}.
    */
-  protected Stream<T> findNodesWithHashHint(Predicate<T> c, int hash) {
+  protected Stream<T> findRecordsWithHashHint(Predicate<T> c, int hash) {
+    if (!contents.containsKey(hash)) {
+      return Stream.of();
+    }
     return contents.get(hash).stream().filter(c);
   }
 
   /**
-   * Retrieves stream of nodes which holds the passed predicate. This method does not hash and is
-   * significantly slower than {@link MetaData#findNodesWithHashHint(Predicate, int)};
+   * Retrieves stream of records which holds the passed predicate. This method is expected to be
+   * significantly slower than {@link Registry#findRecordsWithHashHint}, if the anticipated hash is
+   * known, please use {@link Registry#findRecordsWithHashHint}.
    *
    * @param c Predicate.
    * @return Corresponding stream of {@code T}.
    */
-  protected Stream<T> findNodes(Predicate<T> c) {
+  protected Stream<T> findRecords(Predicate<T> c) {
     return contents.values().stream().filter(c);
+  }
+
+  /**
+   * Builder interface for creating {@link Registry} items. Builders with this interface can make a
+   * registry record of type {@link T} from a row of a TSV file.
+   *
+   * @param <T> Type of the registry record.
+   */
+  public interface Builder<T> {
+    /**
+     * Builds a registry record of type {@link T} from a row of a TSV file.
+     *
+     * @param values Row of a TSV file.
+     * @return Registry record of type {@link T}.
+     */
+    T build(String[] values);
   }
 }

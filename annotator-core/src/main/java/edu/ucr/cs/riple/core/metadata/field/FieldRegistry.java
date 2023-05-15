@@ -12,7 +12,7 @@ import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.ModuleInfo;
-import edu.ucr.cs.riple.core.metadata.MetaData;
+import edu.ucr.cs.riple.core.metadata.Registry;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import edu.ucr.cs.riple.injector.location.OnClass;
@@ -33,7 +33,7 @@ import java.util.Set;
  * j; and a Fix suggesting f to be {@code Nullable}, this class will replace that fix with a fix
  * suggesting f, i, and j be {@code Nullable}.)
  */
-public class FieldRegistry extends MetaData<FieldRecord> {
+public class FieldRegistry extends Registry<FieldRecord> {
 
   /**
    * A map from class flat name to a set of field names that are declared in that class but not
@@ -71,49 +71,53 @@ public class FieldRegistry extends MetaData<FieldRecord> {
   }
 
   @Override
-  protected FieldRecord addNodeByLine(String[] values) {
-    // Class flat name.
-    String clazz = values[0];
-    // Path to class.
-    Path path = Helper.deserializePath(values[1]);
-    CompilationUnit tree;
-    try {
-      tree = StaticJavaParser.parse(path);
-      NodeList<BodyDeclaration<?>> members;
+  protected Builder<FieldRecord> getBuilder() {
+    return values -> {
+      // Class flat name.
+      String clazz = values[0];
+      // Path to class.
+      Path path = Helper.deserializePath(values[1]);
+      CompilationUnit tree;
       try {
-        members = Helper.getTypeDeclarationMembersByFlatName(tree, clazz);
-      } catch (TargetClassNotFound notFound) {
-        System.err.println(notFound.getMessage());
+        tree = StaticJavaParser.parse(path);
+        NodeList<BodyDeclaration<?>> members;
+        try {
+          members = Helper.getTypeDeclarationMembersByFlatName(tree, clazz);
+        } catch (TargetClassNotFound notFound) {
+          System.err.println(notFound.getMessage());
+          return null;
+        }
+        FieldRecord info = new FieldRecord(path, clazz);
+        members.forEach(
+            bodyDeclaration ->
+                bodyDeclaration.ifFieldDeclaration(
+                    fieldDeclaration -> {
+                      NodeList<VariableDeclarator> vars = fieldDeclaration.getVariables();
+                      info.addNewSetOfFieldDeclarations(
+                          vars.stream()
+                              .map(NodeWithSimpleName::getNameAsString)
+                              .collect(ImmutableSet.toImmutableSet()));
+                      // Collect uninitialized fields at declaration.
+                      vars.forEach(
+                          variableDeclarator -> {
+                            String fieldName = variableDeclarator.getNameAsString();
+                            if (variableDeclarator.getInitializer().isEmpty()) {
+                              uninitializedFields.put(clazz, fieldName);
+                            }
+                          });
+                    }));
+        // We still want to keep the information about the class even if it has no field
+        // declarations,
+        // so we can retrieve tha path to the file from the given class flat name. This information
+        // is
+        // used in adding suppression annotations on class level.
+        return info;
+      } catch (FileNotFoundException e) {
         return null;
+      } catch (IOException e) {
+        throw new RuntimeException(e);
       }
-      FieldRecord info = new FieldRecord(path, clazz);
-      members.forEach(
-          bodyDeclaration ->
-              bodyDeclaration.ifFieldDeclaration(
-                  fieldDeclaration -> {
-                    NodeList<VariableDeclarator> vars = fieldDeclaration.getVariables();
-                    info.addNewSetOfFieldDeclarations(
-                        vars.stream()
-                            .map(NodeWithSimpleName::getNameAsString)
-                            .collect(ImmutableSet.toImmutableSet()));
-                    // Collect uninitialized fields at declaration.
-                    vars.forEach(
-                        variableDeclarator -> {
-                          String fieldName = variableDeclarator.getNameAsString();
-                          if (variableDeclarator.getInitializer().isEmpty()) {
-                            uninitializedFields.put(clazz, fieldName);
-                          }
-                        });
-                  }));
-      // We still want to keep the information about the class even if it has no field declarations,
-      // so we can retrieve tha path to the file from the given class flat name. This information is
-      // used in adding suppression annotations on class level.
-      return info;
-    } catch (FileNotFoundException e) {
-      return null;
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    };
   }
 
   /**
@@ -127,7 +131,7 @@ public class FieldRegistry extends MetaData<FieldRecord> {
   public ImmutableSet<String> getInLineMultipleFieldDeclarationsOnField(
       String clazz, Set<String> fields) {
     FieldRecord candidate =
-        findNodeWithHashHint(node -> node.clazz.equals(clazz), FieldRecord.hash(clazz));
+        findRecordWithHashHint(node -> node.clazz.equals(clazz), FieldRecord.hash(clazz));
     if (candidate == null) {
       // No inline multiple field declarations.
       return ImmutableSet.copyOf(fields);
@@ -160,7 +164,7 @@ public class FieldRegistry extends MetaData<FieldRecord> {
    */
   public OnField getLocationOnField(String clazz, String field) {
     FieldRecord candidate =
-        findNodeWithHashHint(node -> node.clazz.equals(clazz), FieldRecord.hash(clazz));
+        findRecordWithHashHint(node -> node.clazz.equals(clazz), FieldRecord.hash(clazz));
     Set<String> fieldNames = Sets.newHashSet(field);
     if (candidate == null) {
       // field is on byte code.
@@ -179,7 +183,7 @@ public class FieldRegistry extends MetaData<FieldRecord> {
    */
   public OnClass getLocationOnClass(String clazz) {
     FieldRecord candidate =
-        findNodeWithHashHint(node -> node.clazz.equals(clazz), FieldRecord.hash(clazz));
+        findRecordWithHashHint(node -> node.clazz.equals(clazz), FieldRecord.hash(clazz));
     if (candidate == null) {
       // class not observed in source code.
       return null;
