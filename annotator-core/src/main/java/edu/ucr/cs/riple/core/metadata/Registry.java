@@ -116,6 +116,7 @@ public abstract class Registry<T> {
       Builder<T> recordBuilder = getBuilder();
       String line = reader.readLine();
       if (line != null) {
+        // Skip header
         line = reader.readLine();
       }
       while (line != null) {
@@ -160,8 +161,9 @@ public abstract class Registry<T> {
   }
 
   /**
-   * Retrieves stream of nodes which holds the passed predicate. This method does not hash and is
-   * significantly slower than {@link Registry#findNodesWithHashHint(Predicate, int)};
+   * Retrieves stream of nodes which holds the passed predicate. This method is expected to be
+   * significantly slower than {@link Registry#findNodesWithHashHint}, if the anticipated hash is
+   * known, please use {@link Registry#findNodesWithHashHint}.
    *
    * @param c Predicate.
    * @return Corresponding stream of {@code T}.
