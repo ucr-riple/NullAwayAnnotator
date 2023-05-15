@@ -60,7 +60,7 @@ public class Annotator {
   /** Injector instance. */
   private final AnnotationInjector injector;
   /** Annotator context. */
-  private final Context context;
+  public final Context context;
   /** Reports cache. */
   public final ReportCache cache;
 

@@ -39,7 +39,7 @@ import edu.ucr.cs.riple.scanner.Serializer;
 public class NonnullStore extends Registry<Location> {
 
   public NonnullStore(Context context) {
-    this(ImmutableSet.of(context.target));
+    this(ImmutableSet.of(context.targetConfiguration));
   }
 
   public NonnullStore(ImmutableSet<ModuleConfiguration> modules) {

@@ -180,7 +180,7 @@ public class ConfigurationTest {
           // for
           // downstream dependencies.
           ImmutableSet<Pair<Path, Path>> actualDownstreamConfigPaths =
-              config.downstreamInfo.stream()
+              config.downstreamConfigurations.stream()
                   .map(
                       moduleInfo -> new Pair<>(moduleInfo.nullawayConfig, moduleInfo.scannerConfig))
                   .collect(ImmutableSet.toImmutableSet());

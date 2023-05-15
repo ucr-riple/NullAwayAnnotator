@@ -28,7 +28,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.io.deserializers.CheckerDeserializer;
-import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
@@ -58,6 +57,10 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+/**
+ * Configuration class which controls all the parameters of the Annotator received either from the
+ * command line arguments or the given json file.
+ */
 public class Config {
 
   /**
@@ -101,7 +104,7 @@ public class Config {
   /** If enabled, effects of public API on downstream dependencies will be considered. */
   public final boolean downStreamDependenciesAnalysisActivated;
   /** Sets of context path information for all downstream dependencies. */
-  public final ImmutableSet<ModuleConfiguration> downstreamInfo;
+  public final ImmutableSet<ModuleConfiguration> downstreamConfigurations;
   /**
    * Path to nullaway library model loader, which enables the communication between annotator and
    * nullaway when processing downstream dependencies.
@@ -115,7 +118,7 @@ public class Config {
    */
   public final AnalysisMode mode;
   /** Global counter for assigning unique id for each instance. */
-  public int moduleCounterID;
+  private int moduleCounterID;
   /**
    * If activated, AutoAnnotator will try to resolve all remaining errors by marking the enclosing
    * method as {@code NullUnMarked}. It will also mark uninitialized fields with
@@ -130,8 +133,6 @@ public class Config {
    * acknowledge the annotation and will not add any {@code @Nullable} annotation to the element.
    */
   public final ImmutableSet<String> nonnullAnnotations;
-  /** Log instance. Responsible for logging all the information about the build time and count. */
-  public final Log log;
   /** Depth of the analysis. Default to 5 if not set by the user */
   public final int depth;
   /**
@@ -423,14 +424,14 @@ public class Config {
 
     if (this.downStreamDependenciesAnalysisActivated) {
       moduleConfigurationList.remove(0);
-      this.downstreamInfo = ImmutableSet.copyOf(moduleConfigurationList);
+      this.downstreamConfigurations = ImmutableSet.copyOf(moduleConfigurationList);
       this.nullawayLibraryModelLoaderPath =
           Paths.get(cmd.getOptionValue(nullawayLibraryModelLoaderPathOption));
       this.downstreamDependenciesBuildCommand =
           cmd.getOptionValue(downstreamDependenciesBuildCommandOption.getLongOpt());
     } else {
       this.nullawayLibraryModelLoaderPath = null;
-      this.downstreamInfo = ImmutableSet.of();
+      this.downstreamConfigurations = ImmutableSet.of();
       this.downstreamDependenciesBuildCommand = null;
     }
     this.inferenceActivated = !cmd.hasOption(deactivateInference);
@@ -441,8 +442,6 @@ public class Config {
             ? cmd.getOptionValue(activateForceResolveOption)
             : "org.jspecify.annotations.NullUnmarked";
     this.moduleCounterID = 0;
-    this.log = new Log();
-    this.log.reset();
     this.generatedCodeDetectors =
         cmd.hasOption(disableRegionDetectionByLombok)
             ? ImmutableSet.of()
@@ -525,7 +524,7 @@ public class Config {
                     jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:ANALYSIS_MODE", String.class)
                 .orElse("default"));
 
-    this.downstreamInfo = ImmutableSet.copyOf(moduleConfigurationList);
+    this.downstreamConfigurations = ImmutableSet.copyOf(moduleConfigurationList);
     this.moduleCounterID = 0;
     this.forceResolveActivated =
         getValueFromKey(jsonObject, "FORCE_RESOLVE", Boolean.class).orElse(false);
@@ -540,7 +539,6 @@ public class Config {
             .orElse(true);
     this.generatedCodeDetectors =
         lombokCodeDetectorActivated ? Sets.immutableEnumSet(SourceType.LOMBOK) : ImmutableSet.of();
-    this.log = new Log();
     this.nonnullAnnotations =
         ImmutableSet.copyOf(
             getArrayValueFromKey(
@@ -549,7 +547,6 @@ public class Config {
                     json -> json.get("NONNULL").toString(),
                     String.class)
                 .orElse(List.of()));
-    this.log.reset();
   }
 
   /**

@@ -47,6 +47,10 @@ public class Log {
    */
   private final List<AddAnnotation> injectedAnnotations = new ArrayList<>();
 
+  public Log() {
+    this.reset();
+  }
+
   /** Resets all log information. */
   public void reset() {
     this.nodes = 0;

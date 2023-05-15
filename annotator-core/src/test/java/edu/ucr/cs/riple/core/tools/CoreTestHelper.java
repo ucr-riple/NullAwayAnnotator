@@ -31,6 +31,7 @@ import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Checker;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
@@ -85,6 +86,8 @@ public class CoreTestHelper {
   private Path expectedOutputPath;
   /** Project builder. */
   private final ProjectBuilder projectBuilder;
+
+  private Log log;
 
   public CoreTestHelper(Path projectPath, Path outDirPath) {
     this.projectPath = projectPath;
@@ -217,9 +220,10 @@ public class CoreTestHelper {
     Path configPath = outDirPath.resolve("context.json");
     checkSourcePackages();
     makeAnnotatorConfigFile(configPath);
-    Config config = new Config(configPath);
+    config = new Config(configPath);
     Annotator annotator = new Annotator(config);
     annotator.start();
+    log = annotator.context.log;
     if (predicate == null) {
       predicate = DEFAULT_PREDICATE.create(config);
     }
@@ -439,15 +443,20 @@ public class CoreTestHelper {
   }
 
   /**
-   * Getter for context.
+   * Getter for Annotator's log after test execution.
    *
-   * @return Context instance.
+   * @return Log instance.
+   */
+  public Log getLog() {
+    return log;
+  }
+
+  /**
+   * Getter for Annotator's config instance which was executed on the test input.
+   *
+   * @return Config instance.
    */
   public Config getConfig() {
-    if (config == null) {
-      throw new IllegalStateException(
-          "Context has not been initialized yet, can only access it after a call of start method.");
-    }
     return config;
   }
 

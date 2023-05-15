@@ -264,7 +264,7 @@ public class Utility {
    * @param context Annotator context.
    */
   public static void buildDownstreamDependencies(Context context) {
-    context.config.downstreamInfo.forEach(
+    context.downstreamConfigurations.forEach(
         module -> {
           FixSerializationConfig.Builder nullAwayConfig =
               new FixSerializationConfig.Builder()
@@ -295,9 +295,9 @@ public class Utility {
     FixSerializationConfig.Builder nullAwayConfig =
         new FixSerializationConfig.Builder()
             .setSuggest(true, true)
-            .setOutputDirectory(context.target.dir.toString())
+            .setOutputDirectory(context.targetConfiguration.dir.toString())
             .setFieldInitInfo(initSerializationEnabled);
-    nullAwayConfig.writeAsXML(context.target.nullawayConfig.toString());
+    nullAwayConfig.writeAsXML(context.targetConfiguration.nullawayConfig.toString());
     build(context, context.config.buildCommand);
   }
 

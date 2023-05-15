@@ -39,8 +39,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Context class for Annotator. Different flags can be set with either command line arguments or an
- * input json file.
+ * Context class for Annotator. This class encapsulates all the code structure information all APIs
+ * might need to access. Each API method knows what it needs to access and can access it from the
+ * context.
  */
 public class Context {
 
@@ -52,12 +53,17 @@ public class Context {
   public final OffsetHandler offsetHandler;
   /** The moduleInfo of target module. */
   public final ModuleInfo targetModuleInfo;
+  /**
+   * Configuration of the target module, required for building the target module and collecting
+   * checkers output.
+   */
+  public final ModuleConfiguration targetConfiguration;
+  /** Sets of context path information for all downstream dependencies. */
+  public final ImmutableSet<ModuleConfiguration> downstreamConfigurations;
   /** Deserializer for reading the output of the checker. */
   public final CheckerDeserializer deserializer;
   /** Checker enum to retrieve checker specific instances. (e.g. {@link CheckerDeserializer}) */
   public final Checker checker;
-
-  public final ModuleConfiguration target;
 
   /**
    * Builds context from command line arguments.
@@ -68,11 +74,11 @@ public class Context {
     this.config = config;
     this.checker = config.checker;
     this.offsetHandler = new OffsetHandler();
+    this.downstreamConfigurations = config.downstreamConfigurations;
     this.log = new Log();
-    this.log.reset();
+    this.targetConfiguration = config.target;
     this.deserializer = initializeCheckerDeserializer();
     this.targetModuleInfo = new ModuleInfo(this, config.target, config.buildCommand);
-    this.target = config.target;
   }
 
   /**
@@ -99,15 +105,6 @@ public class Context {
       throw new RuntimeException(
           "Serialization version mismatch. Upgrade new versions of checkers.");
     }
-  }
-
-  /**
-   * Getter for nonnull annotations.
-   *
-   * @return Immutable set of fully qualified name of nonnull annotations.
-   */
-  public ImmutableSet<String> getNonnullAnnotations() {
-    return config.nonnullAnnotations;
   }
 
   /** Responsible for handling offset changes in source file. */
