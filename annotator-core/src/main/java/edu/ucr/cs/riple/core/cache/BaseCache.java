@@ -72,7 +72,7 @@ public abstract class BaseCache<T extends Impact, S extends Map<Location, T>>
   }
 
   @Override
-  public ImmutableSet<Fix> getTriggeredFixesOnDownstreamForCollection(Collection<Fix> fixTree) {
+  public ImmutableSet<Fix> getTriggeredFixesFromDownstreamForCollection(Collection<Fix> fixTree) {
     return fixTree.stream()
         .map(fix -> store.get(fix.toLocation()))
         .filter(Objects::nonNull)

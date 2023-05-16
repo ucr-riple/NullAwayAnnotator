@@ -126,7 +126,7 @@ public class CachedEvaluator extends AbstractEvaluator {
           report.triggeredErrors = ImmutableSet.copyOf(triggeredErrors);
           // get fixes triggered from downstream.
           report.triggeredFixesFromDownstreamErrors =
-              cache.getTriggeredFixesOnDownstreamForCollection(newTree);
+              cache.getTriggeredFixesFromDownstreamForCollection(newTree);
           // replace the old tree with new tree that contains triggered fixes from this iteration.
           report.tree = newTree;
           report.hasBeenProcessedOnce = true;
