@@ -251,23 +251,15 @@ To view descriptions of all flags, simply run the JAR with the `--help` option.
 - `Annotator` version `1.3.6` is compatible with `NullAway` version `0.10.10` and above.
 
 
-## Features 🧱
+## Features 
 
 - Automatically infers nullability types and injects corresponding annotations
 - Injects suppression annotations for unresolved NullAway errors
 - Minimizes the number of reported NullAway errors
 - Reduces manual effort when applying NullAway to build systems
 
-<!-- ## Limitations ⏹️
 
-Annotator is designed to provide an automated solution for annotating source code to pass NullAway checks. However, there are certain limitations:
-
-- Annotator may not always infer the correct nullability type for every variable and method, which may require manual review and adjustment.
-- Annotator does not resolve runtime exceptions related to nullability; it only focuses on satisfying NullAway checks.
-
-<!-- Annotator is not intended as a replacement for thorough code review and testing. -->
-need to ask nima to add more here.. -->
-## Contributing 🤝
+## Contributing 
 
 We welcome contributions to improve `Annotator`. Please follow these guidelines when submitting a pull request:
 
