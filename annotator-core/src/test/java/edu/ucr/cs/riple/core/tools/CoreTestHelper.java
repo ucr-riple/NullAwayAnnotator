@@ -78,7 +78,7 @@ public class CoreTestHelper {
   private boolean deactivateInference = false;
   /** Analysis mode. */
   private AnalysisMode mode = AnalysisMode.LOCAL;
-  /** Annotator context. */
+  /** Annotator config. */
   private Config config;
   /**
    * Path to the expected output directory. If null, changes on source files will not be checked.
@@ -86,7 +86,7 @@ public class CoreTestHelper {
   private Path expectedOutputPath;
   /** Project builder. */
   private final ProjectBuilder projectBuilder;
-
+  /** Annotator log instance after the test execution. */
   private Log log;
 
   public CoreTestHelper(Path projectPath, Path outDirPath) {
@@ -217,7 +217,7 @@ public class CoreTestHelper {
 
   /** Starts the test process. */
   public void start() {
-    Path configPath = outDirPath.resolve("context.json");
+    Path configPath = outDirPath.resolve("config.json");
     checkSourcePackages();
     makeAnnotatorConfigFile(configPath);
     config = new Config(configPath);
@@ -367,9 +367,9 @@ public class CoreTestHelper {
   }
 
   /**
-   * Creates a context file for annotator.
+   * Creates a config file for annotator.
    *
-   * @param configPath Path to the context file.
+   * @param configPath Path to the config file.
    */
   public void makeAnnotatorConfigFile(Path configPath) {
     Config.Builder builder = new Config.Builder();
@@ -466,7 +466,7 @@ public class CoreTestHelper {
    */
   static class DEFAULT_PREDICATE implements BiPredicate<TReport, Report> {
 
-    /** The context. */
+    /** Annotator config. */
     private final Config config;
 
     private DEFAULT_PREDICATE(Config config) {

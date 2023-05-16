@@ -457,9 +457,8 @@ public class CoreTest extends AnnotatorBaseCoreTest {
         .expectNoReport()
         .toDepth(5)
         .start();
-    //     No annotation should be added, since they are annotated as @Nonnull although each can
-    // reduce
-    //     the number of errors.
+    // No annotation should be added, since they are annotated as @Nonnull although each can reduce
+    // the number of errors.
     Assert.assertEquals(coreTestHelper.getLog().getInjectedAnnotations().size(), 0);
   }
 

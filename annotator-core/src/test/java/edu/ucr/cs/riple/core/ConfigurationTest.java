@@ -75,7 +75,7 @@ public class ConfigurationTest {
   @Before
   public void init() {
     testDir = temporaryFolder.getRoot().toPath();
-    // Make dummy context paths for 5 targets
+    // Make dummy config paths for 5 targets
     try (OutputStream os = new FileOutputStream(testDir.resolve("paths.tsv").toFile())) {
       for (int i = 0; i < 5; i++) {
         String row = i + "nullaway.xml" + "\t" + i + "scanner.xml" + "\n";
@@ -168,16 +168,14 @@ public class ConfigurationTest {
           assertEquals(testDir.resolve("library-model.tsv"), config.nullawayLibraryModelLoaderPath);
           assertTrue(config.downStreamDependenciesAnalysisActivated);
           assertEquals("./gradlew :dep:compileJava", config.downstreamDependenciesBuildCommand);
-          // Compute expected downstream context paths for nullaway and scanner context file paths
-          // for
+          // Compute expected downstream config paths for nullaway and scanner config file paths for
           // downstream dependencies.
           ImmutableSet<Pair<Path, Path>> expectedDownstreamConfigPaths =
               IntStream.range(1, 5)
                   .mapToObj(
                       i -> new Pair<>(Paths.get(i + "nullaway.xml"), Paths.get(i + "scanner.xml")))
                   .collect(ImmutableSet.toImmutableSet());
-          // Retrieve actual downstream context paths for nullaway and scanner context file paths
-          // for
+          // Retrieve actual downstream config paths for nullaway and scanner config file paths for
           // downstream dependencies.
           ImmutableSet<Pair<Path, Path>> actualDownstreamConfigPaths =
               config.downstreamConfigurations.stream()
@@ -191,7 +189,7 @@ public class ConfigurationTest {
   @Test
   public void testConfigFilesHaveDifferentUUID() {
     Set<String> observed = new HashSet<>();
-    // Test for NullAway context
+    // Test for NullAway config
     FixSerializationConfig config = new FixSerializationConfig();
     Path nullawayConfigPath = testDir.resolve("nullaway.xml");
     for (int i = 0; i < 5; i++) {
@@ -199,12 +197,12 @@ public class ConfigurationTest {
       String uuid = getValueFromTag(nullawayConfigPath, "/serialization/uuid");
       if (observed.contains(uuid)) {
         throw new IllegalStateException(
-            "Duplicate UUID found for NullAway context: " + uuid + " in set: " + observed);
+            "Duplicate UUID found for NullAway config: " + uuid + " in set: " + observed);
       }
       observed.add(uuid);
     }
     observed.clear();
-    // Test for Scanner context
+    // Test for Scanner config
     Path scannerConfig = testDir.resolve("scanner.xml");
     for (int i = 0; i < 5; i++) {
       ScannerConfigWriter writer = new ScannerConfigWriter();
@@ -212,7 +210,7 @@ public class ConfigurationTest {
       String uuid = getValueFromTag(scannerConfig, "/scanner/uuid");
       if (observed.contains(uuid)) {
         throw new IllegalStateException(
-            "Duplicate UUID found for Scanner context: " + uuid + " in set: " + observed);
+            "Duplicate UUID found for Scanner config: " + uuid + " in set: " + observed);
       }
       observed.add(uuid);
     }
@@ -262,29 +260,29 @@ public class ConfigurationTest {
     runTestWithMockedBuild(
         testDir,
         () -> {
-          Config context;
+          Config config;
 
           List<CLIFlag> baseFlags = new ArrayList<>(requiredFlagsCli);
           baseFlags.addAll(requiredDownsStreamDependencyFlagsCli);
 
           // Check default mode.
-          context = makeConfigWithFlags(baseFlags);
-          assertFalse(context.forceResolveActivated);
+          config = makeConfigWithFlags(baseFlags);
+          assertFalse(config.forceResolveActivated);
 
           CLIFlag flag = new CLIFlagWithValue("fr", "edu.ucr.example.NullUnmarked");
           baseFlags.add(flag);
-          context = makeConfigWithFlags(baseFlags);
-          assertTrue(context.forceResolveActivated);
-          assertEquals(context.nullUnMarkedAnnotation, "edu.ucr.example.NullUnmarked");
+          config = makeConfigWithFlags(baseFlags);
+          assertTrue(config.forceResolveActivated);
+          assertEquals(config.nullUnMarkedAnnotation, "edu.ucr.example.NullUnmarked");
         });
   }
 
   /**
-   * Helper method for creating a {@link Context} object with the given flags. Before creating the
-   * context file, it cleans up the existing module output directories.
+   * Helper method for creating a {@link Config} object with the given flags. Before creating the
+   * config file, it cleans up the existing module output directories.
    *
-   * @param flags Flags to create the context object.
-   * @return Context instance.
+   * @param flags Flags to create the config object.
+   * @return Config instance.
    */
   private Config makeConfigWithFlags(List<CLIFlag> flags) {
     IntStream.of(0, 5)

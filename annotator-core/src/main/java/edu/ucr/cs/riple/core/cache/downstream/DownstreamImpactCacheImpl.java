@@ -54,6 +54,7 @@ public class DownstreamImpactCacheImpl
     extends BaseCache<DownstreamImpact, ImmutableMap<Location, DownstreamImpact>>
     implements DownstreamImpactCache {
 
+  /** Annotator context instance. */
   private final Context context;
 
   /**
