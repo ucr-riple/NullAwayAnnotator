@@ -26,27 +26,26 @@ package edu.ucr.cs.riple.core.io.deserializers;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Checker;
-import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Set;
 
 /** Base class for all checker deserializers. */
 public abstract class DeserializerBaseClass implements CheckerDeserializer {
 
-  /** Annotator config. */
-  protected final Config config;
+  /** Annotator context. */
+  protected final Context context;
   /** The checker that this deserializer is supporting. */
   protected final Checker checker;
   /** The supporting serialization version of this deserializer. */
   protected final int version;
 
-  public DeserializerBaseClass(Config config, Checker checker, int version) {
-    this.config = config;
+  public DeserializerBaseClass(Context context, Checker checker, int version) {
+    this.context = context;
     this.checker = checker;
     this.version = version;
   }
@@ -59,7 +58,7 @@ public abstract class DeserializerBaseClass implements CheckerDeserializer {
    * @param region Region where the error is reported,
    * @param offset offset of program point in original version where error is reported.
    * @param resolvingFixes Set of fixes that resolve the error.
-   * @param store Nonnull store to check if the element has an explicit nonnull annotation.
+   * @param moduleInfo ModuleInfo of the modules which errors are reported on.
    * @return The corresponding error.
    */
   protected Error createError(
@@ -68,10 +67,10 @@ public abstract class DeserializerBaseClass implements CheckerDeserializer {
       Region region,
       int offset,
       ImmutableSet<Fix> resolvingFixes,
-      NonnullStore store) {
+      ModuleInfo moduleInfo) {
     ImmutableSet<Fix> fixes =
         resolvingFixes.stream()
-            .filter(f -> !store.hasExplicitNonnullAnnotation(f.toLocation()))
+            .filter(f -> !moduleInfo.getNonnullStore().hasExplicitNonnullAnnotation(f.toLocation()))
             .collect(ImmutableSet.toImmutableSet());
     return new Error(errorType, errorMessage, region, offset, fixes);
   }
@@ -81,13 +80,13 @@ public abstract class DeserializerBaseClass implements CheckerDeserializer {
    * statement.
    *
    * @param onField Location of the field.
-   * @param registry Field registry to detect fixes on statements with multiple inline variable
-   *     declarations.
    * @return The updated given location.
    */
-  protected OnField extendVariableList(OnField onField, FieldRegistry registry) {
+  protected OnField extendVariableList(OnField onField, ModuleInfo moduleInfo) {
     Set<String> variables =
-        registry.getInLineMultipleFieldDeclarationsOnField(onField.clazz, onField.variables);
+        moduleInfo
+            .getFieldRegistry()
+            .getInLineMultipleFieldDeclarationsOnField(onField.clazz, onField.variables);
     onField.variables.addAll(variables);
     return onField;
   }

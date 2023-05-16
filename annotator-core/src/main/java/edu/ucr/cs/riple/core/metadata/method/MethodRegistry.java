@@ -27,8 +27,9 @@ package edu.ucr.cs.riple.core.metadata.method;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
-import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.metadata.MetaData;
+import edu.ucr.cs.riple.core.Context;
+import edu.ucr.cs.riple.core.metadata.Registry;
+import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -43,7 +44,7 @@ import javax.annotation.Nullable;
  * The top-down tree structure of methods in the target module, where each method's parent node, is
  * their immediate overriding method.
  */
-public class MethodRegistry extends MetaData<MethodRecord> {
+public class MethodRegistry extends Registry<MethodRecord> {
 
   /** Each method has a unique id across all methods. This hashmap, maps ids to nodes. */
   private HashMap<Integer, MethodRecord> nodes;
@@ -52,8 +53,15 @@ public class MethodRegistry extends MetaData<MethodRecord> {
   /** Set of all classes flat name declared in module. */
   private Set<String> declaredClasses;
 
-  public MethodRegistry(Config config) {
-    super(config, config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
+  public MethodRegistry(Context context) {
+    this(ImmutableSet.of(context.targetConfiguration));
+  }
+
+  public MethodRegistry(ImmutableSet<ModuleConfiguration> modules) {
+    super(
+        modules.stream()
+            .map(moduleInfo -> moduleInfo.dir.resolve(Serializer.METHOD_INFO_FILE_NAME))
+            .collect(ImmutableSet.toImmutableSet()));
   }
 
   @Override
@@ -67,46 +75,48 @@ public class MethodRegistry extends MetaData<MethodRecord> {
   }
 
   @Override
-  protected MethodRecord addNodeByLine(String[] values) {
-    // Nodes unique id.
-    Integer id = Integer.parseInt(values[0]);
-    MethodRecord node;
-    if (nodes.containsKey(id)) {
-      node = nodes.get(id);
-    } else {
-      node = new MethodRecord(id);
-      nodes.put(id, node);
-    }
-    // Fill nodes information.
-    Integer parentId = Integer.parseInt(values[3]);
-    OnMethod location = new OnMethod(Helper.deserializePath(values[8]), values[1], values[2]);
-    boolean isConstructor =
-        Helper.extractCallableName(location.method).equals(Helper.simpleName(location.clazz));
-    node.fillInformation(
-        new OnMethod(Helper.deserializePath(values[8]), values[1], values[2]),
-        parentId,
-        Boolean.parseBoolean(values[5]),
-        values[6],
-        Boolean.parseBoolean(values[7]),
-        isConstructor);
-    // If node has a non-top parent.
-    if (parentId > 0) {
-      MethodRecord parent = nodes.get(parentId);
-      // If parent has not been seen visited before.
-      if (parent == null) {
-        parent = new MethodRecord(parentId);
-        nodes.put(parentId, parent);
+  protected Builder<MethodRecord> getBuilder() {
+    return values -> {
+      // Nodes unique id.
+      Integer id = Integer.parseInt(values[0]);
+      MethodRecord node;
+      if (nodes.containsKey(id)) {
+        node = nodes.get(id);
+      } else {
+        node = new MethodRecord(id);
+        nodes.put(id, node);
       }
-      // Parent is already visited.
-      parent.addChild(id);
-    }
-    // Update list of all declared classes.
-    declaredClasses.add(node.location.clazz);
-    // If node is a constructor, add it to the list of constructors of its class.
-    if (node.isConstructor) {
-      classConstructorMap.put(node.location.clazz, node);
-    }
-    return node;
+      // Fill nodes information.
+      Integer parentId = Integer.parseInt(values[3]);
+      OnMethod location = new OnMethod(Helper.deserializePath(values[8]), values[1], values[2]);
+      boolean isConstructor =
+          Helper.extractCallableName(location.method).equals(Helper.simpleName(location.clazz));
+      node.fillInformation(
+          new OnMethod(Helper.deserializePath(values[8]), values[1], values[2]),
+          parentId,
+          Boolean.parseBoolean(values[5]),
+          values[6],
+          Boolean.parseBoolean(values[7]),
+          isConstructor);
+      // If node has a non-top parent.
+      if (parentId > 0) {
+        MethodRecord parent = nodes.get(parentId);
+        // If parent has not been seen visited before.
+        if (parent == null) {
+          parent = new MethodRecord(parentId);
+          nodes.put(parentId, parent);
+        }
+        // Parent is already visited.
+        parent.addChild(id);
+      }
+      // Update list of all declared classes.
+      declaredClasses.add(node.location.clazz);
+      // If node is a constructor, add it to the list of constructors of its class.
+      if (node.isConstructor) {
+        classConstructorMap.put(node.location.clazz, node);
+      }
+      return node;
+    };
   }
 
   /**
@@ -153,7 +163,7 @@ public class MethodRegistry extends MetaData<MethodRecord> {
    * @return Corresponding method.
    */
   public MethodRecord findMethodByName(String encClass, String method) {
-    return findNodeWithHashHint(
+    return findRecordWithHashHint(
         candidate ->
             candidate.location.clazz.equals(encClass) && candidate.location.method.equals(method),
         MethodRecord.hash(method, encClass));
@@ -165,7 +175,7 @@ public class MethodRegistry extends MetaData<MethodRecord> {
    * @return ImmutableSet of method nodes.
    */
   public ImmutableSet<MethodRecord> getPublicMethodsWithNonPrimitivesReturn() {
-    return findNodes(MethodRecord::isPublicMethodWithNonPrimitiveReturnType)
+    return findRecords(MethodRecord::isPublicMethodWithNonPrimitiveReturnType)
         .collect(ImmutableSet.toImmutableSet());
   }
 

@@ -26,25 +26,24 @@ package edu.ucr.cs.riple.core;
 
 import edu.ucr.cs.riple.core.io.deserializers.CheckerDeserializer;
 import edu.ucr.cs.riple.core.io.deserializers.nullaway.NullAwayV3Deserializer;
-import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
 import javax.annotation.Nullable;
 
 /** Enum class to represent the supported checkers. */
 public enum Checker {
   NULLAWAY() {
     @Override
-    public CheckerDeserializer getDeserializer(Config config, NonnullStore nonnullStore) {
-      return new NullAwayV3Deserializer(config, nonnullStore);
+    public CheckerDeserializer getDeserializer(Context context) {
+      return new NullAwayV3Deserializer(context);
     }
   };
 
   /**
    * Returns the deserializer for the checker.
    *
-   * @param config Annotator config.
+   * @param context Annotator context.
    * @return The corresponding deserializer.
    */
-  public abstract CheckerDeserializer getDeserializer(Config config, NonnullStore nonnullStore);
+  public abstract CheckerDeserializer getDeserializer(Context context);
 
   /**
    * Returns the checker enum value corresponding to the given checker name.

@@ -37,7 +37,7 @@ jobs:
         with:
           java-version: 11
           distribution: 'temurin'
-      - uses: gradle/gradle-build-action@v2
+      - uses: gradle/gradle-build-action@v2.4.2
         with:
           arguments: build --scan
   build-with-upload-artifact:

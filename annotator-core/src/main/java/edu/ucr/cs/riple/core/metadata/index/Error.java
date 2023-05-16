@@ -25,7 +25,7 @@ package edu.ucr.cs.riple.core.metadata.index;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnParameter;
@@ -179,13 +179,13 @@ public class Error {
    * Checks if error is resolvable and all suggested fixes must be applied to an element in target
    * module.
    *
-   * @param registry Method registry to check if elements on are on target.
+   * @param context Annotator context instance.
    * @return true, if error is resolvable via fixes on target module.
    */
-  public boolean isFixableOnTarget(MethodRegistry registry) {
+  public boolean isFixableOnTarget(Context context) {
     return resolvingFixes.size() > 0
         && this.resolvingFixes.stream()
-            .allMatch(fix -> registry.declaredInModule(fix.toLocation()));
+            .allMatch(fix -> context.targetModuleInfo.declaredInModule(fix.toLocation()));
   }
 
   @Override
@@ -201,7 +201,15 @@ public class Error {
 
   @Override
   public String toString() {
-    return "Type='" + messageType + '\'' + ", message='" + message + '\'';
+    return "Type='"
+        + messageType
+        + '\''
+        + ", message='"
+        + message
+        + '\''
+        + ", offset='"
+        + offset
+        + '\'';
   }
 
   /**

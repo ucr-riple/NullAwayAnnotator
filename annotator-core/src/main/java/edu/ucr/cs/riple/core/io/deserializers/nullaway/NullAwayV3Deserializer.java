@@ -27,14 +27,12 @@ package edu.ucr.cs.riple.core.io.deserializers.nullaway;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Checker;
-import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.ModuleInfo;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.io.deserializers.DeserializerBaseClass;
-import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -65,19 +63,15 @@ import java.util.stream.Collectors;
  */
 public class NullAwayV3Deserializer extends DeserializerBaseClass {
 
-  private final NonnullStore nonnullStore;
-
-  public NullAwayV3Deserializer(Config config, NonnullStore nonnullStore) {
-    super(config, Checker.NULLAWAY, 3);
-    this.nonnullStore = nonnullStore;
+  public NullAwayV3Deserializer(Context context) {
+    super(context, Checker.NULLAWAY, 3);
   }
 
   @Override
-  public Set<Error> deserializeErrors(
-      ImmutableSet<ModuleInfo> modules, FieldRegistry fieldRegistry) {
+  public Set<Error> deserializeErrors(ModuleInfo moduleInfo) {
     ImmutableSet<Path> paths =
-        modules.stream()
-            .map(moduleInfo -> moduleInfo.dir.resolve("errors.tsv"))
+        moduleInfo.getModuleConfigurations().stream()
+            .map(config -> config.dir.resolve("errors.tsv"))
             .collect(ImmutableSet.toImmutableSet());
     Set<Error> errors = new HashSet<>();
     paths.forEach(
@@ -88,7 +82,7 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
               // Skip header.
               br.readLine();
               while ((line = br.readLine()) != null) {
-                errors.add(deserializeErrorFromTSVLine(line, fieldRegistry));
+                errors.add(deserializeErrorFromTSVLine(moduleInfo, line));
               }
             }
           } catch (IOException e) {
@@ -101,12 +95,11 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
   /**
    * Deserializes an error from a TSV line.
    *
+   * @param moduleInfo the moduleInfo of the module which the error is reported in.
    * @param line Given TSV line.
-   * @param registry Field registry. Used to detect if a field is initialized, or if the fix is on a
-   *     statement with multiple inline field declarations
    * @return the deserialized error corresponding to the values in the given tsv line.
    */
-  private Error deserializeErrorFromTSVLine(String line, FieldRegistry registry) {
+  private Error deserializeErrorFromTSVLine(ModuleInfo moduleInfo, String line) {
     String[] values = line.split("\t");
     Preconditions.checkArgument(
         values.length == 12,
@@ -121,35 +114,39 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
         Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 6, 12));
     if (nonnullTarget == null && errorType.equals(Error.METHOD_INITIALIZER_ERROR)) {
       ImmutableSet<Fix> resolvingFixes =
-          generateFixesForUninitializedFields(errorMessage, region, registry).stream()
-              .filter(fix -> !nonnullStore.hasExplicitNonnullAnnotation(fix.toLocation()))
+          generateFixesForUninitializedFields(errorMessage, region, moduleInfo).stream()
+              .filter(
+                  fix ->
+                      !moduleInfo.getNonnullStore().hasExplicitNonnullAnnotation(fix.toLocation()))
               .collect(ImmutableSet.toImmutableSet());
       return createError(
           errorType,
           errorMessage,
           region,
-          config.offsetHandler.getOriginalOffset(path, offset),
+          context.offsetHandler.getOriginalOffset(path, offset),
           resolvingFixes,
-          nonnullStore);
+          moduleInfo);
     }
     if (nonnullTarget != null && nonnullTarget.isOnField()) {
-      nonnullTarget = extendVariableList(nonnullTarget.toField(), registry);
+      nonnullTarget = extendVariableList(nonnullTarget.toField(), moduleInfo);
     }
     Fix resolvingFix =
         nonnullTarget == null
             ? null
-            : (nonnullStore.hasExplicitNonnullAnnotation(nonnullTarget)
+            : (moduleInfo.getNonnullStore().hasExplicitNonnullAnnotation(nonnullTarget)
                 // skip if element has explicit nonnull annotation.
                 ? null
                 : new Fix(
-                    new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot), errorType, true));
+                    new AddMarkerAnnotation(nonnullTarget, context.config.nullableAnnot),
+                    errorType,
+                    true));
     return createError(
         errorType,
         errorMessage,
         region,
-        config.offsetHandler.getOriginalOffset(path, offset),
+        context.offsetHandler.getOriginalOffset(path, offset),
         resolvingFix == null ? ImmutableSet.of() : ImmutableSet.of(resolvingFix),
-        nonnullStore);
+        moduleInfo);
   }
 
   /**
@@ -200,17 +197,19 @@ public class NullAwayV3Deserializer extends DeserializerBaseClass {
    * @return Set of fixes for uninitialized fields to resolve the given error.
    */
   protected ImmutableSet<Fix> generateFixesForUninitializedFields(
-      String errorMessage, Region region, FieldRegistry fieldRegistry) {
+      String errorMessage, Region region, ModuleInfo moduleInfo) {
     return extractUninitializedFieldNames(errorMessage).stream()
         .map(
             field -> {
-              OnField locationOnField = fieldRegistry.getLocationOnField(region.clazz, field);
+              OnField locationOnField =
+                  moduleInfo.getFieldRegistry().getLocationOnField(region.clazz, field);
               if (locationOnField == null) {
                 return null;
               }
               return new Fix(
                   new AddMarkerAnnotation(
-                      extendVariableList(locationOnField, fieldRegistry), config.nullableAnnot),
+                      extendVariableList(locationOnField, moduleInfo),
+                      context.config.nullableAnnot),
                   Error.METHOD_INITIALIZER_ERROR,
                   true);
             })

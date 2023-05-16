@@ -65,19 +65,20 @@ public class OffsetChangeHandlingTest {
   private final Path inputPath;
 
   private AnnotationInjector injector;
-  private Config config;
+  private Context context;
 
   @Before
   public void init() {
     root = temporaryFolder.getRoot().toPath();
     CoreTestHelper helper = new CoreTestHelper(root, root).onEmptyProject();
-    Path configPath = root.resolve("config.json");
+    Path configPath = root.resolve("context.json");
     helper.makeAnnotatorConfigFile(configPath);
     Utility.runTestWithMockedBuild(
         root,
         () -> {
-          config = new Config(configPath);
-          injector = new PhysicalInjector(config);
+          Config config = new Config(configPath);
+          context = new Context(config);
+          injector = new PhysicalInjector(context);
           try {
             Files.copy(inputPath, root.resolve("benchmark.java"));
           } catch (IOException e) {
@@ -218,7 +219,7 @@ public class OffsetChangeHandlingTest {
                   toImmutableMap(
                       identity(),
                       s ->
-                          config.offsetHandler.getOriginalOffset(
+                          context.offsetHandler.getOriginalOffset(
                               root.resolve("benchmark.java"), content.indexOf(s))));
       Assert.assertEquals(calculatedOffsetMap, originalFieldOffsetMap);
     } catch (IOException e) {

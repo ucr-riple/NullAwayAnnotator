@@ -25,7 +25,7 @@
 package edu.ucr.cs.riple.core.evaluators;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.evaluators.graph.ConflictGraph;
 import edu.ucr.cs.riple.core.evaluators.graph.processors.ConflictGraphProcessor;
@@ -46,8 +46,8 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
  */
 public abstract class AbstractEvaluator implements Evaluator {
 
-  /** Annotator config. */
-  protected final Config config;
+  /** Annotator context. */
+  protected final Context context;
   /** Conflict graph to storing unprocessed fixes. */
   protected final ConflictGraph graph;
   /** Depth of analysis. */
@@ -60,7 +60,7 @@ public abstract class AbstractEvaluator implements Evaluator {
   public AbstractEvaluator(Supplier supplier) {
     this.supplier = supplier;
     this.depth = supplier.depth();
-    this.config = supplier.getConfig();
+    this.context = supplier.getContext();
     this.graph = new ConflictGraph();
     this.processor = supplier.getGraphProcessor();
   }
@@ -88,7 +88,7 @@ public abstract class AbstractEvaluator implements Evaluator {
     System.out.println("Max Depth level: " + this.depth);
     for (int i = 0; i < this.depth; i++) {
       initializeFixGraph(reports);
-      config.log.updateNodeNumber(graph.getNodes().count());
+      context.log.updateNodeNumber(graph.getNodes().count());
       if (!graph.isEmpty()) {
         System.out.print("Analyzing at level " + (i + 1) + ", ");
         processor.process(graph);

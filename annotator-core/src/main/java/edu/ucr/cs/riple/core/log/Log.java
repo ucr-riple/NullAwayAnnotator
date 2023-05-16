@@ -41,12 +41,15 @@ public class Log {
   private long totalTime;
   /** Total time spent in building targets. */
   private long buildTime = 0;
-
   /**
    * Set of approved and injected annotations. These annotations are evaluated and approved and will
    * not get removed from the source code.
    */
   private final List<AddAnnotation> injectedAnnotations = new ArrayList<>();
+
+  public Log() {
+    this.reset();
+  }
 
   /** Resets all log information. */
   public void reset() {
