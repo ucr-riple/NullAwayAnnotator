@@ -25,7 +25,6 @@
 package edu.ucr.cs.riple.core.cache;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -45,12 +44,9 @@ public abstract class BaseCache<T extends Impact, S extends Map<Location, T>>
 
   /** Container holding cache entries. */
   protected final S store;
-  /** Annotator config. */
-  protected final Config config;
 
-  public BaseCache(Config config, S store) {
+  public BaseCache(S store) {
     this.store = store;
-    this.config = config;
   }
 
   @Override
@@ -76,7 +72,7 @@ public abstract class BaseCache<T extends Impact, S extends Map<Location, T>>
   }
 
   @Override
-  public ImmutableSet<Fix> getTriggeredFixesOnDownstreamForCollection(Collection<Fix> fixTree) {
+  public ImmutableSet<Fix> getTriggeredFixesFromDownstreamForCollection(Collection<Fix> fixTree) {
     return fixTree.stream()
         .map(fix -> store.get(fix.toLocation()))
         .filter(Objects::nonNull)

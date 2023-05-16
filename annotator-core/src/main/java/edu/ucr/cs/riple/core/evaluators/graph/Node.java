@@ -27,12 +27,12 @@ package edu.ucr.cs.riple.core.evaluators.graph;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.Collection;
 import java.util.Collections;
@@ -73,9 +73,7 @@ public class Node {
   /** Corresponding report of processing root. */
   public Report report;
 
-  /**
-   * Regions where original error is reported by the checker and suggested the root fix for that.
-   */
+  /** Regions where original errors reported and NullAway suggested root for that. */
   private ImmutableSet<Region> origins;
 
   public Node(Fix root) {
@@ -121,7 +119,7 @@ public class Node {
     // Add class initialization region, if a fix is modifying a parameter on constructor.
     this.tree.stream()
         .filter(fix -> fix.isOnParameter() && fix.isModifyingConstructor())
-        .forEach(fix -> regions.add(new Region(fix.change.location.clazz, "null")));
+        .forEach(fix -> regions.add(new Region(fix.change.getLocation().clazz, "null")));
   }
 
   /**
@@ -142,14 +140,14 @@ public class Node {
    * @param fixesInOneRound All fixes applied simultaneously to the source code.
    * @param triggeredFixesFromDownstreamErrors Triggered fixes from downstream dependencies.
    * @param triggeredErrors Triggered Errors collected from impacted regions.
-   * @param context {@link Context} instance.
+   * @param moduleInfo {@link ModuleInfo} instance.
    */
   public void updateStatus(
       int localEffect,
       Set<Fix> fixesInOneRound,
       Collection<Fix> triggeredFixesFromDownstreamErrors,
       Collection<Error> triggeredErrors,
-      Context context) {
+      ModuleInfo moduleInfo) {
     // Update list of triggered fixes on downstream.
     this.triggeredFixesFromDownstreamErrors =
         ImmutableSet.copyOf(triggeredFixesFromDownstreamErrors);
@@ -164,7 +162,7 @@ public class Node {
         .map(
             fix -> {
               OnMethod onMethod = fix.toMethod();
-              return context.getMethodRegistry().getImmediateSuperMethod(onMethod);
+              return moduleInfo.getMethodRegistry().getImmediateSuperMethod(onMethod);
             }) // Collection of super methods of all fixes in tree.
         .filter(
             node ->

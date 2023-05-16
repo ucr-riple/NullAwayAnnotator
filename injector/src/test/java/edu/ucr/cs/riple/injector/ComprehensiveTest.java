@@ -27,7 +27,7 @@ package edu.ucr.cs.riple.injector;
 import static java.util.Collections.singleton;
 
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
-import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
+import edu.ucr.cs.riple.injector.changes.RemoveMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
@@ -166,31 +166,31 @@ public class ComprehensiveTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnField("Test.java", "edu.ucr.Test", singleton("foo2")), annot),
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnField("Test.java", "edu.ucr.Test", singleton("foo4")), annot),
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnField("Test.java", "edu.ucr.Test", singleton("foo5")), annot),
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnMethod("Test.java", "edu.ucr.Test", "bar1(Object, Object)"), annot),
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnMethod("Test.java", "edu.ucr.Test", "bar3(Object, Object, Object, Object)"),
                 annot),
-            new RemoveAnnotation(new OnMethod("Test.java", "edu.ucr.Test", "bar4()"), annot),
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(new OnMethod("Test.java", "edu.ucr.Test", "bar4()"), annot),
+            new RemoveMarkerAnnotation(
                 new OnParameter("Test.java", "edu.ucr.Test", "bar1(Object, Object)", 0), annot),
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnParameter("Test.java", "edu.ucr.Test", "bar2(Object, Object)", 1), annot),
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnParameter(
                     "Test.java", "edu.ucr.Test", "bar3(Object, Object, Object, Object)", 0),
                 annot),
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnParameter(
                     "Test.java", "edu.ucr.Test", "bar3(Object, Object, Object, Object)", 1),
                 annot),
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnParameter(
                     "Test.java", "edu.ucr.Test", "bar3(Object, Object, Object, Object)", 3),
                 annot))
@@ -245,19 +245,19 @@ public class ComprehensiveTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnField("Test.java", "edu.ucr.Test", singleton("foo2")), annot),
             new AddMarkerAnnotation(
                 new OnField("Test.java", "edu.ucr.Test", singleton("foo4")), annot),
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnField("Test.java", "edu.ucr.Test", singleton("foo5")), annot),
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnMethod("Test.java", "edu.ucr.Test", "bar1(Object, Object)"), annot),
             new AddMarkerAnnotation(
                 new OnMethod("Test.java", "edu.ucr.Test", "bar3(Object, Object, Object, Object)"),
                 annot),
-            new RemoveAnnotation(new OnMethod("Test.java", "edu.ucr.Test", "bar4()"), annot),
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(new OnMethod("Test.java", "edu.ucr.Test", "bar4()"), annot),
+            new RemoveMarkerAnnotation(
                 new OnParameter("Test.java", "edu.ucr.Test", "bar1(Object, Object)", 0), annot),
             new AddMarkerAnnotation(
                 new OnParameter("Test.java", "edu.ucr.Test", "bar2(Object, Object)", 1), annot),
@@ -265,7 +265,7 @@ public class ComprehensiveTest extends BaseInjectorTest {
                 new OnParameter(
                     "Test.java", "edu.ucr.Test", "bar3(Object, Object, Object, Object)", 0),
                 annot),
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnParameter(
                     "Test.java", "edu.ucr.Test", "bar3(Object, Object, Object, Object)", 1),
                 annot),
@@ -317,11 +317,11 @@ public class ComprehensiveTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnMethod(
                     "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)"),
                 "javax.annotation.Nullable"),
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnParameter(
                     "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 0),
                 "javax.annotation.Nullable"),
@@ -329,7 +329,7 @@ public class ComprehensiveTest extends BaseInjectorTest {
                 new OnParameter(
                     "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 1),
                 "javax.annotation.Nullable"),
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnParameter(
                     "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 2),
                 "javax.annotation.Nullable"),
@@ -337,7 +337,7 @@ public class ComprehensiveTest extends BaseInjectorTest {
                 new OnParameter(
                     "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 3),
                 "javax.annotation.Nullable"),
-            new RemoveAnnotation(
+            new RemoveMarkerAnnotation(
                 new OnParameter(
                     "Main.java", "edu.ucr.Main", "foo6(Map, Object, Object, Object, Object)", 4),
                 "javax.annotation.Nullable"))

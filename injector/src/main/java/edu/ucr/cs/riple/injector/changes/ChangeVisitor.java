@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.injector.visitors;
+package edu.ucr.cs.riple.injector.changes;
 
 import static edu.ucr.cs.riple.injector.location.OnClass.isAnonymousClassFlatName;
 
@@ -30,30 +30,25 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.utils.Pair;
 import edu.ucr.cs.riple.injector.Helper;
-import edu.ucr.cs.riple.injector.changes.Change;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
+import edu.ucr.cs.riple.injector.location.LocationVisitor;
 import edu.ucr.cs.riple.injector.location.OnClass;
 import edu.ucr.cs.riple.injector.location.OnField;
-import edu.ucr.cs.riple.injector.location.OnLocalVariable;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import edu.ucr.cs.riple.injector.modifications.Modification;
-import edu.ucr.cs.riple.injector.modifications.MultiPositionModification;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 
-/** A visitor for applying changes to a compilation unit on a specified location. */
+/**
+ * A visitor for computing the required {@link Modification} to a compilation unit on a specified
+ * location for the requested change.
+ */
 public class ChangeVisitor
-    implements LocationVisitor<Modification, Pair<NodeList<BodyDeclaration<?>>, Change>> {
-
-  /** Visitor for applying changes on the internal structure of the target element's type */
-  public static final TypeChangeVisitor TYPE_CHANGE_VISITOR = new TypeChangeVisitor();
+    implements LocationVisitor<Modification, Pair<NodeList<BodyDeclaration<?>>, ASTChange>> {
 
   /** Compilation unit which the changes will be applied. */
   private final CompilationUnit cu;
@@ -65,10 +60,10 @@ public class ChangeVisitor
   @Override
   @Nullable
   public Modification visitMethod(
-      OnMethod onMethod, Pair<NodeList<BodyDeclaration<?>>, Change> pair) {
+      OnMethod onMethod, Pair<NodeList<BodyDeclaration<?>>, ASTChange> pair) {
     final AtomicReference<Modification> ans = new AtomicReference<>();
     final NodeList<BodyDeclaration<?>> members = pair.a;
-    final Change change = pair.b;
+    final ASTChange change = pair.b;
     members.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifCallableDeclaration(
@@ -78,7 +73,7 @@ public class ChangeVisitor
                     return;
                   }
                   if (onMethod.matchesCallableDeclaration(callableDeclaration)) {
-                    ans.set(change.visit(callableDeclaration));
+                    ans.set(change.computeTextModificationOn(callableDeclaration));
                   }
                 }));
     if (ans.get() == null) {
@@ -89,7 +84,7 @@ public class ChangeVisitor
                     if (annotationMemberDeclaration
                         .getNameAsString()
                         .equals(Helper.extractCallableName(onMethod.method))) {
-                      ans.set(change.visit(annotationMemberDeclaration));
+                      ans.set(change.computeTextModificationOn(annotationMemberDeclaration));
                     }
                   }));
     }
@@ -98,10 +93,11 @@ public class ChangeVisitor
 
   @Override
   @Nullable
-  public Modification visitField(OnField onField, Pair<NodeList<BodyDeclaration<?>>, Change> pair) {
+  public Modification visitField(
+      OnField onField, Pair<NodeList<BodyDeclaration<?>>, ASTChange> pair) {
     final AtomicReference<Modification> ans = new AtomicReference<>();
     final NodeList<BodyDeclaration<?>> members = pair.a;
-    final Change change = pair.b;
+    final ASTChange change = pair.b;
     members.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifFieldDeclaration(
@@ -114,7 +110,7 @@ public class ChangeVisitor
                       fieldDeclaration.asFieldDeclaration().getVariables();
                   for (VariableDeclarator v : vars) {
                     if (onField.variables.contains(v.getName().toString())) {
-                      ans.set(change.visit(fieldDeclaration));
+                      ans.set(change.computeTextModificationOn(fieldDeclaration));
                       break;
                     }
                   }
@@ -125,10 +121,10 @@ public class ChangeVisitor
   @Override
   @Nullable
   public Modification visitParameter(
-      OnParameter onParameter, Pair<NodeList<BodyDeclaration<?>>, Change> pair) {
+      OnParameter onParameter, Pair<NodeList<BodyDeclaration<?>>, ASTChange> pair) {
     final AtomicReference<Modification> ans = new AtomicReference<>();
     final NodeList<BodyDeclaration<?>> members = pair.a;
-    final Change change = pair.b;
+    final ASTChange change = pair.b;
     members.forEach(
         bodyDeclaration ->
             bodyDeclaration.ifCallableDeclaration(
@@ -137,13 +133,13 @@ public class ChangeVisitor
                     // already found the member.
                     return;
                   }
-                  if (onParameter.matchesCallableDeclaration(callableDeclaration)) {
+                  if (onParameter.enclosingMethod.matchesCallableDeclaration(callableDeclaration)) {
                     NodeList<?> params = callableDeclaration.getParameters();
                     if (onParameter.index < params.size()) {
                       if (params.get(onParameter.index) != null) {
                         Node param = params.get(onParameter.index);
                         if (param instanceof Parameter) {
-                          ans.set(change.visit((Parameter) param));
+                          ans.set(change.computeTextModificationOn((Parameter) param));
                         }
                       }
                     }
@@ -154,10 +150,11 @@ public class ChangeVisitor
 
   @Override
   @Nullable
-  public Modification visitClass(OnClass onClass, Pair<NodeList<BodyDeclaration<?>>, Change> pair) {
+  public Modification visitClass(
+      OnClass onClass, Pair<NodeList<BodyDeclaration<?>>, ASTChange> pair) {
     final NodeList<BodyDeclaration<?>> members = pair.a;
-    final Change change = pair.b;
-    if (isAnonymousClassFlatName(change.location.clazz)) {
+    final ASTChange change = pair.b;
+    if (isAnonymousClassFlatName(change.getLocation().clazz)) {
       return null;
     }
     // Get the enclosing class of the members
@@ -165,71 +162,25 @@ public class ChangeVisitor
     if (optionalClass.isEmpty() || !(optionalClass.get() instanceof BodyDeclaration<?>)) {
       return null;
     }
-    return change.visit(((BodyDeclaration<?>) optionalClass.get()));
-  }
-
-  @Override
-  public Modification visitLocalVariable(
-      OnLocalVariable onLocalVariable, Pair<NodeList<BodyDeclaration<?>>, Change> pair) {
-    final NodeList<BodyDeclaration<?>> members = pair.a;
-    final Change change = pair.b;
-    final AtomicReference<Modification> ans = new AtomicReference<>();
-    members.forEach(
-        bodyDeclaration ->
-            bodyDeclaration.ifCallableDeclaration(
-                callableDeclaration -> {
-                  if (ans.get() != null) {
-                    // already found the member.
-                    return;
-                  }
-                  if (onLocalVariable.matchesCallableDeclaration(callableDeclaration)) {
-                    // Find variable declaration in the callable declaration with the variable name.
-                    VariableDeclarationExpr variableDeclarationExpr =
-                        Helper.locateVariableDeclarationExpr(
-                            callableDeclaration, onLocalVariable.varName);
-                    if (variableDeclarationExpr == null) {
-                      return;
-                    }
-                    variableDeclarationExpr
-                        .getVariables()
-                        .forEach(
-                            variableDeclarator -> {
-                              if (variableDeclarator
-                                  .getName()
-                                  .toString()
-                                  .equals(onLocalVariable.varName)) {
-                                // Located the variable.
-                                Set<Modification> modifications = new HashSet<>();
-                                // Process the declaration statement.
-                                modifications.add(change.visit(variableDeclarationExpr));
-                                // Process the declarator type arguments.
-                                modifications.addAll(
-                                    variableDeclarator
-                                        .getType()
-                                        .accept(TYPE_CHANGE_VISITOR, change));
-                                ans.set(new MultiPositionModification(modifications));
-                              }
-                            });
-                  }
-                }));
-    return ans.get();
+    return change.computeTextModificationOn(((BodyDeclaration<?>) optionalClass.get()));
   }
 
   /**
-   * Applies the change to the compilation unit.
+   * Computes the required {@link Modification} that should be applied to the compilation unit for
+   * the given change.
    *
    * @param change the change to apply.
    * @return the modification that should be applied.
    */
   @Nullable
-  public Modification visit(Change change) {
+  public Modification computeModification(ASTChange change) {
     NodeList<BodyDeclaration<?>> members;
     try {
-      members = Helper.getTypeDeclarationMembersByFlatName(cu, change.location.clazz);
+      members = Helper.getTypeDeclarationMembersByFlatName(cu, change.getLocation().clazz);
       if (members == null) {
         return null;
       }
-      return change.location.accept(this, new Pair<>(members, change));
+      return change.getLocation().accept(this, new Pair<>(members, change));
     } catch (TargetClassNotFound notFound) {
       System.err.println(notFound.getMessage());
       return null;

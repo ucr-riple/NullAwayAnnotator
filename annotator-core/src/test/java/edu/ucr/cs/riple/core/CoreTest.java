@@ -27,7 +27,6 @@ package edu.ucr.cs.riple.core;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.singleton;
 
-import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -305,18 +304,8 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             "}")
         .expectNoReport()
         .deactivateInference()
+        .checkOutExpectedOutput("deactivateInferenceTest/expected")
         .start();
-    // Verify that only one @NullUnmarked annotation is injected (No @Nullable injection).
-    Preconditions.checkArgument(
-        coreTestHelper.getConfig().log.getInjectedAnnotations().size() == 1);
-    Preconditions.checkArgument(
-        coreTestHelper
-            .getConfig()
-            .log
-            .getInjectedAnnotations()
-            .get(0)
-            .annotation
-            .equals("org.jspecify.annotations.NullUnmarked"));
   }
 
   @Test
@@ -470,7 +459,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
         .start();
     // No annotation should be added, since they are annotated as @Nonnull although each can reduce
     // the number of errors.
-    Assert.assertEquals(coreTestHelper.getConfig().log.getInjectedAnnotations().size(), 0);
+    Assert.assertEquals(coreTestHelper.getLog().getInjectedAnnotations().size(), 0);
   }
 
   @Test

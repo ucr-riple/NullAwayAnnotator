@@ -24,14 +24,14 @@
 
 package edu.ucr.cs.riple.core.evaluators.graph.processors;
 
-import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.evaluators.graph.Node;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
-import edu.ucr.cs.riple.core.metadata.Context;
 import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Set;
@@ -46,16 +46,16 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
   protected final ErrorStore errorStore;
   /** Downstream impact cache to retrieve impacts of fixes globally. */
   protected final DownstreamImpactCache downstreamImpactCache;
-  /** Annotator config. */
-  protected final Config config;
+  /** Annotator context. */
+  protected final Context context;
   /** Handler to re-run compiler. */
   protected final CompilerRunner compilerRunner;
-  /** Context of the input module which the impact of fixes are computed on. */
-  protected final Context context;
+  /** ModuleInfo of the input module which the impact of fixes are computed on. */
+  protected final ModuleInfo moduleInfo;
 
-  public AbstractConflictGraphProcessor(Config config, CompilerRunner runner, Supplier supplier) {
-    this.config = config;
-    this.context = supplier.getContext();
+  public AbstractConflictGraphProcessor(Context context, CompilerRunner runner, Supplier supplier) {
+    this.context = context;
+    this.moduleInfo = supplier.getModuleInfo();
     this.injector = supplier.getInjector();
     this.downstreamImpactCache = supplier.getDownstreamImpactCache();
     this.errorStore = supplier.getErrorStore();
@@ -75,13 +75,13 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
             error ->
                 error.isSingleFix()
                     && error.toResolvingLocation().isOnParameter()
-                    && error.isFixableOnTarget(config)
+                    && error.isFixableOnTarget(context)
                     && !currentLocationsTargetedByTree.contains(error.toResolvingLocation()))
         .map(
             error ->
                 new Fix(
                     new AddMarkerAnnotation(
-                        error.toResolvingLocation().toParameter(), config.nullableAnnot),
+                        error.toResolvingLocation().toParameter(), context.config.nullableAnnot),
                     "PASSING_NULLABLE",
                     false))
         .collect(Collectors.toSet());

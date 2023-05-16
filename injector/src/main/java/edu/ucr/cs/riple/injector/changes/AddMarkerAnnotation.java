@@ -31,6 +31,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Insertion;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import java.util.Objects;
 import javax.annotation.Nullable;
 
 /**
@@ -38,21 +39,22 @@ import javax.annotation.Nullable;
  * href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-9.html#jls-MarkerAnnotation">Marker
  * Annotation</a> on elements in source code.
  */
-public class AddMarkerAnnotation extends AddAnnotation {
+public class AddMarkerAnnotation extends AnnotationChange implements AddAnnotation {
 
   public AddMarkerAnnotation(Location location, String annotation) {
-    super(location, annotation);
+    super(location, new Name(annotation));
   }
 
   @Override
   @Nullable
-  public <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Modification visit(T node) {
+  public <T extends NodeWithAnnotations<?> & NodeWithRange<?>>
+      Modification computeTextModificationOn(T node) {
     if (node.getRange().isEmpty()) {
       return null;
     }
     Range range = node.getRange().get();
     NodeList<AnnotationExpr> annotations = node.getAnnotations();
-    AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationSimpleName);
+    AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationName.simpleName);
 
     // Check if annot already exists.
     boolean annotAlreadyExists =
@@ -61,5 +63,27 @@ public class AddMarkerAnnotation extends AddAnnotation {
       return null;
     }
     return new Insertion(annotationExpr.toString(), range.begin);
+  }
+
+  @Override
+  public RemoveAnnotation getReverse() {
+    return new RemoveMarkerAnnotation(location, annotationName.fullName);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof AddMarkerAnnotation)) {
+      return false;
+    }
+    AddMarkerAnnotation that = (AddMarkerAnnotation) o;
+    return location.equals(that.location) && annotationName.equals(that.annotationName);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash("ADD", location, annotationName);
   }
 }

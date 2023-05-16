@@ -26,7 +26,6 @@ package edu.ucr.cs.riple.injector.location;
 
 /** Represents the type of the location. */
 public enum LocationKind {
-  LOCAL_VARIABLE,
   CLASS,
   FIELD,
   METHOD,
@@ -50,9 +49,6 @@ public enum LocationKind {
     }
     if (type.equalsIgnoreCase("class")) {
       return CLASS;
-    }
-    if (type.equalsIgnoreCase("local_variable")) {
-      return LOCAL_VARIABLE;
     }
     throw new UnsupportedOperationException("Cannot detect type: " + type);
   }

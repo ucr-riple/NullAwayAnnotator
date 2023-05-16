@@ -20,27 +20,15 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.checkers.nullaway;
+package edu.ucr.cs.riple.core.util;
 
-import java.io.File;
-import java.util.UUID;
 import javax.annotation.Nullable;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 /**
  * IMPORTANT NOTE: THIS CLASS IS COPIED FROM NULLAWAY, WE COPIED THE CLASS CONTENT HERE TO REMOVE
  * DEPENDENCY TO NULLAWAY.
  *
- * <p>Config class for Fix Serialization package.
+ * <p>Context class for Fix Serialization package.
  */
 public class FixSerializationConfig {
 
@@ -72,7 +60,7 @@ public class FixSerializationConfig {
     this.outputDirectory = outputDirectory;
   }
 
-  /** Builder class for Serialization Config */
+  /** Builder class for Serialization Context */
   public static class Builder {
 
     private boolean suggestEnabled;
@@ -103,13 +91,13 @@ public class FixSerializationConfig {
     }
 
     /**
-     * Builds and writes the config with the state in builder at the given path as XML.
+     * Builds and writes the context with the state in builder at the given path as XML.
      *
-     * @param path path to write the config file.
+     * @param path path to write the context file.
      */
     public void writeAsXML(String path) {
       FixSerializationConfig config = this.build();
-      writeNullAwayConfigInXMLFormat(config, path);
+      Utility.writeNullAwayConfigInXMLFormat(config, path);
     }
 
     public FixSerializationConfig build() {
@@ -117,54 +105,6 @@ public class FixSerializationConfig {
         throw new IllegalStateException("did not set mandatory output directory");
       }
       return new FixSerializationConfig(suggestEnabled, suggestEnclosing, fieldInitInfo, outputDir);
-    }
-
-    /**
-     * Writes the {@link FixSerializationConfig} in {@code XML} format.
-     *
-     * @param config Config file to write.
-     * @param path Path to write the config at.
-     */
-    public static void writeNullAwayConfigInXMLFormat(FixSerializationConfig config, String path) {
-      DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-      try {
-        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-        Document doc = docBuilder.newDocument();
-
-        // Root
-        Element rootElement = doc.createElement("serialization");
-        doc.appendChild(rootElement);
-
-        // Suggest
-        Element suggestElement = doc.createElement("suggest");
-        suggestElement.setAttribute("active", String.valueOf(config.suggestEnabled));
-        suggestElement.setAttribute("enclosing", String.valueOf(config.suggestEnclosing));
-        rootElement.appendChild(suggestElement);
-
-        // Field Initialization
-        Element fieldInitInfoEnabled = doc.createElement("fieldInitInfo");
-        fieldInitInfoEnabled.setAttribute("active", String.valueOf(config.fieldInitInfoEnabled));
-        rootElement.appendChild(fieldInitInfoEnabled);
-
-        // Output dir
-        Element outputDir = doc.createElement("path");
-        outputDir.setTextContent(config.outputDirectory);
-        rootElement.appendChild(outputDir);
-
-        // UUID
-        Element uuid = doc.createElement("uuid");
-        uuid.setTextContent(UUID.randomUUID().toString());
-        rootElement.appendChild(uuid);
-
-        // Writings
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Transformer transformer = transformerFactory.newTransformer();
-        DOMSource source = new DOMSource(doc);
-        StreamResult result = new StreamResult(new File(path));
-        transformer.transform(source, result);
-      } catch (ParserConfigurationException | TransformerException e) {
-        throw new RuntimeException("Error happened in writing config.", e);
-      }
     }
   }
 }

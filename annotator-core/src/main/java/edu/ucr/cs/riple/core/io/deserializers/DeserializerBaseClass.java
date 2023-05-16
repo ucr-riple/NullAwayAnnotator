@@ -22,28 +22,31 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.checkers;
+package edu.ucr.cs.riple.core.io.deserializers;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
-import edu.ucr.cs.riple.core.metadata.Context;
+import edu.ucr.cs.riple.core.Checker;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Set;
 
-/** Base class for all checker representations. */
-public abstract class CheckerBaseClass<T extends Error> implements Checker<T> {
+/** Base class for all checker deserializers. */
+public abstract class DeserializerBaseClass implements CheckerDeserializer {
 
-  /** Annotator config. */
-  protected final Config config;
+  /** Annotator context. */
+  protected final Context context;
+  /** The checker that this deserializer is supporting. */
+  protected final Checker checker;
   /** The supporting serialization version of this deserializer. */
   protected final int version;
 
-  public CheckerBaseClass(Config config, int version) {
-    this.config = config;
+  public DeserializerBaseClass(Context context, Checker checker, int version) {
+    this.context = context;
+    this.checker = checker;
     this.version = version;
   }
 
@@ -55,21 +58,21 @@ public abstract class CheckerBaseClass<T extends Error> implements Checker<T> {
    * @param region Region where the error is reported,
    * @param offset offset of program point in original version where error is reported.
    * @param resolvingFixes Set of fixes that resolve the error.
-   * @param context Context of the modules which errors are reported on.
+   * @param moduleInfo ModuleInfo of the modules which errors are reported on.
    * @return The corresponding error.
    */
-  public T createError(
+  protected Error createError(
       String errorType,
       String errorMessage,
       Region region,
       int offset,
       ImmutableSet<Fix> resolvingFixes,
-      Context context) {
+      ModuleInfo moduleInfo) {
     ImmutableSet<Fix> fixes =
         resolvingFixes.stream()
-            .filter(f -> !context.getNonnullStore().hasExplicitNonnullAnnotation(f.toLocation()))
+            .filter(f -> !moduleInfo.getNonnullStore().hasExplicitNonnullAnnotation(f.toLocation()))
             .collect(ImmutableSet.toImmutableSet());
-    return createErrorFactory(errorType, errorMessage, region, offset, fixes);
+    return new Error(errorType, errorMessage, region, offset, fixes);
   }
 
   /**
@@ -79,31 +82,22 @@ public abstract class CheckerBaseClass<T extends Error> implements Checker<T> {
    * @param onField Location of the field.
    * @return The updated given location.
    */
-  protected static OnField extendVariableList(OnField onField, Context context) {
+  protected OnField extendVariableList(OnField onField, ModuleInfo moduleInfo) {
     Set<String> variables =
-        context
+        moduleInfo
             .getFieldRegistry()
             .getInLineMultipleFieldDeclarationsOnField(onField.clazz, onField.variables);
     onField.variables.addAll(variables);
     return onField;
   }
 
-  /**
-   * Returns the checker instance by its name.
-   *
-   * @param name name of the checker.
-   * @param config annotator config.
-   * @return the checker instance with the given name.
-   */
-  public static Checker<?> getCheckerByName(String name, Config config) {
-    if (name == null) {
-      throw new RuntimeException("Checker name is null");
-    }
-    switch (name) {
-      case NullAway.NAME:
-        return new NullAway(config);
-      default:
-        throw new RuntimeException("Unknown checker name: " + name);
-    }
+  @Override
+  public int getVersionNumber() {
+    return version;
+  }
+
+  @Override
+  public Checker getAssociatedChecker() {
+    return checker;
   }
 }

@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.injectors;
 
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import java.io.BufferedOutputStream;
@@ -45,9 +46,15 @@ public class VirtualInjector extends AnnotationInjector {
 
   /** Path to library model loader */
   private final Path libraryModelPath;
+  /**
+   * Annotator configuration, required to check if downstream dependencies analysis is activated or
+   * retrieve the path to library model loader.
+   */
+  private final Config config;
 
-  public VirtualInjector(Config config) {
-    super(config);
+  public VirtualInjector(Context context) {
+    super(context);
+    this.config = context.config;
     this.libraryModelPath = config.nullawayLibraryModelLoaderPath;
     if (config.downStreamDependenciesAnalysisActivated) {
       Preconditions.checkNotNull(
@@ -72,8 +79,13 @@ public class VirtualInjector extends AnnotationInjector {
         new BufferedOutputStream(new FileOutputStream(libraryModelPath.toFile()))) {
       Set<String> rows =
           changes.stream()
-              .filter(addAnnotation -> addAnnotation.location.isOnMethod())
-              .map(annot -> annot.location.clazz + "\t" + annot.location.toMethod().method + "\n")
+              .filter(addAnnotation -> addAnnotation.getLocation().isOnMethod())
+              .map(
+                  annot ->
+                      annot.getLocation().clazz
+                          + "\t"
+                          + annot.getLocation().toMethod().method
+                          + "\n")
               .collect(Collectors.toSet());
       for (String row : rows) {
         os.write(row.getBytes(Charset.defaultCharset()), 0, row.length());

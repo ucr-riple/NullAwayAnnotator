@@ -28,7 +28,7 @@ import static com.google.common.collect.ImmutableMap.toImmutableMap;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.cache.BaseCache;
 import edu.ucr.cs.riple.core.cache.Impact;
@@ -54,19 +54,21 @@ public class DownstreamImpactCacheImpl
     extends BaseCache<DownstreamImpact, ImmutableMap<Location, DownstreamImpact>>
     implements DownstreamImpactCache {
 
+  /** Annotator context instance. */
+  private final Context context;
+
   /**
    * Constructor for creating downstream impact cache. It populates the registry with a downstream
    * impact listing 0 triggered errors and 0 downstream fixes for the result of adding
    * {@code @Nullable} to each method in the target being annotated. The actual impacts, will be
    * computed once {@link #analyzeDownstreamDependencies()} is called.
    *
-   * @param config Annotator config.
+   * @param context Annotator context.
    */
-  public DownstreamImpactCacheImpl(Config config) {
+  public DownstreamImpactCacheImpl(Context context) {
     super(
-        config,
-        config
-            .targetModuleContext
+        context
+            .targetModuleInfo
             .getMethodRegistry()
             .getPublicMethodsWithNonPrimitivesReturn()
             .stream()
@@ -74,18 +76,20 @@ public class DownstreamImpactCacheImpl
                 methodNode ->
                     new DownstreamImpact(
                         new Fix(
-                            new AddMarkerAnnotation(methodNode.location, config.nullableAnnot),
+                            new AddMarkerAnnotation(
+                                methodNode.location, context.config.nullableAnnot),
                             "null",
                             true)))
             .collect(toImmutableMap(Impact::toLocation, Function.identity())));
+    this.context = context;
   }
 
   @Override
   public void analyzeDownstreamDependencies() {
     System.out.println("Analyzing downstream dependencies...");
-    DownstreamDependencySupplier supplier = new DownstreamDependencySupplier(config);
+    DownstreamDependencySupplier supplier = new DownstreamDependencySupplier(context);
     // Collect callers of public APIs in module.
-    MethodRegionTracker tracker = new MethodRegionTracker(config, supplier.getContext());
+    MethodRegionTracker tracker = new MethodRegionTracker(supplier.getModuleInfo());
     // Generate fixes corresponding methods.
     ImmutableSet<Fix> fixes =
         store.values().stream()
@@ -97,7 +101,8 @@ public class DownstreamImpactCacheImpl
             .map(
                 downstreamImpact ->
                     new Fix(
-                        new AddMarkerAnnotation(downstreamImpact.toMethod(), config.nullableAnnot),
+                        new AddMarkerAnnotation(
+                            downstreamImpact.toMethod(), context.config.nullableAnnot),
                         "null",
                         false))
             .collect(ImmutableSet.toImmutableSet());
@@ -171,7 +176,7 @@ public class DownstreamImpactCacheImpl
 
   @Override
   public boolean triggersUnresolvableErrorsOnDownstream(Fix fix) {
-    return getTriggeredErrors(fix).stream().anyMatch(error -> !error.isFixableOnTarget(config));
+    return getTriggeredErrors(fix).stream().anyMatch(error -> !error.isFixableOnTarget(context));
   }
 
   @Override

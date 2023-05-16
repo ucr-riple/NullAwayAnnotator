@@ -32,8 +32,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.javaparser.utils.Pair;
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.checkers.nullaway.FixSerializationConfig;
-import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
+import edu.ucr.cs.riple.core.util.FixSerializationConfig;
+import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.scanner.ScannerConfigWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -98,7 +98,7 @@ public class ConfigurationTest {
                 new CLIFlagWithValue("cp", testDir.resolve("paths.tsv")),
                 new CLIFlagWithValue("i", "edu.ucr.Initializer"),
                 new CLIFlagWithValue("d", testDir),
-                new CLIFlagWithValue("cn", NullAway.NAME)));
+                new CLIFlagWithValue("cn", Checker.NULLAWAY.name())));
     requiredDownsStreamDependencyFlagsCli =
         new ArrayList<>(
             List.of(
@@ -130,7 +130,7 @@ public class ConfigurationTest {
           assertEquals("./gradlew compileJava", config.buildCommand);
           assertEquals(testDir, config.globalDir);
           assertEquals("edu.ucr.Initializer", config.initializerAnnot);
-          assertEquals(Paths.get("0nullaway.xml"), config.target.checkerConfig);
+          assertEquals(Paths.get("0nullaway.xml"), config.target.nullawayConfig);
           assertEquals(Paths.get("0scanner.xml"), config.target.scannerConfig);
         });
   }
@@ -163,7 +163,7 @@ public class ConfigurationTest {
           assertEquals("./gradlew compileJava", config.buildCommand);
           assertEquals(testDir, config.globalDir);
           assertEquals("edu.ucr.Initializer", config.initializerAnnot);
-          assertEquals(Paths.get("0nullaway.xml"), config.target.checkerConfig);
+          assertEquals(Paths.get("0nullaway.xml"), config.target.nullawayConfig);
           assertEquals(Paths.get("0scanner.xml"), config.target.scannerConfig);
           assertEquals(testDir.resolve("library-model.tsv"), config.nullawayLibraryModelLoaderPath);
           assertTrue(config.downStreamDependenciesAnalysisActivated);
@@ -178,8 +178,9 @@ public class ConfigurationTest {
           // Retrieve actual downstream config paths for nullaway and scanner config file paths for
           // downstream dependencies.
           ImmutableSet<Pair<Path, Path>> actualDownstreamConfigPaths =
-              config.downstreamInfo.stream()
-                  .map(moduleInfo -> new Pair<>(moduleInfo.checkerConfig, moduleInfo.scannerConfig))
+              config.downstreamConfigurations.stream()
+                  .map(
+                      moduleInfo -> new Pair<>(moduleInfo.nullawayConfig, moduleInfo.scannerConfig))
                   .collect(ImmutableSet.toImmutableSet());
           assertEquals(actualDownstreamConfigPaths, expectedDownstreamConfigPaths);
         });
@@ -192,8 +193,7 @@ public class ConfigurationTest {
     FixSerializationConfig config = new FixSerializationConfig();
     Path nullawayConfigPath = testDir.resolve("nullaway.xml");
     for (int i = 0; i < 5; i++) {
-      FixSerializationConfig.Builder.writeNullAwayConfigInXMLFormat(
-          config, nullawayConfigPath.toString());
+      Utility.writeNullAwayConfigInXMLFormat(config, nullawayConfigPath.toString());
       String uuid = getValueFromTag(nullawayConfigPath, "/serialization/uuid");
       if (observed.contains(uuid)) {
         throw new IllegalStateException(
@@ -267,12 +267,12 @@ public class ConfigurationTest {
 
           // Check default mode.
           config = makeConfigWithFlags(baseFlags);
-          assertFalse(config.suppressRemainingErrors);
+          assertFalse(config.forceResolveActivated);
 
           CLIFlag flag = new CLIFlagWithValue("fr", "edu.ucr.example.NullUnmarked");
           baseFlags.add(flag);
           config = makeConfigWithFlags(baseFlags);
-          assertTrue(config.suppressRemainingErrors);
+          assertTrue(config.forceResolveActivated);
           assertEquals(config.nullUnMarkedAnnotation, "edu.ucr.example.NullUnmarked");
         });
   }
@@ -327,7 +327,7 @@ public class ConfigurationTest {
     }
   }
 
-  /** Container class for CLI Flag. */
+  /** Container class for Config Flag. */
   private static class CLIFlag {
     /** Flag name; */
     protected final String flag;
@@ -341,7 +341,7 @@ public class ConfigurationTest {
     }
   }
 
-  /** Container class for CLI Flag with value. */
+  /** Container class for Config Flag with value. */
   private static class CLIFlagWithValue extends CLIFlag {
     /** Flag Value. */
     private final Object value;

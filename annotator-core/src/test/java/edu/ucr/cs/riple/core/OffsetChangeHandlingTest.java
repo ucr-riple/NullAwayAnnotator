@@ -35,7 +35,7 @@ import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
 import edu.ucr.cs.riple.core.tools.CoreTestHelper;
 import edu.ucr.cs.riple.core.tools.Utility;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
-import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
+import edu.ucr.cs.riple.injector.changes.RemoveMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -65,19 +65,20 @@ public class OffsetChangeHandlingTest {
   private final Path inputPath;
 
   private AnnotationInjector injector;
-  private Config config;
+  private Context context;
 
   @Before
   public void init() {
     root = temporaryFolder.getRoot().toPath();
     CoreTestHelper helper = new CoreTestHelper(root, root).onEmptyProject();
-    Path configPath = root.resolve("config.json");
+    Path configPath = root.resolve("context.json");
     helper.makeAnnotatorConfigFile(configPath);
     Utility.runTestWithMockedBuild(
         root,
         () -> {
-          config = new Config(configPath);
-          injector = new PhysicalInjector(config);
+          Config config = new Config(configPath);
+          context = new Context(config);
+          injector = new PhysicalInjector(context);
           try {
             Files.copy(inputPath, root.resolve("benchmark.java"));
           } catch (IOException e) {
@@ -198,7 +199,7 @@ public class OffsetChangeHandlingTest {
         Arrays.stream(fields)
             .map(
                 field ->
-                    new RemoveAnnotation(
+                    new RemoveMarkerAnnotation(
                         new OnField(
                             root.resolve("benchmark.java").toString(),
                             fieldClassMap.get(field),
@@ -218,7 +219,7 @@ public class OffsetChangeHandlingTest {
                   toImmutableMap(
                       identity(),
                       s ->
-                          config.offsetHandler.getOriginalOffset(
+                          context.offsetHandler.getOriginalOffset(
                               root.resolve("benchmark.java"), content.indexOf(s))));
       Assert.assertEquals(calculatedOffsetMap, originalFieldOffsetMap);
     } catch (IOException e) {

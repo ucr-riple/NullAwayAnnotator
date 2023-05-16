@@ -71,7 +71,7 @@ public class LocationToJsonVisitor implements LocationVisitor<JSONObject, Void> 
   @Override
   public JSONObject visitParameter(OnParameter onParameter, Void unused) {
     JSONObject res = defaultAction(onParameter);
-    res.put(KEYS.METHOD, onParameter.method);
+    res.put(KEYS.METHOD, onParameter.enclosingMethod);
     res.put(KEYS.INDEX, onParameter.index);
     return res;
   }

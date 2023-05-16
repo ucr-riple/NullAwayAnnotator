@@ -1,8 +1,8 @@
 package edu.ucr.cs.riple.core.metadata.field;
 
 import com.google.common.base.Preconditions;
-import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.metadata.MetaData;
+import edu.ucr.cs.riple.core.Context;
+import edu.ucr.cs.riple.core.metadata.Registry;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * Detects initializer methods in source code. Reads field initialization info serialized by
  * NullAway and uses a heuristic to detect them.
  */
-public class FieldInitializationStore extends MetaData<FieldInitializationNode> {
+public class FieldInitializationStore extends Registry<FieldInitializationNode> {
 
   /**
    * Output file name. It contains information about initializations of fields via methods. On each
@@ -33,20 +33,10 @@ public class FieldInitializationStore extends MetaData<FieldInitializationNode> 
    * Constructs an {@link FieldInitializationStore} instance. After this call, all serialized
    * information from NullAway has been processed.
    *
-   * @param config Annotator config.
+   * @param context Annotator context.
    */
-  public FieldInitializationStore(Config config) {
-    super(config, config.target.dir.resolve(FILE_NAME));
-  }
-
-  @Override
-  protected FieldInitializationNode addNodeByLine(String[] values) {
-    Location location = Location.createLocationFromArrayInfo(values);
-    Preconditions.checkNotNull(
-        location, "Field Location cannot be null: " + Arrays.toString(values));
-    return location.isOnMethod()
-        ? new FieldInitializationNode(location.toMethod(), values[6])
-        : null;
+  public FieldInitializationStore(Context context) {
+    super(context.targetConfiguration.dir.resolve(FILE_NAME));
   }
 
   /**
@@ -69,7 +59,7 @@ public class FieldInitializationStore extends MetaData<FieldInitializationNode> 
     Map<String, Class> classes = new HashMap<>();
     uninitializedFields.forEach(
         onField ->
-            findNodesWithHashHint(
+            findRecordsWithHashHint(
                     candidate ->
                         onField.isOnFieldWithName(candidate.getFieldName())
                             && candidate.getClassName().equals(onField.clazz),
@@ -84,6 +74,18 @@ public class FieldInitializationStore extends MetaData<FieldInitializationNode> 
         .map(Class::findInitializer)
         .filter(Objects::nonNull)
         .collect(Collectors.toSet());
+  }
+
+  @Override
+  protected Builder<FieldInitializationNode> getBuilder() {
+    return values -> {
+      Location location = Location.createLocationFromArrayInfo(values);
+      Preconditions.checkNotNull(
+          location, "Field Location cannot be null: " + Arrays.toString(values));
+      return location.isOnMethod()
+          ? new FieldInitializationNode(location.toMethod(), values[6])
+          : null;
+    };
   }
 
   /** Stores class field / method initialization status. */

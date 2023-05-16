@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core.evaluators.graph.processors;
 
-import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.evaluators.graph.ConflictGraph;
 import edu.ucr.cs.riple.core.evaluators.graph.Node;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
@@ -51,8 +51,8 @@ public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcess
   private final RegionTracker regionTracker;
 
   public ParallelConflictGraphProcessor(
-      Config config, CompilerRunner runner, Supplier supplier, RegionTracker regionTracker) {
-    super(config, runner, supplier);
+      Context context, CompilerRunner runner, Supplier supplier, RegionTracker regionTracker) {
+    super(context, runner, supplier);
     this.regionTracker = regionTracker;
   }
 
@@ -90,7 +90,7 @@ public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcess
                 fixes,
                 getTriggeredFixesFromDownstreamErrors(node),
                 triggeredErrors,
-                context);
+                moduleInfo);
           });
       injector.removeFixes(fixes);
     }

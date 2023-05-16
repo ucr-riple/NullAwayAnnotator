@@ -24,28 +24,12 @@ package edu.ucr.cs.riple.injector.changes;
 
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
-import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Modification;
-import edu.ucr.cs.riple.injector.visitors.LocationToJSONVisitor;
-import java.util.Objects;
 import javax.annotation.Nullable;
-import org.json.simple.JSONObject;
 
 /** Represents a change in the AST of the source code. */
-public abstract class Change {
-  /** Target location. */
-  public final Location location;
-  /** Annotation full name. */
-  public final String annotation;
-  /** Annotation simple name. */
-  public final String annotationSimpleName;
-
-  public Change(Location location, String annotation) {
-    this.annotation = annotation;
-    this.location = location;
-    this.annotationSimpleName = Helper.simpleName(annotation);
-  }
+public interface ASTChange {
 
   /**
    * Visits the given node and translates the change to a text modification.
@@ -55,35 +39,13 @@ public abstract class Change {
    *     will be returned.
    */
   @Nullable
-  public abstract <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Modification visit(T node);
+  <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Modification computeTextModificationOn(
+      T node);
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof Change)) {
-      return false;
-    }
-    Change other = (Change) o;
-    return Objects.equals(location, other.location) && Objects.equals(annotation, other.annotation);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(location, annotation);
-  }
-
-  @SuppressWarnings("unchecked")
-  public JSONObject getJson() {
-    JSONObject res = new JSONObject();
-    res.put("LOCATION", location.accept(new LocationToJSONVisitor(), null));
-    res.put("ANNOTATION", annotation);
-    return res;
-  }
-
-  @Override
-  public String toString() {
-    return location.toString();
-  }
+  /**
+   * Returns the location of the change.
+   *
+   * @return The location of the change.
+   */
+  Location getLocation();
 }

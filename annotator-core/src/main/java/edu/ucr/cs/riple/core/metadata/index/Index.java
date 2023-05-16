@@ -26,9 +26,10 @@ package edu.ucr.cs.riple.core.metadata.index;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
-import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.metadata.Context;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
+import edu.ucr.cs.riple.core.util.Utility;
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -42,22 +43,23 @@ public class Index {
 
   /** Contents of the index. */
   private final Multimap<Region, Error> items;
-  /** Context of the module which indexed errors are reported on. */
+  /** ModuleInfo of the module which indexed errors are reported on. */
+  private final ModuleInfo moduleInfo;
+  /** Annotator context. */
   private final Context context;
-  /** Annotator config. */
-  private final Config config;
 
   /** Creates an instance of Index. Contents are accumulated from multiple sources. */
-  public Index(Config config, Context context) {
-    this.config = config;
+  public Index(Context context, ModuleInfo moduleInfo) {
     this.context = context;
+    this.moduleInfo = moduleInfo;
     this.items = MultimapBuilder.hashKeys().arrayListValues().build();
   }
 
   /** Starts the reading and index process. */
   public void index() {
     items.clear();
-    config.checker.deserializeErrors(context).forEach(error -> items.put(error.getRegion(), error));
+    Utility.readErrorsFromOutputDirectory(context, moduleInfo)
+        .forEach(error -> items.put(error.getRegion(), error));
   }
 
   /**

@@ -25,7 +25,7 @@ package edu.ucr.cs.riple.core.metadata.index;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnParameter;
@@ -33,23 +33,28 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
 
-/** Base class for an error reported by the Checker. */
+/** Represents an error reported by NullAway. */
 @SuppressWarnings("JavaLangClash")
-public abstract class Error {
+public class Error {
 
   /** Error Type. */
   public final String messageType;
   /** Error message. */
   public final String message;
   /** The fixes which can resolve this error (possibly empty). */
-  public final ImmutableSet<Fix> resolvingFixes;
+  private final ImmutableSet<Fix> resolvingFixes;
   /** Offset of program point in original version where error is reported. */
-  public final int offset;
+  private final int offset;
   /** Containing region. */
-  public final Region region;
+  protected final Region region;
+  /** Error type for method initialization errors from NullAway in {@code String}. */
+  public static final String METHOD_INITIALIZER_ERROR = "METHOD_NO_INIT";
+  /** Error type for field initialization errors from NullAway in {@code String}. */
+  public static final String FIELD_INITIALIZER_ERROR = "FIELD_NO_INIT";
 
   public Error(
       String messageType,
@@ -145,17 +150,53 @@ public abstract class Error {
     return this.region;
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof Error)) {
+      return false;
+    }
+    Error error = (Error) o;
+    if (!messageType.equals(error.messageType)) {
+      return false;
+    }
+    if (!region.equals(error.region)) {
+      return false;
+    }
+    if (messageType.equals(METHOD_INITIALIZER_ERROR)) {
+      // we do not need to compare error messages as it can be the same error with a different error
+      // message and should not be treated as a separate error.
+      return true;
+    }
+    return message.equals(error.message)
+        && resolvingFixes.equals(error.resolvingFixes)
+        && offset == error.offset;
+  }
+
   /**
    * Checks if error is resolvable and all suggested fixes must be applied to an element in target
    * module.
    *
-   * @param config Annotator config instance.
+   * @param context Annotator context instance.
    * @return true, if error is resolvable via fixes on target module.
    */
-  public boolean isFixableOnTarget(Config config) {
+  public boolean isFixableOnTarget(Context context) {
     return resolvingFixes.size() > 0
         && this.resolvingFixes.stream()
-            .allMatch(fix -> config.targetModuleContext.declaredInModule(fix.toLocation()));
+            .allMatch(fix -> context.targetModuleInfo.declaredInModule(fix.toLocation()));
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        messageType,
+        // to make sure equal objects will produce the same hashcode.
+        messageType.equals(METHOD_INITIALIZER_ERROR) ? METHOD_INITIALIZER_ERROR : message,
+        region,
+        resolvingFixes,
+        offset);
   }
 
   @Override
@@ -177,8 +218,7 @@ public abstract class Error {
    * @param errors Collection of errors.
    * @return Immutable set of fixes which can resolve all given errors.
    */
-  public static <T extends Error> ImmutableSet<Fix> getResolvingFixesOfErrors(
-      Collection<T> errors) {
+  public static ImmutableSet<Fix> getResolvingFixesOfErrors(Collection<Error> errors) {
     // Each error has a set of resolving fixes and each fix has a set of reasons as why the fix has
     // been suggested. The final returned set of fixes should contain all the reasons it has been
     // suggested across the given collection. Map below stores all the set of reasons each fix is
@@ -219,5 +259,15 @@ public abstract class Error {
       return false;
     }
     return fixes.containsAll(this.resolvingFixes);
+  }
+  /**
+   * Returns true if the error is an initialization error ({@code METHOD_NO_INIT} or {@code
+   * FIELD_NO_INIT}).
+   *
+   * @return true, if the error is an initialization error.
+   */
+  public boolean isInitializationError() {
+    return this.messageType.equals(METHOD_INITIALIZER_ERROR)
+        || this.messageType.equals(FIELD_INITIALIZER_ERROR);
   }
 }
