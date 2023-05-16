@@ -28,7 +28,7 @@ import javax.annotation.Nullable;
  * IMPORTANT NOTE: THIS CLASS IS COPIED FROM NULLAWAY, WE COPIED THE CLASS CONTENT HERE TO REMOVE
  * DEPENDENCY TO NULLAWAY.
  *
- * <p>Config class for Fix Serialization package.
+ * <p>Context class for Fix Serialization package.
  */
 public class FixSerializationConfig {
 
@@ -60,7 +60,7 @@ public class FixSerializationConfig {
     this.outputDirectory = outputDirectory;
   }
 
-  /** Builder class for Serialization Config */
+  /** Builder class for Serialization Context */
   public static class Builder {
 
     private boolean suggestEnabled;
@@ -91,9 +91,9 @@ public class FixSerializationConfig {
     }
 
     /**
-     * Builds and writes the config with the state in builder at the given path as XML.
+     * Builds and writes the context with the state in builder at the given path as XML.
      *
-     * @param path path to write the config file.
+     * @param path path to write the context file.
      */
     public void writeAsXML(String path) {
       FixSerializationConfig config = this.build();

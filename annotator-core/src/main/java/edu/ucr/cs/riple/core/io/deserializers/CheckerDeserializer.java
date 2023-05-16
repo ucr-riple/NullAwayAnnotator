@@ -24,11 +24,9 @@
 
 package edu.ucr.cs.riple.core.io.deserializers;
 
-import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Checker;
-import edu.ucr.cs.riple.core.ModuleInfo;
-import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.Error;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import java.util.Set;
 
 /**
@@ -40,11 +38,10 @@ public interface CheckerDeserializer {
   /**
    * Deserialized errors reported by the checker on the passed modules.
    *
-   * @param modules Context of the module where errors are reported.
-   * @param fieldRegistry Registry of fields in the project.
+   * @param moduleInfo ModuleInfo of the module where errors are reported.
    * @return Corresponding Error instance with the passed values.
    */
-  Set<Error> deserializeErrors(ImmutableSet<ModuleInfo> modules, FieldRegistry fieldRegistry);
+  Set<Error> deserializeErrors(ModuleInfo moduleInfo);
 
   /**
    * Returns the serialization version number which this adapter is associated with.

@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core;
+package edu.ucr.cs.riple.core.module;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,7 +32,8 @@ import java.util.Objects;
 import org.json.simple.JSONObject;
 
 /** Container class to hold paths to nullaway and scanner config files. */
-public class ModuleInfo {
+public class ModuleConfiguration {
+
   /** Path to nullaway config. */
   public final Path nullawayConfig;
   /** Path to scanner config. */
@@ -41,25 +42,25 @@ public class ModuleInfo {
   public final Path dir;
 
   /**
-   * Creates an instance of {@link ModuleInfo} from the given json object.
+   * Creates an instance of {@link ModuleConfiguration} from the given json object.
    *
    * @param id Global unique id for this module.
    * @param globalDir Global path for all Annotator/Scanner/NullAway outputs.
    * @param jsonObject Json Object to retrieve values.
-   * @return An instance of {@link ModuleInfo}.
+   * @return An instance of {@link ModuleConfiguration}.
    */
-  public static ModuleInfo buildFromJson(int id, Path globalDir, JSONObject jsonObject) {
+  public static ModuleConfiguration buildFromJson(int id, Path globalDir, JSONObject jsonObject) {
     String nullawayConfigPath = (String) jsonObject.get("NULLAWAY");
     String scannerConfigPath = (String) jsonObject.get("SCANNER");
     if (nullawayConfigPath == null || scannerConfigPath == null) {
       throw new IllegalArgumentException(
           "Both paths to NullAway and Scanner config files must be set with NULLAWAY and SCANNER keys!");
     }
-    return new ModuleInfo(
+    return new ModuleConfiguration(
         id, globalDir, Paths.get(nullawayConfigPath), Paths.get(scannerConfigPath));
   }
 
-  public ModuleInfo(int id, Path globalDir, Path nullawayConfig, Path scannerConfig) {
+  public ModuleConfiguration(int id, Path globalDir, Path nullawayConfig, Path scannerConfig) {
     this.nullawayConfig = nullawayConfig;
     this.scannerConfig = scannerConfig;
     this.dir = globalDir.resolve(String.valueOf(id));
@@ -76,10 +77,10 @@ public class ModuleInfo {
 
   @Override
   public boolean equals(Object o) {
-    if (!(o instanceof ModuleInfo)) {
+    if (!(o instanceof ModuleConfiguration)) {
       return false;
     }
-    ModuleInfo that = (ModuleInfo) o;
+    ModuleConfiguration that = (ModuleConfiguration) o;
     return nullawayConfig.equals(that.nullawayConfig) && scannerConfig.equals(that.scannerConfig);
   }
 

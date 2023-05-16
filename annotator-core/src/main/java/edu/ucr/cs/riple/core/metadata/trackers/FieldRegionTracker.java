@@ -24,11 +24,9 @@
 
 package edu.ucr.cs.riple.core.metadata.trackers;
 
-import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.ModuleInfo;
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.Registry;
-import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
-import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
@@ -40,19 +38,15 @@ import java.util.stream.Collectors;
 /** Tracker for Fields. */
 public class FieldRegionTracker extends Registry<TrackerNode> implements RegionTracker {
 
-  /**
-   * Store for field declarations. This is used to determine if a field is initialized at
-   * declaration.
-   */
-  private final FieldRegistry fieldRegistry;
-  /** The method registry. Used to retrieve constructors for a class */
-  private final MethodRegistry methodRegistry;
+  /** ModuleInfo of the module which usages of fields are stored. */
+  private final ModuleInfo moduleInfo;
 
-  public FieldRegionTracker(
-      Config config, ModuleInfo info, FieldRegistry fieldRegistry, MethodRegistry methodRegistry) {
-    super(config, info.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME));
-    this.fieldRegistry = fieldRegistry;
-    this.methodRegistry = methodRegistry;
+  public FieldRegionTracker(ModuleInfo moduleInfo) {
+    super(
+        moduleInfo.getModuleConfigurations().stream()
+            .map(configuration -> configuration.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME))
+            .collect(ImmutableSet.toImmutableSet()));
+    this.moduleInfo = moduleInfo;
   }
 
   @Override
@@ -81,10 +75,10 @@ public class FieldRegionTracker extends Registry<TrackerNode> implements RegionT
             .map(fieldName -> new Region(field.clazz, fieldName))
             .collect(Collectors.toSet()));
     // Check if field is initialized at declaration.
-    if (fieldRegistry.isUninitializedField(field)) {
+    if (moduleInfo.getFieldRegistry().isUninitializedField(field)) {
       // If not, add all constructors for the class.
       ans.addAll(
-          methodRegistry.getConstructorsForClass(field.clazz).stream()
+          moduleInfo.getMethodRegistry().getConstructorsForClass(field.clazz).stream()
               .map(onMethod -> new Region(onMethod.clazz, onMethod.method))
               .collect(Collectors.toSet()));
     }

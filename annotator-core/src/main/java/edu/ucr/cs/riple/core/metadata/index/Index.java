@@ -24,13 +24,11 @@
 
 package edu.ucr.cs.riple.core.metadata.index;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
-import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.ModuleInfo;
-import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.util.Collection;
 import java.util.Set;
@@ -45,34 +43,23 @@ public class Index {
 
   /** Contents of the index. */
   private final Multimap<Region, Error> items;
-  /**
-   * Annotator config. Used to retrieve the using {@link
-   * edu.ucr.cs.riple.core.io.deserializers.CheckerDeserializer} corresponding checker.
-   */
-  private final Config config;
-  /** Paths to the file to load the content from. */
-  private final ImmutableSet<ModuleInfo> modules;
-  /** Field registry, */
-  private final FieldRegistry fieldRegistry;
+  /** ModuleInfo of the module which indexed errors are reported on. */
+  private final ModuleInfo moduleInfo;
+  /** Annotator context. */
+  private final Context context;
 
-  /**
-   * Creates an instance of Index. Contents are accumulated from multiple sources.
-   *
-   * @param config Annotator config.
-   * @param modules Modules where the errors are reported on.
-   */
-  public Index(Config config, ImmutableSet<ModuleInfo> modules, FieldRegistry fieldRegistry) {
-    this.config = config;
-    this.modules = modules;
-    this.fieldRegistry = fieldRegistry;
+  /** Creates an instance of Index. Contents are accumulated from multiple sources. */
+  public Index(Context context, ModuleInfo moduleInfo) {
+    this.context = context;
+    this.moduleInfo = moduleInfo;
     this.items = MultimapBuilder.hashKeys().arrayListValues().build();
   }
 
   /** Starts the reading and index process. */
   public void index() {
     items.clear();
-    Utility.readErrorsFromOutputDirectory(config, modules, fieldRegistry)
-        .forEach(e -> items.put(e.getRegion(), e));
+    Utility.readErrorsFromOutputDirectory(context, moduleInfo)
+        .forEach(error -> items.put(error.getRegion(), error));
   }
 
   /**

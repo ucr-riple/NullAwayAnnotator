@@ -70,7 +70,7 @@ public class CachedEvaluator extends AbstractEvaluator {
     // add only fixes that are not stored in cache.
     Set<Fix> fixes =
         reports.stream()
-            .filter(report -> report.requiresFurtherProcess(config))
+            .filter(report -> report.requiresFurtherProcess(context.config))
             .flatMap(report -> report.getFixesForNextIteration().stream())
             .filter(cache::isUnknown)
             .collect(Collectors.toSet());
@@ -107,7 +107,7 @@ public class CachedEvaluator extends AbstractEvaluator {
     // collect requested fixes for each report which was added to conflict graph.
     Map<Report, Set<Fix>> reportFixMap =
         reports.stream()
-            .filter(report -> report.requiresFurtherProcess(config))
+            .filter(report -> report.requiresFurtherProcess(context.config))
             .collect(toMap(identity(), Report::getFixesForNextIteration));
 
     // update reports state.
@@ -126,7 +126,7 @@ public class CachedEvaluator extends AbstractEvaluator {
           report.triggeredErrors = ImmutableSet.copyOf(triggeredErrors);
           // get fixes triggered from downstream.
           report.triggeredFixesFromDownstreamErrors =
-              cache.getTriggeredFixesOnDownstreamForCollection(newTree);
+              cache.getTriggeredFixesFromDownstreamForCollection(newTree);
           // replace the old tree with new tree that contains triggered fixes from this iteration.
           report.tree = newTree;
           report.hasBeenProcessedOnce = true;

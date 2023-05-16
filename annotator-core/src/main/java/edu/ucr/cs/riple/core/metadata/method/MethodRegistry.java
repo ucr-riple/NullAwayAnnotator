@@ -27,8 +27,9 @@ package edu.ucr.cs.riple.core.metadata.method;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
-import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.metadata.Registry;
+import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -52,8 +53,15 @@ public class MethodRegistry extends Registry<MethodRecord> {
   /** Set of all classes flat name declared in module. */
   private Set<String> declaredClasses;
 
-  public MethodRegistry(Config config) {
-    super(config, config.target.dir.resolve(Serializer.METHOD_INFO_FILE_NAME));
+  public MethodRegistry(Context context) {
+    this(ImmutableSet.of(context.targetConfiguration));
+  }
+
+  public MethodRegistry(ImmutableSet<ModuleConfiguration> modules) {
+    super(
+        modules.stream()
+            .map(moduleInfo -> moduleInfo.dir.resolve(Serializer.METHOD_INFO_FILE_NAME))
+            .collect(ImmutableSet.toImmutableSet()));
   }
 
   @Override

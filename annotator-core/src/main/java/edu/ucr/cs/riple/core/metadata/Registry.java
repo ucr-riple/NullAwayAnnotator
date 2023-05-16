@@ -26,7 +26,6 @@ package edu.ucr.cs.riple.core.metadata;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Config;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -54,18 +53,14 @@ public abstract class Registry<T> {
    * java.util.HashMap}) to hold both items.
    */
   protected final ImmutableMultimap<Integer, T> contents;
-  /** Annotator config. */
-  protected final Config config;
 
   /**
    * Constructor for this container. Once this constructor is invoked, all data will be loaded from
    * the file.
    *
-   * @param config Annotator config.
    * @param path Path to the file containing the data.
    */
-  public Registry(Config config, Path path) {
-    this.config = config;
+  public Registry(Path path) {
     ImmutableMultimap.Builder<Integer, T> builder = ImmutableMultimap.builder();
     setup();
     try {
@@ -80,11 +75,9 @@ public abstract class Registry<T> {
    * Constructor for this container. Contents are accumulated from multiple sources. Once this
    * constructor is invoked, all data will be loaded from the file.
    *
-   * @param config Annotator config.
    * @param paths Paths to all files containing data.
    */
-  public Registry(Config config, ImmutableSet<Path> paths) {
-    this.config = config;
+  public Registry(ImmutableSet<Path> paths) {
     ImmutableMultimap.Builder<Integer, T> builder = ImmutableMultimap.builder();
     setup();
     paths.forEach(

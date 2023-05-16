@@ -29,7 +29,6 @@ import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
 import edu.ucr.cs.riple.core.evaluators.suppliers.DownstreamDependencySupplier;
 import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collections;
@@ -51,12 +50,9 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
    */
   private final HashMap<OnMethod, Set<OnParameter>> nullableFlowMap;
 
-  private final MethodRegistry methodRegistry;
-
   public DownstreamImpactEvaluator(DownstreamDependencySupplier supplier) {
     super(supplier);
     this.nullableFlowMap = new HashMap<>();
-    this.methodRegistry = supplier.getMethodRegistry();
   }
 
   @Override
@@ -77,7 +73,7 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
                                       error.isSingleFix()
                                           && error.toResolvingLocation().isOnParameter()
                                           // Method is declared in the target module.
-                                          && methodRegistry.declaredInModule(
+                                          && context.targetModuleInfo.declaredInModule(
                                               error.toResolvingParameter()))
                               .map(Error::toResolvingParameter)
                               .collect(Collectors.toSet());
@@ -88,7 +84,10 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
                         parameters.forEach(
                             onParameter ->
                                 onParameter.path =
-                                    methodRegistry.findMethodByName(
+                                    context
+                                        .targetModuleInfo
+                                        .getMethodRegistry()
+                                        .findMethodByName(
                                             onParameter.clazz, onParameter.enclosingMethod.method)
                                         .location
                                         .path);

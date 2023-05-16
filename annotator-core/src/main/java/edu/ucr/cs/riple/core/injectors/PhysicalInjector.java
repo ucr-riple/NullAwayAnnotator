@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core.injectors;
 
-import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
@@ -35,20 +35,27 @@ import java.util.Set;
 public class PhysicalInjector extends AnnotationInjector {
   private final Injector injector;
 
-  public PhysicalInjector(Config config) {
-    super(config);
+  /**
+   * Creates a new PhysicalInjector instance.
+   *
+   * @param context Annotator context, required to keep record of the changes made to the source
+   *     code to compute the original offsets of reported errors. Original offset of an error, is
+   *     the offset of the error in the source code before any changes are made to the source code.
+   */
+  public PhysicalInjector(Context context) {
+    super(context);
     this.injector = new Injector();
   }
 
   @Override
   public void removeAnnotations(Set<RemoveAnnotation> changes) {
     Set<FileOffsetStore> offsetStores = injector.removeAnnotations(changes);
-    config.offsetHandler.updateStateWithRecentChanges(offsetStores);
+    context.offsetHandler.updateStateWithRecentChanges(offsetStores);
   }
 
   @Override
   public void injectAnnotations(Set<AddAnnotation> changes) {
     Set<FileOffsetStore> offsetStores = injector.addAnnotations(changes);
-    config.offsetHandler.updateStateWithRecentChanges(offsetStores);
+    context.offsetHandler.updateStateWithRecentChanges(offsetStores);
   }
 }

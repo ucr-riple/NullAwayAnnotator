@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core.evaluators.graph.processors;
 
-import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.evaluators.graph.ConflictGraph;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
@@ -36,8 +36,9 @@ import me.tongfei.progressbar.ProgressBar;
 /** Basic processor which processes the impact of each node sequentially. */
 public class SequentialConflictGraphProcessor extends AbstractConflictGraphProcessor {
 
-  public SequentialConflictGraphProcessor(Config config, CompilerRunner runner, Supplier supplier) {
-    super(config, runner, supplier);
+  public SequentialConflictGraphProcessor(
+      Context context, CompilerRunner runner, Supplier supplier) {
+    super(context, runner, supplier);
   }
 
   @Override
@@ -61,7 +62,7 @@ public class SequentialConflictGraphProcessor extends AbstractConflictGraphProce
                   fixes,
                   getTriggeredFixesFromDownstreamErrors(node),
                   errorComparisonResult.dif,
-                  methodRegistry);
+                  moduleInfo);
               injector.removeFixes(fixes);
             });
     pb.close();
