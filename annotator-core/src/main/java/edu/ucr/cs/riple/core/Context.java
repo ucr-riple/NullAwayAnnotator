@@ -109,6 +109,7 @@ public class Context {
 
   /** Responsible for handling offset changes in source file. */
   public static class OffsetHandler {
+
     /** Map of file paths to Offset stores. */
     private final Map<Path, FileOffsetStore> contents;
 

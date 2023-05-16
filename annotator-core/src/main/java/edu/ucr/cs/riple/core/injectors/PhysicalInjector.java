@@ -35,6 +35,13 @@ import java.util.Set;
 public class PhysicalInjector extends AnnotationInjector {
   private final Injector injector;
 
+  /**
+   * Creates a new PhysicalInjector instance.
+   *
+   * @param context Annotator context, required to keep record of the changes made to the source
+   *     code to compute the original offsets of reported errors. Original offset of an error, is
+   *     the offset of the error in the source code before any changes are made to the source code.
+   */
   public PhysicalInjector(Context context) {
     super(context);
     this.injector = new Injector();

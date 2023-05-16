@@ -154,7 +154,7 @@ public class Report {
    * effectiveness with all the corresponding fixes to reach that effectiveness, therefore only the
    * locations are compared in trees.
    *
-   * @param config Annotator Configuration instance.
+   * @param config Annotator Config instance.
    * @param found Produced report, mainly coming from tests.
    * @return true, if two reports are equal (same effectiveness and all locations)
    */
@@ -215,7 +215,7 @@ public class Report {
    * Returns the overall effect of applying fix tree associated to this report according to {@link
    * AnalysisMode}.
    *
-   * @param config Annotator configuration instance.
+   * @param config Annotator Config instance.
    * @return Overall effect ot applying the fix tree.
    */
   public int getOverallEffect(Config config) {
@@ -251,7 +251,7 @@ public class Report {
    * Checks if the report requires further investigation. If a fix is suggested from downstream
    * dependencies, it should still be included the next cycle.
    *
-   * @param config Annotator Configuration instance.
+   * @param config Annotator Config instance.
    * @return true, if report needs further investigation.
    */
   public boolean requiresFurtherProcess(Config config) {

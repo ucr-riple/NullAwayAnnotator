@@ -63,7 +63,7 @@ public class Annotator {
   public final Context context;
   /** Reports cache. */
   public final ReportCache cache;
-
+  /** Annotator configuration. */
   public final Config config;
 
   public Annotator(Config config) {
@@ -102,7 +102,7 @@ public class Annotator {
     FieldInitializationStore fieldInitializationStore = new FieldInitializationStore(context);
     Set<AddAnnotation> initializers =
         fieldInitializationStore.findInitializers(uninitializedFields).stream()
-            .map(onMethod -> new AddMarkerAnnotation(onMethod, context.config.initializerAnnot))
+            .map(onMethod -> new AddMarkerAnnotation(onMethod, config.initializerAnnot))
             .collect(Collectors.toSet());
     this.injector.injectAnnotations(initializers);
   }
@@ -122,7 +122,6 @@ public class Annotator {
             : new VoidDownstreamImpactCache();
     downstreamImpactCache.analyzeDownstreamDependencies();
     TargetModuleCache targetModuleCache = new TargetModuleCache();
-
     if (config.inferenceActivated) {
       // Outer loop starts.
       while (cache.isUpdated()) {
@@ -131,7 +130,6 @@ public class Annotator {
           break;
         }
       }
-
       // Perform once last iteration including all fixes.
       if (!config.disableOuterLoop) {
         cache.disable();
@@ -139,11 +137,9 @@ public class Annotator {
         cache.enable();
       }
     }
-
     if (config.forceResolveActivated) {
       forceResolveRemainingErrors();
     }
-
     System.out.println("\nFinished annotating.");
     Utility.writeReports(context, cache.reports().stream().collect(ImmutableSet.toImmutableSet()));
   }
@@ -168,10 +164,8 @@ public class Annotator {
         });
     // Update cached reports store.
     cache.update(latestReports);
-
     // Tag reports according to selected analysis mode.
     config.mode.tag(downstreamImpactCache, latestReports);
-
     // Inject approved fixes.
     Set<Fix> selectedFixes =
         latestReports.stream()
@@ -179,11 +173,9 @@ public class Annotator {
             .flatMap(report -> config.chain ? report.tree.stream() : Stream.of(report.root))
             .collect(Collectors.toSet());
     injector.injectFixes(selectedFixes);
-
     // Update log.
     context.log.updateInjectedAnnotations(
         selectedFixes.stream().map(fix -> fix.change).collect(Collectors.toSet()));
-
     // Update impact saved state.
     downstreamImpactCache.updateImpactsAfterInjection(selectedFixes);
     targetModuleCache.updateImpactsAfterInjection(selectedFixes);
@@ -204,7 +196,6 @@ public class Annotator {
         Utility.readFixesFromOutputDirectory(context, context.targetModuleInfo).stream()
             .filter(fix -> !cache.processedFix(fix))
             .collect(ImmutableSet.toImmutableSet());
-
     // Initializing required evaluator instances.
     TargetModuleSupplier supplier =
         new TargetModuleSupplier(context, targetModuleCache, downstreamImpactCache);

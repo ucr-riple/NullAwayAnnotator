@@ -143,7 +143,7 @@ public class Utility {
    * Reads serialized errors "errors.tsv" file in the output directory, and returns the collected
    * set of resolving fixes for read errors.
    *
-   * @param context Annotator context.
+   * @param context Annotator context. Required to fetch the deserializer.
    * @param moduleInfo ModuleInfo of the module which fixes are created for.
    * @return Set of collected fixes.
    */
@@ -155,7 +155,7 @@ public class Utility {
   /**
    * Reads serialized errors of passed module in "errors.tsv" file in the output directory,
    *
-   * @param context Annotation context.
+   * @param context Annotation context. Required to fetch the deserializer.
    * @param moduleInfo ModuleInfo of the module which errors are created for.
    * @return Set of serialized errors.
    */

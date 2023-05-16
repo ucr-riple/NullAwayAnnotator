@@ -33,7 +33,7 @@ public class Main {
    * Starting point.
    *
    * @param args if flag '--path' is found, all configurations will be set up based on the given
-   *     json file, otherwise they will be set up according to the set of received config arguments.
+   *     json file, otherwise they will be set up according to the set of received cli arguments.
    */
   public static void main(String[] args) {
     Config config;

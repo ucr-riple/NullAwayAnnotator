@@ -46,10 +46,15 @@ public class VirtualInjector extends AnnotationInjector {
 
   /** Path to library model loader */
   private final Path libraryModelPath;
+  /**
+   * Annotator configuration, required to check if downstream dependencies analysis is activated or
+   * retrieve the path to library model loader.
+   */
+  private final Config config;
 
   public VirtualInjector(Context context) {
     super(context);
-    Config config = context.config;
+    this.config = context.config;
     this.libraryModelPath = config.nullawayLibraryModelLoaderPath;
     if (config.downStreamDependenciesAnalysisActivated) {
       Preconditions.checkNotNull(
@@ -66,7 +71,7 @@ public class VirtualInjector extends AnnotationInjector {
 
   @Override
   public void injectAnnotations(Set<AddAnnotation> changes) {
-    if (!context.config.downStreamDependenciesAnalysisActivated) {
+    if (!config.downStreamDependenciesAnalysisActivated) {
       throw new IllegalStateException(
           "Downstream dependencies analysis not activated, cannot inject annotations virtually!");
     }
