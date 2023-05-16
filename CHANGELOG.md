@@ -62,7 +62,7 @@
 - Added `Library Models Loader` module to interact with `NullAway` when analyzing downstream dependencies.
 - Updated `Core` module installation by forcing Maven Publish to use shadowJar output.
 - Banned mutable declaration of static fields in Annotator code base.
-- Added `UUID` to every generated context file by annotator to ensure re-run of the analysis.
+- Added `UUID` to every generated config file by annotator to ensure re-run of the analysis.
 - Updated testing infrastructure.
 - Fixed bug in `Injector` when the target element is in generated code.
 - Enhanced error report/handling in `Injector` when target class is not located.

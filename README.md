@@ -111,7 +111,7 @@ Below are the instructions to prepare the target project:
 "-XepOpt:AnnotatorScanner:ConfigPath=path_to_scanner_config.xml",
 ```
 
-`path_to_nullaway_config.xml` and `path_to_scanner_config.xml` are context files which **are not necessary** to create at the time of preparing the project.
+`path_to_nullaway_config.xml` and `path_to_scanner_config.xml` are config files which **are not necessary** to create at the time of preparing the project.
 These two files will be created by the script and enables the communication between the script and the analysis.
 
 Please find a sample project setup below:
@@ -130,7 +130,7 @@ tasks.withType(JavaCompile) {
                                               "-Xep:NullAway:ERROR",
                                               "-XepOpt:NullAway:AnnotatedPackages=com.uber",
                                               "-XepOpt:NullAway:SerializeFixMetadata=true",
-                                              "-XepOpt:NullAway:FixSerializationConfigPath=/tmp/NullAwayFix/context.xml",
+                                              "-XepOpt:NullAway:FixSerializationConfigPath=/tmp/NullAwayFix/config.xml",
                                               "-Xep:AnnotatorScanner:ERROR",
                                               "-XepOpt:AnnotatorScanner:ConfigPath=/tmp/NullAwayFix/scanner.xml",
         ]
@@ -143,14 +143,14 @@ We need to inform the `Annotator` about `path_to_nullaway_config.xml` and `path_
 
 ### Running Annotator
 
-`Annotator` requires certain flag values to be able to run successfully. We can pass these values via command line arguments or a context file, we will describe each approach in next sections.
+`Annotator` requires certain flag values to be able to run successfully. We can pass these values via command line arguments or a config file, we will describe each approach in next sections.
 #### Use Command Line Arguments
 
 In order to run `Annotator` on target project `P`, arguments below **must** be passed to `Annotator`:
 1. `-bc,--build-command <arg>`: Command to run `NullAway` on target `P` enclosed in **""**. Please note that this command should be executable from any directory (e.g. `"cd /Absolute /Path /To /P && ./build"`).
 2. `-i,--initializer <arg>`: Fully qualified name of the `@Initializer` annotation.
 3. `-d,--dir <arg>`: Directory where all outputs of `AnnotatorScanner|NullAway` are serialized.
-4. `-cp, --context-paths`: Path to a tsv file containing values defined in [Error Prone](./README.md#Error-Prone-Flags) context paths given in the format: (`path_to_nullaway_config.xml \t path_to_scanner_config`)
+4. `-cp, --config-paths`: Path to a tsv file containing values defined in [Error Prone](./README.md#Error-Prone-Flags) config paths given in the format: (`path_to_nullaway_config.xml \t path_to_scanner_config`)
 
 By default, `Annotator` has the configuration below:
 
@@ -183,10 +183,10 @@ Here are __optional__ arguments which can alter default configurations above:
 18. `eic`, `enable-impact-cache`: Enables fixes impacts caching for next cycles.
 
 
-#### Use context file
+#### Use config file
 
 In this approach we will initialize all flag values in one single file, and pass the path to the `Annotator`.
-See the format of the context file below with sample values:
+See the format of the config file below with sample values:
 ```json
 {
   "BUILD_COMMAND": "cd /path/to/target && command to run javac with analysis (e.g. ./gradlew :p:compileJava)",
@@ -250,7 +250,7 @@ Below is the description of each setting:
 19. `INFERENCE_ACTIVATION`: If true, inference of `@Nullable` annotation will be activated.
 20. `PROCESSORS:LOMBOK:ACTIVATION`: If true, potentially impacted regions will be extended with generated code by Lombok.
 
-Pass the path to the context file above with `-p,--path` argument to `core.jar` and no other flag is required.
+Pass the path to the config file above with `-p,--path` argument to `core.jar` and no other flag is required.
 
 
 To see all flags description simply run the jar with `--help`.
