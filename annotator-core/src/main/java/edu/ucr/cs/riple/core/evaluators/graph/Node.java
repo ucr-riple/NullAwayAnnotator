@@ -30,9 +30,9 @@ import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.Collection;
 import java.util.Collections;
@@ -140,14 +140,14 @@ public class Node {
    * @param fixesInOneRound All fixes applied simultaneously to the source code.
    * @param triggeredFixesFromDownstreamErrors Triggered fixes from downstream dependencies.
    * @param triggeredErrors Triggered Errors collected from impacted regions.
-   * @param registry Method registry instance.
+   * @param moduleInfo {@link ModuleInfo} instance.
    */
   public void updateStatus(
       int localEffect,
       Set<Fix> fixesInOneRound,
       Collection<Fix> triggeredFixesFromDownstreamErrors,
       Collection<Error> triggeredErrors,
-      MethodRegistry registry) {
+      ModuleInfo moduleInfo) {
     // Update list of triggered fixes on downstream.
     this.triggeredFixesFromDownstreamErrors =
         ImmutableSet.copyOf(triggeredFixesFromDownstreamErrors);
@@ -162,7 +162,7 @@ public class Node {
         .map(
             fix -> {
               OnMethod onMethod = fix.toMethod();
-              return registry.getImmediateSuperMethod(onMethod);
+              return moduleInfo.getMethodRegistry().getImmediateSuperMethod(onMethod);
             }) // Collection of super methods of all fixes in tree.
         .filter(
             node ->

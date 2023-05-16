@@ -459,7 +459,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
         .start();
     // No annotation should be added, since they are annotated as @Nonnull although each can reduce
     // the number of errors.
-    Assert.assertEquals(coreTestHelper.getConfig().log.getInjectedAnnotations().size(), 0);
+    Assert.assertEquals(coreTestHelper.getLog().getInjectedAnnotations().size(), 0);
   }
 
   @Test

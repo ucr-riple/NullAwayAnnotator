@@ -25,11 +25,9 @@
 package edu.ucr.cs.riple.core.metadata.trackers;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.ModuleInfo;
-import edu.ucr.cs.riple.core.metadata.MetaData;
+import edu.ucr.cs.riple.core.metadata.Registry;
 import edu.ucr.cs.riple.core.metadata.method.MethodRecord;
-import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -39,32 +37,22 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /** Tracker for Methods. */
-public class MethodRegionTracker extends MetaData<TrackerNode> implements RegionTracker {
+public class MethodRegionTracker extends Registry<TrackerNode> implements RegionTracker {
 
-  /**
-   * {@link MethodRegistry} instance, used to retrieve regions that will be affected due to
-   * inheritance violations.
-   */
-  private final MethodRegistry methodRegistry;
+  /** ModuleInfo of the module which usage of methods are stored. */
+  private final ModuleInfo moduleInfo;
 
-  public MethodRegionTracker(Config config, ModuleInfo info, MethodRegistry methodRegistry) {
-    super(config, info.dir.resolve(Serializer.METHOD_IMPACTED_REGION_FILE_NAME));
-    this.methodRegistry = methodRegistry;
-  }
-
-  public MethodRegionTracker(
-      Config config, ImmutableSet<ModuleInfo> modules, MethodRegistry methodRegistry) {
+  public MethodRegionTracker(ModuleInfo moduleInfo) {
     super(
-        config,
-        modules.stream()
+        moduleInfo.getModuleConfigurations().stream()
             .map(info -> info.dir.resolve(Serializer.METHOD_IMPACTED_REGION_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));
-    this.methodRegistry = methodRegistry;
+    this.moduleInfo = moduleInfo;
   }
 
   @Override
-  protected TrackerNode addNodeByLine(String[] values) {
-    return Utility.deserializeTrackerNode(values);
+  protected Builder<TrackerNode> getBuilder() {
+    return Utility::deserializeTrackerNode;
   }
 
   @Override
@@ -78,7 +66,7 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
     // Add method itself.
     regions.add(new Region(onMethod.clazz, onMethod.method));
     // Add immediate super method.
-    MethodRecord parent = methodRegistry.getImmediateSuperMethod(onMethod);
+    MethodRecord parent = moduleInfo.getMethodRegistry().getImmediateSuperMethod(onMethod);
     if (parent != null && parent.isNonTop()) {
       regions.add(new Region(parent.location.clazz, parent.location.method));
     }
@@ -93,7 +81,7 @@ public class MethodRegionTracker extends MetaData<TrackerNode> implements Region
    * @return Set of regions where target method is called.
    */
   public Set<Region> getCallersOfMethod(String clazz, String method) {
-    return findNodesWithHashHint(
+    return findRecordsWithHashHint(
             candidate ->
                 candidate.calleeClass.equals(clazz) && candidate.calleeMember.equals(method),
             TrackerNode.hash(clazz))

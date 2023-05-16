@@ -26,11 +26,9 @@ package edu.ucr.cs.riple.core.metadata.trackers;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.ModuleInfo;
-import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
-import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.core.metadata.trackers.generatedcode.GeneratedRegionTracker;
 import edu.ucr.cs.riple.core.metadata.trackers.generatedcode.LombokTracker;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.util.HashSet;
@@ -45,18 +43,17 @@ public class CompoundTracker implements RegionTracker {
 
   private final ImmutableSet<GeneratedRegionTracker> generatedRegionsTrackers;
 
-  public CompoundTracker(
-      Config config, ModuleInfo info, MethodRegistry methodRegistry, FieldRegistry fieldRegistry) {
-    MethodRegionTracker methodRegionTracker = new MethodRegionTracker(config, info, methodRegistry);
+  public CompoundTracker(Config config, ModuleInfo moduleInfo) {
+    MethodRegionTracker methodRegionTracker = new MethodRegionTracker(moduleInfo);
     this.trackers =
         ImmutableSet.of(
-            new FieldRegionTracker(config, info, fieldRegistry, methodRegistry),
+            new FieldRegionTracker(moduleInfo),
             methodRegionTracker,
-            new ParameterRegionTracker(methodRegistry, methodRegionTracker));
+            new ParameterRegionTracker(moduleInfo, methodRegionTracker));
     ImmutableSet.Builder<GeneratedRegionTracker> generatedRegionTrackerBuilder =
         new ImmutableSet.Builder<>();
     if (config.generatedCodeDetectors.contains(SourceType.LOMBOK)) {
-      generatedRegionTrackerBuilder.add(new LombokTracker(methodRegistry, methodRegionTracker));
+      generatedRegionTrackerBuilder.add(new LombokTracker(moduleInfo, methodRegionTracker));
     }
     this.generatedRegionsTrackers = generatedRegionTrackerBuilder.build();
   }

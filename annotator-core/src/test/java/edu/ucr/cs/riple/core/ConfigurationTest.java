@@ -178,7 +178,7 @@ public class ConfigurationTest {
           // Retrieve actual downstream config paths for nullaway and scanner config file paths for
           // downstream dependencies.
           ImmutableSet<Pair<Path, Path>> actualDownstreamConfigPaths =
-              config.downstreamInfo.stream()
+              config.downstreamConfigurations.stream()
                   .map(
                       moduleInfo -> new Pair<>(moduleInfo.nullawayConfig, moduleInfo.scannerConfig))
                   .collect(ImmutableSet.toImmutableSet());
@@ -327,7 +327,7 @@ public class ConfigurationTest {
     }
   }
 
-  /** Container class for CLI Flag. */
+  /** Container class for Config Flag. */
   private static class CLIFlag {
     /** Flag name; */
     protected final String flag;
@@ -341,7 +341,7 @@ public class ConfigurationTest {
     }
   }
 
-  /** Container class for CLI Flag with value. */
+  /** Container class for Config Flag with value. */
   private static class CLIFlagWithValue extends CLIFlag {
     /** Flag Value. */
     private final Object value;

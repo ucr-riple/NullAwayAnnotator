@@ -38,11 +38,8 @@ import edu.ucr.cs.riple.core.evaluators.suppliers.TargetModuleSupplier;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
 import edu.ucr.cs.riple.core.metadata.field.FieldInitializationStore;
-import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
-import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
@@ -62,28 +59,27 @@ public class Annotator {
 
   /** Injector instance. */
   private final AnnotationInjector injector;
-  /** Annotator config. */
-  private final Config config;
-
+  /** Annotator context. */
+  public final Context context;
   /** Reports cache. */
   public final ReportCache cache;
-
-  private FieldRegistry fieldRegistry;
-  private MethodRegistry methodRegistry;
+  /** Annotator configuration. */
+  public final Config config;
 
   public Annotator(Config config) {
     this.config = config;
+    this.context = new Context(config);
     this.cache = new ReportCache(config);
-    this.injector = new PhysicalInjector(config);
+    this.injector = new PhysicalInjector(context);
   }
 
   /** Starts the annotating process consist of preprocess followed by the "annotate" phase. */
   public void start() {
     preprocess();
-    long timer = config.log.startTimer();
+    long timer = context.log.startTimer();
     annotate();
-    config.log.stopTimerAndCapture(timer);
-    Utility.writeLog(config);
+    context.log.stopTimerAndCapture(timer);
+    Utility.writeLog(context);
   }
 
   /**
@@ -98,20 +94,12 @@ public class Annotator {
    */
   private void preprocess() {
     System.out.println("Preprocessing...");
-    Utility.setScannerCheckerActivation(config, config.target, true);
-    System.out.println("Making the first build...");
-    Utility.buildTarget(config, true);
-    fieldRegistry = new FieldRegistry(config, config.target);
-    methodRegistry = new MethodRegistry(config);
-    NonnullStore nonnullStore = new NonnullStore(config);
-    config.initializeCheckerDeserializer(nonnullStore);
     Set<OnField> uninitializedFields =
-        Utility.readFixesFromOutputDirectory(config, ImmutableSet.of(config.target), fieldRegistry)
-            .stream()
+        Utility.readFixesFromOutputDirectory(context, context.targetModuleInfo).stream()
             .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
             .map(Fix::toField)
             .collect(Collectors.toSet());
-    FieldInitializationStore fieldInitializationStore = new FieldInitializationStore(config);
+    FieldInitializationStore fieldInitializationStore = new FieldInitializationStore(context);
     Set<AddAnnotation> initializers =
         fieldInitializationStore.findInitializers(uninitializedFields).stream()
             .map(onMethod -> new AddMarkerAnnotation(onMethod, config.initializerAnnot))
@@ -130,11 +118,10 @@ public class Annotator {
     // iteration.
     DownstreamImpactCache downstreamImpactCache =
         config.downStreamDependenciesAnalysisActivated
-            ? new DownstreamImpactCacheImpl(config, methodRegistry)
+            ? new DownstreamImpactCacheImpl(context)
             : new VoidDownstreamImpactCache();
     downstreamImpactCache.analyzeDownstreamDependencies();
-    TargetModuleCache targetModuleCache = new TargetModuleCache(config, methodRegistry);
-
+    TargetModuleCache targetModuleCache = new TargetModuleCache();
     if (config.inferenceActivated) {
       // Outer loop starts.
       while (cache.isUpdated()) {
@@ -143,7 +130,6 @@ public class Annotator {
           break;
         }
       }
-
       // Perform once last iteration including all fixes.
       if (!config.disableOuterLoop) {
         cache.disable();
@@ -151,13 +137,11 @@ public class Annotator {
         cache.enable();
       }
     }
-
     if (config.forceResolveActivated) {
       forceResolveRemainingErrors();
     }
-
     System.out.println("\nFinished annotating.");
-    Utility.writeReports(config, cache.reports().stream().collect(ImmutableSet.toImmutableSet()));
+    Utility.writeReports(context, cache.reports().stream().collect(ImmutableSet.toImmutableSet()));
   }
 
   /**
@@ -180,10 +164,8 @@ public class Annotator {
         });
     // Update cached reports store.
     cache.update(latestReports);
-
     // Tag reports according to selected analysis mode.
-    config.mode.tag(config, downstreamImpactCache, latestReports);
-
+    config.mode.tag(downstreamImpactCache, latestReports);
     // Inject approved fixes.
     Set<Fix> selectedFixes =
         latestReports.stream()
@@ -191,11 +173,9 @@ public class Annotator {
             .flatMap(report -> config.chain ? report.tree.stream() : Stream.of(report.root))
             .collect(Collectors.toSet());
     injector.injectFixes(selectedFixes);
-
     // Update log.
-    config.log.updateInjectedAnnotations(
+    context.log.updateInjectedAnnotations(
         selectedFixes.stream().map(fix -> fix.change).collect(Collectors.toSet()));
-
     // Update impact saved state.
     downstreamImpactCache.updateImpactsAfterInjection(selectedFixes);
     targetModuleCache.updateImpactsAfterInjection(selectedFixes);
@@ -210,27 +190,25 @@ public class Annotator {
    */
   private ImmutableSet<Report> processTriggeredFixes(
       TargetModuleCache targetModuleCache, DownstreamImpactCache downstreamImpactCache) {
-    Utility.buildTarget(config);
+    Utility.buildTarget(context);
     // Suggested fixes of target at the current state.
     ImmutableSet<Fix> fixes =
-        Utility.readFixesFromOutputDirectory(config, ImmutableSet.of(config.target), fieldRegistry)
-            .stream()
+        Utility.readFixesFromOutputDirectory(context, context.targetModuleInfo).stream()
             .filter(fix -> !cache.processedFix(fix))
             .collect(ImmutableSet.toImmutableSet());
-
     // Initializing required evaluator instances.
     TargetModuleSupplier supplier =
-        new TargetModuleSupplier(config, targetModuleCache, downstreamImpactCache, methodRegistry);
+        new TargetModuleSupplier(context, targetModuleCache, downstreamImpactCache);
     Evaluator evaluator = getEvaluator(supplier);
     // Result of the iteration analysis.
     return evaluator.evaluate(fixes);
   }
 
   /**
-   * Creates an {@link Evaluator} corresponding to config values.
+   * Creates an {@link Evaluator} corresponding to context values.
    *
    * @param supplier Supplier to create an instance of Evaluator.
-   * @return {@link Evaluator} corresponding to config values.
+   * @return {@link Evaluator} corresponding to context values.
    */
   private Evaluator getEvaluator(Supplier supplier) {
     if (config.exhaustiveSearch) {
@@ -256,12 +234,11 @@ public class Annotator {
    */
   private void forceResolveRemainingErrors() {
     // Collect regions with remaining errors.
-    Utility.buildTarget(config);
+    Utility.buildTarget(context);
     Set<Error> remainingErrors =
-        Utility.readErrorsFromOutputDirectory(
-            config, ImmutableSet.of(config.target), fieldRegistry);
+        Utility.readErrorsFromOutputDirectory(context, context.targetModuleInfo);
     Set<Fix> remainingFixes =
-        Utility.readFixesFromOutputDirectory(config, ImmutableSet.of(config.target), fieldRegistry);
+        Utility.readFixesFromOutputDirectory(context, context.targetModuleInfo);
     // Collect all regions for NullUnmarked.
     // For all errors in regions which correspond to a method's body, we can add @NullUnmarked at
     // the method level.
@@ -276,7 +253,10 @@ public class Annotator {
                       // @SuppressWarnings("NullAway.Init"). We add @NullUnmarked on constructors
                       // only for errors in the body of the constructor.
                       !error.isInitializationError()) {
-                    return methodRegistry.findMethodByName(error.encClass(), error.encMember());
+                    return context
+                        .targetModuleInfo
+                        .getMethodRegistry()
+                        .findMethodByName(error.encClass(), error.encMember());
                   }
                   // For methods invoked in an initialization region, where the error is that
                   // `@Nullable` is being passed as an argument, we add a `@NullUnmarked` annotation
@@ -285,8 +265,11 @@ public class Annotator {
                       && error.isSingleFix()
                       && error.toResolvingLocation().isOnParameter()) {
                     OnParameter nullableParameter = error.toResolvingParameter();
-                    return methodRegistry.findMethodByName(
-                        nullableParameter.clazz, nullableParameter.enclosingMethod.method);
+                    return context
+                        .targetModuleInfo
+                        .getMethodRegistry()
+                        .findMethodByName(
+                            nullableParameter.clazz, nullableParameter.enclosingMethod.method);
                   }
                   return null;
                 })
@@ -306,12 +289,12 @@ public class Annotator {
             .map(
                 error ->
                     new AddMarkerAnnotation(
-                        fieldRegistry.getLocationOnClass(error.getRegion().clazz),
+                        context.targetModuleInfo.getLocationOnClass(error.getRegion().clazz),
                         config.nullUnMarkedAnnotation))
             .collect(Collectors.toSet()));
     injector.injectAnnotations(nullUnMarkedAnnotations);
     // Update log.
-    config.log.updateInjectedAnnotations(nullUnMarkedAnnotations);
+    context.log.updateInjectedAnnotations(nullUnMarkedAnnotations);
 
     // Collect suppress warnings, errors on field declaration regions.
     Set<OnField> fieldsWithSuppressWarnings =
@@ -330,8 +313,10 @@ public class Annotator {
                 })
             .map(
                 error ->
-                    fieldRegistry.getLocationOnField(
-                        error.getRegion().clazz, error.getRegion().member))
+                    context
+                        .targetModuleInfo
+                        .getFieldRegistry()
+                        .getLocationOnField(error.getRegion().clazz, error.getRegion().member))
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
 
@@ -343,7 +328,7 @@ public class Annotator {
             .collect(Collectors.toSet());
     injector.injectAnnotations(suppressWarningsAnnotations);
     // Update log.
-    config.log.updateInjectedAnnotations(suppressWarningsAnnotations);
+    context.log.updateInjectedAnnotations(suppressWarningsAnnotations);
 
     // Collect NullAway.Init SuppressWarnings
     Set<AddAnnotation> initializationSuppressWarningsAnnotations =
@@ -362,23 +347,21 @@ public class Annotator {
             .collect(Collectors.toSet());
     injector.injectAnnotations(initializationSuppressWarningsAnnotations);
     // Update log.
-    config.log.updateInjectedAnnotations(initializationSuppressWarningsAnnotations);
+    context.log.updateInjectedAnnotations(initializationSuppressWarningsAnnotations);
     // Collect @NullUnmarked annotations on classes for any remaining error.
-    Utility.buildTarget(config);
-    remainingErrors =
-        Utility.readErrorsFromOutputDirectory(
-            config, ImmutableSet.of(config.target), fieldRegistry);
+    Utility.buildTarget(context);
+    remainingErrors = Utility.readErrorsFromOutputDirectory(context, context.targetModuleInfo);
     nullUnMarkedAnnotations =
         remainingErrors.stream()
             .filter(error -> !error.getRegion().isInAnonymousClass())
             .map(
                 error ->
                     new AddMarkerAnnotation(
-                        fieldRegistry.getLocationOnClass(error.getRegion().clazz),
+                        context.targetModuleInfo.getLocationOnClass(error.getRegion().clazz),
                         config.nullUnMarkedAnnotation))
             .collect(Collectors.toSet());
     injector.injectAnnotations(nullUnMarkedAnnotations);
     // Update log.
-    config.log.updateInjectedAnnotations(nullUnMarkedAnnotations);
+    context.log.updateInjectedAnnotations(nullUnMarkedAnnotations);
   }
 }

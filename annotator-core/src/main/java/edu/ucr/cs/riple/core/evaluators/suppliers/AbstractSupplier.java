@@ -24,14 +24,11 @@
 
 package edu.ucr.cs.riple.core.evaluators.suppliers;
 
-import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.ModuleInfo;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
-import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
-import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 
 /** Base class for all instances of {@link Supplier}. */
 public abstract class AbstractSupplier implements Supplier {
@@ -40,21 +37,17 @@ public abstract class AbstractSupplier implements Supplier {
   protected final ErrorStore errorStore;
   /** Injector instance. */
   protected final AnnotationInjector injector;
-  /** Method registry instance. */
-  protected final MethodRegistry methodRegistry;
+  /** ModuleInfo of the module which the impact of fixes are computed on. */
+  protected final ModuleInfo moduleInfo;
   /** Depth of analysis. */
   protected final int depth;
-  /** Field declaration analysis to detect fixes on inline multiple field declaration statements. */
-  protected final FieldRegistry fieldRegistry;
-  /** Annotator config. */
-  protected final Config config;
+  /** Annotator context. */
+  protected final Context context;
 
-  public AbstractSupplier(
-      ImmutableSet<ModuleInfo> modules, Config config, MethodRegistry registry) {
-    this.config = config;
-    this.fieldRegistry = new FieldRegistry(config, modules);
-    this.methodRegistry = registry;
-    this.errorStore = initializeErrorStore(modules);
+  public AbstractSupplier(Context context, ModuleInfo moduleInfo) {
+    this.context = context;
+    this.moduleInfo = moduleInfo;
+    this.errorStore = new ErrorStore(context, moduleInfo);
     this.injector = initializeInjector();
     this.depth = initializeDepth();
   }
@@ -76,13 +69,8 @@ public abstract class AbstractSupplier implements Supplier {
   /**
    * Initializer for error store.
    *
-   * @param modules Set of modules involved in the analysis.
    * @return {@link ErrorStore} of {@link Error} instances.
    */
-  protected ErrorStore initializeErrorStore(ImmutableSet<ModuleInfo> modules) {
-    return new ErrorStore(config, modules, fieldRegistry);
-  }
-
   @Override
   public ErrorStore getErrorStore() {
     return errorStore;
@@ -94,17 +82,12 @@ public abstract class AbstractSupplier implements Supplier {
   }
 
   @Override
-  public MethodRegistry getMethodRegistry() {
-    return methodRegistry;
-  }
-
-  @Override
   public int depth() {
     return depth;
   }
 
   @Override
-  public Config getConfig() {
-    return config;
+  public Context getContext() {
+    return context;
   }
 }

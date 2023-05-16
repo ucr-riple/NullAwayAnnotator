@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core.injectors;
 
-import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
@@ -33,11 +33,11 @@ import java.util.stream.Collectors;
 
 /** Wrapper tool used to inject annotations to the source code. */
 public abstract class AnnotationInjector {
-  /** Core config. */
-  protected final Config config;
+  /** Core context. */
+  protected final Context context;
 
-  public AnnotationInjector(Config config) {
-    this.config = config;
+  public AnnotationInjector(Context context) {
+    this.context = context;
   }
 
   /**

@@ -215,7 +215,7 @@ public class Report {
    * Returns the overall effect of applying fix tree associated to this report according to {@link
    * AnalysisMode}.
    *
-   * @param config Annotator config.
+   * @param config Annotator Config instance.
    * @return Overall effect ot applying the fix tree.
    */
   public int getOverallEffect(Config config) {
@@ -251,7 +251,7 @@ public class Report {
    * Checks if the report requires further investigation. If a fix is suggested from downstream
    * dependencies, it should still be included the next cycle.
    *
-   * @param config Annotator config instance.
+   * @param config Annotator Config instance.
    * @return true, if report needs further investigation.
    */
   public boolean requiresFurtherProcess(Config config) {

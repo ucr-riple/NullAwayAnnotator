@@ -30,8 +30,9 @@ import edu.ucr.cs.riple.core.AnalysisMode;
 import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Checker;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.ModuleInfo;
 import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.log.Log;
+import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.IOException;
@@ -85,6 +86,8 @@ public class CoreTestHelper {
   private Path expectedOutputPath;
   /** Project builder. */
   private final ProjectBuilder projectBuilder;
+  /** Annotator log instance after the test execution. */
+  private Log log;
 
   public CoreTestHelper(Path projectPath, Path outDirPath) {
     this.projectPath = projectPath;
@@ -220,6 +223,7 @@ public class CoreTestHelper {
     config = new Config(configPath);
     Annotator annotator = new Annotator(config);
     annotator.start();
+    log = annotator.context.log;
     if (predicate == null) {
       predicate = DEFAULT_PREDICATE.create(config);
     }
@@ -374,7 +378,7 @@ public class CoreTestHelper {
         projectBuilder.getModules().stream()
             .map(
                 name ->
-                    new ModuleInfo(
+                    new ModuleConfiguration(
                         id[0]++,
                         outDirPath,
                         outDirPath.resolve(name + "-nullaway.xml"),
@@ -439,15 +443,20 @@ public class CoreTestHelper {
   }
 
   /**
-   * Getter for config.
+   * Getter for Annotator's log after test execution.
+   *
+   * @return Log instance.
+   */
+  public Log getLog() {
+    return log;
+  }
+
+  /**
+   * Getter for Annotator's config instance which was executed on the test input.
    *
    * @return Config instance.
    */
   public Config getConfig() {
-    if (config == null) {
-      throw new IllegalStateException(
-          "Config has not been initialized yet, can only access it after a call of start method.");
-    }
     return config;
   }
 
@@ -457,7 +466,7 @@ public class CoreTestHelper {
    */
   static class DEFAULT_PREDICATE implements BiPredicate<TReport, Report> {
 
-    /** The config. */
+    /** Annotator config. */
     private final Config config;
 
     private DEFAULT_PREDICATE(Config config) {
@@ -473,7 +482,7 @@ public class CoreTestHelper {
     /**
      * Creates a new instance of {@link DEFAULT_PREDICATE}.
      *
-     * @param config the config
+     * @param config Annotator config.
      * @return the default predicate
      */
     public static DEFAULT_PREDICATE create(Config config) {

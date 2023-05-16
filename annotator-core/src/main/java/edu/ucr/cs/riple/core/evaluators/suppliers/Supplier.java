@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core.evaluators.suppliers;
 
-import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.cache.TargetModuleCache;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.evaluators.AbstractEvaluator;
@@ -32,7 +32,7 @@ import edu.ucr.cs.riple.core.evaluators.graph.processors.ConflictGraphProcessor;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
-import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 
 /** Supplier for initializing an {@link AbstractEvaluator} instance. */
 public interface Supplier {
@@ -52,13 +52,6 @@ public interface Supplier {
   AnnotationInjector getInjector();
 
   /**
-   * Getter for {@link MethodRegistry} instance.
-   *
-   * @return MethodRegistry instance.
-   */
-  MethodRegistry getMethodRegistry();
-
-  /**
    * Getter for depth of analysis.
    *
    * @return depth.
@@ -66,11 +59,11 @@ public interface Supplier {
   int depth();
 
   /**
-   * Getter for {@link Config} instance.
+   * Getter for {@link Context} instance.
    *
-   * @return Config instance.
+   * @return Context instance.
    */
-  Config getConfig();
+  Context getContext();
 
   /**
    * Getter for {@link DownstreamImpactCache} instance.
@@ -92,4 +85,11 @@ public interface Supplier {
    * @return Target module cache instance.
    */
   TargetModuleCache getTargetModuleCache();
+
+  /**
+   * Getter for {@link ModuleInfo} instance.
+   *
+   * @return ModuleInfo instance.
+   */
+  ModuleInfo getModuleInfo();
 }
