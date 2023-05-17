@@ -70,7 +70,7 @@ public class Context {
    */
   public Context(Config config) {
     this.config = config;
-    this.checker = CheckerBaseClass.getCheckerByName(config.checker, this);
+    this.checker = CheckerBaseClass.getCheckerByName(config.checkerName, this);
     this.offsetHandler = new OffsetHandler();
     this.downstreamConfigurations = config.downstreamConfigurations;
     this.log = new Log();
