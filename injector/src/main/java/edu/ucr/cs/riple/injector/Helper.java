@@ -33,9 +33,17 @@ import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumConstantDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import com.github.javaparser.ast.type.ArrayType;
+import com.github.javaparser.ast.type.Type;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import java.io.FileNotFoundException;
@@ -355,6 +363,58 @@ public class Helper {
       }
     }
     return null;
+  }
+
+  /**
+   * Extracts the type of the given node implementing {@link NodeWithAnnotations}.
+   *
+   * @param node the node.
+   * @return the type of the node.
+   */
+  public static Type getType(NodeWithAnnotations<?> node) {
+    if (node instanceof MethodDeclaration) {
+      return ((MethodDeclaration) node).getType();
+    }
+    if (node instanceof FieldDeclaration) {
+      return ((FieldDeclaration) node).getElementType();
+    }
+    if (node instanceof VariableDeclarationExpr) {
+      NodeList<VariableDeclarator> decls = ((VariableDeclarationExpr) node).getVariables();
+      for (VariableDeclarator v : decls) {
+        // All declared variables in a VariableDeclarationExpr have the same type.
+        // (e.g. Foo a, b, c;)
+        return v.getType();
+      }
+    }
+    if (node instanceof Parameter) {
+      return ((Parameter) node).getType();
+    }
+    if (node instanceof VariableDeclarator) {
+      return ((VariableDeclarator) node).getType();
+    }
+    if (node instanceof ArrayType) {
+      return ((ArrayType) node).getComponentType();
+    }
+    if (node instanceof Type) {
+      return ((Type) node);
+    }
+    throw new RuntimeException("Unknown node type: " + node.getClass());
+  }
+
+  /**
+   * Helper method to check if a node is annotated with a specific annotation.
+   *
+   * @param node the node to check its annotations.
+   * @param expr the annotation to check.
+   * @return true if the node is annotated with the annotation.
+   */
+  public static boolean isAnnotatedWith(Node node, AnnotationExpr expr) {
+    if (!(node instanceof NodeWithAnnotations)) {
+      // Node cannot have annotations.
+      return false;
+    }
+    return ((NodeWithAnnotations<?>) node)
+        .getAnnotations().stream().anyMatch(annot -> annot.equals(expr));
   }
 
   /**
