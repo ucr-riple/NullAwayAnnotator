@@ -70,12 +70,14 @@ public class Context {
    */
   public Context(Config config) {
     this.config = config;
-    this.checker = CheckerBaseClass.getCheckerByName(config.checkerName, this);
     this.offsetHandler = new OffsetHandler();
     this.downstreamConfigurations = config.downstreamConfigurations;
     this.log = new Log();
     this.targetConfiguration = config.target;
+    this.checker = CheckerBaseClass.getCheckerByName(config.checkerName, this);
     this.targetModuleInfo = new ModuleInfo(this, config.target, config.buildCommand);
+    // Checker compatibility check must be after target module info is initialized.
+    this.checker.verifyCheckerCompatibility();
   }
 
   /** Responsible for handling offset changes in source file. */

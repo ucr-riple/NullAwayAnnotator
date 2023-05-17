@@ -64,7 +64,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
   public static final int VERSION = 3;
 
   public NullAway(Context context) {
-    super(context, 3);
+    super(context);
   }
 
   @Override
@@ -391,14 +391,26 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
   }
 
   @Override
-  public void verifyCheckerCompatibility(int version) {
-    Preconditions.checkArgument(
-        version == VERSION,
-        "This Annotator version only supports NullAway serialization version "
-            + VERSION
-            + ", but found: "
-            + version
-            + ", Please update Annotator or NullAway accordingly.");
+  public void verifyCheckerCompatibility() {
+    Path pathToSerializationVersion =
+        config.globalDir.resolve("0").resolve("serialization_version.txt");
+    if (!Files.exists(pathToSerializationVersion)) {
+      throw new RuntimeException(
+          "This version of Annotator does not support the using NullAway version, please upgrade NullAway to version >= 0.10.10");
+    }
+    try {
+      int version =
+          Integer.parseInt(Files.readString(pathToSerializationVersion, Charset.defaultCharset()));
+      Preconditions.checkArgument(
+          version == VERSION,
+          "This Annotator version only supports NullAway serialization version "
+              + VERSION
+              + ", but found: "
+              + version
+              + ", Please update Annotator or NullAway accordingly.");
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override

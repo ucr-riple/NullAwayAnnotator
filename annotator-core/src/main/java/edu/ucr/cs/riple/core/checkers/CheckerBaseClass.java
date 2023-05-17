@@ -40,15 +40,12 @@ public abstract class CheckerBaseClass<T extends Error> implements Checker<T> {
 
   /** Annotator config. */
   protected final Config config;
-  /** The supporting serialization version of this deserializer. */
-  protected final int version;
   /** Annotator context. */
   protected final Context context;
 
-  public CheckerBaseClass(Context context, int version) {
+  public CheckerBaseClass(Context context) {
     this.context = context;
     this.config = context.config;
-    this.version = version;
   }
 
   /**
@@ -96,7 +93,7 @@ public abstract class CheckerBaseClass<T extends Error> implements Checker<T> {
    * Returns the checker instance by its name.
    *
    * @param name name of the checker.
-   * @param config annotator config.
+   * @param context annotator context.
    * @return the checker instance with the given name.
    */
   public static Checker<?> getCheckerByName(String name, Context context) {

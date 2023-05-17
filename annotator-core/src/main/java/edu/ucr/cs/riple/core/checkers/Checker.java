@@ -83,10 +83,8 @@ public interface Checker<T extends Error> {
   /**
    * Verifies that the checker representation in Annotator is compatible with the actual running
    * checker on the target module.
-   *
-   * @param version The version of the actual running checker.
    */
-  void verifyCheckerCompatibility(int version);
+  void verifyCheckerCompatibility();
 
   /**
    * Prepares the config files for the checker to run on the target module.
