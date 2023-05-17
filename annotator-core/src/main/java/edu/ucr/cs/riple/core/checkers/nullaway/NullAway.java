@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Nima Karimipour
+ * Copyright (c) 2023 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -115,11 +115,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
         Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 6, 12));
     if (nonnullTarget == null && errorType.equals(NullAwayError.METHOD_INITIALIZER_ERROR)) {
       ImmutableSet<Fix> resolvingFixes =
-          generateFixesForUninitializedFields(errorMessage, region, moduleInfo).stream()
-              .filter(
-                  fix ->
-                      !moduleInfo.getNonnullStore().hasExplicitNonnullAnnotation(fix.toLocation()))
-              .collect(ImmutableSet.toImmutableSet());
+          generateFixesForUninitializedFields(errorMessage, region, moduleInfo);
       return createError(
           errorType,
           errorMessage,
@@ -134,11 +130,8 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     Fix resolvingFix =
         nonnullTarget == null
             ? null
-            : (moduleInfo.getNonnullStore().hasExplicitNonnullAnnotation(nonnullTarget)
-                // skip if element has explicit nonnull annotation.
-                ? null
-                : new Fix(
-                    new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot), errorType, true));
+            : new Fix(
+                new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot), errorType, true);
     return createError(
         errorType,
         errorMessage,
@@ -381,13 +374,19 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
   }
 
   @Override
-  public NullAwayError createErrorFactory(
+  public NullAwayError createError(
       String errorType,
       String errorMessage,
       Region region,
       int offset,
-      ImmutableSet<Fix> resolvingFixes) {
-    return new NullAwayError(errorType, errorMessage, region, offset, resolvingFixes);
+      ImmutableSet<Fix> resolvingFixes,
+      ModuleInfo module) {
+    // Filter fixes on elements with explicit nonnull annotations.
+    ImmutableSet<Fix> cleanedResolvingFixes =
+        resolvingFixes.stream()
+            .filter(f -> !module.getNonnullStore().hasExplicitNonnullAnnotation(f.toLocation()))
+            .collect(ImmutableSet.toImmutableSet());
+    return new NullAwayError(errorType, errorMessage, region, offset, cleanedResolvingFixes);
   }
 
   @Override

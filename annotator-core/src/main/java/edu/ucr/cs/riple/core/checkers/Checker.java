@@ -71,14 +71,16 @@ public interface Checker<T extends Error> {
    * @param region Region where the error is reported,
    * @param offset offset of program point in original version where error is reported.
    * @param resolvingFixes Set of fixes that resolve the error.
+   * @param module Module where the error is reported.
    * @return The corresponding error.
    */
-  T createErrorFactory(
+  T createError(
       String errorType,
       String errorMessage,
       Region region,
       int offset,
-      ImmutableSet<Fix> resolvingFixes);
+      ImmutableSet<Fix> resolvingFixes,
+      ModuleInfo module);
 
   /**
    * Verifies that the checker representation in Annotator is compatible with the actual running

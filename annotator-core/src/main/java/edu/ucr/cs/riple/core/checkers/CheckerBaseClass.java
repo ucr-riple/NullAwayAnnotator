@@ -24,13 +24,10 @@
 
 package edu.ucr.cs.riple.core.checkers;
 
-import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Set;
@@ -46,31 +43,6 @@ public abstract class CheckerBaseClass<T extends Error> implements Checker<T> {
   public CheckerBaseClass(Context context) {
     this.context = context;
     this.config = context.config;
-  }
-
-  /**
-   * Creates an {@link Error} instance.
-   *
-   * @param errorType Error type.
-   * @param errorMessage Error message.
-   * @param region Region where the error is reported,
-   * @param offset offset of program point in original version where error is reported.
-   * @param resolvingFixes Set of fixes that resolve the error.
-   * @param module Module where the error is reported.
-   * @return The corresponding error.
-   */
-  public T createError(
-      String errorType,
-      String errorMessage,
-      Region region,
-      int offset,
-      ImmutableSet<Fix> resolvingFixes,
-      ModuleInfo module) {
-    ImmutableSet<Fix> fixes =
-        resolvingFixes.stream()
-            .filter(f -> !module.getNonnullStore().hasExplicitNonnullAnnotation(f.toLocation()))
-            .collect(ImmutableSet.toImmutableSet());
-    return createErrorFactory(errorType, errorMessage, region, offset, fixes);
   }
 
   /**
