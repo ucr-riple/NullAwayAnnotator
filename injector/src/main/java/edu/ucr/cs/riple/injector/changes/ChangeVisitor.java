@@ -30,12 +30,14 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.utils.Pair;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import edu.ucr.cs.riple.injector.location.LocationVisitor;
 import edu.ucr.cs.riple.injector.location.OnClass;
 import edu.ucr.cs.riple.injector.location.OnField;
+import edu.ucr.cs.riple.injector.location.OnLocalVariable;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import edu.ucr.cs.riple.injector.modifications.Modification;
@@ -163,6 +165,45 @@ public class ChangeVisitor
       return null;
     }
     return change.computeTextModificationOn(((BodyDeclaration<?>) optionalClass.get()));
+  }
+
+  @Override
+  public Modification visitLocalVariable(
+      OnLocalVariable onLocalVariable, Pair<NodeList<BodyDeclaration<?>>, ASTChange> pair) {
+    final NodeList<BodyDeclaration<?>> members = pair.a;
+    final ASTChange change = pair.b;
+    final AtomicReference<Modification> ans = new AtomicReference<>();
+    members.forEach(
+        bodyDeclaration ->
+            bodyDeclaration.ifCallableDeclaration(
+                callableDeclaration -> {
+                  if (ans.get() != null) {
+                    // already found the member.
+                    return;
+                  }
+                  if (onLocalVariable.encMethod.matchesCallableDeclaration(callableDeclaration)) {
+                    // Find variable declaration in the callable declaration with the variable name.
+                    VariableDeclarationExpr variableDeclarationExpr =
+                        Helper.locateVariableDeclarationExpr(
+                            callableDeclaration, onLocalVariable.varName);
+                    if (variableDeclarationExpr == null) {
+                      return;
+                    }
+                    variableDeclarationExpr
+                        .getVariables()
+                        .forEach(
+                            variableDeclarator -> {
+                              if (variableDeclarator
+                                  .getName()
+                                  .toString()
+                                  .equals(onLocalVariable.varName)) {
+                                // Located the variable.
+                                ans.set(change.computeTextModificationOn(variableDeclarationExpr));
+                              }
+                            });
+                  }
+                }));
+    return ans.get();
   }
 
   /**
