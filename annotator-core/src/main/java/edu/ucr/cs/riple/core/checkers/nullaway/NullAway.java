@@ -31,6 +31,7 @@ import edu.ucr.cs.riple.core.checkers.CheckerBaseClass;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Helper;
@@ -379,17 +380,15 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
   }
 
   @Override
-  public void prepareConfigFilesForBuild(ModuleInfo moduleInfo) {
-    moduleInfo
-        .getModuleConfiguration()
-        .forEach(
-            module -> {
-              FixSerializationConfig.Builder nullAwayConfig =
-                  new FixSerializationConfig.Builder()
-                      .setSuggest(true, true)
-                      .setOutputDirectory(module.dir.toString())
-                      .setFieldInitInfo(true);
-              nullAwayConfig.writeAsXML(module.checkerConfig.toString());
-            });
+  public void prepareConfigFilesForBuild(ImmutableSet<ModuleConfiguration> configurations) {
+    configurations.forEach(
+        module -> {
+          FixSerializationConfig.Builder nullAwayConfig =
+              new FixSerializationConfig.Builder()
+                  .setSuggest(true, true)
+                  .setOutputDirectory(module.dir.toString())
+                  .setFieldInitInfo(true);
+          nullAwayConfig.writeAsXML(module.checkerConfig.toString());
+        });
   }
 }

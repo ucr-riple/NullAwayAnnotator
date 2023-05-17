@@ -29,6 +29,7 @@ import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import java.util.Set;
 
@@ -50,7 +51,6 @@ public interface Checker<T extends Error> {
   /**
    * Suppresses remaining errors reported by the checker.
    *
-   * @param context Annotator context.
    * @param injector Annotation injector to inject selected annotations.
    */
   void suppressRemainingAnnotations(AnnotationInjector injector);
@@ -83,7 +83,8 @@ public interface Checker<T extends Error> {
   /**
    * Prepares the config files for the checker to run on the target module.
    *
-   * @param module Module where its config files should be prepared for a build.
+   * @param configurations Module configurations where their config files should be prepared for a
+   *     build.
    */
-  void prepareConfigFilesForBuild(ModuleInfo module);
+  void prepareConfigFilesForBuild(ImmutableSet<ModuleConfiguration> configurations);
 }

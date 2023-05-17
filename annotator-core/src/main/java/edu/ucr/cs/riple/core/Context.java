@@ -60,7 +60,7 @@ public class Context {
   public final ModuleConfiguration targetConfiguration;
   /** Sets of context path information for all downstream dependencies. */
   public final ImmutableSet<ModuleConfiguration> downstreamConfigurations;
-  /** Checker enum to retrieve checker specific instances. */
+  /** Checker instance. Used to execute checker specific tasks. */
   public final Checker<? extends Error> checker;
 
   /**

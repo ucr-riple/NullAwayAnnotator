@@ -266,40 +266,17 @@ public class Utility {
    * @param context Annotator context.
    */
   public static void buildDownstreamDependencies(Context context) {
-    context.downstreamConfigurations.forEach(
-        module -> {
-          FixSerializationConfig.Builder nullAwayConfig =
-              new FixSerializationConfig.Builder()
-                  .setSuggest(true, true)
-                  .setOutputDirectory(module.dir.toString())
-                  .setFieldInitInfo(false);
-          nullAwayConfig.writeAsXML(module.checkerConfig.toString());
-        });
+    context.checker.prepareConfigFilesForBuild(context.downstreamConfigurations);
     build(context, context.config.downstreamDependenciesBuildCommand);
-  }
-
-  /**
-   * Builds target.
-   *
-   * @param context Annotator context.
-   */
-  public static void buildTarget(Context context) {
-    buildTarget(context, false);
   }
 
   /**
    * Builds target with control on field initialization serialization.
    *
    * @param context Annotator context.
-   * @param initSerializationEnabled Activation flag for field initialization serialization.
    */
-  public static void buildTarget(Context context, boolean initSerializationEnabled) {
-    FixSerializationConfig.Builder nullAwayConfig =
-        new FixSerializationConfig.Builder()
-            .setSuggest(true, true)
-            .setOutputDirectory(context.targetConfiguration.dir.toString())
-            .setFieldInitInfo(initSerializationEnabled);
-    nullAwayConfig.writeAsXML(context.targetConfiguration.checkerConfig.toString());
+  public static void buildTarget(Context context) {
+    context.checker.prepareConfigFilesForBuild(context.targetModuleInfo.getModuleConfigurations());
     build(context, context.config.buildCommand);
   }
 
