@@ -27,7 +27,6 @@ package edu.ucr.cs.riple.core;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.checkers.Checker;
 import edu.ucr.cs.riple.core.checkers.CheckerBaseClass;
-import edu.ucr.cs.riple.core.io.deserializers.CheckerDeserializer;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
@@ -61,7 +60,7 @@ public class Context {
   public final ModuleConfiguration targetConfiguration;
   /** Sets of context path information for all downstream dependencies. */
   public final ImmutableSet<ModuleConfiguration> downstreamConfigurations;
-  /** Checker enum to retrieve checker specific instances. (e.g. {@link CheckerDeserializer}) */
+  /** Checker enum to retrieve checker specific instances. */
   public final Checker<? extends Error> checker;
 
   /**
