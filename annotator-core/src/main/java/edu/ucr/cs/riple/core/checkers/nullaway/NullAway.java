@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.CheckerBaseClass;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
+import edu.ucr.cs.riple.core.metadata.field.FieldInitializationStore;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
@@ -356,6 +357,27 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     injector.injectAnnotations(nullUnMarkedAnnotations);
     // update log
     context.log.updateInjectedAnnotations(nullUnMarkedAnnotations);
+  }
+
+  @Override
+  public void preprocess(AnnotationInjector injector) {
+    // Collect @Initializer annotations. Heuristically, we add @Initializer on methods which writes
+    // a @Nonnull value to more than one uninitialized field, and guarantees initialized fields are
+    // nonnull at all exit paths.
+    // Collect uninitialized fields.
+    Set<OnField> uninitializedFields =
+        Utility.readFixesFromOutputDirectory(context, context.targetModuleInfo).stream()
+            .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
+            .map(Fix::toField)
+            .collect(Collectors.toSet());
+    FieldInitializationStore fieldInitializationStore = new FieldInitializationStore(context);
+    // Collect selected initializers methods.
+    Set<AddAnnotation> initializers =
+        fieldInitializationStore.findInitializers(uninitializedFields).stream()
+            .map(onMethod -> new AddMarkerAnnotation(onMethod, config.initializerAnnot))
+            .collect(Collectors.toSet());
+    // Inject @Initializer annotations.
+    injector.injectAnnotations(initializers);
   }
 
   @Override

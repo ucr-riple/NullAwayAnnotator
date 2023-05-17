@@ -37,12 +37,8 @@ import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.evaluators.suppliers.TargetModuleSupplier;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
-import edu.ucr.cs.riple.core.metadata.field.FieldInitializationStore;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.util.Utility;
-import edu.ucr.cs.riple.injector.changes.AddAnnotation;
-import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
-import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -90,17 +86,7 @@ public class Annotator {
    */
   private void preprocess() {
     System.out.println("Preprocessing...");
-    Set<OnField> uninitializedFields =
-        Utility.readFixesFromOutputDirectory(context, context.targetModuleInfo).stream()
-            .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
-            .map(Fix::toField)
-            .collect(Collectors.toSet());
-    FieldInitializationStore fieldInitializationStore = new FieldInitializationStore(context);
-    Set<AddAnnotation> initializers =
-        fieldInitializationStore.findInitializers(uninitializedFields).stream()
-            .map(onMethod -> new AddMarkerAnnotation(onMethod, config.initializerAnnot))
-            .collect(Collectors.toSet());
-    this.injector.injectAnnotations(initializers);
+    context.checker.preprocess(injector);
   }
 
   /** Performs iterations of inference/injection until no unseen fix is suggested. */

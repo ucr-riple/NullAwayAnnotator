@@ -56,6 +56,14 @@ public interface Checker<T extends Error> {
   void suppressRemainingAnnotations(AnnotationInjector injector);
 
   /**
+   * Used to do any pre-processing steps before running the inference.
+   *
+   * @param injector Annotation injector, can be used to inject any annotations during the
+   *     pre-processing phase.
+   */
+  void preprocess(AnnotationInjector injector);
+
+  /**
    * Creates an {@link Error} instance from the given parameters.
    *
    * @param errorType Error type.
