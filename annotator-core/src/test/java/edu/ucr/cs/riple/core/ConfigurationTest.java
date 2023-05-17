@@ -130,7 +130,7 @@ public class ConfigurationTest {
           assertEquals("./gradlew compileJava", config.buildCommand);
           assertEquals(testDir, config.globalDir);
           assertEquals("edu.ucr.Initializer", config.initializerAnnot);
-          assertEquals(Paths.get("0nullaway.xml"), config.target.nullawayConfig);
+          assertEquals(Paths.get("0nullaway.xml"), config.target.checkerConfig);
           assertEquals(Paths.get("0scanner.xml"), config.target.scannerConfig);
         });
   }
@@ -163,7 +163,7 @@ public class ConfigurationTest {
           assertEquals("./gradlew compileJava", config.buildCommand);
           assertEquals(testDir, config.globalDir);
           assertEquals("edu.ucr.Initializer", config.initializerAnnot);
-          assertEquals(Paths.get("0nullaway.xml"), config.target.nullawayConfig);
+          assertEquals(Paths.get("0nullaway.xml"), config.target.checkerConfig);
           assertEquals(Paths.get("0scanner.xml"), config.target.scannerConfig);
           assertEquals(testDir.resolve("library-model.tsv"), config.nullawayLibraryModelLoaderPath);
           assertTrue(config.downStreamDependenciesAnalysisActivated);
@@ -179,8 +179,7 @@ public class ConfigurationTest {
           // downstream dependencies.
           ImmutableSet<Pair<Path, Path>> actualDownstreamConfigPaths =
               config.downstreamConfigurations.stream()
-                  .map(
-                      moduleInfo -> new Pair<>(moduleInfo.nullawayConfig, moduleInfo.scannerConfig))
+                  .map(moduleInfo -> new Pair<>(moduleInfo.checkerConfig, moduleInfo.scannerConfig))
                   .collect(ImmutableSet.toImmutableSet());
           assertEquals(actualDownstreamConfigPaths, expectedDownstreamConfigPaths);
         });

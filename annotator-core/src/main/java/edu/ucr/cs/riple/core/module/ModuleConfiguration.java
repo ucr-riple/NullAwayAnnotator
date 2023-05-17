@@ -34,8 +34,8 @@ import org.json.simple.JSONObject;
 /** Container class to hold paths to nullaway and scanner config files. */
 public class ModuleConfiguration {
 
-  /** Path to nullaway config. */
-  public final Path nullawayConfig;
+  /** Path to checker config. */
+  public final Path checkerConfig;
   /** Path to scanner config. */
   public final Path scannerConfig;
   /** Directory where all serialized data from checkers are located. */
@@ -60,8 +60,8 @@ public class ModuleConfiguration {
         id, globalDir, Paths.get(nullawayConfigPath), Paths.get(scannerConfigPath));
   }
 
-  public ModuleConfiguration(int id, Path globalDir, Path nullawayConfig, Path scannerConfig) {
-    this.nullawayConfig = nullawayConfig;
+  public ModuleConfiguration(int id, Path globalDir, Path checkerConfig, Path scannerConfig) {
+    this.checkerConfig = checkerConfig;
     this.scannerConfig = scannerConfig;
     this.dir = globalDir.resolve(String.valueOf(id));
     try {
@@ -81,11 +81,11 @@ public class ModuleConfiguration {
       return false;
     }
     ModuleConfiguration that = (ModuleConfiguration) o;
-    return nullawayConfig.equals(that.nullawayConfig) && scannerConfig.equals(that.scannerConfig);
+    return checkerConfig.equals(that.checkerConfig) && scannerConfig.equals(that.scannerConfig);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(nullawayConfig, scannerConfig);
+    return Objects.hash(checkerConfig, scannerConfig);
   }
 }

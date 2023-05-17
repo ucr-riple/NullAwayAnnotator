@@ -143,13 +143,12 @@ public class Utility {
    * Reads serialized errors "errors.tsv" file in the output directory, and returns the collected
    * set of resolving fixes for read errors.
    *
-   * @param context Annotator context. Required to fetch the deserializer.
-   * @param moduleInfo ModuleInfo of the module which fixes are created for.
+   * @param context Context of the annotator.
+   * @param moduleInfo ModuleInfo of the module which errors are created for.
    * @return Set of collected fixes.
    */
   public static Set<Fix> readFixesFromOutputDirectory(Context context, ModuleInfo moduleInfo) {
-    Set<Error> errors = readErrorsFromOutputDirectory(context, moduleInfo);
-    return Error.getResolvingFixesOfErrors(errors);
+    return Error.getResolvingFixesOfErrors(context.checker.deserializeErrors(moduleInfo));
   }
 
   /**
@@ -159,8 +158,11 @@ public class Utility {
    * @param moduleInfo ModuleInfo of the module which errors are created for.
    * @return Set of serialized errors.
    */
-  public static Set<Error> readErrorsFromOutputDirectory(Context context, ModuleInfo moduleInfo) {
-    return context.deserializer.deserializeErrors(moduleInfo);
+  public static <T extends Error> Set<T> readErrorsFromOutputDirectory(
+      Context context, ModuleInfo moduleInfo, Class<T> klass) {
+    return context.checker.deserializeErrors(moduleInfo).stream()
+        .map(klass::cast)
+        .collect(Collectors.toSet());
   }
 
   /**
@@ -271,7 +273,7 @@ public class Utility {
                   .setSuggest(true, true)
                   .setOutputDirectory(module.dir.toString())
                   .setFieldInitInfo(false);
-          nullAwayConfig.writeAsXML(module.nullawayConfig.toString());
+          nullAwayConfig.writeAsXML(module.checkerConfig.toString());
         });
     build(context, context.config.downstreamDependenciesBuildCommand);
   }
@@ -297,7 +299,7 @@ public class Utility {
             .setSuggest(true, true)
             .setOutputDirectory(context.targetConfiguration.dir.toString())
             .setFieldInitInfo(initSerializationEnabled);
-    nullAwayConfig.writeAsXML(context.targetConfiguration.nullawayConfig.toString());
+    nullAwayConfig.writeAsXML(context.targetConfiguration.checkerConfig.toString());
     build(context, context.config.buildCommand);
   }
 

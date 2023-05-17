@@ -148,7 +148,7 @@ public class Config {
    */
   public final ImmutableSet<SourceType> generatedCodeDetectors;
   /** Checker enum to retrieve checker specific instances. (e.g. {@link CheckerDeserializer}) */
-  public final Checker checker;
+  public final String checker;
 
   /**
    * Builds context from command line arguments.
@@ -381,7 +381,7 @@ public class Config {
         cmd.hasOption(nullableOption.getLongOpt())
             ? cmd.getOptionValue(nullableOption.getLongOpt())
             : "javax.annotation.Nullable";
-    this.checker = Checker.getCheckerByName(cmd.getOptionValue(checkerNameOption));
+    this.checker = cmd.getOptionValue(checkerNameOption);
     this.initializerAnnot = cmd.getOptionValue(initializerOption.getLongOpt());
     this.depth =
         Integer.parseInt(
@@ -467,8 +467,7 @@ public class Config {
     } catch (Exception e) {
       throw new RuntimeException("Error in reading/parsing context at path: " + configPath, e);
     }
-    this.checker =
-        Checker.getCheckerByName(getValueFromKey(jsonObject, "CHECKER", String.class).orElse(null));
+    this.checker = getValueFromKey(jsonObject, "CHECKER", String.class).orElse(null);
     this.depth = getValueFromKey(jsonObject, "DEPTH", Long.class).orElse((long) 1).intValue();
     this.chain = getValueFromKey(jsonObject, "CHAIN", Boolean.class).orElse(false);
     this.redirectBuildOutputToStdErr =
@@ -712,7 +711,7 @@ public class Config {
               .map(
                   info -> {
                     JSONObject res = new JSONObject();
-                    res.put("NULLAWAY", info.nullawayConfig.toString());
+                    res.put("NULLAWAY", info.checkerConfig.toString());
                     res.put("SCANNER", info.scannerConfig.toString());
                     return res;
                   })

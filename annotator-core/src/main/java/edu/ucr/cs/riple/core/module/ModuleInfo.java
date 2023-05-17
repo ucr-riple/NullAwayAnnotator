@@ -46,6 +46,8 @@ public class ModuleInfo {
   /** The set of modules this moduleInfo is created for. */
   private final ImmutableSet<ModuleConfiguration> configurations;
 
+  private final Context context;
+
   /**
    * This constructor is used to create a moduleInfo for a single module.
    *
@@ -66,6 +68,7 @@ public class ModuleInfo {
    */
   public ModuleInfo(
       Context context, ImmutableSet<ModuleConfiguration> configurations, String buildCommand) {
+    this.context = context;
     // Build with scanner checker activated to generate required files to create the moduleInfo.
     Utility.setScannerCheckerActivation(context.config, configurations, true);
     configurations.forEach(
@@ -75,7 +78,7 @@ public class ModuleInfo {
                   .setSuggest(true, true)
                   .setOutputDirectory(module.dir.toString())
                   .setFieldInitInfo(true);
-          nullAwayConfig.writeAsXML(module.nullawayConfig.toString());
+          nullAwayConfig.writeAsXML(module.checkerConfig.toString());
         });
     Utility.build(context, buildCommand);
     Utility.setScannerCheckerActivation(context.config, configurations, false);
@@ -110,6 +113,24 @@ public class ModuleInfo {
    */
   public NonnullStore getNonnullStore() {
     return nonnullStore;
+  }
+
+  /**
+   * Getter for the module configuration this moduleInfo is created for.
+   *
+   * @return The module configuration this moduleInfo is created for.
+   */
+  public ImmutableSet<ModuleConfiguration> getModuleConfiguration() {
+    return configurations;
+  }
+
+  /**
+   * Getter for the Annotator context.
+   *
+   * @return The Annotator context.
+   */
+  public Context getContext() {
+    return context;
   }
 
   /**

@@ -46,9 +46,9 @@ public class Error {
   /** Error message. */
   public final String message;
   /** The fixes which can resolve this error (possibly empty). */
-  private final ImmutableSet<Fix> resolvingFixes;
+  protected final ImmutableSet<Fix> resolvingFixes;
   /** Offset of program point in original version where error is reported. */
-  private final int offset;
+  protected final int offset;
   /** Containing region. */
   protected final Region region;
   /** Error type for method initialization errors from NullAway in {@code String}. */
@@ -218,7 +218,8 @@ public class Error {
    * @param errors Collection of errors.
    * @return Immutable set of fixes which can resolve all given errors.
    */
-  public static ImmutableSet<Fix> getResolvingFixesOfErrors(Collection<Error> errors) {
+  public static <T extends Error> ImmutableSet<Fix> getResolvingFixesOfErrors(
+      Collection<T> errors) {
     // Each error has a set of resolving fixes and each fix has a set of reasons as why the fix has
     // been suggested. The final returned set of fixes should contain all the reasons it has been
     // suggested across the given collection. Map below stores all the set of reasons each fix is
@@ -227,7 +228,7 @@ public class Error {
     // Collect all reasons each fix is suggested across the given collection.
     Map<Fix, Set<String>> fixReasonsMap = new HashMap<>();
     errors.stream()
-        .flatMap(error -> error.resolvingFixes.stream())
+        .flatMap(error -> error.getResolvingFixes().stream())
         .forEach(
             fix -> {
               if (fixReasonsMap.containsKey(fix)) {

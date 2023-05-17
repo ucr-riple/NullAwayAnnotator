@@ -25,16 +25,17 @@
 package edu.ucr.cs.riple.core;
 
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.checkers.Checker;
+import edu.ucr.cs.riple.core.checkers.CheckerBaseClass;
 import edu.ucr.cs.riple.core.io.deserializers.CheckerDeserializer;
 import edu.ucr.cs.riple.core.log.Log;
+import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
-import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import edu.ucr.cs.riple.injector.offsets.OffsetChange;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -60,10 +61,8 @@ public class Context {
   public final ModuleConfiguration targetConfiguration;
   /** Sets of context path information for all downstream dependencies. */
   public final ImmutableSet<ModuleConfiguration> downstreamConfigurations;
-  /** Deserializer for reading the output of the checker. */
-  public final CheckerDeserializer deserializer;
   /** Checker enum to retrieve checker specific instances. (e.g. {@link CheckerDeserializer}) */
-  public final Checker checker;
+  public final Checker<? extends Error> checker;
 
   /**
    * Builds context from command line arguments.
@@ -72,39 +71,12 @@ public class Context {
    */
   public Context(Config config) {
     this.config = config;
-    this.checker = config.checker;
+    this.checker = CheckerBaseClass.getCheckerByName(config.checker, this);
     this.offsetHandler = new OffsetHandler();
     this.downstreamConfigurations = config.downstreamConfigurations;
     this.log = new Log();
     this.targetConfiguration = config.target;
-    this.deserializer = initializeCheckerDeserializer();
     this.targetModuleInfo = new ModuleInfo(this, config.target, config.buildCommand);
-  }
-
-  /**
-   * Initializes the checker deserializer based on the checker name and the serialization version.
-   *
-   * @return the checker deserializer associated with the requested checker name and version.
-   */
-  public CheckerDeserializer initializeCheckerDeserializer() {
-    // To retrieve the serialization version, we need to build the target first.
-    Utility.buildTarget(this);
-    Path serializationVersionPath = config.target.dir.resolve("serialization_version.txt");
-    if (!serializationVersionPath.toFile().exists()) {
-      // Older versions of checkers
-      throw new RuntimeException(
-          "Serialization version not found. Upgrade to newer versions of the checkers: "
-              + checker.name());
-    }
-    List<String> lines = Utility.readFileLines(serializationVersionPath);
-    int version = Integer.parseInt(lines.get(0));
-    CheckerDeserializer deserializer = checker.getDeserializer(this);
-    if (deserializer.getVersionNumber() == version) {
-      return deserializer;
-    } else {
-      throw new RuntimeException(
-          "Serialization version mismatch. Upgrade new versions of checkers.");
-    }
   }
 
   /** Responsible for handling offset changes in source file. */
