@@ -26,7 +26,6 @@ package edu.ucr.cs.riple.core.module;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
-import edu.ucr.cs.riple.core.checkers.nullaway.FixSerializationConfig;
 import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
 import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
@@ -69,20 +68,12 @@ public class ModuleInfo {
   public ModuleInfo(
       Context context, ImmutableSet<ModuleConfiguration> configurations, String buildCommand) {
     this.context = context;
+    this.configurations = configurations;
     // Build with scanner checker activated to generate required files to create the moduleInfo.
     Utility.setScannerCheckerActivation(context.config, configurations, true);
-    configurations.forEach(
-        module -> {
-          FixSerializationConfig.Builder nullAwayConfig =
-              new FixSerializationConfig.Builder()
-                  .setSuggest(true, true)
-                  .setOutputDirectory(module.dir.toString())
-                  .setFieldInitInfo(true);
-          nullAwayConfig.writeAsXML(module.checkerConfig.toString());
-        });
+    context.checker.prepareConfigFilesForBuild(configurations);
     Utility.build(context, buildCommand);
     Utility.setScannerCheckerActivation(context.config, configurations, false);
-    this.configurations = configurations;
     this.nonnullStore = new NonnullStore(configurations);
     this.fieldRegistry = new FieldRegistry(configurations);
     this.methodRegistry = new MethodRegistry(context);

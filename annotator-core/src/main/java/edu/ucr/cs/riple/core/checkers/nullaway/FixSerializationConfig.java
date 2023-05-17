@@ -95,7 +95,7 @@ public class FixSerializationConfig {
 
       // Field Initialization
       Element fieldInitInfoEnabled = doc.createElement("fieldInitInfo");
-      fieldInitInfoEnabled.setAttribute("active", String.valueOf(fieldInitInfoEnabled));
+      fieldInitInfoEnabled.setAttribute("active", String.valueOf(this.fieldInitInfoEnabled));
       rootElement.appendChild(fieldInitInfoEnabled);
 
       // Output dir
