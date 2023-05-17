@@ -72,6 +72,53 @@ public class FixSerializationConfig {
     this.outputDirectory = outputDirectory;
   }
 
+  /**
+   * Writes the {@link FixSerializationConfig} in {@code XML} format.
+   *
+   * @param path Path to write the config at.
+   */
+  public void writeNullAwayConfigInXMLFormat(String path) {
+    DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+    try {
+      DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+      Document doc = docBuilder.newDocument();
+
+      // Root
+      Element rootElement = doc.createElement("serialization");
+      doc.appendChild(rootElement);
+
+      // Suggest
+      Element suggestElement = doc.createElement("suggest");
+      suggestElement.setAttribute("active", String.valueOf(suggestEnabled));
+      suggestElement.setAttribute("enclosing", String.valueOf(suggestEnclosing));
+      rootElement.appendChild(suggestElement);
+
+      // Field Initialization
+      Element fieldInitInfoEnabled = doc.createElement("fieldInitInfo");
+      fieldInitInfoEnabled.setAttribute("active", String.valueOf(fieldInitInfoEnabled));
+      rootElement.appendChild(fieldInitInfoEnabled);
+
+      // Output dir
+      Element outputDir = doc.createElement("path");
+      outputDir.setTextContent(outputDirectory);
+      rootElement.appendChild(outputDir);
+
+      // UUID
+      Element uuid = doc.createElement("uuid");
+      uuid.setTextContent(UUID.randomUUID().toString());
+      rootElement.appendChild(uuid);
+
+      // Writings
+      TransformerFactory transformerFactory = TransformerFactory.newInstance();
+      Transformer transformer = transformerFactory.newTransformer();
+      DOMSource source = new DOMSource(doc);
+      StreamResult result = new StreamResult(new File(path));
+      transformer.transform(source, result);
+    } catch (ParserConfigurationException | TransformerException e) {
+      throw new RuntimeException("Error happened in writing config.", e);
+    }
+  }
+
   /** Builder class for Serialization Config */
   public static class Builder {
 
@@ -109,7 +156,7 @@ public class FixSerializationConfig {
      */
     public void writeAsXML(String path) {
       FixSerializationConfig config = this.build();
-      writeNullAwayConfigInXMLFormat(config, path);
+      config.writeNullAwayConfigInXMLFormat(path);
     }
 
     public FixSerializationConfig build() {
@@ -117,54 +164,6 @@ public class FixSerializationConfig {
         throw new IllegalStateException("did not set mandatory output directory");
       }
       return new FixSerializationConfig(suggestEnabled, suggestEnclosing, fieldInitInfo, outputDir);
-    }
-
-    /**
-     * Writes the {@link FixSerializationConfig} in {@code XML} format.
-     *
-     * @param config Config file to write.
-     * @param path Path to write the config at.
-     */
-    public static void writeNullAwayConfigInXMLFormat(FixSerializationConfig config, String path) {
-      DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-      try {
-        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-        Document doc = docBuilder.newDocument();
-
-        // Root
-        Element rootElement = doc.createElement("serialization");
-        doc.appendChild(rootElement);
-
-        // Suggest
-        Element suggestElement = doc.createElement("suggest");
-        suggestElement.setAttribute("active", String.valueOf(config.suggestEnabled));
-        suggestElement.setAttribute("enclosing", String.valueOf(config.suggestEnclosing));
-        rootElement.appendChild(suggestElement);
-
-        // Field Initialization
-        Element fieldInitInfoEnabled = doc.createElement("fieldInitInfo");
-        fieldInitInfoEnabled.setAttribute("active", String.valueOf(config.fieldInitInfoEnabled));
-        rootElement.appendChild(fieldInitInfoEnabled);
-
-        // Output dir
-        Element outputDir = doc.createElement("path");
-        outputDir.setTextContent(config.outputDirectory);
-        rootElement.appendChild(outputDir);
-
-        // UUID
-        Element uuid = doc.createElement("uuid");
-        uuid.setTextContent(UUID.randomUUID().toString());
-        rootElement.appendChild(uuid);
-
-        // Writings
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Transformer transformer = transformerFactory.newTransformer();
-        DOMSource source = new DOMSource(doc);
-        StreamResult result = new StreamResult(new File(path));
-        transformer.transform(source, result);
-      } catch (ParserConfigurationException | TransformerException e) {
-        throw new RuntimeException("Error happened in writing config.", e);
-      }
     }
   }
 }

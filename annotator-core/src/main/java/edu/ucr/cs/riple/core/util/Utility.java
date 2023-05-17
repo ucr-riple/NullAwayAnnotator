@@ -40,7 +40,6 @@ import edu.ucr.cs.riple.scanner.ScannerConfigWriter;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
@@ -51,23 +50,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import me.tongfei.progressbar.ProgressBar;
 import me.tongfei.progressbar.ProgressBarStyle;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 /** Utility class. */
 public class Utility {
@@ -163,54 +151,6 @@ public class Utility {
     return context.checker.deserializeErrors(moduleInfo).stream()
         .map(klass::cast)
         .collect(Collectors.toSet());
-  }
-
-  /**
-   * Writes the {@link FixSerializationConfig} in {@code XML} format.
-   *
-   * @param config Context file to write.
-   * @param path Path to write the context at.
-   */
-  public static void writeNullAwayConfigInXMLFormat(FixSerializationConfig config, String path) {
-    DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-    try {
-      DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-      Document doc = docBuilder.newDocument();
-
-      // Root
-      Element rootElement = doc.createElement("serialization");
-      doc.appendChild(rootElement);
-
-      // Suggest
-      Element suggestElement = doc.createElement("suggest");
-      suggestElement.setAttribute("active", String.valueOf(config.suggestEnabled));
-      suggestElement.setAttribute("enclosing", String.valueOf(config.suggestEnclosing));
-      rootElement.appendChild(suggestElement);
-
-      // Field Initialization
-      Element fieldInitInfoEnabled = doc.createElement("fieldInitInfo");
-      fieldInitInfoEnabled.setAttribute("active", String.valueOf(config.fieldInitInfoEnabled));
-      rootElement.appendChild(fieldInitInfoEnabled);
-
-      // Output dir
-      Element outputDir = doc.createElement("path");
-      outputDir.setTextContent(config.outputDirectory);
-      rootElement.appendChild(outputDir);
-
-      // UUID
-      Element uuid = doc.createElement("uuid");
-      uuid.setTextContent(UUID.randomUUID().toString());
-      rootElement.appendChild(uuid);
-
-      // Writings
-      TransformerFactory transformerFactory = TransformerFactory.newInstance();
-      Transformer transformer = transformerFactory.newTransformer();
-      DOMSource source = new DOMSource(doc);
-      StreamResult result = new StreamResult(new File(path));
-      transformer.transform(source, result);
-    } catch (ParserConfigurationException | TransformerException e) {
-      throw new RuntimeException("Error happened in writing config.", e);
-    }
   }
 
   /**

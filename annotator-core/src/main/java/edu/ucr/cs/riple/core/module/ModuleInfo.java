@@ -26,10 +26,10 @@ package edu.ucr.cs.riple.core.module;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
+import edu.ucr.cs.riple.core.checkers.nullaway.FixSerializationConfig;
 import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
 import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
-import edu.ucr.cs.riple.core.util.FixSerializationConfig;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnClass;

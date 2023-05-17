@@ -32,9 +32,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.javaparser.utils.Pair;
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.checkers.nullaway.FixSerializationConfig;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
-import edu.ucr.cs.riple.core.util.FixSerializationConfig;
-import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.scanner.ScannerConfigWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -193,7 +192,7 @@ public class ConfigurationTest {
     FixSerializationConfig config = new FixSerializationConfig();
     Path nullawayConfigPath = testDir.resolve("nullaway.xml");
     for (int i = 0; i < 5; i++) {
-      Utility.writeNullAwayConfigInXMLFormat(config, nullawayConfigPath.toString());
+      config.writeNullAwayConfigInXMLFormat(nullawayConfigPath.toString());
       String uuid = getValueFromTag(nullawayConfigPath, "/serialization/uuid");
       if (observed.contains(uuid)) {
         throw new IllegalStateException(
