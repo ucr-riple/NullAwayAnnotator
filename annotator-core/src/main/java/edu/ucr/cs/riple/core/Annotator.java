@@ -120,7 +120,7 @@ public class Annotator {
       }
     }
     if (config.forceResolveActivated) {
-      context.checker.suppressRemainingAnnotations(injector);
+      context.checker.suppressRemainingErrors(injector);
     }
     System.out.println("\nFinished annotating.");
     Utility.writeReports(context, cache.reports().stream().collect(ImmutableSet.toImmutableSet()));

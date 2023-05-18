@@ -53,7 +53,7 @@ public interface Checker<T extends Error> {
    *
    * @param injector Annotation injector to inject selected annotations.
    */
-  void suppressRemainingAnnotations(AnnotationInjector injector);
+  void suppressRemainingErrors(AnnotationInjector injector);
 
   /**
    * Used to do any pre-processing steps before running the inference.

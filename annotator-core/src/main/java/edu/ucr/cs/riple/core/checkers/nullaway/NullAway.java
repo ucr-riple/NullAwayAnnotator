@@ -223,7 +223,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
    * @param injector Annotation injector to inject selected annotations.
    */
   @Override
-  public void suppressRemainingAnnotations(AnnotationInjector injector) {
+  public void suppressRemainingErrors(AnnotationInjector injector) {
     // Collect regions with remaining errors.
     Utility.buildTarget(context);
     Set<NullAwayError> remainingErrors = deserializeErrors(context.targetModuleInfo);
