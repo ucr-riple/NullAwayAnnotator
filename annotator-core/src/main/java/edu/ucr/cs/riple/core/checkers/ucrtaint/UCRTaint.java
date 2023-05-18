@@ -25,7 +25,6 @@
 package edu.ucr.cs.riple.core.checkers.ucrtaint;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.CheckerBaseClass;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
@@ -60,6 +59,9 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
   }
 
   @Override
+  public void preprocess(AnnotationInjector injector) {}
+
+  @Override
   public Set<UCRTaintError> deserializeErrors(ModuleInfo module) {
     ImmutableSet<Path> paths =
         module.getModuleConfiguration().stream()
@@ -73,7 +75,7 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
             content = "{ \"errors\": [" + content.substring(0, content.length() - 1) + "]}";
             JSONObject jsonObject = (JSONObject) new JSONParser().parse(content);
             JSONArray errorsJson = (JSONArray) jsonObject.get("errors");
-            errorsJson.forEach(o -> errors.add(deserializeErrorFromJSON((JSONObject) o, context)));
+            errorsJson.forEach(o -> errors.add(deserializeErrorFromJSON((JSONObject) o, module)));
           } catch (IOException | ParseException e) {
             throw new RuntimeException(e);
           }
@@ -81,7 +83,7 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
     return errors;
   }
 
-  private UCRTaintError deserializeErrorFromJSON(JSONObject errorsJson, Context context) {
+  private UCRTaintError deserializeErrorFromJSON(JSONObject errorsJson, ModuleInfo moduleInfo) {
     String errorType = (String) errorsJson.get("messageKey");
     int offset = ((Long) errorsJson.get("offset")).intValue();
     Region region =
@@ -93,7 +95,9 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
         .forEach(
             o -> {
               JSONObject fixJson = (JSONObject) o;
-              Location location = Location.fromJSON((JSONObject) fixJson.get("location"));
+              Location location =
+                  Location.createLocationFromJSON((JSONObject) fixJson.get("location"));
+              location.ifField(onField -> extendVariableList(onField, moduleInfo));
               builder.add(
                   new Fix(
                       new AddTypeUseMarkerAnnotation(
@@ -105,7 +109,7 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
   }
 
   @Override
-  public void suppressRemainingAnnotations(Config config, AnnotationInjector injector) {
+  public void suppressRemainingErrors(AnnotationInjector injector) {
     throw new RuntimeException(
         "Suppression for remaining errors is not supported for " + NAME + "yet!");
   }
