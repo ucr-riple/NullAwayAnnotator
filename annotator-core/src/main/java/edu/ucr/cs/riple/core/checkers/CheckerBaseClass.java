@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.core.checkers;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
+import edu.ucr.cs.riple.core.checkers.ucrtaint.UCRTaint;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.location.OnField;
@@ -75,6 +76,8 @@ public abstract class CheckerBaseClass<T extends Error> implements Checker<T> {
     switch (name) {
       case NullAway.NAME:
         return new NullAway(context);
+      case UCRTaint.NAME:
+        return new UCRTaint(context);
       default:
         throw new RuntimeException("Unknown checker name: " + name);
     }
