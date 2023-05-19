@@ -47,7 +47,9 @@ public class FieldRegionRegistry extends Registry<RegionRecord> implements Regio
   public FieldRegionRegistry(ModuleInfo moduleInfo) {
     super(
         moduleInfo.getModuleConfigurations().stream()
-            .map(configuration -> configuration.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME))
+            .map(
+                configuration ->
+                    configuration.dir.resolve(Serializer.FIELD_IMPACTED_REGION_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));
     this.moduleInfo = moduleInfo;
   }

@@ -150,9 +150,9 @@ public class ConfigurationTest {
             .addSourceFile("SampleClassForTest.java");
     compilationTestHelper.doTest();
     // Verify there are no output files.
-    Assert.assertFalse(root.resolve(Serializer.CLASS_INFO_FILE_NAME).toFile().exists());
+    Assert.assertFalse(root.resolve(Serializer.CLASS_RECORD_FILE_NAME).toFile().exists());
     Assert.assertFalse(root.resolve(Serializer.METHOD_IMPACTED_REGION_FILE_NAME).toFile().exists());
-    Assert.assertFalse(root.resolve(Serializer.FIELD_GRAPH_FILE_NAME).toFile().exists());
-    Assert.assertFalse(root.resolve(Serializer.METHOD_INFO_FILE_NAME).toFile().exists());
+    Assert.assertFalse(root.resolve(Serializer.FIELD_IMPACTED_REGION_FILE_NAME).toFile().exists());
+    Assert.assertFalse(root.resolve(Serializer.METHOD_RECORD_FILE_NAME).toFile().exists());
   }
 }

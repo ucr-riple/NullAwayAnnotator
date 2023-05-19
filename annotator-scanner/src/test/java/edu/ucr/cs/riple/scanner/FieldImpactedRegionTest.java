@@ -50,7 +50,7 @@ public class FieldImpactedRegionTest extends AnnotatorScannerBaseTest<ImpactedRe
           + "USED_CLASS"
           + '\t'
           + "SOURCE_TYPE";
-  private static final String FILE_NAME = "field_graph.tsv";
+  private static final String FILE_NAME = "field_impacted_region_map.tsv";
 
   public FieldImpactedRegionTest() {
     super(FIELD_TRACKER_DISPLAY_FACTORY, HEADER, FILE_NAME);
