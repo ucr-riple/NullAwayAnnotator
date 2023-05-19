@@ -31,8 +31,8 @@ import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.Result;
-import edu.ucr.cs.riple.core.metadata.trackers.Region;
-import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
+import edu.ucr.cs.riple.core.metadata.region.Region;
+import edu.ucr.cs.riple.core.metadata.region.RegionRegistry;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.util.Collection;
 import java.util.HashSet;
@@ -47,18 +47,21 @@ import me.tongfei.progressbar.ProgressBar;
  */
 public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcessor {
 
-  /** Tracker instance to check conflicts. */
-  private final RegionTracker regionTracker;
+  /**
+   * Region registry instance to check conflicts in potentially impacted regions by changes in fix
+   * trees.
+   */
+  private final RegionRegistry regionRegistry;
 
   public ParallelConflictGraphProcessor(
-      Context context, CompilerRunner runner, Supplier supplier, RegionTracker regionTracker) {
+      Context context, CompilerRunner runner, Supplier supplier, RegionRegistry regionRegistry) {
     super(context, runner, supplier);
-    this.regionTracker = regionTracker;
+    this.regionRegistry = regionRegistry;
   }
 
   @Override
   public void process(ConflictGraph graph) {
-    graph.getNodes().forEach(node -> node.reCollectPotentiallyImpactedRegions(regionTracker));
+    graph.getNodes().forEach(node -> node.reCollectPotentiallyImpactedRegions(regionRegistry));
     // find non-conflicting groups.
     graph.findGroups();
     Collection<Set<Node>> nonConflictingGroups = graph.getGroups();

@@ -26,18 +26,20 @@ package edu.ucr.cs.riple.scanner;
 
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.scanner.tools.DisplayFactory;
-import edu.ucr.cs.riple.scanner.tools.TrackerNodeDisplay;
+import edu.ucr.cs.riple.scanner.tools.ImpactedRegionRecordDisplay;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class MethodImpactedRegionTest extends AnnotatorScannerBaseTest<TrackerNodeDisplay> {
+public class MethodImpactedRegionTest
+    extends AnnotatorScannerBaseTest<ImpactedRegionRecordDisplay> {
 
-  private static final DisplayFactory<TrackerNodeDisplay> METHOD_TRACKER_DISPLAY_FACTORY =
+  private static final DisplayFactory<ImpactedRegionRecordDisplay> METHOD_TRACKER_DISPLAY_FACTORY =
       values -> {
         Preconditions.checkArgument(values.length == 5, "Expected to find 5 values on each line");
-        return new TrackerNodeDisplay(values[0], values[1], values[3], values[2], values[4]);
+        return new ImpactedRegionRecordDisplay(
+            values[0], values[1], values[3], values[2], values[4]);
       };
   private static final String HEADER =
       "REGION_CLASS"
@@ -71,8 +73,8 @@ public class MethodImpactedRegionTest extends AnnotatorScannerBaseTest<TrackerNo
             "   Object foo() { return null; };",
             "}")
         .setExpectedOutputs(
-            new TrackerNodeDisplay("edu.ucr.A", "bar()", "edu.ucr.Other", "foo()"),
-            new TrackerNodeDisplay("edu.ucr.A", "bar()", "edu.ucr.Other", "Other()"))
+            new ImpactedRegionRecordDisplay("edu.ucr.A", "bar()", "edu.ucr.Other", "foo()"),
+            new ImpactedRegionRecordDisplay("edu.ucr.A", "bar()", "edu.ucr.Other", "Other()"))
         .doTest();
   }
 
@@ -94,8 +96,9 @@ public class MethodImpactedRegionTest extends AnnotatorScannerBaseTest<TrackerNo
             "    }",
             "}")
         .setExpectedOutputs(
-            new TrackerNodeDisplay("edu.ucr.B", "run()", "edu.ucr.A", "A(java.lang.Object)"),
-            new TrackerNodeDisplay(
+            new ImpactedRegionRecordDisplay(
+                "edu.ucr.B", "run()", "edu.ucr.A", "A(java.lang.Object)"),
+            new ImpactedRegionRecordDisplay(
                 "edu.ucr.A", "A(java.lang.Object)", "java.lang.Object", "Object()"))
         .doTest();
   }
@@ -119,9 +122,10 @@ public class MethodImpactedRegionTest extends AnnotatorScannerBaseTest<TrackerNo
             "  }",
             "}")
         .setExpectedOutputs(
-            new TrackerNodeDisplay("edu.ucr.B", "bar()", "edu.ucr.A", "foo(java.lang.Object)"),
-            new TrackerNodeDisplay("edu.ucr.B", "bar()", "edu.ucr.B", "useA(edu.ucr.A)"),
-            new TrackerNodeDisplay(
+            new ImpactedRegionRecordDisplay(
+                "edu.ucr.B", "bar()", "edu.ucr.A", "foo(java.lang.Object)"),
+            new ImpactedRegionRecordDisplay("edu.ucr.B", "bar()", "edu.ucr.B", "useA(edu.ucr.A)"),
+            new ImpactedRegionRecordDisplay(
                 "edu.ucr.B", "bar()", "java.io.PrintStream", "println(java.lang.Object)"))
         .doTest();
   }
@@ -148,18 +152,20 @@ public class MethodImpactedRegionTest extends AnnotatorScannerBaseTest<TrackerNo
             "  }",
             "}")
         .setExpectedOutputs(
-            new TrackerNodeDisplay(
+            new ImpactedRegionRecordDisplay(
                 "edu.ucr.B", "memberReference()", "edu.ucr.A", "foo(java.lang.Object)"),
-            new TrackerNodeDisplay(
+            new ImpactedRegionRecordDisplay(
                 "edu.ucr.B", "memberReference()", "edu.ucr.B", "useA(edu.ucr.A)"),
-            new TrackerNodeDisplay(
+            new ImpactedRegionRecordDisplay(
                 "edu.ucr.B",
                 "memberReference()",
                 "java.io.PrintStream",
                 "println(java.lang.Object)"),
-            new TrackerNodeDisplay("edu.ucr.B", "lambda()", "edu.ucr.A", "foo(java.lang.Object)"),
-            new TrackerNodeDisplay("edu.ucr.B", "lambda()", "edu.ucr.B", "useA(edu.ucr.A)"),
-            new TrackerNodeDisplay(
+            new ImpactedRegionRecordDisplay(
+                "edu.ucr.B", "lambda()", "edu.ucr.A", "foo(java.lang.Object)"),
+            new ImpactedRegionRecordDisplay(
+                "edu.ucr.B", "lambda()", "edu.ucr.B", "useA(edu.ucr.A)"),
+            new ImpactedRegionRecordDisplay(
                 "edu.ucr.B", "lambda()", "java.io.PrintStream", "println(java.lang.Object)"))
         .doTest();
   }

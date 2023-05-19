@@ -26,18 +26,19 @@ package edu.ucr.cs.riple.scanner;
 
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.scanner.tools.DisplayFactory;
-import edu.ucr.cs.riple.scanner.tools.TrackerNodeDisplay;
+import edu.ucr.cs.riple.scanner.tools.ImpactedRegionRecordDisplay;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class FieldTrackerTest extends AnnotatorScannerBaseTest<TrackerNodeDisplay> {
+public class FieldImpactedRegionTest extends AnnotatorScannerBaseTest<ImpactedRegionRecordDisplay> {
 
-  private static final DisplayFactory<TrackerNodeDisplay> FIELD_TRACKER_DISPLAY_FACTORY =
+  private static final DisplayFactory<ImpactedRegionRecordDisplay> FIELD_TRACKER_DISPLAY_FACTORY =
       values -> {
         Preconditions.checkArgument(values.length == 5, "Expected to find 5 values on each line");
-        return new TrackerNodeDisplay(values[0], values[1], values[3], values[2], values[4]);
+        return new ImpactedRegionRecordDisplay(
+            values[0], values[1], values[3], values[2], values[4]);
       };
   private static final String HEADER =
       "REGION_CLASS"
@@ -51,7 +52,7 @@ public class FieldTrackerTest extends AnnotatorScannerBaseTest<TrackerNodeDispla
           + "SOURCE_TYPE";
   private static final String FILE_NAME = "field_graph.tsv";
 
-  public FieldTrackerTest() {
+  public FieldImpactedRegionTest() {
     super(FIELD_TRACKER_DISPLAY_FACTORY, HEADER, FILE_NAME);
   }
 
@@ -70,7 +71,8 @@ public class FieldTrackerTest extends AnnotatorScannerBaseTest<TrackerNodeDispla
             "class Other {",
             "   Object foo;",
             "}")
-        .setExpectedOutputs(new TrackerNodeDisplay("edu.ucr.A", "bar()", "edu.ucr.Other", "foo"))
+        .setExpectedOutputs(
+            new ImpactedRegionRecordDisplay("edu.ucr.A", "bar()", "edu.ucr.Other", "foo"))
         .doTest();
   }
 
@@ -92,9 +94,9 @@ public class FieldTrackerTest extends AnnotatorScannerBaseTest<TrackerNodeDispla
             "   Object foo;",
             "}")
         .setExpectedOutputs(
-            new TrackerNodeDisplay("edu.ucr.A$1Foo", "baz", "edu.ucr.Other", "foo"),
-            new TrackerNodeDisplay("edu.ucr.A$1Foo", "baz", "edu.ucr.Other", "foo"),
-            new TrackerNodeDisplay("edu.ucr.A$1Foo", "baz", "edu.ucr.A", "other"))
+            new ImpactedRegionRecordDisplay("edu.ucr.A$1Foo", "baz", "edu.ucr.Other", "foo"),
+            new ImpactedRegionRecordDisplay("edu.ucr.A$1Foo", "baz", "edu.ucr.Other", "foo"),
+            new ImpactedRegionRecordDisplay("edu.ucr.A$1Foo", "baz", "edu.ucr.A", "other"))
         .doTest();
   }
 
@@ -128,18 +130,18 @@ public class FieldTrackerTest extends AnnotatorScannerBaseTest<TrackerNodeDispla
             "   }",
             "}")
         .setExpectedOutputs(
-            new TrackerNodeDisplay("edu.ucr.A", "f0", "edu.ucr.B", "foo"),
-            new TrackerNodeDisplay("edu.ucr.A", "f0", "edu.ucr.B", "foo"),
-            new TrackerNodeDisplay("edu.ucr.A", "b", "edu.ucr.A", "b"),
-            new TrackerNodeDisplay("edu.ucr.A", "f1", "edu.ucr.B", "staticFoo"),
-            new TrackerNodeDisplay("edu.ucr.A", "f1", "edu.ucr.B", "staticFoo"),
-            new TrackerNodeDisplay("edu.ucr.A", "f3", "edu.ucr.C", "val"),
-            new TrackerNodeDisplay("edu.ucr.A", "f3", "edu.ucr.C", "val"),
-            new TrackerNodeDisplay("edu.ucr.A", "f3", "edu.ucr.B", "c"),
-            new TrackerNodeDisplay("edu.ucr.A", "b", "edu.ucr.A", "b"),
-            new TrackerNodeDisplay("edu.ucr.A", "f4", "edu.ucr.C", "val"),
-            new TrackerNodeDisplay("edu.ucr.A", "f4", "edu.ucr.C", "val"),
-            new TrackerNodeDisplay("edu.ucr.A", "f4", "edu.ucr.B", "staticC"))
+            new ImpactedRegionRecordDisplay("edu.ucr.A", "f0", "edu.ucr.B", "foo"),
+            new ImpactedRegionRecordDisplay("edu.ucr.A", "f0", "edu.ucr.B", "foo"),
+            new ImpactedRegionRecordDisplay("edu.ucr.A", "b", "edu.ucr.A", "b"),
+            new ImpactedRegionRecordDisplay("edu.ucr.A", "f1", "edu.ucr.B", "staticFoo"),
+            new ImpactedRegionRecordDisplay("edu.ucr.A", "f1", "edu.ucr.B", "staticFoo"),
+            new ImpactedRegionRecordDisplay("edu.ucr.A", "f3", "edu.ucr.C", "val"),
+            new ImpactedRegionRecordDisplay("edu.ucr.A", "f3", "edu.ucr.C", "val"),
+            new ImpactedRegionRecordDisplay("edu.ucr.A", "f3", "edu.ucr.B", "c"),
+            new ImpactedRegionRecordDisplay("edu.ucr.A", "b", "edu.ucr.A", "b"),
+            new ImpactedRegionRecordDisplay("edu.ucr.A", "f4", "edu.ucr.C", "val"),
+            new ImpactedRegionRecordDisplay("edu.ucr.A", "f4", "edu.ucr.C", "val"),
+            new ImpactedRegionRecordDisplay("edu.ucr.A", "f4", "edu.ucr.B", "staticC"))
         .doTest();
   }
 
@@ -158,7 +160,7 @@ public class FieldTrackerTest extends AnnotatorScannerBaseTest<TrackerNodeDispla
             "       return foo;",
             "   }",
             "}")
-        .setExpectedOutputs(new TrackerNodeDisplay("A", "bar()", "A", "foo", "LOMBOK"))
+        .setExpectedOutputs(new ImpactedRegionRecordDisplay("A", "bar()", "A", "foo", "LOMBOK"))
         .doTest();
   }
 }

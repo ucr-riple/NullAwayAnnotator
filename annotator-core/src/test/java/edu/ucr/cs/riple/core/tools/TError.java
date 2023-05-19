@@ -25,7 +25,7 @@
 package edu.ucr.cs.riple.core.tools;
 
 import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.core.metadata.region.Region;
 import edu.ucr.cs.riple.injector.location.Location;
 
 /**

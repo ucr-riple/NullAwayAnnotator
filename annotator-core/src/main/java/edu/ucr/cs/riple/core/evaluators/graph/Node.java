@@ -30,8 +30,8 @@ import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.trackers.Region;
-import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
+import edu.ucr.cs.riple.core.metadata.region.Region;
+import edu.ucr.cs.riple.core.metadata.region.RegionRegistry;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.Collection;
@@ -48,31 +48,23 @@ public class Node {
 
   /** Root fix of the tree. */
   public final Fix root;
-
   /** Set of all fixes in tree. */
   public final Set<Fix> tree;
-
   /** Set of potentially impacted by any node in tree. */
   public final Set<Region> regions;
-
   /** Set of triggered errors if tree is applied on target module. */
   public ImmutableSet<Error> triggeredErrors;
-
   /**
    * Set of triggered fixes on target module that will be triggered if fix tree is applied due to
    * errors in downstream dependencies.
    */
   public ImmutableSet<Fix> triggeredFixesFromDownstreamErrors;
-
   /** Unique id of Node across all nodes. */
   public int id;
-
   /** Effect of applying containing change */
   public int effect;
-
   /** Corresponding report of processing root. */
   public Report report;
-
   /** Regions where original errors reported and NullAway suggested root for that. */
   private ImmutableSet<Region> origins;
 
@@ -109,13 +101,15 @@ public class Node {
    *       to be reported on that class field initialization regions.)
    * </ul>
    *
-   * @param tracker Tracker instance.
+   * @param regionRegistry Region registry instance. Used to retrieve regions that can be
+   *     potentially impacted by the changes in this node.
    */
-  public void reCollectPotentiallyImpactedRegions(RegionTracker tracker) {
+  public void reCollectPotentiallyImpactedRegions(RegionRegistry regionRegistry) {
     this.regions.clear();
     // Add origins.
     this.regions.addAll(this.origins);
-    this.tree.forEach(fix -> tracker.getRegions(fix.toLocation()).ifPresent(regions::addAll));
+    this.tree.forEach(
+        fix -> regionRegistry.getRegions(fix.toLocation()).ifPresent(regions::addAll));
     // Add class initialization region, if a fix is modifying a parameter on constructor.
     this.tree.stream()
         .filter(fix -> fix.isOnParameter() && fix.isModifyingConstructor())

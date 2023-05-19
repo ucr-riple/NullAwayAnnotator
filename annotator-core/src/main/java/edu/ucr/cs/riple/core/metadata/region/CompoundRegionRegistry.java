@@ -22,12 +22,12 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.trackers;
+package edu.ucr.cs.riple.core.metadata.region;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.metadata.trackers.generatedcode.GeneratedRegionTracker;
-import edu.ucr.cs.riple.core.metadata.trackers.generatedcode.LombokTracker;
+import edu.ucr.cs.riple.core.metadata.region.generatedcode.GeneratedRegionRegistry;
+import edu.ucr.cs.riple.core.metadata.region.generatedcode.LombokRegionRegistry;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
@@ -35,35 +35,42 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-/** Container class for all trackers. This tracker can handle all fix types. */
-public class CompoundTracker implements RegionTracker {
+/**
+ * Container class for all region registries. This region registry can identify impacted regions for
+ * all fix types.
+ */
+public class CompoundRegionRegistry implements RegionRegistry {
 
-  /** List of all trackers. */
-  private final ImmutableSet<RegionTracker> trackers;
+  /** List of all region registries. */
+  private final ImmutableSet<RegionRegistry> registries;
+  /**
+   * List of all generated region registries. Generated region registries can extend the impacted
+   * regions created by generated code which are not present in source code.
+   */
+  private final ImmutableSet<GeneratedRegionRegistry> generatedRegionsRegistries;
 
-  private final ImmutableSet<GeneratedRegionTracker> generatedRegionsTrackers;
-
-  public CompoundTracker(Config config, ModuleInfo moduleInfo) {
-    MethodRegionTracker methodRegionTracker = new MethodRegionTracker(moduleInfo);
-    this.trackers =
+  public CompoundRegionRegistry(Config config, ModuleInfo moduleInfo) {
+    MethodRegionRegistry methodRegionRegistry = new MethodRegionRegistry(moduleInfo);
+    this.registries =
         ImmutableSet.of(
-            new FieldRegionTracker(moduleInfo),
-            methodRegionTracker,
-            new ParameterRegionTracker(moduleInfo, methodRegionTracker));
-    ImmutableSet.Builder<GeneratedRegionTracker> generatedRegionTrackerBuilder =
+            new FieldRegionRegistry(moduleInfo),
+            methodRegionRegistry,
+            new ParameterRegionRegistry(moduleInfo, methodRegionRegistry));
+    ImmutableSet.Builder<GeneratedRegionRegistry> generatedRegionRegistryBuilder =
         new ImmutableSet.Builder<>();
     if (config.generatedCodeDetectors.contains(SourceType.LOMBOK)) {
-      generatedRegionTrackerBuilder.add(new LombokTracker(moduleInfo, methodRegionTracker));
+      generatedRegionRegistryBuilder.add(
+          new LombokRegionRegistry(moduleInfo, methodRegionRegistry));
     }
-    this.generatedRegionsTrackers = generatedRegionTrackerBuilder.build();
+    this.generatedRegionsRegistries = generatedRegionRegistryBuilder.build();
   }
 
   @Override
   public Optional<Set<Region>> getRegions(Location location) {
     Set<Region> regions = new HashSet<>();
-    this.trackers.forEach(tracker -> tracker.getRegions(location).ifPresent(regions::addAll));
-    this.generatedRegionsTrackers.forEach(
-        tracker -> regions.addAll(tracker.extendForGeneratedRegions(regions)));
+    this.registries.forEach(registry -> registry.getRegions(location).ifPresent(regions::addAll));
+    this.generatedRegionsRegistries.forEach(
+        registry -> regions.addAll(registry.extendForGeneratedRegions(regions)));
     return Optional.of(regions);
   }
 }

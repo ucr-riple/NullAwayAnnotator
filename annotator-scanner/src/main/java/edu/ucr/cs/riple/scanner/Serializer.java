@@ -30,9 +30,9 @@ import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.util.Name;
 import edu.ucr.cs.riple.scanner.location.SymbolLocation;
-import edu.ucr.cs.riple.scanner.out.ClassInfo;
+import edu.ucr.cs.riple.scanner.out.ClassRecord;
 import edu.ucr.cs.riple.scanner.out.ImpactedRegion;
-import edu.ucr.cs.riple.scanner.out.MethodInfo;
+import edu.ucr.cs.riple.scanner.out.MethodRecord;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -61,13 +61,13 @@ public class Serializer {
   private final Path nonnullInfoPath;
 
   /** File name where all field usage data has been stored. */
-  public static final String FIELD_GRAPH_FILE_NAME = "field_graph.tsv";
+  public static final String FIELD_GRAPH_FILE_NAME = "field_records.tsv";
   /** File name where all impacted regions for changes on methods are serialized. */
   public static final String METHOD_IMPACTED_REGION_FILE_NAME = "method_impacted_region_map.tsv";
   /** File name where all method data has been stored. */
-  public static final String METHOD_INFO_FILE_NAME = "method_info.tsv";
+  public static final String METHOD_INFO_FILE_NAME = "method_records.tsv";
   /** File name where all class data has been stored. */
-  public static final String CLASS_INFO_FILE_NAME = "class_info.tsv";
+  public static final String CLASS_INFO_FILE_NAME = "class_records.tsv";
   /** File name where location of elements explicitly annotated as {@code @Nonnull}. */
   public static final String NON_NULL_ELEMENTS_FILE_NAME = "nonnull_elements.tsv";
 
@@ -92,31 +92,32 @@ public class Serializer {
   }
 
   /**
-   * Appends the string representation of the {@link ImpactedRegion} corresponding to a field graph.
+   * Appends the string representation of the {@link ImpactedRegion} corresponding to a field access
+   * (read of a filed or write to a field) in a region.
    *
-   * @param fieldGraphNode TrackerNode instance.
+   * @param fieldAccessRegion Region where the field access occurred.
    */
-  public void serializeFieldGraphNode(ImpactedRegion fieldGraphNode) {
-    appendToFile(fieldGraphNode.toString(), this.fieldGraphPath);
+  public void serializeFieldAccessRecord(ImpactedRegion fieldAccessRegion) {
+    appendToFile(fieldAccessRegion.toString(), this.fieldGraphPath);
   }
 
   /**
-   * Appends the string representation of the {@link ClassInfo} corresponding to a compilation unit
-   * tree.
+   * Appends the string representation of the {@link ClassRecord} corresponding to a compilation
+   * unit tree.
    *
-   * @param classInfo ClassInfo instance.
+   * @param classRecord ClassInfo instance.
    */
-  public void serializeClassInfo(ClassInfo classInfo) {
-    appendToFile(classInfo.toString(), this.classInfoPath);
+  public void serializeClassRecord(ClassRecord classRecord) {
+    appendToFile(classRecord.toString(), this.classInfoPath);
   }
 
   /**
-   * Appends the string representation of the {@link MethodInfo} corresponding to a method.
+   * Appends the string representation of the {@link MethodRecord} corresponding to a method.
    *
-   * @param methodInfo MethodInfo instance.
+   * @param methodRecord MethodInfo instance.
    */
-  public void serializeMethodInfo(MethodInfo methodInfo) {
-    appendToFile(methodInfo.toString(), this.methodInfoPath);
+  public void serializeMethodRecord(MethodRecord methodRecord) {
+    appendToFile(methodRecord.toString(), this.methodInfoPath);
   }
 
   /**
@@ -153,8 +154,8 @@ public class Serializer {
       if (config.isActive()) {
         initializeFile(methodImpactedRegion, ImpactedRegion.header());
         initializeFile(fieldGraphPath, ImpactedRegion.header());
-        initializeFile(methodInfoPath, MethodInfo.header());
-        initializeFile(classInfoPath, ClassInfo.header());
+        initializeFile(methodInfoPath, MethodRecord.header());
+        initializeFile(classInfoPath, ClassRecord.header());
         initializeFile(nonnullInfoPath, SymbolLocation.header());
       }
     } catch (IOException e) {

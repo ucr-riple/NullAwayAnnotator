@@ -22,11 +22,11 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.trackers.generatedcode;
+package edu.ucr.cs.riple.core.metadata.region.generatedcode;
 
 import edu.ucr.cs.riple.core.evaluators.graph.processors.ParallelConflictGraphProcessor;
-import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
-import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.core.metadata.region.MethodRegionRegistry;
+import edu.ucr.cs.riple.core.metadata.region.Region;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.util.Objects;
@@ -36,24 +36,24 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Tracker for extending potentially impacted regions for elements which will be use in generated
- * code by <a href="https://projectlombok.org">Lombok</a>. Lombok automatically propagates
+ * Region registry for extending potentially impacted regions for elements which will be use in
+ * generated code by <a href="https://projectlombok.org">Lombok</a>. Lombok automatically propagates
  * {@code @Nullable} annotation on fields to getter methods, therefore, extends the set of
- * potentially impacted regions to all callers of that method as well. This tracker, will include
- * all callers of any method region in lombok generated code. This will guarantee that {@link
- * ParallelConflictGraphProcessor} will catch any triggered errors by an annotation including all
- * copied annotations by lombok as well.
+ * potentially impacted regions to all callers of that method as well. This region registry, will
+ * include all callers of any method region in lombok generated code. This will guarantee that
+ * {@link ParallelConflictGraphProcessor} will catch any triggered errors by an annotation including
+ * all copied annotations by lombok as well.
  */
-public class LombokTracker implements GeneratedRegionTracker {
+public class LombokRegionRegistry implements GeneratedRegionRegistry {
 
-  /** Method region tracker to get potentially impacted regions of a method. */
-  private final MethodRegionTracker tracker;
+  /** Method region registry to get potentially impacted regions of a method. */
+  private final MethodRegionRegistry methodRegionRegistry;
   /** ModuleInfo of the module which its generated regions by this processor are stored. */
   private final ModuleInfo moduleInfo;
 
-  public LombokTracker(ModuleInfo moduleInfo, MethodRegionTracker methodRegionTracker) {
+  public LombokRegionRegistry(ModuleInfo moduleInfo, MethodRegionRegistry methodRegionRegistry) {
     this.moduleInfo = moduleInfo;
-    this.tracker = methodRegionTracker;
+    this.methodRegionRegistry = methodRegionRegistry;
   }
 
   @Override
@@ -69,7 +69,7 @@ public class LombokTracker implements GeneratedRegionTracker {
         // add potentially impacted regions for the collected methods.
         .flatMap(
             onMethod -> {
-              Optional<Set<Region>> ans = tracker.getRegions(onMethod);
+              Optional<Set<Region>> ans = methodRegionRegistry.getRegions(onMethod);
               return ans.isPresent() ? ans.get().stream() : Stream.of();
             })
         .collect(Collectors.toSet());

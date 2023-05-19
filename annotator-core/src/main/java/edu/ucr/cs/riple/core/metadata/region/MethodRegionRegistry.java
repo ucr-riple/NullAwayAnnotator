@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.trackers;
+package edu.ucr.cs.riple.core.metadata.region;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.Registry;
@@ -36,13 +36,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/** Tracker for Methods. */
-public class MethodRegionTracker extends Registry<TrackerNode> implements RegionTracker {
+/**
+ * Region registry for Methods. This region registry can identify impacted regions for fixes on
+ * {@link OnMethod}
+ */
+public class MethodRegionRegistry extends Registry<RegionRecord> implements RegionRegistry {
 
   /** ModuleInfo of the module which usage of methods are stored. */
   private final ModuleInfo moduleInfo;
 
-  public MethodRegionTracker(ModuleInfo moduleInfo) {
+  public MethodRegionRegistry(ModuleInfo moduleInfo) {
     super(
         moduleInfo.getModuleConfigurations().stream()
             .map(info -> info.dir.resolve(Serializer.METHOD_IMPACTED_REGION_FILE_NAME))
@@ -51,8 +54,8 @@ public class MethodRegionTracker extends Registry<TrackerNode> implements Region
   }
 
   @Override
-  protected Builder<TrackerNode> getBuilder() {
-    return Utility::deserializeTrackerNode;
+  protected Builder<RegionRecord> getBuilder() {
+    return Utility::deserializeImpactedRegionRecord;
   }
 
   @Override
@@ -84,7 +87,7 @@ public class MethodRegionTracker extends Registry<TrackerNode> implements Region
     return findRecordsWithHashHint(
             candidate ->
                 candidate.calleeClass.equals(clazz) && candidate.calleeMember.equals(method),
-            TrackerNode.hash(clazz))
+            RegionRecord.hash(clazz))
         .map(node -> node.region)
         .collect(Collectors.toSet());
   }

@@ -31,8 +31,8 @@ import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.trackers.Region;
-import edu.ucr.cs.riple.core.metadata.trackers.TrackerNode;
+import edu.ucr.cs.riple.core.metadata.region.Region;
+import edu.ucr.cs.riple.core.metadata.region.RegionRecord;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.scanner.AnnotatorScanner;
@@ -244,17 +244,17 @@ public class Utility {
   }
 
   /**
-   * Deserializes a {@link TrackerNode} corresponding to values stored in a string array.
+   * Deserializes a {@link RegionRecord} corresponding to values stored in a string array.
    *
    * @param values String array of values.
-   * @return Deserialized {@link TrackerNode} instance corresponding to the given values.
+   * @return Deserialized {@link RegionRecord} instance corresponding to the given values.
    */
-  public static TrackerNode deserializeTrackerNode(String[] values) {
+  public static RegionRecord deserializeImpactedRegionRecord(String[] values) {
     Preconditions.checkArgument(
         values.length == 5,
-        "Expected 5 values to create TrackerNode instance in NullAway serialization version 3 but found: "
+        "Expected 5 values to create Impacted Region Record instance in this version of Annotator but found: "
             + values.length);
-    return new TrackerNode(
+    return new RegionRecord(
         new Region(values[0], values[1], SourceType.valueOf(values[4])), values[2], values[3]);
   }
 

@@ -32,7 +32,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class ClassInfoTest extends AnnotatorScannerBaseTest<ClassInfoDisplay> {
+public class ClassRecordTest extends AnnotatorScannerBaseTest<ClassInfoDisplay> {
 
   private static final DisplayFactory<ClassInfoDisplay> CLASS_DISPLAY_FACTORY =
       values -> {
@@ -46,7 +46,7 @@ public class ClassInfoTest extends AnnotatorScannerBaseTest<ClassInfoDisplay> {
   private static final String HEADER = "class\tpath";
   private static final String FILE_NAME = "class_info.tsv";
 
-  public ClassInfoTest() {
+  public ClassRecordTest() {
     super(CLASS_DISPLAY_FACTORY, HEADER, FILE_NAME);
   }
 

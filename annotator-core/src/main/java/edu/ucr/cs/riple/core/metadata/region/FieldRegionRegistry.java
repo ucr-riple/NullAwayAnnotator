@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.trackers;
+package edu.ucr.cs.riple.core.metadata.region;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.Registry;
@@ -35,13 +35,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/** Tracker for Fields. */
-public class FieldRegionTracker extends Registry<TrackerNode> implements RegionTracker {
+/**
+ * Region registry for Fields. This region registry can identify impacted regions for fixes on
+ * {@link OnField}.
+ */
+public class FieldRegionRegistry extends Registry<RegionRecord> implements RegionRegistry {
 
   /** ModuleInfo of the module which usages of fields are stored. */
   private final ModuleInfo moduleInfo;
 
-  public FieldRegionTracker(ModuleInfo moduleInfo) {
+  public FieldRegionRegistry(ModuleInfo moduleInfo) {
     super(
         moduleInfo.getModuleConfigurations().stream()
             .map(configuration -> configuration.dir.resolve(Serializer.FIELD_GRAPH_FILE_NAME))
@@ -50,8 +53,8 @@ public class FieldRegionTracker extends Registry<TrackerNode> implements RegionT
   }
 
   @Override
-  protected Builder<TrackerNode> getBuilder() {
-    return Utility::deserializeTrackerNode;
+  protected Builder<RegionRecord> getBuilder() {
+    return Utility::deserializeImpactedRegionRecord;
   }
 
   @Override
@@ -66,8 +69,8 @@ public class FieldRegionTracker extends Registry<TrackerNode> implements RegionT
                 candidate ->
                     candidate.calleeClass.equals(field.clazz)
                         && field.isOnFieldWithName(candidate.calleeMember),
-                TrackerNode.hash(field.clazz))
-            .map(trackerNode -> trackerNode.region)
+                RegionRecord.hash(field.clazz))
+            .map(regionRecord -> regionRecord.region)
             .collect(Collectors.toSet());
     // Add each a region for each field variable declared in the declaration statement.
     ans.addAll(
