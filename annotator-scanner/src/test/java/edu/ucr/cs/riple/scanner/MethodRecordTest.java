@@ -58,7 +58,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodInfoDisplay
           "method",
           "parent",
           "flags",
-          "nullable",
+          "annotations",
           "visibility",
           "non-primitive-return",
           "path");
@@ -87,7 +87,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodInfoDisplay
                 "returnNonNull()",
                 "0",
                 "[]",
-                "false",
+                "",
                 "public",
                 "true",
                 "edu/ucr/A.java"))
@@ -120,7 +120,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodInfoDisplay
                 "returnNonNull()",
                 "0",
                 "[]",
-                "false",
+                "",
                 "public",
                 "true",
                 "edu/ucr/A.java"),
@@ -130,7 +130,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodInfoDisplay
                 "returnNonNull()",
                 "1",
                 "[]",
-                "false",
+                "",
                 "public",
                 "true",
                 "edu/ucr/B.java"))
@@ -164,7 +164,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodInfoDisplay
                 "publicMethod()",
                 "0",
                 "[]",
-                "false",
+                "",
                 "public",
                 "true",
                 "edu/ucr/A.java"),
@@ -174,7 +174,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodInfoDisplay
                 "privateMethod()",
                 "0",
                 "[]",
-                "false",
+                "",
                 "private",
                 "true",
                 "edu/ucr/A.java"),
@@ -184,7 +184,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodInfoDisplay
                 "protectedMethod()",
                 "0",
                 "[]",
-                "false",
+                "",
                 "protected",
                 "true",
                 "edu/ucr/A.java"),
@@ -194,7 +194,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodInfoDisplay
                 "packageMethod()",
                 "0",
                 "[]",
-                "false",
+                "",
                 "package",
                 "true",
                 "edu/ucr/A.java"))
@@ -231,7 +231,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodInfoDisplay
                 "publicMethod()",
                 "0",
                 "[]",
-                "false",
+                "",
                 "package",
                 "true",
                 "edu/ucr/A.java"),
@@ -241,14 +241,22 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodInfoDisplay
                 "publicAbstractMethod()",
                 "0",
                 "[]",
-                "false",
+                "",
                 "public",
                 "true",
                 "edu/ucr/A.java"),
             new MethodInfoDisplay(
-                "3", "edu.ucr.B", "foo()", "0", "[]", "false", "public", "false", "edu/ucr/B.java"),
+                "3", "edu.ucr.B", "foo()", "0", "[]", "", "public", "false", "edu/ucr/B.java"),
             new MethodInfoDisplay(
-                "4", "edu.ucr.B", "run()", "0", "[]", "true", "public", "true", "edu/ucr/B.java"))
+                "4",
+                "edu.ucr.B",
+                "run()",
+                "0",
+                "[]",
+                "@javax.annotation.Nullable",
+                "public",
+                "true",
+                "edu/ucr/B.java"))
         .doTest();
   }
 }

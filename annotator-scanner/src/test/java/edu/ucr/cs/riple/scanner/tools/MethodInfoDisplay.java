@@ -33,7 +33,7 @@ public class MethodInfoDisplay implements Display {
   public final String symbol;
   public final String parent;
   public final String flags;
-  public final String hasNullableAnnotation;
+  public final String annotations;
   public final String visibility;
   public final String hasNonPrimitiveReturn;
   public String uri;
@@ -44,7 +44,7 @@ public class MethodInfoDisplay implements Display {
       String symbol,
       String parent,
       String flags,
-      String hasNullableAnnotation,
+      String annotations,
       String visibility,
       String hasNonPrimitiveReturn,
       String uri) {
@@ -53,7 +53,7 @@ public class MethodInfoDisplay implements Display {
     this.symbol = symbol;
     this.parent = parent;
     this.flags = flags;
-    this.hasNullableAnnotation = hasNullableAnnotation;
+    this.annotations = annotations;
     this.visibility = visibility;
     this.hasNonPrimitiveReturn = hasNonPrimitiveReturn;
     this.uri = uri;
@@ -72,7 +72,7 @@ public class MethodInfoDisplay implements Display {
         && Objects.equals(symbol, that.symbol)
         && Objects.equals(parent, that.parent)
         && Objects.equals(flags, that.flags)
-        && Objects.equals(hasNullableAnnotation, that.hasNullableAnnotation)
+        && Objects.equals(annotations, that.annotations)
         && Objects.equals(visibility, that.visibility)
         && Objects.equals(hasNonPrimitiveReturn, that.hasNonPrimitiveReturn)
         && Objects.equals(uri, that.uri);
@@ -81,14 +81,7 @@ public class MethodInfoDisplay implements Display {
   @Override
   public int hashCode() {
     return Objects.hash(
-        clazz,
-        symbol,
-        parent,
-        flags,
-        hasNullableAnnotation,
-        visibility,
-        hasNonPrimitiveReturn,
-        uri);
+        clazz, symbol, parent, flags, annotations, visibility, hasNonPrimitiveReturn, uri);
   }
 
   @Override
@@ -108,8 +101,8 @@ public class MethodInfoDisplay implements Display {
         + ", flags='"
         + flags
         + '\''
-        + ", hasNullableAnnotation='"
-        + hasNullableAnnotation
+        + ", annotations='"
+        + annotations
         + '\''
         + ", visibility='"
         + visibility

@@ -161,7 +161,7 @@ public class Node {
         .filter(
             node ->
                 node != null
-                    && !node.hasNullableAnnotation) // If node is already annotated, ignore it.
+                    && !node.hasNullableAnnotation()) // If node is already annotated, ignore it.
         .forEach(
             superMethodNode -> {
               if (this.tree.stream()
