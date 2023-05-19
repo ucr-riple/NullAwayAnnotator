@@ -33,8 +33,8 @@ import edu.ucr.cs.riple.core.evaluators.graph.processors.ParallelConflictGraphPr
 import edu.ucr.cs.riple.core.evaluators.graph.processors.SequentialConflictGraphProcessor;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
-import edu.ucr.cs.riple.core.metadata.trackers.CompoundTracker;
-import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
+import edu.ucr.cs.riple.core.metadata.region.CompoundRegionRegistry;
+import edu.ucr.cs.riple.core.metadata.region.RegionRegistry;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.util.Utility;
 
@@ -87,8 +87,8 @@ public class TargetModuleSupplier extends AbstractSupplier {
   public ConflictGraphProcessor getGraphProcessor() {
     CompilerRunner runner = () -> Utility.buildTarget(context);
     if (context.config.useParallelGraphProcessor) {
-      RegionTracker tracker = new CompoundTracker(context.config, moduleInfo);
-      return new ParallelConflictGraphProcessor(context, runner, this, tracker);
+      RegionRegistry regionRegistry = new CompoundRegionRegistry(context.config, moduleInfo);
+      return new ParallelConflictGraphProcessor(context, runner, this, regionRegistry);
     }
     return new SequentialConflictGraphProcessor(context, runner, this);
   }

@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.scanner.tools;
 
 import java.util.Objects;
 
-public class TrackerNodeDisplay implements Display {
+public class ImpactedRegionRecordDisplay implements Display {
 
   public final String regionClass;
   public final String regionMember;
@@ -34,7 +34,7 @@ public class TrackerNodeDisplay implements Display {
   public final String usedMember;
   public final String sourceType;
 
-  public TrackerNodeDisplay(
+  public ImpactedRegionRecordDisplay(
       String regionClass,
       String regionMember,
       String usedClass,
@@ -47,7 +47,7 @@ public class TrackerNodeDisplay implements Display {
     this.sourceType = sourceType;
   }
 
-  public TrackerNodeDisplay(
+  public ImpactedRegionRecordDisplay(
       String regionClass, String regionMember, String usedClass, String usedMember) {
     this(regionClass, regionMember, usedClass, usedMember, "SOURCE");
   }
@@ -57,10 +57,10 @@ public class TrackerNodeDisplay implements Display {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof TrackerNodeDisplay)) {
+    if (!(o instanceof ImpactedRegionRecordDisplay)) {
       return false;
     }
-    TrackerNodeDisplay that = (TrackerNodeDisplay) o;
+    ImpactedRegionRecordDisplay that = (ImpactedRegionRecordDisplay) o;
     return regionClass.equals(that.regionClass)
         && regionMember.equals(that.regionMember)
         && usedClass.equals(that.usedClass)

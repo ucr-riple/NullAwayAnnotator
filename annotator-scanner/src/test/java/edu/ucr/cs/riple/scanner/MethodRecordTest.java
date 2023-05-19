@@ -33,7 +33,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class MethodInfoTest extends AnnotatorScannerBaseTest<MethodInfoDisplay> {
+public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodInfoDisplay> {
 
   private static final DisplayFactory<MethodInfoDisplay> METHOD_DISPLAY_FACTORY =
       values -> {
@@ -63,9 +63,9 @@ public class MethodInfoTest extends AnnotatorScannerBaseTest<MethodInfoDisplay> 
           "non-primitive-return",
           "path");
 
-  private static final String FILE_NAME = "method_info.tsv";
+  private static final String FILE_NAME = "method_records.tsv";
 
-  public MethodInfoTest() {
+  public MethodRecordTest() {
     super(METHOD_DISPLAY_FACTORY, HEADER, FILE_NAME);
   }
 
