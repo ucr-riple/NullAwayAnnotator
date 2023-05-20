@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.scanner.tools;
 
 import java.util.Objects;
 
-public class MethodInfoDisplay implements Display {
+public class MethodRecordDisplay implements Display {
 
   public final String id;
   public final String clazz;
@@ -38,7 +38,7 @@ public class MethodInfoDisplay implements Display {
   public final String hasNonPrimitiveReturn;
   public String uri;
 
-  public MethodInfoDisplay(
+  public MethodRecordDisplay(
       String id,
       String clazz,
       String symbol,
@@ -64,10 +64,10 @@ public class MethodInfoDisplay implements Display {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof MethodInfoDisplay)) {
+    if (!(o instanceof MethodRecordDisplay)) {
       return false;
     }
-    MethodInfoDisplay that = (MethodInfoDisplay) o;
+    MethodRecordDisplay that = (MethodRecordDisplay) o;
     return Objects.equals(clazz, that.clazz)
         && Objects.equals(symbol, that.symbol)
         && Objects.equals(parent, that.parent)
