@@ -73,7 +73,7 @@ public class MethodRecordDisplay implements Display {
         && Objects.equals(symbol, that.symbol)
         && Objects.equals(parent, that.parent)
         && Objects.equals(flags, that.flags)
-        // Order of annotations is not important, required to make the CI pass.
+        // Order of annotations is not important, required to make the CI stable.
         && Objects.equals(Set.of(annotations.split(",")), Set.of(that.annotations.split(",")))
         && Objects.equals(visibility, that.visibility)
         && Objects.equals(hasNonPrimitiveReturn, that.hasNonPrimitiveReturn)

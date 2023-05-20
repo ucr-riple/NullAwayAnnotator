@@ -141,7 +141,10 @@ public class MethodRecord {
         Serializer.serializeSymbol(symbol),
         String.valueOf(parentID),
         Arrays.toString(parameterAnnotationFlags),
-        annotations.stream().map(Objects::toString).collect(Collectors.joining(",")),
+        annotations.stream()
+            // only interested in the annotation type for now.
+            .map(annot -> annot.getAnnotationType().toString())
+            .collect(Collectors.joining(",")),
         getVisibilityOfMethod(),
         String.valueOf(!symbol.getReturnType().isPrimitiveOrVoid()),
         // for build systems that might return null for bytecodes.

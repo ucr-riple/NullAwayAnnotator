@@ -253,7 +253,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDispl
                 "run()",
                 "0",
                 "[]",
-                "@javax.annotation.Nullable",
+                "javax.annotation.Nullable",
                 "public",
                 "true",
                 "edu/ucr/B.java"))
@@ -272,7 +272,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDispl
             "public class A {",
             "   Object foo;",
             "   @lombok.Generated()",
-            "   @SuppressWarnings(\"ALL\")",
+            "   @SuppressWarnings({\"Check1\",\"Check2\"})",
             "   public Object bar(){",
             "       return foo;",
             "   }",
@@ -284,7 +284,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDispl
                 "bar()",
                 "0",
                 "[]",
-                "@lombok.Generated,@java.lang.SuppressWarnings({\"ALL\"})",
+                "lombok.Generated,java.lang.SuppressWarnings",
                 "public",
                 "true",
                 "edu/ucr/A.java"))
