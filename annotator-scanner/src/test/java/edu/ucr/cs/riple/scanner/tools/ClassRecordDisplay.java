@@ -26,12 +26,12 @@ package edu.ucr.cs.riple.scanner.tools;
 
 import java.util.Objects;
 
-public class ClassInfoDisplay implements Display {
+public class ClassRecordDisplay implements Display {
 
   public final String clazz;
   public String path;
 
-  public ClassInfoDisplay(String clazz, String path) {
+  public ClassRecordDisplay(String clazz, String path) {
     this.clazz = clazz;
     this.path = path;
   }
@@ -41,10 +41,10 @@ public class ClassInfoDisplay implements Display {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof ClassInfoDisplay)) {
+    if (!(o instanceof ClassRecordDisplay)) {
       return false;
     }
-    ClassInfoDisplay that = (ClassInfoDisplay) o;
+    ClassRecordDisplay that = (ClassRecordDisplay) o;
     return clazz.equals(that.clazz) && path.equals(that.path);
   }
 

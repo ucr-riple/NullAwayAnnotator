@@ -25,7 +25,7 @@
 package edu.ucr.cs.riple.scanner;
 
 import com.google.errorprone.CompilationTestHelper;
-import edu.ucr.cs.riple.scanner.tools.ClassInfoDisplay;
+import edu.ucr.cs.riple.scanner.tools.ClassRecordDisplay;
 import edu.ucr.cs.riple.scanner.tools.Display;
 import edu.ucr.cs.riple.scanner.tools.DisplayFactory;
 import edu.ucr.cs.riple.scanner.tools.SerializationTestHelper;
@@ -59,7 +59,8 @@ public class ConfigurationTest {
 
   @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
   // Just a dummy factory to run the tests with, tests will not even start with a null factory.
-  protected DisplayFactory<Display> factory = values -> new ClassInfoDisplay("Unknown", "Unknown");
+  protected DisplayFactory<Display> factory =
+      values -> new ClassRecordDisplay("Unknown", "Unknown");
   protected SerializationTestHelper<Display> tester;
   protected Path root;
 

@@ -25,23 +25,23 @@
 package edu.ucr.cs.riple.scanner;
 
 import com.google.common.base.Preconditions;
-import edu.ucr.cs.riple.scanner.tools.ClassInfoDisplay;
+import edu.ucr.cs.riple.scanner.tools.ClassRecordDisplay;
 import edu.ucr.cs.riple.scanner.tools.DisplayFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class ClassRecordTest extends AnnotatorScannerBaseTest<ClassInfoDisplay> {
+public class ClassRecordTest extends AnnotatorScannerBaseTest<ClassRecordDisplay> {
 
-  private static final DisplayFactory<ClassInfoDisplay> CLASS_DISPLAY_FACTORY =
+  private static final DisplayFactory<ClassRecordDisplay> CLASS_DISPLAY_FACTORY =
       values -> {
         Preconditions.checkArgument(values.length == 2, "Expected to find 2 values on each line");
         // Outputs are written in Temp Directory and is not known at compile time, therefore,
         // relative paths are getting compared.
-        ClassInfoDisplay display = new ClassInfoDisplay(values[0], values[1]);
+        ClassRecordDisplay display = new ClassRecordDisplay(values[0], values[1]);
         display.path = display.path.substring(display.path.indexOf("edu/ucr/"));
-        return new ClassInfoDisplay(values[0], values[1].substring(1));
+        return new ClassRecordDisplay(values[0], values[1].substring(1));
       };
   private static final String HEADER = "class\tpath";
   private static final String FILE_NAME = "class_records.tsv";
@@ -54,7 +54,7 @@ public class ClassRecordTest extends AnnotatorScannerBaseTest<ClassInfoDisplay> 
   public void basicTest() {
     tester
         .addSourceLines("edu/ucr/A.java", "package edu.ucr;", "public class A", "{", "}")
-        .setExpectedOutputs(new ClassInfoDisplay("edu.ucr.A", "edu/ucr/A.java"))
+        .setExpectedOutputs(new ClassRecordDisplay("edu.ucr.A", "edu/ucr/A.java"))
         .doTest();
   }
 
@@ -63,19 +63,19 @@ public class ClassRecordTest extends AnnotatorScannerBaseTest<ClassInfoDisplay> 
     tester
         .addSourceFile("SampleClassForTest.java")
         .setExpectedOutputs(
-            new ClassInfoDisplay(
+            new ClassRecordDisplay(
                 "edu.ucr.cs.riple.scanner.testdata.SampleClassForTest",
                 "edu/ucr/cs/riple/scanner/SampleClassForTest.java"),
-            new ClassInfoDisplay(
+            new ClassRecordDisplay(
                 "edu.ucr.cs.riple.scanner.testdata.SampleClassForTest$Inner",
                 "edu/ucr/cs/riple/scanner/SampleClassForTest.java"),
-            new ClassInfoDisplay(
+            new ClassRecordDisplay(
                 "edu.ucr.cs.riple.scanner.testdata.SampleClassForTest$1InnerMethod",
                 "edu/ucr/cs/riple/scanner/SampleClassForTest.java"),
-            new ClassInfoDisplay(
+            new ClassRecordDisplay(
                 "edu.ucr.cs.riple.scanner.testdata.SampleClassForTest$1InnerMethod$1",
                 "edu/ucr/cs/riple/scanner/SampleClassForTest.java"),
-            new ClassInfoDisplay(
+            new ClassRecordDisplay(
                 "edu.ucr.cs.riple.scanner.testdata.Run",
                 "edu/ucr/cs/riple/scanner/SampleClassForTest.java"))
         .doTest();
