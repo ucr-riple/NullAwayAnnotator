@@ -26,16 +26,16 @@ package edu.ucr.cs.riple.scanner;
 
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.scanner.tools.DisplayFactory;
-import edu.ucr.cs.riple.scanner.tools.MethodInfoDisplay;
+import edu.ucr.cs.riple.scanner.tools.MethodRecordDisplay;
 import java.util.Arrays;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodInfoDisplay> {
+public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDisplay> {
 
-  private static final DisplayFactory<MethodInfoDisplay> METHOD_DISPLAY_FACTORY =
+  private static final DisplayFactory<MethodRecordDisplay> METHOD_DISPLAY_FACTORY =
       values -> {
         Preconditions.checkArgument(
             values.length == 9,
@@ -43,8 +43,8 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodInfoDisplay
                 + values.length
                 + ", "
                 + Arrays.toString(values));
-        MethodInfoDisplay display =
-            new MethodInfoDisplay(
+        MethodRecordDisplay display =
+            new MethodRecordDisplay(
                 values[0], values[1], values[2], values[3], values[4], values[5], values[6],
                 values[7], values[8]);
         display.uri = display.uri.substring(display.uri.indexOf("edu/ucr/"));
@@ -81,7 +81,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodInfoDisplay
             "   }",
             "}")
         .setExpectedOutputs(
-            new MethodInfoDisplay(
+            new MethodRecordDisplay(
                 "1",
                 "edu.ucr.A",
                 "returnNonNull()",
@@ -114,7 +114,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodInfoDisplay
             "   }",
             "}")
         .setExpectedOutputs(
-            new MethodInfoDisplay(
+            new MethodRecordDisplay(
                 "1",
                 "edu.ucr.A",
                 "returnNonNull()",
@@ -124,7 +124,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodInfoDisplay
                 "public",
                 "true",
                 "edu/ucr/A.java"),
-            new MethodInfoDisplay(
+            new MethodRecordDisplay(
                 "2",
                 "edu.ucr.B",
                 "returnNonNull()",
@@ -158,7 +158,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodInfoDisplay
             "   }",
             "}")
         .setExpectedOutputs(
-            new MethodInfoDisplay(
+            new MethodRecordDisplay(
                 "1",
                 "edu.ucr.A",
                 "publicMethod()",
@@ -168,7 +168,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodInfoDisplay
                 "public",
                 "true",
                 "edu/ucr/A.java"),
-            new MethodInfoDisplay(
+            new MethodRecordDisplay(
                 "2",
                 "edu.ucr.A",
                 "privateMethod()",
@@ -178,7 +178,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodInfoDisplay
                 "private",
                 "true",
                 "edu/ucr/A.java"),
-            new MethodInfoDisplay(
+            new MethodRecordDisplay(
                 "3",
                 "edu.ucr.A",
                 "protectedMethod()",
@@ -188,7 +188,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodInfoDisplay
                 "protected",
                 "true",
                 "edu/ucr/A.java"),
-            new MethodInfoDisplay(
+            new MethodRecordDisplay(
                 "4",
                 "edu.ucr.A",
                 "packageMethod()",
@@ -225,7 +225,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodInfoDisplay
             "   }",
             "}")
         .setExpectedOutputs(
-            new MethodInfoDisplay(
+            new MethodRecordDisplay(
                 "1",
                 "edu.ucr.A",
                 "publicMethod()",
@@ -235,7 +235,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodInfoDisplay
                 "package",
                 "true",
                 "edu/ucr/A.java"),
-            new MethodInfoDisplay(
+            new MethodRecordDisplay(
                 "2",
                 "edu.ucr.A",
                 "publicAbstractMethod()",
@@ -245,9 +245,9 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodInfoDisplay
                 "public",
                 "true",
                 "edu/ucr/A.java"),
-            new MethodInfoDisplay(
+            new MethodRecordDisplay(
                 "3", "edu.ucr.B", "foo()", "0", "[]", "false", "public", "false", "edu/ucr/B.java"),
-            new MethodInfoDisplay(
+            new MethodRecordDisplay(
                 "4", "edu.ucr.B", "run()", "0", "[]", "true", "public", "true", "edu/ucr/B.java"))
         .doTest();
   }
