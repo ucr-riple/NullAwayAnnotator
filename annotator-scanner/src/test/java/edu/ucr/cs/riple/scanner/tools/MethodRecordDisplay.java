@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.scanner.tools;
 
 import java.util.Objects;
+import java.util.Set;
 
 public class MethodRecordDisplay implements Display {
 
@@ -72,7 +73,8 @@ public class MethodRecordDisplay implements Display {
         && Objects.equals(symbol, that.symbol)
         && Objects.equals(parent, that.parent)
         && Objects.equals(flags, that.flags)
-        && Objects.equals(annotations, that.annotations)
+        // Order of annotations is not important, required to make the CI pass.
+        && Objects.equals(Set.of(annotations.split(",")), Set.of(that.annotations.split(",")))
         && Objects.equals(visibility, that.visibility)
         && Objects.equals(hasNonPrimitiveReturn, that.hasNonPrimitiveReturn)
         && Objects.equals(uri, that.uri);

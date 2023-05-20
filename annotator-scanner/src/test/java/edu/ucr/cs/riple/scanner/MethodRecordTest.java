@@ -259,4 +259,35 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDispl
                 "edu/ucr/B.java"))
         .doTest();
   }
+
+  @Test
+  public void testLombokGeneratedAnnotationsOnMethod() {
+    tester
+        .addSourceLines(
+            "lombok/Generated.java", "package lombok;", "public @interface Generated { }")
+        .addSourceLines(
+            "edu/ucr/A.java",
+            "package edu.ucr;",
+            "import lombok.Generated;",
+            "public class A {",
+            "   Object foo;",
+            "   @lombok.Generated()",
+            "   @SuppressWarnings(\"ALL\")",
+            "   public Object bar(){",
+            "       return foo;",
+            "   }",
+            "}")
+        .setExpectedOutputs(
+            new MethodRecordDisplay(
+                "1",
+                "edu.ucr.A",
+                "bar()",
+                "0",
+                "[]",
+                "@lombok.Generated,@java.lang.SuppressWarnings({\"ALL\"})",
+                "public",
+                "true",
+                "edu/ucr/A.java"))
+        .doTest();
+  }
 }
