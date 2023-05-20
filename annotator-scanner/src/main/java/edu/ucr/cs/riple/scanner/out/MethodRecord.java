@@ -67,6 +67,8 @@ public class MethodRecord {
   private Boolean[] parameterAnnotationFlags;
   /** ID of the closest super method. */
   private int parentID;
+  /** Delimiter used to separate annotations in the serialized output. */
+  public static final String ANNOTATION_DELIMITER = ",";
 
   private MethodRecord(Symbol.MethodSymbol method, ScannerContext context) {
     this.id = context.getNextMethodId();
@@ -144,7 +146,7 @@ public class MethodRecord {
         annotations.stream()
             // only interested in the annotation type for now.
             .map(annot -> annot.getAnnotationType().toString())
-            .collect(Collectors.joining(",")),
+            .collect(Collectors.joining(ANNOTATION_DELIMITER)),
         getVisibilityOfMethod(),
         String.valueOf(!symbol.getReturnType().isPrimitiveOrVoid()),
         // for build systems that might return null for bytecodes.
