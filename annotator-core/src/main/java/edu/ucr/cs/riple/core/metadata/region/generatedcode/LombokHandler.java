@@ -25,7 +25,6 @@
 package edu.ucr.cs.riple.core.metadata.region.generatedcode;
 
 import edu.ucr.cs.riple.core.evaluators.graph.processors.ParallelConflictGraphProcessor;
-import edu.ucr.cs.riple.core.metadata.region.MethodRegionRegistry;
 import edu.ucr.cs.riple.core.metadata.region.Region;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
@@ -36,24 +35,21 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Region registry for extending potentially impacted regions for elements which will be use in
- * generated code by <a href="https://projectlombok.org">Lombok</a>. Lombok automatically propagates
- * {@code @Nullable} annotation on fields to getter methods, therefore, extends the set of
- * potentially impacted regions to all callers of that method as well. This region registry, will
- * include all callers of any method region in lombok generated code. This will guarantee that
- * {@link ParallelConflictGraphProcessor} will catch any triggered errors by an annotation including
- * all copied annotations by lombok as well.
+ * Handler for lombok generated code. It can extend potentially impacted regions for elements which
+ * will be use in generated code by <a href="https://projectlombok.org">Lombok</a>. Lombok
+ * automatically propagates {@code @Nullable} annotation on fields to getter methods, therefore,
+ * extends the set of potentially impacted regions to all callers of that method as well. This
+ * region registry, will include all callers of any method region in lombok generated code. This
+ * will guarantee that {@link ParallelConflictGraphProcessor} will catch any triggered errors by an
+ * annotation including all copied annotations by lombok as well.
  */
-public class LombokRegionRegistry implements GeneratedRegionRegistry {
+public class LombokHandler implements AnnotationProcessorHandler {
 
-  /** Method region registry to get potentially impacted regions of a method. */
-  private final MethodRegionRegistry methodRegionRegistry;
-  /** ModuleInfo of the module which its generated regions by this processor are stored. */
+  /** Module this handler is associated with. */
   private final ModuleInfo moduleInfo;
 
-  public LombokRegionRegistry(ModuleInfo moduleInfo, MethodRegionRegistry methodRegionRegistry) {
+  public LombokHandler(ModuleInfo moduleInfo) {
     this.moduleInfo = moduleInfo;
-    this.methodRegionRegistry = methodRegionRegistry;
   }
 
   @Override
@@ -62,14 +58,22 @@ public class LombokRegionRegistry implements GeneratedRegionRegistry {
         // filter regions which are created by lombok
         .filter(region -> region.sourceType.equals(SourceType.LOMBOK) && region.isOnMethod())
         // find the corresponding method for the region.
-        .map(region -> moduleInfo.getMethodRegistry().findMethodByName(region.clazz, region.member))
+        .map(
+            methodRecord ->
+                moduleInfo
+                    .getMethodRegistry()
+                    .findMethodByName(methodRecord.clazz, methodRecord.member))
         .filter(Objects::nonNull)
         // get method location.
         .map(methodNode -> methodNode.location)
         // add potentially impacted regions for the collected methods.
         .flatMap(
             onMethod -> {
-              Optional<Set<Region>> ans = methodRegionRegistry.getRegions(onMethod);
+              Optional<Set<Region>> ans =
+                  moduleInfo
+                      .getRegionRegistry()
+                      .getMethodRegionRegistry()
+                      .getImpactedRegions(onMethod);
               return ans.isPresent() ? ans.get().stream() : Stream.of();
             })
         .collect(Collectors.toSet());
