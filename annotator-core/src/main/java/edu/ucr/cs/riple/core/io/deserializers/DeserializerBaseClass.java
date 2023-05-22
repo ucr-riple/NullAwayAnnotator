@@ -32,6 +32,7 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.region.Region;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.location.OnField;
+import java.util.HashSet;
 import java.util.Set;
 
 /** Base class for all checker deserializers. */
@@ -68,8 +69,13 @@ public abstract class DeserializerBaseClass implements CheckerDeserializer {
       int offset,
       ImmutableSet<Fix> resolvingFixes,
       ModuleInfo moduleInfo) {
+    Set<Fix> extendedFixes = new HashSet<>(resolvingFixes);
+    moduleInfo
+        .getAnnotationProcessorHandlers()
+        .forEach(handler -> extendedFixes.addAll(handler.extendForGeneratedFixes(resolvingFixes)));
     ImmutableSet<Fix> fixes =
-        resolvingFixes.stream()
+        extendedFixes.stream()
+            // Exclude fixes on locations that have an explicit nonnull annotation.
             .filter(f -> !moduleInfo.getNonnullStore().hasExplicitNonnullAnnotation(f.toLocation()))
             .collect(ImmutableSet.toImmutableSet());
     return new Error(errorType, errorMessage, region, offset, fixes);

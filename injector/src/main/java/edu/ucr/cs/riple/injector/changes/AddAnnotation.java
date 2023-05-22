@@ -32,4 +32,6 @@ public interface AddAnnotation extends ASTChange {
    * @return The reverse change of this annotation injection.
    */
   RemoveAnnotation getReverse();
+
+  Name getAnnotationName();
 }

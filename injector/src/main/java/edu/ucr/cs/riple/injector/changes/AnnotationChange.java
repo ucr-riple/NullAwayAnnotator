@@ -65,4 +65,8 @@ public abstract class AnnotationChange implements ASTChange {
   public Location getLocation() {
     return location;
   }
+
+  public Name getAnnotationName() {
+    return annotationName;
+  }
 }
