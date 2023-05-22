@@ -31,10 +31,13 @@ import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
 import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
 import edu.ucr.cs.riple.core.metadata.region.CompoundRegionRegistry;
 import edu.ucr.cs.riple.core.metadata.region.RegionRegistry;
+import edu.ucr.cs.riple.core.metadata.region.generatedcode.AnnotationProcessorHandler;
+import edu.ucr.cs.riple.core.metadata.region.generatedcode.LombokHandler;
 import edu.ucr.cs.riple.core.util.FixSerializationConfig;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnClass;
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 
 /** This class is used to store the code structural information about the module. */
 public class ModuleInfo {
@@ -47,8 +50,11 @@ public class ModuleInfo {
   private final NonnullStore nonnullStore;
   /** The set of modules this moduleInfo is created for. */
   private final ImmutableSet<ModuleConfiguration> configurations;
-
-  private final RegionRegistry regionRegistry;
+  /**
+   * Region registry that contains information about the regions that can potentially be impacted by a fix.
+   */
+  private final CompoundRegionRegistry regionRegistry;
+  ImmutableSet<AnnotationProcessorHandler> annotationProcessorHandlers;
 
   /**
    * This constructor is used to create a moduleInfo for a single module.
@@ -87,6 +93,10 @@ public class ModuleInfo {
     this.fieldRegistry = new FieldRegistry(configurations);
     this.methodRegistry = new MethodRegistry(context);
     this.regionRegistry = new CompoundRegionRegistry(context.config, this);
+    ImmutableSet.Builder<AnnotationProcessorHandler> builder = new ImmutableSet.Builder<>();
+    if (context.config.generatedCodeDetectors.contains(SourceType.LOMBOK)) {
+      builder.add(new LombokHandler(re));
+
   }
 
   /**

@@ -44,32 +44,33 @@ import java.util.stream.Stream;
  * {@link ParallelConflictGraphProcessor} will catch any triggered errors by an annotation including
  * all copied annotations by lombok as well.
  */
-public class LombokRegionRegistry implements GeneratedRegionRegistry {
+public class LombokHandler implements AnnotationProcessorHandler {
 
   /** Method region registry to get potentially impacted regions of a method. */
   private final MethodRegionRegistry methodRegionRegistry;
-  /** ModuleInfo of the module which its generated regions by this processor are stored. */
-  private final ModuleInfo moduleInfo;
 
-  public LombokRegionRegistry(ModuleInfo moduleInfo, MethodRegionRegistry methodRegionRegistry) {
-    this.moduleInfo = moduleInfo;
+  public LombokHandler(MethodRegionRegistry methodRegionRegistry) {
     this.methodRegionRegistry = methodRegionRegistry;
   }
 
   @Override
-  public Set<Region> extendForGeneratedRegions(Set<Region> regions) {
+  public Set<Region> extendForGeneratedRegions(ModuleInfo moduleInfo, Set<Region> regions) {
     return regions.stream()
         // filter regions which are created by lombok
         .filter(region -> region.sourceType.equals(SourceType.LOMBOK) && region.isOnMethod())
         // find the corresponding method for the region.
-        .map(region -> moduleInfo.getMethodRegistry().findMethodByName(region.clazz, region.member))
+        .map(
+            methodRecord ->
+                moduleInfo
+                    .getMethodRegistry()
+                    .findMethodByName(methodRecord.clazz, methodRecord.member))
         .filter(Objects::nonNull)
         // get method location.
         .map(methodNode -> methodNode.location)
         // add potentially impacted regions for the collected methods.
         .flatMap(
             onMethod -> {
-              Optional<Set<Region>> ans = methodRegionRegistry.getRegions(onMethod);
+              Optional<Set<Region>> ans = methodRegionRegistry.getImpactedRegions(onMethod);
               return ans.isPresent() ? ans.get().stream() : Stream.of();
             })
         .collect(Collectors.toSet());

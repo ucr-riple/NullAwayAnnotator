@@ -109,7 +109,7 @@ public class Node {
     // Add origins.
     this.regions.addAll(this.origins);
     this.tree.forEach(
-        fix -> regionRegistry.getRegions(fix.toLocation()).ifPresent(regions::addAll));
+        fix -> regionRegistry.getImpactedRegions(fix.toLocation()).ifPresent(regions::addAll));
     // Add class initialization region, if a fix is modifying a parameter on constructor.
     this.tree.stream()
         .filter(fix -> fix.isOnParameter() && fix.isModifyingConstructor())

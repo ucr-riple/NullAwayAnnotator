@@ -26,8 +26,8 @@ package edu.ucr.cs.riple.core.metadata.region;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.metadata.region.generatedcode.GeneratedRegionRegistry;
-import edu.ucr.cs.riple.core.metadata.region.generatedcode.LombokRegionRegistry;
+import edu.ucr.cs.riple.core.metadata.region.generatedcode.AnnotationProcessorHandler;
+import edu.ucr.cs.riple.core.metadata.region.generatedcode.LombokHandler;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
@@ -47,30 +47,33 @@ public class CompoundRegionRegistry implements RegionRegistry {
    * List of all generated region registries. Generated region registries can extend the impacted
    * regions created by generated code which are not present in source code.
    */
-  private final ImmutableSet<GeneratedRegionRegistry> generatedRegionsRegistries;
+  private final ImmutableSet<AnnotationProcessorHandler> generatedRegionsRegistries;
+
+  private final ModuleInfo moduleInfo;
 
   public CompoundRegionRegistry(Config config, ModuleInfo moduleInfo) {
+    this.moduleInfo = moduleInfo;
     MethodRegionRegistry methodRegionRegistry = new MethodRegionRegistry(moduleInfo);
     this.registries =
         ImmutableSet.of(
             new FieldRegionRegistry(moduleInfo),
             methodRegionRegistry,
             new ParameterRegionRegistry(moduleInfo, methodRegionRegistry));
-    ImmutableSet.Builder<GeneratedRegionRegistry> generatedRegionRegistryBuilder =
+    ImmutableSet.Builder<AnnotationProcessorHandler> generatedRegionRegistryBuilder =
         new ImmutableSet.Builder<>();
     if (config.generatedCodeDetectors.contains(SourceType.LOMBOK)) {
-      generatedRegionRegistryBuilder.add(
-          new LombokRegionRegistry(moduleInfo, methodRegionRegistry));
+      generatedRegionRegistryBuilder.add(new LombokHandler(methodRegionRegistry));
     }
     this.generatedRegionsRegistries = generatedRegionRegistryBuilder.build();
   }
 
   @Override
-  public Optional<Set<Region>> getRegions(Location location) {
+  public Optional<Set<Region>> getImpactedRegions(Location location) {
     Set<Region> regions = new HashSet<>();
-    this.registries.forEach(registry -> registry.getRegions(location).ifPresent(regions::addAll));
+    this.registries.forEach(
+        registry -> registry.getImpactedRegions(location).ifPresent(regions::addAll));
     this.generatedRegionsRegistries.forEach(
-        registry -> regions.addAll(registry.extendForGeneratedRegions(regions)));
+        registry -> regions.addAll(registry.extendForGeneratedRegions(moduleInfo, regions)));
     return Optional.of(regions);
   }
 }

@@ -48,7 +48,7 @@ public class ParameterRegionRegistry implements RegionRegistry {
   }
 
   @Override
-  public Optional<Set<Region>> getRegions(Location location) {
+  public Optional<Set<Region>> getImpactedRegions(Location location) {
     if (!location.isOnParameter()) {
       return Optional.empty();
     }
