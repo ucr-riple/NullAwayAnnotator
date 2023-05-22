@@ -45,7 +45,7 @@ public class CompoundRegionRegistry implements RegionRegistry {
   /**
    * Method region registry. This registry is used by other registries to identify impacted regions
    * specifically {@link AnnotationProcessorHandler}. To avoid recreating this instance, it is
-   * created here and passed to other registries.
+   * stored here and passed to other registries.
    */
   private final MethodRegionRegistry methodRegionRegistry;
 
@@ -71,7 +71,7 @@ public class CompoundRegionRegistry implements RegionRegistry {
   }
 
   /**
-   * Returns the method region registry.
+   * Returns the method region registry created by this instance.
    *
    * @return Method region registry instance.
    */
