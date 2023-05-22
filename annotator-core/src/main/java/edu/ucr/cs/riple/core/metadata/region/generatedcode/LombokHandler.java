@@ -35,13 +35,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Region registry for extending potentially impacted regions for elements which will be use in
- * generated code by <a href="https://projectlombok.org">Lombok</a>. Lombok automatically propagates
- * {@code @Nullable} annotation on fields to getter methods, therefore, extends the set of
- * potentially impacted regions to all callers of that method as well. This region registry, will
- * include all callers of any method region in lombok generated code. This will guarantee that
- * {@link ParallelConflictGraphProcessor} will catch any triggered errors by an annotation including
- * all copied annotations by lombok as well.
+ * Handler for lombok generated code. It can extend potentially impacted regions for elements which
+ * will be use in generated code by <a href="https://projectlombok.org">Lombok</a>. Lombok
+ * automatically propagates {@code @Nullable} annotation on fields to getter methods, therefore,
+ * extends the set of potentially impacted regions to all callers of that method as well. This
+ * region registry, will include all callers of any method region in lombok generated code. This
+ * will guarantee that {@link ParallelConflictGraphProcessor} will catch any triggered errors by an
+ * annotation including all copied annotations by lombok as well.
  */
 public class LombokHandler implements AnnotationProcessorHandler {
 
