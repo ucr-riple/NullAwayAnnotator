@@ -60,7 +60,7 @@ public class FieldRegionRegistry extends Registry<RegionRecord> implements Regio
   }
 
   @Override
-  public Optional<Set<Region>> getRegions(Location location) {
+  public Optional<Set<Region>> getImpactedRegions(Location location) {
     if (!location.isOnField()) {
       return Optional.empty();
     }
