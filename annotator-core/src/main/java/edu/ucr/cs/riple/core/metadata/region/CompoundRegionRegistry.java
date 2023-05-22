@@ -64,9 +64,9 @@ public class CompoundRegionRegistry implements RegionRegistry {
     Set<Region> regions = new HashSet<>();
     this.registries.forEach(
         registry -> registry.getImpactedRegions(location).ifPresent(regions::addAll));
-    moduleInfo
+    this.moduleInfo
         .getAnnotationProcessorHandlers()
-        .forEach(registry -> regions.addAll(registry.extendForGeneratedRegions(regions)));
+        .forEach(handler -> regions.addAll(handler.extendForGeneratedRegions(regions)));
     return Optional.of(regions);
   }
 
