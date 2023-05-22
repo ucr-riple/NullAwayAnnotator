@@ -51,10 +51,15 @@ public class ModuleInfo {
   /** The set of modules this moduleInfo is created for. */
   private final ImmutableSet<ModuleConfiguration> configurations;
   /**
-   * Region registry that contains information about the regions that can potentially be impacted by a fix.
+   * Region registry that contains information about the regions that can potentially be impacted by
+   * a fix.
    */
   private final CompoundRegionRegistry regionRegistry;
-  ImmutableSet<AnnotationProcessorHandler> annotationProcessorHandlers;
+  /**
+   * The set of annotation processor handlers that are used to process the generated code in this
+   * module.
+   */
+  private final ImmutableSet<AnnotationProcessorHandler> annotationProcessorHandlers;
 
   /**
    * This constructor is used to create a moduleInfo for a single module.
@@ -95,8 +100,9 @@ public class ModuleInfo {
     this.regionRegistry = new CompoundRegionRegistry(context.config, this);
     ImmutableSet.Builder<AnnotationProcessorHandler> builder = new ImmutableSet.Builder<>();
     if (context.config.generatedCodeDetectors.contains(SourceType.LOMBOK)) {
-      builder.add(new LombokHandler(re));
-
+      builder.add(new LombokHandler(this.regionRegistry.getMethodRegionRegistry()));
+    }
+    this.annotationProcessorHandlers = builder.build();
   }
 
   /**
@@ -157,7 +163,23 @@ public class ModuleInfo {
     return fieldRegistry.getLocationOnClass(clazz);
   }
 
+  /**
+   * Getter for the created {@link RegionRegistry} instance.
+   *
+   * @return The created {@link RegionRegistry} instance.
+   */
   public RegionRegistry getRegionRegistry() {
     return regionRegistry;
+  }
+
+  /**
+   * Getter for the set of annotation processor handlers that are used to process the generated
+   * code.
+   *
+   * @return Immutable set of annotation processor handlers that are used to process the generated
+   *     in this module.
+   */
+  public ImmutableSet<AnnotationProcessorHandler> getAnnotationProcessorHandlers() {
+    return annotationProcessorHandlers;
   }
 }

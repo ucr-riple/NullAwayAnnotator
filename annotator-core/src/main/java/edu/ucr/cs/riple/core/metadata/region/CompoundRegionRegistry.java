@@ -50,10 +50,11 @@ public class CompoundRegionRegistry implements RegionRegistry {
   private final ImmutableSet<AnnotationProcessorHandler> generatedRegionsRegistries;
 
   private final ModuleInfo moduleInfo;
+  private final MethodRegionRegistry methodRegionRegistry;
 
   public CompoundRegionRegistry(Config config, ModuleInfo moduleInfo) {
     this.moduleInfo = moduleInfo;
-    MethodRegionRegistry methodRegionRegistry = new MethodRegionRegistry(moduleInfo);
+    this.methodRegionRegistry = new MethodRegionRegistry(moduleInfo);
     this.registries =
         ImmutableSet.of(
             new FieldRegionRegistry(moduleInfo),
@@ -72,8 +73,14 @@ public class CompoundRegionRegistry implements RegionRegistry {
     Set<Region> regions = new HashSet<>();
     this.registries.forEach(
         registry -> registry.getImpactedRegions(location).ifPresent(regions::addAll));
-    this.generatedRegionsRegistries.forEach(
-        registry -> regions.addAll(registry.extendForGeneratedRegions(moduleInfo, regions)));
+    moduleInfo
+        .getAnnotationProcessorHandlers()
+        .forEach(
+            registry -> regions.addAll(registry.extendForGeneratedRegions(moduleInfo, regions)));
     return Optional.of(regions);
+  }
+
+  public MethodRegionRegistry getMethodRegionRegistry() {
+    return methodRegionRegistry;
   }
 }
