@@ -100,7 +100,7 @@ public class ModuleInfo {
     this.regionRegistry = new CompoundRegionRegistry(this);
     ImmutableSet.Builder<AnnotationProcessorHandler> builder = new ImmutableSet.Builder<>();
     if (context.config.generatedCodeDetectors.contains(SourceType.LOMBOK)) {
-      builder.add(new LombokHandler(this.regionRegistry.getMethodRegionRegistry()));
+      builder.add(new LombokHandler(this));
     }
     this.annotationProcessorHandlers = builder.build();
   }
@@ -168,7 +168,7 @@ public class ModuleInfo {
    *
    * @return The created {@link RegionRegistry} instance.
    */
-  public RegionRegistry getRegionRegistry() {
+  public CompoundRegionRegistry getRegionRegistry() {
     return regionRegistry;
   }
 

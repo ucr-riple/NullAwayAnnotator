@@ -66,11 +66,15 @@ public class CompoundRegionRegistry implements RegionRegistry {
         registry -> registry.getImpactedRegions(location).ifPresent(regions::addAll));
     moduleInfo
         .getAnnotationProcessorHandlers()
-        .forEach(
-            registry -> regions.addAll(registry.extendForGeneratedRegions(moduleInfo, regions)));
+        .forEach(registry -> regions.addAll(registry.extendForGeneratedRegions(regions)));
     return Optional.of(regions);
   }
 
+  /**
+   * Returns the method region registry.
+   *
+   * @return Method region registry instance.
+   */
   public MethodRegionRegistry getMethodRegionRegistry() {
     return methodRegionRegistry;
   }

@@ -25,7 +25,6 @@
 package edu.ucr.cs.riple.core.metadata.region.generatedcode;
 
 import edu.ucr.cs.riple.core.evaluators.graph.processors.ParallelConflictGraphProcessor;
-import edu.ucr.cs.riple.core.metadata.region.MethodRegionRegistry;
 import edu.ucr.cs.riple.core.metadata.region.Region;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
@@ -46,15 +45,15 @@ import java.util.stream.Stream;
  */
 public class LombokHandler implements AnnotationProcessorHandler {
 
-  /** Method region registry to get potentially impacted regions of a method. */
-  private final MethodRegionRegistry methodRegionRegistry;
+  /** Module this handler is associated with. */
+  private final ModuleInfo moduleInfo;
 
-  public LombokHandler(MethodRegionRegistry methodRegionRegistry) {
-    this.methodRegionRegistry = methodRegionRegistry;
+  public LombokHandler(ModuleInfo moduleInfo) {
+    this.moduleInfo = moduleInfo;
   }
 
   @Override
-  public Set<Region> extendForGeneratedRegions(ModuleInfo moduleInfo, Set<Region> regions) {
+  public Set<Region> extendForGeneratedRegions(Set<Region> regions) {
     return regions.stream()
         // filter regions which are created by lombok
         .filter(region -> region.sourceType.equals(SourceType.LOMBOK) && region.isOnMethod())
@@ -70,7 +69,11 @@ public class LombokHandler implements AnnotationProcessorHandler {
         // add potentially impacted regions for the collected methods.
         .flatMap(
             onMethod -> {
-              Optional<Set<Region>> ans = methodRegionRegistry.getImpactedRegions(onMethod);
+              Optional<Set<Region>> ans =
+                  moduleInfo
+                      .getRegionRegistry()
+                      .getMethodRegionRegistry()
+                      .getImpactedRegions(onMethod);
               return ans.isPresent() ? ans.get().stream() : Stream.of();
             })
         .collect(Collectors.toSet());
