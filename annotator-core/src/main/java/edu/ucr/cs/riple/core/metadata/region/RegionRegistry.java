@@ -37,10 +37,10 @@ public interface RegionRegistry {
 
   /**
    * Returns Set of regions where a fix can introduce new errors if injected. Should return {@link
-   * Optional#EMPTY} if the region registry does not know anything about that fix type.
+   * Optional#EMPTY} if the region registry does not contain any information about the location.
    *
    * @param location Location targeted by the fix.
    * @return Set of regions.
    */
-  Optional<Set<Region>> getRegions(Location location);
+  Optional<Set<Region>> getImpactedRegions(Location location);
 }

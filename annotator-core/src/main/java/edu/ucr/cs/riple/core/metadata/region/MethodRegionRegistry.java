@@ -59,7 +59,7 @@ public class MethodRegionRegistry extends Registry<RegionRecord> implements Regi
   }
 
   @Override
-  public Optional<Set<Region>> getRegions(Location location) {
+  public Optional<Set<Region>> getImpactedRegions(Location location) {
     if (!location.isOnMethod()) {
       return Optional.empty();
     }

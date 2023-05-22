@@ -53,10 +53,9 @@ public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcess
    */
   private final RegionRegistry regionRegistry;
 
-  public ParallelConflictGraphProcessor(
-      Context context, CompilerRunner runner, Supplier supplier, RegionRegistry regionRegistry) {
+  public ParallelConflictGraphProcessor(Context context, CompilerRunner runner, Supplier supplier) {
     super(context, runner, supplier);
-    this.regionRegistry = regionRegistry;
+    this.regionRegistry = supplier.getModuleInfo().getRegionRegistry();
   }
 
   @Override

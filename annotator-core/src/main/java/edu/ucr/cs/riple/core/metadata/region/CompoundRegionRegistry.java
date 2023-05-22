@@ -25,12 +25,9 @@
 package edu.ucr.cs.riple.core.metadata.region;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.metadata.region.generatedcode.GeneratedRegionRegistry;
-import edu.ucr.cs.riple.core.metadata.region.generatedcode.LombokRegionRegistry;
+import edu.ucr.cs.riple.core.metadata.region.generatedcode.AnnotationProcessorHandler;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.location.Location;
-import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -43,34 +40,42 @@ public class CompoundRegionRegistry implements RegionRegistry {
 
   /** List of all region registries. */
   private final ImmutableSet<RegionRegistry> registries;
+  /** Module where this registry belongs to. */
+  private final ModuleInfo moduleInfo;
   /**
-   * List of all generated region registries. Generated region registries can extend the impacted
-   * regions created by generated code which are not present in source code.
+   * Method region registry. This registry is used by other registries to identify impacted regions
+   * specifically {@link AnnotationProcessorHandler}. To avoid recreating this instance, it is
+   * stored here and passed to other registries.
    */
-  private final ImmutableSet<GeneratedRegionRegistry> generatedRegionsRegistries;
+  private final MethodRegionRegistry methodRegionRegistry;
 
-  public CompoundRegionRegistry(Config config, ModuleInfo moduleInfo) {
-    MethodRegionRegistry methodRegionRegistry = new MethodRegionRegistry(moduleInfo);
+  public CompoundRegionRegistry(ModuleInfo moduleInfo) {
+    this.moduleInfo = moduleInfo;
+    this.methodRegionRegistry = new MethodRegionRegistry(moduleInfo);
     this.registries =
         ImmutableSet.of(
             new FieldRegionRegistry(moduleInfo),
             methodRegionRegistry,
             new ParameterRegionRegistry(moduleInfo, methodRegionRegistry));
-    ImmutableSet.Builder<GeneratedRegionRegistry> generatedRegionRegistryBuilder =
-        new ImmutableSet.Builder<>();
-    if (config.generatedCodeDetectors.contains(SourceType.LOMBOK)) {
-      generatedRegionRegistryBuilder.add(
-          new LombokRegionRegistry(moduleInfo, methodRegionRegistry));
-    }
-    this.generatedRegionsRegistries = generatedRegionRegistryBuilder.build();
   }
 
   @Override
-  public Optional<Set<Region>> getRegions(Location location) {
+  public Optional<Set<Region>> getImpactedRegions(Location location) {
     Set<Region> regions = new HashSet<>();
-    this.registries.forEach(registry -> registry.getRegions(location).ifPresent(regions::addAll));
-    this.generatedRegionsRegistries.forEach(
-        registry -> regions.addAll(registry.extendForGeneratedRegions(regions)));
+    this.registries.forEach(
+        registry -> registry.getImpactedRegions(location).ifPresent(regions::addAll));
+    this.moduleInfo
+        .getAnnotationProcessorHandlers()
+        .forEach(handler -> regions.addAll(handler.extendForGeneratedRegions(regions)));
     return Optional.of(regions);
+  }
+
+  /**
+   * Returns the method region registry created by this instance.
+   *
+   * @return Method region registry instance.
+   */
+  public MethodRegionRegistry getMethodRegionRegistry() {
+    return methodRegionRegistry;
   }
 }

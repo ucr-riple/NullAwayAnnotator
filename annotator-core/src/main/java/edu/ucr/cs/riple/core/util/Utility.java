@@ -212,16 +212,20 @@ public class Utility {
   }
 
   /**
-   * Activates/Deactivates {@link AnnotatorScanner} features by updating the {@link
-   * edu.ucr.cs.riple.scanner.Config} in {@code XML} format for the given modules.
+   * Enables NullAway serialization for the given modules.
    *
-   * @param config Annotator configuration.
-   * @param modules Immutable set of modules that their configuration files need to be updated.
-   * @param activation activation flag for all features of the scanner.
+   * @param configurations Set of modules to enable NullAway serialization for.
    */
-  public static void setScannerCheckerActivation(
-      Config config, ImmutableSet<ModuleConfiguration> modules, boolean activation) {
-    modules.forEach(info -> setScannerCheckerActivation(config, info, activation));
+  public static void enableNullAwaySerialization(ImmutableSet<ModuleConfiguration> configurations) {
+    configurations.forEach(
+        module -> {
+          FixSerializationConfig.Builder nullAwayConfig =
+              new FixSerializationConfig.Builder()
+                  .setSuggest(true, true)
+                  .setOutputDirectory(module.dir.toString())
+                  .setFieldInitInfo(true);
+          nullAwayConfig.writeAsXML(module.nullawayConfig.toString());
+        });
   }
 
   /**
@@ -241,6 +245,34 @@ public class Utility {
         .setOutput(info.dir)
         .setNonnullAnnotations(config.getNonnullAnnotations())
         .writeAsXML(info.scannerConfig);
+  }
+
+  /**
+   * Activates/Deactivates {@link AnnotatorScanner} features by updating the {@link
+   * edu.ucr.cs.riple.scanner.Config} in {@code XML} format for the given modules.
+   *
+   * @param config Annotator configuration.
+   * @param modules Immutable set of modules that their configuration files need to be updated.
+   * @param activation activation flag for all features of the scanner.
+   */
+  public static void setScannerCheckerActivation(
+      Config config, ImmutableSet<ModuleConfiguration> modules, boolean activation) {
+    modules.forEach(info -> setScannerCheckerActivation(config, info, activation));
+  }
+
+  /**
+   * Runs the scanner checker on the given modules.
+   *
+   * @param context Annotator context.
+   * @param configurations Immutable set of modules that their configuration files need to be
+   *     updated.
+   * @param buildCommand build command to run the Scanner checker.
+   */
+  public static void runScannerChecker(
+      Context context, ImmutableSet<ModuleConfiguration> configurations, String buildCommand) {
+    Utility.setScannerCheckerActivation(context.config, configurations, true);
+    Utility.build(context, buildCommand);
+    Utility.setScannerCheckerActivation(context.config, configurations, false);
   }
 
   /**
