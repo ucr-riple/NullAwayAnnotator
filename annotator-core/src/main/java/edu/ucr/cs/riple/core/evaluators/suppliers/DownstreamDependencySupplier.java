@@ -34,8 +34,6 @@ import edu.ucr.cs.riple.core.evaluators.graph.processors.ParallelConflictGraphPr
 import edu.ucr.cs.riple.core.evaluators.graph.processors.SequentialConflictGraphProcessor;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.VirtualInjector;
-import edu.ucr.cs.riple.core.metadata.region.MethodRegionRegistry;
-import edu.ucr.cs.riple.core.metadata.region.RegionRegistry;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.util.Utility;
 
@@ -50,17 +48,10 @@ import edu.ucr.cs.riple.core.util.Utility;
  */
 public class DownstreamDependencySupplier extends AbstractSupplier {
 
-  /**
-   * Region registry for downstream dependency analysis. It is used to locate regions where a fix on
-   * a public method with non-primitive return type can introduce new errors.
-   */
-  private final RegionRegistry regionRegistry;
-
   public DownstreamDependencySupplier(Context context) {
     super(
         context,
         new ModuleInfo(context, context.downstreamConfigurations, context.config.buildCommand));
-    this.regionRegistry = new MethodRegionRegistry(moduleInfo);
   }
 
   @Override
@@ -82,7 +73,7 @@ public class DownstreamDependencySupplier extends AbstractSupplier {
   public AbstractConflictGraphProcessor getGraphProcessor() {
     CompilerRunner runner = () -> Utility.buildDownstreamDependencies(context);
     return context.config.useParallelGraphProcessor
-        ? new ParallelConflictGraphProcessor(context, runner, this, regionRegistry)
+        ? new ParallelConflictGraphProcessor(context, runner, this)
         : new SequentialConflictGraphProcessor(context, runner, this);
   }
 

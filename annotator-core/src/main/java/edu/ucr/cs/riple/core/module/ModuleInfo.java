@@ -29,6 +29,8 @@ import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
 import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
+import edu.ucr.cs.riple.core.metadata.region.CompoundRegionRegistry;
+import edu.ucr.cs.riple.core.metadata.region.RegionRegistry;
 import edu.ucr.cs.riple.core.util.FixSerializationConfig;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -45,6 +47,8 @@ public class ModuleInfo {
   private final NonnullStore nonnullStore;
   /** The set of modules this moduleInfo is created for. */
   private final ImmutableSet<ModuleConfiguration> configurations;
+
+  private final RegionRegistry regionRegistry;
 
   /**
    * This constructor is used to create a moduleInfo for a single module.
@@ -67,7 +71,8 @@ public class ModuleInfo {
   public ModuleInfo(
       Context context, ImmutableSet<ModuleConfiguration> configurations, String buildCommand) {
     // Build with scanner checker activated to generate required files to create the moduleInfo.
-    Utility.setScannerCheckerActivation(context.config, configurations, true);
+    Utility.enableNullAwaySerialization(configurations);
+    Utility.runScannerChecker(context, configurations, buildCommand);
     configurations.forEach(
         module -> {
           FixSerializationConfig.Builder nullAwayConfig =
@@ -77,12 +82,11 @@ public class ModuleInfo {
                   .setFieldInitInfo(true);
           nullAwayConfig.writeAsXML(module.nullawayConfig.toString());
         });
-    Utility.build(context, buildCommand);
-    Utility.setScannerCheckerActivation(context.config, configurations, false);
     this.configurations = configurations;
     this.nonnullStore = new NonnullStore(configurations);
     this.fieldRegistry = new FieldRegistry(configurations);
     this.methodRegistry = new MethodRegistry(context);
+    this.regionRegistry = new CompoundRegionRegistry(context.config, this);
   }
 
   /**
@@ -141,5 +145,9 @@ public class ModuleInfo {
    */
   public OnClass getLocationOnClass(String clazz) {
     return fieldRegistry.getLocationOnClass(clazz);
+  }
+
+  public RegionRegistry getRegionRegistry() {
+    return regionRegistry;
   }
 }
