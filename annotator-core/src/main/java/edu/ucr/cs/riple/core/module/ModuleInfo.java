@@ -97,7 +97,7 @@ public class ModuleInfo {
     this.nonnullStore = new NonnullStore(configurations);
     this.fieldRegistry = new FieldRegistry(configurations);
     this.methodRegistry = new MethodRegistry(context);
-    this.regionRegistry = new CompoundRegionRegistry(context.config, this);
+    this.regionRegistry = new CompoundRegionRegistry(this);
     ImmutableSet.Builder<AnnotationProcessorHandler> builder = new ImmutableSet.Builder<>();
     if (context.config.generatedCodeDetectors.contains(SourceType.LOMBOK)) {
       builder.add(new LombokHandler(this.regionRegistry.getMethodRegionRegistry()));

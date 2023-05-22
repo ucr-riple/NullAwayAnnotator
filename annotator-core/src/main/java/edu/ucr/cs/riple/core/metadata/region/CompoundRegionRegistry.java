@@ -25,12 +25,9 @@
 package edu.ucr.cs.riple.core.metadata.region;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.metadata.region.generatedcode.AnnotationProcessorHandler;
-import edu.ucr.cs.riple.core.metadata.region.generatedcode.LombokHandler;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.location.Location;
-import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -43,16 +40,16 @@ public class CompoundRegionRegistry implements RegionRegistry {
 
   /** List of all region registries. */
   private final ImmutableSet<RegionRegistry> registries;
-  /**
-   * List of all generated region registries. Generated region registries can extend the impacted
-   * regions created by generated code which are not present in source code.
-   */
-  private final ImmutableSet<AnnotationProcessorHandler> generatedRegionsRegistries;
-
+  /** Module where this registry belongs to. */
   private final ModuleInfo moduleInfo;
+  /**
+   * Method region registry. This registry is used by other registries to identify impacted regions
+   * specifically {@link AnnotationProcessorHandler}. To avoid recreating this instance, it is
+   * created here and passed to other registries.
+   */
   private final MethodRegionRegistry methodRegionRegistry;
 
-  public CompoundRegionRegistry(Config config, ModuleInfo moduleInfo) {
+  public CompoundRegionRegistry(ModuleInfo moduleInfo) {
     this.moduleInfo = moduleInfo;
     this.methodRegionRegistry = new MethodRegionRegistry(moduleInfo);
     this.registries =
@@ -60,12 +57,6 @@ public class CompoundRegionRegistry implements RegionRegistry {
             new FieldRegionRegistry(moduleInfo),
             methodRegionRegistry,
             new ParameterRegionRegistry(moduleInfo, methodRegionRegistry));
-    ImmutableSet.Builder<AnnotationProcessorHandler> generatedRegionRegistryBuilder =
-        new ImmutableSet.Builder<>();
-    if (config.generatedCodeDetectors.contains(SourceType.LOMBOK)) {
-      generatedRegionRegistryBuilder.add(new LombokHandler(methodRegionRegistry));
-    }
-    this.generatedRegionsRegistries = generatedRegionRegistryBuilder.build();
   }
 
   @Override

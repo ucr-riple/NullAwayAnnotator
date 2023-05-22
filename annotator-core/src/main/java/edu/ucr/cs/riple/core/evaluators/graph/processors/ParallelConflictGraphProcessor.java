@@ -60,9 +60,7 @@ public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcess
 
   @Override
   public void process(ConflictGraph graph) {
-    graph
-        .getNodes()
-        .forEach(node -> node.reCollectPotentiallyImpactedRegions(moduleInfo, regionRegistry));
+    graph.getNodes().forEach(node -> node.reCollectPotentiallyImpactedRegions(regionRegistry));
     // find non-conflicting groups.
     graph.findGroups();
     Collection<Set<Node>> nonConflictingGroups = graph.getGroups();
