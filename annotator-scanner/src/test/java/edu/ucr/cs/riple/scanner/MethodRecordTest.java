@@ -109,6 +109,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDispl
             "edu/ucr/B.java",
             "package edu.ucr;",
             "public class B extends A{",
+            "   @Override",
             "   public Object returnNonNull(){",
             "      return new Object();",
             "   }",
@@ -130,7 +131,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDispl
                 "returnNonNull()",
                 "1",
                 "[]",
-                "",
+                "java.lang.Override",
                 "public",
                 "true",
                 "edu/ucr/B.java"))
