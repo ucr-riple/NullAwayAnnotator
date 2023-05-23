@@ -95,11 +95,12 @@ public class Report {
   }
 
   /**
-   * Updates the report's fix tree with the propagated fixes by an annotation processors.
+   * Updates the report's containing fix tree to include the propagated fixes on generated source
+   * code by annotation processors.
    *
    * @param moduleInfo Module info instance where fix tree belongs to.
    */
-  public void reflectAnnotationProcessorChanges(ModuleInfo moduleInfo) {
+  public void reflectAnnotationProcessorChangesOnSourceCode(ModuleInfo moduleInfo) {
     moduleInfo
         .getAnnotationProcessorHandlers()
         .forEach(handler -> tree.addAll(handler.extendForGeneratedFixes(tree)));
