@@ -31,6 +31,7 @@ import edu.ucr.cs.riple.core.evaluators.graph.ConflictGraph;
 import edu.ucr.cs.riple.core.evaluators.graph.processors.ConflictGraphProcessor;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import java.util.function.Consumer;
 
 /**
  * Abstract class for evaluators. Subclasses of this evaluator, computes the effectiveness of fix
@@ -84,7 +85,16 @@ public abstract class AbstractEvaluator implements Evaluator {
   @Override
   public ImmutableSet<Report> evaluate(ImmutableSet<Fix> fixes) {
     ImmutableSet<Report> reports =
-        fixes.stream().map(fix -> new Report(fix, 1)).collect(ImmutableSet.toImmutableSet());
+        fixes.stream()
+            .map(fix -> new Report(fix, 1))
+            .peek(
+                new Consumer<Report>() {
+                  @Override
+                  public void accept(Report report) {
+                    report.reflectAnnotationProcessorChanges(supplier.getModuleInfo());
+                  }
+                })
+            .collect(ImmutableSet.toImmutableSet());
     System.out.println("Max Depth level: " + this.depth);
     for (int i = 0; i < this.depth; i++) {
       initializeFixGraph(reports);

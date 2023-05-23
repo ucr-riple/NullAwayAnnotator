@@ -94,14 +94,17 @@ public class LombokHandler implements AnnotationProcessorHandler {
                 onField ->
                     onField.variables.forEach(
                         name -> {
-                          // Anticipate getter method name.
-                          String getterName =
-                              "get" + Character.toUpperCase(name.charAt(0)) + name.substring(1);
+                          // Expected getter method signature.
+                          String getterSignature =
+                              "get"
+                                  + Character.toUpperCase(name.charAt(0))
+                                  + name.substring(1)
+                                  + "()";
                           // Check if method is lombok generated.
                           MethodRecord getterMethod =
                               moduleInfo
                                   .getMethodRegistry()
-                                  .findMethodByName(onField.clazz, getterName);
+                                  .findMethodByName(onField.clazz, getterSignature);
                           if (getterMethod == null) {
                             // Unlikely to happen, but just in case.
                             return;
@@ -130,7 +133,7 @@ public class LombokHandler implements AnnotationProcessorHandler {
    */
   private static boolean isLombokGenerated(String[] annotations) {
     for (String annotation : annotations) {
-      if (annotation.equals("lombok.generated")) {
+      if (annotation.equals("lombok.Generated")) {
         return true;
       }
     }
