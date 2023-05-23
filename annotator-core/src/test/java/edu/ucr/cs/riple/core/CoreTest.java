@@ -180,7 +180,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             new TReport(new OnParameter("Main.java", "test.Main", "Main(java.lang.Object)", 0), 1))
         .toDepth(1)
         .suppressRemainingErrors()
-        .checkOutExpectedOutput("fieldAssignNullableConstructorForceResolveEnabled/expected")
+        .checkExpectedOutput("fieldAssignNullableConstructorForceResolveEnabled/expected")
         .start();
   }
 
@@ -304,7 +304,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             "}")
         .expectNoReport()
         .deactivateInference()
-        .checkOutExpectedOutput("deactivateInferenceTest/expected")
+        .checkExpectedOutput("deactivateInferenceTest/expected")
         .start();
   }
 
@@ -322,7 +322,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f5")), 0))
         .toDepth(1)
         .suppressRemainingErrors()
-        .checkOutExpectedOutput("errorInFieldDeclarationForceResolveTest/expected")
+        .checkExpectedOutput("errorInFieldDeclarationForceResolveTest/expected")
         .start();
   }
 
@@ -357,7 +357,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f4")), 1))
         .toDepth(1)
         .suppressRemainingErrors()
-        .checkOutExpectedOutput("initializationErrorWithMultipleConstructors/expected")
+        .checkExpectedOutput("initializationErrorWithMultipleConstructors/expected")
         .start();
   }
 
@@ -433,7 +433,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
         .withExpectedReports(new TReport(new OnField("A.java", "test.A", singleton("f")), -3))
         .toDepth(5)
         .suppressRemainingErrors()
-        .checkOutExpectedOutput("staticAndInstanceInitializerBlockTest/expected")
+        .checkExpectedOutput("staticAndInstanceInitializerBlockTest/expected")
         .start();
   }
 
