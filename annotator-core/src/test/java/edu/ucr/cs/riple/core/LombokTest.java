@@ -87,6 +87,8 @@ public class LombokTest extends AnnotatorBaseCoreTest {
             new TReport(
                 new OnField("Main.java", "test.Main", Collections.singleton("f")),
                 0,
+                // The copied annotation on the getF creates an unresolvable error in downstream
+                // dependency, hence, the tree should be rejected.
                 Report.Tag.REJECT))
         .setPredicate(
             (expected, found) ->
