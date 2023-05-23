@@ -97,7 +97,7 @@ public class LombokTest extends AnnotatorBaseCoreTest {
         .enableDownstreamDependencyAnalysis(STRICT)
         .toDepth(1)
         .suppressRemainingErrors()
-        .checkOutExpectedOutput("rejectOnFieldForGeneratedGetterInDownstreamDependencies/expected")
+        .checkExpectedOutput("rejectOnFieldForGeneratedGetterInDownstreamDependencies/expected")
         .start();
   }
 }

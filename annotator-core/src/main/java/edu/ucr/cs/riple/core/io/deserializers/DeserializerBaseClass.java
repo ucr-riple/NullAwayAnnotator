@@ -70,7 +70,6 @@ public abstract class DeserializerBaseClass implements CheckerDeserializer {
       ModuleInfo moduleInfo) {
     ImmutableSet<Fix> fixes =
         resolvingFixes.stream()
-            // Exclude fixes on locations that have an explicit nonnull annotation.
             .filter(f -> !moduleInfo.getNonnullStore().hasExplicitNonnullAnnotation(f.toLocation()))
             .collect(ImmutableSet.toImmutableSet());
     return new Error(errorType, errorMessage, region, offset, fixes);

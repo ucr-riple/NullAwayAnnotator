@@ -31,6 +31,7 @@ import edu.ucr.cs.riple.core.metadata.method.MethodRecord;
 import edu.ucr.cs.riple.core.metadata.region.Region;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
+import edu.ucr.cs.riple.injector.changes.AnnotationChange;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.util.Objects;
 import java.util.Optional;
@@ -110,13 +111,16 @@ public class LombokHandler implements AnnotationProcessorHandler {
                             return;
                           }
                           if (isLombokGenerated(getterMethod.annotations)) {
+                            if (!(fix.change instanceof AnnotationChange)) {
+                              return;
+                            }
+                            AnnotationChange change = (AnnotationChange) fix.change;
                             // Method is lombok generated, add a fix to add the annotation on the
                             // method.
                             builder.add(
                                 new Fix(
                                     new AddMarkerAnnotation(
-                                        getterMethod.location,
-                                        fix.change.getAnnotationName().fullName),
+                                        getterMethod.location, change.getAnnotationName().fullName),
                                     fix.reasons,
                                     fix.fixSourceIsInTarget));
                           }

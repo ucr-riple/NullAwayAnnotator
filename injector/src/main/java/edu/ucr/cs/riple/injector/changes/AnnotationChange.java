@@ -66,6 +66,11 @@ public abstract class AnnotationChange implements ASTChange {
     return location;
   }
 
+  /**
+   * Returns the fully qualified type name of the annotation as a {@link Name} instance.
+   *
+   * @return the name of the annotation.
+   */
   public Name getAnnotationName() {
     return annotationName;
   }
