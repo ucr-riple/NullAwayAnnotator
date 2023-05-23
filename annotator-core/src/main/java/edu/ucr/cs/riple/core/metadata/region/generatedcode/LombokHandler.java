@@ -111,12 +111,13 @@ public class LombokHandler implements AnnotationProcessorHandler {
                             return;
                           }
                           if (isLombokGenerated(getterMethod.annotations)) {
+                            // Method is lombok generated, add a fix to add the annotation on the
+                            // method.
                             if (!(fix.change instanceof AnnotationChange)) {
+                              // Only annotation changes are supported for now.
                               return;
                             }
                             AnnotationChange change = (AnnotationChange) fix.change;
-                            // Method is lombok generated, add a fix to add the annotation on the
-                            // method.
                             builder.add(
                                 new Fix(
                                     new AddMarkerAnnotation(
