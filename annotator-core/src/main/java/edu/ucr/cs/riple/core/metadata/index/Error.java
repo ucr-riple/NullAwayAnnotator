@@ -39,7 +39,7 @@ import javax.annotation.Nullable;
 
 /** Represents an error reported by NullAway. */
 @SuppressWarnings("JavaLangClash")
-public class Error {
+public abstract class Error {
 
   /** Error Type. */
   public final String messageType;
