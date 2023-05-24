@@ -22,82 +22,77 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.io.deserializers;
+package edu.ucr.cs.riple.core.checkers;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Checker;
-import edu.ucr.cs.riple.core.Context;
+import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.region.Region;
+import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
-import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Set;
 
-/** Base class for all checker deserializers. */
-public abstract class DeserializerBaseClass implements CheckerDeserializer {
-
-  /** Annotator context. */
-  protected final Context context;
-  /** The checker that this deserializer is supporting. */
-  protected final Checker checker;
-  /** The supporting serialization version of this deserializer. */
-  protected final int version;
-
-  public DeserializerBaseClass(Context context, Checker checker, int version) {
-    this.context = context;
-    this.checker = checker;
-    this.version = version;
-  }
+/**
+ * Represents a checker that is running on the target module.
+ *
+ * @param <T> Type of errors reported by the checker.
+ */
+public interface Checker<T extends Error> {
 
   /**
-   * Creates an {@link Error} instance.
+   * Deserializes errors reported by the checker from the output using the given context.
+   *
+   * @param module Module where the checker reports errors.
+   * @return Set of errors reported by the checker.
+   */
+  Set<T> deserializeErrors(ModuleInfo module);
+
+  /**
+   * Suppresses remaining errors reported by the checker.
+   *
+   * @param injector Annotation injector to inject selected annotations.
+   */
+  void suppressRemainingErrors(AnnotationInjector injector);
+
+  /**
+   * Used to do any pre-processing steps before running the inference.
+   *
+   * @param injector Annotation injector, can be used to inject any annotations during the
+   *     pre-processing phase.
+   */
+  void preprocess(AnnotationInjector injector);
+
+  /**
+   * Creates an {@link Error} instance from the given parameters.
    *
    * @param errorType Error type.
    * @param errorMessage Error message.
    * @param region Region where the error is reported,
    * @param offset offset of program point in original version where error is reported.
    * @param resolvingFixes Set of fixes that resolve the error.
-   * @param moduleInfo ModuleInfo of the modules which errors are reported on.
+   * @param module Module where the error is reported.
    * @return The corresponding error.
    */
-  protected Error createError(
+  T createError(
       String errorType,
       String errorMessage,
       Region region,
       int offset,
       ImmutableSet<Fix> resolvingFixes,
-      ModuleInfo moduleInfo) {
-    ImmutableSet<Fix> fixes =
-        resolvingFixes.stream()
-            .filter(f -> !moduleInfo.getNonnullStore().hasExplicitNonnullAnnotation(f.toLocation()))
-            .collect(ImmutableSet.toImmutableSet());
-    return new Error(errorType, errorMessage, region, offset, fixes);
-  }
+      ModuleInfo module);
 
   /**
-   * Extends field variable names to full list to include all variables declared in the same
-   * statement.
-   *
-   * @param onField Location of the field.
-   * @return The updated given location.
+   * Verifies that the checker representation in Annotator is compatible with the actual running
+   * checker on the target module.
    */
-  protected OnField extendVariableList(OnField onField, ModuleInfo moduleInfo) {
-    Set<String> variables =
-        moduleInfo
-            .getFieldRegistry()
-            .getInLineMultipleFieldDeclarationsOnField(onField.clazz, onField.variables);
-    onField.variables.addAll(variables);
-    return onField;
-  }
+  void verifyCheckerCompatibility();
 
-  @Override
-  public int getVersionNumber() {
-    return version;
-  }
-
-  @Override
-  public Checker getAssociatedChecker() {
-    return checker;
-  }
+  /**
+   * Prepares the config files for the checker to run on the target module.
+   *
+   * @param configurations Module configurations where their config files should be prepared for a
+   *     build.
+   */
+  void prepareConfigFilesForBuild(ImmutableSet<ModuleConfiguration> configurations);
 }
