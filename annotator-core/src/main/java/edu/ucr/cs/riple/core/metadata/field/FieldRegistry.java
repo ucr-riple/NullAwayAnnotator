@@ -56,7 +56,7 @@ public class FieldRegistry extends Registry<FieldRecord> {
   public FieldRegistry(ImmutableSet<ModuleConfiguration> modules) {
     super(
         modules.stream()
-            .map(info -> info.dir.resolve(Serializer.CLASS_INFO_FILE_NAME))
+            .map(info -> info.dir.resolve(Serializer.CLASS_RECORD_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));
   }
 

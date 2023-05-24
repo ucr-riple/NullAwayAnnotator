@@ -210,7 +210,7 @@ public class CoreTestHelper {
    *     relative the root directory of the project and the given path will be compared.
    * @return This instance of {@link CoreTestHelper}.
    */
-  public CoreTestHelper checkOutExpectedOutput(String expectedOutputPath) {
+  public CoreTestHelper checkExpectedOutput(String expectedOutputPath) {
     this.expectedOutputPath = Utility.getPathOfResource(expectedOutputPath);
     return this;
   }

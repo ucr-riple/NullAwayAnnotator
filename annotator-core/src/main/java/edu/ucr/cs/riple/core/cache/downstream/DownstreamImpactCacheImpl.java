@@ -35,7 +35,7 @@ import edu.ucr.cs.riple.core.cache.Impact;
 import edu.ucr.cs.riple.core.evaluators.suppliers.DownstreamDependencySupplier;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
+import edu.ucr.cs.riple.core.metadata.region.MethodRegionRegistry;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnParameter;
@@ -89,13 +89,13 @@ public class DownstreamImpactCacheImpl
     System.out.println("Analyzing downstream dependencies...");
     DownstreamDependencySupplier supplier = new DownstreamDependencySupplier(context);
     // Collect callers of public APIs in module.
-    MethodRegionTracker tracker = new MethodRegionTracker(supplier.getModuleInfo());
+    MethodRegionRegistry methodRegionRegistry = new MethodRegionRegistry(supplier.getModuleInfo());
     // Generate fixes corresponding methods.
     ImmutableSet<Fix> fixes =
         store.values().stream()
             .filter(
                 input ->
-                    !tracker
+                    !methodRegionRegistry
                         .getCallersOfMethod(input.toMethod().clazz, input.toMethod().method)
                         .isEmpty()) // skip methods that are not called anywhere.
             .map(

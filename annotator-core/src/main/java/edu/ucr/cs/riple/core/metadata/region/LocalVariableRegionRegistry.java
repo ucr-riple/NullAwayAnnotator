@@ -22,18 +22,17 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.trackers;
+package edu.ucr.cs.riple.core.metadata.region;
 
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnLocalVariable;
 import java.util.Optional;
 import java.util.Set;
 
-/** Tracker for Local variables. */
-public class LocalVariableTracker implements RegionTracker {
-
+/** Region Registry for Local variables. */
+public class LocalVariableRegionRegistry implements RegionRegistry {
   @Override
-  public Optional<Set<Region>> getRegions(Location location) {
+  public Optional<Set<Region>> getImpactedRegions(Location location) {
     if (!location.isOnLocalVariable()) {
       return Optional.empty();
     }

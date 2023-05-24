@@ -46,7 +46,6 @@ public class MethodRecord {
   public Visibility visibility;
   /** Is true if the method has non-primitive return. */
   public boolean hasNonPrimitiveReturn;
-
   /** Is true if the method is a constructor. */
   public boolean isConstructor;
 

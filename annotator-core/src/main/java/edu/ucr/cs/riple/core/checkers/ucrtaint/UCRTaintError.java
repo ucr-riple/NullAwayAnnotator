@@ -27,7 +27,7 @@ package edu.ucr.cs.riple.core.checkers.ucrtaint;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.core.metadata.region.Region;
 
 /** Represents an error reported by {@link UCRTaint}. */
 public class UCRTaintError extends Error {
