@@ -110,6 +110,7 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "package test;",
             "public class Foo {",
             "   java.lang.Object bar;",
+            "   java.util.Map<java.lang.String, String[]> f0;",
             "   java.lang.Object baz(java.lang.Object param) {;",
             "       java.lang.Object localVar;",
             "       return new Object();",
@@ -120,6 +121,7 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "import custom.example.Untainted;",
             "public class Foo {",
             "   java.lang.@Untainted Object bar;",
+            "   java.util.@Untainted Map<java.lang.@Untainted String, @Untainted String[]> f0;",
             "   java.lang.@Untainted Object baz(java.lang.@Untainted Object param) {;",
             "       java.lang.@Untainted Object localVar;",
             "       return new Object();",
@@ -128,6 +130,8 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
         .addChanges(
             new AddTypeUseMarkerAnnotation(
                 new OnField("Foo.java", "test.Foo", Set.of("bar")), "custom.example.Untainted"),
+            new AddTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("f0")), "custom.example.Untainted"),
             new AddTypeUseMarkerAnnotation(
                 new OnMethod("Foo.java", "test.Foo", "baz(java.lang.Object)"),
                 "custom.example.Untainted"),
