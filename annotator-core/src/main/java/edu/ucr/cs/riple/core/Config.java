@@ -72,8 +72,8 @@ public class Config {
   /** If activated, impact of fixes will be cached. */
   public final boolean useImpactCache;
   /**
-   * If activated, all suggested fixes from NullAway will be applied to the source code regardless
-   * of their effectiveness.
+   * If activated, all suggested fixes from the checker will be applied to the source code
+   * regardless of their effectiveness.
    */
   public final boolean exhaustiveSearch;
   /**
@@ -92,7 +92,7 @@ public class Config {
   public final boolean disableOuterLoop;
   /** Info of target module. */
   public final ModuleConfiguration target;
-  /** Path to directory where all outputs of nullaway and scanner checker is located. */
+  /** Path to directory where all outputs of checker and scanner checker is located. */
   public final Path globalDir;
   /** Command to build the target module. */
   public final String buildCommand;
@@ -105,8 +105,8 @@ public class Config {
   /** Sets of context path information for all downstream dependencies. */
   public final ImmutableSet<ModuleConfiguration> downstreamConfigurations;
   /**
-   * Path to nullaway library model loader, which enables the communication between annotator and
-   * nullaway when processing downstream dependencies.
+   * Path to NullAway library model loader, which enables the communication between annotator and
+   * NullAway when processing downstream dependencies.
    */
   public final Path nullawayLibraryModelLoaderPath;
   /** Command to build the all downstream dependencies at once. */
@@ -119,11 +119,11 @@ public class Config {
   /** Global counter for assigning unique id for each instance. */
   private int moduleCounterID;
   /**
-   * If activated, AutoAnnotator will try to resolve all remaining errors by marking the enclosing
-   * method as {@code NullUnMarked}. It will also mark uninitialized fields with
-   * {@code @SuppressWarning("NullAway.Init")}
+   * If activated, Annotator will try to suppress all remaining errors. The logic is specific to the
+   * checker suppression mechanism. Annotator will simply call {@link
+   * edu.ucr.cs.riple.core.checkers.Checker#suppressRemainingErrors} methods.
    */
-  public final boolean forceResolveActivated;
+  public final boolean suppressRemainingErrors;
   /** Fully qualified NullUnmarked annotation. */
   public final String nullUnMarkedAnnotation;
   /**
@@ -186,9 +186,9 @@ public class Config {
     Option configPathsOption =
         new Option(
             "cp",
-            "context-paths",
+            "config-paths",
             true,
-            "Path to tsv file containing path to nullaway and scanner context files.");
+            "Path to tsv file containing path to checker and scanner context files.");
     configPathsOption.setRequired(true);
     options.addOption(configPathsOption);
 
@@ -436,10 +436,10 @@ public class Config {
       this.downstreamDependenciesBuildCommand = null;
     }
     this.inferenceActivated = !cmd.hasOption(deactivateInference);
-    this.forceResolveActivated =
+    this.suppressRemainingErrors =
         !this.inferenceActivated || cmd.hasOption(activateForceResolveOption);
     this.nullUnMarkedAnnotation =
-        this.forceResolveActivated
+        this.suppressRemainingErrors
             ? cmd.getOptionValue(activateForceResolveOption)
             : "org.jspecify.annotations.NullUnmarked";
     this.moduleCounterID = 0;
@@ -526,7 +526,7 @@ public class Config {
 
     this.downstreamConfigurations = ImmutableSet.copyOf(moduleConfigurationList);
     this.moduleCounterID = 0;
-    this.forceResolveActivated =
+    this.suppressRemainingErrors =
         getValueFromKey(jsonObject, "FORCE_RESOLVE", Boolean.class).orElse(false);
     this.inferenceActivated =
         getValueFromKey(jsonObject, "INFERENCE_ACTIVATION", Boolean.class).orElse(true);
@@ -712,7 +712,7 @@ public class Config {
               .map(
                   info -> {
                     JSONObject res = new JSONObject();
-                    res.put("NULLAWAY", info.checkerConfig.toString());
+                    res.put("CHECKER", info.checkerConfig.toString());
                     res.put("SCANNER", info.scannerConfig.toString());
                     return res;
                   })

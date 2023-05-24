@@ -266,12 +266,12 @@ public class ConfigurationTest {
 
           // Check default mode.
           config = makeConfigWithFlags(baseFlags);
-          assertFalse(config.forceResolveActivated);
+          assertFalse(config.suppressRemainingErrors);
 
           CLIFlag flag = new CLIFlagWithValue("fr", "edu.ucr.example.NullUnmarked");
           baseFlags.add(flag);
           config = makeConfigWithFlags(baseFlags);
-          assertTrue(config.forceResolveActivated);
+          assertTrue(config.suppressRemainingErrors);
           assertEquals(config.nullUnMarkedAnnotation, "edu.ucr.example.NullUnmarked");
         });
   }
