@@ -45,9 +45,9 @@ import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.tree.JCTree;
-import edu.ucr.cs.riple.scanner.out.ClassInfo;
+import edu.ucr.cs.riple.scanner.out.ClassRecord;
 import edu.ucr.cs.riple.scanner.out.ImpactedRegion;
-import edu.ucr.cs.riple.scanner.out.MethodInfo;
+import edu.ucr.cs.riple.scanner.out.MethodRecord;
 import java.util.ArrayList;
 import java.util.List;
 import javax.lang.model.element.ElementKind;
@@ -93,8 +93,8 @@ public class AnnotatorScanner extends BugChecker
     context
         .getConfig()
         .getSerializer()
-        .serializeClassInfo(
-            new ClassInfo(
+        .serializeClassRecord(
+            new ClassRecord(
                 ASTHelpers.getSymbol(classTree), visitorState.getPath().getCompilationUnit()));
     return Description.NO_MATCH;
   }
@@ -141,16 +141,16 @@ public class AnnotatorScanner extends BugChecker
     }
     Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(tree);
     serializeSymIfNonnull(methodSymbol);
-    MethodInfo methodInfo = MethodInfo.findOrCreate(methodSymbol, context);
-    methodInfo.findParent(state, context);
-    methodInfo.setReturnTypeAnnotation(config);
-    methodInfo.setURI(state);
+    MethodRecord methodRecord = MethodRecord.findOrCreate(methodSymbol, context);
+    methodRecord.findParent(state, context);
+    methodRecord.setReturnTypeAnnotation(config);
+    methodRecord.setURI(state);
     List<Boolean> paramAnnotations = new ArrayList<>();
     for (int i = 0; i < methodSymbol.getParameters().size(); i++) {
       paramAnnotations.add(SymbolUtil.paramHasNullableAnnotation(methodSymbol, i, config));
     }
-    methodInfo.setAnnotationParameterFlags(paramAnnotations);
-    config.getSerializer().serializeMethodInfo(methodInfo);
+    methodRecord.setAnnotationParameterFlags(paramAnnotations);
+    config.getSerializer().serializeMethodRecord(methodRecord);
     return Description.NO_MATCH;
   }
 
@@ -233,7 +233,7 @@ public class AnnotatorScanner extends BugChecker
       context
           .getConfig()
           .getSerializer()
-          .serializeFieldGraphNode(
+          .serializeFieldAccessRecord(
               new ImpactedRegion(context.getConfig(), symbol, state.getPath()));
     }
   }

@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.trackers;
+package edu.ucr.cs.riple.core.metadata.region;
 
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.OnClass;

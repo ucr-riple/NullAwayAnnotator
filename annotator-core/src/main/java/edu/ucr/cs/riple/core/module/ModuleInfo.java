@@ -29,9 +29,14 @@ import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
 import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
 import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
+import edu.ucr.cs.riple.core.metadata.region.CompoundRegionRegistry;
+import edu.ucr.cs.riple.core.metadata.region.RegionRegistry;
+import edu.ucr.cs.riple.core.metadata.region.generatedcode.AnnotationProcessorHandler;
+import edu.ucr.cs.riple.core.metadata.region.generatedcode.LombokHandler;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnClass;
+import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 
 /** This class is used to store the code structural information about the module. */
 public class ModuleInfo {
@@ -44,6 +49,16 @@ public class ModuleInfo {
   private final NonnullStore nonnullStore;
   /** The set of modules this moduleInfo is created for. */
   private final ImmutableSet<ModuleConfiguration> configurations;
+  /**
+   * Region registry that contains information about the regions that can potentially be impacted by
+   * a fix.
+   */
+  private final CompoundRegionRegistry regionRegistry;
+  /**
+   * The set of annotation processor handlers that are used to process the generated code in this
+   * module.
+   */
+  private final ImmutableSet<AnnotationProcessorHandler> annotationProcessorHandlers;
 
   private final Context context;
 
@@ -70,13 +85,17 @@ public class ModuleInfo {
     this.context = context;
     this.configurations = configurations;
     // Build with scanner checker activated to generate required files to create the moduleInfo.
-    Utility.setScannerCheckerActivation(context.config, configurations, true);
     context.checker.prepareConfigFilesForBuild(configurations);
-    Utility.build(context, buildCommand);
-    Utility.setScannerCheckerActivation(context.config, configurations, false);
+    Utility.runScannerChecker(context, configurations, buildCommand);
     this.nonnullStore = new NonnullStore(configurations);
     this.fieldRegistry = new FieldRegistry(configurations);
     this.methodRegistry = new MethodRegistry(context);
+    this.regionRegistry = new CompoundRegionRegistry(this);
+    ImmutableSet.Builder<AnnotationProcessorHandler> builder = new ImmutableSet.Builder<>();
+    if (context.config.generatedCodeDetectors.contains(SourceType.LOMBOK)) {
+      builder.add(new LombokHandler(this));
+    }
+    this.annotationProcessorHandlers = builder.build();
   }
 
   /**
@@ -153,5 +172,25 @@ public class ModuleInfo {
    */
   public OnClass getLocationOnClass(String clazz) {
     return fieldRegistry.getLocationOnClass(clazz);
+  }
+
+  /**
+   * Getter for the created {@link RegionRegistry} instance.
+   *
+   * @return The created {@link RegionRegistry} instance.
+   */
+  public CompoundRegionRegistry getRegionRegistry() {
+    return regionRegistry;
+  }
+
+  /**
+   * Getter for the set of annotation processor handlers that are used to process the generated
+   * code.
+   *
+   * @return Immutable set of annotation processor handlers that are used to process the generated
+   *     in this module.
+   */
+  public ImmutableSet<AnnotationProcessorHandler> getAnnotationProcessorHandlers() {
+    return annotationProcessorHandlers;
   }
 }

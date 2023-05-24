@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.trackers;
+package edu.ucr.cs.riple.core.metadata.region;
 
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -31,21 +31,24 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/** Tracker for Method Parameters. */
-public class ParameterRegionTracker implements RegionTracker {
+/**
+ * Region registry for Method Parameters. This region registry can identify impacted regions for
+ * fixes on {@link OnParameter}
+ */
+public class ParameterRegionRegistry implements RegionRegistry {
 
   /** ModuleInfo of the module which usage of parameters are stored. */
   private final ModuleInfo moduleInfo;
-  /** {@link MethodRegionTracker} instance, used to retrieve all sites. */
-  private final MethodRegionTracker methodRegionTracker;
+  /** {@link MethodRegionRegistry} instance, used to retrieve all sites. */
+  private final MethodRegionRegistry methodRegionRegistry;
 
-  public ParameterRegionTracker(ModuleInfo moduleInfo, MethodRegionTracker methodRegionTracker) {
+  public ParameterRegionRegistry(ModuleInfo moduleInfo, MethodRegionRegistry methodRegionRegistry) {
     this.moduleInfo = moduleInfo;
-    this.methodRegionTracker = methodRegionTracker;
+    this.methodRegionRegistry = methodRegionRegistry;
   }
 
   @Override
-  public Optional<Set<Region>> getRegions(Location location) {
+  public Optional<Set<Region>> getImpactedRegions(Location location) {
     if (!location.isOnParameter()) {
       return Optional.empty();
     }
@@ -71,7 +74,7 @@ public class ParameterRegionTracker implements RegionTracker {
     // to compute its impact.
     // See test: CoreTest#nestedParameters.
     regions.addAll(
-        methodRegionTracker.getCallersOfMethod(parameter.clazz, parameter.enclosingMethod.method));
+        methodRegionRegistry.getCallersOfMethod(parameter.clazz, parameter.enclosingMethod.method));
     return Optional.of(regions);
   }
 }

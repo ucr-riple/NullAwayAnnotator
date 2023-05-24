@@ -30,9 +30,9 @@ import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.util.Name;
 import edu.ucr.cs.riple.scanner.location.SymbolLocation;
-import edu.ucr.cs.riple.scanner.out.ClassInfo;
+import edu.ucr.cs.riple.scanner.out.ClassRecord;
 import edu.ucr.cs.riple.scanner.out.ImpactedRegion;
-import edu.ucr.cs.riple.scanner.out.MethodInfo;
+import edu.ucr.cs.riple.scanner.out.MethodRecord;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -49,35 +49,34 @@ import javax.annotation.Nullable;
  */
 public class Serializer {
 
-  /** Path to write field graph. */
-  private final Path fieldGraphPath;
+  /** Path to write impacted regions for changes on fields. */
+  private final Path fieldImpactedRegionPath;
   /** Path to write impacted regions for changes on methods */
-  private final Path methodImpactedRegion;
-  /** Path to write method info metadata. */
-  private final Path methodInfoPath;
+  private final Path methodImpactedRegionPath;
+  /** Path to write method records. */
+  private final Path methodRecordPath;
   /** Path to write class info data. */
-  private final Path classInfoPath;
+  private final Path classRecordsPath;
   /** Path to write location of elements with explicit {@code @Nonnull} annotation. */
-  private final Path nonnullInfoPath;
-
+  private final Path nonnullElementsPath;
   /** File name where all field usage data has been stored. */
-  public static final String FIELD_GRAPH_FILE_NAME = "field_graph.tsv";
+  public static final String FIELD_IMPACTED_REGION_FILE_NAME = "field_impacted_region_map.tsv";
   /** File name where all impacted regions for changes on methods are serialized. */
   public static final String METHOD_IMPACTED_REGION_FILE_NAME = "method_impacted_region_map.tsv";
   /** File name where all method data has been stored. */
-  public static final String METHOD_INFO_FILE_NAME = "method_info.tsv";
+  public static final String METHOD_RECORD_FILE_NAME = "method_records.tsv";
   /** File name where all class data has been stored. */
-  public static final String CLASS_INFO_FILE_NAME = "class_info.tsv";
+  public static final String CLASS_RECORD_FILE_NAME = "class_records.tsv";
   /** File name where location of elements explicitly annotated as {@code @Nonnull}. */
   public static final String NON_NULL_ELEMENTS_FILE_NAME = "nonnull_elements.tsv";
 
   public Serializer(Config config) {
     Path outputDirectory = config.getOutputDirectory();
-    this.fieldGraphPath = outputDirectory.resolve(FIELD_GRAPH_FILE_NAME);
-    this.methodImpactedRegion = outputDirectory.resolve(METHOD_IMPACTED_REGION_FILE_NAME);
-    this.methodInfoPath = outputDirectory.resolve(METHOD_INFO_FILE_NAME);
-    this.classInfoPath = outputDirectory.resolve(CLASS_INFO_FILE_NAME);
-    this.nonnullInfoPath = outputDirectory.resolve(NON_NULL_ELEMENTS_FILE_NAME);
+    this.fieldImpactedRegionPath = outputDirectory.resolve(FIELD_IMPACTED_REGION_FILE_NAME);
+    this.methodImpactedRegionPath = outputDirectory.resolve(METHOD_IMPACTED_REGION_FILE_NAME);
+    this.methodRecordPath = outputDirectory.resolve(METHOD_RECORD_FILE_NAME);
+    this.classRecordsPath = outputDirectory.resolve(CLASS_RECORD_FILE_NAME);
+    this.nonnullElementsPath = outputDirectory.resolve(NON_NULL_ELEMENTS_FILE_NAME);
     initializeOutputFiles(config);
   }
 
@@ -88,35 +87,36 @@ public class Serializer {
    * @param impactedRegion ImpactedRegion instance which will be serialized to output.
    */
   public void serializeImpactedRegionForMethod(ImpactedRegion impactedRegion) {
-    appendToFile(impactedRegion.toString(), this.methodImpactedRegion);
+    appendToFile(impactedRegion.toString(), this.methodImpactedRegionPath);
   }
 
   /**
-   * Appends the string representation of the {@link ImpactedRegion} corresponding to a field graph.
+   * Appends the string representation of the {@link ImpactedRegion} corresponding to a field access
+   * (read of a filed or write to a field) in a region.
    *
-   * @param fieldGraphNode TrackerNode instance.
+   * @param fieldAccessRegion Region where the field access occurred.
    */
-  public void serializeFieldGraphNode(ImpactedRegion fieldGraphNode) {
-    appendToFile(fieldGraphNode.toString(), this.fieldGraphPath);
+  public void serializeFieldAccessRecord(ImpactedRegion fieldAccessRegion) {
+    appendToFile(fieldAccessRegion.toString(), this.fieldImpactedRegionPath);
   }
 
   /**
-   * Appends the string representation of the {@link ClassInfo} corresponding to a compilation unit
-   * tree.
+   * Appends the string representation of the {@link ClassRecord} corresponding to a compilation
+   * unit tree.
    *
-   * @param classInfo ClassInfo instance.
+   * @param classRecord ClassInfo instance.
    */
-  public void serializeClassInfo(ClassInfo classInfo) {
-    appendToFile(classInfo.toString(), this.classInfoPath);
+  public void serializeClassRecord(ClassRecord classRecord) {
+    appendToFile(classRecord.toString(), this.classRecordsPath);
   }
 
   /**
-   * Appends the string representation of the {@link MethodInfo} corresponding to a method.
+   * Appends the string representation of the {@link MethodRecord} corresponding to a method.
    *
-   * @param methodInfo MethodInfo instance.
+   * @param methodRecord MethodInfo instance.
    */
-  public void serializeMethodInfo(MethodInfo methodInfo) {
-    appendToFile(methodInfo.toString(), this.methodInfoPath);
+  public void serializeMethodRecord(MethodRecord methodRecord) {
+    appendToFile(methodRecord.toString(), this.methodRecordPath);
   }
 
   /**
@@ -127,7 +127,7 @@ public class Serializer {
   public void serializeNonnullSym(Symbol symbol) {
     appendToFile(
         SymbolLocation.createLocationFromSymbol(symbol).tabSeparatedToString(),
-        this.nonnullInfoPath);
+        this.nonnullElementsPath);
   }
 
   /** Cleared the content of the file if exists and writes the header in the first line. */
@@ -151,11 +151,11 @@ public class Serializer {
     try {
       Files.createDirectories(config.getOutputDirectory());
       if (config.isActive()) {
-        initializeFile(methodImpactedRegion, ImpactedRegion.header());
-        initializeFile(fieldGraphPath, ImpactedRegion.header());
-        initializeFile(methodInfoPath, MethodInfo.header());
-        initializeFile(classInfoPath, ClassInfo.header());
-        initializeFile(nonnullInfoPath, SymbolLocation.header());
+        initializeFile(methodImpactedRegionPath, ImpactedRegion.header());
+        initializeFile(fieldImpactedRegionPath, ImpactedRegion.header());
+        initializeFile(methodRecordPath, MethodRecord.header());
+        initializeFile(classRecordsPath, ClassRecord.header());
+        initializeFile(nonnullElementsPath, SymbolLocation.header());
       }
     } catch (IOException e) {
       throw new RuntimeException("Could not finish resetting serializer", e);
