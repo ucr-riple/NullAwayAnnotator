@@ -39,23 +39,19 @@ import javax.annotation.Nullable;
 
 /** Represents an error reported by NullAway. */
 @SuppressWarnings("JavaLangClash")
-public class Error {
+public abstract class Error {
 
   /** Error Type. */
   public final String messageType;
   /** Error message. */
   public final String message;
   /** The fixes which can resolve this error (possibly empty). */
-  private final ImmutableSet<Fix> resolvingFixes;
+  protected final ImmutableSet<Fix> resolvingFixes;
   /** Offset of program point in original version where error is reported. */
-  private final int offset;
+  protected final int offset;
   /** Containing region. */
   protected final Region region;
   /** Error type for method initialization errors from NullAway in {@code String}. */
-  public static final String METHOD_INITIALIZER_ERROR = "METHOD_NO_INIT";
-  /** Error type for field initialization errors from NullAway in {@code String}. */
-  public static final String FIELD_INITIALIZER_ERROR = "FIELD_NO_INIT";
-
   public Error(
       String messageType,
       String message,
@@ -158,21 +154,12 @@ public class Error {
     if (!(o instanceof Error)) {
       return false;
     }
-    Error error = (Error) o;
-    if (!messageType.equals(error.messageType)) {
-      return false;
-    }
-    if (!region.equals(error.region)) {
-      return false;
-    }
-    if (messageType.equals(METHOD_INITIALIZER_ERROR)) {
-      // we do not need to compare error messages as it can be the same error with a different error
-      // message and should not be treated as a separate error.
-      return true;
-    }
-    return message.equals(error.message)
-        && resolvingFixes.equals(error.resolvingFixes)
-        && offset == error.offset;
+    Error other = (Error) o;
+    return messageType.equals(other.messageType)
+        && region.equals(other.region)
+        && message.equals(other.message)
+        && resolvingFixes.equals(other.resolvingFixes)
+        && offset == other.offset;
   }
 
   /**
@@ -190,13 +177,7 @@ public class Error {
 
   @Override
   public int hashCode() {
-    return Objects.hash(
-        messageType,
-        // to make sure equal objects will produce the same hashcode.
-        messageType.equals(METHOD_INITIALIZER_ERROR) ? METHOD_INITIALIZER_ERROR : message,
-        region,
-        resolvingFixes,
-        offset);
+    return Objects.hash(messageType, message, region, resolvingFixes, offset);
   }
 
   @Override
@@ -218,7 +199,8 @@ public class Error {
    * @param errors Collection of errors.
    * @return Immutable set of fixes which can resolve all given errors.
    */
-  public static ImmutableSet<Fix> getResolvingFixesOfErrors(Collection<Error> errors) {
+  public static <T extends Error> ImmutableSet<Fix> getResolvingFixesOfErrors(
+      Collection<T> errors) {
     // Each error has a set of resolving fixes and each fix has a set of reasons as why the fix has
     // been suggested. The final returned set of fixes should contain all the reasons it has been
     // suggested across the given collection. Map below stores all the set of reasons each fix is
@@ -227,7 +209,7 @@ public class Error {
     // Collect all reasons each fix is suggested across the given collection.
     Map<Fix, Set<String>> fixReasonsMap = new HashMap<>();
     errors.stream()
-        .flatMap(error -> error.resolvingFixes.stream())
+        .flatMap(error -> error.getResolvingFixes().stream())
         .forEach(
             fix -> {
               if (fixReasonsMap.containsKey(fix)) {
@@ -259,15 +241,5 @@ public class Error {
       return false;
     }
     return fixes.containsAll(this.resolvingFixes);
-  }
-  /**
-   * Returns true if the error is an initialization error ({@code METHOD_NO_INIT} or {@code
-   * FIELD_NO_INIT}).
-   *
-   * @return true, if the error is an initialization error.
-   */
-  public boolean isInitializationError() {
-    return this.messageType.equals(METHOD_INITIALIZER_ERROR)
-        || this.messageType.equals(FIELD_INITIALIZER_ERROR);
   }
 }

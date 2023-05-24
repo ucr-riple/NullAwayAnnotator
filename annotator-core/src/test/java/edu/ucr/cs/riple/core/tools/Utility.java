@@ -147,7 +147,7 @@ public class Utility {
     try (MockedStatic<edu.ucr.cs.riple.core.util.Utility> utilMock =
         Mockito.mockStatic(edu.ucr.cs.riple.core.util.Utility.class, Mockito.CALLS_REAL_METHODS)) {
       utilMock
-          .when(() -> edu.ucr.cs.riple.core.util.Utility.buildTarget(Mockito.any()))
+          .when(() -> edu.ucr.cs.riple.core.util.Utility.build(Mockito.any(), Mockito.any()))
           .thenAnswer(
               invocation -> {
                 Stream.of(
