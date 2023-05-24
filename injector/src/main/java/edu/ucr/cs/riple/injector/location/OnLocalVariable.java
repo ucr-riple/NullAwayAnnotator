@@ -31,7 +31,8 @@ import java.util.function.Consumer;
 
 /**
  * Represents a location for local variable element. This location is used to apply changes to a
- * local variable.
+ * local variable. Local variables must be declared inside a method. Local variables inside
+ * initializer blocks or lambdas are not supported.
  *
  * <p>Annotations on local variables will be applied on the declaration and all its type arguments
  * if exists. For instance: {@code Foo<Bar, Map<Bar, Bar>> baz}

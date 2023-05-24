@@ -331,7 +331,8 @@ public class Helper {
 
   /**
    * Locates a variable declaration expression in the tree of a {@link CallableDeclaration} with the
-   * given name.
+   * given name. Please note that the target local variable must be declared inside a callable
+   * declaration and local variables inside initializer blocks or lambdas are not supported.
    *
    * @param encMethod The enclosing method which the variable is declared in.
    * @param varName The name of the variable.
