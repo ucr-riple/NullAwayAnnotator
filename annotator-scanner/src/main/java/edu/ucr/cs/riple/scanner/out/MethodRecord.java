@@ -43,7 +43,7 @@ import java.util.Set;
 import javax.lang.model.element.Modifier;
 
 /** Container class to store information regarding a method in source code. */
-public class MethodInfo {
+public class MethodRecord {
 
   /** Symbol of containing method. */
   private final Symbol.MethodSymbol symbol;
@@ -63,7 +63,7 @@ public class MethodInfo {
   /** ID of the closest super method. */
   private int parentID;
 
-  private MethodInfo(Symbol.MethodSymbol method, ScannerContext context) {
+  private MethodRecord(Symbol.MethodSymbol method, ScannerContext context) {
     this.id = context.getNextMethodId();
     this.symbol = method;
     this.clazz = (method != null) ? method.enclClass() : null;
@@ -72,22 +72,23 @@ public class MethodInfo {
   }
 
   /**
-   * Creates a {@link MethodInfo} instance if not visited, otherwise, it will return the
+   * Creates a {@link MethodRecord} instance if not visited, otherwise, it will return the
    * corresponding instance.
    *
    * @param method Method symbol.
    * @param context Scanner context.
-   * @return The corresponding {@link MethodInfo} instance.
+   * @return The corresponding {@link MethodRecord} instance.
    */
-  public static MethodInfo findOrCreate(Symbol.MethodSymbol method, ScannerContext context) {
+  public static MethodRecord findOrCreate(Symbol.MethodSymbol method, ScannerContext context) {
     Symbol.ClassSymbol clazz = method.enclClass();
-    Optional<MethodInfo> optionalMethodInfo =
+    Optional<MethodRecord> optionalMethodInfo =
         context
             .getVisitedMethodsWithHashHint(hash(method))
             .filter(
-                methodInfo -> methodInfo.symbol.equals(method) && methodInfo.clazz.equals(clazz))
+                methodRecord ->
+                    methodRecord.symbol.equals(method) && methodRecord.clazz.equals(clazz))
             .findAny();
-    return optionalMethodInfo.orElseGet(() -> new MethodInfo(method, context));
+    return optionalMethodInfo.orElseGet(() -> new MethodRecord(method, context));
   }
 
   @Override
@@ -95,10 +96,10 @@ public class MethodInfo {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof MethodInfo)) {
+    if (!(o instanceof MethodRecord)) {
       return false;
     }
-    MethodInfo that = (MethodInfo) o;
+    MethodRecord that = (MethodRecord) o;
     return symbol.equals(that.symbol) && clazz.equals(that.clazz);
   }
 
@@ -120,8 +121,8 @@ public class MethodInfo {
       this.parentID = 0;
       return;
     }
-    MethodInfo superMethodInfo = findOrCreate(superMethod, context);
-    this.parentID = superMethodInfo.id;
+    MethodRecord superMethodRecord = findOrCreate(superMethod, context);
+    this.parentID = superMethodRecord.id;
   }
 
   @Override
@@ -207,7 +208,7 @@ public class MethodInfo {
   /**
    * Calculates hash. The hash is calculated based on a {@link
    * com.sun.tools.javac.code.Symbol.MethodSymbol} instance since we want to predict the hash of a
-   * potential {@link MethodInfo} object without creating the {@link MethodInfo} instance.
+   * potential {@link MethodRecord} object without creating the {@link MethodRecord} instance.
    *
    * @param method Method Symbol.
    * @return Expected hash.

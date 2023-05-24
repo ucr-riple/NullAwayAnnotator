@@ -31,8 +31,8 @@ import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.trackers.Region;
-import edu.ucr.cs.riple.core.metadata.trackers.TrackerNode;
+import edu.ucr.cs.riple.core.metadata.region.Region;
+import edu.ucr.cs.riple.core.metadata.region.RegionRecord;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.scanner.AnnotatorScanner;
@@ -212,16 +212,20 @@ public class Utility {
   }
 
   /**
-   * Activates/Deactivates {@link AnnotatorScanner} features by updating the {@link
-   * edu.ucr.cs.riple.scanner.Config} in {@code XML} format for the given modules.
+   * Enables NullAway serialization for the given modules.
    *
-   * @param config Annotator configuration.
-   * @param modules Immutable set of modules that their configuration files need to be updated.
-   * @param activation activation flag for all features of the scanner.
+   * @param configurations Set of modules to enable NullAway serialization for.
    */
-  public static void setScannerCheckerActivation(
-      Config config, ImmutableSet<ModuleConfiguration> modules, boolean activation) {
-    modules.forEach(info -> setScannerCheckerActivation(config, info, activation));
+  public static void enableNullAwaySerialization(ImmutableSet<ModuleConfiguration> configurations) {
+    configurations.forEach(
+        module -> {
+          FixSerializationConfig.Builder nullAwayConfig =
+              new FixSerializationConfig.Builder()
+                  .setSuggest(true, true)
+                  .setOutputDirectory(module.dir.toString())
+                  .setFieldInitInfo(true);
+          nullAwayConfig.writeAsXML(module.nullawayConfig.toString());
+        });
   }
 
   /**
@@ -244,17 +248,45 @@ public class Utility {
   }
 
   /**
-   * Deserializes a {@link TrackerNode} corresponding to values stored in a string array.
+   * Activates/Deactivates {@link AnnotatorScanner} features by updating the {@link
+   * edu.ucr.cs.riple.scanner.Config} in {@code XML} format for the given modules.
+   *
+   * @param config Annotator configuration.
+   * @param modules Immutable set of modules that their configuration files need to be updated.
+   * @param activation activation flag for all features of the scanner.
+   */
+  public static void setScannerCheckerActivation(
+      Config config, ImmutableSet<ModuleConfiguration> modules, boolean activation) {
+    modules.forEach(info -> setScannerCheckerActivation(config, info, activation));
+  }
+
+  /**
+   * Runs the scanner checker on the given modules.
+   *
+   * @param context Annotator context.
+   * @param configurations Immutable set of modules that their configuration files need to be
+   *     updated.
+   * @param buildCommand build command to run the Scanner checker.
+   */
+  public static void runScannerChecker(
+      Context context, ImmutableSet<ModuleConfiguration> configurations, String buildCommand) {
+    Utility.setScannerCheckerActivation(context.config, configurations, true);
+    Utility.build(context, buildCommand);
+    Utility.setScannerCheckerActivation(context.config, configurations, false);
+  }
+
+  /**
+   * Deserializes a {@link RegionRecord} corresponding to values stored in a string array.
    *
    * @param values String array of values.
-   * @return Deserialized {@link TrackerNode} instance corresponding to the given values.
+   * @return Deserialized {@link RegionRecord} instance corresponding to the given values.
    */
-  public static TrackerNode deserializeTrackerNode(String[] values) {
+  public static RegionRecord deserializeImpactedRegionRecord(String[] values) {
     Preconditions.checkArgument(
         values.length == 5,
-        "Expected 5 values to create TrackerNode instance in NullAway serialization version 3 but found: "
+        "Expected 5 values to create Impacted Region Record instance in this version of Annotator but found: "
             + values.length);
-    return new TrackerNode(
+    return new RegionRecord(
         new Region(values[0], values[1], SourceType.valueOf(values[4])), values[2], values[3]);
   }
 

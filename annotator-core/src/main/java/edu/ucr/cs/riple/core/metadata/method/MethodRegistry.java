@@ -60,7 +60,7 @@ public class MethodRegistry extends Registry<MethodRecord> {
   public MethodRegistry(ImmutableSet<ModuleConfiguration> modules) {
     super(
         modules.stream()
-            .map(moduleInfo -> moduleInfo.dir.resolve(Serializer.METHOD_INFO_FILE_NAME))
+            .map(moduleInfo -> moduleInfo.dir.resolve(Serializer.METHOD_RECORD_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));
   }
 

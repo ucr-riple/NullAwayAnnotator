@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Nima Karimipour
+ * Copyright (c) 2020 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,39 +22,25 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.scanner.tools;
+package edu.ucr.cs.riple.core.metadata.region;
 
-import java.util.Objects;
+import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.injector.location.Location;
+import java.util.Optional;
+import java.util.Set;
 
-public class ClassInfoDisplay implements Display {
+/**
+ * Interface for region registries. Region registries can locate regions where a {@link Fix} can
+ * potentially introduce new errors if injected.
+ */
+public interface RegionRegistry {
 
-  public final String clazz;
-  public String path;
-
-  public ClassInfoDisplay(String clazz, String path) {
-    this.clazz = clazz;
-    this.path = path;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof ClassInfoDisplay)) {
-      return false;
-    }
-    ClassInfoDisplay that = (ClassInfoDisplay) o;
-    return clazz.equals(that.clazz) && path.equals(that.path);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(clazz, path);
-  }
-
-  @Override
-  public String toString() {
-    return "clazz='" + clazz + '\'' + ", path='" + path + '\'';
-  }
+  /**
+   * Returns Set of regions where a fix can introduce new errors if injected. Should return {@link
+   * Optional#EMPTY} if the region registry does not contain any information about the location.
+   *
+   * @param location Location targeted by the fix.
+   * @return Set of regions.
+   */
+  Optional<Set<Region>> getImpactedRegions(Location location);
 }
