@@ -152,8 +152,10 @@ public class Utility {
               invocation -> {
                 Stream.of(
                         Serializer.NON_NULL_ELEMENTS_FILE_NAME,
-                        Serializer.CLASS_INFO_FILE_NAME,
-                        Serializer.METHOD_INFO_FILE_NAME)
+                        Serializer.CLASS_RECORD_FILE_NAME,
+                        Serializer.METHOD_IMPACTED_REGION_FILE_NAME,
+                        Serializer.FIELD_IMPACTED_REGION_FILE_NAME,
+                        Serializer.METHOD_RECORD_FILE_NAME)
                     .forEach(
                         fileName ->
                             createAFileWithContent(

@@ -22,12 +22,12 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.trackers;
+package edu.ucr.cs.riple.core.metadata.region;
 
 import java.util.Objects;
 
 /** Container class for holding information regarding usage of class members within classes. */
-public class TrackerNode {
+public class RegionRecord {
 
   /** Region where the element is used. */
   public final Region region;
@@ -36,7 +36,7 @@ public class TrackerNode {
   /** Fully qualified name of the enclosing class of callee. */
   public final String calleeClass;
 
-  public TrackerNode(Region region, String calleeMember, String calleeClass) {
+  public RegionRecord(Region region, String calleeMember, String calleeClass) {
     this.region = region;
     this.calleeMember = calleeMember;
     this.calleeClass = calleeClass;
@@ -47,10 +47,10 @@ public class TrackerNode {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof TrackerNode)) {
+    if (!(o instanceof RegionRecord)) {
       return false;
     }
-    TrackerNode that = (TrackerNode) o;
+    RegionRecord that = (RegionRecord) o;
     return region.equals(that.region)
         && calleeMember.equals(that.calleeMember)
         && calleeClass.equals(that.calleeClass);

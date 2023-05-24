@@ -31,13 +31,13 @@ import java.nio.file.Path;
 import javax.annotation.Nullable;
 
 /** Container for storing class flat name and url to source file containing class. */
-public class ClassInfo {
+public class ClassRecord {
   /** Containing class symbol. */
   public final Symbol.ClassSymbol clazz;
   /** Path to url containing this class. */
   @Nullable public final Path path;
 
-  public ClassInfo(Symbol.ClassSymbol clazz, CompilationUnitTree compilationUnitTree) {
+  public ClassRecord(Symbol.ClassSymbol clazz, CompilationUnitTree compilationUnitTree) {
     this.clazz = clazz;
     this.path = Serializer.pathToSourceFileFromURI(compilationUnitTree.getSourceFile().toUri());
   }

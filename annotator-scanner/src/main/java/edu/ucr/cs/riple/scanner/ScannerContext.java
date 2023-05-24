@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.scanner;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
-import edu.ucr.cs.riple.scanner.out.MethodInfo;
+import edu.ucr.cs.riple.scanner.out.MethodRecord;
 import java.util.stream.Stream;
 
 /**
@@ -42,7 +42,7 @@ public class ScannerContext {
    * MultiMap of visited methods. It stores the set of visited methods paired with their computed
    * hash value.
    */
-  private final Multimap<Integer, MethodInfo> visitedMethods;
+  private final Multimap<Integer, MethodRecord> visitedMethods;
   /**
    * Last given id to the most recent newly visited method. Used to assign unique ids for each
    * method.
@@ -69,10 +69,10 @@ public class ScannerContext {
   /**
    * Adds the method to the set of discovered methods.
    *
-   * @param methodInfo method info instance.
+   * @param methodRecord method info instance.
    */
-  public void visitMethod(MethodInfo methodInfo) {
-    this.visitedMethods.put(methodInfo.hashCode(), methodInfo);
+  public void visitMethod(MethodRecord methodRecord) {
+    this.visitedMethods.put(methodRecord.hashCode(), methodRecord);
   }
 
   /**
@@ -85,12 +85,12 @@ public class ScannerContext {
   }
 
   /**
-   * Retrieves stream of {@link MethodInfo} that has the given hash value.
+   * Retrieves stream of {@link MethodRecord} that has the given hash value.
    *
    * @param hashHint Given hash value to filter elements based on.
-   * @return Stream of {@link MethodInfo}.
+   * @return Stream of {@link MethodRecord}.
    */
-  public Stream<MethodInfo> getVisitedMethodsWithHashHint(int hashHint) {
+  public Stream<MethodRecord> getVisitedMethodsWithHashHint(int hashHint) {
     return this.visitedMethods.get(hashHint).stream();
   }
 }

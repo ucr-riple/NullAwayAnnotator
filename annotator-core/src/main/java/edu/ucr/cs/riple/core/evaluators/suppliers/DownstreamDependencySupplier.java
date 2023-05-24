@@ -34,8 +34,6 @@ import edu.ucr.cs.riple.core.evaluators.graph.processors.ParallelConflictGraphPr
 import edu.ucr.cs.riple.core.evaluators.graph.processors.SequentialConflictGraphProcessor;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.injectors.VirtualInjector;
-import edu.ucr.cs.riple.core.metadata.trackers.MethodRegionTracker;
-import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.util.Utility;
 
@@ -50,13 +48,10 @@ import edu.ucr.cs.riple.core.util.Utility;
  */
 public class DownstreamDependencySupplier extends AbstractSupplier {
 
-  private final RegionTracker tracker;
-
   public DownstreamDependencySupplier(Context context) {
     super(
         context,
         new ModuleInfo(context, context.downstreamConfigurations, context.config.buildCommand));
-    this.tracker = new MethodRegionTracker(moduleInfo);
   }
 
   @Override
@@ -78,7 +73,7 @@ public class DownstreamDependencySupplier extends AbstractSupplier {
   public AbstractConflictGraphProcessor getGraphProcessor() {
     CompilerRunner runner = () -> Utility.buildDownstreamDependencies(context);
     return context.config.useParallelGraphProcessor
-        ? new ParallelConflictGraphProcessor(context, runner, this, tracker)
+        ? new ParallelConflictGraphProcessor(context, runner, this)
         : new SequentialConflictGraphProcessor(context, runner, this);
   }
 

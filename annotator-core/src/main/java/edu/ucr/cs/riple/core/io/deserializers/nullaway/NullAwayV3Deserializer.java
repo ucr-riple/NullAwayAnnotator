@@ -31,7 +31,7 @@ import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.io.deserializers.DeserializerBaseClass;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.trackers.Region;
+import edu.ucr.cs.riple.core.metadata.region.Region;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
