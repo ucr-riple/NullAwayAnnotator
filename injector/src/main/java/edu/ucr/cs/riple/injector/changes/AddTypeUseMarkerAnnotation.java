@@ -70,7 +70,7 @@ public class AddTypeUseMarkerAnnotation extends AddMarkerAnnotation {
 
     if (!Helper.isAnnotatedWith(type, annotationExpr)) {
       // Annotate the type.
-      Range range = findTypeRange(type);
+      Range range = findSimpleNameRangeInTypeName(type);
       if (range == null) {
         return null;
       }
@@ -117,13 +117,13 @@ public class AddTypeUseMarkerAnnotation extends AddMarkerAnnotation {
   }
 
   /**
-   * Find the range of the given type in source code. This is used to insert the annotation before
-   * the type.
+   * Finds the range of the simple name in the fully qualified name of the given type in the source
+   * code. This is used to insert the type use annotations before the type simple name.
    *
    * @param type the type to find its range
    * @return the range of the type or null if the type does not have a range.
    */
-  private static Range findTypeRange(Type type) {
+  private static Range findSimpleNameRangeInTypeName(Type type) {
     if (type instanceof ClassOrInterfaceType) {
       ClassOrInterfaceType classOrInterfaceType = (ClassOrInterfaceType) type;
       if (classOrInterfaceType.getName().getRange().isEmpty()) {
@@ -132,7 +132,7 @@ public class AddTypeUseMarkerAnnotation extends AddMarkerAnnotation {
       return ((ClassOrInterfaceType) type).getName().getRange().get();
     }
     if (type instanceof ArrayType) {
-      return findTypeRange(((ArrayType) type).getComponentType());
+      return findSimpleNameRangeInTypeName(((ArrayType) type).getComponentType());
     }
     if (type instanceof PrimitiveType) {
       if (type.getRange().isEmpty()) {
