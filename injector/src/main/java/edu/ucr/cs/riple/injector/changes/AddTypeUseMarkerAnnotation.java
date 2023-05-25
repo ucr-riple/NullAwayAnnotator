@@ -76,25 +76,8 @@ public class AddTypeUseMarkerAnnotation extends AddMarkerAnnotation {
       }
       modifications.add(new Insertion(annotationExpr.toString(), range.begin));
     }
-    // Annotate type arguments. Note: We currently do not annotate Map<K, V>[] as @Annot Map<@Annot
-    // K, @Annot V>[] and will leave it as @Annot Map<K, V>[]
-    if (type instanceof ClassOrInterfaceType) {
-      ClassOrInterfaceType classOrInterfaceType = (ClassOrInterfaceType) type;
-      if (classOrInterfaceType.getTypeArguments().isPresent()) {
-        classOrInterfaceType
-            .getTypeArguments()
-            .get()
-            .forEach(
-                typeArg -> {
-                  Modification onType =
-                      computeTextModificationOn(
-                          (NodeWithAnnotations<?> & NodeWithRange<?>) typeArg);
-                  if (onType != null) {
-                    modifications.add(onType);
-                  }
-                });
-      }
-    }
+    // Apply the change on type arguments.
+    modifications.addAll(type.accept(new TypeArgumentChangeVisitor(), this));
     return modifications.isEmpty() ? null : new MultiPositionModification(modifications);
   }
 

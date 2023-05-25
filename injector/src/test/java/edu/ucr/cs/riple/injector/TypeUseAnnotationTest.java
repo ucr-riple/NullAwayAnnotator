@@ -196,7 +196,7 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "public class Foo<T> {",
             "   public void foo() {",
             "      java.util.Map<java.lang.String, String[]> f0;",
-            "      T[] f1;",
+            "      Map<T, T>[] f1;",
             "      String[] f2;",
             "   }",
             "}")
@@ -206,7 +206,7 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "public class Foo<T> {",
             "   public void foo() {",
             "      java.util.@UnTainted Map<java.lang.@UnTainted String, @UnTainted String[]> f0;",
-            "      @UnTainted T[] f1;",
+            "      @UnTainted Map<@UnTainted T, @UnTainted T>[] f1;",
             "      @UnTainted String[] f2;",
             "   }",
             "}")
@@ -230,6 +230,7 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "public class Foo {",
             "   java.util.Map<String, String[]> f0;",
             "   java.util.@Untainted Map<@Untainted String, @Untainted String[]> f1;",
+            "   @Untainted Map<java.util.@Untainted Map, @Untainted String>[] f2;",
             "}")
         .expectOutput(
             "package test;",
@@ -237,12 +238,15 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "public class Foo {",
             "   java.util.@Untainted Map<@Untainted String, @Untainted String[]> f0;",
             "   java.util.Map<String, String[]> f1;",
+            "   Map<java.util.Map, String>[] f2;",
             "}")
         .addChanges(
             new AddTypeUseMarkerAnnotation(
                 new OnField("Foo.java", "test.Foo", Set.of("f0")), "custom.example.Untainted"),
             new RemoveTypeUseMarkerAnnotation(
-                new OnField("Foo.java", "test.Foo", Set.of("f1")), "custom.example.Untainted"))
+                new OnField("Foo.java", "test.Foo", Set.of("f1")), "custom.example.Untainted"),
+            new RemoveTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("f2")), "custom.example.Untainted"))
         .start();
   }
 }
