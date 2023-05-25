@@ -367,7 +367,7 @@ public class Helper {
   }
 
   /**
-   * Extracts the type of the given node implementing {@link NodeWithAnnotations}.
+   * <<<<<<< HEAD Extracts the type of the given node implementing {@link NodeWithAnnotations}.
    *
    * @param node the node.
    * @return the type of the node.
@@ -419,7 +419,7 @@ public class Helper {
   }
 
   /**
-   * Extracts the integer at the start of string (e.g. 129uid -> 129).
+   * ======= >>>>>>> master Extracts the integer at the start of string (e.g. 129uid -> 129).
    *
    * @param key string containing the integer.
    * @return the integer at the start of the key, empty if no digit found at the beginning (e.g.
