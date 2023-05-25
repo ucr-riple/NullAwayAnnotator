@@ -20,15 +20,27 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.util;
+package edu.ucr.cs.riple.core.checkers.nullaway;
 
+import java.io.File;
+import java.util.UUID;
 import javax.annotation.Nullable;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * IMPORTANT NOTE: THIS CLASS IS COPIED FROM NULLAWAY, WE COPIED THE CLASS CONTENT HERE TO REMOVE
  * DEPENDENCY TO NULLAWAY.
  *
- * <p>Context class for Fix Serialization package.
+ * <p>Config class for Fix Serialization package.
  */
 public class FixSerializationConfig {
 
@@ -60,7 +72,54 @@ public class FixSerializationConfig {
     this.outputDirectory = outputDirectory;
   }
 
-  /** Builder class for Serialization Context */
+  /**
+   * Writes the {@link FixSerializationConfig} in {@code XML} format.
+   *
+   * @param path Path to write the config at.
+   */
+  public void writeNullAwayConfigInXMLFormat(String path) {
+    DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+    try {
+      DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+      Document doc = docBuilder.newDocument();
+
+      // Root
+      Element rootElement = doc.createElement("serialization");
+      doc.appendChild(rootElement);
+
+      // Suggest
+      Element suggestElement = doc.createElement("suggest");
+      suggestElement.setAttribute("active", String.valueOf(suggestEnabled));
+      suggestElement.setAttribute("enclosing", String.valueOf(suggestEnclosing));
+      rootElement.appendChild(suggestElement);
+
+      // Field Initialization
+      Element fieldInitInfoEnabled = doc.createElement("fieldInitInfo");
+      fieldInitInfoEnabled.setAttribute("active", String.valueOf(this.fieldInitInfoEnabled));
+      rootElement.appendChild(fieldInitInfoEnabled);
+
+      // Output dir
+      Element outputDir = doc.createElement("path");
+      outputDir.setTextContent(outputDirectory);
+      rootElement.appendChild(outputDir);
+
+      // UUID
+      Element uuid = doc.createElement("uuid");
+      uuid.setTextContent(UUID.randomUUID().toString());
+      rootElement.appendChild(uuid);
+
+      // Writings
+      TransformerFactory transformerFactory = TransformerFactory.newInstance();
+      Transformer transformer = transformerFactory.newTransformer();
+      DOMSource source = new DOMSource(doc);
+      StreamResult result = new StreamResult(new File(path));
+      transformer.transform(source, result);
+    } catch (ParserConfigurationException | TransformerException e) {
+      throw new RuntimeException("Error happened in writing config.", e);
+    }
+  }
+
+  /** Builder class for Serialization Config */
   public static class Builder {
 
     private boolean suggestEnabled;
@@ -91,13 +150,13 @@ public class FixSerializationConfig {
     }
 
     /**
-     * Builds and writes the context with the state in builder at the given path as XML.
+     * Builds and writes the config with the state in builder at the given path as XML.
      *
-     * @param path path to write the context file.
+     * @param path path to write the config file.
      */
     public void writeAsXML(String path) {
       FixSerializationConfig config = this.build();
-      Utility.writeNullAwayConfigInXMLFormat(config, path);
+      config.writeNullAwayConfigInXMLFormat(path);
     }
 
     public FixSerializationConfig build() {

@@ -58,7 +58,7 @@ public class Index {
   /** Starts the reading and index process. */
   public void index() {
     items.clear();
-    Utility.readErrorsFromOutputDirectory(context, moduleInfo)
+    Utility.readErrorsFromOutputDirectory(context, moduleInfo, Error.class)
         .forEach(error -> items.put(error.getRegion(), error));
   }
 
