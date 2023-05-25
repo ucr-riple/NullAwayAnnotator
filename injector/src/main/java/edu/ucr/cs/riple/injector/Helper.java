@@ -419,7 +419,7 @@ public class Helper {
   }
 
   /**
-   * ======= >>>>>>> master Extracts the integer at the start of string (e.g. 129uid -> 129).
+   * Extracts the integer at the start of string (e.g. 129uid -> 129).
    *
    * @param key string containing the integer.
    * @return the integer at the start of the key, empty if no digit found at the beginning (e.g.
