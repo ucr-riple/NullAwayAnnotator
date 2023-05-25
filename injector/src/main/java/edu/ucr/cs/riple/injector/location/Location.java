@@ -119,6 +119,14 @@ public abstract class Location {
   public void ifField(Consumer<OnField> consumer) {}
 
   /**
+   * If this location is of kind {@link LocationKind#LOCAL_VARIABLE}, calls the consumer on the
+   * location.
+   *
+   * @param consumer The consumer to be called.
+   */
+  public void ifLocalVariable(Consumer<OnLocalVariable> consumer) {}
+
+  /**
    * Returns downcast of this instance to {@link OnField} if this location is of kind {@link
    * LocationKind#FIELD}, Otherwise, returns null.
    *
@@ -167,6 +175,20 @@ public abstract class Location {
   }
 
   /**
+   * Returns downcast of this instance to {@link OnLocalVariable} if this location is of kind {@link
+   * LocationKind#LOCAL_VARIABLE}, Otherwise, returns null.
+   *
+   * @return The {@link OnLocalVariable} instance of this location if it is of kind {@link
+   *     LocationKind#LOCAL_VARIABLE}, null otherwise.
+   */
+  public OnLocalVariable toLocalVariable() {
+    if (this instanceof OnLocalVariable) {
+      return (OnLocalVariable) this;
+    }
+    return null;
+  }
+
+  /**
    * Returns true if this location is of kind {@link LocationKind#METHOD}.
    *
    * @return true if this location is of kind {@link LocationKind#METHOD}.
@@ -190,6 +212,15 @@ public abstract class Location {
    * @return true if this location is of kind {@link LocationKind#PARAMETER}.
    */
   public boolean isOnParameter() {
+    return false;
+  }
+
+  /**
+   * Returns true if this location is of kind {@link LocationKind#LOCAL_VARIABLE}.
+   *
+   * @return true if this location is of kind {@link LocationKind#LOCAL_VARIABLE}.
+   */
+  public boolean isOnLocalVariable() {
     return false;
   }
 

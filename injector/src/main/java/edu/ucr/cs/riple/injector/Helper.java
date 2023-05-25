@@ -29,22 +29,27 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.AnnotationDeclaration;
 import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumConstantDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /** A utility class. */
 public class Helper {
@@ -325,6 +330,35 @@ public class Helper {
   }
 
   /**
+   * Locates a variable declaration expression in the tree of a {@link CallableDeclaration} with the
+   * given name. Please note that the target local variable must be declared inside a callable
+   * declaration and local variables inside initializer blocks or lambdas are not supported.
+   *
+   * @param encMethod The enclosing method which the variable is declared in.
+   * @param varName The name of the variable.
+   * @return The variable declaration expression, or null if it is not found.
+   */
+  @Nullable
+  public static VariableDeclarationExpr locateVariableDeclarationExpr(
+      CallableDeclaration<?> encMethod, String varName) {
+    // Should not visit inner nodes of inner methods in the given method, since the given
+    // method should be the closest enclosing method of the target local variable. Therefore, we
+    // use DirectMethodParentIterator to skip inner methods.
+    Iterator<Node> treeIterator = new DirectMethodParentIterator(encMethod);
+    while (treeIterator.hasNext()) {
+      Node n = treeIterator.next();
+      if (n instanceof VariableDeclarationExpr) {
+        VariableDeclarationExpr v = (VariableDeclarationExpr) n;
+        if (v.getVariables().stream()
+            .anyMatch(variableDeclarator -> variableDeclarator.getNameAsString().equals(varName))) {
+          return v;
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
    * Extracts the integer at the start of string (e.g. 129uid -> 129).
    *
    * @param key string containing the integer.
@@ -453,6 +487,38 @@ public class Helper {
           .orElse(false);
     } catch (FileNotFoundException e) {
       throw new IllegalArgumentException("File not found: " + path, e);
+    }
+  }
+
+  /**
+   * Iterates over children of a {@link CallableDeclaration} in a depth-first manner, skipping over
+   * any {@link BodyDeclaration}.
+   */
+  public static final class DirectMethodParentIterator implements Iterator<Node> {
+
+    private final ArrayDeque<Node> deque = new ArrayDeque<>();
+
+    public DirectMethodParentIterator(CallableDeclaration<?> node) {
+      deque.add(node);
+    }
+
+    @Override
+    public boolean hasNext() {
+      return !deque.isEmpty();
+    }
+
+    @Override
+    public Node next() {
+      Node next = deque.removeFirst();
+      List<Node> children = next.getChildNodes();
+      for (int i = children.size() - 1; i >= 0; i--) {
+        Node child = children.get(i);
+        if (!(child instanceof BodyDeclaration<?>)) {
+          // Skip over any CallableDeclaration.
+          deque.add(children.get(i));
+        }
+      }
+      return next;
     }
   }
 }
