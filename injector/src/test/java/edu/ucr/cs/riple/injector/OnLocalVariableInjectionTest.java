@@ -170,6 +170,63 @@ public class OnLocalVariableInjectionTest extends BaseInjectorTest {
   }
 
   @Test
+  public void onLocalVariableWithIdenticalExistingLambdaAndInitializerBlockLocalVariable() {
+    injectorTestHelper
+        .addInput("Bar.java", "package test;", "public interface Bar {", "   void m();", "}")
+        .expectOutput("package test;", "public interface Bar {", "   void m();", "}")
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "public class Foo {",
+            "   static {",
+            "     Object f0;",
+            "   }",
+            "   public void foo() {",
+            "       class InnerFoo {",
+            "          static {",
+            "              Object f0;", // Static initializer block. Should not be annotated.
+            "          }",
+            "          public void foo() {",
+            "              Object f0;",
+            "          }",
+            "       }",
+            "       useBar(() -> {",
+            "         Object f0;", // Lambda. Should not be annotated.
+            "       });",
+            "       Object f0;", // Only this one should be annotated.
+            "   }",
+            "  public void useBar(Bar b) { }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "   static {",
+            "     Object f0;",
+            "   }",
+            "   public void foo() {",
+            "       class InnerFoo {",
+            "          static {",
+            "              Object f0;",
+            "          }",
+            "          public void foo() {",
+            "              Object f0;",
+            "          }",
+            "       }",
+            "       useBar(() -> {",
+            "         Object f0;",
+            "       });",
+            "       @UnTainted Object f0;", // Is annotated.
+            "   }",
+            "  public void useBar(Bar b) { }",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"))
+        .start();
+  }
+
+  @Test
   public void onArrayType() {
     injectorTestHelper
         .addInput(
