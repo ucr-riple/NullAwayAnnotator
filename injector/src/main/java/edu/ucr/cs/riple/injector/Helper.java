@@ -367,7 +367,7 @@ public class Helper {
   }
 
   /**
-   * <<<<<<< HEAD Extracts the type of the given node implementing {@link NodeWithAnnotations}.
+   * Extracts the type of the given node implementing {@link NodeWithAnnotations}.
    *
    * @param node the node.
    * @return the type of the node.
