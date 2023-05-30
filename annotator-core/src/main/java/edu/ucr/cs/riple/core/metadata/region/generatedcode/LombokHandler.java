@@ -107,7 +107,9 @@ public class LombokHandler implements AnnotationProcessorHandler {
                                   .getMethodRegistry()
                                   .findMethodByName(onField.clazz, getterSignature);
                           if (getterMethod == null) {
-                            // Unlikely to happen, but just in case.
+                            // Getter method is not declared. skip.
+                            // Note: If the getter method is generated, it should still be in the
+                            // registry.
                             return;
                           }
                           if (isLombokGenerated(getterMethod.annotations)) {
