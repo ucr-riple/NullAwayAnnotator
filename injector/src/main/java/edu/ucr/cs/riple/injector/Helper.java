@@ -394,7 +394,7 @@ public class Helper {
       return ((VariableDeclarator) node).getType();
     }
     if (node instanceof ArrayType) {
-      return ((ArrayType) node).getComponentType();
+      return ((ArrayType) node).getElementType();
     }
     if (node instanceof Type) {
       return ((Type) node);
