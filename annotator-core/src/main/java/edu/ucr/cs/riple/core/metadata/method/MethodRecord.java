@@ -24,8 +24,8 @@
 
 package edu.ucr.cs.riple.core.metadata.method;
 
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.injector.location.OnMethod;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -41,8 +41,8 @@ public class MethodRecord {
   public Integer id;
   /** Location of the containing method. */
   public OnMethod location;
-  /** Set of annotations on method return type */
-  public String[] annotations;
+  /** Set of annotations on the method return type or the method itself */
+  public ImmutableSet<String> annotations;
   /** Visibility of the method. */
   public Visibility visibility;
   /** Is true if the method has non-primitive return. */
@@ -90,7 +90,7 @@ public class MethodRecord {
   private static MethodRecord top() {
     if (TOP == null) {
       MethodRecord node = new MethodRecord(0);
-      node.fillInformation(null, -1, new String[0], "private", false, false);
+      node.fillInformation(null, -1, ImmutableSet.of(), "private", false, false);
       return node;
     }
     return TOP;
@@ -118,7 +118,7 @@ public class MethodRecord {
   void fillInformation(
       OnMethod location,
       Integer parent,
-      String[] annotations,
+      ImmutableSet<String> annotations,
       String visibility,
       boolean hasNonPrimitiveReturn,
       boolean isConstructor) {
@@ -161,9 +161,7 @@ public class MethodRecord {
    * @return True if method has nullable annotation on the return type.
    */
   public boolean hasNullableAnnotation() {
-    return annotations != null
-        && annotations.length > 0
-        && Arrays.stream(annotations).anyMatch(MethodRecord::isNullableAnnotation);
+    return annotations != null && annotations.stream().anyMatch(MethodRecord::isNullableAnnotation);
   }
 
   /**

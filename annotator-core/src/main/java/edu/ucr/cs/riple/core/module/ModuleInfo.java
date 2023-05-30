@@ -33,7 +33,6 @@ import edu.ucr.cs.riple.core.metadata.region.CompoundRegionRegistry;
 import edu.ucr.cs.riple.core.metadata.region.RegionRegistry;
 import edu.ucr.cs.riple.core.metadata.region.generatedcode.AnnotationProcessorHandler;
 import edu.ucr.cs.riple.core.metadata.region.generatedcode.LombokHandler;
-import edu.ucr.cs.riple.core.util.FixSerializationConfig;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnClass;
@@ -61,6 +60,8 @@ public class ModuleInfo {
    */
   private final ImmutableSet<AnnotationProcessorHandler> annotationProcessorHandlers;
 
+  private final Context context;
+
   /**
    * This constructor is used to create a moduleInfo for a single module.
    *
@@ -81,19 +82,11 @@ public class ModuleInfo {
    */
   public ModuleInfo(
       Context context, ImmutableSet<ModuleConfiguration> configurations, String buildCommand) {
-    // Build with scanner checker activated to generate required files to create the moduleInfo.
-    Utility.enableNullAwaySerialization(configurations);
-    Utility.runScannerChecker(context, configurations, buildCommand);
-    configurations.forEach(
-        module -> {
-          FixSerializationConfig.Builder nullAwayConfig =
-              new FixSerializationConfig.Builder()
-                  .setSuggest(true, true)
-                  .setOutputDirectory(module.dir.toString())
-                  .setFieldInitInfo(true);
-          nullAwayConfig.writeAsXML(module.nullawayConfig.toString());
-        });
+    this.context = context;
     this.configurations = configurations;
+    // Build with scanner checker activated to generate required files to create the moduleInfo.
+    context.checker.prepareConfigFilesForBuild(configurations);
+    Utility.runScannerChecker(context, configurations, buildCommand);
     this.nonnullStore = new NonnullStore(configurations);
     this.fieldRegistry = new FieldRegistry(configurations);
     this.methodRegistry = new MethodRegistry(context);
@@ -130,6 +123,24 @@ public class ModuleInfo {
    */
   public NonnullStore getNonnullStore() {
     return nonnullStore;
+  }
+
+  /**
+   * Getter for the module configuration this moduleInfo is created for.
+   *
+   * @return The module configuration this moduleInfo is created for.
+   */
+  public ImmutableSet<ModuleConfiguration> getModuleConfiguration() {
+    return configurations;
+  }
+
+  /**
+   * Getter for the Annotator context.
+   *
+   * @return The Annotator context.
+   */
+  public Context getContext() {
+    return context;
   }
 
   /**

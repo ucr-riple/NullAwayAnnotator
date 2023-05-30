@@ -291,4 +291,57 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDispl
                 "edu/ucr/A.java"))
         .doTest();
   }
+
+  @Test
+  public void testTypeUseAnnotationSerialization() {
+    tester
+        .addSourceLines(
+            // Exact copy of org.jspecify.annotations.Nullable
+            "org/jspecify/annotations/Nullable.java",
+            "package org.jspecify.annotations;",
+            "import static java.lang.annotation.ElementType.TYPE_USE;",
+            "import static java.lang.annotation.RetentionPolicy.RUNTIME;",
+            "import java.lang.annotation.Documented;",
+            "import java.lang.annotation.Retention;",
+            "import java.lang.annotation.Target;",
+            "@Documented",
+            "@Target(TYPE_USE)",
+            "@Retention(RUNTIME)",
+            "public @interface Nullable {}")
+        .addSourceLines(
+            "edu/ucr/A.java",
+            "package edu.ucr;",
+            "import org.jspecify.annotations.Nullable;",
+            "public class A {",
+            "   @javax.annotation.Nullable",
+            "   public Object bar(){",
+            "       return null;",
+            "   }",
+            "   public @Nullable Object foo(){",
+            "       return null;",
+            "   }",
+            "}")
+        .setExpectedOutputs(
+            new MethodRecordDisplay(
+                "1",
+                "edu.ucr.A",
+                "bar()",
+                "0",
+                "[]",
+                "javax.annotation.Nullable",
+                "public",
+                "true",
+                "edu/ucr/A.java"),
+            new MethodRecordDisplay(
+                "2",
+                "edu.ucr.A",
+                "foo()",
+                "0",
+                "[]",
+                "org.jspecify.annotations.Nullable",
+                "public",
+                "true",
+                "edu/ucr/A.java"))
+        .doTest();
+  }
 }

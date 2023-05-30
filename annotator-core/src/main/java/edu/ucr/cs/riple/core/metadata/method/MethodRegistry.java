@@ -96,7 +96,7 @@ public class MethodRegistry extends Registry<MethodRecord> {
       node.fillInformation(
           new OnMethod(Helper.deserializePath(values[8]), values[1], values[2]),
           parentId,
-          values[5].split(ANNOTATION_DELIMITER),
+          ImmutableSet.copyOf(values[5].split(ANNOTATION_DELIMITER)),
           values[6],
           Boolean.parseBoolean(values[7]),
           isConstructor);
