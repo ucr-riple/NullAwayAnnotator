@@ -56,8 +56,8 @@ public class MethodRecord {
   /** Unique id assigned to this method across all visited methods. */
   private final int id;
   /**
-   * Set of annotations on the method return type. If the method has no annotations, then this field
-   * will be empty and not {@code null}.
+   * Set of annotations on the method return type or the method itself. If the method has no
+   * annotations, then this field will be empty and not {@code null}.
    */
   private ImmutableSet<? extends AnnotationMirror> annotations;
   /**

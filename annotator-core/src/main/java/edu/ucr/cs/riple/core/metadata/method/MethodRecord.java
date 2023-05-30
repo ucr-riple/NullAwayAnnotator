@@ -41,7 +41,7 @@ public class MethodRecord {
   public Integer id;
   /** Location of the containing method. */
   public OnMethod location;
-  /** Set of annotations on method return type */
+  /** Set of annotations on the method return type or the method itself */
   public ImmutableSet<String> annotations;
   /** Visibility of the method. */
   public Visibility visibility;
