@@ -394,6 +394,10 @@ public class Helper {
       return ((VariableDeclarator) node).getType();
     }
     if (node instanceof ArrayType) {
+      // Currently, we only annotate the element types (contents) of an array, not the pointer
+      // itself.
+      // TODO: This should be updated in a follow-up PR. This will reflect both type-use and
+      // type-declaration annotations.
       return ((ArrayType) node).getElementType();
     }
     if (node instanceof Type) {
