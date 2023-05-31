@@ -84,7 +84,12 @@ public abstract class AbstractEvaluator implements Evaluator {
   @Override
   public ImmutableSet<Report> evaluate(ImmutableSet<Fix> fixes) {
     ImmutableSet<Report> reports =
-        fixes.stream().map(fix -> new Report(fix, 1)).collect(ImmutableSet.toImmutableSet());
+        fixes.stream()
+            .map(fix -> new Report(fix, 1))
+            .peek(
+                report ->
+                    report.reflectAnnotationProcessorChangesOnSourceCode(supplier.getModuleInfo()))
+            .collect(ImmutableSet.toImmutableSet());
     System.out.println("Max Depth level: " + this.depth);
     for (int i = 0; i < this.depth; i++) {
       initializeFixGraph(reports);

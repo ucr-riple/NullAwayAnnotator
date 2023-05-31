@@ -29,6 +29,7 @@ import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.HashSet;
 import java.util.Objects;
@@ -91,6 +92,18 @@ public class Report {
     this.lowerBoundEffectOnDownstreamDependencies = 0;
     this.upperBoundEffectOnDownstreamDependencies = 0;
     this.tag = Tag.REJECT;
+  }
+
+  /**
+   * Updates the report's containing fix tree to include the propagated fixes on generated source
+   * code by annotation processors.
+   *
+   * @param moduleInfo Module info instance where fix tree belongs to.
+   */
+  public void reflectAnnotationProcessorChangesOnSourceCode(ModuleInfo moduleInfo) {
+    moduleInfo
+        .getAnnotationProcessorHandlers()
+        .forEach(handler -> tree.addAll(handler.extendForGeneratedFixes(tree)));
   }
 
   /**
