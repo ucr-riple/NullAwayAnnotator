@@ -25,10 +25,10 @@
 package edu.ucr.cs.riple.scanner.out;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.VisitorState;
 import com.sun.source.tree.CompilationUnitTree;
 import com.sun.tools.javac.code.Symbol;
-import edu.ucr.cs.riple.scanner.Config;
 import edu.ucr.cs.riple.scanner.ScannerContext;
 import edu.ucr.cs.riple.scanner.Serializer;
 import edu.ucr.cs.riple.scanner.SymbolUtil;
@@ -40,6 +40,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Modifier;
 
 /** Container class to store information regarding a method in source code. */
@@ -54,14 +56,19 @@ public class MethodRecord {
   /** Unique id assigned to this method across all visited methods. */
   private final int id;
   /**
+   * Set of annotations on the method return type or the method itself. If the method has no
+   * annotations, then this field will be empty and not {@code null}.
+   */
+  private ImmutableSet<? extends AnnotationMirror> annotations;
+  /**
    * Flag value for parameters annotations. If {@code annotFlags[j]} is {@code true} then the
    * parameter at index {@code j} has a {@code @Nullable} annotation.
    */
   private Boolean[] parameterAnnotationFlags;
-  /** If {@code true} the method has a {@code @Nullable} annotation on it's return type. */
-  private boolean hasNullableOnReturnType;
   /** ID of the closest super method. */
   private int parentID;
+  /** Delimiter used to separate annotations in the serialized output. */
+  public static final String ANNOTATION_DELIMITER = ",";
 
   private MethodRecord(Symbol.MethodSymbol method, ScannerContext context) {
     this.id = context.getNextMethodId();
@@ -136,7 +143,10 @@ public class MethodRecord {
         Serializer.serializeSymbol(symbol),
         String.valueOf(parentID),
         Arrays.toString(parameterAnnotationFlags),
-        String.valueOf(hasNullableOnReturnType),
+        annotations.stream()
+            // only interested in the annotation type for now.
+            .map(annot -> annot.getAnnotationType().toString())
+            .collect(Collectors.joining(ANNOTATION_DELIMITER)),
         getVisibilityOfMethod(),
         String.valueOf(!symbol.getReturnType().isPrimitiveOrVoid()),
         // for build systems that might return null for bytecodes.
@@ -156,7 +166,7 @@ public class MethodRecord {
         "method",
         "parent",
         "flags",
-        "nullable",
+        "annotations",
         "visibility",
         "non-primitive-return",
         "path");
@@ -175,14 +185,10 @@ public class MethodRecord {
     this.parameterAnnotationFlags = annotFlags.toArray(this.parameterAnnotationFlags);
   }
 
-  /**
-   * Sets return type annotation. Checks if method has {@code @Nullable} annotation on its return
-   * type.
-   *
-   * @param config Scanner config.
-   */
-  public void setReturnTypeAnnotation(Config config) {
-    this.hasNullableOnReturnType = SymbolUtil.hasNullableAnnotation(this.symbol, config);
+  /** Initializes the set of annotations for this method. */
+  public void collectMethodAnnotations() {
+    this.annotations =
+        SymbolUtil.getAllAnnotations(this.symbol).collect(ImmutableSet.toImmutableSet());
   }
 
   /**

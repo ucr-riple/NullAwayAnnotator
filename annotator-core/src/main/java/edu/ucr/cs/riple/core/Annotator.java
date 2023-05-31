@@ -119,7 +119,7 @@ public class Annotator {
         cache.enable();
       }
     }
-    if (config.forceResolveActivated) {
+    if (config.suppressRemainingErrors) {
       context.checker.suppressRemainingErrors(injector);
     }
     System.out.println("\nFinished annotating.");

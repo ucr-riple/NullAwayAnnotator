@@ -31,7 +31,7 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import org.json.simple.JSONObject;
 
-/** Container class to hold paths to nullaway and scanner config files. */
+/** Container class to hold paths to checker and scanner config files. */
 public class ModuleConfiguration {
 
   /** Path to checker config. */
@@ -50,14 +50,14 @@ public class ModuleConfiguration {
    * @return An instance of {@link ModuleConfiguration}.
    */
   public static ModuleConfiguration buildFromJson(int id, Path globalDir, JSONObject jsonObject) {
-    String nullawayConfigPath = (String) jsonObject.get("NULLAWAY");
+    String checkerConfigPath = (String) jsonObject.get("CHECKER");
     String scannerConfigPath = (String) jsonObject.get("SCANNER");
-    if (nullawayConfigPath == null || scannerConfigPath == null) {
+    if (checkerConfigPath == null || scannerConfigPath == null) {
       throw new IllegalArgumentException(
-          "Both paths to NullAway and Scanner config files must be set with NULLAWAY and SCANNER keys!");
+          "Both paths to NullAway and Scanner config files must be set with CHECKER and SCANNER keys!");
     }
     return new ModuleConfiguration(
-        id, globalDir, Paths.get(nullawayConfigPath), Paths.get(scannerConfigPath));
+        id, globalDir, Paths.get(checkerConfigPath), Paths.get(scannerConfigPath));
   }
 
   public ModuleConfiguration(int id, Path globalDir, Path checkerConfig, Path scannerConfig) {

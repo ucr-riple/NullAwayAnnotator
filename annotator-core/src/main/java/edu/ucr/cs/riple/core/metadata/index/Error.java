@@ -39,7 +39,7 @@ import javax.annotation.Nullable;
 
 /** Represents an error reported by NullAway. */
 @SuppressWarnings("JavaLangClash")
-public class Error {
+public abstract class Error {
 
   /** Error Type. */
   public final String messageType;
@@ -52,10 +52,6 @@ public class Error {
   /** Containing region. */
   protected final Region region;
   /** Error type for method initialization errors from NullAway in {@code String}. */
-  public static final String METHOD_INITIALIZER_ERROR = "METHOD_NO_INIT";
-  /** Error type for field initialization errors from NullAway in {@code String}. */
-  public static final String FIELD_INITIALIZER_ERROR = "FIELD_NO_INIT";
-
   public Error(
       String messageType,
       String message,
@@ -158,21 +154,12 @@ public class Error {
     if (!(o instanceof Error)) {
       return false;
     }
-    Error error = (Error) o;
-    if (!messageType.equals(error.messageType)) {
-      return false;
-    }
-    if (!region.equals(error.region)) {
-      return false;
-    }
-    if (messageType.equals(METHOD_INITIALIZER_ERROR)) {
-      // we do not need to compare error messages as it can be the same error with a different error
-      // message and should not be treated as a separate error.
-      return true;
-    }
-    return message.equals(error.message)
-        && resolvingFixes.equals(error.resolvingFixes)
-        && offset == error.offset;
+    Error other = (Error) o;
+    return messageType.equals(other.messageType)
+        && region.equals(other.region)
+        && message.equals(other.message)
+        && resolvingFixes.equals(other.resolvingFixes)
+        && offset == other.offset;
   }
 
   /**
@@ -190,13 +177,7 @@ public class Error {
 
   @Override
   public int hashCode() {
-    return Objects.hash(
-        messageType,
-        // to make sure equal objects will produce the same hashcode.
-        messageType.equals(METHOD_INITIALIZER_ERROR) ? METHOD_INITIALIZER_ERROR : message,
-        region,
-        resolvingFixes,
-        offset);
+    return Objects.hash(messageType, message, region, resolvingFixes, offset);
   }
 
   @Override
@@ -260,15 +241,5 @@ public class Error {
       return false;
     }
     return fixes.containsAll(this.resolvingFixes);
-  }
-  /**
-   * Returns true if the error is an initialization error ({@code METHOD_NO_INIT} or {@code
-   * FIELD_NO_INIT}).
-   *
-   * @return true, if the error is an initialization error.
-   */
-  public boolean isInitializationError() {
-    return this.messageType.equals(METHOD_INITIALIZER_ERROR)
-        || this.messageType.equals(FIELD_INITIALIZER_ERROR);
   }
 }

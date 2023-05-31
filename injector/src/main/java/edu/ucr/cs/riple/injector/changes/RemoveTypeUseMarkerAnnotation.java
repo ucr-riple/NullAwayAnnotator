@@ -27,7 +27,6 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -78,23 +77,7 @@ public class RemoveTypeUseMarkerAnnotation extends RemoveMarkerAnnotation {
     }
 
     // Remove annotation from type arguments if exists e.g. List<@Annot String>
-    if (type instanceof ClassOrInterfaceType) {
-      ClassOrInterfaceType classOrInterfaceType = (ClassOrInterfaceType) type;
-      if (classOrInterfaceType.getTypeArguments().isPresent()) {
-        classOrInterfaceType
-            .getTypeArguments()
-            .get()
-            .forEach(
-                typeArg -> {
-                  Modification onType =
-                      computeTextModificationOn(
-                          (NodeWithAnnotations<?> & NodeWithRange<?>) typeArg);
-                  if (onType != null) {
-                    modifications.add(onType);
-                  }
-                });
-      }
-    }
+    modifications.addAll(type.accept(new TypeArgumentChangeVisitor(), this));
     return modifications.isEmpty() ? null : new MultiPositionModification(modifications);
   }
 }

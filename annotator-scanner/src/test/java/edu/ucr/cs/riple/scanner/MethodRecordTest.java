@@ -58,7 +58,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDispl
           "method",
           "parent",
           "flags",
-          "nullable",
+          "annotations",
           "visibility",
           "non-primitive-return",
           "path");
@@ -87,7 +87,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDispl
                 "returnNonNull()",
                 "0",
                 "[]",
-                "false",
+                "",
                 "public",
                 "true",
                 "edu/ucr/A.java"))
@@ -109,6 +109,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDispl
             "edu/ucr/B.java",
             "package edu.ucr;",
             "public class B extends A{",
+            "   @Override",
             "   public Object returnNonNull(){",
             "      return new Object();",
             "   }",
@@ -120,7 +121,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDispl
                 "returnNonNull()",
                 "0",
                 "[]",
-                "false",
+                "",
                 "public",
                 "true",
                 "edu/ucr/A.java"),
@@ -130,7 +131,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDispl
                 "returnNonNull()",
                 "1",
                 "[]",
-                "false",
+                "java.lang.Override",
                 "public",
                 "true",
                 "edu/ucr/B.java"))
@@ -164,7 +165,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDispl
                 "publicMethod()",
                 "0",
                 "[]",
-                "false",
+                "",
                 "public",
                 "true",
                 "edu/ucr/A.java"),
@@ -174,7 +175,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDispl
                 "privateMethod()",
                 "0",
                 "[]",
-                "false",
+                "",
                 "private",
                 "true",
                 "edu/ucr/A.java"),
@@ -184,7 +185,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDispl
                 "protectedMethod()",
                 "0",
                 "[]",
-                "false",
+                "",
                 "protected",
                 "true",
                 "edu/ucr/A.java"),
@@ -194,7 +195,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDispl
                 "packageMethod()",
                 "0",
                 "[]",
-                "false",
+                "",
                 "package",
                 "true",
                 "edu/ucr/A.java"))
@@ -231,7 +232,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDispl
                 "publicMethod()",
                 "0",
                 "[]",
-                "false",
+                "",
                 "package",
                 "true",
                 "edu/ucr/A.java"),
@@ -241,14 +242,106 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDispl
                 "publicAbstractMethod()",
                 "0",
                 "[]",
-                "false",
+                "",
                 "public",
                 "true",
                 "edu/ucr/A.java"),
             new MethodRecordDisplay(
-                "3", "edu.ucr.B", "foo()", "0", "[]", "false", "public", "false", "edu/ucr/B.java"),
+                "3", "edu.ucr.B", "foo()", "0", "[]", "", "public", "false", "edu/ucr/B.java"),
             new MethodRecordDisplay(
-                "4", "edu.ucr.B", "run()", "0", "[]", "true", "public", "true", "edu/ucr/B.java"))
+                "4",
+                "edu.ucr.B",
+                "run()",
+                "0",
+                "[]",
+                "javax.annotation.Nullable",
+                "public",
+                "true",
+                "edu/ucr/B.java"))
+        .doTest();
+  }
+
+  @Test
+  public void testLombokGeneratedAnnotationsOnMethod() {
+    tester
+        .addSourceLines(
+            "lombok/Generated.java", "package lombok;", "public @interface Generated { }")
+        .addSourceLines(
+            "edu/ucr/A.java",
+            "package edu.ucr;",
+            "import lombok.Generated;",
+            "public class A {",
+            "   Object foo;",
+            "   @lombok.Generated()",
+            "   @SuppressWarnings({\"Check1\",\"Check2\"})",
+            "   public Object bar(){",
+            "       return foo;",
+            "   }",
+            "}")
+        .setExpectedOutputs(
+            new MethodRecordDisplay(
+                "1",
+                "edu.ucr.A",
+                "bar()",
+                "0",
+                "[]",
+                "lombok.Generated,java.lang.SuppressWarnings",
+                "public",
+                "true",
+                "edu/ucr/A.java"))
+        .doTest();
+  }
+
+  @Test
+  public void testTypeUseAnnotationSerialization() {
+    tester
+        .addSourceLines(
+            // Exact copy of org.jspecify.annotations.Nullable
+            "org/jspecify/annotations/Nullable.java",
+            "package org.jspecify.annotations;",
+            "import static java.lang.annotation.ElementType.TYPE_USE;",
+            "import static java.lang.annotation.RetentionPolicy.RUNTIME;",
+            "import java.lang.annotation.Documented;",
+            "import java.lang.annotation.Retention;",
+            "import java.lang.annotation.Target;",
+            "@Documented",
+            "@Target(TYPE_USE)",
+            "@Retention(RUNTIME)",
+            "public @interface Nullable {}")
+        .addSourceLines(
+            "edu/ucr/A.java",
+            "package edu.ucr;",
+            "import org.jspecify.annotations.Nullable;",
+            "public class A {",
+            "   @javax.annotation.Nullable",
+            "   public Object bar(){",
+            "       return null;",
+            "   }",
+            "   public @Nullable Object foo(){",
+            "       return null;",
+            "   }",
+            "}")
+        .setExpectedOutputs(
+            new MethodRecordDisplay(
+                "1",
+                "edu.ucr.A",
+                "bar()",
+                "0",
+                "[]",
+                "javax.annotation.Nullable",
+                "public",
+                "true",
+                "edu/ucr/A.java"),
+            new MethodRecordDisplay(
+                "2",
+                "edu.ucr.A",
+                "foo()",
+                "0",
+                "[]",
+                "org.jspecify.annotations.Nullable",
+                "public",
+                "true",
+                "edu/ucr/A.java"))
         .doTest();
   }
 }

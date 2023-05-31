@@ -143,7 +143,7 @@ public class AnnotatorScanner extends BugChecker
     serializeSymIfNonnull(methodSymbol);
     MethodRecord methodRecord = MethodRecord.findOrCreate(methodSymbol, context);
     methodRecord.findParent(state, context);
-    methodRecord.setReturnTypeAnnotation(config);
+    methodRecord.collectMethodAnnotations();
     methodRecord.setURI(state);
     List<Boolean> paramAnnotations = new ArrayList<>();
     for (int i = 0; i < methodSymbol.getParameters().size(); i++) {
