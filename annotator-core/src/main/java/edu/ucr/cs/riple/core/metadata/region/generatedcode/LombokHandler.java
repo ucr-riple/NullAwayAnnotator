@@ -138,12 +138,7 @@ public class LombokHandler implements AnnotationProcessorHandler {
    * @param annotations Nodes annotations.
    * @return True if the given annotations contains {@code lombok.generated} annotation.
    */
-  private static boolean isLombokGenerated(String[] annotations) {
-    for (String annotation : annotations) {
-      if (annotation.equals("lombok.Generated")) {
-        return true;
-      }
-    }
-    return false;
+  private static boolean isLombokGenerated(ImmutableSet<String> annotations) {
+    return annotations.stream().anyMatch(name -> name.equals("lombok.Generated"));
   }
 }
