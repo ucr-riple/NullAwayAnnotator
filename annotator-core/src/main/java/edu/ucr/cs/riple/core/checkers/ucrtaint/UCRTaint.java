@@ -27,7 +27,6 @@ package edu.ucr.cs.riple.core.checkers.ucrtaint;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.CheckerBaseClass;
-import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.region.Region;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
@@ -59,7 +58,7 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
   }
 
   @Override
-  public void preprocess(AnnotationInjector injector) {}
+  public void preprocess() {}
 
   @Override
   public Set<UCRTaintError> deserializeErrors(ModuleInfo module) {
@@ -109,7 +108,7 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
   }
 
   @Override
-  public void suppressRemainingErrors(AnnotationInjector injector) {
+  public void suppressRemainingErrors() {
     throw new RuntimeException(
         "Suppression for remaining errors is not supported for " + NAME + "yet!");
   }

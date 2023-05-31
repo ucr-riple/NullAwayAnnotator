@@ -25,7 +25,6 @@
 package edu.ucr.cs.riple.core.checkers;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.region.Region;
@@ -48,20 +47,11 @@ public interface Checker<T extends Error> {
    */
   Set<T> deserializeErrors(ModuleInfo module);
 
-  /**
-   * Suppresses remaining errors reported by the checker.
-   *
-   * @param injector Annotation injector to inject selected annotations.
-   */
-  void suppressRemainingErrors(AnnotationInjector injector);
+  /** Suppresses remaining errors reported by the checker. */
+  void suppressRemainingErrors();
 
-  /**
-   * Used to do any pre-processing steps before running the inference.
-   *
-   * @param injector Annotation injector, can be used to inject any annotations during the
-   *     pre-processing phase.
-   */
-  void preprocess(AnnotationInjector injector);
+  /** Used to do any pre-processing steps before running the inference. */
+  void preprocess();
 
   /**
    * Creates an {@link Error} instance from the given parameters.
@@ -95,4 +85,7 @@ public interface Checker<T extends Error> {
    *     build.
    */
   void prepareConfigFilesForBuild(ImmutableSet<ModuleConfiguration> configurations);
+
+  /** Used to do any post-processing steps after running the inference. */
+  void cleanup();
 }

@@ -30,8 +30,11 @@ import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.checkers.ucrtaint.UCRTaint;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
+import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /** Base class for all checker representations. */
 public abstract class CheckerBaseClass<T extends Error> implements Checker<T> {
@@ -81,5 +84,17 @@ public abstract class CheckerBaseClass<T extends Error> implements Checker<T> {
       default:
         throw new RuntimeException("Unknown checker name: " + name);
     }
+  }
+
+  @Override
+  public void cleanup() {
+    // Remove all annotations added on local variables.
+    Set<RemoveAnnotation> annotations =
+        context.log.getInjectedAnnotations().stream()
+            .filter(addAnnotation -> addAnnotation.getLocation().isOnLocalVariable())
+            .map(AddAnnotation::getReverse)
+            .collect(Collectors.toSet());
+    // Remove
+    context.injector.removeAnnotations(annotations);
   }
 }
