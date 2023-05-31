@@ -28,14 +28,17 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.utils.Pair;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import edu.ucr.cs.riple.injector.location.LocationVisitor;
 import edu.ucr.cs.riple.injector.location.OnClass;
 import edu.ucr.cs.riple.injector.location.OnField;
+import edu.ucr.cs.riple.injector.location.OnLocalVariable;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import edu.ucr.cs.riple.injector.modifications.Modification;
@@ -163,6 +166,33 @@ public class ChangeVisitor
       return null;
     }
     return change.computeTextModificationOn(((BodyDeclaration<?>) optionalClass.get()));
+  }
+
+  @Override
+  public Modification visitLocalVariable(
+      OnLocalVariable onLocalVariable, Pair<NodeList<BodyDeclaration<?>>, ASTChange> pair) {
+    final NodeList<BodyDeclaration<?>> members = pair.a;
+    final ASTChange change = pair.b;
+    for (BodyDeclaration<?> member : members) {
+      if (member instanceof CallableDeclaration<?>) {
+        CallableDeclaration<?> callableDeclaration = (CallableDeclaration<?>) member;
+        if (onLocalVariable.encMethod.matchesCallableDeclaration(callableDeclaration)) {
+          // Find variable declaration in the callable declaration with the variable name.
+          VariableDeclarationExpr variableDeclarationExpr =
+              Helper.locateVariableDeclarationExpr(callableDeclaration, onLocalVariable.varName);
+          if (variableDeclarationExpr == null) {
+            return null;
+          }
+          for (VariableDeclarator variableDeclarator : variableDeclarationExpr.getVariables()) {
+            if (variableDeclarator.getName().toString().equals(onLocalVariable.varName)) {
+              // Located the variable.
+              return change.computeTextModificationOn(variableDeclarationExpr);
+            }
+          }
+        }
+      }
+    }
+    return null;
   }
 
   /**
