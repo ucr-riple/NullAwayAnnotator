@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.metadata.method;
 
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.HashSet;
 import java.util.Objects;
@@ -40,8 +41,8 @@ public class MethodRecord {
   public Integer id;
   /** Location of the containing method. */
   public OnMethod location;
-  /** Is true if the method is already annotated with {@code Nullable} annotation. */
-  public boolean hasNullableAnnotation;
+  /** Set of annotations on the method return type or the method itself */
+  public ImmutableSet<String> annotations;
   /** Visibility of the method. */
   public Visibility visibility;
   /** Is true if the method has non-primitive return. */
@@ -89,7 +90,7 @@ public class MethodRecord {
   private static MethodRecord top() {
     if (TOP == null) {
       MethodRecord node = new MethodRecord(0);
-      node.fillInformation(null, -1, false, "private", false, false);
+      node.fillInformation(null, -1, ImmutableSet.of(), "private", false, false);
       return node;
     }
     return TOP;
@@ -109,7 +110,7 @@ public class MethodRecord {
    *
    * @param location Location of containing method.
    * @param parent Parent's id.
-   * @param hasNullableAnnotation True, if it has Nullable Annotation.
+   * @param annotations Set of annotations on method return type.
    * @param visibility Visibility of this method.
    * @param hasNonPrimitiveReturn True, if it has a non-primitive return.
    * @param isConstructor True, if it is a constructor.
@@ -117,13 +118,13 @@ public class MethodRecord {
   void fillInformation(
       OnMethod location,
       Integer parent,
-      boolean hasNullableAnnotation,
+      ImmutableSet<String> annotations,
       String visibility,
       boolean hasNonPrimitiveReturn,
       boolean isConstructor) {
     this.parent = parent;
     this.location = location;
-    this.hasNullableAnnotation = hasNullableAnnotation;
+    this.annotations = annotations;
     this.visibility = Visibility.parse(visibility);
     this.hasNonPrimitiveReturn = hasNonPrimitiveReturn;
     this.isConstructor = isConstructor;
@@ -152,6 +153,30 @@ public class MethodRecord {
    */
   public boolean isPublicMethodWithNonPrimitiveReturnType() {
     return hasNonPrimitiveReturn && visibility.equals(MethodRecord.Visibility.PUBLIC);
+  }
+
+  /**
+   * Returns true if method has nullable annotation on the return type.
+   *
+   * @return True if method has nullable annotation on the return type.
+   */
+  public boolean hasNullableAnnotation() {
+    return annotations != null && annotations.stream().anyMatch(MethodRecord::isNullableAnnotation);
+  }
+
+  /**
+   * Returns true if the given annotation should be acknowledged as a nullable annotation. The check
+   * is based on the fully qualified name of the annotation.
+   *
+   * @param annot Fully qualified name of the annotation to check.
+   * @return True if the given annotation should be acknowledged as a nullable annotation.
+   */
+  private static boolean isNullableAnnotation(String annot) {
+    return annot.endsWith(".Nullable")
+        || annot.endsWith(".checkerframework.checker.nullness.compatqual.NullableDecl")
+        // matches javax.annotation.CheckForNull and
+        // edu.umd.cs.findbugs.annotations.CheckForNull
+        || annot.endsWith(".CheckForNull");
   }
 
   @Override

@@ -24,6 +24,8 @@
 
 package edu.ucr.cs.riple.core.metadata.method;
 
+import static edu.ucr.cs.riple.scanner.out.MethodRecord.ANNOTATION_DELIMITER;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
@@ -94,7 +96,7 @@ public class MethodRegistry extends Registry<MethodRecord> {
       node.fillInformation(
           new OnMethod(Helper.deserializePath(values[8]), values[1], values[2]),
           parentId,
-          Boolean.parseBoolean(values[5]),
+          ImmutableSet.copyOf(values[5].split(ANNOTATION_DELIMITER)),
           values[6],
           Boolean.parseBoolean(values[7]),
           isConstructor);
