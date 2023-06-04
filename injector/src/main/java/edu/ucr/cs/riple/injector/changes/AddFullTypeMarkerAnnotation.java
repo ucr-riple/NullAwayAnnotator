@@ -49,10 +49,10 @@ import javax.annotation.Nullable;
  * output will be: {@code java.util.@Nullable Map<@Nullable String, java.lang.@Nullable String>
  * list;}
  */
-public class AddTypeUseMarkerAnnotation extends AddMarkerAnnotation {
+public class AddFullTypeMarkerAnnotation extends AnnotationChange implements AddAnnotation {
 
-  public AddTypeUseMarkerAnnotation(Location location, String annotation) {
-    super(location, annotation);
+  public AddFullTypeMarkerAnnotation(Location location, String annotation) {
+    super(location, new Name(annotation));
   }
 
   @Override
@@ -83,7 +83,7 @@ public class AddTypeUseMarkerAnnotation extends AddMarkerAnnotation {
 
   @Override
   public RemoveAnnotation getReverse() {
-    return new RemoveTypeUseMarkerAnnotation(location, annotationName.fullName);
+    return new RemoveFullTypeMarkerAnnotation(location, annotationName.fullName);
   }
 
   @Override
@@ -91,10 +91,10 @@ public class AddTypeUseMarkerAnnotation extends AddMarkerAnnotation {
     if (this == other) {
       return true;
     }
-    if (!(other instanceof AddTypeUseMarkerAnnotation)) {
+    if (!(other instanceof AddFullTypeMarkerAnnotation)) {
       return false;
     }
-    AddTypeUseMarkerAnnotation otherAdd = (AddTypeUseMarkerAnnotation) other;
+    AddFullTypeMarkerAnnotation otherAdd = (AddFullTypeMarkerAnnotation) other;
     return this.location.equals(otherAdd.location)
         && this.annotationName.equals(otherAdd.annotationName);
   }
@@ -125,5 +125,15 @@ public class AddTypeUseMarkerAnnotation extends AddMarkerAnnotation {
     }
     throw new RuntimeException(
         "Unexpected type to get range from: " + type + " : " + type.getClass());
+  }
+
+  /**
+   * Converts this change to a declaration change. This is used to apply the change to the
+   * declaration only.
+   *
+   * @return a declaration change that adds the annotation to the declaration.
+   */
+  public AddMarkerAnnotation toDeclaration() {
+    return new AddMarkerAnnotation(location, annotationName.simpleName);
   }
 }
