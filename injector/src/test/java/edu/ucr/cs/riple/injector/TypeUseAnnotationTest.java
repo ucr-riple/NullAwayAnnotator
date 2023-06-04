@@ -24,8 +24,8 @@
 
 package edu.ucr.cs.riple.injector;
 
-import edu.ucr.cs.riple.injector.changes.AddTypeUseMarkerAnnotation;
-import edu.ucr.cs.riple.injector.changes.RemoveTypeUseMarkerAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddFullTypeMarkerAnnotation;
+import edu.ucr.cs.riple.injector.changes.RemoveFullTypeMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnLocalVariable;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -59,11 +59,11 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddTypeUseMarkerAnnotation(
+            new AddFullTypeMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"),
-            new AddTypeUseMarkerAnnotation(
+            new AddFullTypeMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"), "edu.ucr.UnTainted"),
-            new AddTypeUseMarkerAnnotation(
+            new AddFullTypeMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
         .start();
   }
@@ -93,11 +93,11 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new RemoveTypeUseMarkerAnnotation(
+            new RemoveFullTypeMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"),
-            new RemoveTypeUseMarkerAnnotation(
+            new RemoveFullTypeMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"), "edu.ucr.UnTainted"),
-            new RemoveTypeUseMarkerAnnotation(
+            new RemoveFullTypeMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
         .start();
   }
@@ -128,17 +128,17 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddTypeUseMarkerAnnotation(
+            new AddFullTypeMarkerAnnotation(
                 new OnField("Foo.java", "test.Foo", Set.of("bar")), "custom.example.Untainted"),
-            new AddTypeUseMarkerAnnotation(
+            new AddFullTypeMarkerAnnotation(
                 new OnField("Foo.java", "test.Foo", Set.of("f0")), "custom.example.Untainted"),
-            new AddTypeUseMarkerAnnotation(
+            new AddFullTypeMarkerAnnotation(
                 new OnMethod("Foo.java", "test.Foo", "baz(java.lang.Object)"),
                 "custom.example.Untainted"),
-            new AddTypeUseMarkerAnnotation(
+            new AddFullTypeMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "baz(java.lang.Object)", "localVar"),
                 "custom.example.Untainted"),
-            new AddTypeUseMarkerAnnotation(
+            new AddFullTypeMarkerAnnotation(
                 new OnParameter("Foo.java", "test.Foo", "baz(java.lang.Object)", 0),
                 "custom.example.Untainted"))
         .start();
@@ -171,17 +171,17 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new RemoveTypeUseMarkerAnnotation(
+            new RemoveFullTypeMarkerAnnotation(
                 new OnField("Foo.java", "test.Foo", Set.of("bar")), "custom.example.Untainted"),
-            new RemoveTypeUseMarkerAnnotation(
+            new RemoveFullTypeMarkerAnnotation(
                 new OnField("Foo.java", "test.Foo", Set.of("f0")), "custom.example.Untainted"),
-            new RemoveTypeUseMarkerAnnotation(
+            new RemoveFullTypeMarkerAnnotation(
                 new OnMethod("Foo.java", "test.Foo", "baz(java.lang.Object)"),
                 "custom.example.Untainted"),
-            new RemoveTypeUseMarkerAnnotation(
+            new RemoveFullTypeMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "baz(java.lang.Object)", "localVar"),
                 "custom.example.Untainted"),
-            new RemoveTypeUseMarkerAnnotation(
+            new RemoveFullTypeMarkerAnnotation(
                 new OnParameter("Foo.java", "test.Foo", "baz(java.lang.Object)", 0),
                 "custom.example.Untainted"))
         .start();
@@ -211,11 +211,11 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddTypeUseMarkerAnnotation(
+            new AddFullTypeMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"),
-            new AddTypeUseMarkerAnnotation(
+            new AddFullTypeMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"), "edu.ucr.UnTainted"),
-            new AddTypeUseMarkerAnnotation(
+            new AddFullTypeMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
         .start();
   }
@@ -241,11 +241,11 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "   Map<java.util.Map, String>[] f2;",
             "}")
         .addChanges(
-            new AddTypeUseMarkerAnnotation(
+            new AddFullTypeMarkerAnnotation(
                 new OnField("Foo.java", "test.Foo", Set.of("f0")), "custom.example.Untainted"),
-            new RemoveTypeUseMarkerAnnotation(
+            new RemoveFullTypeMarkerAnnotation(
                 new OnField("Foo.java", "test.Foo", Set.of("f1")), "custom.example.Untainted"),
-            new RemoveTypeUseMarkerAnnotation(
+            new RemoveFullTypeMarkerAnnotation(
                 new OnField("Foo.java", "test.Foo", Set.of("f2")), "custom.example.Untainted"))
         .start();
   }

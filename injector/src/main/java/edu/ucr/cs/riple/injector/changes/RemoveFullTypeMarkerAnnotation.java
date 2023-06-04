@@ -47,9 +47,9 @@ import javax.annotation.Nullable;
  * {@code Map} and all the type arguments. The final output will be: {@code java.util.Map<String,
  * java.lang.String> list;}
  */
-public class RemoveTypeUseMarkerAnnotation extends RemoveMarkerAnnotation {
+public class RemoveFullTypeMarkerAnnotation extends RemoveMarkerAnnotation {
 
-  public RemoveTypeUseMarkerAnnotation(Location location, String annotation) {
+  public RemoveFullTypeMarkerAnnotation(Location location, String annotation) {
     super(location, annotation);
   }
 
