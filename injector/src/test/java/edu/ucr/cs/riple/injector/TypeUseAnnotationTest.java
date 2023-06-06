@@ -249,4 +249,37 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
                 new OnField("Foo.java", "test.Foo", Set.of("f2")), "custom.example.Untainted"))
         .start();
   }
+
+  @Test
+  public void additionOnInitializerTest() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "public class Foo {",
+            "   public void foo() {",
+            "      int f0 = 0;",
+            "      Bar<String, Integer, Baz<String, Integer>> f1 = new Custom<String, String>();",
+            "      String f2 = \"FOO\";",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "   public void foo() {",
+            "      @UnTainted int f0 = 0;",
+            "      @UnTainted Bar<@UnTainted String, @UnTainted Integer, @UnTainted Baz<@UnTainted String, @UnTainted Integer>> f1 = new Custom<@UnTainted String, @UnTainted String>();",
+            "      @UnTainted String f2 = \"FOO\";",
+            "   }",
+            "}")
+        .addChanges(
+            new AddFullTypeMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"),
+            new AddFullTypeMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"), "edu.ucr.UnTainted"),
+            new AddFullTypeMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
+        .start();
+  }
 }

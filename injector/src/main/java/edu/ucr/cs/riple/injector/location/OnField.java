@@ -24,10 +24,11 @@
 
 package edu.ucr.cs.riple.injector.location;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.injector.Helper;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -54,6 +55,9 @@ public class OnField extends Location {
 
   public OnField(Path path, String clazz, Set<String> variables) {
     super(LocationKind.FIELD, path, clazz);
+    // Check that the set is not empty and does not contain null elements.
+    Preconditions.checkArgument(!variables.isEmpty());
+    Preconditions.checkArgument(variables.stream().noneMatch(Objects::isNull));
     this.variables = variables;
   }
 
@@ -63,7 +67,11 @@ public class OnField extends Location {
 
   public OnField(JSONObject json) {
     super(LocationKind.FIELD, json);
-    this.variables = new HashSet<>(Collections.singletonList((String) json.get("variables")));
+    String fieldName = (String) json.get("field");
+    if (fieldName == null) {
+      throw new IllegalArgumentException("Field name cannot be null, " + json);
+    }
+    this.variables = Sets.newHashSet(fieldName);
   }
 
   @Override

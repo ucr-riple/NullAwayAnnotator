@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package edu.ucr.cs.riple.core.metadata.index;
 
 import com.google.common.base.Preconditions;
