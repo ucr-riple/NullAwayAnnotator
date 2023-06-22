@@ -122,7 +122,7 @@ public class AnalysisModeTest extends AnnotatorBaseCoreTest {
   }
 
   @Test
-  public void strictModeWithForceResolveTest() {
+  public void strictModeWithSuppressRemainingErrorsTest() {
     coreTestHelper
         .onTarget()
         .withSourceFile("Foo.java", "analysismode/Foo.java")
