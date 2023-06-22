@@ -108,7 +108,7 @@ tasks.register("configureNullAwayVersion"){
         case "0.10.4":
             test {
                 filter {
-                    excludeTest "edu.ucr.cs.riple.core.CoreTest", "errorInFieldDeclarationForceResolveTest"
+                    excludeTest "edu.ucr.cs.riple.core.CoreTest", "errorInFieldDeclarationSuppressRemainingErrorsTest"
                     excludeTest "edu.ucr.cs.riple.core.CoreTest", "initializationErrorWithMultipleConstructors"
                 }
             }

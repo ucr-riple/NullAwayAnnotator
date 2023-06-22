@@ -255,7 +255,7 @@ public class ConfigurationTest {
   }
 
   @Test
-  public void testForceResolveFlag() {
+  public void testSuppressRemainingErrorFlag() {
     runTestWithMockedBuild(
         testDir,
         () -> {
@@ -268,7 +268,7 @@ public class ConfigurationTest {
           config = makeConfigWithFlags(baseFlags);
           assertFalse(config.suppressRemainingErrors);
 
-          CLIFlag flag = new CLIFlagWithValue("fr", "edu.ucr.example.NullUnmarked");
+          CLIFlag flag = new CLIFlagWithValue("sre", "edu.ucr.example.NullUnmarked");
           baseFlags.add(flag);
           config = makeConfigWithFlags(baseFlags);
           assertTrue(config.suppressRemainingErrors);

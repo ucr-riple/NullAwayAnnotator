@@ -156,7 +156,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
   }
 
   @Test
-  public void fieldAssignNullableConstructorForceResolveEnabled() {
+  public void fieldAssignNullableConstructorSuppressRemainingErrorsEnabled() {
     coreTestHelper
         .onTarget()
         .withSourceLines(
@@ -180,7 +180,8 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             new TReport(new OnParameter("Main.java", "test.Main", "Main(java.lang.Object)", 0), 1))
         .toDepth(1)
         .suppressRemainingErrors()
-        .checkExpectedOutput("fieldAssignNullableConstructorForceResolveEnabled/expected")
+        .checkExpectedOutput(
+            "fieldAssignNullableConstructorSuppressRemainingErrorsEnabled/expected")
         .start();
   }
 
@@ -199,7 +200,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
   }
 
   @Test
-  public void multipleFieldDeclarationTestForceResolveEnabled() {
+  public void multipleFieldDeclarationTestSuppressRemainingErrorsEnabled() {
     coreTestHelper
         .onTarget()
         .withSourceDirectory("test", "multiplefielddeclration")
@@ -309,10 +310,10 @@ public class CoreTest extends AnnotatorBaseCoreTest {
   }
 
   @Test
-  public void errorInFieldDeclarationForceResolveTest() {
+  public void errorInFieldDeclarationSuppressRemainingErrorsTest() {
     coreTestHelper
         .onTarget()
-        .withSourceDirectory("test", "errorInFieldDeclarationForceResolveTest/input")
+        .withSourceDirectory("test", "errorInFieldDeclarationSuppressRemainingErrorsTest/input")
         .withExpectedReports(
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f1")), 2),
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f2", "f3")), 2),
@@ -322,7 +323,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             new TReport(new OnField("Foo.java", "test.Foo", Set.of("f5")), 0))
         .toDepth(1)
         .suppressRemainingErrors()
-        .checkExpectedOutput("errorInFieldDeclarationForceResolveTest/expected")
+        .checkExpectedOutput("errorInFieldDeclarationSuppressRemainingErrorsTest/expected")
         .start();
   }
 

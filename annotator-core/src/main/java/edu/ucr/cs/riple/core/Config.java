@@ -312,11 +312,11 @@ public class Config {
     analysisMode.setRequired(false);
     options.addOption(analysisMode);
 
-    // Force resolve activation
-    Option activateForceResolveOption =
-        new Option("fr", "force-resolve", true, "Activates force resolve mode.");
-    activateForceResolveOption.setRequired(false);
-    options.addOption(activateForceResolveOption);
+    // Suppress remaining error activation
+    Option suppressRemainingErrorsOption =
+        new Option("sre", "suppress-remaining-errors", true, "Suppresses remaining errors");
+    suppressRemainingErrorsOption.setRequired(false);
+    options.addOption(suppressRemainingErrorsOption);
 
     // Disable inference
     Option deactivateInference =
@@ -437,10 +437,10 @@ public class Config {
     }
     this.inferenceActivated = !cmd.hasOption(deactivateInference);
     this.suppressRemainingErrors =
-        !this.inferenceActivated || cmd.hasOption(activateForceResolveOption);
+        !this.inferenceActivated || cmd.hasOption(suppressRemainingErrorsOption);
     this.nullUnMarkedAnnotation =
         this.suppressRemainingErrors
-            ? cmd.getOptionValue(activateForceResolveOption)
+            ? cmd.getOptionValue(suppressRemainingErrorsOption)
             : "org.jspecify.annotations.NullUnmarked";
     this.moduleCounterID = 0;
     this.generatedCodeDetectors =
@@ -527,7 +527,7 @@ public class Config {
     this.downstreamConfigurations = ImmutableSet.copyOf(moduleConfigurationList);
     this.moduleCounterID = 0;
     this.suppressRemainingErrors =
-        getValueFromKey(jsonObject, "FORCE_RESOLVE", Boolean.class).orElse(false);
+        getValueFromKey(jsonObject, "SUPPRESS_REMAINING_ERRORS", Boolean.class).orElse(false);
     this.inferenceActivated =
         getValueFromKey(jsonObject, "INFERENCE_ACTIVATION", Boolean.class).orElse(true);
     this.nullUnMarkedAnnotation =
@@ -667,7 +667,7 @@ public class Config {
     public Path nullawayLibraryModelLoaderPath;
     public AnalysisMode mode = AnalysisMode.LOCAL;
     public String downstreamBuildCommand;
-    public boolean forceResolveActivation = false;
+    public boolean suppressRemainingErrors = false;
     public String nullUnmarkedAnnotation = "org.jspecify.annotations.NullUnmarked";
     public boolean inferenceActivated = true;
     public boolean useCacheImpact = false;
@@ -704,7 +704,7 @@ public class Config {
       json.put("DEPTH", depth);
       json.put("EXHAUSTIVE_SEARCH", exhaustiveSearch);
       json.put("REDIRECT_BUILD_OUTPUT_TO_STDERR", redirectBuildOutputToStdErr);
-      json.put("FORCE_RESOLVE", forceResolveActivation);
+      json.put("SUPPRESS_REMAINING_ERRORS", suppressRemainingErrors);
       json.put("INFERENCE_ACTIVATION", inferenceActivated);
       JSONArray configPathsJson = new JSONArray();
       configPathsJson.addAll(

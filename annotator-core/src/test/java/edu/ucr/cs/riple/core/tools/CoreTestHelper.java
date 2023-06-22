@@ -70,7 +70,7 @@ public class CoreTestHelper {
   private boolean outerLoopActivated = false;
   /** Bailout activation. Deactivated by default */
   private boolean disableBailout = false;
-  /** Force resolve activation. Deactivated by default */
+  /** Suppress remaining errors mode activation. Deactivated by default */
   private boolean suppressRemainingErrors = false;
   /** Downstream dependency analysis activation. Deactivated by default */
   private boolean downstreamDependencyAnalysisActivated = false;
@@ -262,7 +262,7 @@ public class CoreTestHelper {
       try {
         List<String> lines = Files.readAllLines(path);
         if (lines.size() != 1) {
-          fail("Force Resolve Mode did not resolve all errors:\n" + lines);
+          fail("Suppress Remaining Errors Mode did not resolve all errors:\n" + lines);
         }
       } catch (IOException e) {
         throw new RuntimeException("Exception happened while reading file at: " + path);
@@ -398,7 +398,7 @@ public class CoreTestHelper {
     builder.downStreamDependenciesAnalysisActivated = downstreamDependencyAnalysisActivated;
     builder.mode = mode;
     builder.inferenceActivated = !deactivateInference;
-    builder.forceResolveActivation = suppressRemainingErrors;
+    builder.suppressRemainingErrors = suppressRemainingErrors;
     builder.useCacheImpact = true;
     builder.sourceTypes.add(SourceType.LOMBOK);
     builder.cache = true;
