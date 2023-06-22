@@ -1,5 +1,14 @@
 ## CHANGELOG
 
+### Version 1.3.7
+- Added support for applying modifications on local variables
+- Added support for type use annotation changes
+- Redesigned inference engine to work with custom checkers
+- Added flag `-cn, --checker-name <arg>` to required flags. (Use `NULLAWAY` for arg to run inference for NullAway)
+- Enhanced lombok support by propagating @Nullable on fields to their corresponding getters.
+- Renamed flag `--force-resolove` to `--suppress-remaining-errors`.
+- Bug fixes and refactorings.
+
 ### Version 1.3.6
 - Added inference deactivation mode.
 - Split field initialization region into smaller regions where each field declaration is a region.
