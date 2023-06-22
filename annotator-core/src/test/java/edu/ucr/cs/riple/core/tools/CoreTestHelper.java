@@ -398,7 +398,7 @@ public class CoreTestHelper {
     builder.downStreamDependenciesAnalysisActivated = downstreamDependencyAnalysisActivated;
     builder.mode = mode;
     builder.inferenceActivated = !deactivateInference;
-    builder.forceResolveActivation = suppressRemainingErrors;
+    builder.suppressRemainingErrors = suppressRemainingErrors;
     builder.useCacheImpact = true;
     builder.sourceTypes.add(SourceType.LOMBOK);
     builder.cache = true;
