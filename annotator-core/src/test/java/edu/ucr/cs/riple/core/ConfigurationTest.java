@@ -255,7 +255,7 @@ public class ConfigurationTest {
   }
 
   @Test
-  public void testSuppressRemaininErrorFlag() {
+  public void testSuppressRemainingErrorFlag() {
     runTestWithMockedBuild(
         testDir,
         () -> {
