@@ -418,8 +418,18 @@ public class Helper {
       // Node cannot have annotations.
       return false;
     }
-    return ((NodeWithAnnotations<?>) node)
-        .getAnnotations().stream().anyMatch(annot -> annot.equals(expr));
+    return isAnnotatedWith((NodeWithAnnotations<?>) node, expr);
+  }
+
+  /**
+   * Helper method to check if a node is annotated with a specific annotation.
+   *
+   * @param node the node to check its annotations.
+   * @param expr the annotation to check.
+   * @return true if the node is annotated with the annotation.
+   */
+  public static boolean isAnnotatedWith(NodeWithAnnotations<?> node, AnnotationExpr expr) {
+    return node.getAnnotations().stream().anyMatch(annot -> annot.equals(expr));
   }
 
   /**

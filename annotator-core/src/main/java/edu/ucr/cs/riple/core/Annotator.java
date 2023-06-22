@@ -65,6 +65,7 @@ public class Annotator {
     preprocess();
     long timer = context.log.startTimer();
     annotate();
+    //    context.checker.cleanup();
     context.log.stopTimerAndCapture(timer);
     Utility.writeLog(context);
   }
@@ -117,7 +118,6 @@ public class Annotator {
     if (config.suppressRemainingErrors) {
       context.checker.suppressRemainingErrors();
     }
-    // context.checker.cleanup();
     System.out.println("\nFinished annotating.");
     Utility.writeReports(context, cache.reports().stream().collect(ImmutableSet.toImmutableSet()));
   }

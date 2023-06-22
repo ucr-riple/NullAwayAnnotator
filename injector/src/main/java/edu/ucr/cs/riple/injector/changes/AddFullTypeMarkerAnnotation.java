@@ -71,7 +71,7 @@ public class AddFullTypeMarkerAnnotation extends AnnotationChange implements Add
     Set<Modification> modifications = new HashSet<>();
     Type type = Helper.getType(node);
 
-    if (!Helper.isAnnotatedWith(type, annotationExpr)) {
+    if (!Helper.isAnnotatedWith(node, annotationExpr)) {
       // Annotate the type.
       Range range = findSimpleNameRangeInTypeName(type);
       if (range == null) {

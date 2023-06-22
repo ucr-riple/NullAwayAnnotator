@@ -282,4 +282,66 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
         .start();
   }
+
+  @Test
+  public void quick() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "   public void foo() {",
+            "      @UnTainted int f0 = 0;",
+            "      @UnTainted Bar<@UnTainted String, @UnTainted Integer, @UnTainted Baz<@UnTainted String, @UnTainted Integer>> f1 = new Custom<@UnTainted String, @UnTainted String>();",
+            "      @UnTainted String f2 = \"FOO\";",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "   public void foo() {",
+            "      int f0 = 0;",
+            "      Bar<@UnTainted String, @UnTainted Integer, @UnTainted Baz<@UnTainted String, @UnTainted Integer>> f1 = new Custom<@UnTainted String, @UnTainted String>();",
+            "      String f2 = \"FOO\";",
+            "   }",
+            "}")
+        .addChanges(
+            new AddFullTypeMarkerAnnotation(
+                    new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted")
+                .toDeclaration()
+                .getReverse(),
+            new AddFullTypeMarkerAnnotation(
+                    new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"), "edu.ucr.UnTainted")
+                .toDeclaration()
+                .getReverse(),
+            new AddFullTypeMarkerAnnotation(
+                    new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted")
+                .toDeclaration()
+                .getReverse())
+        .start();
+  }
+
+  @Test
+  public void avoidDuplicate() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.RUntainted;",
+            "public class Foo {",
+            "   public @RUntainted Map<@RUntainted String, @RUntainted String> bar();",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.RUntainted;",
+            "public class Foo {",
+            "   public @RUntainted Map<@RUntainted String, @RUntainted String> bar();",
+            "}")
+        .addChanges(
+            new AddFullTypeMarkerAnnotation(
+                new OnMethod("Foo.java", "test.Foo", "bar()"), "edu.ucr.RUntainted"))
+        .start();
+  }
 }
