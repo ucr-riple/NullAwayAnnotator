@@ -24,7 +24,10 @@ package edu.ucr.cs.riple.injector.changes;
 
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import com.github.javaparser.ast.type.Type;
@@ -78,6 +81,20 @@ public class RemoveFullTypeMarkerAnnotation extends RemoveMarkerAnnotation {
 
     // Remove annotation from type arguments if exists e.g. List<@Annot String>
     modifications.addAll(type.accept(new TypeArgumentChangeVisitor(), this));
+
+    // TODO: Hacky, but for now
+    if (node instanceof VariableDeclarationExpr) {
+      VariableDeclarationExpr vde = (VariableDeclarationExpr) node;
+      if (vde.getVariables().size() > 0) {
+        if (vde.getVariables().get(0).getInitializer().isPresent()) {
+          Expression initializedValue = vde.getVariables().get(0).getInitializer().get();
+          if (initializedValue instanceof ObjectCreationExpr) {
+            Type initializedType = ((ObjectCreationExpr) initializedValue).getType();
+            modifications.addAll(initializedType.accept(new TypeArgumentChangeVisitor(), this));
+          }
+        }
+      }
+    }
     return modifications.isEmpty() ? null : new MultiPositionModification(modifications);
   }
 }
