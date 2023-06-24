@@ -344,4 +344,42 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
                 new OnMethod("Foo.java", "test.Foo", "bar()"), "edu.ucr.RUntainted"))
         .start();
   }
+
+  @Test
+  public void deletionOnInitializerTest() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "   public void foo() {",
+            "      @UnTainted int f0 = 0;",
+            "      @UnTainted Bar<@UnTainted String, @UnTainted Integer, @UnTainted Baz<@UnTainted String, @UnTainted Integer>> f1 = new Custom<@UnTainted String, @UnTainted String>();",
+            "      @UnTainted String f2 = \"FOO\";",
+            "      @UnTainted Bar<@UnTainted String, @UnTainted Integer[], @UnTainted Baz<@UnTainted String, @UnTainted Integer>> f3 = new Custom<@UnTainted String, @UnTainted Integer[], @UnTainted String>();",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "   public void foo() {",
+            "      int f0 = 0;",
+            "      Bar<String, Integer, Baz<String, Integer>> f1 = new Custom<String, String>();",
+            "      String f2 = \"FOO\";",
+            "      Bar<String, Integer[], Baz<String, Integer>> f3 = new Custom<String, Integer[], String>();",
+            "   }",
+            "}")
+        .addChanges(
+            new RemoveFullTypeMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"),
+            new RemoveFullTypeMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"), "edu.ucr.UnTainted"),
+            new RemoveFullTypeMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"),
+            new RemoveFullTypeMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f3"), "edu.ucr.UnTainted"))
+        .start();
+  }
 }

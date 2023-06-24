@@ -27,30 +27,18 @@ package edu.ucr.cs.riple.core.checkers.ucrtaint;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.CheckerBaseClass;
-import edu.ucr.cs.riple.core.checkers.nullaway.FixSerializationConfig;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.region.Region;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.changes.AddFullTypeMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
-
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -59,6 +47,12 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * Represents <a href="https://github.com/kanaksad/UCRTaintingChecker">UCRTaint</a> checker in
@@ -135,31 +129,31 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
   @Override
   public void prepareConfigFilesForBuild(ImmutableSet<ModuleConfiguration> configurations) {
     configurations.forEach(
-            module -> {
-              DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-              try {
-                DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-                Document doc = docBuilder.newDocument();
+        module -> {
+          DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+          try {
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            Document doc = docBuilder.newDocument();
 
-                // Root
-                Element rootElement = doc.createElement("serialization");
-                doc.appendChild(rootElement);
+            // Root
+            Element rootElement = doc.createElement("serialization");
+            doc.appendChild(rootElement);
 
-                // Output dir
-                Element outputDir = doc.createElement("path");
-                outputDir.setTextContent(module.dir.toString());
-                rootElement.appendChild(outputDir);
+            // Output dir
+            Element outputDir = doc.createElement("path");
+            outputDir.setTextContent(module.dir.toString());
+            rootElement.appendChild(outputDir);
 
-                // Writings
-                TransformerFactory transformerFactory = TransformerFactory.newInstance();
-                Transformer transformer = transformerFactory.newTransformer();
-                DOMSource source = new DOMSource(doc);
-                StreamResult result = new StreamResult(module.checkerConfig.toFile());
-                transformer.transform(source, result);
-              } catch (ParserConfigurationException | TransformerException e) {
-                throw new RuntimeException("Error happened in writing config.", e);
-              }
-            });
+            // Writings
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(module.checkerConfig.toFile());
+            transformer.transform(source, result);
+          } catch (ParserConfigurationException | TransformerException e) {
+            throw new RuntimeException("Error happened in writing config.", e);
+          }
+        });
   }
 
   @Override
