@@ -45,7 +45,10 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
@@ -301,6 +304,28 @@ public class Utility {
       return stream.collect(Collectors.toList());
     } catch (IOException e) {
       throw new RuntimeException("Exception while reading file: " + path, e);
+    }
+  }
+
+  public static void timeStamp(Config config) {
+    Path path = config.globalDir.resolve("time-stamp.txt");
+    if (!path.toFile().exists()) {
+      // make the file if it doesn't exist
+      try {
+        Files.createFile(path);
+      } catch (IOException e) {
+        throw new RuntimeException("Exception while creating file: " + path, e);
+      }
+    }
+    // append the current time to the file
+    try {
+      Files.write(
+          path,
+          Collections.singleton(LocalDateTime.now(ZoneId.of("America/Los_Angeles")) + "\n"),
+          Charset.defaultCharset(),
+          StandardOpenOption.APPEND);
+    } catch (IOException e) {
+      throw new RuntimeException("Exception while writing in file: " + path, e);
     }
   }
 }

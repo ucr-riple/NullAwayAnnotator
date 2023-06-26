@@ -76,6 +76,7 @@ public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcess
       Set<Fix> fixes =
           group.stream().flatMap(node -> node.tree.stream()).collect(Collectors.toSet());
       injector.injectFixes(fixes);
+      Utility.timeStamp(context.config);
       compilerRunner.run();
       errorStore.saveState();
       group.forEach(

@@ -34,6 +34,7 @@ import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.ast.type.WildcardType;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Insertion;
@@ -139,6 +140,9 @@ public class AddFullTypeMarkerAnnotation extends AnnotationChange implements Add
         return null;
       }
       return type.getRange().get();
+    }
+    if (type instanceof WildcardType) {
+      return findSimpleNameRangeInTypeName(((WildcardType) type).getExtendedType().orElse(null));
     }
     throw new RuntimeException(
         "Unexpected type to get range from: " + type + " : " + type.getClass());
