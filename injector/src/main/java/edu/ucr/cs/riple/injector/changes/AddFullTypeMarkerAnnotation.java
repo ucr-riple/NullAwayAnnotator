@@ -72,7 +72,11 @@ public class AddFullTypeMarkerAnnotation extends AnnotationChange implements Add
     Set<Modification> modifications = new HashSet<>();
     Type type = Helper.getType(node);
 
-    if (!Helper.isAnnotatedWith(node, annotationExpr)) {
+    // For annotation on fully qualified name or inner class, the annotation is on the type. (e.g.
+    // Map.@Annot Entry or java.util.@Annot Map)
+    if (!(Helper.isAnnotatedWith(type, annotationExpr)
+        // For top level class, the annotation is on the node itself.
+        || Helper.isAnnotatedWith(node, annotationExpr))) {
       // Annotate the type.
       Range range = findSimpleNameRangeInTypeName(type);
       if (range == null) {

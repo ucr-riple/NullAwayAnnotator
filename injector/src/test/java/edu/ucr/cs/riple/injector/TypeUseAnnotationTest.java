@@ -382,4 +382,38 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f3"), "edu.ucr.UnTainted"))
         .start();
   }
+
+  @Test
+  public void avoidDuplicateOnAnnotationOnInnerClass() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.Untainted;",
+            "public class Foo {",
+            "   public void foo() {",
+            "     for (Map.@Untainted Entry<@Untainted String, @Untainted String> entry : m_additionalPreferences.entrySet()) {",
+            "       String key = entry.getKey();",
+            "       @RUntainted String value = entry.getValue();",
+            "       m_user.setAdditionalInfo(PREFERENCES_ADDITIONAL_PREFIX + key, value);",
+            "     }",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.Untainted;",
+            "public class Foo {",
+            "   public void foo() {",
+            "     for (Map.@Untainted Entry<@Untainted String, @Untainted String> entry : m_additionalPreferences.entrySet()) {",
+            "       String key = entry.getKey();",
+            "       @RUntainted String value = entry.getValue();",
+            "       m_user.setAdditionalInfo(PREFERENCES_ADDITIONAL_PREFIX + key, value);",
+            "     }",
+            "   }",
+            "}")
+        .addChanges(
+            new AddFullTypeMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "entry"), "edu.ucr.Untainted"))
+        .start();
+  }
 }
