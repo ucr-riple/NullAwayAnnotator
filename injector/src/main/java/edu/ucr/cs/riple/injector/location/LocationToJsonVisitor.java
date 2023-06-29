@@ -45,7 +45,7 @@ public class LocationToJsonVisitor implements LocationVisitor<JSONObject, Void> 
     JSONObject res = new JSONObject();
     res.put(KEYS.CLASS, location.clazz);
     res.put(KEYS.KIND, location.type.toString());
-    res.put(KEYS.PATH, location.path);
+    res.put(KEYS.PATH, location.path.toString());
     return res;
   }
 
@@ -71,7 +71,7 @@ public class LocationToJsonVisitor implements LocationVisitor<JSONObject, Void> 
   @Override
   public JSONObject visitParameter(OnParameter onParameter, Void unused) {
     JSONObject res = defaultAction(onParameter);
-    res.put(KEYS.METHOD, onParameter.enclosingMethod);
+    res.put(KEYS.METHOD, onParameter.enclosingMethod.method);
     res.put(KEYS.INDEX, onParameter.index);
     return res;
   }
@@ -85,7 +85,7 @@ public class LocationToJsonVisitor implements LocationVisitor<JSONObject, Void> 
   @Override
   public JSONObject visitLocalVariable(OnLocalVariable onLocalVariable, Void unused) {
     JSONObject res = defaultAction(onLocalVariable);
-    res.put(KEYS.METHOD, onLocalVariable.encMethod);
+    res.put(KEYS.METHOD, onLocalVariable.encMethod.method);
     res.put(KEYS.VARIABLES, onLocalVariable.varName);
     return res;
   }
