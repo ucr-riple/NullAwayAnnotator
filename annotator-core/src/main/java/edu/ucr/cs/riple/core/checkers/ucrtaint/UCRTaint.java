@@ -97,8 +97,8 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
     int offset = ((Long) errorsJson.get("offset")).intValue();
     Region region =
         new Region(
-            (String) ((JSONObject) errorsJson.get("region")).get("member"),
-            (String) ((JSONObject) errorsJson.get("region")).get("class"));
+            (String) ((JSONObject) errorsJson.get("region")).get("class"),
+            (String) ((JSONObject) errorsJson.get("region")).get("symbol"));
     ImmutableSet.Builder<Fix> builder = ImmutableSet.builder();
     ((JSONArray) errorsJson.get("fixes"))
         .forEach(
