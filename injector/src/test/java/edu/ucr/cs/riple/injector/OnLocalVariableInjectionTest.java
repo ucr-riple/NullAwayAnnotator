@@ -258,4 +258,29 @@ public class OnLocalVariableInjectionTest extends BaseInjectorTest {
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
         .start();
   }
+
+  @Test
+  public void onLocalVariableInStaticInitializerBlock() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "public class Foo {",
+            "  static {",
+            "    Object f0;",
+            "  }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "  static {",
+            "    @UnTainted Object f0;",
+            "  }",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "", "f0"), "edu.ucr.UnTainted"))
+        .start();
+  }
 }

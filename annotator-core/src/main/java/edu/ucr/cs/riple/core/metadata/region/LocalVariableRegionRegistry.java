@@ -37,6 +37,8 @@ public class LocalVariableRegionRegistry implements RegionRegistry {
       return Optional.empty();
     }
     OnLocalVariable localVariable = location.toLocalVariable();
-    return Optional.of(Set.of(new Region(localVariable.clazz, localVariable.encMethod.method)));
+    // If null, this location points to a local variable inside a static initializer block.
+    String regionMember = localVariable.encMethod == null ? "" : localVariable.encMethod.method;
+    return Optional.of(Set.of(new Region(localVariable.clazz, regionMember)));
   }
 }

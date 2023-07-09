@@ -34,6 +34,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumConstantDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
@@ -55,7 +56,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -558,6 +561,23 @@ public class Helper {
     } catch (FileNotFoundException e) {
       throw new IllegalArgumentException("File not found: " + path, e);
     }
+  }
+
+  /**
+   * Returns containing static initializer blocks of a {@link BodyDeclaration}.
+   *
+   * @param bodyDeclaration the body declaration to get its static initializer blocks.
+   * @return the static initializer blocks of the body declaration.
+   */
+  public static Set<InitializerDeclaration> getStaticInitializerBlocks(
+      BodyDeclaration<?> bodyDeclaration) {
+    return bodyDeclaration.getChildNodes().stream()
+        .filter(
+            node ->
+                node instanceof InitializerDeclaration
+                    && ((InitializerDeclaration) node).isStatic())
+        .map(node -> (InitializerDeclaration) node)
+        .collect(Collectors.toSet());
   }
 
   /**

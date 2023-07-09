@@ -29,6 +29,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.CallableDeclaration;
+import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
@@ -42,7 +43,9 @@ import edu.ucr.cs.riple.injector.location.OnLocalVariable;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 
@@ -173,6 +176,27 @@ public class ChangeVisitor
       OnLocalVariable onLocalVariable, Pair<NodeList<BodyDeclaration<?>>, ASTChange> pair) {
     final NodeList<BodyDeclaration<?>> members = pair.a;
     final ASTChange change = pair.b;
+    if (onLocalVariable.encMethod == null) {
+      if (members.getParentNode().isEmpty()
+          || !(members.getParentNode().get() instanceof BodyDeclaration<?>)) {
+        return null;
+      }
+      Set<InitializerDeclaration> staticBlock =
+          Helper.getStaticInitializerBlocks((BodyDeclaration<?>) members.getParentNode().get());
+      for (InitializerDeclaration block : staticBlock) {
+        List<VariableDeclarationExpr> variables =
+            block.findAll(VariableDeclarationExpr.class, Node.TreeTraversal.PREORDER);
+        for (VariableDeclarationExpr variableDeclarationExpr : variables) {
+          for (VariableDeclarator variableDeclarator : variableDeclarationExpr.getVariables()) {
+            if (variableDeclarator.getName().toString().equals(onLocalVariable.varName)) {
+              // Located the variable.
+              return change.computeTextModificationOn(variableDeclarationExpr);
+            }
+          }
+        }
+      }
+      return null;
+    }
     for (BodyDeclaration<?> member : members) {
       if (member instanceof CallableDeclaration<?>) {
         CallableDeclaration<?> callableDeclaration = (CallableDeclaration<?>) member;
