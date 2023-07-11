@@ -37,7 +37,11 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -106,11 +110,26 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
               JSONObject fixJson = (JSONObject) o;
               Location location =
                   Location.createLocationFromJSON((JSONObject) fixJson.get("location"));
+              final List<Deque<Integer>> i = new ArrayList<>();
+              if (((JSONObject) fixJson.get("location")).containsKey("type-variable-position")) {
+                JSONArray indecies =
+                    (JSONArray)
+                        ((JSONObject) fixJson.get("location")).get("type-variable-position");
+                indecies.forEach(
+                    index -> {
+                      Deque<Integer> deque = new ArrayDeque<>();
+                      ((JSONArray) index).forEach(ii -> deque.add(((Long) ii).intValue()));
+                      i.add(deque);
+                    });
+              }
+              if (i.isEmpty()) {
+                i.add(new ArrayDeque<>(List.of(0)));
+              }
               location.ifField(onField -> extendVariableList(onField, moduleInfo));
               builder.add(
                   new Fix(
                       new AddTypeUseMarkerAnnotation(
-                          location, "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted"),
+                          location, "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted", i),
                       errorType,
                       true));
             });
