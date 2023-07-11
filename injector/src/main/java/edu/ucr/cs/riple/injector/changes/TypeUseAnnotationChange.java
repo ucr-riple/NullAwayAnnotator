@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 University of California, Riverside.
+ * Copyright (c) 2023 University of California, Riverside.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,6 @@
 
 package edu.ucr.cs.riple.injector.changes;
 
-import com.github.javaparser.Range;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
@@ -33,68 +32,82 @@ import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import com.github.javaparser.ast.type.Type;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
-import edu.ucr.cs.riple.injector.modifications.Deletion;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.modifications.MultiPositionModification;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashSet;
-import java.util.Optional;
+import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
 
-/**
- * Removes a type-use marker annotation from a node in the source code. It will remove the
- * annotation both from the declaration and all type arguments.
- *
- * <p>For instance, for the node: {@code java.util.@Nullable Map<@Nullable String,
- * java.lang.@Nullable String> list;} It will remove the {@code @Nullable} annotation from the type
- * {@code Map} and all the type arguments. The final output will be: {@code java.util.Map<String,
- * java.lang.String> list;}
- */
-public class RemoveFullTypeMarkerAnnotation extends RemoveMarkerAnnotation {
+/** Represents a type-use annotation change on types in the AST. */
+public abstract class TypeUseAnnotationChange extends AnnotationChange {
 
-  public RemoveFullTypeMarkerAnnotation(Location location, String annotation) {
+  /** List of indices that represent the position of the type argument in the node's type. */
+  protected final List<Deque<Integer>> typeIndex;
+
+  public TypeUseAnnotationChange(
+      Location location, Name annotation, List<Deque<Integer>> typeIndex) {
     super(location, annotation);
+    this.typeIndex = typeIndex;
   }
 
-  @Override
+  /**
+   * Computes the text modification on the given type argument. It does not modify the containing
+   * type arguments of the given type.
+   */
   @Nullable
+  public abstract Modification computeTextModificationOnType(
+      Type type, AnnotationExpr annotationExpr);
+
+  /**
+   * Computes the text modification on the given node. It does not modify the containing type
+   * arguments.
+   */
+  public abstract <T extends NodeWithAnnotations<?> & NodeWithRange<?>>
+      Modification computeTextModificationOnNode(T node, AnnotationExpr annotationExpr);
+
+  @Nullable
+  @Override
   public <T extends NodeWithAnnotations<?> & NodeWithRange<?>>
       Modification computeTextModificationOn(T node) {
-    Type type = Helper.getType(node);
-    AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationName.simpleName);
     Set<Modification> modifications = new HashSet<>();
-    // Remove the annotation from the declaration if exists e.g. @Annot String f;
-    Modification onDeclaration = super.computeTextModificationOn(node);
-    if (onDeclaration != null) {
-      modifications.add(onDeclaration);
-    } else {
-      // Remove the annotation from the type if exists e.g. java.lang.@Annot String f;
-      for (AnnotationExpr expr : type.getAnnotations()) {
-        if (expr.equals(annotationExpr)) {
-          Optional<Range> annotRange = expr.getRange();
-          annotRange
-              .map(value -> new Deletion(expr.toString(), value.begin, value.end))
-              .ifPresent(modifications::add);
-        }
-      }
+    AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationName.simpleName);
+    Type type = Helper.getType(node);
+    Modification onNode = computeTextModificationOnNode(node, annotationExpr);
+    if (onNode != null) {
+      modifications.add(onNode);
     }
-
-    // Remove annotation from type arguments if exists e.g. List<@Annot String>
-    modifications.addAll(type.accept(new TypeArgumentChangeVisitor(), this));
-
-    // TODO: Hacky, but for now
+    // Check if the expression is a variable declaration with an initializer.
+    Type initializedType = null;
     if (node instanceof VariableDeclarationExpr) {
       VariableDeclarationExpr vde = (VariableDeclarationExpr) node;
       if (vde.getVariables().size() > 0) {
         if (vde.getVariables().get(0).getInitializer().isPresent()) {
           Expression initializedValue = vde.getVariables().get(0).getInitializer().get();
           if (initializedValue instanceof ObjectCreationExpr) {
-            Type initializedType = ((ObjectCreationExpr) initializedValue).getType();
-            modifications.addAll(initializedType.accept(new TypeArgumentChangeVisitor(), this));
+            initializedType = ((ObjectCreationExpr) initializedValue).getType();
           }
         }
       }
     }
+
+    for (Deque<Integer> index : typeIndex) {
+      if (index.size() == 1 && index.peek() == 0) {
+        // Already added on declaration.
+        continue;
+      }
+      // copy index to a new deque
+      Deque<Integer> copy = new ArrayDeque<>(index);
+      // Apply the change on type arguments.
+      modifications.addAll(type.accept(new TypeArgumentChangeVisitor(index, annotationExpr), this));
+      if (initializedType != null) {
+        modifications.addAll(
+            initializedType.accept(new TypeArgumentChangeVisitor(copy, annotationExpr), this));
+      }
+    }
+
     return modifications.isEmpty() ? null : new MultiPositionModification(modifications);
   }
 }

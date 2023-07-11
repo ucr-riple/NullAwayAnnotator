@@ -31,7 +31,7 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.region.Region;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
-import edu.ucr.cs.riple.injector.changes.AddFullTypeMarkerAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddTypeUseMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -109,7 +109,7 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
               location.ifField(onField -> extendVariableList(onField, moduleInfo));
               builder.add(
                   new Fix(
-                      new AddFullTypeMarkerAnnotation(
+                      new AddTypeUseMarkerAnnotation(
                           location, "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted"),
                       errorType,
                       true));

@@ -24,12 +24,18 @@
 
 package edu.ucr.cs.riple.injector;
 
-import edu.ucr.cs.riple.injector.changes.AddFullTypeMarkerAnnotation;
-import edu.ucr.cs.riple.injector.changes.RemoveFullTypeMarkerAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddTypeUseMarkerAnnotation;
+import edu.ucr.cs.riple.injector.changes.RemoveTypeUseMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnLocalVariable;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.List;
 import java.util.Set;
 import org.junit.Test;
 
@@ -54,16 +60,18 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "public class Foo {",
             "   public void foo() {",
             "      @UnTainted int f0;",
-            "      @UnTainted Bar<@UnTainted String, @UnTainted Integer, @UnTainted Baz<@UnTainted String, @UnTainted Integer>> f1;",
+            "      @UnTainted Bar<@UnTainted String, Integer, @UnTainted Baz<String, @UnTainted Integer>> f1;",
             "      @UnTainted String f2;",
             "   }",
             "}")
         .addChanges(
-            new AddFullTypeMarkerAnnotation(
+            new AddTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"),
-            new AddFullTypeMarkerAnnotation(
-                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"), "edu.ucr.UnTainted"),
-            new AddFullTypeMarkerAnnotation(
+            new AddTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"),
+                "edu.ucr.UnTainted",
+                List.of(dequeOf(0), dequeOf(1, 0), dequeOf(3, 0), dequeOf(3, 2, 0))),
+            new AddTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
         .start();
   }
@@ -78,7 +86,7 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "public class Foo {",
             "   public void foo() {",
             "      @UnTainted int f0;",
-            "      @UnTainted Bar<@UnTainted String, @UnTainted Integer, @UnTainted Baz<@UnTainted String, @UnTainted Integer>> f1;",
+            "      @UnTainted Bar<@UnTainted String, Integer, @UnTainted Baz<String, @UnTainted Integer>> f1;",
             "      @UnTainted String f2;",
             "   }",
             "}")
@@ -93,11 +101,13 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new RemoveFullTypeMarkerAnnotation(
+            new RemoveTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"),
-            new RemoveFullTypeMarkerAnnotation(
-                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"), "edu.ucr.UnTainted"),
-            new RemoveFullTypeMarkerAnnotation(
+            new RemoveTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"),
+                "edu.ucr.UnTainted",
+                List.of(dequeOf(0), dequeOf(1, 0), dequeOf(3, 0), dequeOf(3, 2, 0))),
+            new RemoveTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
         .start();
   }
@@ -128,17 +138,19 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddFullTypeMarkerAnnotation(
+            new AddTypeUseMarkerAnnotation(
                 new OnField("Foo.java", "test.Foo", Set.of("bar")), "custom.example.Untainted"),
-            new AddFullTypeMarkerAnnotation(
-                new OnField("Foo.java", "test.Foo", Set.of("f0")), "custom.example.Untainted"),
-            new AddFullTypeMarkerAnnotation(
+            new AddTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("f0")),
+                "custom.example.Untainted",
+                List.of(dequeOf(0), dequeOf(1, 0), dequeOf(2, 0))),
+            new AddTypeUseMarkerAnnotation(
                 new OnMethod("Foo.java", "test.Foo", "baz(java.lang.Object)"),
                 "custom.example.Untainted"),
-            new AddFullTypeMarkerAnnotation(
+            new AddTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "baz(java.lang.Object)", "localVar"),
                 "custom.example.Untainted"),
-            new AddFullTypeMarkerAnnotation(
+            new AddTypeUseMarkerAnnotation(
                 new OnParameter("Foo.java", "test.Foo", "baz(java.lang.Object)", 0),
                 "custom.example.Untainted"))
         .start();
@@ -171,17 +183,19 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new RemoveFullTypeMarkerAnnotation(
+            new RemoveTypeUseMarkerAnnotation(
                 new OnField("Foo.java", "test.Foo", Set.of("bar")), "custom.example.Untainted"),
-            new RemoveFullTypeMarkerAnnotation(
-                new OnField("Foo.java", "test.Foo", Set.of("f0")), "custom.example.Untainted"),
-            new RemoveFullTypeMarkerAnnotation(
+            new RemoveTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("f0")),
+                "custom.example.Untainted",
+                List.of(dequeOf(0), dequeOf(1, 0), dequeOf(2, 0))),
+            new RemoveTypeUseMarkerAnnotation(
                 new OnMethod("Foo.java", "test.Foo", "baz(java.lang.Object)"),
                 "custom.example.Untainted"),
-            new RemoveFullTypeMarkerAnnotation(
+            new RemoveTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "baz(java.lang.Object)", "localVar"),
                 "custom.example.Untainted"),
-            new RemoveFullTypeMarkerAnnotation(
+            new RemoveTypeUseMarkerAnnotation(
                 new OnParameter("Foo.java", "test.Foo", "baz(java.lang.Object)", 0),
                 "custom.example.Untainted"))
         .start();
@@ -211,11 +225,15 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddFullTypeMarkerAnnotation(
-                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"),
-            new AddFullTypeMarkerAnnotation(
-                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"), "edu.ucr.UnTainted"),
-            new AddFullTypeMarkerAnnotation(
+            new AddTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"),
+                "edu.ucr.UnTainted",
+                List.of(dequeOf(0), dequeOf(1, 0), dequeOf(2, 0))),
+            new AddTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"),
+                "edu.ucr.UnTainted",
+                List.of(dequeOf(0), dequeOf(1, 0), dequeOf(2, 0))),
+            new AddTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
         .start();
   }
@@ -241,12 +259,18 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "   Map<java.util.Map, String>[] f2;",
             "}")
         .addChanges(
-            new AddFullTypeMarkerAnnotation(
-                new OnField("Foo.java", "test.Foo", Set.of("f0")), "custom.example.Untainted"),
-            new RemoveFullTypeMarkerAnnotation(
-                new OnField("Foo.java", "test.Foo", Set.of("f1")), "custom.example.Untainted"),
-            new RemoveFullTypeMarkerAnnotation(
-                new OnField("Foo.java", "test.Foo", Set.of("f2")), "custom.example.Untainted"))
+            new AddTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("f0")),
+                "custom.example.Untainted",
+                List.of(dequeOf(0), dequeOf(1, 0), dequeOf(2, 0))),
+            new RemoveTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("f1")),
+                "custom.example.Untainted",
+                List.of(dequeOf(0), dequeOf(1, 0), dequeOf(2, 0))),
+            new RemoveTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("f2")),
+                "custom.example.Untainted",
+                List.of(dequeOf(0), dequeOf(1, 0), dequeOf(2, 0))))
         .start();
   }
 
@@ -259,7 +283,7 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "public class Foo {",
             "   public void foo() {",
             "      int f0 = 0;",
-            "      Bar<String, Integer, Baz<String, Integer>> f1 = new Custom<String, String>();",
+            "      Bar<String, Integer, Baz<String, Integer>> f1 = new Bar<String, Integer, Baz<String, Integer>>();",
             "      String f2 = \"FOO\";",
             "   }",
             "}")
@@ -269,22 +293,24 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "public class Foo {",
             "   public void foo() {",
             "      @UnTainted int f0 = 0;",
-            "      @UnTainted Bar<@UnTainted String, @UnTainted Integer, @UnTainted Baz<@UnTainted String, @UnTainted Integer>> f1 = new Custom<@UnTainted String, @UnTainted String>();",
+            "      @UnTainted Bar<@UnTainted String, Integer, Baz<String, @UnTainted Integer>> f1 = new Bar<@UnTainted String, Integer, Baz<String, @UnTainted Integer>>();",
             "      @UnTainted String f2 = \"FOO\";",
             "   }",
             "}")
         .addChanges(
-            new AddFullTypeMarkerAnnotation(
+            new AddTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"),
-            new AddFullTypeMarkerAnnotation(
-                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"), "edu.ucr.UnTainted"),
-            new AddFullTypeMarkerAnnotation(
+            new AddTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"),
+                "edu.ucr.UnTainted",
+                List.of(dequeOf(0), dequeOf(1, 0), dequeOf(3, 2, 0))),
+            new AddTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
         .start();
   }
 
   @Test
-  public void quick() {
+  public void removalOnDeclarationOnly() {
     injectorTestHelper
         .addInput(
             "Foo.java",
@@ -308,15 +334,15 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddFullTypeMarkerAnnotation(
+            new AddTypeUseMarkerAnnotation(
                     new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted")
                 .toDeclaration()
                 .getReverse(),
-            new AddFullTypeMarkerAnnotation(
+            new AddTypeUseMarkerAnnotation(
                     new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"), "edu.ucr.UnTainted")
                 .toDeclaration()
                 .getReverse(),
-            new AddFullTypeMarkerAnnotation(
+            new AddTypeUseMarkerAnnotation(
                     new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted")
                 .toDeclaration()
                 .getReverse())
@@ -340,8 +366,10 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "   public @RUntainted Map<@RUntainted String, @RUntainted String> bar();",
             "}")
         .addChanges(
-            new AddFullTypeMarkerAnnotation(
-                new OnMethod("Foo.java", "test.Foo", "bar()"), "edu.ucr.RUntainted"))
+            new AddTypeUseMarkerAnnotation(
+                new OnMethod("Foo.java", "test.Foo", "bar()"),
+                "edu.ucr.RUntainted",
+                List.of(dequeOf(0), dequeOf(1, 0), dequeOf(2, 0))))
         .start();
   }
 
@@ -355,9 +383,9 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "public class Foo {",
             "   public void foo() {",
             "      @UnTainted int f0 = 0;",
-            "      @UnTainted Bar<@UnTainted String, @UnTainted Integer, @UnTainted Baz<@UnTainted String, @UnTainted Integer>> f1 = new Custom<@UnTainted String, @UnTainted String>();",
+            "      @UnTainted Bar<@UnTainted String, @UnTainted Integer, @UnTainted Baz<@UnTainted String, @UnTainted Integer>> f1 = new Bar<@UnTainted String, @UnTainted Integer, @UnTainted Baz<@UnTainted String, @UnTainted Integer>>();",
             "      @UnTainted String f2 = \"FOO\";",
-            "      @UnTainted Bar<@UnTainted String, @UnTainted Integer[], @UnTainted Baz<@UnTainted String, @UnTainted Integer>> f3 = new Custom<@UnTainted String, @UnTainted Integer[], @UnTainted String>();",
+            "      @UnTainted Bar<@UnTainted String, @UnTainted Integer[], @UnTainted Baz<@UnTainted String, @UnTainted Integer>> f3 = new Bar<@UnTainted String, @UnTainted Integer[], @UnTainted Baz<@UnTainted String, @UnTainted Integer>>();",
             "   }",
             "}")
         .expectOutput(
@@ -366,20 +394,36 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "public class Foo {",
             "   public void foo() {",
             "      int f0 = 0;",
-            "      Bar<String, Integer, Baz<String, Integer>> f1 = new Custom<String, String>();",
+            "      Bar<String, Integer, Baz<String, Integer>> f1 = new Bar<String, Integer, Baz<String, Integer>>();",
             "      String f2 = \"FOO\";",
-            "      Bar<String, Integer[], Baz<String, Integer>> f3 = new Custom<String, Integer[], String>();",
+            "      Bar<String, Integer[], Baz<String, Integer>> f3 = new Bar<String, Integer[], Baz<String, Integer>>();",
             "   }",
             "}")
         .addChanges(
-            new RemoveFullTypeMarkerAnnotation(
+            new RemoveTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"),
-            new RemoveFullTypeMarkerAnnotation(
-                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"), "edu.ucr.UnTainted"),
-            new RemoveFullTypeMarkerAnnotation(
+            new RemoveTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"),
+                "edu.ucr.UnTainted",
+                List.of(
+                    dequeOf(0),
+                    dequeOf(1, 0),
+                    dequeOf(2, 0),
+                    dequeOf(3, 0),
+                    dequeOf(3, 1, 0),
+                    dequeOf(3, 2, 0))),
+            new RemoveTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"),
-            new RemoveFullTypeMarkerAnnotation(
-                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f3"), "edu.ucr.UnTainted"))
+            new RemoveTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f3"),
+                "edu.ucr.UnTainted",
+                List.of(
+                    dequeOf(0),
+                    dequeOf(1, 0),
+                    dequeOf(2, 0),
+                    dequeOf(3, 0),
+                    dequeOf(3, 1, 0),
+                    dequeOf(3, 2, 0))))
         .start();
   }
 
@@ -412,8 +456,40 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "   }",
             "}")
         .addChanges(
-            new AddFullTypeMarkerAnnotation(
+            new AddTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "entry"), "edu.ucr.Untainted"))
         .start();
+  }
+
+  @Test
+  public void addTypeUseOnType() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.Untainted;",
+            "public class Foo {",
+            "   private final Object f0;",
+            "   private final Object f1;",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.Untainted;",
+            "public class Foo {",
+            "   @Untainted private final Object f0;",
+            "   private final @Untainted Object f1;",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Collections.singleton("f0")),
+                "edu.ucr.Untainted"),
+            new AddTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Collections.singleton("f1")),
+                "edu.ucr.Untainted"))
+        .start();
+  }
+
+  private static Deque<Integer> dequeOf(Integer... values) {
+    return new ArrayDeque<>(Arrays.asList(values));
   }
 }

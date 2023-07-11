@@ -22,6 +22,7 @@
 
 package edu.ucr.cs.riple.injector;
 
+import com.github.javaparser.Range;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
@@ -44,7 +45,10 @@ import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.type.ArrayType;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.ast.type.WildcardType;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import java.io.FileNotFoundException;
@@ -578,6 +582,37 @@ public class Helper {
                     && ((InitializerDeclaration) node).isStatic())
         .map(node -> (InitializerDeclaration) node)
         .collect(Collectors.toSet());
+  }
+
+  /**
+   * Finds the range of the simple name in the fully qualified name of the given type in the source
+   * code. This is used to insert the type use annotations before the type simple name.
+   *
+   * @param type the type to find its range
+   * @return the range of the type or null if the type does not have a range.
+   */
+  public static Range findSimpleNameRangeInTypeName(Type type) {
+    if (type instanceof ClassOrInterfaceType) {
+      ClassOrInterfaceType classOrInterfaceType = (ClassOrInterfaceType) type;
+      if (classOrInterfaceType.getName().getRange().isEmpty()) {
+        return null;
+      }
+      return ((ClassOrInterfaceType) type).getName().getRange().get();
+    }
+    if (type instanceof ArrayType) {
+      return findSimpleNameRangeInTypeName(((ArrayType) type).getComponentType());
+    }
+    if (type instanceof PrimitiveType) {
+      if (type.getRange().isEmpty()) {
+        return null;
+      }
+      return type.getRange().get();
+    }
+    if (type instanceof WildcardType) {
+      return findSimpleNameRangeInTypeName(((WildcardType) type).getExtendedType().orElse(null));
+    }
+    throw new RuntimeException(
+        "Unexpected type to get range from: " + type + " : " + type.getClass());
   }
 
   /**

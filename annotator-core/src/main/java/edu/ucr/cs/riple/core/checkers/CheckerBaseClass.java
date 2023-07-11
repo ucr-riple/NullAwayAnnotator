@@ -31,7 +31,7 @@ import edu.ucr.cs.riple.core.checkers.ucrtaint.UCRTaint;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
-import edu.ucr.cs.riple.injector.changes.AddFullTypeMarkerAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddTypeUseMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Set;
@@ -96,8 +96,8 @@ public abstract class CheckerBaseClass<T extends Error> implements Checker<T> {
             // Keep added type use annotations.
             .map(
                 addAnnotation ->
-                    addAnnotation instanceof AddFullTypeMarkerAnnotation
-                        ? ((AddFullTypeMarkerAnnotation) addAnnotation).toDeclaration()
+                    addAnnotation instanceof AddTypeUseMarkerAnnotation
+                        ? ((AddTypeUseMarkerAnnotation) addAnnotation).toDeclaration()
                         : addAnnotation)
             .map(AddAnnotation::getReverse)
             .collect(Collectors.toSet());
