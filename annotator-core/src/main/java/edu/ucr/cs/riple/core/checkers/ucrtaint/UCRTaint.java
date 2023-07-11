@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.checkers.ucrtaint;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.CheckerBaseClass;
@@ -37,12 +38,11 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -110,26 +110,30 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
               JSONObject fixJson = (JSONObject) o;
               Location location =
                   Location.createLocationFromJSON((JSONObject) fixJson.get("location"));
-              final List<Deque<Integer>> i = new ArrayList<>();
+              final ImmutableList.Builder<ImmutableList<Integer>> bul = ImmutableList.builder();
+              AtomicBoolean empty = new AtomicBoolean(true);
               if (((JSONObject) fixJson.get("location")).containsKey("type-variable-position")) {
                 JSONArray indecies =
                     (JSONArray)
                         ((JSONObject) fixJson.get("location")).get("type-variable-position");
                 indecies.forEach(
                     index -> {
-                      Deque<Integer> deque = new ArrayDeque<>();
-                      ((JSONArray) index).forEach(ii -> deque.add(((Long) ii).intValue()));
-                      i.add(deque);
+                      List<Integer> indexList = new ArrayList<>();
+                      ((JSONArray) index).forEach(ii -> indexList.add(((Long) ii).intValue()));
+                      bul.add(ImmutableList.copyOf(indexList));
+                      empty.set(false);
                     });
               }
-              if (i.isEmpty()) {
-                i.add(new ArrayDeque<>(List.of(0)));
+              if (empty.get()) {
+                bul.add(ImmutableList.of(0));
               }
               location.ifField(onField -> extendVariableList(onField, moduleInfo));
               builder.add(
                   new Fix(
                       new AddTypeUseMarkerAnnotation(
-                          location, "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted", i),
+                          location,
+                          "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted",
+                          bul.build()),
                       errorType,
                       true));
             });

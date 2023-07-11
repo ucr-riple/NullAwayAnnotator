@@ -29,13 +29,12 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import com.github.javaparser.ast.type.Type;
+import com.google.common.collect.ImmutableList;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Insertion;
 import edu.ucr.cs.riple.injector.modifications.Modification;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.List;
+import java.util.Objects;
 import javax.annotation.Nullable;
 
 /**
@@ -50,11 +49,11 @@ import javax.annotation.Nullable;
 public class AddTypeUseMarkerAnnotation extends TypeUseAnnotationChange implements AddAnnotation {
 
   public AddTypeUseMarkerAnnotation(Location location, String annotation) {
-    this(location, annotation, List.of(new ArrayDeque<>(List.of(0))));
+    this(location, annotation, ImmutableList.of(ImmutableList.of(0)));
   }
 
   public AddTypeUseMarkerAnnotation(
-      Location location, String annotation, List<Deque<Integer>> typeIndex) {
+      Location location, String annotation, ImmutableList<ImmutableList<Integer>> typeIndex) {
     super(location, new Name(annotation), typeIndex);
   }
 
@@ -75,7 +74,7 @@ public class AddTypeUseMarkerAnnotation extends TypeUseAnnotationChange implemen
   public <T extends NodeWithAnnotations<?> & NodeWithRange<?>>
       Modification computeTextModificationOnNode(T node, AnnotationExpr annotationExpr) {
     boolean addOnDeclaration =
-        typeIndex.stream().anyMatch(index -> index.size() == 1 && index.peek() == 0);
+        typeIndex.stream().anyMatch(index -> index.size() == 1 && index.get(0) == 0);
     Type type = Helper.getType(node);
     // For annotation on fully qualified name or inner class, the annotation is on the type. (e.g.
     // Map.@Annot Entry or java.util.@Annot Map)
@@ -99,19 +98,6 @@ public class AddTypeUseMarkerAnnotation extends TypeUseAnnotationChange implemen
     return new RemoveTypeUseMarkerAnnotation(location, annotationName.fullName, typeIndex);
   }
 
-  @Override
-  public boolean equals(Object other) {
-    if (this == other) {
-      return true;
-    }
-    if (!(other instanceof AddTypeUseMarkerAnnotation)) {
-      return false;
-    }
-    AddTypeUseMarkerAnnotation otherAdd = (AddTypeUseMarkerAnnotation) other;
-    return this.location.equals(otherAdd.location)
-        && this.annotationName.equals(otherAdd.annotationName);
-  }
-
   /**
    * Converts this change to a declaration change. This is used to apply the change to the
    * declaration only.
@@ -120,5 +106,19 @@ public class AddTypeUseMarkerAnnotation extends TypeUseAnnotationChange implemen
    */
   public AddMarkerAnnotation toDeclaration() {
     return new AddMarkerAnnotation(location, annotationName.simpleName);
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    boolean ans = super.equals(other);
+    if (!ans) {
+      return false;
+    }
+    return other instanceof AddTypeUseMarkerAnnotation;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), AddTypeUseMarkerAnnotation.class);
   }
 }

@@ -27,13 +27,12 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import com.github.javaparser.ast.type.Type;
+import com.google.common.collect.ImmutableList;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Deletion;
 import edu.ucr.cs.riple.injector.modifications.Modification;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
@@ -50,11 +49,11 @@ public class RemoveTypeUseMarkerAnnotation extends TypeUseAnnotationChange
     implements RemoveAnnotation {
 
   public RemoveTypeUseMarkerAnnotation(Location location, String annotation) {
-    super(location, new Name(annotation), List.of(new ArrayDeque<>(List.of(0))));
+    super(location, new Name(annotation), ImmutableList.of(ImmutableList.of(0)));
   }
 
   public RemoveTypeUseMarkerAnnotation(
-      Location location, String annotation, List<Deque<Integer>> typeIndex) {
+      Location location, String annotation, ImmutableList<ImmutableList<Integer>> typeIndex) {
     super(location, new Name(annotation), typeIndex);
   }
 
@@ -77,8 +76,9 @@ public class RemoveTypeUseMarkerAnnotation extends TypeUseAnnotationChange
   public <T extends NodeWithAnnotations<?> & NodeWithRange<?>>
       Modification computeTextModificationOnNode(T node, AnnotationExpr annotationExpr) {
     Type type = Helper.getType(node);
+
     boolean removeOnDeclaration =
-        typeIndex.stream().anyMatch(index -> index.size() == 1 && index.peek() == 0);
+        typeIndex.stream().anyMatch(index -> index.size() == 1 && index.get(0) == 0);
     if (removeOnDeclaration) {
       // Remove the annotation from the declaration if exists e.g. @Annot String f;
       for (AnnotationExpr expr : node.getAnnotations()) {
@@ -98,5 +98,19 @@ public class RemoveTypeUseMarkerAnnotation extends TypeUseAnnotationChange
       }
     }
     return null;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    boolean ans = super.equals(o);
+    if (!ans) {
+      return false;
+    }
+    return o instanceof RemoveTypeUseMarkerAnnotation;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), RemoveTypeUseMarkerAnnotation.class);
   }
 }

@@ -79,6 +79,6 @@ public class RemoveMarkerAnnotation extends AnnotationChange implements RemoveAn
 
   @Override
   public int hashCode() {
-    return Objects.hash("REMOVE-MARKER", location, annotationName);
+    return Objects.hash(RemoveMarkerAnnotation.class, location, annotationName);
   }
 }

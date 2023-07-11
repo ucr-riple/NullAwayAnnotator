@@ -30,6 +30,7 @@ import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import com.github.javaparser.ast.type.Type;
+import com.google.common.collect.ImmutableList;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Modification;
@@ -37,7 +38,7 @@ import edu.ucr.cs.riple.injector.modifications.MultiPositionModification;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
 
@@ -45,10 +46,10 @@ import javax.annotation.Nullable;
 public abstract class TypeUseAnnotationChange extends AnnotationChange {
 
   /** List of indices that represent the position of the type argument in the node's type. */
-  protected final List<Deque<Integer>> typeIndex;
+  protected final ImmutableList<ImmutableList<Integer>> typeIndex;
 
   public TypeUseAnnotationChange(
-      Location location, Name annotation, List<Deque<Integer>> typeIndex) {
+      Location location, Name annotation, ImmutableList<ImmutableList<Integer>> typeIndex) {
     super(location, annotation);
     this.typeIndex = typeIndex;
   }
@@ -93,15 +94,16 @@ public abstract class TypeUseAnnotationChange extends AnnotationChange {
       }
     }
 
-    for (Deque<Integer> index : typeIndex) {
-      if (index.size() == 1 && index.peek() == 0) {
+    for (ImmutableList<Integer> index : typeIndex) {
+      Deque<Integer> cc = new ArrayDeque<>(index);
+      if (cc.size() == 1 && cc.peek() == 0) {
         // Already added on declaration.
         continue;
       }
       // copy index to a new deque
-      Deque<Integer> copy = new ArrayDeque<>(index);
+      Deque<Integer> copy = new ArrayDeque<>(cc);
       // Apply the change on type arguments.
-      modifications.addAll(type.accept(new TypeArgumentChangeVisitor(index, annotationExpr), this));
+      modifications.addAll(type.accept(new TypeArgumentChangeVisitor(cc, annotationExpr), this));
       if (initializedType != null) {
         modifications.addAll(
             initializedType.accept(new TypeArgumentChangeVisitor(copy, annotationExpr), this));
@@ -109,5 +111,22 @@ public abstract class TypeUseAnnotationChange extends AnnotationChange {
     }
 
     return modifications.isEmpty() ? null : new MultiPositionModification(modifications);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    boolean ans = super.equals(o);
+    if (!(o instanceof TypeUseAnnotationChange)) {
+      return false;
+    }
+    if (!ans) {
+      return false;
+    }
+    return typeIndex.equals(((TypeUseAnnotationChange) o).typeIndex);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), typeIndex);
   }
 }

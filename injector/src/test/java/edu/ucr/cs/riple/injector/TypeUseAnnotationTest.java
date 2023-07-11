@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.injector;
 
+import com.google.common.collect.ImmutableList;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddTypeUseMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.RemoveTypeUseMarkerAnnotation;
@@ -31,11 +32,7 @@ import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnLocalVariable;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
-import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Deque;
-import java.util.List;
 import java.util.Set;
 import org.junit.Test;
 
@@ -70,7 +67,11 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             new AddTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"),
                 "edu.ucr.UnTainted",
-                List.of(dequeOf(0), dequeOf(1, 0), dequeOf(3, 0), dequeOf(3, 2, 0))),
+                ImmutableList.of(
+                    ImmutableList.of(0),
+                    ImmutableList.of(1, 0),
+                    ImmutableList.of(3, 0),
+                    ImmutableList.of(3, 2, 0))),
             new AddTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
         .start();
@@ -106,7 +107,11 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             new RemoveTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"),
                 "edu.ucr.UnTainted",
-                List.of(dequeOf(0), dequeOf(1, 0), dequeOf(3, 0), dequeOf(3, 2, 0))),
+                ImmutableList.of(
+                    ImmutableList.of(0),
+                    ImmutableList.of(1, 0),
+                    ImmutableList.of(3, 0),
+                    ImmutableList.of(3, 2, 0))),
             new RemoveTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
         .start();
@@ -143,7 +148,8 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             new AddTypeUseMarkerAnnotation(
                 new OnField("Foo.java", "test.Foo", Set.of("f0")),
                 "custom.example.Untainted",
-                List.of(dequeOf(0), dequeOf(1, 0), dequeOf(2, 0))),
+                ImmutableList.of(
+                    ImmutableList.of(0), ImmutableList.of(1, 0), ImmutableList.of(2, 0))),
             new AddTypeUseMarkerAnnotation(
                 new OnMethod("Foo.java", "test.Foo", "baz(java.lang.Object)"),
                 "custom.example.Untainted"),
@@ -188,7 +194,8 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             new RemoveTypeUseMarkerAnnotation(
                 new OnField("Foo.java", "test.Foo", Set.of("f0")),
                 "custom.example.Untainted",
-                List.of(dequeOf(0), dequeOf(1, 0), dequeOf(2, 0))),
+                ImmutableList.of(
+                    ImmutableList.of(0), ImmutableList.of(1, 0), ImmutableList.of(2, 0))),
             new RemoveTypeUseMarkerAnnotation(
                 new OnMethod("Foo.java", "test.Foo", "baz(java.lang.Object)"),
                 "custom.example.Untainted"),
@@ -228,11 +235,13 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             new AddTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"),
                 "edu.ucr.UnTainted",
-                List.of(dequeOf(0), dequeOf(1, 0), dequeOf(2, 0))),
+                ImmutableList.of(
+                    ImmutableList.of(0), ImmutableList.of(1, 0), ImmutableList.of(2, 0))),
             new AddTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"),
                 "edu.ucr.UnTainted",
-                List.of(dequeOf(0), dequeOf(1, 0), dequeOf(2, 0))),
+                ImmutableList.of(
+                    ImmutableList.of(0), ImmutableList.of(1, 0), ImmutableList.of(2, 0))),
             new AddTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
         .start();
@@ -262,15 +271,18 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             new AddTypeUseMarkerAnnotation(
                 new OnField("Foo.java", "test.Foo", Set.of("f0")),
                 "custom.example.Untainted",
-                List.of(dequeOf(0), dequeOf(1, 0), dequeOf(2, 0))),
+                ImmutableList.of(
+                    ImmutableList.of(0), ImmutableList.of(1, 0), ImmutableList.of(2, 0))),
             new RemoveTypeUseMarkerAnnotation(
                 new OnField("Foo.java", "test.Foo", Set.of("f1")),
                 "custom.example.Untainted",
-                List.of(dequeOf(0), dequeOf(1, 0), dequeOf(2, 0))),
+                ImmutableList.of(
+                    ImmutableList.of(0), ImmutableList.of(1, 0), ImmutableList.of(2, 0))),
             new RemoveTypeUseMarkerAnnotation(
                 new OnField("Foo.java", "test.Foo", Set.of("f2")),
                 "custom.example.Untainted",
-                List.of(dequeOf(0), dequeOf(1, 0), dequeOf(2, 0))))
+                ImmutableList.of(
+                    ImmutableList.of(0), ImmutableList.of(1, 0), ImmutableList.of(2, 0))))
         .start();
   }
 
@@ -303,7 +315,8 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             new AddTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"),
                 "edu.ucr.UnTainted",
-                List.of(dequeOf(0), dequeOf(1, 0), dequeOf(3, 2, 0))),
+                ImmutableList.of(
+                    ImmutableList.of(0), ImmutableList.of(1, 0), ImmutableList.of(3, 2, 0))),
             new AddTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
         .start();
@@ -369,7 +382,8 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             new AddTypeUseMarkerAnnotation(
                 new OnMethod("Foo.java", "test.Foo", "bar()"),
                 "edu.ucr.RUntainted",
-                List.of(dequeOf(0), dequeOf(1, 0), dequeOf(2, 0))))
+                ImmutableList.of(
+                    ImmutableList.of(0), ImmutableList.of(1, 0), ImmutableList.of(2, 0))))
         .start();
   }
 
@@ -405,25 +419,25 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             new RemoveTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"),
                 "edu.ucr.UnTainted",
-                List.of(
-                    dequeOf(0),
-                    dequeOf(1, 0),
-                    dequeOf(2, 0),
-                    dequeOf(3, 0),
-                    dequeOf(3, 1, 0),
-                    dequeOf(3, 2, 0))),
+                ImmutableList.of(
+                    ImmutableList.of(0),
+                    ImmutableList.of(1, 0),
+                    ImmutableList.of(2, 0),
+                    ImmutableList.of(3, 0),
+                    ImmutableList.of(3, 1, 0),
+                    ImmutableList.of(3, 2, 0))),
             new RemoveTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"),
             new RemoveTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f3"),
                 "edu.ucr.UnTainted",
-                List.of(
-                    dequeOf(0),
-                    dequeOf(1, 0),
-                    dequeOf(2, 0),
-                    dequeOf(3, 0),
-                    dequeOf(3, 1, 0),
-                    dequeOf(3, 2, 0))))
+                ImmutableList.of(
+                    ImmutableList.of(0),
+                    ImmutableList.of(1, 0),
+                    ImmutableList.of(2, 0),
+                    ImmutableList.of(3, 0),
+                    ImmutableList.of(3, 1, 0),
+                    ImmutableList.of(3, 2, 0))))
         .start();
   }
 
@@ -487,9 +501,5 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
                 new OnField("Foo.java", "test.Foo", Collections.singleton("f1")),
                 "edu.ucr.Untainted"))
         .start();
-  }
-
-  private static Deque<Integer> dequeOf(Integer... values) {
-    return new ArrayDeque<>(Arrays.asList(values));
   }
 }
