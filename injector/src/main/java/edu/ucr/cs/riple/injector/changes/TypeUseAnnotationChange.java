@@ -35,8 +35,6 @@ import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.modifications.MultiPositionModification;
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -63,8 +61,8 @@ public abstract class TypeUseAnnotationChange extends AnnotationChange {
       Type type, AnnotationExpr annotationExpr);
 
   /**
-   * Computes the text modification on the given node. It does not modify the containing type
-   * arguments.
+   * Computes the text modification on the given node if required. It does not modify the containing
+   * type arguments.
    */
   public abstract <T extends NodeWithAnnotations<?> & NodeWithRange<?>>
       Modification computeTextModificationOnNode(T node, AnnotationExpr annotationExpr);
@@ -93,20 +91,16 @@ public abstract class TypeUseAnnotationChange extends AnnotationChange {
         }
       }
     }
-
     for (ImmutableList<Integer> index : typeIndex) {
-      Deque<Integer> cc = new ArrayDeque<>(index);
-      if (cc.size() == 1 && cc.peek() == 0) {
+      if (index.size() == 1 && index.get(0) == 0) {
         // Already added on declaration.
         continue;
       }
-      // copy index to a new deque
-      Deque<Integer> copy = new ArrayDeque<>(cc);
       // Apply the change on type arguments.
-      modifications.addAll(type.accept(new TypeArgumentChangeVisitor(cc, annotationExpr), this));
+      modifications.addAll(type.accept(new TypeArgumentChangeVisitor(index, annotationExpr), this));
       if (initializedType != null) {
         modifications.addAll(
-            initializedType.accept(new TypeArgumentChangeVisitor(copy, annotationExpr), this));
+            initializedType.accept(new TypeArgumentChangeVisitor(index, annotationExpr), this));
       }
     }
 

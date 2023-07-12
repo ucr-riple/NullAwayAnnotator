@@ -27,7 +27,9 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.GenericVisitorWithDefaults;
+import com.google.common.collect.ImmutableList;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.Set;
@@ -50,8 +52,8 @@ public class TypeArgumentChangeVisitor
   private final Deque<Integer> index;
   private final AnnotationExpr annotationExpr;
 
-  public TypeArgumentChangeVisitor(Deque<Integer> index, AnnotationExpr annotationExpr) {
-    this.index = index;
+  public TypeArgumentChangeVisitor(ImmutableList<Integer> index, AnnotationExpr annotationExpr) {
+    this.index = new ArrayDeque<>(index);
     this.annotationExpr = annotationExpr;
   }
 
