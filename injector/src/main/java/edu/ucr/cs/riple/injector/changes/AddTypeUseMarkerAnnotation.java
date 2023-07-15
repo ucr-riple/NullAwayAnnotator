@@ -121,4 +121,9 @@ public class AddTypeUseMarkerAnnotation extends TypeUseAnnotationChange implemen
   public int hashCode() {
     return Objects.hash(super.hashCode(), AddTypeUseMarkerAnnotation.class);
   }
+
+  @Override
+  public String toString() {
+    return super.toString() + ", index: " + typeIndex;
+  }
 }
