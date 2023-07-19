@@ -71,19 +71,36 @@ public class Utility {
    * @param command The shell command to run.
    */
   public static void executeCommand(Config config, String command) {
+    BufferedReader errorReader = null;
+    BufferedReader outputReader = null;
     try {
       Process p = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
-      BufferedReader reader =
-          new BufferedReader(new InputStreamReader(p.getErrorStream(), Charset.defaultCharset()));
-      String line;
-      while ((line = reader.readLine()) != null) {
-        if (config.redirectBuildOutputToStdErr) {
-          System.err.println(line);
+      errorReader = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+      outputReader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+      String errorLine;
+      while ((errorLine = errorReader.readLine()) != null || outputReader.readLine() != null) {
+        if (errorLine != null && config.redirectBuildOutputToStdErr){
+          System.err.println(errorLine);
         }
       }
       p.waitFor();
     } catch (Exception e) {
       throw new RuntimeException("Exception happened in executing command: " + command, e);
+    } finally {
+      if (errorReader != null) {
+        try {
+          errorReader.close();
+        } catch (IOException e) {
+          System.err.println("Error in closing error reader.");
+        }
+      }
+      if (outputReader != null) {
+        try {
+          outputReader.close();
+        } catch (IOException e) {
+          System.err.println("Error in closing output reader.");
+        }
+      }
     }
   }
 
@@ -198,9 +215,9 @@ public class Utility {
    */
   public static void runScannerChecker(
       Context context, ImmutableSet<ModuleConfiguration> configurations, String buildCommand) {
-    Utility.setScannerCheckerActivation(context.config, configurations, true);
-    Utility.build(context, buildCommand);
-    Utility.setScannerCheckerActivation(context.config, configurations, false);
+//    Utility.setScannerCheckerActivation(context.config, configurations, true);
+//    Utility.build(context, buildCommand);
+//    Utility.setScannerCheckerActivation(context.config, configurations, false);
   }
 
   /**
