@@ -30,6 +30,7 @@ import com.github.javaparser.ast.ImportDeclaration;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -55,9 +56,9 @@ public class Printer {
   public Printer(Path path) {
     this.path = path;
     try {
-      lines = Files.readAllLines(path);
+      lines = Files.readAllLines(path, Charset.defaultCharset());
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException("Happened at path: " + path, e);
     }
     this.offsetStore = new FileOffsetStore(lines, path);
   }
@@ -163,7 +164,7 @@ public class Printer {
    */
   public FileOffsetStore write() {
     try {
-      Files.write(path, lines);
+      Files.write(path, lines, Charset.defaultCharset());
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
