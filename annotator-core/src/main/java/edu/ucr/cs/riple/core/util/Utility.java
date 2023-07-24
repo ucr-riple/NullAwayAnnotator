@@ -67,7 +67,7 @@ public class Utility {
    */
   public static void executeCommand(Config config, String command) {
     try {
-      ProcessBuilder pb = new ProcessBuilder(command);
+      ProcessBuilder pb = new ProcessBuilder("/bin/sh", "-c", command);
       if (config.redirectBuildOutputToStdErr) {
         pb.redirectError(ProcessBuilder.Redirect.INHERIT);
         pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
