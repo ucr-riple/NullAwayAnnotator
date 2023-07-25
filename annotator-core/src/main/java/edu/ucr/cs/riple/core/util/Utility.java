@@ -38,10 +38,8 @@ import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.scanner.AnnotatorScanner;
 import edu.ucr.cs.riple.scanner.ScannerConfigWriter;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -71,36 +69,18 @@ public class Utility {
    * @param command The shell command to run.
    */
   public static void executeCommand(Config config, String command) {
-    BufferedReader errorReader = null;
-    BufferedReader outputReader = null;
     try {
-      Process p = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
-      errorReader = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-      outputReader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-      String errorLine;
-      while ((errorLine = errorReader.readLine()) != null || outputReader.readLine() != null) {
-        if (errorLine != null && config.redirectBuildOutputToStdErr){
-          System.err.println(errorLine);
-        }
+      ProcessBuilder pb = new ProcessBuilder("/bin/sh", "-c", command);
+      if (config.redirectBuildOutputToStdErr) {
+        pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+        pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+      }else{
+        pb.redirectError(ProcessBuilder.Redirect.DISCARD);
+        pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
       }
-      p.waitFor();
+      pb.start().waitFor();
     } catch (Exception e) {
       throw new RuntimeException("Exception happened in executing command: " + command, e);
-    } finally {
-      if (errorReader != null) {
-        try {
-          errorReader.close();
-        } catch (IOException e) {
-          System.err.println("Error in closing error reader.");
-        }
-      }
-      if (outputReader != null) {
-        try {
-          outputReader.close();
-        } catch (IOException e) {
-          System.err.println("Error in closing output reader.");
-        }
-      }
     }
   }
 
@@ -215,9 +195,9 @@ public class Utility {
    */
   public static void runScannerChecker(
       Context context, ImmutableSet<ModuleConfiguration> configurations, String buildCommand) {
-//    Utility.setScannerCheckerActivation(context.config, configurations, true);
-//    Utility.build(context, buildCommand);
-//    Utility.setScannerCheckerActivation(context.config, configurations, false);
+    //    Utility.setScannerCheckerActivation(context.config, configurations, true);
+    //    Utility.build(context, buildCommand);
+    //    Utility.setScannerCheckerActivation(context.config, configurations, false);
   }
 
   /**
