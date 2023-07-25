@@ -73,6 +73,15 @@ public class MethodRegionRegistry extends Registry<RegionRecord> implements Regi
     if (parent != null && parent.isNonTop()) {
       regions.add(new Region(parent.location.clazz, parent.location.method));
     }
+    // Add all overriding methods.
+    Set<MethodRecord> overridingMethods =
+        moduleInfo.getMethodRegistry().getImmediateSubMethods(onMethod);
+    overridingMethods.forEach(
+        subMethod -> {
+          if (subMethod != null && subMethod.isNonTop()) {
+            regions.add(new Region(subMethod.location.clazz, subMethod.location.method));
+          }
+        });
     return Optional.of(regions);
   }
 

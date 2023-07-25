@@ -38,7 +38,7 @@ public class MethodRecord {
   /** Parent's node id. */
   public Integer parent;
   /** A unique id for method across all methods. */
-  public Integer id;
+  public final Integer id;
   /** Location of the containing method. */
   public OnMethod location;
   /** Set of annotations on the method return type or the method itself */

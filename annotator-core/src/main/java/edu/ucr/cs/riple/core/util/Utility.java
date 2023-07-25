@@ -74,7 +74,7 @@ public class Utility {
       if (config.redirectBuildOutputToStdErr) {
         pb.redirectError(ProcessBuilder.Redirect.INHERIT);
         pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-      }else{
+      } else {
         pb.redirectError(ProcessBuilder.Redirect.DISCARD);
         pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
       }
@@ -195,9 +195,9 @@ public class Utility {
    */
   public static void runScannerChecker(
       Context context, ImmutableSet<ModuleConfiguration> configurations, String buildCommand) {
-    //    Utility.setScannerCheckerActivation(context.config, configurations, true);
-    //    Utility.build(context, buildCommand);
-    //    Utility.setScannerCheckerActivation(context.config, configurations, false);
+    Utility.setScannerCheckerActivation(context.config, configurations, true);
+    Utility.build(context, buildCommand);
+    Utility.setScannerCheckerActivation(context.config, configurations, false);
   }
 
   /**
