@@ -71,6 +71,10 @@ public class Utility {
       if (config.redirectBuildOutputToStdErr) {
         pb.redirectError(ProcessBuilder.Redirect.INHERIT);
         pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+      }else {
+        // to avoid buffer filling up
+        pb.redirectError(ProcessBuilder.Redirect.DISCARD);
+        pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
       }
       pb.start().waitFor();
     } catch (Exception e) {
