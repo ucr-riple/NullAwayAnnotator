@@ -108,10 +108,8 @@ public class FieldRegistry extends Registry<FieldRecord> {
         // is
         // used in adding suppression annotations on class level.
         return info;
-      } catch (FileNotFoundException e) {
+      } catch (Exception e) {
         return null;
-      } catch (IOException e) {
-        throw new RuntimeException(e);
       }
     };
   }
