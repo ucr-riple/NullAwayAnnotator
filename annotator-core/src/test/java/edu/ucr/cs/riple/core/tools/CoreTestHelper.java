@@ -407,8 +407,10 @@ public class CoreTestHelper {
         !getEnvironmentVariable("ANNOTATOR_TEST_DISABLE_PARALLEL_PROCESSING");
     if (downstreamDependencyAnalysisActivated) {
       builder.buildCommand =
-          projectBuilder.computeBuildCommandWithLibraryModelLoaderDependency(this.outDirPath);
-      builder.downstreamBuildCommand = builder.buildCommand;
+          projectBuilder.computeTargetBuildCommandWithLibraryModelLoaderDependency(this.outDirPath);
+      builder.downstreamBuildCommand =
+          projectBuilder.computeDownstreamDependencyBuildCommandWithLibraryModelLoaderDependency(
+              this.outDirPath);
       builder.nullawayLibraryModelLoaderPath =
           Utility.getPathToLibraryModel(outDirPath)
               .resolve(
@@ -423,7 +425,7 @@ public class CoreTestHelper {
                       "librarymodel",
                       "nullable-methods.tsv"));
     } else {
-      builder.buildCommand = projectBuilder.computeBuildCommand(this.outDirPath);
+      builder.buildCommand = projectBuilder.computeTargetBuildCommand(this.outDirPath);
     }
     builder.write(configPath);
   }
