@@ -28,6 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Helper class to create a project with multiple modules. Each module has a source directory which
@@ -96,25 +97,47 @@ public class ProjectBuilder {
   }
 
   /**
-   * Computes the build command for the project template. It includes, changing directory command
-   * from root to project root dir, command to compile the project and the computed paths to config
-   * files which will be passed through gradle command line arguments.
+   * Computes the build command for the target module. It includes, changing directory command from
+   * root to project root dir, command to compile the project and the computed paths to config files
+   * which will be passed through gradle command line arguments.
    *
    * @param outDirPath Path to serialization output directory,
    * @return The command to build the project including the command line arguments, this command can
    *     * be executed from any directory.
    */
-  public String computeBuildCommand(Path outDirPath) {
+  public String computeTargetBuildCommand(Path outDirPath) {
     return String.format(
-        "%s && ./gradlew compileJava %s -Plibrary-model-loader-path=%s --rerun-tasks",
+        "%s && ./gradlew %s %s -Plibrary-model-loader-path=%s --rerun-tasks",
         Utility.changeDirCommand(pathToProject),
+        computeCompileGradleCommandForModules(modules.subList(0, 1)),
         String.join(" ", Utility.computeConfigPathsWithGradleArguments(outDirPath, modules)),
         Utility.getPathToLibraryModel(outDirPath)
             .resolve(Paths.get("build", "libs", "librarymodel.jar")));
   }
 
   /**
-   * Computes the build command for the project template. It includes, changing directory command
+   * Computes the build command for the target project. It includes, changing directory command from
+   * root to project root dir, command to compile the project, command to update library model
+   * loader jar and the computed paths to config files which will be passed through gradle command
+   * line arguments.
+   *
+   * @param outDirPath Path to serialization output directory,
+   * @return The command to build the project including the command line arguments, this command can
+   *     * be executed from any directory.
+   */
+  public String computeTargetBuildCommandWithLibraryModelLoaderDependency(Path outDirPath) {
+    return String.format(
+        "%s && ./gradlew library-model-loader:jar --rerun-tasks && %s && ./gradlew %s %s -Plibrary-model-loader-path=%s --rerun-tasks",
+        Utility.changeDirCommand(outDirPath.resolve("Annotator")),
+        Utility.changeDirCommand(pathToProject),
+        computeCompileGradleCommandForModules(modules.subList(0, 1)),
+        String.join(" ", Utility.computeConfigPathsWithGradleArguments(outDirPath, modules)),
+        Utility.getPathToLibraryModel(outDirPath)
+            .resolve(Paths.get("build", "libs", "librarymodel.jar")));
+  }
+
+  /**
+   * Computes the build command for downstream dependencies. It includes, changing directory command
    * from root to project root dir, command to compile the project, command to update library model
    * loader jar and the computed paths to config files which will be passed through gradle command
    * line arguments.
@@ -123,13 +146,28 @@ public class ProjectBuilder {
    * @return The command to build the project including the command line arguments, this command can
    *     * be executed from any directory.
    */
-  public String computeBuildCommandWithLibraryModelLoaderDependency(Path outDirPath) {
+  public String computeDownstreamDependencyBuildCommandWithLibraryModelLoaderDependency(
+      Path outDirPath) {
     return String.format(
-        "%s && ./gradlew library-model-loader:jar --rerun-tasks && %s && ./gradlew compileJava %s -Plibrary-model-loader-path=%s --rerun-tasks",
+        "%s && ./gradlew library-model-loader:jar --rerun-tasks && %s && ./gradlew %s %s -Plibrary-model-loader-path=%s --rerun-tasks",
         Utility.changeDirCommand(outDirPath.resolve("Annotator")),
         Utility.changeDirCommand(pathToProject),
+        computeCompileGradleCommandForModules(modules.subList(1, modules.size())),
         String.join(" ", Utility.computeConfigPathsWithGradleArguments(outDirPath, modules)),
         Utility.getPathToLibraryModel(outDirPath)
             .resolve(Paths.get("build", "libs", "librarymodel.jar")));
+  }
+
+  /**
+   * Computes the gradle compile command for the given modules. {e.g. :module1:compileJava
+   * :module2:compileJava ...}
+   *
+   * @param modules List of modules to compile.
+   * @return The gradle compile command for the given modules.
+   */
+  private String computeCompileGradleCommandForModules(List<Module> modules) {
+    return modules.stream()
+        .map(module -> String.format(":%s:compileJava", module))
+        .collect(Collectors.joining(" "));
   }
 }
