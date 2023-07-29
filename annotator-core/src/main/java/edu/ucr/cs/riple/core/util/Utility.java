@@ -38,10 +38,8 @@ import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.scanner.AnnotatorScanner;
 import edu.ucr.cs.riple.scanner.ScannerConfigWriter;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -69,16 +67,16 @@ public class Utility {
    */
   public static void executeCommand(Config config, String command) {
     try {
-      Process p = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
-      BufferedReader reader =
-          new BufferedReader(new InputStreamReader(p.getErrorStream(), Charset.defaultCharset()));
-      String line;
-      while ((line = reader.readLine()) != null) {
-        if (config.redirectBuildOutputToStdErr) {
-          System.err.println(line);
-        }
+      ProcessBuilder pb = new ProcessBuilder("/bin/sh", "-c", command);
+      if (config.redirectBuildOutputToStdErr) {
+        pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+        pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+      } else {
+        // to avoid buffer filling up
+        pb.redirectError(ProcessBuilder.Redirect.DISCARD);
+        pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
       }
-      p.waitFor();
+      pb.start().waitFor();
     } catch (Exception e) {
       throw new RuntimeException("Exception happened in executing command: " + command, e);
     }
