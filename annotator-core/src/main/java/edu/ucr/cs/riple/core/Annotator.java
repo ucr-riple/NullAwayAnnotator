@@ -101,6 +101,7 @@ public class Annotator {
     downstreamImpactCache.analyzeDownstreamDependencies();
     TargetModuleCache targetModuleCache = new TargetModuleCache();
     if (config.inferenceActivated) {
+      System.out.println("Max Depth level: " + config.depth);
       // Outer loop starts.
       while (cache.isUpdated()) {
         executeNextIteration(targetModuleCache, downstreamImpactCache);

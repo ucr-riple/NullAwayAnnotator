@@ -90,7 +90,6 @@ public abstract class AbstractEvaluator implements Evaluator {
                 report ->
                     report.reflectAnnotationProcessorChangesOnSourceCode(supplier.getModuleInfo()))
             .collect(ImmutableSet.toImmutableSet());
-    System.out.println("Max Depth level: " + this.depth);
     for (int i = 0; i < this.depth; i++) {
       initializeFixGraph(reports);
       context.log.updateNodeNumber(graph.getNodes().count());
