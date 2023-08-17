@@ -86,8 +86,6 @@ public class Annotator {
     annotate();
     config.log.stopTimerAndCapture(timer);
     Utility.writeLog(config);
-    System.out.println("Annotator LOG:");
-    System.out.println(config.log);
   }
 
   /**

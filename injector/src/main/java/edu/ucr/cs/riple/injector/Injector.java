@@ -23,6 +23,7 @@
 package edu.ucr.cs.riple.injector;
 
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toSet;
 
 import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.StaticJavaParser;
@@ -52,6 +53,7 @@ public class Injector {
   public <T extends Change> Set<FileOffsetStore> start(Set<T> changes) {
     // Start method does not support addition and deletion on same element. Should be split into
     // call for addition and deletion separately.
+    changes = changes.stream().filter(c -> c.location != null).collect(toSet());
     Map<Path, List<Change>> map =
         changes.stream().collect(groupingBy(change -> change.location.path));
     Set<FileOffsetStore> offsets = new LinkedHashSet<>();

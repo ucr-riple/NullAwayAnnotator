@@ -347,7 +347,7 @@ public class Utility {
    * @param config Annotator config.
    */
   public static void writeLog(Config config) {
-    Path path = config.globalDir.resolve("log.txt");
+    Path path = config.globalDir.resolve("0").resolve("log.txt");
     try {
       Files.write(path, Collections.singleton(config.log.toString()), Charset.defaultCharset());
     } catch (IOException exception) {
