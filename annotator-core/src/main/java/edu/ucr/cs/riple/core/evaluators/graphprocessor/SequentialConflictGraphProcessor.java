@@ -29,9 +29,7 @@ import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.metadata.graph.ConflictGraph;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.Result;
-import edu.ucr.cs.riple.core.util.Utility;
 import java.util.Set;
-import me.tongfei.progressbar.ProgressBar;
 
 /** Basic processor which processes the impact of each node sequentially. */
 public class SequentialConflictGraphProcessor extends AbstractConflictGraphProcessor {
@@ -44,14 +42,13 @@ public class SequentialConflictGraphProcessor extends AbstractConflictGraphProce
   public void process(ConflictGraph graph) {
     int count = (int) graph.getNodes().count();
     System.out.println("Scheduling for: " + count + " runs.");
-    ProgressBar pb = Utility.createProgressBar("Processing", count);
     graph
         .getNodes()
         .forEach(
             node -> {
-              pb.step();
               Set<Fix> fixes = node.tree;
               injector.injectFixes(fixes);
+              System.out.print("Building. ");
               compilerRunner.run();
               errorStore.saveState();
               Result errorComparisonResult = errorStore.compare();
@@ -64,6 +61,5 @@ public class SequentialConflictGraphProcessor extends AbstractConflictGraphProce
                   methodDeclarationTree);
               injector.removeFixes(fixes);
             });
-    pb.close();
   }
 }

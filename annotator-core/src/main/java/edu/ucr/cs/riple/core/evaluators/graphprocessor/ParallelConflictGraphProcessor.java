@@ -33,12 +33,10 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.index.Result;
 import edu.ucr.cs.riple.core.metadata.trackers.Region;
 import edu.ucr.cs.riple.core.metadata.trackers.RegionTracker;
-import edu.ucr.cs.riple.core.util.Utility;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-import me.tongfei.progressbar.ProgressBar;
 
 /**
  * Parallel processor which computes the impact of nodes in parallel. In this processor,
@@ -68,14 +66,13 @@ public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcess
             + " builds for: "
             + graph.getNodes().count()
             + " fixes");
-    ProgressBar pb = Utility.createProgressBar("Processing", nonConflictingGroups.size());
     for (Set<Node> group : nonConflictingGroups) {
-      pb.step();
       Set<Fix> fixes =
           group.stream()
               .flatMap(node -> node.tree.stream())
               .collect(Collectors.toCollection(LinkedHashSet::new));
       injector.injectFixes(fixes);
+      System.out.print("Building. ");
       compilerRunner.run();
       errorStore.saveState();
       group.forEach(
@@ -96,6 +93,5 @@ public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcess
           });
       injector.removeFixes(fixes);
     }
-    pb.close();
   }
 }

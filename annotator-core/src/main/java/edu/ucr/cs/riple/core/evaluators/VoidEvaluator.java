@@ -37,6 +37,7 @@ public class VoidEvaluator implements Evaluator {
 
   @Override
   public ImmutableSet<Report> evaluate(ImmutableSet<Fix> fixes) {
+    System.out.println("Accepted all fixes");
     return fixes.stream().map(fix -> new Report(fix, -1)).collect(ImmutableSet.toImmutableSet());
   }
 }
