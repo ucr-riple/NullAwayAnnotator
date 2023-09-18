@@ -75,4 +75,13 @@ public interface LocationVisitor<R, P> {
    * @return a visitor-specified result
    */
   R visitLocalVariable(OnLocalVariable onLocalVariable, P p);
+
+  /**
+   * Visits a location for a poly method.
+   *
+   * @param onPolyMethod the location for a poly method
+   * @param p a visitor-specified parameter
+   * @return a visitor-specified result
+   */
+  R visitPolyMethod(OnPolyMethod onPolyMethod, P p);
 }

@@ -42,6 +42,7 @@ import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnLocalVariable;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
+import edu.ucr.cs.riple.injector.location.OnPolyMethod;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.util.List;
 import java.util.Optional;
@@ -216,6 +217,13 @@ public class ChangeVisitor
         }
       }
     }
+    return null;
+  }
+
+  @Override
+  public Modification visitPolyMethod(
+      OnPolyMethod onPolyMethod,
+      Pair<NodeList<BodyDeclaration<?>>, ASTChange> nodeListASTChangePair) {
     return null;
   }
 

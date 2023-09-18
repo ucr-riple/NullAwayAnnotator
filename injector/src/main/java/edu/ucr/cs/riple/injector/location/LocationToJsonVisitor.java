@@ -89,4 +89,9 @@ public class LocationToJsonVisitor implements LocationVisitor<JSONObject, Void> 
     res.put(KEYS.VARIABLES, onLocalVariable.varName);
     return res;
   }
+
+  @Override
+  public JSONObject visitPolyMethod(OnPolyMethod onPolyMethod, Void unused) {
+    return null;
+  }
 }

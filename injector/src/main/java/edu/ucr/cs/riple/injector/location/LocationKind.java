@@ -30,6 +30,7 @@ public enum LocationKind {
   CLASS,
   FIELD,
   METHOD,
+  POLY_METHOD,
   PARAMETER;
 
   /**
