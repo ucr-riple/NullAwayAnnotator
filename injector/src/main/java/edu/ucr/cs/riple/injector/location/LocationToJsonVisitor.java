@@ -90,8 +90,14 @@ public class LocationToJsonVisitor implements LocationVisitor<JSONObject, Void> 
     return res;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public JSONObject visitPolyMethod(OnPolyMethod onPolyMethod, Void unused) {
-    return null;
+    JSONObject res = defaultAction(onPolyMethod);
+    res.put(KEYS.METHOD, onPolyMethod.method);
+    JSONArray indices = new JSONArray();
+    indices.addAll(onPolyMethod.indices);
+    res.put(KEYS.INDEX, indices);
+    return res;
   }
 }

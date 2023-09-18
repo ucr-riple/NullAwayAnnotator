@@ -44,6 +44,8 @@ import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import edu.ucr.cs.riple.injector.location.OnPolyMethod;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import edu.ucr.cs.riple.injector.modifications.MultiPositionModification;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -222,9 +224,31 @@ public class ChangeVisitor
 
   @Override
   public Modification visitPolyMethod(
-      OnPolyMethod onPolyMethod,
-      Pair<NodeList<BodyDeclaration<?>>, ASTChange> nodeListASTChangePair) {
-    return null;
+      OnPolyMethod onPolyMethod, Pair<NodeList<BodyDeclaration<?>>, ASTChange> pair) {
+    final AtomicReference<Modification> ans = new AtomicReference<>();
+    final NodeList<BodyDeclaration<?>> members = pair.a;
+    final ASTChange change = pair.b;
+    members.forEach(
+        bodyDeclaration ->
+            bodyDeclaration.ifCallableDeclaration(
+                callableDeclaration -> {
+                  if (ans.get() != null) {
+                    // already found the member.
+                    return;
+                  }
+                  if (onPolyMethod.matcher.matchesCallableDeclaration(callableDeclaration)) {
+                    Set<Modification> modifications = new HashSet<>();
+                    modifications.add(change.computeTextModificationOn(callableDeclaration));
+                    for (int i = 0; i < callableDeclaration.getParameters().size(); i++) {
+                      Parameter param = (Parameter) callableDeclaration.getParameters().get(i);
+                      if (onPolyMethod.indices.contains(i)) {
+                        modifications.add(change.computeTextModificationOn(param));
+                      }
+                    }
+                    ans.set(new MultiPositionModification(modifications));
+                  }
+                }));
+    return ans.get();
   }
 
   /**

@@ -55,6 +55,9 @@ public enum LocationKind {
     if (type.equalsIgnoreCase("class")) {
       return CLASS;
     }
+    if (type.equalsIgnoreCase("poly_method")) {
+      return POLY_METHOD;
+    }
     throw new UnsupportedOperationException("Cannot detect type: " + type);
   }
 }
