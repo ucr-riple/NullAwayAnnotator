@@ -114,20 +114,22 @@ public abstract class Location {
   }
 
   public static Location createLocationFromJSON(JSONObject json) {
-    String kind = (String) json.get("kind");
+    LocationKind kind = LocationKind.getType((String) json.get("kind"));
     switch (kind) {
-      case "METHOD":
+      case METHOD:
         return new OnMethod(json);
-      case "FIELD":
+      case FIELD:
         return new OnField(json);
-      case "PARAMETER":
+      case PARAMETER:
         return new OnParameter(json);
-      case "LOCAL_VARIABLE":
+      case LOCAL_VARIABLE:
         return new OnLocalVariable(json);
-      case "CLASS":
+      case CLASS:
         return new OnClass(json);
+      case POLY_METHOD:
+        return new OnPolyMethod(json);
       default:
-        throw new RuntimeException("Cannot reach this statement, kind: " + kind);
+        throw new RuntimeException("Does not support location creation from json of kind: " + kind);
     }
   }
 

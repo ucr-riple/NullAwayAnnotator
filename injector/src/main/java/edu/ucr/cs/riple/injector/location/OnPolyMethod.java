@@ -27,6 +27,8 @@ package edu.ucr.cs.riple.injector.location;
 import com.google.common.collect.ImmutableList;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.SignatureMatcher;
+import org.json.simple.JSONObject;
+
 import java.nio.file.Path;
 import java.util.List;
 
@@ -51,6 +53,13 @@ public class OnPolyMethod extends Location {
 
   public OnPolyMethod(String path, String clazz, String method, List<Integer> indices) {
     this(Helper.deserializePath(path), clazz, method, indices);
+  }
+
+  public OnPolyMethod(JSONObject json) {
+    super(LocationKind.POLY_METHOD, json);
+    this.method = (String) json.get("method");
+    this.matcher = new SignatureMatcher(method);
+    this.indices = ImmutableList.copyOf((List<Integer>) json.get("arguments"));
   }
 
   @Override

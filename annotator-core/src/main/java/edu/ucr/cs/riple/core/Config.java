@@ -360,7 +360,7 @@ public class Config {
       cmd = parser.parse(options, args);
     } catch (ParseException e) {
       showHelp(formatter, options);
-      throw new IllegalArgumentException("Error in reading context flags: " + e.getMessage(), e);
+      throw new IllegalArgumentException("Error in reading config flags: " + e.getMessage(), e);
     }
 
     // Check if either all flags are available or none is present
@@ -569,7 +569,7 @@ public class Config {
   }
 
   private static void showHelp(HelpFormatter formatter, Options options) {
-    formatter.printHelp("Annotator context Flags", options);
+    formatter.printHelp("Annotator config Flags", options);
   }
 
   private <T> Config.OrElse<T> getValueFromKey(JSONObject json, String key, Class<T> klass) {
