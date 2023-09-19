@@ -75,6 +75,7 @@ public class Utility {
         pb.redirectError(ProcessBuilder.Redirect.INHERIT);
         pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
       } else {
+        // to avoid buffer filling up
         pb.redirectError(ProcessBuilder.Redirect.DISCARD);
         pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
       }

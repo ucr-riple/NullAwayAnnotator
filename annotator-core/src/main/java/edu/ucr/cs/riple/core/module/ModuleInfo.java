@@ -87,6 +87,7 @@ public class ModuleInfo {
     // Build with scanner checker activated to generate required files to create the moduleInfo.
     context.checker.prepareConfigFilesForBuild(configurations);
     Utility.runScannerChecker(context, configurations, buildCommand);
+    Utility.build(context, buildCommand);
     this.nonnullStore = new NonnullStore(configurations);
     this.fieldRegistry = new FieldRegistry(configurations);
     this.methodRegistry = new MethodRegistry(context);

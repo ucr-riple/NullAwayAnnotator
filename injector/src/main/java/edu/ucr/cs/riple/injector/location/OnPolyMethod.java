@@ -27,10 +27,9 @@ package edu.ucr.cs.riple.injector.location;
 import com.google.common.collect.ImmutableList;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.SignatureMatcher;
-import org.json.simple.JSONObject;
-
 import java.nio.file.Path;
 import java.util.List;
+import org.json.simple.JSONObject;
 
 public class OnPolyMethod extends Location {
 

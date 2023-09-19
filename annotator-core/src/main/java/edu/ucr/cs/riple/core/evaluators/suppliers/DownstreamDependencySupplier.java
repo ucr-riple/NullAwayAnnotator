@@ -51,7 +51,10 @@ public class DownstreamDependencySupplier extends AbstractSupplier {
   public DownstreamDependencySupplier(Context context) {
     super(
         context,
-        new ModuleInfo(context, context.downstreamConfigurations, context.config.buildCommand));
+        new ModuleInfo(
+            context,
+            context.downstreamConfigurations,
+            context.config.downstreamDependenciesBuildCommand));
   }
 
   @Override

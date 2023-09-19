@@ -343,11 +343,11 @@ public class CoreTestHelper {
         actualOutput.remove(expected);
       }
     }
-    if (notFound.size() == 0 && actualOutput.size() == 0) {
+    if (notFound.isEmpty() && actualOutput.isEmpty()) {
       return;
     }
     StringBuilder errorMessage = new StringBuilder();
-    if (notFound.size() != 0) {
+    if (!notFound.isEmpty()) {
       errorMessage
           .append(notFound.size())
           .append(" expected Reports were NOT found:")
@@ -355,7 +355,7 @@ public class CoreTestHelper {
           .append(notFound.stream().map(Report::toString).collect(Collectors.joining("\n")))
           .append("\n");
     }
-    if (actualOutput.size() != 0) {
+    if (!actualOutput.isEmpty()) {
       errorMessage
           .append(actualOutput.size())
           .append(" unexpected Reports were found:")
@@ -407,8 +407,10 @@ public class CoreTestHelper {
         !getEnvironmentVariable("ANNOTATOR_TEST_DISABLE_PARALLEL_PROCESSING");
     if (downstreamDependencyAnalysisActivated) {
       builder.buildCommand =
-          projectBuilder.computeBuildCommandWithLibraryModelLoaderDependency(this.outDirPath);
-      builder.downstreamBuildCommand = builder.buildCommand;
+          projectBuilder.computeTargetBuildCommandWithLibraryModelLoaderDependency(this.outDirPath);
+      builder.downstreamBuildCommand =
+          projectBuilder.computeDownstreamDependencyBuildCommandWithLibraryModelLoaderDependency(
+              this.outDirPath);
       builder.nullawayLibraryModelLoaderPath =
           Utility.getPathToLibraryModel(outDirPath)
               .resolve(
@@ -423,7 +425,7 @@ public class CoreTestHelper {
                       "librarymodel",
                       "nullable-methods.tsv"));
     } else {
-      builder.buildCommand = projectBuilder.computeBuildCommand(this.outDirPath);
+      builder.buildCommand = projectBuilder.computeTargetBuildCommand(this.outDirPath);
     }
     builder.write(configPath);
   }

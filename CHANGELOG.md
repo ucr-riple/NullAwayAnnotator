@@ -1,5 +1,9 @@
 ## CHANGELOG
 
+### Version 1.3.8
+- Fixed bug in downstream dependency analysis.
+- Updated test infrastructure to compute distinct build commands for target and downstream modules.
+
 ### Version 1.3.7
 - Added support for applying modifications on local variables
 - Added support for type use annotation changes
