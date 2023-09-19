@@ -24,6 +24,8 @@
 
 package edu.ucr.cs.riple.core.module;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
@@ -62,15 +64,15 @@ public class ModuleConfiguration {
     this.checkerConfig = checkerConfig;
     this.scannerConfig = scannerConfig;
     this.dir = globalDir.resolve(String.valueOf(id));
-    //    try {
-    //      Files.deleteIfExists(this.dir);
-    //      if (!this.dir.toFile().mkdirs()) {
-    //        throw new RuntimeException(
-    //            "Could not create output directory for project: " + this.dir.toFile());
-    //      }
-    //    } catch (IOException e) {
-    //      throw new RuntimeException(e);
-    //    }
+    try {
+      Files.deleteIfExists(this.dir);
+      if (!this.dir.toFile().mkdirs()) {
+        throw new RuntimeException(
+            "Could not create output directory for project: " + this.dir.toFile());
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
