@@ -64,6 +64,11 @@ import org.w3c.dom.Element;
  */
 public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
 
+  private static final String UNTAINTED_ANNOTATION =
+      "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted";
+  private static final String POLY_ANNOTATION =
+      "edu.ucr.cs.riple.taint.ucrtainting.qual.RPolyTainted";
+
   /** The name of the checker. This is used to identify the checker in the configuration file. */
   public static final String NAME = "UCRTaint";
 
@@ -84,7 +89,8 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
     paths.forEach(
         path -> {
           try {
-            String content = Files.readString(path, Charset.defaultCharset());
+            String content =
+                path.toFile().exists() ? Files.readString(path, Charset.defaultCharset()) : "";
             content = "{ \"errors\": [" + content.substring(0, content.length() - 1) + "]}";
             JSONObject jsonObject = (JSONObject) new JSONParser().parse(content);
             JSONArray errorsJson = (JSONArray) jsonObject.get("errors");
@@ -132,7 +138,7 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
                   new Fix(
                       new AddTypeUseMarkerAnnotation(
                           location,
-                          "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted",
+                          location.isOnPolyMethod() ? POLY_ANNOTATION : UNTAINTED_ANNOTATION,
                           bul.build()),
                       errorType,
                       true));

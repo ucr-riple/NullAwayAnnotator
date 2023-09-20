@@ -60,7 +60,7 @@ public abstract class AnnotationInjector {
    * @param fixes Set of fixes to apply.
    */
   public void injectFixes(Set<Fix> fixes) {
-    if (fixes == null || fixes.size() == 0) {
+    if (fixes == null || fixes.isEmpty()) {
       return;
     }
     injectAnnotations(fixes.stream().map(fix -> fix.change).collect(Collectors.toSet()));

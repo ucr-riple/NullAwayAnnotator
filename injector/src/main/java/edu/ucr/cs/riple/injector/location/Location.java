@@ -162,6 +162,14 @@ public abstract class Location {
   public void ifLocalVariable(Consumer<OnLocalVariable> consumer) {}
 
   /**
+   * If this location is of kind {@link LocationKind#POLY_METHOD}, calls the consumer on the
+   * location.
+   *
+   * @param consumer The consumer to be called.
+   */
+  public void ifPolyMethod(Consumer<OnPolyMethod> consumer) {}
+
+  /**
    * Returns downcast of this instance to {@link OnField} if this location is of kind {@link
    * LocationKind#FIELD}, Otherwise, returns null.
    *
@@ -224,6 +232,20 @@ public abstract class Location {
   }
 
   /**
+   * Returns downcast of this instance to {@link OnPolyMethod} if this location is of kind {@link
+   * LocationKind#POLY_METHOD}, Otherwise, returns null.
+   *
+   * @return The {@link OnPolyMethod} instance of this location if it is of kind {@link
+   *     LocationKind#POLY_METHOD}, null otherwise.
+   */
+  public OnPolyMethod toPolyMethod() {
+    if (this instanceof OnPolyMethod) {
+      return (OnPolyMethod) this;
+    }
+    return null;
+  }
+
+  /**
    * Returns true if this location is of kind {@link LocationKind#METHOD}.
    *
    * @return true if this location is of kind {@link LocationKind#METHOD}.
@@ -256,6 +278,15 @@ public abstract class Location {
    * @return true if this location is of kind {@link LocationKind#LOCAL_VARIABLE}.
    */
   public boolean isOnLocalVariable() {
+    return false;
+  }
+
+  /**
+   * Returns true if this location is of kind {@link LocationKind#POLY_METHOD}.
+   *
+   * @return true if this location is of kind {@link LocationKind#POLY_METHOD}.
+   */
+  public boolean isOnPolyMethod() {
     return false;
   }
 

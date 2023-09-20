@@ -29,6 +29,8 @@ import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.SignatureMatcher;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 import org.json.simple.JSONObject;
 
 public class OnPolyMethod extends Location {
@@ -58,11 +60,43 @@ public class OnPolyMethod extends Location {
     super(LocationKind.POLY_METHOD, json);
     this.method = (String) json.get("method");
     this.matcher = new SignatureMatcher(method);
-    this.indices = ImmutableList.copyOf((List<Integer>) json.get("arguments"));
+    this.indices =
+        ((List<Long>) json.get("arguments"))
+            .stream().map(Long::intValue).collect(ImmutableList.toImmutableList());
   }
 
   @Override
   public <R, P> R accept(LocationVisitor<R, P> v, P p) {
     return v.visitPolyMethod(this, p);
+  }
+
+  @Override
+  public void ifPolyMethod(Consumer<OnPolyMethod> consumer) {
+    consumer.accept(this);
+  }
+
+  @Override
+  public boolean isOnPolyMethod() {
+    return true;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof OnPolyMethod)) {
+      return false;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
+    OnPolyMethod that = (OnPolyMethod) o;
+    return Objects.equals(indices, that.indices) && Objects.equals(method, that.method);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), indices, method);
   }
 }

@@ -198,34 +198,6 @@ public abstract class Error {
    */
   public static <T extends Error> ImmutableSet<ImmutableSet<Fix>> getResolvingFixesOfErrors(
       Collection<T> errors) {
-    // Each error has a set of resolving fixes and each fix has a set of reasons as why the fix has
-    // been suggested. The final returned set of fixes should contain all the reasons it has been
-    // suggested across the given collection. Map below stores all the set of reasons each fix is
-    // suggested in the given collection.
-
-    // Collect all reasons each fix is suggested across the given collection.
-    //    Map<Fix, Set<String>> fixReasonsMap = new HashMap<>();
-    //    errors.stream()
-    //        .flatMap(error -> error.getResolvingFixes().stream())
-    //        .forEach(
-    //            fix -> {
-    //              if (fixReasonsMap.containsKey(fix)) {
-    //                fixReasonsMap.get(fix).addAll(fix.reasons);
-    //              } else {
-    //                fixReasonsMap.put(fix, new HashSet<>(fix.reasons));
-    //              }
-    //            });
-    //
-    //    ImmutableSet.Builder<Fix> builder = ImmutableSet.builder();
-    //    for (Fix key : fixReasonsMap.keySet()) {
-    //      // To avoid mutating fixes stored in the given collection, we create new instances.
-    //      // which contain the full set of reasons.
-    //      builder.add(
-    //          new Fix(
-    //              key.change, ImmutableSet.copyOf(fixReasonsMap.get(key)),
-    // key.fixSourceIsInTarget));
-    //    }
-    //    return builder.build();
     return errors.stream()
         .map(error -> error.resolvingFixes)
         .filter(fixes -> !fixes.isEmpty())
