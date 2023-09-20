@@ -88,9 +88,11 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
     Set<UCRTaintError> errors = new HashSet<>();
     paths.forEach(
         path -> {
+          if (!path.toFile().exists()) {
+            return;
+          }
           try {
-            String content =
-                path.toFile().exists() ? Files.readString(path, Charset.defaultCharset()) : "";
+            String content = Files.readString(path, Charset.defaultCharset());
             content = "{ \"errors\": [" + content.substring(0, content.length() - 1) + "]}";
             JSONObject jsonObject = (JSONObject) new JSONParser().parse(content);
             JSONArray errorsJson = (JSONArray) jsonObject.get("errors");
