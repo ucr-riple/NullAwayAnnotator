@@ -39,6 +39,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Vertex in {@link ConflictGraph} graph. It stores a fix tree (starting from a root) and all it's
@@ -184,7 +185,10 @@ public class Node {
 
   /** Merges triggered fixes to the tree, to prepare the analysis for the next depth. */
   public void mergeTriggered() {
-    this.tree.addAll(Error.getResolvingFixesOfErrors(this.triggeredErrors));
+    this.tree.addAll(
+        Error.getResolvingFixesOfErrors(this.triggeredErrors).stream()
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet()));
     this.tree.addAll(triggeredFixesFromDownstreamErrors);
     this.tree.forEach(fix -> fix.fixSourceIsInTarget = true);
   }

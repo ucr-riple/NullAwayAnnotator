@@ -31,7 +31,7 @@ import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.location.Location;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -272,13 +272,16 @@ public class Report {
       // report has not been processed.
       return true;
     }
-    if (triggeredFixesFromDownstreamErrors.size() != 0
+    if (!triggeredFixesFromDownstreamErrors.isEmpty()
         && !tree.containsAll(triggeredFixesFromDownstreamErrors)) {
       // Report contains fixes from downstream dependencies, their effectiveness on target module
       // should be investigated.
       return true;
     }
-    ImmutableSet<Fix> triggeredFixes = Error.getResolvingFixesOfErrors(triggeredErrors);
+    ImmutableSet<Fix> triggeredFixes =
+        Error.getResolvingFixesOfErrors(triggeredErrors).stream()
+            .flatMap(Collection::stream)
+            .collect(ImmutableSet.toImmutableSet());
     if (tree.containsAll(triggeredFixes)) {
       // no change in the tree structure.
       return false;
@@ -299,7 +302,10 @@ public class Report {
     if (!hasBeenProcessedOnce) {
       return root;
     }
-    Set<Fix> triggeredFixes = new HashSet<>(Error.getResolvingFixesOfErrors(this.triggeredErrors));
+    Set<Fix> triggeredFixes =
+        Error.getResolvingFixesOfErrors(this.triggeredErrors).stream()
+            .flatMap(Set::stream)
+            .collect(Collectors.toSet());
     triggeredFixes.addAll(triggeredFixesFromDownstreamErrors);
     return triggeredFixes;
   }

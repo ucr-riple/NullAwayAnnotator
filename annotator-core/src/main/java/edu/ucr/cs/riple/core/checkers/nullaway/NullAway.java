@@ -28,19 +28,14 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.CheckerBaseClass;
-import edu.ucr.cs.riple.core.metadata.field.FieldInitializationStore;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.region.Region;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
-import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Helper;
-import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
-import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
-import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -221,154 +216,11 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
    */
   @Override
   public void suppressRemainingErrors() {
-    // Collect regions with remaining errors.
-    Utility.buildTarget(context);
-    Set<NullAwayError> remainingErrors = deserializeErrors(context.targetModuleInfo);
-    Set<Fix> remainingFixes =
-        Utility.readFixesFromOutputDirectory(context, context.targetModuleInfo);
-    // Collect all regions for NullUnmarked.
-    // For all errors in regions which correspond to a method's body, we can add @NullUnmarked at
-    // the method level.
-    Set<AddAnnotation> nullUnMarkedAnnotations =
-        remainingErrors.stream()
-            // find the corresponding method nodes.
-            .map(
-                error -> {
-                  if (error.getRegion().isOnCallable()
-                      &&
-                      // We suppress initialization errors reported on constructors using
-                      // @SuppressWarnings("NullAway.Init"). We add @NullUnmarked on constructors
-                      // only for errors in the body of the constructor.
-                      error.isNonInitializationError()) {
-                    return context
-                        .targetModuleInfo
-                        .getMethodRegistry()
-                        .findMethodByName(error.encClass(), error.encMember());
-                  }
-                  // For methods invoked in an initialization region, where the error is that
-                  // `@Nullable` is being passed as an argument, we add a `@NullUnmarked` annotation
-                  // to the called method.
-                  if (error.messageType.equals("PASS_NULLABLE")
-                      && error.isSingleFix()
-                      && error.toResolvingLocation().isOnParameter()) {
-                    OnParameter nullableParameter = error.toResolvingParameter();
-                    return context
-                        .targetModuleInfo
-                        .getMethodRegistry()
-                        .findMethodByName(
-                            nullableParameter.clazz, nullableParameter.enclosingMethod.method);
-                  }
-                  return null;
-                })
-            // Filter null values from map above.
-            .filter(Objects::nonNull)
-            .map(node -> new AddMarkerAnnotation(node.location, config.nullUnMarkedAnnotation))
-            .collect(Collectors.toSet());
-
-    // For errors within static initialization blocks, add a @NullUnmarked annotation on the
-    // enclosing class
-    nullUnMarkedAnnotations.addAll(
-        remainingErrors.stream()
-            .filter(
-                error ->
-                    error.getRegion().isOnInitializationBlock()
-                        && !error.getRegion().isInAnonymousClass())
-            .map(
-                error ->
-                    new AddMarkerAnnotation(
-                        context.targetModuleInfo.getLocationOnClass(error.getRegion().clazz),
-                        config.nullUnMarkedAnnotation))
-            .collect(Collectors.toSet()));
-    Set<AddAnnotation> result = new HashSet<>(nullUnMarkedAnnotations);
-
-    // Collect suppress warnings, errors on field declaration regions.
-    Set<OnField> fieldsWithSuppressWarnings =
-        remainingErrors.stream()
-            .filter(
-                error -> {
-                  if (!error.getRegion().isOnField()) {
-                    return false;
-                  }
-                  if (error.messageType.equals("PASS_NULLABLE")) {
-                    // It is already resolved with @NullUnmarked selected above.
-                    return false;
-                  }
-                  // We can silence them by SuppressWarnings("NullAway.Init")
-                  return error.isNonInitializationError();
-                })
-            .map(
-                error ->
-                    context
-                        .targetModuleInfo
-                        .getFieldRegistry()
-                        .getLocationOnField(error.getRegion().clazz, error.getRegion().member))
-            .filter(Objects::nonNull)
-            .collect(Collectors.toSet());
-
-    Set<AddAnnotation> suppressWarningsAnnotations =
-        fieldsWithSuppressWarnings.stream()
-            .map(
-                onField ->
-                    new AddSingleElementAnnotation(onField, "SuppressWarnings", "NullAway", false))
-            .collect(Collectors.toSet());
-    result.addAll(suppressWarningsAnnotations);
-
-    // Collect NullAway.Init SuppressWarnings
-    Set<AddAnnotation> initializationSuppressWarningsAnnotations =
-        remainingFixes.stream()
-            .filter(
-                fix ->
-                    fix.isOnField()
-                        && (fix.reasons.contains("METHOD_NO_INIT")
-                            || fix.reasons.contains("FIELD_NO_INIT")))
-            // Filter nodes annotated with SuppressWarnings("NullAway")
-            .filter(fix -> !fieldsWithSuppressWarnings.contains(fix.toField()))
-            .map(
-                fix ->
-                    new AddSingleElementAnnotation(
-                        fix.toField(), "SuppressWarnings", "NullAway.Init", false))
-            .collect(Collectors.toSet());
-    result.addAll(initializationSuppressWarningsAnnotations);
-    context.injector.injectAnnotations(result);
-    // update log
-    context.log.updateInjectedAnnotations(result);
-    // Collect @NullUnmarked annotations on classes for any remaining error.
-    Utility.buildTarget(context);
-    remainingErrors = deserializeErrors(context.targetModuleInfo);
-    nullUnMarkedAnnotations =
-        remainingErrors.stream()
-            .filter(error -> !error.getRegion().isInAnonymousClass())
-            .map(
-                error ->
-                    new AddMarkerAnnotation(
-                        context.targetModuleInfo.getLocationOnClass(error.getRegion().clazz),
-                        config.nullUnMarkedAnnotation))
-            .collect(Collectors.toSet());
-    context.injector.injectAnnotations(nullUnMarkedAnnotations);
-    // update log
-    context.log.updateInjectedAnnotations(nullUnMarkedAnnotations);
+    throw new RuntimeException("suppressRemainingErrors Not implemented yet.");
   }
 
   @Override
-  public void preprocess() {
-    // Collect @Initializer annotations. Heuristically, we add @Initializer on methods which writes
-    // a @Nonnull value to more than one uninitialized field, and guarantees initialized fields are
-    // nonnull at all exit paths.
-    // Collect uninitialized fields.
-    Set<OnField> uninitializedFields =
-        Utility.readFixesFromOutputDirectory(context, context.targetModuleInfo).stream()
-            .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
-            .map(Fix::toField)
-            .collect(Collectors.toSet());
-    FieldInitializationStore fieldInitializationStore = new FieldInitializationStore(context);
-    // Collect selected initializers methods.
-    Set<AddAnnotation> initializers =
-        fieldInitializationStore.findInitializers(uninitializedFields).stream()
-            .map(onMethod -> new AddMarkerAnnotation(onMethod, config.initializerAnnot))
-            .collect(Collectors.toSet());
-    // Inject @Initializer annotations.
-    context.injector.injectAnnotations(initializers);
-  }
+  public void preprocess() {}
 
   @Override
   public NullAwayError createError(

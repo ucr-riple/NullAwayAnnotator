@@ -31,11 +31,7 @@ import edu.ucr.cs.riple.core.metadata.region.Region;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import javax.annotation.Nullable;
 
 /** Represents an error reported by NullAway. */
@@ -82,7 +78,7 @@ public abstract class Error {
    * @return true if error is resolvable and false otherwise.
    */
   public boolean hasFix() {
-    return this.resolvingFixes.size() > 0;
+    return !this.resolvingFixes.isEmpty();
   }
 
   public ImmutableSet<Fix> getResolvingFixes() {
@@ -208,27 +204,31 @@ public abstract class Error {
     // suggested in the given collection.
 
     // Collect all reasons each fix is suggested across the given collection.
-    Map<Fix, Set<String>> fixReasonsMap = new HashMap<>();
-    errors.stream()
-        .flatMap(error -> error.getResolvingFixes().stream())
-        .forEach(
-            fix -> {
-              if (fixReasonsMap.containsKey(fix)) {
-                fixReasonsMap.get(fix).addAll(fix.reasons);
-              } else {
-                fixReasonsMap.put(fix, new HashSet<>(fix.reasons));
-              }
-            });
-
-    ImmutableSet.Builder<Fix> builder = ImmutableSet.builder();
-    for (Fix key : fixReasonsMap.keySet()) {
-      // To avoid mutating fixes stored in the given collection, we create new instances.
-      // which contain the full set of reasons.
-      builder.add(
-          new Fix(
-              key.change, ImmutableSet.copyOf(fixReasonsMap.get(key)), key.fixSourceIsInTarget));
-    }
-    return builder.build();
+    //    Map<Fix, Set<String>> fixReasonsMap = new HashMap<>();
+    //    errors.stream()
+    //        .flatMap(error -> error.getResolvingFixes().stream())
+    //        .forEach(
+    //            fix -> {
+    //              if (fixReasonsMap.containsKey(fix)) {
+    //                fixReasonsMap.get(fix).addAll(fix.reasons);
+    //              } else {
+    //                fixReasonsMap.put(fix, new HashSet<>(fix.reasons));
+    //              }
+    //            });
+    //
+    //    ImmutableSet.Builder<Fix> builder = ImmutableSet.builder();
+    //    for (Fix key : fixReasonsMap.keySet()) {
+    //      // To avoid mutating fixes stored in the given collection, we create new instances.
+    //      // which contain the full set of reasons.
+    //      builder.add(
+    //          new Fix(
+    //              key.change, ImmutableSet.copyOf(fixReasonsMap.get(key)),
+    // key.fixSourceIsInTarget));
+    //    }
+    //    return builder.build();
+    return errors.stream()
+        .map(error -> error.resolvingFixes)
+        .collect(ImmutableSet.toImmutableSet());
   }
 
   /**

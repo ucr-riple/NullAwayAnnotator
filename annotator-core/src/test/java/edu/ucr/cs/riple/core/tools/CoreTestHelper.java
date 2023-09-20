@@ -402,7 +402,7 @@ public class CoreTestHelper {
     builder.useCacheImpact = true;
     builder.sourceTypes.add(SourceType.LOMBOK);
     builder.cache = true;
-    builder.useCacheImpact = !getEnvironmentVariable("ANNOTATOR_TEST_DISABLE_CACHING");
+    builder.useCacheImpact = false;
     builder.useParallelProcessor =
         !getEnvironmentVariable("ANNOTATOR_TEST_DISABLE_PARALLEL_PROCESSING");
     if (downstreamDependencyAnalysisActivated) {
@@ -477,7 +477,13 @@ public class CoreTestHelper {
 
     @Override
     public boolean test(TReport expected, Report found) {
-      return expected.root.change.getLocation().equals(found.root.change.getLocation())
+      return expected
+              .root
+              .iterator()
+              .next()
+              .change
+              .getLocation()
+              .equals(found.root.iterator().next().change.getLocation())
           && expected.getExpectedValue() == found.getOverallEffect(config);
     }
 

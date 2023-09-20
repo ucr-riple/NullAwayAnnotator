@@ -169,7 +169,7 @@ public class Annotator {
       TargetModuleCache targetModuleCache, DownstreamImpactCache downstreamImpactCache) {
     Utility.buildTarget(context);
     // Suggested fixes of target at the current state.
-    ImmutableSet<Fix> fixes =
+    ImmutableSet<ImmutableSet<Fix>> fixes =
         Utility.readFixesFromOutputDirectory(context, context.targetModuleInfo).stream()
             .filter(fix -> !cache.processedFix(fix))
             .collect(ImmutableSet.toImmutableSet());

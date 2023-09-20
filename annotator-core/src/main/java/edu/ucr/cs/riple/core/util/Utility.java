@@ -137,7 +137,8 @@ public class Utility {
    * @param moduleInfo ModuleInfo of the module which errors are created for.
    * @return Set of collected fixes.
    */
-  public static Set<Fix> readFixesFromOutputDirectory(Context context, ModuleInfo moduleInfo) {
+  public static ImmutableSet<ImmutableSet<Fix>> readFixesFromOutputDirectory(
+      Context context, ModuleInfo moduleInfo) {
     return Error.getResolvingFixesOfErrors(context.checker.deserializeErrors(moduleInfo));
   }
 
