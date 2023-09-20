@@ -47,7 +47,7 @@ import java.util.Set;
 public class Node {
 
   /** Root fix of the tree. */
-  public final Fix root;
+  public final Set<Fix> root;
   /** Set of all fixes in tree. */
   public final Set<Fix> tree;
   /** Set of potentially impacted by any node in tree. */
@@ -68,7 +68,7 @@ public class Node {
   /** Regions where original errors reported and NullAway suggested root for that. */
   private ImmutableSet<Region> origins;
 
-  public Node(Fix root) {
+  public Node(Set<Fix> root) {
     this.regions = new HashSet<>();
     this.root = root;
     this.triggeredFixesFromDownstreamErrors = ImmutableSet.of();
@@ -201,7 +201,7 @@ public class Node {
    * @param fix Fix instance.
    * @return Expected hash.
    */
-  public static int getHash(Fix fix) {
+  public static int getHash(Set<Fix> fix) {
     return Objects.hash(fix);
   }
 

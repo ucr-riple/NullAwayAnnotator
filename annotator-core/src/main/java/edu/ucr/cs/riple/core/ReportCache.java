@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /** Reports cache. Used to detect fixes that has already been processed. */
 public class ReportCache {
@@ -37,7 +38,7 @@ public class ReportCache {
    * suggestion. Note: Set does not have get method, here we use map which retrieves elements
    * efficiently.
    */
-  private final Map<Fix, Report> store;
+  private final Map<Set<Fix>, Report> store;
   /** Cache activation switch. */
   private boolean enabled;
 
@@ -59,7 +60,7 @@ public class ReportCache {
    * @param fix Fix instance.
    * @return true if the fix is already processed.
    */
-  public boolean processedFix(Fix fix) {
+  public boolean processedFix(Set<Fix> fix) {
     if (!enabled) {
       return false;
     }

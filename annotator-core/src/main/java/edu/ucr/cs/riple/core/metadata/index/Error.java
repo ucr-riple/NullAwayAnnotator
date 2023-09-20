@@ -200,7 +200,7 @@ public abstract class Error {
    * @param errors Collection of errors.
    * @return Immutable set of fixes which can resolve all given errors.
    */
-  public static <T extends Error> ImmutableSet<Fix> getResolvingFixesOfErrors(
+  public static <T extends Error> ImmutableSet<ImmutableSet<Fix>> getResolvingFixesOfErrors(
       Collection<T> errors) {
     // Each error has a set of resolving fixes and each fix has a set of reasons as why the fix has
     // been suggested. The final returned set of fixes should contain all the reasons it has been

@@ -63,7 +63,7 @@ public class ConflictGraph {
    * @param fix Corresponding fix for node.
    * @return The created node.
    */
-  public Node addNodeToVertices(Fix fix) {
+  public Node addNodeToVertices(Set<Fix> fix) {
     Node node = new Node(fix);
     nodes.put(Node.getHash(fix), node);
     return node;

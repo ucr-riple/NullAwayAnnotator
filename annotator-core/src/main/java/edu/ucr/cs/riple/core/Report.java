@@ -45,7 +45,7 @@ public class Report {
   /** Effect on target module. */
   public int localEffect;
   /** Root of fix tree associated to this report instance. */
-  public Fix root;
+  public Set<Fix> root;
   /** Fix tree associated to this report instance. */
   public Set<Fix> tree;
   /**
@@ -82,7 +82,7 @@ public class Report {
   /** Status of the report. */
   private Tag tag;
 
-  public Report(Fix root, int localEffect) {
+  public Report(Set<Fix> root, int localEffect) {
     this.localEffect = localEffect;
     this.root = root;
     this.tree = Sets.newHashSet(root);
@@ -178,8 +178,8 @@ public class Report {
     if (this.getOverallEffect(config) != found.getOverallEffect(config)) {
       return false;
     }
-    this.tree.add(this.root);
-    found.tree.add(found.root);
+    this.tree.addAll(this.root);
+    found.tree.addAll(found.root);
     Set<Location> thisTree = this.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
     Set<Location> otherTree = found.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
     if (!thisTree.equals(otherTree)) {
@@ -297,7 +297,7 @@ public class Report {
    */
   public Set<Fix> getFixesForNextIteration() {
     if (!hasBeenProcessedOnce) {
-      return Set.of(root);
+      return root;
     }
     Set<Fix> triggeredFixes = new HashSet<>(Error.getResolvingFixesOfErrors(this.triggeredErrors));
     triggeredFixes.addAll(triggeredFixesFromDownstreamErrors);

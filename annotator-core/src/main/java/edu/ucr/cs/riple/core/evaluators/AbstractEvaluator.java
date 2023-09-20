@@ -82,7 +82,7 @@ public abstract class AbstractEvaluator implements Evaluator {
   protected abstract void collectGraphResults(ImmutableSet<Report> reports);
 
   @Override
-  public ImmutableSet<Report> evaluate(ImmutableSet<Fix> fixes) {
+  public ImmutableSet<Report> evaluate(ImmutableSet<ImmutableSet<Fix>> fixes) {
     ImmutableSet<Report> reports =
         fixes.stream()
             .map(fix -> new Report(fix, 1))

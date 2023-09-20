@@ -97,7 +97,8 @@ public class Utility {
     JSONObject result = new JSONObject();
     JSONArray reportsJson = new JSONArray();
     for (Report report : reports) {
-      JSONObject reportJson = report.root.getJson();
+      // todo fix here
+      JSONObject reportJson = report.root.iterator().next().getJson();
       reportJson.put("LOCAL EFFECT", report.localEffect);
       reportJson.put("OVERALL EFFECT", report.getOverallEffect(context.config));
       reportJson.put("Upper Bound EFFECT", report.getUpperBoundEffectOnDownstreamDependencies());

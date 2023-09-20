@@ -30,6 +30,7 @@ import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.evaluators.graph.Node;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import java.util.Set;
 
 /**
  * This evaluator for each fix tree computes the effectiveness by injecting the fix tree entirely to
@@ -57,7 +58,7 @@ public class BasicEvaluator extends AbstractEvaluator {
         .filter(input -> input.requiresFurtherProcess(context.config))
         .forEach(
             report -> {
-              Fix root = report.root;
+              Set<Fix> root = report.root;
               Node node = graph.addNodeToVertices(root);
               node.setOrigins(supplier.getErrorStore());
               node.report = report;

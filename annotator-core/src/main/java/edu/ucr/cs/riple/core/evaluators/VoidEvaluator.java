@@ -36,7 +36,7 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 public class VoidEvaluator implements Evaluator {
 
   @Override
-  public ImmutableSet<Report> evaluate(ImmutableSet<Fix> fixes) {
+  public ImmutableSet<Report> evaluate(ImmutableSet<ImmutableSet<Fix>> fixes) {
     return fixes.stream().map(fix -> new Report(fix, -1)).collect(ImmutableSet.toImmutableSet());
   }
 }

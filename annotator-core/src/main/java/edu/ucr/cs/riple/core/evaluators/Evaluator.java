@@ -32,5 +32,5 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 public interface Evaluator {
 
   /** Makes an Immutable Set of reports from impacts of the given fixes. */
-  ImmutableSet<Report> evaluate(ImmutableSet<Fix> fixes);
+  ImmutableSet<Report> evaluate(ImmutableSet<ImmutableSet<Fix>> fixes);
 }

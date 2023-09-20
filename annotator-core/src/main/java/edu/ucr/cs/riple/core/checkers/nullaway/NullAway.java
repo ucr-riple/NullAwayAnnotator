@@ -170,7 +170,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
             // carefully and updated if the format is changed by NullAway (maybe regex?).
             .map(s -> s.substring(0, s.indexOf("(")).trim())
             .collect(Collectors.toSet());
-    if (fields.size() == 0) {
+    if (fields.isEmpty()) {
       throw new RuntimeException(
           "Could not extract any uninitialized field in message for initializer error in version "
               + 3

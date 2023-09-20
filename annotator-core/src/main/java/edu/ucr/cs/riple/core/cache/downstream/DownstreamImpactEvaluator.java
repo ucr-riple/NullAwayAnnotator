@@ -63,37 +63,42 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
         .getNodes()
         .forEach(
             node ->
-                node.root.ifOnMethod(
-                    method -> {
-                      // Impacted parameters.
-                      Set<OnParameter> parameters =
-                          node.triggeredErrors.stream()
-                              .filter(
-                                  error ->
-                                      error.isSingleFix()
-                                          && error.toResolvingLocation().isOnParameter()
-                                          // Method is declared in the target module.
-                                          && context.targetModuleInfo.declaredInModule(
-                                              error.toResolvingParameter()))
-                              .map(Error::toResolvingParameter)
-                              .collect(Collectors.toSet());
-                      if (!parameters.isEmpty()) {
-                        // Update path for each parameter. These triggered fixes do not have an
-                        // actual physical path since they are provided as a jar file in downstream
-                        // dependencies.
-                        parameters.forEach(
-                            onParameter ->
-                                onParameter.path =
-                                    context
-                                        .targetModuleInfo
-                                        .getMethodRegistry()
-                                        .findMethodByName(
-                                            onParameter.clazz, onParameter.enclosingMethod.method)
-                                        .location
-                                        .path);
-                        nullableFlowMap.put(method, parameters);
-                      }
-                    }));
+                node.root
+                    .iterator()
+                    .next()
+                    .ifOnMethod(
+                        method -> {
+                          // Impacted parameters.
+                          Set<OnParameter> parameters =
+                              node.triggeredErrors.stream()
+                                  .filter(
+                                      error ->
+                                          error.isSingleFix()
+                                              && error.toResolvingLocation().isOnParameter()
+                                              // Method is declared in the target module.
+                                              && context.targetModuleInfo.declaredInModule(
+                                                  error.toResolvingParameter()))
+                                  .map(Error::toResolvingParameter)
+                                  .collect(Collectors.toSet());
+                          if (!parameters.isEmpty()) {
+                            // Update path for each parameter. These triggered fixes do not have an
+                            // actual physical path since they are provided as a jar file in
+                            // downstream
+                            // dependencies.
+                            parameters.forEach(
+                                onParameter ->
+                                    onParameter.path =
+                                        context
+                                            .targetModuleInfo
+                                            .getMethodRegistry()
+                                            .findMethodByName(
+                                                onParameter.clazz,
+                                                onParameter.enclosingMethod.method)
+                                            .location
+                                            .path);
+                            nullableFlowMap.put(method, parameters);
+                          }
+                        }));
   }
 
   /**

@@ -91,7 +91,7 @@ public class DownstreamImpactCacheImpl
     // Collect callers of public APIs in module.
     MethodRegionRegistry methodRegionRegistry = new MethodRegionRegistry(supplier.getModuleInfo());
     // Generate fixes corresponding methods.
-    ImmutableSet<Fix> fixes =
+    ImmutableSet<ImmutableSet<Fix>> fixes =
         store.values().stream()
             .filter(
                 input ->
@@ -100,11 +100,12 @@ public class DownstreamImpactCacheImpl
                         .isEmpty()) // skip methods that are not called anywhere.
             .map(
                 downstreamImpact ->
-                    new Fix(
-                        new AddMarkerAnnotation(
-                            downstreamImpact.toMethod(), context.config.nullableAnnot),
-                        "null",
-                        false))
+                    ImmutableSet.of(
+                        new Fix(
+                            new AddMarkerAnnotation(
+                                downstreamImpact.toMethod(), context.config.nullableAnnot),
+                            "null",
+                            false)))
             .collect(ImmutableSet.toImmutableSet());
     DownstreamImpactEvaluator evaluator = new DownstreamImpactEvaluator(supplier);
     ImmutableSet<Report> reports = evaluator.evaluate(fixes);
@@ -116,7 +117,8 @@ public class DownstreamImpactCacheImpl
               Set<OnParameter> impactedParameters =
                   evaluator.getImpactedParameters(method.toMethod());
               reports.stream()
-                  .filter(input -> input.root.toMethod().equals(method.toMethod()))
+                  .filter(
+                      input -> input.root.iterator().next().toMethod().equals(method.toMethod()))
                   .findAny()
                   .ifPresent(report -> method.setStatus(report, impactedParameters));
             });

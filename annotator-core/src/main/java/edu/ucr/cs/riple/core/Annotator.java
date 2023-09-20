@@ -30,7 +30,6 @@ import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCacheImpl;
 import edu.ucr.cs.riple.core.cache.downstream.VoidDownstreamImpactCache;
 import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
-import edu.ucr.cs.riple.core.evaluators.CachedEvaluator;
 import edu.ucr.cs.riple.core.evaluators.Evaluator;
 import edu.ucr.cs.riple.core.evaluators.VoidEvaluator;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
@@ -39,7 +38,6 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * The main class of the core module. Responsible for analyzing the target module and injecting the
@@ -149,7 +147,7 @@ public class Annotator {
     Set<Fix> selectedFixes =
         latestReports.stream()
             .filter(Report::approved)
-            .flatMap(report -> config.chain ? report.tree.stream() : Stream.of(report.root))
+            .flatMap(report -> config.chain ? report.tree.stream() : report.root.stream())
             .collect(Collectors.toSet());
     context.injector.injectFixes(selectedFixes);
     // Update log.
@@ -194,7 +192,7 @@ public class Annotator {
       return new VoidEvaluator();
     }
     if (config.useImpactCache) {
-      return new CachedEvaluator(supplier);
+      throw new RuntimeException("Impact cache is not supported in this version.");
     }
     return new BasicEvaluator(supplier);
   }
