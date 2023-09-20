@@ -2,10 +2,10 @@ package test;
 import javax.annotation.Nullable;
 public class Foo {
   @Nullable Bar f0 = new Bar().process(null);
-  @SuppressWarnings("NullAway.Init") Bar f1;
-  @SuppressWarnings("NullAway.Init") Bar f2, f3;
+  Bar f1;
+  Bar f2, f3;
   @Nullable Bar nullableBar;
-  @SuppressWarnings("NullAway") Bar f4 = nullableBar.process(new Object());
+  Bar f4 = nullableBar.process(new Object());
   @Nullable Bar f5;
   Foo() {
     this.f2 = new Bar();

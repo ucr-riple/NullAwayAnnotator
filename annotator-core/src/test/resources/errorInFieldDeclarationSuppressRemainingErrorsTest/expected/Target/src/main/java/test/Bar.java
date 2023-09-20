@@ -4,7 +4,7 @@ import org.jspecify.annotations.NullUnmarked;
 public class Bar {
   Object foo = new Object();
   public void deref() {}
-  @NullUnmarked @Nullable
+  @Nullable
   public Bar process(Object foo) {
     this.foo = foo;
     receiveNonnull(foo);

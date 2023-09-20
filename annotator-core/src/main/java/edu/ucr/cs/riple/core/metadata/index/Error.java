@@ -228,6 +228,7 @@ public abstract class Error {
     //    return builder.build();
     return errors.stream()
         .map(error -> error.resolvingFixes)
+        .filter(fixes -> !fixes.isEmpty())
         .collect(ImmutableSet.toImmutableSet());
   }
 
@@ -238,7 +239,7 @@ public abstract class Error {
    * @return true, if this error is resolvable.
    */
   public boolean isResolvableWith(Collection<Fix> fixes) {
-    if (resolvingFixes.size() == 0) {
+    if (resolvingFixes.isEmpty()) {
       return false;
     }
     return fixes.containsAll(this.resolvingFixes);

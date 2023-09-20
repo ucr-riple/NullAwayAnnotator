@@ -1,11 +1,12 @@
 package test;
-
+import com.uber.nullaway.annotations.Initializer;
 public class Main {
 
   public Object f1, f2, f3, f4 = new Object();
 
   Object f5;
 
+  @Initializer
   public void init() {
     f1 = new Object();
     f2 = new Object();
