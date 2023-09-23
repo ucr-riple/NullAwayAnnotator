@@ -57,6 +57,7 @@ public class CompoundRegionRegistry implements RegionRegistry {
             new FieldRegionRegistry(moduleInfo),
             methodRegionRegistry,
             new LocalVariableRegionRegistry(),
+            new PolyMethodRegionRegistry(methodRegionRegistry),
             new ParameterRegionRegistry(moduleInfo, methodRegionRegistry));
   }
 

@@ -99,4 +99,18 @@ public class OnPolyMethod extends Location {
   public int hashCode() {
     return Objects.hash(super.hashCode(), indices, method);
   }
+
+  @Override
+  public String toString() {
+    return "OnPolyMethod{"
+        + "class='"
+        + clazz
+        + '\''
+        + ", method='"
+        + method
+        + '\''
+        + ", indices="
+        + indices
+        + '}';
+  }
 }

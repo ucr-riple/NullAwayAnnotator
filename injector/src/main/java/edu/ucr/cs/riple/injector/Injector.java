@@ -32,6 +32,7 @@ import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AnnotationChange;
 import edu.ucr.cs.riple.injector.changes.ChangeVisitor;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
+import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.io.IOException;
@@ -95,6 +96,24 @@ public class Injector {
           offsets.add(offsetStore);
         });
     return offsets;
+  }
+
+  public static boolean isTheChange(ASTChange change) {
+    String sig = "conditionalParse(java.lang.String,com.opensymphony.xwork2.ActionInvocation)";
+    Location location = change.getLocation();
+    if (!location.clazz.equals("org.apache.struts2.result.StrutsResultSupport")) {
+      return false;
+    }
+    if (location.isOnPolyMethod()) {
+      return location.toPolyMethod().method.equals(sig);
+    }
+    if (location.isOnMethod()) {
+      return location.toMethod().method.equals(sig);
+    }
+    if (location.isOnParameter()) {
+      return location.toParameter().enclosingMethod.method.equals(sig);
+    }
+    return false;
   }
 
   /**

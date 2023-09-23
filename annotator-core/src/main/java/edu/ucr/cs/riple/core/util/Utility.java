@@ -70,7 +70,12 @@ public class Utility {
    */
   public static void executeCommand(Config config, String command) {
     try {
-      ProcessBuilder pb = new ProcessBuilder("/bin/sh", "-c", command);
+      ProcessBuilder pb =
+          new ProcessBuilder(
+              "/bin/sh",
+              "-c",
+              "export PATH=/home/nima/Documents/environments/maven/apache-maven-3.9.1/bin/mvn:$PATH && "
+                  + command);
       if (config.redirectBuildOutputToStdErr) {
         pb.redirectError(ProcessBuilder.Redirect.INHERIT);
         pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);

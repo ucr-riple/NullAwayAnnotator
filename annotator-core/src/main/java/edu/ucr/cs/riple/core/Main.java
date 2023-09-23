@@ -24,48 +24,46 @@
 
 package edu.ucr.cs.riple.core;
 
-import java.nio.file.Paths;
-
 /** Starting point. */
 public class Main {
 
-  /**
-   * Starting point.
-   *
-   * @param args if flag '--path' is found, all configurations will be set up based on the given
-   *     json file, otherwise they will be set up according to the set of received cli arguments.
-   */
-  public static void main(String[] args) {
-    Config config;
-    if (args.length == 2 && args[0].equals("--path")) {
-      config = new Config(Paths.get(args[1]));
-    } else {
-      config = new Config(args);
-    }
-    Annotator annotator = new Annotator(config);
-    annotator.start();
-  }
-
+  //  /**
+  //   * Starting point.
+  //   *
+  //   * @param args if flag '--path' is found, all configurations will be set up based on the given
+  //   *     json file, otherwise they will be set up according to the set of received cli
+  // arguments.
+  //   */
   //  public static void main(String[] args) {
-  //    args =
-  //        new String[] {
-  //          "-d",
-  //          "/Users/nima/Desktop/docker/benchmarks/untitled/annotator-out/",
-  //          "-bc",
-  //          "cd /Users/nima/Desktop/docker/benchmarks/untitled && ./gradlew compileJava
-  // --rerun-tasks",
-  //          "-cp",
-  //          "/Users/nima/Desktop/docker/benchmarks/untitled/annotator-out/paths.tsv",
-  //          "-n",
-  //          "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted",
-  //          "-i",
-  //          "edu.ucr.cs.riple.taint.ucrtainting.qual.Init",
-  //          "-cn",
-  //          "UCRTaint",
-  //          "-rboserr"
-  //        };
-  //    Config config = new Config(args);
+  //    Config config;
+  //    if (args.length == 2 && args[0].equals("--path")) {
+  //      config = new Config(Paths.get(args[1]));
+  //    } else {
+  //      config = new Config(args);
+  //    }
   //    Annotator annotator = new Annotator(config);
   //    annotator.start();
   //  }
+
+  public static void main(String[] args) {
+    args =
+        new String[] {
+          "-d",
+          "/home/nima/Developer/taint-benchmarks/struts/annotator-out/core",
+          "-bc",
+          "cd /home/nima/Developer/taint-benchmarks/struts && /home/nima/Documents/environments/maven/apache-maven-3.9.1/bin/mvn clean compile -pl core",
+          "-cp",
+          "/home/nima/Developer/taint-benchmarks/struts/annotator-out/core/paths.tsv",
+          "-n",
+          "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted",
+          "-i",
+          "edu.ucr.cs.riple.taint.ucrtainting.qual.Init",
+          "-cn",
+          "UCRTaint",
+          "-rboserr"
+        };
+    Config config = new Config(args);
+    Annotator annotator = new Annotator(config);
+    annotator.start();
+  }
 }

@@ -83,7 +83,7 @@ public class Printer {
    * @param imports Set of import declarations to be added.
    */
   public void addImports(CompilationUnit tree, Set<ImportDeclaration> imports) {
-    if (imports.size() == 0) {
+    if (imports.isEmpty()) {
       return;
     }
     int line = findStartOffsetForImports(tree);
@@ -130,7 +130,7 @@ public class Printer {
     // No package exists, add import under copyright header if exists, otherwise on the first line.
     for (int i = 0; i < lines.size(); i++) {
       String line = lines.get(i).strip();
-      if (line.equals("")) {
+      if (line.isEmpty()) {
         continue;
       }
       // For copyrights surrounded with "/* **/"
