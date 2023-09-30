@@ -69,13 +69,29 @@ public class Utility {
    * @param command The shell command to run.
    */
   public static void executeCommand(Config config, String command) {
+    final Path logPath = config.globalDir.resolve("command_log.txt");
+    if (!logPath.toFile().exists()) {
+      // make the file if it doesn't exist
+      try {
+        Files.createFile(logPath);
+      } catch (IOException e) {
+        throw new RuntimeException("Exception while creating file: " + logPath, e);
+      }
+    }
+    // get current time
+    LocalDateTime now = LocalDateTime.now(ZoneId.of("America/Los_Angeles"));
+    // append the command to the file
     try {
-      ProcessBuilder pb =
-          new ProcessBuilder(
-              "/bin/sh",
-              "-c",
-              "export PATH=/home/nima/Documents/environments/maven/apache-maven-3.9.1/bin/mvn:$PATH && "
-                  + command);
+      Files.write(
+          logPath,
+          Collections.singleton(now + ":" + command + "\n"),
+          Charset.defaultCharset(),
+          StandardOpenOption.APPEND);
+    } catch (IOException e) {
+      throw new RuntimeException("Exception while writing in file: " + logPath, e);
+    }
+    try {
+      ProcessBuilder pb = new ProcessBuilder("/bin/sh", "-c", command);
       if (config.redirectBuildOutputToStdErr) {
         pb.redirectError(ProcessBuilder.Redirect.INHERIT);
         pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
