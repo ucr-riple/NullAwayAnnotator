@@ -77,17 +77,6 @@ public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcess
       pb.step();
       Set<Fix> fixes =
           group.stream().flatMap(node -> node.tree.stream()).collect(Collectors.toSet());
-      group.forEach(
-          new Consumer<Node>() {
-            @Override
-            public void accept(Node node) {
-              for (Fix fix : node.tree) {
-                if (Injector.isTheChange(fix.change)) {
-                  System.out.println("The change is: " + fix.change);
-                }
-              }
-            }
-          });
       injector.injectFixes(fixes);
       Utility.timeStamp(context.config);
       compilerRunner.run();
