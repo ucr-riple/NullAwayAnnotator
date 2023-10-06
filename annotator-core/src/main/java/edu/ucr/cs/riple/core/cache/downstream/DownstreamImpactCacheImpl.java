@@ -203,4 +203,33 @@ public class DownstreamImpactCacheImpl
     }
     return ImmutableSet.copyOf(impact.getTriggeredErrors());
   }
+
+  /**
+   * Returns the effect of applying a fix on the target on downstream dependencies.
+   *
+   * @param fix Fix targeting an element in target.
+   * @param fixTree Fix tree in target that will be annotated as {@code @Nullable}.
+   * @return Effect on downstream dependencies.
+   */
+  public int effectOnDownstreamDependenciesWithLog(Fix fix, Set<Fix> fixTree) {
+    System.err.println("Computing effect on downstream");
+    DownstreamImpact downstreamImpact = fetchImpact(fix);
+    if (downstreamImpact == null) {
+      System.err.println("No impact");
+      return 0;
+    }
+    // Some triggered errors might be resolved due to fixes in the tree, and we should not double
+    // count them.
+    Set<Error> triggeredErrors = downstreamImpact.getTriggeredErrors();
+    System.err.println("Triggered errors on downstream: " + triggeredErrors.size());
+    triggeredErrors.forEach(
+        error -> {
+          System.err.println(error.messageType + " " + error.message);
+          System.out.println("Resolvable fix with tree: " + error.isResolvableWith(fixTree));
+        });
+    long resolvedErrors =
+        triggeredErrors.stream().filter(error -> error.isResolvableWith(fixTree)).count();
+    System.out.println("Count of resolved errors: " + resolvedErrors);
+    return triggeredErrors.size() - (int) resolvedErrors;
+  }
 }

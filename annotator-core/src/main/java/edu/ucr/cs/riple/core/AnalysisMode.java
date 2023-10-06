@@ -29,6 +29,7 @@ import static edu.ucr.cs.riple.core.Report.Tag.REJECT;
 
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
+import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCacheImpl;
 import java.util.Collection;
 
 /** Analysis mode in making inference decisions. */
@@ -60,6 +61,40 @@ public enum AnalysisMode {
     public void tag(DownstreamImpactCache downstreamImpactCache, Collection<Report> reports) {
       reports.forEach(
           report -> {
+            boolean log =
+                !report.containsDestructiveMethod(downstreamImpactCache)
+                    && report.getUpperBoundEffectOnDownstreamDependencies() != 0;
+            if (log) {
+              System.err.println(
+                  "===================================UNEXPECTED STATE===================================");
+              System.err.println(
+                  "Upper bound value: " + report.getUpperBoundEffectOnDownstreamDependencies());
+              final int[] newUpperBoundCalc = {0};
+              System.err.println("Upper bound calculation:");
+              report.tree.forEach(
+                  fix -> {
+                    System.err.println("Fix location: " + fix.toLocation());
+                    boolean triggersUnresolvableErrorsOnDownstream =
+                        downstreamImpactCache.triggersUnresolvableErrorsOnDownstream(fix);
+                    System.err.println(
+                        "Number of errors triggered in downstream: "
+                            + triggersUnresolvableErrorsOnDownstream);
+                    if (triggersUnresolvableErrorsOnDownstream) {
+                      System.err.println("UNEXPECTED STATE: Expected to not trigger any error");
+                    }
+                    int upperEffect =
+                        ((DownstreamImpactCacheImpl) downstreamImpactCache)
+                            .effectOnDownstreamDependenciesWithLog(fix, report.tree);
+                    newUpperBoundCalc[0] += upperEffect;
+                    System.err.println("Effect on downstream:" + upperEffect);
+                    if (upperEffect != 0) {
+                      System.err.println("UNEXPECTED STATE: " + upperEffect);
+                    }
+                  });
+              System.err.println("New value of upper bound: " + newUpperBoundCalc[0]);
+              System.err.println(
+                  "===================================END===================================");
+            }
             // Check for destructive methods.
             if (report.containsDestructiveMethod(downstreamImpactCache)) {
               report.tag(REJECT);
