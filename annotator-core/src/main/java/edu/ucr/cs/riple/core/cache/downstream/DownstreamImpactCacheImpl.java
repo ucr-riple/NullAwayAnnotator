@@ -154,6 +154,7 @@ public class DownstreamImpactCacheImpl
             + fix
             + ", "
             + fixTree);
+    log("fetching impact");
     DownstreamImpact downstreamImpact = fetchImpact(fix);
     if (downstreamImpact == null) {
       log("no impact, returning 0");
@@ -182,7 +183,7 @@ public class DownstreamImpactCacheImpl
             .count();
     log("resolved errors: " + resolvedErrors);
     int ans = triggeredErrors.size() - (int) resolvedErrors;
-    log("returning: " + ans);
+    log("end ---effectOnDownstreamDependencies(Fix fix, Set<Fix> fixTree)---, returning: " + ans);
     return ans;
   }
 
@@ -205,6 +206,7 @@ public class DownstreamImpactCacheImpl
   public boolean triggersUnresolvableErrorsOnDownstream(Fix fix) {
     log("---triggersUnresolvableErrorsOnDownstream(fix)---, with param: " + fix);
     ImmutableSet<Error> errors = getTriggeredErrors(fix);
+    log("back to triggersUnresolvableErrorsOnDownstream");
     log("triggered errors: " + errors);
     boolean ans =
         errors.stream()
@@ -218,6 +220,7 @@ public class DownstreamImpactCacheImpl
                     return !fixableOnTarget;
                   }
                 });
+    log("end ---triggersUnresolvableErrorsOnDownstream(fix)---, returning: " + ans);
     return ans;
   }
 
@@ -235,14 +238,20 @@ public class DownstreamImpactCacheImpl
 
   @Override
   public ImmutableSet<Error> getTriggeredErrors(Fix fix) {
+    log("---getTriggeredErrors(Fix fix)---, with param: " + fix);
     // We currently only store impact of methods on downstream dependencies.
     if (!fix.isOnMethod()) {
       return ImmutableSet.of();
     }
+    log("fix is on method");
     DownstreamImpact impact = fetchImpact(fix);
+    log("impact: " + impact);
     if (impact == null) {
+      log("no impact, returning empty set");
       return ImmutableSet.of();
     }
-    return ImmutableSet.copyOf(impact.getTriggeredErrors());
+    ImmutableSet<Error> ans = ImmutableSet.copyOf(impact.getTriggeredErrors());
+    log("end ---getTriggeredErrors(Fix fix)---, returning: " + ans);
+    return ans;
   }
 }

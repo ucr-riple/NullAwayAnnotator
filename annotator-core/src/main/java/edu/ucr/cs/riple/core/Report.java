@@ -24,6 +24,8 @@
 
 package edu.ucr.cs.riple.core;
 
+import static edu.ucr.cs.riple.core.util.Utility.log;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
@@ -34,6 +36,7 @@ import edu.ucr.cs.riple.injector.location.Location;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -115,7 +118,21 @@ public class Report {
    *     dependency.
    */
   public boolean containsDestructiveMethod(DownstreamImpactCache cache) {
-    return this.tree.stream().anyMatch(cache::triggersUnresolvableErrorsOnDownstream);
+    log("---in containsDestructiveMethod(Cache)---");
+    boolean b =
+        this.tree.stream()
+            .anyMatch(
+                new Predicate<Fix>() {
+                  @Override
+                  public boolean test(Fix fix) {
+                    log("checking if fix is destructive: " + fix);
+                    boolean ans = cache.triggersUnresolvableErrorsOnDownstream(fix);
+                    log("is destructive: " + ans);
+                    return ans;
+                  }
+                });
+    log("---end containsDestructiveMethod(Cache)--- returning: " + b);
+    return b;
   }
 
   /**

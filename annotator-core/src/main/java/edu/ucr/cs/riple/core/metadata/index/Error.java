@@ -175,17 +175,20 @@ public abstract class Error {
   public boolean isFixableOnTarget(Context context) {
     log("---isFixableOnTarget(Context context)---");
     log("has resolving fixes: " + !resolvingFixes.isEmpty());
-    return !resolvingFixes.isEmpty()
-        && this.resolvingFixes.stream()
-            .allMatch(
-                new Predicate<Fix>() {
-                  @Override
-                  public boolean test(Fix fix) {
-                    boolean ans = context.targetModuleInfo.declaredInModule(fix.toLocation());
-                    log("Fix : " + fix + " is targeting TARGET module: " + ans);
-                    return ans;
-                  }
-                });
+    boolean ans =
+        !resolvingFixes.isEmpty()
+            && this.resolvingFixes.stream()
+                .allMatch(
+                    new Predicate<Fix>() {
+                      @Override
+                      public boolean test(Fix fix) {
+                        boolean ans = context.targetModuleInfo.declaredInModule(fix.toLocation());
+                        log("Fix : " + fix + " is targeting TARGET module: " + ans);
+                        return ans;
+                      }
+                    });
+    log("end---isFixableOnTarget(Context context)---, returning: " + ans);
+    return ans;
   }
 
   @Override
@@ -252,7 +255,7 @@ public abstract class Error {
    * @return true, if this error is resolvable.
    */
   public boolean isResolvableWith(Collection<Fix> fixes) {
-    if (resolvingFixes.size() == 0) {
+    if (resolvingFixes.isEmpty()) {
       return false;
     }
     return fixes.containsAll(this.resolvingFixes);

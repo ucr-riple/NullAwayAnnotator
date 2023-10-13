@@ -85,13 +85,20 @@ public enum AnalysisMode {
                   int upperEffect =
                       ((DownstreamImpactCacheImpl) downstreamImpactCache)
                           .effectOnDownstreamDependencies(fix, report.tree);
+                  log("newUpperBoundCalc[0] before: " + newUpperBoundCalc[0]);
                   newUpperBoundCalc[0] += upperEffect;
                   log("Effect on downstream:" + upperEffect);
+                  log("newUpperBoundCalc[0] after: " + newUpperBoundCalc[0]);
                   if (upperEffect != 0) {
                     log("UNEXPECTED STATE: " + upperEffect);
                   }
                 });
             log("Recomputed value of upper bound: " + newUpperBoundCalc[0]);
+
+            log("checking containsDestructiveMethod:");
+            boolean containsDestructiveMethod =
+                report.containsDestructiveMethod(downstreamImpactCache);
+            log("containsDestructiveMethod: " + containsDestructiveMethod);
             log("===================================END===================================");
             Annotator.logActive = false;
             // Check for destructive methods.

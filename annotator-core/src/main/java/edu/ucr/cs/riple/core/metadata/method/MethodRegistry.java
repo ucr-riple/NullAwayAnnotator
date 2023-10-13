@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.metadata.method;
 
+import static edu.ucr.cs.riple.core.util.Utility.log;
 import static edu.ucr.cs.riple.scanner.out.MethodRecord.ANNOTATION_DELIMITER;
 
 import com.google.common.collect.ImmutableSet;
@@ -201,9 +202,13 @@ public class MethodRegistry extends Registry<MethodRecord> {
    *     module, and false otherwise.
    */
   public boolean declaredInModule(@Nullable Location location) {
+    log("checking if " + location + " is declared in module");
     if (location == null || location.clazz.equals("null")) {
+      log("location is null or class is null");
       return false;
     }
-    return this.declaredClasses.contains(location.clazz);
+    boolean ans = this.declaredClasses.contains(location.clazz);
+    log("declared in target: " + ans);
+    return ans;
   }
 }
