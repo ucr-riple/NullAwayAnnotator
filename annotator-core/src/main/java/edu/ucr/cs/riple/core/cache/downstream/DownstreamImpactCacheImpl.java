@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.cache.downstream;
 
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static edu.ucr.cs.riple.core.util.Utility.log;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -43,6 +44,7 @@ import java.util.Collection;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
@@ -146,17 +148,42 @@ public class DownstreamImpactCacheImpl
    * @param fixTree Fix tree in target that will be annotated as {@code @Nullable}.
    * @return Effect on downstream dependencies.
    */
-  private int effectOnDownstreamDependencies(Fix fix, Set<Fix> fixTree) {
+  public int effectOnDownstreamDependencies(Fix fix, Set<Fix> fixTree) {
+    log(
+        "---effectOnDownstreamDependencies(Fix fix, Set<Fix> fixTree)---, with params: "
+            + fix
+            + ", "
+            + fixTree);
     DownstreamImpact downstreamImpact = fetchImpact(fix);
     if (downstreamImpact == null) {
+      log("no impact, returning 0");
       return 0;
     }
     // Some triggered errors might be resolved due to fixes in the tree, and we should not double
     // count them.
+    log("found impact");
     Set<Error> triggeredErrors = downstreamImpact.getTriggeredErrors();
+    log("triggered errors: " + triggeredErrors);
     long resolvedErrors =
-        triggeredErrors.stream().filter(error -> error.isResolvableWith(fixTree)).count();
-    return triggeredErrors.size() - (int) resolvedErrors;
+        triggeredErrors.stream()
+            .filter(
+                new Predicate<Error>() {
+                  @Override
+                  public boolean test(Error error) {
+                    boolean errorIsResolvableWithFixTree = error.isResolvableWith(fixTree);
+                    log(
+                        "error: "
+                            + error
+                            + ", is resolvable with  fix tree: "
+                            + errorIsResolvableWithFixTree);
+                    return errorIsResolvableWithFixTree;
+                  }
+                })
+            .count();
+    log("resolved errors: " + resolvedErrors);
+    int ans = triggeredErrors.size() - (int) resolvedErrors;
+    log("returning: " + ans);
+    return ans;
   }
 
   @Override
@@ -176,7 +203,22 @@ public class DownstreamImpactCacheImpl
 
   @Override
   public boolean triggersUnresolvableErrorsOnDownstream(Fix fix) {
-    return getTriggeredErrors(fix).stream().anyMatch(error -> !error.isFixableOnTarget(context));
+    log("---triggersUnresolvableErrorsOnDownstream(fix)---, with param: " + fix);
+    ImmutableSet<Error> errors = getTriggeredErrors(fix);
+    log("triggered errors: " + errors);
+    boolean ans =
+        errors.stream()
+            .anyMatch(
+                new Predicate<Error>() {
+                  @Override
+                  public boolean test(Error error) {
+                    log("checking if error: " + error + " is fixable on target");
+                    boolean fixableOnTarget = error.isFixableOnTarget(context);
+                    log("fixable on target: " + fixableOnTarget);
+                    return !fixableOnTarget;
+                  }
+                });
+    return ans;
   }
 
   @Override
@@ -202,34 +244,5 @@ public class DownstreamImpactCacheImpl
       return ImmutableSet.of();
     }
     return ImmutableSet.copyOf(impact.getTriggeredErrors());
-  }
-
-  /**
-   * Returns the effect of applying a fix on the target on downstream dependencies.
-   *
-   * @param fix Fix targeting an element in target.
-   * @param fixTree Fix tree in target that will be annotated as {@code @Nullable}.
-   * @return Effect on downstream dependencies.
-   */
-  public int effectOnDownstreamDependenciesWithLog(Fix fix, Set<Fix> fixTree) {
-    System.err.println("Computing effect on downstream");
-    DownstreamImpact downstreamImpact = fetchImpact(fix);
-    if (downstreamImpact == null) {
-      System.err.println("No impact");
-      return 0;
-    }
-    // Some triggered errors might be resolved due to fixes in the tree, and we should not double
-    // count them.
-    Set<Error> triggeredErrors = downstreamImpact.getTriggeredErrors();
-    System.err.println("Triggered errors on downstream: " + triggeredErrors.size());
-    triggeredErrors.forEach(
-        error -> {
-          System.err.println(error.messageType + " " + error.message);
-          System.out.println("Resolvable fix with tree: " + error.isResolvableWith(fixTree));
-        });
-    long resolvedErrors =
-        triggeredErrors.stream().filter(error -> error.isResolvableWith(fixTree)).count();
-    System.out.println("Count of resolved errors: " + resolvedErrors);
-    return triggeredErrors.size() - (int) resolvedErrors;
   }
 }

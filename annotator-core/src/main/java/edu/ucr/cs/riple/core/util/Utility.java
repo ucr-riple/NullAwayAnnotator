@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.util;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.Report;
@@ -301,6 +302,12 @@ public class Utility {
       return stream.collect(Collectors.toList());
     } catch (IOException e) {
       throw new RuntimeException("Exception while reading file: " + path, e);
+    }
+  }
+
+  public static void log(String message) {
+    if (Annotator.logActive) {
+      System.err.println(message);
     }
   }
 }

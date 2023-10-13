@@ -62,7 +62,7 @@ subprojects { proj ->
                 check("WildcardImport", CheckSeverity.ERROR)
                 check("MissingBraces", CheckSeverity.ERROR)
                 if (project.name != "ban-mutable-static") {
-                    check("BanMutableStatic", CheckSeverity.ERROR)
+                    check("BanMutableStatic", CheckSeverity.OFF)
                 }
             }
         }

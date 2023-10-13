@@ -23,6 +23,8 @@
  */
 package edu.ucr.cs.riple.core.metadata.index;
 
+import static edu.ucr.cs.riple.core.util.Utility.log;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
@@ -35,6 +37,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 /** Represents an error reported by NullAway. */
@@ -170,9 +173,19 @@ public abstract class Error {
    * @return true, if error is resolvable via fixes on target module.
    */
   public boolean isFixableOnTarget(Context context) {
-    return resolvingFixes.size() > 0
+    log("---isFixableOnTarget(Context context)---");
+    log("has resolving fixes: " + !resolvingFixes.isEmpty());
+    return !resolvingFixes.isEmpty()
         && this.resolvingFixes.stream()
-            .allMatch(fix -> context.targetModuleInfo.declaredInModule(fix.toLocation()));
+            .allMatch(
+                new Predicate<Fix>() {
+                  @Override
+                  public boolean test(Fix fix) {
+                    boolean ans = context.targetModuleInfo.declaredInModule(fix.toLocation());
+                    log("Fix : " + fix + " is targeting TARGET module: " + ans);
+                    return ans;
+                  }
+                });
   }
 
   @Override
@@ -190,7 +203,9 @@ public abstract class Error {
         + '\''
         + ", offset='"
         + offset
-        + '\'';
+        + '\''
+        + ", resolvable='"
+        + resolvingFixes;
   }
 
   /**

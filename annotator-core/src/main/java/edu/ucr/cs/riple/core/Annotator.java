@@ -58,6 +58,8 @@ public class Annotator {
   /** Annotator configuration. */
   public final Config config;
 
+  public static boolean logActive = false;
+
   public Annotator(Config config) {
     this.config = config;
     this.context = new Context(config);

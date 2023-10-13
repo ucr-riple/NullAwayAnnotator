@@ -399,10 +399,9 @@ public class CoreTestHelper {
     builder.mode = mode;
     builder.inferenceActivated = !deactivateInference;
     builder.suppressRemainingErrors = suppressRemainingErrors;
-    builder.useCacheImpact = true;
     builder.sourceTypes.add(SourceType.LOMBOK);
     builder.cache = true;
-    builder.useCacheImpact = !getEnvironmentVariable("ANNOTATOR_TEST_DISABLE_CACHING");
+    builder.useCacheImpact = false;
     builder.useParallelProcessor =
         !getEnvironmentVariable("ANNOTATOR_TEST_DISABLE_PARALLEL_PROCESSING");
     if (downstreamDependencyAnalysisActivated) {

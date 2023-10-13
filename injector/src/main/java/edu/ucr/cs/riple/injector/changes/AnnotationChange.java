@@ -58,7 +58,7 @@ public abstract class AnnotationChange implements ASTChange {
 
   @Override
   public String toString() {
-    return location.toString();
+    return location.toString() + " annotation: " + annotationName.toString();
   }
 
   @Override
