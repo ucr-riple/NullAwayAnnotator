@@ -257,10 +257,12 @@ public class Utility {
   public static void buildTarget(Context context) {
     try {
       Files.deleteIfExists(context.config.target.dir.resolve("errors1.tsv"));
-      // copy errors.tsv to errors1.tsv
-      Files.copy(
-          context.config.target.dir.resolve("errors.tsv"),
-          context.config.target.dir.resolve("errors1.tsv"));
+      if (Files.exists(context.config.target.dir.resolve("errors.tsv"))) {
+        // copy errors.tsv to errors1.tsv
+        Files.copy(
+            context.config.target.dir.resolve("errors.tsv"),
+            context.config.target.dir.resolve("errors1.tsv"));
+      }
       Files.deleteIfExists(context.config.target.dir.resolve("errors.tsv"));
     } catch (IOException e) {
       throw new RuntimeException(e);
