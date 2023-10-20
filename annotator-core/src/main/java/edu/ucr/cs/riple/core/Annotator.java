@@ -24,6 +24,8 @@
 
 package edu.ucr.cs.riple.core;
 
+import com.github.javaparser.ParserConfiguration;
+import com.github.javaparser.StaticJavaParser;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.cache.TargetModuleCache;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
@@ -60,6 +62,9 @@ public class Annotator {
 
   /** Starts the annotating process consist of preprocess followed by the "annotate" phase. */
   public void start() {
+    ParserConfiguration parserConfiguration = new ParserConfiguration();
+    parserConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
+    StaticJavaParser.setConfiguration(parserConfiguration);
     preprocess();
     long timer = context.log.startTimer();
     annotate();
