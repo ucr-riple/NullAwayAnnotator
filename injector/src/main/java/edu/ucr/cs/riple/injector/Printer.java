@@ -24,6 +24,8 @@
 
 package edu.ucr.cs.riple.injector;
 
+import static edu.ucr.cs.riple.injector.Injector.isTargetPath;
+
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
@@ -33,7 +35,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -58,10 +59,8 @@ public class Printer {
     this.path = path;
     try {
       lines = Files.readAllLines(path, Charset.defaultCharset());
-      if (path.equals(
-          Paths.get(
-              "/home/nima/Developer/taint-benchmarks/struts/core/src/main/java/org/apache/struts2/result/StrutsResultSupport.java"))) {
-        System.out.println("BEFOREEEEEEEEEEE:");
+      if (isTargetPath(path)) {
+        System.out.println("BEFORE:");
         lines.forEach(System.out::println);
         System.out.println("END");
       }
@@ -172,9 +171,7 @@ public class Printer {
    */
   public FileOffsetStore write() {
     try {
-      if (path.equals(
-          Paths.get(
-              "/home/nima/Developer/taint-benchmarks/struts/core/src/main/java/org/apache/struts2/result/StrutsResultSupport.java"))) {
+      if (isTargetPath(path)) {
         System.out.println("WRITING:");
         lines.forEach(System.out::println);
         System.out.println("END");

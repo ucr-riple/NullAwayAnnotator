@@ -37,6 +37,7 @@ import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,14 @@ import java.util.Set;
 
 /** Injector main class which can add / remove annotations. */
 public class Injector {
+
+  public static final Path TARGET_PATH =
+      Paths.get(
+          "/home/nima/Developer/taint-benchmarks/struts/core/src/main/java/org/apache/struts2/result/StrutsResultSupport.java");
+
+  public static boolean isTargetPath(Path path) {
+    return TARGET_PATH.equals(path);
+  }
 
   /**
    * Starts applying the requested changes.
@@ -89,6 +98,10 @@ public class Injector {
             } catch (Exception ex) {
               System.err.println("Encountered Exception: " + ex);
             }
+          }
+          if (isTargetPath(path)) {
+            System.out.println("Fixes:");
+            changeList.forEach(System.out::println);
           }
           Printer printer = new Printer(path);
           printer.applyModifications(modifications);
