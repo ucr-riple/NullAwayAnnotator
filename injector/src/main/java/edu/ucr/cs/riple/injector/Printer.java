@@ -24,8 +24,6 @@
 
 package edu.ucr.cs.riple.injector;
 
-import static edu.ucr.cs.riple.injector.Injector.isTargetPath;
-
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
@@ -59,11 +57,6 @@ public class Printer {
     this.path = path;
     try {
       lines = Files.readAllLines(path, Charset.defaultCharset());
-      if (isTargetPath(path)) {
-        System.out.println("BEFORE:");
-        lines.forEach(System.out::println);
-        System.out.println("END");
-      }
     } catch (IOException e) {
       throw new RuntimeException("Happened at path: " + path, e);
     }
@@ -171,11 +164,6 @@ public class Printer {
    */
   public FileOffsetStore write() {
     try {
-      if (isTargetPath(path)) {
-        System.out.println("WRITING:");
-        lines.forEach(System.out::println);
-        System.out.println("END");
-      }
       Files.write(path, lines, Charset.defaultCharset());
     } catch (IOException e) {
       throw new RuntimeException(e);

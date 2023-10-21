@@ -157,7 +157,7 @@ public class OnPolyMethodInjectionTest extends BaseInjectorTest {
             "import custom.annot.Poly;",
             "import custom.annot.Untainted;",
             "public class Foo {",
-            "  protected @RPolyTainted String conditionalParse(@RPolyTainted String param, @RPolyTainted ActionInvocation invocation) {",
+            "  protected String conditionalParse(String param, ActionInvocation invocation) {",
             "     if (parse && param != null && invocation != null) {",
             "       return TextParseUtil.translateVariables(",
             "             param,",
@@ -185,6 +185,13 @@ public class OnPolyMethodInjectionTest extends BaseInjectorTest {
             " }",
             "}")
         .addChanges(
+            new AddTypeUseMarkerAnnotation(
+                new OnPolyMethod(
+                    "Foo.java",
+                    "test.Foo",
+                    "conditionalParse(java.lang.String,com.opensymphony.xwork2.ActionInvocation)",
+                    List.of(0, 1)),
+                "custom.annot.Untainted"),
             new AddTypeUseMarkerAnnotation(
                 new OnParameter(
                     "Foo.java",
