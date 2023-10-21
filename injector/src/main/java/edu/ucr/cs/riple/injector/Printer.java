@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -57,6 +58,11 @@ public class Printer {
     this.path = path;
     try {
       lines = Files.readAllLines(path, Charset.defaultCharset());
+      if(path.equals(Paths.get("/home/nima/Developer/taint-benchmarks/struts/core/src/main/java/org/apache/struts2/result/StrutsResultSupport.java"))){
+        System.out.println("BEFOREEEEEEEEEEE:");
+        lines.forEach(System.out::println);
+        System.out.println("END");
+      }
     } catch (IOException e) {
       throw new RuntimeException("Happened at path: " + path, e);
     }
@@ -164,6 +170,9 @@ public class Printer {
    */
   public FileOffsetStore write() {
     try {
+      System.out.println("WRITING:");
+      lines.forEach(System.out::println);
+      System.out.println("END");
       Files.write(path, lines, Charset.defaultCharset());
     } catch (IOException e) {
       throw new RuntimeException(e);
