@@ -61,7 +61,6 @@ public class Injector {
         (path, changeList) -> {
           CompilationUnit tree;
           try {
-            System.out.println("PARSING: " + path);
             tree = StaticJavaParser.parse(path);
           } catch (IOException exception) {
             return;
