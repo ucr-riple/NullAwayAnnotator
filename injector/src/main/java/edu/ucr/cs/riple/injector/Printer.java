@@ -58,7 +58,9 @@ public class Printer {
     this.path = path;
     try {
       lines = Files.readAllLines(path, Charset.defaultCharset());
-      if(path.equals(Paths.get("/home/nima/Developer/taint-benchmarks/struts/core/src/main/java/org/apache/struts2/result/StrutsResultSupport.java"))){
+      if (path.equals(
+          Paths.get(
+              "/home/nima/Developer/taint-benchmarks/struts/core/src/main/java/org/apache/struts2/result/StrutsResultSupport.java"))) {
         System.out.println("BEFOREEEEEEEEEEE:");
         lines.forEach(System.out::println);
         System.out.println("END");
@@ -170,9 +172,13 @@ public class Printer {
    */
   public FileOffsetStore write() {
     try {
-      System.out.println("WRITING:");
-      lines.forEach(System.out::println);
-      System.out.println("END");
+      if (path.equals(
+          Paths.get(
+              "/home/nima/Developer/taint-benchmarks/struts/core/src/main/java/org/apache/struts2/result/StrutsResultSupport.java"))) {
+        System.out.println("WRITING:");
+        lines.forEach(System.out::println);
+        System.out.println("END");
+      }
       Files.write(path, lines, Charset.defaultCharset());
     } catch (IOException e) {
       throw new RuntimeException(e);
