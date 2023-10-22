@@ -38,6 +38,8 @@ import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.evaluators.suppliers.TargetModuleSupplier;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.util.Utility;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -173,6 +175,12 @@ public class Annotator {
   private ImmutableSet<Report> processTriggeredFixes(
       TargetModuleCache targetModuleCache, DownstreamImpactCache downstreamImpactCache) {
     Utility.buildTarget(context);
+    try {
+      Files.copy(
+          config.target.dir.resolve("errors.json"), config.target.dir.resolve("errors_copy.json"));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
     // Suggested fixes of target at the current state.
     ImmutableSet<ImmutableSet<Fix>> fixes =
         Utility.readFixesFromOutputDirectory(context, context.targetModuleInfo).stream()
