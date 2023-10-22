@@ -40,6 +40,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /** Injector main class which can add / remove annotations. */
 public class Injector {
@@ -58,6 +59,7 @@ public class Injector {
     Set<FileOffsetStore> offsets = new HashSet<>();
     map.forEach(
         (path, changeList) -> {
+          changeList = filterChange(changeList);
           CompilationUnit tree;
           try {
             tree = StaticJavaParser.parse(path);
@@ -135,5 +137,23 @@ public class Injector {
    */
   public Set<FileOffsetStore> removeAnnotations(Set<RemoveAnnotation> requests) {
     return this.start(requests);
+  }
+
+  public List<ASTChange> filterChange(List<ASTChange> changes) {
+    Set<String> polyMethods =
+        changes.stream()
+            .filter(change -> change.getLocation().isOnPolyMethod())
+            .map(change -> change.getLocation().toPolyMethod().method)
+            .collect(Collectors.toSet());
+    return changes.stream()
+        .filter(
+            astChange -> {
+              if (!astChange.getLocation().isOnParameter()) {
+                return true;
+              }
+              return !polyMethods.contains(
+                  astChange.getLocation().toParameter().enclosingMethod.method);
+            })
+        .collect(Collectors.toList());
   }
 }
