@@ -174,8 +174,9 @@ public class Annotator {
    */
   private ImmutableSet<Report> processTriggeredFixes(
       TargetModuleCache targetModuleCache, DownstreamImpactCache downstreamImpactCache) {
-    Utility.buildTarget(context);
     try {
+      Files.deleteIfExists(config.target.dir.resolve("errors.json"));
+      Utility.buildTarget(context);
       Files.copy(
           config.target.dir.resolve("errors.json"), config.target.dir.resolve("errors_copy.json"));
     } catch (IOException e) {
