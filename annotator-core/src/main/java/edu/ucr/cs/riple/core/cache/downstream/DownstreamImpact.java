@@ -162,4 +162,20 @@ public class DownstreamImpact extends Impact {
   public OnMethod toMethod() {
     return fix.toMethod();
   }
+
+  @Override
+  public String toString() {
+    return "DownstreamImpact{"
+        + "impactedParametersMap="
+        + impactedParametersMap
+        + ", effect="
+        + effect
+        + ", fix="
+        + fix
+        + ", triggeredErrors="
+        + triggeredErrors
+        + ", triggeredFixesFromDownstreamErrors="
+        + triggeredFixesFromDownstreamErrors
+        + '}';
+  }
 }

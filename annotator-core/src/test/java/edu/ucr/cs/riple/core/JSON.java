@@ -42,10 +42,9 @@ public class JSON extends AnnotatorBaseCoreTest {
         .withSourceLines(
             "Bar.java",
             "package test;",
-            "import com.fasterxml.jackson.annotation.JsonProperty;",
-            "import java.io.Serializable;",
             "public class Bar {",
-            "   @JsonProperty public String foo;",
+            "   public String foo;",
+            "   public String foo2;",
             "   public void setFoo(String foo) {",
             "     this.foo = foo;",
             "   }",
@@ -61,7 +60,7 @@ public class JSON extends AnnotatorBaseCoreTest {
             "public class Dep {",
             "   public Bar bar = new Bar();",
             "   public void exec() {",
-            "     bar.foo = bar.getFoo();",
+            "     bar.foo2 = bar.getFoo();",
             "   }",
             "}")
         .withExpectedReports()
