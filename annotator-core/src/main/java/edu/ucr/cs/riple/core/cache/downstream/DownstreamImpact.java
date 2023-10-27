@@ -51,11 +51,6 @@ public class DownstreamImpact extends Impact {
    * in node is annotated as {@code @Nullable} with their corresponding triggered errors.
    */
   private final HashMap<OnParameter, Set<Error>> impactedParametersMap;
-  /**
-   * Effect of injecting a {@code Nullable} annotation on pointing method of node on downstream
-   * dependencies.
-   */
-  private int effect;
 
   public DownstreamImpact(Fix fix) {
     super(fix);
@@ -63,7 +58,6 @@ public class DownstreamImpact extends Impact {
     Preconditions.checkArgument(
         fix.isOnMethod(),
         "Unexpected Fix instance. Only impacts of fixes on methods should be tracked for downstream dependencies");
-    this.effect = 0;
     this.impactedParametersMap = new HashMap<>();
     this.triggeredErrors = ImmutableSet.of();
   }
@@ -81,7 +75,6 @@ public class DownstreamImpact extends Impact {
    * @param impactedParameters Set of impacted paramaters.
    */
   public void setStatus(Report report, Set<OnParameter> impactedParameters) {
-    this.effect = report.localEffect;
     this.triggeredErrors = ImmutableSet.copyOf(report.triggeredErrors);
     // Count the number of times each parameter received a @Nullable.
     impactedParameters.forEach(
@@ -106,15 +99,6 @@ public class DownstreamImpact extends Impact {
    */
   public static int hash(String method, String clazz) {
     return MethodRecord.hash(method, clazz);
-  }
-
-  /**
-   * Getter for effect.
-   *
-   * @return Effect.
-   */
-  public int getEffect() {
-    return effect;
   }
 
   /**
@@ -145,7 +129,6 @@ public class DownstreamImpact extends Impact {
                 onParameter -> {
                   if (impactedParametersMap.containsKey(onParameter)) {
                     Set<Error> errors = impactedParametersMap.get(onParameter);
-                    effect -= errors.size();
                     temp.removeAll(errors);
                     annotatedParameters.add(onParameter);
                   }
