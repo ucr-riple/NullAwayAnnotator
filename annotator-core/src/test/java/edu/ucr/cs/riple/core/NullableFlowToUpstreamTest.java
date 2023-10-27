@@ -27,14 +27,16 @@ package edu.ucr.cs.riple.core;
 import static com.google.common.collect.Sets.newHashSet;
 
 import edu.ucr.cs.riple.core.tools.TReport;
+import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collections;
+import java.util.Set;
 import org.junit.Test;
 
-public class ArgumentNullableFlowTest extends AnnotatorBaseCoreTest {
+public class NullableFlowToUpstreamTest extends AnnotatorBaseCoreTest {
 
-  public ArgumentNullableFlowTest() {
+  public NullableFlowToUpstreamTest() {
     super("nullable-multi-modular");
   }
 
@@ -107,6 +109,47 @@ public class ArgumentNullableFlowTest extends AnnotatorBaseCoreTest {
         .setPredicate((expected, found) -> expected.testEquals(coreTestHelper.getConfig(), found))
         .toDepth(5)
         .disableBailOut()
+        .start();
+  }
+
+  @Test
+  public void upperBoundCountForResolvableErrorOnDownstreamTest() {
+    coreTestHelper
+        .onTarget()
+        .withSourceLines(
+            "Bar.java",
+            "package test;",
+            "public class Bar {",
+            "   public String foo;",
+            "   public String foo2 = \"\";",
+            "   public String getFoo() {",
+            "     return foo;",
+            "   }",
+            "}")
+        .withDependency("Dep")
+        .withSourceLines(
+            "Dep.java",
+            "package test.dep;",
+            "import test.Bar;",
+            "public class Dep {",
+            "   public Bar bar = new Bar();",
+            "   public void exec() {",
+            "     bar.foo2 = bar.getFoo();",
+            "   }",
+            "}")
+        .withExpectedReports(
+            new TReport(
+                new OnField("Bar.java", "test.Bar", Set.of("foo")),
+                -1,
+                // fixes in tree:
+                Set.of(
+                    new OnMethod("Bar.java", "test.Bar", "getFoo(String)"),
+                    // coming from flow of nullable back to target through a field write.
+                    new OnField("Bar.java", "test.Bar", Set.of("foo2"))),
+                Set.of()))
+        .disableBailOut()
+        .enableDownstreamDependencyAnalysis(AnalysisMode.STRICT)
+        .toDepth(5)
         .start();
   }
 }

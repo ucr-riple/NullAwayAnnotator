@@ -29,10 +29,7 @@ import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
 import edu.ucr.cs.riple.core.evaluators.suppliers.DownstreamDependencySupplier;
 import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.injector.location.OnMethod;
-import edu.ucr.cs.riple.injector.location.OnParameter;
-import java.util.Collections;
-import java.util.HashMap;
+import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,16 +40,8 @@ import java.util.stream.Collectors;
  */
 class DownstreamImpactEvaluator extends BasicEvaluator {
 
-  /**
-   * Map of public methods in target module to parameters in target module, which are source of
-   * nullable flow back to upstream module (target) from downstream dependencies, if annotated as
-   * {@code @Nullable}.
-   */
-  private final HashMap<OnMethod, Set<OnParameter>> nullableFlowMap;
-
   public DownstreamImpactEvaluator(DownstreamDependencySupplier supplier) {
     super(supplier);
-    this.nullableFlowMap = new HashMap<>();
   }
 
   @Override
@@ -65,45 +54,27 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
             node ->
                 node.root.ifOnMethod(
                     method -> {
-                      // Impacted parameters.
-                      Set<OnParameter> parameters =
+                      // Impacted locations.
+                      Set<Location> locations =
                           node.triggeredErrors.stream()
                               .filter(
                                   error ->
                                       error.isSingleFix()
-                                          && error.toResolvingLocation().isOnParameter()
                                           // Method is declared in the target module.
                                           && context.targetModuleInfo.declaredInModule(
-                                              error.toResolvingParameter()))
-                              .map(Error::toResolvingParameter)
+                                              error.toResolvingLocation()))
+                              .map(Error::toResolvingLocation)
                               .collect(Collectors.toSet());
-                      if (!parameters.isEmpty()) {
-                        // Update path for each parameter. These triggered fixes do not have an
+                      if (!locations.isEmpty()) {
+                        // Update path for each location. These triggered fixes do not have an
                         // actual physical path since they are provided as a jar file in downstream
                         // dependencies.
-                        parameters.forEach(
-                            onParameter ->
-                                onParameter.path =
-                                    context
-                                        .targetModuleInfo
-                                        .getMethodRegistry()
-                                        .findMethodByName(
-                                            onParameter.clazz, onParameter.enclosingMethod.method)
-                                        .location
+                        locations.forEach(
+                            location ->
+                                location.path =
+                                    context.targetModuleInfo.getLocationOnClass(location.clazz)
                                         .path);
-                        nullableFlowMap.put(method, parameters);
                       }
                     }));
-  }
-
-  /**
-   * Returns set of parameters that will receive {@code @Nullable} if the passed method is annotated
-   * as {@code @Nullable}.
-   *
-   * @param method Method to be annotated.
-   * @return Set of impacted parameters. If no parameter is impacted, empty set will be returned.
-   */
-  public Set<OnParameter> getImpactedParameters(OnMethod method) {
-    return nullableFlowMap.getOrDefault(method, Collections.emptySet());
   }
 }
