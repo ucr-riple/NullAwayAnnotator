@@ -120,11 +120,11 @@ public class NullableFlowToUpstreamTest extends AnnotatorBaseCoreTest {
             "Bar.java",
             "package test;",
             "public class Bar {",
-            "   public String foo;",
-            "   public String foo2 = \"\";",
-            "   public String getFoo() {",
-            "     return foo;",
-            "   }",
+            "    public String foo;",
+            "    public String foo2 = \"\";",
+            "    public String getFoo() {",
+            "        return foo;",
+            "    }",
             "}")
         .withDependency("Dep")
         .withSourceLines(
@@ -132,10 +132,10 @@ public class NullableFlowToUpstreamTest extends AnnotatorBaseCoreTest {
             "package test.dep;",
             "import test.Bar;",
             "public class Dep {",
-            "   public Bar bar = new Bar();",
-            "   public void exec() {",
-            "     bar.foo2 = bar.getFoo();",
-            "   }",
+            "    public Bar bar = new Bar();",
+            "    public void exec() {",
+            "        bar.foo2 = bar.getFoo();",
+            "    }",
             "}")
         .withExpectedReports(
             new TReport(
