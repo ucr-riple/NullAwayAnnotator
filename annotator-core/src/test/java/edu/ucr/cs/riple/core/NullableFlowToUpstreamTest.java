@@ -113,7 +113,7 @@ public class NullableFlowToUpstreamTest extends AnnotatorBaseCoreTest {
   }
 
   @Test
-  public void upperBoundCountForResolvableErrorOnDownstreamTest() {
+  public void nullableFlowToUpstreamThroughFieldWriteTest() {
     coreTestHelper
         .onTarget()
         .withSourceLines(
@@ -150,6 +150,7 @@ public class NullableFlowToUpstreamTest extends AnnotatorBaseCoreTest {
         .disableBailOut()
         .enableDownstreamDependencyAnalysis(AnalysisMode.STRICT)
         .toDepth(5)
+        .checkExpectedOutput("nullableflowfieldwrite/expected")
         .start();
   }
 }
