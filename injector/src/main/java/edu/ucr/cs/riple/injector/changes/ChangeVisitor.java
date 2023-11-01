@@ -29,6 +29,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.CallableDeclaration;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -38,6 +39,7 @@ import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import edu.ucr.cs.riple.injector.location.LocationVisitor;
 import edu.ucr.cs.riple.injector.location.OnClass;
+import edu.ucr.cs.riple.injector.location.OnClassDeclaration;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnLocalVariable;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -50,6 +52,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 /**
@@ -249,6 +252,33 @@ public class ChangeVisitor
                   }
                 }));
     return ans.get();
+  }
+
+  @Override
+  public Modification visitClassDeclaration(
+      OnClassDeclaration onClassDeclaration, Pair<NodeList<BodyDeclaration<?>>, ASTChange> pair) {
+    final NodeList<BodyDeclaration<?>> members = pair.a;
+    final ASTChange change = pair.b;
+    // Get the enclosing class of the members
+    Optional<Node> optionalClass = members.getParentNode();
+    if (optionalClass.isEmpty() || !(optionalClass.get() instanceof BodyDeclaration<?>)) {
+      return null;
+    }
+    BodyDeclaration<?> enclosingClass = (BodyDeclaration<?>) optionalClass.get();
+    if (!(enclosingClass instanceof ClassOrInterfaceDeclaration)) {
+      return null;
+    }
+    final Modification[] modification = {null};
+    ClassOrInterfaceDeclaration declaration = (ClassOrInterfaceDeclaration) enclosingClass;
+    Stream.concat(
+            declaration.getImplementedTypes().stream(), declaration.getExtendedTypes().stream())
+        .filter(
+            type ->
+                Helper.simpleName(type.getNameAsString())
+                    .equals(Helper.simpleName(onClassDeclaration.target)))
+        .findFirst()
+        .ifPresent(type -> modification[0] = change.computeTextModificationOn(type));
+    return modification[0];
   }
 
   /**

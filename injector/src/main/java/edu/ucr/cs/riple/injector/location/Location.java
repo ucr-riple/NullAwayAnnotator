@@ -126,6 +126,8 @@ public abstract class Location {
         return new OnLocalVariable(json);
       case CLASS:
         return new OnClass(json);
+      case CLASS_DECL:
+        return new OnClassDeclaration(json);
       case POLY_METHOD:
         return new OnPolyMethod(json);
       default:

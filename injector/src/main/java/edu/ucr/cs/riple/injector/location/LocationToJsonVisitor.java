@@ -37,7 +37,8 @@ public class LocationToJsonVisitor implements LocationVisitor<JSONObject, Void> 
     KIND,
     CLASS,
     PATH,
-    INDEX
+    INDEX,
+    SUPER,
   }
 
   @SuppressWarnings("unchecked")
@@ -98,6 +99,14 @@ public class LocationToJsonVisitor implements LocationVisitor<JSONObject, Void> 
     JSONArray indices = new JSONArray();
     indices.addAll(onPolyMethod.indices);
     res.put(KEYS.INDEX, indices);
+    return res;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public JSONObject visitClassDeclaration(OnClassDeclaration onClassDeclaration, Void unused) {
+    JSONObject res = defaultAction(onClassDeclaration);
+    res.put(KEYS.SUPER, onClassDeclaration.target);
     return res;
   }
 }

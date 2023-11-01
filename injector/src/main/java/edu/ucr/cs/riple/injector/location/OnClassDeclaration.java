@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2023 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,44 +24,31 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-/** Represents the type of the location. */
-public enum LocationKind {
-  LOCAL_VARIABLE,
-  CLASS,
-  FIELD,
-  METHOD,
-  POLY_METHOD,
-  CLASS_DECL,
-  PARAMETER;
+import edu.ucr.cs.riple.injector.Helper;
+import java.nio.file.Path;
+import org.json.simple.JSONObject;
 
-  /**
-   * Returns the type of the location based on the string representation.
-   *
-   * @param type the string representation of the type.
-   * @return the type of the location.
-   */
-  public static LocationKind getType(String type) {
-    if (type.equalsIgnoreCase("local_variable")) {
-      return LOCAL_VARIABLE;
-    }
-    if (type.equalsIgnoreCase("field")) {
-      return FIELD;
-    }
-    if (type.equalsIgnoreCase("method")) {
-      return METHOD;
-    }
-    if (type.equalsIgnoreCase("parameter")) {
-      return PARAMETER;
-    }
-    if (type.equalsIgnoreCase("class")) {
-      return CLASS;
-    }
-    if (type.equalsIgnoreCase("poly_method")) {
-      return POLY_METHOD;
-    }
-    if (type.equalsIgnoreCase("class_declaration")) {
-      return CLASS_DECL;
-    }
-    throw new UnsupportedOperationException("Cannot detect type: " + type);
+public class OnClassDeclaration extends Location {
+
+  public final String target;
+
+  public OnClassDeclaration(Path path, String clazz, String target) {
+    super(LocationKind.CLASS_DECL, path, clazz);
+    this.target = target;
+  }
+
+  public OnClassDeclaration(String path, String clazz, String target) {
+    super(LocationKind.CLASS_DECL, Helper.deserializePath(path), clazz);
+    this.target = target;
+  }
+
+  public OnClassDeclaration(JSONObject json) {
+    super(LocationKind.CLASS_DECL, json);
+    this.target = (String) json.get("target");
+  }
+
+  @Override
+  public <R, P> R accept(LocationVisitor<R, P> v, P p) {
+    return v.visitClassDeclaration(this, p);
   }
 }
