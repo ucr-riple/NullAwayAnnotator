@@ -38,7 +38,6 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.region.MethodRegionRegistry;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
-import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collection;
 import java.util.OptionalInt;
 import java.util.Set;
@@ -112,14 +111,11 @@ public class DownstreamImpactCacheImpl
     this.store
         .values()
         .forEach(
-            method -> {
-              Set<OnParameter> impactedParameters =
-                  evaluator.getImpactedParameters(method.toMethod());
-              reports.stream()
-                  .filter(input -> input.root.toMethod().equals(method.toMethod()))
-                  .findAny()
-                  .ifPresent(report -> method.setStatus(report, impactedParameters));
-            });
+            methodImpact ->
+                reports.stream()
+                    .filter(input -> input.root.toMethod().equals(methodImpact.toMethod()))
+                    .findAny()
+                    .ifPresent(methodImpact::setStatus));
     System.out.println("Analyzing downstream dependencies completed!");
   }
 
