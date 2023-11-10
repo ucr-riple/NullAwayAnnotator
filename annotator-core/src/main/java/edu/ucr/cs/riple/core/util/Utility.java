@@ -119,7 +119,10 @@ public class Utility {
     JSONArray reportsJson = new JSONArray();
     for (Report report : reports) {
       // todo fix here
-      JSONObject reportJson = report.root.iterator().next().getJson();
+      JSONArray root = new JSONArray();
+      root.addAll(report.root.stream().map(Fix::getJson).collect(Collectors.toList()));
+      JSONObject reportJson = new JSONObject();
+      reportJson.put("ROOT", root);
       reportJson.put("LOCAL EFFECT", report.localEffect);
       reportJson.put("OVERALL EFFECT", report.getOverallEffect(context.config));
       reportJson.put("Upper Bound EFFECT", report.getUpperBoundEffectOnDownstreamDependencies());
