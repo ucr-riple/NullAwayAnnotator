@@ -123,4 +123,14 @@ public abstract class TypeUseAnnotationChange extends AnnotationChange {
   public int hashCode() {
     return Objects.hash(super.hashCode(), typeIndex);
   }
+
+  /**
+   * Returns the list of indices that represent the position of the type argument in the node's
+   * type.
+   *
+   * @return List of indices.
+   */
+  public ImmutableList<ImmutableList<Integer>> getTypeIndex() {
+    return typeIndex;
+  }
 }

@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.core.metadata.index;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.changes.TypeUseAnnotationChange;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.LocationKind;
 import edu.ucr.cs.riple.injector.location.LocationToJsonVisitor;
@@ -177,6 +178,10 @@ public class Fix {
    * @return Json instance.
    */
   public JSONObject getJson() {
+    JSONObject object = change.getLocation().accept(new LocationToJsonVisitor(), null);
+    if (this.change instanceof TypeUseAnnotationChange) {
+      object.put("typeIndex", ((TypeUseAnnotationChange) this.change).getTypeIndex());
+    }
     return change.getLocation().accept(new LocationToJsonVisitor(), null);
   }
 
