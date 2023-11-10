@@ -123,10 +123,7 @@ public class Utility {
       root.addAll(report.root.stream().map(Fix::getJson).collect(Collectors.toList()));
       JSONObject reportJson = new JSONObject();
       reportJson.put("ROOT", root);
-      reportJson.put("LOCAL EFFECT", report.localEffect);
-      reportJson.put("OVERALL EFFECT", report.getOverallEffect(context.config));
-      reportJson.put("Upper Bound EFFECT", report.getUpperBoundEffectOnDownstreamDependencies());
-      reportJson.put("Lower Bound EFFECT", report.getLowerBoundEffectOnDownstreamDependencies());
+      reportJson.put("EFFECT", report.localEffect);
       reportJson.put("FINISHED", !report.requiresFurtherProcess(context.config));
       JSONArray followUps = new JSONArray();
       followUps.addAll(report.tree.stream().map(Fix::getJson).collect(Collectors.toList()));
@@ -136,8 +133,8 @@ public class Utility {
     // Sort by overall effect.
     reportsJson.sort(
         (o1, o2) -> {
-          int first = (Integer) ((JSONObject) o1).get("OVERALL EFFECT");
-          int second = (Integer) ((JSONObject) o2).get("OVERALL EFFECT");
+          int first = (Integer) ((JSONObject) o1).get("EFFECT");
+          int second = (Integer) ((JSONObject) o2).get("EFFECT");
           return Integer.compare(second, first);
         });
     result.put("REPORTS", reportsJson);
