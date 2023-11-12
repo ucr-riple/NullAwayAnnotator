@@ -379,7 +379,7 @@ public class Helper {
    * @param node the node.
    * @return the type of the node.
    */
-  public static Type getType(NodeWithAnnotations<?> node) {
+  public static Type getTypeFromNode(NodeWithAnnotations<?> node) {
     if (node instanceof MethodDeclaration) {
       return ((MethodDeclaration) node).getType();
     }
@@ -400,17 +400,25 @@ public class Helper {
     if (node instanceof VariableDeclarator) {
       return ((VariableDeclarator) node).getType();
     }
-    if (node instanceof ArrayType) {
-      // Currently, we only annotate the element types (contents) of an array, not the pointer
-      // itself.
-      // TODO: This should be updated in a follow-up PR. This will reflect both type-use and
-      // type-declaration annotations.
-      return ((ArrayType) node).getElementType();
-    }
     if (node instanceof Type) {
       return ((Type) node);
     }
     throw new RuntimeException("Unknown node type: " + node.getClass() + " " + node);
+  }
+
+  /**
+   * Extracts the type of the given node implementing {@link NodeWithAnnotations}.
+   *
+   * @param node the node.
+   * @return the type of the node.
+   */
+  public static Type getType(NodeWithAnnotations<?> node) {
+    // Currently, we only annotate the element types (contents) of an array, not the pointer
+    // itself.
+    // TODO: This should be updated in a follow-up PR. This will reflect both type-use and
+    // TODO: type-declaration annotations.
+    Type type = getTypeFromNode(node);
+    return type instanceof ArrayType ? ((ArrayType) type).getComponentType() : type;
   }
 
   /**
@@ -421,9 +429,7 @@ public class Helper {
    * @return true if the node is annotated with the annotation.
    */
   public static boolean isAnnotatedWith(Type type, AnnotationExpr expr) {
-    // we do not support annotations on reference on arrays, hence, we check the component type.
-    Type targetType = type instanceof ArrayType ? ((ArrayType) type).getComponentType() : type;
-    return targetType.getAnnotations().stream().anyMatch(annot -> annot.equals(expr));
+    return type.getAnnotations().stream().anyMatch(annot -> annot.equals(expr));
   }
 
   /**

@@ -593,4 +593,31 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
                 "custom.example.RUntainted"))
         .start();
   }
+
+  @Test
+  public void onArrayTypeDeletionTest() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import custom.example.Untainted;",
+            "public class Foo {",
+            "   void baz(java.lang.Object param) {",
+            "       final java.lang.@RUntainted String[] localVar = content.split(\"\\n\");",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import custom.example.Untainted;",
+            "public class Foo {",
+            "   void baz(java.lang.Object param) {",
+            "       final java.lang.String[] localVar = content.split(\"\\n\");",
+            "   }",
+            "}")
+        .addChanges(
+            new RemoveTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "baz(java.lang.Object)", "localVar"),
+                "custom.example.RUntainted"))
+        .start();
+  }
 }
