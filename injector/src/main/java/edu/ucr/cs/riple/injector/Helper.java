@@ -421,7 +421,9 @@ public class Helper {
    * @return true if the node is annotated with the annotation.
    */
   public static boolean isAnnotatedWith(Type type, AnnotationExpr expr) {
-    return type.getAnnotations().stream().anyMatch(annot -> annot.equals(expr));
+    // we do not support annotations on reference on arrays, hence, we check the component type.
+    Type targetType = type instanceof ArrayType ? ((ArrayType) type).getComponentType() : type;
+    return targetType.getAnnotations().stream().anyMatch(annot -> annot.equals(expr));
   }
 
   /**

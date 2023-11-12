@@ -110,9 +110,8 @@ public class OnPolyMethodInjectionTest extends BaseInjectorTest {
         .expectOutput(
             "package test;",
             "import custom.annot.Poly;",
-            "import custom.annot.Untainted;",
             "public class Foo {",
-            "   protected @Poly String conditionalParse(@Poly @Untainted String param, @Poly @Untainted ActionInvocation invocation) {",
+            "   protected @Poly String conditionalParse(@Poly String param, @Poly ActionInvocation invocation) {",
             "     if (parse && param != null && invocation != null) {",
             "         return TextParseUtil.translateVariables(",
             "           param,",
@@ -154,7 +153,7 @@ public class OnPolyMethodInjectionTest extends BaseInjectorTest {
         .addInput(
             "Foo.java",
             "package test;",
-            "import custom.annot.Poly;",
+            "import custom.annot.RPolyTainted;",
             "import custom.annot.Untainted;",
             "public class Foo {",
             "  protected String conditionalParse(String param, ActionInvocation invocation) {",
@@ -170,10 +169,10 @@ public class OnPolyMethodInjectionTest extends BaseInjectorTest {
             "}")
         .expectOutput(
             "package test;",
-            "import custom.annot.Poly;",
+            "import custom.annot.RPolyTainted;",
             "import custom.annot.Untainted;",
             "public class Foo {",
-            "  protected @RPolyTainted String conditionalParse(@RPolyTainted @Untainted String param, @RPolyTainted @Untainted ActionInvocation invocation) {",
+            "  protected @RPolyTainted String conditionalParse(@RPolyTainted String param, @RPolyTainted ActionInvocation invocation) {",
             "     if (parse && param != null && invocation != null) {",
             "       return TextParseUtil.translateVariables(",
             "             param,",
@@ -191,7 +190,7 @@ public class OnPolyMethodInjectionTest extends BaseInjectorTest {
                     "test.Foo",
                     "conditionalParse(java.lang.String,com.opensymphony.xwork2.ActionInvocation)",
                     List.of(0, 1)),
-                "custom.annot.Untainted"),
+                "custom.annot.RPolyTainted"),
             new AddTypeUseMarkerAnnotation(
                 new OnParameter(
                     "Foo.java",

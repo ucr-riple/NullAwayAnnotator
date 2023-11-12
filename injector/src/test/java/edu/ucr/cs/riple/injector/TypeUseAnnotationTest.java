@@ -502,4 +502,95 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
                 "edu.ucr.Untainted"))
         .start();
   }
+
+  @Test
+  public void additionOnFullyQualifiedTypeNamesOnTypeArgsTest() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "public class Foo {",
+            "   void baz(java.lang.Object param) {",
+            "       final java.util.HashMap<java.lang.String,java.lang.String> localVar = new HashMap<String, String>();",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import custom.example.Untainted;",
+            "public class Foo {",
+            "   void baz(java.lang.Object param) {",
+            "       final java.util.HashMap<java.lang.@Untainted String,java.lang.@Untainted String> localVar = new HashMap<@Untainted String, @Untainted String>();",
+            "   }",
+            "}")
+        .addChanges(
+            new AddTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "baz(java.lang.Object)", "localVar"),
+                "custom.example.Untainted",
+                ImmutableList.of(ImmutableList.of(1, 0), ImmutableList.of(2, 0))))
+        .start();
+  }
+
+  @Test
+  public void deletionOnFullyQualifiedTypeNamesOnTypeArgsTest() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import custom.example.Untainted;",
+            "public class Foo {",
+            "   void baz(java.lang.Object param) {",
+            "       final java.util.HashMap<java.lang.String,java.lang.@RUntainted String> localVar = new HashMap<String, String>();",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import custom.example.Untainted;",
+            "public class Foo {",
+            "   void baz(java.lang.Object param) {",
+            "       final java.util.HashMap<java.lang.String,java.lang.@RUntainted String> localVar = new HashMap<String, String>();",
+            "   }",
+            "}")
+        .addChanges(
+            new RemoveTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "baz(java.lang.Object)", "localVar"),
+                "custom.example.Untainted",
+                ImmutableList.of(ImmutableList.of(1, 0), ImmutableList.of(2, 0))))
+        .start();
+  }
+
+  @Test
+  public void onArrayTypeDuplicateTest() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import custom.example.Untainted;",
+            "public class Foo {",
+            "   void baz(java.lang.Object param) {",
+            "       final java.lang.@RUntainted String[] localVar = content.split(\"\\n\");",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import custom.example.Untainted;",
+            "public class Foo {",
+            "   void baz(java.lang.Object param) {",
+            "       final java.lang.@RUntainted String[] localVar = content.split(\"\\n\");",
+            "   }",
+            "}")
+        .addChanges(
+            new AddTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "baz(java.lang.Object)", "localVar"),
+                "custom.example.RUntainted"),
+            new AddTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "baz(java.lang.Object)", "localVar"),
+                "custom.example.RUntainted"),
+            new AddTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "baz(java.lang.Object)", "localVar"),
+                "custom.example.RUntainted"),
+            new AddTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "baz(java.lang.Object)", "localVar"),
+                "custom.example.RUntainted"))
+        .start();
+  }
 }
