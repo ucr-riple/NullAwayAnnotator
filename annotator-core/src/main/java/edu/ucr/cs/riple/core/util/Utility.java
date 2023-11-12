@@ -254,7 +254,7 @@ public class Utility {
    */
   public static void buildTarget(Context context) {
     try {
-      Files.deleteIfExists(context.config.target.dir.resolve("errors.tsv"));
+      Files.deleteIfExists(context.config.target.dir.resolve("errors.json"));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
