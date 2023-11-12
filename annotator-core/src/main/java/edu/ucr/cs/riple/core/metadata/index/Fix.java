@@ -182,7 +182,7 @@ public class Fix {
     if (this.change instanceof TypeUseAnnotationChange) {
       object.put("typeIndex", ((TypeUseAnnotationChange) this.change).getTypeIndex());
     }
-    return change.getLocation().accept(new LocationToJsonVisitor(), null);
+    return object;
   }
 
   /**
