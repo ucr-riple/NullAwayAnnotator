@@ -217,9 +217,9 @@ public class Utility {
    */
   public static void runScannerChecker(
       Context context, ImmutableSet<ModuleConfiguration> configurations, String buildCommand) {
-    Utility.setScannerCheckerActivation(context.config, configurations, true);
-    Utility.build(context, buildCommand);
-    Utility.setScannerCheckerActivation(context.config, configurations, false);
+//    Utility.setScannerCheckerActivation(context.config, configurations, true);
+//    Utility.build(context, buildCommand);
+//    Utility.setScannerCheckerActivation(context.config, configurations, false);
   }
 
   /**

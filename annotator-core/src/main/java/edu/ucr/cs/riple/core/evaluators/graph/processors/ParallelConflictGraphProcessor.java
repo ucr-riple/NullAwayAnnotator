@@ -25,7 +25,6 @@
 package edu.ucr.cs.riple.core.evaluators.graph.processors;
 
 import edu.ucr.cs.riple.core.Context;
-import edu.ucr.cs.riple.core.Main;
 import edu.ucr.cs.riple.core.evaluators.graph.ConflictGraph;
 import edu.ucr.cs.riple.core.evaluators.graph.Node;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
@@ -38,7 +37,6 @@ import edu.ucr.cs.riple.core.util.Utility;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import me.tongfei.progressbar.ProgressBar;
 
@@ -74,18 +72,6 @@ public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcess
             + " fixes");
     ProgressBar pb = Utility.createProgressBar("Processing", nonConflictingGroups.size());
     for (Set<Node> group : nonConflictingGroups) {
-
-      if (group.stream()
-          .noneMatch(
-              new Predicate<Node>() {
-                @Override
-                public boolean test(Node node) {
-                  return Main.isTheFix(node.root);
-                }
-              })) {
-        continue;
-      }
-
       pb.step();
       Set<Fix> fixes =
           group.stream().flatMap(node -> node.tree.stream()).collect(Collectors.toSet());

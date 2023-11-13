@@ -178,6 +178,14 @@ public class Annotator {
         Utility.readFixesFromOutputDirectory(context, context.targetModuleInfo).stream()
             .filter(fix -> !cache.processedFix(fix))
             .collect(ImmutableSet.toImmutableSet());
+    //    fixes.stream().forEach(new Consumer<ImmutableSet<Fix>>() {
+    //      @Override
+    //      public void accept(ImmutableSet<Fix> fixes) {
+    //        if(Main.isTheFix(fixes)){
+    //          System.out.println("IS THE FIX");
+    //        }
+    //      }
+    //    });
     // Initializing required evaluator instances.
     TargetModuleSupplier supplier =
         new TargetModuleSupplier(context, targetModuleCache, downstreamImpactCache);
