@@ -177,6 +177,7 @@ public class Fix {
    *
    * @return Json instance.
    */
+  @SuppressWarnings("unchecked")
   public JSONObject getJson() {
     JSONObject object = change.getLocation().accept(new LocationToJsonVisitor(), null);
     if (this.change instanceof TypeUseAnnotationChange) {
