@@ -180,7 +180,7 @@ public class Fix {
   public JSONObject getJson() {
     JSONObject object = change.getLocation().accept(new LocationToJsonVisitor(), null);
     if (this.change instanceof TypeUseAnnotationChange) {
-      object.put("typeIndex", ((TypeUseAnnotationChange) this.change).getTypeIndex());
+      object.put("TYPE_INDEX", ((TypeUseAnnotationChange) this.change).getTypeIndex());
     }
     return object;
   }
