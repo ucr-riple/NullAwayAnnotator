@@ -23,15 +23,19 @@
 package edu.ucr.cs.riple.injector;
 
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
+import com.google.common.collect.ImmutableList;
 import edu.ucr.cs.riple.injector.changes.ASTChange;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AnnotationChange;
 import edu.ucr.cs.riple.injector.changes.ChangeVisitor;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
+import edu.ucr.cs.riple.injector.changes.TypeUseAnnotationChange;
+import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.io.IOException;
@@ -60,6 +64,7 @@ public class Injector {
     map.forEach(
         (path, changeList) -> {
           changeList = filterChange(changeList);
+          combineTypeArgumentIndices(changeList);
           CompilationUnit tree;
           try {
             tree = StaticJavaParser.parse(path);
@@ -155,5 +160,28 @@ public class Injector {
                   astChange.getLocation().toParameter().enclosingMethod.method);
             })
         .collect(Collectors.toList());
+  }
+
+  public void combineTypeArgumentIndices(List<ASTChange> changes) {
+    Map<Location, List<ImmutableList<ImmutableList<Integer>>>> map =
+        changes.stream()
+            .filter(astChange -> astChange instanceof TypeUseAnnotationChange)
+            .collect(
+                groupingBy(
+                    ASTChange::getLocation,
+                    mapping(
+                        change -> ((TypeUseAnnotationChange) change).getTypeIndex(),
+                        Collectors.toList())));
+    changes.forEach(
+        astChange -> {
+          if (!(astChange instanceof TypeUseAnnotationChange)) {
+            return;
+          }
+          List<ImmutableList<ImmutableList<Integer>>> typeIndices =
+              map.get(astChange.getLocation());
+          ImmutableList.Builder<ImmutableList<Integer>> builder = ImmutableList.builder();
+          typeIndices.forEach(builder::addAll);
+          ((TypeUseAnnotationChange) astChange).typeIndex = builder.build();
+        });
   }
 }
