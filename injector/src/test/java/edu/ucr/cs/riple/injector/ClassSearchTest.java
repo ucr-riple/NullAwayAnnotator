@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.injector;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
@@ -62,6 +63,29 @@ public class ClassSearchTest extends BaseInjectorTest {
             new AddMarkerAnnotation(
                 new OnMethod("Main.java", "com.test.Main", "foo(java.lang.Object)"),
                 "javax.annotation.Nullable"))
+        .start();
+  }
+
+  @Test
+  public void recordDeclaration() {
+    StaticJavaParser.setConfiguration(
+        new ParserConfiguration().setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17));
+    injectorTestHelper
+        .addInput(
+            "Main.java",
+            "package com.test;",
+            "public record Main(AttributeSet getSource, Attribute<?> getAttribute, Object getValue, Object getOldValue) {",
+            "   public String foo();",
+            "}")
+        .expectOutput(
+            "package com.test;",
+            "import javax.annotation.Nullable;",
+            "public record Main(AttributeSet getSource, Attribute<?> getAttribute, Object getValue, Object getOldValue) {",
+            "   @Nullable public String foo();",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnMethod("Main.java", "com.test.Main", "foo()"), "javax.annotation.Nullable"))
         .start();
   }
 
