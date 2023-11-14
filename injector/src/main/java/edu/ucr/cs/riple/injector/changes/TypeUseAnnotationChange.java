@@ -44,7 +44,7 @@ import javax.annotation.Nullable;
 public abstract class TypeUseAnnotationChange extends AnnotationChange {
 
   /** List of indices that represent the position of the type argument in the node's type. */
-  protected final ImmutableList<ImmutableList<Integer>> typeIndex;
+  public ImmutableList<ImmutableList<Integer>> typeIndex;
 
   public TypeUseAnnotationChange(
       Location location, Name annotation, ImmutableList<ImmutableList<Integer>> typeIndex) {

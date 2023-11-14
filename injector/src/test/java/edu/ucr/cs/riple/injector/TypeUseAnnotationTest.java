@@ -526,7 +526,11 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             new AddTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "baz(java.lang.Object)", "localVar"),
                 "custom.example.Untainted",
-                ImmutableList.of(ImmutableList.of(1, 0), ImmutableList.of(2, 0))))
+                ImmutableList.of(ImmutableList.of(1, 0))),
+            new AddTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "baz(java.lang.Object)", "localVar"),
+                "custom.example.Untainted",
+                ImmutableList.of(ImmutableList.of(2, 0))))
         .start();
   }
 
@@ -539,7 +543,7 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "import custom.example.Untainted;",
             "public class Foo {",
             "   void baz(java.lang.Object param) {",
-            "       final java.util.HashMap<java.lang.String,java.lang.@RUntainted String> localVar = new HashMap<String, String>();",
+            "       final java.util.HashMap<java.lang.@Untainted String,java.lang.@Untainted String> localVar = new HashMap<@Untainted String, @Untainted String>();",
             "   }",
             "}")
         .expectOutput(
@@ -547,14 +551,18 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "import custom.example.Untainted;",
             "public class Foo {",
             "   void baz(java.lang.Object param) {",
-            "       final java.util.HashMap<java.lang.String,java.lang.@RUntainted String> localVar = new HashMap<String, String>();",
+            "       final java.util.HashMap<java.lang.String,java.lang.String> localVar = new HashMap<String, String>();",
             "   }",
             "}")
         .addChanges(
             new RemoveTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "baz(java.lang.Object)", "localVar"),
                 "custom.example.Untainted",
-                ImmutableList.of(ImmutableList.of(1, 0), ImmutableList.of(2, 0))))
+                ImmutableList.of(ImmutableList.of(1, 0))),
+            new RemoveTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "baz(java.lang.Object)", "localVar"),
+                "custom.example.Untainted",
+                ImmutableList.of(ImmutableList.of(2, 0))))
         .start();
   }
 
