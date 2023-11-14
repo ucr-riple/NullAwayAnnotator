@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -107,6 +108,8 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
   private UCRTaintError deserializeErrorFromJSON(JSONObject errorsJson, ModuleInfo moduleInfo) {
     String errorType = (String) errorsJson.get("messageKey");
     int offset = ((Long) errorsJson.get("offset")).intValue();
+    Path path = Paths.get((String) errorsJson.get("path"));
+    offset = context.offsetHandler.getOriginalOffset(path, offset);
     Region region =
         new Region(
             (String) ((JSONObject) errorsJson.get("region")).get("class"),

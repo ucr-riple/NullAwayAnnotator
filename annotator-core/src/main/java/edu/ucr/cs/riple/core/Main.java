@@ -45,49 +45,4 @@ public class Main {
     Annotator annotator = new Annotator(config);
     annotator.start();
   }
-
-  //  public static void main(String[] args) {
-  //    args =
-  //        new String[] {
-  //          //            "-d",
-  //          //            "/home/nima/Developer/taint-benchmarks/struts/annotator-out/core",
-  //          //            "-bc",
-  //          //            "java_17 && cd /home/nima/Developer/taint-benchmarks/struts &&
-  //          // /home/nima/Documents/environments/maven/apache-maven-3.9.1/bin/mvn clean compile
-  // -pl
-  //          // core",
-  //          //            "-cp",
-  //          //
-  // "/home/nima/Developer/taint-benchmarks/struts/annotator-out/core/paths.tsv",
-  //          //            "-n",
-  //          //            "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted",
-  //          //            "-i",
-  //          //            "edu.ucr.cs.riple.taint.ucrtainting.qual.Init",
-  //          //            "-cn",
-  //          //            "UCRTaint",
-  //          //            "-rboserr"
-  //          "-d",
-  //          "/home/nima/Developer/taint-benchmarks/logisim-evolution/annotator-out/",
-  //          "-bc",
-  //          "export JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64/ && cd
-  // /home/nima/Developer/taint-benchmarks/logisim-evolution && ./gradlew compileJava
-  // --rerun-tasks",
-  //          "-cp",
-  //          "/home/nima/Developer/taint-benchmarks/logisim-evolution/annotator-out/paths.tsv",
-  //          "-i",
-  //          "edu.ucr.Initializer",
-  //          "-n",
-  //          "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted",
-  //          "-cn",
-  //          "UCRTaint",
-  //          "--depth",
-  //          "2",
-  //          "-dol",
-  //          "-rboserr",
-  ////          "--disable-parallel-processing"
-  //        };
-  //    Config config = new Config(args);
-  //    Annotator annotator = new Annotator(config);
-  //    annotator.start();
-  //  }
 }
