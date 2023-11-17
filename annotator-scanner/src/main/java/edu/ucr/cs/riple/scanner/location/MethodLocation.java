@@ -24,7 +24,6 @@ package edu.ucr.cs.riple.scanner.location;
 
 import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.riple.scanner.Serializer;
-
 import javax.lang.model.element.ElementKind;
 
 /**
