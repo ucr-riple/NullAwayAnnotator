@@ -1,5 +1,9 @@
 ## CHANGELOG
 
+### Version 1.3.10
+- Fixed a bug in nonnull symbol detection.
+- Fixed bugs in Scanner symbol serialization.
+
 ### Version 1.3.9
 - Fixed bug in downstream dependency analysis.
 - Updated track of flow of nullable from downstream to upstream through field writes.
