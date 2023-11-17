@@ -558,7 +558,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
   }
 
   @Test
-  public void nonnullTypeUseAcknowledgmentTest() {
+  public void nonnullTypeUseAnnotationOnFormalParameterAcknowledgmentTest() {
     coreTestHelper
         .onTarget()
         .withSourceLines(
