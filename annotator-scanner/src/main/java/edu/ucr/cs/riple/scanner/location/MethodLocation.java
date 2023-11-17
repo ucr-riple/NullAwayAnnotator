@@ -45,7 +45,7 @@ public class MethodLocation extends AbstractSymbolLocation {
     return String.join(
         "\t",
         type.toString(),
-        enclosingClass.flatName(),
+        Serializer.serializeSymbol(enclosingClass),
         Serializer.serializeSymbol(enclosingMethod),
         "null",
         "null",
