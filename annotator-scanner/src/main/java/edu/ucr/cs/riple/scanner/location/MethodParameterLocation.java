@@ -24,6 +24,7 @@ package edu.ucr.cs.riple.scanner.location;
 
 import com.google.common.base.Preconditions;
 import com.sun.tools.javac.code.Symbol;
+import edu.ucr.cs.riple.scanner.Serializer;
 import javax.lang.model.element.ElementKind;
 
 /**
@@ -66,8 +67,8 @@ public class MethodParameterLocation extends AbstractSymbolLocation {
         "\t",
         type.toString(),
         enclosingClass.flatName(),
-        enclosingMethod.toString(),
-        paramSymbol.toString(),
+        Serializer.serializeSymbol(enclosingMethod),
+        Serializer.serializeSymbol(paramSymbol),
         String.valueOf(index),
         path != null ? path.toString() : "null");
   }
