@@ -566,7 +566,8 @@ public class CoreTest extends AnnotatorBaseCoreTest {
             "package test;",
             "import org.jetbrains.annotations.NotNull;",
             "public class A {",
-            "   private @NotNull Object field;",
+            "  static void foo(@NotNull Object o) {}",
+            "  static void bar() { foo(null); }",
             "}")
         .expectNoReport()
         .toDepth(5)
