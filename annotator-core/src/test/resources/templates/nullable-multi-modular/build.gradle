@@ -53,6 +53,8 @@ subprojects {
 
         // to add @Initializer
         compileOnly 'com.uber.nullaway:nullaway-annotations:0.10.10'
+        // to add jetbrains annotations (testing type use vs type declaration)
+        compileOnly 'org.jetbrains:annotations:24.0.0'
         compileOnly "org.jspecify:jspecify:0.3.0"
         compileOnly "com.google.code.findbugs:jsr305:3.0.2"
         errorprone "com.google.errorprone:error_prone_core:2.3.2"
