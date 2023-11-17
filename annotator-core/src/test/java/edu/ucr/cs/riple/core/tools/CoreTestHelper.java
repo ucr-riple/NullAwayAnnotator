@@ -402,9 +402,8 @@ public class CoreTestHelper {
     builder.useCacheImpact = true;
     builder.sourceTypes.add(SourceType.LOMBOK);
     builder.cache = true;
-    builder.useCacheImpact = !getEnvironmentVariable("ANNOTATOR_TEST_DISABLE_CACHING");
-    builder.useParallelProcessor =
-        !getEnvironmentVariable("ANNOTATOR_TEST_DISABLE_PARALLEL_PROCESSING");
+    builder.useCacheImpact = false;
+    builder.useParallelProcessor = true;
     if (downstreamDependencyAnalysisActivated) {
       builder.buildCommand =
           projectBuilder.computeTargetBuildCommandWithLibraryModelLoaderDependency(this.outDirPath);

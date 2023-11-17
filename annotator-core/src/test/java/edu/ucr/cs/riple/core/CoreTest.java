@@ -556,4 +556,23 @@ public class CoreTest extends AnnotatorBaseCoreTest {
         .toDepth(1)
         .start();
   }
+
+  @Test
+  public void nonnullTypeUseAcknowledgmentTest(){
+    coreTestHelper
+            .onTarget()
+            .withSourceLines(
+                    "A.java",
+                    "package test;",
+                    "import org.jetbrains.annotations.NotNull;",
+                    "public class A {",
+                    "   private @NotNull Object field;",
+                    "}")
+            .expectNoReport()
+            .toDepth(5)
+            .start();
+    // No annotation should be added, since they are annotated as @Nonnull although each can reduce
+    // the number of errors.
+    Assert.assertEquals(coreTestHelper.getLog().getInjectedAnnotations().size(), 0);
+  }
 }
