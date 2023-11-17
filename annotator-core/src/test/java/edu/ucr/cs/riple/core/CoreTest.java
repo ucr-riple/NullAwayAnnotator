@@ -558,21 +558,20 @@ public class CoreTest extends AnnotatorBaseCoreTest {
   }
 
   @Test
-  public void nonnullTypeUseAcknowledgmentTest(){
+  public void nonnullTypeUseAcknowledgmentTest() {
     coreTestHelper
-            .onTarget()
-            .withSourceLines(
-                    "A.java",
-                    "package test;",
-                    "import org.jetbrains.annotations.NotNull;",
-                    "public class A {",
-                    "   private @NotNull Object field;",
-                    "}")
-            .expectNoReport()
-            .toDepth(5)
-            .start();
-    // No annotation should be added, since they are annotated as @Nonnull although each can reduce
-    // the number of errors.
+        .onTarget()
+        .withSourceLines(
+            "A.java",
+            "package test;",
+            "import org.jetbrains.annotations.NotNull;",
+            "public class A {",
+            "   private @NotNull Object field;",
+            "}")
+        .expectNoReport()
+        .toDepth(5)
+        .start();
+    // No annotation should be added even though it can reduce the number of errors.
     Assert.assertEquals(coreTestHelper.getLog().getInjectedAnnotations().size(), 0);
   }
 }
