@@ -39,7 +39,9 @@ import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -98,8 +100,25 @@ public class Injector {
           Printer printer = new Printer(path);
           printer.applyModifications(modifications);
           printer.addImports(tree, imports);
-          FileOffsetStore offsetStore = printer.write();
-          offsets.add(offsetStore);
+          String contentBefore = null;
+          try {
+            contentBefore = Files.readString(path);
+            FileOffsetStore offsetStore = printer.write();
+            offsets.add(offsetStore);
+            StaticJavaParser.parse(path);
+          } catch (Exception e) {
+            System.out.println("Error happened on: " + path);
+            try {
+              Path bakPath = Paths.get(path.toString() + ".bak");
+              Files.createFile(bakPath);
+              Files.write(bakPath, contentBefore.getBytes());
+              System.out.println("Applying changes:");
+              changeList.forEach(System.out::println);
+            } catch (Exception ex) {
+              throw new RuntimeException(ex);
+            }
+            throw new RuntimeException(e);
+          }
         });
     return offsets;
   }
