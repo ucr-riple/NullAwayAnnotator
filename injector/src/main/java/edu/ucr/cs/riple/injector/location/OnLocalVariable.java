@@ -28,6 +28,7 @@ import edu.ucr.cs.riple.injector.Helper;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.function.Consumer;
+import org.json.simple.JSONObject;
 
 /**
  * Represents a location for local variable element. This location is used to apply changes to a
@@ -49,6 +50,12 @@ public class OnLocalVariable extends Location {
 
   public OnLocalVariable(String path, String clazz, String encMethod, String varName) {
     this(Helper.deserializePath(path), clazz, encMethod, varName);
+  }
+
+  public OnLocalVariable(JSONObject json) {
+    super(LocationKind.LOCAL_VARIABLE, json);
+    this.encMethod = new OnMethod(json);
+    this.varName = (String) json.get("varName");
   }
 
   @Override

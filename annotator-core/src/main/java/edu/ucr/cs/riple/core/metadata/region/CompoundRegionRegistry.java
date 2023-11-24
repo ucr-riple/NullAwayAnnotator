@@ -56,6 +56,7 @@ public class CompoundRegionRegistry implements RegionRegistry {
         ImmutableSet.of(
             new FieldRegionRegistry(moduleInfo),
             methodRegionRegistry,
+            new LocalVariableRegionRegistry(),
             new ParameterRegionRegistry(moduleInfo, methodRegionRegistry));
   }
 

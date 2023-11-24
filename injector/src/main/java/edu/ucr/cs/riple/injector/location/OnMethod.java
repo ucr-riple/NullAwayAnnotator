@@ -30,6 +30,7 @@ import edu.ucr.cs.riple.injector.SignatureMatcher;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.function.Consumer;
+import org.json.simple.JSONObject;
 
 /** Represents a location for method element. This location is used to apply changes to a method. */
 public class OnMethod extends Location {
@@ -50,6 +51,12 @@ public class OnMethod extends Location {
 
   public OnMethod(String path, String clazz, String method) {
     this(Helper.deserializePath(path), clazz, method);
+  }
+
+  public OnMethod(JSONObject json) {
+    super(LocationKind.METHOD, json);
+    this.method = (String) json.get("method");
+    this.matcher = new SignatureMatcher(method);
   }
 
   /**
