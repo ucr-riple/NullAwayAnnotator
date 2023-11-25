@@ -253,6 +253,12 @@ public class Utility {
    * @param context Annotator context.
    */
   public static void buildTarget(Context context) {
+    System.gc();
+    try {
+      Thread.sleep(5 * 1000);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
     try {
       Files.deleteIfExists(context.config.target.dir.resolve("errors.json"));
     } catch (IOException e) {
