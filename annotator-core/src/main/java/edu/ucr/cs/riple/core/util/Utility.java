@@ -255,17 +255,17 @@ public class Utility {
   public static void buildTarget(Context context) {
     System.gc();
     try {
-      Thread.sleep(5 * 1000);
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
-    try {
       Files.deleteIfExists(context.config.target.dir.resolve("errors.json"));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
     context.checker.prepareConfigFilesForBuild(context.targetModuleInfo.getModuleConfigurations());
     build(context, context.config.buildCommand);
+    try {
+      Thread.sleep(5 * 1000);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
