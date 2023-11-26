@@ -261,11 +261,6 @@ public class Utility {
     }
     context.checker.prepareConfigFilesForBuild(context.targetModuleInfo.getModuleConfigurations());
     build(context, context.config.buildCommand);
-    try {
-      Thread.sleep(5 * 1000);
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   /**
