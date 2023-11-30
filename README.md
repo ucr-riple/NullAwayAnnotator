@@ -89,8 +89,8 @@ This sections describes how to run `Annotator` on any project.
 - ### Requirements for the Target Project
 
   #### Dependencies
-	-  `NullAway` checker must be activated with version >= `0.10.10`
-	- `AnnotatorScanner` checker must be activated with version >= `1.3.6`, see more about `AnnotatorScanner` [here](../type-annotator-scanner/README.md).
+    -  `NullAway` checker must be activated with version >= `0.10.10`
+    - `AnnotatorScanner` checker must be activated with version >= `1.3.6`, see more about `AnnotatorScanner` [here](../type-annotator-scanner/README.md).
 
   #### Error Prone Flags
   Since Nullaway is built as a plugin for [Error Prone](https://github.com/google/error-prone), we need to set the following flags in our build.gradle,
@@ -138,11 +138,8 @@ This sections describes how to run `Annotator` on any project.
 	You must provide the Annotator with the paths to `path_to_nullaway_config.xml` and `path_to_scanner_config.xml`. Further details on this process are described in the sections below.
 
 - ### Running Annotator
+  `Annotator` necessitates specific flag values for successful execution. You can provide these values through command line arguments.
 
-
-	`Annotator` necessitates specific flag values for successful execution. You can provide these values through command line arguments or a configuration file. The following sections detail each approach.
-
-	#### Approach 1: Using the CLI options - 
 
 	To run `Annotator` on the target project `P`, the arguments below **must** be passed to `Annotator`:
 
@@ -181,56 +178,6 @@ Here is a template command you can use to run Annotator from the CLI, using CLI 
 ```bash
 java -jar ./path/to/annotator-core.jar -d "/path/to/output/directory" -cp "/path/to/config/paths.tsv" -i com.example.Initializer -bc "cd /path/to/targetProject && ./gradlew build -x test"
 ```
-
-
-#### Approach 2: Use config.json file
-In this approach, you will initialize all flag values in a single file and pass the path to the `Annotator`. Below is the format of the configuration file with sample values:
-
-```json
-{
-  "BUILD_COMMAND": "cd /path/to/target && command to run javac with analysis (e.g. ./gradlew :p:compileJava)",
-  "ANNOTATION": {
-    "INITIALIZER": "com.example.Initializer",
-    "NULLABLE": "javax.annotation.Nullable",
-    "NULL_UNMARKED": "com.example.NullUnmarked",
-    "NONNULL": [
-        "com.example.Nonnull"
-    ]
-  },
-  "OUTPUT_DIR": "/tmp/NullAwayFix",
-  "CHAIN": false,
-  "PARALLEL_PROCESSING": true,
-  "CACHE_IMPACT_ACTIVATION": false,
-  "CACHE": true,
-  "BAILOUT": true,
-  "REDIRECT_BUILD_OUTPUT_TO_STDERR": false,
-  "EXHAUSTIVE_SEARCH": false,
-  "OUTER_LOOP": true,
-  "CONFIG_PATHS": [
-    {
-      "NULLAWAY": "path_to_nullaway_config.xml",
-      "SCANNER": "path_to_scanner_config.xml"
-    }
-  ],
-  "PROCESSORS": {
-    "LOMBOK": true
-  },
-  "DEPTH": 1,
-  "DOWNSTREAM_DEPENDENCY": {
-    "ACTIVATION": true,
-    "BUILD_COMMAND": "cd /path/to/dependencies && command to run javac with analysis (e.g. ./gradlew :p:compileJava)",
-    "LIBRARY_MODEL_LOADER_PATH": "path to nullaway library model loader jar",
-    "ANALYSIS_MODE": "default"
-  },
-  "FORCE_RESOLVE": false,
-  "INFERENCE_ACTIVATION": true
-}
-```
-Here is a template command you can use to run Annotator from the CLI, using config.json -
-```bash
-java -jar /path/to/annotator-core.jar -p path_to/config.json
-```
-Provide the path to the configuration file above with the `-p,--path` argument to `core.jar`, and no other flags are needed.
 
 To view descriptions of all flags, simply run the JAR with the `--help` option.
 
