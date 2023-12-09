@@ -84,7 +84,7 @@ public abstract class Location {
     if (values[0] == null || values[0].equals("null")) {
       return null;
     }
-    LocationKind type = LocationKind.getType(values[0]);
+    LocationKind type = LocationKind.getKind(values[0]);
     Path path = Helper.deserializePath(values[5]);
     String clazz = values[1];
     switch (type) {

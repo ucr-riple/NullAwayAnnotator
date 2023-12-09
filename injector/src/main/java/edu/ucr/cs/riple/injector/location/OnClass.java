@@ -61,6 +61,6 @@ public class OnClass extends Location {
 
   @Override
   public String toString() {
-    return "OnClass{" + "type=" + kind + ", clazz='" + clazz + '\'' + ", path=" + path + '}';
+    return "OnClass{" + "kind=" + kind + ", clazz='" + clazz + '\'' + ", path=" + path + '}';
   }
 }
