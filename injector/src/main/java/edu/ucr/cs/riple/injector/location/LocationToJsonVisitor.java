@@ -44,7 +44,7 @@ public class LocationToJsonVisitor implements LocationVisitor<JSONObject, Void> 
   private JSONObject defaultAction(Location location) {
     JSONObject res = new JSONObject();
     res.put(KEYS.CLASS, location.clazz);
-    res.put(KEYS.KIND, location.kind.toString());
+    res.put(KEYS.KIND, location.getKind().toString());
     res.put(KEYS.PATH, location.path);
     return res;
   }

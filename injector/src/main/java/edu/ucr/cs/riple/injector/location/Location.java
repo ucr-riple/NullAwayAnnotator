@@ -260,4 +260,13 @@ public abstract class Location {
   public String getClazz() {
     return clazz;
   }
+
+  /**
+   * Returns this location's kind.
+   *
+   * @return This location's kind.
+   */
+  public LocationKind getKind() {
+    return kind;
+  }
 }
