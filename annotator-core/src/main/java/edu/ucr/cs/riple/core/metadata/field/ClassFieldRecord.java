@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.metadata.field;
 
+import com.github.javaparser.ast.type.Type;
 import com.google.common.collect.ImmutableSet;
 import java.nio.file.Path;
 import java.util.HashSet;
@@ -88,9 +89,8 @@ public class ClassFieldRecord {
    *
    * @param collection Set of all fields declared within the same statement.
    */
-  public void addNewSetOfFieldDeclarations(
-      ImmutableSet<String> collection, boolean hasNonPrimitive) {
-    this.fields.add(new FieldDeclarationRecord(collection, hasNonPrimitive));
+  public void addNewSetOfFieldDeclarations(ImmutableSet<String> collection, Type type) {
+    this.fields.add(new FieldDeclarationRecord(collection, type));
   }
 
   /** Field declaration record. Used to store information regarding multiple field declaration. */
@@ -99,11 +99,11 @@ public class ClassFieldRecord {
     /** Name of all fields declared within the same statement. */
     public final ImmutableSet<String> names;
     /** True if an element is not a primitive type. */
-    public final boolean hasNonPrimitiveType;
+    public final Type type;
 
-    public FieldDeclarationRecord(ImmutableSet<String> names, boolean hasNonPrimitiveType) {
+    public FieldDeclarationRecord(ImmutableSet<String> names, Type type) {
       this.names = names;
-      this.hasNonPrimitiveType = hasNonPrimitiveType;
+      this.type = type;
     }
   }
 }

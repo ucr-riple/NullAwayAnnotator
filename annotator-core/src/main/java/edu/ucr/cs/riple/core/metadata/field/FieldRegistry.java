@@ -119,12 +119,11 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
                         // unexpected but just in case.
                         return;
                       }
-                      boolean hasPrimitiveType = first.get().getType().isPrimitiveType();
                       record.addNewSetOfFieldDeclarations(
                           vars.stream()
                               .map(NodeWithSimpleName::getNameAsString)
                               .collect(ImmutableSet.toImmutableSet()),
-                          hasPrimitiveType);
+                          first.get().getType());
                       // Collect uninitialized fields at declaration.
                       vars.forEach(
                           variableDeclarator -> {
