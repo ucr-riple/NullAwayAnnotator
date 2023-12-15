@@ -115,8 +115,7 @@ public class DownstreamImpactCacheImpl
     // Update method status based on the results.
     reports.forEach(
         report -> {
-          DownstreamImpact impact = new DownstreamImpact(report.root);
-          impact.setStatus(report);
+          DownstreamImpact impact = new DownstreamImpact(report);
           store.put(report.root.toLocation(), impact);
         });
     System.out.println("Analyzing downstream dependencies completed!");

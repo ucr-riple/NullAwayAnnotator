@@ -28,9 +28,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.cache.Impact;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodRecord;
-import edu.ucr.cs.riple.injector.location.OnMethod;
 
 /**
  * Container class for storing overall impact of a fix applied in target module on downstream
@@ -38,28 +36,18 @@ import edu.ucr.cs.riple.injector.location.OnMethod;
  */
 public class DownstreamImpact extends Impact {
 
-  public DownstreamImpact(Fix fix) {
-    super(fix);
+  public DownstreamImpact(Report report) {
+    super(report.root);
     // Only store impacts of fixes targeting methods.
     Preconditions.checkArgument(
         fix.isOnMethod(),
         "Unexpected Fix instance. Only impacts of fixes on methods should be tracked for downstream dependencies");
-    this.triggeredErrors = ImmutableSet.of();
+    this.triggeredErrors = ImmutableSet.copyOf(report.triggeredErrors);
   }
 
   @Override
   public int hashCode() {
     return hash(fix.toMethod().method, fix.toMethod().clazz);
-  }
-
-  /**
-   * Updates the status of methods impact on downstream dependencies.
-   *
-   * @param report Result of applying making method in node {@code @Nullable} in downstream
-   *     dependencies.
-   */
-  public void setStatus(Report report) {
-    this.triggeredErrors = ImmutableSet.copyOf(report.triggeredErrors);
   }
 
   /**
@@ -72,14 +60,5 @@ public class DownstreamImpact extends Impact {
    */
   public static int hash(String method, String clazz) {
     return MethodRecord.hash(method, clazz);
-  }
-
-  /**
-   * Gets the containing method location.
-   *
-   * @return Containing method location.
-   */
-  public OnMethod toMethod() {
-    return fix.toMethod();
   }
 }
