@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.metadata.method;
 
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.HashSet;
 import java.util.Objects;
@@ -177,6 +178,15 @@ public class MethodRecord {
         // matches javax.annotation.CheckForNull and
         // edu.umd.cs.findbugs.annotations.CheckForNull
         || annot.endsWith(".CheckForNull");
+  }
+
+  /**
+   * Returns location of the method.
+   *
+   * @return Location of the method.
+   */
+  public Location toLocation() {
+    return location;
   }
 
   @Override
