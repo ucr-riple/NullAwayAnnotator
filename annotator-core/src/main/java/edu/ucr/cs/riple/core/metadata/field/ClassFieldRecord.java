@@ -98,7 +98,7 @@ public class ClassFieldRecord {
 
     /** Name of all fields declared within the same statement. */
     public final ImmutableSet<String> names;
-    /** True if an element is not a primitive type. */
+    /** Type of the field. */
     public final Type type;
 
     public FieldDeclarationRecord(ImmutableSet<String> names, Type type) {
