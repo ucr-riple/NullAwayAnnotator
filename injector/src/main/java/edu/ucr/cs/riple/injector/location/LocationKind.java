@@ -33,27 +33,27 @@ public enum LocationKind {
   PARAMETER;
 
   /**
-   * Returns the type of the location based on the string representation.
+   * Returns the kind of the location based on the string representation.
    *
-   * @param type the string representation of the type.
-   * @return the type of the location.
+   * @param kind the string representation of the kind.
+   * @return the kind of the location.
    */
-  public static LocationKind getType(String type) {
-    if (type.equalsIgnoreCase("local_variable")) {
+  public static LocationKind getKind(String kind) {
+    if (kind.equalsIgnoreCase("local_variable")) {
       return LOCAL_VARIABLE;
     }
-    if (type.equalsIgnoreCase("field")) {
+    if (kind.equalsIgnoreCase("field")) {
       return FIELD;
     }
-    if (type.equalsIgnoreCase("method")) {
+    if (kind.equalsIgnoreCase("method")) {
       return METHOD;
     }
-    if (type.equalsIgnoreCase("parameter")) {
+    if (kind.equalsIgnoreCase("parameter")) {
       return PARAMETER;
     }
-    if (type.equalsIgnoreCase("class")) {
+    if (kind.equalsIgnoreCase("class")) {
       return CLASS;
     }
-    throw new UnsupportedOperationException("Cannot detect type: " + type);
+    throw new UnsupportedOperationException("Cannot detect kind: " + kind);
   }
 }
