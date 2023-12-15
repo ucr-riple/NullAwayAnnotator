@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
@@ -80,22 +81,28 @@ public class DownstreamImpactCacheImpl
    */
   private ImmutableSet<Location> retrieveLocationsToCacheImpactsOnDownstreamDependencies(
       Context context, ModuleInfo moduleInfo) {
-    // Collect callers of public APIs in module.
+    ImmutableSet.Builder<Location> locationsToCache = ImmutableSet.builder();
+    // Collect public methods with non-primitive return types.
+    // Used to collect callers of each method.
     MethodRegionRegistry methodRegionRegistry = new MethodRegionRegistry(moduleInfo);
-    return context
-        .targetModuleInfo
-        .getMethodRegistry()
-        .getPublicMethodsWithNonPrimitivesReturn()
-        .stream()
-        .map(MethodRecord::toLocation)
-        .filter(
-            input ->
-                !methodRegionRegistry
-                    .getCallersOfMethod(input.toMethod().clazz, input.toMethod().method)
-                    // skip methods that are not called anywhere. This has a significant impact
-                    // on performance.
-                    .isEmpty())
-        .collect(ImmutableSet.toImmutableSet());
+    locationsToCache.addAll(
+        context
+            .targetModuleInfo
+            .getMethodRegistry()
+            .getPublicMethodsWithNonPrimitivesReturn()
+            .stream()
+            .map(MethodRecord::toLocation)
+            .filter(
+                input ->
+                    !methodRegionRegistry
+                        .getCallersOfMethod(input.toMethod().clazz, input.toMethod().method)
+                        // skip methods that are not called anywhere. This has a significant impact
+                        // on performance.
+                        .isEmpty())
+            .collect(Collectors.toSet()));
+    // Collect public fields with non-primitive types.
+
+    return locationsToCache.build();
   }
 
   @Override
@@ -107,10 +114,9 @@ public class DownstreamImpactCacheImpl
         retrieveLocationsToCacheImpactsOnDownstreamDependencies(context, supplier.getModuleInfo())
             .stream()
             .map(
-                downstreamImpact ->
+                location ->
                     new Fix(
-                        new AddMarkerAnnotation(
-                            downstreamImpact.toMethod(), context.config.nullableAnnot),
+                        new AddMarkerAnnotation(location, context.config.nullableAnnot),
                         "null",
                         false))
             .collect(ImmutableSet.toImmutableSet());
@@ -126,7 +132,8 @@ public class DownstreamImpactCacheImpl
   }
 
   /**
-   * Retrieves the corresponding {@link DownstreamImpact} to a fix.
+   * Retrieves the corresponding {@link DownstreamImpact} to a fix. The fix should be targeting a
+   * method or a field.
    *
    * @param fix Target fix.
    * @return Corresponding {@link DownstreamImpact}, null if not located.
@@ -134,8 +141,8 @@ public class DownstreamImpactCacheImpl
   @Nullable
   @Override
   public DownstreamImpact fetchImpact(Fix fix) {
-    if (!fix.isOnMethod()) {
-      // we currently store only impacts of fixes for methods on downstream dependencies.
+    if (!(fix.isOnMethod() || fix.isOnField())) {
+      // we currently store only impacts of fixes for methods / fields on downstream dependencies.
       return null;
     }
     return super.fetchImpact(fix);
