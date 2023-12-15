@@ -29,7 +29,6 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
@@ -114,16 +113,11 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
                 bodyDeclaration.ifFieldDeclaration(
                     fieldDeclaration -> {
                       NodeList<VariableDeclarator> vars = fieldDeclaration.getVariables();
-                      Optional<VariableDeclarator> first = vars.getFirst();
-                      if (first.isEmpty()) {
+                      if (vars.getFirst().isEmpty()) {
                         // unexpected but just in case.
                         return;
                       }
-                      record.addNewSetOfFieldDeclarations(
-                          vars.stream()
-                              .map(NodeWithSimpleName::getNameAsString)
-                              .collect(ImmutableSet.toImmutableSet()),
-                          first.get().getType());
+                      record.addNewSetOfFieldDeclarations(fieldDeclaration);
                       // Collect uninitialized fields at declaration.
                       vars.forEach(
                           variableDeclarator -> {

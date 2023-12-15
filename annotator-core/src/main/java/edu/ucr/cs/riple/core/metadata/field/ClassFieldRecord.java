@@ -24,7 +24,10 @@
 
 package edu.ucr.cs.riple.core.metadata.field;
 
+import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.type.Type;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import java.nio.file.Path;
 import java.util.HashSet;
@@ -89,8 +92,8 @@ public class ClassFieldRecord {
    *
    * @param collection Set of all fields declared within the same statement.
    */
-  public void addNewSetOfFieldDeclarations(ImmutableSet<String> collection, Type type) {
-    this.fields.add(new FieldDeclarationRecord(collection, type));
+  public void addNewSetOfFieldDeclarations(FieldDeclaration fieldDeclaration) {
+    this.fields.add(new FieldDeclarationRecord(fieldDeclaration));
   }
 
   /** Field declaration record. Used to store information regarding multiple field declaration. */
@@ -100,10 +103,17 @@ public class ClassFieldRecord {
     public final ImmutableSet<String> names;
     /** Type of the field. */
     public final Type type;
+    /** Field declaration node. */
+    public final FieldDeclaration fieldDeclaration;
 
-    public FieldDeclarationRecord(ImmutableSet<String> names, Type type) {
-      this.names = names;
-      this.type = type;
+    public FieldDeclarationRecord(FieldDeclaration fieldDeclaration) {
+      this.names =
+          fieldDeclaration.getVariables().stream()
+              .map(NodeWithSimpleName::getNameAsString)
+              .collect(ImmutableSet.toImmutableSet());
+      Preconditions.checkArgument(fieldDeclaration.getVariables().getFirst().isPresent());
+      this.type = fieldDeclaration.getVariables().getFirst().get().getType();
+      this.fieldDeclaration = fieldDeclaration;
     }
   }
 }
