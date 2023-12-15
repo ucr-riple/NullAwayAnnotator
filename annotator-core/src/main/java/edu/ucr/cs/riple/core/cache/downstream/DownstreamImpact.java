@@ -28,7 +28,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.cache.Impact;
-import edu.ucr.cs.riple.core.metadata.method.MethodRecord;
 
 /**
  * Container class for storing overall impact of a fix applied in target module on downstream
@@ -43,22 +42,5 @@ public class DownstreamImpact extends Impact {
         fix.isOnMethod(),
         "Unexpected Fix instance. Only impacts of fixes on methods should be tracked for downstream dependencies");
     this.triggeredErrors = ImmutableSet.copyOf(report.triggeredErrors);
-  }
-
-  @Override
-  public int hashCode() {
-    return hash(fix.toMethod().method, fix.toMethod().clazz);
-  }
-
-  /**
-   * Calculates hash. This method is used outside this class to calculate the expected hash based on
-   * instance's properties value if the actual instance is not available.
-   *
-   * @param method Method signature.
-   * @param clazz Fully qualified name of the containing class.
-   * @return Expected hash.
-   */
-  public static int hash(String method, String clazz) {
-    return MethodRecord.hash(method, clazz);
   }
 }
