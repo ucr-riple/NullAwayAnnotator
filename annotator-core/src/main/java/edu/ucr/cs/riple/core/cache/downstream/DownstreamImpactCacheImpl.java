@@ -33,6 +33,7 @@ import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodRecord;
 import edu.ucr.cs.riple.core.metadata.region.MethodRegionRegistry;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Collection;
@@ -72,17 +73,28 @@ public class DownstreamImpactCacheImpl
    * on downstream dependencies and stored in this cache.
    *
    * @param context Annotator context.
+   * @param moduleInfo Module info of the downstream dependencies. Downstream dependencies are
+   *     collectively viewed as a single module.
    * @return Set of locations that impact of making them {@code @Nullable} should be computed on
    *     downstream dependencies and stored in this cache.
    */
   private ImmutableSet<Location> retrieveLocationsToCacheImpactsOnDownstreamDependencies(
-      Context context) {
+      Context context, ModuleInfo moduleInfo) {
+    // Collect callers of public APIs in module.
+    MethodRegionRegistry methodRegionRegistry = new MethodRegionRegistry(moduleInfo);
     return context
         .targetModuleInfo
         .getMethodRegistry()
         .getPublicMethodsWithNonPrimitivesReturn()
         .stream()
         .map(MethodRecord::toLocation)
+        .filter(
+            input ->
+                !methodRegionRegistry
+                    .getCallersOfMethod(input.toMethod().clazz, input.toMethod().method)
+                    // skip methods that are not called anywhere. This has a significant impact
+                    // on performance.
+                    .isEmpty())
         .collect(ImmutableSet.toImmutableSet());
   }
 
@@ -90,18 +102,10 @@ public class DownstreamImpactCacheImpl
   public void analyzeDownstreamDependencies() {
     System.out.println("Analyzing downstream dependencies...");
     DownstreamDependencySupplier supplier = new DownstreamDependencySupplier(context);
-    // Collect callers of public APIs in module.
-    MethodRegionRegistry methodRegionRegistry = new MethodRegionRegistry(supplier.getModuleInfo());
     // Generate fixes corresponding methods.
     ImmutableSet<Fix> fixes =
-        retrieveLocationsToCacheImpactsOnDownstreamDependencies(context).stream()
-            .filter(
-                input ->
-                    !methodRegionRegistry
-                        .getCallersOfMethod(input.toMethod().clazz, input.toMethod().method)
-                        // skip methods that are not called anywhere. This has a significant impact
-                        // on performance.
-                        .isEmpty())
+        retrieveLocationsToCacheImpactsOnDownstreamDependencies(context, supplier.getModuleInfo())
+            .stream()
             .map(
                 downstreamImpact ->
                     new Fix(
