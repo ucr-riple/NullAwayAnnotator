@@ -24,24 +24,23 @@
 
 package edu.ucr.cs.riple.core.cache.downstream;
 
-import static com.google.common.collect.ImmutableMap.toImmutableMap;
-
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.cache.BaseCache;
-import edu.ucr.cs.riple.core.cache.Impact;
 import edu.ucr.cs.riple.core.evaluators.suppliers.DownstreamDependencySupplier;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.metadata.method.MethodRecord;
 import edu.ucr.cs.riple.core.metadata.region.MethodRegionRegistry;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.OptionalInt;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
@@ -50,7 +49,7 @@ import javax.annotation.Nullable;
  * once created, cannot be updated.
  */
 public class DownstreamImpactCacheImpl
-    extends BaseCache<DownstreamImpact, ImmutableMap<Location, DownstreamImpact>>
+    extends BaseCache<DownstreamImpact, Map<Location, DownstreamImpact>>
     implements DownstreamImpactCache {
 
   /** Annotator context instance. */
@@ -65,22 +64,18 @@ public class DownstreamImpactCacheImpl
    * @param context Annotator context.
    */
   public DownstreamImpactCacheImpl(Context context) {
-    super(
-        context
-            .targetModuleInfo
-            .getMethodRegistry()
-            .getPublicMethodsWithNonPrimitivesReturn()
-            .stream()
-            .map(
-                methodNode ->
-                    new DownstreamImpact(
-                        new Fix(
-                            new AddMarkerAnnotation(
-                                methodNode.location, context.config.nullableAnnot),
-                            "null",
-                            true)))
-            .collect(toImmutableMap(Impact::toLocation, Function.identity())));
+    super(new HashMap<>());
     this.context = context;
+  }
+
+  private Set<Location> retrieveLocationsToCacheImpactsOnDownstreamDependencies(Context context) {
+    return context
+        .targetModuleInfo
+        .getMethodRegistry()
+        .getPublicMethodsWithNonPrimitivesReturn()
+        .stream()
+        .map(MethodRecord::toLocation)
+        .collect(Collectors.toSet());
   }
 
   @Override
@@ -91,7 +86,7 @@ public class DownstreamImpactCacheImpl
     MethodRegionRegistry methodRegionRegistry = new MethodRegionRegistry(supplier.getModuleInfo());
     // Generate fixes corresponding methods.
     ImmutableSet<Fix> fixes =
-        store.values().stream()
+        retrieveLocationsToCacheImpactsOnDownstreamDependencies(context).stream()
             .filter(
                 input ->
                     !methodRegionRegistry
@@ -108,14 +103,12 @@ public class DownstreamImpactCacheImpl
     DownstreamImpactEvaluator evaluator = new DownstreamImpactEvaluator(supplier);
     ImmutableSet<Report> reports = evaluator.evaluate(fixes);
     // Update method status based on the results.
-    this.store
-        .values()
-        .forEach(
-            methodImpact ->
-                reports.stream()
-                    .filter(input -> input.root.toMethod().equals(methodImpact.toMethod()))
-                    .findAny()
-                    .ifPresent(methodImpact::setStatus));
+    reports.forEach(
+        report -> {
+          DownstreamImpact impact = new DownstreamImpact(report.root);
+          impact.setStatus(report);
+          store.put(report.root.toLocation(), impact);
+        });
     System.out.println("Analyzing downstream dependencies completed!");
   }
 
