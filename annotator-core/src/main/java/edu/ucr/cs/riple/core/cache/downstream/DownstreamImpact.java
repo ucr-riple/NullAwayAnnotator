@@ -39,8 +39,8 @@ public class DownstreamImpact extends Impact {
     super(report.root);
     // Only store impacts of fixes targeting methods.
     Preconditions.checkArgument(
-        fix.isOnMethod(),
-        "Unexpected Fix instance. Only impacts of fixes on methods should be tracked for downstream dependencies");
+        fix.isOnMethod() || fix.isOnField(),
+        "Unexpected Fix instance. Only impacts of fixes on methods / fields should be tracked for downstream dependencies");
     this.triggeredErrors = ImmutableSet.copyOf(report.triggeredErrors);
   }
 }
