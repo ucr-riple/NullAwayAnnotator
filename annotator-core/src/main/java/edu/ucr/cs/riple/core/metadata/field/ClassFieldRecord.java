@@ -115,5 +115,14 @@ public class ClassFieldRecord {
       this.type = fieldDeclaration.getVariables().getFirst().get().getType();
       this.fieldDeclaration = fieldDeclaration;
     }
+
+    /**
+     * Checks if the field declaration is public and has non-primitive type.
+     *
+     * @return true, if the field declaration is public and has non-primitive type.
+     */
+    public boolean isPublicFieldWithNonPrimitiveType() {
+      return fieldDeclaration.isPublic() && !type.isPrimitiveType();
+    }
   }
 }

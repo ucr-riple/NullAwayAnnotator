@@ -214,4 +214,28 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
     }
     return new OnClass(candidate.pathToSourceFile, candidate.clazz);
   }
+
+  /**
+   * Returns public method with public visibility and non-primitive return type.
+   *
+   * @return ImmutableSet of method nodes.
+   */
+  public ImmutableSet<OnField> getPublicFieldWithNonPrimitiveType() {
+    ImmutableSet.Builder<OnField> builder = ImmutableSet.builder();
+    contents
+        .values()
+        .forEach(
+            record ->
+                record.fields.forEach(
+                    fieldDeclarationRecord -> {
+                      if (fieldDeclarationRecord.isPublicFieldWithNonPrimitiveType()) {
+                        builder.add(
+                            new OnField(
+                                record.pathToSourceFile,
+                                record.clazz,
+                                fieldDeclarationRecord.names));
+                      }
+                    }));
+    return builder.build();
+  }
 }
