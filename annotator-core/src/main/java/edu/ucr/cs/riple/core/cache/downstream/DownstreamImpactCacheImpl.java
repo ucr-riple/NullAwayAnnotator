@@ -40,7 +40,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
@@ -76,14 +75,15 @@ public class DownstreamImpactCacheImpl
    * @return Set of locations that impact of making them {@code @Nullable} should be computed on
    *     downstream dependencies and stored in this cache.
    */
-  private Set<Location> retrieveLocationsToCacheImpactsOnDownstreamDependencies(Context context) {
+  private ImmutableSet<Location> retrieveLocationsToCacheImpactsOnDownstreamDependencies(
+      Context context) {
     return context
         .targetModuleInfo
         .getMethodRegistry()
         .getPublicMethodsWithNonPrimitivesReturn()
         .stream()
         .map(MethodRecord::toLocation)
-        .collect(Collectors.toSet());
+        .collect(ImmutableSet.toImmutableSet());
   }
 
   @Override
