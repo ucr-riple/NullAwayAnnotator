@@ -117,7 +117,7 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
                         // unexpected but just in case.
                         return;
                       }
-                      record.addNewSetOfFieldDeclarations(fieldDeclaration);
+                      record.addFieldDeclaration(fieldDeclaration);
                       // Collect uninitialized fields at declaration.
                       vars.forEach(
                           variableDeclarator -> {

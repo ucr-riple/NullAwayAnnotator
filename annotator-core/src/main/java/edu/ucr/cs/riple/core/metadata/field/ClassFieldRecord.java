@@ -88,11 +88,11 @@ public class ClassFieldRecord {
   }
 
   /**
-   * Adds a new set multiple field declaration to the existing set.
+   * Adds a field declaration to this record.
    *
-   * @param collection Set of all fields declared within the same statement.
+   * @param fieldDeclaration Field declaration to add.
    */
-  public void addNewSetOfFieldDeclarations(FieldDeclaration fieldDeclaration) {
+  public void addFieldDeclaration(FieldDeclaration fieldDeclaration) {
     this.fields.add(new FieldDeclarationRecord(fieldDeclaration));
   }
 
