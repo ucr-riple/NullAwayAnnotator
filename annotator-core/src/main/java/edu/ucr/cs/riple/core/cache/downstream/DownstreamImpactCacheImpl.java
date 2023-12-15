@@ -68,6 +68,14 @@ public class DownstreamImpactCacheImpl
     this.context = context;
   }
 
+  /**
+   * Retrieves the set of locations that impact of making them {@code @Nullable} should be computed
+   * on downstream dependencies and stored in this cache.
+   *
+   * @param context Annotator context.
+   * @return Set of locations that impact of making them {@code @Nullable} should be computed on
+   *     downstream dependencies and stored in this cache.
+   */
   private Set<Location> retrieveLocationsToCacheImpactsOnDownstreamDependencies(Context context) {
     return context
         .targetModuleInfo
@@ -91,7 +99,9 @@ public class DownstreamImpactCacheImpl
                 input ->
                     !methodRegionRegistry
                         .getCallersOfMethod(input.toMethod().clazz, input.toMethod().method)
-                        .isEmpty()) // skip methods that are not called anywhere.
+                        // skip methods that are not called anywhere. This has a significant impact
+                        // on performance.
+                        .isEmpty())
             .map(
                 downstreamImpact ->
                     new Fix(
