@@ -63,6 +63,7 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
    * initialized at declaration.
    */
   private Multimap<String, String> uninitializedFields;
+
   /**
    * Constructor for {@link FieldRegistry}.
    *
@@ -113,11 +114,17 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
                 bodyDeclaration.ifFieldDeclaration(
                     fieldDeclaration -> {
                       NodeList<VariableDeclarator> vars = fieldDeclaration.getVariables();
+                      Optional<VariableDeclarator> first = vars.getFirst();
+                      if (first.isEmpty()) {
+                        // unexpected but just in case.
+                        return;
+                      }
+                      boolean hasPrimitiveType = first.get().getType().isPrimitiveType();
                       record.addNewSetOfFieldDeclarations(
                           vars.stream()
                               .map(NodeWithSimpleName::getNameAsString)
                               .collect(ImmutableSet.toImmutableSet()),
-                          false);
+                          hasPrimitiveType);
                       // Collect uninitialized fields at declaration.
                       vars.forEach(
                           variableDeclarator -> {
