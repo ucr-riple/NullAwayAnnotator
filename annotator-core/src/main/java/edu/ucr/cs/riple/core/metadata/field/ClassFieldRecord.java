@@ -93,9 +93,12 @@ public class ClassFieldRecord {
     this.fields.add(new FieldDeclarationRecord(collection, hasNonPrimitive));
   }
 
+  /** Field declaration record. Used to store information regarding multiple field declaration. */
   public static class FieldDeclarationRecord {
 
+    /** Name of all fields declared within the same statement. */
     public final ImmutableSet<String> names;
+    /** True if an element is not a primitive type. */
     public final boolean hasNonPrimitiveType;
 
     public FieldDeclarationRecord(ImmutableSet<String> names, boolean hasNonPrimitiveType) {
