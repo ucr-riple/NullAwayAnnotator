@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.injectors;
 
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
@@ -36,6 +37,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Wrapper tool used to inject annotations virtually to the source code. This injector serializes
@@ -51,6 +53,9 @@ public class VirtualInjector extends AnnotationInjector {
    * retrieve the path to library model loader.
    */
   private final Config config;
+
+  public static final String NULLABLE_METHOD_LIST_FILE_NAME = "nullable-methods.tsv";
+  public static final String NULLABLE_FIELD_LIST_FILE_NAME = "nullable-fields.tsv";
 
   public VirtualInjector(Context context) {
     super(context);
@@ -75,31 +80,44 @@ public class VirtualInjector extends AnnotationInjector {
       throw new IllegalStateException(
           "Downstream dependencies analysis not activated, cannot inject annotations virtually!");
     }
-    try (BufferedOutputStream os =
-        new BufferedOutputStream(new FileOutputStream(libraryModelPath.toFile()))) {
-      Set<String> rows =
-          changes.stream()
-              .filter(addAnnotation -> addAnnotation.getLocation().isOnMethod())
-              .map(
-                  annot ->
-                      annot.getLocation().clazz
-                          + "\t"
-                          + annot.getLocation().toMethod().method
-                          + "\n")
-              .collect(Collectors.toSet());
+    // write methods
+    writeAnnotationsToFile(
+        changes.stream().filter(addAnnotation -> addAnnotation.getLocation().isOnMethod()),
+        libraryModelPath.resolve(NULLABLE_METHOD_LIST_FILE_NAME),
+        annot ->
+            Stream.of(
+                annot.getLocation().clazz + "\t" + annot.getLocation().toMethod().method + "\n"));
+    // write fields
+    writeAnnotationsToFile(
+        changes.stream().filter(addAnnotation -> addAnnotation.getLocation().isOnField()),
+        libraryModelPath.resolve(NULLABLE_FIELD_LIST_FILE_NAME),
+        annot ->
+            annot.getLocation().toField().variables.stream()
+                .map(variable -> annot.getLocation().clazz + "\t" + variable + "\n"));
+  }
+
+  private static void writeAnnotationsToFile(
+      Stream<AddAnnotation> annotations,
+      Path path,
+      Function<AddAnnotation, Stream<String>> mapper) {
+    try (BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(path.toFile()))) {
+      Set<String> rows = annotations.flatMap(mapper).collect(Collectors.toSet());
       for (String row : rows) {
         os.write(row.getBytes(Charset.defaultCharset()), 0, row.length());
       }
       os.flush();
     } catch (IOException e) {
-      throw new RuntimeException("Error happened for writing at file: " + libraryModelPath, e);
+      throw new RuntimeException("Error happened for writing at file: " + path, e);
     }
   }
 
   /** Removes any existing entry from library models. */
   private void clear() {
     try {
-      new FileOutputStream(libraryModelPath.toFile()).close();
+      new FileOutputStream(libraryModelPath.resolve(NULLABLE_FIELD_LIST_FILE_NAME).toFile())
+          .close();
+      new FileOutputStream(libraryModelPath.resolve(NULLABLE_METHOD_LIST_FILE_NAME).toFile())
+          .close();
     } catch (IOException e) {
       throw new RuntimeException("Could not clear library model loader content", e);
     }

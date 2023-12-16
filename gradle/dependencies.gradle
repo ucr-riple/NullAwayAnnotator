@@ -42,7 +42,7 @@ def versions = [
         commonsio              : "2.11.0",
         progressbar            : "0.9.2",
         junit                  : "5.7.2",
-        nullaway               : "0.9.8",
+        nullaway               : "0.10.19-SNAPSHOT",
         mockito                : "5.2.0",
 ]
 
