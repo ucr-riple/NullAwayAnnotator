@@ -31,8 +31,6 @@ import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -60,33 +58,34 @@ public class FieldRegionRegistry extends Registry<RegionRecord> implements Regio
   }
 
   @Override
-  public Optional<Set<Region>> getImpactedRegions(Location location) {
+  public ImmutableSet<Region> getImpactedRegions(Location location) {
     if (!location.isOnField()) {
-      return Optional.empty();
+      return ImmutableSet.of();
     }
     OnField field = location.toField();
     // Add all regions where the field is assigned a new value or read.
-    Set<Region> ans =
+    ImmutableSet.Builder<Region> builder = ImmutableSet.builder();
+    builder.addAll(
         findRecordsWithHashHint(
                 candidate ->
                     candidate.calleeClass.equals(field.clazz)
                         && field.isOnFieldWithName(candidate.calleeMember),
                 RegionRecord.hash(field.clazz))
             .map(regionRecord -> regionRecord.region)
-            .collect(Collectors.toSet());
+            .collect(Collectors.toSet()));
     // Add each a region for each field variable declared in the declaration statement.
-    ans.addAll(
+    builder.addAll(
         field.variables.stream()
             .map(fieldName -> new Region(field.clazz, fieldName))
             .collect(Collectors.toSet()));
     // Check if field is initialized at declaration.
     if (moduleInfo.getFieldRegistry().isUninitializedField(field)) {
       // If not, add all constructors for the class.
-      ans.addAll(
+      builder.addAll(
           moduleInfo.getMethodRegistry().getConstructorsForClass(field.clazz).stream()
               .map(onMethod -> new Region(onMethod.clazz, onMethod.method))
               .collect(Collectors.toSet()));
     }
-    return Optional.of(ans);
+    return builder.build();
   }
 }

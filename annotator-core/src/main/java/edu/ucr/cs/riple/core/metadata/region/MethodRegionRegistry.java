@@ -32,7 +32,6 @@ import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.scanner.Serializer;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -59,21 +58,22 @@ public class MethodRegionRegistry extends Registry<RegionRecord> implements Regi
   }
 
   @Override
-  public Optional<Set<Region>> getImpactedRegions(Location location) {
+  public ImmutableSet<Region> getImpactedRegions(Location location) {
     if (!location.isOnMethod()) {
-      return Optional.empty();
+      return ImmutableSet.of();
     }
+    ImmutableSet.Builder<Region> builder = ImmutableSet.builder();
     OnMethod onMethod = location.toMethod();
     // Add callers of method.
-    Set<Region> regions = getCallersOfMethod(onMethod.clazz, onMethod.method);
+    builder.addAll(getCallersOfMethod(onMethod.clazz, onMethod.method));
     // Add method itself.
-    regions.add(new Region(onMethod.clazz, onMethod.method));
+    builder.add(new Region(onMethod.clazz, onMethod.method));
     // Add immediate super method.
     MethodRecord parent = moduleInfo.getMethodRegistry().getImmediateSuperMethod(onMethod);
     if (parent != null && parent.isNonTop()) {
-      regions.add(new Region(parent.location.clazz, parent.location.method));
+      builder.add(new Region(parent.location.clazz, parent.location.method));
     }
-    return Optional.of(regions);
+    return builder.build();
   }
 
   /**
