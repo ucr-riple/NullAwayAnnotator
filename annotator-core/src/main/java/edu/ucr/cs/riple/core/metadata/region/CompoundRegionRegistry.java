@@ -62,15 +62,15 @@ public class CompoundRegionRegistry implements RegionRegistry {
     this.registries.forEach(
         registry -> fromRegistriesBuilder.addAll(registry.getImpactedRegions(location)));
     ImmutableSet<Region> fromRegionRegistries = fromRegistriesBuilder.build();
-    ImmutableSet.Builder<Region> extendedImpactedRegions = ImmutableSet.builder();
-    extendedImpactedRegions.addAll(fromRegionRegistries);
+    ImmutableSet.Builder<Region> extendedRegionsBuilder = ImmutableSet.builder();
+    extendedRegionsBuilder.addAll(fromRegionRegistries);
     this.moduleInfo
         .getAnnotationProcessorHandlers()
         .forEach(
             handler ->
-                extendedImpactedRegions.addAll(
+                extendedRegionsBuilder.addAll(
                     handler.extendForGeneratedRegions(fromRegionRegistries)));
-    return fromRegistriesBuilder.build();
+    return extendedRegionsBuilder.build();
   }
 
   @Override
