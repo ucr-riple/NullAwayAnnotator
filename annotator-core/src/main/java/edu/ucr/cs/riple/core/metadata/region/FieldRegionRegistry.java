@@ -65,14 +65,7 @@ public class FieldRegionRegistry extends Registry<RegionRecord> implements Regio
     OnField field = location.toField();
     // Add all regions where the field is assigned a new value or read.
     ImmutableSet.Builder<Region> builder = ImmutableSet.builder();
-    builder.addAll(
-        findRecordsWithHashHint(
-                candidate ->
-                    candidate.calleeClass.equals(field.clazz)
-                        && field.isOnFieldWithName(candidate.calleeMember),
-                RegionRecord.hash(field.clazz))
-            .map(regionRecord -> regionRecord.region)
-            .collect(Collectors.toSet()));
+    builder.addAll(getImpactedRegionsByUse(location));
     // Add each a region for each field variable declared in the declaration statement.
     builder.addAll(
         field.variables.stream()
@@ -87,5 +80,20 @@ public class FieldRegionRegistry extends Registry<RegionRecord> implements Regio
               .collect(Collectors.toSet()));
     }
     return builder.build();
+  }
+
+  @Override
+  public ImmutableSet<Region> getImpactedRegionsByUse(Location location) {
+    if (!location.isOnField()) {
+      return ImmutableSet.of();
+    }
+    OnField field = location.toField();
+    return findRecordsWithHashHint(
+            candidate ->
+                candidate.calleeClass.equals(field.clazz)
+                    && field.isOnFieldWithName(candidate.calleeMember),
+            RegionRecord.hash(field.clazz))
+        .map(regionRecord -> regionRecord.region)
+        .collect(ImmutableSet.toImmutableSet());
   }
 }

@@ -59,7 +59,7 @@ public class ParameterRegionRegistry implements RegionRegistry {
             .map(node -> new Region(node.location.clazz, node.location.method))
             .collect(Collectors.toSet()));
     // Add the method the fix is targeting.
-    builder.add(new Region(parameter.clazz, parameter.enclosingMethod.method));
+    builder.addAll(getImpactedRegionsByUse(location));
     // Add all call sites. It will also reserve call sites to prevent callers from passing @Nullable
     // simultaneously while investigating parameters impact.
     // See example below:
@@ -73,8 +73,16 @@ public class ParameterRegionRegistry implements RegionRegistry {
     // (passing `@Nullable` to `@Nonnull` parameter) as bar#o is temporarily annotated as @Nullable
     // to compute its impact.
     // See test: CoreTest#nestedParameters.
-    builder.addAll(
-        methodRegionRegistry.getCallersOfMethod(parameter.clazz, parameter.enclosingMethod.method));
+    builder.addAll(methodRegionRegistry.getImpactedRegionsByUse(parameter.toMethod()));
     return builder.build();
+  }
+
+  @Override
+  public ImmutableSet<Region> getImpactedRegionsByUse(Location location) {
+    if (!location.isOnParameter()) {
+      return ImmutableSet.of();
+    }
+    OnParameter parameter = location.toParameter();
+    return ImmutableSet.of(new Region(parameter.clazz, parameter.enclosingMethod.method));
   }
 }

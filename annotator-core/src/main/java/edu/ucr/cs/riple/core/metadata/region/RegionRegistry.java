@@ -41,4 +41,19 @@ public interface RegionRegistry {
    * @return Immutable Set of regions.
    */
   ImmutableSet<Region> getImpactedRegions(Location location);
+
+  /**
+   * Returns the set of regions where the element targeted by the passed location has been used.
+   * For:
+   *
+   * <ul>
+   *   <li>methods, it returns the set of regions where the method has been called.
+   *   <li>fields, it returns the set of regions where the field has been accessed.
+   *   <li>parameters, it returns the enclosing method.
+   * </ul>
+   *
+   * @param location Location targeted by the fix.
+   * @return Immutable Set of regions where the passed location's targeted element has been used.
+   */
+  ImmutableSet<Region> getImpactedRegionsByUse(Location location);
 }

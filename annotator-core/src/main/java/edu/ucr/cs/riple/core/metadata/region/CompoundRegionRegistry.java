@@ -73,6 +73,14 @@ public class CompoundRegionRegistry implements RegionRegistry {
     return fromRegistriesBuilder.build();
   }
 
+  @Override
+  public ImmutableSet<Region> getImpactedRegionsByUse(Location location) {
+    ImmutableSet.Builder<Region> fromRegistriesBuilder = ImmutableSet.builder();
+    this.registries.forEach(
+        registry -> fromRegistriesBuilder.addAll(registry.getImpactedRegionsByUse(location)));
+    return fromRegistriesBuilder.build();
+  }
+
   /**
    * Returns the method region registry created by this instance.
    *

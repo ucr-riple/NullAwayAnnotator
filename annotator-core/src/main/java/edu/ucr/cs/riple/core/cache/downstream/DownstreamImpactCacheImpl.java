@@ -91,7 +91,7 @@ public class DownstreamImpactCacheImpl
         .filter(
             input ->
                 !methodRegionRegistry
-                    .getCallersOfMethod(input.toMethod().clazz, input.toMethod().method)
+                    .getImpactedRegionsByUse(input)
                     // skip methods that are not called anywhere. This has a significant impact
                     // on performance.
                     .isEmpty())

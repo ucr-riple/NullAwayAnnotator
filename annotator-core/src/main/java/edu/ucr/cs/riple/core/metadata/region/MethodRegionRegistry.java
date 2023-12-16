@@ -32,8 +32,6 @@ import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.scanner.Serializer;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Region registry for Methods. This region registry can identify impacted regions for fixes on
@@ -65,7 +63,7 @@ public class MethodRegionRegistry extends Registry<RegionRecord> implements Regi
     ImmutableSet.Builder<Region> builder = ImmutableSet.builder();
     OnMethod onMethod = location.toMethod();
     // Add callers of method.
-    builder.addAll(getCallersOfMethod(onMethod.clazz, onMethod.method));
+    builder.addAll(getImpactedRegionsByUse(onMethod));
     // Add method itself.
     builder.add(new Region(onMethod.clazz, onMethod.method));
     // Add immediate super method.
@@ -76,19 +74,19 @@ public class MethodRegionRegistry extends Registry<RegionRecord> implements Regi
     return builder.build();
   }
 
-  /**
-   * Returns set of regions where the target method is called.
-   *
-   * @param clazz Fully qualified name of the class of the target method.
-   * @param method Method signature.
-   * @return Set of regions where target method is called.
-   */
-  public Set<Region> getCallersOfMethod(String clazz, String method) {
+  @Override
+  public ImmutableSet<Region> getImpactedRegionsByUse(Location location) {
+    if (!location.isOnMethod()) {
+      return ImmutableSet.of();
+    }
+    OnMethod onMethod = location.toMethod();
+    // Add callers of method.
     return findRecordsWithHashHint(
             candidate ->
-                candidate.calleeClass.equals(clazz) && candidate.calleeMember.equals(method),
-            RegionRecord.hash(clazz))
+                candidate.calleeClass.equals(onMethod.clazz)
+                    && candidate.calleeMember.equals(onMethod.method),
+            RegionRecord.hash(onMethod.clazz))
         .map(node -> node.region)
-        .collect(Collectors.toSet());
+        .collect(ImmutableSet.toImmutableSet());
   }
 }
