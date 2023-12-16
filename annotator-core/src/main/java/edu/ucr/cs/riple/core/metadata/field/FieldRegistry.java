@@ -216,9 +216,9 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
   }
 
   /**
-   * Returns public method with public visibility and non-primitive return type.
+   * Returns fields with public visibility and a non-primitive return type.
    *
-   * @return ImmutableSet of method nodes.
+   * @return ImmutableSet of fields location.
    */
   public ImmutableSet<OnField> getPublicFieldWithNonPrimitiveType() {
     ImmutableSet.Builder<OnField> builder = ImmutableSet.builder();

@@ -32,6 +32,7 @@ import edu.ucr.cs.riple.core.evaluators.suppliers.DownstreamDependencySupplier;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodRecord;
+import edu.ucr.cs.riple.core.metadata.region.FieldRegionRegistry;
 import edu.ucr.cs.riple.core.metadata.region.MethodRegionRegistry;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
@@ -85,6 +86,7 @@ public class DownstreamImpactCacheImpl
     // Collect public methods with non-primitive return types.
     // Used to collect callers of each method.
     MethodRegionRegistry methodRegionRegistry = new MethodRegionRegistry(moduleInfo);
+    FieldRegionRegistry fieldRegionRegistry = new FieldRegionRegistry(moduleInfo);
     locationsToCache.addAll(
         context
             .targetModuleInfo
@@ -101,7 +103,10 @@ public class DownstreamImpactCacheImpl
                         .isEmpty())
             .collect(Collectors.toSet()));
     // Collect public fields with non-primitive types.
-
+    locationsToCache.addAll(
+        context.targetModuleInfo.getFieldRegistry().getPublicFieldWithNonPrimitiveType().stream()
+            .filter(onField -> fieldRegionRegistry.getImpactedRegions(onField).isPresent())
+            .collect(Collectors.toSet()));
     return locationsToCache.build();
   }
 
