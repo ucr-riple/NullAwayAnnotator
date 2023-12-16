@@ -28,9 +28,6 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.region.generatedcode.AnnotationProcessorHandler;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.location.Location;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * Container class for all region registries. This region registry can identify impacted regions for
@@ -60,14 +57,28 @@ public class CompoundRegionRegistry implements RegionRegistry {
   }
 
   @Override
-  public Optional<Set<Region>> getImpactedRegions(Location location) {
-    Set<Region> regions = new HashSet<>();
+  public ImmutableSet<Region> getImpactedRegions(Location location) {
+    ImmutableSet.Builder<Region> fromRegistriesBuilder = ImmutableSet.builder();
     this.registries.forEach(
-        registry -> registry.getImpactedRegions(location).ifPresent(regions::addAll));
+        registry -> fromRegistriesBuilder.addAll(registry.getImpactedRegions(location)));
+    ImmutableSet<Region> fromRegionRegistries = fromRegistriesBuilder.build();
+    ImmutableSet.Builder<Region> extendedRegionsBuilder = ImmutableSet.builder();
+    extendedRegionsBuilder.addAll(fromRegionRegistries);
     this.moduleInfo
         .getAnnotationProcessorHandlers()
-        .forEach(handler -> regions.addAll(handler.extendForGeneratedRegions(regions)));
-    return Optional.of(regions);
+        .forEach(
+            handler ->
+                extendedRegionsBuilder.addAll(
+                    handler.extendForGeneratedRegions(fromRegionRegistries)));
+    return extendedRegionsBuilder.build();
+  }
+
+  @Override
+  public ImmutableSet<Region> getImpactedRegionsByUse(Location location) {
+    ImmutableSet.Builder<Region> fromRegistriesBuilder = ImmutableSet.builder();
+    this.registries.forEach(
+        registry -> fromRegistriesBuilder.addAll(registry.getImpactedRegionsByUse(location)));
+    return fromRegistriesBuilder.build();
   }
 
   /**

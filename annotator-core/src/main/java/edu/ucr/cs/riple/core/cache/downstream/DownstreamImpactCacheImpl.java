@@ -97,7 +97,7 @@ public class DownstreamImpactCacheImpl
             .filter(
                 input ->
                     !methodRegionRegistry
-                        .getCallersOfMethod(input.toMethod().clazz, input.toMethod().method)
+                        .getImpactedRegionsByUse(input.toMethod())
                         // skip methods that are not called anywhere. This has a significant impact
                         // on performance.
                         .isEmpty())
@@ -105,7 +105,9 @@ public class DownstreamImpactCacheImpl
     // Collect public fields with non-primitive types.
     locationsToCache.addAll(
         context.targetModuleInfo.getFieldRegistry().getPublicFieldWithNonPrimitiveType().stream()
-            .filter(onField -> fieldRegionRegistry.getImpactedRegions(onField).isPresent())
+            // skip fields that are not accessed anywhere. This has a significant impact
+            // on performance.
+            .filter(onField -> !fieldRegionRegistry.getImpactedRegionsByUse(onField).isEmpty())
             .collect(Collectors.toSet()));
     return locationsToCache.build();
   }

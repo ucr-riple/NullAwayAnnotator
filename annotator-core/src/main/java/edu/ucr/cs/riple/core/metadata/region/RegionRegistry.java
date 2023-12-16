@@ -24,10 +24,9 @@
 
 package edu.ucr.cs.riple.core.metadata.region;
 
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.injector.location.Location;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * Interface for region registries. Region registries can locate regions where a {@link Fix} can
@@ -36,11 +35,25 @@ import java.util.Set;
 public interface RegionRegistry {
 
   /**
-   * Returns Set of regions where a fix can introduce new errors if injected. Should return {@link
-   * Optional#EMPTY} if the region registry does not contain any information about the location.
+   * Returns Set of regions where a fix can introduce new errors if injected.
    *
    * @param location Location targeted by the fix.
-   * @return Set of regions.
+   * @return Immutable Set of regions.
    */
-  Optional<Set<Region>> getImpactedRegions(Location location);
+  ImmutableSet<Region> getImpactedRegions(Location location);
+
+  /**
+   * Returns the set of regions where the element targeted by the passed location has been used.
+   * For:
+   *
+   * <ul>
+   *   <li>methods, it returns the set of regions where the method has been called.
+   *   <li>fields, it returns the set of regions where the field has been accessed.
+   *   <li>parameters, it returns the enclosing method.
+   * </ul>
+   *
+   * @param location Location targeted by the fix.
+   * @return Immutable Set of regions where the passed location's targeted element has been used.
+   */
+  ImmutableSet<Region> getImpactedRegionsByUse(Location location);
 }

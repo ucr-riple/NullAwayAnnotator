@@ -34,10 +34,8 @@ import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.AnnotationChange;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Handler for lombok generated code. It can extend potentially impacted regions for elements which
@@ -73,14 +71,12 @@ public class LombokHandler implements AnnotationProcessorHandler {
         .map(methodNode -> methodNode.location)
         // add potentially impacted regions for the collected methods.
         .flatMap(
-            onMethod -> {
-              Optional<Set<Region>> ans =
-                  moduleInfo
-                      .getRegionRegistry()
-                      .getMethodRegionRegistry()
-                      .getImpactedRegions(onMethod);
-              return ans.isPresent() ? ans.get().stream() : Stream.of();
-            })
+            onMethod ->
+                moduleInfo
+                    .getRegionRegistry()
+                    .getMethodRegionRegistry()
+                    .getImpactedRegions(onMethod)
+                    .stream())
         .collect(Collectors.toSet());
   }
 
