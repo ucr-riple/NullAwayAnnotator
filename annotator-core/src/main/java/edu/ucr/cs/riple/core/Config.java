@@ -105,8 +105,9 @@ public class Config {
   /** Sets of context path information for all downstream dependencies. */
   public final ImmutableSet<ModuleConfiguration> downstreamConfigurations;
   /**
-   * Path to NullAway library model loader, which enables the communication between annotator and
-   * NullAway when processing downstream dependencies.
+   * Path to NullAway library model loader resource directory, which enables the communication
+   * between annotator and NullAway when processing downstream dependencies. Annotator will write
+   * annotation on files in this directory and the using Library Model Loader reads them.
    */
   public final Path nullawayLibraryModelLoaderPath;
   /** Command to build the all downstream dependencies at once. */
@@ -299,7 +300,7 @@ public class Config {
             "nlmlp",
             "nullaway-library-model-loader-path",
             true,
-            "NullAway Library Model loader path");
+            "NullAway Library Model loader resource directory path");
     nullawayLibraryModelLoaderPathOption.setRequired(false);
     options.addOption(nullawayLibraryModelLoaderPathOption);
     // Down stream analysis: Analysis mode.
