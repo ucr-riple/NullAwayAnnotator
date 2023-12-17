@@ -50,6 +50,10 @@ public class LibraryModelLoader implements LibraryModels {
     this.nullableMethods =
         parseTSVFileFromResourcesToMemberRef(
             NULLABLE_METHOD_LIST_FILE_NAME, values -> methodRef(values[0], values[1]));
+    // Using lambda below instead of the anonymous class will cause a crash in NullAway execution.
+    //    this.nullableFields =
+    //        parseTSVFileFromResourcesToMemberRef(
+    //            NULLABLE_FIELD_LIST_FILE_NAME, values -> fieldRef(values[0], values[1]));
     this.nullableFields =
         parseTSVFileFromResourcesToMemberRef(
             NULLABLE_FIELD_LIST_FILE_NAME,
