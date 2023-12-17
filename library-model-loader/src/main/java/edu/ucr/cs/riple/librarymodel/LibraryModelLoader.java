@@ -52,13 +52,7 @@ public class LibraryModelLoader implements LibraryModels {
             NULLABLE_METHOD_LIST_FILE_NAME, values -> methodRef(values[0], values[1]));
     this.nullableFields =
         parseTSVFileFromResourcesToMemberRef(
-            NULLABLE_FIELD_LIST_FILE_NAME,
-            new Factory<FieldRef>() {
-              @Override
-              public FieldRef create(String[] values) {
-                return fieldRef(values[0], values[1]);
-              }
-            });
+            NULLABLE_FIELD_LIST_FILE_NAME, values -> fieldRef(values[0], values[1]));
   }
 
   /**

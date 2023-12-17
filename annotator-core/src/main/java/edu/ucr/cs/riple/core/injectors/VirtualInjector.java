@@ -53,8 +53,9 @@ public class VirtualInjector extends AnnotationInjector {
    * retrieve the path to library model loader.
    */
   private final Config config;
-
+  /** Name of the resource file in library model loader which contains list of nullable methods. */
   public static final String NULLABLE_METHOD_LIST_FILE_NAME = "nullable-methods.tsv";
+  /** Name of the resource file in library model loader which contains list of nullable fields. */
   public static final String NULLABLE_FIELD_LIST_FILE_NAME = "nullable-fields.tsv";
 
   public VirtualInjector(Context context) {
@@ -92,10 +93,22 @@ public class VirtualInjector extends AnnotationInjector {
         changes.stream().filter(addAnnotation -> addAnnotation.getLocation().isOnField()),
         libraryModelPath.resolve(NULLABLE_FIELD_LIST_FILE_NAME),
         annot ->
+            // An annotation on a single statement with multiple declaration will be considered for
+            // each declaration as well. Hence, we have to consider it for all variables.
+            // E.g. for {@Nullable String a, b;} we have to consider both a and b be nullable and
+            // each one on a separate line.
             annot.getLocation().toField().variables.stream()
                 .map(variable -> annot.getLocation().clazz + "\t" + variable + "\n"));
   }
 
+  /**
+   * Writes the passed annotation to the passed file. It uses the passed mapper to map the
+   * annotation to a string. And writes each string to a separate line.
+   *
+   * @param annotations Annotations to be written.
+   * @param path Path to the file to be written.
+   * @param mapper Mapper to map the annotation to a string.
+   */
   private static void writeAnnotationsToFile(
       Stream<AddAnnotation> annotations,
       Path path,
