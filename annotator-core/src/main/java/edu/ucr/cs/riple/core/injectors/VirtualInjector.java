@@ -94,9 +94,14 @@ public class VirtualInjector extends AnnotationInjector {
         libraryModelPath.resolve(NULLABLE_FIELD_LIST_FILE_NAME),
         annot ->
             // An annotation on a single statement with multiple declaration will be considered for
-            // each declaration as well. Hence, we have to consider it for all variables.
-            // E.g. for {@Nullable String a, b;} we have to consider both a and b be nullable and
-            // each one on a separate line.
+            // all declared variables. Hence, we have to mark all variables as nullable.
+            // E.g. for
+            // class Foo {
+            //     @Nullable Object a, b;
+            // }
+            // we have to consider both a and b be nullable and write each one
+            // ("Foo\ta" and "Foo\tb")
+            // on a separate line.
             annot.getLocation().toField().variables.stream()
                 .map(variable -> annot.getLocation().clazz + "\t" + variable + "\n"));
   }
