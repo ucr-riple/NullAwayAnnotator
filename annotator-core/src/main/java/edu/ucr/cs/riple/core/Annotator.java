@@ -29,7 +29,6 @@ import com.github.javaparser.StaticJavaParser;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.cache.TargetModuleCache;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
-import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCacheImpl;
 import edu.ucr.cs.riple.core.cache.downstream.VoidDownstreamImpactCache;
 import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
 import edu.ucr.cs.riple.core.evaluators.Evaluator;
@@ -97,10 +96,7 @@ public class Annotator {
     // computation does not depend on the changes in the target module, it will compute the same
     // result in each iteration, therefore we perform the analysis only once and reuse it in each
     // iteration.
-    DownstreamImpactCache downstreamImpactCache =
-        config.downStreamDependenciesAnalysisActivated
-            ? new DownstreamImpactCacheImpl(context)
-            : new VoidDownstreamImpactCache();
+    DownstreamImpactCache downstreamImpactCache = new VoidDownstreamImpactCache();
     downstreamImpactCache.analyzeDownstreamDependencies();
     TargetModuleCache targetModuleCache = new TargetModuleCache();
     if (config.inferenceActivated) {

@@ -26,19 +26,11 @@ package edu.ucr.cs.riple.core.cache.downstream;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.cache.Impact;
-import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.method.MethodRecord;
 import edu.ucr.cs.riple.injector.location.OnMethod;
-import edu.ucr.cs.riple.injector.location.OnParameter;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Container class for storing overall impact of a fix applied in target module on downstream
@@ -46,25 +38,12 @@ import java.util.stream.Collectors;
  */
 public class DownstreamImpact extends Impact {
 
-  /**
-   * Map of parameters in target module that will receive {@code Nullable} value if targeted method
-   * in node is annotated as {@code @Nullable} with their corresponding triggered errors.
-   */
-  private final HashMap<OnParameter, Set<Error>> impactedParametersMap;
-  /**
-   * Effect of injecting a {@code Nullable} annotation on pointing method of node on downstream
-   * dependencies.
-   */
-  private int effect;
-
   public DownstreamImpact(Fix fix) {
     super(fix);
     // Only store impacts of fixes targeting methods.
     Preconditions.checkArgument(
         fix.isOnMethod(),
         "Unexpected Fix instance. Only impacts of fixes on methods should be tracked for downstream dependencies");
-    this.effect = 0;
-    this.impactedParametersMap = new HashMap<>();
     this.triggeredErrors = ImmutableSet.of();
   }
 
@@ -78,22 +57,9 @@ public class DownstreamImpact extends Impact {
    *
    * @param report Result of applying making method in node {@code @Nullable} in downstream
    *     dependencies.
-   * @param impactedParameters Set of impacted paramaters.
    */
-  public void setStatus(Report report, Set<OnParameter> impactedParameters) {
-    this.effect = report.localEffect;
+  public void setStatus(Report report) {
     this.triggeredErrors = ImmutableSet.copyOf(report.triggeredErrors);
-    // Count the number of times each parameter received a @Nullable.
-    impactedParameters.forEach(
-        onParameter -> {
-          Set<Error> triggered =
-              triggeredErrors.stream()
-                  .filter(
-                      error ->
-                          error.isSingleFix() && error.toResolvingLocation().equals(onParameter))
-                  .collect(Collectors.toSet());
-          impactedParametersMap.put(onParameter, triggered);
-        });
   }
 
   /**
@@ -106,52 +72,6 @@ public class DownstreamImpact extends Impact {
    */
   public static int hash(String method, String clazz) {
     return MethodRecord.hash(method, clazz);
-  }
-
-  /**
-   * Getter for effect.
-   *
-   * @return Effect.
-   */
-  public int getEffect() {
-    return effect;
-  }
-
-  /**
-   * Returns set of triggered errors if method is {@code @Nullable} on downstream dependencies.
-   *
-   * @return Set of errors.
-   */
-  @Override
-  public ImmutableSet<Error> getTriggeredErrors() {
-    return triggeredErrors;
-  }
-
-  /**
-   * Updates the status of method's impact after injection of fixes in target module. Potentially
-   * part of stored impact result is invalid due to injection of fixes. (e.g. some impacted
-   * parameters may already be annotated as {@code @Nullable} and will no longer trigger errors on
-   * downstream dependencies). This method addresses this issue by updating method's status.
-   *
-   * @param fixes List of injected fixes.
-   */
-  @Override
-  public void updateStatusAfterInjection(Collection<Fix> fixes) {
-    Set<OnParameter> annotatedParameters = new HashSet<>();
-    Set<Error> temp = Sets.newHashSet(triggeredErrors);
-    fixes.forEach(
-        fix ->
-            fix.ifOnParameter(
-                onParameter -> {
-                  if (impactedParametersMap.containsKey(onParameter)) {
-                    Set<Error> errors = impactedParametersMap.get(onParameter);
-                    effect -= errors.size();
-                    temp.removeAll(errors);
-                    annotatedParameters.add(onParameter);
-                  }
-                }));
-    this.triggeredErrors = ImmutableSet.copyOf(temp);
-    annotatedParameters.forEach(impactedParametersMap::remove);
   }
 
   /**

@@ -23,6 +23,7 @@
 package edu.ucr.cs.riple.scanner.location;
 
 import com.sun.tools.javac.code.Symbol;
+import edu.ucr.cs.riple.scanner.Serializer;
 import javax.lang.model.element.ElementKind;
 
 /**
@@ -44,9 +45,9 @@ public class FieldLocation extends AbstractSymbolLocation {
     return String.join(
         "\t",
         type.toString(),
-        enclosingClass.flatName(),
+        Serializer.serializeSymbol(enclosingClass),
         "null",
-        variableSymbol.toString(),
+        Serializer.serializeSymbol(variableSymbol),
         "null",
         path != null ? path.toString() : "null");
   }
