@@ -74,14 +74,13 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
         .filter(
             error ->
                 error.isSingleFix()
-                    && error.toResolvingLocation().isOnParameter()
                     && error.isFixableOnTarget(context)
                     && !currentLocationsTargetedByTree.contains(error.toResolvingLocation()))
         .map(
             error ->
                 new Fix(
                     new AddMarkerAnnotation(
-                        error.toResolvingLocation().toParameter(), context.config.nullableAnnot),
+                        error.toResolvingLocation(), context.config.nullableAnnot),
                     "PASSING_NULLABLE",
                     false))
         .collect(Collectors.toSet());

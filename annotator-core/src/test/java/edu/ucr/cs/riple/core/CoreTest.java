@@ -557,4 +557,23 @@ public class CoreTest extends AnnotatorBaseCoreTest {
         .toDepth(1)
         .start();
   }
+
+  @Test
+  public void nonnullTypeUseAnnotationOnFormalParameterAcknowledgmentTest() {
+    coreTestHelper
+        .onTarget()
+        .withSourceLines(
+            "A.java",
+            "package test;",
+            "import org.jetbrains.annotations.NotNull;",
+            "public class A {",
+            "  static void foo(@NotNull Object o) {}",
+            "  static void bar() { foo(null); }",
+            "}")
+        .expectNoReport()
+        .toDepth(5)
+        .start();
+    // No annotation should be added even though it can reduce the number of errors.
+    Assert.assertEquals(coreTestHelper.getLog().getInjectedAnnotations().size(), 0);
+  }
 }

@@ -39,6 +39,7 @@ import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -111,7 +112,10 @@ public class Injector {
             try {
               Path bakPath = Paths.get(path.toString() + ".bak");
               Files.createFile(bakPath);
-              Files.write(bakPath, contentBefore.getBytes());
+              if (contentBefore == null) {
+                return;
+              }
+              Files.write(bakPath, contentBefore.getBytes(Charset.defaultCharset()));
               System.out.println("Applying changes:");
               changeList.forEach(System.out::println);
             } catch (Exception ex) {
