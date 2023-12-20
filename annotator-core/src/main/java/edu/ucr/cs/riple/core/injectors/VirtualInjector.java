@@ -28,6 +28,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
+import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import java.io.BufferedOutputStream;
@@ -131,13 +132,7 @@ public class VirtualInjector extends AnnotationInjector {
 
   /** Removes any existing entry from library models. */
   private void clear() {
-    try {
-      new FileOutputStream(libraryModelPath.resolve(NULLABLE_FIELD_LIST_FILE_NAME).toFile())
-          .close();
-      new FileOutputStream(libraryModelPath.resolve(NULLABLE_METHOD_LIST_FILE_NAME).toFile())
-          .close();
-    } catch (IOException e) {
-      throw new RuntimeException("Could not clear library model loader content", e);
-    }
+    Utility.clearFileContentsAtPath(libraryModelPath.resolve(NULLABLE_FIELD_LIST_FILE_NAME));
+    Utility.clearFileContentsAtPath(libraryModelPath.resolve(NULLABLE_METHOD_LIST_FILE_NAME));
   }
 }
