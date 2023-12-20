@@ -22,11 +22,11 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.index;
+package edu.ucr.cs.riple.core.registries.index;
 
 import edu.ucr.cs.riple.core.Context;
-import edu.ucr.cs.riple.core.metadata.region.Region;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
+import edu.ucr.cs.riple.core.registries.region.Region;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

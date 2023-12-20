@@ -22,14 +22,14 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.region.generatedcode;
+package edu.ucr.cs.riple.core.registries.region.generatedcode;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.evaluators.graph.processors.ParallelConflictGraphProcessor;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.method.MethodRecord;
-import edu.ucr.cs.riple.core.metadata.region.Region;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
+import edu.ucr.cs.riple.core.registries.index.Fix;
+import edu.ucr.cs.riple.core.registries.method.MethodRecord;
+import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.AnnotationChange;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;

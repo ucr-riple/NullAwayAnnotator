@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.core.evaluators;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.registries.index.Fix;
 
 /** Interface for evaluators. Evaluators create reports from the impacts of fixes. */
 public interface Evaluator {

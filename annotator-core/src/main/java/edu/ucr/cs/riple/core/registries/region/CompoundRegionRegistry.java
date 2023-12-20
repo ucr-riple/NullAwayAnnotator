@@ -22,11 +22,11 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.region;
+package edu.ucr.cs.riple.core.registries.region;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.metadata.region.generatedcode.AnnotationProcessorHandler;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
+import edu.ucr.cs.riple.core.registries.region.generatedcode.AnnotationProcessorHandler;
 import edu.ucr.cs.riple.injector.location.Location;
 
 /**

@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.core.evaluators;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.registries.index.Fix;
 
 /**
  * This evaluator does not evaluate the given fixes based on the impacts on the result of the

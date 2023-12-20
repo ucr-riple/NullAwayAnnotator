@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
 import edu.ucr.cs.riple.core.evaluators.suppliers.DownstreamDependencySupplier;
-import edu.ucr.cs.riple.core.metadata.index.Error;
+import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Set;
 import java.util.stream.Collectors;

@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.field;
+package edu.ucr.cs.riple.core.registries.field;
 
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.nio.file.Path;

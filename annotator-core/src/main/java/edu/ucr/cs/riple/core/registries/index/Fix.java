@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.index;
+package edu.ucr.cs.riple.core.registries.index;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.injector.Helper;

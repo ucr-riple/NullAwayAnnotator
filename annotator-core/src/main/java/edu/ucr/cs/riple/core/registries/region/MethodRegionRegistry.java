@@ -22,32 +22,30 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.region;
+package edu.ucr.cs.riple.core.registries.region;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.metadata.Registry;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
+import edu.ucr.cs.riple.core.registries.Registry;
+import edu.ucr.cs.riple.core.registries.method.MethodRecord;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
-import edu.ucr.cs.riple.injector.location.OnField;
+import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.scanner.Serializer;
-import java.util.stream.Collectors;
 
 /**
- * Region registry for Fields. This region registry can identify impacted regions for fixes on
- * {@link OnField}.
+ * Region registry for Methods. This region registry can identify impacted regions for fixes on
+ * {@link OnMethod}
  */
-public class FieldRegionRegistry extends Registry<RegionRecord> implements RegionRegistry {
+public class MethodRegionRegistry extends Registry<RegionRecord> implements RegionRegistry {
 
-  /** ModuleInfo of the module which usages of fields are stored. */
+  /** ModuleInfo of the module which usage of methods are stored. */
   private final ModuleInfo moduleInfo;
 
-  public FieldRegionRegistry(ModuleInfo moduleInfo) {
+  public MethodRegionRegistry(ModuleInfo moduleInfo) {
     super(
         moduleInfo.getModuleConfigurations().stream()
-            .map(
-                configuration ->
-                    configuration.dir.resolve(Serializer.FIELD_IMPACTED_REGION_FILE_NAME))
+            .map(info -> info.dir.resolve(Serializer.METHOD_IMPACTED_REGION_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));
     this.moduleInfo = moduleInfo;
   }
@@ -59,41 +57,36 @@ public class FieldRegionRegistry extends Registry<RegionRecord> implements Regio
 
   @Override
   public ImmutableSet<Region> getImpactedRegions(Location location) {
-    if (!location.isOnField()) {
+    if (!location.isOnMethod()) {
       return ImmutableSet.of();
     }
-    OnField field = location.toField();
-    // Add all regions where the field is assigned a new value or read.
     ImmutableSet.Builder<Region> builder = ImmutableSet.builder();
-    builder.addAll(getImpactedRegionsByUse(location));
-    // Add each a region for each field variable declared in the declaration statement.
-    builder.addAll(
-        field.variables.stream()
-            .map(fieldName -> new Region(field.clazz, fieldName))
-            .collect(Collectors.toSet()));
-    // Check if field is initialized at declaration.
-    if (moduleInfo.getFieldRegistry().isUninitializedField(field)) {
-      // If not, add all constructors for the class.
-      builder.addAll(
-          moduleInfo.getMethodRegistry().getConstructorsForClass(field.clazz).stream()
-              .map(onMethod -> new Region(onMethod.clazz, onMethod.method))
-              .collect(Collectors.toSet()));
+    OnMethod onMethod = location.toMethod();
+    // Add callers of method.
+    builder.addAll(getImpactedRegionsByUse(onMethod));
+    // Add method itself.
+    builder.add(new Region(onMethod.clazz, onMethod.method));
+    // Add immediate super method.
+    MethodRecord parent = moduleInfo.getMethodRegistry().getImmediateSuperMethod(onMethod);
+    if (parent != null && parent.isNonTop()) {
+      builder.add(new Region(parent.location.clazz, parent.location.method));
     }
     return builder.build();
   }
 
   @Override
   public ImmutableSet<Region> getImpactedRegionsByUse(Location location) {
-    if (!location.isOnField()) {
+    if (!location.isOnMethod()) {
       return ImmutableSet.of();
     }
-    OnField field = location.toField();
+    OnMethod onMethod = location.toMethod();
+    // Add callers of method.
     return findRecordsWithHashHint(
             candidate ->
-                candidate.calleeClass.equals(field.clazz)
-                    && field.isOnFieldWithName(candidate.calleeMember),
-            RegionRecord.hash(field.clazz))
-        .map(regionRecord -> regionRecord.region)
+                candidate.calleeClass.equals(onMethod.clazz)
+                    && candidate.calleeMember.equals(onMethod.method),
+            RegionRecord.hash(onMethod.clazz))
+        .map(node -> node.region)
         .collect(ImmutableSet.toImmutableSet());
   }
 }
