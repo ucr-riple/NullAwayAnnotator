@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.method;
+package edu.ucr.cs.riple.core.registries.method;
 
 import static edu.ucr.cs.riple.scanner.out.MethodRecord.ANNOTATION_DELIMITER;
 
@@ -30,8 +30,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import edu.ucr.cs.riple.core.Context;
-import edu.ucr.cs.riple.core.metadata.Registry;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
+import edu.ucr.cs.riple.core.registries.Registry;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;

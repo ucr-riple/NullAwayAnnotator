@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Nima Karimipour
+ * Copyright (c) 2020 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,15 +22,38 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.evaluators;
+package edu.ucr.cs.riple.core.registries.region;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.registries.index.Fix;
+import edu.ucr.cs.riple.injector.location.Location;
 
-/** Interface for evaluators. Evaluators create reports from the impacts of fixes. */
-public interface Evaluator {
+/**
+ * Interface for region registries. Region registries can locate regions where a {@link Fix} can
+ * potentially introduce new errors if injected.
+ */
+public interface RegionRegistry {
 
-  /** Makes an Immutable Set of reports from impacts of the given fixes. */
-  ImmutableSet<Report> evaluate(ImmutableSet<Fix> fixes);
+  /**
+   * Returns Set of regions where a fix can introduce new errors if injected.
+   *
+   * @param location Location targeted by the fix.
+   * @return Immutable Set of regions.
+   */
+  ImmutableSet<Region> getImpactedRegions(Location location);
+
+  /**
+   * Returns the set of regions where the element targeted by the passed location has been used.
+   * For:
+   *
+   * <ul>
+   *   <li>methods, it returns the set of regions where the method has been called.
+   *   <li>fields, it returns the set of regions where the field has been accessed.
+   *   <li>parameters, it returns the enclosing method.
+   * </ul>
+   *
+   * @param location Location targeted by the fix.
+   * @return Immutable Set of regions where the passed location's targeted element has been used.
+   */
+  ImmutableSet<Region> getImpactedRegionsByUse(Location location);
 }

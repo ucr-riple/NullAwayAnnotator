@@ -1,17 +1,40 @@
-package edu.ucr.cs.riple.core.metadata.field;
+/*
+ * MIT License
+ *
+ * Copyright (c) 2022 Nima Karimipour
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+package edu.ucr.cs.riple.core.registries.field;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Sets;
-import edu.ucr.cs.riple.core.metadata.Registry;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
+import edu.ucr.cs.riple.core.registries.Registry;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import edu.ucr.cs.riple.injector.location.OnClass;
@@ -32,13 +55,14 @@ import java.util.Set;
  * j; and a Fix suggesting f to be {@code Nullable}, this class will replace that fix with a fix
  * suggesting f, i, and j be {@code Nullable}.)
  */
-public class FieldRegistry extends Registry<FieldRecord> {
+public class FieldRegistry extends Registry<ClassFieldRecord> {
 
   /**
    * A map from class flat name to a set of field names that are declared in that class but not
    * initialized at declaration.
    */
   private Multimap<String, String> uninitializedFields;
+
   /**
    * Constructor for {@link FieldRegistry}.
    *
@@ -67,7 +91,7 @@ public class FieldRegistry extends Registry<FieldRecord> {
   }
 
   @Override
-  protected Builder<FieldRecord> getBuilder() {
+  protected Builder<ClassFieldRecord> getBuilder() {
     return values -> {
       // Class flat name.
       String clazz = values[0];
@@ -83,16 +107,17 @@ public class FieldRegistry extends Registry<FieldRecord> {
           System.err.println(notFound.getMessage());
           return null;
         }
-        FieldRecord info = new FieldRecord(path, clazz);
+        ClassFieldRecord record = new ClassFieldRecord(path, clazz);
         members.forEach(
             bodyDeclaration ->
                 bodyDeclaration.ifFieldDeclaration(
                     fieldDeclaration -> {
                       NodeList<VariableDeclarator> vars = fieldDeclaration.getVariables();
-                      info.addNewSetOfFieldDeclarations(
-                          vars.stream()
-                              .map(NodeWithSimpleName::getNameAsString)
-                              .collect(ImmutableSet.toImmutableSet()));
+                      if (vars.getFirst().isEmpty()) {
+                        // unexpected but just in case.
+                        return;
+                      }
+                      record.addFieldDeclaration(fieldDeclaration);
                       // Collect uninitialized fields at declaration.
                       vars.forEach(
                           variableDeclarator -> {
@@ -103,11 +128,9 @@ public class FieldRegistry extends Registry<FieldRecord> {
                           });
                     }));
         // We still want to keep the information about the class even if it has no field
-        // declarations,
-        // so we can retrieve tha path to the file from the given class flat name. This information
-        // is
-        // used in adding suppression annotations on class level.
-        return info;
+        // declarations, so we can retrieve tha path to the file from the given class flat name.
+        // This information is used in adding suppression annotations on class level.
+        return record;
       } catch (FileNotFoundException e) {
         return null;
       } catch (IOException e) {
@@ -126,15 +149,20 @@ public class FieldRegistry extends Registry<FieldRecord> {
    */
   public ImmutableSet<String> getInLineMultipleFieldDeclarationsOnField(
       String clazz, Set<String> fields) {
-    FieldRecord candidate =
-        findRecordWithHashHint(node -> node.clazz.equals(clazz), FieldRecord.hash(clazz));
+    ClassFieldRecord candidate =
+        findRecordWithHashHint(node -> node.clazz.equals(clazz), ClassFieldRecord.hash(clazz));
     if (candidate == null) {
       // No inline multiple field declarations.
       return ImmutableSet.copyOf(fields);
     }
-    Optional<ImmutableSet<String>> inLineGroupFieldDeclaration =
-        candidate.fields.stream().filter(group -> !Collections.disjoint(group, fields)).findFirst();
-    return inLineGroupFieldDeclaration.orElse(ImmutableSet.copyOf(fields));
+    Optional<ClassFieldRecord.FieldDeclarationRecord> inLineGroupFieldDeclaration =
+        candidate.fields.stream()
+            .filter(group -> !Collections.disjoint(group.names, fields))
+            .findFirst();
+    if (inLineGroupFieldDeclaration.isPresent()) {
+      return inLineGroupFieldDeclaration.get().names;
+    }
+    return ImmutableSet.copyOf(fields);
   }
 
   /**
@@ -159,8 +187,8 @@ public class FieldRegistry extends Registry<FieldRecord> {
    * @return {@link OnField} instance targeting the passed field and class.
    */
   public OnField getLocationOnField(String clazz, String field) {
-    FieldRecord candidate =
-        findRecordWithHashHint(node -> node.clazz.equals(clazz), FieldRecord.hash(clazz));
+    ClassFieldRecord candidate =
+        findRecordWithHashHint(node -> node.clazz.equals(clazz), ClassFieldRecord.hash(clazz));
     Set<String> fieldNames = Sets.newHashSet(field);
     if (candidate == null) {
       // field is on byte code.
@@ -178,8 +206,8 @@ public class FieldRegistry extends Registry<FieldRecord> {
    *     classes flat name.
    */
   public OnClass getLocationOnClass(String clazz) {
-    FieldRecord candidate =
-        findRecordWithHashHint(node -> node.clazz.equals(clazz), FieldRecord.hash(clazz));
+    ClassFieldRecord candidate =
+        findRecordWithHashHint(node -> node.clazz.equals(clazz), ClassFieldRecord.hash(clazz));
     if (candidate == null) {
       // class not observed in source code.
       return null;

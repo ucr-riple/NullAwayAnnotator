@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.core.evaluators.graph;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.registries.index.Fix;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

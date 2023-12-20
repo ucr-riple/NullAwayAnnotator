@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
 import edu.ucr.cs.riple.core.evaluators.suppliers.DownstreamDependencySupplier;
-import edu.ucr.cs.riple.core.metadata.index.Error;
+import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -51,30 +51,27 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
     this.graph
         .getNodes()
         .forEach(
-            node ->
-                node.root.ifOnMethod(
-                    method -> {
-                      // Impacted locations.
-                      Set<Location> locations =
-                          node.triggeredErrors.stream()
-                              .filter(
-                                  error ->
-                                      error.isSingleFix()
-                                          // Method is declared in the target module.
-                                          && context.targetModuleInfo.declaredInModule(
-                                              error.toResolvingLocation()))
-                              .map(Error::toResolvingLocation)
-                              .collect(Collectors.toSet());
-                      if (!locations.isEmpty()) {
-                        // Update path for each location. These triggered fixes do not have an
-                        // actual physical path since they are provided as a jar file in downstream
-                        // dependencies.
-                        locations.forEach(
-                            location ->
-                                location.path =
-                                    context.targetModuleInfo.getLocationOnClass(location.clazz)
-                                        .path);
-                      }
-                    }));
+            node -> {
+              // Impacted locations.
+              Set<Location> locations =
+                  node.triggeredErrors.stream()
+                      .filter(
+                          error ->
+                              error.isSingleFix()
+                                  // Method is declared in the target module.
+                                  && context.targetModuleInfo.declaredInModule(
+                                      error.toResolvingLocation()))
+                      .map(Error::toResolvingLocation)
+                      .collect(Collectors.toSet());
+              if (!locations.isEmpty()) {
+                // Update path for each location. These triggered fixes do not have an
+                // actual physical path since they are provided as a jar file in downstream
+                // dependencies.
+                locations.forEach(
+                    location ->
+                        location.path =
+                            context.targetModuleInfo.getLocationOnClass(location.clazz).path);
+              }
+            });
   }
 }

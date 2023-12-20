@@ -22,11 +22,11 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.region.generatedcode;
+package edu.ucr.cs.riple.core.registries.region.generatedcode;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.region.Region;
+import edu.ucr.cs.riple.core.registries.index.Fix;
+import edu.ucr.cs.riple.core.registries.region.Region;
 import java.util.Set;
 
 /**

@@ -29,10 +29,11 @@ import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.cache.BaseCache;
 import edu.ucr.cs.riple.core.evaluators.suppliers.DownstreamDependencySupplier;
-import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.method.MethodRecord;
-import edu.ucr.cs.riple.core.metadata.region.MethodRegionRegistry;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
+import edu.ucr.cs.riple.core.registries.index.Error;
+import edu.ucr.cs.riple.core.registries.index.Fix;
+import edu.ucr.cs.riple.core.registries.method.MethodRecord;
+import edu.ucr.cs.riple.core.registries.region.MethodRegionRegistry;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Collection;
@@ -40,7 +41,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
@@ -73,35 +73,39 @@ public class DownstreamImpactCacheImpl
    * on downstream dependencies and stored in this cache.
    *
    * @param context Annotator context.
+   * @param moduleInfo Module info of the downstream dependencies. Downstream dependencies are
+   *     collectively viewed as a single module.
    * @return Set of locations that impact of making them {@code @Nullable} should be computed on
    *     downstream dependencies and stored in this cache.
    */
-  private Set<Location> retrieveLocationsToCacheImpactsOnDownstreamDependencies(Context context) {
+  private ImmutableSet<Location> retrieveLocationsToCacheImpactsOnDownstreamDependencies(
+      Context context, ModuleInfo moduleInfo) {
+    // Collect callers of public APIs in module.
+    MethodRegionRegistry methodRegionRegistry = new MethodRegionRegistry(moduleInfo);
     return context
         .targetModuleInfo
         .getMethodRegistry()
         .getPublicMethodsWithNonPrimitivesReturn()
         .stream()
         .map(MethodRecord::toLocation)
-        .collect(Collectors.toSet());
+        .filter(
+            input ->
+                !methodRegionRegistry
+                    .getImpactedRegionsByUse(input)
+                    // skip methods that are not called anywhere. This has a significant impact
+                    // on performance.
+                    .isEmpty())
+        .collect(ImmutableSet.toImmutableSet());
   }
 
   @Override
   public void analyzeDownstreamDependencies() {
     System.out.println("Analyzing downstream dependencies...");
     DownstreamDependencySupplier supplier = new DownstreamDependencySupplier(context);
-    // Collect callers of public APIs in module.
-    MethodRegionRegistry methodRegionRegistry = new MethodRegionRegistry(supplier.getModuleInfo());
     // Generate fixes corresponding methods.
     ImmutableSet<Fix> fixes =
-        retrieveLocationsToCacheImpactsOnDownstreamDependencies(context).stream()
-            .filter(
-                input ->
-                    !methodRegionRegistry
-                        .getCallersOfMethod(input.toMethod().clazz, input.toMethod().method)
-                        // skip methods that are not called anywhere. This has a significant impact
-                        // on performance.
-                        .isEmpty())
+        retrieveLocationsToCacheImpactsOnDownstreamDependencies(context, supplier.getModuleInfo())
+            .stream()
             .map(
                 downstreamImpact ->
                     new Fix(
@@ -115,8 +119,7 @@ public class DownstreamImpactCacheImpl
     // Update method status based on the results.
     reports.forEach(
         report -> {
-          DownstreamImpact impact = new DownstreamImpact(report.root);
-          impact.setStatus(report);
+          DownstreamImpact impact = new DownstreamImpact(report);
           store.put(report.root.toLocation(), impact);
         });
     System.out.println("Analyzing downstream dependencies completed!");
