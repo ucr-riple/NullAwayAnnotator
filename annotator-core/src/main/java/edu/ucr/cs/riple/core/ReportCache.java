@@ -25,7 +25,7 @@
 package edu.ucr.cs.riple.core;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.registries.index.Fix;
 import java.util.HashMap;
 import java.util.Map;
 

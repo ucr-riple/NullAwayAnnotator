@@ -22,13 +22,13 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.index;
+package edu.ucr.cs.riple.core.registries.index;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import edu.ucr.cs.riple.core.Context;
-import edu.ucr.cs.riple.core.metadata.region.Region;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
+import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.util.Collection;
 import java.util.Set;

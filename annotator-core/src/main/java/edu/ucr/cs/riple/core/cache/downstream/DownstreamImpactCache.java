@@ -25,7 +25,7 @@
 package edu.ucr.cs.riple.core.cache.downstream;
 
 import edu.ucr.cs.riple.core.cache.ImpactCache;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.registries.index.Fix;
 import java.util.Set;
 
 /**

@@ -29,7 +29,7 @@ import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.evaluators.graph.Node;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.registries.index.Fix;
 
 /**
  * This evaluator for each fix tree computes the effectiveness by injecting the fix tree entirely to

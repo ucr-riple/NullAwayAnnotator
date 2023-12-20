@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.field;
+package edu.ucr.cs.riple.core.registries.field;
 
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;

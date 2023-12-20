@@ -27,8 +27,8 @@ package edu.ucr.cs.riple.core.checkers;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
-import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
+import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Set;
 

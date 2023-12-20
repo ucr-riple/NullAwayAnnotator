@@ -22,11 +22,11 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.field;
+package edu.ucr.cs.riple.core.registries.field;
 
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.Context;
-import edu.ucr.cs.riple.core.metadata.Registry;
+import edu.ucr.cs.riple.core.registries.Registry;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;

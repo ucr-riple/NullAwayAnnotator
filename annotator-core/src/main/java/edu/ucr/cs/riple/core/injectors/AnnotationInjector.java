@@ -25,7 +25,7 @@
 package edu.ucr.cs.riple.core.injectors;
 
 import edu.ucr.cs.riple.core.Context;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import java.util.Set;

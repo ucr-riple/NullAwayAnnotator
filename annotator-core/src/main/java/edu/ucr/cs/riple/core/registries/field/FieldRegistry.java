@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.field;
+package edu.ucr.cs.riple.core.registries.field;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -33,8 +33,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Sets;
-import edu.ucr.cs.riple.core.metadata.Registry;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
+import edu.ucr.cs.riple.core.registries.Registry;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import edu.ucr.cs.riple.injector.location.OnClass;

@@ -25,8 +25,8 @@
 package edu.ucr.cs.riple.core.cache.downstream;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.registries.index.Error;
+import edu.ucr.cs.riple.core.registries.index.Fix;
 import java.util.Collection;
 import java.util.Set;
 import javax.annotation.Nullable;
