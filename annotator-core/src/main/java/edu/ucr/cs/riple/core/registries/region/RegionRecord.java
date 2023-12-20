@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.region;
+package edu.ucr.cs.riple.core.registries.region;
 
 import java.util.Objects;
 

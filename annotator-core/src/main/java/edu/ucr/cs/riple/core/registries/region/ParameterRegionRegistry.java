@@ -22,13 +22,12 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.region;
+package edu.ucr.cs.riple.core.registries.region;
 
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnParameter;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -48,18 +47,19 @@ public class ParameterRegionRegistry implements RegionRegistry {
   }
 
   @Override
-  public Optional<Set<Region>> getImpactedRegions(Location location) {
+  public ImmutableSet<Region> getImpactedRegions(Location location) {
     if (!location.isOnParameter()) {
-      return Optional.empty();
+      return ImmutableSet.of();
     }
     OnParameter parameter = location.toParameter();
+    ImmutableSet.Builder<Region> builder = ImmutableSet.builder();
     // Get regions which will be potentially affected by inheritance violations.
-    Set<Region> regions =
+    builder.addAll(
         moduleInfo.getMethodRegistry().getImmediateSubMethods(parameter.toMethod()).stream()
             .map(node -> new Region(node.location.clazz, node.location.method))
-            .collect(Collectors.toSet());
+            .collect(Collectors.toSet()));
     // Add the method the fix is targeting.
-    regions.add(new Region(parameter.clazz, parameter.enclosingMethod.method));
+    builder.addAll(getImpactedRegionsByUse(location));
     // Add all call sites. It will also reserve call sites to prevent callers from passing @Nullable
     // simultaneously while investigating parameters impact.
     // See example below:
@@ -73,8 +73,16 @@ public class ParameterRegionRegistry implements RegionRegistry {
     // (passing `@Nullable` to `@Nonnull` parameter) as bar#o is temporarily annotated as @Nullable
     // to compute its impact.
     // See test: CoreTest#nestedParameters.
-    regions.addAll(
-        methodRegionRegistry.getCallersOfMethod(parameter.clazz, parameter.enclosingMethod.method));
-    return Optional.of(regions);
+    builder.addAll(methodRegionRegistry.getImpactedRegionsByUse(parameter.toMethod()));
+    return builder.build();
+  }
+
+  @Override
+  public ImmutableSet<Region> getImpactedRegionsByUse(Location location) {
+    if (!location.isOnParameter()) {
+      return ImmutableSet.of();
+    }
+    OnParameter parameter = location.toParameter();
+    return ImmutableSet.of(new Region(parameter.clazz, parameter.enclosingMethod.method));
   }
 }

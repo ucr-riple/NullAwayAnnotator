@@ -22,25 +22,20 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.region;
+package edu.ucr.cs.riple.core.registries.index;
 
-import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.injector.location.Location;
-import java.util.Optional;
-import java.util.Set;
+import java.util.Collection;
 
-/**
- * Interface for region registries. Region registries can locate regions where a {@link Fix} can
- * potentially introduce new errors if injected.
- */
-public interface RegionRegistry {
+/** Stores the result of comparison between two collections A and B (A - B). */
+public class Result {
 
-  /**
-   * Returns Set of regions where a fix can introduce new errors if injected. Should return {@link
-   * Optional#EMPTY} if the region registry does not contain any information about the location.
-   *
-   * @param location Location targeted by the fix.
-   * @return Set of regions.
-   */
-  Optional<Set<Region>> getImpactedRegions(Location location);
+  /** Difference in number of elements in collection A and B. */
+  public final int size;
+  /** Items that are present in A, but not B. */
+  public final Collection<Error> dif;
+
+  public Result(int size, Collection<Error> dif) {
+    this.size = size;
+    this.dif = dif;
+  }
 }

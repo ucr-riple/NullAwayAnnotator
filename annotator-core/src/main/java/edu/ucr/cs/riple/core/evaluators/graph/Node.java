@@ -27,12 +27,12 @@ package edu.ucr.cs.riple.core.evaluators.graph;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.ErrorStore;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.region.Region;
-import edu.ucr.cs.riple.core.metadata.region.RegionRegistry;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
+import edu.ucr.cs.riple.core.registries.index.Error;
+import edu.ucr.cs.riple.core.registries.index.ErrorStore;
+import edu.ucr.cs.riple.core.registries.index.Fix;
+import edu.ucr.cs.riple.core.registries.region.Region;
+import edu.ucr.cs.riple.core.registries.region.RegionRegistry;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.Collection;
 import java.util.Collections;
@@ -109,7 +109,7 @@ public class Node {
     // Add origins.
     this.regions.addAll(this.origins);
     this.tree.forEach(
-        fix -> regionRegistry.getImpactedRegions(fix.toLocation()).ifPresent(regions::addAll));
+        fix -> this.regions.addAll(regionRegistry.getImpactedRegions(fix.toLocation())));
     // Add class initialization region, if a fix is modifying a parameter on constructor.
     this.tree.stream()
         .filter(fix -> fix.isOnParameter() && fix.isModifyingConstructor())

@@ -22,22 +22,20 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.metadata.region.generatedcode;
+package edu.ucr.cs.riple.core.registries.region.generatedcode;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.evaluators.graph.processors.ParallelConflictGraphProcessor;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.method.MethodRecord;
-import edu.ucr.cs.riple.core.metadata.region.Region;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
+import edu.ucr.cs.riple.core.registries.index.Fix;
+import edu.ucr.cs.riple.core.registries.method.MethodRecord;
+import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.AnnotationChange;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Handler for lombok generated code. It can extend potentially impacted regions for elements which
@@ -73,14 +71,12 @@ public class LombokHandler implements AnnotationProcessorHandler {
         .map(methodNode -> methodNode.location)
         // add potentially impacted regions for the collected methods.
         .flatMap(
-            onMethod -> {
-              Optional<Set<Region>> ans =
-                  moduleInfo
-                      .getRegionRegistry()
-                      .getMethodRegionRegistry()
-                      .getImpactedRegions(onMethod);
-              return ans.isPresent() ? ans.get().stream() : Stream.of();
-            })
+            onMethod ->
+                moduleInfo
+                    .getRegionRegistry()
+                    .getMethodRegionRegistry()
+                    .getImpactedRegions(onMethod)
+                    .stream())
         .collect(Collectors.toSet());
   }
 
