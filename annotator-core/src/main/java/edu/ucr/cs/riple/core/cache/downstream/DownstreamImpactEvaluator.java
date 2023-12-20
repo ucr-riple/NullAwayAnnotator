@@ -51,30 +51,27 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
     this.graph
         .getNodes()
         .forEach(
-            node ->
-                node.root.ifOnMethod(
-                    method -> {
-                      // Impacted locations.
-                      Set<Location> locations =
-                          node.triggeredErrors.stream()
-                              .filter(
-                                  error ->
-                                      error.isSingleFix()
-                                          // Method is declared in the target module.
-                                          && context.targetModuleInfo.declaredInModule(
-                                              error.toResolvingLocation()))
-                              .map(Error::toResolvingLocation)
-                              .collect(Collectors.toSet());
-                      if (!locations.isEmpty()) {
-                        // Update path for each location. These triggered fixes do not have an
-                        // actual physical path since they are provided as a jar file in downstream
-                        // dependencies.
-                        locations.forEach(
-                            location ->
-                                location.path =
-                                    context.targetModuleInfo.getLocationOnClass(location.clazz)
-                                        .path);
-                      }
-                    }));
+            node -> {
+              // Impacted locations.
+              Set<Location> locations =
+                  node.triggeredErrors.stream()
+                      .filter(
+                          error ->
+                              error.isSingleFix()
+                                  // Method is declared in the target module.
+                                  && context.targetModuleInfo.declaredInModule(
+                                      error.toResolvingLocation()))
+                      .map(Error::toResolvingLocation)
+                      .collect(Collectors.toSet());
+              if (!locations.isEmpty()) {
+                // Update path for each location. These triggered fixes do not have an
+                // actual physical path since they are provided as a jar file in downstream
+                // dependencies.
+                locations.forEach(
+                    location ->
+                        location.path =
+                            context.targetModuleInfo.getLocationOnClass(location.clazz).path);
+              }
+            });
   }
 }
