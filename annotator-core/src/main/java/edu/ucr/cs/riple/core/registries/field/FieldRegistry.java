@@ -241,6 +241,14 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
     return builder.build();
   }
 
+  /**
+   * Checks if the given location is a field and declared in the module this registry is created
+   * for.
+   *
+   * @param location Location of check.
+   * @return True if the given location is a field and declared in the module this registry is
+   *     created for.
+   */
   public boolean declaredInModule(@Nullable Location location) {
     if (location == null || location.clazz.equals("null")) {
       return false;
