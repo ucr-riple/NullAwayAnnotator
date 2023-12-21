@@ -27,7 +27,7 @@ public class Foo {
   // This is the field which will be accessed directly by the downstream dependencies
   // Making it nullable will decrease the number of errors on target
   // but it will create unresolvable errors on downstream dependencies as well.
-  // Annotator should be able to detect this and make leave f untouched.
+  // Annotator should be able to detect this and leave f untouched.
   public Object f;
 
   // This field is safe to be annotated as @Nullable. No use in downstream dependencies. But it trigger making f @Nullable as well.
