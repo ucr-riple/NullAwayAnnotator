@@ -30,8 +30,8 @@ public class Foo {
   // Annotator should be able to detect this and leave f untouched.
   public Object f;
 
-  // This field is safe to be annotated as @Nullable. No use in downstream dependencies. But it trigger making f @Nullable as well.
-  // Annotator should be able to detect this and leave f1 untouched.
+  // This field is safe to be annotated as @Nullable. No use in downstream dependencies. But it triggers making f @Nullable as well.
+  // Annotator should be able to detect this and leave f1 untouched as well.
   public Object f1;
 
   // This field is safe to be annotated as @Nullable. The resulting error on downstream dependencies can be fixed by making f3 @Nullable.
