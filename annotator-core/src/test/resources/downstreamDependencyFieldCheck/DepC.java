@@ -29,6 +29,7 @@ public class DepC {
   Foo foo = new Foo();
 
   public void dereferenceFoo() {
+    // dereference f directly. Making f @Nullable will create an unresolvable here.
     foo.f.toString();
   }
 }

@@ -29,6 +29,7 @@ public class DepB {
   Foo foo = new Foo();
 
   public Object returnF(){
+    // return f directly. Making f @Nullable will create an unresolvable here.
     return foo.f;
   }
 }

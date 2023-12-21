@@ -27,6 +27,7 @@ import test.target.Foo;
 public class DepA {
 
     public void flowF2BackToF3(Foo foo) {
+      // If f2 is annotated as @Nullable, the corresponding error on f3 can be resolved on target.
       foo.f3 = foo.f2;
     }
 }
