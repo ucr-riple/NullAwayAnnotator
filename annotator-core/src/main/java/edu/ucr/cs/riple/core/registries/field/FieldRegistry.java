@@ -37,6 +37,7 @@ import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.registries.Registry;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
+import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnClass;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
@@ -46,6 +47,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
+import javax.annotation.Nullable;
 
 /**
  * Stores field declaration data on classes. It can Detect multiple inline field declarations. An
@@ -237,5 +239,19 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
                       }
                     }));
     return builder.build();
+  }
+
+  public boolean declaredInModule(@Nullable Location location) {
+    if (location == null || location.clazz.equals("null")) {
+      return false;
+    }
+    if (!location.isOnField()) {
+      return false;
+    }
+    OnField onField = location.toField();
+    return findRecordWithHashHint(
+            node -> node.clazz.equals(location.clazz) && node.hasFieldWithName(onField.variables),
+            ClassFieldRecord.hash(location.clazz))
+        != null;
   }
 }

@@ -198,7 +198,6 @@ public class DownstreamImpactCacheImpl
   @Override
   public ImmutableSet<Error> getTriggeredErrorsForCollection(Collection<Fix> fixTree) {
     return fixTree.stream()
-        .filter(Fix::isOnMethod)
         .flatMap(
             fix -> {
               DownstreamImpact impact = fetchImpact(fix);
@@ -209,8 +208,8 @@ public class DownstreamImpactCacheImpl
 
   @Override
   public ImmutableSet<Error> getTriggeredErrors(Fix fix) {
-    // We currently only store impact of methods on downstream dependencies.
-    if (!fix.isOnMethod()) {
+    // We currently only store impact of methods / fields on downstream dependencies.
+    if (!(fix.isOnMethod() || fix.isOnField())) {
       return ImmutableSet.of();
     }
     DownstreamImpact impact = fetchImpact(fix);

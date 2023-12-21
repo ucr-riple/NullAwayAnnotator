@@ -170,7 +170,7 @@ public abstract class Error {
    * @return true, if error is resolvable via fixes on target module.
    */
   public boolean isFixableOnTarget(Context context) {
-    return resolvingFixes.size() > 0
+    return !resolvingFixes.isEmpty()
         && this.resolvingFixes.stream()
             .allMatch(fix -> context.targetModuleInfo.declaredInModule(fix.toLocation()));
   }

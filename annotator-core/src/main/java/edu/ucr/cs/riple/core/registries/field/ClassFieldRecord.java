@@ -96,6 +96,16 @@ public class ClassFieldRecord {
     this.fields.add(new FieldDeclarationRecord(fieldDeclaration));
   }
 
+  /**
+   * Checks if the class contains a field with the given name.
+   *
+   * @param name Name of the field.
+   * @return true, if the class contains a field with the given name.
+   */
+  public boolean hasFieldWithName(Set<String> name) {
+    return this.fields.stream().anyMatch(decl -> decl.names.equals(name));
+  }
+
   /** Field declaration record. Used to store information regarding multiple field declaration. */
   public static class FieldDeclarationRecord {
 

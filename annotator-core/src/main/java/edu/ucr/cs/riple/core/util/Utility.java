@@ -43,7 +43,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
@@ -89,14 +88,12 @@ public class Utility {
    * @param path Path to the file.
    */
   public static void clearFileContentsAtPath(Path path) {
-    if (Files.exists(path)) {
-      try (BufferedWriter writer =
-          Files.newBufferedWriter(
-              path, Charset.defaultCharset(), StandardOpenOption.TRUNCATE_EXISTING)) {
-        writer.flush();
-      } catch (IOException e) {
-        throw new RuntimeException("Could not clear content of file: " + path, e);
-      }
+    try {
+      Files.deleteIfExists(path);
+      Files.createDirectories(path.getParent());
+      Files.createFile(path);
+    } catch (IOException e) {
+      throw new RuntimeException("Could not clear content of file: " + path, e);
     }
   }
 
