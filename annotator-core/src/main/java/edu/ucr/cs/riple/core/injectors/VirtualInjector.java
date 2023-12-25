@@ -37,7 +37,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -120,10 +119,16 @@ public class VirtualInjector extends AnnotationInjector {
       Path path,
       Function<AddAnnotation, Stream<String>> mapper) {
     try (BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(path.toFile()))) {
-      Set<String> rows = annotations.flatMap(mapper).collect(Collectors.toSet());
-      for (String row : rows) {
-        os.write(row.getBytes(Charset.defaultCharset()), 0, row.length());
-      }
+      annotations
+          .flatMap(mapper)
+          .forEach(
+              row -> {
+                try {
+                  os.write(row.getBytes(Charset.defaultCharset()), 0, row.length());
+                } catch (IOException e) {
+                  throw new RuntimeException("Error in writing annotation:" + row, e);
+                }
+              });
       os.flush();
     } catch (IOException e) {
       throw new RuntimeException("Error happened for writing at file: " + path, e);
