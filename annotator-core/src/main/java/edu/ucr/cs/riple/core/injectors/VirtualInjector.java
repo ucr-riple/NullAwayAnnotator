@@ -28,13 +28,13 @@ import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
-import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -46,8 +46,8 @@ import java.util.stream.Stream;
  */
 public class VirtualInjector extends AnnotationInjector {
 
-  /** Path to library model loader */
-  private final Path libraryModelPath;
+  /** Path to library model loader resources directory */
+  private final Path libraryModelResourcesDirectoryPath;
   /**
    * Annotator configuration, required to check if downstream dependencies analysis is activated or
    * retrieve the path to library model loader.
@@ -61,10 +61,17 @@ public class VirtualInjector extends AnnotationInjector {
   public VirtualInjector(Context context) {
     super(context);
     this.config = context.config;
-    this.libraryModelPath = config.nullawayLibraryModelLoaderPath;
+    this.libraryModelResourcesDirectoryPath = config.nullawayLibraryModelLoaderPath;
     if (config.downStreamDependenciesAnalysisActivated) {
+      try {
+        // make the directories for resources
+        Files.createDirectories(libraryModelResourcesDirectoryPath);
+      } catch (IOException e) {
+        throw new RuntimeException(
+            "Error happened for creating directory: " + libraryModelResourcesDirectoryPath, e);
+      }
       Preconditions.checkNotNull(
-          libraryModelPath,
+          libraryModelResourcesDirectoryPath,
           "NullawayLibraryModelLoaderPath cannot be null while downstream dependencies analysis is activated.");
       clear();
     }
@@ -84,14 +91,14 @@ public class VirtualInjector extends AnnotationInjector {
     // write methods
     writeAnnotationsToFile(
         changes.stream().filter(addAnnotation -> addAnnotation.getLocation().isOnMethod()),
-        libraryModelPath.resolve(NULLABLE_METHOD_LIST_FILE_NAME),
+        libraryModelResourcesDirectoryPath.resolve(NULLABLE_METHOD_LIST_FILE_NAME),
         annot ->
             Stream.of(
                 annot.getLocation().clazz + "\t" + annot.getLocation().toMethod().method + "\n"));
     // write fields
     writeAnnotationsToFile(
         changes.stream().filter(addAnnotation -> addAnnotation.getLocation().isOnField()),
-        libraryModelPath.resolve(NULLABLE_FIELD_LIST_FILE_NAME),
+        libraryModelResourcesDirectoryPath.resolve(NULLABLE_FIELD_LIST_FILE_NAME),
         annot ->
             // An annotation on a single statement with multiple declaration will be considered for
             // all declared variables. Hence, we have to mark all variables as nullable.
@@ -137,7 +144,14 @@ public class VirtualInjector extends AnnotationInjector {
 
   /** Removes any existing entry from library models. */
   private void clear() {
-    Utility.clearFileContentsAtPath(libraryModelPath.resolve(NULLABLE_FIELD_LIST_FILE_NAME));
-    Utility.clearFileContentsAtPath(libraryModelPath.resolve(NULLABLE_METHOD_LIST_FILE_NAME));
+    try {
+      Files.deleteIfExists(
+          libraryModelResourcesDirectoryPath.resolve(NULLABLE_FIELD_LIST_FILE_NAME));
+      Files.deleteIfExists(
+          libraryModelResourcesDirectoryPath.resolve(NULLABLE_METHOD_LIST_FILE_NAME));
+    } catch (IOException e) {
+      throw new RuntimeException(
+          "Error happened for deleting file: " + libraryModelResourcesDirectoryPath, e);
+    }
   }
 }
