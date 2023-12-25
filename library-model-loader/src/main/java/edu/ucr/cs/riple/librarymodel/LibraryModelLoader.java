@@ -26,11 +26,9 @@ import static com.uber.nullaway.LibraryModels.FieldRef.fieldRef;
 import static com.uber.nullaway.LibraryModels.MethodRef.methodRef;
 
 import com.google.auto.service.AutoService;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.uber.nullaway.LibraryModels;
-import com.uber.nullaway.handlers.stream.StreamTypeRecord;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -134,11 +132,6 @@ public class LibraryModelLoader implements LibraryModels {
   @Override
   public ImmutableSet<FieldRef> nullableFields() {
     return nullableFields;
-  }
-
-  @Override
-  public ImmutableList<StreamTypeRecord> customStreamNullabilitySpecs() {
-    return LibraryModels.super.customStreamNullabilitySpecs();
   }
 
   /**
