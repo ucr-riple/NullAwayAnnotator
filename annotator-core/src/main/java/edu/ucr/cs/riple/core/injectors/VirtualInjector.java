@@ -109,7 +109,7 @@ public class VirtualInjector extends AnnotationInjector {
 
   /**
    * Writes the passed annotation to the passed file. It uses the passed mapper to map the
-   * annotation to a string. And writes each string to a separate line.
+   * annotation to a stream of strings. And writes each string to a separate line.
    *
    * @param annotations Annotations to be written.
    * @param path Path to the file to be written.
