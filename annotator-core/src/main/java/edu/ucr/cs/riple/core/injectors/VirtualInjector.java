@@ -113,7 +113,7 @@ public class VirtualInjector extends AnnotationInjector {
    *
    * @param annotations Annotations to be written.
    * @param path Path to the file to be written.
-   * @param mapper Mapper to map the annotation to a string.
+   * @param mapper Mapper to map the annotation to a stream of strings.
    */
   private static void writeAnnotationsToFile(
       Stream<AddAnnotation> annotations,
