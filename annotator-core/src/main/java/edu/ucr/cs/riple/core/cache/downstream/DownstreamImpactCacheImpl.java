@@ -83,10 +83,10 @@ public class DownstreamImpactCacheImpl
   private ImmutableSet<Location> retrieveLocationsToCacheImpactsOnDownstreamDependencies(
       Context context, ModuleInfo moduleInfo) {
     ImmutableSet.Builder<Location> locationsToCache = ImmutableSet.builder();
-    // Collect public methods with non-primitive return types.
     // Used to collect callers of each method.
     MethodRegionRegistry methodRegionRegistry = new MethodRegionRegistry(moduleInfo);
     FieldRegionRegistry fieldRegionRegistry = new FieldRegionRegistry(moduleInfo);
+    // Collect public methods with non-primitive return types.
     locationsToCache.addAll(
         context
             .targetModuleInfo
