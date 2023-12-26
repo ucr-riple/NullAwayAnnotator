@@ -83,21 +83,6 @@ public class Utility {
   }
 
   /**
-   * Clears the content of the file at the given path if the file exists.
-   *
-   * @param path Path to the file.
-   */
-  public static void clearFileContentsAtPath(Path path) {
-    try {
-      Files.deleteIfExists(path);
-      Files.createDirectories(path.getParent());
-      Files.createFile(path);
-    } catch (IOException e) {
-      throw new RuntimeException("Could not clear content of file: " + path, e);
-    }
-  }
-
-  /**
    * Writes reports content in json format in reports.json file in the output directory.
    *
    * @param context Annotator context.
