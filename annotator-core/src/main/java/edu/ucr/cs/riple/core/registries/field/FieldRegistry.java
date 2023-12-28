@@ -258,7 +258,9 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
     }
     OnField onField = location.toField();
     return findRecordWithHashHint(
-            node -> node.clazz.equals(location.clazz) && node.hasFieldWithName(onField.variables),
+            node ->
+                node.clazz.equals(location.clazz)
+                    && node.hasExactFieldDeclarationWithNames(onField.variables),
             ClassFieldRecord.hash(location.clazz))
         != null;
   }

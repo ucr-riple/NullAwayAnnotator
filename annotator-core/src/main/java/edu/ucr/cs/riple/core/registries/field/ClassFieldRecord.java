@@ -97,12 +97,21 @@ public class ClassFieldRecord {
   }
 
   /**
-   * Checks if the class contains a field with the given name.
+   * Checks if the class has a field declaration with exactly the specified variable names. For
+   * instance, for a class:
    *
-   * @param name Name of the field.
-   * @return true, if the class contains a field with the given name.
+   * <pre>{@code
+   * class Example {
+   *     Object a, b, c;
+   * }
+   * }</pre>
+   *
+   * The call with ["a", "b", "c"] will return true, but for ["a", "b"] or ["a"] will return false.
+   *
+   * @param name The set of names to be checked for a matching field declaration.
+   * @return true if there exists a field declaration with exactly the given names; false otherwise.
    */
-  public boolean hasFieldWithName(Set<String> name) {
+  public boolean hasExactFieldDeclarationWithNames(Set<String> name) {
     return this.fields.stream().anyMatch(decl -> decl.names.equals(name));
   }
 
