@@ -159,6 +159,15 @@ public class ModuleInfo {
    * @return True if the passed location is declared in this moduleInfo's modules, false otherwise.
    */
   public boolean declaredInModule(Location location) {
+    if (location.isOnParameter()) {
+      location = location.toMethod();
+    }
+    if (location.isOnMethod()) {
+      return methodRegistry.declaredInModule(location);
+    }
+    if (location.isOnField()) {
+      return fieldRegistry.declaredInModule(location);
+    }
     return methodRegistry.declaredInModule(location);
   }
 

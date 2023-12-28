@@ -37,6 +37,7 @@ import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.registries.Registry;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
+import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnClass;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
@@ -46,6 +47,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
+import javax.annotation.Nullable;
 
 /**
  * Stores field declaration data on classes. It can Detect multiple inline field declarations. An
@@ -213,5 +215,53 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
       return null;
     }
     return new OnClass(candidate.pathToSourceFile, candidate.clazz);
+  }
+
+  /**
+   * Returns fields with public visibility and a non-primitive return type.
+   *
+   * @return ImmutableSet of fields location.
+   */
+  public ImmutableSet<OnField> getPublicFieldWithNonPrimitiveType() {
+    ImmutableSet.Builder<OnField> builder = ImmutableSet.builder();
+    contents
+        .values()
+        .forEach(
+            record ->
+                record.fields.forEach(
+                    fieldDeclarationRecord -> {
+                      if (fieldDeclarationRecord.isPublicFieldWithNonPrimitiveType()) {
+                        builder.add(
+                            new OnField(
+                                record.pathToSourceFile,
+                                record.clazz,
+                                fieldDeclarationRecord.names));
+                      }
+                    }));
+    return builder.build();
+  }
+
+  /**
+   * Checks if the given location is a field and declared in the module this registry is created
+   * for.
+   *
+   * @param location Location of check.
+   * @return True if the given location is a field and declared in the module this registry is
+   *     created for.
+   */
+  public boolean declaredInModule(@Nullable Location location) {
+    if (location == null || location.clazz.equals("null")) {
+      return false;
+    }
+    if (!location.isOnField()) {
+      return false;
+    }
+    OnField onField = location.toField();
+    return findRecordWithHashHint(
+            node ->
+                node.clazz.equals(location.clazz)
+                    && node.hasExactFieldDeclarationWithNames(onField.variables),
+            ClassFieldRecord.hash(location.clazz))
+        != null;
   }
 }

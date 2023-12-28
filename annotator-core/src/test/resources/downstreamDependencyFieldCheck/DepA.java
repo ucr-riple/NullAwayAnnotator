@@ -1,7 +1,5 @@
 /*
- * MIT License
- *
- * Copyright (c) 2022 Nima Karimipour
+ * Copyright (c) 2022 University of California, Riverside.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,25 +20,14 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.cache.downstream;
+package test.depa;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.Report;
-import edu.ucr.cs.riple.core.cache.Impact;
+import test.target.Foo;
 
-/**
- * Container class for storing overall impact of a fix applied in target module on downstream
- * dependencies. At this moment, only impact of public methods with non-primitive return are stored.
- */
-public class DownstreamImpact extends Impact {
+public class DepA {
 
-  public DownstreamImpact(Report report) {
-    super(report.root);
-    // Only store impacts of fixes targeting methods.
-    Preconditions.checkArgument(
-        fix.isOnMethod() || fix.isOnField(),
-        "Unexpected Fix instance. Only impacts of fixes on methods / fields should be tracked for downstream dependencies");
-    this.triggeredErrors = ImmutableSet.copyOf(report.triggeredErrors);
-  }
+    public void flowF2BackToF3(Foo foo) {
+      // If f2 is annotated as @Nullable, the corresponding error on f3 can be resolved on target.
+      foo.f3 = foo.f2;
+    }
 }

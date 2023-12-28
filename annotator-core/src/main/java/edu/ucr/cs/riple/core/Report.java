@@ -107,14 +107,14 @@ public class Report {
   }
 
   /**
-   * Checks if any of the fix in tree, will trigger an unresolvable error in downstream
+   * Checks if any of the fix in the tree, will trigger an unresolvable error in downstream
    * dependencies.
    *
    * @param cache Downstream cache to check impact of method on downstream dependencies.
    * @return true, if report contains a fix which will trigger an unresolvable error in downstream
    *     dependency.
    */
-  public boolean containsDestructiveMethod(DownstreamImpactCache cache) {
+  public boolean containsDestructiveChange(DownstreamImpactCache cache) {
     return this.tree.stream().anyMatch(cache::triggersUnresolvableErrorsOnDownstream);
   }
 
