@@ -98,7 +98,7 @@ if(javaVersion.isJava11()){
     // exclude Java17Test which is not compatible with Java 11.
     test {
         filter {
-            includeTestsMatching "edu.ucr.cs.riple.java17.Java17Test"
+            includeTestsMatching "edu.ucr.cs.riple.core.Java17Test"
         }
     }
 }
