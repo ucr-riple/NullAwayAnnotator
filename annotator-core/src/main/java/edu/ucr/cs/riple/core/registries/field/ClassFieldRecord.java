@@ -108,7 +108,7 @@ public class ClassFieldRecord {
    *
    * The call with ["a", "b", "c"] will return true, but for ["a", "b"] or ["a"] will return false.
    *
-   * @param name The set of names to be checked for a matching field declaration.
+   * @param names The set of names to be checked for a matching field declaration.
    * @return true if there exists a field declaration with exactly the given names; false otherwise.
    */
   public boolean hasExactFieldDeclarationWithNames(Set<String> names) {
