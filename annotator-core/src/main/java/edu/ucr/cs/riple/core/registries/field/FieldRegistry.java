@@ -24,7 +24,6 @@
 
 package edu.ucr.cs.riple.core.registries.field;
 
-import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
@@ -36,12 +35,11 @@ import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.registries.Registry;
 import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import edu.ucr.cs.riple.injector.location.OnClass;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Optional;
@@ -98,44 +96,38 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
       // Path to class.
       Path path = Helper.deserializePath(values[1]);
       CompilationUnit tree;
+      tree = Injector.parse(path);
+      NodeList<BodyDeclaration<?>> members;
       try {
-        tree = StaticJavaParser.parse(path);
-        NodeList<BodyDeclaration<?>> members;
-        try {
-          members = Helper.getTypeDeclarationMembersByFlatName(tree, clazz);
-        } catch (TargetClassNotFound notFound) {
-          System.err.println(notFound.getMessage());
-          return null;
-        }
-        ClassFieldRecord record = new ClassFieldRecord(path, clazz);
-        members.forEach(
-            bodyDeclaration ->
-                bodyDeclaration.ifFieldDeclaration(
-                    fieldDeclaration -> {
-                      NodeList<VariableDeclarator> vars = fieldDeclaration.getVariables();
-                      if (vars.getFirst().isEmpty()) {
-                        // unexpected but just in case.
-                        return;
-                      }
-                      record.addFieldDeclaration(fieldDeclaration);
-                      // Collect uninitialized fields at declaration.
-                      vars.forEach(
-                          variableDeclarator -> {
-                            String fieldName = variableDeclarator.getNameAsString();
-                            if (variableDeclarator.getInitializer().isEmpty()) {
-                              uninitializedFields.put(clazz, fieldName);
-                            }
-                          });
-                    }));
-        // We still want to keep the information about the class even if it has no field
-        // declarations, so we can retrieve tha path to the file from the given class flat name.
-        // This information is used in adding suppression annotations on class level.
-        return record;
-      } catch (FileNotFoundException e) {
+        members = Helper.getTypeDeclarationMembersByFlatName(tree, clazz);
+      } catch (TargetClassNotFound notFound) {
+        System.err.println(notFound.getMessage());
         return null;
-      } catch (IOException e) {
-        throw new RuntimeException(e);
       }
+      ClassFieldRecord record = new ClassFieldRecord(path, clazz);
+      members.forEach(
+          bodyDeclaration ->
+              bodyDeclaration.ifFieldDeclaration(
+                  fieldDeclaration -> {
+                    NodeList<VariableDeclarator> vars = fieldDeclaration.getVariables();
+                    if (vars.getFirst().isEmpty()) {
+                      // unexpected but just in case.
+                      return;
+                    }
+                    record.addFieldDeclaration(fieldDeclaration);
+                    // Collect uninitialized fields at declaration.
+                    vars.forEach(
+                        variableDeclarator -> {
+                          String fieldName = variableDeclarator.getNameAsString();
+                          if (variableDeclarator.getInitializer().isEmpty()) {
+                            uninitializedFields.put(clazz, fieldName);
+                          }
+                        });
+                  }));
+      // We still want to keep the information about the class even if it has no field
+      // declarations, so we can retrieve tha path to the file from the given class flat name.
+      // This information is used in adding suppression annotations on class level.
+      return record;
     };
   }
 

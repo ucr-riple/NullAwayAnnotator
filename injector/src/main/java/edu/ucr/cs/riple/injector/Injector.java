@@ -24,6 +24,7 @@ package edu.ucr.cs.riple.injector;
 
 import static java.util.stream.Collectors.groupingBy;
 
+import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
@@ -59,11 +60,7 @@ public class Injector {
     map.forEach(
         (path, changeList) -> {
           CompilationUnit tree;
-          try {
-            tree = StaticJavaParser.parse(path);
-          } catch (IOException exception) {
-            return;
-          }
+          tree = parse(path);
           ChangeVisitor visitor = new ChangeVisitor(tree);
           Set<Modification> modifications = new HashSet<>();
           Set<ImportDeclaration> imports = new HashSet<>();
@@ -135,5 +132,23 @@ public class Injector {
    */
   public Set<FileOffsetStore> removeAnnotations(Set<RemoveAnnotation> requests) {
     return this.start(requests);
+  }
+
+  /**
+   * Parses the given file into a compilation unit tree.
+   *
+   * @param path Path to the file.
+   * @return Compilation unit tree.
+   */
+  public static CompilationUnit parse(Path path) {
+    // Set parser configuration to Java 17.
+    ParserConfiguration parserConfiguration = new ParserConfiguration();
+    parserConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
+    StaticJavaParser.setConfiguration(parserConfiguration);
+    try {
+      return StaticJavaParser.parse(path);
+    } catch (IOException e) {
+      throw new RuntimeException("File not found at path: " + path, e);
+    }
   }
 }

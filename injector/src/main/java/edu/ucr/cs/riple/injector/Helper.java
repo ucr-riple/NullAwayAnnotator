@@ -22,7 +22,6 @@
 
 package edu.ucr.cs.riple.injector;
 
-import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
@@ -46,7 +45,6 @@ import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.Type;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
-import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayDeque;
@@ -543,15 +541,11 @@ public class Helper {
    * @return true if src has a package declaration and starts with root.
    */
   public static boolean srcIsUnderClassClassPath(Path path, String rootPackage) {
-    try {
-      CompilationUnit cu = StaticJavaParser.parse(path.toFile());
-      Optional<PackageDeclaration> packageDeclaration = cu.getPackageDeclaration();
-      return packageDeclaration
-          .map(declaration -> declaration.getNameAsString().startsWith(rootPackage))
-          .orElse(false);
-    } catch (FileNotFoundException e) {
-      throw new IllegalArgumentException("File not found: " + path, e);
-    }
+    CompilationUnit cu = Injector.parse(path);
+    Optional<PackageDeclaration> packageDeclaration = cu.getPackageDeclaration();
+    return packageDeclaration
+        .map(declaration -> declaration.getNameAsString().startsWith(rootPackage))
+        .orElse(false);
   }
 
   /**

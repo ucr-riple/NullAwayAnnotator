@@ -93,25 +93,12 @@ shadowJar {
     archiveClassifier = null
 }
 
-// Configure test environment
-def nullawayVersionMap = [0:"0.10.4", 1:"0.10.5"]
-tasks.register("configureNullAwayVersion"){
-    if(!project.hasProperty("nullaway-serialization-format-version")){
-        return
-    }
-    NULLAWAY_TEST = nullawayVersionMap.get((project.getProperty("nullaway-serialization-format-version")) as int)
-    println "NullAway Test version changed to: " + NULLAWAY_TEST
-
-    // exclude unsupported tests below...
-    switch (NULLAWAY_TEST){
-        case "0.10.4":
-            test {
-                filter {
-                    excludeTest "edu.ucr.cs.riple.core.CoreTest", "errorInFieldDeclarationSuppressRemainingErrorsTest"
-                    excludeTest "edu.ucr.cs.riple.core.CoreTest", "initializationErrorWithMultipleConstructors"
-                }
-            }
-            break
+def javaVersion = JavaVersion.current()
+if(javaVersion.isJava11()){
+    // exclude Java17Test which is not compatible with Java 11.
+    test {
+        filter {
+            includeTestsMatching "edu.ucr.cs.riple.java17.Java17Test"
+        }
     }
 }
-tasks.test.dependsOn("configureNullAwayVersion")
