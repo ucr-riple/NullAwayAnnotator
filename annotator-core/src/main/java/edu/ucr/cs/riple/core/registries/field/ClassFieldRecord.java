@@ -111,7 +111,7 @@ public class ClassFieldRecord {
    * @param name The set of names to be checked for a matching field declaration.
    * @return true if there exists a field declaration with exactly the given names; false otherwise.
    */
-  public boolean hasExactFieldDeclarationWithNames(Set<String> name) {
+  public boolean hasExactFieldDeclarationWithNames(Set<String> names) {
     return this.fields.stream().anyMatch(decl -> decl.names.equals(name));
   }
 
