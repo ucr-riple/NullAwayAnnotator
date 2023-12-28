@@ -29,6 +29,10 @@ import edu.ucr.cs.riple.injector.location.OnField;
 import java.util.Set;
 import org.junit.Test;
 
+/**
+ * Tests in this class are related to Java 17 features. These tests include blocks of code that are
+ * not syntactically supported by java 11.
+ */
 public class Java17Test extends AnnotatorBaseCoreTest {
 
   public Java17Test() {
@@ -45,6 +49,7 @@ public class Java17Test extends AnnotatorBaseCoreTest {
             "public class Main {",
             "   Object f1, f2, f3, f4;",
             "   void foo() {",
+            "      // this block is not supported by java 11",
             "      if(f1 instanceof String s) { }",
             "   }",
             "}")

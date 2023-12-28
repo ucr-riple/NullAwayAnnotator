@@ -93,9 +93,9 @@ shadowJar {
     archiveClassifier = null
 }
 
-def javaVersion = JavaVersion.current()
-if(javaVersion.isJava11()){
-    // exclude Java17Test which is not compatible with Java 11.
+// Exclude tests not supported by Java 11.
+if(JavaVersion.current().isJava11()){
+    // exclude Java17Test which is designed to test Java 17 features.
     test {
         filter {
             excludeTestsMatching "edu.ucr.cs.riple.core.Java17Test"
