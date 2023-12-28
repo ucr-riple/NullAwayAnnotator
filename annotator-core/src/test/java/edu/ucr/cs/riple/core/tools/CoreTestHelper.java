@@ -415,15 +415,7 @@ public class CoreTestHelper {
           Utility.getPathToLibraryModel(outDirPath)
               .resolve(
                   Paths.get(
-                      "src",
-                      "main",
-                      "resources",
-                      "edu",
-                      "ucr",
-                      "cs",
-                      "riple",
-                      "librarymodel",
-                      "nullable-methods.tsv"));
+                      "src", "main", "resources", "edu", "ucr", "cs", "riple", "librarymodel"));
     } else {
       builder.buildCommand = projectBuilder.computeTargetBuildCommand(this.outDirPath);
     }
