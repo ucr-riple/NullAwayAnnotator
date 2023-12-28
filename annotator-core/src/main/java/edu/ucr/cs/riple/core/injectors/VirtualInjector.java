@@ -136,7 +136,6 @@ public class VirtualInjector extends AnnotationInjector {
                   throw new RuntimeException("Error in writing annotation:" + row, e);
                 }
               });
-      os.flush();
     } catch (IOException e) {
       throw new RuntimeException("Error happened for writing at file: " + path, e);
     }
