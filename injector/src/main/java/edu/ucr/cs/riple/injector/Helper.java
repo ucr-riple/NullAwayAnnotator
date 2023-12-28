@@ -542,6 +542,9 @@ public class Helper {
    */
   public static boolean srcIsUnderClassClassPath(Path path, String rootPackage) {
     CompilationUnit cu = Injector.parse(path);
+    if (cu == null) {
+      return false;
+    }
     Optional<PackageDeclaration> packageDeclaration = cu.getPackageDeclaration();
     return packageDeclaration
         .map(declaration -> declaration.getNameAsString().startsWith(rootPackage))

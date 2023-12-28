@@ -95,8 +95,10 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
       String clazz = values[0];
       // Path to class.
       Path path = Helper.deserializePath(values[1]);
-      CompilationUnit tree;
-      tree = Injector.parse(path);
+      CompilationUnit tree = Injector.parse(path);
+      if (tree == null) {
+        return null;
+      }
       NodeList<BodyDeclaration<?>> members;
       try {
         members = Helper.getTypeDeclarationMembersByFlatName(tree, clazz);
