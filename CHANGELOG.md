@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### Version 1.3.11
+- Extended downstream dependency analysis to support indexing impacts of making fields nullable on downstream dependencies.
+
 ### Version 1.3.10
 - Fixed a bug in nonnull symbol detection.
 - Fixed bugs in Scanner symbol serialization.
