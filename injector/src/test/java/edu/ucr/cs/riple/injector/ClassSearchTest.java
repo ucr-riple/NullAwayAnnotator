@@ -24,10 +24,10 @@
 
 package edu.ucr.cs.riple.injector;
 
-import static com.github.javaparser.StaticJavaParser.parse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
@@ -475,7 +475,7 @@ public class ClassSearchTest extends BaseInjectorTest {
         new String[] {
           "package com.test;", "public @interface Main{", "   public String foo();", "}"
         };
-    CompilationUnit tree = parse(String.join("\n", clazzLines));
+    CompilationUnit tree = StaticJavaParser.parse(String.join("\n", clazzLines));
     TargetClassNotFound thrown =
         assertThrows(
             TargetClassNotFound.class,
