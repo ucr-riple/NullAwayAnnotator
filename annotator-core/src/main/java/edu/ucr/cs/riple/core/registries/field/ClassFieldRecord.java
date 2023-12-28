@@ -112,7 +112,7 @@ public class ClassFieldRecord {
    * @return true if there exists a field declaration with exactly the given names; false otherwise.
    */
   public boolean hasExactFieldDeclarationWithNames(Set<String> names) {
-    return this.fields.stream().anyMatch(decl -> decl.names.equals(name));
+    return this.fields.stream().anyMatch(decl -> decl.names.equals(names));
   }
 
   /** Field declaration record. Used to store information regarding multiple field declaration. */
