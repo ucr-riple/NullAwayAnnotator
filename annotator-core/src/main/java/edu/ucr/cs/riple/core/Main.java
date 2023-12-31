@@ -49,41 +49,22 @@ public class Main {
   //  public static void main(String[] args) {
   //    args =
   //        new String[] {
-  //          //            "-d",
-  //          //            "/home/nima/Developer/taint-benchmarks/struts/annotator-out/core",
-  //          //            "-bc",
-  //          //            "java_17 && cd /home/nima/Developer/taint-benchmarks/struts &&
-  //          // /home/nima/Documents/environments/maven/apache-maven-3.9.1/bin/mvn clean compile
-  // -pl
-  //          // core",
-  //          //            "-cp",
-  //          //
-  // "/home/nima/Developer/taint-benchmarks/struts/annotator-out/core/paths.tsv",
-  //          //            "-n",
-  //          //            "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted",
-  //          //            "-i",
-  //          //            "edu.ucr.cs.riple.taint.ucrtainting.qual.Init",
-  //          //            "-cn",
-  //          //            "UCRTaint",
-  //          //            "-rboserr"
   //          "-d",
-  //          "/Users/nima/Developer/logisim-evolution/annotator-out/",
+  //          "/Users/nima/Downloads/annotator-inference-debug/annotator-out",
   //          "-bc",
-  //          "export JAVA_HOME=`/usr/libexec/java_home -v 17` && cd
-  // /Users/nima/Developer/logisim-evolution && ./gradlew compileJava --rerun-tasks",
+  //          "cd /Users/nima/Downloads/annotator-inference-debug && ./gradlew compileJava
+  // --rerun-tasks",
   //          "-cp",
-  //          "/Users/nima/Developer/logisim-evolution/annotator-out//paths.tsv",
-  //          "-i",
-  //          "edu.ucr.Initializer",
+  //          "/Users/nima/Downloads/annotator-inference-debug/annotator-out/paths.tsv",
   //          "-n",
   //          "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted",
+  //          "-i",
+  //          "edu.ucr.cs.riple.taint.ucrtainting.qual.Init",
   //          "-cn",
   //          "UCRTaint",
-  //          "--depth",
-  //          "2",
-  //          "-dol",
   //          "-rboserr",
-  //          "--disable-parallel-processing"
+  //          "--depth",
+  //          "7",
   //        };
   //    Config config = new Config(args);
   //    Annotator annotator = new Annotator(config);

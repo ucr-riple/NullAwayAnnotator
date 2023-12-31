@@ -54,4 +54,9 @@ public class Name {
   public int hashCode() {
     return Objects.hash(simpleName, fullName);
   }
+
+  @Override
+  public String toString() {
+    return simpleName;
+  }
 }

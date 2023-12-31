@@ -123,7 +123,7 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
             o -> {
               JSONObject fixJson = (JSONObject) o;
               // TODO: very bad code, fix it later.
-              if (LocationKind.getKind((String) fixJson.get("location"))
+              if (LocationKind.getKind((String) ((JSONObject) fixJson.get("location")).get("kind"))
                   .equals(LocationKind.POLY_METHOD)) {
                 builder.addAll(createPolyMethodFixes(errorType, fixJson));
                 return;
@@ -149,7 +149,7 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
     String clazz = (String) locationJson.get("class");
     String method = (String) locationJson.get("method");
     String path = (String) locationJson.get("path");
-    JSONObject typeVariablePosition = (JSONObject) locationJson.get("type-variable-position");
+    JSONArray typeVariablePosition = (JSONArray) locationJson.get("type-variable-position");
     JSONObject onMethodJson = new JSONObject();
     onMethodJson.put("kind", "METHOD");
     onMethodJson.put("class", clazz);
@@ -172,7 +172,7 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
               parameterJson.put("class", clazz);
               parameterJson.put("method", method);
               parameterJson.put("path", path);
-              parameterJson.put("index", Integer.parseInt((String) key));
+              parameterJson.put("index", Long.parseLong((String) key));
               parameterJson.put("type-variable-position", args.get(key));
               OnParameter onParameter = new OnParameter(parameterJson);
               fixes.add(
@@ -188,8 +188,8 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
   private static ImmutableList<ImmutableList<Integer>> getTypePositionIndices(JSONObject location) {
     final ImmutableList.Builder<ImmutableList<Integer>> bul = ImmutableList.builder();
     AtomicBoolean empty = new AtomicBoolean(true);
-    if ((location).containsKey("type-variable-position")) {
-      JSONArray indices = (JSONArray) (location).get("type-variable-position");
+    if (location.containsKey("type-variable-position")) {
+      JSONArray indices = (JSONArray) location.get("type-variable-position");
       indices.forEach(
           index -> {
             List<Integer> indexList = new ArrayList<>();
