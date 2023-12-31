@@ -82,7 +82,7 @@ public abstract class TypeUseAnnotationChange extends AnnotationChange {
     Type initializedType = null;
     if (node instanceof VariableDeclarationExpr) {
       VariableDeclarationExpr vde = (VariableDeclarationExpr) node;
-      if (vde.getVariables().size() > 0) {
+      if (!vde.getVariables().isEmpty()) {
         if (vde.getVariables().get(0).getInitializer().isPresent()) {
           Expression initializedValue = vde.getVariables().get(0).getInitializer().get();
           if (initializedValue instanceof ObjectCreationExpr) {
@@ -103,7 +103,6 @@ public abstract class TypeUseAnnotationChange extends AnnotationChange {
             initializedType.accept(new TypeArgumentChangeVisitor(index, annotationExpr), this));
       }
     }
-
     return modifications.isEmpty() ? null : new MultiPositionModification(modifications);
   }
 

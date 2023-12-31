@@ -168,21 +168,22 @@ public class Injector {
   }
 
   public List<ASTChange> filterChange(List<ASTChange> changes) {
-    Set<String> polyMethods =
-        changes.stream()
-            .filter(change -> change.getLocation().isOnPolyMethod())
-            .map(change -> change.getLocation().toPolyMethod().method)
-            .collect(Collectors.toSet());
-    return changes.stream()
-        .filter(
-            astChange -> {
-              if (!astChange.getLocation().isOnParameter()) {
-                return true;
-              }
-              return !polyMethods.contains(
-                  astChange.getLocation().toParameter().enclosingMethod.method);
-            })
-        .collect(Collectors.toList());
+    //    Set<String> polyMethods =
+    //        changes.stream()
+    //            .filter(change -> change().isOnPolyMethod())
+    //            .map(change -> change.getLocation().toPolyMethod().method)
+    //            .collect(Collectors.toSet());
+    //    return changes.stream()
+    //        .filter(
+    //            astChange -> {
+    //              if (!astChange.getLocation().isOnParameter()) {
+    //                return true;
+    //              }
+    //              return !polyMethods.contains(
+    //                  astChange.getLocation().toParameter().enclosingMethod.method);
+    //            })
+    //        .collect(Collectors.toList());
+    return changes;
   }
 
   public void combineTypeArgumentIndices(List<ASTChange> changes) {

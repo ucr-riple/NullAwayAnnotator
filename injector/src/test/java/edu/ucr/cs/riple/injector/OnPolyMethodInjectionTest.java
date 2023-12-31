@@ -24,189 +24,193 @@
 
 package edu.ucr.cs.riple.injector;
 
-import edu.ucr.cs.riple.injector.changes.AddTypeUseMarkerAnnotation;
-import edu.ucr.cs.riple.injector.changes.RemoveTypeUseMarkerAnnotation;
-import edu.ucr.cs.riple.injector.location.OnParameter;
-import edu.ucr.cs.riple.injector.location.OnPolyMethod;
-import java.util.List;
-import org.junit.Test;
-
 public class OnPolyMethodInjectionTest extends BaseInjectorTest {
 
-  @Test
-  public void additionTest() {
-    injectorTestHelper
-        .addInput(
-            "Foo.java",
-            "package test;",
-            "public class Foo {",
-            "   public Object test(Object f, Object f2) {",
-            "      return f;",
-            "   }",
-            "}")
-        .expectOutput(
-            "package test;",
-            "import custom.annot.Poly;",
-            "public class Foo {",
-            "   public @Poly Object test(Object f, @Poly Object f2) {",
-            "      return f;",
-            "   }",
-            "}")
-        .addChanges(
-            new AddTypeUseMarkerAnnotation(
-                new OnPolyMethod(
-                    "Foo.java", "test.Foo", "test(java.lang.Object,java.lang.Object)", List.of(1)),
-                "custom.annot.Poly"))
-        .start();
-  }
-
-  @Test
-  public void deletionTest() {
-    injectorTestHelper
-        .addInput(
-            "Foo.java",
-            "package test;",
-            "import custom.annot.Poly;",
-            "public class Foo {",
-            "   public @Poly Object test(Object f, @Poly Object f2) {",
-            "      return f;",
-            "   }",
-            "}")
-        .expectOutput(
-            "package test;",
-            "import custom.annot.Poly;",
-            "public class Foo {",
-            "   public Object test(Object f, Object f2) {",
-            "      return f;",
-            "   }",
-            "}")
-        .addChanges(
-            new RemoveTypeUseMarkerAnnotation(
-                new OnPolyMethod(
-                    "Foo.java", "test.Foo", "test(java.lang.Object,java.lang.Object)", List.of(1)),
-                "custom.annot.Poly"))
-        .start();
-  }
-
-  @Test
-  public void multipleAdditionTest() {
-    injectorTestHelper
-        .addInput(
-            "Foo.java",
-            "package test;",
-            "import custom.annot.Poly;",
-            "public class Foo {",
-            "   protected @Poly String conditionalParse(@Poly String param, @Poly ActionInvocation invocation) {",
-            "     if (parse && param != null && invocation != null) {",
-            "         return TextParseUtil.translateVariables(",
-            "           param,",
-            "           invocation.getStack(),",
-            "           new EncodingParsedValueEvaluator());",
-            "     } else {",
-            "         return param;",
-            "     }",
-            "   }",
-            "}")
-        .expectOutput(
-            "package test;",
-            "import custom.annot.Poly;",
-            "public class Foo {",
-            "   protected @Poly String conditionalParse(@Poly String param, @Poly ActionInvocation invocation) {",
-            "     if (parse && param != null && invocation != null) {",
-            "         return TextParseUtil.translateVariables(",
-            "           param,",
-            "           invocation.getStack(),",
-            "           new EncodingParsedValueEvaluator());",
-            "     } else {",
-            "         return param;",
-            "     }",
-            "   }",
-            "}")
-        .addChanges(
-            new AddTypeUseMarkerAnnotation(
-                new OnPolyMethod(
-                    "Foo.java",
-                    "test.Foo",
-                    "conditionalParse(java.lang.String,com.opensymphony.xwork2.ActionInvocation)",
-                    List.of(0, 1)),
-                "custom.annot.Poly"),
-            new AddTypeUseMarkerAnnotation(
-                new OnParameter(
-                    "Foo.java",
-                    "test.Foo",
-                    "conditionalParse(java.lang.String,com.opensymphony.xwork2.ActionInvocation)",
-                    0),
-                "custom.annot.Untainted"),
-            new AddTypeUseMarkerAnnotation(
-                new OnParameter(
-                    "Foo.java",
-                    "test.Foo",
-                    "conditionalParse(java.lang.String,com.opensymphony.xwork2.ActionInvocation)",
-                    1),
-                "custom.annot.Untainted"))
-        .start();
-  }
-
-  @Test
-  public void gg() {
-    injectorTestHelper
-        .addInput(
-            "Foo.java",
-            "package test;",
-            "import custom.annot.RPolyTainted;",
-            "import custom.annot.Untainted;",
-            "public class Foo {",
-            "  protected String conditionalParse(String param, ActionInvocation invocation) {",
-            "     if (parse && param != null && invocation != null) {",
-            "       return TextParseUtil.translateVariables(",
-            "             param,",
-            "             invocation.getStack(),",
-            "             new EncodingParsedValueEvaluator());",
-            "     } else {",
-            "       return param;",
-            "     }",
-            " }",
-            "}")
-        .expectOutput(
-            "package test;",
-            "import custom.annot.RPolyTainted;",
-            "import custom.annot.Untainted;",
-            "public class Foo {",
-            "  protected @RPolyTainted String conditionalParse(@RPolyTainted String param, @RPolyTainted ActionInvocation invocation) {",
-            "     if (parse && param != null && invocation != null) {",
-            "       return TextParseUtil.translateVariables(",
-            "             param,",
-            "             invocation.getStack(),",
-            "             new EncodingParsedValueEvaluator());",
-            "     } else {",
-            "       return param;",
-            "     }",
-            " }",
-            "}")
-        .addChanges(
-            new AddTypeUseMarkerAnnotation(
-                new OnPolyMethod(
-                    "Foo.java",
-                    "test.Foo",
-                    "conditionalParse(java.lang.String,com.opensymphony.xwork2.ActionInvocation)",
-                    List.of(0, 1)),
-                "custom.annot.RPolyTainted"),
-            new AddTypeUseMarkerAnnotation(
-                new OnParameter(
-                    "Foo.java",
-                    "test.Foo",
-                    "conditionalParse(java.lang.String,com.opensymphony.xwork2.ActionInvocation)",
-                    0),
-                "custom.annot.Untainted"),
-            new AddTypeUseMarkerAnnotation(
-                new OnParameter(
-                    "Foo.java",
-                    "test.Foo",
-                    "conditionalParse(java.lang.String,com.opensymphony.xwork2.ActionInvocation)",
-                    1),
-                "custom.annot.Untainted"))
-        .start();
-  }
+  //  @Test
+  //  public void additionTest() {
+  //    injectorTestHelper
+  //        .addInput(
+  //            "Foo.java",
+  //            "package test;",
+  //            "public class Foo {",
+  //            "   public Object test(Object f, Object f2) {",
+  //            "      return f;",
+  //            "   }",
+  //            "}")
+  //        .expectOutput(
+  //            "package test;",
+  //            "import custom.annot.Poly;",
+  //            "public class Foo {",
+  //            "   public @Poly Object test(Object f, @Poly Object f2) {",
+  //            "      return f;",
+  //            "   }",
+  //            "}")
+  //        .addChanges(
+  //            new AddTypeUseMarkerAnnotation(
+  //                new OnPolyMethod(
+  //                    "Foo.java", "test.Foo", "test(java.lang.Object,java.lang.Object)",
+  // List.of(1)),
+  //                "custom.annot.Poly"))
+  //        .start();
+  //  }
+  //
+  //  @Test
+  //  public void deletionTest() {
+  //    injectorTestHelper
+  //        .addInput(
+  //            "Foo.java",
+  //            "package test;",
+  //            "import custom.annot.Poly;",
+  //            "public class Foo {",
+  //            "   public @Poly Object test(Object f, @Poly Object f2) {",
+  //            "      return f;",
+  //            "   }",
+  //            "}")
+  //        .expectOutput(
+  //            "package test;",
+  //            "import custom.annot.Poly;",
+  //            "public class Foo {",
+  //            "   public Object test(Object f, Object f2) {",
+  //            "      return f;",
+  //            "   }",
+  //            "}")
+  //        .addChanges(
+  //            new RemoveTypeUseMarkerAnnotation(
+  //                new OnPolyMethod(
+  //                    "Foo.java", "test.Foo", "test(java.lang.Object,java.lang.Object)",
+  // List.of(1)),
+  //                "custom.annot.Poly"))
+  //        .start();
+  //  }
+  //
+  //  @Test
+  //  public void multipleAdditionTest() {
+  //    injectorTestHelper
+  //        .addInput(
+  //            "Foo.java",
+  //            "package test;",
+  //            "import custom.annot.Poly;",
+  //            "public class Foo {",
+  //            "   protected @Poly String conditionalParse(@Poly String param, @Poly
+  // ActionInvocation invocation) {",
+  //            "     if (parse && param != null && invocation != null) {",
+  //            "         return TextParseUtil.translateVariables(",
+  //            "           param,",
+  //            "           invocation.getStack(),",
+  //            "           new EncodingParsedValueEvaluator());",
+  //            "     } else {",
+  //            "         return param;",
+  //            "     }",
+  //            "   }",
+  //            "}")
+  //        .expectOutput(
+  //            "package test;",
+  //            "import custom.annot.Poly;",
+  //            "public class Foo {",
+  //            "   protected @Poly String conditionalParse(@Poly String param, @Poly
+  // ActionInvocation invocation) {",
+  //            "     if (parse && param != null && invocation != null) {",
+  //            "         return TextParseUtil.translateVariables(",
+  //            "           param,",
+  //            "           invocation.getStack(),",
+  //            "           new EncodingParsedValueEvaluator());",
+  //            "     } else {",
+  //            "         return param;",
+  //            "     }",
+  //            "   }",
+  //            "}")
+  //        .addChanges(
+  //            new AddTypeUseMarkerAnnotation(
+  //                new OnPolyMethod(
+  //                    "Foo.java",
+  //                    "test.Foo",
+  //
+  // "conditionalParse(java.lang.String,com.opensymphony.xwork2.ActionInvocation)",
+  //                    List.of(0, 1)),
+  //                "custom.annot.Poly"),
+  //            new AddTypeUseMarkerAnnotation(
+  //                new OnParameter(
+  //                    "Foo.java",
+  //                    "test.Foo",
+  //
+  // "conditionalParse(java.lang.String,com.opensymphony.xwork2.ActionInvocation)",
+  //                    0),
+  //                "custom.annot.Untainted"),
+  //            new AddTypeUseMarkerAnnotation(
+  //                new OnParameter(
+  //                    "Foo.java",
+  //                    "test.Foo",
+  //
+  // "conditionalParse(java.lang.String,com.opensymphony.xwork2.ActionInvocation)",
+  //                    1),
+  //                "custom.annot.Untainted"))
+  //        .start();
+  //  }
+  //
+  //  @Test
+  //  public void gg() {
+  //    injectorTestHelper
+  //        .addInput(
+  //            "Foo.java",
+  //            "package test;",
+  //            "import custom.annot.RPolyTainted;",
+  //            "import custom.annot.Untainted;",
+  //            "public class Foo {",
+  //            "  protected String conditionalParse(String param, ActionInvocation invocation) {",
+  //            "     if (parse && param != null && invocation != null) {",
+  //            "       return TextParseUtil.translateVariables(",
+  //            "             param,",
+  //            "             invocation.getStack(),",
+  //            "             new EncodingParsedValueEvaluator());",
+  //            "     } else {",
+  //            "       return param;",
+  //            "     }",
+  //            " }",
+  //            "}")
+  //        .expectOutput(
+  //            "package test;",
+  //            "import custom.annot.RPolyTainted;",
+  //            "import custom.annot.Untainted;",
+  //            "public class Foo {",
+  //            "  protected @RPolyTainted String conditionalParse(@RPolyTainted String param,
+  // @RPolyTainted ActionInvocation invocation) {",
+  //            "     if (parse && param != null && invocation != null) {",
+  //            "       return TextParseUtil.translateVariables(",
+  //            "             param,",
+  //            "             invocation.getStack(),",
+  //            "             new EncodingParsedValueEvaluator());",
+  //            "     } else {",
+  //            "       return param;",
+  //            "     }",
+  //            " }",
+  //            "}")
+  //        .addChanges(
+  //            new AddTypeUseMarkerAnnotation(
+  //                new OnPolyMethod(
+  //                    "Foo.java",
+  //                    "test.Foo",
+  //
+  // "conditionalParse(java.lang.String,com.opensymphony.xwork2.ActionInvocation)",
+  //                    List.of(0, 1)),
+  //                "custom.annot.RPolyTainted"),
+  //            new AddTypeUseMarkerAnnotation(
+  //                new OnParameter(
+  //                    "Foo.java",
+  //                    "test.Foo",
+  //
+  // "conditionalParse(java.lang.String,com.opensymphony.xwork2.ActionInvocation)",
+  //                    0),
+  //                "custom.annot.Untainted"),
+  //            new AddTypeUseMarkerAnnotation(
+  //                new OnParameter(
+  //                    "Foo.java",
+  //                    "test.Foo",
+  //
+  // "conditionalParse(java.lang.String,com.opensymphony.xwork2.ActionInvocation)",
+  //                    1),
+  //                "custom.annot.Untainted"))
+  //        .start();
+  //  }
 }
 
 //  protected @RPolyTainted String conditionalParse(@RPolyTainted @RUntainted St@RPolyTainted ring

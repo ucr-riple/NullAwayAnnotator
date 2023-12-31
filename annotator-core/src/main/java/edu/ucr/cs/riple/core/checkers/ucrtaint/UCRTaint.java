@@ -34,6 +34,9 @@ import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.changes.AddTypeUseMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
+import edu.ucr.cs.riple.injector.location.LocationKind;
+import edu.ucr.cs.riple.injector.location.OnMethod;
+import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -119,36 +122,86 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
         .forEach(
             o -> {
               JSONObject fixJson = (JSONObject) o;
+              // TODO: very bad code, fix it later.
+              if (LocationKind.getKind((String) fixJson.get("location"))
+                  .equals(LocationKind.POLY_METHOD)) {
+                builder.addAll(createPolyMethodFixes(errorType, fixJson));
+                return;
+              }
               Location location =
                   Location.createLocationFromJSON((JSONObject) fixJson.get("location"));
-              final ImmutableList.Builder<ImmutableList<Integer>> bul = ImmutableList.builder();
-              AtomicBoolean empty = new AtomicBoolean(true);
-              if (((JSONObject) fixJson.get("location")).containsKey("type-variable-position")) {
-                JSONArray indecies =
-                    (JSONArray)
-                        ((JSONObject) fixJson.get("location")).get("type-variable-position");
-                indecies.forEach(
-                    index -> {
-                      List<Integer> indexList = new ArrayList<>();
-                      ((JSONArray) index).forEach(ii -> indexList.add(((Long) ii).intValue()));
-                      bul.add(ImmutableList.copyOf(indexList));
-                      empty.set(false);
-                    });
-              }
-              if (empty.get()) {
-                bul.add(ImmutableList.of(0));
-              }
+              ImmutableList<ImmutableList<Integer>> typeIndex =
+                  getTypePositionIndices((JSONObject) fixJson.get("location"));
               location.ifField(onField -> extendVariableList(onField, moduleInfo));
               builder.add(
                   new Fix(
-                      new AddTypeUseMarkerAnnotation(
-                          location,
-                          location.isOnPolyMethod() ? POLY_ANNOTATION : UNTAINTED_ANNOTATION,
-                          bul.build()),
+                      new AddTypeUseMarkerAnnotation(location, UNTAINTED_ANNOTATION, typeIndex),
                       errorType,
                       true));
             });
     return new UCRTaintError(errorType, "", region, offset, builder.build());
+  }
+
+  private Set<Fix> createPolyMethodFixes(String errorType, JSONObject fixJson) {
+    // TODO: terrible code, fix later.
+    Set<Fix> fixes = new HashSet<>();
+    JSONObject locationJson = (JSONObject) fixJson.get("location");
+    String clazz = (String) locationJson.get("class");
+    String method = (String) locationJson.get("method");
+    String path = (String) locationJson.get("path");
+    JSONObject typeVariablePosition = (JSONObject) locationJson.get("type-variable-position");
+    JSONObject onMethodJson = new JSONObject();
+    onMethodJson.put("kind", "METHOD");
+    onMethodJson.put("class", clazz);
+    onMethodJson.put("method", method);
+    onMethodJson.put("path", path);
+    onMethodJson.put("type-variable-position", typeVariablePosition);
+    OnMethod onMethod = new OnMethod(onMethodJson);
+    fixes.add(
+        new Fix(
+            new AddTypeUseMarkerAnnotation(
+                onMethod, POLY_ANNOTATION, getTypePositionIndices(onMethodJson)),
+            errorType,
+            true));
+    JSONObject args = (JSONObject) locationJson.get("arguments");
+    args.keySet()
+        .forEach(
+            key -> {
+              JSONObject parameterJson = new JSONObject();
+              parameterJson.put("kind", "PARAMETER");
+              parameterJson.put("class", clazz);
+              parameterJson.put("method", method);
+              parameterJson.put("path", path);
+              parameterJson.put("index", Integer.parseInt((String) key));
+              parameterJson.put("type-variable-position", args.get(key));
+              OnParameter onParameter = new OnParameter(parameterJson);
+              fixes.add(
+                  new Fix(
+                      new AddTypeUseMarkerAnnotation(
+                          onParameter, POLY_ANNOTATION, getTypePositionIndices(parameterJson)),
+                      errorType,
+                      true));
+            });
+    return fixes;
+  }
+
+  private static ImmutableList<ImmutableList<Integer>> getTypePositionIndices(JSONObject location) {
+    final ImmutableList.Builder<ImmutableList<Integer>> bul = ImmutableList.builder();
+    AtomicBoolean empty = new AtomicBoolean(true);
+    if ((location).containsKey("type-variable-position")) {
+      JSONArray indices = (JSONArray) (location).get("type-variable-position");
+      indices.forEach(
+          index -> {
+            List<Integer> indexList = new ArrayList<>();
+            ((JSONArray) index).forEach(ii -> indexList.add(((Long) ii).intValue()));
+            bul.add(ImmutableList.copyOf(indexList));
+            empty.set(false);
+          });
+    }
+    if (empty.get()) {
+      bul.add(ImmutableList.of(0));
+    }
+    return bul.build();
   }
 
   @Override
