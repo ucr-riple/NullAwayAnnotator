@@ -156,11 +156,10 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
     onMethodJson.put("method", method);
     onMethodJson.put("path", path);
     onMethodJson.put("type-variable-position", typeVariablePosition);
-    OnMethod onMethod = new OnMethod(onMethodJson);
     fixes.add(
         new Fix(
             new AddTypeUseMarkerAnnotation(
-                onMethod, POLY_ANNOTATION, getTypePositionIndices(onMethodJson)),
+                new OnMethod(onMethodJson), POLY_ANNOTATION, getTypePositionIndices(onMethodJson)),
             errorType,
             true));
     JSONObject args = (JSONObject) locationJson.get("arguments");
@@ -174,11 +173,12 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
               parameterJson.put("path", path);
               parameterJson.put("index", Long.parseLong((String) key));
               parameterJson.put("type-variable-position", args.get(key));
-              OnParameter onParameter = new OnParameter(parameterJson);
               fixes.add(
                   new Fix(
                       new AddTypeUseMarkerAnnotation(
-                          onParameter, POLY_ANNOTATION, getTypePositionIndices(parameterJson)),
+                          new OnParameter(parameterJson),
+                          POLY_ANNOTATION,
+                          getTypePositionIndices(parameterJson)),
                       errorType,
                       true));
             });
