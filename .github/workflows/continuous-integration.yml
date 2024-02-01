@@ -84,3 +84,18 @@ jobs:
           ANNOTATOR_TEST_DISABLE_PARALLEL_PROCESSING: "true"
           ANNOTATOR_TEST_DISABLE_CACHING: "true"
         run: ./gradlew build --rerun-tasks --scan
+  parser-coinfiguration-17:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: 17
+          distribution: 'temurin'
+      - name: Build with Gradle
+        env:
+          ANNOTATOR_TEST_DISABLE_PARALLEL_PROCESSING: "false"
+          ANNOTATOR_TEST_DISABLE_CACHING: "false"
+        run: ./gradlew :annotator-core:test --tests "edu.ucr.cs.riple.core.Java17Test"
+
