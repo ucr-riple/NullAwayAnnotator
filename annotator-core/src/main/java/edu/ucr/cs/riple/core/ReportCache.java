@@ -26,9 +26,15 @@ package edu.ucr.cs.riple.core;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /** Reports cache. Used to detect fixes that has already been processed. */
 public class ReportCache {
@@ -73,10 +79,59 @@ public class ReportCache {
    * @param reports Set of the latest processed reports.
    */
   public void update(ImmutableSet<Report> reports) {
+    log("-------------------update-------------------");
     int size = store.keySet().size();
+    log("size before:" + size);
+    reports.forEach(
+        new Consumer<Report>() {
+          @Override
+          public void accept(Report report) {
+            log("adding new key");
+            report.root.forEach(fix -> log(fix.toString()));
+            log("key-fix-ended");
+          }
+        });
     reports.forEach(report -> store.put(report.root, report));
+    log("cache after addition");
+    store
+        .keySet()
+        .forEach(
+            new Consumer<Set<Fix>>() {
+              @Override
+              public void accept(Set<Fix> fixes) {
+                log("keys");
+                fixes.forEach(fix -> log(fix.toString()));
+                log("key-ended");
+              }
+            });
+    log("cache ended");
+    log("size after:" + store.keySet().size());
     if (size == store.keySet().size()) {
       stateUpdated = false;
+      log("state updated: " + stateUpdated);
+    }
+    log("final state:" + stateUpdated);
+    log("-------------------update-ended-------------------");
+  }
+
+  public static void log(String message) {
+    try {
+      final Path path = Paths.get("/tmp/annotator.log");
+      if (!path.toFile().exists()) {
+        path.toFile().createNewFile();
+      }
+      try (FileWriter fw = new FileWriter(path.toFile(), true);
+          BufferedWriter bw = new BufferedWriter(fw);
+          PrintWriter out = new PrintWriter(bw)) {
+        out.println(message);
+        fw.flush();
+        bw.flush();
+        out.flush();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 
