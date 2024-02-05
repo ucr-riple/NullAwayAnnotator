@@ -61,6 +61,7 @@ public class Annotator {
 
   /** Starts the annotating process consist of preprocess followed by the "annotate" phase. */
   public void start() {
+    ReportCache.log("Starting annotating process...");
     ParserConfiguration parserConfiguration = new ParserConfiguration();
     parserConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
     StaticJavaParser.setConfiguration(parserConfiguration);
@@ -89,6 +90,7 @@ public class Annotator {
 
   /** Performs iterations of inference/injection until no unseen fix is suggested. */
   private void annotate() {
+    ReportCache.log("annotate");
     // The downstream impact cache stores the impact of making each public API @Nullable on
     // downstream dependencies.
     // downstreamImpactCache analyzes effects of all public APIs on downstream dependencies.
@@ -102,7 +104,9 @@ public class Annotator {
     if (config.inferenceActivated) {
       System.out.println("Max Depth level: " + config.depth);
       // Outer loop starts.
+      ReportCache.log("cache is updated: " + cache.isUpdated());
       while (cache.isUpdated()) {
+        ReportCache.log("executing next iteration");
         executeNextIteration(targetModuleCache, downstreamImpactCache);
         if (config.disableOuterLoop) {
           break;
@@ -131,6 +135,7 @@ public class Annotator {
    */
   private void executeNextIteration(
       TargetModuleCache targetModuleCache, DownstreamImpactCache downstreamImpactCache) {
+    ReportCache.log("getting latest reports");
     ImmutableSet<Report> latestReports =
         processTriggeredFixes(targetModuleCache, downstreamImpactCache);
     // Compute boundaries of effects on downstream dependencies.
@@ -140,8 +145,10 @@ public class Annotator {
             report.computeBoundariesOfEffectivenessOnDownstreamDependencies(downstreamImpactCache);
           }
         });
+    ReportCache.log("updating cache and injecting fixes.");
     // Update cached reports store.
     cache.update(latestReports);
+    ReportCache.log("Cache updated");
     // Tag reports according to selected analysis mode.
     config.mode.tag(downstreamImpactCache, latestReports);
     // Inject approved fixes.
