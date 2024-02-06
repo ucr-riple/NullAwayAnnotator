@@ -50,6 +50,9 @@ public abstract class TypeUseAnnotationChange extends AnnotationChange {
       Location location, Name annotation, ImmutableList<ImmutableList<Integer>> typeIndex) {
     super(location, annotation);
     this.typeIndex = typeIndex;
+    if(typeIndex.size() > 4){
+        throw new IllegalArgumentException("Type index size should be less than 4");
+    }
   }
 
   /**
