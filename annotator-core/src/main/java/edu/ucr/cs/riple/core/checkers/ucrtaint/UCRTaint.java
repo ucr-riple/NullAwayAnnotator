@@ -205,6 +205,9 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
     }
     ImmutableList<ImmutableList<Integer>> ans = bul.build();
     ReportCache.log("For location: " + location + " indices are: " + ans);
+    if(ans.size() > 4){
+        throw new RuntimeException("Too many indices: " + ans);
+    }
     return ans;
   }
 

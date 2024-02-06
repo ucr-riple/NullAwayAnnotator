@@ -1,0 +1,206 @@
+{
+  "errors": [
+    {
+      "path": "/home/nima/Developer/taint-benchmarks/struts/core/src/main/java/org/apache/struts2/dispatcher/DefaultDispatcherErrorHandler.java",
+      "messageKey": "argument",
+      "offset": 5437,
+      "index": 104,
+      "region": {
+        "symbol": "handleErrorInDevMode(javax.servlet.http.HttpServletResponse,int,java.lang.Exception)",
+        "class": "org.apache.struts2.dispatcher.DefaultDispatcherErrorHandler"
+      },
+      "fixes": [
+        {
+          "annotation": "poly",
+          "location": {
+            "path": "/home/nima/Developer/taint-benchmarks/struts/core/src/main/java/com/opensymphony/xwork2/util/location/LocationAttributes.java",
+            "type-variable-position": [
+              [
+                0
+              ]
+            ],
+            "method": "getLocation(org.w3c.dom.Element,java.lang.String)",
+            "kind": "POLY_METHOD",
+            "arguments": {
+              "0": [
+                [
+                  0
+                ]
+              ],
+              "1": [
+                [
+                  0
+                ]
+              ]
+            },
+            "class": "com.opensymphony.xwork2.util.location.LocationAttributes"
+          }
+        },
+        {
+          "annotation": "poly",
+          "location": {
+            "path": "/home/nima/Developer/taint-benchmarks/struts/core/src/main/java/com/opensymphony/xwork2/util/ClassLoaderUtil.java",
+            "type-variable-position": [
+              [
+                0
+              ]
+            ],
+            "method": "getResource(java.lang.String,java.lang.Class)",
+            "kind": "POLY_METHOD",
+            "arguments": {
+              "0": [
+                [
+                  0
+                ]
+              ],
+              "1": [
+                [
+                  0
+                ]
+              ]
+            },
+            "class": "com.opensymphony.xwork2.util.ClassLoaderUtil"
+          }
+        },
+        {
+          "annotation": "untainted",
+          "location": {
+            "path": "/home/nima/Developer/taint-benchmarks/struts/core/src/main/java/com/opensymphony/xwork2/util/location/Locatable.java",
+            "type-variable-position": [
+              [
+                0
+              ]
+            ],
+            "method": "getLocation()",
+            "kind": "METHOD",
+            "class": "com.opensymphony.xwork2.util.location.Locatable"
+          }
+        },
+        {
+          "annotation": "poly",
+          "location": {
+            "path": "/home/nima/Developer/taint-benchmarks/struts/core/src/main/java/com/opensymphony/xwork2/util/location/LocationUtils.java",
+            "type-variable-position": [
+              [
+                0
+              ]
+            ],
+            "method": "getLocation(java.lang.Object,java.lang.String)",
+            "kind": "POLY_METHOD",
+            "arguments": {
+              "0": [
+                [
+                  0
+                ]
+              ],
+              "1": [
+                [
+                  0
+                ]
+              ]
+            },
+            "class": "com.opensymphony.xwork2.util.location.LocationUtils"
+          }
+        },
+        {
+          "annotation": "poly",
+          "location": {
+            "path": "/home/nima/Developer/taint-benchmarks/struts/core/src/main/java/com/opensymphony/xwork2/util/location/LocationAttributes.java",
+            "type-variable-position": [
+              [
+                0
+              ]
+            ],
+            "method": "getColumn(org.w3c.dom.Element)",
+            "kind": "POLY_METHOD",
+            "arguments": {
+              "0": [
+                [
+                  0
+                ]
+              ]
+            },
+            "class": "com.opensymphony.xwork2.util.location.LocationAttributes"
+          }
+        },
+        {
+          "annotation": "poly",
+          "location": {
+            "path": "/home/nima/Developer/taint-benchmarks/struts/core/src/main/java/com/opensymphony/xwork2/util/location/LocationAttributes.java",
+            "type-variable-position": [
+              [
+                0
+              ]
+            ],
+            "method": "getLine(org.w3c.dom.Element)",
+            "kind": "POLY_METHOD",
+            "arguments": {
+              "0": [
+                [
+                  0
+                ]
+              ]
+            },
+            "class": "com.opensymphony.xwork2.util.location.LocationAttributes"
+          }
+        },
+        {
+          "annotation": "poly",
+          "location": {
+            "path": "/home/nima/Developer/taint-benchmarks/struts/core/src/main/java/com/opensymphony/xwork2/util/location/LocationAttributes.java",
+            "type-variable-position": [
+              [
+                0
+              ]
+            ],
+            "method": "getLocation(org.w3c.dom.Element)",
+            "kind": "POLY_METHOD",
+            "arguments": {
+              "0": [
+                [
+                  0
+                ]
+              ]
+            },
+            "class": "com.opensymphony.xwork2.util.location.LocationAttributes"
+          }
+        },
+        {
+          "annotation": "untainted",
+          "location": {
+            "path": "/home/nima/Developer/taint-benchmarks/struts/core/src/main/java/com/opensymphony/xwork2/util/location/LocationUtils.java",
+            "type-variable-position": [
+              [
+                0
+              ]
+            ],
+            "method": "getLocation(java.lang.Object,java.lang.String)",
+            "kind": "METHOD",
+            "class": "com.opensymphony.xwork2.util.location.LocationUtils$LocationFinder"
+          }
+        },
+        {
+          "annotation": "poly",
+          "location": {
+            "path": "/home/nima/Developer/taint-benchmarks/struts/core/src/main/java/com/opensymphony/xwork2/util/location/LocationUtils.java",
+            "type-variable-position": [
+              [
+                0
+              ]
+            ],
+            "method": "getLocation(java.lang.Object)",
+            "kind": "POLY_METHOD",
+            "arguments": {
+              "0": [
+                [
+                  0
+                ]
+              ]
+            },
+            "class": "com.opensymphony.xwork2.util.location.LocationUtils"
+          }
+        }
+      ]
+    }
+  ]
+}
