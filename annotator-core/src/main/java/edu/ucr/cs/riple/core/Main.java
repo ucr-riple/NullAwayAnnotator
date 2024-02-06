@@ -36,8 +36,8 @@ public class Main {
    *     json file, otherwise they will be set up according to the set of received cli arguments.
    */
   public static void main(String[] args) {
-    System.out.println("VERSION: 1.3.9-TAINT-debug-SNAPSHOT-2");
-    ReportCache.log("VERSION: 1.3.9-TAINT-debug-SNAPSHOT-2");
+    System.out.println("VERSION: 1.3.9-TAINT-debug-SNAPSHOT-3");
+    ReportCache.log("VERSION: 1.3.9-TAINT-debug-SNAPSHOT-3");
     Config config;
     if (args.length == 2 && args[0].equals("--path")) {
       config = new Config(Paths.get(args[1]));
