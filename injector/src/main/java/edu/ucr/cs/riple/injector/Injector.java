@@ -61,6 +61,7 @@ public class Injector {
   public <T extends ASTChange> Set<FileOffsetStore> start(Set<T> changes) {
     // Start method does not support addition and deletion on same element. Should be split into
     // call for addition and deletion separately.
+    changes = changes.stream().peek(ASTChange::copy).collect(Collectors.toSet());
     Map<Path, List<ASTChange>> map =
         changes.stream().collect(groupingBy(change -> change.getLocation().path));
     Set<FileOffsetStore> offsets = new HashSet<>();
@@ -187,7 +188,7 @@ public class Injector {
   }
 
   public void combineTypeArgumentIndices(List<ASTChange> changes) {
-    Map<Location, List<ImmutableList<ImmutableList<Integer>>>> map =
+    Map<Location, Set<ImmutableList<ImmutableList<Integer>>>> map =
         changes.stream()
             .filter(astChange -> astChange instanceof TypeUseAnnotationChange)
             .collect(
@@ -195,13 +196,13 @@ public class Injector {
                     ASTChange::getLocation,
                     mapping(
                         change -> ((TypeUseAnnotationChange) change).getTypeIndex(),
-                        Collectors.toList())));
+                        Collectors.toSet())));
     changes.forEach(
         astChange -> {
           if (!(astChange instanceof TypeUseAnnotationChange)) {
             return;
           }
-          List<ImmutableList<ImmutableList<Integer>>> typeIndices =
+          Set<ImmutableList<ImmutableList<Integer>>> typeIndices =
               map.get(astChange.getLocation());
           ImmutableList.Builder<ImmutableList<Integer>> builder = ImmutableList.builder();
           typeIndices.forEach(builder::addAll);

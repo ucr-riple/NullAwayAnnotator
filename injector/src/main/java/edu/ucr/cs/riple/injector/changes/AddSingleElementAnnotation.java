@@ -184,4 +184,9 @@ public class AddSingleElementAnnotation extends AnnotationChange implements AddA
   public int hashCode() {
     return Objects.hash(super.hashCode(), argument, repeatable);
   }
+
+  @Override
+  public ASTChange copy() {
+    return new AddSingleElementAnnotation(location, annotationName.fullName, argument, repeatable);
+  }
 }

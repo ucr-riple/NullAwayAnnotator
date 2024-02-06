@@ -126,4 +126,9 @@ public class AddTypeUseMarkerAnnotation extends TypeUseAnnotationChange implemen
   public String toString() {
     return super.toString() + ", index: " + typeIndex;
   }
+
+  @Override
+  public ASTChange copy() {
+    return new AddTypeUseMarkerAnnotation(location, annotationName.fullName, typeIndex);
+  }
 }
