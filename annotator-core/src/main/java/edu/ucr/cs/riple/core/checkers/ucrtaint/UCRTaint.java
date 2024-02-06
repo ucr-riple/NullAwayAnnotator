@@ -27,6 +27,8 @@ package edu.ucr.cs.riple.core.checkers.ucrtaint;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
+import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.ReportCache;
 import edu.ucr.cs.riple.core.checkers.CheckerBaseClass;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.region.Region;
@@ -201,7 +203,9 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
     if (empty.get()) {
       bul.add(ImmutableList.of(0));
     }
-    return bul.build();
+    ImmutableList<ImmutableList<Integer>> ans = bul.build();
+    ReportCache.log("For location: " + location + " indices are: " + ans);
+    return ans;
   }
 
   @Override
