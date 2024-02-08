@@ -35,6 +35,7 @@ import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.body.RecordDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
@@ -143,6 +144,10 @@ public class Helper {
     Optional<ClassOrInterfaceDeclaration> interfaceDeclaration = tree.getInterfaceByName(name);
     if (interfaceDeclaration.isPresent()) {
       return interfaceDeclaration.get();
+    }
+    Optional<RecordDeclaration> recordDeclaration = tree.getRecordByName(name);
+    if (recordDeclaration.isPresent()) {
+      return recordDeclaration.get();
     }
     throw new TargetClassNotFound("Top-Level", name, tree);
   }
@@ -284,6 +289,9 @@ public class Helper {
     }
     if (node instanceof EnumConstantDeclaration) {
       return ((EnumConstantDeclaration) node).getClassBody();
+    }
+    if (node instanceof RecordDeclaration) {
+      return ((RecordDeclaration) node).getMembers();
     }
     return null;
   }

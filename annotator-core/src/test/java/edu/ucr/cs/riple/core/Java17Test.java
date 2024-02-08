@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core;
 
 import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.injector.location.OnField;
+import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.Set;
 import org.junit.Test;
 
@@ -55,6 +56,24 @@ public class Java17Test extends AnnotatorBaseCoreTest {
             "}")
         .withExpectedReports(
             new TReport(new OnField("Main.java", "test.Main", Set.of("f1", "f2", "f3", "f4")), -4))
+        .start();
+  }
+
+  @Test
+  public void recordDeclarationTest() {
+    coreTestHelper
+        .onTarget()
+        .withSourceLines(
+            "A.java",
+            "package test;",
+            "public record A(String name) {",
+            "  public static A create(String name) {",
+            "      return null;",
+            "  }",
+            "}")
+        .withExpectedReports(
+            new TReport(new OnMethod("A.java", "test.A", "create(java.lang.String)"), -1))
+        .toDepth(5)
         .start();
   }
 }
