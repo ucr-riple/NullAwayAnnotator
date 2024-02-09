@@ -67,7 +67,9 @@ public class Annotator {
     preprocess();
     long timer = context.log.startTimer();
     annotate();
-    context.checker.cleanup();
+    if (!config.disableCleanup) {
+      context.checker.cleanup();
+    }
     context.log.stopTimerAndCapture(timer);
     Utility.writeLog(context);
   }

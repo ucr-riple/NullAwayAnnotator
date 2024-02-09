@@ -150,6 +150,11 @@ public class Config {
    * Checker name to retrieve the {@link edu.ucr.cs.riple.core.checkers.Checker} specific instance.
    */
   public final String checkerName;
+  /**
+   * If true, it will deactivate clean up phase which removes all annotations on local variables
+   * except for the ones that are on type arguments.
+   */
+  public final boolean disableCleanup;
 
   /**
    * Builds context from command line arguments.
@@ -346,6 +351,14 @@ public class Config {
     nonnullAnnotationsOption.setValueSeparator(',');
     options.addOption(nonnullAnnotationsOption);
 
+    // Deactivate clean up
+    Option deactivateCleanupOption =
+        new Option(
+            "dcu",
+            "deactivate-cleanup",
+            false,
+            "Deactivates clean up phase which removes all annotations on local variables except for the ones that are on type arguments");
+
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
@@ -451,6 +464,7 @@ public class Config {
         !cmd.hasOption(nonnullAnnotationsOption)
             ? ImmutableSet.of()
             : ImmutableSet.copyOf(cmd.getOptionValue(nonnullAnnotationsOption).split(","));
+    this.disableCleanup = cmd.hasOption(deactivateCleanupOption.getLongOpt());
   }
 
   /**
@@ -547,6 +561,8 @@ public class Config {
                     json -> json.get("NONNULL").toString(),
                     String.class)
                 .orElse(List.of()));
+    this.disableCleanup =
+        getValueFromKey(jsonObject, "DISABLE_CLEANUP", Boolean.class).orElse(false);
   }
 
   /**
