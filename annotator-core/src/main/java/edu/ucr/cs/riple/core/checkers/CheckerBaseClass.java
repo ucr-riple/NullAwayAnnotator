@@ -34,6 +34,7 @@ import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddTypeUseMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -89,6 +90,7 @@ public abstract class CheckerBaseClass<T extends Error> implements Checker<T> {
 
   @Override
   public void cleanup() {
+    System.out.println("Cleaning up...");
     // Remove all annotations added on local variables.
     Set<RemoveAnnotation> annotations =
         context.log.getInjectedAnnotations().stream()
@@ -99,6 +101,7 @@ public abstract class CheckerBaseClass<T extends Error> implements Checker<T> {
                     addAnnotation instanceof AddTypeUseMarkerAnnotation
                         ? ((AddTypeUseMarkerAnnotation) addAnnotation).toDeclaration()
                         : addAnnotation)
+            .filter(Objects::nonNull)
             .map(AddAnnotation::getReverse)
             .collect(Collectors.toSet());
     // Remove

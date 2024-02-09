@@ -104,8 +104,13 @@ public class AddTypeUseMarkerAnnotation extends TypeUseAnnotationChange implemen
    *
    * @return a declaration change that adds the annotation to the declaration.
    */
-  public AddMarkerAnnotation toDeclaration() {
-    return new AddMarkerAnnotation(location, annotationName.simpleName);
+  @Nullable
+  public AddTypeUseMarkerAnnotation toDeclaration() {
+    if (typeIndex.contains(ImmutableList.of(0))) {
+      return new AddTypeUseMarkerAnnotation(location, annotationName.simpleName);
+    } else {
+      return null;
+    }
   }
 
   @Override
