@@ -358,6 +358,7 @@ public class Config {
             "deactivate-cleanup",
             false,
             "Deactivates clean up phase which removes all annotations on local variables except for the ones that are on type arguments");
+    options.addOption(deactivateCleanupOption);
 
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
@@ -464,7 +465,9 @@ public class Config {
         !cmd.hasOption(nonnullAnnotationsOption)
             ? ImmutableSet.of()
             : ImmutableSet.copyOf(cmd.getOptionValue(nonnullAnnotationsOption).split(","));
+    System.out.println("SETTING CLEAN UP: " + cmd.hasOption(deactivateCleanupOption.getLongOpt()));
     this.disableCleanup = cmd.hasOption(deactivateCleanupOption.getLongOpt());
+    System.out.println("CLEAN UP: " + this.disableCleanup);
   }
 
   /**
