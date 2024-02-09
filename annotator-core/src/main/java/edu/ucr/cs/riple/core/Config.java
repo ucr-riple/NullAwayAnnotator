@@ -465,9 +465,7 @@ public class Config {
         !cmd.hasOption(nonnullAnnotationsOption)
             ? ImmutableSet.of()
             : ImmutableSet.copyOf(cmd.getOptionValue(nonnullAnnotationsOption).split(","));
-    System.out.println("SETTING CLEAN UP: " + cmd.hasOption(deactivateCleanupOption.getLongOpt()));
     this.disableCleanup = cmd.hasOption(deactivateCleanupOption.getLongOpt());
-    System.out.println("CLEAN UP: " + this.disableCleanup);
   }
 
   /**
