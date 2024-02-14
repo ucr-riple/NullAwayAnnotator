@@ -148,25 +148,22 @@ public class Injector {
    */
   @Nullable
   public static CompilationUnit parse(Path path) {
-      // TODO: Figure out how to differentiate a generated file from a non-generated file.
-      if (path == null) {
-          return null;
-      }
-      // Set parser configuration to Java 17.
-      ParserConfiguration parserConfiguration = new ParserConfiguration();
-      parserConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
-      StaticJavaParser.setConfiguration(parserConfiguration);
-      try {
-          return StaticJavaParser.parse(path);
-      } catch (FileNotFoundException e) {
-          return null;
-      }
-      // Catch the NoSuchFileException and return null explicitly.
-      catch(NoSuchFileException e ){
-          return null;
-      }
-      catch (IOException e) {
-          throw new RuntimeException("Error happened on parsing file at: " + path, e);
-      }
+    // TODO: Figure out how to differentiate a generated file from a non-generated file.
+    if(path==null){
+      return null;
+    }
+    ParserConfiguration parserConfiguration = new ParserConfiguration();
+    // Set parser configuration to Java 17.
+    parserConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
+    StaticJavaParser.setConfiguration(parserConfiguration);
+    try {
+      return StaticJavaParser.parse(path);
+    } catch (FileNotFoundException e) {
+      return null;
+    } catch (NoSuchFileException e) {
+      return null;
+    }catch (IOException e) {
+      throw new RuntimeException("Error happened on parsing file at: " + path, e);
+    }
   }
 }
