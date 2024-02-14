@@ -149,7 +149,7 @@ public class Injector {
   @Nullable
   public static CompilationUnit parse(Path path) {
     // TODO: Figure out how to differentiate a generated file from a non-generated file.
-    if(path==null){
+    if (path == null) {
       return null;
     }
     ParserConfiguration parserConfiguration = new ParserConfiguration();
@@ -162,7 +162,7 @@ public class Injector {
       return null;
     } catch (NoSuchFileException e) {
       return null;
-    }catch (IOException e) {
+    } catch (IOException e) {
       throw new RuntimeException("Error happened on parsing file at: " + path, e);
     }
   }
