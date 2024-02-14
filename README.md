@@ -75,7 +75,7 @@ class Test{
 `Annotator` propagates the effects of a change throughout the entire module and injects several follow-up annotations to fully resolve a specific warning.
 It is also capable of processing modules within monorepos, taking into account the modules public APIs and the impacts of annotations on downstream dependencies for improved results.
 ## Installation
-We ship Annotator on [Maven](https://repo.maven.apache.org/maven2/edu/ucr/cs/riple/annotator/annotator-core/1.3.6/annotator-core-1.3.6.jar), as a JAR. You can find the artifact information below -
+We ship Annotator on [Maven](https://repo.maven.apache.org/maven2/edu/ucr/cs/riple/annotator/), as a JAR. You can find the artifact information below -
 ```
 GROUP: edu.ucr.cs.riple.annotator
 ID: annotator-core
@@ -184,25 +184,6 @@ To view descriptions of all flags, simply run the JAR with the `--help` option.
 ## NullAway Compatibility
 
 - `Annotator` version `1.3.6` is compatible with `NullAway` version `0.10.10` and above.
-
-
-## Features
-
-- Automatically infers nullability types and injects corresponding annotations
-- Injects suppression annotations for unresolved NullAway errors
-- Minimizes the number of reported NullAway errors
-- Reduces manual effort when applying NullAway to build systems
-
-
-## Contributing
-
-We welcome contributions to improve `Annotator`. Please follow these guidelines when submitting a pull request:
-
-1. Fork the repository and create your branch from `master`.
-2. If you've added code that should be tested, add tests.
-3. Ensure the test suite passes.
-4. Make sure your code lints.
-5. Update documentation if necessary.
 
 ## License
 

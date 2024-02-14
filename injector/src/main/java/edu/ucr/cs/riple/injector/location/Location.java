@@ -36,8 +36,8 @@ import javax.annotation.Nullable;
 /** Represents a location of an element in the source code. */
 public abstract class Location {
 
-  /** The type of the element. */
-  public final LocationKind type;
+  /** The kind of the element. */
+  public final LocationKind kind;
   /** The flat name of enclosing class of the element. */
   public final String clazz;
   /** The path to the file containing the element. */
@@ -47,12 +47,12 @@ public abstract class Location {
    * Creates an instance of {@link Location} for a given type, path and class. This constructor is a
    * base class for all subclasses and must provide these values upon instantiation.
    *
-   * @param type The type of the element.
+   * @param kind The type of the element.
    * @param path The path to the file containing the element.
    * @param clazz The flat name of the enclosing class of the element.
    */
-  public Location(LocationKind type, Path path, String clazz) {
-    this.type = type;
+  public Location(LocationKind kind, Path path, String clazz) {
+    this.kind = kind;
     this.clazz = clazz;
     this.path = path;
   }
@@ -84,7 +84,7 @@ public abstract class Location {
     if (values[0] == null || values[0].equals("null")) {
       return null;
     }
-    LocationKind type = LocationKind.getType(values[0]);
+    LocationKind type = LocationKind.getKind(values[0]);
     Path path = Helper.deserializePath(values[5]);
     String clazz = values[1];
     switch (type) {
@@ -233,7 +233,7 @@ public abstract class Location {
       return false;
     }
     Location other = (Location) o;
-    return type == other.type && clazz.equals(other.clazz);
+    return kind == other.kind && clazz.equals(other.clazz);
   }
 
   /**
@@ -249,7 +249,7 @@ public abstract class Location {
 
   @Override
   public int hashCode() {
-    return Objects.hash(type, clazz);
+    return Objects.hash(kind, clazz);
   }
 
   /**
@@ -259,5 +259,14 @@ public abstract class Location {
    */
   public String getClazz() {
     return clazz;
+  }
+
+  /**
+   * Returns this location's kind.
+   *
+   * @return This location's kind.
+   */
+  public LocationKind getKind() {
+    return kind;
   }
 }

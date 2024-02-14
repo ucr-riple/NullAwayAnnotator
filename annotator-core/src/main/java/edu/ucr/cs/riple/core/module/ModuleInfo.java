@@ -26,13 +26,13 @@ package edu.ucr.cs.riple.core.module;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
-import edu.ucr.cs.riple.core.metadata.field.FieldRegistry;
-import edu.ucr.cs.riple.core.metadata.index.NonnullStore;
-import edu.ucr.cs.riple.core.metadata.method.MethodRegistry;
-import edu.ucr.cs.riple.core.metadata.region.CompoundRegionRegistry;
-import edu.ucr.cs.riple.core.metadata.region.RegionRegistry;
-import edu.ucr.cs.riple.core.metadata.region.generatedcode.AnnotationProcessorHandler;
-import edu.ucr.cs.riple.core.metadata.region.generatedcode.LombokHandler;
+import edu.ucr.cs.riple.core.registries.field.FieldRegistry;
+import edu.ucr.cs.riple.core.registries.index.NonnullStore;
+import edu.ucr.cs.riple.core.registries.method.MethodRegistry;
+import edu.ucr.cs.riple.core.registries.region.CompoundRegionRegistry;
+import edu.ucr.cs.riple.core.registries.region.RegionRegistry;
+import edu.ucr.cs.riple.core.registries.region.generatedcode.AnnotationProcessorHandler;
+import edu.ucr.cs.riple.core.registries.region.generatedcode.LombokHandler;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnClass;
@@ -159,6 +159,15 @@ public class ModuleInfo {
    * @return True if the passed location is declared in this moduleInfo's modules, false otherwise.
    */
   public boolean declaredInModule(Location location) {
+    if (location.isOnParameter()) {
+      location = location.toMethod();
+    }
+    if (location.isOnMethod()) {
+      return methodRegistry.declaredInModule(location);
+    }
+    if (location.isOnField()) {
+      return fieldRegistry.declaredInModule(location);
+    }
     return methodRegistry.declaredInModule(location);
   }
 

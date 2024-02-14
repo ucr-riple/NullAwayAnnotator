@@ -35,14 +35,14 @@ def versions = [
         errorProne             : defaultErrorProneVersion,
         errorProneApi          : project.hasProperty("epApiVersion") ? epApiVersion : oldestErrorProneApi,
         autoService            : "1.0-rc7",
-        javaparser             : "3.24.0",
+        javaparser             : "3.25.7",
         json                   : "1.1.1",
         guava                  : "31.0.1-jre",
         cli                    : "1.5.0",
         commonsio              : "2.11.0",
         progressbar            : "0.9.2",
         junit                  : "5.7.2",
-        nullaway               : "0.9.8",
+        nullaway               : "0.10.19",
         mockito                : "5.2.0",
 ]
 

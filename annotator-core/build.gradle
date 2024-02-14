@@ -57,7 +57,7 @@ googleJavaFormat {
 }
 
 // Should be the latest supporting version of NullAway.
-def NULLAWAY_TEST = "0.10.10"
+def NULLAWAY_TEST = "0.10.19"
 
 tasks.test.dependsOn(':annotator-scanner:publishToMavenLocal')
 
@@ -93,25 +93,12 @@ shadowJar {
     archiveClassifier = null
 }
 
-// Configure test environment
-def nullawayVersionMap = [0:"0.10.4", 1:"0.10.5"]
-tasks.register("configureNullAwayVersion"){
-    if(!project.hasProperty("nullaway-serialization-format-version")){
-        return
-    }
-    NULLAWAY_TEST = nullawayVersionMap.get((project.getProperty("nullaway-serialization-format-version")) as int)
-    println "NullAway Test version changed to: " + NULLAWAY_TEST
-
-    // exclude unsupported tests below...
-    switch (NULLAWAY_TEST){
-        case "0.10.4":
-            test {
-                filter {
-                    excludeTest "edu.ucr.cs.riple.core.CoreTest", "errorInFieldDeclarationSuppressRemainingErrorsTest"
-                    excludeTest "edu.ucr.cs.riple.core.CoreTest", "initializationErrorWithMultipleConstructors"
-                }
-            }
-            break
+// Exclude tests not supported by Java 11.
+if(JavaVersion.current().isJava11()){
+    // exclude Java17Test which is designed to test Java 17 features.
+    test {
+        filter {
+            excludeTestsMatching "edu.ucr.cs.riple.core.Java17Test"
+        }
     }
 }
-tasks.test.dependsOn("configureNullAwayVersion")

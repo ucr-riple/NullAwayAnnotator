@@ -30,7 +30,7 @@ import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.evaluators.graph.ConflictGraph;
 import edu.ucr.cs.riple.core.evaluators.graph.processors.ConflictGraphProcessor;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.registries.index.Fix;
 
 /**
  * Abstract class for evaluators. Subclasses of this evaluator, computes the effectiveness of fix

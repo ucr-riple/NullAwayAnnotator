@@ -25,10 +25,11 @@
 package edu.ucr.cs.riple.core.cache;
 
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.registries.index.Error;
+import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Set;
 
 /** Stores the set of errors which will be triggered if the containing fix is applied. */
@@ -96,5 +97,22 @@ public class Impact {
    */
   public Location toLocation() {
     return fix.toLocation();
+  }
+
+  @Override
+  public int hashCode() {
+    return fix.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof Impact)) {
+      return false;
+    }
+    Impact impact = (Impact) o;
+    return Objects.equals(fix, impact.fix);
   }
 }

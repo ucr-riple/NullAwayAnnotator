@@ -22,6 +22,7 @@
 
 package edu.ucr.cs.riple.librarymodel;
 
+import static com.uber.nullaway.LibraryModels.FieldRef.fieldRef;
 import static com.uber.nullaway.LibraryModels.MethodRef.methodRef;
 
 import com.google.auto.service.AutoService;
@@ -38,21 +39,28 @@ import java.nio.charset.Charset;
 public class LibraryModelLoader implements LibraryModels {
 
   public final String NULLABLE_METHOD_LIST_FILE_NAME = "nullable-methods.tsv";
+  public final String NULLABLE_FIELD_LIST_FILE_NAME = "nullable-fields.tsv";
   public final ImmutableSet<MethodRef> nullableMethods;
+  public final ImmutableSet<FieldRef> nullableFields;
 
   // Assuming this constructor will be called when picked by service loader
   public LibraryModelLoader() {
-    this.nullableMethods = parseTSVFileFromResourcesToMethodRef(NULLABLE_METHOD_LIST_FILE_NAME);
+    this.nullableMethods =
+        parseTSVFileFromResourcesToMemberRef(
+            NULLABLE_METHOD_LIST_FILE_NAME, values -> methodRef(values[0], values[1]));
+    this.nullableFields =
+        parseTSVFileFromResourcesToMemberRef(
+            NULLABLE_FIELD_LIST_FILE_NAME, values -> fieldRef(values[0], values[1]));
   }
 
   /**
-   * Loads a file from resources and parses the content into set of {@link
-   * com.uber.nullaway.LibraryModels.MethodRef}.
+   * Loads a file from resources and creates an instance of type T from each line of the file.
    *
    * @param name File name in resources.
-   * @return ImmutableSet of content in the passed file. Returns empty if the file does not exist.
+   * @return ImmutableSet of contents in the file. Returns empty if the file does not exist.
    */
-  private ImmutableSet<MethodRef> parseTSVFileFromResourcesToMethodRef(String name) {
+  private <T> ImmutableSet<T> parseTSVFileFromResourcesToMemberRef(
+      String name, Factory<T> factory) {
     // Check if resource exists
     if (getClass().getResource(name) == null) {
       return ImmutableSet.of();
@@ -61,13 +69,13 @@ public class LibraryModelLoader implements LibraryModels {
       if (is == null) {
         return ImmutableSet.of();
       }
-      ImmutableSet.Builder<MethodRef> contents = ImmutableSet.builder();
+      ImmutableSet.Builder<T> contents = ImmutableSet.builder();
       BufferedReader reader =
           new BufferedReader(new InputStreamReader(is, Charset.defaultCharset()));
       String line = reader.readLine();
       while (line != null) {
         String[] values = line.split("\\t");
-        contents.add(methodRef(values[0], values[1]));
+        contents.add(factory.create(values));
         line = reader.readLine();
       }
       return contents.build();
@@ -119,5 +127,25 @@ public class LibraryModelLoader implements LibraryModels {
   @Override
   public ImmutableSetMultimap<MethodRef, Integer> castToNonNullMethods() {
     return ImmutableSetMultimap.of();
+  }
+
+  @Override
+  public ImmutableSet<FieldRef> nullableFields() {
+    return nullableFields;
+  }
+
+  /**
+   * Factory interface for creating an instance of type T from a string array.
+   *
+   * @param <T> Type of the instance to create.
+   */
+  interface Factory<T> {
+    /**
+     * Creates an instance of type T from a string array.
+     *
+     * @param values String array to create the instance from.
+     * @return An instance of type T.
+     */
+    T create(String[] values);
   }
 }

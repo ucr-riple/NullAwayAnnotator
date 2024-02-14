@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.injectors;
 
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
@@ -33,9 +34,10 @@ import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Wrapper tool used to inject annotations virtually to the source code. This injector serializes
@@ -44,21 +46,32 @@ import java.util.stream.Collectors;
  */
 public class VirtualInjector extends AnnotationInjector {
 
-  /** Path to library model loader */
-  private final Path libraryModelPath;
+  /** Path to library model loader resources directory */
+  private final Path libraryModelResourcesDirectoryPath;
   /**
    * Annotator configuration, required to check if downstream dependencies analysis is activated or
    * retrieve the path to library model loader.
    */
   private final Config config;
+  /** Name of the resource file in library model loader which contains list of nullable methods. */
+  public static final String NULLABLE_METHOD_LIST_FILE_NAME = "nullable-methods.tsv";
+  /** Name of the resource file in library model loader which contains list of nullable fields. */
+  public static final String NULLABLE_FIELD_LIST_FILE_NAME = "nullable-fields.tsv";
 
   public VirtualInjector(Context context) {
     super(context);
     this.config = context.config;
-    this.libraryModelPath = config.nullawayLibraryModelLoaderPath;
+    this.libraryModelResourcesDirectoryPath = config.nullawayLibraryModelLoaderPath;
     if (config.downStreamDependenciesAnalysisActivated) {
+      try {
+        // make the directories for resources
+        Files.createDirectories(libraryModelResourcesDirectoryPath);
+      } catch (IOException e) {
+        throw new RuntimeException(
+            "Error happened for creating directory: " + libraryModelResourcesDirectoryPath, e);
+      }
       Preconditions.checkNotNull(
-          libraryModelPath,
+          libraryModelResourcesDirectoryPath,
           "NullawayLibraryModelLoaderPath cannot be null while downstream dependencies analysis is activated.");
       clear();
     }
@@ -75,33 +88,69 @@ public class VirtualInjector extends AnnotationInjector {
       throw new IllegalStateException(
           "Downstream dependencies analysis not activated, cannot inject annotations virtually!");
     }
-    try (BufferedOutputStream os =
-        new BufferedOutputStream(new FileOutputStream(libraryModelPath.toFile()))) {
-      Set<String> rows =
-          changes.stream()
-              .filter(addAnnotation -> addAnnotation.getLocation().isOnMethod())
-              .map(
-                  annot ->
-                      annot.getLocation().clazz
-                          + "\t"
-                          + annot.getLocation().toMethod().method
-                          + "\n")
-              .collect(Collectors.toSet());
-      for (String row : rows) {
-        os.write(row.getBytes(Charset.defaultCharset()), 0, row.length());
-      }
-      os.flush();
+    // write methods
+    writeAnnotationsToFile(
+        changes.stream().filter(addAnnotation -> addAnnotation.getLocation().isOnMethod()),
+        libraryModelResourcesDirectoryPath.resolve(NULLABLE_METHOD_LIST_FILE_NAME),
+        annot ->
+            Stream.of(
+                annot.getLocation().clazz + "\t" + annot.getLocation().toMethod().method + "\n"));
+    // write fields
+    writeAnnotationsToFile(
+        changes.stream().filter(addAnnotation -> addAnnotation.getLocation().isOnField()),
+        libraryModelResourcesDirectoryPath.resolve(NULLABLE_FIELD_LIST_FILE_NAME),
+        annot ->
+            // An annotation on a single statement with multiple declaration will be considered for
+            // all declared variables. Hence, we have to mark all variables as nullable.
+            // E.g. for
+            // class Foo {
+            //     @Nullable Object a, b;
+            // }
+            // we have to consider both a and b be nullable and write each one
+            // ("Foo\ta" and "Foo\tb")
+            // on a separate line.
+            annot.getLocation().toField().variables.stream()
+                .map(variable -> annot.getLocation().clazz + "\t" + variable + "\n"));
+  }
+
+  /**
+   * Writes the passed annotation to the passed file. It uses the passed mapper to map the
+   * annotation to a stream of strings. And writes each string to a separate line.
+   *
+   * @param annotations Annotations to be written.
+   * @param path Path to the file to be written.
+   * @param mapper Mapper to map the annotation to a stream of strings.
+   */
+  private static void writeAnnotationsToFile(
+      Stream<AddAnnotation> annotations,
+      Path path,
+      Function<AddAnnotation, Stream<String>> mapper) {
+    try (BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(path.toFile()))) {
+      annotations
+          .flatMap(mapper)
+          .forEach(
+              row -> {
+                try {
+                  os.write(row.getBytes(Charset.defaultCharset()), 0, row.length());
+                } catch (IOException e) {
+                  throw new RuntimeException("Error in writing annotation:" + row, e);
+                }
+              });
     } catch (IOException e) {
-      throw new RuntimeException("Error happened for writing at file: " + libraryModelPath, e);
+      throw new RuntimeException("Error happened for writing at file: " + path, e);
     }
   }
 
   /** Removes any existing entry from library models. */
   private void clear() {
     try {
-      new FileOutputStream(libraryModelPath.toFile()).close();
+      Files.deleteIfExists(
+          libraryModelResourcesDirectoryPath.resolve(NULLABLE_FIELD_LIST_FILE_NAME));
+      Files.deleteIfExists(
+          libraryModelResourcesDirectoryPath.resolve(NULLABLE_METHOD_LIST_FILE_NAME));
     } catch (IOException e) {
-      throw new RuntimeException("Could not clear library model loader content", e);
+      throw new RuntimeException(
+          "Error happened for deleting file: " + libraryModelResourcesDirectoryPath, e);
     }
   }
 }

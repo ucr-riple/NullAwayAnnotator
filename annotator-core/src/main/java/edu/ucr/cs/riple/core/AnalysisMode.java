@@ -61,7 +61,7 @@ public enum AnalysisMode {
       reports.forEach(
           report -> {
             // Check for destructive methods.
-            if (report.containsDestructiveMethod(downstreamImpactCache)) {
+            if (report.containsDestructiveChange(downstreamImpactCache)) {
               report.tag(REJECT);
               return;
             }

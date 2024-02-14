@@ -24,24 +24,25 @@
 
 package edu.ucr.cs.riple.core.cache.downstream;
 
-import static com.google.common.collect.ImmutableMap.toImmutableMap;
-
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.cache.BaseCache;
-import edu.ucr.cs.riple.core.cache.Impact;
 import edu.ucr.cs.riple.core.evaluators.suppliers.DownstreamDependencySupplier;
-import edu.ucr.cs.riple.core.metadata.index.Error;
-import edu.ucr.cs.riple.core.metadata.index.Fix;
-import edu.ucr.cs.riple.core.metadata.region.MethodRegionRegistry;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
+import edu.ucr.cs.riple.core.registries.index.Error;
+import edu.ucr.cs.riple.core.registries.index.Fix;
+import edu.ucr.cs.riple.core.registries.method.MethodRecord;
+import edu.ucr.cs.riple.core.registries.region.FieldRegionRegistry;
+import edu.ucr.cs.riple.core.registries.region.MethodRegionRegistry;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.OptionalInt;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
@@ -50,7 +51,7 @@ import javax.annotation.Nullable;
  * once created, cannot be updated.
  */
 public class DownstreamImpactCacheImpl
-    extends BaseCache<DownstreamImpact, ImmutableMap<Location, DownstreamImpact>>
+    extends BaseCache<DownstreamImpact, Map<Location, DownstreamImpact>>
     implements DownstreamImpactCache {
 
   /** Annotator context instance. */
@@ -65,62 +66,81 @@ public class DownstreamImpactCacheImpl
    * @param context Annotator context.
    */
   public DownstreamImpactCacheImpl(Context context) {
-    super(
+    super(new HashMap<>());
+    this.context = context;
+  }
+
+  /**
+   * Retrieves the set of locations that impact of making them {@code @Nullable} should be computed
+   * on downstream dependencies and stored in this cache.
+   *
+   * @param context Annotator context.
+   * @param moduleInfo Module info of the downstream dependencies. Downstream dependencies are
+   *     collectively viewed as a single module.
+   * @return Set of locations that impact of making them {@code @Nullable} should be computed on
+   *     downstream dependencies and stored in this cache.
+   */
+  private ImmutableSet<Location> retrieveLocationsToCacheImpactsOnDownstreamDependencies(
+      Context context, ModuleInfo moduleInfo) {
+    ImmutableSet.Builder<Location> locationsToCache = ImmutableSet.builder();
+    // Used to collect callers of each method.
+    MethodRegionRegistry methodRegionRegistry = new MethodRegionRegistry(moduleInfo);
+    FieldRegionRegistry fieldRegionRegistry = new FieldRegionRegistry(moduleInfo);
+    // Collect public methods with non-primitive return types.
+    locationsToCache.addAll(
         context
             .targetModuleInfo
             .getMethodRegistry()
             .getPublicMethodsWithNonPrimitivesReturn()
             .stream()
-            .map(
-                methodNode ->
-                    new DownstreamImpact(
-                        new Fix(
-                            new AddMarkerAnnotation(
-                                methodNode.location, context.config.nullableAnnot),
-                            "null",
-                            true)))
-            .collect(toImmutableMap(Impact::toLocation, Function.identity())));
-    this.context = context;
+            .map(MethodRecord::toLocation)
+            .filter(
+                input ->
+                    !methodRegionRegistry
+                        .getImpactedRegionsByUse(input.toMethod())
+                        // skip methods that are not called anywhere. This has a significant impact
+                        // on performance.
+                        .isEmpty())
+            .collect(Collectors.toSet()));
+    // Collect public fields with non-primitive types.
+    locationsToCache.addAll(
+        context.targetModuleInfo.getFieldRegistry().getPublicFieldWithNonPrimitiveType().stream()
+            // skip fields that are not accessed anywhere. This has a significant impact
+            // on performance.
+            .filter(onField -> !fieldRegionRegistry.getImpactedRegionsByUse(onField).isEmpty())
+            .collect(Collectors.toSet()));
+    return locationsToCache.build();
   }
 
   @Override
   public void analyzeDownstreamDependencies() {
     System.out.println("Analyzing downstream dependencies...");
     DownstreamDependencySupplier supplier = new DownstreamDependencySupplier(context);
-    // Collect callers of public APIs in module.
-    MethodRegionRegistry methodRegionRegistry = new MethodRegionRegistry(supplier.getModuleInfo());
     // Generate fixes corresponding methods.
     ImmutableSet<Fix> fixes =
-        store.values().stream()
-            .filter(
-                input ->
-                    !methodRegionRegistry
-                        .getCallersOfMethod(input.toMethod().clazz, input.toMethod().method)
-                        .isEmpty()) // skip methods that are not called anywhere.
+        retrieveLocationsToCacheImpactsOnDownstreamDependencies(context, supplier.getModuleInfo())
+            .stream()
             .map(
-                downstreamImpact ->
+                location ->
                     new Fix(
-                        new AddMarkerAnnotation(
-                            downstreamImpact.toMethod(), context.config.nullableAnnot),
+                        new AddMarkerAnnotation(location, context.config.nullableAnnot),
                         "null",
                         false))
             .collect(ImmutableSet.toImmutableSet());
     DownstreamImpactEvaluator evaluator = new DownstreamImpactEvaluator(supplier);
     ImmutableSet<Report> reports = evaluator.evaluate(fixes);
     // Update method status based on the results.
-    this.store
-        .values()
-        .forEach(
-            methodImpact ->
-                reports.stream()
-                    .filter(input -> input.root.toMethod().equals(methodImpact.toMethod()))
-                    .findAny()
-                    .ifPresent(methodImpact::setStatus));
+    reports.forEach(
+        report -> {
+          DownstreamImpact impact = new DownstreamImpact(report);
+          store.put(report.root.toLocation(), impact);
+        });
     System.out.println("Analyzing downstream dependencies completed!");
   }
 
   /**
-   * Retrieves the corresponding {@link DownstreamImpact} to a fix.
+   * Retrieves the corresponding {@link DownstreamImpact} to a fix. The fix should be targeting a
+   * method or a field.
    *
    * @param fix Target fix.
    * @return Corresponding {@link DownstreamImpact}, null if not located.
@@ -128,8 +148,8 @@ public class DownstreamImpactCacheImpl
   @Nullable
   @Override
   public DownstreamImpact fetchImpact(Fix fix) {
-    if (!fix.isOnMethod()) {
-      // we currently store only impacts of fixes for methods on downstream dependencies.
+    if (!(fix.isOnMethod() || fix.isOnField())) {
+      // we currently store only impacts of fixes for methods / fields on downstream dependencies.
       return null;
     }
     return super.fetchImpact(fix);
@@ -178,7 +198,6 @@ public class DownstreamImpactCacheImpl
   @Override
   public ImmutableSet<Error> getTriggeredErrorsForCollection(Collection<Fix> fixTree) {
     return fixTree.stream()
-        .filter(Fix::isOnMethod)
         .flatMap(
             fix -> {
               DownstreamImpact impact = fetchImpact(fix);
@@ -189,8 +208,8 @@ public class DownstreamImpactCacheImpl
 
   @Override
   public ImmutableSet<Error> getTriggeredErrors(Fix fix) {
-    // We currently only store impact of methods on downstream dependencies.
-    if (!fix.isOnMethod()) {
+    // We currently only store impact of methods / fields on downstream dependencies.
+    if (!(fix.isOnMethod() || fix.isOnField())) {
       return ImmutableSet.of();
     }
     DownstreamImpact impact = fetchImpact(fix);
