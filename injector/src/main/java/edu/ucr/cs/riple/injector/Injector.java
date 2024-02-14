@@ -37,6 +37,7 @@ import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
@@ -147,16 +148,25 @@ public class Injector {
    */
   @Nullable
   public static CompilationUnit parse(Path path) {
-    // Set parser configuration to Java 17.
-    ParserConfiguration parserConfiguration = new ParserConfiguration();
-    parserConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
-    StaticJavaParser.setConfiguration(parserConfiguration);
-    try {
-      return StaticJavaParser.parse(path);
-    } catch (FileNotFoundException e) {
-      return null;
-    } catch (IOException e) {
-      throw new RuntimeException("Error happened on parsing file at: " + path, e);
-    }
+      // TODO: Figure out how to differentiate a generated file from a non-generated file.
+      if (path == null) {
+          return null;
+      }
+      // Set parser configuration to Java 17.
+      ParserConfiguration parserConfiguration = new ParserConfiguration();
+      parserConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
+      StaticJavaParser.setConfiguration(parserConfiguration);
+      try {
+          return StaticJavaParser.parse(path);
+      } catch (FileNotFoundException e) {
+          return null;
+      }
+      // Catch the NoSuchFileException and return null explicitly.
+      catch(NoSuchFileException e ){
+          return null;
+      }
+      catch (IOException e) {
+          throw new RuntimeException("Error happened on parsing file at: " + path, e);
+      }
   }
 }
