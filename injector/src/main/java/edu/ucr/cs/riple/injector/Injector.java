@@ -147,8 +147,7 @@ public class Injector {
    * @return Compilation unit tree, if the file does not exist, returns null.
    */
   @Nullable
-  public static CompilationUnit parse(Path path) {
-    // TODO: Figure out how to differentiate a generated file from a non-generated file.
+  public static CompilationUnit parse(@Nullable Path path) {
     if (path == null) {
       return null;
     }
@@ -158,8 +157,6 @@ public class Injector {
     StaticJavaParser.setConfiguration(parserConfiguration);
     try {
       return StaticJavaParser.parse(path);
-    } catch (FileNotFoundException e) {
-      return null;
     } catch (NoSuchFileException e) {
       return null;
     } catch (IOException e) {
