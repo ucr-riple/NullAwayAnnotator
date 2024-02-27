@@ -22,6 +22,7 @@
 
 package edu.ucr.cs.riple.injector.changes;
 
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
@@ -85,6 +86,18 @@ public abstract class TypeUseAnnotationChange extends AnnotationChange {
       if (!vde.getVariables().isEmpty()) {
         if (vde.getVariables().get(0).getInitializer().isPresent()) {
           Expression initializedValue = vde.getVariables().get(0).getInitializer().get();
+          if (initializedValue instanceof ObjectCreationExpr) {
+            initializedType = ((ObjectCreationExpr) initializedValue).getType();
+          }
+        }
+      }
+    }
+    if (node instanceof FieldDeclaration) {
+      FieldDeclaration fieldDeclaration = (FieldDeclaration) node;
+      for (int i = 0; i < fieldDeclaration.getVariables().size(); i++) {
+        if (fieldDeclaration.getVariables().get(i).getInitializer().isPresent()) {
+          Expression initializedValue =
+              fieldDeclaration.getVariables().get(i).getInitializer().get();
           if (initializedValue instanceof ObjectCreationExpr) {
             initializedType = ((ObjectCreationExpr) initializedValue).getType();
           }
