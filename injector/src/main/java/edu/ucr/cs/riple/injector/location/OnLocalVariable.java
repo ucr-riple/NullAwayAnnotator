@@ -46,6 +46,8 @@ public class OnLocalVariable extends Location {
   /** Name of the local variable. */
   public final String varName;
 
+  public boolean isOnArray = false;
+
   public OnLocalVariable(Path path, String clazz, String encMethod, String varName) {
     super(LocationKind.LOCAL_VARIABLE, path, clazz);
     this.encMethod = encMethod.equals("") ? null : new OnMethod(path, clazz, encMethod);

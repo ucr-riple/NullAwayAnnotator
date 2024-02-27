@@ -192,6 +192,7 @@ public class ChangeVisitor
         for (VariableDeclarationExpr variableDeclarationExpr : variables) {
           for (VariableDeclarator variableDeclarator : variableDeclarationExpr.getVariables()) {
             if (variableDeclarator.getName().toString().equals(onLocalVariable.varName)) {
+              onLocalVariable.isOnArray = variableDeclarator.getType().isArrayType();
               // Located the variable.
               return change.computeTextModificationOn(variableDeclarationExpr);
             }
@@ -212,6 +213,7 @@ public class ChangeVisitor
           }
           for (VariableDeclarator variableDeclarator : variableDeclarationExpr.getVariables()) {
             if (variableDeclarator.getName().toString().equals(onLocalVariable.varName)) {
+              onLocalVariable.isOnArray = variableDeclarator.getType().isArrayType();
               // Located the variable.
               return change.computeTextModificationOn(variableDeclarationExpr);
             }

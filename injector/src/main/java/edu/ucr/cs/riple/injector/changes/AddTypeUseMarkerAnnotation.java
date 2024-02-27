@@ -32,6 +32,7 @@ import com.github.javaparser.ast.type.Type;
 import com.google.common.collect.ImmutableList;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
+import edu.ucr.cs.riple.injector.location.OnLocalVariable;
 import edu.ucr.cs.riple.injector.modifications.Insertion;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.util.Objects;
@@ -106,6 +107,10 @@ public class AddTypeUseMarkerAnnotation extends TypeUseAnnotationChange implemen
    */
   @Nullable
   public AddTypeUseMarkerAnnotation toDeclaration() {
+    // check if the annotation is on array declaration
+    if (isOnLocalVariableArray() && typeIndex.contains(ImmutableList.of(0))) {
+      return null;
+    }
     if (typeIndex.contains(ImmutableList.of(0))) {
       return new AddTypeUseMarkerAnnotation(location, annotationName.simpleName);
     } else {
@@ -130,5 +135,13 @@ public class AddTypeUseMarkerAnnotation extends TypeUseAnnotationChange implemen
   @Override
   public String toString() {
     return super.toString() + ", index: " + typeIndex;
+  }
+
+  public boolean isOnLocalVariableArray() {
+    if (!location.isOnLocalVariable()) {
+      return false;
+    }
+    OnLocalVariable onLocalVariable = (OnLocalVariable) location;
+    return onLocalVariable.isOnArray;
   }
 }
