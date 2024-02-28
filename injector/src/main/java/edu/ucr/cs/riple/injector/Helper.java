@@ -625,6 +625,10 @@ public class Helper {
       return type.getRange().get();
     }
     if (type instanceof WildcardType) {
+      if (((WildcardType) type).getExtendedType().isEmpty()) {
+        // type is simply: "?"
+        return type.getRange().get();
+      }
       return findSimpleNameRangeInTypeName(((WildcardType) type).getExtendedType().orElse(null));
     }
     throw new RuntimeException(

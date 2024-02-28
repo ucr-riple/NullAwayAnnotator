@@ -26,6 +26,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.WildcardType;
 import com.github.javaparser.ast.visitor.GenericVisitorWithDefaults;
 import com.google.common.collect.ImmutableList;
 import edu.ucr.cs.riple.injector.modifications.Modification;
@@ -80,6 +81,15 @@ public class TypeArgumentChangeVisitor
   @Override
   public Set<Modification> visit(ArrayType type, TypeUseAnnotationChange change) {
     return type.getComponentType().accept(this, change);
+  }
+
+  public Set<Modification> visit(WildcardType type, TypeUseAnnotationChange change) {
+    Modification onType = change.computeTextModificationOnType(type, annotationExpr);
+    if (onType != null) {
+      return Set.of(onType);
+    } else {
+      return Collections.emptySet();
+    }
   }
 
   /** This will be called by every node visit method that is not overridden. */

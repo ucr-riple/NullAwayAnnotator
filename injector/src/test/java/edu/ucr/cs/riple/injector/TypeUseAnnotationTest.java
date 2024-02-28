@@ -675,4 +675,46 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
                 ImmutableList.of(ImmutableList.of(2, 0))))
         .start();
   }
+
+  @Test
+  public void additionOnWildCard() {
+    injectorTestHelper
+        .addInput("Foo.java", "package test;", "public class Foo {", "   Map<String, ?> map;", "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "   Map<String, @UnTainted ?> map;",
+            "}")
+        .addChanges(
+            new AddTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Collections.singleton("map")),
+                "edu.ucr.UnTainted",
+                ImmutableList.of(ImmutableList.of(2, 0))))
+        .start();
+  }
+
+  @Test
+  public void deletionOnWildCard() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "   Map<String, @UnTainted ?> map;",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "   Map<String, ?> map;",
+            "}")
+        .addChanges(
+            new RemoveTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Collections.singleton("map")),
+                "edu.ucr.UnTainted",
+                ImmutableList.of(ImmutableList.of(2, 0))))
+        .start();
+  }
 }
