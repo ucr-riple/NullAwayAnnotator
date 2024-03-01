@@ -83,6 +83,7 @@ public class TypeArgumentChangeVisitor
     return type.getComponentType().accept(this, change);
   }
 
+  @Override
   public Set<Modification> visit(WildcardType type, TypeUseAnnotationChange change) {
     Modification onType = change.computeTextModificationOnType(type, annotationExpr);
     if (onType != null) {
