@@ -49,29 +49,29 @@ public class Main {
     annotator.start();
   }
 
-  //  public static void main(String[] args) {
-  //    args =
-  //        new String[] {
-  //          "-d",
-  //          "/Users/nima/Developer/commons-configuration/annotator-out",
-  //          "-bc",
-  //          "cd /Users/nima/Developer/commons-configuration && ./annotator-command.sh",
-  //          "-cp",
-  //          "/Users/nima/Developer/commons-configuration/annotator-out/paths.tsv",
-  //          "-n",
-  //          "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted",
-  //          "-i",
-  //          "edu.ucr.cs.riple.taint.ucrtainting.qual.Init",
-  //          "-cn",
-  //          "UCRTaint",
-  //          "-rboserr",
-  //          "--depth",
-  //          "10",
-  //        };
-  //    Config config = new Config(args);
-  //    Annotator annotator = new Annotator(config);
-  //    annotator.start();
-  //  }
+  //    public static void main(String[] args) {
+  //      args =
+  //          new String[] {
+  //            "-d",
+  //            "/Users/nima/Developer/commons-configuration/annotator-out",
+  //            "-bc",
+  //            "cd /Users/nima/Developer/commons-configuration && ./annotator-command.sh",
+  //            "-cp",
+  //            "/Users/nima/Developer/commons-configuration/annotator-out/paths.tsv",
+  //            "-n",
+  //            "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted",
+  //            "-i",
+  //            "edu.ucr.cs.riple.taint.ucrtainting.qual.Init",
+  //            "-cn",
+  //            "UCRTaint",
+  //            "-rboserr",
+  //            "--depth",
+  //            "10",
+  //          };
+  //      Config config = new Config(args);
+  //      Annotator annotator = new Annotator(config);
+  //      annotator.start();
+  //    }
 
   //  public static boolean isTheFix(Set<Fix> fixes) {
   //    if (fixes.size() != 1) {

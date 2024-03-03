@@ -38,7 +38,6 @@ import edu.ucr.cs.riple.injector.changes.TypeUseAnnotationChange;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -69,13 +68,13 @@ public class Injector {
           changeList = filterChange(changeList);
           combineTypeArgumentIndices(changeList);
           CompilationUnit tree;
-          if(path == null || path.toString().equals("null")){
-              return;
+          if (path == null || path.toString().equals("null")) {
+            return;
           }
           try {
             tree = StaticJavaParser.parse(path);
           } catch (Exception exception) {
-            System.err.println("Parse error on: " + path + " " + exception);
+            System.err.println("Parse error on: " + path + " " + exception.getClass());
             return;
           }
           ChangeVisitor visitor = new ChangeVisitor(tree);
