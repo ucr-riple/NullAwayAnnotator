@@ -717,4 +717,79 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
                 ImmutableList.of(ImmutableList.of(2, 0))))
         .start();
   }
+
+  @Test
+  public void wildCardExtendedType() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "   public synchronized ConfigurationBuilder<? extends HierarchicalConfiguration<?>> m() throws ConfigurationException {}",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "   public synchronized ConfigurationBuilder<? extends @UnTainted HierarchicalConfiguration<?>> m() throws ConfigurationException {}",
+            "}")
+        .addChanges(
+            new AddTypeUseMarkerAnnotation(
+                new OnMethod("Foo.java", "test.Foo", "m()"),
+                "edu.ucr.UnTainted",
+                ImmutableList.of(ImmutableList.of(1, 0))))
+        .start();
+  }
+
+  @Test
+  public void existingWildCardExtendedType() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "   public synchronized ConfigurationBuilder<? extends @UnTainted HierarchicalConfiguration<?>> m() throws ConfigurationException {}",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "   public synchronized ConfigurationBuilder<? extends @UnTainted HierarchicalConfiguration<?>> m() throws ConfigurationException {}",
+            "}")
+        .addChanges(
+            new AddTypeUseMarkerAnnotation(
+                new OnMethod("Foo.java", "test.Foo", "m()"),
+                "edu.ucr.UnTainted",
+                ImmutableList.of(ImmutableList.of(1, 0))))
+        .start();
+  }
+
+  @Test
+  public void removeWildCardExtendedType() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "   public synchronized ConfigurationBuilder<? extends @UnTainted HierarchicalConfiguration<?>> m() throws ConfigurationException {}",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "   public synchronized ConfigurationBuilder<? extends HierarchicalConfiguration<?>> m() throws ConfigurationException {}",
+            "}")
+        .addChanges(
+            new RemoveTypeUseMarkerAnnotation(
+                new OnMethod("Foo.java", "test.Foo", "m()"),
+                "edu.ucr.UnTainted",
+                ImmutableList.of(ImmutableList.of(1, 0))))
+        .start();
+  }
 }
+
+// public synchronized ConfigurationBuilder<? extends HierarchicalConfiguration<?>>
+// getDefinitionBuilder() throws ConfigurationException {

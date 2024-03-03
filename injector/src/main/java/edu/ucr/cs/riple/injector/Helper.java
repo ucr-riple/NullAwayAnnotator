@@ -48,6 +48,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.PrimitiveType;
+import com.github.javaparser.ast.type.ReferenceType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.WildcardType;
 import com.google.common.base.Preconditions;
@@ -437,6 +438,10 @@ public class Helper {
    * @return true if the node is annotated with the annotation.
    */
   public static boolean isAnnotatedWith(Type type, AnnotationExpr expr) {
+    if (type instanceof WildcardType) {
+      Optional<ReferenceType> extendedType = ((WildcardType) type).getExtendedType();
+      return extendedType.isPresent() && isAnnotatedWith(extendedType.get(), expr);
+    }
     return type.getAnnotations().stream().anyMatch(annot -> annot.equals(expr));
   }
 

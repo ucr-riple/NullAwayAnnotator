@@ -26,7 +26,9 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
+import com.github.javaparser.ast.type.ReferenceType;
 import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.ast.type.WildcardType;
 import com.google.common.collect.ImmutableList;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -61,6 +63,12 @@ public class RemoveTypeUseMarkerAnnotation extends TypeUseAnnotationChange
   @Override
   public Modification computeTextModificationOnType(Type type, AnnotationExpr annotationExpr) {
     // Remove the annotation from the type if exists e.g. java.lang.@Annot String f;
+    if (type instanceof WildcardType) {
+      Optional<ReferenceType> extendedType = ((WildcardType) type).getExtendedType();
+      if (extendedType.isPresent()) {
+        type = extendedType.get();
+      }
+    }
     for (AnnotationExpr expr : type.getAnnotations()) {
       if (expr.equals(annotationExpr)) {
         Optional<Range> annotRange = expr.getRange();
