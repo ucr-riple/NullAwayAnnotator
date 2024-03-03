@@ -790,6 +790,3 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
         .start();
   }
 }
-
-// public synchronized ConfigurationBuilder<? extends HierarchicalConfiguration<?>>
-// getDefinitionBuilder() throws ConfigurationException {

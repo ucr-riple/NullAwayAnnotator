@@ -69,9 +69,13 @@ public class Injector {
           changeList = filterChange(changeList);
           combineTypeArgumentIndices(changeList);
           CompilationUnit tree;
+          if(path == null || path.toString().equals("null")){
+              return;
+          }
           try {
             tree = StaticJavaParser.parse(path);
           } catch (IOException exception) {
+            System.err.println("Parse error on: " + path + " " + exception);
             return;
           }
           ChangeVisitor visitor = new ChangeVisitor(tree);

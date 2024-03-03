@@ -253,7 +253,6 @@ public class Utility {
    * @param context Annotator context.
    */
   public static void buildTarget(Context context) {
-    System.gc();
     try {
       Files.deleteIfExists(context.config.target.dir.resolve("errors.json"));
     } catch (IOException e) {
