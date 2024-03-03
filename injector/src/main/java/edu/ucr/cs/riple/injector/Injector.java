@@ -76,7 +76,6 @@ public class Injector {
             tree = StaticJavaParser.parse(path);
           } catch (Exception exception) {
             System.err.println("Parse error on: " + path + " " + exception);
-            System.exit(0);
             return;
           }
           ChangeVisitor visitor = new ChangeVisitor(tree);
