@@ -35,6 +35,7 @@ import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.injector.changes.AddTypeUseMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.LocationKind;
+import edu.ucr.cs.riple.injector.location.OnClass;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.io.IOException;
@@ -110,13 +111,14 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
 
   private UCRTaintError deserializeErrorFromJSON(JSONObject errorsJson, ModuleInfo moduleInfo) {
     String errorType = (String) errorsJson.get("messageKey");
-    int offset = ((Long) errorsJson.get("offset")).intValue();
-    Path path = Paths.get((String) errorsJson.get("path"));
-    offset = context.offsetHandler.getOriginalOffset(path, offset);
+    int index = ((Long) errorsJson.get("index")).intValue();
     Region region =
         new Region(
             (String) ((JSONObject) errorsJson.get("region")).get("class"),
             (String) ((JSONObject) errorsJson.get("region")).get("symbol"));
+    int offset = ((Long) errorsJson.get("offset")).intValue();
+    Path path = Paths.get((String) errorsJson.get("path"));
+    offset = context.offsetHandler.getOriginalOffset(path, offset);
     ImmutableSet.Builder<Fix> builder = ImmutableSet.builder();
     ((JSONArray) errorsJson.get("fixes"))
         .forEach(
@@ -130,6 +132,15 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
               }
               Location location =
                   Location.createLocationFromJSON((JSONObject) fixJson.get("location"));
+              if (location.path == null || location.path.toString().equals("null")) {
+                // might be due to compiler bugs in the serialization for fixes on unwatched
+                // classes. This is last try to get the path from the field registry.
+                OnClass onClass =
+                    context.targetModuleInfo.getFieldRegistry().getLocationOnClass(location.clazz);
+                if (onClass != null && onClass.path != null) {
+                  location.path = onClass.path;
+                }
+              }
               ImmutableList<ImmutableList<Integer>> typeIndex =
                   getTypePositionIndices((JSONObject) fixJson.get("location"));
               location.ifField(onField -> extendVariableList(onField, moduleInfo));
@@ -139,7 +150,11 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
                       errorType,
                       true));
             });
-    return new UCRTaintError(errorType, "", region, offset, builder.build());
+    ImmutableSet<Fix> fixes = builder.build();
+    //    if (index == 1) {
+    //      Main.setFixes(fixes);
+    //    }
+    return new UCRTaintError(errorType, "index: " + index, region, offset, fixes);
   }
 
   private Set<Fix> createPolyMethodFixes(String errorType, JSONObject fixJson) {

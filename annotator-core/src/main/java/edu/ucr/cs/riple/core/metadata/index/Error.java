@@ -154,7 +154,7 @@ public abstract class Error {
     Error other = (Error) o;
     return messageType.equals(other.messageType)
         && region.equals(other.region)
-        && message.equals(other.message)
+        //        && message.equals(other.message)
         && resolvingFixes.equals(other.resolvingFixes)
         && offset == other.offset;
   }
@@ -174,7 +174,7 @@ public abstract class Error {
 
   @Override
   public int hashCode() {
-    return Objects.hash(messageType, message, region, resolvingFixes, offset);
+    return Objects.hash(messageType, region, resolvingFixes, offset);
   }
 
   @Override
@@ -187,6 +187,9 @@ public abstract class Error {
         + '\''
         + ", offset='"
         + offset
+        + '\''
+        + ", fix size='"
+        + resolvingFixes.size()
         + '\'';
   }
 

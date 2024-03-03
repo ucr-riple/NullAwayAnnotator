@@ -24,7 +24,10 @@
 
 package edu.ucr.cs.riple.core;
 
+import edu.ucr.cs.riple.core.metadata.index.Fix;
 import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
 
 /** Starting point. */
 public class Main {
@@ -50,12 +53,11 @@ public class Main {
   //    args =
   //        new String[] {
   //          "-d",
-  //          "/Users/nima/Downloads/annotator-inference-debug/annotator-out",
+  //          "/Users/nima/Developer/commons-configuration/annotator-out",
   //          "-bc",
-  //          "cd /Users/nima/Downloads/annotator-inference-debug && ./gradlew compileJava
-  // --rerun-tasks",
+  //          "cd /Users/nima/Developer/commons-configuration && ./annotator-command.sh",
   //          "-cp",
-  //          "/Users/nima/Downloads/annotator-inference-debug/annotator-out/paths.tsv",
+  //          "/Users/nima/Developer/commons-configuration/annotator-out/paths.tsv",
   //          "-n",
   //          "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted",
   //          "-i",
@@ -64,7 +66,7 @@ public class Main {
   //          "UCRTaint",
   //          "-rboserr",
   //          "--depth",
-  //          "7",
+  //          "10",
   //        };
   //    Config config = new Config(args);
   //    Annotator annotator = new Annotator(config);
@@ -91,4 +93,16 @@ public class Main {
   //    }
   //    return true;
   //  }
+
+  static final Set<Fix> fixes = new HashSet<>();
+
+  public static boolean isTheFix(Set<Fix> checkFixes) {
+    return fixes.equals(checkFixes);
+  }
+
+  public static void setFixes(Set<Fix> newFixes) {
+    if (fixes.isEmpty()) {
+      fixes.addAll(newFixes);
+    }
+  }
 }

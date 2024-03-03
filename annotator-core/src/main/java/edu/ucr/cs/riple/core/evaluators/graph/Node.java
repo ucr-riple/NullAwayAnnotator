@@ -191,6 +191,7 @@ public class Node {
             .collect(Collectors.toSet()));
     this.tree.addAll(triggeredFixesFromDownstreamErrors);
     this.tree.forEach(fix -> fix.fixSourceIsInTarget = true);
+    this.triggeredErrors = ImmutableSet.of();
   }
 
   @Override

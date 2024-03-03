@@ -72,6 +72,9 @@ public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcess
             + " fixes");
     ProgressBar pb = Utility.createProgressBar("Processing", nonConflictingGroups.size());
     for (Set<Node> group : nonConflictingGroups) {
+      //      if (group.stream().noneMatch(node -> Main.isTheFix(node.root))) {
+      //        continue;
+      //      }
       pb.step();
       Set<Fix> fixes =
           group.stream().flatMap(node -> node.tree.stream()).collect(Collectors.toSet());
