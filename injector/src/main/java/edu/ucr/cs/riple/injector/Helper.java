@@ -22,6 +22,7 @@
 
 package edu.ucr.cs.riple.injector;
 
+import com.github.javaparser.JavaToken;
 import com.github.javaparser.Range;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -393,7 +394,7 @@ public class Helper {
       return ((MethodDeclaration) node).getType();
     }
     if (node instanceof FieldDeclaration) {
-      return ((FieldDeclaration) node).getElementType();
+      return ((FieldDeclaration) node).getVariables().get(0).getType();
     }
     if (node instanceof VariableDeclarationExpr) {
       NodeList<VariableDeclarator> decls = ((VariableDeclarationExpr) node).getVariables();
@@ -422,12 +423,12 @@ public class Helper {
    * @return the type of the node.
    */
   public static Type getType(NodeWithAnnotations<?> node) {
-    // Currently, we only annotate the element types (contents) of an array, not the pointer
-    // itself.
-    // TODO: This should be updated in a follow-up PR. This will reflect both type-use and
-    // TODO: type-declaration annotations.
     Type type = getTypeFromNode(node);
-    return type instanceof ArrayType ? ((ArrayType) type).getComponentType() : type;
+    if (type instanceof ArrayType) {
+      // on array types, javaparser considers the component type as a reference.
+      ((ArrayType) type).getComponentType().setAnnotations(node.getAnnotations());
+    }
+    return type;
   }
 
   /**
@@ -621,7 +622,25 @@ public class Helper {
       return ((ClassOrInterfaceType) type).getName().getRange().get();
     }
     if (type instanceof ArrayType) {
-      return findSimpleNameRangeInTypeName(((ArrayType) type).getComponentType());
+      ArrayType arrayType = (ArrayType) type;
+      if (arrayType.getTokenRange().isEmpty()) {
+        return null;
+      }
+      Range componentTypeRange = findSimpleNameRangeInTypeName(arrayType.getComponentType());
+      if (componentTypeRange == null) {
+        return null;
+      }
+      Range ans = null;
+      for (JavaToken token : arrayType.getTokenRange().get()) {
+        if (token.getText().equals("[")) {
+          if (token.getRange().isEmpty()) {
+            return null;
+          }
+          ans = token.getRange().get();
+          break;
+        }
+      }
+      return ans;
     }
     if (type instanceof PrimitiveType) {
       if (type.getRange().isEmpty()) {

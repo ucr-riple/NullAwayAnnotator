@@ -1,0 +1,3 @@
+injector/src/main/java/edu/ucr/cs/riple/injector/Helper.java:430:    return type instanceof ArrayType ? ((ArrayType) type).getComponentType() : type;
+injector/src/main/java/edu/ucr/cs/riple/injector/Helper.java:624:      return findSimpleNameRangeInTypeName(((ArrayType) type).getComponentType());
+injector/src/main/java/edu/ucr/cs/riple/injector/changes/TypeArgumentChangeVisitor.java:83:    return type.getComponentType().accept(this, change);

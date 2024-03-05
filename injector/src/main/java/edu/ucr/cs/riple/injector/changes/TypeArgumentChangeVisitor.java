@@ -33,6 +33,7 @@ import edu.ucr.cs.riple.injector.modifications.Modification;
 import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -68,7 +69,7 @@ public class TypeArgumentChangeVisitor
         return Collections.emptySet();
       }
     }
-    if (type.getTypeArguments().isEmpty() || this.index.size() == 0) {
+    if (type.getTypeArguments().isEmpty() || this.index.isEmpty()) {
       return Collections.emptySet();
     }
     int index = this.index.pollFirst() - 1;
@@ -80,7 +81,15 @@ public class TypeArgumentChangeVisitor
 
   @Override
   public Set<Modification> visit(ArrayType type, TypeUseAnnotationChange change) {
-    return type.getComponentType().accept(this, change);
+    if (index.size() == 2 && index.containsAll(List.of(1, 0))) {
+      Modification onComponent =
+          change.computeTextModificationOnType(type.getComponentType(), annotationExpr);
+      return onComponent != null ? Set.of(onComponent) : Collections.emptySet();
+    }
+    if (index.size() == 1 && index.getFirst() == 0) {
+      return type.accept(this, change);
+    }
+    return Collections.emptySet();
   }
 
   @Override
