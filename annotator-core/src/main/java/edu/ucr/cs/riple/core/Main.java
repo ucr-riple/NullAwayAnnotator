@@ -49,49 +49,33 @@ public class Main {
     annotator.start();
   }
 
-  //    public static void main(String[] args) {
-  //      args =
-  //          new String[] {
-  //            "-d",
-  //            "/Users/nima/Developer/commons-configuration/annotator-out",
-  //            "-bc",
-  //            "cd /Users/nima/Developer/commons-configuration && ./annotator-command.sh",
-  //            "-cp",
-  //            "/Users/nima/Developer/commons-configuration/annotator-out/paths.tsv",
-  //            "-n",
-  //            "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted",
-  //            "-i",
-  //            "edu.ucr.cs.riple.taint.ucrtainting.qual.Init",
-  //            "-cn",
-  //            "UCRTaint",
-  //            "-rboserr",
-  //            "--depth",
-  //            "10",
-  //          };
-  //      Config config = new Config(args);
-  //      Annotator annotator = new Annotator(config);
-  //      annotator.start();
-  //    }
-
-  //  public static boolean isTheFix(Set<Fix> fixes) {
-  //    if (fixes.size() != 1) {
-  //      return false;
-  //    }
-  //    Fix fix = fixes.iterator().next();
-  //    //
-  //    //
-  // "annotation":"untainted","location":{"path":"/home/nima/Developer/taint-benchmarks/logisim-evolution/src/main/java/com/cburch/logisim/util/LineBuffer.java","type-variable-position":[[1,0]],"method":"get()","kind":"METHOD","class":"com.cburch.logisim.util.LineBuffer"}}]},
-  //    if (!fix.isOnMethod()) {
-  //      return false;
-  //    }
-  //    OnMethod onMethod = fix.toMethod();
-  //    if (!onMethod.method.equals("get()")) {
-  //      return false;
-  //    }
-  //    if (!onMethod.clazz.equals("com.cburch.logisim.util.LineBuffer")) {
-  //      return false;
-  //    }
-  //    return true;
+  //  public static void main(String[] args) {
+  //    String benchmarkPath = "/home/nima/Developer/taint-benchmarks/alfresco-community-repo";
+  //    String module = null; // or "remote-api"
+  //    args =
+  //        new String[] {
+  //          "-d",
+  //          String.format("%s/annotator-out%s", benchmarkPath, module == null ? "" : "/" +
+  // module),
+  //          "-bc",
+  //          String.format("cd %s && ./annotator-command.sh", benchmarkPath),
+  //          "-cp",
+  //          String.format("%s/annotator-out%s/paths.tsv", benchmarkPath, module == null ? "" : "/"
+  // + module),
+  //          "-n",
+  //          "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted",
+  //          "-i",
+  //          "edu.ucr.cs.riple.taint.ucrtainting.qual.Init",
+  //          "-cn",
+  //          "UCRTaint",
+  //          "-rboserr",
+  //          "--depth",
+  //          "10",
+  //        };
+  //    System.out.println("args: " + String.join(" ", args));
+  //    Config config = new Config(args);
+  //    Annotator annotator = new Annotator(config);
+  //    annotator.start();
   //  }
 
   static final Set<Fix> fixes = new HashSet<>();
