@@ -49,34 +49,34 @@ public class Main {
     annotator.start();
   }
 
-  //  public static void main(String[] args) {
-  //    String benchmarkPath = "/home/nima/Developer/taint-benchmarks/alfresco-community-repo";
-  //    String module = null; // or "remote-api"
-  //    args =
-  //        new String[] {
-  //          "-d",
-  //          String.format("%s/annotator-out%s", benchmarkPath, module == null ? "" : "/" +
+  //    public static void main(String[] args) {
+  //      String benchmarkPath = "/Users/nima/Developer/alfresco-community-repo";
+  //      String module = "core"; // or "remote-api"
+  //      args =
+  //          new String[] {
+  //            "-d",
+  //            String.format("%s/annotator-out%s", benchmarkPath, module == null ? "" : "/" +
   // module),
-  //          "-bc",
-  //          String.format("cd %s && ./annotator-command.sh", benchmarkPath),
-  //          "-cp",
-  //          String.format("%s/annotator-out%s/paths.tsv", benchmarkPath, module == null ? "" : "/"
-  // + module),
-  //          "-n",
-  //          "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted",
-  //          "-i",
-  //          "edu.ucr.cs.riple.taint.ucrtainting.qual.Init",
-  //          "-cn",
-  //          "UCRTaint",
-  //          "-rboserr",
-  //          "--depth",
-  //          "10",
-  //        };
-  //    System.out.println("args: " + String.join(" ", args));
-  //    Config config = new Config(args);
-  //    Annotator annotator = new Annotator(config);
-  //    annotator.start();
-  //  }
+  //            "-bc",
+  //            String.format("cd %s && ./annotator-command.sh", benchmarkPath),
+  //            "-cp",
+  //            String.format("%s/annotator-out%s/paths.tsv", benchmarkPath, module == null ? "" :
+  // "/" + module),
+  //            "-n",
+  //            "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted",
+  //            "-i",
+  //            "edu.ucr.cs.riple.taint.ucrtainting.qual.Init",
+  //            "-cn",
+  //            "UCRTaint",
+  //            "-rboserr",
+  //            "--depth",
+  //            "10",
+  //          };
+  //      System.out.println("args: " + String.join(" ", args));
+  //      Config config = new Config(args);
+  //      Annotator annotator = new Annotator(config);
+  //      annotator.start();
+  //    }
 
   static final Set<Fix> fixes = new HashSet<>();
 

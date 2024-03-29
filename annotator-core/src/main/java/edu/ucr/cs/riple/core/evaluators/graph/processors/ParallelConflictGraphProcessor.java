@@ -37,7 +37,6 @@ import edu.ucr.cs.riple.core.util.Utility;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import me.tongfei.progressbar.ProgressBar;
 
@@ -79,8 +78,6 @@ public class ParallelConflictGraphProcessor extends AbstractConflictGraphProcess
       pb.step();
       Set<Fix> fixes =
           group.stream().flatMap(node -> node.tree.stream()).collect(Collectors.toSet());
-      System.out.println("Checking fixes:");
-      fixes.forEach(fix -> System.out.println(fix.change));
       injector.injectFixes(fixes);
       Utility.timeStamp(context.config);
       compilerRunner.run();

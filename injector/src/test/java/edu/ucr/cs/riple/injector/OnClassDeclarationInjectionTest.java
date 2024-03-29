@@ -73,4 +73,91 @@ public class OnClassDeclarationInjectionTest extends BaseInjectorTest {
                 ImmutableList.of(ImmutableList.of(1, 0))))
         .start();
   }
+
+  @Test
+  public void additionOnAnonymousClassTest() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "public class Test {",
+            "   void test() {",
+            "   @RUntainted",
+            "   File uriFile =",
+            "       new File(",
+            "           AccessController.doPrivileged(",
+            "             new PrivilegedAction<String>() {",
+            "               public String run() {",
+            "                 return null;",
+            "               }",
+            "             }));",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.custom.RUntainted;",
+            "public class Test {",
+            "   void test() {",
+            "   @RUntainted",
+            "   File uriFile =",
+            "       new File(",
+            "           AccessController.doPrivileged(",
+            "             new PrivilegedAction<@RUntainted String>() {",
+            "               public String run() {",
+            "                 return null;",
+            "               }",
+            "             }));",
+            "   }",
+            "}")
+        .addChanges(
+            new AddTypeUseMarkerAnnotation(
+                new OnClassDeclaration("Foo.java", "test.Test$1", "java.security.PrivilegedAction"),
+                "edu.custom.RUntainted",
+                ImmutableList.of(ImmutableList.of(1, 0))))
+        .start();
+  }
+
+  @Test
+  public void deletionOnAnonymousClassTest() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.custom.RUntainted;",
+            "public class Test {",
+            "   void test() {",
+            "   @RUntainted",
+            "   File uriFile =",
+            "       new File(",
+            "           AccessController.doPrivileged(",
+            "             new PrivilegedAction<@RUntainted String>() {",
+            "               public String run() {",
+            "                 return null;",
+            "               }",
+            "             }));",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.custom.RUntainted;",
+            "public class Test {",
+            "   void test() {",
+            "   @RUntainted",
+            "   File uriFile =",
+            "       new File(",
+            "           AccessController.doPrivileged(",
+            "             new PrivilegedAction<String>() {",
+            "               public String run() {",
+            "                 return null;",
+            "               }",
+            "             }));",
+            "   }",
+            "}")
+        .addChanges(
+            new RemoveTypeUseMarkerAnnotation(
+                new OnClassDeclaration("Foo.java", "test.Test$1", "java.security.PrivilegedAction"),
+                "edu.custom.RUntainted",
+                ImmutableList.of(ImmutableList.of(1, 0))))
+        .start();
+  }
 }

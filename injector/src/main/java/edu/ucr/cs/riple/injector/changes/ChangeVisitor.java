@@ -33,7 +33,9 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.utils.Pair;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
@@ -231,17 +233,28 @@ public class ChangeVisitor
     final ASTChange change = pair.b;
     // Get the enclosing class of the members
     Optional<Node> optionalClass = members.getParentNode();
-    if (optionalClass.isEmpty() || !(optionalClass.get() instanceof BodyDeclaration<?>)) {
+    if (optionalClass.isEmpty()) {
       return null;
     }
-    BodyDeclaration<?> enclosingClass = (BodyDeclaration<?>) optionalClass.get();
-    if (!(enclosingClass instanceof ClassOrInterfaceDeclaration)) {
+    Stream<ClassOrInterfaceType> typeStream = null;
+    if (optionalClass.get() instanceof BodyDeclaration<?>) {
+      BodyDeclaration<?> enclosingClass = (BodyDeclaration<?>) optionalClass.get();
+      if (enclosingClass instanceof ClassOrInterfaceDeclaration) {
+        ClassOrInterfaceDeclaration declaration = (ClassOrInterfaceDeclaration) enclosingClass;
+        typeStream =
+            Stream.concat(
+                declaration.getImplementedTypes().stream(),
+                declaration.getExtendedTypes().stream());
+      }
+    }
+    if (optionalClass.get() instanceof ObjectCreationExpr) {
+      typeStream = Stream.of(((ObjectCreationExpr) optionalClass.get()).getType());
+    }
+    if (typeStream == null) {
       return null;
     }
     final Modification[] modification = {null};
-    ClassOrInterfaceDeclaration declaration = (ClassOrInterfaceDeclaration) enclosingClass;
-    Stream.concat(
-            declaration.getImplementedTypes().stream(), declaration.getExtendedTypes().stream())
+    typeStream
         .filter(
             type ->
                 Helper.simpleName(type.getNameAsString())
