@@ -103,6 +103,7 @@ public class OnMethod extends Location {
 
   @Override
   public String toString() {
-    return "OnMethod{" + "method='" + method + '\'' + ", clazz='" + clazz + '\'' + '}';
+    String onPath = this.path == null ? ", Path is null " : "";
+    return "OnMethod{" + "method='" + method + '\'' + ", clazz='" + clazz + '\'' + onPath + '}';
   }
 }

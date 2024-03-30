@@ -115,6 +115,7 @@ public class OnField extends Location {
 
   @Override
   public String toString() {
-    return "OnField{" + "variables=" + variables + ", clazz='" + clazz + '\'' + '}';
+    String onPath = this.path == null ? ", Path is null " : "";
+    return "OnField{" + "variables=" + variables + ", clazz='" + clazz + '\'' + onPath + '}';
   }
 }

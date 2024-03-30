@@ -51,4 +51,9 @@ public class OnClassDeclaration extends Location {
   public <R, P> R accept(LocationVisitor<R, P> v, P p) {
     return v.visitClassDeclaration(this, p);
   }
+
+  @Override
+  public String toString() {
+    return "OnClassDeclaration{" + ", clazz='" + clazz + '\'' + ", path=" + path + '}';
+  }
 }

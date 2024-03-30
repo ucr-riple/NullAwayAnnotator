@@ -102,6 +102,7 @@ public class OnLocalVariable extends Location {
 
   @Override
   public String toString() {
+    String onPath = this.path == null ? ", Path is null " : "";
     return "OnLocalVariable{"
         + "encMethod='"
         + encMethod
@@ -111,6 +112,7 @@ public class OnLocalVariable extends Location {
         + '\''
         + "varName='"
         + varName
+        + onPath
         + '}';
   }
 }
