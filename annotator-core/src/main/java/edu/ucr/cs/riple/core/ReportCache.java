@@ -96,7 +96,8 @@ public class ReportCache {
 
   /** Disabled cache. */
   public void disable() {
-    this.enabled = false;
+    this.store.clear();
+    this.enabled = true;
   }
 
   /**
