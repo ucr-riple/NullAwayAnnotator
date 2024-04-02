@@ -1,5 +1,9 @@
 ## CHANGELOG
 
+### Version 1.3.13
+- Added support for fixes on record declarations.
+- Bug fixes and refactorings.
+
 ### Version 1.3.12
 - Set the java parser language level to 17 making the tool adaptable to source code written in Java 17.
 
