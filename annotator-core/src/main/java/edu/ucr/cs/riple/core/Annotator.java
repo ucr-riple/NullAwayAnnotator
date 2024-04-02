@@ -121,7 +121,7 @@ public class Annotator {
         executeNextIteration(targetModuleCache, downstreamImpactCache);
         System.out.println("Doing final search...");
         int i = 0;
-        while (addedMoreFixes && i < 5) {
+        while (addedMoreFixes && i < 3) {
           i++;
           Utility.buildTarget(context);
           System.out.println(i + " - Added fixes, looking for more fixes...");
