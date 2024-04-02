@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.cache.TargetModuleCache;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.cache.downstream.VoidDownstreamImpactCache;
+import edu.ucr.cs.riple.core.checkers.ucrtaint.UCRTaintError;
 import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
 import edu.ucr.cs.riple.core.evaluators.Evaluator;
 import edu.ucr.cs.riple.core.evaluators.VoidEvaluator;
@@ -52,6 +53,7 @@ public class Annotator {
   public final ReportCache cache;
   /** Annotator configuration. */
   public final Config config;
+  boolean addedMoreFixes = false;
 
   public Annotator(Config config) {
     this.config = config;
@@ -102,7 +104,7 @@ public class Annotator {
     downstreamImpactCache.analyzeDownstreamDependencies();
     TargetModuleCache targetModuleCache = new TargetModuleCache();
     if (config.inferenceActivated) {
-      System.out.println("Max Depth level: " + config.depth);
+      System.out.println("Max Depth level: " + config.depth + ", chain: " + config.chain);
       // Outer loop starts.
       while (cache.isUpdated()) {
         executeNextIteration(targetModuleCache, downstreamImpactCache);
@@ -113,7 +115,18 @@ public class Annotator {
       // Perform once last iteration including all fixes.
       if (!config.disableOuterLoop) {
         cache.disable();
+        System.out.println("Doing additional search...");
+        System.out.println("Setting Chain from " + config.chain + " to true");
+        config.chain = true;
         executeNextIteration(targetModuleCache, downstreamImpactCache);
+        System.out.println("Doing final search...");
+        int i = 0;
+        while (addedMoreFixes && i < 5) {
+          i++;
+          Utility.buildTarget(context);
+          System.out.println(i + " - Added fixes, looking for more fixes...");
+          executeNextIteration(targetModuleCache, downstreamImpactCache);
+        }
         cache.enable();
       }
     }
@@ -153,6 +166,7 @@ public class Annotator {
             .flatMap(report -> config.chain ? report.tree.stream() : report.root.stream())
             .collect(Collectors.toSet());
     context.injector.injectFixes(selectedFixes);
+    addedMoreFixes = !selectedFixes.isEmpty();
     // Update log.
     context.log.updateInjectedAnnotations(
         selectedFixes.stream().map(fix -> fix.change).collect(Collectors.toSet()));

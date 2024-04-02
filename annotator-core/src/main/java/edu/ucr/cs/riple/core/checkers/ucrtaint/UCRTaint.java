@@ -137,8 +137,12 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
                 // classes. This is last try to get the path from the field registry.
                 OnClass onClass =
                     context.targetModuleInfo.getFieldRegistry().getLocationOnClass(location.clazz);
-                if (onClass != null && onClass.path != null) {
+                if (onClass != null
+                    && onClass.path != null
+                    && onClass.path.toString().equals("null")) {
                   location.path = onClass.path;
+                } else {
+                  return;
                 }
               }
               ImmutableList<ImmutableList<Integer>> typeIndex =
@@ -151,9 +155,7 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
                       true));
             });
     ImmutableSet<Fix> fixes = builder.build();
-    //    if (index == 1) {
-    //      Main.setFixes(fixes);
-    //    }
+    edu.ucr.cs.riple.core.Main.setFixes(index, fixes);
     return new UCRTaintError(errorType, "index: " + index, region, offset, fixes);
   }
 

@@ -80,7 +80,7 @@ public class Config {
    * If activated, all containing fixes in the fix tree will be applied to the source code,
    * otherwise only the root fix will be applied.
    */
-  public final boolean chain;
+  public boolean chain;
   /**
    * If enabled, at each iteration fixes with effectiveness will be tagged to exclude them in
    * further iterations.

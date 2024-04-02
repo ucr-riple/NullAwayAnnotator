@@ -221,4 +221,9 @@ public class Node {
     Node node = (Node) o;
     return root.equals(node.root);
   }
+
+  @Override
+  public String toString() {
+    return "root:" + root;
+  }
 }

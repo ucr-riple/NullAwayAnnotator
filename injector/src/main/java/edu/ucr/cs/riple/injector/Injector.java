@@ -113,7 +113,7 @@ public class Injector {
           } catch (Exception e) {
             System.out.println("Error happened on: " + path);
             try {
-              Path bakPath = Paths.get(path.toString() + ".bak");
+              Path bakPath = Paths.get(path + ".bak");
               Files.createFile(bakPath);
               if (contentBefore == null) {
                 return;
