@@ -1,5 +1,10 @@
 public class Test {
 
+    @RUntainted List<Map<List<@RUntainted String>, @RUntainted String>> s;
+
+    private @RUntainted String a;
+    @RUntainted String b;
+
     List<@RUntainted String> m = new ArrayList<@RUntainted String>(), n = new ArrayList<@RUntainted String>();
 
     public void useI(I i, Map<? extends @RUntainted String, ? extends @RUntainted String> map){
@@ -22,5 +27,8 @@ public class Test {
         public void bar(@RUntainted List<Map<List<@RUntainted String>, @RUntainted String>> s){
             System.out.println(s);
         }
+    }
+
+    private java.lang.@RUntainted Number findNumberName() {
     }
 }

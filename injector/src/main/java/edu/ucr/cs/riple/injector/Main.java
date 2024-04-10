@@ -144,27 +144,25 @@ public class Main {
         return;
       }
       boolean annotOnTopLevel =
-          Helper.isAnnotatedWith(node, ANNOTATION) || Helper.isAnnotatedWith(type, ANNOTATION);
-      int count = annotOnTopLevel ? 1 : 0;
-      count += type.accept(new AnnotationCounter(), null);
-      if (count > 0) {
+          Helper.isAnnotatedWith(node, ANNOTATION) && !Helper.isAnnotatedWith(type, ANNOTATION);
+      int count = type.accept(new AnnotationCounter(), null);
+      if (count > 0 || annotOnTopLevel) {
         String n = node.toString();
         if (node instanceof MethodDeclaration) {
           n = ((MethodDeclaration) node).getDeclarationAsString();
         }
-        System.out.println(
-            n
-                + " - "
-                + "top-level "
-                + (annotOnTopLevel ? "1" : "0")
-                + " - type arg "
-                + (annotOnTopLevel ? count - 1 : count));
-        if (annotOnTopLevel) {
-          TOP_LEVEL_COUNT++;
-          TYPE_ARG_COUNT += count - 1;
-        } else {
-          TYPE_ARG_COUNT += count;
+        int onTypeArg = count;
+        int onTopLevel = 0;
+        if (Helper.isAnnotatedWith(node, ANNOTATION) && !Helper.isAnnotatedWith(type, ANNOTATION)) {
+          onTopLevel = 1;
         }
+        if (Helper.isAnnotatedWith(node, ANNOTATION) && Helper.isAnnotatedWith(type, ANNOTATION)) {
+          onTypeArg = count - 1;
+          onTopLevel = 1;
+        }
+        System.out.println(n + " - " + "top-level " + onTopLevel + " - type arg " + onTypeArg);
+        TOP_LEVEL_COUNT += onTopLevel;
+        TYPE_ARG_COUNT += onTypeArg;
       }
     }
   }
