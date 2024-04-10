@@ -57,7 +57,8 @@ import java.util.stream.Stream;
 
 public class Main {
 
-  static final AnnotationExpr UNTAINTED = new MarkerAnnotationExpr("RUntainted");
+  static final AnnotationExpr ANNOTATION = new MarkerAnnotationExpr("RUntainted");
+  //  static final AnnotationExpr ANNOTATION = new MarkerAnnotationExpr("RPolyTainted");
   static int TOP_LEVEL_COUNT = 0;
   static int TYPE_ARG_COUNT = 0;
 
@@ -143,7 +144,7 @@ public class Main {
         return;
       }
       boolean annotOnTopLevel =
-          Helper.isAnnotatedWith(node, UNTAINTED) || Helper.isAnnotatedWith(type, UNTAINTED);
+          Helper.isAnnotatedWith(node, ANNOTATION) || Helper.isAnnotatedWith(type, ANNOTATION);
       int count = annotOnTopLevel ? 1 : 0;
       count += type.accept(new AnnotationCounter(), null);
       if (count > 0) {
@@ -214,6 +215,6 @@ public class Main {
     if (type == null) {
       return false;
     }
-    return Helper.isAnnotatedWith(type, UNTAINTED) || Helper.isAnnotatedWith(node, UNTAINTED);
+    return Helper.isAnnotatedWith(type, ANNOTATION) || Helper.isAnnotatedWith(node, ANNOTATION);
   }
 }
