@@ -25,7 +25,6 @@
 package edu.ucr.cs.riple.core;
 
 import edu.ucr.cs.riple.core.metadata.index.Fix;
-
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
@@ -51,32 +50,34 @@ public class Main {
     annotator.start();
   }
 
-//        public static void main(String[] args) {
-//          String benchmarkPath = "/home/nima/Developer/taint-benchmarks/cxf";
-//          String module = null; // or "remote-api"
-//          args =
-//              new String[] {
-//                "-d",
-//                String.format("%s/annotator-out%s", benchmarkPath, module == null ? "" : "/" + module),
-//                "-bc",
-//                String.format("cd %s && ./annotator-command.sh", benchmarkPath),
-//                "-cp",
-//                String.format("%s/annotator-out%s/paths.tsv", benchmarkPath, module == null ? "" : "/" + module),
-//                "-n",
-//                "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted",
-//                "-i",
-//                "edu.ucr.cs.riple.taint.ucrtainting.qual.Init",
-//                "-cn",
-//                "UCRTaint",
-//                "-rboserr",
-//                "--depth",
-//                "10",
-//              };
-//          System.out.println("args: " + String.join(" ", args));
-//          Config config = new Config(args);
-//          Annotator annotator = new Annotator(config);
-//          annotator.start();
-//        }
+  //        public static void main(String[] args) {
+  //          String benchmarkPath = "/home/nima/Developer/taint-benchmarks/cxf";
+  //          String module = null; // or "remote-api"
+  //          args =
+  //              new String[] {
+  //                "-d",
+  //                String.format("%s/annotator-out%s", benchmarkPath, module == null ? "" : "/" +
+  // module),
+  //                "-bc",
+  //                String.format("cd %s && ./annotator-command.sh", benchmarkPath),
+  //                "-cp",
+  //                String.format("%s/annotator-out%s/paths.tsv", benchmarkPath, module == null ? ""
+  // : "/" + module),
+  //                "-n",
+  //                "edu.ucr.cs.riple.taint.ucrtainting.qual.RUntainted",
+  //                "-i",
+  //                "edu.ucr.cs.riple.taint.ucrtainting.qual.Init",
+  //                "-cn",
+  //                "UCRTaint",
+  //                "-rboserr",
+  //                "--depth",
+  //                "10",
+  //              };
+  //          System.out.println("args: " + String.join(" ", args));
+  //          Config config = new Config(args);
+  //          Annotator annotator = new Annotator(config);
+  //          annotator.start();
+  //        }
 
   static final Set<Fix> fixes = new HashSet<>();
 
@@ -85,9 +86,9 @@ public class Main {
   }
 
   public static void setFixes(int index, Set<Fix> newFixes) {
-    if(index == 2){
+    if (index == 2) {
       if (fixes.isEmpty()) {
-           fixes.addAll(newFixes);
+        fixes.addAll(newFixes);
       }
     }
   }

@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.cache.TargetModuleCache;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.cache.downstream.VoidDownstreamImpactCache;
-import edu.ucr.cs.riple.core.checkers.ucrtaint.UCRTaint;
 import edu.ucr.cs.riple.core.checkers.ucrtaint.UCRTaintError;
 import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
 import edu.ucr.cs.riple.core.evaluators.Evaluator;
@@ -54,6 +53,7 @@ public class Annotator {
   public final ReportCache cache;
   /** Annotator configuration. */
   public final Config config;
+
   boolean addedMoreFixes = false;
 
   public Annotator(Config config) {
@@ -185,7 +185,9 @@ public class Annotator {
   private ImmutableSet<Report> processTriggeredFixes(
       TargetModuleCache targetModuleCache, DownstreamImpactCache downstreamImpactCache) {
     Utility.buildTarget(context);
-    Set<UCRTaintError> errors = Utility.readErrorsFromOutputDirectory(context, context.targetModuleInfo, UCRTaintError.class);
+    Set<UCRTaintError> errors =
+        Utility.readErrorsFromOutputDirectory(
+            context, context.targetModuleInfo, UCRTaintError.class);
     System.out.println("Triggered Errors in this iteration: " + errors.size());
     // Suggested fixes of target at the current state.
     ImmutableSet<ImmutableSet<Fix>> fixes =

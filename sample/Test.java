@@ -1,9 +1,26 @@
 public class Test {
-    public static void main(String[] args) {
-        System.out.println("Hello, World!");
+
+    List<@RUntainted String> m = new ArrayList<@RUntainted String>(), n = new ArrayList<@RUntainted String>();
+
+    public void useI(I i, Map<? extends @RUntainted String, ? extends @RUntainted String> map){
+        List<@RUntainted String> l = new ArrayList<@RUntainted String>();
     }
 
-    public void foo(@RUntainted String s) {
-        System.out.println(s);
+    public void foo(){
+        useI(new I<@RUntainted String>(){
+            public void bar(String s){
+                System.out.println(s);
+            }
+        });
+    }
+
+    interface I<T> {
+        void bar(T t);
+    }
+
+    class B implements I<@RUntainted String> {
+        public void bar(@RUntainted List<Map<List<@RUntainted String>, @RUntainted String>> s){
+            System.out.println(s);
+        }
     }
 }

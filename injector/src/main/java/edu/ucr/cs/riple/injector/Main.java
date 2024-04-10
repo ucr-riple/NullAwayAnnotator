@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2024 Nima Karimipour.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 package edu.ucr.cs.riple.injector;
 
 import com.github.javaparser.ParserConfiguration;
@@ -5,14 +27,12 @@ import com.github.javaparser.Range;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.AnnotationMemberDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.AnnotationExpr;
-import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
@@ -33,19 +53,16 @@ import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class Main {
 
   static final AnnotationExpr UNTAINTED = new MarkerAnnotationExpr("RUntainted");
-  static final Set<Range> visitedRanges = new HashSet<>();
   static int TOP_LEVEL_COUNT = 0;
   static int TYPE_ARG_COUNT = 0;
 
   public static void main(String[] args) throws IOException {
-    // find paths all java files in the given directory
-    String directory = "/Users/nima/Developer/struts/core/src/main/java";
+    String directory = "/Users/nima/Developer/NullAwayAnnotator/sample";
     try (Stream<Path> paths = Files.walk(Paths.get(directory))) {
       paths.forEach(
           path -> {
@@ -75,6 +92,8 @@ public class Main {
 
   static class AnnotationVisitor extends VoidVisitorAdapter<Void> {
 
+    static final Set<Range> visitedRanges = new HashSet<>();
+
     @Override
     public void visit(final MethodDeclaration n, final Void arg) {
       checkForAnnotation(n);
@@ -102,10 +121,16 @@ public class Main {
 
     @Override
     public void visit(ClassOrInterfaceDeclaration n, Void arg) {
-      checkForAnnotation(n);
+      Stream.concat(n.getExtendedTypes().stream(), n.getImplementedTypes().stream())
+          .forEach(this::checkForAnnotation);
     }
 
-    public <T extends NodeWithAnnotations<?> & NodeWithRange<?>> void checkForAnnotation(T node) {
+    @Override
+    public void visit(ObjectCreationExpr n, Void arg) {
+      checkForAnnotation(n.getType());
+    }
+
+    private <T extends NodeWithAnnotations<?> & NodeWithRange<?>> void checkForAnnotation(T node) {
       if (node.getRange().isEmpty()) {
         return;
       }
@@ -119,35 +144,8 @@ public class Main {
       }
       boolean annotOnTopLevel =
           Helper.isAnnotatedWith(node, UNTAINTED) || Helper.isAnnotatedWith(type, UNTAINTED);
-      Type initializedType = null;
-      if (node instanceof VariableDeclarationExpr) {
-        VariableDeclarationExpr vde = (VariableDeclarationExpr) node;
-        if (!vde.getVariables().isEmpty()) {
-          if (vde.getVariables().get(0).getInitializer().isPresent()) {
-            Expression initializedValue = vde.getVariables().get(0).getInitializer().get();
-            if (initializedValue instanceof ObjectCreationExpr) {
-              initializedType = ((ObjectCreationExpr) initializedValue).getType();
-            }
-          }
-        }
-      }
-      if (node instanceof FieldDeclaration) {
-        FieldDeclaration fieldDeclaration = (FieldDeclaration) node;
-        for (int i = 0; i < fieldDeclaration.getVariables().size(); i++) {
-          if (fieldDeclaration.getVariables().get(i).getInitializer().isPresent()) {
-            Expression initializedValue =
-                fieldDeclaration.getVariables().get(i).getInitializer().get();
-            if (initializedValue instanceof ObjectCreationExpr) {
-              initializedType = ((ObjectCreationExpr) initializedValue).getType();
-            }
-          }
-        }
-      }
       int count = annotOnTopLevel ? 1 : 0;
       count += type.accept(new AnnotationCounter(), null);
-      if (initializedType != null) {
-        count += initializedType.accept(new AnnotationCounter(), null);
-      }
       if (count > 0) {
         String n = node.toString();
         if (node instanceof MethodDeclaration) {
@@ -160,11 +158,11 @@ public class Main {
                 + (annotOnTopLevel ? "1" : "0")
                 + " - type arg "
                 + (annotOnTopLevel ? count - 1 : count));
-        if(annotOnTopLevel) {
-            TOP_LEVEL_COUNT++;
-            TYPE_ARG_COUNT += count - 1;
-        }else{
-            TYPE_ARG_COUNT += count;
+        if (annotOnTopLevel) {
+          TOP_LEVEL_COUNT++;
+          TYPE_ARG_COUNT += count - 1;
+        } else {
+          TYPE_ARG_COUNT += count;
         }
       }
     }
@@ -180,21 +178,16 @@ public class Main {
           start.incrementAndGet();
         }
       }
+      if (type.getTypeArguments().isEmpty()) {
+        return start.get();
+      }
       type.getTypeArguments()
-          .ifPresent(
-              new Consumer<NodeList<Type>>() {
-                @Override
-                public void accept(NodeList<Type> t) {
-                  t.forEach(
-                      typeArg -> {
-                        Integer i = typeArg.accept(AnnotationCounter.this, unused);
-                        if (i == null) {
-                          System.out.println();
-                        }
-                        if (i != null) {
-                          start.addAndGet(i);
-                        }
-                      });
+          .get()
+          .forEach(
+              typeArg -> {
+                Integer i = typeArg.accept(AnnotationCounter.this, unused);
+                if (i != null) {
+                  start.addAndGet(i);
                 }
               });
       return start.get();
