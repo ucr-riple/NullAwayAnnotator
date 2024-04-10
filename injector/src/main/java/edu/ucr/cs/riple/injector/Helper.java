@@ -412,7 +412,7 @@ public class Helper {
     if (node instanceof Type) {
       return ((Type) node);
     }
-    throw new RuntimeException("Unknown node type: " + node.getClass() + " " + node);
+    return null;
   }
 
   /**
