@@ -75,7 +75,7 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
       "edu.ucr.cs.riple.taint.ucrtainting.qual.RPolyTainted";
 
   /** The name of the checker. This is used to identify the checker in the configuration file. */
-  public static final String NAME = "UCRTaint";
+  public static final String NAME = "Taint";
 
   public UCRTaint(Context context) {
     super(context);
