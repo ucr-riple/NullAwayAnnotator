@@ -94,18 +94,22 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
 
   @Override
   protected Builder<ClassFieldRecord> getBuilder() {
-    AtomicReference<Pair<Path, CompilationUnit>> lastParsed = new AtomicReference<>();
+    // This method is called with a pair of a class flat name and a path to source file containing
+    // the class. To avoid parsing a source file multiple times, we keep the last parsed
+    // source file in a reference. This optimization is according to the assumption that Scanner
+    // visits all classes within a single compilation unit tree consecutively.
+    AtomicReference<Pair<Path, CompilationUnit>> lastParsedSourceFile = new AtomicReference<>();
     return values -> {
       // Path to class.
       Path path = Helper.deserializePath(values[1]);
       CompilationUnit tree;
-      if (lastParsed.get() != null && lastParsed.get().a.equals(path)) {
+      if (lastParsedSourceFile.get() != null && lastParsedSourceFile.get().a.equals(path)) {
         // Already visited.
-        tree = lastParsed.get().b;
+        tree = lastParsedSourceFile.get().b;
       } else {
         tree = Injector.parse(path);
       }
-      lastParsed.set(new Pair<>(path, tree));
+      lastParsedSourceFile.set(new Pair<>(path, tree));
       if (tree == null) {
         return null;
       }

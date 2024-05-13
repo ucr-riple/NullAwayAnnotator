@@ -575,4 +575,26 @@ public class CoreTest extends AnnotatorBaseCoreTest {
     // No annotation should be added even though it can reduce the number of errors.
     Assert.assertEquals(coreTestHelper.getLog().getInjectedAnnotations().size(), 0);
   }
+
+  @Test
+  public void aaaaaa() {
+    coreTestHelper
+        .onTarget()
+        .withSourceLines(
+            "A.java",
+            "package test;",
+            "import org.jetbrains.annotations.NotNull;",
+            "public class A {",
+            "  class B1 {}",
+            "  class B2 {}",
+            "  class B3 {}",
+            "  class B4 {}",
+            "  class B5 {}",
+            "}")
+        .expectNoReport()
+        .toDepth(5)
+        .start();
+    // No annotation should be added even though it can reduce the number of errors.
+    Assert.assertEquals(coreTestHelper.getLog().getInjectedAnnotations().size(), 0);
+  }
 }
