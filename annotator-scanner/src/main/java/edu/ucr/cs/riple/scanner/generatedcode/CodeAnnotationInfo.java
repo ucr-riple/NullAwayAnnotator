@@ -79,12 +79,6 @@ public final class CodeAnnotationInfo {
             ? (Symbol.ClassSymbol) symbol
             : ASTHelpers.enclosingClass(symbol);
     if (classSymbol == null) {
-      Preconditions.checkArgument(
-          isClassFieldOfPrimitiveType(
-              symbol), // One known case where this can happen: int.class, void.class, etc.
-          String.format(
-              "Unexpected symbol passed to CodeAnnotationInfo.isGenerated(...) with null enclosing class: %s",
-              symbol));
       return false;
     }
     Symbol.ClassSymbol outermostClassSymbol = get(classSymbol).outermostClassSymbol;
