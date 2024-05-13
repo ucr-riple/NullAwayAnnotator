@@ -74,7 +74,10 @@ public final class CodeAnnotationInfo {
    *     {@code @Generated}; false otherwise
    */
   public boolean isGenerated(Symbol symbol) {
-    Symbol.ClassSymbol classSymbol = ASTHelpers.enclosingClass(symbol);
+    Symbol.ClassSymbol classSymbol =
+        symbol instanceof Symbol.ClassSymbol
+            ? (Symbol.ClassSymbol) symbol
+            : ASTHelpers.enclosingClass(symbol);
     if (classSymbol == null) {
       Preconditions.checkArgument(
           isClassFieldOfPrimitiveType(

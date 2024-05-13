@@ -316,6 +316,7 @@ public class AnnotatorScanner extends BugChecker
 
   /**
    * Checks if the given symbol is generated.
+   *
    * @param symbol Given symbol.
    * @param context Error prone context.
    * @return True if the symbol is generated; false otherwise.
