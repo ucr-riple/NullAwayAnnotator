@@ -43,6 +43,7 @@ import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.scanner.Serializer;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -92,16 +93,23 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
 
   @Override
   protected Builder<ClassFieldRecord> getBuilder() {
+    // Parsed source files.
+    final Set<Path> visited = new HashSet<>();
     return values -> {
-      // Class flat name.
-      String clazz = values[0];
       // Path to class.
       Path path = Helper.deserializePath(values[1]);
+      if (visited.contains(path)) {
+        // Already visited.
+        return null;
+      }
+      visited.add(path);
       CompilationUnit tree = Injector.parse(path);
       if (tree == null) {
         return null;
       }
       NodeList<BodyDeclaration<?>> members;
+      // Class flat name.
+      String clazz = values[0];
       try {
         members = Helper.getTypeDeclarationMembersByFlatName(tree, clazz);
       } catch (TargetClassNotFound notFound) {
