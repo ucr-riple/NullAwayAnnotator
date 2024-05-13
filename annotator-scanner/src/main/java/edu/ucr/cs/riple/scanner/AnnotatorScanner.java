@@ -93,7 +93,7 @@ public class AnnotatorScanner extends BugChecker
       return Description.NO_MATCH;
     }
     Symbol.ClassSymbol classSymbol = ASTHelpers.getSymbol(classTree);
-    if (classSymbol == null || isGenerated(classSymbol, visitorState.context)) {
+    if (classSymbol == null || isInGeneratedClass(classSymbol, visitorState.context)) {
       return Description.NO_MATCH;
     }
     context
@@ -111,7 +111,7 @@ public class AnnotatorScanner extends BugChecker
       return Description.NO_MATCH;
     }
     Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(tree);
-    if (methodSymbol == null || isGenerated(methodSymbol, state.context)) {
+    if (methodSymbol == null || isInGeneratedClass(methodSymbol, state.context)) {
       return Description.NO_MATCH;
     }
     config
@@ -132,7 +132,7 @@ public class AnnotatorScanner extends BugChecker
       throw new RuntimeException("not expecting unresolved method here");
     }
     if (methodSymbol.owner.enclClass().getSimpleName().isEmpty()
-        || isGenerated(methodSymbol, state.context)) {
+        || isInGeneratedClass(methodSymbol, state.context)) {
       // An anonymous class cannot declare its own constructors, so we do not need to serialize it.
       return Description.NO_MATCH;
     }
@@ -150,7 +150,7 @@ public class AnnotatorScanner extends BugChecker
       return Description.NO_MATCH;
     }
     Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(tree);
-    if (methodSymbol == null || isGenerated(methodSymbol, state.context)) {
+    if (methodSymbol == null || isInGeneratedClass(methodSymbol, state.context)) {
       return Description.NO_MATCH;
     }
     serializeSymIfNonnull(methodSymbol);
@@ -173,7 +173,7 @@ public class AnnotatorScanner extends BugChecker
       return Description.NO_MATCH;
     }
     Symbol.VarSymbol varSymbol = ASTHelpers.getSymbol(tree);
-    if (varSymbol == null || isGenerated(varSymbol, state.context)) {
+    if (varSymbol == null || isInGeneratedClass(varSymbol, state.context)) {
       return Description.NO_MATCH;
     }
     serializeSymIfField(ASTHelpers.getSymbol(tree.getInitializer()), state);
@@ -187,7 +187,7 @@ public class AnnotatorScanner extends BugChecker
       return Description.NO_MATCH;
     }
     Symbol symbol = ASTHelpers.getSymbol(tree);
-    if (symbol == null || isGenerated(symbol, state.context)) {
+    if (symbol == null || isInGeneratedClass(symbol, state.context)) {
       return Description.NO_MATCH;
     }
     serializeSymIfField(symbol, state);
@@ -200,7 +200,7 @@ public class AnnotatorScanner extends BugChecker
       return Description.NO_MATCH;
     }
     Symbol symbol = ASTHelpers.getSymbol(tree);
-    if (symbol == null || isGenerated(symbol, state.context)) {
+    if (symbol == null || isInGeneratedClass(symbol, state.context)) {
       return Description.NO_MATCH;
     }
     serializeSymIfField(symbol, state);
@@ -235,7 +235,7 @@ public class AnnotatorScanner extends BugChecker
     serializeImpactedRegionForFunctionalInterface(config, memberReferenceTree, visitorState);
     if (memberReferenceTree instanceof JCTree.JCMemberReference) {
       Symbol calledMethod = ((JCTree.JCMemberReference) memberReferenceTree).sym;
-      if (calledMethod == null || isGenerated(calledMethod, visitorState.context)) {
+      if (calledMethod == null || isInGeneratedClass(calledMethod, visitorState.context)) {
         return Description.NO_MATCH;
       }
       if (calledMethod instanceof Symbol.MethodSymbol) {
@@ -315,14 +315,14 @@ public class AnnotatorScanner extends BugChecker
   }
 
   /**
-   * Checks if the given symbol is generated.
+   * Checks if the given symbol is in a generated class.
    *
    * @param symbol Given symbol.
    * @param context Error prone context.
-   * @return True if the symbol is generated; false otherwise.
+   * @return True if the symbol is in a generated class, false otherwise.
    */
-  private boolean isGenerated(Symbol symbol, Context context) {
+  private boolean isInGeneratedClass(Symbol symbol, Context context) {
     CodeAnnotationInfo codeAnnotationInfo = CodeAnnotationInfo.instance(context);
-    return codeAnnotationInfo.isGenerated(symbol);
+    return codeAnnotationInfo.isInGeneratedClass(symbol);
   }
 }

@@ -32,7 +32,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.errorprone.util.ASTHelpers;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.util.Context;
-import javax.lang.model.element.ElementKind;
 
 /**
  * Provides APIs for querying whether code is annotated for nullness checking, and for related
@@ -73,7 +72,7 @@ public final class CodeAnnotationInfo {
    * @return true if symbol represents an entity contained in a class annotated with
    *     {@code @Generated}; false otherwise
    */
-  public boolean isGenerated(Symbol symbol) {
+  public boolean isInGeneratedClass(Symbol symbol) {
     Symbol.ClassSymbol classSymbol =
         symbol instanceof Symbol.ClassSymbol
             ? (Symbol.ClassSymbol) symbol
@@ -83,22 +82,6 @@ public final class CodeAnnotationInfo {
     }
     Symbol.ClassSymbol outermostClassSymbol = get(classSymbol).outermostClassSymbol;
     return hasDirectAnnotationWithSimpleName(outermostClassSymbol, "Generated");
-  }
-
-  /**
-   * Check if the symbol represents the .class field of a primitive type.
-   *
-   * <p>e.g. int.class, boolean.class, void.class, etc.
-   *
-   * @param symbol symbol for entity
-   * @return true iff this symbol represents t.class for a primitive type t.
-   */
-  private static boolean isClassFieldOfPrimitiveType(Symbol symbol) {
-    return symbol.name.contentEquals("class")
-        && symbol.owner != null
-        && symbol.owner.getKind().equals(ElementKind.CLASS)
-        && symbol.owner.getQualifiedName().equals(symbol.owner.getSimpleName())
-        && symbol.owner.enclClass() == null;
   }
 
   /**
