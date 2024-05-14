@@ -352,14 +352,14 @@ public class Config {
     options.addOption(nonnullAnnotationsOption);
 
     // Language level to use when parsing
-    Option languageLevel =
+    Option languageLevelOption =
         new Option(
             "ll",
             "language-level",
             true,
             "Java language level to use when parsing code. Supported values are 11 and 17.  Defaults to 11.");
-    languageLevel.setRequired(false);
-    options.addOption(languageLevel);
+    languageLevelOption.setRequired(false);
+    options.addOption(languageLevelOption);
 
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
@@ -462,7 +462,7 @@ public class Config {
         cmd.hasOption(disableRegionDetectionByLombok)
             ? ImmutableSet.of()
             : Sets.immutableEnumSet(SourceType.LOMBOK);
-    this.languageLevel = getLanguageLevel(cmd.getOptionValue(languageLevel, "17"));
+    this.languageLevel = getLanguageLevel(cmd.getOptionValue(languageLevelOption, "17"));
     this.nonnullAnnotations =
         !cmd.hasOption(nonnullAnnotationsOption)
             ? ImmutableSet.of()
