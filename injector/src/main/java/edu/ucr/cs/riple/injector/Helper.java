@@ -549,7 +549,8 @@ public class Helper {
    * @param rootPackage Root package simple name.
    * @return true if src has a package declaration and starts with root.
    */
-  public static boolean srcIsUnderClassClassPath(Path path, String rootPackage, ParserConfiguration.LanguageLevel languageLevel) {
+  public static boolean srcIsUnderClassClassPath(
+      Path path, String rootPackage, ParserConfiguration.LanguageLevel languageLevel) {
     CompilationUnit cu = Injector.parse(path, languageLevel);
     if (cu == null) {
       return false;

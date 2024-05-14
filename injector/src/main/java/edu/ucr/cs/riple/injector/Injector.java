@@ -157,7 +157,8 @@ public class Injector {
    * @return Compilation unit tree, if the file does not exist, returns null.
    */
   @Nullable
-  public static CompilationUnit parse(@Nullable Path path, ParserConfiguration.LanguageLevel level) {
+  public static CompilationUnit parse(
+      @Nullable Path path, ParserConfiguration.LanguageLevel level) {
     if (path == null) {
       // Annotator is correctly receiving null as argument for fixes suggested on third party
       // libraries. And NullAway is correctly serializing fixes with null paths. Please note that we

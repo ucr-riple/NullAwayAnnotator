@@ -153,9 +153,7 @@ public class Config {
    */
   public final String checkerName;
 
-  /**
-   * Language level to use when parsing Java code.  Defaults to Java 11.
-   */
+  /** Language level to use when parsing Java code. Defaults to Java 11. */
   public final ParserConfiguration.LanguageLevel languageLevel;
 
   /**
@@ -355,11 +353,11 @@ public class Config {
 
     // Language level to use when parsing
     Option languageLevel =
-            new Option(
-                    "ll",
-                    "language-level",
-                    false,
-                    "Java language level to use when parsing code. Supported values are 11 and 17.  Defaults to 11.");
+        new Option(
+            "ll",
+            "language-level",
+            false,
+            "Java language level to use when parsing code. Supported values are 11 and 17.  Defaults to 11.");
     languageLevel.setRequired(false);
     options.addOption(languageLevel);
 
@@ -471,7 +469,8 @@ public class Config {
             : ImmutableSet.copyOf(cmd.getOptionValue(nonnullAnnotationsOption).split(","));
   }
 
-  private ParserConfiguration.LanguageLevel getLanguageLevel(CommandLine cmd, Option languageLevel) {
+  private ParserConfiguration.LanguageLevel getLanguageLevel(
+      CommandLine cmd, Option languageLevel) {
     String languageLevelString = cmd.getOptionValue(languageLevel, "11");
     switch (languageLevelString) {
       case "11":
