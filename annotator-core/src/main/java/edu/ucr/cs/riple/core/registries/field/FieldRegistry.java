@@ -110,9 +110,10 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
           // Already visited.
           tree = lastParsedSourceFile.b;
         } else {
+          // Not visited yet, parse the source file.
           tree = Injector.parse(path);
+          lastParsedSourceFile = new Pair<>(path, tree);
         }
-        lastParsedSourceFile = new Pair<>(path, tree);
         if (tree == null) {
           return null;
         }
