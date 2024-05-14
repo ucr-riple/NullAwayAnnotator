@@ -90,11 +90,14 @@ public class CoreTestHelper {
   /** Annotator log instance after the test execution. */
   private Log log;
 
+  private ParserConfiguration.LanguageLevel languageLevel;
+
   public CoreTestHelper(Path projectPath, Path outDirPath) {
     this.projectPath = projectPath;
     this.outDirPath = outDirPath;
     this.expectedReports = new HashSet<>();
     this.projectBuilder = new ProjectBuilder(this, projectPath);
+    this.languageLevel = ParserConfiguration.LanguageLevel.JAVA_11;
   }
 
   public Module onTarget() {
@@ -213,6 +216,11 @@ public class CoreTestHelper {
    */
   public CoreTestHelper checkExpectedOutput(String expectedOutputPath) {
     this.expectedOutputPath = Utility.getPathOfResource(expectedOutputPath);
+    return this;
+  }
+
+  public CoreTestHelper withLanguageLevel(ParserConfiguration.LanguageLevel languageLevel) {
+    this.languageLevel = languageLevel;
     return this;
   }
 
@@ -408,6 +416,7 @@ public class CoreTestHelper {
     builder.useCacheImpact = true;
     builder.sourceTypes.add(SourceType.LOMBOK);
     builder.cache = true;
+    builder.languageLevel = languageLevel;
     builder.useCacheImpact = !getEnvironmentVariable("ANNOTATOR_TEST_DISABLE_CACHING");
     builder.useParallelProcessor =
         !getEnvironmentVariable("ANNOTATOR_TEST_DISABLE_PARALLEL_PROCESSING");
