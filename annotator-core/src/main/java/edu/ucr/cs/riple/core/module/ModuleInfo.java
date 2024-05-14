@@ -87,10 +87,10 @@ public class ModuleInfo {
     // Build with scanner checker activated to generate required files to create the moduleInfo.
     context.checker.prepareConfigFilesForBuild(configurations);
     Utility.runScannerChecker(context, configurations, buildCommand);
-    this.nonnullStore = new NonnullStore(configurations);
+    this.nonnullStore = new NonnullStore(configurations, context);
     this.fieldRegistry = new FieldRegistry(configurations, context);
     this.methodRegistry = new MethodRegistry(context);
-    this.regionRegistry = new CompoundRegionRegistry(this);
+    this.regionRegistry = new CompoundRegionRegistry(this, context);
     ImmutableSet.Builder<AnnotationProcessorHandler> builder = new ImmutableSet.Builder<>();
     if (context.config.generatedCodeDetectors.contains(SourceType.LOMBOK)) {
       builder.add(new LombokHandler(this));

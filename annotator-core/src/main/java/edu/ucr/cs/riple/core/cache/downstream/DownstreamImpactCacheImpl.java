@@ -84,8 +84,8 @@ public class DownstreamImpactCacheImpl
       Context context, ModuleInfo moduleInfo) {
     ImmutableSet.Builder<Location> locationsToCache = ImmutableSet.builder();
     // Used to collect callers of each method.
-    MethodRegionRegistry methodRegionRegistry = new MethodRegionRegistry(moduleInfo);
-    FieldRegionRegistry fieldRegionRegistry = new FieldRegionRegistry(moduleInfo);
+    MethodRegionRegistry methodRegionRegistry = new MethodRegionRegistry(moduleInfo, context);
+    FieldRegionRegistry fieldRegionRegistry = new FieldRegionRegistry(moduleInfo, context);
     // Collect public methods with non-primitive return types.
     locationsToCache.addAll(
         context

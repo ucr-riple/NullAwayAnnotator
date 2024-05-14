@@ -60,7 +60,7 @@ public class FieldInitializationStore extends Registry<FieldInitializationNode> 
    * @param context Annotator context.
    */
   public FieldInitializationStore(Context context) {
-    super(context.targetConfiguration.dir.resolve(FILE_NAME));
+    super(context.targetConfiguration.dir.resolve(FILE_NAME), context);
   }
 
   /**

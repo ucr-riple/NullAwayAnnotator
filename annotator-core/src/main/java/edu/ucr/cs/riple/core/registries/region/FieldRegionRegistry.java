@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.registries.region;
 
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.registries.Registry;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -42,13 +43,14 @@ public class FieldRegionRegistry extends Registry<RegionRecord> implements Regio
   /** ModuleInfo of the module which usages of fields are stored. */
   private final ModuleInfo moduleInfo;
 
-  public FieldRegionRegistry(ModuleInfo moduleInfo) {
+  public FieldRegionRegistry(ModuleInfo moduleInfo, Context context) {
     super(
         moduleInfo.getModuleConfigurations().stream()
             .map(
                 configuration ->
                     configuration.dir.resolve(Serializer.FIELD_IMPACTED_REGION_FILE_NAME))
-            .collect(ImmutableSet.toImmutableSet()));
+            .collect(ImmutableSet.toImmutableSet()),
+        context);
     this.moduleInfo = moduleInfo;
   }
 

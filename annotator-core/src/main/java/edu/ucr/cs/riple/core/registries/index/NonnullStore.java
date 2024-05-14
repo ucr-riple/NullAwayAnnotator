@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.registries.index;
 
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.registries.Registry;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -37,11 +38,12 @@ import edu.ucr.cs.riple.scanner.Serializer;
  */
 public class NonnullStore extends Registry<Location> {
 
-  public NonnullStore(ImmutableSet<ModuleConfiguration> modules) {
+  public NonnullStore(ImmutableSet<ModuleConfiguration> modules, Context context) {
     super(
         modules.stream()
             .map(moduleInfo -> moduleInfo.dir.resolve(Serializer.NON_NULL_ELEMENTS_FILE_NAME))
-            .collect(ImmutableSet.toImmutableSet()));
+            .collect(ImmutableSet.toImmutableSet()),
+        context);
   }
 
   @Override

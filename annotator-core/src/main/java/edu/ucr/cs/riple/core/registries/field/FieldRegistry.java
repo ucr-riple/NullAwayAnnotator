@@ -63,8 +63,6 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
    * initialized at declaration.
    */
   private Multimap<String, String> uninitializedFields;
-
-  private final Context context;
   /**
    * Constructor for {@link FieldRegistry}.
    *
@@ -83,8 +81,8 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
     super(
         modules.stream()
             .map(info -> info.dir.resolve(Serializer.CLASS_RECORD_FILE_NAME))
-            .collect(ImmutableSet.toImmutableSet()));
-    this.context = context;
+            .collect(ImmutableSet.toImmutableSet()),
+        context);
   }
 
   @Override

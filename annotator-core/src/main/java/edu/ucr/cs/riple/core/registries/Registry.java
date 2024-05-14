@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.registries;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Context;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -54,14 +55,17 @@ public abstract class Registry<T> {
    */
   protected final ImmutableMultimap<Integer, T> contents;
 
+  protected final Context context;
+
   /**
    * Constructor for this container. Once this constructor is invoked, all data will be loaded from
    * the file.
    *
    * @param path Path to the file containing the data.
    */
-  public Registry(Path path) {
+  public Registry(Path path, Context context) {
     ImmutableMultimap.Builder<Integer, T> builder = ImmutableMultimap.builder();
+    this.context = context;
     setup();
     try {
       populateContent(path, builder);
@@ -77,8 +81,9 @@ public abstract class Registry<T> {
    *
    * @param paths Paths to all files containing data.
    */
-  public Registry(ImmutableSet<Path> paths) {
+  public Registry(ImmutableSet<Path> paths, Context context) {
     ImmutableMultimap.Builder<Integer, T> builder = ImmutableMultimap.builder();
+    this.context = context;
     setup();
     paths.forEach(
         path -> {

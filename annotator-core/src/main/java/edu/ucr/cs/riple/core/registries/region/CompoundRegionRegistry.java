@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.registries.region;
 
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.registries.region.generatedcode.AnnotationProcessorHandler;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -46,12 +47,12 @@ public class CompoundRegionRegistry implements RegionRegistry {
    */
   private final MethodRegionRegistry methodRegionRegistry;
 
-  public CompoundRegionRegistry(ModuleInfo moduleInfo) {
+  public CompoundRegionRegistry(ModuleInfo moduleInfo, Context context) {
     this.moduleInfo = moduleInfo;
-    this.methodRegionRegistry = new MethodRegionRegistry(moduleInfo);
+    this.methodRegionRegistry = new MethodRegionRegistry(moduleInfo, context);
     this.registries =
         ImmutableSet.of(
-            new FieldRegionRegistry(moduleInfo),
+            new FieldRegionRegistry(moduleInfo, context),
             methodRegionRegistry,
             new ParameterRegionRegistry(moduleInfo, methodRegionRegistry));
   }
