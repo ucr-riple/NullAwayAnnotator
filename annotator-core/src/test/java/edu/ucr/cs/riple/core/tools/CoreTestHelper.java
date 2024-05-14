@@ -97,7 +97,7 @@ public class CoreTestHelper {
     this.outDirPath = outDirPath;
     this.expectedReports = new HashSet<>();
     this.projectBuilder = new ProjectBuilder(this, projectPath);
-    this.languageLevel = ParserConfiguration.LanguageLevel.JAVA_11;
+    this.languageLevel = ParserConfiguration.LanguageLevel.JAVA_17;
   }
 
   public Module onTarget() {

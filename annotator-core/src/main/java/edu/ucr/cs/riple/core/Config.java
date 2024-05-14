@@ -153,7 +153,7 @@ public class Config {
    */
   public final String checkerName;
 
-  /** Language level to use when parsing Java code. Defaults to Java 11. */
+  /** Language level to use when parsing Java code. Defaults to Java 17. */
   public final ParserConfiguration.LanguageLevel languageLevel;
 
   /**
@@ -462,7 +462,7 @@ public class Config {
         cmd.hasOption(disableRegionDetectionByLombok)
             ? ImmutableSet.of()
             : Sets.immutableEnumSet(SourceType.LOMBOK);
-    this.languageLevel = getLanguageLevel(cmd.getOptionValue(languageLevel, "11"));
+    this.languageLevel = getLanguageLevel(cmd.getOptionValue(languageLevel, "17"));
     this.nonnullAnnotations =
         !cmd.hasOption(nonnullAnnotationsOption)
             ? ImmutableSet.of()
@@ -573,7 +573,7 @@ public class Config {
     this.generatedCodeDetectors =
         lombokCodeDetectorActivated ? Sets.immutableEnumSet(SourceType.LOMBOK) : ImmutableSet.of();
     this.languageLevel =
-        getLanguageLevel(getValueFromKey(jsonObject, "LANGUAGE_LEVEL", String.class).orElse("11"));
+        getLanguageLevel(getValueFromKey(jsonObject, "LANGUAGE_LEVEL", String.class).orElse("17"));
     this.nonnullAnnotations =
         ImmutableSet.copyOf(
             getArrayValueFromKey(
