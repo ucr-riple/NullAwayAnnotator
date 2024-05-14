@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.tools;
 
 import static org.junit.Assert.fail;
 
+import com.github.javaparser.ParserConfiguration;
 import edu.ucr.cs.riple.core.AnalysisMode;
 import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Config;
@@ -319,7 +320,12 @@ public class CoreTestHelper {
       walk.filter(path -> path.toFile().isFile() && path.toFile().getName().endsWith(".java"))
           .forEach(
               path -> {
-                if (!Helper.srcIsUnderClassClassPath(path, "test", config.languageLevel)) {
+                if (!Helper.srcIsUnderClassClassPath(
+                    path,
+                    "test",
+                    config != null
+                        ? config.languageLevel
+                        : ParserConfiguration.LanguageLevel.JAVA_11)) {
                   throw new IllegalArgumentException(
                       "Source files must have package declaration starting with \"test\": " + path);
                 }
