@@ -47,7 +47,7 @@ public final class CodeAnnotationInfo {
 
   private static final int MAX_CLASS_CACHE_SIZE = 200;
 
-  private final Cache<Symbol.ClassSymbol, ClassCacheRecord> classCache =
+  private final Cache<Symbol.ClassSymbol, Symbol.ClassSymbol> classCache =
       CacheBuilder.newBuilder().maximumSize(MAX_CLASS_CACHE_SIZE).build();
 
   private CodeAnnotationInfo() {}
@@ -80,7 +80,7 @@ public final class CodeAnnotationInfo {
     if (classSymbol == null) {
       return false;
     }
-    Symbol.ClassSymbol outermostClassSymbol = get(classSymbol).outermostClassSymbol;
+    Symbol.ClassSymbol outermostClassSymbol = get(classSymbol);
     return hasDirectAnnotationWithSimpleName(outermostClassSymbol, "Generated");
   }
 
@@ -95,8 +95,8 @@ public final class CodeAnnotationInfo {
    *     annotations on enclosing classes, the containing package, and other NullAway configuration
    *     like annotated packages
    */
-  private ClassCacheRecord get(Symbol.ClassSymbol classSymbol) {
-    ClassCacheRecord record = classCache.getIfPresent(classSymbol);
+  private Symbol.ClassSymbol get(Symbol.ClassSymbol classSymbol) {
+    Symbol.ClassSymbol record = classCache.getIfPresent(classSymbol);
     if (record != null) {
       return record;
     }
@@ -106,30 +106,14 @@ public final class CodeAnnotationInfo {
       Symbol.ClassSymbol enclosingClass = ASTHelpers.enclosingClass(classSymbol);
       // enclosingClass can be null in weird cases like for array methods
       if (enclosingClass != null) {
-        ClassCacheRecord recordForEnclosing = get(enclosingClass);
-        record = new ClassCacheRecord(recordForEnclosing.outermostClassSymbol);
+        record = get(enclosingClass);
       }
     }
     if (record == null) {
       // We are already at the outermost class (we can find), so let's create a record for it
-      record = new ClassCacheRecord(classSymbol);
+      record = classSymbol;
     }
     classCache.put(classSymbol, record);
     return record;
-  }
-
-  /**
-   * Immutable record holding the outermost class symbol and the nullness-annotated state for a
-   * given (possibly inner) class.
-   *
-   * <p>The class being referenced by the record is not represented by this object, but rather the
-   * key used to retrieve it.
-   */
-  private static final class ClassCacheRecord {
-    public final Symbol.ClassSymbol outermostClassSymbol;
-
-    public ClassCacheRecord(Symbol.ClassSymbol outermostClassSymbol) {
-      this.outermostClassSymbol = outermostClassSymbol;
-    }
   }
 }
