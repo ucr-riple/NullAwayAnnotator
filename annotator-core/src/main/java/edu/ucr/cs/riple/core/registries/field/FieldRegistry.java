@@ -94,14 +94,15 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
   @Override
   protected Builder<ClassFieldRecord> getBuilder() {
     return new Builder<>() {
-      // This method is called with a pair of a class flat name and a path to source file containing
-      // the class. To avoid parsing a source file multiple times, we keep the last parsed
-      // source file in a reference. This optimization is according to the assumption that Scanner
-      // visits all classes within a single compilation unit tree consecutively.
       Pair<Path, CompilationUnit> lastParsedSourceFile = new Pair<>(null, null);
 
       @Override
       public ClassFieldRecord build(String[] values) {
+        // This method is called with values in format of: [class flat name, path to source file].
+        // To avoid parsing a source file multiple times, we keep the last parsed
+        // source file in a reference.
+        // This optimization is according to the assumption that Scanner
+        // visits all classes within a single compilation unit tree consecutively.
         // Path to class.
         Path path = Helper.deserializePath(values[1]);
         CompilationUnit tree;
