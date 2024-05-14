@@ -319,7 +319,7 @@ public class CoreTestHelper {
       walk.filter(path -> path.toFile().isFile() && path.toFile().getName().endsWith(".java"))
           .forEach(
               path -> {
-                if (!Helper.srcIsUnderClassClassPath(path, "test")) {
+                if (!Helper.srcIsUnderClassClassPath(path, "test", config.languageLevel)) {
                   throw new IllegalArgumentException(
                       "Source files must have package declaration starting with \"test\": " + path);
                 }

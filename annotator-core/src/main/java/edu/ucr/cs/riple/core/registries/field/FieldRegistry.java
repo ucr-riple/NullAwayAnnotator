@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Sets;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.registries.Registry;
 import edu.ucr.cs.riple.injector.Helper;
@@ -63,13 +64,14 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
    */
   private Multimap<String, String> uninitializedFields;
 
+  private final Context context;
   /**
    * Constructor for {@link FieldRegistry}.
    *
    * @param module Information of the target module.
    */
-  public FieldRegistry(ModuleConfiguration module) {
-    this(ImmutableSet.of(module));
+  public FieldRegistry(ModuleConfiguration module, Context context) {
+    this(ImmutableSet.of(module), context);
   }
 
   /**
@@ -77,11 +79,12 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
    *
    * @param modules Information of set of modules.
    */
-  public FieldRegistry(ImmutableSet<ModuleConfiguration> modules) {
+  public FieldRegistry(ImmutableSet<ModuleConfiguration> modules, Context context) {
     super(
         modules.stream()
             .map(info -> info.dir.resolve(Serializer.CLASS_RECORD_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()));
+    this.context = context;
   }
 
   @Override
@@ -97,7 +100,7 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
       String clazz = values[0];
       // Path to class.
       Path path = Helper.deserializePath(values[1]);
-      CompilationUnit tree = Injector.parse(path);
+      CompilationUnit tree = Injector.parse(path, context.config.languageLevel);
       if (tree == null) {
         return null;
       }

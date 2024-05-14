@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core;
 
+import com.github.javaparser.ParserConfiguration;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -151,6 +152,11 @@ public class Config {
    * Checker name to retrieve the {@link edu.ucr.cs.riple.core.checkers.Checker} specific instance.
    */
   public final String checkerName;
+
+  /**
+   * Language level to use when parsing Java code.  Defaults to Java 11.
+   */
+  public final ParserConfiguration.LanguageLevel languageLevel;
 
   /**
    * Builds context from command line arguments.
@@ -347,6 +353,16 @@ public class Config {
     nonnullAnnotationsOption.setValueSeparator(',');
     options.addOption(nonnullAnnotationsOption);
 
+    // Language level to use when parsing
+    Option languageLevel =
+            new Option(
+                    "ll",
+                    "language-level",
+                    false,
+                    "Java language level to use when parsing code. Supported values are 11 and 17.  Defaults to 11.");
+    languageLevel.setRequired(false);
+    options.addOption(languageLevel);
+
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
@@ -448,10 +464,23 @@ public class Config {
         cmd.hasOption(disableRegionDetectionByLombok)
             ? ImmutableSet.of()
             : Sets.immutableEnumSet(SourceType.LOMBOK);
+    this.languageLevel = getLanguageLevel(cmd, languageLevel);
     this.nonnullAnnotations =
         !cmd.hasOption(nonnullAnnotationsOption)
             ? ImmutableSet.of()
             : ImmutableSet.copyOf(cmd.getOptionValue(nonnullAnnotationsOption).split(","));
+  }
+
+  private ParserConfiguration.LanguageLevel getLanguageLevel(CommandLine cmd, Option languageLevel) {
+    String languageLevelString = cmd.getOptionValue(languageLevel, "11");
+    switch (languageLevelString) {
+      case "11":
+        return ParserConfiguration.LanguageLevel.JAVA_11;
+      case "17":
+        return ParserConfiguration.LanguageLevel.JAVA_17;
+      default:
+        throw new IllegalArgumentException("Unsupported language level: " + languageLevelString);
+    }
   }
 
   /**
@@ -540,6 +569,8 @@ public class Config {
             .orElse(true);
     this.generatedCodeDetectors =
         lombokCodeDetectorActivated ? Sets.immutableEnumSet(SourceType.LOMBOK) : ImmutableSet.of();
+    // TODO add a JSON key for this
+    this.languageLevel = ParserConfiguration.LanguageLevel.JAVA_11;
     this.nonnullAnnotations =
         ImmutableSet.copyOf(
             getArrayValueFromKey(

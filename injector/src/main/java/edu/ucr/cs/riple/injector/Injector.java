@@ -47,6 +47,16 @@ import javax.annotation.Nullable;
 /** Injector main class which can add / remove annotations. */
 public class Injector {
 
+  private final ParserConfiguration.LanguageLevel languageLevel;
+
+  public Injector() {
+    this(ParserConfiguration.LanguageLevel.JAVA_11);
+  }
+
+  public Injector(ParserConfiguration.LanguageLevel languageLevel) {
+    this.languageLevel = languageLevel;
+  }
+
   /**
    * Starts applying the requested changes.
    *
@@ -61,7 +71,7 @@ public class Injector {
     Set<FileOffsetStore> offsets = new HashSet<>();
     map.forEach(
         (path, changeList) -> {
-          CompilationUnit tree = parse(path);
+          CompilationUnit tree = parse(path, languageLevel);
           if (tree == null) {
             return;
           }
@@ -147,7 +157,7 @@ public class Injector {
    * @return Compilation unit tree, if the file does not exist, returns null.
    */
   @Nullable
-  public static CompilationUnit parse(@Nullable Path path) {
+  public static CompilationUnit parse(@Nullable Path path, ParserConfiguration.LanguageLevel level) {
     if (path == null) {
       // Annotator is correctly receiving null as argument for fixes suggested on third party
       // libraries. And NullAway is correctly serializing fixes with null paths. Please note that we
@@ -156,8 +166,7 @@ public class Injector {
       return null;
     }
     ParserConfiguration parserConfiguration = new ParserConfiguration();
-    // Set parser configuration to Java 17.
-    parserConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
+    parserConfiguration.setLanguageLevel(level);
     StaticJavaParser.setConfiguration(parserConfiguration);
     try {
       return StaticJavaParser.parse(path);

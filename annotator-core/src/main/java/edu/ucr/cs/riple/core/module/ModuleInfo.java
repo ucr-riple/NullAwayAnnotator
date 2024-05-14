@@ -88,7 +88,7 @@ public class ModuleInfo {
     context.checker.prepareConfigFilesForBuild(configurations);
     Utility.runScannerChecker(context, configurations, buildCommand);
     this.nonnullStore = new NonnullStore(configurations);
-    this.fieldRegistry = new FieldRegistry(configurations);
+    this.fieldRegistry = new FieldRegistry(configurations, context);
     this.methodRegistry = new MethodRegistry(context);
     this.regionRegistry = new CompoundRegionRegistry(this);
     ImmutableSet.Builder<AnnotationProcessorHandler> builder = new ImmutableSet.Builder<>();
