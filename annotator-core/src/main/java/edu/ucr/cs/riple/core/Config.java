@@ -356,8 +356,8 @@ public class Config {
         new Option(
             "ll",
             "language-level",
-            false,
-            "Java language level to use when parsing code. Supported values are 11 and 17.  Defaults to 11.");
+            true,
+            "Java language level to use when parsing code. Supported values are 11 and 17.  Defaults to 17.");
     languageLevel.setRequired(false);
     options.addOption(languageLevel);
 
