@@ -44,7 +44,7 @@ public class PhysicalInjector extends AnnotationInjector {
    */
   public PhysicalInjector(Context context) {
     super(context);
-    this.injector = new Injector();
+    this.injector = new Injector(context.config.languageLevel);
   }
 
   @Override
