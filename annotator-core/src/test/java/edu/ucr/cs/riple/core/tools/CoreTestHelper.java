@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.tools;
 
 import static org.junit.Assert.fail;
 
+import com.github.javaparser.ParserConfiguration;
 import edu.ucr.cs.riple.core.AnalysisMode;
 import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Config;
@@ -89,11 +90,14 @@ public class CoreTestHelper {
   /** Annotator log instance after the test execution. */
   private Log log;
 
+  private ParserConfiguration.LanguageLevel languageLevel;
+
   public CoreTestHelper(Path projectPath, Path outDirPath) {
     this.projectPath = projectPath;
     this.outDirPath = outDirPath;
     this.expectedReports = new HashSet<>();
     this.projectBuilder = new ProjectBuilder(this, projectPath);
+    this.languageLevel = ParserConfiguration.LanguageLevel.JAVA_17;
   }
 
   public Module onTarget() {
@@ -215,6 +219,11 @@ public class CoreTestHelper {
     return this;
   }
 
+  public CoreTestHelper withLanguageLevel(ParserConfiguration.LanguageLevel languageLevel) {
+    this.languageLevel = languageLevel;
+    return this;
+  }
+
   /** Starts the test process. */
   public void start() {
     Path configPath = outDirPath.resolve("config.json");
@@ -319,7 +328,7 @@ public class CoreTestHelper {
       walk.filter(path -> path.toFile().isFile() && path.toFile().getName().endsWith(".java"))
           .forEach(
               path -> {
-                if (!Helper.srcIsUnderClassClassPath(path, "test")) {
+                if (!Helper.srcIsUnderClassClassPath(path, "test", languageLevel)) {
                   throw new IllegalArgumentException(
                       "Source files must have package declaration starting with \"test\": " + path);
                 }
@@ -402,6 +411,7 @@ public class CoreTestHelper {
     builder.useCacheImpact = true;
     builder.sourceTypes.add(SourceType.LOMBOK);
     builder.cache = true;
+    builder.languageLevel = languageLevel;
     builder.useCacheImpact = !getEnvironmentVariable("ANNOTATOR_TEST_DISABLE_CACHING");
     builder.useParallelProcessor =
         !getEnvironmentVariable("ANNOTATOR_TEST_DISABLE_PARALLEL_PROCESSING");

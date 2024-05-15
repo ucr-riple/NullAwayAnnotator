@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core;
 
+import com.github.javaparser.ParserConfiguration;
 import edu.ucr.cs.riple.core.tools.TReport;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -56,6 +57,7 @@ public class Java17Test extends AnnotatorBaseCoreTest {
             "}")
         .withExpectedReports(
             new TReport(new OnField("Main.java", "test.Main", Set.of("f1", "f2", "f3", "f4")), -4))
+        .withLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17)
         .start();
   }
 
@@ -74,6 +76,7 @@ public class Java17Test extends AnnotatorBaseCoreTest {
         .withExpectedReports(
             new TReport(new OnMethod("A.java", "test.A", "create(java.lang.String)"), -1))
         .toDepth(5)
+        .withLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17)
         .start();
   }
 }

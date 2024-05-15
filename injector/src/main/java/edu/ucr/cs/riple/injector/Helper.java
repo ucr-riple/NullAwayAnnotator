@@ -22,6 +22,7 @@
 
 package edu.ucr.cs.riple.injector;
 
+import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
@@ -548,8 +549,9 @@ public class Helper {
    * @param rootPackage Root package simple name.
    * @return true if src has a package declaration and starts with root.
    */
-  public static boolean srcIsUnderClassClassPath(Path path, String rootPackage) {
-    CompilationUnit cu = Injector.parse(path);
+  public static boolean srcIsUnderClassClassPath(
+      Path path, String rootPackage, ParserConfiguration.LanguageLevel languageLevel) {
+    CompilationUnit cu = Injector.parse(path, languageLevel);
     if (cu == null) {
       return false;
     }

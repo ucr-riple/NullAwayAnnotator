@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.registries.region;
 
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.registries.Registry;
 import edu.ucr.cs.riple.core.registries.method.MethodRecord;
@@ -42,11 +43,12 @@ public class MethodRegionRegistry extends Registry<RegionRecord> implements Regi
   /** ModuleInfo of the module which usage of methods are stored. */
   private final ModuleInfo moduleInfo;
 
-  public MethodRegionRegistry(ModuleInfo moduleInfo) {
+  public MethodRegionRegistry(ModuleInfo moduleInfo, Context context) {
     super(
         moduleInfo.getModuleConfigurations().stream()
             .map(info -> info.dir.resolve(Serializer.METHOD_IMPACTED_REGION_FILE_NAME))
-            .collect(ImmutableSet.toImmutableSet()));
+            .collect(ImmutableSet.toImmutableSet()),
+        context);
     this.moduleInfo = moduleInfo;
   }
 
