@@ -1,5 +1,9 @@
 ## CHANGELOG
 
+### Version 1.3.14
+- Improved performance on initialization od Annotator by parsing each source file only once.
+- Added a new flag `-ll` or `--language-level` to specify the language level of the source code.
+
 ### Version 1.3.13
 - Added support for fixes on record declarations.
 - Bug fixes and refactorings.
