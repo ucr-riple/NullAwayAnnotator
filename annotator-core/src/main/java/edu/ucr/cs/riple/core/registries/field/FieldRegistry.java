@@ -28,6 +28,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.utils.Pair;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
@@ -93,46 +94,64 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
 
   @Override
   protected Builder<ClassFieldRecord> getBuilder() {
-    return values -> {
-      // Class flat name.
-      String clazz = values[0];
-      // Path to class.
-      Path path = Helper.deserializePath(values[1]);
-      CompilationUnit tree = Injector.parse(path, context.config.languageLevel);
-      if (tree == null) {
-        return null;
+    return new Builder<>() {
+      Pair<Path, CompilationUnit> lastParsedSourceFile = new Pair<>(null, null);
+
+      @Override
+      public ClassFieldRecord build(String[] values) {
+        // This method is called with values in format of: [class flat name, path to source file].
+        // To avoid parsing a source file multiple times, we keep the last parsed
+        // source file in a reference.
+        // This optimization is according to the assumption that Scanner
+        // visits all classes within a single compilation unit tree consecutively.
+        // Path to class.
+        Path path = Helper.deserializePath(values[1]);
+        CompilationUnit tree;
+        if (lastParsedSourceFile.a != null && lastParsedSourceFile.a.equals(path)) {
+          // Already visited.
+          tree = lastParsedSourceFile.b;
+        } else {
+          // Not visited yet, parse the source file.
+          tree = Injector.parse(path, context.config.languageLevel);
+          lastParsedSourceFile = new Pair<>(path, tree);
+        }
+        if (tree == null) {
+          return null;
+        }
+        NodeList<BodyDeclaration<?>> members;
+        // Class flat name.
+        String clazz = values[0];
+        try {
+          members = Helper.getTypeDeclarationMembersByFlatName(tree, clazz);
+        } catch (TargetClassNotFound notFound) {
+          System.err.println(notFound.getMessage());
+          return null;
+        }
+        ClassFieldRecord record = new ClassFieldRecord(path, clazz);
+        members.forEach(
+            bodyDeclaration ->
+                bodyDeclaration.ifFieldDeclaration(
+                    fieldDeclaration -> {
+                      NodeList<VariableDeclarator> vars = fieldDeclaration.getVariables();
+                      if (vars.getFirst().isEmpty()) {
+                        // unexpected but just in case.
+                        return;
+                      }
+                      record.addFieldDeclaration(fieldDeclaration);
+                      // Collect uninitialized fields at declaration.
+                      vars.forEach(
+                          variableDeclarator -> {
+                            String fieldName = variableDeclarator.getNameAsString();
+                            if (variableDeclarator.getInitializer().isEmpty()) {
+                              uninitializedFields.put(clazz, fieldName);
+                            }
+                          });
+                    }));
+        // We still want to keep the information about the class even if it has no field
+        // declarations, so we can retrieve tha path to the file from the given class flat name.
+        // This information is used in adding suppression annotations on class level.
+        return record;
       }
-      NodeList<BodyDeclaration<?>> members;
-      try {
-        members = Helper.getTypeDeclarationMembersByFlatName(tree, clazz);
-      } catch (TargetClassNotFound notFound) {
-        System.err.println(notFound.getMessage());
-        return null;
-      }
-      ClassFieldRecord record = new ClassFieldRecord(path, clazz);
-      members.forEach(
-          bodyDeclaration ->
-              bodyDeclaration.ifFieldDeclaration(
-                  fieldDeclaration -> {
-                    NodeList<VariableDeclarator> vars = fieldDeclaration.getVariables();
-                    if (vars.getFirst().isEmpty()) {
-                      // unexpected but just in case.
-                      return;
-                    }
-                    record.addFieldDeclaration(fieldDeclaration);
-                    // Collect uninitialized fields at declaration.
-                    vars.forEach(
-                        variableDeclarator -> {
-                          String fieldName = variableDeclarator.getNameAsString();
-                          if (variableDeclarator.getInitializer().isEmpty()) {
-                            uninitializedFields.put(clazz, fieldName);
-                          }
-                        });
-                  }));
-      // We still want to keep the information about the class even if it has no field
-      // declarations, so we can retrieve tha path to the file from the given class flat name.
-      // This information is used in adding suppression annotations on class level.
-      return record;
     };
   }
 
@@ -195,12 +214,10 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
   }
 
   /**
-   * Creates a {@link edu.ucr.cs.riple.injector.location.OnClass} instance targeting the passed
-   * classes flat name.
+   * Creates a {@link OnClass} instance targeting the passed classes flat name.
    *
    * @param clazz Enclosing class of the field.
-   * @return {@link edu.ucr.cs.riple.injector.location.OnClass} instance targeting the passed
-   *     classes flat name.
+   * @return {@link OnClass} instance targeting the passed classes flat name.
    */
   public OnClass getLocationOnClass(String clazz) {
     ClassFieldRecord candidate =
