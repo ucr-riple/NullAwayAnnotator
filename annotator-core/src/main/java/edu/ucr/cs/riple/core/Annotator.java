@@ -38,7 +38,10 @@ import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.evaluators.suppliers.TargetModuleSupplier;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.util.Utility;
+import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -167,9 +170,18 @@ public class Annotator {
             .collect(Collectors.toSet());
     context.injector.injectFixes(selectedFixes);
     addedMoreFixes = !selectedFixes.isEmpty();
+    Set<AddAnnotation> addedAnnotations =
+        selectedFixes.stream()
+            .map(fix -> fix.change)
+            .collect(Collectors.toSet());
+    Set<String> annotationString = addedAnnotations.stream().map(Object::toString).collect(Collectors.toSet());
+    StringBuilder log = new StringBuilder("Added annotations: \n");
+    for (String s : annotationString) {
+      log.append(s).append("\n");
+    }
+    Utility.log(log.toString());
     // Update log.
-    context.log.updateInjectedAnnotations(
-        selectedFixes.stream().map(fix -> fix.change).collect(Collectors.toSet()));
+    context.log.updateInjectedAnnotations(addedAnnotations);
     // Update impact saved state.
     downstreamImpactCache.updateImpactsAfterInjection(selectedFixes);
     targetModuleCache.updateImpactsAfterInjection(selectedFixes);

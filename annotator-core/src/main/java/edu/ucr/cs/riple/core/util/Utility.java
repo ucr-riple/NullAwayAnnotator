@@ -39,10 +39,13 @@ import edu.ucr.cs.riple.scanner.AnnotatorScanner;
 import edu.ucr.cs.riple.scanner.ScannerConfigWriter;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -350,6 +353,29 @@ public class Utility {
           StandardOpenOption.APPEND);
     } catch (IOException e) {
       throw new RuntimeException("Exception while writing in file: " + path, e);
+    }
+  }
+
+  /**
+   * Logs the given message to the log file at /tmp/ucr_checker/log.txt.
+   *
+   * @param message The message to log.
+   */
+  public static void log(Object message) {
+    final Path LOG_PATH = Paths.get("/tmp/annotator/log.txt");
+    try {
+      if (!Files.exists(LOG_PATH.getParent())) {
+        Files.createDirectories(LOG_PATH.getParent());
+      }
+    } catch (IOException e) {
+      throw new RuntimeException("Could not create directory at: " + LOG_PATH, e);
+    }
+    // append to file
+    try (OutputStream os = new FileOutputStream(LOG_PATH.toFile(), true)) {
+      os.write((message + "\n").getBytes(Charset.defaultCharset()), 0, (message + "\n").length());
+      os.flush();
+    } catch (IOException e) {
+      throw new RuntimeException("Error happened for writing at file: " + LOG_PATH, e);
     }
   }
 }
