@@ -32,6 +32,8 @@ import java.util.Set;
 /** Starting point. */
 public class Main {
 
+  public final static boolean DEBUG = true;
+
   /**
    * Starting point.
    *

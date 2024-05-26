@@ -41,7 +41,6 @@ import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -168,6 +167,17 @@ public class Annotator {
             .filter(Report::approved)
             .flatMap(report -> config.chain ? report.tree.stream() : report.root.stream())
             .collect(Collectors.toSet());
+
+
+    // DEBUG
+    if(Main.DEBUG){
+      Set<String> injectedFixes =
+          selectedFixes.stream().map(Fix::toString).collect(Collectors.toSet());
+      StringBuilder logInjected = new StringBuilder("Injected fixes: \n");
+      injectedFixes.forEach(logInjected::append);
+      Utility.log(logInjected.toString());
+    }
+
     context.injector.injectFixes(selectedFixes);
     addedMoreFixes = !selectedFixes.isEmpty();
     Set<AddAnnotation> addedAnnotations =
