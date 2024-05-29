@@ -28,6 +28,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
+import edu.ucr.cs.riple.core.Main;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.metadata.index.Error;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
@@ -362,6 +363,9 @@ public class Utility {
    * @param message The message to log.
    */
   public static void log(Object message) {
+    if(!Main.DEBUG){
+      return;
+    }
     final Path LOG_PATH = Paths.get("/tmp/annotator/log.txt");
     try {
       if (!Files.exists(LOG_PATH.getParent())) {

@@ -26,6 +26,8 @@ package edu.ucr.cs.riple.core;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
+import edu.ucr.cs.riple.core.util.Utility;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -74,7 +76,13 @@ public class ReportCache {
    */
   public void update(ImmutableSet<Report> reports) {
     int size = store.keySet().size();
+    Utility.log("Cache size before: " + size);
+    Utility.log("Reports size: " + reports.size());
+    StringBuilder sb = new StringBuilder("Reports are: \n");
+    reports.forEach(report -> sb.append(report).append("\n"));
+    Utility.log(sb.toString());
     reports.forEach(report -> store.put(report.root, report));
+    Utility.log("Size after: " + store.keySet().size());
     if (size == store.keySet().size()) {
       stateUpdated = false;
     }

@@ -167,29 +167,26 @@ public class Annotator {
             .filter(Report::approved)
             .flatMap(report -> config.chain ? report.tree.stream() : report.root.stream())
             .collect(Collectors.toSet());
-
-
     // DEBUG
-    if(Main.DEBUG){
-      Set<String> injectedFixes =
-          selectedFixes.stream().map(Fix::toString).collect(Collectors.toSet());
-      StringBuilder logInjected = new StringBuilder("Injected fixes: \n");
-      injectedFixes.forEach(logInjected::append);
-      Utility.log(logInjected.toString());
+    Utility.log("Log For this iteration:");
+    Utility.log("Selected Fixes size: " + selectedFixes.size());
+    Set<String> injectedFixes =
+        selectedFixes.stream().map(Fix::toString).collect(Collectors.toSet());
+    StringBuilder logInjected = new StringBuilder("Injected: \n");
+    injectedFixes.forEach(logInjected::append);
+    System.out.println("End");
+    if(!selectedFixes.isEmpty()){
+      Utility.log("First: " + selectedFixes.iterator().next().toString());
     }
-
+    Utility.log(logInjected.toString());
     context.injector.injectFixes(selectedFixes);
     addedMoreFixes = !selectedFixes.isEmpty();
+    Utility.log("Added more fixes: " + addedMoreFixes);
     Set<AddAnnotation> addedAnnotations =
         selectedFixes.stream()
             .map(fix -> fix.change)
             .collect(Collectors.toSet());
-    Set<String> annotationString = addedAnnotations.stream().map(Object::toString).collect(Collectors.toSet());
-    StringBuilder log = new StringBuilder("Added annotations: \n");
-    for (String s : annotationString) {
-      log.append(s).append("\n");
-    }
-    Utility.log(log.toString());
+    Utility.log("Added Annotations size: " + addedAnnotations.size());
     // Update log.
     context.log.updateInjectedAnnotations(addedAnnotations);
     // Update impact saved state.
