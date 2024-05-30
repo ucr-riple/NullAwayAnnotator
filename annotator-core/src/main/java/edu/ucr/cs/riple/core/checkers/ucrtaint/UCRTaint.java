@@ -32,6 +32,7 @@ import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.metadata.region.Region;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
+import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddTypeUseMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.LocationKind;
@@ -202,7 +203,7 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
     return fixes;
   }
 
-  private static ImmutableList<ImmutableList<Integer>> getTypePositionIndices(JSONObject location) {
+  private ImmutableList<ImmutableList<Integer>> getTypePositionIndices(JSONObject location) {
     final ImmutableList.Builder<ImmutableList<Integer>> bul = ImmutableList.builder();
     AtomicBoolean empty = new AtomicBoolean(true);
     if (location.containsKey("type-variable-position")) {
@@ -218,7 +219,19 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
     if (empty.get()) {
       bul.add(ImmutableList.of(0));
     }
-    return bul.build();
+    ImmutableList<ImmutableList<Integer>> ans = bul.build();
+    int contains = 0;
+    for (ImmutableList<Integer> list : ans) {
+      if (list.equals(ImmutableList.of(0))) {
+        contains++;
+      }
+    }
+    if (contains > 1) {
+      Utility.log(
+          config, "------------------UnExpected fix type index-------------------:" + contains);
+      Utility.log(config, "Location: " + location);
+    }
+    return ans;
   }
 
   @Override

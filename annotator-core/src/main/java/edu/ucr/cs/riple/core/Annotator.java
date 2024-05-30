@@ -39,7 +39,6 @@ import edu.ucr.cs.riple.core.evaluators.suppliers.TargetModuleSupplier;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
-
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -66,6 +65,7 @@ public class Annotator {
 
   /** Starts the annotating process consist of preprocess followed by the "annotate" phase. */
   public void start() {
+    Utility.log(config, "CHECK LOG IS ENABLED");
     ParserConfiguration parserConfiguration = new ParserConfiguration();
     parserConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
     StaticJavaParser.setConfiguration(parserConfiguration);
@@ -168,25 +168,23 @@ public class Annotator {
             .flatMap(report -> config.chain ? report.tree.stream() : report.root.stream())
             .collect(Collectors.toSet());
     // DEBUG
-    Utility.log("Log For this iteration:");
-    Utility.log("Selected Fixes size: " + selectedFixes.size());
+    Utility.log(config, "Log For this iteration:");
+    Utility.log(config, "Selected Fixes size: " + selectedFixes.size());
     Set<String> injectedFixes =
         selectedFixes.stream().map(Fix::toString).collect(Collectors.toSet());
     StringBuilder logInjected = new StringBuilder("Injected: \n");
     injectedFixes.forEach(logInjected::append);
     System.out.println("End");
-    if(!selectedFixes.isEmpty()){
-      Utility.log("First: " + selectedFixes.iterator().next().toString());
+    if (!selectedFixes.isEmpty()) {
+      Utility.log(config, "First: " + selectedFixes.iterator().next().toString());
     }
-    Utility.log(logInjected.toString());
+    Utility.log(config, logInjected.toString());
     context.injector.injectFixes(selectedFixes);
     addedMoreFixes = !selectedFixes.isEmpty();
-    Utility.log("Added more fixes: " + addedMoreFixes);
+    Utility.log(config, "Added more fixes: " + addedMoreFixes);
     Set<AddAnnotation> addedAnnotations =
-        selectedFixes.stream()
-            .map(fix -> fix.change)
-            .collect(Collectors.toSet());
-    Utility.log("Added Annotations size: " + addedAnnotations.size());
+        selectedFixes.stream().map(fix -> fix.change).collect(Collectors.toSet());
+    Utility.log(config, "Added Annotations size: " + addedAnnotations.size());
     // Update log.
     context.log.updateInjectedAnnotations(addedAnnotations);
     // Update impact saved state.

@@ -46,7 +46,6 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -362,11 +361,11 @@ public class Utility {
    *
    * @param message The message to log.
    */
-  public static void log(Object message) {
-    if(!Main.DEBUG){
+  public static void log(Config config, Object message) {
+    if (!Main.DEBUG) {
       return;
     }
-    final Path LOG_PATH = Paths.get("/tmp/annotator/log.txt");
+    final Path LOG_PATH = config.globalDir.resolve("annotator-log.txt");
     try {
       if (!Files.exists(LOG_PATH.getParent())) {
         Files.createDirectories(LOG_PATH.getParent());

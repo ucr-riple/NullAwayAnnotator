@@ -27,7 +27,6 @@ package edu.ucr.cs.riple.core;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.util.Utility;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -44,6 +43,8 @@ public class ReportCache {
   /** Cache activation switch. */
   private boolean enabled;
 
+  private Config config;
+
   /**
    * If true, the content of cache has been updated when {@link ReportCache#update(ImmutableSet)}
    * method is called. Used to determine if annotator should perform another iteration of analysis.
@@ -52,6 +53,7 @@ public class ReportCache {
 
   public ReportCache(Config config) {
     this.store = new HashMap<>();
+    this.config = config;
     this.enabled = config.useCache;
     this.stateUpdated = true;
   }
@@ -76,13 +78,20 @@ public class ReportCache {
    */
   public void update(ImmutableSet<Report> reports) {
     int size = store.keySet().size();
-    Utility.log("Cache size before: " + size);
-    Utility.log("Reports size: " + reports.size());
-    StringBuilder sb = new StringBuilder("Reports are: \n");
-    reports.forEach(report -> sb.append(report).append("\n"));
-    Utility.log(sb.toString());
+    Utility.log(config, "Cache size before: " + size);
+    Utility.log(config, "Reports size: " + reports.size());
+    StringBuilder sb = new StringBuilder("New Reports are: \n");
+    reports.forEach(report -> sb.append(report.root).append("\n"));
+    Utility.log(config, sb.toString());
+    Set<Report> notInCache =
+        reports.stream()
+            .filter(report -> !store.containsKey(report.root))
+            .collect(ImmutableSet.toImmutableSet());
+    StringBuilder sb1 = new StringBuilder("Not in cache: \n");
+    notInCache.forEach(report -> sb1.append(report.root).append("\n"));
+    Utility.log(config, sb1.toString());
     reports.forEach(report -> store.put(report.root, report));
-    Utility.log("Size after: " + store.keySet().size());
+    Utility.log(config, "Size after: " + store.keySet().size());
     if (size == store.keySet().size()) {
       stateUpdated = false;
     }
