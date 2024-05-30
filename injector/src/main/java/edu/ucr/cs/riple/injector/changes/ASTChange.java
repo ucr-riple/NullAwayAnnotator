@@ -48,4 +48,6 @@ public interface ASTChange {
    * @return The location of the change.
    */
   Location getLocation();
+
+  ASTChange copy();
 }

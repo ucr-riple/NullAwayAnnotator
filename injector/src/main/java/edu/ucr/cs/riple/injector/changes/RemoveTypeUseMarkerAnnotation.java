@@ -121,4 +121,9 @@ public class RemoveTypeUseMarkerAnnotation extends TypeUseAnnotationChange
   public int hashCode() {
     return Objects.hash(super.hashCode(), RemoveTypeUseMarkerAnnotation.class);
   }
+
+  @Override
+  public ASTChange copy() {
+    return new RemoveTypeUseMarkerAnnotation(location, annotationName.fullName, typeIndex);
+  }
 }

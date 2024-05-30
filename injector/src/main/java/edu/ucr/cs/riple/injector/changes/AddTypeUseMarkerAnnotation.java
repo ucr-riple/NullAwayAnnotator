@@ -144,4 +144,9 @@ public class AddTypeUseMarkerAnnotation extends TypeUseAnnotationChange implemen
     OnLocalVariable onLocalVariable = (OnLocalVariable) location;
     return onLocalVariable.isOnArray;
   }
+
+  @Override
+  public ASTChange copy() {
+    return new AddTypeUseMarkerAnnotation(location, annotationName.fullName, typeIndex);
+  }
 }
