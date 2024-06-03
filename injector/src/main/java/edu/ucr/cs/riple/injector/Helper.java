@@ -442,7 +442,7 @@ public class Helper {
       Optional<ReferenceType> extendedType = ((WildcardType) type).getExtendedType();
       return extendedType.isPresent() && isAnnotatedWith(extendedType.get(), expr);
     }
-    return type.getAnnotations().stream().anyMatch(annot -> annot.equals(expr));
+    return type.getAnnotations().stream().anyMatch(annot -> annot.getName().equals(expr.getName()));
   }
 
   /**
@@ -453,7 +453,7 @@ public class Helper {
    * @return true if the node is annotated with the annotation.
    */
   public static boolean isAnnotatedWith(NodeWithAnnotations<?> node, AnnotationExpr expr) {
-    return node.getAnnotations().stream().anyMatch(annot -> annot.equals(expr));
+    return node.getAnnotations().stream().anyMatch(annot -> annot.getName().equals(expr.getName()));
   }
 
   /**
