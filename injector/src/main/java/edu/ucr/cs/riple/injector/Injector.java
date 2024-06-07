@@ -79,7 +79,7 @@ public class Injector {
     map.forEach(
         (path, changeList) -> {
           if (buggyPath.equals(path)) {
-            counter++;
+            changeList.forEach(Injector::writeAtPath);
           }
           changeList = filterChange(changeList);
           combineTypeArgumentIndices(changeList);

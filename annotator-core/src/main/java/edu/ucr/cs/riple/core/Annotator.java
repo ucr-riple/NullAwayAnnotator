@@ -78,7 +78,6 @@ public class Annotator {
     }
     context.log.stopTimerAndCapture(timer);
     Utility.writeLog(context);
-    Injector.writeAtPath(context.config.globalDir.resolve("added_fixes.json"));
   }
 
   /**
