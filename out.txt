@@ -1,0 +1,202 @@
+Initialized native services in: /Users/nima/.gradle/native
+Initialized jansi services in: /Users/nima/.gradle/native
+Received JVM installation metadata from '/Library/Java/JavaVirtualMachines/jdk-11.0.12.jdk/Contents/Home': {JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-11.0.12.jdk/Contents/Home, JAVA_VERSION=11.0.12, JAVA_VENDOR=Oracle Corporation, RUNTIME_NAME=Java(TM) SE Runtime Environment, RUNTIME_VERSION=11.0.12+8-LTS-237, VM_NAME=Java HotSpot(TM) 64-Bit Server VM, VM_VERSION=11.0.12+8-LTS-237, VM_VENDOR=Oracle Corporation, OS_ARCH=x86_64}
+The client will now receive all logging from the daemon (pid: 53865). The daemon log file: /Users/nima/.gradle/daemon/8.1.1/daemon-53865.out.log
+Starting 4th build in daemon [uptime: 1 mins 7.706 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 512 MiB, non-heap usage: 18% of 384 MiB]
+Using 16 worker leases.
+Now considering [/Users/nima/Developer/NullAwayAnnotator] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Settings evaluated using settings file '/Users/nima/Developer/NullAwayAnnotator/settings.gradle'.
+Projects loaded. Root project using build file '/Users/nima/Developer/NullAwayAnnotator/build.gradle'.
+Included projects: [root project 'NullAwayAnnotator', project ':annotator-core', project ':annotator-scanner', project ':checks', project ':injector', project ':library-model-loader', project ':checks:ban-mutable-static']
+
+> Configure project :
+Evaluating root project 'NullAwayAnnotator' using build file '/Users/nima/Developer/NullAwayAnnotator/build.gradle'.
+The configuration detachedConfiguration1 is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration detachedConfiguration1 is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration detachedConfiguration1 is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration detachedConfiguration1 is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration detachedConfiguration2 is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration detachedConfiguration2 is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration detachedConfiguration2 is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration detachedConfiguration2 is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration :classpath is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration :classpath is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration :classpath is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration :classpath is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+
+> Configure project :annotator-core
+Evaluating project ':annotator-core' using build file '/Users/nima/Developer/NullAwayAnnotator/annotator-core/build.gradle'.
+The configuration detachedConfiguration1 is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration detachedConfiguration1 is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration detachedConfiguration1 is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration detachedConfiguration1 is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration detachedConfiguration2 is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration detachedConfiguration2 is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration detachedConfiguration2 is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration detachedConfiguration2 is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration :annotator-core:classpath is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration :annotator-core:classpath is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration :annotator-core:classpath is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration :annotator-core:classpath is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+
+> Configure project :annotator-scanner
+Evaluating project ':annotator-scanner' using build file '/Users/nima/Developer/NullAwayAnnotator/annotator-scanner/build.gradle'.
+The configuration detachedConfiguration1 is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration detachedConfiguration1 is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration detachedConfiguration1 is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration detachedConfiguration1 is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration :annotator-scanner:classpath is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration :annotator-scanner:classpath is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration :annotator-scanner:classpath is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration :annotator-scanner:classpath is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+
+> Configure project :checks
+Evaluating project ':checks' using build file '/Users/nima/Developer/NullAwayAnnotator/checks/build.gradle'.
+
+> Configure project :injector
+Evaluating project ':injector' using build file '/Users/nima/Developer/NullAwayAnnotator/injector/build.gradle'.
+The configuration detachedConfiguration1 is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration detachedConfiguration1 is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration detachedConfiguration1 is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration detachedConfiguration1 is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration :injector:classpath is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration :injector:classpath is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration :injector:classpath is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration :injector:classpath is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+
+> Configure project :library-model-loader
+Evaluating project ':library-model-loader' using build file '/Users/nima/Developer/NullAwayAnnotator/library-model-loader/build.gradle'.
+The configuration detachedConfiguration1 is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration detachedConfiguration1 is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration detachedConfiguration1 is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration detachedConfiguration1 is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration :library-model-loader:classpath is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration :library-model-loader:classpath is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration :library-model-loader:classpath is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration :library-model-loader:classpath is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+
+> Configure project :checks:ban-mutable-static
+Evaluating project ':checks:ban-mutable-static' using build file '/Users/nima/Developer/NullAwayAnnotator/checks/ban-mutable-static/build.gradle'.
+The configuration detachedConfiguration1 is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration detachedConfiguration1 is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration detachedConfiguration1 is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration detachedConfiguration1 is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration :checks:ban-mutable-static:classpath is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration :checks:ban-mutable-static:classpath is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration :checks:ban-mutable-static:classpath is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration :checks:ban-mutable-static:classpath is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+All projects evaluated.
+Task path ':injector:test' matched project ':injector'
+Task name matched 'test'
+Selected primary task 'test' from project :injector
+The configuration :injector:mainSourceElements is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration :checks:ban-mutable-static:mainSourceElements is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+Tasks to be executed: [task ':checks:ban-mutable-static:compileJava', task ':checks:ban-mutable-static:processResources', task ':checks:ban-mutable-static:classes', task ':checks:ban-mutable-static:jar', task ':injector:compileJava', task ':injector:processResources', task ':injector:classes', task ':injector:compileTestJava', task ':injector:processTestResources', task ':injector:testClasses', task ':injector:test']
+Tasks that were excluded: []
+Resolve mutations for :checks:ban-mutable-static:compileJava (Thread[Execution worker,5,main]) started.
+:checks:ban-mutable-static:compileJava (Thread[Execution worker,5,main]) started.
+
+> Task :checks:ban-mutable-static:compileJava
+Caching disabled for task ':checks:ban-mutable-static:compileJava' because:
+  Build cache is disabled
+Task ':checks:ban-mutable-static:compileJava' is not up-to-date because:
+  Executed with '--rerun-tasks'.
+The input changes require a full rebuild for incremental task ':checks:ban-mutable-static:compileJava'.
+Full recompilation is required because no incremental change information is available. This is usually caused by clean builds or changing compiler arguments.
+Compiling with toolchain '/Library/Java/JavaVirtualMachines/jdk-11.0.12.jdk/Contents/Home'.
+Compiling with JDK Java compiler API.
+Class dependency analysis for incremental compilation took 0.017 secs.
+Created classpath snapshot for incremental compilation in 0.04 secs.
+Resolve mutations for :checks:ban-mutable-static:processResources (Thread[Execution worker,5,main]) started.
+:checks:ban-mutable-static:processResources (Thread[Execution worker,5,main]) started.
+
+> Task :checks:ban-mutable-static:processResources NO-SOURCE
+Skipping task ':checks:ban-mutable-static:processResources' as it has no source files and no previous output files.
+Resolve mutations for :checks:ban-mutable-static:classes (Thread[Execution worker,5,main]) started.
+:checks:ban-mutable-static:classes (Thread[Execution worker,5,main]) started.
+
+> Task :checks:ban-mutable-static:classes
+Skipping task ':checks:ban-mutable-static:classes' as it has no actions.
+Resolve mutations for :checks:ban-mutable-static:jar (Thread[Execution worker,5,main]) started.
+:checks:ban-mutable-static:jar (Thread[Execution worker,5,main]) started.
+
+> Task :checks:ban-mutable-static:jar
+Caching disabled for task ':checks:ban-mutable-static:jar' because:
+  Build cache is disabled
+Task ':checks:ban-mutable-static:jar' is not up-to-date because:
+  Executed with '--rerun-tasks'.
+file or directory '/Users/nima/Developer/NullAwayAnnotator/checks/ban-mutable-static/build/resources/main', not found
+work action resolve ban-mutable-static.jar (project :checks:ban-mutable-static) (Thread[Execution worker,5,main]) started.
+Resolve mutations for :injector:compileJava (Thread[Execution worker,5,main]) started.
+:injector:compileJava (Thread[Execution worker,5,main]) started.
+
+> Task :injector:compileJava
+Caching disabled for task ':injector:compileJava' because:
+  Build cache is disabled
+Task ':injector:compileJava' is not up-to-date because:
+  Executed with '--rerun-tasks'.
+The input changes require a full rebuild for incremental task ':injector:compileJava'.
+Full recompilation is required because no incremental change information is available. This is usually caused by clean builds or changing compiler arguments.
+Compiling with toolchain '/Library/Java/JavaVirtualMachines/jdk-11.0.12.jdk/Contents/Home'.
+Compiling with JDK Java compiler API.
+Class dependency analysis for incremental compilation took 0.032 secs.
+Created classpath snapshot for incremental compilation in 0.017 secs.
+Resolve mutations for :injector:processResources (Thread[Execution worker,5,main]) started.
+:injector:processResources (Thread[Execution worker,5,main]) started.
+
+> Task :injector:processResources NO-SOURCE
+Skipping task ':injector:processResources' as it has no source files and no previous output files.
+Resolve mutations for :injector:classes (Thread[Execution worker,5,main]) started.
+:injector:classes (Thread[Execution worker Thread 12,5,main]) started.
+
+> Task :injector:classes
+Skipping task ':injector:classes' as it has no actions.
+Resolve mutations for :injector:compileTestJava (Thread[Execution worker Thread 12,5,main]) started.
+:injector:compileTestJava (Thread[Execution worker Thread 12,5,main]) started.
+
+> Task :injector:compileTestJava
+Caching disabled for task ':injector:compileTestJava' because:
+  Build cache is disabled
+Task ':injector:compileTestJava' is not up-to-date because:
+  Executed with '--rerun-tasks'.
+The input changes require a full rebuild for incremental task ':injector:compileTestJava'.
+Full recompilation is required because no incremental change information is available. This is usually caused by clean builds or changing compiler arguments.
+Compiling with toolchain '/Library/Java/JavaVirtualMachines/jdk-11.0.12.jdk/Contents/Home'.
+Compiling with JDK Java compiler API.
+Class dependency analysis for incremental compilation took 0.009 secs.
+Created classpath snapshot for incremental compilation in 0.003 secs.
+Resolve mutations for :injector:processTestResources (Thread[Execution worker Thread 12,5,main]) started.
+:injector:processTestResources (Thread[Execution worker Thread 12,5,main]) started.
+
+> Task :injector:processTestResources
+Caching disabled for task ':injector:processTestResources' because:
+  Build cache is disabled
+Task ':injector:processTestResources' is not up-to-date because:
+  Executed with '--rerun-tasks'.
+Resolve mutations for :injector:testClasses (Thread[Execution worker Thread 12,5,main]) started.
+:injector:testClasses (Thread[Execution worker Thread 12,5,main]) started.
+
+> Task :injector:testClasses
+Skipping task ':injector:testClasses' as it has no actions.
+Resolve mutations for :injector:test (Thread[Execution worker Thread 12,5,main]) started.
+:injector:test (Thread[Execution worker Thread 12,5,main]) started.
+Gradle Test Executor 2 started executing tests.
+Gradle Test Executor 2 finished executing tests.
+
+> Task :injector:test
+Caching disabled for task ':injector:test' because:
+  Build cache is disabled
+Task ':injector:test' is not up-to-date because:
+  Executed with '--rerun-tasks'.
+Starting process 'Gradle Test Executor 2'. Working directory: /Users/nima/Developer/NullAwayAnnotator/injector Command: /Library/Java/JavaVirtualMachines/jdk-11.0.12.jdk/Contents/Home/bin/java -Djunit.jupiter.execution.parallel.enabled=true -Djunit.jupiter.execution.parallel.mode.default=concurrent -Dorg.gradle.internal.worker.tmpdir=/Users/nima/Developer/NullAwayAnnotator/injector/build/tmp/test/work -Dorg.gradle.native=false @/Users/nima/.gradle/.tmp/gradle-worker-classpath14327584521423624688txt -Xmx512m -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 2'
+Successfully started process 'Gradle Test Executor 2'
+Finished generating test XML results (0.001 secs) into: /Users/nima/Developer/NullAwayAnnotator/injector/build/test-results/test
+Generating HTML test report...
+Finished generating test html results (0.003 secs) into: /Users/nima/Developer/NullAwayAnnotator/injector/build/reports/tests/test
+
+BUILD SUCCESSFUL in 7s
+6 actionable tasks: 6 executed
+Watched directory hierarchies: [/Users/nima/Developer/NullAwayAnnotator]

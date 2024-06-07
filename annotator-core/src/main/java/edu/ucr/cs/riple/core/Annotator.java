@@ -38,6 +38,7 @@ import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.evaluators.suppliers.TargetModuleSupplier;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.util.Utility;
+import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -77,6 +78,7 @@ public class Annotator {
     }
     context.log.stopTimerAndCapture(timer);
     Utility.writeLog(context);
+    Injector.writeAtPath(context.config.globalDir.resolve("added_fixes.json"));
   }
 
   /**
