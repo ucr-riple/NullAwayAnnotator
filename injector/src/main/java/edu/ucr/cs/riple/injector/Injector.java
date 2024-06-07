@@ -60,7 +60,6 @@ public class Injector {
   private static final Path buggyPath =
       Paths.get(
           "/home/nima/Developer/taint-benchmarks/opencms-core/src/org/opencms/importexport/CmsImportVersion5.java");
-  public static final Map<Integer, List<ASTChange>> buggyChanges = new HashMap<>();
   public static Integer counter = 0;
 
   /**
@@ -81,7 +80,6 @@ public class Injector {
         (path, changeList) -> {
           if (buggyPath.equals(path)) {
             counter++;
-            buggyChanges.put(counter, changeList);
           }
           changeList = filterChange(changeList);
           combineTypeArgumentIndices(changeList);
