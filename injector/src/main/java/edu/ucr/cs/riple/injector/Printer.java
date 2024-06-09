@@ -39,6 +39,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
  * Applies the text modification instances to source file. Text modifications are applied according
@@ -69,6 +70,10 @@ public class Printer {
    * @param modifications Set of modifications.
    */
   public void applyModifications(Set<Modification> modifications) {
+    modifications =
+        modifications.stream()
+            .flatMap(modification -> modification.flatten().stream())
+            .collect(Collectors.toSet());
     // Modification are sorted to start from the last position, to make the changes ineffective to
     // current computed offsets.
     SortedSet<Modification> reversedSortedSet = new TreeSet<>(Collections.reverseOrder());

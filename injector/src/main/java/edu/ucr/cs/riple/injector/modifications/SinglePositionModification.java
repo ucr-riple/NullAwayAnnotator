@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.injector.modifications;
 
 import com.github.javaparser.Position;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Base class for modifications which require only a single string modification at a position in the
@@ -78,5 +79,10 @@ public abstract class SinglePositionModification implements Modification {
       return content.compareTo(((SinglePositionModification) o).content);
     }
     return 0;
+  }
+
+  @Override
+  public Set<Modification> flatten() {
+    return Set.of(this);
   }
 }

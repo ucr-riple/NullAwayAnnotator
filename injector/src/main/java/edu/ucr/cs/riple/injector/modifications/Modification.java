@@ -29,6 +29,7 @@ import edu.ucr.cs.riple.injector.changes.ASTChange;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Represents a text modification in the source file which are translation of {@link ASTChange}
@@ -54,4 +55,6 @@ public interface Modification extends Comparable<Modification> {
    * @return Starting position of the modification on the source file.
    */
   Position getStartingPosition();
+
+  Set<Modification> flatten();
 }

@@ -38,7 +38,6 @@ import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.evaluators.suppliers.TargetModuleSupplier;
 import edu.ucr.cs.riple.core.metadata.index.Fix;
 import edu.ucr.cs.riple.core.util.Utility;
-import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import java.util.Set;
 import java.util.stream.Collectors;

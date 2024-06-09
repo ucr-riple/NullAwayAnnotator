@@ -789,4 +789,40 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
                 ImmutableList.of(ImmutableList.of(1, 0))))
         .start();
   }
+
+  @Test
+  public void multipleInlineLocalVariableTest() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "   public void bar() {",
+            "       List<Node> a1 = null, a2 = null;",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.UnTainted;",
+            "public class Foo {",
+            "   public void bar() {",
+            "       @UnTainted List<@UnTainted Node> a1 = null, a2 = null;",
+            "   }",
+            "}")
+        .addChanges(
+            new AddTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "bar()", "a1"),
+                "edu.ucr.UnTainted",
+                ImmutableList.of(ImmutableList.of(0))),
+            new AddTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "bar()", "a1"),
+                "edu.ucr.UnTainted",
+                ImmutableList.of(ImmutableList.of(1, 0))),
+            new AddTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "bar()", "a2"),
+                "edu.ucr.UnTainted",
+                ImmutableList.of(ImmutableList.of(1, 0))))
+        .start();
+  }
 }

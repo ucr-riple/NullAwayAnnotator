@@ -22,10 +22,7 @@
 
 package edu.ucr.cs.riple.injector;
 
-import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.Range;
-import com.github.javaparser.StaticJavaParser;
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.AnnotationMemberDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -43,13 +40,7 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.WildcardType;
 import com.github.javaparser.ast.visitor.GenericVisitorWithDefaults;
-import com.github.javaparser.ast.visitor.TreeVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -62,34 +53,95 @@ public class Main {
   static int TOP_LEVEL_COUNT = 0;
   static int TYPE_ARG_COUNT = 0;
 
-  public static void main(String[] args) throws IOException {
-    String directory = "/Users/nima/Developer/NullAwayAnnotator/sample";
-    try (Stream<Path> paths = Files.walk(Paths.get(directory))) {
-      paths.forEach(
-          path -> {
-            if (path.toString().endsWith(".java")) {
-              try {
-                StaticJavaParser.setConfiguration(
-                    new ParserConfiguration()
-                        .setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17));
-                CompilationUnit tree = StaticJavaParser.parse(path.toFile());
-                TreeVisitor visitor =
-                    new TreeVisitor() {
-                      @Override
-                      public void process(Node node) {
-                        node.accept(new AnnotationVisitor(), null);
-                      }
-                    };
-                visitor.visitBreadthFirst(tree);
-              } catch (FileNotFoundException e) {
-                System.out.println("Exception for : " + path + " " + e);
-              }
-            }
-          });
-    }
-    System.out.println("Top-level: " + TOP_LEVEL_COUNT);
-    System.out.println("Type arg: " + TYPE_ARG_COUNT);
-  }
+  //  public static void main(String[] args) {
+  //    // read json file
+  //    Path path = Paths.get("/Users/nima/Desktop/annot_log.json");
+  //    JSONObject jsonObject;
+  //    List<List<ASTChange>> allChanges = new ArrayList<>();
+  //    try {
+  //      Object obj = new JSONParser().parse(Files.newBufferedReader(path,
+  // Charset.defaultCharset()));
+  //      jsonObject = (JSONObject) obj;
+  //    } catch (Exception e) {
+  //      throw new RuntimeException("Error in reading/parsing context at path: " + path, e);
+  //    }
+  //    JSONArray fixes = (JSONArray) jsonObject.get("fixes");
+  //    List<ASTChange> thisGroup = new ArrayList<>();
+  //    boolean lastWasAddition = true;
+  //    for (Object fix : fixes) {
+  //      JSONObject fixObj = (JSONObject) fix;
+  //      Location location = Location.createLocationFromJSON(fixObj);
+  //      ImmutableList<ImmutableList<Integer>> typeIndex = getTypePositionIndices(fixObj);
+  //      String annot = (String) fixObj.get("annot");
+  //      boolean isAddition = ((String) fixObj.get("type")).contains("AddTypeUseMarkerAnnotation");
+  //      ASTChange change =
+  //          isAddition
+  //              ? new AddTypeUseMarkerAnnotation(location, annot, typeIndex)
+  //              : new RemoveTypeUseMarkerAnnotation(location, annot, typeIndex);
+  //      if (lastWasAddition != isAddition) {
+  //        allChanges.add(thisGroup);
+  //        thisGroup = new ArrayList<>();
+  //        thisGroup.add(change);
+  //        lastWasAddition = isAddition;
+  //      } else {
+  //        thisGroup.add(change);
+  //      }
+  //    }
+  //    Injector injector = new Injector();
+  //    int i = 0;
+  //    for (List<ASTChange> changes : allChanges) {
+  //      i++;
+  //      if (i != 509) {
+  //        continue;
+  //      }
+  //      List<ASTChange> filtered =
+  //          changes.stream()
+  //              .filter(
+  //                  astChange -> {
+  //                    if (!astChange.getLocation().isOnLocalVariable()) {
+  //                      return false;
+  //                    }
+  //                    OnLocalVariable localVariable = astChange.getLocation().toLocalVariable();
+  //                    Preconditions.checkArgument(localVariable.encMethod != null);
+  //                    return localVariable.encMethod.method.equals("readResourcesFromManifest()")
+  //                        && (localVariable.varName.equals("acentryNodes")
+  //                            || localVariable.varName.equals("fileNodes"));
+  //                  })
+  //              .collect(Collectors.toList());
+  //      System.out.println("Processing group: " + i + " " + filtered.size());
+  //            injector.start(filtered);
+  //    }
+  //    System.out.println(allChanges.size());
+  //  }
+
+  //  public static void main(String[] args) throws IOException {
+  //    String directory = "/Users/nima/Developer/NullAwayAnnotator/sample";
+  //    try (Stream<Path> paths = Files.walk(Paths.get(directory))) {
+  //      paths.forEach(
+  //          path -> {
+  //            if (path.toString().endsWith(".java")) {
+  //              try {
+  //                StaticJavaParser.setConfiguration(
+  //                    new ParserConfiguration()
+  //                        .setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17));
+  //                CompilationUnit tree = StaticJavaParser.parse(path.toFile());
+  //                TreeVisitor visitor =
+  //                    new TreeVisitor() {
+  //                      @Override
+  //                      public void process(Node node) {
+  //                        node.accept(new AnnotationVisitor(), null);
+  //                      }
+  //                    };
+  //                visitor.visitBreadthFirst(tree);
+  //              } catch (FileNotFoundException e) {
+  //                System.out.println("Exception for : " + path + " " + e);
+  //              }
+  //            }
+  //          });
+  //    }
+  //    System.out.println("Top-level: " + TOP_LEVEL_COUNT);
+  //    System.out.println("Type arg: " + TYPE_ARG_COUNT);
+  //  }
 
   static class AnnotationVisitor extends VoidVisitorAdapter<Void> {
 
