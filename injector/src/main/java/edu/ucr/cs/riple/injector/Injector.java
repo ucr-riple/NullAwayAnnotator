@@ -36,12 +36,8 @@ import edu.ucr.cs.riple.injector.changes.ChangeVisitor;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import edu.ucr.cs.riple.injector.changes.TypeUseAnnotationChange;
 import edu.ucr.cs.riple.injector.location.Location;
-import edu.ucr.cs.riple.injector.location.LocationToJsonVisitor;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -51,15 +47,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.json.simple.JSONObject;
 
 /** Injector main class which can add / remove annotations. */
 public class Injector {
-
-  private static final Path buggyPath =
-      Paths.get(
-          "/home/nima/Developer/taint-benchmarks/opencms-core/src/org/opencms/importexport/CmsImportVersion5.java");
-  public static Integer counter = 0;
 
   /**
    * Starts applying the requested changes.
@@ -77,9 +67,6 @@ public class Injector {
     Set<FileOffsetStore> offsets = new HashSet<>();
     map.forEach(
         (path, changeList) -> {
-          if (buggyPath.equals(path)) {
-            changeList.forEach(Injector::writeAtPath);
-          }
           changeList = filterChange(changeList);
           combineTypeArgumentIndices(changeList);
           CompilationUnit tree;
@@ -87,7 +74,6 @@ public class Injector {
             return;
           }
           try {
-
             tree = StaticJavaParser.parse(path);
           } catch (Exception exception) {
             System.err.println("Parse error on: " + path + " " + exception.getClass());
@@ -226,27 +212,5 @@ public class Injector {
           typeIndices.forEach(builder::addAll);
           ((TypeUseAnnotationChange) astChange).typeIndex = builder.build();
         });
-  }
-
-  public static void writeAtPath(ASTChange change) {
-    final Path path = Paths.get("/tmp/ucr_checker/annot_log.txt");
-    try {
-      if (!Files.exists(path.getParent())) {
-        Files.createDirectories(path.getParent());
-      }
-    } catch (IOException e) {
-      throw new RuntimeException("Could not create directory at: " + path, e);
-    }
-    JSONObject json = change.getLocation().accept(new LocationToJsonVisitor(), null);
-    json.put("type-variable-position", ((TypeUseAnnotationChange) change).typeIndex);
-    json.put("annot", ((TypeUseAnnotationChange) change).annotationName.fullName);
-    json.put("type", change.getClass().toString());
-    String entry = json + ",\n";
-    try (OutputStream os = new FileOutputStream(path.toFile(), true)) {
-      os.write(entry.getBytes(Charset.defaultCharset()), 0, entry.length());
-      os.flush();
-    } catch (IOException e) {
-      throw new RuntimeException("Error happened for writing at file: " + path, e);
-    }
   }
 }
