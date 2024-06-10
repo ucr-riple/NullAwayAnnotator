@@ -26,7 +26,6 @@ package edu.ucr.cs.riple.core.registries.field;
 
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
-import com.github.javaparser.ast.type.Type;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import java.nio.file.Path;
@@ -120,10 +119,10 @@ public class ClassFieldRecord {
 
     /** Name of all fields declared within the same statement. */
     public final ImmutableSet<String> names;
-    /** Type of the field. */
-    public final Type type;
-    /** Field declaration node. */
-    public final FieldDeclaration fieldDeclaration;
+    /** True if the field declaration is of primitive type, false otherwise. */
+    public final boolean isPrimitiveType;
+    /** True if the field declaration is public, false otherwise. */
+    public final boolean isPublic;
 
     public FieldDeclarationRecord(FieldDeclaration fieldDeclaration) {
       this.names =
@@ -131,8 +130,9 @@ public class ClassFieldRecord {
               .map(NodeWithSimpleName::getNameAsString)
               .collect(ImmutableSet.toImmutableSet());
       Preconditions.checkArgument(fieldDeclaration.getVariables().getFirst().isPresent());
-      this.type = fieldDeclaration.getVariables().getFirst().get().getType();
-      this.fieldDeclaration = fieldDeclaration;
+      this.isPrimitiveType =
+          fieldDeclaration.getVariables().getFirst().get().getType().isPrimitiveType();
+      this.isPublic = fieldDeclaration.isPublic();
     }
 
     /**
@@ -141,7 +141,7 @@ public class ClassFieldRecord {
      * @return true, if the field declaration is public and has non-primitive type.
      */
     public boolean isPublicFieldWithNonPrimitiveType() {
-      return fieldDeclaration.isPublic() && !type.isPrimitiveType();
+      return isPublic && !isPrimitiveType;
     }
   }
 }
