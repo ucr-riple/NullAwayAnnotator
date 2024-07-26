@@ -41,7 +41,7 @@ public class Main {
    *     json file, otherwise they will be set up according to the set of received cli arguments.
    */
   public static void main(String[] args) {
-    System.out.println("Annotator extended search version 2 - DEBUG");
+    System.out.println("Annotator extended search version 3");
     Config config;
     if (args.length == 2 && args[0].equals("--path")) {
       config = new Config(Paths.get(args[1]));
