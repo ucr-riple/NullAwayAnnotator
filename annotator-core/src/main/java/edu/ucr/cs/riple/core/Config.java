@@ -156,6 +156,8 @@ public class Config {
    */
   public final boolean disableCleanup;
 
+  public final boolean disableLocalVarOpt;
+
   /**
    * Builds context from command line arguments.
    *
@@ -360,6 +362,12 @@ public class Config {
             "Deactivates clean up phase which removes all annotations on local variables except for the ones that are on type arguments");
     options.addOption(deactivateCleanupOption);
 
+    // local var opt
+    Option disableLocalVarOpt =
+        new Option("dlo", "disable-localVar-opt", false, "Disables local var opt");
+    disableLocalVarOpt.setRequired(false);
+    options.addOption(disableLocalVarOpt);
+
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
@@ -425,7 +433,6 @@ public class Config {
     this.redirectBuildOutputToStdErr =
         cmd.hasOption(redirectBuildOutputToStdErrOption.getLongOpt());
     this.bailout = !cmd.hasOption(disableBailoutOption.getLongOpt());
-    this.useCache = !cmd.hasOption(disableCacheOption.getLongOpt());
     this.disableOuterLoop = cmd.hasOption(disableOuterLoopOption.getLongOpt());
     this.useParallelGraphProcessor = !cmd.hasOption(disableParallelProcessingOption.getLongOpt());
     this.useImpactCache = cmd.hasOption(enableFixImpactCacheOption.getLongOpt());
@@ -466,6 +473,8 @@ public class Config {
             ? ImmutableSet.of()
             : ImmutableSet.copyOf(cmd.getOptionValue(nonnullAnnotationsOption).split(","));
     this.disableCleanup = cmd.hasOption(deactivateCleanupOption.getLongOpt());
+    this.disableLocalVarOpt = cmd.hasOption(disableLocalVarOpt);
+    this.useCache = !(this.disableLocalVarOpt || cmd.hasOption(disableCacheOption.getLongOpt()));
   }
 
   /**
@@ -564,6 +573,7 @@ public class Config {
                 .orElse(List.of()));
     this.disableCleanup =
         getValueFromKey(jsonObject, "DISABLE_CLEANUP", Boolean.class).orElse(false);
+    this.disableLocalVarOpt = false;
   }
 
   /**

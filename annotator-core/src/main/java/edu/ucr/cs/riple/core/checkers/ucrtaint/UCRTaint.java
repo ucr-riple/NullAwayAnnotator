@@ -261,6 +261,11 @@ public class UCRTaint extends CheckerBaseClass<UCRTaintError> {
             outputDir.setTextContent(module.dir.toString());
             rootElement.appendChild(outputDir);
 
+            // Local Var Opt
+            Element localVarOpt = doc.createElement("localVarOpt");
+            localVarOpt.setTextContent(String.valueOf(!config.disableLocalVarOpt));
+            rootElement.appendChild(localVarOpt);
+
             // Writings
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
