@@ -206,9 +206,7 @@ public class ModuleInfo {
     return annotationProcessorHandlers;
   }
 
-  /**
-   * Checks if AnnotatorScanner is executed correctly for the modules.
-   */
+  /** Checks if AnnotatorScanner is executed correctly for the modules. */
   private void checkScannerConfiguration() {
     for (ModuleConfiguration config : configurations) {
       if (config.scannerConfig == null) {
