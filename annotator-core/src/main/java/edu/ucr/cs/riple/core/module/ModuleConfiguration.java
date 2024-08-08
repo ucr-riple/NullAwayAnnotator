@@ -40,6 +40,11 @@ public class ModuleConfiguration {
   public final Path scannerConfig;
   /** Directory where all serialized data from checkers are located. */
   public final Path dir;
+  /**
+   * Global unique ID for this module. 0 is for the target module, and the i-th module is for the
+   * i-th downstream dependency.
+   */
+  public final int id;
 
   /**
    * Creates an instance of {@link ModuleConfiguration} from the given json object.
@@ -63,6 +68,7 @@ public class ModuleConfiguration {
   public ModuleConfiguration(int id, Path globalDir, Path checkerConfig, Path scannerConfig) {
     this.checkerConfig = checkerConfig;
     this.scannerConfig = scannerConfig;
+    this.id = id;
     this.dir = globalDir.resolve(String.valueOf(id));
     try {
       Files.deleteIfExists(this.dir);
