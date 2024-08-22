@@ -36,7 +36,9 @@ import edu.ucr.cs.riple.core.registries.region.generatedcode.LombokHandler;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnClass;
+import edu.ucr.cs.riple.scanner.Serializer;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
+import java.nio.file.Path;
 
 /** This class is used to store the code structural information about the module. */
 public class ModuleInfo {
@@ -87,6 +89,7 @@ public class ModuleInfo {
     // Build with scanner checker activated to generate required files to create the moduleInfo.
     context.checker.prepareConfigFilesForBuild(configurations);
     Utility.runScannerChecker(context, configurations, buildCommand);
+    checkScannerConfiguration();
     this.nonnullStore = new NonnullStore(configurations, context);
     this.fieldRegistry = new FieldRegistry(configurations, context);
     this.methodRegistry = new MethodRegistry(context);
@@ -201,5 +204,32 @@ public class ModuleInfo {
    */
   public ImmutableSet<AnnotationProcessorHandler> getAnnotationProcessorHandlers() {
     return annotationProcessorHandlers;
+  }
+
+  /** Checks if AnnotatorScanner is executed correctly for the modules. */
+  private void checkScannerConfiguration() {
+    for (ModuleConfiguration config : configurations) {
+      if (config.scannerConfig == null) {
+        throw new IllegalArgumentException(
+            "AnnotatorScanner configuration is not set for module: " + config);
+      }
+      // check for existence of one of the serialized files from Scanner. In this case we chose
+      // NON_NULL_ELEMENTS_FILE_NAME but any other file would work.
+      Path pathToNonnull = config.dir.resolve(Serializer.NON_NULL_ELEMENTS_FILE_NAME);
+      if (!pathToNonnull.toFile().exists()) {
+        String moduleName = config.id == 0 ? "target" : "dependency " + config.id;
+        throw new IllegalArgumentException(
+            "AnnotatorScanner is not correctly configured for the module: "
+                + moduleName
+                + ".\n"
+                + "Please verify that the path specified for AnnotatorScanner on line "
+                + config.id
+                + " in the configuration file matches the path provided in file with -cp/--config-paths, "
+                + "and that it is identical to the path specified with -XepOpt:AnnotatorScanner:ConfigPath."
+                + "\n"
+                + "If the path is set correctly, rerun annotator with -rboserr/--redirect-build-output-stderr flag "
+                + "and check compilation output and ensure NullAway and AnnotatorScanner is executing properly.");
+      }
+    }
   }
 }
