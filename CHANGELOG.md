@@ -1,5 +1,9 @@
 ## CHANGELOG
 
+### Version 1.3.15
+- Improved logging for failure in the module configuration to run Annotator.
+- Updated javaparser dependency.
+
 ### Version 1.3.14
 - Improved performance on initialization od Annotator by parsing each source file only once.
 - Added a new flag `-ll` or `--language-level` to specify the language level of the source code.
