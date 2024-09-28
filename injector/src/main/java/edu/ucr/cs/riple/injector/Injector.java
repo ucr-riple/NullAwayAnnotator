@@ -173,8 +173,15 @@ public class Injector {
     try {
       return StaticJavaParser.parse(path);
     } catch (ParseProblemException e) {
+      // The original exception is not useful for the user. We should provide a more informative one
       System.err.println(
-          "Javaparser was not able to parse file at: " + path + "\n" + e.getMessage());
+          "javaparser was not able to parse file at: "
+              + path
+              + "\n"
+              + e.getMessage()
+              + "\n"
+              + "Shutting down.");
+      // Exit with error code 1 to indicate failure.
       System.exit(1);
       return null;
     } catch (NoSuchFileException e) {
