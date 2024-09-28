@@ -174,11 +174,15 @@ public class Injector {
       return StaticJavaParser.parse(path);
     } catch (ParseProblemException e) {
       // The original exception is not useful for the user. We should provide a more informative one
+      String message = e.getMessage();
+      // If the message contains the stack trace, we should remove it.
+      int index = message.indexOf("Problem stacktrace :");
+      message = index == -1 ? message : message.substring(0, index);
       System.err.println(
           "javaparser was not able to parse file at: "
               + path
               + "\n"
-              + e.getMessage()
+              + message
               + "\n"
               + "Shutting down.");
       // Exit with error code 1 to indicate failure.
