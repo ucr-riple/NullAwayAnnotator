@@ -24,6 +24,7 @@ package edu.ucr.cs.riple.injector;
 
 import static java.util.stream.Collectors.groupingBy;
 
+import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -171,6 +172,11 @@ public class Injector {
     StaticJavaParser.setConfiguration(parserConfiguration);
     try {
       return StaticJavaParser.parse(path);
+    } catch (ParseProblemException e) {
+      System.err.println(
+          "Javaparser was not able to parse file at: " + path + "\n" + e.getMessage());
+      System.exit(1);
+      return null;
     } catch (NoSuchFileException e) {
       return null;
     } catch (IOException e) {

@@ -1,0 +1,84 @@
+/*
+ * Copyright (c) 2022 University of California, Riverside.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+import net.ltgt.gradle.errorprone.CheckSeverity
+
+plugins{
+    id "net.ltgt.errorprone" version "2.0.1" apply false
+}
+
+subprojects {
+    apply plugin: "java"
+    apply plugin: "net.ltgt.errorprone"
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        google()
+    }
+
+    def libraryloader = project.getProperty("library-model-loader-path")
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+
+    dependencies {
+        if(project.name != "Target"){
+            compileOnly project(":Target")
+            annotationProcessor files(libraryloader)
+        }
+        // Add lombok
+        compileOnly 'org.projectlombok:lombok:1.18.24'
+        annotationProcessor 'org.projectlombok:lombok:1.18.24'
+
+        annotationProcessor "com.uber.nullaway:nullaway:" + System.getenv('NULLAWAY_TEST_VERSION')
+        annotationProcessor "edu.ucr.cs.riple.annotator:annotator-scanner:" + System.getenv('ANNOTATOR_VERSION')
+
+        // to add @Initializer
+        compileOnly 'com.uber.nullaway:nullaway-annotations:0.10.10'
+        compileOnly "org.jspecify:jspecify:0.3.0"
+        compileOnly "com.google.code.findbugs:jsr305:3.0.2"
+        errorprone "com.google.errorprone:error_prone_core:2.3.2"
+        errorproneJavac "com.google.errorprone:javac:9+181-r4173-1"
+    }
+
+    tasks.withType(JavaCompile) {
+        // remove the if condition if you want to run NullAway on test code
+        if (!name.toLowerCase().contains("test")) {
+            options.errorprone.disableAllChecks = true
+            options.errorprone.disableAllWarnings = true
+            options.errorprone {
+                check("NullAway", CheckSeverity.WARN)
+                check("AnnotatorScanner", CheckSeverity.WARN)
+                option("NullAway:AnnotatedPackages", "test")
+                option("NullAway:SerializeFixMetadata", "true")
+                option("NullAway:FixSerializationConfigPath", project.getProperty(project.name + "-nullaway-config-path"))
+                option("NullAway:AcknowledgeLibraryModelsOfAnnotatedCode", "true")
+                option("AnnotatorScanner:ConfigPath", project.getProperty(project.name + "-scanner-config-path"))
+            }
+        }
+        options.compilerArgs << "-Xmaxerrs" << "100000"
+        options.compilerArgs << "-Xmaxwarns" << "100000"
+    }
+}
