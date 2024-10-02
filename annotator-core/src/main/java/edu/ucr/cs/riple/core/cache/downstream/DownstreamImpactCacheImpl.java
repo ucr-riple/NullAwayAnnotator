@@ -51,7 +51,7 @@ import javax.annotation.Nullable;
  * once created, cannot be updated.
  */
 public class DownstreamImpactCacheImpl
-    extends BaseCache<DownstreamImpact, Map<Location, DownstreamImpact>>
+    extends BaseCache<DownstreamImpact, Map<Set<Location>, DownstreamImpact>>
     implements DownstreamImpactCache {
 
   /** Annotator context instance. */
@@ -133,7 +133,7 @@ public class DownstreamImpactCacheImpl
     reports.forEach(
         report -> {
           DownstreamImpact impact = new DownstreamImpact(report);
-          store.put(report.root.toLocation(), impact);
+          store.put(report.root.toLocations(), impact);
         });
     System.out.println("Analyzing downstream dependencies completed!");
   }

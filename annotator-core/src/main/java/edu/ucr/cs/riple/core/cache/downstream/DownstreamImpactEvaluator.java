@@ -57,7 +57,7 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
                   node.triggeredErrors.stream()
                       .filter(
                           error ->
-                              error.isSingleFix()
+                              error.isSingleAnnotationFix()
                                   // Method is declared in the target module.
                                   && context.targetModuleInfo.declaredInModule(
                                       error.toResolvingLocation()))

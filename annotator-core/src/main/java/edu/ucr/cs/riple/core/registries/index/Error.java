@@ -30,11 +30,7 @@ import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import javax.annotation.Nullable;
 
 /** Represents an error reported by NullAway. */
@@ -45,56 +41,40 @@ public abstract class Error {
   public final String messageType;
   /** Error message. */
   public final String message;
-  /** The fixes which can resolve this error (possibly empty). */
-  protected final ImmutableSet<Fix> resolvingFixes;
+  /** The fixes which can resolve this error (possibly null). */
+  @Nullable protected final Fix fix;
   /** Offset of program point in original version where error is reported. */
   protected final int offset;
   /** Containing region. */
   protected final Region region;
   /** Error type for method initialization errors from NullAway in {@code String}. */
-  public Error(
-      String messageType,
-      String message,
-      Region region,
-      int offset,
-      ImmutableSet<Fix> resolvingFixes) {
+  public Error(String messageType, String message, Region region, int offset, @Nullable Fix fix) {
     this.region = region;
     this.messageType = messageType;
     this.message = message;
     this.offset = offset;
-    this.resolvingFixes = resolvingFixes;
+    this.fix = fix;
   }
-
-  public Error(
-      String messageType, String message, Region region, int offset, @Nullable Fix resolvingFix) {
-    this(
-        messageType,
-        message,
-        region,
-        offset,
-        resolvingFix == null ? ImmutableSet.of() : ImmutableSet.of(resolvingFix));
-  }
-
   /**
    * Checks if error is resolvable.
    *
    * @return true if error is resolvable and false otherwise.
    */
   public boolean hasFix() {
-    return this.resolvingFixes.size() > 0;
+    return this.fix != null;
   }
 
-  public ImmutableSet<Fix> getResolvingFixes() {
-    return this.resolvingFixes;
+  public Fix getFix() {
+    return this.fix;
   }
 
   /**
-   * Checks if error is resolvable with only one fix.
+   * Checks if error is resolvable with only one annotation.
    *
-   * @return true if error is resolvable with only one fix and false otherwise.
+   * @return true if error is resolvable with only one annotation and false otherwise.
    */
-  public boolean isSingleFix() {
-    return this.resolvingFixes.size() == 1;
+  public boolean isSingleAnnotationFix() {
+    return this.fix != null && fix.changes.size() == 1;
   }
 
   /**
@@ -103,9 +83,10 @@ public abstract class Error {
    * @return Location of the fix resolving this error.
    */
   public Location toResolvingLocation() {
-    Preconditions.checkArgument(resolvingFixes.size() == 1);
+    Preconditions.checkArgument(fix != null && fix.changes.size() == 1);
+    Preconditions.checkArgument(fix.toLocations().size() == 1);
     // no get() method, have to use iterator.
-    return resolvingFixes.iterator().next().toLocation();
+    return fix.toLocations().iterator().next();
   }
 
   /**
@@ -158,7 +139,7 @@ public abstract class Error {
     return messageType.equals(other.messageType)
         && region.equals(other.region)
         && message.equals(other.message)
-        && resolvingFixes.equals(other.resolvingFixes)
+        && fix.equals(other.fix)
         && offset == other.offset;
   }
 
@@ -170,14 +151,14 @@ public abstract class Error {
    * @return true, if error is resolvable via fixes on target module.
    */
   public boolean isFixableOnTarget(Context context) {
-    return !resolvingFixes.isEmpty()
-        && this.resolvingFixes.stream()
-            .allMatch(fix -> context.targetModuleInfo.declaredInModule(fix.toLocation()));
+    return fix != null
+        && this.fix.changes.stream()
+            .allMatch(change -> context.targetModuleInfo.declaredInModule(change.getLocation()));
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(messageType, message, region, resolvingFixes, offset);
+    return Objects.hash(messageType, message, region, fix, offset);
   }
 
   @Override
@@ -201,33 +182,10 @@ public abstract class Error {
    */
   public static <T extends Error> ImmutableSet<Fix> getResolvingFixesOfErrors(
       Collection<T> errors) {
-    // Each error has a set of resolving fixes and each fix has a set of reasons as why the fix has
-    // been suggested. The final returned set of fixes should contain all the reasons it has been
-    // suggested across the given collection. Map below stores all the set of reasons each fix is
-    // suggested in the given collection.
-
-    // Collect all reasons each fix is suggested across the given collection.
-    Map<Fix, Set<String>> fixReasonsMap = new HashMap<>();
-    errors.stream()
-        .flatMap(error -> error.getResolvingFixes().stream())
-        .forEach(
-            fix -> {
-              if (fixReasonsMap.containsKey(fix)) {
-                fixReasonsMap.get(fix).addAll(fix.reasons);
-              } else {
-                fixReasonsMap.put(fix, new HashSet<>(fix.reasons));
-              }
-            });
-
-    ImmutableSet.Builder<Fix> builder = ImmutableSet.builder();
-    for (Fix key : fixReasonsMap.keySet()) {
-      // To avoid mutating fixes stored in the given collection, we create new instances.
-      // which contain the full set of reasons.
-      builder.add(
-          new Fix(
-              key.change, ImmutableSet.copyOf(fixReasonsMap.get(key)), key.fixSourceIsInTarget));
-    }
-    return builder.build();
+    return errors.stream()
+        .filter(Error::hasFix)
+        .map(Error::getFix)
+        .collect(ImmutableSet.toImmutableSet());
   }
 
   /**
@@ -237,9 +195,9 @@ public abstract class Error {
    * @return true, if this error is resolvable.
    */
   public boolean isResolvableWith(Collection<Fix> fixes) {
-    if (resolvingFixes.size() == 0) {
+    if (fix == null) {
       return false;
     }
-    return fixes.containsAll(this.resolvingFixes);
+    return fixes.contains(this.fix);
   }
 }

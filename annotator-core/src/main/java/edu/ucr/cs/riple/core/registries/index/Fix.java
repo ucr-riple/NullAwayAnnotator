@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.registries.index;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.changes.ASTChange;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.LocationKind;
@@ -34,7 +35,9 @@ import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import org.json.simple.JSONObject;
 
 /**
@@ -44,10 +47,9 @@ import org.json.simple.JSONObject;
 public class Fix {
 
   /** Suggested change. */
-  public final AddAnnotation change;
+  public final Set<AddAnnotation> changes;
   /** Reasons this fix is suggested by NullAway in string. */
   public final ImmutableSet<String> reasons;
-
   /**
    * If true, the fix is suggested due to an error in the target module, false if the fix is
    * suggested due to error in downstream dependencies.
@@ -59,7 +61,12 @@ public class Fix {
   }
 
   public Fix(AddAnnotation change, ImmutableSet<String> reasons, boolean fixSourceIsInTarget) {
-    this.change = change;
+    this(ImmutableSet.of(change), reasons, fixSourceIsInTarget);
+  }
+
+  public Fix(
+      Set<AddAnnotation> changes, ImmutableSet<String> reasons, boolean fixSourceIsInTarget) {
+    this.changes = changes;
     this.reasons = reasons;
     this.fixSourceIsInTarget = fixSourceIsInTarget;
   }
@@ -69,8 +76,8 @@ public class Fix {
    *
    * @return Location information.
    */
-  public Location toLocation() {
-    return change.getLocation();
+  public Set<Location> toLocations() {
+    return changes.stream().map(ASTChange::getLocation).collect(Collectors.toSet());
   }
 
   /**
@@ -79,7 +86,7 @@ public class Fix {
    * @return true, if fix is targeting a method.
    */
   public boolean isOnMethod() {
-    return change.getLocation().isOnMethod();
+    return changes.size() == 1 && changes.iterator().next().getLocation().isOnMethod();
   }
 
   /**
@@ -88,7 +95,7 @@ public class Fix {
    * @return Target method information.
    */
   public OnMethod toMethod() {
-    return change.getLocation().toMethod();
+    return changes.iterator().next().getLocation().toMethod();
   }
 
   /**
@@ -97,7 +104,9 @@ public class Fix {
    * @param consumer Consumer instance.
    */
   public void ifOnMethod(Consumer<OnMethod> consumer) {
-    change.getLocation().ifMethod(consumer);
+    if (isOnMethod()) {
+      changes.iterator().next().getLocation().ifMethod(consumer);
+    }
   }
 
   /**
@@ -106,7 +115,7 @@ public class Fix {
    * @return true, if fix is targeting a parameter.
    */
   public boolean isOnParameter() {
-    return change.getLocation().isOnParameter();
+    return changes.size() == 1 && changes.iterator().next().getLocation().isOnParameter();
   }
 
   /**
@@ -115,7 +124,7 @@ public class Fix {
    * @return Target method parameter.
    */
   public OnParameter toParameter() {
-    return change.getLocation().toParameter();
+    return changes.iterator().next().getLocation().toParameter();
   }
 
   /**
@@ -124,7 +133,9 @@ public class Fix {
    * @param consumer Consumer instance.
    */
   public void ifOnParameter(Consumer<OnParameter> consumer) {
-    change.getLocation().ifParameter(consumer);
+    if (isOnParameter()) {
+      changes.iterator().next().getLocation().ifParameter(consumer);
+    }
   }
 
   /**
@@ -133,7 +144,7 @@ public class Fix {
    * @return true, if fix is targeting a field.
    */
   public boolean isOnField() {
-    return change.getLocation().isOnField();
+    return changes.size() == 1 && changes.iterator().next().getLocation().isOnField();
   }
 
   /**
@@ -142,7 +153,7 @@ public class Fix {
    * @return Target field information.
    */
   public OnField toField() {
-    return change.getLocation().toField();
+    return changes.iterator().next().getLocation().toField();
   }
 
   /**
@@ -151,7 +162,9 @@ public class Fix {
    * @param consumer Consumer instance.
    */
   public void ifOnField(Consumer<OnField> consumer) {
-    change.getLocation().ifField(consumer);
+    if (isOnField()) {
+      changes.iterator().next().getLocation().ifField(consumer);
+    }
   }
 
   @Override
@@ -163,12 +176,12 @@ public class Fix {
       return false;
     }
     Fix fix = (Fix) o;
-    return change.equals(fix.change);
+    return changes.equals(fix.changes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(change);
+    return Objects.hash(changes);
   }
 
   /**
@@ -177,7 +190,7 @@ public class Fix {
    * @return Json instance.
    */
   public JSONObject getJson() {
-    return change.getLocation().accept(new LocationToJsonVisitor(), null);
+    return changes.iterator().next().getLocation().accept(new LocationToJsonVisitor(), null);
   }
 
   /**
@@ -186,17 +199,17 @@ public class Fix {
    * @return true, if fix is modifying constructor.
    */
   public boolean isModifyingConstructor() {
-    if (isOnField()) {
+    if (!(isOnMethod() || isOnParameter())) {
       return false;
     }
     String methodSignature =
         isOnMethod() ? toMethod().method : toParameter().enclosingMethod.method;
-    return Helper.extractCallableName(methodSignature)
-        .equals(Helper.simpleName(change.getLocation().clazz));
+    String clazz = changes.iterator().next().getLocation().clazz;
+    return Helper.extractCallableName(methodSignature).equals(Helper.simpleName(clazz));
   }
 
   @Override
   public String toString() {
-    return change.toString();
+    return changes.toString();
   }
 }

@@ -29,7 +29,9 @@ import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /** Wrapper tool used to inject annotations to the source code. */
 public abstract class AnnotationInjector {
@@ -50,7 +52,11 @@ public abstract class AnnotationInjector {
       return;
     }
     Set<RemoveAnnotation> toRemove =
-        fixes.stream().map(fix -> fix.change.getReverse()).collect(Collectors.toSet());
+        fixes.stream()
+            .flatMap(
+                (Function<Fix, Stream<RemoveAnnotation>>)
+                    fix -> fix.changes.stream().map(AddAnnotation::getReverse))
+            .collect(Collectors.toSet());
     removeAnnotations(toRemove);
   }
 
@@ -63,7 +69,8 @@ public abstract class AnnotationInjector {
     if (fixes == null || fixes.size() == 0) {
       return;
     }
-    injectAnnotations(fixes.stream().map(fix -> fix.change).collect(Collectors.toSet()));
+    injectAnnotations(
+        fixes.stream().flatMap(fix -> fix.changes.stream()).collect(Collectors.toSet()));
   }
 
   /**

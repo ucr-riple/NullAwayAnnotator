@@ -24,7 +24,6 @@
 
 package edu.ucr.cs.riple.core.checkers.nullaway;
 
-import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.registries.region.Region;
@@ -38,13 +37,8 @@ public class NullAwayError extends Error {
   /** Error type for field initialization errors from NullAway in {@code String}. */
   public static final String FIELD_INITIALIZER_ERROR = "FIELD_NO_INIT";
 
-  public NullAwayError(
-      String messageType,
-      String message,
-      Region region,
-      int offset,
-      ImmutableSet<Fix> resolvingFixes) {
-    super(messageType, message, region, offset, resolvingFixes);
+  public NullAwayError(String messageType, String message, Region region, int offset, Fix fix) {
+    super(messageType, message, region, offset, fix);
   }
 
   @Override
@@ -67,9 +61,7 @@ public class NullAwayError extends Error {
       // message and should not be treated as a separate error.
       return true;
     }
-    return message.equals(error.message)
-        && resolvingFixes.equals(error.resolvingFixes)
-        && offset == error.offset;
+    return message.equals(error.message) && fix.equals(error.fix) && offset == error.offset;
   }
 
   @Override
@@ -79,7 +71,7 @@ public class NullAwayError extends Error {
         // to make sure equal objects will produce the same hashcode.
         messageType.equals(METHOD_INITIALIZER_ERROR) ? METHOD_INITIALIZER_ERROR : message,
         region,
-        resolvingFixes,
+        fix,
         offset);
   }
 

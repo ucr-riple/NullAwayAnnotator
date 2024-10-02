@@ -157,7 +157,7 @@ public class Annotator {
     injector.injectFixes(selectedFixes);
     // Update log.
     context.log.updateInjectedAnnotations(
-        selectedFixes.stream().map(fix -> fix.change).collect(Collectors.toSet()));
+        selectedFixes.stream().flatMap(fix -> fix.changes.stream()).collect(Collectors.toSet()));
     // Update impact saved state.
     downstreamImpactCache.updateImpactsAfterInjection(selectedFixes);
     targetModuleCache.updateImpactsAfterInjection(selectedFixes);

@@ -95,8 +95,8 @@ public class Impact {
    *
    * @return Containing fix location.
    */
-  public Location toLocation() {
-    return fix.toLocation();
+  public Set<Location> toLocations() {
+    return fix.toLocations();
   }
 
   @Override

@@ -52,6 +52,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 /** Represents <a href="https://github.com/uber/NullAway">NullAway</a> checker in Annotator. */
 public class NullAway extends CheckerBaseClass<NullAwayError> {
@@ -82,7 +83,10 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
               // Skip header.
               br.readLine();
               while ((line = br.readLine()) != null) {
-                errors.add(deserializeErrorFromTSVLine(module, line));
+                NullAwayError error = deserializeErrorFromTSVLine(module, line);
+                if (error != null) {
+                  errors.add(error);
+                }
               }
             }
           } catch (IOException e) {
@@ -99,6 +103,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
    * @param line Given TSV line.
    * @return the deserialized error corresponding to the values in the given tsv line.
    */
+  @Nullable
   private NullAwayError deserializeErrorFromTSVLine(ModuleInfo moduleInfo, String line) {
     Context context = moduleInfo.getContext();
     String[] values = line.split("\t");
@@ -114,30 +119,33 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     Location nonnullTarget =
         Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 6, 12));
     if (nonnullTarget == null && errorType.equals(NullAwayError.METHOD_INITIALIZER_ERROR)) {
-      ImmutableSet<Fix> resolvingFixes =
-          generateFixesForUninitializedFields(errorMessage, region, moduleInfo);
+      Set<AddAnnotation> annotationsOnField =
+          computeAddAnnotationInstancesForUninitializedFields(errorMessage, region, moduleInfo);
+      if (annotationsOnField.isEmpty()) {
+        return null;
+      }
       return createError(
           errorType,
           errorMessage,
           region,
           context.offsetHandler.getOriginalOffset(path, offset),
-          resolvingFixes,
+          annotationsOnField,
           moduleInfo);
     }
     if (nonnullTarget != null && nonnullTarget.isOnField()) {
       nonnullTarget = extendVariableList(nonnullTarget.toField(), moduleInfo);
     }
-    Fix resolvingFix =
+    Set<AddAnnotation> annotations =
         nonnullTarget == null
-            ? null
-            : new Fix(
-                new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot), errorType, true);
+            ? Set.of()
+            : Set.of(new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot));
+
     return createError(
         errorType,
         errorMessage,
         region,
         context.offsetHandler.getOriginalOffset(path, offset),
-        resolvingFix == null ? ImmutableSet.of() : ImmutableSet.of(resolvingFix),
+        annotations,
         moduleInfo);
   }
 
@@ -188,7 +196,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
    * @param region Region where the error is reported.
    * @return Set of fixes for uninitialized fields to resolve the given error.
    */
-  protected ImmutableSet<Fix> generateFixesForUninitializedFields(
+  protected ImmutableSet<AddAnnotation> computeAddAnnotationInstancesForUninitializedFields(
       String errorMessage, Region region, ModuleInfo module) {
     return extractUninitializedFieldNames(errorMessage).stream()
         .map(
@@ -198,11 +206,8 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
               if (locationOnField == null) {
                 return null;
               }
-              return new Fix(
-                  new AddMarkerAnnotation(
-                      extendVariableList(locationOnField, module), config.nullableAnnot),
-                  NullAwayError.METHOD_INITIALIZER_ERROR,
-                  true);
+              return new AddMarkerAnnotation(
+                  extendVariableList(locationOnField, module), config.nullableAnnot);
             })
         .filter(Objects::nonNull)
         .collect(ImmutableSet.toImmutableSet());
@@ -252,7 +257,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                   // `@Nullable` is being passed as an argument, we add a `@NullUnmarked` annotation
                   // to the called method.
                   if (error.messageType.equals("PASS_NULLABLE")
-                      && error.isSingleFix()
+                      && error.isSingleAnnotationFix()
                       && error.toResolvingLocation().isOnParameter()) {
                     OnParameter nullableParameter = error.toResolvingParameter();
                     return context
@@ -373,20 +378,25 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     injector.injectAnnotations(initializers);
   }
 
-  @Override
-  public NullAwayError createError(
+  private NullAwayError createError(
       String errorType,
       String errorMessage,
       Region region,
       int offset,
-      ImmutableSet<Fix> resolvingFixes,
+      Set<AddAnnotation> annotations,
       ModuleInfo module) {
     // Filter fixes on elements with explicit nonnull annotations.
-    ImmutableSet<Fix> cleanedResolvingFixes =
-        resolvingFixes.stream()
-            .filter(f -> !module.getNonnullStore().hasExplicitNonnullAnnotation(f.toLocation()))
+    ImmutableSet<AddAnnotation> cleanedAnnotations =
+        annotations.stream()
+            .filter(
+                annot ->
+                    !module.getNonnullStore().hasExplicitNonnullAnnotation(annot.getLocation()))
             .collect(ImmutableSet.toImmutableSet());
-    return new NullAwayError(errorType, errorMessage, region, offset, cleanedResolvingFixes);
+    Fix fix =
+        cleanedAnnotations.isEmpty()
+            ? null
+            : new Fix(cleanedAnnotations, ImmutableSet.of(errorType), true);
+    return new NullAwayError(errorType, errorMessage, region, offset, fix);
   }
 
   @Override

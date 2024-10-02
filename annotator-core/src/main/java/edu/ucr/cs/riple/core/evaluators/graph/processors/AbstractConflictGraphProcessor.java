@@ -35,7 +35,9 @@ import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /** Base class for conflict graph processors. */
 public abstract class AbstractConflictGraphProcessor implements ConflictGraphProcessor {
@@ -69,11 +71,13 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
    */
   protected Set<Fix> getTriggeredFixesFromDownstreamErrors(Node node) {
     Set<Location> currentLocationsTargetedByTree =
-        node.tree.stream().map(Fix::toLocation).collect(Collectors.toSet());
+        node.tree.stream()
+            .flatMap((Function<Fix, Stream<Location>>) fix -> fix.toLocations().stream())
+            .collect(Collectors.toSet());
     return downstreamImpactCache.getTriggeredErrorsForCollection(node.tree).stream()
         .filter(
             error ->
-                error.isSingleFix()
+                error.isSingleAnnotationFix()
                     && error.isFixableOnTarget(context)
                     && !currentLocationsTargetedByTree.contains(error.toResolvingLocation()))
         .map(

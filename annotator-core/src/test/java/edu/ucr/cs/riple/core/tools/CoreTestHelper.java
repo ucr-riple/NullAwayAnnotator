@@ -479,7 +479,13 @@ public class CoreTestHelper {
 
     @Override
     public boolean test(TReport expected, Report found) {
-      return expected.root.change.getLocation().equals(found.root.change.getLocation())
+      return expected
+              .root
+              .changes
+              .iterator()
+              .next()
+              .getLocation()
+              .equals(found.root.changes.iterator().next().getLocation())
           && expected.getExpectedValue() == found.getOverallEffect(config);
     }
 

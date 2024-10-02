@@ -32,7 +32,7 @@ import java.util.Set;
  * Cache for storing impacts of fixes on target module. This cache's state is not immutable and can
  * be updated.
  */
-public class TargetModuleCache extends BaseCache<Impact, HashMap<Location, Impact>> {
+public class TargetModuleCache extends BaseCache<Impact, HashMap<Set<Location>, Impact>> {
 
   public TargetModuleCache() {
     super(new HashMap<>());
@@ -44,6 +44,6 @@ public class TargetModuleCache extends BaseCache<Impact, HashMap<Location, Impac
    * @param newData New given impacts.
    */
   public void updateCacheState(Set<Impact> newData) {
-    newData.forEach(t -> store.put(t.toLocation(), t));
+    newData.forEach(t -> store.put(t.toLocations(), t));
   }
 }
