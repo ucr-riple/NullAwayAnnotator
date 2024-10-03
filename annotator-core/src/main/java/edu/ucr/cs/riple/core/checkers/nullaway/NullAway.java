@@ -139,7 +139,6 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
         nonnullTarget == null
             ? Set.of()
             : Set.of(new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot));
-
     return createError(
         errorType,
         errorMessage,

@@ -52,7 +52,7 @@ public class NullAwayError extends Error {
   @Override
   protected Set<Fix> computeFixesFromAnnotations(Set<AddAnnotation> annotations) {
     return annotations.stream()
-        .map(annot -> new Fix(annot, messageType, true))
+        .map(annot -> new Fix(annot, messageType))
         .collect(Collectors.toSet());
   }
 

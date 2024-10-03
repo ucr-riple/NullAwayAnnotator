@@ -1,7 +1,5 @@
 /*
- * MIT License
- *
- * Copyright (c) 2022 Nima Karimipour
+ * Copyright (c) 2024 University of California, Riverside.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,20 +20,29 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.tools;
+package edu.ucr.cs.riple.injector.exceptions;
 
-import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.registries.index.Fix;
-import edu.ucr.cs.riple.injector.location.Location;
+import com.github.javaparser.ParseProblemException;
+import java.nio.file.Path;
 
 /**
- * Wrapper class for {@link Fix} used to create dummy fixes (with default values) as part of {@link
- * TReport} matchers, which in turn are used by tests to define expected reports to be matched by
- * the actual reports produced by the test case.
+ * Exception indicating that an error occurred while parsing a source file.
+ *
+ * <p>This serves as a wrapper for the {@link ParseProblemException} class, providing a more concise
+ * representation of the underlying issue.
  */
-public class TFix extends Fix {
+public class ParseException extends RuntimeException {
 
-  public TFix(Location location) {
-    super(new DefaultAnnotation(location), ImmutableSet.of());
+  public ParseException(Path path, ParseProblemException exception) {
+    super(retrieveExceptionMessage(path, exception), exception);
+  }
+
+  private static String retrieveExceptionMessage(Path path, ParseProblemException e) {
+    String message = e.getMessage();
+    // If the message contains the stack trace, we should remove it. It does not contain any useful
+    // information.
+    int index = message.indexOf("Problem stacktrace :");
+    message = index == -1 ? message : message.substring(0, index);
+    return "javaparser was not able to parse file at: " + path + "\nParse problem:" + message;
   }
 }

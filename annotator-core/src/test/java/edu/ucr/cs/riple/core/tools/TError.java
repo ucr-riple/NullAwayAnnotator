@@ -47,7 +47,7 @@ public class TError extends Error {
   @Override
   protected Set<Fix> computeFixesFromAnnotations(Set<AddAnnotation> annotations) {
     return annotations.stream()
-        .map(addAnnotation -> new Fix(addAnnotation, ImmutableSet.of(messageType), true))
+        .map(addAnnotation -> new Fix(addAnnotation, ImmutableSet.of(messageType)))
         .collect(Collectors.toSet());
   }
 }

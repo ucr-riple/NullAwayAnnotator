@@ -24,6 +24,7 @@ package edu.ucr.cs.riple.injector;
 
 import static java.util.stream.Collectors.groupingBy;
 
+import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -33,6 +34,7 @@ import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AnnotationChange;
 import edu.ucr.cs.riple.injector.changes.ChangeVisitor;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
+import edu.ucr.cs.riple.injector.exceptions.ParseException;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.io.IOException;
@@ -171,6 +173,9 @@ public class Injector {
     StaticJavaParser.setConfiguration(parserConfiguration);
     try {
       return StaticJavaParser.parse(path);
+    } catch (ParseProblemException e) {
+      // The original exception is not useful for the user. We should provide a more informative one
+      throw new ParseException(path, e);
     } catch (NoSuchFileException e) {
       return null;
     } catch (IOException e) {

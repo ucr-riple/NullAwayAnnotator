@@ -192,7 +192,6 @@ public class Node {
   public void mergeTriggered() {
     this.tree.addAll(Error.getResolvingFixesOfErrors(this.triggeredErrors));
     this.tree.addAll(triggeredFixesFromDownstreamErrors);
-    this.tree.forEach(fix -> fix.fixSourceIsInTarget = true);
   }
 
   @Override
