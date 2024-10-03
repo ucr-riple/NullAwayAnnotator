@@ -35,7 +35,7 @@ def versions = [
         errorProne             : defaultErrorProneVersion,
         errorProneApi          : project.hasProperty("epApiVersion") ? epApiVersion : oldestErrorProneApi,
         autoService            : "1.0-rc7",
-        javaparser             : "3.26.0",
+        javaparser             : "3.26.2",
         json                   : "1.1.1",
         guava                  : "31.0.1-jre",
         cli                    : "1.5.0",
