@@ -371,8 +371,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     injector.injectAnnotations(initializers);
   }
 
-  @Override
-  public NullAwayError createError(
+  private NullAwayError createError(
       String errorType,
       String errorMessage,
       Region region,
