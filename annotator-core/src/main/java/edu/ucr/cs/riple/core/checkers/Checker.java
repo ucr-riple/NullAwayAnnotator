@@ -29,8 +29,6 @@ import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.registries.index.Error;
-import edu.ucr.cs.riple.core.registries.index.Fix;
-import edu.ucr.cs.riple.core.registries.region.Region;
 import java.util.Set;
 
 /**
