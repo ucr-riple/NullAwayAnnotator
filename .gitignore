@@ -3,6 +3,7 @@
 build/
 **/build/
 build
+bin/
 /.idea/
 *.iml
 local.properties
