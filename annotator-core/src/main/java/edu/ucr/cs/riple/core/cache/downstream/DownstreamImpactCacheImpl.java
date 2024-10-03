@@ -123,9 +123,7 @@ public class DownstreamImpactCacheImpl
             .map(
                 location ->
                     new Fix(
-                        new AddMarkerAnnotation(location, context.config.nullableAnnot),
-                        "null",
-                        false))
+                        new AddMarkerAnnotation(location, context.config.nullableAnnot), "null"))
             .collect(ImmutableSet.toImmutableSet());
     DownstreamImpactEvaluator evaluator = new DownstreamImpactEvaluator(supplier);
     ImmutableSet<Report> reports = evaluator.evaluate(fixes);
