@@ -369,6 +369,19 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     injector.injectAnnotations(initializers);
   }
 
+  /**
+   * Creates a {@link NullAwayError} instance using the provided arguments. It also removes
+   * annotation change requests that are on an element with explict nonnull annotation.
+   *
+   * @param errorType Error Type from NullAway.
+   * @param errorMessage Error Message from NullAway.
+   * @param region Region where the error is reported.
+   * @param offset Offset of program point in the source file where the error is reported.
+   * @param annotations Annotations that should be added source file to resolve the error.
+   * @param module Module where this error is reported.
+   * @return Creates and returns the corresponding {@link NullAwayError} instance using the provided
+   *     information.
+   */
   private NullAwayError createError(
       String errorType,
       String errorMessage,
