@@ -43,7 +43,7 @@ public abstract class Error {
   /** Error message. */
   public final String message;
   /** The fixes which can resolve this error (possibly null). */
-  protected final Set<Fix> fixes;
+  protected final Set<Fix> resolvingFixes;
   /** Offset of program point in original version where error is reported. */
   protected final int offset;
   /** Containing region. */
@@ -60,13 +60,13 @@ public abstract class Error {
     this.messageType = messageType;
     this.message = message;
     this.offset = offset;
-    this.fixes = computeFixesFromAnnotations(annotations);
+    this.resolvingFixes = computeFixesFromAnnotations(annotations);
   }
 
   protected abstract Set<Fix> computeFixesFromAnnotations(Set<AddAnnotation> annotations);
 
   public Set<Fix> getFixes() {
-    return this.fixes;
+    return this.resolvingFixes;
   }
 
   /**
@@ -75,7 +75,7 @@ public abstract class Error {
    * @return true if error is resolvable with only one annotation and false otherwise.
    */
   public boolean isSingleAnnotationFix() {
-    return !fixes.isEmpty() && fixes.iterator().next().changes.size() == 1;
+    return !resolvingFixes.isEmpty() && resolvingFixes.iterator().next().changes.size() == 1;
   }
 
   /**
@@ -84,9 +84,10 @@ public abstract class Error {
    * @return Location of the fix resolving this error.
    */
   public Location toResolvingLocation() {
-    Preconditions.checkArgument(!fixes.isEmpty() && fixes.iterator().next().changes.size() == 1);
+    Preconditions.checkArgument(
+        !resolvingFixes.isEmpty() && resolvingFixes.iterator().next().changes.size() == 1);
     // no get() method, have to use iterator.
-    return fixes.iterator().next().changes.iterator().next().getLocation();
+    return resolvingFixes.iterator().next().changes.iterator().next().getLocation();
   }
 
   /**
@@ -139,7 +140,7 @@ public abstract class Error {
     return messageType.equals(other.messageType)
         && region.equals(other.region)
         && message.equals(other.message)
-        && fixes.equals(other.fixes)
+        && resolvingFixes.equals(other.resolvingFixes)
         && offset == other.offset;
   }
 
@@ -151,14 +152,14 @@ public abstract class Error {
    * @return true, if error is resolvable via fixes on target module.
    */
   public boolean isFixableOnTarget(Context context) {
-    return this.fixes.stream()
+    return this.resolvingFixes.stream()
         .flatMap(fix -> fix.changes.stream())
         .allMatch(change -> context.targetModuleInfo.declaredInModule(change.getLocation()));
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(messageType, message, region, fixes, offset);
+    return Objects.hash(messageType, message, region, resolvingFixes, offset);
   }
 
   @Override
@@ -182,7 +183,9 @@ public abstract class Error {
    */
   public static <T extends Error> ImmutableSet<Fix> getResolvingFixesOfErrors(
       Collection<T> errors) {
-    return errors.stream().flatMap(t -> t.fixes.stream()).collect(ImmutableSet.toImmutableSet());
+    return errors.stream()
+        .flatMap(t -> t.resolvingFixes.stream())
+        .collect(ImmutableSet.toImmutableSet());
   }
 
   /**
@@ -192,9 +195,9 @@ public abstract class Error {
    * @return true, if this error is resolvable.
    */
   public boolean isResolvableWith(Collection<Fix> fixes) {
-    if (this.fixes.isEmpty()) {
+    if (this.resolvingFixes.isEmpty()) {
       return false;
     }
-    return fixes.containsAll(this.fixes);
+    return fixes.containsAll(this.resolvingFixes);
   }
 }

@@ -76,7 +76,9 @@ public class NullAwayError extends Error {
       // message and should not be treated as a separate error.
       return true;
     }
-    return message.equals(error.message) && fixes.equals(error.fixes) && offset == error.offset;
+    return message.equals(error.message)
+        && resolvingFixes.equals(error.resolvingFixes)
+        && offset == error.offset;
   }
 
   @Override
@@ -86,7 +88,7 @@ public class NullAwayError extends Error {
         // to make sure equal objects will produce the same hashcode.
         messageType.equals(METHOD_INITIALIZER_ERROR) ? METHOD_INITIALIZER_ERROR : message,
         region,
-        fixes,
+        resolvingFixes,
         offset);
   }
 
