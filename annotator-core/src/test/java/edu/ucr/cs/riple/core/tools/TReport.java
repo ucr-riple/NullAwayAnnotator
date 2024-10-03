@@ -49,9 +49,7 @@ public class TReport extends Report {
   }
 
   public TReport(Location root, int effect, Tag tag) {
-    super(
-        new Fix(new AddMarkerAnnotation(root, "javax.annotation.Nullable"), ImmutableSet.of()),
-        effect);
+    super(new Fix(new AddMarkerAnnotation(root, "javax.annotation.Nullable"), "null"), effect);
     this.expectedValue = effect;
     if (tag != null) {
       this.tag(tag);

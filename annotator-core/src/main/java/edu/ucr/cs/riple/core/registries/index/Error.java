@@ -30,11 +30,7 @@ import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import javax.annotation.Nullable;
 
 /** Represents an error reported by NullAway. */
@@ -201,31 +197,9 @@ public abstract class Error {
    */
   public static <T extends Error> ImmutableSet<Fix> getResolvingFixesOfErrors(
       Collection<T> errors) {
-    // Each error has a set of resolving fixes and each fix has a set of reasons as why the fix has
-    // been suggested. The final returned set of fixes should contain all the reasons it has been
-    // suggested across the given collection. Map below stores all the set of reasons each fix is
-    // suggested in the given collection.
-
-    // Collect all reasons each fix is suggested across the given collection.
-    Map<Fix, Set<String>> fixReasonsMap = new HashMap<>();
-    errors.stream()
-        .flatMap(error -> error.getResolvingFixes().stream())
-        .forEach(
-            fix -> {
-              if (fixReasonsMap.containsKey(fix)) {
-                fixReasonsMap.get(fix).addAll(fix.reasons);
-              } else {
-                fixReasonsMap.put(fix, new HashSet<>(fix.reasons));
-              }
-            });
-
-    ImmutableSet.Builder<Fix> builder = ImmutableSet.builder();
-    for (Fix key : fixReasonsMap.keySet()) {
-      // To avoid mutating fixes stored in the given collection, we create new instances.
-      // which contain the full set of reasons.
-      builder.add(new Fix(key.change, ImmutableSet.copyOf(fixReasonsMap.get(key))));
-    }
-    return builder.build();
+    return errors.stream()
+        .flatMap(t -> t.resolvingFixes.stream())
+        .collect(ImmutableSet.toImmutableSet());
   }
 
   /**

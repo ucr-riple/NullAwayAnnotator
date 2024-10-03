@@ -320,8 +320,8 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
             .filter(
                 fix ->
                     fix.isOnField()
-                        && (fix.reasons.contains("METHOD_NO_INIT")
-                            || fix.reasons.contains("FIELD_NO_INIT")))
+                        && (fix.errorType.equals("METHOD_NO_INIT")
+                            || fix.errorType.equals("FIELD_NO_INIT")))
             // Filter nodes annotated with SuppressWarnings("NullAway")
             .filter(fix -> !fieldsWithSuppressWarnings.contains(fix.toField()))
             .map(
@@ -358,7 +358,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     // Collect uninitialized fields.
     Set<OnField> uninitializedFields =
         Utility.readFixesFromOutputDirectory(context, context.targetModuleInfo).stream()
-            .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
+            .filter(fix -> fix.isOnField() && fix.errorType.contains("FIELD_NO_INIT"))
             .map(Fix::toField)
             .collect(Collectors.toSet());
     FieldInitializationStore fieldInitializationStore = new FieldInitializationStore(context);
