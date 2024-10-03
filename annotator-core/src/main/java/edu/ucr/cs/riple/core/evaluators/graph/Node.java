@@ -87,8 +87,7 @@ public class Node {
   public void setOrigins(ErrorStore errorStore) {
     this.origins =
         ImmutableSet.copyOf(
-            errorStore.getRegionsForElements(
-                error -> error.getFixes() != null && error.getFixes().equals(root)));
+            errorStore.getRegionsForElements(error -> error.getFixes().contains(root)));
   }
 
   /**

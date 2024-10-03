@@ -68,15 +68,6 @@ public abstract class Error {
 
   protected abstract Set<Fix> computeFixesFromAnnotations(Set<AddAnnotation> annotations);
 
-  /**
-   * Checks if error is resolvable.
-   *
-   * @return true if error is resolvable and false otherwise.
-   */
-  public boolean hasFix() {
-    return this.fixes != null;
-  }
-
   public Set<Fix> getFixes() {
     return this.fixes;
   }
