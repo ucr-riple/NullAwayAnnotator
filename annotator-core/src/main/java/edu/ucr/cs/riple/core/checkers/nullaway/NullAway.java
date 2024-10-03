@@ -52,7 +52,6 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
 /** Represents <a href="https://github.com/uber/NullAway">NullAway</a> checker in Annotator. */
 public class NullAway extends CheckerBaseClass<NullAwayError> {
@@ -83,10 +82,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
               // Skip header.
               br.readLine();
               while ((line = br.readLine()) != null) {
-                NullAwayError error = deserializeErrorFromTSVLine(module, line);
-                if (error != null) {
-                  errors.add(error);
-                }
+                errors.add(deserializeErrorFromTSVLine(module, line));
               }
             }
           } catch (IOException e) {
@@ -103,7 +99,6 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
    * @param line Given TSV line.
    * @return the deserialized error corresponding to the values in the given tsv line.
    */
-  @Nullable
   private NullAwayError deserializeErrorFromTSVLine(ModuleInfo moduleInfo, String line) {
     Context context = moduleInfo.getContext();
     String[] values = line.split("\t");
@@ -121,9 +116,6 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     if (nonnullTarget == null && errorType.equals(NullAwayError.METHOD_INITIALIZER_ERROR)) {
       Set<AddAnnotation> annotationsOnField =
           computeAddAnnotationInstancesForUninitializedFields(errorMessage, region, moduleInfo);
-      if (annotationsOnField.isEmpty()) {
-        return null;
-      }
       return createError(
           errorType,
           errorMessage,
