@@ -27,11 +27,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.registries.region.Region;
+import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collection;
 import java.util.Objects;
-import javax.annotation.Nullable;
+import java.util.Set;
 
 /** Represents an error reported by NullAway. */
 @SuppressWarnings("JavaLangClash")
@@ -41,31 +42,43 @@ public abstract class Error {
   public final String messageType;
   /** Error message. */
   public final String message;
+  /** Annotations */
+  public final Set<AddAnnotation> annotations;
   /** The fixes which can resolve this error (possibly null). */
-  @Nullable protected final Fix fix;
+  protected final Set<Fix> fixes;
   /** Offset of program point in original version where error is reported. */
   protected final int offset;
   /** Containing region. */
   protected final Region region;
+
   /** Error type for method initialization errors from NullAway in {@code String}. */
-  public Error(String messageType, String message, Region region, int offset, @Nullable Fix fix) {
+  public Error(
+      String messageType,
+      String message,
+      Region region,
+      int offset,
+      Set<AddAnnotation> annotations) {
     this.region = region;
     this.messageType = messageType;
     this.message = message;
     this.offset = offset;
-    this.fix = fix;
+    this.annotations = annotations;
+    this.fixes = computeFixesFromAnnotations(annotations);
   }
+
+  protected abstract Set<Fix> computeFixesFromAnnotations(Set<AddAnnotation> annotations);
+
   /**
    * Checks if error is resolvable.
    *
    * @return true if error is resolvable and false otherwise.
    */
   public boolean hasFix() {
-    return this.fix != null;
+    return this.fixes != null;
   }
 
-  public Fix getFix() {
-    return this.fix;
+  public Set<Fix> getFixes() {
+    return this.fixes;
   }
 
   /**
@@ -74,7 +87,7 @@ public abstract class Error {
    * @return true if error is resolvable with only one annotation and false otherwise.
    */
   public boolean isSingleAnnotationFix() {
-    return this.fix != null && fix.changes.size() == 1;
+    return !fixes.isEmpty() && fixes.iterator().next().changes.size() == 1;
   }
 
   /**
@@ -83,10 +96,9 @@ public abstract class Error {
    * @return Location of the fix resolving this error.
    */
   public Location toResolvingLocation() {
-    Preconditions.checkArgument(fix != null && fix.changes.size() == 1);
-    Preconditions.checkArgument(fix.toLocations().size() == 1);
+    Preconditions.checkArgument(!fixes.isEmpty() && fixes.iterator().next().changes.size() == 1);
     // no get() method, have to use iterator.
-    return fix.toLocations().iterator().next();
+    return fixes.iterator().next().changes.iterator().next().getLocation();
   }
 
   /**
@@ -139,7 +151,7 @@ public abstract class Error {
     return messageType.equals(other.messageType)
         && region.equals(other.region)
         && message.equals(other.message)
-        && fix.equals(other.fix)
+        && fixes.equals(other.fixes)
         && offset == other.offset;
   }
 
@@ -151,14 +163,14 @@ public abstract class Error {
    * @return true, if error is resolvable via fixes on target module.
    */
   public boolean isFixableOnTarget(Context context) {
-    return fix != null
-        && this.fix.changes.stream()
-            .allMatch(change -> context.targetModuleInfo.declaredInModule(change.getLocation()));
+    return this.fixes.stream()
+        .flatMap(fix -> fix.changes.stream())
+        .allMatch(change -> context.targetModuleInfo.declaredInModule(change.getLocation()));
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(messageType, message, region, fix, offset);
+    return Objects.hash(messageType, message, region, fixes, offset);
   }
 
   @Override
@@ -182,10 +194,7 @@ public abstract class Error {
    */
   public static <T extends Error> ImmutableSet<Fix> getResolvingFixesOfErrors(
       Collection<T> errors) {
-    return errors.stream()
-        .filter(Error::hasFix)
-        .map(Error::getFix)
-        .collect(ImmutableSet.toImmutableSet());
+    return errors.stream().flatMap(t -> t.fixes.stream()).collect(ImmutableSet.toImmutableSet());
   }
 
   /**
@@ -195,9 +204,9 @@ public abstract class Error {
    * @return true, if this error is resolvable.
    */
   public boolean isResolvableWith(Collection<Fix> fixes) {
-    if (fix == null) {
+    if (this.fixes.isEmpty()) {
       return false;
     }
-    return fixes.contains(this.fix);
+    return fixes.containsAll(this.fixes);
   }
 }

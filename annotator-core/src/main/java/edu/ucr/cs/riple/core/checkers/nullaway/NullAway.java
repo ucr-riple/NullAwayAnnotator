@@ -392,11 +392,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                 annot ->
                     !module.getNonnullStore().hasExplicitNonnullAnnotation(annot.getLocation()))
             .collect(ImmutableSet.toImmutableSet());
-    Fix fix =
-        cleanedAnnotations.isEmpty()
-            ? null
-            : new Fix(cleanedAnnotations, ImmutableSet.of(errorType), true);
-    return new NullAwayError(errorType, errorMessage, region, offset, fix);
+    return new NullAwayError(errorType, errorMessage, region, offset, cleanedAnnotations);
   }
 
   @Override

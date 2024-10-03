@@ -34,9 +34,7 @@ import edu.ucr.cs.riple.injector.location.Location;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Container class to store information regarding effectiveness of a fix, its associated fix tree
@@ -183,28 +181,22 @@ public class Report {
     this.tree.add(this.root);
     found.tree.add(found.root);
     Set<Location> thisTree =
-        this.tree.stream()
-            .flatMap((Function<Fix, Stream<Location>>) fix -> fix.toLocations().stream())
-            .collect(Collectors.toSet());
+        this.tree.stream().flatMap(fix -> fix.toLocations().stream()).collect(Collectors.toSet());
 
     Set<Location> otherTree =
-        found.tree.stream()
-            .flatMap((Function<Fix, Stream<Location>>) fix -> fix.toLocations().stream())
-            .collect(Collectors.toSet());
+        found.tree.stream().flatMap(fix -> fix.toLocations().stream()).collect(Collectors.toSet());
     if (!thisTree.equals(otherTree)) {
       return false;
     }
     Set<Location> thisTriggered =
         this.triggeredErrors.stream()
-            .map(Error::getFix)
-            .filter(Objects::nonNull)
-            .flatMap((Function<Fix, Stream<Location>>) fix -> fix.toLocations().stream())
+            .flatMap(error -> error.getFixes().stream())
+            .flatMap(fix -> fix.toLocations().stream())
             .collect(Collectors.toSet());
     Set<Location> otherTriggered =
         found.triggeredErrors.stream()
-            .map(Error::getFix)
-            .filter(Objects::nonNull)
-            .flatMap((Function<Fix, Stream<Location>>) fix -> fix.toLocations().stream())
+            .flatMap(error -> error.getFixes().stream())
+            .flatMap(fix -> fix.toLocations().stream())
             .collect(Collectors.toSet());
     return otherTriggered.equals(thisTriggered);
   }
