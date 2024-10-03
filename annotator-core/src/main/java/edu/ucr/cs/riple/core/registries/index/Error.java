@@ -63,6 +63,16 @@ public abstract class Error {
     this.resolvingFixes = computeFixesFromAnnotations(annotations);
   }
 
+  /**
+   * Creates a set of {@link Fix} instances from the provided set of annotations that resolve the
+   * error. A fix instance can contain multiple annotations, which are grouped for evaluation. A fix
+   * is an input to the search algorithm, and if approved, all its contained annotations will be
+   * applied to the source code.
+   *
+   * @param annotations A set of annotations that, if fully applied, resolve the error. Each fix can
+   *     contain a subset of these annotations.
+   * @return A set of fix instances, each representing a possible group of annotations.
+   */
   protected abstract Set<Fix> computeFixesFromAnnotations(Set<AddAnnotation> annotations);
 
   public Set<Fix> getFixes() {
