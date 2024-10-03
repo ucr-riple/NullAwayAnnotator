@@ -48,20 +48,13 @@ public class Fix {
   /** Reasons this fix is suggested by NullAway in string. */
   public final ImmutableSet<String> reasons;
 
-  /**
-   * If true, the fix is suggested due to an error in the target module, false if the fix is
-   * suggested due to error in downstream dependencies.
-   */
-  public boolean fixSourceIsInTarget;
-
-  public Fix(AddAnnotation change, String reason, boolean fixSourceIsInTarget) {
-    this(change, ImmutableSet.of(reason), fixSourceIsInTarget);
+  public Fix(AddAnnotation change, String reason) {
+    this(change, ImmutableSet.of(reason));
   }
 
-  public Fix(AddAnnotation change, ImmutableSet<String> reasons, boolean fixSourceIsInTarget) {
+  public Fix(AddAnnotation change, ImmutableSet<String> reasons) {
     this.change = change;
     this.reasons = reasons;
-    this.fixSourceIsInTarget = fixSourceIsInTarget;
   }
 
   /**

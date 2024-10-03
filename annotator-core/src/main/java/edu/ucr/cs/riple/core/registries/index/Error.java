@@ -223,9 +223,7 @@ public abstract class Error {
     for (Fix key : fixReasonsMap.keySet()) {
       // To avoid mutating fixes stored in the given collection, we create new instances.
       // which contain the full set of reasons.
-      builder.add(
-          new Fix(
-              key.change, ImmutableSet.copyOf(fixReasonsMap.get(key)), key.fixSourceIsInTarget));
+      builder.add(new Fix(key.change, ImmutableSet.copyOf(fixReasonsMap.get(key))));
     }
     return builder.build();
   }

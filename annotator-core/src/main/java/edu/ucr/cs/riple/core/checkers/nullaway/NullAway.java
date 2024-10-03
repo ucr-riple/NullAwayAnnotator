@@ -130,8 +130,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     Fix resolvingFix =
         nonnullTarget == null
             ? null
-            : new Fix(
-                new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot), errorType, true);
+            : new Fix(new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot), errorType);
     return createError(
         errorType,
         errorMessage,
@@ -201,8 +200,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
               return new Fix(
                   new AddMarkerAnnotation(
                       extendVariableList(locationOnField, module), config.nullableAnnot),
-                  NullAwayError.METHOD_INITIALIZER_ERROR,
-                  true);
+                  NullAwayError.METHOD_INITIALIZER_ERROR);
             })
         .filter(Objects::nonNull)
         .collect(ImmutableSet.toImmutableSet());
