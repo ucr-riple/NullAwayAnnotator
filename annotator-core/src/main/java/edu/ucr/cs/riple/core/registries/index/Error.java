@@ -42,8 +42,6 @@ public abstract class Error {
   public final String messageType;
   /** Error message. */
   public final String message;
-  /** Annotations */
-  public final Set<AddAnnotation> annotations;
   /** The fixes which can resolve this error (possibly null). */
   protected final Set<Fix> fixes;
   /** Offset of program point in original version where error is reported. */
@@ -62,7 +60,6 @@ public abstract class Error {
     this.messageType = messageType;
     this.message = message;
     this.offset = offset;
-    this.annotations = annotations;
     this.fixes = computeFixesFromAnnotations(annotations);
   }
 
