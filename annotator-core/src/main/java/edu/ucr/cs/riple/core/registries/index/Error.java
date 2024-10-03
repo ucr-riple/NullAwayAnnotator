@@ -94,8 +94,7 @@ public abstract class Error {
    * @return Location of the fix resolving this error.
    */
   public Location toResolvingLocation() {
-    Preconditions.checkArgument(
-        !resolvingFixes.isEmpty() && resolvingFixes.iterator().next().changes.size() == 1);
+    Preconditions.checkArgument(isSingleAnnotationFix());
     // no get() method, have to use iterator.
     return resolvingFixes.iterator().next().changes.iterator().next().getLocation();
   }
