@@ -34,7 +34,7 @@ import java.nio.file.Path;
 public class ParseException extends RuntimeException {
 
   public ParseException(Path path, ParseProblemException exception) {
-    super(retrieveExceptionMessage(path, exception));
+    super(retrieveExceptionMessage(path, exception), exception);
   }
 
   private static String retrieveExceptionMessage(Path path, ParseProblemException e) {
