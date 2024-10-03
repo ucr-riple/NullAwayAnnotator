@@ -29,8 +29,6 @@ import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.registries.index.Error;
-import edu.ucr.cs.riple.core.registries.index.Fix;
-import edu.ucr.cs.riple.core.registries.region.Region;
 import java.util.Set;
 
 /**
@@ -62,25 +60,6 @@ public interface Checker<T extends Error> {
    *     pre-processing phase.
    */
   void preprocess(AnnotationInjector injector);
-
-  /**
-   * Creates an {@link Error} instance from the given parameters.
-   *
-   * @param errorType Error type.
-   * @param errorMessage Error message.
-   * @param region Region where the error is reported,
-   * @param offset offset of program point in original version where error is reported.
-   * @param resolvingFixes Set of fixes that resolve the error.
-   * @param module Module where the error is reported.
-   * @return The corresponding error.
-   */
-  T createError(
-      String errorType,
-      String errorMessage,
-      Region region,
-      int offset,
-      ImmutableSet<Fix> resolvingFixes,
-      ModuleInfo module);
 
   /**
    * Verifies that the checker representation in Annotator is compatible with the actual running
