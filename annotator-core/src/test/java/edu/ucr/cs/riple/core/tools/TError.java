@@ -24,13 +24,13 @@
 
 package edu.ucr.cs.riple.core.tools;
 
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Wrapper class for {@link Error} used to create dummy errors (with default values) as part of
@@ -44,7 +44,7 @@ public class TError extends Error {
   }
 
   @Override
-  protected Set<Fix> computeFixesFromAnnotations(Set<AddAnnotation> annotations) {
-    return annotations.stream().map(Fix::new).collect(Collectors.toSet());
+  protected ImmutableSet<Fix> computeFixesFromAnnotations(Set<AddAnnotation> annotations) {
+    return annotations.stream().map(Fix::new).collect(ImmutableSet.toImmutableSet());
   }
 }

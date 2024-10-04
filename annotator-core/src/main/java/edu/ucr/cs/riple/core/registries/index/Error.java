@@ -42,8 +42,8 @@ public abstract class Error {
   public final String messageType;
   /** Error message. */
   public final String message;
-  /** The fixes which can resolve this error (possibly null). */
-  protected final Set<Fix> resolvingFixes;
+  /** The fixes which can resolve this error (possibly empty). */
+  protected final ImmutableSet<Fix> resolvingFixes;
   /** Offset of program point in original version where error is reported. */
   protected final int offset;
   /** Containing region. */
@@ -73,7 +73,7 @@ public abstract class Error {
    *     contain a subset of these annotations.
    * @return A set of fix instances, each representing a possible group of annotations.
    */
-  protected abstract Set<Fix> computeFixesFromAnnotations(Set<AddAnnotation> annotations);
+  protected abstract ImmutableSet<Fix> computeFixesFromAnnotations(Set<AddAnnotation> annotations);
 
   public Set<Fix> getFixes() {
     return this.resolvingFixes;

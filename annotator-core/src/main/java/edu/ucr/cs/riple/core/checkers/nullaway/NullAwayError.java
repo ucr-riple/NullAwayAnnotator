@@ -24,13 +24,13 @@
 
 package edu.ucr.cs.riple.core.checkers.nullaway;
 
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /** Represents an error reported by {@link NullAway}. */
 public class NullAwayError extends Error {
@@ -50,10 +50,10 @@ public class NullAwayError extends Error {
   }
 
   @Override
-  protected Set<Fix> computeFixesFromAnnotations(Set<AddAnnotation> annotations) {
+  protected ImmutableSet<Fix> computeFixesFromAnnotations(Set<AddAnnotation> annotations) {
     // In NullAway inference, each annotation is examined individually. Thus, we create a separate
     // fix instance for each annotation.
-    return annotations.stream().map(Fix::new).collect(Collectors.toSet());
+    return annotations.stream().map(Fix::new).collect(ImmutableSet.toImmutableSet());
   }
 
   @Override
