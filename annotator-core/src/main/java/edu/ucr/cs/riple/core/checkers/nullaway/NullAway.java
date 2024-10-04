@@ -326,7 +326,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
             .filter(
                 e ->
                     e.messageType.equals("METHOD_NO_INIT") || e.messageType.equals("FIELD_NO_INIT"))
-            .flatMap(e -> e.getFixes().stream())
+            .flatMap(e -> e.getResolvingFixes().stream())
             .filter(Fix::isOnField)
             // Filter nodes annotated with SuppressWarnings("NullAway")
             .filter(fix -> !fieldsWithSuppressWarnings.contains(fix.toField()))
@@ -367,7 +367,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                 context, context.targetModuleInfo, NullAwayError.class)
             .stream()
             .filter(e -> e.messageType.equals("FIELD_NO_INIT"))
-            .flatMap(e -> e.getFixes().stream())
+            .flatMap(e -> e.getResolvingFixes().stream())
             .filter(Fix::isOnField)
             .map(Fix::toField)
             .collect(Collectors.toSet());

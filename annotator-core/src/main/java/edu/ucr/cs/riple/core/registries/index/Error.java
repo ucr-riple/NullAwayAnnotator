@@ -75,7 +75,12 @@ public abstract class Error {
    */
   protected abstract ImmutableSet<Fix> computeFixesFromAnnotations(Set<AddAnnotation> annotations);
 
-  public Set<Fix> getFixes() {
+  /**
+   * Getter for the set of fixes that resolves this error.
+   *
+   * @return Set of fixes that resolves this error.
+   */
+  public ImmutableSet<Fix> getResolvingFixes() {
     return this.resolvingFixes;
   }
 

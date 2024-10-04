@@ -189,12 +189,12 @@ public class Report {
     }
     Set<Location> thisTriggered =
         this.triggeredErrors.stream()
-            .flatMap(error -> error.getFixes().stream())
+            .flatMap(error -> error.getResolvingFixes().stream())
             .flatMap(fix -> fix.toLocations().stream())
             .collect(Collectors.toSet());
     Set<Location> otherTriggered =
         found.triggeredErrors.stream()
-            .flatMap(error -> error.getFixes().stream())
+            .flatMap(error -> error.getResolvingFixes().stream())
             .flatMap(fix -> fix.toLocations().stream())
             .collect(Collectors.toSet());
     return otherTriggered.equals(thisTriggered);
