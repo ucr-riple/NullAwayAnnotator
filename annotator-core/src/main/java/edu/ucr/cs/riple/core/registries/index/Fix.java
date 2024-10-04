@@ -58,9 +58,9 @@ public class Fix {
   }
 
   /**
-   * Returns the targeted location information.
+   * Returns the set of locations targeted by this fix instance.
    *
-   * @return Location information.
+   * @return Set of locations targeted by this fix instance.
    */
   public Set<Location> toLocations() {
     return changes.stream().map(ASTChange::getLocation).collect(Collectors.toSet());
