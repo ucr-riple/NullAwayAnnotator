@@ -120,8 +120,7 @@ public class LombokHandler implements AnnotationProcessorHandler {
                                             new Fix(
                                                 new AddMarkerAnnotation(
                                                     getterMethod.location,
-                                                    change.getAnnotationName().fullName),
-                                                fix.reasons));
+                                                    change.getAnnotationName().fullName)));
                                       }
                                     }))));
     return builder.build();

@@ -24,7 +24,6 @@
 
 package edu.ucr.cs.riple.core.tools;
 
-import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.registries.region.Region;
@@ -46,8 +45,6 @@ public class TError extends Error {
 
   @Override
   protected Set<Fix> computeFixesFromAnnotations(Set<AddAnnotation> annotations) {
-    return annotations.stream()
-        .map(addAnnotation -> new Fix(addAnnotation, ImmutableSet.of(messageType)))
-        .collect(Collectors.toSet());
+    return annotations.stream().map(Fix::new).collect(Collectors.toSet());
   }
 }

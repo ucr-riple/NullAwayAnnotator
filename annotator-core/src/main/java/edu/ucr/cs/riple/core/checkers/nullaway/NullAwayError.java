@@ -53,9 +53,7 @@ public class NullAwayError extends Error {
   protected Set<Fix> computeFixesFromAnnotations(Set<AddAnnotation> annotations) {
     // In NullAway inference, each annotation is examined individually. Thus, we create a separate
     // fix instance for each annotation.
-    return annotations.stream()
-        .map(annot -> new Fix(annot, messageType))
-        .collect(Collectors.toSet());
+    return annotations.stream().map(Fix::new).collect(Collectors.toSet());
   }
 
   @Override

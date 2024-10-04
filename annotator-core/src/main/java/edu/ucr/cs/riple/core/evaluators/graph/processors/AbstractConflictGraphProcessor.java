@@ -80,8 +80,7 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
             error ->
                 new Fix(
                     new AddMarkerAnnotation(
-                        error.toResolvingLocation(), context.config.nullableAnnot),
-                    "PASSING_NULLABLE"))
+                        error.toResolvingLocation(), context.config.nullableAnnot)))
         .collect(Collectors.toSet());
   }
 }

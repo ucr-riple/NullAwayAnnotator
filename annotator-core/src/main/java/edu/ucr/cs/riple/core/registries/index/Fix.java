@@ -48,20 +48,13 @@ public class Fix {
 
   /** Suggested change. */
   public final Set<AddAnnotation> changes;
-  /** Reasons this fix is suggested by NullAway in string. */
-  public final ImmutableSet<String> reasons;
 
-  public Fix(AddAnnotation change, String reason) {
-    this(change, ImmutableSet.of(reason));
+  public Fix(AddAnnotation change) {
+    this(ImmutableSet.of(change));
   }
 
-  public Fix(AddAnnotation change, ImmutableSet<String> reasons) {
-    this(ImmutableSet.of(change), reasons);
-  }
-
-  public Fix(ImmutableSet<AddAnnotation> change, ImmutableSet<String> reasons) {
+  public Fix(ImmutableSet<AddAnnotation> change) {
     this.changes = change;
-    this.reasons = reasons;
   }
 
   /**
