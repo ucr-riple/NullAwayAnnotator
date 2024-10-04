@@ -91,9 +91,9 @@ public class Impact {
   }
 
   /**
-   * Gets the containing location.
+   * Gets the containing locations.
    *
-   * @return Containing fix location.
+   * @return Containing fix locations.
    */
   public Set<Location> toLocations() {
     return fix.toLocations();
