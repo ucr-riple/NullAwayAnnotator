@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.registries.index;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.changes.ASTChange;
@@ -67,7 +68,7 @@ public class Fix {
   }
 
   /**
-   * Checks if fix is targeting a method.
+   * Checks if fix contains only one change and the change is on a method.
    *
    * @return true, if fix is targeting a method.
    */
@@ -76,11 +77,14 @@ public class Fix {
   }
 
   /**
-   * Returns the targeted method information.
+   * Returns the targeted method location if this fix contains only one change and that change is on
+   * method.
    *
    * @return Target method information.
    */
   public OnMethod toMethod() {
+    Preconditions.checkArgument(
+        isOnMethod(), "This fix contains more than one change or the change is not on method.");
     return changes.iterator().next().getLocation().toMethod();
   }
 
@@ -96,7 +100,7 @@ public class Fix {
   }
 
   /**
-   * Checks if fix is targeting a parameter.
+   * Checks if fix contains only one change and the change is on a parameter.
    *
    * @return true, if fix is targeting a parameter.
    */
@@ -105,11 +109,15 @@ public class Fix {
   }
 
   /**
-   * Returns the targeted parameter information.
+   * Returns the targeted parameter location if this fix contains only one change and that change is
+   * on a parameter.
    *
    * @return Target method parameter.
    */
   public OnParameter toParameter() {
+    Preconditions.checkArgument(
+        isOnParameter(),
+        "This fix contains more than one change or the change is not on parameter.");
     return changes.iterator().next().getLocation().toParameter();
   }
 
@@ -125,7 +133,7 @@ public class Fix {
   }
 
   /**
-   * Checks if fix is targeting a field.
+   * Checks if fix contains only one change and the change is on a field.
    *
    * @return true, if fix is targeting a field.
    */
@@ -134,11 +142,14 @@ public class Fix {
   }
 
   /**
-   * Returns the targeted field information.
+   * Returns the targeted field location if this fix contains only one change and that change is on
+   * a field.
    *
    * @return Target field information.
    */
   public OnField toField() {
+    Preconditions.checkArgument(
+        isOnField(), "This fix contains more than one change or the change is not on field.");
     return changes.iterator().next().getLocation().toField();
   }
 
@@ -180,7 +191,7 @@ public class Fix {
   }
 
   /**
-   * Checks if fix is modifying constructor (parameter or method).
+   * Checks if fix is a single change and is modifying constructor (parameter or method).
    *
    * @return true, if fix is modifying constructor.
    */
