@@ -24,7 +24,6 @@
 
 package edu.ucr.cs.riple.core.tools;
 
-import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.injector.location.Location;
 
@@ -36,6 +35,6 @@ import edu.ucr.cs.riple.injector.location.Location;
 public class TFix extends Fix {
 
   public TFix(Location location) {
-    super(new DefaultAnnotation(location), ImmutableSet.of());
+    super(new DefaultAnnotation(location));
   }
 }

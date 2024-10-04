@@ -24,7 +24,6 @@
 
 package edu.ucr.cs.riple.core.registries.index;
 
-import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -45,16 +44,9 @@ public class Fix {
 
   /** Suggested change. */
   public final AddAnnotation change;
-  /** Reasons this fix is suggested by NullAway in string. */
-  public final ImmutableSet<String> reasons;
 
-  public Fix(AddAnnotation change, String reason) {
-    this(change, ImmutableSet.of(reason));
-  }
-
-  public Fix(AddAnnotation change, ImmutableSet<String> reasons) {
+  public Fix(AddAnnotation change) {
     this.change = change;
-    this.reasons = reasons;
   }
 
   /**

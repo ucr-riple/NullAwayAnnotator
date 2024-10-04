@@ -130,7 +130,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     Fix resolvingFix =
         nonnullTarget == null
             ? null
-            : new Fix(new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot), errorType);
+            : new Fix(new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot));
     return createError(
         errorType,
         errorMessage,
@@ -199,8 +199,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
               }
               return new Fix(
                   new AddMarkerAnnotation(
-                      extendVariableList(locationOnField, module), config.nullableAnnot),
-                  NullAwayError.METHOD_INITIALIZER_ERROR);
+                      extendVariableList(locationOnField, module), config.nullableAnnot));
             })
         .filter(Objects::nonNull)
         .collect(ImmutableSet.toImmutableSet());
@@ -316,12 +315,12 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
 
     // Collect NullAway.Init SuppressWarnings
     Set<AddAnnotation> initializationSuppressWarningsAnnotations =
-        remainingFixes.stream()
+        remainingErrors.stream()
             .filter(
-                fix ->
-                    fix.isOnField()
-                        && (fix.reasons.contains("METHOD_NO_INIT")
-                            || fix.reasons.contains("FIELD_NO_INIT")))
+                e ->
+                    e.messageType.equals("METHOD_NO_INIT") || e.messageType.equals("FIELD_NO_INIT"))
+            .flatMap(e -> e.getResolvingFixes().stream())
+            .filter(Fix::isOnField)
             // Filter nodes annotated with SuppressWarnings("NullAway")
             .filter(fix -> !fieldsWithSuppressWarnings.contains(fix.toField()))
             .map(
@@ -357,8 +356,12 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     // nonnull at all exit paths.
     // Collect uninitialized fields.
     Set<OnField> uninitializedFields =
-        Utility.readFixesFromOutputDirectory(context, context.targetModuleInfo).stream()
-            .filter(fix -> fix.isOnField() && fix.reasons.contains("FIELD_NO_INIT"))
+        Utility.readErrorsFromOutputDirectory(
+                context, context.targetModuleInfo, NullAwayError.class)
+            .stream()
+            .filter(e -> e.messageType.equals("FIELD_NO_INIT"))
+            .flatMap(e -> e.getResolvingFixes().stream())
+            .filter(Fix::isOnField)
             .map(Fix::toField)
             .collect(Collectors.toSet());
     FieldInitializationStore fieldInitializationStore = new FieldInitializationStore(context);
