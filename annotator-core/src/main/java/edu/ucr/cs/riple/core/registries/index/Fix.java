@@ -44,12 +44,9 @@ public class Fix {
 
   /** Suggested change. */
   public final AddAnnotation change;
-  /** Error type this fix is suggested by checker in string. */
-  public final String errorType;
 
-  public Fix(AddAnnotation change, String errorType) {
+  public Fix(AddAnnotation change) {
     this.change = change;
-    this.errorType = errorType;
   }
 
   /**
