@@ -115,7 +115,8 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
         Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 6, 12));
     if (nonnullTarget == null && errorType.equals(NullAwayError.METHOD_INITIALIZER_ERROR)) {
       Set<AddAnnotation> annotationsOnField =
-          computeAddAnnotationInstancesForUninitializedFields(errorMessage, region, moduleInfo);
+          computeAddAnnotationInstancesForUninitializedFields(
+              errorMessage, region.clazz, moduleInfo);
       return createError(
           errorType,
           errorMessage,
@@ -181,19 +182,26 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
   }
 
   /**
-   * Generates a set of fixes for uninitialized fields from the given error message.
+   * Computes a set of {@link AddAnnotation} instances for fields that are uninitialized. This
+   * method extracts field names from the provided error message, and for each uninitialized field,
+   * it attempts to find the location of the field within the specified class. If a field's location
+   * is found, an {@link AddMarkerAnnotation} is created with the appropriate nullable annotation
+   * and added to the result set.
    *
-   * @param errorMessage Given error message.
-   * @param region Region where the error is reported.
-   * @return Set of fixes for uninitialized fields to resolve the given error.
+   * @param errorMessage the error message containing the details about uninitialized fields.
+   * @param encClass The class where this error is reported.
+   * @param module the {@link ModuleInfo} containing the field registry and configuration
+   *     information.
+   * @return an {@link ImmutableSet} of {@link AddAnnotation} instances representing the fields that
+   *     should have annotations added, based on their uninitialized status.
    */
-  protected ImmutableSet<AddAnnotation> computeAddAnnotationInstancesForUninitializedFields(
-      String errorMessage, Region region, ModuleInfo module) {
+  private ImmutableSet<AddAnnotation> computeAddAnnotationInstancesForUninitializedFields(
+      String errorMessage, String encClass, ModuleInfo module) {
     return extractUninitializedFieldNames(errorMessage).stream()
         .map(
             field -> {
               OnField locationOnField =
-                  module.getFieldRegistry().getLocationOnField(region.clazz, field);
+                  module.getFieldRegistry().getLocationOnField(encClass, field);
               if (locationOnField == null) {
                 return null;
               }
