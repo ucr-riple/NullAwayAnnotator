@@ -46,7 +46,7 @@ import org.json.simple.JSONObject;
  */
 public class Fix {
 
-  /** Suggested change. */
+  /** The set of suggested changes that should be evaluated together by this fix instance. */
   public final Set<AddAnnotation> changes;
 
   public Fix(AddAnnotation change) {
