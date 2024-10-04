@@ -39,7 +39,6 @@ import edu.ucr.cs.riple.injector.location.OnClass;
 import edu.ucr.cs.riple.scanner.Serializer;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.nio.file.Path;
-import java.util.Set;
 
 /** This class is used to store the code structural information about the module. */
 public class ModuleInfo {
@@ -173,10 +172,6 @@ public class ModuleInfo {
       return fieldRegistry.declaredInModule(location);
     }
     return methodRegistry.declaredInModule(location);
-  }
-
-  public boolean declaredInModule(Set<Location> locations) {
-    return locations.stream().allMatch(this::declaredInModule);
   }
 
   /**
