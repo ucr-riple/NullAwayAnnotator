@@ -182,7 +182,6 @@ public class Report {
     found.tree.add(found.root);
     Set<Location> thisTree =
         this.tree.stream().flatMap(fix -> fix.toLocations().stream()).collect(Collectors.toSet());
-
     Set<Location> otherTree =
         found.tree.stream().flatMap(fix -> fix.toLocations().stream()).collect(Collectors.toSet());
     if (!thisTree.equals(otherTree)) {
