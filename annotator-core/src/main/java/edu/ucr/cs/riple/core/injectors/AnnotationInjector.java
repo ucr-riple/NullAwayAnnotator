@@ -50,7 +50,9 @@ public abstract class AnnotationInjector {
       return;
     }
     Set<RemoveAnnotation> toRemove =
-        fixes.stream().map(fix -> fix.change.getReverse()).collect(Collectors.toSet());
+        fixes.stream()
+            .flatMap(fix -> fix.changes.stream().map(AddAnnotation::getReverse))
+            .collect(Collectors.toSet());
     removeAnnotations(toRemove);
   }
 
@@ -63,7 +65,8 @@ public abstract class AnnotationInjector {
     if (fixes == null || fixes.size() == 0) {
       return;
     }
-    injectAnnotations(fixes.stream().map(fix -> fix.change).collect(Collectors.toSet()));
+    injectAnnotations(
+        fixes.stream().flatMap(fix -> fix.changes.stream()).collect(Collectors.toSet()));
   }
 
   /**

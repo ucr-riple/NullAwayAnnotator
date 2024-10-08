@@ -114,29 +114,30 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     Location nonnullTarget =
         Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 6, 12));
     if (nonnullTarget == null && errorType.equals(NullAwayError.METHOD_INITIALIZER_ERROR)) {
-      ImmutableSet<Fix> resolvingFixes =
-          generateFixesForUninitializedFields(errorMessage, region, moduleInfo);
+      Set<AddAnnotation> annotationsOnField =
+          computeAddAnnotationInstancesForUninitializedFields(
+              errorMessage, region.clazz, moduleInfo);
       return createError(
           errorType,
           errorMessage,
           region,
           context.offsetHandler.getOriginalOffset(path, offset),
-          resolvingFixes,
+          annotationsOnField,
           moduleInfo);
     }
     if (nonnullTarget != null && nonnullTarget.isOnField()) {
       nonnullTarget = extendVariableList(nonnullTarget.toField(), moduleInfo);
     }
-    Fix resolvingFix =
+    Set<AddAnnotation> annotations =
         nonnullTarget == null
-            ? null
-            : new Fix(new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot));
+            ? Set.of()
+            : Set.of(new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot));
     return createError(
         errorType,
         errorMessage,
         region,
         context.offsetHandler.getOriginalOffset(path, offset),
-        resolvingFix == null ? ImmutableSet.of() : ImmutableSet.of(resolvingFix),
+        annotations,
         moduleInfo);
   }
 
@@ -181,25 +182,31 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
   }
 
   /**
-   * Generates a set of fixes for uninitialized fields from the given error message.
+   * Computes a set of {@link AddAnnotation} instances for fields that are uninitialized. This
+   * method extracts field names from the provided error message, and for each uninitialized field,
+   * it attempts to find the location of the field within the specified class. If a field's location
+   * is found, an {@link AddMarkerAnnotation} is created with the appropriate nullable annotation
+   * and added to the result set.
    *
-   * @param errorMessage Given error message.
-   * @param region Region where the error is reported.
-   * @return Set of fixes for uninitialized fields to resolve the given error.
+   * @param errorMessage the error message containing the details about uninitialized fields.
+   * @param encClass The class where this error is reported.
+   * @param module the {@link ModuleInfo} containing the field registry and configuration
+   *     information.
+   * @return an {@link ImmutableSet} of {@link AddAnnotation} instances representing the fields that
+   *     should have annotations added, based on their uninitialized status.
    */
-  protected ImmutableSet<Fix> generateFixesForUninitializedFields(
-      String errorMessage, Region region, ModuleInfo module) {
+  private ImmutableSet<AddAnnotation> computeAddAnnotationInstancesForUninitializedFields(
+      String errorMessage, String encClass, ModuleInfo module) {
     return extractUninitializedFieldNames(errorMessage).stream()
         .map(
             field -> {
               OnField locationOnField =
-                  module.getFieldRegistry().getLocationOnField(region.clazz, field);
+                  module.getFieldRegistry().getLocationOnField(encClass, field);
               if (locationOnField == null) {
                 return null;
               }
-              return new Fix(
-                  new AddMarkerAnnotation(
-                      extendVariableList(locationOnField, module), config.nullableAnnot));
+              return new AddMarkerAnnotation(
+                  extendVariableList(locationOnField, module), config.nullableAnnot);
             })
         .filter(Objects::nonNull)
         .collect(ImmutableSet.toImmutableSet());
@@ -249,7 +256,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                   // `@Nullable` is being passed as an argument, we add a `@NullUnmarked` annotation
                   // to the called method.
                   if (error.messageType.equals("PASS_NULLABLE")
-                      && error.isSingleFix()
+                      && error.isSingleAnnotationFix()
                       && error.toResolvingLocation().isOnParameter()) {
                     OnParameter nullableParameter = error.toResolvingParameter();
                     return context
@@ -382,7 +389,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
    * @param errorMessage Error Message from NullAway.
    * @param region Region where the error is reported.
    * @param offset Offset of program point in the source file where the error is reported.
-   * @param resolvingFixes Resolving fixes that can fix the error if all applied to source code.
+   * @param annotations Annotations that should be added source file to resolve the error.
    * @param module Module where this error is reported.
    * @return Creates and returns the corresponding {@link NullAwayError} instance using the provided
    *     information.
@@ -392,14 +399,16 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
       String errorMessage,
       Region region,
       int offset,
-      ImmutableSet<Fix> resolvingFixes,
+      Set<AddAnnotation> annotations,
       ModuleInfo module) {
     // Filter fixes on elements with explicit nonnull annotations.
-    ImmutableSet<Fix> cleanedResolvingFixes =
-        resolvingFixes.stream()
-            .filter(f -> !module.getNonnullStore().hasExplicitNonnullAnnotation(f.toLocation()))
+    ImmutableSet<AddAnnotation> cleanedAnnotations =
+        annotations.stream()
+            .filter(
+                annot ->
+                    !module.getNonnullStore().hasExplicitNonnullAnnotation(annot.getLocation()))
             .collect(ImmutableSet.toImmutableSet());
-    return new NullAwayError(errorType, errorMessage, region, offset, cleanedResolvingFixes);
+    return new NullAwayError(errorType, errorMessage, region, offset, cleanedAnnotations);
   }
 
   @Override

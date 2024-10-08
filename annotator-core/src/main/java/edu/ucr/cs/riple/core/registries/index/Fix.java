@@ -24,7 +24,10 @@
 
 package edu.ucr.cs.riple.core.registries.index;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.changes.ASTChange;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.LocationKind;
@@ -33,7 +36,9 @@ import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import org.json.simple.JSONObject;
 
 /**
@@ -42,38 +47,45 @@ import org.json.simple.JSONObject;
  */
 public class Fix {
 
-  /** Suggested change. */
-  public final AddAnnotation change;
+  /** The set of suggested changes that should be evaluated together by this fix instance. */
+  public final Set<AddAnnotation> changes;
 
   public Fix(AddAnnotation change) {
-    this.change = change;
+    this(ImmutableSet.of(change));
+  }
+
+  public Fix(ImmutableSet<AddAnnotation> change) {
+    this.changes = change;
   }
 
   /**
-   * Returns the targeted location information.
+   * Returns the set of locations targeted by this fix instance.
    *
-   * @return Location information.
+   * @return Set of locations targeted by this fix instance.
    */
-  public Location toLocation() {
-    return change.getLocation();
+  public Set<Location> toLocations() {
+    return changes.stream().map(ASTChange::getLocation).collect(Collectors.toSet());
   }
 
   /**
-   * Checks if fix is targeting a method.
+   * Checks if fix contains only one change and the change is on a method.
    *
    * @return true, if fix is targeting a method.
    */
   public boolean isOnMethod() {
-    return change.getLocation().isOnMethod();
+    return changes.size() == 1 && changes.iterator().next().getLocation().isOnMethod();
   }
 
   /**
-   * Returns the targeted method information.
+   * Returns the targeted method location if this fix contains only one change and that change is on
+   * method.
    *
    * @return Target method information.
    */
   public OnMethod toMethod() {
-    return change.getLocation().toMethod();
+    Preconditions.checkArgument(
+        isOnMethod(), "This fix contains more than one change or the change is not on method.");
+    return changes.iterator().next().getLocation().toMethod();
   }
 
   /**
@@ -82,25 +94,31 @@ public class Fix {
    * @param consumer Consumer instance.
    */
   public void ifOnMethod(Consumer<OnMethod> consumer) {
-    change.getLocation().ifMethod(consumer);
+    if (isOnMethod()) {
+      changes.iterator().next().getLocation().ifMethod(consumer);
+    }
   }
 
   /**
-   * Checks if fix is targeting a parameter.
+   * Checks if fix contains only one change and the change is on a parameter.
    *
    * @return true, if fix is targeting a parameter.
    */
   public boolean isOnParameter() {
-    return change.getLocation().isOnParameter();
+    return changes.size() == 1 && changes.iterator().next().getLocation().isOnParameter();
   }
 
   /**
-   * Returns the targeted parameter information.
+   * Returns the targeted parameter location if this fix contains only one change and that change is
+   * on a parameter.
    *
    * @return Target method parameter.
    */
   public OnParameter toParameter() {
-    return change.getLocation().toParameter();
+    Preconditions.checkArgument(
+        isOnParameter(),
+        "This fix contains more than one change or the change is not on parameter.");
+    return changes.iterator().next().getLocation().toParameter();
   }
 
   /**
@@ -109,25 +127,30 @@ public class Fix {
    * @param consumer Consumer instance.
    */
   public void ifOnParameter(Consumer<OnParameter> consumer) {
-    change.getLocation().ifParameter(consumer);
+    if (isOnParameter()) {
+      changes.iterator().next().getLocation().ifParameter(consumer);
+    }
   }
 
   /**
-   * Checks if fix is targeting a field.
+   * Checks if fix contains only one change and the change is on a field.
    *
    * @return true, if fix is targeting a field.
    */
   public boolean isOnField() {
-    return change.getLocation().isOnField();
+    return changes.size() == 1 && changes.iterator().next().getLocation().isOnField();
   }
 
   /**
-   * Returns the targeted field information.
+   * Returns the targeted field location if this fix contains only one change and that change is on
+   * a field.
    *
    * @return Target field information.
    */
   public OnField toField() {
-    return change.getLocation().toField();
+    Preconditions.checkArgument(
+        isOnField(), "This fix contains more than one change or the change is not on field.");
+    return changes.iterator().next().getLocation().toField();
   }
 
   /**
@@ -136,7 +159,9 @@ public class Fix {
    * @param consumer Consumer instance.
    */
   public void ifOnField(Consumer<OnField> consumer) {
-    change.getLocation().ifField(consumer);
+    if (isOnField()) {
+      changes.iterator().next().getLocation().ifField(consumer);
+    }
   }
 
   @Override
@@ -148,12 +173,12 @@ public class Fix {
       return false;
     }
     Fix fix = (Fix) o;
-    return change.equals(fix.change);
+    return changes.equals(fix.changes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(change);
+    return Objects.hash(changes);
   }
 
   /**
@@ -162,26 +187,26 @@ public class Fix {
    * @return Json instance.
    */
   public JSONObject getJson() {
-    return change.getLocation().accept(new LocationToJsonVisitor(), null);
+    return changes.iterator().next().getLocation().accept(new LocationToJsonVisitor(), null);
   }
 
   /**
-   * Checks if fix is modifying constructor (parameter or method).
+   * Checks if fix is a single change and is modifying constructor (parameter or method).
    *
    * @return true, if fix is modifying constructor.
    */
   public boolean isModifyingConstructor() {
-    if (isOnField()) {
+    if (!(isOnMethod() || isOnParameter())) {
       return false;
     }
     String methodSignature =
         isOnMethod() ? toMethod().method : toParameter().enclosingMethod.method;
-    return Helper.extractCallableName(methodSignature)
-        .equals(Helper.simpleName(change.getLocation().clazz));
+    String clazz = changes.iterator().next().getLocation().clazz;
+    return Helper.extractCallableName(methodSignature).equals(Helper.simpleName(clazz));
   }
 
   @Override
   public String toString() {
-    return change.toString();
+    return changes.toString();
   }
 }

@@ -87,42 +87,42 @@ public class LombokHandler implements AnnotationProcessorHandler {
     ImmutableSet.Builder<Fix> builder = ImmutableSet.builder();
     fixes.forEach(
         fix ->
-            fix.ifOnField(
-                onField ->
-                    onField.variables.forEach(
-                        name -> {
-                          // Expected getter method signature.
-                          String getterSignature =
-                              "get"
-                                  + Character.toUpperCase(name.charAt(0))
-                                  + name.substring(1)
-                                  + "()";
-                          // Check if method is lombok generated.
-                          MethodRecord getterMethod =
-                              moduleInfo
-                                  .getMethodRegistry()
-                                  .findMethodByName(onField.clazz, getterSignature);
-                          if (getterMethod == null) {
-                            // Getter method is not declared. skip.
-                            // Note: If the getter method is generated, it should still be in the
-                            // registry.
-                            return;
-                          }
-                          if (isLombokGenerated(getterMethod.annotations)) {
-                            // Method is lombok generated, add a fix to add the annotation on the
-                            // method.
-                            if (!(fix.change instanceof AnnotationChange)) {
-                              // Only annotation changes are supported for now.
-                              return;
-                            }
-                            AnnotationChange change = (AnnotationChange) fix.change;
-                            builder.add(
-                                new Fix(
-                                    new AddMarkerAnnotation(
-                                        getterMethod.location,
-                                        change.getAnnotationName().fullName)));
-                          }
-                        })));
+            fix.changes.forEach(
+                addAnnotation ->
+                    addAnnotation
+                        .getLocation()
+                        .ifField(
+                            onField ->
+                                onField.variables.forEach(
+                                    name -> {
+                                      // Expected getter method signature.
+                                      String getterSignature =
+                                          "get"
+                                              + Character.toUpperCase(name.charAt(0))
+                                              + name.substring(1)
+                                              + "()";
+                                      // Check if method is lombok generated.
+                                      MethodRecord getterMethod =
+                                          moduleInfo
+                                              .getMethodRegistry()
+                                              .findMethodByName(onField.clazz, getterSignature);
+                                      if (getterMethod == null) {
+                                        // Getter method is not declared. skip.
+                                        // Note: If the getter method is generated, it should still
+                                        // be in the registry.
+                                        return;
+                                      }
+                                      if (isLombokGenerated(getterMethod.annotations)) {
+                                        // Method is lombok generated, add a fix to add the
+                                        // annotation on the method.
+                                        AnnotationChange change = (AnnotationChange) addAnnotation;
+                                        builder.add(
+                                            new Fix(
+                                                new AddMarkerAnnotation(
+                                                    getterMethod.location,
+                                                    change.getAnnotationName().fullName)));
+                                      }
+                                    }))));
     return builder.build();
   }
 

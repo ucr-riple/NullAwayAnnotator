@@ -39,6 +39,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Vertex in {@link ConflictGraph} graph. It stores a fix tree (starting from a root) and all it's
@@ -109,11 +110,15 @@ public class Node {
     // Add origins.
     this.regions.addAll(this.origins);
     this.tree.forEach(
-        fix -> this.regions.addAll(regionRegistry.getImpactedRegions(fix.toLocation())));
+        fix ->
+            this.regions.addAll(
+                fix.toLocations().stream()
+                    .flatMap(location -> regionRegistry.getImpactedRegions(location).stream())
+                    .collect(Collectors.toSet())));
     // Add class initialization region, if a fix is modifying a parameter on constructor.
     this.tree.stream()
         .filter(fix -> fix.isOnParameter() && fix.isModifyingConstructor())
-        .forEach(fix -> regions.add(new Region(fix.change.getLocation().clazz, "null")));
+        .forEach(fix -> regions.add(new Region(fix.toParameter().clazz, "null")));
   }
 
   /**

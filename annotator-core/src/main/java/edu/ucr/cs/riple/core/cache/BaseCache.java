@@ -27,7 +27,6 @@ package edu.ucr.cs.riple.core.cache;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.Fix;
-import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -39,8 +38,7 @@ import javax.annotation.Nullable;
  * @param <T> type of impacts saved in this model.
  * @param <S> type of the map used to store impacts.
  */
-public abstract class BaseCache<T extends Impact, S extends Map<Location, T>>
-    implements ImpactCache<T> {
+public abstract class BaseCache<T extends Impact, S extends Map<Fix, T>> implements ImpactCache<T> {
 
   /** Container holding cache entries. */
   protected final S store;
@@ -51,19 +49,19 @@ public abstract class BaseCache<T extends Impact, S extends Map<Location, T>>
 
   @Override
   public boolean isUnknown(Fix fix) {
-    return !this.store.containsKey(fix.toLocation());
+    return !this.store.containsKey(fix);
   }
 
   @Nullable
   @Override
   public T fetchImpact(Fix fix) {
-    return store.get(fix.toLocation());
+    return store.get(fix);
   }
 
   @Override
   public ImmutableSet<Error> getTriggeredErrorsForCollection(Collection<Fix> fixes) {
     return fixes.stream()
-        .map(fix -> store.get(fix.toLocation()))
+        .map(store::get)
         .filter(Objects::nonNull)
         .flatMap(impact -> impact.triggeredErrors.stream())
         // filter errors that will be resolved with the existing collection of fixes.
@@ -74,7 +72,7 @@ public abstract class BaseCache<T extends Impact, S extends Map<Location, T>>
   @Override
   public ImmutableSet<Fix> getTriggeredFixesFromDownstreamForCollection(Collection<Fix> fixTree) {
     return fixTree.stream()
-        .map(fix -> store.get(fix.toLocation()))
+        .map(store::get)
         .filter(Objects::nonNull)
         .flatMap(impact -> impact.getTriggeredFixesFromDownstreamErrors().stream())
         // filter fixes that are already inside tree.
@@ -95,6 +93,6 @@ public abstract class BaseCache<T extends Impact, S extends Map<Location, T>>
 
   @Override
   public int size() {
-    return this.store.values().size();
+    return this.store.size();
   }
 }

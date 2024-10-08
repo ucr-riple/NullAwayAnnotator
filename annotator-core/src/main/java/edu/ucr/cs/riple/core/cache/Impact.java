@@ -27,7 +27,6 @@ package edu.ucr.cs.riple.core.cache;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.Fix;
-import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
@@ -88,15 +87,6 @@ public class Impact {
    */
   public ImmutableSet<Fix> getTriggeredFixesFromDownstreamErrors() {
     return triggeredFixesFromDownstreamErrors;
-  }
-
-  /**
-   * Gets the containing location.
-   *
-   * @return Containing fix location.
-   */
-  public Location toLocation() {
-    return fix.toLocation();
   }
 
   @Override

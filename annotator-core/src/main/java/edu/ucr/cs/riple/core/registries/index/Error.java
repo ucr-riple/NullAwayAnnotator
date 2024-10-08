@@ -27,11 +27,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.registries.region.Region;
+import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collection;
 import java.util.Objects;
-import javax.annotation.Nullable;
+import java.util.Set;
 
 /** Represents an error reported by NullAway. */
 @SuppressWarnings("JavaLangClash")
@@ -47,50 +48,49 @@ public abstract class Error {
   protected final int offset;
   /** Containing region. */
   protected final Region region;
+
   /** Error type for method initialization errors from NullAway in {@code String}. */
   public Error(
       String messageType,
       String message,
       Region region,
       int offset,
-      ImmutableSet<Fix> resolvingFixes) {
+      Set<AddAnnotation> annotations) {
     this.region = region;
     this.messageType = messageType;
     this.message = message;
     this.offset = offset;
-    this.resolvingFixes = resolvingFixes;
-  }
-
-  public Error(
-      String messageType, String message, Region region, int offset, @Nullable Fix resolvingFix) {
-    this(
-        messageType,
-        message,
-        region,
-        offset,
-        resolvingFix == null ? ImmutableSet.of() : ImmutableSet.of(resolvingFix));
+    this.resolvingFixes = computeFixesFromAnnotations(annotations);
   }
 
   /**
-   * Checks if error is resolvable.
+   * Creates a set of {@link Fix} instances from the provided set of annotations that resolve the
+   * error. A fix instance can contain multiple annotations, which are grouped for evaluation. A fix
+   * is an input to the search algorithm, and if approved, all its contained annotations will be
+   * applied to the source code.
    *
-   * @return true if error is resolvable and false otherwise.
+   * @param annotations A set of annotations that, if fully applied, resolve the error. Each fix can
+   *     contain a subset of these annotations.
+   * @return A set of fix instances, each representing a possible group of annotations.
    */
-  public boolean hasFix() {
-    return this.resolvingFixes.size() > 0;
-  }
+  protected abstract ImmutableSet<Fix> computeFixesFromAnnotations(Set<AddAnnotation> annotations);
 
+  /**
+   * Getter for the set of fixes that resolves this error.
+   *
+   * @return Set of fixes that resolves this error.
+   */
   public ImmutableSet<Fix> getResolvingFixes() {
     return this.resolvingFixes;
   }
 
   /**
-   * Checks if error is resolvable with only one fix.
+   * Checks if error is resolvable with only one annotation.
    *
-   * @return true if error is resolvable with only one fix and false otherwise.
+   * @return true if error is resolvable with only one annotation and false otherwise.
    */
-  public boolean isSingleFix() {
-    return this.resolvingFixes.size() == 1;
+  public boolean isSingleAnnotationFix() {
+    return !resolvingFixes.isEmpty() && resolvingFixes.iterator().next().changes.size() == 1;
   }
 
   /**
@@ -99,9 +99,9 @@ public abstract class Error {
    * @return Location of the fix resolving this error.
    */
   public Location toResolvingLocation() {
-    Preconditions.checkArgument(resolvingFixes.size() == 1);
+    Preconditions.checkArgument(isSingleAnnotationFix());
     // no get() method, have to use iterator.
-    return resolvingFixes.iterator().next().toLocation();
+    return resolvingFixes.iterator().next().changes.iterator().next().getLocation();
   }
 
   /**
@@ -166,9 +166,9 @@ public abstract class Error {
    * @return true, if error is resolvable via fixes on target module.
    */
   public boolean isFixableOnTarget(Context context) {
-    return !resolvingFixes.isEmpty()
-        && this.resolvingFixes.stream()
-            .allMatch(fix -> context.targetModuleInfo.declaredInModule(fix.toLocation()));
+    return this.resolvingFixes.stream()
+        .flatMap(fix -> fix.changes.stream())
+        .allMatch(change -> context.targetModuleInfo.declaredInModule(change.getLocation()));
   }
 
   @Override
@@ -209,7 +209,7 @@ public abstract class Error {
    * @return true, if this error is resolvable.
    */
   public boolean isResolvableWith(Collection<Fix> fixes) {
-    if (resolvingFixes.size() == 0) {
+    if (this.resolvingFixes.isEmpty()) {
       return false;
     }
     return fixes.containsAll(this.resolvingFixes);
