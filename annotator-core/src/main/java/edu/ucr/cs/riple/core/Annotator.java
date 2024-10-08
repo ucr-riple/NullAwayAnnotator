@@ -51,10 +51,13 @@ public class Annotator {
 
   /** Injector instance. */
   private final AnnotationInjector injector;
+
   /** Annotator context. */
   public final Context context;
+
   /** Reports cache. */
   public final ReportCache cache;
+
   /** Annotator configuration. */
   public final Config config;
 

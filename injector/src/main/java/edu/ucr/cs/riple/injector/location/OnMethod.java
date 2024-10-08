@@ -36,6 +36,7 @@ public class OnMethod extends Location {
 
   /** Method signature of the target element. */
   public final String method;
+
   /**
    * Matcher for the method signature. Method signature is given as a string, this matcher is used
    * to match the target.

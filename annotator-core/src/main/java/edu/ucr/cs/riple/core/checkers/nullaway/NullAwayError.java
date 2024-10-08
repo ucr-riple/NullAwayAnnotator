@@ -37,6 +37,7 @@ public class NullAwayError extends Error {
 
   /** Error type for method initialization errors from NullAway in {@code String}. */
   public static final String METHOD_INITIALIZER_ERROR = "METHOD_NO_INIT";
+
   /** Error type for field initialization errors from NullAway in {@code String}. */
   public static final String FIELD_INITIALIZER_ERROR = "FIELD_NO_INIT";
 

@@ -34,6 +34,7 @@ public class SignatureMatcher {
 
   /** Simple name of the callable. */
   private final String callableName;
+
   /** List of parameters detected from signature in string. */
   private final List<String> parameterTypes;
 

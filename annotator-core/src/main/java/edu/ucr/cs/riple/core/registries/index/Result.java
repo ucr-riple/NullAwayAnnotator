@@ -31,6 +31,7 @@ public class Result {
 
   /** Difference in number of elements in collection A and B. */
   public final int size;
+
   /** Items that are present in A, but not B. */
   public final Collection<Error> dif;
 

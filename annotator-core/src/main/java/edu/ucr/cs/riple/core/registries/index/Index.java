@@ -43,8 +43,10 @@ public class Index {
 
   /** Contents of the index. */
   private final Multimap<Region, Error> items;
+
   /** ModuleInfo of the module which indexed errors are reported on. */
   private final ModuleInfo moduleInfo;
+
   /** Annotator context. */
   private final Context context;
 

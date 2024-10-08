@@ -37,6 +37,7 @@ public class OnParameter extends Location {
 
   /** Enclosing Method location of the parameter. */
   public final OnMethod enclosingMethod;
+
   /** Index of the parameter in the method signature. */
   public final int index;
 

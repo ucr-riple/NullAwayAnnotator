@@ -45,6 +45,7 @@ public class ConflictGraph {
 
   /** Nodes in this graph */
   public final Multimap<Integer, Node> nodes;
+
   /**
    * Groups in this graph, nodes which does not have any conflict in regions will in the same group.
    * Please note that this is a graph coloring problem, set of groups is calculated using a greedy

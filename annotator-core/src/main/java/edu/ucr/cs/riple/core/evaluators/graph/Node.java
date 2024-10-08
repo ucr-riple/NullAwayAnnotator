@@ -49,23 +49,31 @@ public class Node {
 
   /** Root fix of the tree. */
   public final Fix root;
+
   /** Set of all fixes in tree. */
   public final Set<Fix> tree;
+
   /** Set of potentially impacted by any node in tree. */
   public final Set<Region> regions;
+
   /** Set of triggered errors if tree is applied on target module. */
   public ImmutableSet<Error> triggeredErrors;
+
   /**
    * Set of triggered fixes on target module that will be triggered if fix tree is applied due to
    * errors in downstream dependencies.
    */
   public ImmutableSet<Fix> triggeredFixesFromDownstreamErrors;
+
   /** Unique id of Node across all nodes. */
   public int id;
+
   /** Effect of applying containing change */
   public int effect;
+
   /** Corresponding report of processing root. */
   public Report report;
+
   /** Regions where original errors reported and NullAway suggested root for that. */
   private ImmutableSet<Region> origins;
 

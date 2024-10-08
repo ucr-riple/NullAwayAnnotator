@@ -14,10 +14,12 @@ public class Module {
 
   /** Name of the module. */
   final String name;
+
   /**
    * Path to the source directory of the module. All classes must be under test package directory.
    */
   final Path srcSet;
+
   /**
    * Reference to {@link ProjectBuilder} to preserve a builder pattern and return to the control
    * back to it.

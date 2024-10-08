@@ -24,6 +24,7 @@ import net.ltgt.gradle.errorprone.CheckSeverity
 plugins{
     id "net.ltgt.errorprone" version "2.0.1" apply false
     id "com.vanniktech.maven.publish" version "0.22.0" apply false
+    id("com.diffplug.gradle.spotless") version "6.25.0" apply false
 }
 
 allprojects {
@@ -44,6 +45,7 @@ subprojects { proj ->
 
     proj.apply plugin: "java"
     proj.apply plugin: "net.ltgt.errorprone"
+    proj.apply plugin: "com.diffplug.spotless"
 
     proj.dependencies {
         errorprone deps.build.errorProneCore
@@ -77,4 +79,10 @@ subprojects { proj ->
 
     sourceCompatibility = 1.11
     targetCompatibility = 1.11
+
+    spotless {
+        java {
+            googleJavaFormat('1.24.0')
+        }
+    }
 }

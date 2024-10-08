@@ -56,37 +56,51 @@ public class CoreTestHelper {
 
   /** The expected reports which gets compared with computed reports when process is finished. */
   private final Set<TReport> expectedReports;
+
   /** Path to the project. */
   private final Path projectPath;
+
   /** Path to root directory where all output exists including the project. */
   private final Path outDirPath;
+
   /**
    * Predicate to be used for comparing reports. If not set by the user, {@link DEFAULT_PREDICATE}
    * will be used.
    */
   private BiPredicate<TReport, Report> predicate;
+
   /** Depth of the analysis. */
   private int depth = 1;
+
   /** Outer loop activation. Deactivated by default */
   private boolean outerLoopActivated = false;
+
   /** Bailout activation. Deactivated by default */
   private boolean disableBailout = false;
+
   /** Suppress remaining errors mode activation. Deactivated by default */
   private boolean suppressRemainingErrors = false;
+
   /** Downstream dependency analysis activation. Deactivated by default */
   private boolean downstreamDependencyAnalysisActivated = false;
+
   /** Inference activation. Activated by default */
   private boolean deactivateInference = false;
+
   /** Analysis mode. */
   private AnalysisMode mode = AnalysisMode.LOCAL;
+
   /** Annotator config. */
   private Config config;
+
   /**
    * Path to the expected output directory. If null, changes on source files will not be checked.
    */
   private Path expectedOutputPath;
+
   /** Project builder. */
   private final ProjectBuilder projectBuilder;
+
   /** Annotator log instance after the test execution. */
   private Log log;
 

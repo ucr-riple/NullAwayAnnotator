@@ -48,13 +48,16 @@ public class VirtualInjector extends AnnotationInjector {
 
   /** Path to library model loader resources directory */
   private final Path libraryModelResourcesDirectoryPath;
+
   /**
    * Annotator configuration, required to check if downstream dependencies analysis is activated or
    * retrieve the path to library model loader.
    */
   private final Config config;
+
   /** Name of the resource file in library model loader which contains list of nullable methods. */
   public static final String NULLABLE_METHOD_LIST_FILE_NAME = "nullable-methods.tsv";
+
   /** Name of the resource file in library model loader which contains list of nullable fields. */
   public static final String NULLABLE_FIELD_LIST_FILE_NAME = "nullable-fields.tsv";
 

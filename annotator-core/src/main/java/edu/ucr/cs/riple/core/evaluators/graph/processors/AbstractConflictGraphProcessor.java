@@ -42,14 +42,19 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
 
   /** Injector used in the processor to inject / remove fixes. */
   protected final AnnotationInjector injector;
+
   /** Error store instance to store state of fixes before and after of injections. */
   protected final ErrorStore errorStore;
+
   /** Downstream impact cache to retrieve impacts of fixes globally. */
   protected final DownstreamImpactCache downstreamImpactCache;
+
   /** Annotator context. */
   protected final Context context;
+
   /** Handler to re-run compiler. */
   protected final CompilerRunner compilerRunner;
+
   /** ModuleInfo of the input module which the impact of fixes are computed on. */
   protected final ModuleInfo moduleInfo;
 

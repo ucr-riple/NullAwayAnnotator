@@ -37,6 +37,7 @@ public abstract class CheckerBaseClass<T extends Error> implements Checker<T> {
 
   /** Annotator config. */
   protected final Config config;
+
   /** Annotator context. */
   protected final Context context;
 
