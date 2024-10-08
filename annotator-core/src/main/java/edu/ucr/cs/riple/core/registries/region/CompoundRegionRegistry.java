@@ -38,8 +38,10 @@ public class CompoundRegionRegistry implements RegionRegistry {
 
   /** List of all region registries. */
   private final ImmutableSet<RegionRegistry> registries;
+
   /** Module where this registry belongs to. */
   private final ModuleInfo moduleInfo;
+
   /**
    * Method region registry. This registry is used by other registries to identify impacted regions
    * specifically {@link AnnotationProcessorHandler}. To avoid recreating this instance, it is

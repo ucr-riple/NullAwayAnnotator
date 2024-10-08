@@ -38,8 +38,10 @@ public class ClassFieldRecord {
 
   /** Set of al fields declared within one statement. */
   public final Set<FieldDeclarationRecord> fields;
+
   /** Flat name of the containing class. */
   public final String clazz;
+
   /** Path to source file containing this class. */
   public final Path pathToSourceFile;
 
@@ -119,8 +121,10 @@ public class ClassFieldRecord {
 
     /** Name of all fields declared within the same statement. */
     public final ImmutableSet<String> names;
+
     /** True if the field declaration is of primitive type, false otherwise. */
     public final boolean isPrimitiveType;
+
     /** True if the field declaration is public, false otherwise. */
     public final boolean isPublic;
 

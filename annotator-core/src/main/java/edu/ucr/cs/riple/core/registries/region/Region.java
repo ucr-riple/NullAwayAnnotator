@@ -39,8 +39,10 @@ public class Region {
    * value will be String of {@code "null"} not {@code null}.
    */
   public final String member;
+
   /** Fully qualified name of the enclosing class of the region. */
   public final String clazz;
+
   /**
    * Type of region. If region exists in source code, this value is {@code "SOURCE"}, otherwise it
    * will be the name of the processor created this region. (e.g. {"LOMBOK"}).

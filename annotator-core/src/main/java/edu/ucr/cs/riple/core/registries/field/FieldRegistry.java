@@ -64,6 +64,7 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
    * initialized at declaration.
    */
   private Multimap<String, String> uninitializedFields;
+
   /**
    * Constructor for {@link FieldRegistry}.
    *

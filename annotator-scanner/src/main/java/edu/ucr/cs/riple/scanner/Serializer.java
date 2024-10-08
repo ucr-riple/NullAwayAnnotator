@@ -51,22 +51,31 @@ public class Serializer {
 
   /** Path to write impacted regions for changes on fields. */
   private final Path fieldImpactedRegionPath;
+
   /** Path to write impacted regions for changes on methods */
   private final Path methodImpactedRegionPath;
+
   /** Path to write method records. */
   private final Path methodRecordPath;
+
   /** Path to write class info data. */
   private final Path classRecordsPath;
+
   /** Path to write location of elements with explicit {@code @Nonnull} annotation. */
   private final Path nonnullElementsPath;
+
   /** File name where all field usage data has been stored. */
   public static final String FIELD_IMPACTED_REGION_FILE_NAME = "field_impacted_region_map.tsv";
+
   /** File name where all impacted regions for changes on methods are serialized. */
   public static final String METHOD_IMPACTED_REGION_FILE_NAME = "method_impacted_region_map.tsv";
+
   /** File name where all method data has been stored. */
   public static final String METHOD_RECORD_FILE_NAME = "method_records.tsv";
+
   /** File name where all class data has been stored. */
   public static final String CLASS_RECORD_FILE_NAME = "class_records.tsv";
+
   /** File name where location of elements explicitly annotated as {@code @Nonnull}. */
   public static final String NON_NULL_ELEMENTS_FILE_NAME = "nonnull_elements.tsv";
 

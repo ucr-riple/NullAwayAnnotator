@@ -38,6 +38,7 @@ public class OnLocalVariable extends Location {
 
   /** Enclosing method of the target local variable. */
   public final OnMethod encMethod;
+
   /** Name of the local variable. */
   public final String varName;
 

@@ -40,12 +40,16 @@ public abstract class Error {
 
   /** Error Type. */
   public final String messageType;
+
   /** Error message. */
   public final String message;
+
   /** The fixes which can resolve this error (possibly empty). */
   protected final ImmutableSet<Fix> resolvingFixes;
+
   /** Offset of program point in original version where error is reported. */
   protected final int offset;
+
   /** Containing region. */
   protected final Region region;
 

@@ -55,12 +55,16 @@ import org.junit.runners.JUnit4;
 public class OffsetChangeHandlingTest {
 
   @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+
   /** Map of field name to original field location offset. */
   private final ImmutableMap<String, Integer> originalFieldOffsetMap;
+
   /** Map of field to enclosing flat name. */
   private final ImmutableMap<String, String> fieldClassMap;
+
   /** Root of tests. */
   private Path root;
+
   /** Path to input in resources directory. */
   private final Path inputPath;
 

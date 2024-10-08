@@ -30,6 +30,7 @@ public class Name {
 
   /** The simple name of the name, i.e., the last identifier. */
   public final String simpleName;
+
   /** The full name of the name, i.e., all identifiers. */
   public final String fullName;
 

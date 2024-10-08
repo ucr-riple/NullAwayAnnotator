@@ -120,8 +120,10 @@ public class FieldInitializationStore extends Registry<FieldInitializationNode> 
      * signature.
      */
     private final HashMap<String, InitializerMethod> initializers;
+
     /** Fully qualified name of the class. */
     private final String clazz;
+
     /** Path to file where the class exists. */
     private final Path path;
 
@@ -205,6 +207,7 @@ public class FieldInitializationStore extends Registry<FieldInitializationNode> 
   private static class InitializerMethod {
     /** Methods signature. */
     private final String signature;
+
     /** Initialized field. */
     private final Set<String> fields;
 

@@ -35,12 +35,16 @@ public class Log {
 
   /** Sum of number of nodes constructed in each {@link ConflictGraph}. */
   private long nodes;
+
   /** Number of build requests. */
   private long requested;
+
   /** Total time spent for annotator from start to finish. */
   private long totalTime;
+
   /** Total time spent in building targets. */
   private long buildTime = 0;
+
   /**
    * Set of approved and injected annotations. These annotations are evaluated and approved and will
    * not get removed from the source code.

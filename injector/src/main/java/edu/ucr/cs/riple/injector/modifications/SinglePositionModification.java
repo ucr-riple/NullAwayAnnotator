@@ -35,6 +35,7 @@ public abstract class SinglePositionModification implements Modification {
 
   /** Starting position where the modification should be applied in the source file. */
   public final Position startPosition;
+
   /** Content of modification. */
   public final String content;
 

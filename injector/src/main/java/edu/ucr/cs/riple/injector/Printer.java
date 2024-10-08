@@ -47,8 +47,10 @@ public class Printer {
 
   /** Path to source file. */
   private final Path path;
+
   /** Lines of source file. */
   private final List<String> lines;
+
   /** Offset store for recording changes in source code. */
   private final FileOffsetStore offsetStore;
 

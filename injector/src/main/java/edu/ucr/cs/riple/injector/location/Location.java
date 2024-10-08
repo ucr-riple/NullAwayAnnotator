@@ -38,8 +38,10 @@ public abstract class Location {
 
   /** The kind of the element. */
   public final LocationKind kind;
+
   /** The flat name of enclosing class of the element. */
   public final String clazz;
+
   /** The path to the file containing the element. */
   public Path path;
 
@@ -111,6 +113,7 @@ public abstract class Location {
    * @param consumer The consumer to be called.
    */
   public void ifParameter(Consumer<OnParameter> consumer) {}
+
   /**
    * If this location is of kind {@link LocationKind#FIELD}, calls the consumer on the location.
    *

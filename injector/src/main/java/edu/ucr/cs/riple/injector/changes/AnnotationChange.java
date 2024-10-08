@@ -30,6 +30,7 @@ public abstract class AnnotationChange implements ASTChange {
 
   /** Location of the element which its annotations should be changed. */
   public final Location location;
+
   /** Annotation name. */
   public final Name annotationName;
 

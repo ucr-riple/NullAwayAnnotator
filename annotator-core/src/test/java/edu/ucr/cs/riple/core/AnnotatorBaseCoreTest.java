@@ -42,12 +42,16 @@ public abstract class AnnotatorBaseCoreTest {
 
   /** Temporary folder for each test. */
   @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+
   /** Name of the used project template */
   protected final String projectTemplate;
+
   /** Path to the unit test project */
   protected Path unitTestProjectPath;
+
   /** Path to the output directory */
   protected Path outDirPath;
+
   /** Helper class for core tests */
   protected CoreTestHelper coreTestHelper;
 

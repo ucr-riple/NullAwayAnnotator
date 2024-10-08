@@ -36,8 +36,10 @@ public class Impact {
 
   /** Target fix. */
   public final Fix fix;
+
   /** Set of triggered errors, if this fix is applied to source code. */
   protected ImmutableSet<Error> triggeredErrors;
+
   /**
    * Set of triggered fixes on the target module from downstream dependencies errors if containing
    * fix is applied.
