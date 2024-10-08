@@ -30,7 +30,6 @@ import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.Fix;
-import edu.ucr.cs.riple.injector.location.Location;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -180,22 +179,16 @@ public class Report {
     }
     this.tree.add(this.root);
     found.tree.add(found.root);
-    Set<Location> thisTree =
-        this.tree.stream().flatMap(fix -> fix.toLocations().stream()).collect(Collectors.toSet());
-    Set<Location> otherTree =
-        found.tree.stream().flatMap(fix -> fix.toLocations().stream()).collect(Collectors.toSet());
-    if (!thisTree.equals(otherTree)) {
+    if (!this.tree.equals(found.tree)) {
       return false;
     }
-    Set<Location> thisTriggered =
+    Set<Fix> thisTriggered =
         this.triggeredErrors.stream()
             .flatMap(error -> error.getResolvingFixes().stream())
-            .flatMap(fix -> fix.toLocations().stream())
             .collect(Collectors.toSet());
-    Set<Location> otherTriggered =
+    Set<Fix> otherTriggered =
         found.triggeredErrors.stream()
             .flatMap(error -> error.getResolvingFixes().stream())
-            .flatMap(fix -> fix.toLocations().stream())
             .collect(Collectors.toSet());
     return otherTriggered.equals(thisTriggered);
   }
