@@ -26,7 +26,6 @@ package edu.ucr.cs.riple.core.registries.index;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.changes.ASTChange;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -199,10 +198,7 @@ public class Fix {
     if (!(isOnMethod() || isOnParameter())) {
       return false;
     }
-    String methodSignature =
-        isOnMethod() ? toMethod().method : toParameter().enclosingMethod.method;
-    String clazz = changes.iterator().next().getLocation().clazz;
-    return Helper.extractCallableName(methodSignature).equals(Helper.simpleName(clazz));
+    return (isOnMethod() ? toMethod() : toParameter().enclosingMethod).isOnConstructor();
   }
 
   @Override

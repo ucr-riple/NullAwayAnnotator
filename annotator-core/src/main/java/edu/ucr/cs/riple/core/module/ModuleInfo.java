@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.core.module;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.registries.field.FieldRegistry;
+import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.registries.index.NonnullStore;
 import edu.ucr.cs.riple.core.registries.method.MethodRegistry;
 import edu.ucr.cs.riple.core.registries.region.CompoundRegionRegistry;
@@ -161,10 +162,10 @@ public class ModuleInfo {
   }
 
   /**
-   * Checks if the passed location is declared in this moduleInfo's modules.
+   * Checks if the passed location is declared in containing modules.
    *
    * @param location The location to check.
-   * @return True if the passed location is declared in this moduleInfo's modules, false otherwise.
+   * @return True if the passed location is declared in containing modules., false otherwise.
    */
   public boolean declaredInModule(Location location) {
     if (location.isOnParameter()) {
@@ -177,6 +178,17 @@ public class ModuleInfo {
       return fieldRegistry.declaredInModule(location);
     }
     return methodRegistry.declaredInModule(location);
+  }
+
+  /**
+   * Checks if the passed fix contains only annotation changes on elements declared in the
+   * containing modules.
+   *
+   * @param fix The Fix to check.
+   * @return True if the passed fix contains annotation changes only on containing modules.
+   */
+  public boolean declaredInModule(Fix fix) {
+    return fix.changes.stream().allMatch(annot -> declaredInModule(annot.getLocation()));
   }
 
   /**

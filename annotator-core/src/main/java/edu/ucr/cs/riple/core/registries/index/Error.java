@@ -33,6 +33,7 @@ import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /** Represents an error reported by NullAway. */
 @SuppressWarnings("JavaLangClash")
@@ -86,6 +87,15 @@ public abstract class Error {
    */
   public ImmutableSet<Fix> getResolvingFixes() {
     return this.resolvingFixes;
+  }
+
+  /**
+   * Returns a stream of resolving fixes for this error.
+   *
+   * @return Stream of resolving fixes.
+   */
+  public Stream<Fix> getResolvingFixesStream() {
+    return this.resolvingFixes.stream();
   }
 
   /**
@@ -170,9 +180,7 @@ public abstract class Error {
    * @return true, if error is resolvable via fixes on target module.
    */
   public boolean isFixableOnTarget(Context context) {
-    return this.resolvingFixes.stream()
-        .flatMap(fix -> fix.changes.stream())
-        .allMatch(change -> context.targetModuleInfo.declaredInModule(change.getLocation()));
+    return this.resolvingFixes.stream().allMatch(context.targetModuleInfo::declaredInModule);
   }
 
   @Override

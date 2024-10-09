@@ -85,8 +85,8 @@ public class MethodRegionRegistry extends Registry<RegionRecord> implements Regi
     // Add callers of method.
     return findRecordsWithHashHint(
             candidate ->
-                candidate.calleeClass.equals(onMethod.clazz)
-                    && candidate.calleeMember.equals(onMethod.method),
+                candidate.encClass.equals(onMethod.clazz)
+                    && candidate.member.equals(onMethod.method),
             RegionRecord.hash(onMethod.clazz))
         .map(node -> node.region)
         .collect(ImmutableSet.toImmutableSet());

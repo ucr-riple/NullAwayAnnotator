@@ -99,4 +99,13 @@ public class OnMethod extends Location {
   public String toString() {
     return "OnMethod{" + "method='" + method + '\'' + ", clazz='" + clazz + '\'' + '}';
   }
+
+  /**
+   * Checks if this location is targeting a constructor.
+   *
+   * @return True if this location is targeting a constructor.
+   */
+  public boolean isOnConstructor() {
+    return Helper.extractCallableName(method).equals(Helper.simpleName(clazz));
+  }
 }
