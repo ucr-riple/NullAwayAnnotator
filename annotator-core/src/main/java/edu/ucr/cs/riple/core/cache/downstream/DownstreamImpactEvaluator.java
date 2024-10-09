@@ -54,7 +54,7 @@ class DownstreamImpactEvaluator extends BasicEvaluator {
               node.triggeredErrors.forEach(
                   error ->
                       error
-                          .getResolvingFixes()
+                          .getResolvingFixesStream()
                           .forEach(
                               fix ->
                                   fix.changes.forEach(

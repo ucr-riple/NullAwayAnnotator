@@ -191,11 +191,11 @@ public class Report {
     }
     Set<Fix> thisTriggered =
         this.triggeredErrors.stream()
-            .flatMap(error -> error.getResolvingFixes().stream())
+            .flatMap(Error::getResolvingFixesStream)
             .collect(Collectors.toSet());
     Set<Fix> otherTriggered =
         found.triggeredErrors.stream()
-            .flatMap(error -> error.getResolvingFixes().stream())
+            .flatMap(Error::getResolvingFixesStream)
             .collect(Collectors.toSet());
     return otherTriggered.equals(thisTriggered);
   }

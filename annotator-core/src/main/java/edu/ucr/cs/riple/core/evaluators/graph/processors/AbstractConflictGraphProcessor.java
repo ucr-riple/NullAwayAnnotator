@@ -30,6 +30,7 @@ import edu.ucr.cs.riple.core.evaluators.graph.Node;
 import edu.ucr.cs.riple.core.evaluators.suppliers.Supplier;
 import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
+import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.ErrorStore;
 import edu.ucr.cs.riple.core.registries.index.Fix;
 import java.util.Set;
@@ -73,7 +74,7 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
   protected Set<Fix> getTriggeredFixesFromDownstreamErrors(Node node) {
     return downstreamImpactCache.getTriggeredErrorsForCollection(node.tree).stream()
         .filter(error -> error.isFixableOnTarget(context))
-        .flatMap(error -> error.getResolvingFixes().stream())
+        .flatMap(Error::getResolvingFixesStream)
         .collect(Collectors.toSet());
   }
 }

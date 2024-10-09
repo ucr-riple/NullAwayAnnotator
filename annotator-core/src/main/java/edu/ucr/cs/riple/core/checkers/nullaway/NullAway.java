@@ -32,6 +32,7 @@ import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.registries.field.FieldInitializationStore;
+import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -232,8 +233,6 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     // Collect regions with remaining errors.
     Utility.buildTarget(context);
     Set<NullAwayError> remainingErrors = deserializeErrors(context.targetModuleInfo);
-    Set<Fix> remainingFixes =
-        Utility.readFixesFromOutputDirectory(context, context.targetModuleInfo);
     // Collect all regions for NullUnmarked.
     // For all errors in regions which correspond to a method's body, we can add @NullUnmarked at
     // the method level.
@@ -327,7 +326,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
             .filter(
                 e ->
                     e.messageType.equals("METHOD_NO_INIT") || e.messageType.equals("FIELD_NO_INIT"))
-            .flatMap(e -> e.getResolvingFixes().stream())
+            .flatMap(Error::getResolvingFixesStream)
             .filter(Fix::isOnField)
             // Filter nodes annotated with SuppressWarnings("NullAway")
             .filter(fix -> !fieldsWithSuppressWarnings.contains(fix.toField()))
@@ -368,7 +367,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                 context, context.targetModuleInfo, NullAwayError.class)
             .stream()
             .filter(e -> e.messageType.equals("FIELD_NO_INIT"))
-            .flatMap(e -> e.getResolvingFixes().stream())
+            .flatMap(Error::getResolvingFixesStream)
             .filter(Fix::isOnField)
             .map(Fix::toField)
             .collect(Collectors.toSet());
