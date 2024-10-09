@@ -38,6 +38,7 @@ public class ParameterRegionRegistry implements RegionRegistry {
 
   /** ModuleInfo of the module which usage of parameters are stored. */
   private final ModuleInfo moduleInfo;
+
   /** {@link MethodRegionRegistry} instance, used to retrieve all sites. */
   private final MethodRegionRegistry methodRegionRegistry;
 

@@ -48,12 +48,16 @@ public class ErrorProneCLIFlagsConfig implements Config {
 
   /** Path to output dir. */
   @Nonnull private final Path outputDirectory;
+
   /** Controls serialization services activation. */
   private final boolean serializationIsActive;
+
   /** Serializing instance for writing outputs at the desired paths. */
   private final Serializer serializer;
+
   /** Source type resolver for serialized regions. */
   private final SymbolSourceResolver symbolSourceResolver;
+
   /** Immutable set of fully qualified name of {@code @Nonnull} annotations. */
   private final ImmutableSet<String> nonnullAnnotations;
 

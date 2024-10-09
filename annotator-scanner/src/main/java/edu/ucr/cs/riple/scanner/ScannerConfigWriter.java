@@ -49,8 +49,10 @@ public class ScannerConfigWriter {
 
   /** Path to output directory. */
   private Path outputDirectory;
+
   /** Controls serialization services activation. */
   private boolean serializationActivation;
+
   /** Set of activated generated code detectors. */
   private final Set<SourceType> activatedGeneratedCodeDetectors;
 

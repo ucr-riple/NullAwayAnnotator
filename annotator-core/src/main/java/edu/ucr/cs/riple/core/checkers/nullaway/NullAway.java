@@ -60,6 +60,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
    * The name of the checker. To select this checker, this name must be used in the configurations.
    */
   public static final String NAME = "NULLAWAY";
+
   /** Supported version of NullAway serialization. */
   public static final int VERSION = 3;
 

@@ -39,10 +39,13 @@ public class ImpactedRegion {
 
   /** Symbol of the member. */
   private final Symbol memberSymbol;
+
   /** Symbol of the enclosing class of the impacted region. */
   @Nullable private final Symbol.ClassSymbol regionClass;
+
   /** Symbol of the impacted region. */
   @Nullable private final Symbol regionMember;
+
   /** Source type of the impacted region. */
   private final SourceType source;
 

@@ -46,17 +46,22 @@ public class ModuleInfo {
 
   /** This field is used to store the information about the fields in the module. */
   private final FieldRegistry fieldRegistry;
+
   /** This field is used to store the information about the methods in the module. */
   private final MethodRegistry methodRegistry;
+
   /** This field is used to store the information about the nonnull annotations in the module. */
   private final NonnullStore nonnullStore;
+
   /** The set of modules this moduleInfo is created for. */
   private final ImmutableSet<ModuleConfiguration> configurations;
+
   /**
    * Region registry that contains information about the regions that can potentially be impacted by
    * a fix.
    */
   private final CompoundRegionRegistry regionRegistry;
+
   /**
    * The set of annotation processor handlers that are used to process the generated code in this
    * module.

@@ -47,19 +47,25 @@ public class Context {
 
   /** Annotator configuration. */
   public final Config config;
+
   /** Log instance. Responsible for logging all the information about the build time and count. */
   public final Log log;
+
   /** Handler for computing the original offset of reported errors with existing changes. */
   public final OffsetHandler offsetHandler;
+
   /** The moduleInfo of target module. */
   public final ModuleInfo targetModuleInfo;
+
   /**
    * Configuration of the target module, required for building the target module and collecting
    * checkers output.
    */
   public final ModuleConfiguration targetConfiguration;
+
   /** Sets of context path information for all downstream dependencies. */
   public final ImmutableSet<ModuleConfiguration> downstreamConfigurations;
+
   /** Checker instance. Used to execute checker specific tasks. */
   public final Checker<? extends Error> checker;
 

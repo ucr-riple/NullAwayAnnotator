@@ -43,27 +43,34 @@ public class Report {
 
   /** Effect on target module. */
   public int localEffect;
+
   /** Root of fix tree associated to this report instance. */
   public Fix root;
+
   /** Fix tree associated to this report instance. */
   public Set<Fix> tree;
+
   /**
    * Set of errors that will be triggered in target module if fix tree is applied to the source
    * code.
    */
   public ImmutableSet<Error> triggeredErrors;
+
   /**
    * Set of triggered fixes on target module that will be triggered if fix tree is applied due to
    * errors in downstream dependencies.
    */
   public ImmutableSet<Fix> triggeredFixesFromDownstreamErrors;
+
   /** If true, this report's tree has been processed for at least one iteration */
   public boolean hasBeenProcessedOnce;
+
   /**
    * Lower bound of number of errors in downstream dependencies if fix tree is applied to the target
    * module.
    */
   private int lowerBoundEffectOnDownstreamDependencies;
+
   /**
    * Upper bound of number of errors in downstream dependencies if fix tree is applied to the target
    * module.

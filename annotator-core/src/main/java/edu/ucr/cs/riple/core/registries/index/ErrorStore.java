@@ -41,10 +41,13 @@ public class ErrorStore {
 
   /** Initial state indexed by enclosing class and method. */
   private final Index root;
+
   /** Current state indexed by enclosing class and method. */
   private Index current;
+
   /** ModuleInfo of the module which indexed errors are reported on. */
   private final ModuleInfo moduleInfo;
+
   /** Annotator context. */
   private final Context context;
 

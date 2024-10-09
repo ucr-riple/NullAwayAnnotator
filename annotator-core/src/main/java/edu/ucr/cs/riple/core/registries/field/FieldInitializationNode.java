@@ -37,6 +37,7 @@ public class FieldInitializationNode {
 
   /** Location of the initializer method. */
   private final OnMethod initializerLocation;
+
   /** Initialized field by the {@link FieldInitializationNode#initializerLocation}. */
   private final String field;
 

@@ -43,11 +43,13 @@ public class ScannerContext {
    * hash value.
    */
   private final Multimap<Integer, MethodRecord> visitedMethods;
+
   /**
    * Last given id to the most recent newly visited method. Used to assign unique ids for each
    * method.
    */
   private int methodId;
+
   /** Type Annotator Scanner config. */
   private final Config config;
 

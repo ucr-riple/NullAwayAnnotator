@@ -38,6 +38,7 @@ public class ReportCache {
    * efficiently.
    */
   private final Map<Fix, Report> store;
+
   /** Cache activation switch. */
   private boolean enabled;
 

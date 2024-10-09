@@ -36,18 +36,25 @@ public class MethodRecord {
 
   /** Set of children's id. */
   public Set<Integer> children;
+
   /** Parent's node id. */
   public Integer parent;
+
   /** A unique id for method across all methods. */
   public Integer id;
+
   /** Location of the containing method. */
   public OnMethod location;
+
   /** Set of annotations on the method return type or the method itself */
   public ImmutableSet<String> annotations;
+
   /** Visibility of the method. */
   public Visibility visibility;
+
   /** Is true if the method has non-primitive return. */
   public boolean hasNonPrimitiveReturn;
+
   /** Is true if the method is a constructor. */
   public boolean isConstructor;
 

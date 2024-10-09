@@ -48,12 +48,16 @@ public abstract class AbstractEvaluator implements Evaluator {
 
   /** Annotator context. */
   protected final Context context;
+
   /** Conflict graph to storing unprocessed fixes. */
   protected final ConflictGraph graph;
+
   /** Depth of analysis. */
   protected final int depth;
+
   /** Graph processor to process the graph. */
   protected ConflictGraphProcessor processor;
+
   /** Supplier used for initialization. */
   protected final Supplier supplier;
 

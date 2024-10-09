@@ -35,12 +35,16 @@ public abstract class AbstractSupplier implements Supplier {
 
   /** Error Store instance. */
   protected final ErrorStore errorStore;
+
   /** Injector instance. */
   protected final AnnotationInjector injector;
+
   /** ModuleInfo of the module which the impact of fixes are computed on. */
   protected final ModuleInfo moduleInfo;
+
   /** Depth of analysis. */
   protected final int depth;
+
   /** Annotator context. */
   protected final Context context;
 

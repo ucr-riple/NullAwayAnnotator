@@ -36,10 +36,13 @@ public class ModuleConfiguration {
 
   /** Path to checker config. */
   public final Path checkerConfig;
+
   /** Path to scanner config. */
   public final Path scannerConfig;
+
   /** Directory where all serialized data from checkers are located. */
   public final Path dir;
+
   /**
    * Global unique ID for this module. 0 is for the target module, and the i-th module is for the
    * i-th downstream dependency.

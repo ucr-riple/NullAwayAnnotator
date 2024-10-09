@@ -49,24 +49,31 @@ public class MethodRecord {
 
   /** Symbol of containing method. */
   private final Symbol.MethodSymbol symbol;
+
   /** Symbol of the enclosing class for the method. */
   private final Symbol.ClassSymbol clazz;
+
   /** Path to file containing the source file. */
   private URI uri;
+
   /** Unique id assigned to this method across all visited methods. */
   private final int id;
+
   /**
    * Set of annotations on the method return type or the method itself. If the method has no
    * annotations, then this field will be empty and not {@code null}.
    */
   private ImmutableSet<? extends AnnotationMirror> annotations;
+
   /**
    * Flag value for parameters annotations. If {@code annotFlags[j]} is {@code true} then the
    * parameter at index {@code j} has a {@code @Nullable} annotation.
    */
   private Boolean[] parameterAnnotationFlags;
+
   /** ID of the closest super method. */
   private int parentID;
+
   /** Delimiter used to separate annotations in the serialized output. */
   public static final String ANNOTATION_DELIMITER = ",";
 

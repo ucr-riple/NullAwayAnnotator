@@ -38,8 +38,10 @@ public class ProjectBuilder {
 
   /** Set of modules in the project. */
   private final List<Module> modules;
+
   /** Path to the project. */
   private final Path pathToProject;
+
   /**
    * Reference to {@link CoreTestHelper} to preserve a builder pattern and return to the control
    * back to it.

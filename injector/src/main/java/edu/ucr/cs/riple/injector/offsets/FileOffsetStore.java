@@ -41,8 +41,10 @@ public class FileOffsetStore {
 
   /** Path to file. */
   private final Path path;
+
   /** List of existing offset changes. */
   private SortedSet<OffsetChange> offsetChanges;
+
   /** Contents of file. */
   private final ImmutableList<String> lines;
 

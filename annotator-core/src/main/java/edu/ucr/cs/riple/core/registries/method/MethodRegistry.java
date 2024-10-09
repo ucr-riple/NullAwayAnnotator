@@ -50,8 +50,10 @@ public class MethodRegistry extends Registry<MethodRecord> {
 
   /** Each method has a unique id across all methods. This hashmap, maps ids to nodes. */
   private HashMap<Integer, MethodRecord> nodes;
+
   /** A map from class flat name to its declared constructors */
   private Multimap<String, MethodRecord> classConstructorMap;
+
   /** Set of all classes flat name declared in module. */
   private Set<String> declaredClasses;
 

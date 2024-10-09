@@ -35,6 +35,7 @@ public class OffsetChange implements Comparable<OffsetChange> {
 
   /** Index of addition / deletion. */
   public final int position;
+
   /** Number of characters added / removed. */
   public final int numChars;
 

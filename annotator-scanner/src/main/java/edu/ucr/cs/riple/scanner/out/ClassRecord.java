@@ -34,6 +34,7 @@ import javax.annotation.Nullable;
 public class ClassRecord {
   /** Containing class symbol. */
   public final Symbol.ClassSymbol clazz;
+
   /** Path to url containing this class. */
   @Nullable public final Path path;
 
