@@ -26,21 +26,26 @@ package edu.ucr.cs.riple.core.registries.region;
 
 import java.util.Objects;
 
-/** Container class for holding information regarding usage of class members within classes. */
+/**
+ * Records for holding information regarding usage of class members within class regions across the
+ * program. (E.g. It saves the information field "f" of class "Baz" is used within region
+ * "a.b.c.Foo#bar()")
+ */
 public class RegionRecord {
 
-  /** Region where the element is used. */
+  /** The used member from class {@link RegionRecord#encClass} string representation. */
+  public final String member;
+
+  /** Fully qualified name of the enclosing class of used member. */
+  public final String encClass;
+
+  /** Region where the {@link RegionRecord#member} is used. */
   public final Region region;
 
-  public final String calleeMember;
-
-  /** Fully qualified name of the enclosing class of callee. */
-  public final String calleeClass;
-
-  public RegionRecord(Region region, String calleeMember, String calleeClass) {
+  public RegionRecord(Region region, String member, String encClass) {
     this.region = region;
-    this.calleeMember = calleeMember;
-    this.calleeClass = calleeClass;
+    this.member = member;
+    this.encClass = encClass;
   }
 
   @Override
@@ -53,15 +58,15 @@ public class RegionRecord {
     }
     RegionRecord that = (RegionRecord) o;
     return region.equals(that.region)
-        && calleeMember.equals(that.calleeMember)
-        && calleeClass.equals(that.calleeClass);
+        && member.equals(that.member)
+        && encClass.equals(that.encClass);
   }
 
   /**
    * Calculates hash. This method is used outside this class to calculate the expected hash based on
    * instance's properties value if the actual instance is not available.
    *
-   * @param clazz Full qualified name.
+   * @param clazz Full qualified name of the enclosing class of the used member.
    * @return Expected hash.
    */
   public static int hash(String clazz) {
@@ -70,6 +75,6 @@ public class RegionRecord {
 
   @Override
   public int hashCode() {
-    return hash(calleeClass);
+    return hash(encClass);
   }
 }

@@ -92,8 +92,7 @@ public class FieldRegionRegistry extends Registry<RegionRecord> implements Regio
     OnField field = location.toField();
     return findRecordsWithHashHint(
             candidate ->
-                candidate.calleeClass.equals(field.clazz)
-                    && field.isOnFieldWithName(candidate.calleeMember),
+                candidate.encClass.equals(field.clazz) && field.isOnFieldWithName(candidate.member),
             RegionRecord.hash(field.clazz))
         .map(regionRecord -> regionRecord.region)
         .collect(ImmutableSet.toImmutableSet());
