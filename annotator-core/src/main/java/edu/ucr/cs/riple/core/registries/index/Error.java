@@ -166,9 +166,7 @@ public abstract class Error {
    * @return true, if error is resolvable via fixes on target module.
    */
   public boolean isFixableOnTarget(Context context) {
-    return this.resolvingFixes.stream()
-        .flatMap(fix -> fix.changes.stream())
-        .allMatch(change -> context.targetModuleInfo.declaredInModule(change.getLocation()));
+    return this.resolvingFixes.stream().allMatch(context.targetModuleInfo::declaredInModule);
   }
 
   @Override

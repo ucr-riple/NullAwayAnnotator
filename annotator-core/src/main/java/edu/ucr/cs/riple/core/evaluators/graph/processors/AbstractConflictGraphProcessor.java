@@ -32,8 +32,6 @@ import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.registries.index.ErrorStore;
 import edu.ucr.cs.riple.core.registries.index.Fix;
-import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
-import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -68,19 +66,9 @@ public abstract class AbstractConflictGraphProcessor implements ConflictGraphPro
    * @param node Node in process.
    */
   protected Set<Fix> getTriggeredFixesFromDownstreamErrors(Node node) {
-    Set<Location> currentLocationsTargetedByTree =
-        node.tree.stream().flatMap(fix -> fix.toLocations().stream()).collect(Collectors.toSet());
     return downstreamImpactCache.getTriggeredErrorsForCollection(node.tree).stream()
-        .filter(
-            error ->
-                error.isSingleAnnotationFix()
-                    && error.isFixableOnTarget(context)
-                    && !currentLocationsTargetedByTree.contains(error.toResolvingLocation()))
-        .map(
-            error ->
-                new Fix(
-                    new AddMarkerAnnotation(
-                        error.toResolvingLocation(), context.config.nullableAnnot)))
+        .filter(error -> error.isFixableOnTarget(context))
+        .flatMap(error -> error.getResolvingFixes().stream())
         .collect(Collectors.toSet());
   }
 }

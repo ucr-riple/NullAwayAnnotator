@@ -200,7 +200,7 @@ public class Report {
         + ", "
         + root
         + ", "
-        + tree.stream().map(Fix::toLocations).collect(Collectors.toSet());
+        + tree;
   }
 
   /**
