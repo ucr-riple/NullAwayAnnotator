@@ -202,12 +202,7 @@ public class Report {
 
   @Override
   public String toString() {
-    return "Effect="
-        + localEffect
-        + ", "
-        + root
-        + ", "
-        + tree;
+    return "Effect=" + localEffect + ", " + root + ", " + tree;
   }
 
   /**
