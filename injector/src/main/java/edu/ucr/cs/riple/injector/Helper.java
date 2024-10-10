@@ -393,7 +393,9 @@ public class Helper {
       return ((MethodDeclaration) node).getType();
     }
     if (node instanceof FieldDeclaration) {
-      return ((FieldDeclaration) node).getElementType();
+      FieldDeclaration fd = (FieldDeclaration) node;
+      Preconditions.checkArgument(!fd.getVariables().isEmpty());
+      return fd.getVariables().get(0).getType();
     }
     if (node instanceof VariableDeclarationExpr) {
       NodeList<VariableDeclarator> decls = ((VariableDeclarationExpr) node).getVariables();
