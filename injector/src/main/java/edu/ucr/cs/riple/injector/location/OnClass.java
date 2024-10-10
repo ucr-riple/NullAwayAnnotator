@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.Printer;
 import java.nio.file.Path;
 import java.util.regex.Pattern;
 
@@ -42,7 +42,7 @@ public class OnClass extends Location {
   }
 
   public OnClass(String path, String clazz) {
-    this(Helper.deserializePath(path), clazz);
+    this(Printer.deserializePath(path), clazz);
   }
 
   /**

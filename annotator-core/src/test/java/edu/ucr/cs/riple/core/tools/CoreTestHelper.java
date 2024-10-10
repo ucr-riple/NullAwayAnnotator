@@ -27,6 +27,8 @@ package edu.ucr.cs.riple.core.tools;
 import static org.junit.Assert.fail;
 
 import com.github.javaparser.ParserConfiguration;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.PackageDeclaration;
 import edu.ucr.cs.riple.core.AnalysisMode;
 import edu.ucr.cs.riple.core.Annotator;
 import edu.ucr.cs.riple.core.Config;
@@ -34,7 +36,7 @@ import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
-import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -46,6 +48,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
@@ -342,7 +345,7 @@ public class CoreTestHelper {
       walk.filter(path -> path.toFile().isFile() && path.toFile().getName().endsWith(".java"))
           .forEach(
               path -> {
-                if (!Helper.srcIsUnderClassClassPath(path, "test", languageLevel)) {
+                if (!srcIsUnderClassClassPath(path, "test", languageLevel)) {
                   throw new IllegalArgumentException(
                       "Source files must have package declaration starting with \"test\": " + path);
                 }
@@ -350,6 +353,25 @@ public class CoreTestHelper {
     } catch (IOException e) {
       throw new RuntimeException("Error happened in processing src under: " + projectPath, e);
     }
+  }
+
+  /**
+   * Used to check if src package declaration is under a specific root.
+   *
+   * @param path Path to src file.
+   * @param rootPackage Root package simple name.
+   * @return true if src has a package declaration and starts with root.
+   */
+  private static boolean srcIsUnderClassClassPath(
+      Path path, String rootPackage, ParserConfiguration.LanguageLevel languageLevel) {
+    CompilationUnit cu = Injector.parse(path, languageLevel);
+    if (cu == null) {
+      return false;
+    }
+    Optional<PackageDeclaration> packageDeclaration = cu.getPackageDeclaration();
+    return packageDeclaration
+        .map(declaration -> declaration.getNameAsString().startsWith(rootPackage))
+        .orElse(false);
   }
 
   /**

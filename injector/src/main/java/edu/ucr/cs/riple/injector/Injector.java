@@ -41,6 +41,7 @@ import edu.ucr.cs.riple.injector.exceptions.ParseException;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
+import edu.ucr.cs.riple.injector.util.ASTUtils;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -95,7 +96,7 @@ public class Injector {
                 modifications.add(modification);
                 if (change instanceof AddAnnotation) {
                   String annotationFullName = ((AnnotationChange) change).annotationName.fullName;
-                  if (Helper.getPackageName(annotationFullName) != null) {
+                  if (ASTUtils.getPackageName(annotationFullName) != null) {
                     ImportDeclaration importDeclaration =
                         StaticJavaParser.parseImport("import " + annotationFullName + ";");
                     if (treeRequiresImportDeclaration(
@@ -140,7 +141,8 @@ public class Injector {
     return tree.getImports().stream()
         .noneMatch(
             impDecl ->
-                Helper.simpleName(impDecl.getNameAsString()).equals(Helper.simpleName(annotation)));
+                ASTUtils.simpleName(impDecl.getNameAsString())
+                    .equals(ASTUtils.simpleName(annotation)));
   }
 
   /**

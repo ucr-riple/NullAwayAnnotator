@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.injector;
 
 import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.type.Type;
+import edu.ucr.cs.riple.injector.util.ASTUtils;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,7 +45,7 @@ public class SignatureMatcher {
    * @param signature Signature to process.
    */
   public SignatureMatcher(String signature) {
-    this.callableName = Helper.extractCallableName(signature);
+    this.callableName = ASTUtils.extractCallableName(signature);
     this.parameterTypes = extractParameterTypesFromSignature(signature);
   }
 
@@ -125,8 +126,8 @@ public class SignatureMatcher {
       if (signatureType.equals(callableType)) {
         continue;
       }
-      String simpleCallableType = Helper.simpleName(callableType);
-      String simpleSignatureType = Helper.simpleName(signatureType);
+      String simpleCallableType = ASTUtils.simpleName(callableType);
+      String simpleSignatureType = ASTUtils.simpleName(signatureType);
       if (simpleCallableType.equals(simpleSignatureType)) {
         continue;
       }

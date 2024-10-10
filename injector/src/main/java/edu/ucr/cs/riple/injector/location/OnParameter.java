@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.Printer;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -48,7 +48,7 @@ public class OnParameter extends Location {
   }
 
   public OnParameter(String path, String clazz, String method, int index) {
-    this(Helper.deserializePath(path), clazz, method, index);
+    this(Printer.deserializePath(path), clazz, method, index);
   }
 
   @Override
