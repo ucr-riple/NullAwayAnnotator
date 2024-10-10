@@ -415,21 +415,6 @@ public class Helper {
   }
 
   /**
-   * Extracts the type of the given node implementing {@link NodeWithAnnotations}.
-   *
-   * @param node the node.
-   * @return the type of the node.
-   */
-  public static Type getType(NodeWithAnnotations<?> node) {
-    // Currently, we only annotate the element types (contents) of an array, not the pointer
-    // itself.
-    // TODO: This should be updated in a follow-up PR. This will reflect both type-use and
-    // TODO: type-declaration annotations.
-    Type type = getTypeFromNode(node);
-    return type instanceof ArrayType ? ((ArrayType) type).getComponentType() : type;
-  }
-
-  /**
    * Helper method to check if a type is annotated with a specific annotation.
    *
    * @param type the type to check its annotations.

@@ -76,7 +76,7 @@ public class AddTypeUseMarkerAnnotation extends TypeUseAnnotationChange implemen
       Modification computeTextModificationOnNode(T node, AnnotationExpr annotationExpr) {
     boolean addOnDeclaration =
         typeIndex.stream().anyMatch(index -> index.size() == 1 && index.get(0) == 0);
-    Type type = Helper.getType(node);
+    Type type = Helper.getTypeFromNode(node);
     // For annotation on fully qualified name or inner class, the annotation is on the type. (e.g.
     // Map.@Annot Entry or java.util.@Annot Map)
     if (addOnDeclaration) {

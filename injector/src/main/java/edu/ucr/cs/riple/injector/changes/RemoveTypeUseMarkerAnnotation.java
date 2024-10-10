@@ -83,7 +83,7 @@ public class RemoveTypeUseMarkerAnnotation extends TypeUseAnnotationChange
   @Override
   public <T extends NodeWithAnnotations<?> & NodeWithRange<?>>
       Modification computeTextModificationOnNode(T node, AnnotationExpr annotationExpr) {
-    Type type = Helper.getType(node);
+    Type type = Helper.getTypeFromNode(node);
 
     boolean removeOnDeclaration =
         typeIndex.stream().anyMatch(index -> index.size() == 1 && index.get(0) == 0);

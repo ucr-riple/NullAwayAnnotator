@@ -74,7 +74,7 @@ public abstract class TypeUseAnnotationChange extends AnnotationChange {
       Modification computeTextModificationOn(T node) {
     Set<Modification> modifications = new HashSet<>();
     AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationName.simpleName);
-    Type type = Helper.getType(node);
+    Type type = Helper.getTypeFromNode(node);
     Modification onNode = computeTextModificationOnNode(node, annotationExpr);
     if (onNode != null) {
       modifications.add(onNode);
