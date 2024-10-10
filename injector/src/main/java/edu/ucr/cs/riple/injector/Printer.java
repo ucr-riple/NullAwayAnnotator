@@ -30,6 +30,7 @@ import com.github.javaparser.ast.ImportDeclaration;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -38,6 +39,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
  * Applies the text modification instances to source file. Text modifications are applied according
@@ -57,9 +59,9 @@ public class Printer {
   public Printer(Path path) {
     this.path = path;
     try {
-      lines = Files.readAllLines(path);
+      lines = Files.readAllLines(path, Charset.defaultCharset());
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException("Happened at path: " + path, e);
     }
     this.offsetStore = new FileOffsetStore(lines, path);
   }
@@ -70,6 +72,10 @@ public class Printer {
    * @param modifications Set of modifications.
    */
   public void applyModifications(Set<Modification> modifications) {
+    modifications =
+        modifications.stream()
+            .flatMap(modification -> modification.flatten().stream())
+            .collect(Collectors.toSet());
     // Modification are sorted to start from the last position, to make the changes ineffective to
     // current computed offsets.
     SortedSet<Modification> reversedSortedSet = new TreeSet<>(Collections.reverseOrder());
@@ -84,7 +90,7 @@ public class Printer {
    * @param imports Set of import declarations to be added.
    */
   public void addImports(CompilationUnit tree, Set<ImportDeclaration> imports) {
-    if (imports.size() == 0) {
+    if (imports.isEmpty()) {
       return;
     }
     int line = findStartOffsetForImports(tree);
@@ -112,7 +118,7 @@ public class Printer {
    * @return The offset where all the new import declaration statements should be inserted.
    */
   private int findStartOffsetForImports(CompilationUnit tree) {
-    // Get position of last import is exists
+    // Get position of last import if exists
     Optional<ImportDeclaration> optional = tree.getImports().getLast();
     if (optional.isPresent()) {
       // at least one import statement exist, add imports after that
@@ -131,7 +137,7 @@ public class Printer {
     // No package exists, add import under copyright header if exists, otherwise on the first line.
     for (int i = 0; i < lines.size(); i++) {
       String line = lines.get(i).strip();
-      if (line.equals("")) {
+      if (line.isEmpty()) {
         continue;
       }
       // For copyrights surrounded with "/* **/"
@@ -165,7 +171,7 @@ public class Printer {
    */
   public FileOffsetStore write() {
     try {
-      Files.write(path, lines);
+      Files.write(path, lines, Charset.defaultCharset());
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

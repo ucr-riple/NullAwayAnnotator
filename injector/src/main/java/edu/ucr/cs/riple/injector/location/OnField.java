@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.injector.location;
 
+import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.injector.Helper;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -52,6 +53,9 @@ public class OnField extends Location {
 
   public OnField(Path path, String clazz, Set<String> variables) {
     super(LocationKind.FIELD, path, clazz);
+    // Check that the set is not empty and does not contain null elements.
+    Preconditions.checkArgument(!variables.isEmpty());
+    Preconditions.checkArgument(variables.stream().noneMatch(Objects::isNull));
     this.variables = variables;
   }
 
@@ -100,6 +104,7 @@ public class OnField extends Location {
 
   @Override
   public String toString() {
-    return "OnField{" + "variables=" + variables + ", clazz='" + clazz + '\'' + '}';
+    String onPath = this.path == null ? ", Path is null " : "";
+    return "OnField{" + "variables=" + variables + ", clazz='" + clazz + '\'' + onPath + '}';
   }
 }

@@ -24,12 +24,15 @@
 
 package edu.ucr.cs.riple.injector;
 
+import com.google.common.collect.ImmutableList;
+import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddTypeUseMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.RemoveTypeUseMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnLocalVariable;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
+import java.util.Collections;
 import java.util.Set;
 import org.junit.Test;
 
@@ -50,21 +53,29 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "}")
         .expectOutput(
             "package test;",
-            "import edu.ucr.UnTainted;",
+            "import edu.ucr.custom.Nullable;",
             "public class Foo {",
             "   public void foo() {",
-            "      @UnTainted int f0;",
-            "      @UnTainted Bar<@UnTainted String, @UnTainted Integer, @UnTainted Baz<@UnTainted String, @UnTainted Integer>> f1;",
-            "      @UnTainted String f2;",
+            "      @Nullable int f0;",
+            "      @Nullable Bar<@Nullable String, Integer, @Nullable Baz<String, @Nullable Integer>> f1;",
+            "      @Nullable String f2;",
             "   }",
             "}")
         .addChanges(
             new AddTypeUseMarkerAnnotation(
-                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"),
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"),
+                "edu.ucr.custom.Nullable"),
             new AddTypeUseMarkerAnnotation(
-                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"), "edu.ucr.UnTainted"),
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(
+                    ImmutableList.of(0),
+                    ImmutableList.of(1, 0),
+                    ImmutableList.of(3, 0),
+                    ImmutableList.of(3, 2, 0))),
             new AddTypeUseMarkerAnnotation(
-                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"),
+                "edu.ucr.custom.Nullable"))
         .start();
   }
 
@@ -74,17 +85,17 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
         .addInput(
             "Foo.java",
             "package test;",
-            "import edu.ucr.UnTainted;",
+            "import edu.ucr.custom.Nullable;",
             "public class Foo {",
             "   public void foo() {",
-            "      @UnTainted int f0;",
-            "      @UnTainted Bar<@UnTainted String, @UnTainted Integer, @UnTainted Baz<@UnTainted String, @UnTainted Integer>> f1;",
-            "      @UnTainted String f2;",
+            "      @Nullable int f0;",
+            "      @Nullable Bar<@Nullable String, Integer, @Nullable Baz<String, @Nullable Integer>> f1;",
+            "      @Nullable String f2;",
             "   }",
             "}")
         .expectOutput(
             "package test;",
-            "import edu.ucr.UnTainted;",
+            "import edu.ucr.custom.Nullable;",
             "public class Foo {",
             "   public void foo() {",
             "      int f0;",
@@ -94,11 +105,19 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "}")
         .addChanges(
             new RemoveTypeUseMarkerAnnotation(
-                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"),
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"),
+                "edu.ucr.custom.Nullable"),
             new RemoveTypeUseMarkerAnnotation(
-                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"), "edu.ucr.UnTainted"),
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(
+                    ImmutableList.of(0),
+                    ImmutableList.of(1, 0),
+                    ImmutableList.of(3, 0),
+                    ImmutableList.of(3, 2, 0))),
             new RemoveTypeUseMarkerAnnotation(
-                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"),
+                "edu.ucr.custom.Nullable"))
         .start();
   }
 
@@ -118,29 +137,32 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "}")
         .expectOutput(
             "package test;",
-            "import custom.example.Untainted;",
+            "import edu.ucr.custom.Nullable;",
             "public class Foo {",
-            "   java.lang.@Untainted Object bar;",
-            "   java.util.@Untainted Map<java.lang.@Untainted String, @Untainted String[]> f0;",
-            "   java.lang.@Untainted Object baz(java.lang.@Untainted Object param) {;",
-            "       java.lang.@Untainted Object localVar;",
+            "   java.lang.@Nullable Object bar;",
+            "   java.util.@Nullable Map<java.lang.@Nullable String, @Nullable String[]> f0;",
+            "   java.lang.@Nullable Object baz(java.lang.@Nullable Object param) {;",
+            "       java.lang.@Nullable Object localVar;",
             "       return new Object();",
             "   }",
             "}")
         .addChanges(
             new AddTypeUseMarkerAnnotation(
-                new OnField("Foo.java", "test.Foo", Set.of("bar")), "custom.example.Untainted"),
+                new OnField("Foo.java", "test.Foo", Set.of("bar")), "edu.ucr.custom.Nullable"),
             new AddTypeUseMarkerAnnotation(
-                new OnField("Foo.java", "test.Foo", Set.of("f0")), "custom.example.Untainted"),
+                new OnField("Foo.java", "test.Foo", Set.of("f0")),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(
+                    ImmutableList.of(0), ImmutableList.of(1, 0), ImmutableList.of(2, 0))),
             new AddTypeUseMarkerAnnotation(
                 new OnMethod("Foo.java", "test.Foo", "baz(java.lang.Object)"),
-                "custom.example.Untainted"),
+                "edu.ucr.custom.Nullable"),
             new AddTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "baz(java.lang.Object)", "localVar"),
-                "custom.example.Untainted"),
+                "edu.ucr.custom.Nullable"),
             new AddTypeUseMarkerAnnotation(
                 new OnParameter("Foo.java", "test.Foo", "baz(java.lang.Object)", 0),
-                "custom.example.Untainted"))
+                "edu.ucr.custom.Nullable"))
         .start();
   }
 
@@ -150,18 +172,18 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
         .addInput(
             "Foo.java",
             "package test;",
-            "import custom.example.Untainted;",
+            "import edu.ucr.custom.Nullable;",
             "public class Foo {",
-            "   java.lang.@Untainted Object bar;",
-            "   java.util.@Untainted Map<java.lang.@Untainted String, @Untainted String[]> f0;",
-            "   java.lang.@Untainted Object baz(java.lang.@Untainted Object param) {;",
-            "       java.lang.@Untainted Object localVar;",
+            "   java.lang.@Nullable Object bar;",
+            "   java.util.@Nullable Map<java.lang.@Nullable String, @Nullable String[]> f0;",
+            "   java.lang.@Nullable Object baz(java.lang.@Nullable Object param) {;",
+            "       java.lang.@Nullable Object localVar;",
             "       return new Object();",
             "   }",
             "}")
         .expectOutput(
             "package test;",
-            "import custom.example.Untainted;",
+            "import edu.ucr.custom.Nullable;",
             "public class Foo {",
             "   java.lang.Object bar;",
             "   java.util.Map<java.lang.String, String[]> f0;",
@@ -172,18 +194,21 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "}")
         .addChanges(
             new RemoveTypeUseMarkerAnnotation(
-                new OnField("Foo.java", "test.Foo", Set.of("bar")), "custom.example.Untainted"),
+                new OnField("Foo.java", "test.Foo", Set.of("bar")), "edu.ucr.custom.Nullable"),
             new RemoveTypeUseMarkerAnnotation(
-                new OnField("Foo.java", "test.Foo", Set.of("f0")), "custom.example.Untainted"),
+                new OnField("Foo.java", "test.Foo", Set.of("f0")),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(
+                    ImmutableList.of(0), ImmutableList.of(1, 0), ImmutableList.of(2, 0))),
             new RemoveTypeUseMarkerAnnotation(
                 new OnMethod("Foo.java", "test.Foo", "baz(java.lang.Object)"),
-                "custom.example.Untainted"),
+                "edu.ucr.custom.Nullable"),
             new RemoveTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "baz(java.lang.Object)", "localVar"),
-                "custom.example.Untainted"),
+                "edu.ucr.custom.Nullable"),
             new RemoveTypeUseMarkerAnnotation(
                 new OnParameter("Foo.java", "test.Foo", "baz(java.lang.Object)", 0),
-                "custom.example.Untainted"))
+                "edu.ucr.custom.Nullable"))
         .start();
   }
 
@@ -202,21 +227,28 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "}")
         .expectOutput(
             "package test;",
-            "import edu.ucr.UnTainted;",
+            "import edu.ucr.custom.Nullable;",
             "public class Foo<T> {",
             "   public void foo() {",
-            "      java.util.@UnTainted Map<java.lang.@UnTainted String, @UnTainted String[]> f0;",
-            "      @UnTainted Map<@UnTainted T, @UnTainted T>[] f1;",
-            "      @UnTainted String[] f2;",
+            "      java.util.@Nullable Map<java.lang.@Nullable String, @Nullable String[]> f0;",
+            "      @Nullable Map<@Nullable T, @Nullable T>[] f1;",
+            "      @Nullable String[] f2;",
             "   }",
             "}")
         .addChanges(
             new AddTypeUseMarkerAnnotation(
-                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"), "edu.ucr.UnTainted"),
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(
+                    ImmutableList.of(0), ImmutableList.of(1, 0), ImmutableList.of(2, 0))),
             new AddTypeUseMarkerAnnotation(
-                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"), "edu.ucr.UnTainted"),
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(
+                    ImmutableList.of(0), ImmutableList.of(1, 0), ImmutableList.of(2, 0))),
             new AddTypeUseMarkerAnnotation(
-                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"), "edu.ucr.UnTainted"))
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"),
+                "edu.ucr.custom.Nullable"))
         .start();
   }
 
@@ -226,27 +258,521 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
         .addInput(
             "Foo.java",
             "package test;",
-            "import custom.example.Untainted;",
+            "import edu.ucr.custom.Nullable;",
             "public class Foo {",
             "   java.util.Map<String, String[]> f0;",
-            "   java.util.@Untainted Map<@Untainted String, @Untainted String[]> f1;",
-            "   @Untainted Map<java.util.@Untainted Map, @Untainted String>[] f2;",
+            "   java.util.@Nullable Map<@Nullable String, @Nullable String[]> f1;",
+            "   @Nullable Map<java.util.@Nullable Map, @Nullable String>[] f2;",
             "}")
         .expectOutput(
             "package test;",
-            "import custom.example.Untainted;",
+            "import edu.ucr.custom.Nullable;",
             "public class Foo {",
-            "   java.util.@Untainted Map<@Untainted String, @Untainted String[]> f0;",
+            "   java.util.@Nullable Map<@Nullable String, @Nullable String[]> f0;",
             "   java.util.Map<String, String[]> f1;",
             "   Map<java.util.Map, String>[] f2;",
             "}")
         .addChanges(
             new AddTypeUseMarkerAnnotation(
-                new OnField("Foo.java", "test.Foo", Set.of("f0")), "custom.example.Untainted"),
+                new OnField("Foo.java", "test.Foo", Set.of("f0")),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(
+                    ImmutableList.of(0), ImmutableList.of(1, 0), ImmutableList.of(2, 0))),
             new RemoveTypeUseMarkerAnnotation(
-                new OnField("Foo.java", "test.Foo", Set.of("f1")), "custom.example.Untainted"),
+                new OnField("Foo.java", "test.Foo", Set.of("f1")),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(
+                    ImmutableList.of(0), ImmutableList.of(1, 0), ImmutableList.of(2, 0))),
             new RemoveTypeUseMarkerAnnotation(
-                new OnField("Foo.java", "test.Foo", Set.of("f2")), "custom.example.Untainted"))
+                new OnField("Foo.java", "test.Foo", Set.of("f2")),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(
+                    ImmutableList.of(0), ImmutableList.of(1, 0), ImmutableList.of(2, 0))))
+        .start();
+  }
+
+  @Test
+  public void additionOnInitializerTest() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "public class Foo {",
+            "   public void foo() {",
+            "      int f0 = 0;",
+            "      Bar<String, Integer, Baz<String, Integer>> f1 = new Bar<String, Integer, Baz<String, Integer>>();",
+            "      String f2 = \"FOO\";",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   public void foo() {",
+            "      @Nullable int f0 = 0;",
+            "      @Nullable Bar<@Nullable String, Integer, Baz<String, @Nullable Integer>> f1 = new Bar<@Nullable String, Integer, Baz<String, @Nullable Integer>>();",
+            "      @Nullable String f2 = \"FOO\";",
+            "   }",
+            "}")
+        .addChanges(
+            new AddTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"),
+                "edu.ucr.custom.Nullable"),
+            new AddTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(
+                    ImmutableList.of(0), ImmutableList.of(1, 0), ImmutableList.of(3, 2, 0))),
+            new AddTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"),
+                "edu.ucr.custom.Nullable"))
+        .start();
+  }
+
+  @Test
+  public void removalOnDeclarationOnly() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   public void foo() {",
+            "      @Nullable int f0 = 0;",
+            "      @Nullable Bar<@Nullable String, @Nullable Integer, @Nullable Baz<@Nullable String, @Nullable Integer>> f1 = new Custom<@Nullable String, @Nullable String>();",
+            "      @Nullable String f2 = \"FOO\";",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   public void foo() {",
+            "      int f0 = 0;",
+            "      Bar<@Nullable String, @Nullable Integer, @Nullable Baz<@Nullable String, @Nullable Integer>> f1 = new Custom<@Nullable String, @Nullable String>();",
+            "      String f2 = \"FOO\";",
+            "   }",
+            "}")
+        .addChanges(
+            new AddTypeUseMarkerAnnotation(
+                    new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"),
+                    "edu.ucr.custom.Nullable")
+                .toDeclaration()
+                .getReverse(),
+            new AddTypeUseMarkerAnnotation(
+                    new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"),
+                    "edu.ucr.custom.Nullable")
+                .toDeclaration()
+                .getReverse(),
+            new AddTypeUseMarkerAnnotation(
+                    new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"),
+                    "edu.ucr.custom.Nullable")
+                .toDeclaration()
+                .getReverse())
+        .start();
+  }
+
+  @Test
+  public void avoidDuplicate() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.RUntainted;",
+            "public class Foo {",
+            "   public @RUntainted Map<@RUntainted String, @RUntainted String> bar();",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.RUntainted;",
+            "public class Foo {",
+            "   public @RUntainted Map<@RUntainted String, @RUntainted String> bar();",
+            "}")
+        .addChanges(
+            new AddTypeUseMarkerAnnotation(
+                new OnMethod("Foo.java", "test.Foo", "bar()"),
+                "edu.ucr.RUntainted",
+                ImmutableList.of(
+                    ImmutableList.of(0), ImmutableList.of(1, 0), ImmutableList.of(2, 0))))
+        .start();
+  }
+
+  @Test
+  public void deletionOnInitializerTest() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   public void foo() {",
+            "      @Nullable int f0 = 0;",
+            "      @Nullable Bar<@Nullable String, @Nullable Integer, @Nullable Baz<@Nullable String, @Nullable Integer>> f1 = new Bar<@Nullable String, @Nullable Integer, @Nullable Baz<@Nullable String, @Nullable Integer>>();",
+            "      @Nullable String f2 = \"FOO\";",
+            "      @Nullable Bar<@Nullable String, @Nullable Integer[], @Nullable Baz<@Nullable String, @Nullable Integer>> f3 = new Bar<@Nullable String, @Nullable Integer[], @Nullable Baz<@Nullable String, @Nullable Integer>>();",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   public void foo() {",
+            "      int f0 = 0;",
+            "      Bar<String, Integer, Baz<String, Integer>> f1 = new Bar<String, Integer, Baz<String, Integer>>();",
+            "      String f2 = \"FOO\";",
+            "      Bar<String, Integer[], Baz<String, Integer>> f3 = new Bar<String, Integer[], Baz<String, Integer>>();",
+            "   }",
+            "}")
+        .addChanges(
+            new RemoveTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f0"),
+                "edu.ucr.custom.Nullable"),
+            new RemoveTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(
+                    ImmutableList.of(0),
+                    ImmutableList.of(1, 0),
+                    ImmutableList.of(2, 0),
+                    ImmutableList.of(3, 0),
+                    ImmutableList.of(3, 1, 0),
+                    ImmutableList.of(3, 2, 0))),
+            new RemoveTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"),
+                "edu.ucr.custom.Nullable"),
+            new RemoveTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f3"),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(
+                    ImmutableList.of(0),
+                    ImmutableList.of(1, 0),
+                    ImmutableList.of(2, 0),
+                    ImmutableList.of(3, 0),
+                    ImmutableList.of(3, 1, 0),
+                    ImmutableList.of(3, 2, 0))))
+        .start();
+  }
+
+  @Test
+  public void avoidDuplicateOnAnnotationOnInnerClass() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   public void foo() {",
+            "     for (Map.@Nullable Entry<@Nullable String, @Nullable String> entry : m_additionalPreferences.entrySet()) {",
+            "       String key = entry.getKey();",
+            "       @RUntainted String value = entry.getValue();",
+            "       m_user.setAdditionalInfo(PREFERENCES_ADDITIONAL_PREFIX + key, value);",
+            "     }",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   public void foo() {",
+            "     for (Map.@Nullable Entry<@Nullable String, @Nullable String> entry : m_additionalPreferences.entrySet()) {",
+            "       String key = entry.getKey();",
+            "       @RUntainted String value = entry.getValue();",
+            "       m_user.setAdditionalInfo(PREFERENCES_ADDITIONAL_PREFIX + key, value);",
+            "     }",
+            "   }",
+            "}")
+        .addChanges(
+            new AddTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "foo()", "entry"),
+                "edu.ucr.custom.Nullable"))
+        .start();
+  }
+
+  @Test
+  public void addTypeUseOnType() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   private final Object f0;",
+            "   private final Object f1;",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   @Nullable private final Object f0;",
+            "   private final @Nullable Object f1;",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Collections.singleton("f0")),
+                "edu.ucr.custom.Nullable"),
+            new AddTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Collections.singleton("f1")),
+                "edu.ucr.custom.Nullable"))
+        .start();
+  }
+
+  @Test
+  public void additionOnFullyQualifiedTypeNamesOnTypeArgsTest() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "public class Foo {",
+            "   void baz(java.lang.Object param) {",
+            "       final java.util.HashMap<java.lang.String,java.lang.String> localVar = new HashMap<String, String>();",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   void baz(java.lang.Object param) {",
+            "       final java.util.HashMap<java.lang.@Nullable String,java.lang.@Nullable String> localVar = new HashMap<@Nullable String, @Nullable String>();",
+            "   }",
+            "}")
+        .addChanges(
+            new AddTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "baz(java.lang.Object)", "localVar"),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(ImmutableList.of(1, 0))),
+            new AddTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "baz(java.lang.Object)", "localVar"),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(ImmutableList.of(2, 0))))
+        .start();
+  }
+
+  @Test
+  public void deletionOnFullyQualifiedTypeNamesOnTypeArgsTest() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   void baz(java.lang.Object param) {",
+            "       final java.util.HashMap<java.lang.@Nullable String,java.lang.@Nullable String> localVar = new HashMap<@Nullable String, @Nullable String>();",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   void baz(java.lang.Object param) {",
+            "       final java.util.HashMap<java.lang.String,java.lang.String> localVar = new HashMap<String, String>();",
+            "   }",
+            "}")
+        .addChanges(
+            new RemoveTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "baz(java.lang.Object)", "localVar"),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(ImmutableList.of(1, 0))),
+            new RemoveTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "baz(java.lang.Object)", "localVar"),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(ImmutableList.of(2, 0))))
+        .start();
+  }
+
+  @Test
+  public void additionOnInitializerFieldTest() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "public class Foo {",
+            "   Map<String, String> map = new HashMap<String, String>();",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   Map<String, @Nullable String> map = new HashMap<String, @Nullable String>();",
+            "}")
+        .addChanges(
+            new AddTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Collections.singleton("map")),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(ImmutableList.of(2, 0))))
+        .start();
+  }
+
+  @Test
+  public void deletionOnInitializerFieldTest() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   Map<String, @Nullable String> map = new HashMap<String, @Nullable String>();",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   Map<String, String> map = new HashMap<String, String>();",
+            "}")
+        .addChanges(
+            new RemoveTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Collections.singleton("map")),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(ImmutableList.of(2, 0))))
+        .start();
+  }
+
+  @Test
+  public void additionOnWildCard() {
+    injectorTestHelper
+        .addInput("Foo.java", "package test;", "public class Foo {", "   Map<String, ?> map;", "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   Map<String, @Nullable ?> map;",
+            "}")
+        .addChanges(
+            new AddTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Collections.singleton("map")),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(ImmutableList.of(2, 0))))
+        .start();
+  }
+
+  @Test
+  public void deletionOnWildCard() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   Map<String, @Nullable ?> map;",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   Map<String, ?> map;",
+            "}")
+        .addChanges(
+            new RemoveTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Collections.singleton("map")),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(ImmutableList.of(2, 0))))
+        .start();
+  }
+
+  @Test
+  public void wildCardExtendedType() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   public synchronized ConfigurationBuilder<? extends HierarchicalConfiguration<?>> m() throws ConfigurationException {}",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   public synchronized ConfigurationBuilder<? extends @Nullable HierarchicalConfiguration<?>> m() throws ConfigurationException {}",
+            "}")
+        .addChanges(
+            new AddTypeUseMarkerAnnotation(
+                new OnMethod("Foo.java", "test.Foo", "m()"),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(ImmutableList.of(1, 0))))
+        .start();
+  }
+
+  @Test
+  public void existingWildCardExtendedType() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   public synchronized ConfigurationBuilder<? extends @Nullable HierarchicalConfiguration<?>> m() throws ConfigurationException {}",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   public synchronized ConfigurationBuilder<? extends @Nullable HierarchicalConfiguration<?>> m() throws ConfigurationException {}",
+            "}")
+        .addChanges(
+            new AddTypeUseMarkerAnnotation(
+                new OnMethod("Foo.java", "test.Foo", "m()"),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(ImmutableList.of(1, 0))))
+        .start();
+  }
+
+  @Test
+  public void removeWildCardExtendedType() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   public synchronized ConfigurationBuilder<? extends @Nullable HierarchicalConfiguration<?>> m() throws ConfigurationException {}",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   public synchronized ConfigurationBuilder<? extends HierarchicalConfiguration<?>> m() throws ConfigurationException {}",
+            "}")
+        .addChanges(
+            new RemoveTypeUseMarkerAnnotation(
+                new OnMethod("Foo.java", "test.Foo", "m()"),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(ImmutableList.of(1, 0))))
+        .start();
+  }
+
+  @Test
+  public void multipleInlineLocalVariableTest() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   public void bar() {",
+            "       List<Node> a1 = null, a2 = null;",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import edu.ucr.custom.Nullable;",
+            "public class Foo {",
+            "   public void bar() {",
+            "       @Nullable List<@Nullable Node> a1 = null, a2 = null;",
+            "   }",
+            "}")
+        .addChanges(
+            new AddTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "bar()", "a1"),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(ImmutableList.of(0))),
+            new AddTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "bar()", "a1"),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(ImmutableList.of(1, 0))),
+            new AddTypeUseMarkerAnnotation(
+                new OnLocalVariable("Foo.java", "test.Foo", "bar()", "a2"),
+                "edu.ucr.custom.Nullable",
+                ImmutableList.of(ImmutableList.of(1, 0))))
         .start();
   }
 }

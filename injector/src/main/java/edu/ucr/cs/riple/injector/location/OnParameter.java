@@ -90,6 +90,7 @@ public class OnParameter extends Location {
 
   @Override
   public String toString() {
+    String onPath = this.path == null ? ", Path is null " : "";
     return "OnParameter{"
         + "class='"
         + clazz
@@ -99,6 +100,7 @@ public class OnParameter extends Location {
         + '\''
         + ", index="
         + index
+        + onPath
         + '}';
   }
 }

@@ -37,7 +37,8 @@ public class LocationToJsonVisitor implements LocationVisitor<JSONObject, Void> 
     KIND,
     CLASS,
     PATH,
-    INDEX
+    INDEX,
+    SUPER,
   }
 
   @SuppressWarnings("unchecked")
@@ -71,7 +72,7 @@ public class LocationToJsonVisitor implements LocationVisitor<JSONObject, Void> 
   @Override
   public JSONObject visitParameter(OnParameter onParameter, Void unused) {
     JSONObject res = defaultAction(onParameter);
-    res.put(KEYS.METHOD, onParameter.enclosingMethod);
+    res.put(KEYS.METHOD, onParameter.enclosingMethod.method);
     res.put(KEYS.INDEX, onParameter.index);
     return res;
   }
@@ -85,8 +86,16 @@ public class LocationToJsonVisitor implements LocationVisitor<JSONObject, Void> 
   @Override
   public JSONObject visitLocalVariable(OnLocalVariable onLocalVariable, Void unused) {
     JSONObject res = defaultAction(onLocalVariable);
-    res.put(KEYS.METHOD, onLocalVariable.encMethod);
+    res.put(KEYS.METHOD, onLocalVariable.encMethod == null ? "" : onLocalVariable.encMethod.method);
     res.put(KEYS.VARIABLES, onLocalVariable.varName);
+    return res;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public JSONObject visitClassDeclaration(OnClassDeclaration onClassDeclaration, Void unused) {
+    JSONObject res = defaultAction(onClassDeclaration);
+    res.put(KEYS.SUPER, onClassDeclaration.target);
     return res;
   }
 }

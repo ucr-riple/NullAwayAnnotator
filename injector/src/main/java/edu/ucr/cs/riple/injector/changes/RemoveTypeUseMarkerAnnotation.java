@@ -24,18 +24,18 @@ package edu.ucr.cs.riple.injector.changes;
 
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.expr.AnnotationExpr;
-import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
+import com.github.javaparser.ast.type.ReferenceType;
 import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.ast.type.WildcardType;
+import com.google.common.collect.ImmutableList;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Deletion;
 import edu.ucr.cs.riple.injector.modifications.Modification;
-import edu.ucr.cs.riple.injector.modifications.MultiPositionModification;
-import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import javax.annotation.Nullable;
 
 /**
@@ -47,37 +47,83 @@ import javax.annotation.Nullable;
  * {@code Map} and all the type arguments. The final output will be: {@code java.util.Map<String,
  * java.lang.String> list;}
  */
-public class RemoveTypeUseMarkerAnnotation extends RemoveMarkerAnnotation {
+public class RemoveTypeUseMarkerAnnotation extends TypeUseAnnotationChange
+    implements RemoveAnnotation {
 
   public RemoveTypeUseMarkerAnnotation(Location location, String annotation) {
-    super(location, annotation);
+    super(location, new Name(annotation), ImmutableList.of(ImmutableList.of(0)));
   }
 
-  @Override
+  public RemoveTypeUseMarkerAnnotation(
+      Location location, String annotation, ImmutableList<ImmutableList<Integer>> typeIndex) {
+    super(location, new Name(annotation), typeIndex);
+  }
+
   @Nullable
-  public <T extends NodeWithAnnotations<?> & NodeWithRange<?>>
-      Modification computeTextModificationOn(T node) {
-    Type type = Helper.getType(node);
-    AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationName.simpleName);
-    Set<Modification> modifications = new HashSet<>();
-    // Remove the annotation from the declaration if exists e.g. @Annot String f;
-    Modification onDeclaration = super.computeTextModificationOn(node);
-    if (onDeclaration != null) {
-      modifications.add(onDeclaration);
-    } else {
-      // Remove the annotation from the type if exists e.g. java.lang.@Annot String f;
-      for (AnnotationExpr expr : type.getAnnotations()) {
-        if (expr.equals(annotationExpr)) {
-          Optional<Range> annotRange = expr.getRange();
-          annotRange
-              .map(value -> new Deletion(expr.toString(), value.begin, value.end))
-              .ifPresent(modifications::add);
+  @Override
+  public Modification computeTextModificationOnType(Type type, AnnotationExpr annotationExpr) {
+    // Remove the annotation from the type if exists e.g. java.lang.@Annot String f;
+    if (type instanceof WildcardType) {
+      Optional<ReferenceType> extendedType = ((WildcardType) type).getExtendedType();
+      if (extendedType.isPresent()) {
+        type = extendedType.get();
+      }
+    }
+    for (AnnotationExpr expr : type.getAnnotations()) {
+      if (expr.equals(annotationExpr)) {
+        Optional<Range> annotRange = expr.getRange();
+        if (annotRange.isPresent()) {
+          return new Deletion(expr.toString(), annotRange.get().begin, annotRange.get().end);
         }
       }
     }
+    return null;
+  }
 
-    // Remove annotation from type arguments if exists e.g. List<@Annot String>
-    modifications.addAll(type.accept(new TypeArgumentChangeVisitor(), this));
-    return modifications.isEmpty() ? null : new MultiPositionModification(modifications);
+  @Override
+  public <T extends NodeWithAnnotations<?> & NodeWithRange<?>>
+      Modification computeTextModificationOnNode(T node, AnnotationExpr annotationExpr) {
+    Type type = Helper.getTypeFromNode(node);
+
+    boolean removeOnDeclaration =
+        typeIndex.stream().anyMatch(index -> index.size() == 1 && index.get(0) == 0);
+    if (removeOnDeclaration) {
+      // Remove the annotation from the declaration if exists e.g. @Annot String f;
+      for (AnnotationExpr expr : node.getAnnotations()) {
+        if (expr.equals(annotationExpr)) {
+          Optional<Range> annotRange = expr.getRange();
+          if (annotRange.isPresent()) {
+            return new Deletion(expr.toString(), annotRange.get().begin, annotRange.get().end);
+          }
+        }
+      }
+      Modification onType = computeTextModificationOnType(type, annotationExpr);
+      if (onType != null) {
+        return onType;
+      } else {
+        // Remove the annotation from the type if exists e.g. java.lang.@Annot String f;
+        return computeTextModificationOnType(type, annotationExpr);
+      }
+    }
+    return null;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    boolean ans = super.equals(o);
+    if (!ans) {
+      return false;
+    }
+    return o instanceof RemoveTypeUseMarkerAnnotation;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), RemoveTypeUseMarkerAnnotation.class);
+  }
+
+  @Override
+  public ASTChange copy() {
+    return new RemoveTypeUseMarkerAnnotation(location, annotationName.fullName, typeIndex);
   }
 }

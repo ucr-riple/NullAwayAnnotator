@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 /** Represents a composite modification that consists of multiple modifications. */
 public class MultiPositionModification implements Modification {
@@ -56,7 +58,14 @@ public class MultiPositionModification implements Modification {
   }
 
   @Override
-  public int compareTo(Modification o) {
+  public int compareTo(@Nonnull Modification o) {
     return COMPARATOR.compare(this, o);
+  }
+
+  @Override
+  public Set<Modification> flatten() {
+    return modifications.stream()
+        .flatMap(modification -> modification.flatten().stream())
+        .collect(Collectors.toSet());
   }
 }

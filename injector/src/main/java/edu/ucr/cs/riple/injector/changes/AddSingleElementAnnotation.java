@@ -61,7 +61,7 @@ public class AddSingleElementAnnotation extends AnnotationChange implements AddA
       Location location, String annotation, String argument, boolean repeatable) {
     super(location, new Name(annotation));
     Preconditions.checkArgument(
-        argument != null && !argument.equals(""),
+        argument != null && !argument.isEmpty(),
         "argument cannot be null or empty, use AddAnnotation instead.");
     this.argument = argument;
     this.repeatable = repeatable;
@@ -183,5 +183,10 @@ public class AddSingleElementAnnotation extends AnnotationChange implements AddA
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), argument, repeatable);
+  }
+
+  @Override
+  public ASTChange copy() {
+    return new AddSingleElementAnnotation(location, annotationName.fullName, argument, repeatable);
   }
 }

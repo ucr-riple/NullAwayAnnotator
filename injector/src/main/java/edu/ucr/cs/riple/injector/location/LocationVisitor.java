@@ -75,4 +75,13 @@ public interface LocationVisitor<R, P> {
    * @return a visitor-specified result
    */
   R visitLocalVariable(OnLocalVariable onLocalVariable, P p);
+
+  /**
+   * Visits a location for a class declaration.
+   *
+   * @param onClassDeclaration the location for a class declaration.
+   * @param p a visitor-specified parameter
+   * @return a visitor-specified result
+   */
+  R visitClassDeclaration(OnClassDeclaration onClassDeclaration, P p);
 }
