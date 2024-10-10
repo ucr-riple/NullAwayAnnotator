@@ -32,10 +32,10 @@ import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import com.github.javaparser.ast.type.Type;
 import com.google.common.collect.ImmutableList;
-import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.modifications.MultiPositionModification;
+import edu.ucr.cs.riple.injector.util.TypeUtils;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -74,7 +74,7 @@ public abstract class TypeUseAnnotationChange extends AnnotationChange {
       Modification computeTextModificationOn(T node) {
     Set<Modification> modifications = new HashSet<>();
     AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationName.simpleName);
-    Type type = Helper.getTypeFromNode(node);
+    Type type = TypeUtils.getTypeFromNode(node);
     Modification onNode = computeTextModificationOnNode(node, annotationExpr);
     if (onNode != null) {
       modifications.add(onNode);

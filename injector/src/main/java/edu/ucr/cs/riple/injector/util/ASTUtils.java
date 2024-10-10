@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2022 University of California, Riverside.
+ * MIT License
+ *
+ * Copyright (c) 2024 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,10 +22,8 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.injector;
+package edu.ucr.cs.riple.injector.util;
 
-import com.github.javaparser.ParserConfiguration;
-import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
@@ -34,27 +34,13 @@ import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumConstantDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.RecordDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
-import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
-import com.github.javaparser.ast.type.ArrayType;
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
-import com.github.javaparser.ast.type.PrimitiveType;
-import com.github.javaparser.ast.type.ReferenceType;
-import com.github.javaparser.ast.type.Type;
-import com.github.javaparser.ast.type.WildcardType;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,12 +50,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-/** A utility class. */
-public class Helper {
+/** Utility class for working with nodes in AST in Java and Javaparser. */
+public class ASTUtils {
 
   /**
    * Extracts the callable simple name from callable signature. (e.g. on input "run(Object i)"
@@ -368,7 +353,7 @@ public class Helper {
     // Should not visit inner nodes of inner methods in the given method, since the given
     // method should be the closest enclosing method of the target local variable. Therefore, we
     // use DirectMethodParentIterator to skip inner methods.
-    Iterator<Node> treeIterator = new DirectMethodParentIterator(encMethod);
+    Iterator<Node> treeIterator = new ASTUtils.DirectMethodParentIterator(encMethod);
     while (treeIterator.hasNext()) {
       Node n = treeIterator.next();
       if (n instanceof VariableDeclarationExpr) {
@@ -380,67 +365,6 @@ public class Helper {
       }
     }
     return null;
-  }
-
-  /**
-   * Extracts the type of the given node implementing {@link NodeWithAnnotations}.
-   *
-   * @param node the node.
-   * @return the type of the node.
-   */
-  public static Type getTypeFromNode(NodeWithAnnotations<?> node) {
-    if (node instanceof MethodDeclaration) {
-      return ((MethodDeclaration) node).getType();
-    }
-    if (node instanceof FieldDeclaration) {
-      FieldDeclaration fd = (FieldDeclaration) node;
-      Preconditions.checkArgument(!fd.getVariables().isEmpty());
-      return fd.getVariables().get(0).getType();
-    }
-    if (node instanceof VariableDeclarationExpr) {
-      NodeList<VariableDeclarator> decls = ((VariableDeclarationExpr) node).getVariables();
-      for (VariableDeclarator v : decls) {
-        // All declared variables in a VariableDeclarationExpr have the same type.
-        // (e.g. Foo a, b, c;)
-        return v.getType();
-      }
-    }
-    if (node instanceof Parameter) {
-      return ((Parameter) node).getType();
-    }
-    if (node instanceof VariableDeclarator) {
-      return ((VariableDeclarator) node).getType();
-    }
-    if (node instanceof Type) {
-      return ((Type) node);
-    }
-    return null;
-  }
-
-  /**
-   * Helper method to check if a type is annotated with a specific annotation.
-   *
-   * @param type the type to check its annotations.
-   * @param expr the annotation to check.
-   * @return true if the node is annotated with the annotation.
-   */
-  public static boolean isAnnotatedWith(Type type, AnnotationExpr expr) {
-    if (type instanceof WildcardType) {
-      Optional<ReferenceType> extendedType = ((WildcardType) type).getExtendedType();
-      return extendedType.isPresent() && isAnnotatedWith(extendedType.get(), expr);
-    }
-    return type.getAnnotations().stream().anyMatch(annot -> annot.getName().equals(expr.getName()));
-  }
-
-  /**
-   * Helper method to check if a node is annotated with a specific annotation.
-   *
-   * @param node the node to check its annotations.
-   * @param expr the annotation to check.
-   * @return true if the node is annotated with the annotation.
-   */
-  public static boolean isAnnotatedWith(NodeWithAnnotations<?> node, AnnotationExpr expr) {
-    return node.getAnnotations().stream().anyMatch(annot -> annot.getName().equals(expr.getName()));
   }
 
   /**
@@ -530,52 +454,6 @@ public class Helper {
   }
 
   /**
-   * Deserializes a Path instance from a string.
-   *
-   * @param serializedPath Serialized path to file.
-   * @return The modified Path.
-   */
-  public static Path deserializePath(String serializedPath) {
-    final String jarPrefix = "jar:";
-    final String filePrefix = "file://";
-    String path = serializedPath;
-    if (serializedPath.startsWith(jarPrefix)) {
-      path = path.substring(jarPrefix.length());
-    }
-    if (serializedPath.startsWith(filePrefix)) {
-      path = path.substring(filePrefix.length());
-    }
-    // Keep only one occurrence of "/" from the beginning if more than one exists.
-    path = Paths.get(path).toString();
-    int start = 0;
-    while (start + 1 < path.length()
-        && path.charAt(start) == '/'
-        && path.charAt(start + 1) == '/') {
-      start++;
-    }
-    return Paths.get(path.substring(start));
-  }
-
-  /**
-   * Used to check if src package declaration is under a specific root.
-   *
-   * @param path Path to src file.
-   * @param rootPackage Root package simple name.
-   * @return true if src has a package declaration and starts with root.
-   */
-  public static boolean srcIsUnderClassClassPath(
-      Path path, String rootPackage, ParserConfiguration.LanguageLevel languageLevel) {
-    CompilationUnit cu = Injector.parse(path, languageLevel);
-    if (cu == null) {
-      return false;
-    }
-    Optional<PackageDeclaration> packageDeclaration = cu.getPackageDeclaration();
-    return packageDeclaration
-        .map(declaration -> declaration.getNameAsString().startsWith(rootPackage))
-        .orElse(false);
-  }
-
-  /**
    * Returns containing static initializer blocks of a {@link BodyDeclaration}.
    *
    * @param bodyDeclaration the body declaration to get its static initializer blocks.
@@ -590,70 +468,6 @@ public class Helper {
                     && ((InitializerDeclaration) node).isStatic())
         .map(node -> (InitializerDeclaration) node)
         .collect(Collectors.toSet());
-  }
-
-  /**
-   * Finds the range of the simple name in the fully qualified name of the given type in the source
-   * code. This is used to insert the type use annotations before the type simple name.
-   *
-   * @param type the type to find its range
-   * @return the range of the type or null if the type does not have a range.
-   */
-  public static Range findSimpleNameRangeInTypeName(Type type) {
-    if (type instanceof ClassOrInterfaceType) {
-      ClassOrInterfaceType classOrInterfaceType = (ClassOrInterfaceType) type;
-      if (classOrInterfaceType.getName().getRange().isEmpty()) {
-        return null;
-      }
-      return ((ClassOrInterfaceType) type).getName().getRange().get();
-    }
-    if (type instanceof ArrayType) {
-      return findSimpleNameRangeInTypeName(((ArrayType) type).getComponentType());
-    }
-    if (type instanceof PrimitiveType) {
-      if (type.getRange().isEmpty()) {
-        return null;
-      }
-      return type.getRange().get();
-    }
-    if (type instanceof WildcardType) {
-      if (((WildcardType) type).getExtendedType().isEmpty()) {
-        // type is simply: "?"
-        return type.getRange().get();
-      }
-      return findSimpleNameRangeInTypeName(((WildcardType) type).getExtendedType().orElse(null));
-    }
-    throw new RuntimeException(
-        "Unexpected type to get range from: " + type + " : " + type.getClass());
-  }
-
-  /**
-   * Retrieves the types associated with the given node. If the node is a class or interface
-   * declaration, it returns the implemented and extended types. If the node is an object creation
-   * expression, it returns the type of the object being created. In all other cases, an empty set
-   * is returned.
-   *
-   * @param node the node from which to extract types, typically a {@code BodyDeclaration<?>} (like
-   *     a class or interface declaration) or an {@code ObjectCreationExpr}.
-   * @return a set of {@code ClassOrInterfaceType} representing the implemented, extended, or
-   *     instantiated types, or an empty set if the node does not contain relevant type information.
-   */
-  public static Set<ClassOrInterfaceType> getEnclosingOrInstantiatedTypes(Node node) {
-    Stream<ClassOrInterfaceType> typeStream = null;
-    if (node instanceof BodyDeclaration<?>) {
-      BodyDeclaration<?> enclosingClass = (BodyDeclaration<?>) node;
-      if (enclosingClass instanceof ClassOrInterfaceDeclaration) {
-        ClassOrInterfaceDeclaration declaration = (ClassOrInterfaceDeclaration) enclosingClass;
-        typeStream =
-            Stream.concat(
-                declaration.getImplementedTypes().stream(),
-                declaration.getExtendedTypes().stream());
-      }
-    }
-    if (node instanceof ObjectCreationExpr) {
-      typeStream = Stream.of(((ObjectCreationExpr) node).getType());
-    }
-    return typeStream == null ? Set.of() : typeStream.collect(Collectors.toSet());
   }
 
   /**

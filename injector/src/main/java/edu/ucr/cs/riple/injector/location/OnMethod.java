@@ -25,8 +25,9 @@
 package edu.ucr.cs.riple.injector.location;
 
 import com.github.javaparser.ast.body.CallableDeclaration;
-import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.Printer;
 import edu.ucr.cs.riple.injector.SignatureMatcher;
+import edu.ucr.cs.riple.injector.util.ASTUtils;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -50,7 +51,7 @@ public class OnMethod extends Location {
   }
 
   public OnMethod(String path, String clazz, String method) {
-    this(Helper.deserializePath(path), clazz, method);
+    this(Printer.deserializePath(path), clazz, method);
   }
 
   /**
@@ -101,7 +102,7 @@ public class OnMethod extends Location {
    * @return True if this location is targeting a constructor.
    */
   public boolean isOnConstructor() {
-    return Helper.extractCallableName(method).equals(Helper.simpleName(clazz));
+    return ASTUtils.extractCallableName(method).equals(ASTUtils.simpleName(clazz));
   }
 
   @Override

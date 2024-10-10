@@ -22,19 +22,17 @@
 
 package edu.ucr.cs.riple.injector.changes;
 
-import static edu.ucr.cs.riple.injector.Helper.findSimpleNameRangeInTypeName;
-
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import com.github.javaparser.ast.type.Type;
 import com.google.common.collect.ImmutableList;
-import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnLocalVariable;
 import edu.ucr.cs.riple.injector.modifications.Insertion;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import edu.ucr.cs.riple.injector.util.TypeUtils;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
@@ -61,10 +59,10 @@ public class AddTypeUseMarkerAnnotation extends TypeUseAnnotationChange implemen
   @Nullable
   @Override
   public Modification computeTextModificationOnType(Type type, AnnotationExpr annotationExpr) {
-    if (Helper.isAnnotatedWith(type, annotationExpr)) {
+    if (TypeUtils.isAnnotatedWith(type, annotationExpr)) {
       return null;
     }
-    Range range = findSimpleNameRangeInTypeName(type);
+    Range range = TypeUtils.findSimpleNameRangeInTypeName(type);
     if (range == null) {
       return null;
     }
@@ -76,17 +74,17 @@ public class AddTypeUseMarkerAnnotation extends TypeUseAnnotationChange implemen
       Modification computeTextModificationOnNode(T node, AnnotationExpr annotationExpr) {
     boolean addOnDeclaration =
         typeIndex.stream().anyMatch(index -> index.size() == 1 && index.get(0) == 0);
-    Type type = Helper.getTypeFromNode(node);
+    Type type = TypeUtils.getTypeFromNode(node);
     // For annotation on fully qualified name or inner class, the annotation is on the type. (e.g.
     // Map.@Annot Entry or java.util.@Annot Map)
     if (addOnDeclaration) {
-      if (Helper.isAnnotatedWith(node, annotationExpr)) {
+      if (TypeUtils.isAnnotatedWith(node, annotationExpr)) {
         return null;
       }
       // Javaparser does not know if an annotation is a type-use or declaration annotation.
       // While seeing "@Annot Object f", the type is not annotated and the annotation is on the
       // node.
-      if (Helper.isAnnotatedWith(type, annotationExpr)) {
+      if (TypeUtils.isAnnotatedWith(type, annotationExpr)) {
         return null;
       }
       return computeTextModificationOnType(type, annotationExpr);

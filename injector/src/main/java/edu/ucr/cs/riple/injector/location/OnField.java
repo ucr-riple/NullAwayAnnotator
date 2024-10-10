@@ -25,7 +25,7 @@
 package edu.ucr.cs.riple.injector.location;
 
 import com.google.common.base.Preconditions;
-import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.Printer;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Objects;
@@ -60,7 +60,7 @@ public class OnField extends Location {
   }
 
   public OnField(String path, String clazz, Set<String> variables) {
-    this(Helper.deserializePath(path), clazz, variables);
+    this(Printer.deserializePath(path), clazz, variables);
   }
 
   @Override

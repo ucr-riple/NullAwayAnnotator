@@ -24,8 +24,8 @@
 
 package edu.ucr.cs.riple.core.registries.region;
 
-import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.OnClass;
+import edu.ucr.cs.riple.injector.util.ASTUtils;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.util.Objects;
 
@@ -82,7 +82,7 @@ public class Region {
       return Type.INIT_BLOCK;
     }
     if (regionMember.contains("(")) {
-      return Helper.extractCallableName(regionMember).equals(Helper.simpleName(regionClass))
+      return ASTUtils.extractCallableName(regionMember).equals(ASTUtils.simpleName(regionClass))
           ? Type.CONSTRUCTOR
           : Type.METHOD;
     }

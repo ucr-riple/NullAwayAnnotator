@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.Printer;
 import java.nio.file.Path;
 import org.json.simple.JSONObject;
 
@@ -38,7 +38,7 @@ public class OnClassDeclaration extends Location {
   }
 
   public OnClassDeclaration(String path, String clazz, String target) {
-    super(LocationKind.CLASS_DECL, Helper.deserializePath(path), clazz);
+    super(LocationKind.CLASS_DECL, Printer.deserializePath(path), clazz);
     this.target = target;
   }
 

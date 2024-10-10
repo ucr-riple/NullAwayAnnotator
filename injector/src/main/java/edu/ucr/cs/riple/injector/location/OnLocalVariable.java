@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.Printer;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -55,7 +55,7 @@ public class OnLocalVariable extends Location {
   }
 
   public OnLocalVariable(String path, String clazz, String encMethod, String varName) {
-    this(Helper.deserializePath(path), clazz, encMethod, varName);
+    this(Printer.deserializePath(path), clazz, encMethod, varName);
   }
 
   @Override

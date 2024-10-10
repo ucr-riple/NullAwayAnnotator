@@ -30,10 +30,10 @@ import com.github.javaparser.ast.type.ReferenceType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.WildcardType;
 import com.google.common.collect.ImmutableList;
-import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Deletion;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import edu.ucr.cs.riple.injector.util.TypeUtils;
 import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -83,7 +83,7 @@ public class RemoveTypeUseMarkerAnnotation extends TypeUseAnnotationChange
   @Override
   public <T extends NodeWithAnnotations<?> & NodeWithRange<?>>
       Modification computeTextModificationOnNode(T node, AnnotationExpr annotationExpr) {
-    Type type = Helper.getTypeFromNode(node);
+    Type type = TypeUtils.getTypeFromNode(node);
 
     boolean removeOnDeclaration =
         typeIndex.stream().anyMatch(index -> index.size() == 1 && index.get(0) == 0);

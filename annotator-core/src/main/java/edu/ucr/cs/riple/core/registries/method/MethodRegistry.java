@@ -32,9 +32,10 @@ import com.google.common.collect.MultimapBuilder;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.registries.Registry;
-import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.Printer;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
+import edu.ucr.cs.riple.injector.util.ASTUtils;
 import edu.ucr.cs.riple.scanner.Serializer;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -93,11 +94,11 @@ public class MethodRegistry extends Registry<MethodRecord> {
       }
       // Fill nodes information.
       Integer parentId = Integer.parseInt(values[3]);
-      OnMethod location = new OnMethod(Helper.deserializePath(values[8]), values[1], values[2]);
+      OnMethod location = new OnMethod(Printer.deserializePath(values[8]), values[1], values[2]);
       boolean isConstructor =
-          Helper.extractCallableName(location.method).equals(Helper.simpleName(location.clazz));
+          ASTUtils.extractCallableName(location.method).equals(ASTUtils.simpleName(location.clazz));
       node.fillInformation(
-          new OnMethod(Helper.deserializePath(values[8]), values[1], values[2]),
+          new OnMethod(Printer.deserializePath(values[8]), values[1], values[2]),
           parentId,
           ImmutableSet.copyOf(values[5].split(ANNOTATION_DELIMITER)),
           values[6],

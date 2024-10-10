@@ -35,7 +35,6 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.utils.Pair;
-import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import edu.ucr.cs.riple.injector.location.LocationVisitor;
 import edu.ucr.cs.riple.injector.location.OnClass;
@@ -45,6 +44,8 @@ import edu.ucr.cs.riple.injector.location.OnLocalVariable;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import edu.ucr.cs.riple.injector.util.ASTUtils;
+import edu.ucr.cs.riple.injector.util.TypeUtils;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -91,7 +92,7 @@ public class ChangeVisitor
                   annotationMemberDeclaration -> {
                     if (annotationMemberDeclaration
                         .getNameAsString()
-                        .equals(Helper.extractCallableName(onMethod.method))) {
+                        .equals(ASTUtils.extractCallableName(onMethod.method))) {
                       ans.set(change.computeTextModificationOn(annotationMemberDeclaration));
                     }
                   }));
@@ -187,7 +188,7 @@ public class ChangeVisitor
       }
       // Static block initializers.
       Set<InitializerDeclaration> staticBlock =
-          Helper.getStaticInitializerBlocks((BodyDeclaration<?>) members.getParentNode().get());
+          ASTUtils.getStaticInitializerBlocks((BodyDeclaration<?>) members.getParentNode().get());
       // Locate the block with the target local variable.
       for (InitializerDeclaration block : staticBlock) {
         List<VariableDeclarationExpr> variables =
@@ -210,7 +211,7 @@ public class ChangeVisitor
         if (onLocalVariable.encMethod.matchesCallableDeclaration(callableDeclaration)) {
           // Find variable declaration in the callable declaration with the variable name.
           VariableDeclarationExpr variableDeclarationExpr =
-              Helper.locateVariableDeclarationExpr(callableDeclaration, onLocalVariable.varName);
+              ASTUtils.locateVariableDeclarationExpr(callableDeclaration, onLocalVariable.varName);
           if (variableDeclarationExpr == null) {
             return null;
           }
@@ -238,10 +239,10 @@ public class ChangeVisitor
       return null;
     }
     Set<ClassOrInterfaceType> typeStream =
-        Helper.getEnclosingOrInstantiatedTypes(optionalClass.get());
+        TypeUtils.getEnclosingOrInstantiatedTypes(optionalClass.get());
     for (ClassOrInterfaceType classOrInterfaceType : typeStream) {
-      if (Helper.simpleName(classOrInterfaceType.getNameAsString())
-          .equals(Helper.simpleName(onClassDeclaration.target))) {
+      if (ASTUtils.simpleName(classOrInterfaceType.getNameAsString())
+          .equals(ASTUtils.simpleName(onClassDeclaration.target))) {
         return change.computeTextModificationOn(classOrInterfaceType);
       }
     }
@@ -259,7 +260,7 @@ public class ChangeVisitor
   public Modification computeModification(ASTChange change) {
     NodeList<BodyDeclaration<?>> members;
     try {
-      members = Helper.getTypeDeclarationMembersByFlatName(cu, change.getLocation().clazz);
+      members = ASTUtils.getTypeDeclarationMembersByFlatName(cu, change.getLocation().clazz);
       if (members == null) {
         return null;
       }

@@ -36,7 +36,7 @@ import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.core.util.Utility;
-import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.Printer;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
@@ -109,7 +109,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
         "Expected 12 values to create Error instance in NullAway serialization version 2 but found: "
             + values.length);
     int offset = Integer.parseInt(values[4]);
-    Path path = Helper.deserializePath(values[5]);
+    Path path = Printer.deserializePath(values[5]);
     String errorMessage = values[1];
     String errorType = values[0];
     Region region = new Region(values[2], values[3]);
