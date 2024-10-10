@@ -118,7 +118,7 @@ public class Printer {
    * @return The offset where all the new import declaration statements should be inserted.
    */
   private int findStartOffsetForImports(CompilationUnit tree) {
-    // Get position of last import is exists
+    // Get position of last import if exists
     Optional<ImportDeclaration> optional = tree.getImports().getLast();
     if (optional.isPresent()) {
       // at least one import statement exist, add imports after that

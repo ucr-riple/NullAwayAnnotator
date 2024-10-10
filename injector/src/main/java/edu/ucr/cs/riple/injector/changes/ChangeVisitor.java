@@ -29,11 +29,9 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.CallableDeclaration;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.utils.Pair;
@@ -51,7 +49,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 /**
@@ -240,32 +237,15 @@ public class ChangeVisitor
     if (optionalClass.isEmpty()) {
       return null;
     }
-    Stream<ClassOrInterfaceType> typeStream = null;
-    if (optionalClass.get() instanceof BodyDeclaration<?>) {
-      BodyDeclaration<?> enclosingClass = (BodyDeclaration<?>) optionalClass.get();
-      if (enclosingClass instanceof ClassOrInterfaceDeclaration) {
-        ClassOrInterfaceDeclaration declaration = (ClassOrInterfaceDeclaration) enclosingClass;
-        typeStream =
-            Stream.concat(
-                declaration.getImplementedTypes().stream(),
-                declaration.getExtendedTypes().stream());
+    Set<ClassOrInterfaceType> typeStream =
+        Helper.getEnclosingOrInstantiatedTypes(optionalClass.get());
+    for (ClassOrInterfaceType classOrInterfaceType : typeStream) {
+      if (Helper.simpleName(classOrInterfaceType.getNameAsString())
+          .equals(Helper.simpleName(onClassDeclaration.target))) {
+        return change.computeTextModificationOn(classOrInterfaceType);
       }
     }
-    if (optionalClass.get() instanceof ObjectCreationExpr) {
-      typeStream = Stream.of(((ObjectCreationExpr) optionalClass.get()).getType());
-    }
-    if (typeStream == null) {
-      return null;
-    }
-    final Modification[] modification = {null};
-    typeStream
-        .filter(
-            type ->
-                Helper.simpleName(type.getNameAsString())
-                    .equals(Helper.simpleName(onClassDeclaration.target)))
-        .findFirst()
-        .ifPresent(type -> modification[0] = change.computeTextModificationOn(type));
-    return modification[0];
+    return null;
   }
 
   /**

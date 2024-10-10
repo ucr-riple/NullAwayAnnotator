@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.injector.modifications;
 import com.github.javaparser.Position;
 import java.util.Objects;
 import java.util.Set;
+import javax.annotation.Nonnull;
 
 /**
  * Base class for modifications which require only a single string modification at a position in the
@@ -69,7 +70,7 @@ public abstract class SinglePositionModification implements Modification {
   }
 
   @Override
-  public int compareTo(Modification o) {
+  public int compareTo(@Nonnull Modification o) {
     int value = COMPARATOR.compare(this, o);
     if (value != 0) {
       return value;

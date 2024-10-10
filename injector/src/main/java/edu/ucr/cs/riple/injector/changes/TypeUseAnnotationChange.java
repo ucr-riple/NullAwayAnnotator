@@ -80,6 +80,36 @@ public abstract class TypeUseAnnotationChange extends AnnotationChange {
       modifications.add(onNode);
     }
     // Check if the expression is a variable declaration with an initializer.
+    Type initializedType = getInitializedType(node);
+    for (ImmutableList<Integer> index : typeIndex) {
+      if (index.size() == 1 && index.get(0) == 0) {
+        // Already added on declaration.
+        continue;
+      }
+      // Apply the change on type arguments.
+      modifications.addAll(type.accept(new TypeArgumentChangeVisitor(index, annotationExpr), this));
+      if (initializedType != null) {
+        modifications.addAll(
+            initializedType.accept(new TypeArgumentChangeVisitor(index, annotationExpr), this));
+      }
+    }
+    return modifications.isEmpty() ? null : new MultiPositionModification(modifications);
+  }
+
+  /**
+   * Retrieves the type of the object being initialized within the given node, if applicable. This
+   * method handles nodes representing variable declarations or field declarations that may contain
+   * an initializer expression. If the initializer is an object creation expression, the type of the
+   * created object is returned.
+   *
+   * @param node the node from which to extract the initialized type, either a {@code
+   *     VariableDeclarationExpr} or a {@code FieldDeclaration}.
+   * @param <T> a node that extends both {@code NodeWithAnnotations} and {@code NodeWithRange}.
+   * @return the {@code Type} of the object being initialized if the initializer is an {@code
+   *     ObjectCreationExpr}, or {@code null} if no such type can be determined.
+   */
+  private static <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Type getInitializedType(
+      T node) {
     Type initializedType = null;
     if (node instanceof VariableDeclarationExpr) {
       VariableDeclarationExpr vde = (VariableDeclarationExpr) node;
@@ -104,19 +134,7 @@ public abstract class TypeUseAnnotationChange extends AnnotationChange {
         }
       }
     }
-    for (ImmutableList<Integer> index : typeIndex) {
-      if (index.size() == 1 && index.get(0) == 0) {
-        // Already added on declaration.
-        continue;
-      }
-      // Apply the change on type arguments.
-      modifications.addAll(type.accept(new TypeArgumentChangeVisitor(index, annotationExpr), this));
-      if (initializedType != null) {
-        modifications.addAll(
-            initializedType.accept(new TypeArgumentChangeVisitor(index, annotationExpr), this));
-      }
-    }
-    return modifications.isEmpty() ? null : new MultiPositionModification(modifications);
+    return initializedType;
   }
 
   @Override

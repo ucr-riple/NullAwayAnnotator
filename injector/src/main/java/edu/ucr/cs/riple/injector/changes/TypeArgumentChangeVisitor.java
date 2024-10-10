@@ -68,7 +68,7 @@ public class TypeArgumentChangeVisitor
         return Collections.emptySet();
       }
     }
-    if (type.getTypeArguments().isEmpty() || this.index.size() == 0) {
+    if (type.getTypeArguments().isEmpty() || this.index.isEmpty()) {
       return Collections.emptySet();
     }
     int index = this.index.pollFirst() - 1;

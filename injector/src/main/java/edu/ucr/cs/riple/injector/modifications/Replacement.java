@@ -38,7 +38,7 @@ public class Replacement extends SinglePositionModification {
     super(content, startPosition);
     // Position in javaparser is not 0 indexed and line and column fields are final.
     this.endPosition = new Position(endPosition.line - 1, endPosition.column - 1);
-    if (content.equals("")) {
+    if (content.isEmpty()) {
       throw new IllegalArgumentException("content cannot be empty, use Deletion instead");
     }
   }
@@ -61,7 +61,7 @@ public class Replacement extends SinglePositionModification {
     }
     line = new StringBuilder(lines.get(startPosition.line));
     line.delete(0, endPosition.column + 1);
-    if (!line.toString().equals("")) {
+    if (!line.toString().isEmpty()) {
       // keep other content if exists.
       lines.set(startPosition.line, padding + line.toString().strip());
     } else {

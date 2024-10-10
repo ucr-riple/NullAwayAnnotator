@@ -64,6 +64,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -178,7 +179,7 @@ public class Helper {
             nodes.add(node);
           }
         });
-    if (nodes.size() == 0) {
+    if (nodes.isEmpty()) {
       throw new TargetClassNotFound("Direct-Inner-Class", name, cursor);
     }
     return nodes.get(0);
@@ -331,20 +332,20 @@ public class Helper {
             + " : "
             + flatName);
     String flatNameExcludingPackageName =
-        packageName.equals("") ? flatName : flatName.substring(packageName.length() + 1);
+        packageName.isEmpty() ? flatName : flatName.substring(packageName.length() + 1);
     List<String> keys = new ArrayList<>(Arrays.asList(flatNameExcludingPackageName.split("\\$")));
     Node cursor = findTopLevelClassDeclarationOnCompilationUnit(cu, keys.get(0));
     keys.remove(0);
     for (String key : keys) {
       String indexString = extractIntegerFromBeginningOfStringInString(key);
       String actualName = key.substring(indexString.length());
-      int index = indexString.equals("") ? 0 : Integer.parseInt(indexString) - 1;
+      int index = indexString.isEmpty() ? 0 : Integer.parseInt(indexString) - 1;
       Preconditions.checkNotNull(cursor);
       if (key.matches("\\d+")) {
         cursor = findAnonymousClassOrEnumConstant(cursor, index);
       } else {
         cursor =
-            indexString.equals("")
+            indexString.isEmpty()
                 ? findDirectInnerClass(cursor, actualName)
                 : findNonDirectInnerClass(cursor, actualName, index);
       }
@@ -489,7 +490,7 @@ public class Helper {
       }
       index++;
     }
-    if (name.length() > 0) {
+    if (!name.isEmpty()) {
       ans.append(tmp);
     }
     return ans.toString().replaceAll(" ", "");
@@ -622,6 +623,35 @@ public class Helper {
     }
     throw new RuntimeException(
         "Unexpected type to get range from: " + type + " : " + type.getClass());
+  }
+
+  /**
+   * Retrieves the types associated with the given node. If the node is a class or interface
+   * declaration, it returns the implemented and extended types. If the node is an object creation
+   * expression, it returns the type of the object being created. In all other cases, an empty set
+   * is returned.
+   *
+   * @param node the node from which to extract types, typically a {@code BodyDeclaration<?>} (like
+   *     a class or interface declaration) or an {@code ObjectCreationExpr}.
+   * @return a set of {@code ClassOrInterfaceType} representing the implemented, extended, or
+   *     instantiated types, or an empty set if the node does not contain relevant type information.
+   */
+  public static Set<ClassOrInterfaceType> getEnclosingOrInstantiatedTypes(Node node) {
+    Stream<ClassOrInterfaceType> typeStream = null;
+    if (node instanceof BodyDeclaration<?>) {
+      BodyDeclaration<?> enclosingClass = (BodyDeclaration<?>) node;
+      if (enclosingClass instanceof ClassOrInterfaceDeclaration) {
+        ClassOrInterfaceDeclaration declaration = (ClassOrInterfaceDeclaration) enclosingClass;
+        typeStream =
+            Stream.concat(
+                declaration.getImplementedTypes().stream(),
+                declaration.getExtendedTypes().stream());
+      }
+    }
+    if (node instanceof ObjectCreationExpr) {
+      typeStream = Stream.of(((ObjectCreationExpr) node).getType());
+    }
+    return typeStream == null ? Set.of() : typeStream.collect(Collectors.toSet());
   }
 
   /**
