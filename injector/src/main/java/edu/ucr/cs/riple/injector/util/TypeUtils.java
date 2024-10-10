@@ -51,6 +51,7 @@ import java.util.stream.Stream;
 
 /** Utility class for working with types in Java and Javaparser. */
 public class TypeUtils {
+
   /**
    * Extracts the type of the given node implementing {@link NodeWithAnnotations}.
    *
