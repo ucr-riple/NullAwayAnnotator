@@ -23,6 +23,7 @@
 package edu.ucr.cs.riple.injector;
 
 import com.github.javaparser.ParserConfiguration;
+import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
@@ -34,6 +35,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumConstantDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.RecordDeclaration;
@@ -44,7 +46,11 @@ import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.type.ArrayType;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.PrimitiveType;
+import com.github.javaparser.ast.type.ReferenceType;
 import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.ast.type.WildcardType;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import java.nio.file.Path;
@@ -55,7 +61,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -379,7 +387,7 @@ public class Helper {
    * @param node the node.
    * @return the type of the node.
    */
-  public static Type getType(NodeWithAnnotations<?> node) {
+  public static Type getTypeFromNode(NodeWithAnnotations<?> node) {
     if (node instanceof MethodDeclaration) {
       return ((MethodDeclaration) node).getType();
     }
@@ -400,17 +408,40 @@ public class Helper {
     if (node instanceof VariableDeclarator) {
       return ((VariableDeclarator) node).getType();
     }
-    if (node instanceof ArrayType) {
-      // Currently, we only annotate the element types (contents) of an array, not the pointer
-      // itself.
-      // TODO: This should be updated in a follow-up PR. This will reflect both type-use and
-      // type-declaration annotations.
-      return ((ArrayType) node).getElementType();
-    }
     if (node instanceof Type) {
       return ((Type) node);
     }
-    throw new RuntimeException("Unknown node type: " + node.getClass());
+    return null;
+  }
+
+  /**
+   * Extracts the type of the given node implementing {@link NodeWithAnnotations}.
+   *
+   * @param node the node.
+   * @return the type of the node.
+   */
+  public static Type getType(NodeWithAnnotations<?> node) {
+    // Currently, we only annotate the element types (contents) of an array, not the pointer
+    // itself.
+    // TODO: This should be updated in a follow-up PR. This will reflect both type-use and
+    // TODO: type-declaration annotations.
+    Type type = getTypeFromNode(node);
+    return type instanceof ArrayType ? ((ArrayType) type).getComponentType() : type;
+  }
+
+  /**
+   * Helper method to check if a type is annotated with a specific annotation.
+   *
+   * @param type the type to check its annotations.
+   * @param expr the annotation to check.
+   * @return true if the node is annotated with the annotation.
+   */
+  public static boolean isAnnotatedWith(Type type, AnnotationExpr expr) {
+    if (type instanceof WildcardType) {
+      Optional<ReferenceType> extendedType = ((WildcardType) type).getExtendedType();
+      return extendedType.isPresent() && isAnnotatedWith(extendedType.get(), expr);
+    }
+    return type.getAnnotations().stream().anyMatch(annot -> annot.getName().equals(expr.getName()));
   }
 
   /**
@@ -420,13 +451,8 @@ public class Helper {
    * @param expr the annotation to check.
    * @return true if the node is annotated with the annotation.
    */
-  public static boolean isAnnotatedWith(Node node, AnnotationExpr expr) {
-    if (!(node instanceof NodeWithAnnotations)) {
-      // Node cannot have annotations.
-      return false;
-    }
-    return ((NodeWithAnnotations<?>) node)
-        .getAnnotations().stream().anyMatch(annot -> annot.equals(expr));
+  public static boolean isAnnotatedWith(NodeWithAnnotations<?> node, AnnotationExpr expr) {
+    return node.getAnnotations().stream().anyMatch(annot -> annot.getName().equals(expr.getName()));
   }
 
   /**
@@ -559,6 +585,58 @@ public class Helper {
     return packageDeclaration
         .map(declaration -> declaration.getNameAsString().startsWith(rootPackage))
         .orElse(false);
+  }
+
+  /**
+   * Returns containing static initializer blocks of a {@link BodyDeclaration}.
+   *
+   * @param bodyDeclaration the body declaration to get its static initializer blocks.
+   * @return the static initializer blocks of the body declaration.
+   */
+  public static Set<InitializerDeclaration> getStaticInitializerBlocks(
+      BodyDeclaration<?> bodyDeclaration) {
+    return bodyDeclaration.getChildNodes().stream()
+        .filter(
+            node ->
+                node instanceof InitializerDeclaration
+                    && ((InitializerDeclaration) node).isStatic())
+        .map(node -> (InitializerDeclaration) node)
+        .collect(Collectors.toSet());
+  }
+
+  /**
+   * Finds the range of the simple name in the fully qualified name of the given type in the source
+   * code. This is used to insert the type use annotations before the type simple name.
+   *
+   * @param type the type to find its range
+   * @return the range of the type or null if the type does not have a range.
+   */
+  public static Range findSimpleNameRangeInTypeName(Type type) {
+    if (type instanceof ClassOrInterfaceType) {
+      ClassOrInterfaceType classOrInterfaceType = (ClassOrInterfaceType) type;
+      if (classOrInterfaceType.getName().getRange().isEmpty()) {
+        return null;
+      }
+      return ((ClassOrInterfaceType) type).getName().getRange().get();
+    }
+    if (type instanceof ArrayType) {
+      return findSimpleNameRangeInTypeName(((ArrayType) type).getComponentType());
+    }
+    if (type instanceof PrimitiveType) {
+      if (type.getRange().isEmpty()) {
+        return null;
+      }
+      return type.getRange().get();
+    }
+    if (type instanceof WildcardType) {
+      if (((WildcardType) type).getExtendedType().isEmpty()) {
+        // type is simply: "?"
+        return type.getRange().get();
+      }
+      return findSimpleNameRangeInTypeName(((WildcardType) type).getExtendedType().orElse(null));
+    }
+    throw new RuntimeException(
+        "Unexpected type to get range from: " + type + " : " + type.getClass());
   }
 
   /**

@@ -30,6 +30,8 @@ public enum LocationKind {
   CLASS,
   FIELD,
   METHOD,
+  POLY_METHOD,
+  CLASS_DECL,
   PARAMETER;
 
   /**
@@ -53,6 +55,12 @@ public enum LocationKind {
     }
     if (kind.equalsIgnoreCase("class")) {
       return CLASS;
+    }
+    if (kind.equalsIgnoreCase("poly_method")) {
+      return POLY_METHOD;
+    }
+    if (kind.equalsIgnoreCase("class_declaration")) {
+      return CLASS_DECL;
     }
     throw new UnsupportedOperationException("Cannot detect kind: " + kind);
   }

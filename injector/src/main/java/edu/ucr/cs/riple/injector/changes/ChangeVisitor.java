@@ -29,21 +29,29 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.CallableDeclaration;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.utils.Pair;
 import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import edu.ucr.cs.riple.injector.location.LocationVisitor;
 import edu.ucr.cs.riple.injector.location.OnClass;
+import edu.ucr.cs.riple.injector.location.OnClassDeclaration;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnLocalVariable;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 /**
@@ -173,6 +181,32 @@ public class ChangeVisitor
       OnLocalVariable onLocalVariable, Pair<NodeList<BodyDeclaration<?>>, ASTChange> pair) {
     final NodeList<BodyDeclaration<?>> members = pair.a;
     final ASTChange change = pair.b;
+    if (onLocalVariable.encMethod == null) {
+      // The local variable is inside a static block initializer.
+      if (members.getParentNode().isEmpty()
+          || !(members.getParentNode().get() instanceof BodyDeclaration<?>)) {
+        // Highly unlikely, but we still do the check and return.
+        return null;
+      }
+      // Static block initializers.
+      Set<InitializerDeclaration> staticBlock =
+          Helper.getStaticInitializerBlocks((BodyDeclaration<?>) members.getParentNode().get());
+      // Locate the block with the target local variable.
+      for (InitializerDeclaration block : staticBlock) {
+        List<VariableDeclarationExpr> variables =
+            block.findAll(VariableDeclarationExpr.class, Node.TreeTraversal.PREORDER);
+        for (VariableDeclarationExpr variableDeclarationExpr : variables) {
+          for (VariableDeclarator variableDeclarator : variableDeclarationExpr.getVariables()) {
+            if (variableDeclarator.getName().toString().equals(onLocalVariable.varName)) {
+              onLocalVariable.isOnArray = variableDeclarator.getType().isArrayType();
+              // Located the variable.
+              return change.computeTextModificationOn(variableDeclarationExpr);
+            }
+          }
+        }
+      }
+      return null;
+    }
     for (BodyDeclaration<?> member : members) {
       if (member instanceof CallableDeclaration<?>) {
         CallableDeclaration<?> callableDeclaration = (CallableDeclaration<?>) member;
@@ -185,6 +219,7 @@ public class ChangeVisitor
           }
           for (VariableDeclarator variableDeclarator : variableDeclarationExpr.getVariables()) {
             if (variableDeclarator.getName().toString().equals(onLocalVariable.varName)) {
+              onLocalVariable.isOnArray = variableDeclarator.getType().isArrayType();
               // Located the variable.
               return change.computeTextModificationOn(variableDeclarationExpr);
             }
@@ -193,6 +228,44 @@ public class ChangeVisitor
       }
     }
     return null;
+  }
+
+  @Override
+  public Modification visitClassDeclaration(
+      OnClassDeclaration onClassDeclaration, Pair<NodeList<BodyDeclaration<?>>, ASTChange> pair) {
+    final NodeList<BodyDeclaration<?>> members = pair.a;
+    final ASTChange change = pair.b;
+    // Get the enclosing class of the members
+    Optional<Node> optionalClass = members.getParentNode();
+    if (optionalClass.isEmpty()) {
+      return null;
+    }
+    Stream<ClassOrInterfaceType> typeStream = null;
+    if (optionalClass.get() instanceof BodyDeclaration<?>) {
+      BodyDeclaration<?> enclosingClass = (BodyDeclaration<?>) optionalClass.get();
+      if (enclosingClass instanceof ClassOrInterfaceDeclaration) {
+        ClassOrInterfaceDeclaration declaration = (ClassOrInterfaceDeclaration) enclosingClass;
+        typeStream =
+            Stream.concat(
+                declaration.getImplementedTypes().stream(),
+                declaration.getExtendedTypes().stream());
+      }
+    }
+    if (optionalClass.get() instanceof ObjectCreationExpr) {
+      typeStream = Stream.of(((ObjectCreationExpr) optionalClass.get()).getType());
+    }
+    if (typeStream == null) {
+      return null;
+    }
+    final Modification[] modification = {null};
+    typeStream
+        .filter(
+            type ->
+                Helper.simpleName(type.getNameAsString())
+                    .equals(Helper.simpleName(onClassDeclaration.target)))
+        .findFirst()
+        .ifPresent(type -> modification[0] = change.computeTextModificationOn(type));
+    return modification[0];
   }
 
   /**

@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2022 University of California, Riverside.
+ * MIT License
+ *
+ * Copyright (c) 2023 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,39 +22,38 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.injector.changes;
+package edu.ucr.cs.riple.injector.location;
 
-import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
-import com.github.javaparser.ast.nodeTypes.NodeWithRange;
-import edu.ucr.cs.riple.injector.location.Location;
-import edu.ucr.cs.riple.injector.modifications.Modification;
-import javax.annotation.Nullable;
+import edu.ucr.cs.riple.injector.Helper;
+import java.nio.file.Path;
+import org.json.simple.JSONObject;
 
-/** Represents a change in the AST of the source code. */
-public interface ASTChange {
+public class OnClassDeclaration extends Location {
 
-  /**
-   * Visits the given node and translates the change to a text modification.
-   *
-   * @param node Given node.
-   * @return A text modification instance if the translation is successful, otherwise {@code null}
-   *     will be returned.
-   */
-  @Nullable
-  <T extends NodeWithAnnotations<?> & NodeWithRange<?>> Modification computeTextModificationOn(
-      T node);
+  public final String target;
 
-  /**
-   * Returns the location of the change.
-   *
-   * @return The location of the change.
-   */
-  Location getLocation();
+  public OnClassDeclaration(Path path, String clazz, String target) {
+    super(LocationKind.CLASS_DECL, path, clazz);
+    this.target = target;
+  }
 
-  /**
-   * Copies this instance and returns it.
-   *
-   * @return Copy of this instance.
-   */
-  ASTChange copy();
+  public OnClassDeclaration(String path, String clazz, String target) {
+    super(LocationKind.CLASS_DECL, Helper.deserializePath(path), clazz);
+    this.target = target;
+  }
+
+  public OnClassDeclaration(JSONObject json) {
+    super(LocationKind.CLASS_DECL, json);
+    this.target = (String) json.get("target");
+  }
+
+  @Override
+  public <R, P> R accept(LocationVisitor<R, P> v, P p) {
+    return v.visitClassDeclaration(this, p);
+  }
+
+  @Override
+  public String toString() {
+    return "OnClassDeclaration{" + ", clazz='" + clazz + '\'' + ", path=" + path + '}';
+  }
 }

@@ -95,11 +95,6 @@ public class OnMethod extends Location {
     return Objects.hash(super.hashCode(), method);
   }
 
-  @Override
-  public String toString() {
-    return "OnMethod{" + "method='" + method + '\'' + ", clazz='" + clazz + '\'' + '}';
-  }
-
   /**
    * Checks if this location is targeting a constructor.
    *
@@ -107,5 +102,11 @@ public class OnMethod extends Location {
    */
   public boolean isOnConstructor() {
     return Helper.extractCallableName(method).equals(Helper.simpleName(clazz));
+  }
+
+  @Override
+  public String toString() {
+    String onPath = this.path == null ? ", Path is null " : "";
+    return "OnMethod{" + "method='" + method + '\'' + ", clazz='" + clazz + '\'' + onPath + '}';
   }
 }

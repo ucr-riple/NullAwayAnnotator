@@ -28,10 +28,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.injector.Helper;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
+import org.json.simple.JSONObject;
 
 /** Represents a location of an element in the source code. */
 public abstract class Location {
@@ -57,6 +59,19 @@ public abstract class Location {
     this.kind = kind;
     this.clazz = clazz;
     this.path = path;
+  }
+
+  /**
+   * Creates an instance of {@link Location} for a given type, and retrieves path and class values
+   * from the given JSON object.
+   *
+   * @param kind The kind of the location.
+   * @param json The JSON object containing the path and class values.
+   */
+  public Location(LocationKind kind, JSONObject json) {
+    this.kind = kind;
+    this.clazz = (String) json.get("class");
+    this.path = Paths.get((String) json.get("path"));
   }
 
   /**
@@ -96,8 +111,10 @@ public abstract class Location {
         return new OnMethod(path, clazz, values[2]);
       case PARAMETER:
         return new OnParameter(path, clazz, values[2], Integer.parseInt(values[4]));
+      default:
+        throw new RuntimeException(
+            "Cannot reach this statement, values: " + Arrays.toString(values));
     }
-    throw new RuntimeException("Cannot reach this statement, values: " + Arrays.toString(values));
   }
 
   /**
