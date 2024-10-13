@@ -94,6 +94,11 @@ public class AddMarkerAnnotation extends AnnotationChange implements AddAnnotati
 
   @Override
   public int hashCode() {
-    return Objects.hash("ADD", location, annotationName);
+    return Objects.hash(AddMarkerAnnotation.class, location, annotationName);
+  }
+
+  @Override
+  public ASTChange copy() {
+    return new AddMarkerAnnotation(location, annotationName.fullName);
   }
 }

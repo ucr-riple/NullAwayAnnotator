@@ -23,14 +23,16 @@
 package edu.ucr.cs.riple.injector.changes;
 
 import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
-import com.github.javaparser.ast.nodeTypes.NodeWithRange;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.WildcardType;
 import com.github.javaparser.ast.visitor.GenericVisitorWithDefaults;
+import com.google.common.collect.ImmutableList;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import java.util.ArrayDeque;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.Deque;
 import java.util.Set;
 
 /**
@@ -46,36 +48,54 @@ import java.util.Set;
  * types are desired, their corresponding visit methods should be overridden.
  */
 public class TypeArgumentChangeVisitor
-    extends GenericVisitorWithDefaults<Set<Modification>, ASTChange> {
+    extends GenericVisitorWithDefaults<Set<Modification>, TypeUseAnnotationChange> {
 
-  @Override
-  public Set<Modification> visit(ClassOrInterfaceType type, ASTChange change) {
-    if (type.getTypeArguments().isEmpty()) {
-      return Collections.emptySet();
-    }
-    Set<Modification> result = new HashSet<>();
-    type.getTypeArguments()
-        .get()
-        .forEach(
-            typeArg -> {
-              Modification onType =
-                  change.computeTextModificationOn(
-                      (NodeWithAnnotations<?> & NodeWithRange<?>) typeArg);
-              if (onType != null) {
-                result.add(onType);
-              }
-            });
-    return result;
+  private final Deque<Integer> index;
+  private final AnnotationExpr annotationExpr;
+
+  public TypeArgumentChangeVisitor(ImmutableList<Integer> index, AnnotationExpr annotationExpr) {
+    this.index = new ArrayDeque<>(index);
+    this.annotationExpr = annotationExpr;
   }
 
   @Override
-  public Set<Modification> visit(ArrayType type, ASTChange change) {
+  public Set<Modification> visit(ClassOrInterfaceType type, TypeUseAnnotationChange change) {
+    if (index.size() == 1 && index.getFirst() == 0) {
+      Modification onType = change.computeTextModificationOnType(type, annotationExpr);
+      if (onType != null) {
+        return Set.of(onType);
+      } else {
+        return Collections.emptySet();
+      }
+    }
+    if (type.getTypeArguments().isEmpty() || this.index.isEmpty()) {
+      return Collections.emptySet();
+    }
+    int index = this.index.pollFirst() - 1;
+    if (type.getTypeArguments().get().size() <= index) {
+      return Collections.emptySet();
+    }
+    return type.getTypeArguments().get().get(index).accept(this, change);
+  }
+
+  @Override
+  public Set<Modification> visit(ArrayType type, TypeUseAnnotationChange change) {
     return type.getComponentType().accept(this, change);
+  }
+
+  @Override
+  public Set<Modification> visit(WildcardType type, TypeUseAnnotationChange change) {
+    Modification onType = change.computeTextModificationOnType(type, annotationExpr);
+    if (onType != null) {
+      return Set.of(onType);
+    } else {
+      return Collections.emptySet();
+    }
   }
 
   /** This will be called by every node visit method that is not overridden. */
   @Override
-  public Set<Modification> defaultAction(Node n, ASTChange arg) {
+  public Set<Modification> defaultAction(Node n, TypeUseAnnotationChange arg) {
     // For now, we do not intend to annotate any other type.
     return Collections.emptySet();
   }

@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.injector.tools;
 import static edu.ucr.cs.riple.injector.tools.Utility.pathOf;
 import static org.junit.Assert.fail;
 
+import com.github.javaparser.ParserConfiguration;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.changes.ASTChange;
 import java.io.IOException;
@@ -47,6 +48,8 @@ public class InjectorTestHelper {
     this.rootPath = path;
     this.changes = new ArrayList<>();
     this.files = new ArrayList<>();
+    ParserConfiguration parserConfiguration = new ParserConfiguration();
+    parserConfiguration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
     makeDirectories();
   }
 
@@ -74,7 +77,7 @@ public class InjectorTestHelper {
   }
 
   public void start() {
-    Injector injector = new Injector();
+    Injector injector = new Injector(ParserConfiguration.LanguageLevel.JAVA_17);
     injector.start(Set.copyOf(changes));
     for (String key : files) {
       try {

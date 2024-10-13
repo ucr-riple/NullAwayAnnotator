@@ -28,6 +28,7 @@ import edu.ucr.cs.riple.injector.Helper;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
 
 /**
  * Represents a location for local variable element. This location is used to apply changes to a
@@ -36,15 +37,20 @@ import java.util.function.Consumer;
  */
 public class OnLocalVariable extends Location {
 
-  /** Enclosing method of the target local variable. */
-  public final OnMethod encMethod;
+  /**
+   * Enclosing method of the target local variable. If null, this location points to a local
+   * variable inside a static initializer block
+   */
+  @Nullable public final OnMethod encMethod;
 
   /** Name of the local variable. */
   public final String varName;
 
+  public boolean isOnArray = false;
+
   public OnLocalVariable(Path path, String clazz, String encMethod, String varName) {
     super(LocationKind.LOCAL_VARIABLE, path, clazz);
-    this.encMethod = new OnMethod(path, clazz, encMethod);
+    this.encMethod = encMethod.isEmpty() ? null : new OnMethod(path, clazz, encMethod);
     this.varName = varName;
   }
 
@@ -69,7 +75,13 @@ public class OnLocalVariable extends Location {
       return false;
     }
     OnLocalVariable that = (OnLocalVariable) o;
-    return this.encMethod.equals(that.encMethod) && this.varName.equals(that.varName);
+    if (!this.varName.equals(that.varName)) {
+      return false;
+    }
+    if (this.encMethod == null) {
+      return that.encMethod == null;
+    }
+    return this.encMethod.equals(that.encMethod);
   }
 
   @Override
@@ -84,6 +96,7 @@ public class OnLocalVariable extends Location {
 
   @Override
   public String toString() {
+    String onPath = this.path == null ? ", Path is null " : "";
     return "OnLocalVariable{"
         + "encMethod='"
         + encMethod
@@ -93,6 +106,7 @@ public class OnLocalVariable extends Location {
         + '\''
         + "varName='"
         + varName
+        + onPath
         + '}';
   }
 }
