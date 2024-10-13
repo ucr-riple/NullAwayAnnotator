@@ -28,6 +28,7 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
+import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.Type;
 import com.google.common.collect.ImmutableList;
 import edu.ucr.cs.riple.injector.Helper;
@@ -67,6 +68,13 @@ public class AddTypeUseMarkerAnnotation extends TypeUseAnnotationChange implemen
     Range range = findSimpleNameRangeInTypeName(type);
     if (range == null) {
       return null;
+    }
+
+    if (type instanceof ArrayType) {
+      ArrayType.Origin origin = ((ArrayType) type).getOrigin();
+      if (origin == ArrayType.Origin.TYPE) {
+        range = range.withBeginColumn(range.end.column + 1);
+      }
     }
     return new Insertion(annotationExpr.toString(), range.begin);
   }

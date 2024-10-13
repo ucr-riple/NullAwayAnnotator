@@ -244,9 +244,9 @@ public class OnLocalVariableInjectionTest extends BaseInjectorTest {
             "import edu.ucr.UnTainted;",
             "public class Foo<T> {",
             "   public void foo() {",
-            "      Map<String, T @UnTainted []>[] f0;",
-            "      T @UnTainted [] f1;",
-            "      String @UnTainted [] f2;",
+            "      @UnTainted Map<String, T[]>[] f0;",
+            "      @UnTainted T[] f1;",
+            "      @UnTainted String[] f2;",
             "   }",
             "}")
         .addChanges(

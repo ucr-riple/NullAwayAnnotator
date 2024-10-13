@@ -63,35 +63,6 @@ public class OnFieldInjectionTest extends BaseInjectorTest {
   }
 
   @Test
-  public void fieldNullableArray() {
-    injectorTestHelper
-        .addInput(
-            "Foo.java",
-            "package test;",
-            "import javax.annotation.Nullable;",
-            "public class Foo {",
-            "   Object[] h = new Object[4];",
-            "   public void test(@Nullable Object[] f) {",
-            "      h = f;",
-            "   }",
-            "}")
-        .expectOutput(
-            "package test;",
-            "import javax.annotation.Nullable;",
-            "public class Foo {",
-            "   Object @Nullable [] h = new Object[4];",
-            "   public void test(@Nullable Object[] f) {",
-            "      h = f;",
-            "   }",
-            "}")
-        .addChanges(
-            new AddMarkerAnnotation(
-                new OnField("Foo.java", "test.Foo", Collections.singleton("h")),
-                "javax.annotation.Nullable"))
-        .start();
-  }
-
-  @Test
   public void addDeclarationAnnotationOnFieldWithTypeAnnotation() {
     injectorTestHelper
         .addInput(

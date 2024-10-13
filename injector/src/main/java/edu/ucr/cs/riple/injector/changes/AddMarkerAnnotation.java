@@ -62,17 +62,7 @@ public class AddMarkerAnnotation extends AnnotationChange implements AddAnnotati
     if (annotAlreadyExists) {
       return null;
     }
-
-    String annotation = annotationExpr.toString();
-    // Check node for array
-    int index = node.toString().indexOf('[');
-    // Node has array
-    if (index != -1) {
-      int begin = range.begin.column + index;
-      range = range.withBeginColumn(range.begin.column + index);
-      annotation = " " + annotation;
-    }
-    return new Insertion(annotation, range.begin);
+    return new Insertion(annotationExpr.toString(), range.begin);
   }
 
   @Override

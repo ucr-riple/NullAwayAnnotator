@@ -278,7 +278,7 @@ public class LexicalPreservationTest extends BaseInjectorTest {
             "package test;",
             "import javax.annotation.Nullable;",
             "public class A {",
-            "   private Object @Nullable [] allTest;",
+            "   @Nullable private Object[] allTest;",
             "}")
         .addInput(
             "B.java", "package test;", "public class B {", "   private Object allTest[];", "}")
