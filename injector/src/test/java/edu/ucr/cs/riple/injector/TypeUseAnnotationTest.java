@@ -231,8 +231,8 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "public class Foo<T> {",
             "   public void foo() {",
             "      java.util.@Nullable Map<java.lang.@Nullable String, @Nullable String[]> f0;",
-            "      @Nullable Map<@Nullable T, @Nullable T>[] f1;",
-            "      @Nullable String[] f2;",
+            "      Map<@Nullable T, @Nullable T> @Nullable [] f1;",
+            "      String @Nullable [] f2;",
             "   }",
             "}")
         .addChanges(

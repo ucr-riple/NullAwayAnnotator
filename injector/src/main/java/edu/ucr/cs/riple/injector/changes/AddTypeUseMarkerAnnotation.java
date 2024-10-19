@@ -69,14 +69,12 @@ public class AddTypeUseMarkerAnnotation extends TypeUseAnnotationChange implemen
     if (range == null) {
       return null;
     }
-
+    String annotationExpression = annotationExpr.toString();
+    // Need to add a space between annotation and simpleName if type is array type
     if (type instanceof ArrayType) {
-      ArrayType.Origin origin = ((ArrayType) type).getOrigin();
-      if (origin == ArrayType.Origin.TYPE) {
-        range = range.withBeginColumn(range.end.column + 1);
-      }
+      annotationExpression = " " + annotationExpression;
     }
-    return new Insertion(annotationExpr.toString(), range.begin);
+    return new Insertion(annotationExpression, range.begin);
   }
 
   @Override
