@@ -222,17 +222,18 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "   public void foo() {",
             "      java.util.Map<java.lang.String, String[]> f0;",
             "      Map<T, T>[] f1;",
-            "      String[] f2;",
+            "      int[] f2;",
             "   }",
             "}")
         .expectOutput(
-            "package test;",
+
+                "package test;",
             "import edu.ucr.custom.Nullable;",
             "public class Foo<T> {",
             "   public void foo() {",
-            "      java.util.@Nullable Map<java.lang.@Nullable String, @Nullable String[]> f0;",
+            "      java.util.@Nullable Map<java.lang.@Nullable String, String @Nullable []> f0;",
             "      Map<@Nullable T, @Nullable T> @Nullable [] f1;",
-            "      String @Nullable [] f2;",
+            "      int @Nullable [] f2;",
             "   }",
             "}")
         .addChanges(
