@@ -80,7 +80,20 @@ public class TypeArgumentChangeVisitor
 
   @Override
   public Set<Modification> visit(ArrayType type, TypeUseAnnotationChange change) {
-    return type.getComponentType().accept(this, change);
+    if (index.size() == 1 && index.getFirst() == 0) {
+      Modification onType = change.computeTextModificationOnType(type, annotationExpr);
+      if (onType != null) {
+        return Set.of(onType);
+      }
+    }
+    // if current index is 1, the process component type
+    if (!index.isEmpty()) {
+      boolean onComponentType = index.pollFirst() == 1;
+      if (onComponentType) {
+        return type.getComponentType().accept(this, change);
+      }
+    }
+    return Collections.emptySet();
   }
 
   @Override

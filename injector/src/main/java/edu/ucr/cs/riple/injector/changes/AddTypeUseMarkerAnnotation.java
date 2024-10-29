@@ -28,7 +28,6 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
-import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.Type;
 import com.google.common.collect.ImmutableList;
 import edu.ucr.cs.riple.injector.Helper;
@@ -69,12 +68,7 @@ public class AddTypeUseMarkerAnnotation extends TypeUseAnnotationChange implemen
     if (range == null) {
       return null;
     }
-    String annotationExpression = annotationExpr.toString();
-    // Need to add a space between annotation and simpleName if type is array type
-    if (type instanceof ArrayType) {
-      annotationExpression = " " + annotationExpression;
-    }
-    return new Insertion(annotationExpression, range.begin);
+    return new Insertion(annotationExpr.toString(), range.begin);
   }
 
   @Override
@@ -114,6 +108,7 @@ public class AddTypeUseMarkerAnnotation extends TypeUseAnnotationChange implemen
   @Nullable
   public AddTypeUseMarkerAnnotation toDeclaration() {
     // check if the annotation is on array declaration
+    // TODO check this for array.
     if (isOnLocalVariableArray() && typeIndex.contains(ImmutableList.of(0))) {
       return null;
     }
