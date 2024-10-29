@@ -95,9 +95,9 @@ public class ASTUtils {
    */
   public static boolean isTypeDeclarationOrAnonymousClass(Node node) {
     return node instanceof ClassOrInterfaceDeclaration
-            || node instanceof EnumDeclaration
-            || node instanceof AnnotationDeclaration
-            || (node instanceof ObjectCreationExpr
+        || node instanceof EnumDeclaration
+        || node instanceof AnnotationDeclaration
+        || (node instanceof ObjectCreationExpr
             && ((ObjectCreationExpr) node).getAnonymousClassBody().isPresent());
   }
 
@@ -112,7 +112,7 @@ public class ASTUtils {
    * @throws TargetClassNotFound if the target class is not found.
    */
   public static NodeList<BodyDeclaration<?>> getTypeDeclarationMembersByFlatName(
-          CompilationUnit cu, String flatName) throws TargetClassNotFound {
+      CompilationUnit cu, String flatName) throws TargetClassNotFound {
     String packageName;
     Optional<PackageDeclaration> packageDeclaration = cu.getPackageDeclaration();
     if (packageDeclaration.isPresent()) {
@@ -121,13 +121,13 @@ public class ASTUtils {
       packageName = "";
     }
     Preconditions.checkArgument(
-            flatName.startsWith(packageName),
-            "Package name of compilation unit is incompatible with class name: "
-                    + packageName
-                    + " : "
-                    + flatName);
+        flatName.startsWith(packageName),
+        "Package name of compilation unit is incompatible with class name: "
+            + packageName
+            + " : "
+            + flatName);
     String flatNameExcludingPackageName =
-            packageName.isEmpty() ? flatName : flatName.substring(packageName.length() + 1);
+        packageName.isEmpty() ? flatName : flatName.substring(packageName.length() + 1);
     List<String> keys = new ArrayList<>(Arrays.asList(flatNameExcludingPackageName.split("\\$")));
     Node cursor = findTopLevelClassDeclarationOnCompilationUnit(cu, keys.get(0));
     keys.remove(0);
@@ -140,9 +140,9 @@ public class ASTUtils {
         cursor = findAnonymousClassOrEnumConstant(cursor, index);
       } else {
         cursor =
-                indexString.isEmpty()
-                        ? findDirectInnerClass(cursor, actualName)
-                        : findNonDirectInnerClass(cursor, actualName, index);
+            indexString.isEmpty()
+                ? findDirectInnerClass(cursor, actualName)
+                : findNonDirectInnerClass(cursor, actualName, index);
       }
     }
     return getMembersOfNode(cursor);
@@ -159,7 +159,7 @@ public class ASTUtils {
    */
   @Nullable
   public static VariableDeclarationExpr locateVariableDeclarationExpr(
-          CallableDeclaration<?> encMethod, String varName) {
+      CallableDeclaration<?> encMethod, String varName) {
     // Should not visit inner nodes of inner methods in the given method, since the given
     // method should be the closest enclosing method of the target local variable. Therefore, we
     // use DirectMethodParentIterator to skip inner methods.
@@ -169,7 +169,7 @@ public class ASTUtils {
       if (n instanceof VariableDeclarationExpr) {
         VariableDeclarationExpr v = (VariableDeclarationExpr) n;
         if (v.getVariables().stream()
-                .anyMatch(variableDeclarator -> variableDeclarator.getNameAsString().equals(varName))) {
+            .anyMatch(variableDeclarator -> variableDeclarator.getNameAsString().equals(varName))) {
           return v;
         }
       }
@@ -251,14 +251,14 @@ public class ASTUtils {
    * @return the static initializer blocks of the body declaration.
    */
   public static Set<InitializerDeclaration> getStaticInitializerBlocks(
-          BodyDeclaration<?> bodyDeclaration) {
+      BodyDeclaration<?> bodyDeclaration) {
     return bodyDeclaration.getChildNodes().stream()
-            .filter(
-                    node ->
-                            node instanceof InitializerDeclaration
-                                    && ((InitializerDeclaration) node).isStatic())
-            .map(node -> (InitializerDeclaration) node)
-            .collect(Collectors.toSet());
+        .filter(
+            node ->
+                node instanceof InitializerDeclaration
+                    && ((InitializerDeclaration) node).isStatic())
+        .map(node -> (InitializerDeclaration) node)
+        .collect(Collectors.toSet());
   }
 
   /**
@@ -273,7 +273,7 @@ public class ASTUtils {
    */
   @Nonnull
   private static TypeDeclaration<?> findTopLevelClassDeclarationOnCompilationUnit(
-          CompilationUnit tree, String name) throws TargetClassNotFound {
+      CompilationUnit tree, String name) throws TargetClassNotFound {
     Optional<ClassOrInterfaceDeclaration> classDeclaration = tree.getClassByName(name);
     if (classDeclaration.isPresent()) {
       return classDeclaration.get();
@@ -283,7 +283,7 @@ public class ASTUtils {
       return enumDeclaration.get();
     }
     Optional<AnnotationDeclaration> annotationDeclaration =
-            tree.getAnnotationDeclarationByName(name);
+        tree.getAnnotationDeclarationByName(name);
     if (annotationDeclaration.isPresent()) {
       return annotationDeclaration.get();
     }
@@ -309,12 +309,12 @@ public class ASTUtils {
   private static Node findDirectInnerClass(Node cursor, String name) throws TargetClassNotFound {
     List<Node> nodes = new ArrayList<>();
     cursor.walk(
-            Node.TreeTraversal.DIRECT_CHILDREN,
-            node -> {
-              if (isDeclarationWithName(node, name)) {
-                nodes.add(node);
-              }
-            });
+        Node.TreeTraversal.DIRECT_CHILDREN,
+        node -> {
+          if (isDeclarationWithName(node, name)) {
+            nodes.add(node);
+          }
+        });
     if (nodes.isEmpty()) {
       throw new TargetClassNotFound("Direct-Inner-Class", name, cursor);
     }
@@ -331,15 +331,15 @@ public class ASTUtils {
    * @throws TargetClassNotFound if the target class is not found.
    */
   private static Node findNonDirectInnerClass(Node cursor, String name, int index)
-          throws TargetClassNotFound {
+      throws TargetClassNotFound {
     final List<Node> candidates = new ArrayList<>();
     walk(
-            cursor,
-            candidates,
-            node ->
-                    isDeclarationWithName(node, name)
-                            && node.getParentNode().isPresent()
-                            && !node.getParentNode().get().equals(cursor));
+        cursor,
+        candidates,
+        node ->
+            isDeclarationWithName(node, name)
+                && node.getParentNode().isPresent()
+                && !node.getParentNode().get().equals(cursor));
     if (index >= candidates.size()) {
       throw new TargetClassNotFound("Non-Direct-Inner-Class", index + name, cursor);
     }
@@ -369,7 +369,7 @@ public class ASTUtils {
    * @throws TargetClassNotFound if the target class is not found.
    */
   private static Node findAnonymousClassOrEnumConstant(Node cursor, int index)
-          throws TargetClassNotFound {
+      throws TargetClassNotFound {
     final List<Node> candidates = new ArrayList<>();
     if (cursor instanceof EnumDeclaration) {
       // According to the Java language specification, enum constants are the first members of
@@ -383,14 +383,14 @@ public class ASTUtils {
       index -= constants.size();
     }
     walk(
-            cursor,
-            candidates,
-            node -> {
-              if (node instanceof ObjectCreationExpr) {
-                return ((ObjectCreationExpr) node).getAnonymousClassBody().isPresent();
-              }
-              return false;
-            });
+        cursor,
+        candidates,
+        node -> {
+          if (node instanceof ObjectCreationExpr) {
+            return ((ObjectCreationExpr) node).getAnonymousClassBody().isPresent();
+          }
+          return false;
+        });
     if (index >= candidates.size()) {
       throw new TargetClassNotFound("Top-Level-Anonymous-Class", "$" + index, cursor);
     }
@@ -459,15 +459,15 @@ public class ASTUtils {
    */
   private static void walk(Node cursor, List<Node> candidates, Predicate<Node> predicate) {
     cursor.walk(
-            Node.TreeTraversal.DIRECT_CHILDREN,
-            node -> {
-              if (!isTypeDeclarationOrAnonymousClass(node)) {
-                walk(node, candidates, predicate);
-              }
-              if (predicate.test(node)) {
-                candidates.add(node);
-              }
-            });
+        Node.TreeTraversal.DIRECT_CHILDREN,
+        node -> {
+          if (!isTypeDeclarationOrAnonymousClass(node)) {
+            walk(node, candidates, predicate);
+          }
+          if (predicate.test(node)) {
+            candidates.add(node);
+          }
+        });
   }
 
   /**
