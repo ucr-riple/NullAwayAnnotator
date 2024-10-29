@@ -106,6 +106,7 @@ public class AddTypeUseMarkerAnnotation extends TypeUseAnnotationChange implemen
   @Nullable
   public AddTypeUseMarkerAnnotation toDeclaration() {
     // check if the annotation is on array declaration
+    // TODO check this for array.
     if (isOnLocalVariableArray() && typeIndex.contains(ImmutableList.of(0))) {
       return null;
     }
