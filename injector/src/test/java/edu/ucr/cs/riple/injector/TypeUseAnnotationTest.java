@@ -807,16 +807,16 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "package test;",
             "import javax.annotation.Nullable;",
             "public class Foo {",
-            "   Object[] h = new Object[4];",
+            "   Object@Nullable [] h = new Object[4];",
             "}")
         .expectOutput(
             "package test;",
             "import javax.annotation.Nullable;",
             "public class Foo {",
-            "   Object@Nullable [] h = new Object[4];",
+            "   Object[] h = new Object[4];",
             "}")
         .addChanges(
-            new AddTypeUseMarkerAnnotation(
+            new RemoveTypeUseMarkerAnnotation(
                 new OnField("Foo.java", "test.Foo", Collections.singleton("h")),
                 "javax.annotation.Nullable"))
         .start();
