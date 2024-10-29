@@ -777,7 +777,30 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
   }
 
   @Test
-  public void simpleArrayNullableInsertion() {
+  public void nullableArrayAdditionOnReference() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "   Object[] h = new Object[4];",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "   Object@Nullable [] h = new Object[4];",
+            "}")
+        .addChanges(
+            new AddTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Collections.singleton("h")),
+                "javax.annotation.Nullable"))
+        .start();
+  }
+
+  @Test
+  public void nullableArrayDeletionOnReference() {
     injectorTestHelper
         .addInput(
             "Foo.java",
