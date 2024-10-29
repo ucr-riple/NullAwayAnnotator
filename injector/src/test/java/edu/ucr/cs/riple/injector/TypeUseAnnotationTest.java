@@ -226,8 +226,7 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "   }",
             "}")
         .expectOutput(
-
-                "package test;",
+            "package test;",
             "import edu.ucr.custom.Nullable;",
             "public class Foo<T> {",
             "   public void foo() {",
