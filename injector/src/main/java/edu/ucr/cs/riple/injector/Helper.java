@@ -22,8 +22,10 @@
 
 package edu.ucr.cs.riple.injector;
 
+import com.github.javaparser.JavaToken;
 import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.Range;
+import com.github.javaparser.TokenRange;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
@@ -608,7 +610,16 @@ public class Helper {
       return ((ClassOrInterfaceType) type).getName().getRange().get();
     }
     if (type instanceof ArrayType) {
-      return findSimpleNameRangeInTypeName(((ArrayType) type).getComponentType());
+      Optional<TokenRange> tokenRange = type.getTokenRange();
+      if (tokenRange.isEmpty()) {
+        return null;
+      }
+      for (JavaToken javaToken : tokenRange.get()) {
+        if (javaToken.asString().equals("[")) {
+          return javaToken.getRange().orElse(null);
+        }
+      }
+      return null;
     }
     if (type instanceof PrimitiveType) {
       if (type.getRange().isEmpty()) {

@@ -140,7 +140,7 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "import edu.ucr.custom.Nullable;",
             "public class Foo {",
             "   java.lang.@Nullable Object bar;",
-            "   java.util.@Nullable Map<java.lang.@Nullable String, @Nullable String[]> f0;",
+            "   java.util.@Nullable Map<java.lang.@Nullable String, String@Nullable []> f0;",
             "   java.lang.@Nullable Object baz(java.lang.@Nullable Object param) {;",
             "       java.lang.@Nullable Object localVar;",
             "       return new Object();",
@@ -175,7 +175,7 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "import edu.ucr.custom.Nullable;",
             "public class Foo {",
             "   java.lang.@Nullable Object bar;",
-            "   java.util.@Nullable Map<java.lang.@Nullable String, @Nullable String[]> f0;",
+            "   java.util.@Nullable Map<java.lang.@Nullable String, String @Nullable []> f0;",
             "   java.lang.@Nullable Object baz(java.lang.@Nullable Object param) {;",
             "       java.lang.@Nullable Object localVar;",
             "       return new Object();",
@@ -186,7 +186,7 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "import edu.ucr.custom.Nullable;",
             "public class Foo {",
             "   java.lang.Object bar;",
-            "   java.util.Map<java.lang.String, String[]> f0;",
+            "   java.util.Map<java.lang.String, String []> f0;",
             "   java.lang.Object baz(java.lang.Object param) {;",
             "       java.lang.Object localVar;",
             "       return new Object();",
@@ -222,7 +222,7 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "   public void foo() {",
             "      java.util.Map<java.lang.String, String[]> f0;",
             "      Map<T, T>[] f1;",
-            "      String[] f2;",
+            "      int[] f2;",
             "   }",
             "}")
         .expectOutput(
@@ -230,9 +230,9 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "import edu.ucr.custom.Nullable;",
             "public class Foo<T> {",
             "   public void foo() {",
-            "      java.util.@Nullable Map<java.lang.@Nullable String, @Nullable String[]> f0;",
-            "      @Nullable Map<@Nullable T, @Nullable T>[] f1;",
-            "      @Nullable String[] f2;",
+            "      java.util.@Nullable Map<java.lang.@Nullable String, String@Nullable []> f0;",
+            "      Map<@Nullable T, @Nullable T>@Nullable [] f1;",
+            "      int@Nullable [] f2;",
             "   }",
             "}")
         .addChanges(
@@ -245,7 +245,7 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f1"),
                 "edu.ucr.custom.Nullable",
                 ImmutableList.of(
-                    ImmutableList.of(0), ImmutableList.of(1, 0), ImmutableList.of(2, 0))),
+                    ImmutableList.of(0), ImmutableList.of(1, 1, 0), ImmutableList.of(1, 2, 0))),
             new AddTypeUseMarkerAnnotation(
                 new OnLocalVariable("Foo.java", "test.Foo", "foo()", "f2"),
                 "edu.ucr.custom.Nullable"))
@@ -261,14 +261,14 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "import edu.ucr.custom.Nullable;",
             "public class Foo {",
             "   java.util.Map<String, String[]> f0;",
-            "   java.util.@Nullable Map<@Nullable String, @Nullable String[]> f1;",
-            "   @Nullable Map<java.util.@Nullable Map, @Nullable String>[] f2;",
+            "   java.util.@Nullable Map<@Nullable String, String@Nullable []> f1;",
+            "   Map<java.util.@Nullable Map, @Nullable String>@Nullable [] f2;",
             "}")
         .expectOutput(
             "package test;",
             "import edu.ucr.custom.Nullable;",
             "public class Foo {",
-            "   java.util.@Nullable Map<@Nullable String, @Nullable String[]> f0;",
+            "   java.util.@Nullable Map<@Nullable String, String@Nullable []> f0;",
             "   java.util.Map<String, String[]> f1;",
             "   Map<java.util.Map, String>[] f2;",
             "}")
@@ -287,7 +287,7 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
                 new OnField("Foo.java", "test.Foo", Set.of("f2")),
                 "edu.ucr.custom.Nullable",
                 ImmutableList.of(
-                    ImmutableList.of(0), ImmutableList.of(1, 0), ImmutableList.of(2, 0))))
+                    ImmutableList.of(0), ImmutableList.of(1, 1, 0), ImmutableList.of(1, 2, 0))))
         .start();
   }
 
@@ -409,7 +409,7 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
             "      @Nullable int f0 = 0;",
             "      @Nullable Bar<@Nullable String, @Nullable Integer, @Nullable Baz<@Nullable String, @Nullable Integer>> f1 = new Bar<@Nullable String, @Nullable Integer, @Nullable Baz<@Nullable String, @Nullable Integer>>();",
             "      @Nullable String f2 = \"FOO\";",
-            "      @Nullable Bar<@Nullable String, @Nullable Integer[], @Nullable Baz<@Nullable String, @Nullable Integer>> f3 = new Bar<@Nullable String, @Nullable Integer[], @Nullable Baz<@Nullable String, @Nullable Integer>>();",
+            "      @Nullable Bar<@Nullable String, Integer@Nullable [], @Nullable Baz<@Nullable String, @Nullable Integer>> f3 = new Bar<@Nullable String, Integer@Nullable [], @Nullable Baz<@Nullable String, @Nullable Integer>>();",
             "   }",
             "}")
         .expectOutput(
@@ -773,6 +773,52 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
                 new OnLocalVariable("Foo.java", "test.Foo", "bar()", "a2"),
                 "edu.ucr.custom.Nullable",
                 ImmutableList.of(ImmutableList.of(1, 0))))
+        .start();
+  }
+
+  @Test
+  public void nullableArrayAdditionOnReference() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "   Object[] h = new Object[4];",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "   Object@Nullable [] h = new Object[4];",
+            "}")
+        .addChanges(
+            new AddTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Collections.singleton("h")),
+                "javax.annotation.Nullable"))
+        .start();
+  }
+
+  @Test
+  public void nullableArrayDeletionOnReference() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "   Object@Nullable [] h = new Object[4];",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "   Object[] h = new Object[4];",
+            "}")
+        .addChanges(
+            new RemoveTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Collections.singleton("h")),
+                "javax.annotation.Nullable"))
         .start();
   }
 }
