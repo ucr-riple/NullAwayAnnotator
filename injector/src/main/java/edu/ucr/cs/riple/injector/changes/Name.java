@@ -22,7 +22,7 @@
 
 package edu.ucr.cs.riple.injector.changes;
 
-import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.util.ASTUtils;
 import java.util.Objects;
 
 /** A name that may consist of multiple identifiers. */
@@ -36,7 +36,7 @@ public class Name {
 
   public Name(String fullName) {
     this.fullName = fullName;
-    this.simpleName = Helper.simpleName(fullName);
+    this.simpleName = ASTUtils.simpleName(fullName);
   }
 
   @Override

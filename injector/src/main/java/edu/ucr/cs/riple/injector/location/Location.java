@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.injector.location;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
-import edu.ucr.cs.riple.injector.Helper;
+import edu.ucr.cs.riple.injector.Printer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -102,7 +102,7 @@ public abstract class Location {
       return null;
     }
     LocationKind type = LocationKind.getKind(values[0]);
-    Path path = Helper.deserializePath(values[5]);
+    Path path = Printer.deserializePath(values[5]);
     String clazz = values[1];
     switch (type) {
       case FIELD:

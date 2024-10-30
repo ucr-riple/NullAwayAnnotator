@@ -36,12 +36,13 @@ import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.registries.Registry;
-import edu.ucr.cs.riple.injector.Helper;
 import edu.ucr.cs.riple.injector.Injector;
+import edu.ucr.cs.riple.injector.Printer;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnClass;
 import edu.ucr.cs.riple.injector.location.OnField;
+import edu.ucr.cs.riple.injector.util.ASTUtils;
 import edu.ucr.cs.riple.scanner.Serializer;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -106,7 +107,7 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
         // This optimization is according to the assumption that Scanner
         // visits all classes within a single compilation unit tree consecutively.
         // Path to class.
-        Path path = Helper.deserializePath(values[1]);
+        Path path = Printer.deserializePath(values[1]);
         CompilationUnit tree;
         if (lastParsedSourceFile.a != null && lastParsedSourceFile.a.equals(path)) {
           // Already visited.
@@ -123,7 +124,7 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
         // Class flat name.
         String clazz = values[0];
         try {
-          members = Helper.getTypeDeclarationMembersByFlatName(tree, clazz);
+          members = ASTUtils.getTypeDeclarationMembersByFlatName(tree, clazz);
         } catch (TargetClassNotFound notFound) {
           System.err.println(notFound.getMessage());
           return null;

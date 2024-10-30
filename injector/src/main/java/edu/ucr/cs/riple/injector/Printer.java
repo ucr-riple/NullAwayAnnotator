@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -176,5 +177,32 @@ public class Printer {
       throw new RuntimeException(e);
     }
     return offsetStore;
+  }
+
+  /**
+   * Deserializes a Path instance from a string.
+   *
+   * @param serializedPath Serialized path to file.
+   * @return The modified Path.
+   */
+  public static Path deserializePath(String serializedPath) {
+    final String jarPrefix = "jar:";
+    final String filePrefix = "file://";
+    String path = serializedPath;
+    if (serializedPath.startsWith(jarPrefix)) {
+      path = path.substring(jarPrefix.length());
+    }
+    if (serializedPath.startsWith(filePrefix)) {
+      path = path.substring(filePrefix.length());
+    }
+    // Keep only one occurrence of "/" from the beginning if more than one exists.
+    path = Paths.get(path).toString();
+    int start = 0;
+    while (start + 1 < path.length()
+        && path.charAt(start) == '/'
+        && path.charAt(start + 1) == '/') {
+      start++;
+    }
+    return Paths.get(path.substring(start));
   }
 }

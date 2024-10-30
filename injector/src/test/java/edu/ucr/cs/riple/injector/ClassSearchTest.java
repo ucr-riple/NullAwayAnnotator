@@ -33,6 +33,7 @@ import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
+import edu.ucr.cs.riple.injector.util.ASTUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
@@ -501,7 +502,7 @@ public class ClassSearchTest extends BaseInjectorTest {
     TargetClassNotFound thrown =
         assertThrows(
             TargetClassNotFound.class,
-            () -> Helper.getTypeDeclarationMembersByFlatName(tree, "com.test.NotIncluded"));
+            () -> ASTUtils.getTypeDeclarationMembersByFlatName(tree, "com.test.NotIncluded"));
     assertTrue(thrown.getMessage().contains(expectedErrorMessage));
   }
 
