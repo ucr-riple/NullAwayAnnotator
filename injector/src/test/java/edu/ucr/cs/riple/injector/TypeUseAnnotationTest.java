@@ -821,4 +821,28 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
                 "javax.annotation.Nullable"))
         .start();
   }
+
+  @Test
+  public void nullableArrayAdditionOnComponentWithArrayOfPrimitiveType() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "   List<char[]> h3 = new ArrayList<>();",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "   List<@Nullable char[]> h3 = new ArrayList<>();",
+            "}")
+        .addChanges(
+            new AddTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Collections.singleton("h3")),
+                "javax.annotation.Nullable",
+                ImmutableList.of(ImmutableList.of(1, 1, 0))))
+        .start();
+  }
 }
