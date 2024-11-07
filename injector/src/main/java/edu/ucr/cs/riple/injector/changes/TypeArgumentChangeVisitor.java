@@ -26,6 +26,8 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.PrimitiveType;
+import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.WildcardType;
 import com.github.javaparser.ast.visitor.GenericVisitorWithDefaults;
 import com.google.common.collect.ImmutableList;
@@ -58,15 +60,36 @@ public class TypeArgumentChangeVisitor
     this.annotationExpr = annotationExpr;
   }
 
+  /**
+   * Applies the change on the given type.
+   *
+   * @param type the type to apply the change on.
+   * @param change the change to apply.
+   * @return the set of modifications to apply on the type.
+   */
+  private Set<Modification> applyOnType(Type type, TypeUseAnnotationChange change) {
+    Modification onType = change.computeTextModificationOnType(type, annotationExpr);
+    if (onType != null) {
+      return Set.of(onType);
+    } else {
+      // Unable to apply the change on the type.
+      return Collections.emptySet();
+    }
+  }
+
+  /**
+   * Checks if the index reached to base.
+   *
+   * @return true if the index is at base, false otherwise.
+   */
+  private boolean isAtBase() {
+    return index.size() == 1 && index.getFirst() == 0;
+  }
+
   @Override
   public Set<Modification> visit(ClassOrInterfaceType type, TypeUseAnnotationChange change) {
-    if (index.size() == 1 && index.getFirst() == 0) {
-      Modification onType = change.computeTextModificationOnType(type, annotationExpr);
-      if (onType != null) {
-        return Set.of(onType);
-      } else {
-        return Collections.emptySet();
-      }
+    if (isAtBase()) {
+      return applyOnType(type, change);
     }
     if (type.getTypeArguments().isEmpty() || this.index.isEmpty()) {
       return Collections.emptySet();
@@ -80,11 +103,8 @@ public class TypeArgumentChangeVisitor
 
   @Override
   public Set<Modification> visit(ArrayType type, TypeUseAnnotationChange change) {
-    if (index.size() == 1 && index.getFirst() == 0) {
-      Modification onType = change.computeTextModificationOnType(type, annotationExpr);
-      if (onType != null) {
-        return Set.of(onType);
-      }
+    if (isAtBase()) {
+      return applyOnType(type, change);
     }
     // if current index is 1, the process component type
     if (!index.isEmpty()) {
@@ -98,12 +118,23 @@ public class TypeArgumentChangeVisitor
 
   @Override
   public Set<Modification> visit(WildcardType type, TypeUseAnnotationChange change) {
-    Modification onType = change.computeTextModificationOnType(type, annotationExpr);
-    if (onType != null) {
-      return Set.of(onType);
-    } else {
-      return Collections.emptySet();
+    return applyOnType(type, change);
+  }
+
+  /**
+   * This method is called when the visitor visits a primitive type. This is necessary because the
+   * component type of array may be a primitive type.
+   *
+   * @param type the primitive type
+   * @param change the change to apply
+   * @return the set of modifications to apply on the type.
+   */
+  @Override
+  public Set<Modification> visit(PrimitiveType type, TypeUseAnnotationChange change) {
+    if (isAtBase()) {
+      return applyOnType(type, change);
     }
+    return Collections.emptySet();
   }
 
   /** This will be called by every node visit method that is not overridden. */
