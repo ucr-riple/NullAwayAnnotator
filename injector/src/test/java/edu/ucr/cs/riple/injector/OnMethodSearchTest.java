@@ -27,11 +27,9 @@ package edu.ucr.cs.riple.injector;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
-@RunWith(JUnit4.class)
 public class OnMethodSearchTest extends BaseInjectorTest {
+
   @Test
   public void initializerConstructor() {
     injectorTestHelper

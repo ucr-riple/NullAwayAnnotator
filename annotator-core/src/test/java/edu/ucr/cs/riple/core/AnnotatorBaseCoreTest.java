@@ -31,12 +31,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /** Base class for all core tests. */
+@Ignore
 @RunWith(JUnit4.class)
 public abstract class AnnotatorBaseCoreTest {
 

@@ -30,10 +30,7 @@ import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.util.Collections;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
-@RunWith(JUnit4.class)
 public class AnnotationWithArgumentTest extends BaseInjectorTest {
 
   @Test
@@ -422,7 +419,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
         .expectOutput(
             "package com.edu;",
             "public class Super {",
-            // Google java format will convert annot below into multi line format if needed.
+            // Google java format will convert annot below into multi-line format if needed.
             "   @SuppressWarnings({ \"InvalidThrowsLink\", \"MalformedInlineTag\", \"unchecked\", \"NullAway.Init\" })",
             "   Object h = new Object();",
             "   public void test(Object f) {",

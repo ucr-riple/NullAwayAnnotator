@@ -75,7 +75,7 @@ public class ConfigurationTest {
   @Before
   public void init() {
     testDir = temporaryFolder.getRoot().toPath();
-    // Make dummy config paths for 5 targets
+    // Make fake config paths for 5 targets
     try (OutputStream os = new FileOutputStream(testDir.resolve("paths.tsv").toFile())) {
       for (int i = 0; i < 5; i++) {
         String row = i + "nullaway.xml" + "\t" + i + "scanner.xml" + "\n";
@@ -303,9 +303,9 @@ public class ConfigurationTest {
 
   /**
    * Helper method for reading value of a node located at /key_1/key_2/.../key_n (in the form of
-   * {@code Xpath} query) from a xml document at the given path.
+   * {@code Xpath} query) from an XML document at the given path.
    *
-   * @param path Path to xml file.
+   * @param path Path to an XML file.
    * @param key Key to locate the value, can be nested in the form of {@code Xpath} query (e.g.
    *     /key1/key2/.../key_n).
    * @return The value in the specified keychain as {@code String}.

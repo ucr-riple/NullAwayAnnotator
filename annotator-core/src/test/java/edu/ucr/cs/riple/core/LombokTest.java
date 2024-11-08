@@ -50,10 +50,10 @@ public class LombokTest extends AnnotatorBaseCoreTest {
             "class Main {",
             "   Object f;",
             "   public Object m1(){",
-            "       return getF();", // Should be error
+            "       return getF();", // Should be an error
             "   }",
             "   public Object m2(){",
-            "       return getF();", // Should be error
+            "       return getF();", // Should be an error
             "   }",
             "}")
         .withExpectedReports(
@@ -80,7 +80,7 @@ public class LombokTest extends AnnotatorBaseCoreTest {
             "package test;",
             "class Dep {",
             "   public Object returnNullable(){",
-            "       return new Main().getF();", // Should be error
+            "       return new Main().getF();", // Should be an error
             "   }",
             "}")
         .withExpectedReports(
@@ -88,7 +88,7 @@ public class LombokTest extends AnnotatorBaseCoreTest {
                 new OnField("Main.java", "test.Main", Collections.singleton("f")),
                 0,
                 // The copied annotation on the getF creates an unresolvable error in downstream
-                // dependency, hence, the tree should be rejected.
+                // dependency; hence, the tree should be rejected.
                 Report.Tag.REJECT))
         .setPredicate(
             (expected, found) ->

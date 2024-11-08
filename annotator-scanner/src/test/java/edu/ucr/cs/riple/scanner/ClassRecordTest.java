@@ -28,10 +28,7 @@ import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.scanner.tools.ClassRecordDisplay;
 import edu.ucr.cs.riple.scanner.tools.DisplayFactory;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
-@RunWith(JUnit4.class)
 public class ClassRecordTest extends AnnotatorScannerBaseTest<ClassRecordDisplay> {
 
   private static final DisplayFactory<ClassRecordDisplay> CLASS_DISPLAY_FACTORY =
@@ -59,7 +56,7 @@ public class ClassRecordTest extends AnnotatorScannerBaseTest<ClassRecordDisplay
   }
 
   @Test
-  public void checkClassesAreWrittenInFlatName() {
+  public void checkClassesAreWrittenInFlatNameTest() {
     tester
         .addSourceFile("SampleClassForTest.java")
         .setExpectedOutputs(

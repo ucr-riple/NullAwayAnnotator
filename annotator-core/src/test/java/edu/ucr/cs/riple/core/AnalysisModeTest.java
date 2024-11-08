@@ -49,14 +49,14 @@ public class AnalysisModeTest extends AnnotatorBaseCoreTest {
         .withDependency("Dep")
         .withSourceFile("Dep.java", "analysismode/Dep.java")
         .withExpectedReports(
-            // Resolves 6 errors locally and all errors on downstream dependencies can be resolved
-            // with no new triggered error, therefore the effect is -6. The fix triggers no error
-            // in downstream dependencies, should be approved.
+            // Resolves 6 errors locally, and all errors on downstream dependencies can be resolved
+            // with no new triggered error; therefore, the effect is -6.
+            // The fix triggers no error in downstream dependencies, should be approved.
             new TReport(
                 new OnMethod("Foo.java", "test.target.Foo", "returnNullGood()"), -6, APPROVE),
             // Resolves 6 errors locally but creates 1 error on downstream dependencies that cannot
-            // be resolved, therefore the effect is -5. The fix triggers 1 error in downstream
-            // dependencies, should be rejected.
+            // be resolved; therefore, the effect is -5.
+            // The fix triggers 1 error in downstream dependencies, should be rejected.
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullBad()"), -5, REJECT))
         .setPredicate(
             (expected, found) ->
@@ -105,8 +105,8 @@ public class AnalysisModeTest extends AnnotatorBaseCoreTest {
             new TReport(
                 new OnMethod("Foo.java", "test.target.Foo", "returnNullGood()"), -6, APPROVE),
             // Resolves 6 errors locally but creates 1 error on downstream dependencies that cannot
-            // be resolved, one of the triggered fixes in the tree, triggers an error in downstream
-            // dependency, the overall effect is -6 + 1 + 1 = -4 in upper bound mode.
+            // be resolved; one of the triggered fixes in the tree, triggers an error in downstream
+            // dependency; the overall effect is -6 + 1 + 1 = -4 in upper-bound mode.
             new TReport(
                 new OnMethod("Foo.java", "test.target.Foo", "returnNullBad()"), -4, APPROVE))
         .setPredicate(
@@ -129,14 +129,14 @@ public class AnalysisModeTest extends AnnotatorBaseCoreTest {
         .withDependency("Dep")
         .withSourceFile("Dep.java", "analysismode/Dep.java")
         .withExpectedReports(
-            // Resolves 6 errors locally and all errors on downstream dependencies can be resolved
-            // with no new triggered error, therefore the effect is -6. The fix triggers no error
-            // in downstream dependencies, should be approved.
+            // Resolves 6 errors locally, and all errors on downstream dependencies can be resolved
+            // with no new triggered error; therefore, the effect is -6.
+            // The fix triggers no error in downstream dependencies, should be approved.
             new TReport(
                 new OnMethod("Foo.java", "test.target.Foo", "returnNullGood()"), -6, APPROVE),
             // Resolves 6 errors locally but creates 1 error on downstream dependencies that cannot
-            // be resolved, therefore the effect is -5. The fix triggers 1 error in downstream
-            // dependencies, should be rejected.
+            // be resolved; therefore, the effect is -5.
+            // The fix triggers 1 error in downstream dependencies, should be rejected.
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullBad()"), -5, REJECT))
         .setPredicate(
             (expected, found) ->

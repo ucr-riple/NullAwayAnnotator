@@ -28,9 +28,14 @@ import edu.ucr.cs.riple.injector.tools.InjectorTestHelper;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
+@Ignore
+@RunWith(JUnit4.class)
 public class BaseInjectorTest {
 
   @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();

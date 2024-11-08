@@ -28,10 +28,7 @@ import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.scanner.tools.DisplayFactory;
 import edu.ucr.cs.riple.scanner.tools.ImpactedRegionRecordDisplay;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
-@RunWith(JUnit4.class)
 public class MethodImpactedRegionTest
     extends AnnotatorScannerBaseTest<ImpactedRegionRecordDisplay> {
 
@@ -58,7 +55,7 @@ public class MethodImpactedRegionTest
   }
 
   @Test
-  public void BasicTest() {
+  public void basicTest() {
     tester
         .addSourceLines(
             "edu/ucr/A.java",
@@ -104,7 +101,7 @@ public class MethodImpactedRegionTest
   }
 
   @Test
-  public void methodReference() {
+  public void methodReferenceTest() {
     tester
         .addSourceLines(
             "edu/ucr/A.java",
@@ -131,7 +128,7 @@ public class MethodImpactedRegionTest
   }
 
   @Test
-  public void lambda() {
+  public void lambdaTest() {
     tester
         .addSourceLines(
             "edu/ucr/A.java",

@@ -77,7 +77,7 @@ public class NullableFlowToUpstreamTest extends AnnotatorBaseCoreTest {
                         "Foo.java", "test.target.Foo", "bar1(java.lang.Object,java.lang.Object)")),
                 Collections.emptySet()),
             // Change creates two errors on downstream dependencies (1 resolvable) and resolves one
-            // error locally, therefore the overall effect is 0.
+            // error locally; therefore, the overall effect is 0.
             new TReport(
                 new OnMethod("Foo.java", "test.target.Foo", "getNull()"),
                 0,
@@ -141,7 +141,6 @@ public class NullableFlowToUpstreamTest extends AnnotatorBaseCoreTest {
             new TReport(
                 new OnField("Bar.java", "test.Bar", Set.of("foo")),
                 -1,
-                // fixes in tree:
                 Set.of(
                     new OnMethod("Bar.java", "test.Bar", "getFoo(String)"),
                     // coming from flow of nullable back to target through a field write.

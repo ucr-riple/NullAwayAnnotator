@@ -59,7 +59,7 @@ public class DownstreamAnalysisTest extends AnnotatorBaseCoreTest {
             // DepA by 0, DepB by 1 and DepC by 0. Hence, the total effect is: -4.
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableGood(int)"), -4),
             // Change increases errors on target by 1, and also increases them in downstream
-            // dependency DepA by 1. Hence , the total effect is: 2.
+            // dependency DepA by 1.Hence, the total effect is: 2.
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "bar()"), 2))
         .setPredicate(
             (expected, found) ->
@@ -108,21 +108,21 @@ public class DownstreamAnalysisTest extends AnnotatorBaseCoreTest {
         .withSourceFile("DepC.java", "downstreamDependencyFieldCheck/DepC.java")
         .withExpectedReports(
             // Effect on target is -1, Effect on DepA is 0 and on DepB and DepC is 1 ->
-            // Lower bound is 2. And overall effect is -1 + 2 = 1. Effect is greater than 0 and
-            // triggers unresolved errors on downstream dependencies, hence the tree should be
-            // tagged as REJECT.
+            // Lower bound is 2. And overall effect is -1 + 2 = 1.
+            // The Effect is greater than 0 and triggers unresolved errors on downstream
+            // dependencies, hence the tree should be tagged as REJECT.
             new TReport(new OnField("Foo.java", "test.target.Foo", Set.of("f")), 1, REJECT),
             // Effect on target is -2. Root is on f1, but it triggers making f @Nullable as well.
-            // Fix tree containing both fixes resolves two errors leaving no remaining error, effect
-            // on target is -2. But f creates 2 errors on downstream dependencies, hence the lower
-            // bound is 2. Overall effect is -2 + 2 = 0. Since f creates unresolved errors on
+            // Fix a tree containing both fixes resolves two errors leaving no remaining error,
+            // effect on target is -2. But f creates 2 errors on downstream dependencies, hence the
+            // lower bound is 2. Overall effect is -2 + 2 = 0. Since f creates unresolved errors on
             // downstream dependencies, the tree should be tagged as REJECT even though the overall
             // effect is not greater than 0.
             new TReport(new OnField("Foo.java", "test.target.Foo", Set.of("f1")), 0, REJECT),
             // Effect on target is -1. Root is on f2, but it triggers making f3 @Nullable through an
-            // assignment in DepA and the tree is extended to include the corresponding fix. Since,
+            // assignment in DepA and the tree is extended to include the corresponding fix. Since
             // f2 creates a resolvable error in downstream dependencies that the corresponding fix
-            // is present in the fix tree, the lower bound effect is 0. Overall effect is -1 + 0 =
+            // is present in the fix tree, the lower-bound effect is 0. Overall effect is -1 + 0 =
             // -1. Since the overall effect is less than 0, with no error in downstream
             // dependencies, the tree should be tagged as APPROVE.
             new TReport(new OnField("Foo.java", "test.target.Foo", Set.of("f2")), -1, APPROVE))
@@ -158,8 +158,8 @@ public class DownstreamAnalysisTest extends AnnotatorBaseCoreTest {
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableBad(int)"), 10),
             // Only returnNullableGood triggers new errors in this fix chain (+1), lower bound is 1.
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableGood(int)"), 1),
-            // Root fix triggers 1 error on downstream dependency but returnNullableBad is
-            // present in the fix tree, therefore the lower bound effect for the tree should be 10.
+            // Root fix triggers 1 error on downstream dependency, but returnNullableBad is
+            // present in the fix tree, therefore, the lower-bound effect for the tree should be 10.
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "bar()"), 10))
         .setPredicate(
             (expected, found) ->
@@ -191,8 +191,8 @@ public class DownstreamAnalysisTest extends AnnotatorBaseCoreTest {
             // should be 1
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "returnNullableGood(int)"), 1),
             // Root fix triggers 1 error on downstream dependency and returnNullableBad is
-            // present in the fix tree and triggers 10 errors on downstream dependency, therefore
-            // the upper bound effect for the tree should be 11.
+            // present in the fix tree and triggers 10 errors on downstream dependency, therefore,
+            // the upper-bound effect for the tree should be 11.
             new TReport(new OnMethod("Foo.java", "test.target.Foo", "bar()"), 11))
         .setPredicate(
             (expected, found) ->

@@ -29,10 +29,7 @@ import edu.ucr.cs.riple.injector.changes.AddTypeUseMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.RemoveTypeUseMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.OnClassDeclaration;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
-@RunWith(JUnit4.class)
 public class OnClassDeclarationInjectionTest extends BaseInjectorTest {
 
   @Test

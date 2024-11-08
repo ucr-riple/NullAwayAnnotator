@@ -58,7 +58,7 @@ import org.w3c.dom.Element;
 public class ConfigurationTest {
 
   @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
-  // Just a dummy factory to run the tests with, tests will not even start with a null factory.
+  // Just a fake factory to run the tests with, tests will not even start with a null factory.
   protected DisplayFactory<Display> factory =
       values -> new ClassRecordDisplay("Unknown", "Unknown");
   protected SerializationTestHelper<Display> tester;
@@ -71,7 +71,7 @@ public class ConfigurationTest {
 
   @Test
   public void checkExceptionIsThrownIfConfigPathNotSet() {
-    // -XepOpt:Scanner:ConfigPath is not set should expect an error.
+    // - XepOpt:Scanner:ConfigPath is not set should expect an error.
     tester =
         new SerializationTestHelper<>(root)
             .setArgs(
