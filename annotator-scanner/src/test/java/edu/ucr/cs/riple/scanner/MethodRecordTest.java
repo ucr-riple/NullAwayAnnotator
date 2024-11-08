@@ -29,10 +29,7 @@ import edu.ucr.cs.riple.scanner.tools.DisplayFactory;
 import edu.ucr.cs.riple.scanner.tools.MethodRecordDisplay;
 import java.util.Arrays;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
-@RunWith(JUnit4.class)
 public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDisplay> {
 
   private static final DisplayFactory<MethodRecordDisplay> METHOD_DISPLAY_FACTORY =
@@ -70,7 +67,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDispl
   }
 
   @Test
-  public void BasicTest() {
+  public void basicTest() {
     tester
         .addSourceLines(
             "edu/ucr/A.java",
@@ -95,7 +92,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDispl
   }
 
   @Test
-  public void TestID() {
+  public void methodIDAssignmentTest() {
     tester
         .addSourceLines(
             "edu/ucr/A.java",
@@ -262,7 +259,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDispl
   }
 
   @Test
-  public void testLombokGeneratedAnnotationsOnMethod() {
+  public void lombokGeneratedAnnotationsOnMethodTest() {
     tester
         .addSourceLines(
             "lombok/Generated.java", "package lombok;", "public @interface Generated { }")
@@ -293,7 +290,7 @@ public class MethodRecordTest extends AnnotatorScannerBaseTest<MethodRecordDispl
   }
 
   @Test
-  public void testTypeUseAnnotationSerialization() {
+  public void typeUseAnnotationSerializationTest() {
     tester
         .addSourceLines(
             // Exact copy of org.jspecify.annotations.Nullable

@@ -40,6 +40,7 @@ import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 
 public class InjectorTestHelper {
+
   private final List<ASTChange> changes;
   private final List<String> files;
   private final Path rootPath;

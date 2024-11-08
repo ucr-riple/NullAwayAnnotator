@@ -28,10 +28,7 @@ import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.scanner.tools.DisplayFactory;
 import edu.ucr.cs.riple.scanner.tools.ImpactedRegionRecordDisplay;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
-@RunWith(JUnit4.class)
 public class FieldImpactedRegionTest extends AnnotatorScannerBaseTest<ImpactedRegionRecordDisplay> {
 
   private static final DisplayFactory<ImpactedRegionRecordDisplay> FIELD_TRACKER_DISPLAY_FACTORY =
@@ -57,7 +54,7 @@ public class FieldImpactedRegionTest extends AnnotatorScannerBaseTest<ImpactedRe
   }
 
   @Test
-  public void BasicTest() {
+  public void basicTest() {
     tester
         .addSourceLines(
             "edu/ucr/A.java",
@@ -146,7 +143,7 @@ public class FieldImpactedRegionTest extends AnnotatorScannerBaseTest<ImpactedRe
   }
 
   @Test
-  public void LombokGeneratedCodeDetectionTest() {
+  public void lombokGeneratedCodeDetectionTest() {
     tester
         .addSourceLines(
             "lombok/Generated.java", "package lombok;", "public @interface Generated { }")

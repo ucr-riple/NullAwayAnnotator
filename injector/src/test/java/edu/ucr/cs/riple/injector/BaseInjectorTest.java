@@ -30,7 +30,10 @@ import java.nio.file.Paths;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
+@RunWith(JUnit4.class)
 public class BaseInjectorTest {
 
   @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();

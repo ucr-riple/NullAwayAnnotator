@@ -39,10 +39,7 @@ import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
-@RunWith(JUnit4.class)
 public class ClassSearchTest extends BaseInjectorTest {
 
   @Test

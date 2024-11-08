@@ -38,7 +38,10 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
+@RunWith(JUnit4.class)
 public abstract class AnnotatorScannerBaseTest<T extends Display> {
 
   @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
