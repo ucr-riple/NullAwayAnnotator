@@ -69,7 +69,7 @@ public class ImportDeclarationAdditionTest extends BaseInjectorTest {
   @Test
   public void customEndingWithNullableExists() {
     // Custom annot ending with Nullable exists, the import declaration should be added since we
-    // only skip if the simple name is exactly is Nullable.
+    // only skip if the simple name is exactly Nullable.
     injectorTestHelper
         .addInput(
             "Main.java",

@@ -383,7 +383,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
                 // effect is -1 + 1 (triggered error on this.f = foo()) = 0.
                 new OnMethod("A.java", "test.A", "foo()"),
                 -2,
-                // adding @Nullable on f will resolve the triggered error by foo() and also resolves
+                // Adding @Nullable on f will resolve the triggered error by foo() and also resolves
                 // the initialization error on A() as well.
                 // Therefore, the combined effect is -1 + (-1) = -2. It resolves all existing
                 // errors.

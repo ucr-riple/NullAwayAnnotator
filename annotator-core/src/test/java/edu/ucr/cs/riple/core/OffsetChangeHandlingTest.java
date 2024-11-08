@@ -212,7 +212,7 @@ public class OffsetChangeHandlingTest {
             .collect(Collectors.toSet()));
   }
 
-  /** Verifies if the calculated offsets matches the original offsets. */
+  /** Verifies if the calculated offsets match the original offsets. */
   private void verifyCalculatedOffsets() {
     try {
       String content = Files.readString(root.resolve("benchmark.java"));

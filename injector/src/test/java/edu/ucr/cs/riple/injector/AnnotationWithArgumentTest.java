@@ -419,7 +419,7 @@ public class AnnotationWithArgumentTest extends BaseInjectorTest {
         .expectOutput(
             "package com.edu;",
             "public class Super {",
-            // Google java format will convert annot below into multi line format if needed.
+            // Google java format will convert annot below into multi-line format if needed.
             "   @SuppressWarnings({ \"InvalidThrowsLink\", \"MalformedInlineTag\", \"unchecked\", \"NullAway.Init\" })",
             "   Object h = new Object();",
             "   public void test(Object f) {",
