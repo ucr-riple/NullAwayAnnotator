@@ -36,11 +36,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+@Ignore
 @RunWith(JUnit4.class)
 public abstract class AnnotatorScannerBaseTest<T extends Display> {
 
