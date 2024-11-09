@@ -35,14 +35,10 @@ echo -e "$nullaway_config_path\t$scanner_config_path" > sample/annotator-out/pat
 
 # run the annotator
 java -jar annotator-core-1.3.15.jar \
-    -bc "cd $(pwd) && ./gradlew sample:compileJava" \
+    -bc "cd $(pwd)/sample && ./gradlew compileJava" \
     -d "$annotator_out_dir" \
     -n javax.annotation.Nullable \
     -cp sample/annotator-out/paths.tsv \
     -cn NULLAWAY \
     -i com.uber.nullaway.annotations.Initializer \
     -sre org.jspecify.annotations.NullUnmarked
-
-
-
-
