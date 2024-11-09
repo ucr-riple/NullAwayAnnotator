@@ -112,49 +112,56 @@ Since Nullaway is built as a plugin for [Error Prone](https://github.com/google/
 
 The following code snippet demonstrates how to configure the `JavaCompile` tasks in your `build.gradle` to use NullAway as a plugin for [Error Prone](https://github.com/google/error-prone):
 ```groovy
-  dependencies {  
-      annotationProcessor 'edu.ucr.cs.riple.annotator:annotator-scanner:1.3.6'  
-      annotationProcessor "com.uber.nullaway:nullaway:0.10.10"  
-      errorprone "com.google.errorprone:error_prone_core:2.4.0"  
-      errorproneJavac "com.google.errorprone:javac:9+181-r4173-1"  
-      //All other target project dependencies
-  }  
-	  
-	  
-  tasks.withType(JavaCompile) {  
-      // remove the if condition if you want to run NullAway on test code  
-      if (!name.toLowerCase().contains("test")) {  
-          options.errorprone {  
-          check("NullAway", CheckSeverity.ERROR)  
-          check("AnnotatorScanner", CheckSeverity.ERROR)  
-          option("NullAway:AnnotatedPackages", "org.example")  
-          option("NullAway:SerializeFixMetadata", "true")  
-          option("NullAway:FixSerializationConfigPath", "path_to/nullaway.xml")  
-          option("AnnotatorScanner:ConfigPath", "path_to/scanner.xml")  
-          }  
-          options.compilerArgs << "-Xmaxerrs"<< "100000"  
-          options.compilerArgs << "-Xmaxwarns" << "100000"  
-      }  
-	  
-  }
+dependencies {
+    annotationProcessor 'edu.ucr.cs.riple.annotator:annotator-scanner:1.3.6'  
+    annotationProcessor "com.uber.nullaway:nullaway:0.10.10"  
+    errorprone "com.google.errorprone:error_prone_core:2.4.0"  
+    errorproneJavac "com.google.errorprone:javac:9+181-r4173-1"
+
+    // add required annotation dependencies
+    // Initializer
+    compileOnly 'com.uber.nullaway:nullaway-annotations:0.10.10'
+    // Nullable annotations
+    compileOnly "com.google.code.findbugs:jsr305:3.0.2"
+    // JSpecify annotations for NullUnmarked
+    compileOnly "org.jspecify:jspecify:0.3.0"
+    //All other target project dependencies
+}  
+
+tasks.withType(JavaCompile) {
+    // remove the if condition if you want to run NullAway on test code  
+    if (!name.toLowerCase().contains("test")) {  
+        options.errorprone {  
+            check("NullAway", CheckSeverity.ERROR)  
+            check("AnnotatorScanner", CheckSeverity.ERROR)  
+            option("NullAway:AnnotatedPackages", "org.example")  
+            option("NullAway:SerializeFixMetadata", "true")  
+            option("NullAway:FixSerializationConfigPath", "path_to/nullaway.xml")  
+            option("AnnotatorScanner:ConfigPath", "path_to/scanner.xml")  
+        }  
+        options.compilerArgs << "-Xmaxerrs"<< "100000"  
+        options.compilerArgs << "-Xmaxwarns" << "100000"  
+    }   
+}
 ```
 `path_to_nullaway_config.xml` and `path_to_scanner_config.xml` are configuration files that **do not need to be created** during the initial project setup. The script will generate these files, facilitating seamless communication between the script and the analysis. At this point, the target project is prepared for the Annotator to process.
 	
-You must provide the Annotator with the paths to `path_to_nullaway_config.xml` and `path_to_scanner_config.xml`. Further details on this process are described in the sections below.
+You must provide the Annotator with the absolute paths to `path_to_nullaway_config.xml` and `path_to_scanner_config.xml`. 
+Further details on this process are described in the sections below.
 
 ### Running Annotator
 `Annotator` necessitates specific flag values for successful execution. You can provide these values through command line arguments.
 
 To run `Annotator` on the target project `P`, the arguments below **must** be passed to `Annotator`:
-| Flag | Description |
-|------|-------------|
-| `-bc,--build-command <arg>` | Command to run `NullAway` on target `P` enclosed in **""**. Please note that this command should be executable from any directory (e.g., `"cd /Absolute/Path/To/P && ./build"`).|
-| `-i,--initializer <arg>` | Fully qualified name of the `@Initializer` annotation. |
-| `-d,--dir <arg>` | Directory where all outputs of `AnnotatorScanner` and `NullAway` are serialized. |
-| `-cp, --config-paths` | Path to a TSV file containing values defined in [Error Prone](./README.md#Error-Prone-Flags) config paths given in the format: (`path_to_nullaway_config.xml \t path_to_scanner_config`).|
-| `-cn, --checker-name` | Checker name to be used for the analysis. (use NULLAWAY to request inference for NullAway.)|
-| `-sre, --supress-remaning-errors` <arg> | Suppress remaining errors in the code with the given `@NullUnmared` annotation (e.g. `org.jspecify.annotations.NullUnmarked`)| 
 
+| Flag | Description                                                                                                                                                                      |
+|------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `-bc,--build-command <arg>` | Command to run `NullAway` on target `P` enclosed in **""**. Please note that this command should be executable from any directory (e.g., `"cd /Absolute/Path/To/P && ./build"`). |
+| `-i,--initializer <arg>` | Fully qualified name of the `@Initializer` annotation.                                                                                                                           |
+| `-d,--dir <arg>` | Absolute path of an **Empty** Directory where all outputs of `AnnotatorScanner` and `NullAway` are serialized.                                                                   |
+| `-cp, --config-paths` | Path to a TSV file containing value of config paths given in the format: (`path_to_nullaway_config.xml \t path_to_scanner_config`).                                              |
+| `-cn, --checker-name` | Checker name to be used for the analysis. (use `NULLAWAY` to request inference for NullAway.)                                                                                    |
+| `-sre, --supress-remaning-errors` <arg> | Suppress remaining errors in the code with the given `@NullUnmared` annotation (e.g. `org.jspecify.annotations.NullUnmarked`)                                                    |
 
 By default, `Annotator` has the configuration below:
 
@@ -181,8 +188,23 @@ To learn more about all the __optional__ arguments, please refer to [OPTIONS.md]
 Here is a template command you can use to run Annotator from the CLI, using CLI options-
 ```bash
 curl -O https://repo.maven.apache.org/maven2/edu/ucr/cs/riple/annotator/annotator-core/1.3.15/annotator-core-1.3.15.jar 
-java -jar ./path/to/annotator-core.jar -d "/path/to/output/directory" -cp "/path/to/config/paths.tsv" -i com.example.Initializer -bc "cd /path/to/targetProject && ./gradlew build -x test"
+java -jar annotator-core-1.3.15.jar \ 
+    -bc "cd project && command_to_compile_target_project_using_javac" \
+    -d "path_to_selected_annotator_out_dir" \
+    -n javax.annotation.Nullable \
+    -cp sample/annotator-out/paths.tsv \
+    -cn NULLAWAY \
+    -i com.uber.nullaway.annotations.Initializer \
+    -sre org.jspecify.annotations.NullUnmarked
 ```
+
+## Running Annotator on the [example project](#code-example)
+The example in this readme is available in module `sample` in this project.
+To run Annotator on the example project, you can use the following command:
+```bash
+./annotator-sample-command.sh
+```
+It will run annotator on the sample project and will produce the output shown in this readme.
 
 To view descriptions of all flags, simply run the JAR with the `--help` option.
 
