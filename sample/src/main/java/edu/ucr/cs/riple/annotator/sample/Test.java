@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2024 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,12 +22,29 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'NullAwayAnnotator'
-include 'annotator-core'
-include 'annotator-scanner'
-include 'injector'
-include 'library-model-loader'
-include 'checks'
-include 'checks:ban-mutable-static'
-include 'sample'
+package edu.ucr.cs.riple.annotator.sample;
 
+public class Test{
+  Object f1 = null;
+  Object f2 = null;
+  Object f3 = null;
+  Object f4 = null;
+  Object f5 = f4;
+  Object f6 = new Object();
+
+  String m1(){
+    return f1 != null ? f1.toString() : f2.toString() + f6.toString();
+  }
+
+  int m2(){
+    return f3 != null ? f3.hashCode() : f2.hashCode() + f6.hashCode();
+  }
+
+  Object m3(){
+    return f5;
+  }
+
+  void m4(){
+    f6 = null;
+  }
+}
