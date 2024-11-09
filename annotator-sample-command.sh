@@ -34,7 +34,7 @@ nullaway_config_path="$(pwd)/sample/annotator-out/nullaway.xml"
 echo -e "$nullaway_config_path\t$scanner_config_path" > sample/annotator-out/paths.tsv
 
 # run the annotator
-xjava -jar annotator-core-1.3.15.jar \
+java -jar annotator-core-1.3.15.jar \
     -bc "cd $(pwd) && ./gradlew sample:compileJava" \
     -d "$annotator_out_dir" \
     -n javax.annotation.Nullable \
