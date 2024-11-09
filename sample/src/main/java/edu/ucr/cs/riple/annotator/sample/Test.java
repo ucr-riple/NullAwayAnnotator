@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.annotator.sample;
 
-public class Test{
+public class Test {
   Object f1 = null;
   Object f2 = null;
   Object f3 = null;
@@ -32,19 +32,19 @@ public class Test{
   Object f5 = f4;
   Object f6 = new Object();
 
-  String m1(){
+  String m1() {
     return f1 != null ? f1.toString() : f2.toString() + f6.toString();
   }
 
-  int m2(){
+  int m2() {
     return f3 != null ? f3.hashCode() : f2.hashCode() + f6.hashCode();
   }
 
-  Object m3(){
+  Object m3() {
     return f5;
   }
 
-  void m4(){
+  void m4() {
     f6 = null;
   }
 }
