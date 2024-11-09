@@ -24,16 +24,25 @@
 # download annotator-core.jar from maven repository
 curl -O https://repo.maven.apache.org/maven2/edu/ucr/cs/riple/annotator/annotator-core/1.3.15/annotator-core-1.3.15.jar
 
+# make an EMPTY directory for the annotator output
+annotator_out_dir="$(pwd)/sample/annotator-out"
+rm -rvf "$annotator_out_dir" && mkdir -p "$annotator_out_dir"
+
 # make paths.tsv and add the placed nullaway_config_path and scanner_config_path
 scanner_config_path="$(pwd)/sample/annotator-out/scanner.xml"
 nullaway_config_path="$(pwd)/sample/annotator-out/nullaway.xml"
 echo -e "$nullaway_config_path\t$scanner_config_path" > sample/annotator-out/paths.tsv
 
-# output directory used by the annotator
-annotator_out_dir="$(pwd)/sample/annotator-out"
-
 # run the annotator
-java -jar annotator-core-1.3.15.jar -bc "cd $(pwd) && ./gradlew sample:compileJava" -d $annotator_out_dir -n javax.annotation.nullable -cp sample/annotator-out/paths.tsv -cn NullAway -i com.uber.nullaway.annotations.Initializer -sre org.jspecify.annotations.NullUnmarked
+xjava -jar annotator-core-1.3.15.jar \
+    -bc "cd $(pwd) && ./gradlew sample:compileJava" \
+    -d "$annotator_out_dir" \
+    -n javax.annotation.Nullable \
+    -cp sample/annotator-out/paths.tsv \
+    -cn NULLAWAY \
+    -i com.uber.nullaway.annotations.Initializer \
+    -sre org.jspecify.annotations.NullUnmarked
+
 
 
 

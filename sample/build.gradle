@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 University of California, Riverside.
+ * Copyright (c) 2024 University of California, Riverside.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,15 @@ repositories {
 dependencies {
     annotationProcessor "com.uber.nullaway:nullaway:0.10.10"
     annotationProcessor project(':annotator-scanner')
+
+    // add required annotation dependencies
+    // Initializer
     compileOnly 'com.uber.nullaway:nullaway-annotations:0.10.10'
+    // Nullable annotations
+    compileOnly "com.google.code.findbugs:jsr305:3.0.2"
+    // JSpecify annotations for NullUnmarked
+    compileOnly "org.jspecify:jspecify:0.3.0"
+
     annotationProcessor "com.uber.nullaway:nullaway:0.10.10"
     errorprone "com.google.errorprone:error_prone_core:2.4.0"
     errorproneJavac "com.google.errorprone:javac:9+181-r4173-1"
