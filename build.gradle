@@ -86,10 +86,3 @@ subprojects { proj ->
         }
     }
 }
-
-// sample is not a buildable project, it is just a sample project to demonstrate the usage of the annotator.
-project(":sample") {
-    tasks.named("build").configure {
-        enabled = false
-    }
-}
