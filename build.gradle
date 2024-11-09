@@ -87,8 +87,9 @@ subprojects { proj ->
     }
 }
 
+// sample is not a buildable project, it is just a sample project to demonstrate the usage of the annotator.
 project(":sample") {
-    tasks.configureEach { task ->
-        task.onlyIf { false } // This will skip all tasks for this project
+    tasks.named("build").configure {
+        enabled = false
     }
 }

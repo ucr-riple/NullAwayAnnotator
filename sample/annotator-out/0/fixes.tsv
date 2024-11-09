@@ -1,0 +1,6 @@
+kind	class	method	param	index	uri	reason	annotation	rootClass	rootMethod
+FIELD	edu.ucr.cs.riple.annotator.sample.Test	null	f1	null	/Users/nima/Developer/NullAwayAnnotator/sample/src/main/java/edu/ucr/cs/riple/annotator/sample/Test.java	ASSIGN_FIELD_NULLABLE	nullable	edu.ucr.cs.riple.annotator.sample.Test	f1
+FIELD	edu.ucr.cs.riple.annotator.sample.Test	null	f2	null	/Users/nima/Developer/NullAwayAnnotator/sample/src/main/java/edu/ucr/cs/riple/annotator/sample/Test.java	ASSIGN_FIELD_NULLABLE	nullable	edu.ucr.cs.riple.annotator.sample.Test	f2
+FIELD	edu.ucr.cs.riple.annotator.sample.Test	null	f3	null	/Users/nima/Developer/NullAwayAnnotator/sample/src/main/java/edu/ucr/cs/riple/annotator/sample/Test.java	ASSIGN_FIELD_NULLABLE	nullable	edu.ucr.cs.riple.annotator.sample.Test	f3
+FIELD	edu.ucr.cs.riple.annotator.sample.Test	null	f4	null	/Users/nima/Developer/NullAwayAnnotator/sample/src/main/java/edu/ucr/cs/riple/annotator/sample/Test.java	ASSIGN_FIELD_NULLABLE	nullable	edu.ucr.cs.riple.annotator.sample.Test	f4
+FIELD	edu.ucr.cs.riple.annotator.sample.Test	null	f6	null	/Users/nima/Developer/NullAwayAnnotator/sample/src/main/java/edu/ucr/cs/riple/annotator/sample/Test.java	ASSIGN_FIELD_NULLABLE	nullable	edu.ucr.cs.riple.annotator.sample.Test	m4()
