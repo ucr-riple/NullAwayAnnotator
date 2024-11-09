@@ -86,3 +86,9 @@ subprojects { proj ->
         }
     }
 }
+
+project(":sample") {
+    tasks.configureEach { task ->
+        task.onlyIf { false } // This will skip all tasks for this project
+    }
+}
