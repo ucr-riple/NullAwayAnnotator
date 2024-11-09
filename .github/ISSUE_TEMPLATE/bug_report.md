@@ -8,22 +8,16 @@ assignees: ''
 ---
 
 **Describe the bug**
-A clear and concise description of what the bug is.
+A clear and concise description of what the bug is and the used version of the software.
 
-**To Reproduce**
+**To Reproduce** [OPTIONAL]
 Steps to reproduce the behavior: (Prefer a code snippet)
 
-**Expected behavior**
+**Expected behavior** [OPTIONAL]
 A clear and concise description of what you expected to happen.
 
-**Stack trace**
+**Stack trace** [OPTIONAL]
 If applicable, add stack trace of the exception below.
 
-**OS (please complete the following information):**
- - OS: [e.g. iOS]
- - Version [e.g. 22]
- - Annotator Version [e.g. v1.3.1-LOCAL]
-
-
-**Additional context**
+**Additional context** [OPTIONAL]
 Add any other context about the problem here.
