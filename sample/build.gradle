@@ -57,7 +57,7 @@ tasks.withType(JavaCompile).configureEach {
         options.errorprone {
             check("NullAway", CheckSeverity.ERROR)
             check("AnnotatorScanner", CheckSeverity.ERROR)
-            option("NullAway:AnnotatedPackages", "edu.ucr.cs.riple")
+            option("NullAway:AnnotatedPackages", "com.example")
             option("NullAway:SerializeFixMetadata", "true")
             option("NullAway:FixSerializationConfigPath", nullaway_config_path)
             option("AnnotatorScanner:ConfigPath", scanner_config_path)

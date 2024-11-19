@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.annotator.sample;
+package com.example;
 
 public class Test {
   Object f1 = null;
