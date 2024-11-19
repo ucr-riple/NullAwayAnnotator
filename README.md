@@ -18,6 +18,7 @@ The final output of Annotator is a source code that passes NullAway checks with 
 In the code below, `NullAway` reports five warnings.
 
 ```java
+package com.example;
 class Test{
     Object f1 = null; // warning: assigning @Nullable expression to @NonNull field
     Object f2 = null; // warning: assigning @Nullable expression to @NonNull field
@@ -49,6 +50,7 @@ For unresolved errors, suppression annotations are injected.
 The output below shows the result of running `Annotator` on the code above.
 
 ```java
+package com.example;
 import javax.annotation.Nullable; // added by Annotator
 import org.jspecify.annotations.NullUnmarked; // added by Annotator
 
