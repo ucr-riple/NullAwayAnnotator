@@ -100,15 +100,15 @@ public class BasicTest extends BaseInjectorTest {
             "package edu.ucr;",
             "import javax.annotation.Nullable;",
             "public class Test {",
-            "   @Nullable @GuardedBy(\"this\") // Either a RuntimeException, non-fatal Error, or IOException.",
-            "  private  Throwable creationFailure;",
+            "  @Nullable @GuardedBy(\"this\") // Either a RuntimeException, non-fatal Error, or IOException.",
+            "  private Throwable creationFailure;",
             "}")
         .expectOutput(
             "package edu.ucr;",
             "import javax.annotation.Nullable;",
             "public class Test {",
-            "   @Nullable @GuardedBy(\"this\") // Either a RuntimeException, non-fatal Error, or IOException.",
-            "  private  Throwable creationFailure;",
+            "  @Nullable @GuardedBy(\"this\") // Either a RuntimeException, non-fatal Error, or IOException.",
+            "  private Throwable creationFailure;",
             "}")
         .addChanges(
             new AddMarkerAnnotation(
