@@ -26,7 +26,9 @@ package edu.ucr.cs.riple.injector;
 
 import edu.ucr.cs.riple.injector.changes.ASTChange;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
+import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
+import java.util.Collections;
 import org.junit.Test;
 
 public class BasicTest extends BaseInjectorTest {
@@ -86,6 +88,31 @@ public class BasicTest extends BaseInjectorTest {
         .addChanges(
             new AddMarkerAnnotation(
                 new OnMethod("Foo.java", "test.Foo", "test(java.lang.Object)"),
+                "javax.annotation.Nullable"))
+        .start();
+  }
+
+  @Test
+  public void ignoreCommentsOnAnnotationEqualCheckTest() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package edu.ucr;",
+            "import javax.annotation.Nullable;",
+            "public class Test {",
+            "   @Nullable @GuardedBy(\"this\") // Either a RuntimeException, non-fatal Error, or IOException.",
+            "  private  Throwable creationFailure;",
+            "}")
+        .expectOutput(
+            "package edu.ucr;",
+            "import javax.annotation.Nullable;",
+            "public class Test {",
+            "   @Nullable @GuardedBy(\"this\") // Either a RuntimeException, non-fatal Error, or IOException.",
+            "  private  Throwable creationFailure;",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnField("Foo.java", "edu.ucr.Test", Collections.singleton("creationFailure")),
                 "javax.annotation.Nullable"))
         .start();
   }

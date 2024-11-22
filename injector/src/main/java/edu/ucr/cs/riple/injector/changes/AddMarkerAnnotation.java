@@ -23,7 +23,6 @@
 package edu.ucr.cs.riple.injector.changes;
 
 import com.github.javaparser.Range;
-import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
@@ -31,6 +30,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Insertion;
 import edu.ucr.cs.riple.injector.modifications.Modification;
+import edu.ucr.cs.riple.injector.util.TypeUtils;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
@@ -53,13 +53,10 @@ public class AddMarkerAnnotation extends AnnotationChange implements AddAnnotati
       return null;
     }
     Range range = node.getRange().get();
-    NodeList<AnnotationExpr> annotations = node.getAnnotations();
     AnnotationExpr annotationExpr = new MarkerAnnotationExpr(annotationName.simpleName);
 
     // Check if annot already exists.
-    boolean annotAlreadyExists =
-        annotations.stream().anyMatch(annot -> annot.equals(annotationExpr));
-    if (annotAlreadyExists) {
+    if (TypeUtils.isAnnotatedWith(node, annotationExpr)) {
       return null;
     }
     return new Insertion(annotationExpr.toString(), range.begin);
