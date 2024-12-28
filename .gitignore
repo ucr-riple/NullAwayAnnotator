@@ -30,5 +30,5 @@ gradle-app.setting
 /runner/jars/core.jar
 **/__pycache__/
 
-openai.txt
+# Ignore OpenAI API key
 /annotator-core/src/main/resources/openai-api-key.txt
