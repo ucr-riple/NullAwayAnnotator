@@ -28,7 +28,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.CheckerBaseClass;
-import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.registries.field.FieldInitializationStore;
@@ -225,11 +224,9 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
    *   <li>Explicit {@code Nullable} assignments to fields will be annotated as
    *       {@code @SuppressWarnings("NullAway")}.
    * </ul>
-   *
-   * @param injector Annotation injector to inject selected annotations.
    */
   @Override
-  public void suppressRemainingErrors(AnnotationInjector injector) {
+  public void suppressRemainingErrors() {
     // Collect regions with remaining errors.
     Utility.buildTarget(context);
     Set<NullAwayError> remainingErrors = deserializeErrors(context.targetModuleInfo);
@@ -336,7 +333,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                         fix.toField(), "SuppressWarnings", "NullAway.Init", false))
             .collect(Collectors.toSet());
     result.addAll(initializationSuppressWarningsAnnotations);
-    injector.injectAnnotations(result);
+    context.getInjector().injectAnnotations(result);
     // update log
     context.log.updateInjectedAnnotations(result);
     // Collect @NullUnmarked annotations on classes for any remaining error.
@@ -351,13 +348,13 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                         context.targetModuleInfo.getLocationOnClass(error.getRegion().clazz),
                         config.nullUnMarkedAnnotation))
             .collect(Collectors.toSet());
-    injector.injectAnnotations(nullUnMarkedAnnotations);
+    context.getInjector().injectAnnotations(nullUnMarkedAnnotations);
     // update log
     context.log.updateInjectedAnnotations(nullUnMarkedAnnotations);
   }
 
   @Override
-  public void preprocess(AnnotationInjector injector) {
+  public void preprocess() {
     // Collect @Initializer annotations. Heuristically, we add @Initializer on methods which writes
     // a @Nonnull value to more than one uninitialized field, and guarantees initialized fields are
     // nonnull at all exit paths.
@@ -378,7 +375,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
             .map(onMethod -> new AddMarkerAnnotation(onMethod, config.initializerAnnot))
             .collect(Collectors.toSet());
     // Inject @Initializer annotations.
-    injector.injectAnnotations(initializers);
+    context.getInjector().injectAnnotations(initializers);
   }
 
   /**
