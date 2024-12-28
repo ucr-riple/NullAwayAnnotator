@@ -31,3 +31,4 @@ gradle-app.setting
 **/__pycache__/
 
 openai.txt
+/annotator-core/src/main/resources/openai-api-key.txt
