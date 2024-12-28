@@ -27,6 +27,8 @@ package edu.ucr.cs.riple.core;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.checkers.Checker;
 import edu.ucr.cs.riple.core.checkers.CheckerBaseClass;
+import edu.ucr.cs.riple.core.injectors.AnnotationInjector;
+import edu.ucr.cs.riple.core.injectors.PhysicalInjector;
 import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
@@ -69,6 +71,8 @@ public class Context {
   /** Checker instance. Used to execute checker specific tasks. */
   public final Checker<? extends Error> checker;
 
+  public final AnnotationInjector injector;
+
   /**
    * Builds context from command line arguments.
    *
@@ -84,6 +88,16 @@ public class Context {
     this.targetModuleInfo = new ModuleInfo(this, config.target, config.buildCommand);
     // Checker compatibility check must be after target module info is initialized.
     this.checker.verifyCheckerCompatibility();
+    this.injector = new PhysicalInjector(this);
+  }
+
+  /**
+   * Gets the injector.
+   *
+   * @return Injector instance.
+   */
+  public AnnotationInjector getInjector() {
+    return injector;
   }
 
   /** Responsible for handling offset changes in source file. */
