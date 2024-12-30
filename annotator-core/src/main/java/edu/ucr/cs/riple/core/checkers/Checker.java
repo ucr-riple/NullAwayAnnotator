@@ -48,6 +48,13 @@ public interface Checker<T extends Error> {
   /** Suppresses remaining errors reported by the checker. */
   void suppressRemainingErrors();
 
+  /**
+   * Resolves remaining errors reported by the checker. This method is called after the appropriate
+   * annotations are injected. This method should not be called if the remaining errors are
+   * suppressed. Changes by this method can contain source code changes.
+   */
+  void resolveRemainingErrors();
+
   /** Used to do any pre-processing steps before running the inference. */
   void preprocess();
 

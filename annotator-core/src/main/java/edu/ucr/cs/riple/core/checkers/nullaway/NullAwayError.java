@@ -35,11 +35,17 @@ import java.util.Set;
 /** Represents an error reported by {@link NullAway}. */
 public class NullAwayError extends Error {
 
-  /** Error type for method initialization errors from NullAway in {@code String}. */
-  public static final String METHOD_INITIALIZER_ERROR = "METHOD_NO_INIT";
+  public enum ErrorType {
+    METHOD_INITIALIZER("METHOD_NO_INIT"),
+    FIELD_INITIALIZER("FIELD_NO_INIT"),
+    DEREFERENCE("DEREFERENCE");
 
-  /** Error type for field initialization errors from NullAway in {@code String}. */
-  public static final String FIELD_INITIALIZER_ERROR = "FIELD_NO_INIT";
+    public final String type;
+
+    ErrorType(String type) {
+      this.type = type;
+    }
+  }
 
   public NullAwayError(
       String messageType,
@@ -72,7 +78,7 @@ public class NullAwayError extends Error {
     if (!region.equals(error.region)) {
       return false;
     }
-    if (messageType.equals(METHOD_INITIALIZER_ERROR)) {
+    if (messageType.equals(ErrorType.METHOD_INITIALIZER.type)) {
       // we do not need to compare error messages as it can be the same error with a different error
       // message and should not be treated as a separate error.
       return true;
@@ -87,7 +93,7 @@ public class NullAwayError extends Error {
     return Objects.hash(
         messageType,
         // to make sure equal objects will produce the same hashcode.
-        messageType.equals(METHOD_INITIALIZER_ERROR) ? METHOD_INITIALIZER_ERROR : message,
+        messageType.equals(ErrorType.FIELD_INITIALIZER.type) ? ErrorType.METHOD_INITIALIZER.type : message,
         region,
         resolvingFixes,
         offset);
@@ -100,7 +106,7 @@ public class NullAwayError extends Error {
    * @return true, if the error is an initialization error.
    */
   public boolean isNonInitializationError() {
-    return !this.messageType.equals(METHOD_INITIALIZER_ERROR)
-        && !this.messageType.equals(FIELD_INITIALIZER_ERROR);
+    return !this.messageType.equals(ErrorType.METHOD_INITIALIZER.type)
+        && !this.messageType.equals(ErrorType.FIELD_INITIALIZER.type);
   }
 }

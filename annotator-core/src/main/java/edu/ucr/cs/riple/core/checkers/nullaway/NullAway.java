@@ -354,6 +354,18 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
   }
 
   @Override
+  public void resolveRemainingErrors() {
+    // Collect regions with remaining errors.
+    Utility.buildTarget(context);
+    Set<NullAwayError> remainingErrors = deserializeErrors(context.targetModuleInfo);
+    remainingErrors.stream()
+        .collect(Collectors.groupingBy(NullAwayError::getRegion))
+        .forEach((region, nullAwayErrors) -> nullAwayErrors.forEach(error -> {
+
+        }));
+  }
+
+  @Override
   public void preprocess() {
     // Collect @Initializer annotations. Heuristically, we add @Initializer on methods which writes
     // a @Nonnull value to more than one uninitialized field, and guarantees initialized fields are
