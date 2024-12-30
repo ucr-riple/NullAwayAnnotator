@@ -27,9 +27,13 @@ import static java.util.stream.Collectors.mapping;
 
 import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.ParserConfiguration;
+import com.github.javaparser.Range;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.CallableDeclaration;
 import com.google.common.collect.ImmutableList;
 import edu.ucr.cs.riple.injector.changes.ASTChange;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
@@ -38,13 +42,16 @@ import edu.ucr.cs.riple.injector.changes.ChangeVisitor;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import edu.ucr.cs.riple.injector.changes.TypeUseAnnotationChange;
 import edu.ucr.cs.riple.injector.exceptions.ParseException;
+import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import edu.ucr.cs.riple.injector.util.ASTUtils;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -227,6 +234,37 @@ public class Injector {
       return null;
     } catch (IOException e) {
       throw new RuntimeException("Error happened on parsing file at: " + path, e);
+    }
+  }
+
+  public String[] getRegionSourceCode(@Nullable Path path, String encClass, String method) {
+    CompilationUnit compilationUnit = parse(path, languageLevel);
+    SignatureMatcher matcher = new SignatureMatcher(method);
+    if (compilationUnit == null) {
+      return null;
+    }
+    try {
+      NodeList<BodyDeclaration<?>> members =
+          ASTUtils.getTypeDeclarationMembersByFlatName(compilationUnit, encClass);
+      CallableDeclaration<?> target = null;
+      for (BodyDeclaration<?> bodyDeclaration : members) {
+        if (bodyDeclaration instanceof CallableDeclaration<?>) {
+          CallableDeclaration<?> callableDeclaration = (CallableDeclaration<?>) bodyDeclaration;
+          if (matcher.matchesCallableDeclaration(callableDeclaration)) {
+            target = callableDeclaration;
+            break;
+          }
+        }
+      }
+      if (target == null || target.getRange().isEmpty()) {
+        return null;
+      }
+      Range range = target.getRange().get();
+      String content = Files.readString(path);
+      String[] lines = content.split("\n");
+      return Arrays.copyOfRange(lines, range.begin.line - 1, range.end.line);
+    } catch (TargetClassNotFound | IOException e) {
+      return null;
     }
   }
 }

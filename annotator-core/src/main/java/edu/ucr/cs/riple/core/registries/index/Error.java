@@ -30,6 +30,7 @@ import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnParameter;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
@@ -54,16 +55,21 @@ public abstract class Error {
   /** Containing region. */
   protected final Region region;
 
+  /** Path to the file where the error is reported. */
+  public final Path path;
+
   /** Error type for method initialization errors from NullAway in {@code String}. */
   public Error(
       String messageType,
       String message,
       Region region,
+      Path path,
       int offset,
       Set<AddAnnotation> annotations) {
     this.region = region;
     this.messageType = messageType;
     this.message = message;
+    this.path = path;
     this.offset = offset;
     this.resolvingFixes = computeFixesFromAnnotations(annotations);
   }

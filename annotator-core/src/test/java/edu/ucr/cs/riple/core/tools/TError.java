@@ -40,7 +40,13 @@ import java.util.Set;
 public class TError extends Error {
 
   public TError(Location location) {
-    super("null", "null", new Region("null", "null"), 0, Set.of(new DefaultAnnotation(location)));
+    super(
+        "null",
+        "null",
+        new Region("null", "null"),
+        null,
+        0,
+        Set.of(new DefaultAnnotation(location)));
   }
 
   @Override

@@ -114,7 +114,8 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     Region region = new Region(values[2], values[3]);
     Location nonnullTarget =
         Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 6, 12));
-    if (nonnullTarget == null && errorType.equals(NullAwayError.METHOD_INITIALIZER_ERROR)) {
+    if (nonnullTarget == null
+        && errorType.equals(NullAwayError.ErrorType.METHOD_INITIALIZER.type)) {
       Set<AddAnnotation> annotationsOnField =
           computeAddAnnotationInstancesForUninitializedFields(
               errorMessage, region.clazz, moduleInfo);
@@ -122,6 +123,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
           errorType,
           errorMessage,
           region,
+          path,
           context.offsetHandler.getOriginalOffset(path, offset),
           annotationsOnField,
           moduleInfo);
@@ -137,6 +139,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
         errorType,
         errorMessage,
         region,
+        path,
         context.offsetHandler.getOriginalOffset(path, offset),
         annotations,
         moduleInfo);
@@ -360,9 +363,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     Set<NullAwayError> remainingErrors = deserializeErrors(context.targetModuleInfo);
     remainingErrors.stream()
         .collect(Collectors.groupingBy(NullAwayError::getRegion))
-        .forEach((region, nullAwayErrors) -> nullAwayErrors.forEach(error -> {
-
-        }));
+        .forEach((region, nullAwayErrors) -> nullAwayErrors.forEach(error -> {}));
   }
 
   @Override
@@ -397,6 +398,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
    * @param errorType Error Type from NullAway.
    * @param errorMessage Error Message from NullAway.
    * @param region Region where the error is reported.
+   * @param path Path to the file where the error is reported.
    * @param offset Offset of program point in the source file where the error is reported.
    * @param annotations Annotations that should be added source file to resolve the error.
    * @param module Module where this error is reported.
@@ -407,6 +409,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
       String errorType,
       String errorMessage,
       Region region,
+      Path path,
       int offset,
       Set<AddAnnotation> annotations,
       ModuleInfo module) {
@@ -417,7 +420,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                 annot ->
                     !module.getNonnullStore().hasExplicitNonnullAnnotation(annot.getLocation()))
             .collect(ImmutableSet.toImmutableSet());
-    return new NullAwayError(errorType, errorMessage, region, offset, cleanedAnnotations);
+    return new NullAwayError(errorType, errorMessage, region, path, offset, cleanedAnnotations);
   }
 
   @Override

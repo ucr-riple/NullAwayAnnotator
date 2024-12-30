@@ -1,11 +1,13 @@
-package edu.ucr.cs.riple.core.agent;
+package edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent;
 
+import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Objects;
 
 public class ChatGPT {
@@ -23,14 +25,15 @@ public class ChatGPT {
       BufferedReader reader =
           new BufferedReader(
               new InputStreamReader(
-                  Objects.requireNonNull(getClass().getResourceAsStream("/openai-api-key.txt"))));
+                  Objects.requireNonNull(getClass().getResourceAsStream("/openai-api-key.txt")),
+                  Charset.defaultCharset()));
       apiKey = reader.readLine();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
-  public String ask(String prompt) {
+  private String ask(String prompt) {
     String url = "https://api.openai.com/v1/chat/completions";
 
     try {
@@ -69,9 +72,11 @@ public class ChatGPT {
     }
   }
 
-  public static String extractMessageFromJSONResponse(String response) {
+  private static String extractMessageFromJSONResponse(String response) {
     int start = response.indexOf("content") + 11;
     int end = response.indexOf("\"", start);
     return response.substring(start, end);
   }
+
+  private void fixDereferenceErrorInEqualsMethod(NullAwayError error) {}
 }

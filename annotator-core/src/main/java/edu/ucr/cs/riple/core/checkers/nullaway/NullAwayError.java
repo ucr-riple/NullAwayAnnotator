@@ -29,6 +29,7 @@ import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Set;
 
@@ -51,9 +52,10 @@ public class NullAwayError extends Error {
       String messageType,
       String message,
       Region region,
+      Path path,
       int offset,
       Set<AddAnnotation> annotations) {
-    super(messageType, message, region, offset, annotations);
+    super(messageType, message, region, path, offset, annotations);
   }
 
   @Override
@@ -93,7 +95,9 @@ public class NullAwayError extends Error {
     return Objects.hash(
         messageType,
         // to make sure equal objects will produce the same hashcode.
-        messageType.equals(ErrorType.FIELD_INITIALIZER.type) ? ErrorType.METHOD_INITIALIZER.type : message,
+        messageType.equals(ErrorType.FIELD_INITIALIZER.type)
+            ? ErrorType.METHOD_INITIALIZER.type
+            : message,
         region,
         resolvingFixes,
         offset);
