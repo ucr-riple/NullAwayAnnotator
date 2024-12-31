@@ -1,4 +1,4 @@
-package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
+package edu.ucr.cs.riple.core.util;
 
 import com.github.javaparser.ast.CompilationUnit;
 import edu.ucr.cs.riple.core.Config;
@@ -22,8 +22,8 @@ public class ASTUtil {
     return methodName.equals("equals");
   }
 
-  public static Stream<String> getRegionSourceCode(Config config, Path path, Region region) {
-    CompilationUnit compilationUnit = Injector.parse(path, config.languageLevel);
-    return null;
+  public static String[] getRegionSourceCode(Config config, Path path, Region region) {
+    Injector injector = new Injector(config.languageLevel);
+    return injector.getRegionSourceCode(path, region.clazz, region.member);
   }
 }

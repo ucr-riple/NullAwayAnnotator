@@ -40,13 +40,16 @@ import edu.ucr.cs.riple.scanner.ScannerConfigWriter;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -299,6 +302,21 @@ public class Utility {
       return stream.collect(Collectors.toList());
     } catch (IOException e) {
       throw new RuntimeException("Exception while reading file: " + path, e);
+    }
+  }
+
+  /**
+   * Reads the content of a resource file.
+   *
+   * @param resourcePath The path to the resource file.
+   * @return The content of the resource file.
+   */
+  public static String readResourceContent(String resourcePath) {
+
+    try {
+      return Files.readString(Paths.get(Objects.requireNonNull(Utility.class.getResource(resourcePath)).toURI()));
+    } catch (IOException | URISyntaxException e) {
+      throw new RuntimeException("Exception while reading resource: " + resourcePath, e);
     }
   }
 }

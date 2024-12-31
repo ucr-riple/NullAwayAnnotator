@@ -1,36 +1,29 @@
 package edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent;
 
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
+import edu.ucr.cs.riple.core.util.ASTUtil;
+import edu.ucr.cs.riple.core.util.Utility;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.Objects;
 
 public class ChatGPT {
 
   private static final String MODEL = "gpt-4o";
   private final String apiKey;
+  private final String dereferenceEqualsMethodRewritePrompt;
+  private final Config config;
 
-  public ChatGPT() {
+  public ChatGPT(Config config) {
     // read openai-api-key.txt from resources
-    try {
-      // check if the file is in the resources
-      if (getClass().getResource("/openai-api-key.txt") == null) {
-        throw new RuntimeException("openai-api-key.txt not found in resources");
-      }
-      BufferedReader reader =
-          new BufferedReader(
-              new InputStreamReader(
-                  Objects.requireNonNull(getClass().getResourceAsStream("/openai-api-key.txt")),
-                  Charset.defaultCharset()));
-      apiKey = reader.readLine();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    this.apiKey = Utility.readResourceContent("openai-api-key.txt");
+    this.dereferenceEqualsMethodRewritePrompt = Utility.readResourceContent("prompts/dereference-equals-rewrite.txt");
+    this.config = config;
   }
 
   private String ask(String prompt) {
@@ -78,5 +71,10 @@ public class ChatGPT {
     return response.substring(start, end);
   }
 
-  private void fixDereferenceErrorInEqualsMethod(NullAwayError error) {}
+  public void fixDereferenceErrorInEqualsMethod(NullAwayError error) {
+    String[] enclosingMethod = ASTUtil.getRegionSourceCode(config, error.path, error.getRegion());
+    String prompt = String.format(dereferenceEqualsMethodRewritePrompt, enclosingMethod[0]);
+    String response = ask(prompt);
+    System.out.println(response);
+  }
 }
