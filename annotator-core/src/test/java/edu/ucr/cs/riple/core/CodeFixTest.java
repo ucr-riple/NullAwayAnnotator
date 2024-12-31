@@ -37,11 +37,19 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
     coreTestHelper
         .onTarget()
         .withSourceLines(
-            "Main.java",
+            "Foo.java",
             "package test;",
+            "import javax.annotation.Nullable;",
             "public class Foo {",
-            "   Object run() {",
-            "     return null;",
+            "   @Nullable Object f;",
+            "   public boolean equals(Object other) {",
+            "      if(other == null) {",
+            "         return false;",
+            "      }",
+            "      if(other instanceof Foo) {",
+            "         return f.equals(((Foo) other).f);",
+            "      }",
+            "      return false;",
             "   }",
             "}")
         .expectNoReport()

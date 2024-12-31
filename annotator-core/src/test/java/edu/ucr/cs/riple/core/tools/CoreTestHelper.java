@@ -464,6 +464,7 @@ public class CoreTestHelper {
     builder.useCacheImpact = true;
     builder.sourceTypes.add(SourceType.LOMBOK);
     builder.cache = true;
+    builder.resolveRemainingErrors = resolveRemainingErrors;
     builder.languageLevel = languageLevel;
     builder.useCacheImpact = !getEnvironmentVariable("ANNOTATOR_TEST_DISABLE_CACHING");
     builder.useParallelProcessor =

@@ -312,10 +312,9 @@ public class Utility {
    * @return The content of the resource file.
    */
   public static String readResourceContent(String resourcePath) {
-
     try {
       return Files.readString(
-          Paths.get(Objects.requireNonNull(Utility.class.getResource(resourcePath)).toURI()));
+          Paths.get(Objects.requireNonNull(Utility.class.getResource(resourcePath)).toURI()), Charset.defaultCharset());
     } catch (IOException | URISyntaxException e) {
       throw new RuntimeException("Exception while reading resource: " + resourcePath, e);
     }

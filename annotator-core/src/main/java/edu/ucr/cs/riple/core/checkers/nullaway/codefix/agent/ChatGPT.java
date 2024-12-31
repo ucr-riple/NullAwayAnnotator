@@ -45,7 +45,7 @@ public class ChatGPT {
 
   public ChatGPT(Config config) {
     // read openai-api-key.txt from resources
-    this.apiKey = Utility.readResourceContent("openai-api-key.txt");
+    this.apiKey = Utility.readResourceContent("openai-api-key.txt").trim();
     this.dereferenceEqualsMethodRewritePrompt =
         Utility.readResourceContent("prompts/dereference-equals-rewrite.txt");
     this.config = config;
@@ -55,19 +55,25 @@ public class ChatGPT {
     String url = "https://api.openai.com/v1/chat/completions";
 
     try {
+      // Making a POST request
       URL obj = new URL(url);
       HttpURLConnection connection = (HttpURLConnection) obj.openConnection();
       connection.setRequestMethod("POST");
       connection.setRequestProperty("Authorization", "Bearer " + apiKey);
       connection.setRequestProperty("Content-Type", "application/json");
 
-      // The request body
-      String body =
-          "{\"model\": \""
-              + MODEL
-              + "\", \"messages\": [{\"role\": \"user\", \"content\": \""
-              + prompt
-              + "\"}]}";
+      // Request content
+      JsonObject message = new JsonObject();
+      message.addProperty("role", "user");
+      message.addProperty("content", prompt); // No need to escape
+      JsonArray messages = new JsonArray();
+      messages.add(message);
+      JsonObject requestBody = new JsonObject();
+      requestBody.addProperty("model", MODEL);
+      requestBody.add("messages", messages);
+      String body = requestBody.toString();
+
+      // Send request
       connection.setDoOutput(true);
       OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream(), Charset.defaultCharset());
       writer.write(body);
@@ -77,14 +83,12 @@ public class ChatGPT {
       // Response from ChatGPT
       BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.defaultCharset()));
       String line;
-
       StringBuilder response = new StringBuilder();
       while ((line = br.readLine()) != null) {
         response.append(line);
       }
       br.close();
       return extractMessageFromJSONResponse(response.toString());
-
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -97,9 +101,9 @@ public class ChatGPT {
   }
 
   public void fixDereferenceErrorInEqualsMethod(NullAwayError error) {
-    String[] enclosingMethod = ASTUtil.getRegionSourceCode(config, error.path, error.getRegion());
-    String prompt = String.format(dereferenceEqualsMethodRewritePrompt, enclosingMethod[0]);
-    String response = ask(prompt);
+    String enclosingMethod = ASTUtil.getRegionSourceCode(config, error.path, error.getRegion());
+    String prompt = String.format(dereferenceEqualsMethodRewritePrompt, enclosingMethod);
+    String response = ask("say hi");
     System.out.println(response);
   }
 }
