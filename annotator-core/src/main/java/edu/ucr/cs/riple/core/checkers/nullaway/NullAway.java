@@ -28,6 +28,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.CheckerBaseClass;
+import edu.ucr.cs.riple.core.checkers.nullaway.codefix.NullAwayCodeFix;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.registries.field.FieldInitializationStore;
@@ -61,11 +62,14 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
    */
   public static final String NAME = "NULLAWAY";
 
+  private final NullAwayCodeFix codeFix;
+
   /** Supported version of NullAway serialization. */
   public static final int VERSION = 3;
 
   public NullAway(Context context) {
     super(context);
+    this.codeFix = new NullAwayCodeFix(context.config);
   }
 
   @Override
@@ -363,7 +367,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     Set<NullAwayError> remainingErrors = deserializeErrors(context.targetModuleInfo);
     remainingErrors.stream()
         .collect(Collectors.groupingBy(NullAwayError::getRegion))
-        .forEach((region, nullAwayErrors) -> nullAwayErrors.forEach(error -> {}));
+        .forEach((region, nullAwayErrors) -> nullAwayErrors.forEach(codeFix::fix));
   }
 
   @Override

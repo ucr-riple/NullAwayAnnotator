@@ -119,6 +119,9 @@ public class Annotator {
     if (config.suppressRemainingErrors) {
       context.checker.suppressRemainingErrors();
     }
+    if (config.resolveRemainingErrors) {
+      context.checker.resolveRemainingErrors();
+    }
     System.out.println("\nFinished annotating.");
     Utility.writeReports(context, cache.reports().stream().collect(ImmutableSet.toImmutableSet()));
   }

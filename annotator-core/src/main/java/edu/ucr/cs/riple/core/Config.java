@@ -181,6 +181,9 @@ public class Config {
   /** Language level to use when parsing Java code. Defaults to Java 17. */
   public final ParserConfiguration.LanguageLevel languageLevel;
 
+  /** If activated, annotator will try to resolve remaining errors mostly by code changes. */
+  public final boolean resolveRemainingErrors;
+
   /**
    * Builds context from command line arguments.
    *
@@ -386,6 +389,12 @@ public class Config {
     languageLevelOption.setRequired(false);
     options.addOption(languageLevelOption);
 
+    // Resolve remaining errors
+    Option resolveRemainingErrorsOption =
+        new Option("rre", "resolve-remaining-errors", false, "Resolves remaining errors.");
+    resolveRemainingErrorsOption.setRequired(false);
+    options.addOption(resolveRemainingErrorsOption);
+
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
@@ -492,6 +501,7 @@ public class Config {
         !cmd.hasOption(nonnullAnnotationsOption)
             ? ImmutableSet.of()
             : ImmutableSet.copyOf(cmd.getOptionValue(nonnullAnnotationsOption).split(","));
+    this.resolveRemainingErrors = cmd.hasOption(resolveRemainingErrorsOption);
   }
 
   /**
@@ -599,6 +609,8 @@ public class Config {
         lombokCodeDetectorActivated ? Sets.immutableEnumSet(SourceType.LOMBOK) : ImmutableSet.of();
     this.languageLevel =
         getLanguageLevel(getValueFromKey(jsonObject, "LANGUAGE_LEVEL", String.class).orElse("17"));
+    this.resolveRemainingErrors =
+        getValueFromKey(jsonObject, "RESOLVE_REMAINING_ERRORS", Boolean.class).orElse(false);
     this.nonnullAnnotations =
         ImmutableSet.copyOf(
             getArrayValueFromKey(
@@ -736,6 +748,7 @@ public class Config {
     public int depth = 1;
     public String checker;
     public ParserConfiguration.LanguageLevel languageLevel;
+    public boolean resolveRemainingErrors = false;
 
     @SuppressWarnings("unchecked")
     public void write(Path path) {
@@ -769,6 +782,7 @@ public class Config {
       json.put("SUPPRESS_REMAINING_ERRORS", suppressRemainingErrors);
       json.put("INFERENCE_ACTIVATION", inferenceActivated);
       json.put("LANGUAGE_LEVEL", languageLevel.name().split("_")[1]);
+      json.put("RESOLVE_REMAINING_ERRORS", resolveRemainingErrors);
       JSONArray configPathsJson = new JSONArray();
       configPathsJson.addAll(
           configPaths.stream()

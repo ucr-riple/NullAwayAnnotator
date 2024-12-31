@@ -109,12 +109,15 @@ public class CoreTestHelper {
 
   private ParserConfiguration.LanguageLevel languageLevel;
 
+  private boolean resolveRemainingErrors;
+
   public CoreTestHelper(Path projectPath, Path outDirPath) {
     this.projectPath = projectPath;
     this.outDirPath = outDirPath;
     this.expectedReports = new HashSet<>();
     this.projectBuilder = new ProjectBuilder(this, projectPath);
     this.languageLevel = ParserConfiguration.LanguageLevel.JAVA_17;
+    this.resolveRemainingErrors = false;
   }
 
   public Module onTarget() {
@@ -241,12 +244,26 @@ public class CoreTestHelper {
     return this;
   }
 
+  public CoreTestHelper resolveRemainingErrors() {
+    this.resolveRemainingErrors = true;
+    return this;
+  }
+
   /** Starts the test process. */
   public void start() {
     Path configPath = outDirPath.resolve("config.json");
     checkSourcePackages();
     makeAnnotatorConfigFile(configPath);
     config = new Config(configPath);
+
+    // check if resolve remaining errors is set
+    if (resolveRemainingErrors) {
+      if (expectedReports.size() != 0) {
+        throw new IllegalArgumentException(
+            "This test is designed to verify code changes for resolving remaining errors. To validate expected reports, create a separate test.");
+      }
+    }
+
     Annotator annotator = new Annotator(config);
     annotator.start();
     log = annotator.context.log;

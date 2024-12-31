@@ -22,30 +22,30 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.util;
+package edu.ucr.cs.riple.core;
 
-import edu.ucr.cs.riple.core.Config;
-import edu.ucr.cs.riple.core.registries.region.Region;
-import edu.ucr.cs.riple.injector.Injector;
-import java.nio.file.Path;
+import org.junit.Test;
 
-public class ASTUtil {
+public class CodeFixTest extends AnnotatorBaseCoreTest {
 
-  public static boolean isObjectEqualsMethod(String member) {
-    if (!member.contains("(")) {
-      return false;
-    }
-    String methodName = member.substring(0, member.indexOf("("));
-    // check if it has only one parameter and the parameter is an java.lang.Object
-    String parameter = member.substring(member.indexOf("(") + 1, member.indexOf(")"));
-    if (!parameter.equals("java.lang.Object")) {
-      return false;
-    }
-    return methodName.equals("equals");
+  public CodeFixTest() {
+    super("nullable-multi-modular");
   }
 
-  public static String[] getRegionSourceCode(Config config, Path path, Region region) {
-    Injector injector = new Injector(config.languageLevel);
-    return injector.getRegionSourceCode(path, region.clazz, region.member);
+  @Test
+  public void dereferenceEqualsRewriteTest() {
+    coreTestHelper
+        .onTarget()
+        .withSourceLines(
+            "Main.java",
+            "package test;",
+            "public class Foo {",
+            "   Object run() {",
+            "     return null;",
+            "   }",
+            "}")
+        .expectNoReport()
+        .resolveRemainingErrors()
+        .start();
   }
 }
