@@ -41,6 +41,7 @@ dependencies {
     implementation project(':annotator-scanner')
     implementation deps.build.guava
     implementation deps.build.json
+    implementation deps.build.gson
     implementation deps.build.progressbar
     implementation deps.build.javaparser
     implementation deps.build.commonscli

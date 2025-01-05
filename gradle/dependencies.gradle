@@ -44,6 +44,7 @@ def versions = [
         junit                  : "5.7.2",
         nullaway               : "0.10.19",
         mockito                : "5.2.0",
+        gson                   : "2.8.8",
 ]
 
 def apt = [
@@ -62,6 +63,7 @@ def build = [
         errorProneJavac         : "com.google.errorprone:javac:9+181-r4173-1",
         errorProneCheckApi      : "com.google.errorprone:error_prone_check_api:${versions.errorProneApi}",
         nullaway                : "com.uber.nullaway:nullaway:${versions.nullaway}",
+        gson                    : "com.google.code.gson:gson:${versions.gson}",
 ]
 
 def test = [

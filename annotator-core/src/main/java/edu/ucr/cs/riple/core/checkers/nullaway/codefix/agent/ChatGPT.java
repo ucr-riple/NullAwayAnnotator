@@ -24,6 +24,8 @@
 
 package edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.core.util.ASTUtil;
@@ -103,7 +105,7 @@ public class ChatGPT {
   public void fixDereferenceErrorInEqualsMethod(NullAwayError error) {
     String enclosingMethod = ASTUtil.getRegionSourceCode(config, error.path, error.getRegion());
     String prompt = String.format(dereferenceEqualsMethodRewritePrompt, enclosingMethod);
-    String response = ask("say hi");
+    String response = ask(prompt);
     System.out.println(response);
   }
 }
