@@ -314,7 +314,8 @@ public class Utility {
   public static String readResourceContent(String resourcePath) {
     try {
       return Files.readString(
-          Paths.get(Objects.requireNonNull(Utility.class.getResource(resourcePath)).toURI()), Charset.defaultCharset());
+          Paths.get(Objects.requireNonNull(Utility.class.getResource(resourcePath)).toURI()),
+          Charset.defaultCharset());
     } catch (IOException | URISyntaxException e) {
       throw new RuntimeException("Exception while reading resource: " + resourcePath, e);
     }

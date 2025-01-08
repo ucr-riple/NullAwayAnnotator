@@ -28,8 +28,6 @@ import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.injector.Injector;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 public class ASTUtil {
 
@@ -47,7 +45,7 @@ public class ASTUtil {
   }
 
   public static String getRegionSourceCode(Config config, Path path, Region region) {
-    Injector injector = new Injector(config.languageLevel);
-    return String.join("\n", injector.getRegionSourceCode(path, region.clazz, region.member));
+    return new Injector(config.languageLevel)
+        .getMethodSourceCode(path, region.clazz, region.member);
   }
 }

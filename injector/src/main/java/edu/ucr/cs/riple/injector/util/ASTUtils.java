@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.injector.util;
 
+import com.github.javaparser.Position;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
@@ -40,6 +41,7 @@ import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.google.common.base.Preconditions;
+import edu.ucr.cs.riple.injector.SignatureMatcher;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -259,6 +261,52 @@ public class ASTUtils {
                     && ((InitializerDeclaration) node).isStatic())
         .map(node -> (InitializerDeclaration) node)
         .collect(Collectors.toSet());
+  }
+
+  /**
+   * Returns the callable declaration with the given signature in the compilation unit.
+   *
+   * @param cu Compilation unit where the target callable declaration is located.
+   * @param encClass Enclosing class name.
+   * @param method Method signature.
+   * @return The callable declaration with the given signature, or null if it is not found.
+   * @throws TargetClassNotFound if the target class source code is not found.
+   */
+  @Nullable
+  public static CallableDeclaration<?> getCallableDeclaration(
+      CompilationUnit cu, String encClass, String method) throws TargetClassNotFound {
+    SignatureMatcher matcher = new SignatureMatcher(method);
+    NodeList<BodyDeclaration<?>> members =
+        ASTUtils.getTypeDeclarationMembersByFlatName(cu, encClass);
+    CallableDeclaration<?> target = null;
+    for (BodyDeclaration<?> bodyDeclaration : members) {
+      if (bodyDeclaration instanceof CallableDeclaration<?>) {
+        CallableDeclaration<?> callableDeclaration = (CallableDeclaration<?>) bodyDeclaration;
+        if (matcher.matchesCallableDeclaration(callableDeclaration)) {
+          target = callableDeclaration;
+          break;
+        }
+      }
+    }
+    return target;
+  }
+
+  /**
+   * Computes the index of a character in a string from a position.
+   *
+   * @param content The content of the file.
+   * @param position The position of the character.
+   * @return The index of the character in the content.
+   */
+  public static int computeIndexFromPosition(String content, Position position) {
+    int line = 1, index = 0;
+    while (line < position.line) {
+      if (content.charAt(index) == '\n') {
+        line++;
+      }
+      index++;
+    }
+    return index + position.column - 1;
   }
 
   /**

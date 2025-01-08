@@ -31,14 +31,13 @@ import com.github.javaparser.Range;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
-import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.CallableDeclaration;
 import com.google.common.collect.ImmutableList;
 import edu.ucr.cs.riple.injector.changes.ASTChange;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AnnotationChange;
 import edu.ucr.cs.riple.injector.changes.ChangeVisitor;
+import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import edu.ucr.cs.riple.injector.changes.TypeUseAnnotationChange;
 import edu.ucr.cs.riple.injector.exceptions.ParseException;
@@ -51,7 +50,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -79,7 +77,6 @@ public class Injector {
    * @return Offset changes of source file.
    */
   public <T extends ASTChange> Set<FileOffsetStore> start(Set<T> changes) {
-
     changes = changes.stream().map(t -> (T) t.copy()).collect(Collectors.toSet());
     // Start method does not support addition and deletion on same element. Should be split into
     // call for addition and deletion separately.
@@ -237,34 +234,41 @@ public class Injector {
     }
   }
 
-  public String[] getRegionSourceCode(@Nullable Path path, String encClass, String method) {
+  /**
+   * Returns the source code of the region of the method in the class.
+   *
+   * @param path Path to the file containing the method.
+   * @param encClass Enclosing class of the method.
+   * @param method Method signature.
+   * @return Source code of the region of the method.
+   */
+  public String getMethodSourceCode(@Nullable Path path, String encClass, String method) {
     CompilationUnit compilationUnit = parse(path, languageLevel);
-    SignatureMatcher matcher = new SignatureMatcher(method);
     if (compilationUnit == null) {
       return null;
     }
     try {
-      NodeList<BodyDeclaration<?>> members =
-          ASTUtils.getTypeDeclarationMembersByFlatName(compilationUnit, encClass);
-      CallableDeclaration<?> target = null;
-      for (BodyDeclaration<?> bodyDeclaration : members) {
-        if (bodyDeclaration instanceof CallableDeclaration<?>) {
-          CallableDeclaration<?> callableDeclaration = (CallableDeclaration<?>) bodyDeclaration;
-          if (matcher.matchesCallableDeclaration(callableDeclaration)) {
-            target = callableDeclaration;
-            break;
-          }
-        }
-      }
+      CallableDeclaration<?> target =
+          ASTUtils.getCallableDeclaration(compilationUnit, encClass, method);
       if (target == null || target.getRange().isEmpty()) {
         return null;
       }
       Range range = target.getRange().get();
       String content = Files.readString(path);
-      String[] lines = content.split("\n");
-      return Arrays.copyOfRange(lines, range.begin.line - 1, range.end.line);
+      return content
+              .substring(
+                  ASTUtils.computeIndexFromPosition(content, range.begin),
+                  // The end position is exclusive, so we need to add 1 to include the last
+                  // character which is the enclosing brace.
+                  ASTUtils.computeIndexFromPosition(content, range.end))
+              .trim()
+          + "\n}";
     } catch (TargetClassNotFound | IOException e) {
       return null;
     }
+  }
+
+  public void rewriteMethod(MethodRewriteChange change) {
+    start(Set.of(change));
   }
 }

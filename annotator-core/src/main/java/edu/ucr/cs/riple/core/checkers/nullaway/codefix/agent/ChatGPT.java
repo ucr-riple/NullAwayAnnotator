@@ -30,6 +30,8 @@ import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.core.util.ASTUtil;
 import edu.ucr.cs.riple.core.util.Utility;
+import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
+import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -40,6 +42,7 @@ import java.nio.charset.Charset;
 
 public class ChatGPT {
 
+  private static final String URL = "https://api.openai.com/v1/chat/completions";
   private static final String MODEL = "gpt-4o";
   private final String apiKey;
   private final String dereferenceEqualsMethodRewritePrompt;
@@ -53,12 +56,15 @@ public class ChatGPT {
     this.config = config;
   }
 
+  private static String parseCode(String code) {
+    return code;
+  }
+
   private String ask(String prompt) {
-    String url = "https://api.openai.com/v1/chat/completions";
 
     try {
       // Making a POST request
-      URL obj = new URL(url);
+      URL obj = new URL(URL);
       HttpURLConnection connection = (HttpURLConnection) obj.openConnection();
       connection.setRequestMethod("POST");
       connection.setRequestProperty("Authorization", "Bearer " + apiKey);
@@ -77,13 +83,16 @@ public class ChatGPT {
 
       // Send request
       connection.setDoOutput(true);
-      OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream(), Charset.defaultCharset());
+      OutputStreamWriter writer =
+          new OutputStreamWriter(connection.getOutputStream(), Charset.defaultCharset());
       writer.write(body);
       writer.flush();
       writer.close();
 
       // Response from ChatGPT
-      BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.defaultCharset()));
+      BufferedReader br =
+          new BufferedReader(
+              new InputStreamReader(connection.getInputStream(), Charset.defaultCharset()));
       String line;
       StringBuilder response = new StringBuilder();
       while ((line = br.readLine()) != null) {
@@ -102,10 +111,12 @@ public class ChatGPT {
     return response.substring(start, end);
   }
 
-  public void fixDereferenceErrorInEqualsMethod(NullAwayError error) {
+  public MethodRewriteChange fixDereferenceErrorInEqualsMethod(NullAwayError error) {
     String enclosingMethod = ASTUtil.getRegionSourceCode(config, error.path, error.getRegion());
     String prompt = String.format(dereferenceEqualsMethodRewritePrompt, enclosingMethod);
     String response = ask(prompt);
-    System.out.println(response);
+    String code = parseCode(response);
+    return new MethodRewriteChange(
+        new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member), code);
   }
 }

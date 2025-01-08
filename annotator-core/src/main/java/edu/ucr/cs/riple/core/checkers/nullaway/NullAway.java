@@ -40,6 +40,7 @@ import edu.ucr.cs.riple.injector.Printer;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
+import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnParameter;
@@ -365,9 +366,19 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     // Collect regions with remaining errors.
     Utility.buildTarget(context);
     Set<NullAwayError> remainingErrors = deserializeErrors(context.targetModuleInfo);
+    Set<MethodRewriteChange> rewrites = new HashSet<>();
     remainingErrors.stream()
         .collect(Collectors.groupingBy(NullAwayError::getRegion))
-        .forEach((region, nullAwayErrors) -> nullAwayErrors.forEach(codeFix::fix));
+        .forEach(
+            ((region, nullAwayErrors) ->
+                nullAwayErrors.forEach(
+                    error -> {
+                      MethodRewriteChange change = codeFix.fix(error);
+                      if (change != null) {
+                        rewrites.add(change);
+                      }
+                    })));
+    rewrites.forEach(codeFix::apply);
   }
 
   @Override

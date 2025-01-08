@@ -29,6 +29,7 @@ import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent.ChatGPT;
 import edu.ucr.cs.riple.core.util.ASTUtil;
 import edu.ucr.cs.riple.injector.Injector;
+import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
 
 public class NullAwayCodeFix {
 
@@ -42,19 +43,23 @@ public class NullAwayCodeFix {
     this.config = config;
   }
 
-  public void fix(NullAwayError error) {
+  public MethodRewriteChange fix(NullAwayError error) {
     switch (error.messageType) {
       case "DEREFERENCE_NULLABLE":
-        resolveDereferenceError(error);
-        break;
+        return resolveDereferenceError(error);
       default:
-        return;
+        return null;
     }
   }
 
-  private void resolveDereferenceError(NullAwayError error) {
+  private MethodRewriteChange resolveDereferenceError(NullAwayError error) {
     if (ASTUtil.isObjectEqualsMethod(error.getRegion().member)) {
-      gpt.fixDereferenceErrorInEqualsMethod(error);
+      return gpt.fixDereferenceErrorInEqualsMethod(error);
     }
+    return null;
+  }
+
+  public void apply(MethodRewriteChange methodRewriteChange) {
+    injector.rewriteMethod(methodRewriteChange);
   }
 }
