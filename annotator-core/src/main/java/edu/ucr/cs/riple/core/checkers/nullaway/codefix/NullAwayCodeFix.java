@@ -30,36 +30,59 @@ import edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent.ChatGPT;
 import edu.ucr.cs.riple.core.util.ASTUtil;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
+import java.util.Set;
 
+/** A class that provides code fixes for {@link NullAwayError}s. */
 public class NullAwayCodeFix {
 
+  /** The {@link ChatGPT} instance used to generate code fixes. */
   private final ChatGPT gpt;
+
+  /** The {@link Injector} instance used to apply code fixes. */
   private final Injector injector;
-  private final Config config;
 
   public NullAwayCodeFix(Config config) {
     this.gpt = new ChatGPT(config);
     this.injector = new Injector(config.languageLevel);
-    this.config = config;
   }
 
-  public MethodRewriteChange fix(NullAwayError error) {
+  /**
+   * Generates a code fix for the given {@link NullAwayError}. The fix is rewrites of sets of
+   * methods.
+   *
+   * @param error the error to fix.
+   * @return a {@link MethodRewriteChange} that represents the code fix, or {@code null} if the
+   *     error cannot be fixed.
+   */
+  public Set<MethodRewriteChange> fix(NullAwayError error) {
     switch (error.messageType) {
       case "DEREFERENCE_NULLABLE":
         return resolveDereferenceError(error);
       default:
-        return null;
+        return Set.of();
     }
   }
 
-  private MethodRewriteChange resolveDereferenceError(NullAwayError error) {
+  /**
+   * Resolves a dereference error by generating a code fix.
+   *
+   * @param error the error to fix.
+   * @return a {@link MethodRewriteChange} that represents the code fix, or {@code null} if the
+   *     error cannot be fixed.
+   */
+  private Set<MethodRewriteChange> resolveDereferenceError(NullAwayError error) {
     if (ASTUtil.isObjectEqualsMethod(error.getRegion().member)) {
       return gpt.fixDereferenceErrorInEqualsMethod(error);
     }
-    return null;
+    return Set.of();
   }
 
-  public void apply(MethodRewriteChange methodRewriteChange) {
-    injector.rewriteMethod(methodRewriteChange);
+  /**
+   * Applies the given {@link MethodRewriteChange} to the source code.
+   *
+   * @param changes the changes to apply.
+   */
+  public void apply(Set<MethodRewriteChange> changes) {
+    changes.forEach(injector::rewriteMethod);
   }
 }

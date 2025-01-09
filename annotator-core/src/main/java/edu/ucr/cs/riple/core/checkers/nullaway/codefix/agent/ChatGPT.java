@@ -37,16 +37,31 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.Set;
 
+/** Wrapper class to interact with ChatGPT to generate code fixes for {@link NullAwayError}s. */
 public class ChatGPT {
 
+  /** The URL to send the request to ChatGPT. */
   private static final String URL = "https://api.openai.com/v1/chat/completions";
+
+  /** The model to use for the request from ChatGPT. */
   private static final String MODEL = "gpt-4o";
+
+  /** The API key to use for the request from ChatGPT. */
   private final String apiKey;
+
+  /** The prompt to ask ChatGPT to rewrite the {@link Object#equals(Object)} method. */
   private final String dereferenceEqualsMethodRewritePrompt;
+
+  /** The {@link Config} instance. */
   private final Config config;
+
+  /** The URL to send the request to ChatGPT. */
+  private final URL url;
 
   public ChatGPT(Config config) {
     // read openai-api-key.txt from resources
@@ -54,18 +69,55 @@ public class ChatGPT {
     this.dereferenceEqualsMethodRewritePrompt =
         Utility.readResourceContent("prompts/dereference-equals-rewrite.txt");
     this.config = config;
+    try {
+      this.url = new URL(URL);
+    } catch (MalformedURLException e) {
+      throw new RuntimeException("Error Happened creating URL to: " + URL, e);
+    }
   }
 
+  /**
+   * Fix a dereference error by generating a code fix. The fix is a rewrite of the {@link
+   * Object#equals(Object)} method. Instead of comparing on the field directly that might cause of a
+   * dereference error, it should simply call {@code Objects.equals} on the field.
+   *
+   * @param error the error to fix.
+   * @return a {@link MethodRewriteChange} that represents the code fix, or {@code null} if the
+   *     error cannot be fixed.
+   */
+  public Set<MethodRewriteChange> fixDereferenceErrorInEqualsMethod(NullAwayError error) {
+    String enclosingMethod = ASTUtil.getRegionSourceCode(config, error.path, error.getRegion());
+    String prompt = String.format(dereferenceEqualsMethodRewritePrompt, enclosingMethod);
+    String response = ask(prompt);
+    String code = parseCode(response);
+    return Set.of(
+        new MethodRewriteChange(
+            new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member), code));
+  }
+
+  /**
+   * Parse the code from the response from ChatGPT.
+   *
+   * @param code the code from the response.
+   * @return the parsed code.
+   */
   private static String parseCode(String code) {
-    return code;
+    // Code is in the format: "```java\ncode\n```}"
+    int start = code.indexOf("```java") + 7;
+    int end = code.lastIndexOf("```");
+    return code.substring(start, end);
   }
 
+  /**
+   * Ask ChatGPT a question and get a response.
+   *
+   * @param prompt the question to ask.
+   * @return the response from ChatGPT.
+   */
   private String ask(String prompt) {
-
     try {
       // Making a POST request
-      URL obj = new URL(URL);
-      HttpURLConnection connection = (HttpURLConnection) obj.openConnection();
+      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
       connection.setRequestMethod("POST");
       connection.setRequestProperty("Authorization", "Bearer " + apiKey);
       connection.setRequestProperty("Content-Type", "application/json");
@@ -105,18 +157,20 @@ public class ChatGPT {
     }
   }
 
+  /**
+   * Extract the message from the JSON response from ChatGPT. The response is in the format:
+   * {"choices":[{"role":"user","content":"..."}]}
+   *
+   * @param response the JSON response.
+   * @return the message from the response.
+   */
   private static String extractMessageFromJSONResponse(String response) {
-    int start = response.indexOf("content") + 11;
+    int contentIndex = response.indexOf("content");
+    if (contentIndex == -1) {
+      return "";
+    }
+    int start = contentIndex + 11;
     int end = response.indexOf("\"", start);
     return response.substring(start, end);
-  }
-
-  public MethodRewriteChange fixDereferenceErrorInEqualsMethod(NullAwayError error) {
-    String enclosingMethod = ASTUtil.getRegionSourceCode(config, error.path, error.getRegion());
-    String prompt = String.format(dereferenceEqualsMethodRewritePrompt, enclosingMethod);
-    String response = ask(prompt);
-    String code = parseCode(response);
-    return new MethodRewriteChange(
-        new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member), code);
   }
 }
