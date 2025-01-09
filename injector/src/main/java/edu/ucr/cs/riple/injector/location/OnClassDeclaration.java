@@ -24,9 +24,9 @@
 
 package edu.ucr.cs.riple.injector.location;
 
+import com.google.gson.JsonObject;
 import edu.ucr.cs.riple.injector.Printer;
 import java.nio.file.Path;
-import org.json.simple.JSONObject;
 
 public class OnClassDeclaration extends Location {
 
@@ -42,9 +42,9 @@ public class OnClassDeclaration extends Location {
     this.target = target;
   }
 
-  public OnClassDeclaration(JSONObject json) {
+  public OnClassDeclaration(JsonObject json) {
     super(LocationKind.CLASS_DECL, json);
-    this.target = (String) json.get("target");
+    this.target = json.get("target").getAsString();
   }
 
   @Override

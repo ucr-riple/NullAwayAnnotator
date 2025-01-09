@@ -56,4 +56,42 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
         .resolveRemainingErrors()
         .start();
   }
+
+  @Test
+  public void dereferenceHashCodeRewriteTest() {
+    coreTestHelper
+        .onTarget()
+        .withSourceLines(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "   @Nullable Object f;",
+            "   public int hashCode() {",
+            "      return f.hashCode();",
+            "   }",
+            "}")
+        .expectNoReport()
+        .resolveRemainingErrors()
+        .start();
+  }
+
+  @Test
+  public void dereferenceToStringRewriteTest() {
+    coreTestHelper
+        .onTarget()
+        .withSourceLines(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "   @Nullable Object f;",
+            "   public String toString() {",
+            "      return f.toString();",
+            "   }",
+            "}")
+        .expectNoReport()
+        .resolveRemainingErrors()
+        .start();
+  }
 }
