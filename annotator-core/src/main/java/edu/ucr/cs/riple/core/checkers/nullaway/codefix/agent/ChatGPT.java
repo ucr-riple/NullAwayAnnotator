@@ -89,7 +89,15 @@ public class ChatGPT {
     String enclosingMethod = ASTUtil.getRegionSourceCode(config, error.path, error.getRegion());
     String prompt = String.format(dereferenceEqualsMethodRewritePrompt, enclosingMethod);
     String response = ask(prompt);
+    if (response.isEmpty()) {
+      // if response is empty, we cannot generate a code fix.
+      return Set.of();
+    }
     String code = parseCode(response);
+    if (code.isEmpty()) {
+      // if we do not have any code change suggestion, we cannot generate a code fix.
+      return Set.of();
+    }
     return Set.of(
         new MethodRewriteChange(
             new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member), code));
@@ -103,6 +111,9 @@ public class ChatGPT {
    */
   private static String parseCode(String code) {
     // Code is in the format: "```java\ncode\n```}"
+    if (!code.contains("```java")) {
+      return "";
+    }
     int start = code.indexOf("```java") + 7;
     int end = code.lastIndexOf("```");
     return code.substring(start, end);
