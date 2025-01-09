@@ -63,6 +63,10 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
    */
   public static final String NAME = "NULLAWAY";
 
+  /**
+   * Code fix instance for NullAway. It is responsible for generating code fixes for NullAway
+   * errors.
+   */
   private final NullAwayCodeFix codeFix;
 
   /** Supported version of NullAway serialization. */
