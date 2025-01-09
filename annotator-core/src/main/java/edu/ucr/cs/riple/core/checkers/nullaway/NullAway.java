@@ -373,12 +373,12 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
             ((region, nullAwayErrors) ->
                 nullAwayErrors.forEach(
                     error -> {
-                      MethodRewriteChange change = codeFix.fix(error);
+                      Set<MethodRewriteChange> change = codeFix.fix(error);
                       if (change != null) {
-                        rewrites.add(change);
+                        rewrites.addAll(change);
                       }
                     })));
-    rewrites.forEach(codeFix::apply);
+    codeFix.apply(rewrites);
   }
 
   @Override
