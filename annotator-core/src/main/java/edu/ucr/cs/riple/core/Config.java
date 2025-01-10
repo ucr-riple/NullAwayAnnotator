@@ -677,23 +677,9 @@ public class Config {
       this.value = value;
     }
 
-    @SuppressWarnings("SameParameterValue")
-    JsonPrimitive orElse(int other) {
+    JsonPrimitive orElse(Object other) {
       return value.equals(JsonNull.INSTANCE)
-          ? new JsonPrimitive(other)
-          : value.getAsJsonPrimitive();
-    }
-
-    JsonPrimitive orElse(String other) {
-      other = other == null ? "" : other;
-      return value.equals(JsonNull.INSTANCE)
-          ? new JsonPrimitive(other)
-          : value.getAsJsonPrimitive();
-    }
-
-    JsonPrimitive orElse(boolean other) {
-      return value.equals(JsonNull.INSTANCE)
-          ? new JsonPrimitive(other)
+          ? new JsonPrimitive(String.valueOf(other))
           : value.getAsJsonPrimitive();
     }
   }
