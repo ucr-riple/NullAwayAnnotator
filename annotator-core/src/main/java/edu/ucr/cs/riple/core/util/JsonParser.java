@@ -30,7 +30,6 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
@@ -74,22 +73,18 @@ public class JsonParser {
    */
   public OrElse getValueFromKey(String key) {
     JsonObject current = json;
-    try {
-      ArrayList<String> keys = new ArrayList<>(Arrays.asList(key.split(":")));
-      while (keys.size() != 1) {
-        if (current.keySet().contains(keys.get(0))) {
-          current = (JsonObject) current.get(keys.get(0));
-          keys.remove(0);
-        } else {
-          return new OrElse(JsonNull.INSTANCE);
-        }
+    List<String> keys = Arrays.asList(key.split(":"));
+    while (keys.size() != 1) {
+      if (current.keySet().contains(keys.get(0))) {
+        current = (JsonObject) current.get(keys.get(0));
+        keys.remove(0);
+      } else {
+        return new OrElse(JsonNull.INSTANCE);
       }
-      return current.keySet().contains(keys.get(0))
-          ? new OrElse(current.get(keys.get(0)))
-          : new OrElse(JsonNull.INSTANCE);
-    } catch (Exception e) {
-      return new OrElse(JsonNull.INSTANCE);
     }
+    return current.keySet().contains(keys.get(0))
+        ? new OrElse(current.get(keys.get(0)))
+        : new OrElse(JsonNull.INSTANCE);
   }
 
   /**
