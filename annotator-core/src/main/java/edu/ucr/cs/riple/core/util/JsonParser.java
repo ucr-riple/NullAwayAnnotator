@@ -29,6 +29,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSyntaxException;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
@@ -49,7 +53,7 @@ public class JsonParser {
    * @param path The path to the JSON file.
    */
   public JsonParser(Path path) {
-    this.json = Utility.parseJson(path);
+    this.json = parseJson(path);
   }
 
   /**
@@ -58,7 +62,7 @@ public class JsonParser {
    * @param content The content of the JSON file.
    */
   public JsonParser(String content) {
-    this.json = Utility.parseJson(content);
+    this.json = parseJson(content);
   }
 
   /**
@@ -111,6 +115,36 @@ public class JsonParser {
       }
       throw new IllegalStateException(
           "Expected type to be json array, found: " + jsonValue.value.getClass());
+    }
+  }
+
+  /**
+   * Parses a file in json format and returns as a JsonObject.
+   *
+   * @param path The path to the file.
+   * @return The JsonObject parsed from the file.
+   */
+  private static JsonObject parseJson(Path path) {
+    try {
+      return com.google.gson.JsonParser.parseReader(
+              Files.newBufferedReader(path, Charset.defaultCharset()))
+          .getAsJsonObject();
+    } catch (JsonSyntaxException | IOException e) {
+      throw new RuntimeException("Error in parsing json at path: " + path, e);
+    }
+  }
+
+  /**
+   * Parses a string in json format and returns as a JsonObject.
+   *
+   * @param content The content to parse.
+   * @return The JsonObject parsed from the content.
+   */
+  private static JsonObject parseJson(String content) {
+    try {
+      return com.google.gson.JsonParser.parseString(content).getAsJsonObject();
+    } catch (JsonSyntaxException e) {
+      throw new RuntimeException("Error in parsing: " + content, e);
     }
   }
 

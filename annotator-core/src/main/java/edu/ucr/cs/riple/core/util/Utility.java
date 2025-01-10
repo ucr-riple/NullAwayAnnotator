@@ -28,8 +28,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.Report;
@@ -303,35 +301,6 @@ public class Utility {
       return stream.collect(Collectors.toList());
     } catch (IOException e) {
       throw new RuntimeException("Exception while reading file: " + path, e);
-    }
-  }
-
-  /**
-   * Parses a file in json format and returns as a JsonObject.
-   *
-   * @param path The path to the file.
-   * @return The JsonObject parsed from the file.
-   */
-  public static JsonObject parseJson(Path path) {
-    try {
-      return JsonParser.parseReader(Files.newBufferedReader(path, Charset.defaultCharset()))
-          .getAsJsonObject();
-    } catch (JsonSyntaxException | IOException e) {
-      throw new RuntimeException("Error in parsing json at path: " + path, e);
-    }
-  }
-
-  /**
-   * Parses a string in json format and returns as a JsonObject.
-   *
-   * @param content The content to parse.
-   * @return The JsonObject parsed from the content.
-   */
-  public static JsonObject parseJson(String content) {
-    try {
-      return JsonParser.parseString(content).getAsJsonObject();
-    } catch (JsonSyntaxException e) {
-      throw new RuntimeException("Error in parsing: " + content, e);
     }
   }
 }
