@@ -26,7 +26,6 @@ package edu.ucr.cs.riple.core.registries.index;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
-import com.google.gson.JsonObject;
 import edu.ucr.cs.riple.injector.changes.ASTChange;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -39,6 +38,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import org.json.simple.JSONObject;
 
 /**
  * Stores information suggesting adding @Nullable on an element in source code. These suggestions
@@ -185,7 +185,7 @@ public class Fix {
    *
    * @return Json instance.
    */
-  public JsonObject getJson() {
+  public JSONObject getJson() {
     return changes.iterator().next().getLocation().accept(new LocationToJsonVisitor(), null);
   }
 

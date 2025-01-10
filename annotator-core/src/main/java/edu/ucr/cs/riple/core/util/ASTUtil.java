@@ -27,76 +27,25 @@ package edu.ucr.cs.riple.core.util;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.injector.Injector;
-import edu.ucr.cs.riple.injector.util.SignatureMatcher;
 import java.nio.file.Path;
 
-/** Utility class for AST operations. */
 public class ASTUtil {
 
-  /**
-   * Returns the source code of a region.
-   *
-   * @param config Annotator configuration.
-   * @param path the path of the source file.
-   * @param region the region to get the source code of.
-   * @return the source code of the region.
-   */
+  public static boolean isObjectEqualsMethod(String member) {
+    if (!member.contains("(")) {
+      return false;
+    }
+    String methodName = member.substring(0, member.indexOf("("));
+    // check if it has only one parameter and the parameter is an java.lang.Object
+    String parameter = member.substring(member.indexOf("(") + 1, member.indexOf(")"));
+    if (!parameter.equals("java.lang.Object")) {
+      return false;
+    }
+    return methodName.equals("equals");
+  }
+
   public static String getRegionSourceCode(Config config, Path path, Region region) {
     return new Injector(config.languageLevel)
         .getMethodSourceCode(path, region.clazz, region.member);
-  }
-
-  /**
-   * Checks if a member is the {@link Object#equals(Object)} method of the Object class.
-   *
-   * @param member the member to check.
-   * @return true if the member is the {@link Object#equals(Object)} method of the Object class.
-   */
-  public static boolean isObjectEqualsMethod(String member) {
-    if (!SignatureMatcher.isCallableDeclaration(member)) {
-      return false;
-    }
-    SignatureMatcher matcher = new SignatureMatcher(member);
-    if (!matcher.callableName.equals("equals")) {
-      return false;
-    }
-    if (matcher.parameterTypes.size() != 1) {
-      return false;
-    }
-    return matcher.parameterTypes.get(0).equals("java.lang.Object");
-  }
-
-  /**
-   * Checks if a member is the {@link Object#toString()} method of the Object class.
-   *
-   * @param member the member to check.
-   * @return true if the member is the {@link Object#toString()} method of the Object class.
-   */
-  public static boolean isObjectToStringMethod(String member) {
-    if (!SignatureMatcher.isCallableDeclaration(member)) {
-      return false;
-    }
-    SignatureMatcher matcher = new SignatureMatcher(member);
-    if (!matcher.callableName.equals("toString")) {
-      return false;
-    }
-    return matcher.parameterTypes.isEmpty();
-  }
-
-  /**
-   * Checks if a member is the {@link Object#hashCode()} method of the Object class.
-   *
-   * @param member the member to check.
-   * @return true if the member is the {@link Object#hashCode()} method of the Object class.
-   */
-  public static boolean isObjectHashCodeMethod(String member) {
-    if (!SignatureMatcher.isCallableDeclaration(member)) {
-      return false;
-    }
-    SignatureMatcher matcher = new SignatureMatcher(member);
-    if (!matcher.callableName.equals("hashCode")) {
-      return false;
-    }
-    return matcher.parameterTypes.isEmpty();
   }
 }

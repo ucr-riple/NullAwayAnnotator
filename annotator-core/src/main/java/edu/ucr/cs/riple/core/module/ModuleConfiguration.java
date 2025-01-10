@@ -29,8 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
-
-import com.google.gson.JsonObject;
+import org.json.simple.JSONObject;
 
 /** Container class to hold paths to checker and scanner config files. */
 public class ModuleConfiguration {
@@ -58,9 +57,9 @@ public class ModuleConfiguration {
    * @param jsonObject Json Object to retrieve values.
    * @return An instance of {@link ModuleConfiguration}.
    */
-  public static ModuleConfiguration buildFromJson(int id, Path globalDir, JsonObject jsonObject) {
-    String checkerConfigPath = jsonObject.get("CHECKER").getAsString();
-    String scannerConfigPath = jsonObject.get("SCANNER").getAsString();
+  public static ModuleConfiguration buildFromJson(int id, Path globalDir, JSONObject jsonObject) {
+    String checkerConfigPath = (String) jsonObject.get("CHECKER");
+    String scannerConfigPath = (String) jsonObject.get("SCANNER");
     if (checkerConfigPath == null || scannerConfigPath == null) {
       throw new IllegalArgumentException(
           "Both paths to NullAway and Scanner config files must be set with CHECKER and SCANNER keys!");

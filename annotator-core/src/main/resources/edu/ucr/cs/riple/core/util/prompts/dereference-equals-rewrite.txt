@@ -27,8 +27,4 @@ Here is the code snippet that I want to be fixed:
 
 %s
 
-And the error I want to be fixed is:
-
-%s
-
 Just give me the fixed code snippet. I will apply the fix to my codebase. Do not import any additional libraries or classes or java comments.

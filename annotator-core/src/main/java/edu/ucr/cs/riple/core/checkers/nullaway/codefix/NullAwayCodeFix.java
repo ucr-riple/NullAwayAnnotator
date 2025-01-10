@@ -74,12 +74,6 @@ public class NullAwayCodeFix {
     if (ASTUtil.isObjectEqualsMethod(error.getRegion().member)) {
       return gpt.fixDereferenceErrorInEqualsMethod(error);
     }
-    if (ASTUtil.isObjectToStringMethod(error.getRegion().member)) {
-      return gpt.fixDereferenceErrorInToStringMethod(error);
-    }
-    if (ASTUtil.isObjectHashCodeMethod(error.getRegion().member)) {
-      return gpt.fixDereferenceErrorInHashCodeMethod(error);
-    }
     return Set.of();
   }
 

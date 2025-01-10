@@ -374,14 +374,14 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     remainingErrors.stream()
         .collect(Collectors.groupingBy(NullAwayError::getRegion))
         .forEach(
-            (region, nullAwayErrors) ->
+            ((region, nullAwayErrors) ->
                 nullAwayErrors.forEach(
                     error -> {
                       Set<MethodRewriteChange> change = codeFix.fix(error);
                       if (change != null) {
                         rewrites.addAll(change);
                       }
-                    }));
+                    })));
     codeFix.apply(rewrites);
   }
 

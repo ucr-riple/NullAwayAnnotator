@@ -26,9 +26,6 @@ package edu.ucr.cs.riple.core.util;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.Report;
@@ -50,7 +47,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -59,6 +55,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import me.tongfei.progressbar.ProgressBar;
 import me.tongfei.progressbar.ProgressBarStyle;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 /** Utility class. */
 public class Utility {
@@ -93,34 +91,36 @@ public class Utility {
    * @param context Annotator context.
    * @param reports Immutable set of reports.
    */
+  @SuppressWarnings("unchecked")
   public static void writeReports(Context context, ImmutableSet<Report> reports) {
     Path reportsPath = context.config.globalDir.resolve("reports.json");
-    JsonObject result = new JsonObject();
-    JsonArray reportsJson = new JsonArray();
-    List<Report> sortedReports = new ArrayList<>(reports);
-    // sort by overall effect
-    sortedReports.sort((o1, o2) ->
-        // Descending order
-        Integer.compare(o2.getOverallEffect(context.config), o1.getOverallEffect(context.config))
-    );
-    for (Report report : sortedReports) {
-      JsonObject reportJson = report.root.getJson();
-      reportJson.addProperty("LOCAL EFFECT", report.localEffect);
-      reportJson.addProperty("OVERALL EFFECT", report.getOverallEffect(context.config));
-      reportJson.addProperty("Upper Bound EFFECT", report.getUpperBoundEffectOnDownstreamDependencies());
-      reportJson.addProperty("Lower Bound EFFECT", report.getLowerBoundEffectOnDownstreamDependencies());
-      reportJson.addProperty("FINISHED", !report.requiresFurtherProcess(context.config));
-      JsonArray followUps = new JsonArray();
+    JSONObject result = new JSONObject();
+    JSONArray reportsJson = new JSONArray();
+    for (Report report : reports) {
+      JSONObject reportJson = report.root.getJson();
+      reportJson.put("LOCAL EFFECT", report.localEffect);
+      reportJson.put("OVERALL EFFECT", report.getOverallEffect(context.config));
+      reportJson.put("Upper Bound EFFECT", report.getUpperBoundEffectOnDownstreamDependencies());
+      reportJson.put("Lower Bound EFFECT", report.getLowerBoundEffectOnDownstreamDependencies());
+      reportJson.put("FINISHED", !report.requiresFurtherProcess(context.config));
+      JSONArray followUps = new JSONArray();
       if (context.config.chain && report.localEffect < 1) {
-        report.tree.stream().map(Fix::getJson).forEach(followUps::add);
+        followUps.addAll(report.tree.stream().map(Fix::getJson).collect(Collectors.toList()));
       }
-      reportJson.add("TREE", followUps);
+      reportJson.put("TREE", followUps);
       reportsJson.add(reportJson);
     }
-    result.add("REPORTS", reportsJson);
+    // Sort by overall effect.
+    reportsJson.sort(
+        (o1, o2) -> {
+          int first = (Integer) ((JSONObject) o1).get("OVERALL EFFECT");
+          int second = (Integer) ((JSONObject) o2).get("OVERALL EFFECT");
+          return Integer.compare(second, first);
+        });
+    result.put("REPORTS", reportsJson);
     try (BufferedWriter writer =
         Files.newBufferedWriter(reportsPath.toFile().toPath(), Charset.defaultCharset())) {
-      writer.write(result.toString().replace("\\/", "/").replace("\\\\\\", "\\"));
+      writer.write(result.toJSONString().replace("\\/", "/").replace("\\\\\\", "\\"));
       writer.flush();
     } catch (IOException e) {
       throw new RuntimeException(
@@ -319,30 +319,5 @@ public class Utility {
     } catch (IOException | URISyntaxException e) {
       throw new RuntimeException("Exception while reading resource: " + resourcePath, e);
     }
-  }
-
-  /**
-   * Parses a JSON string and returns a JSONObject.
-   *
-   * @param json The JSON string to parse.
-   * @return The parsed JSONObject.
-   */
-  public static JsonObject parseJson(String json) {
-    // parse using gson
-    return JsonParser.parseString(json).getAsJsonObject();
-  }
-
-  /**
-   * Parses a JSON file and returns a JSONObject.
-   *
-   * @param path The path to the JSON file.
-   * @return The parsed JSONObject.
-   */
-  public static JsonObject parseJson(Path path){
-      try {
-          return JsonParser.parseReader(Files.newBufferedReader(path, Charset.defaultCharset())).getAsJsonObject();
-      } catch (IOException e) {
-          throw new RuntimeException(e);
-      }
   }
 }

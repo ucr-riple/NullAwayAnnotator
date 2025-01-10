@@ -24,13 +24,15 @@
 
 dependencies {
     implementation deps.build.guava
-    implementation deps.build.gson
-    implementation deps.build.progressbar
-    implementation deps.build.javaparser
 
+    implementation deps.build.javaparser
     testImplementation deps.build.javaparser
+
+    implementation deps.build.json
+
+    implementation deps.build.progressbar
+
     testImplementation deps.build.commonsio
-    testImplementation 'junit:junit:4.13.1'
 }
 
 spotless {

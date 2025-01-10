@@ -24,11 +24,11 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 /** A visitor that converts a location to a JSON object. */
-public class LocationToJsonVisitor implements LocationVisitor<JsonObject, Void> {
+public class LocationToJsonVisitor implements LocationVisitor<JSONObject, Void> {
 
   /** The Keys used to represent a location in JSON format */
   public enum KEYS {
@@ -41,56 +41,61 @@ public class LocationToJsonVisitor implements LocationVisitor<JsonObject, Void> 
     SUPER,
   }
 
-  private JsonObject defaultAction(Location location) {
-    JsonObject res = new JsonObject();
-    res.addProperty(KEYS.CLASS.name(), location.clazz);
-    res.addProperty(KEYS.KIND.name(), location.getKind().toString());
-    res.addProperty(KEYS.PATH.name(), location.path.toString());
+  @SuppressWarnings("unchecked")
+  private JSONObject defaultAction(Location location) {
+    JSONObject res = new JSONObject();
+    res.put(KEYS.CLASS, location.clazz);
+    res.put(KEYS.KIND, location.getKind().toString());
+    res.put(KEYS.PATH, location.path);
+    return res;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public JSONObject visitMethod(OnMethod onMethod, Void unused) {
+    JSONObject res = defaultAction(onMethod);
+    res.put(KEYS.METHOD, onMethod.method);
+    return res;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public JSONObject visitField(OnField onField, Void unused) {
+    JSONObject res = defaultAction(onField);
+    JSONArray fields = new JSONArray();
+    fields.addAll(onField.variables);
+    res.put(KEYS.VARIABLES, fields);
+    return res;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public JSONObject visitParameter(OnParameter onParameter, Void unused) {
+    JSONObject res = defaultAction(onParameter);
+    res.put(KEYS.METHOD, onParameter.enclosingMethod.method);
+    res.put(KEYS.INDEX, onParameter.index);
     return res;
   }
 
   @Override
-  public JsonObject visitMethod(OnMethod onMethod, Void unused) {
-    JsonObject res = defaultAction(onMethod);
-    res.addProperty(KEYS.METHOD.name(), onMethod.method);
-    return res;
-  }
-
-  @Override
-  public JsonObject visitField(OnField onField, Void unused) {
-    JsonObject res = defaultAction(onField);
-    JsonArray fields = new JsonArray();
-    // Add the variables to the JSON array fields
-    onField.variables.forEach(fields::add);
-    res.add(KEYS.VARIABLES.name(), fields);
-    return res;
-  }
-
-  @Override
-  public JsonObject visitParameter(OnParameter onParameter, Void unused) {
-    JsonObject res = defaultAction(onParameter);
-    res.addProperty(KEYS.METHOD.name(), onParameter.enclosingMethod.method);
-    res.addProperty(KEYS.INDEX.name(), onParameter.index);
-    return res;
-  }
-
-  @Override
-  public JsonObject visitClass(OnClass onClass, Void unused) {
+  public JSONObject visitClass(OnClass onClass, Void unused) {
     return defaultAction(onClass);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public JsonObject visitLocalVariable(OnLocalVariable onLocalVariable, Void unused) {
-    JsonObject res = defaultAction(onLocalVariable);
-    res.addProperty(KEYS.METHOD.name(), onLocalVariable.encMethod == null ? "" : onLocalVariable.encMethod.method);
-    res.addProperty(KEYS.VARIABLES.name(), onLocalVariable.varName);
+  public JSONObject visitLocalVariable(OnLocalVariable onLocalVariable, Void unused) {
+    JSONObject res = defaultAction(onLocalVariable);
+    res.put(KEYS.METHOD, onLocalVariable.encMethod == null ? "" : onLocalVariable.encMethod.method);
+    res.put(KEYS.VARIABLES, onLocalVariable.varName);
     return res;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public JsonObject visitClassDeclaration(OnClassDeclaration onClassDeclaration, Void unused) {
-    JsonObject res = defaultAction(onClassDeclaration);
-    res.addProperty(KEYS.SUPER.name(), onClassDeclaration.target);
+  public JSONObject visitClassDeclaration(OnClassDeclaration onClassDeclaration, Void unused) {
+    JSONObject res = defaultAction(onClassDeclaration);
+    res.put(KEYS.SUPER, onClassDeclaration.target);
     return res;
   }
 }
