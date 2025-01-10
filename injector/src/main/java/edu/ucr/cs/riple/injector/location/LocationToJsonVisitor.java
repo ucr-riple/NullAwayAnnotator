@@ -24,8 +24,8 @@
 
 package edu.ucr.cs.riple.injector.location;
 
-import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 /** A visitor that converts a location to a JSON object. */
 public class LocationToJsonVisitor implements LocationVisitor<JsonObject, Void> {
@@ -81,7 +81,9 @@ public class LocationToJsonVisitor implements LocationVisitor<JsonObject, Void> 
   @Override
   public JsonObject visitLocalVariable(OnLocalVariable onLocalVariable, Void unused) {
     JsonObject res = defaultAction(onLocalVariable);
-    res.addProperty(KEYS.METHOD.name(), onLocalVariable.encMethod == null ? "" : onLocalVariable.encMethod.method);
+    res.addProperty(
+        KEYS.METHOD.name(),
+        onLocalVariable.encMethod == null ? "" : onLocalVariable.encMethod.method);
     res.addProperty(KEYS.VARIABLES.name(), onLocalVariable.varName);
     return res;
   }

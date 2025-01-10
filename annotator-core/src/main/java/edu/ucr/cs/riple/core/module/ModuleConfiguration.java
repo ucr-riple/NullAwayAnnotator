@@ -24,13 +24,12 @@
 
 package edu.ucr.cs.riple.core.module;
 
+import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
-
-import com.google.gson.JsonObject;
 
 /** Container class to hold paths to checker and scanner config files. */
 public class ModuleConfiguration {

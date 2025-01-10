@@ -50,7 +50,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -650,7 +649,7 @@ public class Config {
   }
 
   private <T> ListOrElse<T> getArrayValueFromKey(
-          JsonObject json, String key, Function<JsonObject, T> mapper, Class<T> klass) {
+      JsonObject json, String key, Function<JsonObject, T> mapper, Class<T> klass) {
     if (json == null) {
       return new ListOrElse<>(null, klass);
     }
@@ -660,8 +659,10 @@ public class Config {
     } else {
       if (jsonValue.value instanceof JsonArray) {
         return new ListOrElse<>(
-                StreamSupport.stream(((JsonArray) jsonValue.value).spliterator(), false).map(JsonElement::getAsJsonObject).map(mapper), klass
-        );
+            StreamSupport.stream(((JsonArray) jsonValue.value).spliterator(), false)
+                .map(JsonElement::getAsJsonObject)
+                .map(mapper),
+            klass);
       }
       throw new IllegalStateException(
           "Expected type to be json array, found: " + jsonValue.value.getClass());
@@ -765,14 +766,13 @@ public class Config {
       json.addProperty("INFERENCE_ACTIVATION", inferenceActivated);
       json.addProperty("LANGUAGE_LEVEL", languageLevel.name().split("_")[1]);
       JsonArray configPathsJson = new JsonArray();
-          configPaths
-              .forEach(
-                  info -> {
-                    JsonObject res = new JsonObject();
-                    res.addProperty("CHECKER", info.checkerConfig.toString());
-                    res.addProperty("SCANNER", info.scannerConfig.toString());
-                    configPathsJson.add(res);
-                  });
+      configPaths.forEach(
+          info -> {
+            JsonObject res = new JsonObject();
+            res.addProperty("CHECKER", info.checkerConfig.toString());
+            res.addProperty("SCANNER", info.scannerConfig.toString());
+            configPathsJson.add(res);
+          });
       json.add("CONFIG_PATHS", configPathsJson);
       JsonObject downstreamDependency = new JsonObject();
       downstreamDependency.addProperty("ACTIVATION", downStreamDependenciesAnalysisActivated);

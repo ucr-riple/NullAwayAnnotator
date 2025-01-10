@@ -94,13 +94,21 @@ public class Utility {
     JsonObject result = new JsonObject();
     JsonArray reportsJson = new JsonArray();
     // Sort reports based on the overall effect in descending order.
-    List<Report> sorted = reports.stream().sorted((r1, r2) -> Integer.compare(r2.getOverallEffect(context.config), r1.getOverallEffect(context.config))).collect(Collectors.toList());
+    List<Report> sorted =
+        reports.stream()
+            .sorted(
+                (r1, r2) ->
+                    Integer.compare(
+                        r2.getOverallEffect(context.config), r1.getOverallEffect(context.config)))
+            .collect(Collectors.toList());
     for (Report report : sorted) {
       JsonObject reportJson = report.root.getJson();
       reportJson.addProperty("LOCAL EFFECT", report.localEffect);
       reportJson.addProperty("OVERALL EFFECT", report.getOverallEffect(context.config));
-      reportJson.addProperty("Upper Bound EFFECT", report.getUpperBoundEffectOnDownstreamDependencies());
-      reportJson.addProperty("Lower Bound EFFECT", report.getLowerBoundEffectOnDownstreamDependencies());
+      reportJson.addProperty(
+          "Upper Bound EFFECT", report.getUpperBoundEffectOnDownstreamDependencies());
+      reportJson.addProperty(
+          "Lower Bound EFFECT", report.getLowerBoundEffectOnDownstreamDependencies());
       reportJson.addProperty("FINISHED", !report.requiresFurtherProcess(context.config));
       JsonArray followUps = new JsonArray();
       if (context.config.chain && report.localEffect < 1) {
@@ -299,12 +307,14 @@ public class Utility {
 
   /**
    * Parses a file in json format and returns as a JsonObject.
+   *
    * @param path The path to the file.
    * @return The JsonObject parsed from the file.
    */
   public static JsonObject parseJson(Path path) {
     try {
-      return JsonParser.parseReader(Files.newBufferedReader(path, Charset.defaultCharset())).getAsJsonObject();
+      return JsonParser.parseReader(Files.newBufferedReader(path, Charset.defaultCharset()))
+          .getAsJsonObject();
     } catch (Exception e) {
       throw new RuntimeException("Error in reading/parsing context at path: " + path, e);
     }
