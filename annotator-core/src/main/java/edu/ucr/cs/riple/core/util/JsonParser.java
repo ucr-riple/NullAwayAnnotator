@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -77,17 +76,18 @@ public class JsonParser {
    */
   public OrElse getValueFromKey(String key) {
     JsonObject current = json;
-    List<String> keys = Arrays.asList(key.split(":"));
-    while (keys.size() != 1) {
-      if (current.keySet().contains(keys.get(0))) {
-        current = (JsonObject) current.get(keys.get(0));
-        keys.remove(0);
+    String[] keys = key.split(":");
+    int index = 0;
+    while (index != keys.length - 1) {
+      if (current.keySet().contains(keys[index])) {
+        current = (JsonObject) current.get(keys[index]);
+        index++;
       } else {
         return new OrElse(JsonNull.INSTANCE);
       }
     }
-    return current.keySet().contains(keys.get(0))
-        ? new OrElse(current.get(keys.get(0)))
+    return current.keySet().contains(keys[index])
+        ? new OrElse(current.get(keys[index]))
         : new OrElse(JsonNull.INSTANCE);
   }
 
