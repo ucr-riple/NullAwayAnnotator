@@ -542,7 +542,7 @@ public class Config {
             .getAsString();
     this.initializerAnnot =
         getValueFromKey(jsonObject, "ANNOTATION:INITIALIZER")
-            .orElse("javax.annotation.Nullable")
+            .orElse("com.uber.nullaway.annotations.Initializer")
             .getAsString();
     this.globalDir =
         Paths.get(getValueFromKey(jsonObject, "OUTPUT_DIR").orElse(null).getAsString());
