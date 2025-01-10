@@ -30,7 +30,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
@@ -520,50 +522,52 @@ public class Config {
   public Config(Path configPath) {
     Preconditions.checkNotNull(configPath);
     JsonObject jsonObject = Utility.parseJson(configPath);
-    this.checkerName = getValueFromKey(jsonObject, "CHECKER", String.class).orElse(null);
-    this.depth = getValueFromKey(jsonObject, "DEPTH", Long.class).orElse((long) 1).intValue();
-    this.chain = getValueFromKey(jsonObject, "CHAIN", Boolean.class).orElse(false);
+    this.checkerName = getValueFromKey(jsonObject, "CHECKER").orElse(null).getAsString();
+    this.depth = getValueFromKey(jsonObject, "DEPTH").orElse(1).getAsInt();
+    this.chain = getValueFromKey(jsonObject, "CHAIN").orElse(false).getAsBoolean();
     this.redirectBuildOutputToStdErr =
-        getValueFromKey(jsonObject, "REDIRECT_BUILD_OUTPUT_TO_STDERR", Boolean.class).orElse(false);
-    this.useCache = getValueFromKey(jsonObject, "CACHE", Boolean.class).orElse(true);
+        getValueFromKey(jsonObject, "REDIRECT_BUILD_OUTPUT_TO_STDERR").orElse(false).getAsBoolean();
+    this.useCache = getValueFromKey(jsonObject, "CACHE").orElse(true).getAsBoolean();
     this.useParallelGraphProcessor =
-        getValueFromKey(jsonObject, "PARALLEL_PROCESSING", Boolean.class).orElse(true);
+        getValueFromKey(jsonObject, "PARALLEL_PROCESSING").orElse(true).getAsBoolean();
     this.useImpactCache =
-        getValueFromKey(jsonObject, "CACHE_IMPACT_ACTIVATION", Boolean.class).orElse(false);
+        getValueFromKey(jsonObject, "CACHE_IMPACT_ACTIVATION").orElse(false).getAsBoolean();
     this.exhaustiveSearch =
-        getValueFromKey(jsonObject, "EXHAUSTIVE_SEARCH", Boolean.class).orElse(true);
-    this.disableOuterLoop = !getValueFromKey(jsonObject, "OUTER_LOOP", Boolean.class).orElse(false);
-    this.bailout = getValueFromKey(jsonObject, "BAILOUT", Boolean.class).orElse(true);
+        getValueFromKey(jsonObject, "EXHAUSTIVE_SEARCH").orElse(true).getAsBoolean();
+    this.disableOuterLoop = !getValueFromKey(jsonObject, "OUTER_LOOP").orElse(false).getAsBoolean();
+    this.bailout = getValueFromKey(jsonObject, "BAILOUT").orElse(true).getAsBoolean();
     this.nullableAnnot =
-        getValueFromKey(jsonObject, "ANNOTATION:NULLABLE", String.class)
-            .orElse("javax.annotation.Nullable");
+        getValueFromKey(jsonObject, "ANNOTATION:NULLABLE")
+            .orElse("javax.annotation.Nullable")
+            .getAsString();
     this.initializerAnnot =
-        getValueFromKey(jsonObject, "ANNOTATION:INITIALIZER", String.class)
-            .orElse("javax.annotation.Nullable");
+        getValueFromKey(jsonObject, "ANNOTATION:INITIALIZER")
+            .orElse("javax.annotation.Nullable")
+            .getAsString();
     this.globalDir =
-        Paths.get(getValueFromKey(jsonObject, "OUTPUT_DIR", String.class).orElse(null));
+        Paths.get(getValueFromKey(jsonObject, "OUTPUT_DIR").orElse(null).getAsString());
     List<ModuleConfiguration> moduleConfigurationList =
         getArrayValueFromKey(
                 jsonObject,
                 "CONFIG_PATHS",
-                instance ->
-                    ModuleConfiguration.buildFromJson(getNextModuleUniqueID(), globalDir, instance),
-                ModuleConfiguration.class)
+                moduleInfo ->
+                    ModuleConfiguration.buildFromJson(
+                        getNextModuleUniqueID(), globalDir, moduleInfo))
             .orElse(Collections.emptyList());
     this.target = moduleConfigurationList.get(0);
-    this.buildCommand = getValueFromKey(jsonObject, "BUILD_COMMAND", String.class).orElse(null);
+    this.buildCommand = getValueFromKey(jsonObject, "BUILD_COMMAND").orElse(null).getAsString();
     this.downStreamDependenciesAnalysisActivated =
-        getValueFromKey(jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:ACTIVATION", Boolean.class)
-            .orElse(false);
+        getValueFromKey(jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:ACTIVATION")
+            .orElse(false)
+            .getAsBoolean();
     this.downstreamDependenciesBuildCommand =
-        getValueFromKey(jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:BUILD_COMMAND", String.class)
-            .orElse(null);
+        getValueFromKey(jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:BUILD_COMMAND")
+            .orElse(null)
+            .getAsString();
     String nullawayLibraryModelLoaderPathString =
-        getValueFromKey(
-                jsonObject,
-                "DOWNSTREAM_DEPENDENCY_ANALYSIS:LIBRARY_MODEL_LOADER_PATH",
-                String.class)
-            .orElse(null);
+        getValueFromKey(jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:LIBRARY_MODEL_LOADER_PATH")
+            .orElse(null)
+            .getAsString();
     this.nullawayLibraryModelLoaderPath =
         nullawayLibraryModelLoaderPathString == null
             ? null
@@ -572,34 +576,32 @@ public class Config {
     this.mode =
         AnalysisMode.parseMode(
             this.downStreamDependenciesAnalysisActivated,
-            getValueFromKey(
-                    jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:ANALYSIS_MODE", String.class)
-                .orElse("default"));
+            getValueFromKey(jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:ANALYSIS_MODE")
+                .orElse("default")
+                .getAsString());
 
     this.downstreamConfigurations = ImmutableSet.copyOf(moduleConfigurationList);
     this.moduleCounterID = 0;
     this.suppressRemainingErrors =
-        getValueFromKey(jsonObject, "SUPPRESS_REMAINING_ERRORS", Boolean.class).orElse(false);
+        getValueFromKey(jsonObject, "SUPPRESS_REMAINING_ERRORS").orElse(false).getAsBoolean();
     this.inferenceActivated =
-        getValueFromKey(jsonObject, "INFERENCE_ACTIVATION", Boolean.class).orElse(true);
+        getValueFromKey(jsonObject, "INFERENCE_ACTIVATION").orElse(true).getAsBoolean();
     this.nullUnMarkedAnnotation =
-        getValueFromKey(jsonObject, "ANNOTATION:NULL_UNMARKED", String.class)
-            .orElse("org.jspecify.annotations.NullUnmarked");
+        getValueFromKey(jsonObject, "ANNOTATION:NULL_UNMARKED")
+            .orElse("org.jspecify.annotations.NullUnmarked")
+            .getAsString();
     boolean lombokCodeDetectorActivated =
-        getValueFromKey(
-                jsonObject, "PROCESSORS:" + SourceType.LOMBOK.name() + ":ACTIVATION", Boolean.class)
-            .orElse(true);
+        getValueFromKey(jsonObject, "PROCESSORS:" + SourceType.LOMBOK.name() + ":ACTIVATION")
+            .orElse(true)
+            .getAsBoolean();
     this.generatedCodeDetectors =
         lombokCodeDetectorActivated ? Sets.immutableEnumSet(SourceType.LOMBOK) : ImmutableSet.of();
     this.languageLevel =
-        getLanguageLevel(getValueFromKey(jsonObject, "LANGUAGE_LEVEL", String.class).orElse("17"));
+        getLanguageLevel(getValueFromKey(jsonObject, "LANGUAGE_LEVEL").orElse("17").getAsString());
     this.nonnullAnnotations =
         ImmutableSet.copyOf(
             getArrayValueFromKey(
-                    jsonObject,
-                    "ANNOTATION:NONNULL",
-                    json -> json.get("NONNULL").toString(),
-                    String.class)
+                    jsonObject, "ANNOTATION:NONNULL", json -> json.get("NONNULL").getAsString())
                 .orElse(List.of()));
   }
 
@@ -626,9 +628,9 @@ public class Config {
     formatter.printHelp("Annotator context Flags", options);
   }
 
-  private <T> Config.OrElse<T> getValueFromKey(JsonObject json, String key, Class<T> klass) {
+  private OrElse getValueFromKey(JsonObject json, String key) {
     if (json == null) {
-      return new OrElse<>(null, klass);
+      return new OrElse(JsonNull.INSTANCE);
     }
     try {
       ArrayList<String> keys = new ArrayList<>(Arrays.asList(key.split(":")));
@@ -637,66 +639,77 @@ public class Config {
           json = (JsonObject) json.get(keys.get(0));
           keys.remove(0);
         } else {
-          return new OrElse<>(null, klass);
+          return new OrElse(JsonNull.INSTANCE);
         }
       }
       return json.keySet().contains(keys.get(0))
-          ? new OrElse<>(json.get(keys.get(0)), klass)
-          : new OrElse<>(null, klass);
+          ? new OrElse(json.get(keys.get(0)))
+          : new OrElse(JsonNull.INSTANCE);
     } catch (Exception e) {
-      return new OrElse<>(null, klass);
+      return new OrElse(JsonNull.INSTANCE);
     }
   }
 
   private <T> ListOrElse<T> getArrayValueFromKey(
-      JsonObject json, String key, Function<JsonObject, T> mapper, Class<T> klass) {
+      JsonObject json, String key, Function<JsonObject, T> mapper) {
     if (json == null) {
-      return new ListOrElse<>(null, klass);
+      return new ListOrElse<>(Stream.of());
     }
-    OrElse<T> jsonValue = getValueFromKey(json, key, klass);
-    if (jsonValue.value == null) {
-      return new ListOrElse<>(null, klass);
+    OrElse jsonValue = getValueFromKey(json, key);
+    if (jsonValue.value.equals(JsonNull.INSTANCE)) {
+      return new ListOrElse<>(Stream.of());
     } else {
       if (jsonValue.value instanceof JsonArray) {
         return new ListOrElse<>(
             StreamSupport.stream(((JsonArray) jsonValue.value).spliterator(), false)
-                .map(JsonElement::getAsJsonObject)
-                .map(mapper),
-            klass);
+                .map(jsonElement -> mapper.apply(jsonElement.getAsJsonObject())));
       }
       throw new IllegalStateException(
           "Expected type to be json array, found: " + jsonValue.value.getClass());
     }
   }
 
-  private static class OrElse<T> {
-    private final Object value;
-    private final Class<T> klass;
+  private static class OrElse {
 
-    OrElse(Object value, Class<T> klass) {
+    private final JsonElement value;
+
+    OrElse(JsonElement value) {
       this.value = value;
-      this.klass = klass;
     }
 
-    T orElse(T other) {
-      return value == null ? other : klass.cast(this.value);
+    @SuppressWarnings("SameParameterValue")
+    JsonPrimitive orElse(int other) {
+      return value.equals(JsonNull.INSTANCE)
+          ? new JsonPrimitive(other)
+          : value.getAsJsonPrimitive();
+    }
+
+    JsonPrimitive orElse(String other) {
+      other = other == null ? "" : other;
+      return value.equals(JsonNull.INSTANCE)
+          ? new JsonPrimitive(other)
+          : value.getAsJsonPrimitive();
+    }
+
+    JsonPrimitive orElse(boolean other) {
+      return value.equals(JsonNull.INSTANCE)
+          ? new JsonPrimitive(other)
+          : value.getAsJsonPrimitive();
     }
   }
 
   private static class ListOrElse<T> {
-    private final Stream<?> value;
-    private final Class<T> klass;
+    private final Stream<T> value;
 
-    ListOrElse(Stream<?> value, Class<T> klass) {
+    ListOrElse(Stream<T> value) {
       this.value = value;
-      this.klass = klass;
     }
 
     List<T> orElse(List<T> other) {
       if (value == null) {
         return other;
       } else {
-        return this.value.map(klass::cast).collect(Collectors.toList());
+        return this.value.collect(Collectors.toList());
       }
     }
   }
