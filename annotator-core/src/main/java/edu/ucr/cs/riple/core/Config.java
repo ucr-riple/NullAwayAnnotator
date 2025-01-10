@@ -523,7 +523,7 @@ public class Config {
     Preconditions.checkNotNull(configPath);
     JsonObject jsonObject = Utility.parseJson(configPath);
     this.checkerName = getValueFromKey(jsonObject, "CHECKER").orElse(null).getAsString();
-    this.depth = getValueFromKey(jsonObject, "DEPTH").orElse(1).getAsInt();
+    this.depth = getValueFromKey(jsonObject, "DEPTH").orElse(5).getAsInt();
     this.chain = getValueFromKey(jsonObject, "CHAIN").orElse(false).getAsBoolean();
     this.redirectBuildOutputToStdErr =
         getValueFromKey(jsonObject, "REDIRECT_BUILD_OUTPUT_TO_STDERR").orElse(false).getAsBoolean();
