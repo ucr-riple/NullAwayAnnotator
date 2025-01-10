@@ -29,6 +29,7 @@ import com.google.gson.JsonObject;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.core.util.ASTUtil;
+import edu.ucr.cs.riple.core.util.JsonParser;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -40,6 +41,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Set;
 
 /** Wrapper class to interact with ChatGPT to generate code fixes for {@link NullAwayError}s. */
@@ -57,6 +59,12 @@ public class ChatGPT {
   /** The prompt to ask ChatGPT to rewrite the {@link Object#equals(Object)} method. */
   private final String dereferenceEqualsMethodRewritePrompt;
 
+  /** The prompt to ask ChatGPT to rewrite the {@link Object#toString()} ()} method. */
+  private final String dereferenceToStringMethodRewritePrompt;
+
+  /** The prompt to ask ChatGPT to rewrite the {@link Object#hashCode()} method. */
+  private final String dereferenceHashCodeMethodRewritePrompt;
+
   /** The {@link Config} instance. */
   private final Config config;
 
@@ -67,7 +75,11 @@ public class ChatGPT {
     // read openai-api-key.txt from resources
     this.apiKey = Utility.readResourceContent("openai-api-key.txt").trim();
     this.dereferenceEqualsMethodRewritePrompt =
-        Utility.readResourceContent("prompts/dereference-equals-rewrite.txt");
+        Utility.readResourceContent("prompts/dereference/equals-rewrite.txt");
+    this.dereferenceToStringMethodRewritePrompt =
+        Utility.readResourceContent("prompts/dereference/tostring-rewrite.txt");
+    this.dereferenceHashCodeMethodRewritePrompt =
+        Utility.readResourceContent("prompts/dereference/hashcode-rewrite.txt");
     this.config = config;
     try {
       this.url = new URL(URL);
@@ -87,7 +99,46 @@ public class ChatGPT {
    */
   public Set<MethodRewriteChange> fixDereferenceErrorInEqualsMethod(NullAwayError error) {
     String enclosingMethod = ASTUtil.getRegionSourceCode(config, error.path, error.getRegion());
-    String prompt = String.format(dereferenceEqualsMethodRewritePrompt, enclosingMethod);
+    String prompt =
+        String.format(dereferenceEqualsMethodRewritePrompt, enclosingMethod, error.message);
+    String response = ask(prompt);
+    if (response.isEmpty()) {
+      // if response is empty, we cannot generate a code fix.
+      return Set.of();
+    }
+    String code = parseCode(response);
+    if (code.isEmpty()) {
+      // if we do not have any code change suggestion, we cannot generate a code fix.
+      return Set.of();
+    }
+    return Set.of(
+        new MethodRewriteChange(
+            new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member), code));
+  }
+
+  public Set<MethodRewriteChange> fixDereferenceErrorInToStringMethod(NullAwayError error) {
+    String enclosingMethod = ASTUtil.getRegionSourceCode(config, error.path, error.getRegion());
+    String prompt =
+        String.format(dereferenceToStringMethodRewritePrompt, enclosingMethod, error.message);
+    String response = ask(prompt);
+    if (response.isEmpty()) {
+      // if response is empty, we cannot generate a code fix.
+      return Set.of();
+    }
+    String code = parseCode(response);
+    if (code.isEmpty()) {
+      // if we do not have any code change suggestion, we cannot generate a code fix.
+      return Set.of();
+    }
+    return Set.of(
+        new MethodRewriteChange(
+            new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member), code));
+  }
+
+  public Set<MethodRewriteChange> fixDereferenceErrorInHashCodeMethod(NullAwayError error) {
+    String enclosingMethod = ASTUtil.getRegionSourceCode(config, error.path, error.getRegion());
+    String prompt =
+        String.format(dereferenceHashCodeMethodRewritePrompt, enclosingMethod, error.message);
     String response = ask(prompt);
     if (response.isEmpty()) {
       // if response is empty, we cannot generate a code fix.
@@ -176,12 +227,12 @@ public class ChatGPT {
    * @return the message from the response.
    */
   private static String extractMessageFromJSONResponse(String response) {
-    int contentIndex = response.indexOf("content");
-    if (contentIndex == -1) {
+    JsonParser parser = new JsonParser(response);
+    List<JsonObject> choices = parser.getArrayValueFromKey("choices").orElse(List.of());
+    if (choices.isEmpty()) {
       return "";
     }
-    int start = contentIndex + 11;
-    int end = response.indexOf("\"", start);
-    return response.substring(start, end);
+    JsonObject choice = choices.get(0);
+    return new JsonParser(choice).getValueFromKey("message:content").orElse("").getAsString();
   }
 }

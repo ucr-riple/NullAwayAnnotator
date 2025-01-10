@@ -41,7 +41,6 @@ import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.google.common.base.Preconditions;
-import edu.ucr.cs.riple.injector.SignatureMatcher;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import java.util.ArrayDeque;
 import java.util.ArrayList;

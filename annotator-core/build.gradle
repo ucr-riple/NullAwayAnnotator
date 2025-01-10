@@ -36,19 +36,17 @@ application {
 }
 
 dependencies {
-
     implementation project(':injector')
     implementation project(':annotator-scanner')
     implementation deps.build.guava
-    implementation deps.build.json
     implementation deps.build.gson
     implementation deps.build.progressbar
     implementation deps.build.javaparser
     implementation deps.build.commonscli
-    testImplementation deps.build.commonsio
-    testImplementation 'junit:junit:4.13.1'
-    testImplementation deps.test.mockito
 
+    testImplementation deps.build.commonsio
+    testImplementation deps.test.junit
+    testImplementation deps.test.mockito
 }
 
 // Exclude formatting files under resources
@@ -96,7 +94,7 @@ shadowJar {
 }
 
 // Exclude tests not supported by Java 11.
-if(JavaVersion.current().isJava11()){
+if (JavaVersion.current().isJava11()) {
     // exclude Java17Test which is designed to test Java 17 features.
     test {
         filter {
