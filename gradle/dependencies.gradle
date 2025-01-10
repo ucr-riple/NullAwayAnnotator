@@ -32,28 +32,29 @@ def defaultErrorProneVersion =  JavaVersion.current() >= JavaVersion.VERSION_11 
 
 
 def versions = [
-        errorProne             : defaultErrorProneVersion,
-        errorProneApi          : project.hasProperty("epApiVersion") ? epApiVersion : oldestErrorProneApi,
-        autoService            : "1.0-rc7",
-        javaparser             : "3.26.2",
-        json                   : "1.1.1",
-        guava                  : "31.0.1-jre",
-        cli                    : "1.5.0",
-        commonsio              : "2.11.0",
-        progressbar            : "0.9.2",
-        junit                  : "5.7.2",
-        nullaway               : "0.10.19",
-        mockito                : "5.2.0",
+        errorProne              : defaultErrorProneVersion,
+        errorProneApi           : project.hasProperty("epApiVersion") ? epApiVersion : oldestErrorProneApi,
+        autoService             : "1.0-rc7",
+        javaparser              : "3.26.2",
+        gson                    : "2.11.0",
+        guava                   : "31.0.1-jre",
+        cli                     : "1.5.0",
+        commonsio               : "2.11.0",
+        progressbar             : "0.9.2",
+        junitjupiter            : "5.7.2",
+        nullaway                : "0.10.19",
+        mockito                 : "5.2.0",
+        junit                   : "4.13.2"
 ]
 
 def apt = [
-        autoService      : "com.google.auto.service:auto-service:${versions.autoService}",
-        autoServiceAnnot : "com.google.auto.service:auto-service-annotations:${versions.autoService}",
+        autoService             : "com.google.auto.service:auto-service:${versions.autoService}",
+        autoServiceAnnot        : "com.google.auto.service:auto-service-annotations:${versions.autoService}",
 ]
 
 def build = [
         guava                   : "com.google.guava:guava:${versions.guava}",
-        json                    : "com.googlecode.json-simple:json-simple:${versions.json}",
+        gson                    : "com.google.code.gson:gson:${versions.gson}",
         progressbar             : "me.tongfei:progressbar:${versions.progressbar}",
         javaparser              : "com.github.javaparser:javaparser-core:${versions.javaparser}",
         commonscli              : "commons-cli:commons-cli:${versions.cli}",
@@ -65,8 +66,9 @@ def build = [
 ]
 
 def test = [
-        junitapi                : "org.junit.jupiter:junit-jupiter-api:${versions.junit}",
-        junitengine             : "org.junit.jupiter:junit-jupiter-engine:${versions.junit}",
+        junitapi                : "org.junit.jupiter:junit-jupiter-api:${versions.junitjupiter}",
+        junitengine             : "org.junit.jupiter:junit-jupiter-engine:${versions.junitjupiter}",
+        junit                   : "junit:junit:${versions.junit}",
         errorProneTestHelpers   : "com.google.errorprone:error_prone_test_helpers:${versions.errorProneApi}",
         mockito                 : "org.mockito:mockito-core:${versions.mockito}"
 ]

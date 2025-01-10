@@ -28,7 +28,10 @@ import com.github.javaparser.ParserConfiguration;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
+import edu.ucr.cs.riple.core.util.JsonParser;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.BufferedWriter;
@@ -37,15 +40,11 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -53,9 +52,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 /**
  * Configuration class which controls all the parameters of the Annotator received either from the
@@ -518,58 +514,56 @@ public class Config {
    */
   public Config(Path configPath) {
     Preconditions.checkNotNull(configPath);
-    JSONObject jsonObject;
-    try {
-      Object obj =
-          new JSONParser().parse(Files.newBufferedReader(configPath, Charset.defaultCharset()));
-      jsonObject = (JSONObject) obj;
-    } catch (Exception e) {
-      throw new RuntimeException("Error in reading/parsing context at path: " + configPath, e);
-    }
-    this.checkerName = getValueFromKey(jsonObject, "CHECKER", String.class).orElse(null);
-    this.depth = getValueFromKey(jsonObject, "DEPTH", Long.class).orElse((long) 1).intValue();
-    this.chain = getValueFromKey(jsonObject, "CHAIN", Boolean.class).orElse(false);
+    JsonParser parser = new JsonParser(configPath);
+    this.checkerName = parser.getValueFromKey("CHECKER").orElse(null).getAsString();
+    this.depth = parser.getValueFromKey("DEPTH").orElse(5).getAsInt();
+    this.chain = parser.getValueFromKey("CHAIN").orElse(false).getAsBoolean();
     this.redirectBuildOutputToStdErr =
-        getValueFromKey(jsonObject, "REDIRECT_BUILD_OUTPUT_TO_STDERR", Boolean.class).orElse(false);
-    this.useCache = getValueFromKey(jsonObject, "CACHE", Boolean.class).orElse(true);
+        parser.getValueFromKey("REDIRECT_BUILD_OUTPUT_TO_STDERR").orElse(false).getAsBoolean();
+    this.useCache = parser.getValueFromKey("CACHE").orElse(true).getAsBoolean();
     this.useParallelGraphProcessor =
-        getValueFromKey(jsonObject, "PARALLEL_PROCESSING", Boolean.class).orElse(true);
+        parser.getValueFromKey("PARALLEL_PROCESSING").orElse(true).getAsBoolean();
     this.useImpactCache =
-        getValueFromKey(jsonObject, "CACHE_IMPACT_ACTIVATION", Boolean.class).orElse(false);
-    this.exhaustiveSearch =
-        getValueFromKey(jsonObject, "EXHAUSTIVE_SEARCH", Boolean.class).orElse(true);
-    this.disableOuterLoop = !getValueFromKey(jsonObject, "OUTER_LOOP", Boolean.class).orElse(false);
-    this.bailout = getValueFromKey(jsonObject, "BAILOUT", Boolean.class).orElse(true);
+        parser.getValueFromKey("CACHE_IMPACT_ACTIVATION").orElse(false).getAsBoolean();
+    this.exhaustiveSearch = parser.getValueFromKey("EXHAUSTIVE_SEARCH").orElse(true).getAsBoolean();
+    this.disableOuterLoop = !parser.getValueFromKey("OUTER_LOOP").orElse(false).getAsBoolean();
+    this.bailout = parser.getValueFromKey("BAILOUT").orElse(true).getAsBoolean();
     this.nullableAnnot =
-        getValueFromKey(jsonObject, "ANNOTATION:NULLABLE", String.class)
-            .orElse("javax.annotation.Nullable");
+        parser
+            .getValueFromKey("ANNOTATION:NULLABLE")
+            .orElse("javax.annotation.Nullable")
+            .getAsString();
     this.initializerAnnot =
-        getValueFromKey(jsonObject, "ANNOTATION:INITIALIZER", String.class)
-            .orElse("javax.annotation.Nullable");
-    this.globalDir =
-        Paths.get(getValueFromKey(jsonObject, "OUTPUT_DIR", String.class).orElse(null));
+        parser
+            .getValueFromKey("ANNOTATION:INITIALIZER")
+            .orElse("com.uber.nullaway.annotations.Initializer")
+            .getAsString();
+    this.globalDir = Paths.get(parser.getValueFromKey("OUTPUT_DIR").orElse(null).getAsString());
     List<ModuleConfiguration> moduleConfigurationList =
-        getArrayValueFromKey(
-                jsonObject,
+        parser
+            .getArrayValueFromKey(
                 "CONFIG_PATHS",
-                instance ->
-                    ModuleConfiguration.buildFromJson(getNextModuleUniqueID(), globalDir, instance),
-                ModuleConfiguration.class)
+                moduleInfo ->
+                    ModuleConfiguration.buildFromJson(
+                        getNextModuleUniqueID(), globalDir, moduleInfo))
             .orElse(Collections.emptyList());
     this.target = moduleConfigurationList.get(0);
-    this.buildCommand = getValueFromKey(jsonObject, "BUILD_COMMAND", String.class).orElse(null);
+    this.buildCommand = parser.getValueFromKey("BUILD_COMMAND").orElse(null).getAsString();
     this.downStreamDependenciesAnalysisActivated =
-        getValueFromKey(jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:ACTIVATION", Boolean.class)
-            .orElse(false);
+        parser
+            .getValueFromKey("DOWNSTREAM_DEPENDENCY_ANALYSIS:ACTIVATION")
+            .orElse(false)
+            .getAsBoolean();
     this.downstreamDependenciesBuildCommand =
-        getValueFromKey(jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:BUILD_COMMAND", String.class)
-            .orElse(null);
+        parser
+            .getValueFromKey("DOWNSTREAM_DEPENDENCY_ANALYSIS:BUILD_COMMAND")
+            .orElse(null)
+            .getAsString();
     String nullawayLibraryModelLoaderPathString =
-        getValueFromKey(
-                jsonObject,
-                "DOWNSTREAM_DEPENDENCY_ANALYSIS:LIBRARY_MODEL_LOADER_PATH",
-                String.class)
-            .orElse(null);
+        parser
+            .getValueFromKey("DOWNSTREAM_DEPENDENCY_ANALYSIS:LIBRARY_MODEL_LOADER_PATH")
+            .orElse(null)
+            .getAsString();
     this.nullawayLibraryModelLoaderPath =
         nullawayLibraryModelLoaderPathString == null
             ? null
@@ -578,34 +572,35 @@ public class Config {
     this.mode =
         AnalysisMode.parseMode(
             this.downStreamDependenciesAnalysisActivated,
-            getValueFromKey(
-                    jsonObject, "DOWNSTREAM_DEPENDENCY_ANALYSIS:ANALYSIS_MODE", String.class)
-                .orElse("default"));
-
+            parser
+                .getValueFromKey("DOWNSTREAM_DEPENDENCY_ANALYSIS:ANALYSIS_MODE")
+                .orElse("default")
+                .getAsString());
     this.downstreamConfigurations = ImmutableSet.copyOf(moduleConfigurationList);
     this.moduleCounterID = 0;
     this.suppressRemainingErrors =
-        getValueFromKey(jsonObject, "SUPPRESS_REMAINING_ERRORS", Boolean.class).orElse(false);
+        parser.getValueFromKey("SUPPRESS_REMAINING_ERRORS").orElse(false).getAsBoolean();
     this.inferenceActivated =
-        getValueFromKey(jsonObject, "INFERENCE_ACTIVATION", Boolean.class).orElse(true);
+        parser.getValueFromKey("INFERENCE_ACTIVATION").orElse(true).getAsBoolean();
     this.nullUnMarkedAnnotation =
-        getValueFromKey(jsonObject, "ANNOTATION:NULL_UNMARKED", String.class)
-            .orElse("org.jspecify.annotations.NullUnmarked");
+        parser
+            .getValueFromKey("ANNOTATION:NULL_UNMARKED")
+            .orElse("org.jspecify.annotations.NullUnmarked")
+            .getAsString();
     boolean lombokCodeDetectorActivated =
-        getValueFromKey(
-                jsonObject, "PROCESSORS:" + SourceType.LOMBOK.name() + ":ACTIVATION", Boolean.class)
-            .orElse(true);
+        parser
+            .getValueFromKey("PROCESSORS:" + SourceType.LOMBOK.name() + ":ACTIVATION")
+            .orElse(true)
+            .getAsBoolean();
     this.generatedCodeDetectors =
         lombokCodeDetectorActivated ? Sets.immutableEnumSet(SourceType.LOMBOK) : ImmutableSet.of();
     this.languageLevel =
-        getLanguageLevel(getValueFromKey(jsonObject, "LANGUAGE_LEVEL", String.class).orElse("17"));
+        getLanguageLevel(parser.getValueFromKey("LANGUAGE_LEVEL").orElse("17").getAsString());
     this.nonnullAnnotations =
         ImmutableSet.copyOf(
-            getArrayValueFromKey(
-                    jsonObject,
-                    "ANNOTATION:NONNULL",
-                    json -> json.get("NONNULL").toString(),
-                    String.class)
+            parser
+                .getArrayValueFromKey(
+                    "ANNOTATION:NONNULL", json -> json.get("NONNULL").getAsString())
                 .orElse(List.of()));
   }
 
@@ -632,78 +627,7 @@ public class Config {
     formatter.printHelp("Annotator context Flags", options);
   }
 
-  private <T> Config.OrElse<T> getValueFromKey(JSONObject json, String key, Class<T> klass) {
-    if (json == null) {
-      return new OrElse<>(null, klass);
-    }
-    try {
-      ArrayList<String> keys = new ArrayList<>(Arrays.asList(key.split(":")));
-      while (keys.size() != 1) {
-        if (json.containsKey(keys.get(0))) {
-          json = (JSONObject) json.get(keys.get(0));
-          keys.remove(0);
-        } else {
-          return new OrElse<>(null, klass);
-        }
-      }
-      return json.containsKey(keys.get(0))
-          ? new OrElse<>(json.get(keys.get(0)), klass)
-          : new OrElse<>(null, klass);
-    } catch (Exception e) {
-      return new OrElse<>(null, klass);
-    }
-  }
-
-  @SuppressWarnings({"SameParameterValue", "unchecked"})
-  private <T> ListOrElse<T> getArrayValueFromKey(
-      JSONObject json, String key, Function<JSONObject, T> mapper, Class<T> klass) {
-    if (json == null) {
-      return new ListOrElse<>(null, klass);
-    }
-    OrElse<T> jsonValue = getValueFromKey(json, key, klass);
-    if (jsonValue.value == null) {
-      return new ListOrElse<>(null, klass);
-    } else {
-      if (jsonValue.value instanceof JSONArray) {
-        return new ListOrElse<>(((JSONArray) jsonValue.value).stream().map(mapper), klass);
-      }
-      throw new IllegalStateException(
-          "Expected type to be json array, found: " + jsonValue.value.getClass());
-    }
-  }
-
-  private static class OrElse<T> {
-    private final Object value;
-    private final Class<T> klass;
-
-    OrElse(Object value, Class<T> klass) {
-      this.value = value;
-      this.klass = klass;
-    }
-
-    T orElse(T other) {
-      return value == null ? other : klass.cast(this.value);
-    }
-  }
-
-  private static class ListOrElse<T> {
-    private final Stream<?> value;
-    private final Class<T> klass;
-
-    ListOrElse(Stream<?> value, Class<T> klass) {
-      this.value = value;
-      this.klass = klass;
-    }
-
-    List<T> orElse(List<T> other) {
-      if (value == null) {
-        return other;
-      } else {
-        return this.value.map(klass::cast).collect(Collectors.toList());
-      }
-    }
-  }
-
+  /** Builder for creating a {@link Config} instance on json file. */
   public static class Builder {
 
     public String buildCommand;
@@ -737,7 +661,6 @@ public class Config {
     public String checker;
     public ParserConfiguration.LanguageLevel languageLevel;
 
-    @SuppressWarnings("unchecked")
     public void write(Path path) {
       Preconditions.checkNotNull(
           buildCommand, "Build command must be initialized to construct the context.");
@@ -748,41 +671,38 @@ public class Config {
           outputDir, "Output Directory must be initialized to construct the context.");
       Preconditions.checkNotNull(
           nullableAnnotation, "Nullable Annotation must be initialized to construct the context.");
-      JSONObject json = new JSONObject();
-      json.put("BUILD_COMMAND", buildCommand);
-      json.put("CHECKER", checker);
-      JSONObject annotation = new JSONObject();
-      annotation.put("INITIALIZER", initializerAnnotation);
-      annotation.put("NULLABLE", nullableAnnotation);
-      annotation.put("NULL_UNMARKED", nullUnmarkedAnnotation);
-      json.put("ANNOTATION", annotation);
-      json.put("OUTER_LOOP", outerLoopActivation);
-      json.put("OUTPUT_DIR", outputDir);
-      json.put("CHAIN", chain);
-      json.put("PARALLEL_PROCESSING", useParallelProcessor);
-      json.put("CACHE_IMPACT_ACTIVATION", useCacheImpact);
-      json.put("CACHE", cache);
-      json.put("BAILOUT", bailout);
-      json.put("DEPTH", depth);
-      json.put("EXHAUSTIVE_SEARCH", exhaustiveSearch);
-      json.put("REDIRECT_BUILD_OUTPUT_TO_STDERR", redirectBuildOutputToStdErr);
-      json.put("SUPPRESS_REMAINING_ERRORS", suppressRemainingErrors);
-      json.put("INFERENCE_ACTIVATION", inferenceActivated);
-      json.put("LANGUAGE_LEVEL", languageLevel.name().split("_")[1]);
-      JSONArray configPathsJson = new JSONArray();
-      configPathsJson.addAll(
-          configPaths.stream()
-              .map(
-                  info -> {
-                    JSONObject res = new JSONObject();
-                    res.put("CHECKER", info.checkerConfig.toString());
-                    res.put("SCANNER", info.scannerConfig.toString());
-                    return res;
-                  })
-              .collect(Collectors.toList()));
-      json.put("CONFIG_PATHS", configPathsJson);
-      JSONObject downstreamDependency = new JSONObject();
-      downstreamDependency.put("ACTIVATION", downStreamDependenciesAnalysisActivated);
+      JsonObject json = new JsonObject();
+      json.addProperty("BUILD_COMMAND", buildCommand);
+      json.addProperty("CHECKER", checker);
+      JsonObject annotation = new JsonObject();
+      annotation.addProperty("INITIALIZER", initializerAnnotation);
+      annotation.addProperty("NULLABLE", nullableAnnotation);
+      annotation.addProperty("NULL_UNMARKED", nullUnmarkedAnnotation);
+      json.add("ANNOTATION", annotation);
+      json.addProperty("OUTER_LOOP", outerLoopActivation);
+      json.addProperty("OUTPUT_DIR", outputDir);
+      json.addProperty("CHAIN", chain);
+      json.addProperty("PARALLEL_PROCESSING", useParallelProcessor);
+      json.addProperty("CACHE_IMPACT_ACTIVATION", useCacheImpact);
+      json.addProperty("CACHE", cache);
+      json.addProperty("BAILOUT", bailout);
+      json.addProperty("DEPTH", depth);
+      json.addProperty("EXHAUSTIVE_SEARCH", exhaustiveSearch);
+      json.addProperty("REDIRECT_BUILD_OUTPUT_TO_STDERR", redirectBuildOutputToStdErr);
+      json.addProperty("SUPPRESS_REMAINING_ERRORS", suppressRemainingErrors);
+      json.addProperty("INFERENCE_ACTIVATION", inferenceActivated);
+      json.addProperty("LANGUAGE_LEVEL", languageLevel.name().split("_")[1]);
+      JsonArray configPathsJson = new JsonArray();
+      configPaths.forEach(
+          info -> {
+            JsonObject res = new JsonObject();
+            res.addProperty("CHECKER", info.checkerConfig.toString());
+            res.addProperty("SCANNER", info.scannerConfig.toString());
+            configPathsJson.add(res);
+          });
+      json.add("CONFIG_PATHS", configPathsJson);
+      JsonObject downstreamDependency = new JsonObject();
+      downstreamDependency.addProperty("ACTIVATION", downStreamDependenciesAnalysisActivated);
       if (downStreamDependenciesAnalysisActivated) {
         Preconditions.checkNotNull(
             nullawayLibraryModelLoaderPath,
@@ -790,26 +710,24 @@ public class Config {
         Preconditions.checkArgument(
             !mode.equals(AnalysisMode.LOCAL),
             "Cannot perform downstream dependencies analysis with mode: \"Local\", use one of [default|lower_bound|upper_bound].");
-        downstreamDependency.put(
+        downstreamDependency.addProperty(
             "LIBRARY_MODEL_LOADER_PATH", nullawayLibraryModelLoaderPath.toString());
         Preconditions.checkNotNull(downstreamBuildCommand);
-        downstreamDependency.put("BUILD_COMMAND", downstreamBuildCommand);
-        downstreamDependency.put("ANALYSIS_MODE", mode.name());
+        downstreamDependency.addProperty("BUILD_COMMAND", downstreamBuildCommand);
+        downstreamDependency.addProperty("ANALYSIS_MODE", mode.name());
       }
-      json.put("DOWNSTREAM_DEPENDENCY_ANALYSIS", downstreamDependency);
-
-      JSONObject processors = new JSONObject();
+      json.add("DOWNSTREAM_DEPENDENCY_ANALYSIS", downstreamDependency);
+      JsonObject processors = new JsonObject();
       sourceTypes.forEach(
           sourceType -> {
-            JSONObject st = new JSONObject();
-            st.put("ACTIVATION", true);
-            processors.put(sourceType.name(), st);
+            JsonObject st = new JsonObject();
+            st.addProperty("ACTIVATION", true);
+            processors.add(sourceType.name(), st);
           });
-      json.put("PROCESSORS", processors);
-
+      json.add("PROCESSORS", processors);
       try (BufferedWriter file =
           Files.newBufferedWriter(path.toFile().toPath(), Charset.defaultCharset())) {
-        file.write(json.toJSONString());
+        file.write(json.toString());
       } catch (IOException e) {
         System.err.println("Error happened in writing context json: " + e);
       }
