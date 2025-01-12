@@ -98,10 +98,14 @@ public class ChatGPT {
   }
 
   /**
-   * This method retrieves the API key from the local machine environment variable. This mechanism should be changed in future and ask the user to provide a key, or use a different mechanism to store the key. For now, it is fine to use this method so we don't have to expose the API key in the code.
+   * This method retrieves the API key from the local machine environment variable. This mechanism
+   * should be changed in future and ask the user to provide a key, or use a different mechanism to
+   * store the key. For now, it is fine to use this method so we don't have to expose the API key in
+   * the code.
+   *
    * @return the API key.
    */
-  private String  retrieveApiKey() {
+  private String retrieveApiKey() {
     return System.getenv("OPENAI_KEY").trim();
   }
 
