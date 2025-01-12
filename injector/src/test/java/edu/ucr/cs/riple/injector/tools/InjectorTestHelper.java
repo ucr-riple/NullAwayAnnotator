@@ -31,6 +31,8 @@ import com.github.javaparser.ParserConfiguration;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.changes.ASTChange;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -79,7 +81,15 @@ public class InjectorTestHelper {
 
   public void start() {
     Injector injector = new Injector(ParserConfiguration.LanguageLevel.JAVA_17);
-    injector.start(Set.copyOf(changes));
+    Method method;
+    try {
+      // method is private, so we need to make it accessible
+      method = Injector.class.getDeclaredMethod("start", Set.class);
+      method.setAccessible(true);
+      method.invoke(injector, Set.copyOf(changes));
+    } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+      throw new RuntimeException(e);
+    }
     for (String key : files) {
       try {
         String found =

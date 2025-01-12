@@ -76,7 +76,7 @@ public class Injector {
    * @param changes Set of changes.
    * @return Offset changes of source file.
    */
-  public <T extends ASTChange> Set<FileOffsetStore> start(Set<T> changes) {
+  private <T extends ASTChange> Set<FileOffsetStore> start(Set<T> changes) {
     changes = changes.stream().map(t -> (T) t.copy()).collect(Collectors.toSet());
     // Start method does not support addition and deletion on same element. Should be split into
     // call for addition and deletion separately.
