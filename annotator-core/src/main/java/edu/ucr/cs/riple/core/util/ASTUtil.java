@@ -42,8 +42,7 @@ public class ASTUtil {
    * @return the source code of the region.
    */
   public static String getRegionSourceCode(Config config, Path path, Region region) {
-    return new Injector(config.languageLevel)
-        .getMethodSourceCode(path, region.clazz, region.member);
+    return Injector.getMethodSourceCode(path, region.clazz, region.member, config.languageLevel);
   }
 
   /**

@@ -81,14 +81,16 @@ public class InjectorTestHelper {
 
   public void start() {
     Injector injector = new Injector(ParserConfiguration.LanguageLevel.JAVA_17);
-    Method method;
     try {
-      // method is private, so we need to make it accessible
-      method = Injector.class.getDeclaredMethod("start", Set.class);
+      Method method = Injector.class.getDeclaredMethod("start", Set.class);
       method.setAccessible(true);
       method.invoke(injector, Set.copyOf(changes));
-    } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-      throw new RuntimeException(e);
+    } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+      throw new RuntimeException(
+          "Error invoking method [Injector#start(Set)].\n"
+              + "This method is private and must only be accessed via reflection. Direct calls are not allowed.\n"
+              + "Please update the logic to align with changes in the Injector class.",
+          e);
     }
     for (String key : files) {
       try {
