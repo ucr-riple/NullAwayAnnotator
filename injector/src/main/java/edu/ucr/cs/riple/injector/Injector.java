@@ -258,16 +258,21 @@ public class Injector {
       return content
               .substring(
                   ASTUtils.computeIndexFromPosition(content, range.begin),
-                  // The end position is exclusive, so we need to add 1 to include the last
-                  // character which is the enclosing brace.
                   ASTUtils.computeIndexFromPosition(content, range.end))
               .trim()
+          // The end position is exclusive, so we need to add 1 to include the last
+          // character which is the enclosing brace.
           + "\n}";
     } catch (TargetClassNotFound | IOException e) {
       return null;
     }
   }
 
+  /**
+   * Rewrites the method with the new method.
+   *
+   * @param change Method rewrite change.
+   */
   public void rewriteMethod(MethodRewriteChange change) {
     start(Set.of(change));
   }

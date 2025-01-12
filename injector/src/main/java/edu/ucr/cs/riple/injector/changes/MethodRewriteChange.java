@@ -50,7 +50,11 @@ public class MethodRewriteChange implements ASTChange {
     if (node.getRange().isEmpty()) {
       return null;
     }
-    return new Replacement(newMethod, node.getRange().get().begin, node.getRange().get().end);
+    // find the indent of the first line of the method
+    int indent = node.getRange().get().begin.column - 1;
+    // indent the new method
+    String indentedMethod = newMethod.replaceAll("\n", "\n" + " ".repeat(indent));
+    return new Replacement(indentedMethod, node.getRange().get().begin, node.getRange().get().end);
   }
 
   @Override

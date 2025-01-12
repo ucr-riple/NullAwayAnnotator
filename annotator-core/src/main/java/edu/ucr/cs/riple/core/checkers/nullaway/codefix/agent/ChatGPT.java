@@ -43,6 +43,8 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** Wrapper class to interact with ChatGPT to generate code fixes for {@link NullAwayError}s. */
 public class ChatGPT {
@@ -71,6 +73,12 @@ public class ChatGPT {
   /** The URL to send the request to ChatGPT. */
   private final URL url;
 
+  /**
+   * The pattern to extract the code from the response from ChatGPT. The code is in the format:
+   * {@code ```java\ncode\n```}.
+   */
+  private final Pattern codeResponsePattern;
+
   public ChatGPT(Config config) {
     // read openai-api-key.txt from resources
     this.apiKey = Utility.readResourceContent("openai-api-key.txt").trim();
@@ -81,6 +89,7 @@ public class ChatGPT {
     this.dereferenceHashCodeMethodRewritePrompt =
         Utility.readResourceContent("prompts/dereference/hashcode-rewrite.txt");
     this.config = config;
+    this.codeResponsePattern = Pattern.compile("```java\\n(.*?)\\n```", Pattern.DOTALL);
     try {
       this.url = new URL(URL);
     } catch (MalformedURLException e) {
@@ -160,14 +169,12 @@ public class ChatGPT {
    * @param code the code from the response.
    * @return the parsed code.
    */
-  private static String parseCode(String code) {
-    // Code is in the format: "```java\ncode\n```}"
-    if (!code.contains("```java")) {
-      return "";
+  private String parseCode(String code) {
+    Matcher matcher = codeResponsePattern.matcher(code);
+    if (matcher.find()) {
+      return matcher.group(1);
     }
-    int start = code.indexOf("```java") + 7;
-    int end = code.lastIndexOf("```");
-    return code.substring(start, end);
+    return "";
   }
 
   /**
