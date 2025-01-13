@@ -98,6 +98,65 @@ public class ChatGPT {
   }
 
   /**
+   * Fix a dereference error by generating a code fix. The fix is a rewrite of the {@link
+   * Object#equals(Object)} method. Instead of comparing on the field directly that might cause of a
+   * dereference error, it should simply call {@code Objects.equals} on the field.
+   *
+   * @param error the error to fix.
+   * @return a {@link MethodRewriteChange} that represents the code fix, or {@code null} if the
+   *     error cannot be fixed.
+   */
+  public Set<MethodRewriteChange> fixDereferenceErrorInEqualsMethod(NullAwayError error) {
+    MethodRewriteChange change = fixErrorInPlace(error, dereferenceEqualsMethodRewritePrompt);
+    return change == null ? Set.of() : Set.of(change);
+  }
+
+  /**
+   * Fix a dereference error by generating a code fix. The fix is a rewrite of the {@link
+   * Object#toString()} method. The fix is to check if the field use value "null" and if not, call
+   * the toString method on the field.
+   *
+   * @param error the error to fix.
+   * @return a {@link MethodRewriteChange} that represents the code fix, or {@code null} if the
+   *     error cannot be fixed.
+   */
+  public Set<MethodRewriteChange> fixDereferenceErrorInToStringMethod(NullAwayError error) {
+    MethodRewriteChange change = fixErrorInPlace(error, dereferenceToStringMethodRewritePrompt);
+    return change == null ? Set.of() : Set.of(change);
+  }
+
+  /**
+   * Fix a dereference error by generating a code fix. The fix is a rewrite of the {@link
+   * Object#hashCode()} method. The fix is to check if the field use value 1 and if not, call the
+   * hashCode method on the field.
+   *
+   * @param error the error to fix.
+   * @return a {@link MethodRewriteChange} that represents the code fix, or {@code null} if the
+   *     error cannot be fixed.
+   */
+  public Set<MethodRewriteChange> fixDereferenceErrorInHashCodeMethod(NullAwayError error) {
+    MethodRewriteChange change = fixErrorInPlace(error, dereferenceHashCodeMethodRewritePrompt);
+    return change == null ? Set.of() : Set.of(change);
+  }
+
+  /**
+   * Extract the message from the JSON response from ChatGPT. The response is in the format:
+   * {"choices":[{"role":"user","content":"..."}]}
+   *
+   * @param response the JSON response.
+   * @return the message from the response.
+   */
+  private static String extractMessageFromJSONResponse(String response) {
+    JsonParser parser = new JsonParser(response);
+    List<JsonObject> choices = parser.getArrayValueFromKey("choices").orElse(List.of());
+    if (choices.isEmpty()) {
+      return "";
+    }
+    JsonObject choice = choices.get(0);
+    return new JsonParser(choice).getValueFromKey("message:content").orElse("").getAsString();
+  }
+
+  /**
    * This method retrieves the API key from the local machine environment variable. This mechanism
    * should be changed in future and ask the user to provide a key, or use a different mechanism to
    * store the key. For now, it is fine to use this method so we don't have to expose the API key in
@@ -110,69 +169,25 @@ public class ChatGPT {
   }
 
   /**
-   * Fix a dereference error by generating a code fix. The fix is a rewrite of the {@link
-   * Object#equals(Object)} method. Instead of comparing on the field directly that might cause of a
-   * dereference error, it should simply call {@code Objects.equals} on the field.
+   * Fix the error in place (by rewriting the method) by asking ChatGPT to generate a code fix.
    *
    * @param error the error to fix.
+   * @param prompt the prompt to ask ChatGPT.
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code null} if the
    *     error cannot be fixed.
    */
-  public Set<MethodRewriteChange> fixDereferenceErrorInEqualsMethod(NullAwayError error) {
+  private MethodRewriteChange fixErrorInPlace(NullAwayError error, String prompt) {
     String enclosingMethod = ASTUtil.getRegionSourceCode(config, error.path, error.getRegion());
-    String prompt =
-        String.format(dereferenceEqualsMethodRewritePrompt, enclosingMethod, error.message);
-    String response = ask(prompt);
+    String response = ask(String.format(prompt, enclosingMethod, error.message));
     if (response.isEmpty()) {
-      // if response is empty, we cannot generate a code fix.
-      return Set.of();
+      return null;
     }
     String code = parseCode(response);
     if (code.isEmpty()) {
-      // if we do not have any code change suggestion, we cannot generate a code fix.
-      return Set.of();
+      return null;
     }
-    return Set.of(
-        new MethodRewriteChange(
-            new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member), code));
-  }
-
-  public Set<MethodRewriteChange> fixDereferenceErrorInToStringMethod(NullAwayError error) {
-    String enclosingMethod = ASTUtil.getRegionSourceCode(config, error.path, error.getRegion());
-    String prompt =
-        String.format(dereferenceToStringMethodRewritePrompt, enclosingMethod, error.message);
-    String response = ask(prompt);
-    if (response.isEmpty()) {
-      // if response is empty, we cannot generate a code fix.
-      return Set.of();
-    }
-    String code = parseCode(response);
-    if (code.isEmpty()) {
-      // if we do not have any code change suggestion, we cannot generate a code fix.
-      return Set.of();
-    }
-    return Set.of(
-        new MethodRewriteChange(
-            new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member), code));
-  }
-
-  public Set<MethodRewriteChange> fixDereferenceErrorInHashCodeMethod(NullAwayError error) {
-    String enclosingMethod = ASTUtil.getRegionSourceCode(config, error.path, error.getRegion());
-    String prompt =
-        String.format(dereferenceHashCodeMethodRewritePrompt, enclosingMethod, error.message);
-    String response = ask(prompt);
-    if (response.isEmpty()) {
-      // if response is empty, we cannot generate a code fix.
-      return Set.of();
-    }
-    String code = parseCode(response);
-    if (code.isEmpty()) {
-      // if we do not have any code change suggestion, we cannot generate a code fix.
-      return Set.of();
-    }
-    return Set.of(
-        new MethodRewriteChange(
-            new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member), code));
+    return new MethodRewriteChange(
+        new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member), code);
   }
 
   /**
@@ -236,22 +251,5 @@ public class ChatGPT {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  /**
-   * Extract the message from the JSON response from ChatGPT. The response is in the format:
-   * {"choices":[{"role":"user","content":"..."}]}
-   *
-   * @param response the JSON response.
-   * @return the message from the response.
-   */
-  private static String extractMessageFromJSONResponse(String response) {
-    JsonParser parser = new JsonParser(response);
-    List<JsonObject> choices = parser.getArrayValueFromKey("choices").orElse(List.of());
-    if (choices.isEmpty()) {
-      return "";
-    }
-    JsonObject choice = choices.get(0);
-    return new JsonParser(choice).getValueFromKey("message:content").orElse("").getAsString();
   }
 }
