@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2025 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,12 +22,30 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'NullAwayAnnotator'
-include 'annotator-core'
-include 'annotator-scanner'
-include 'injector'
-include 'library-model-loader'
-include 'checks'
-include 'checks:ban-mutable-static'
-include 'annotation-util'
+import com.vanniktech.maven.publish.SonatypeHost
 
+plugins {
+    id 'maven-publish'
+    id "com.vanniktech.maven.publish"
+}
+
+dependencies {
+    compileOnly "com.google.code.findbugs:jsr305:3.0.2"
+}
+
+// Exclude formatting files under resources
+spotless {
+    java {
+        targetExclude 'src/test/resources/**/*.java'
+    }
+}
+
+publishing {
+    mavenPublishing {
+        publishToMavenCentral(SonatypeHost.S01)
+    }
+
+    repositories {
+        mavenLocal()
+    }
+}

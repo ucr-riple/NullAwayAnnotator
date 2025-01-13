@@ -298,14 +298,16 @@ public class CoreTestHelper {
         }
       }
     }
-    if (suppressRemainingErrors) {
+    if (suppressRemainingErrors || resolveRemainingErrors) {
       // Check no error will be reported in Target module
       Utility.executeCommand(config.buildCommand);
       Path path = outDirPath.resolve("0").resolve("errors.tsv");
       try {
         List<String> lines = Files.readAllLines(path);
         if (lines.size() != 1) {
-          fail("Suppress Remaining Errors Mode did not resolve all errors:\n" + lines);
+          String feature =
+              suppressRemainingErrors ? "Suppress Remaining Errors" : "Resolve Remaining Errors";
+          fail(feature + " Mode did not resolve all errors:\n" + lines);
         }
       } catch (IOException e) {
         throw new RuntimeException("Exception happened while reading file at: " + path);

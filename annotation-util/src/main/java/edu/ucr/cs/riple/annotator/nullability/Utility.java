@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2025 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,12 +22,27 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'NullAwayAnnotator'
-include 'annotator-core'
-include 'annotator-scanner'
-include 'injector'
-include 'library-model-loader'
-include 'checks'
-include 'checks:ban-mutable-static'
-include 'annotation-util'
+package edu.ucr.cs.riple.annotator.nullability;
 
+import javax.annotation.Nullable;
+
+public class Utility {
+
+  private Utility() {
+    throw new IllegalStateException("Utility class");
+  }
+
+  /**
+   * Used to cast an object to null and silence the nullability checker.
+   *
+   * @param obj the object to cast to null.
+   * @return null
+   * @param <T> the type of the object.
+   */
+  public static <T> T castToNull(@Nullable T obj) {
+    if (obj == null) {
+      throw new IllegalStateException("Expected obj to be non-null");
+    }
+    return obj;
+  }
+}

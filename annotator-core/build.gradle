@@ -60,6 +60,7 @@ spotless {
 def NULLAWAY_TEST = "0.10.19"
 
 tasks.test.dependsOn(':annotator-scanner:publishToMavenLocal')
+tasks.test.dependsOn(':annotation-util:publishToMavenLocal')
 
 // Set up environment variables for test configuration tu run with the latest development version.
 tasks.test.doFirst {
