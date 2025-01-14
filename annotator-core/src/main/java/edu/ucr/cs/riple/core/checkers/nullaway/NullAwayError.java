@@ -88,7 +88,7 @@ public class NullAwayError extends Error {
     }
     return message.equals(error.message)
         && resolvingFixes.equals(error.resolvingFixes)
-        && position.adaptedOffset == error.position.adaptedOffset;
+        && position.equals(error.position);
   }
 
   @Override
@@ -101,7 +101,7 @@ public class NullAwayError extends Error {
             : message,
         region,
         resolvingFixes,
-        position.adaptedOffset);
+        position);
   }
 
   /**

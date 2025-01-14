@@ -176,7 +176,7 @@ public abstract class Error {
         && region.equals(other.region)
         && message.equals(other.message)
         && resolvingFixes.equals(other.resolvingFixes)
-        && position.adaptedOffset == other.position.adaptedOffset;
+        && position.equals(other.position);
   }
 
   /**
@@ -192,7 +192,7 @@ public abstract class Error {
 
   @Override
   public int hashCode() {
-    return Objects.hash(messageType, message, region, resolvingFixes, position.adaptedOffset);
+    return Objects.hash(messageType, message, region, resolvingFixes, position);
   }
 
   @Override
@@ -204,7 +204,7 @@ public abstract class Error {
         + message
         + '\''
         + ", offset='"
-        + position.adaptedOffset
+        + position
         + '\'';
   }
 
