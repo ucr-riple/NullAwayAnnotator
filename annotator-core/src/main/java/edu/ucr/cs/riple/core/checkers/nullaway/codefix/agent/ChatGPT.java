@@ -169,7 +169,15 @@ public class ChatGPT {
         .append("\n")
         .append(
             "If it is possible to be null JUST SAY YES and if it is NOT possible to be null JUST SAY NO");
-    return ask(prompt.toString()).equalsIgnoreCase("no");
+    String response = ask(prompt.toString());
+    response = response.trim().toLowerCase();
+    if (response.equals("yes")) {
+      return false;
+    }
+    if (response.equals("no")) {
+      return true;
+    }
+    throw new RuntimeException("Invalid response from ChatGPT.");
   }
 
   /**
@@ -337,19 +345,6 @@ public class ChatGPT {
       return extractMessageFromJSONResponse(response.toString());
     } catch (IOException e) {
       throw new RuntimeException(e);
-    }
-  }
-
-  public static void main(String[] args) {
-    String sentence = "dereferenced expression coll is @Nullable";
-    Pattern pattern = Pattern.compile("dereferenced expression (\\w+) is @Nullable");
-    Matcher matcher = pattern.matcher(sentence);
-
-    if (matcher.find()) {
-      String expr = matcher.group(1); // Group 1 captures the word
-      System.out.println("Extracted expression: " + expr);
-    } else {
-      System.out.println("No match found.");
     }
   }
 }
