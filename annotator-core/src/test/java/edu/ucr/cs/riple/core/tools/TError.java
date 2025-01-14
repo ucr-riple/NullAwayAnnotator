@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.tools;
 
 import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.core.checkers.DiagnosticPosition;
 import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.registries.region.Region;
@@ -45,7 +46,7 @@ public class TError extends Error {
         "null",
         new Region("null", "null"),
         null,
-        0,
+        new DiagnosticPosition(),
         Set.of(new DefaultAnnotation(location)));
   }
 

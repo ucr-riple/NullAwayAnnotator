@@ -28,6 +28,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.CheckerBaseClass;
+import edu.ucr.cs.riple.core.checkers.DiagnosticPosition;
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.NullAwayCodeFix;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
@@ -123,19 +124,15 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     Region region = new Region(values[2], values[3]);
     Location nonnullTarget =
         Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 6, 12));
+    DiagnosticPosition position =
+        new DiagnosticPosition(path, offset, context.offsetHandler.getOriginalOffset(path, offset));
     if (nonnullTarget == null
         && errorType.equals(NullAwayError.ErrorType.METHOD_INITIALIZER.type)) {
       Set<AddAnnotation> annotationsOnField =
           computeAddAnnotationInstancesForUninitializedFields(
               errorMessage, region.clazz, moduleInfo);
       return createError(
-          errorType,
-          errorMessage,
-          region,
-          path,
-          context.offsetHandler.getOriginalOffset(path, offset),
-          annotationsOnField,
-          moduleInfo);
+          errorType, errorMessage, region, path, position, annotationsOnField, moduleInfo);
     }
     if (nonnullTarget != null && nonnullTarget.isOnField()) {
       nonnullTarget = extendVariableList(nonnullTarget.toField(), moduleInfo);
@@ -144,14 +141,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
         nonnullTarget == null
             ? Set.of()
             : Set.of(new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot));
-    return createError(
-        errorType,
-        errorMessage,
-        region,
-        path,
-        context.offsetHandler.getOriginalOffset(path, offset),
-        annotations,
-        moduleInfo);
+    return createError(errorType, errorMessage, region, path, position, annotations, moduleInfo);
   }
 
   /**
@@ -184,7 +174,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
             // carefully and updated if the format is changed by NullAway (maybe regex?).
             .map(s -> s.substring(0, s.indexOf("(")).trim())
             .collect(Collectors.toSet());
-    if (fields.size() == 0) {
+    if (fields.isEmpty()) {
       throw new RuntimeException(
           "Could not extract any uninitialized field in message for initializer error in version "
               + 3
@@ -418,7 +408,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
    * @param errorMessage Error Message from NullAway.
    * @param region Region where the error is reported.
    * @param path Path to the file where the error is reported.
-   * @param offset Offset of program point in the source file where the error is reported.
+   * @param position Diagnostic position where the error is reported.
    * @param annotations Annotations that should be added source file to resolve the error.
    * @param module Module where this error is reported.
    * @return Creates and returns the corresponding {@link NullAwayError} instance using the provided
@@ -429,7 +419,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
       String errorMessage,
       Region region,
       Path path,
-      int offset,
+      DiagnosticPosition position,
       Set<AddAnnotation> annotations,
       ModuleInfo module) {
     // Filter fixes on elements with explicit nonnull annotations.
@@ -439,7 +429,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                 annot ->
                     !module.getNonnullStore().hasExplicitNonnullAnnotation(annot.getLocation()))
             .collect(ImmutableSet.toImmutableSet());
-    return new NullAwayError(errorType, errorMessage, region, path, offset, cleanedAnnotations);
+    return new NullAwayError(errorType, errorMessage, region, path, position, cleanedAnnotations);
   }
 
   @Override

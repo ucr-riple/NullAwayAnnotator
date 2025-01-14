@@ -37,9 +37,6 @@ import java.util.Set;
 /** Represents an error reported by {@link NullAway}. */
 public class NullAwayError extends Error {
 
-  /** The line of source code associated with the diagnostic offset. */
-  public final DiagnosticPosition position;
-
   public enum ErrorType {
     METHOD_INITIALIZER("METHOD_NO_INIT"),
     FIELD_INITIALIZER("FIELD_NO_INIT"),
@@ -57,10 +54,9 @@ public class NullAwayError extends Error {
       String message,
       Region region,
       Path path,
-      int offset,
+      DiagnosticPosition position,
       Set<AddAnnotation> annotations) {
-    super(messageType, message, region, path, offset, annotations);
-    this.position = new DiagnosticPosition(path, offset);
+    super(messageType, message, region, path, position, annotations);
   }
 
   @Override
@@ -92,7 +88,7 @@ public class NullAwayError extends Error {
     }
     return message.equals(error.message)
         && resolvingFixes.equals(error.resolvingFixes)
-        && offset == error.offset;
+        && position.adaptedOffset == error.position.adaptedOffset;
   }
 
   @Override
@@ -105,7 +101,7 @@ public class NullAwayError extends Error {
             : message,
         region,
         resolvingFixes,
-        offset);
+        position.adaptedOffset);
   }
 
   /**

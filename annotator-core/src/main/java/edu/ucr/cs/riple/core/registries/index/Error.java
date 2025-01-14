@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.registries.index;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
+import edu.ucr.cs.riple.core.checkers.DiagnosticPosition;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -46,17 +47,17 @@ public abstract class Error {
   /** Error message. */
   public final String message;
 
-  /** The fixes which can resolve this error (possibly empty). */
-  protected final ImmutableSet<Fix> resolvingFixes;
-
-  /** Offset of program point in original version where error is reported. */
-  protected final int offset;
-
-  /** Containing region. */
-  protected final Region region;
+  /** Position where this error is reported */
+  public final DiagnosticPosition position;
 
   /** Path to the file where the error is reported. */
   public final Path path;
+
+  /** The fixes which can resolve this error (possibly empty). */
+  protected final ImmutableSet<Fix> resolvingFixes;
+
+  /** Containing region. */
+  protected final Region region;
 
   /** Error type for method initialization errors from NullAway in {@code String}. */
   public Error(
@@ -64,13 +65,13 @@ public abstract class Error {
       String message,
       Region region,
       Path path,
-      int offset,
+      DiagnosticPosition position,
       Set<AddAnnotation> annotations) {
     this.region = region;
     this.messageType = messageType;
     this.message = message;
     this.path = path;
-    this.offset = offset;
+    this.position = position;
     this.resolvingFixes = computeFixesFromAnnotations(annotations);
   }
 
@@ -175,7 +176,7 @@ public abstract class Error {
         && region.equals(other.region)
         && message.equals(other.message)
         && resolvingFixes.equals(other.resolvingFixes)
-        && offset == other.offset;
+        && position.adaptedOffset == other.position.adaptedOffset;
   }
 
   /**
@@ -191,7 +192,7 @@ public abstract class Error {
 
   @Override
   public int hashCode() {
-    return Objects.hash(messageType, message, region, resolvingFixes, offset);
+    return Objects.hash(messageType, message, region, resolvingFixes, position.adaptedOffset);
   }
 
   @Override
@@ -203,7 +204,7 @@ public abstract class Error {
         + message
         + '\''
         + ", offset='"
-        + offset
+        + position.adaptedOffset
         + '\'';
   }
 
