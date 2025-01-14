@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.registries;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
@@ -94,6 +95,16 @@ public abstract class Registry<T> {
           }
         });
     this.contents = builder.build();
+    construct();
+  }
+
+  /**
+   * Retrieves records stored in this registry.
+   *
+   * @return Immutable collection of records.
+   */
+  public ImmutableCollection<T> getRecords() {
+    return contents.values();
   }
 
   /**
@@ -101,6 +112,12 @@ public abstract class Registry<T> {
    * file.
    */
   protected void setup() {}
+
+  /**
+   * Subclasses can override this method to perform any initialization after loading data from the
+   * file.
+   */
+  protected void construct() {}
 
   /**
    * Loads data existing in the given path, to the given builder.

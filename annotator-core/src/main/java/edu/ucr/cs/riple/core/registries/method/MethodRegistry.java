@@ -58,6 +58,16 @@ public class MethodRegistry extends Registry<MethodRecord> {
   /** Set of all classes flat name declared in module. */
   private Set<String> declaredClasses;
 
+  /** The context instance. */
+  private final Context context;
+
+  /**
+   * A type based call graph that maps a method to its callers. This relation is context insensitive
+   * and only contains direct type based calls. This field is not initialized in the constructor and
+   * needs to be initialized by calling {@link #initializeTypeBasedCallGraph()}.
+   */
+  private TypeBasedCallGraph typeBasedCallGraph;
+
   public MethodRegistry(Context context) {
     this(ImmutableSet.of(context.targetConfiguration), context);
   }
@@ -68,6 +78,7 @@ public class MethodRegistry extends Registry<MethodRecord> {
             .map(moduleInfo -> moduleInfo.dir.resolve(Serializer.METHOD_RECORD_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()),
         context);
+    this.context = context;
   }
 
   @Override
@@ -106,12 +117,8 @@ public class MethodRegistry extends Registry<MethodRecord> {
           isConstructor);
       // If node has a non-top parent.
       if (parentId > 0) {
-        MethodRecord parent = nodes.get(parentId);
+        MethodRecord parent = nodes.computeIfAbsent(parentId, MethodRecord::new);
         // If parent has not been seen visited before.
-        if (parent == null) {
-          parent = new MethodRecord(parentId);
-          nodes.put(parentId, parent);
-        }
         // Parent is already visited.
         parent.addChild(id);
       }
@@ -209,5 +216,24 @@ public class MethodRegistry extends Registry<MethodRecord> {
       return false;
     }
     return this.declaredClasses.contains(location.clazz);
+  }
+
+  /** Initializes the type based call graph. */
+  public void initializeTypeBasedCallGraph() {
+    this.typeBasedCallGraph =
+        new TypeBasedCallGraph(
+            this, context.targetModuleInfo.getRegionRegistry().getMethodRegionRegistry());
+  }
+
+  /**
+   * Get callers of the given method.
+   *
+   * @param encClass Fully Qualified name of the class.
+   * @param member Method signature.
+   * @return Set of callers of the given method.
+   */
+  public ImmutableSet<MethodRecord> getCallers(String encClass, String member) {
+    MethodRecord callee = findMethodByName(encClass, member);
+    return callee == null ? ImmutableSet.of() : typeBasedCallGraph.getCallers(callee);
   }
 }

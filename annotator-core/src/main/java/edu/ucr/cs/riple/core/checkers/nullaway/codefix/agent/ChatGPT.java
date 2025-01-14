@@ -24,10 +24,14 @@
 
 package edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent;
 
+import com.google.common.base.Preconditions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
+import edu.ucr.cs.riple.core.registries.method.MethodRecord;
+import edu.ucr.cs.riple.core.registries.method.MethodRegistry;
+import edu.ucr.cs.riple.core.registries.region.MethodRegionRegistry;
 import edu.ucr.cs.riple.core.util.ASTUtil;
 import edu.ucr.cs.riple.core.util.JsonParser;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -41,7 +45,12 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -67,8 +76,8 @@ public class ChatGPT {
   /** The prompt to ask ChatGPT to rewrite the {@link Object#hashCode()} method. */
   private final String dereferenceHashCodeMethodRewritePrompt;
 
-  /** The {@link Config} instance. */
-  private final Config config;
+  /** The {@link Context} instance. */
+  private final Context context;
 
   /** The URL to send the request to ChatGPT. */
   private final URL url;
@@ -79,7 +88,7 @@ public class ChatGPT {
    */
   private final Pattern codeResponsePattern;
 
-  public ChatGPT(Config config) {
+  public ChatGPT(Context context) {
     // read openai-api-key.txt from resources
     this.apiKey = retrieveApiKey();
     this.dereferenceEqualsMethodRewritePrompt =
@@ -88,7 +97,7 @@ public class ChatGPT {
         Utility.readResourceContent("prompts/dereference/tostring-rewrite.txt");
     this.dereferenceHashCodeMethodRewritePrompt =
         Utility.readResourceContent("prompts/dereference/hashcode-rewrite.txt");
-    this.config = config;
+    this.context = context;
     this.codeResponsePattern = Pattern.compile("```java\\n(.*?)\\n```", Pattern.DOTALL);
     try {
       this.url = new URL(URL);
@@ -123,6 +132,22 @@ public class ChatGPT {
   public Set<MethodRewriteChange> fixDereferenceErrorInToStringMethod(NullAwayError error) {
     MethodRewriteChange change = fixErrorInPlace(error, dereferenceToStringMethodRewritePrompt);
     return change == null ? Set.of() : Set.of(change);
+  }
+
+  /**
+   * Check if the error is a false positive at the error point. If it is a false positive, then the
+   * solution is to cast the variable to nonnull.
+   *
+   * @param error the error to check.
+   * @return {@code true} if the error is a false positive, {@code false} otherwise.
+   */
+  public boolean checkIfFalsePositiveAtErrorPoint(NullAwayError error) {
+    // Build a context for prompt generation
+    // Retrieve the callers of the method up to a depth of 3.
+    Map<Integer, Set<MethodRecord>> depthRecord =
+        computeBFSOnCallGraph(error.getRegion().clazz, error.getRegion().member);
+    // Construct the prompt
+    return false;
   }
 
   /**
@@ -169,6 +194,44 @@ public class ChatGPT {
   }
 
   /**
+   * Compute a BFS on the call graph to find the callers of the given method up to a depth of 3.
+   * @param clazz the class name of the target method.
+   * @param member the member name of the target method.
+   * @return A map from depth to the set of methods at that depth.
+   */
+  private Map<Integer, Set<MethodRecord>> computeBFSOnCallGraph(String clazz, String member) {
+    final MethodRegistry mr = context.targetModuleInfo.getMethodRegistry();
+    MethodRecord current = mr.findMethodByName(clazz, member);
+    Preconditions.checkArgument(
+        current != null, String.format("Method not found: %s#%s", clazz, member));
+    Deque<MethodRecord> deque = new LinkedList<>();
+    final MethodRegionRegistry mrr =
+        context.targetModuleInfo.getRegionRegistry().getMethodRegionRegistry();
+    int depth = 0;
+    deque.add(current);
+    Map<Integer, Set<MethodRecord>> depthRecord = new HashMap<>();
+    while (!deque.isEmpty() && depth < 4) {
+      depthRecord.put(depth, new HashSet<>());
+      int size = deque.size();
+      for (int i = 0; i < size; i++) {
+        MethodRecord method = deque.poll();
+        if (method == null) {
+          continue;
+        }
+        depthRecord.get(depth).add(method);
+        for (MethodRecord caller : mrr.getCallers(method)) {
+          if (caller == null) {
+            continue;
+          }
+          deque.add(caller);
+        }
+      }
+      depth++;
+    }
+    return depthRecord;
+  }
+
+  /**
    * Fix the error in place (by rewriting the method) by asking ChatGPT to generate a code fix.
    *
    * @param error the error to fix.
@@ -177,7 +240,8 @@ public class ChatGPT {
    *     error cannot be fixed.
    */
   private MethodRewriteChange fixErrorInPlace(NullAwayError error, String prompt) {
-    String enclosingMethod = ASTUtil.getRegionSourceCode(config, error.path, error.getRegion());
+    String enclosingMethod =
+        ASTUtil.getRegionSourceCode(context.config, error.path, error.getRegion());
     String response = ask(String.format(prompt, enclosingMethod, error.message));
     if (response.isEmpty()) {
       return null;

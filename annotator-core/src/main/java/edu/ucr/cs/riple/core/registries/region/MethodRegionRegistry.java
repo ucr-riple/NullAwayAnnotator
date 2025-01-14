@@ -29,10 +29,15 @@ import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.registries.Registry;
 import edu.ucr.cs.riple.core.registries.method.MethodRecord;
+import edu.ucr.cs.riple.core.registries.method.MethodRegistry;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.scanner.Serializer;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Region registry for Methods. This region registry can identify impacted regions for fixes on
@@ -43,6 +48,15 @@ public class MethodRegionRegistry extends Registry<RegionRecord> implements Regi
   /** ModuleInfo of the module which usage of methods are stored. */
   private final ModuleInfo moduleInfo;
 
+  /**
+   * A map from method to its callers. This relation is context insensitive and only contains direct
+   * type based calls.
+   */
+  private final Map<MethodRecord, Set<MethodRecord>> callers;
+
+  /** Method registry of the module. */
+  private final MethodRegistry methodRegistry;
+
   public MethodRegionRegistry(ModuleInfo moduleInfo, Context context) {
     super(
         moduleInfo.getModuleConfigurations().stream()
@@ -50,11 +64,18 @@ public class MethodRegionRegistry extends Registry<RegionRecord> implements Regi
             .collect(ImmutableSet.toImmutableSet()),
         context);
     this.moduleInfo = moduleInfo;
+    this.callers = new HashMap<>();
+    this.methodRegistry = moduleInfo.getMethodRegistry();
   }
 
-  @Override
-  protected Builder<RegionRecord> getBuilder() {
-    return Utility::deserializeImpactedRegionRecord;
+  /**
+   * Returns the set of callers of the given method.
+   *
+   * @param method Method to find its callers.
+   * @return Set of callers of the given method.
+   */
+  public Set<MethodRecord> getCallers(MethodRecord method) {
+    return callers.getOrDefault(method, new HashSet<>());
   }
 
   @Override
@@ -90,5 +111,22 @@ public class MethodRegionRegistry extends Registry<RegionRecord> implements Regi
             RegionRecord.hash(onMethod.clazz))
         .map(node -> node.region)
         .collect(ImmutableSet.toImmutableSet());
+  }
+
+  @Override
+  protected void construct() {
+    for (RegionRecord record : contents.values()) {
+      MethodRecord method =
+          methodRegistry.findMethodByName(record.region.clazz, record.region.member);
+      if (method != null) {
+        callers.putIfAbsent(method, new HashSet<>());
+        callers.get(method).add(method);
+      }
+    }
+  }
+
+  @Override
+  protected Builder<RegionRecord> getBuilder() {
+    return Utility::deserializeImpactedRegionRecord;
   }
 }

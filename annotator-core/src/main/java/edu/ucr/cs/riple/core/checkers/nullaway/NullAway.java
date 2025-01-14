@@ -74,7 +74,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
 
   public NullAway(Context context) {
     super(context);
-    this.codeFix = new NullAwayCodeFix(context.config);
+    this.codeFix = new NullAwayCodeFix(context);
   }
 
   @Override

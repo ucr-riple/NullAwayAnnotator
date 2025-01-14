@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 
-import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent.ChatGPT;
 import edu.ucr.cs.riple.core.util.ASTUtil;
@@ -41,9 +41,9 @@ public class NullAwayCodeFix {
   /** The {@link Injector} instance used to apply code fixes. */
   private final Injector injector;
 
-  public NullAwayCodeFix(Config config) {
-    this.gpt = new ChatGPT(config);
-    this.injector = new Injector(config.languageLevel);
+  public NullAwayCodeFix(Context context) {
+    this.gpt = new ChatGPT(context);
+    this.injector = new Injector(context.config.languageLevel);
   }
 
   /**
@@ -80,6 +80,12 @@ public class NullAwayCodeFix {
     if (ASTUtil.isObjectHashCodeMethod(error.getRegion().member)) {
       return gpt.fixDereferenceErrorInHashCodeMethod(error);
     }
+    // Check if it is a false positive
+    if (gpt.checkIfFalsePositiveAtErrorPoint(error)) {
+      // cast to nonnull.
+      return Set.of();
+    }
+
     return Set.of();
   }
 
