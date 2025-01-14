@@ -40,6 +40,7 @@ public class DiagnosticPosition {
   /** The line of source code associated with the diagnostic offset. */
   public final String diagnosticLine;
 
+  /** This offset is adapted to offset in the program that no operation by Annotator is applied. */
   public final int adaptedOffset;
 
   public DiagnosticPosition(Path path, int offset, int adaptedOffset) {
