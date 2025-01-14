@@ -45,12 +45,11 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -144,9 +143,28 @@ public class ChatGPT {
   public boolean checkIfFalsePositiveAtErrorPoint(NullAwayError error) {
     // Build a context for prompt generation
     // Retrieve the callers of the method up to a depth of 3.
-    Map<Integer, Set<MethodRecord>> depthRecord =
+    List<Set<MethodRecord>> depthRecord =
         computeBFSOnCallGraph(error.getRegion().clazz, error.getRegion().member);
+    Pattern pattern = Pattern.compile("dereferenced expression (\\S+) is @Nullable");
+    Matcher matcher = pattern.matcher(error.message);
     // Construct the prompt
+    StringBuilder prompt = new StringBuilder();
+    String expression = matcher.group(1);
+    String enclosingMethod =
+        ASTUtil.getRegionSourceCode(context.config, error.path, error.getRegion());
+    prompt
+        .append("In the method below is there a possibility that the expression: ")
+        .append(expression)
+        .append(" at line: ")
+        .append(error.diagnosticLine)
+        .append(" be null")
+        .append("\n")
+        .append(enclosingMethod)
+        .append("\n")
+        .append(
+            "I only need one single word as answer from you. "
+                + "Just in case it is not possible to be null JUST SAY NO and if it is possible to be null JUST SAY YES");
+
     return false;
   }
 
@@ -200,26 +218,26 @@ public class ChatGPT {
    * @param member the member name of the target method.
    * @return A map from depth to the set of methods at that depth.
    */
-  private Map<Integer, Set<MethodRecord>> computeBFSOnCallGraph(String clazz, String member) {
+  private List<Set<MethodRecord>> computeBFSOnCallGraph(String clazz, String member) {
     final MethodRegistry mr = context.targetModuleInfo.getMethodRegistry();
     MethodRecord current = mr.findMethodByName(clazz, member);
     Preconditions.checkArgument(
         current != null, String.format("Method not found: %s#%s", clazz, member));
-    Deque<MethodRecord> deque = new LinkedList<>();
+    Deque<MethodRecord> deque = new ArrayDeque<>();
     final MethodRegionRegistry mrr =
         context.targetModuleInfo.getRegionRegistry().getMethodRegionRegistry();
     int depth = 0;
     deque.add(current);
-    Map<Integer, Set<MethodRecord>> depthRecord = new HashMap<>();
-    while (!deque.isEmpty() && depth < 4) {
-      depthRecord.put(depth, new HashSet<>());
+    List<Set<MethodRecord>> depthRecord = new ArrayList<>();
+    while (!deque.isEmpty() && depth++ < 4) {
+      Set<MethodRecord> currentDepth = new HashSet<>();
       int size = deque.size();
       for (int i = 0; i < size; i++) {
         MethodRecord method = deque.poll();
         if (method == null) {
           continue;
         }
-        depthRecord.get(depth).add(method);
+        currentDepth.add(method);
         for (MethodRecord caller : mrr.getCallers(method)) {
           if (caller == null) {
             continue;
@@ -227,7 +245,7 @@ public class ChatGPT {
           deque.add(caller);
         }
       }
-      depth++;
+      depthRecord.add(currentDepth);
     }
     return depthRecord;
   }

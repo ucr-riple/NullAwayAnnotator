@@ -219,9 +219,13 @@ public class Utility {
   }
 
   /**
-   * Builds all downstream dependencies.
+   * Compiles all downstream dependencies and runs the checker on each module. The activation of
+   * {@link AnnotatorScanner} is determined by the state of the configuration files. To enable the
+   * scanner, update the configuration files using {@link #setScannerCheckerActivation(Config,
+   * ImmutableSet, boolean)} prior to calling this method. Or directly call {@link
+   * #runScannerChecker(Context, ImmutableSet, String)}
    *
-   * @param context Annotator context.
+   * @param context the context for the annotator.
    */
   public static void buildDownstreamDependencies(Context context) {
     context.checker.prepareConfigFilesForBuild(context.downstreamConfigurations);
@@ -229,9 +233,13 @@ public class Utility {
   }
 
   /**
-   * Builds target with control on field initialization serialization.
+   * Compiles the target module and runs the checker on it. The activation of {@link
+   * AnnotatorScanner} depends on the state of the configuration files. To enable the scanner,
+   * update the configuration files using {@link #setScannerCheckerActivation(Config,
+   * ModuleConfiguration, boolean)} prior to calling this method. Or directly call {@link
+   * #runScannerChecker(Context, ImmutableSet, String)}
    *
-   * @param context Annotator context.
+   * @param context the context for the annotator.
    */
   public static void buildTarget(Context context) {
     context.checker.prepareConfigFilesForBuild(context.targetModuleInfo.getModuleConfigurations());

@@ -95,7 +95,6 @@ public abstract class Registry<T> {
           }
         });
     this.contents = builder.build();
-    construct();
   }
 
   /**
@@ -112,12 +111,6 @@ public abstract class Registry<T> {
    * file.
    */
   protected void setup() {}
-
-  /**
-   * Subclasses can override this method to perform any initialization after loading data from the
-   * file.
-   */
-  protected void construct() {}
 
   /**
    * Loads data existing in the given path, to the given builder.

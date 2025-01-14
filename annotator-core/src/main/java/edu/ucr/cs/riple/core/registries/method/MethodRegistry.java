@@ -58,9 +58,6 @@ public class MethodRegistry extends Registry<MethodRecord> {
   /** Set of all classes flat name declared in module. */
   private Set<String> declaredClasses;
 
-  /** The context instance. */
-  private final Context context;
-
   /**
    * A type based call graph that maps a method to its callers. This relation is context insensitive
    * and only contains direct type based calls. This field is not initialized in the constructor and
@@ -78,7 +75,6 @@ public class MethodRegistry extends Registry<MethodRecord> {
             .map(moduleInfo -> moduleInfo.dir.resolve(Serializer.METHOD_RECORD_FILE_NAME))
             .collect(ImmutableSet.toImmutableSet()),
         context);
-    this.context = context;
   }
 
   @Override

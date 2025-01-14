@@ -29,7 +29,6 @@ import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.registries.Registry;
 import edu.ucr.cs.riple.core.registries.method.MethodRecord;
-import edu.ucr.cs.riple.core.registries.method.MethodRegistry;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -54,9 +53,6 @@ public class MethodRegionRegistry extends Registry<RegionRecord> implements Regi
    */
   private final Map<MethodRecord, Set<MethodRecord>> callers;
 
-  /** Method registry of the module. */
-  private final MethodRegistry methodRegistry;
-
   public MethodRegionRegistry(ModuleInfo moduleInfo, Context context) {
     super(
         moduleInfo.getModuleConfigurations().stream()
@@ -65,7 +61,6 @@ public class MethodRegionRegistry extends Registry<RegionRecord> implements Regi
         context);
     this.moduleInfo = moduleInfo;
     this.callers = new HashMap<>();
-    this.methodRegistry = moduleInfo.getMethodRegistry();
   }
 
   /**
@@ -111,18 +106,6 @@ public class MethodRegionRegistry extends Registry<RegionRecord> implements Regi
             RegionRecord.hash(onMethod.clazz))
         .map(node -> node.region)
         .collect(ImmutableSet.toImmutableSet());
-  }
-
-  @Override
-  protected void construct() {
-    for (RegionRecord record : contents.values()) {
-      MethodRecord method =
-          methodRegistry.findMethodByName(record.region.clazz, record.region.member);
-      if (method != null) {
-        callers.putIfAbsent(method, new HashSet<>());
-        callers.get(method).add(method);
-      }
-    }
   }
 
   @Override

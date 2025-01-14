@@ -94,4 +94,27 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
         .resolveRemainingErrors()
         .start();
   }
+
+  @Test
+  public void castToNullDereferenceTest() {
+    coreTestHelper
+        .onTarget()
+        .withSourceLines(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "import java.util.Collection;",
+            "public class Foo {",
+            "   public String toString(@Nullable Collection<?> coll) {",
+            "     boolean isEmpty = coll == null || coll.isEmpty();",
+            "     if(isEmpty) {",
+            "       return \"\";",
+            "     }",
+            "     return coll.iterator().next().toString();",
+            "   }",
+            "}")
+        .expectNoReport()
+        .resolveRemainingErrors()
+        .start();
+  }
 }

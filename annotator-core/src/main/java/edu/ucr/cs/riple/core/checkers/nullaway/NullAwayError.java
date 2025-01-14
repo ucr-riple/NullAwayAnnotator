@@ -28,13 +28,18 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.registries.region.Region;
+import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
 /** Represents an error reported by {@link NullAway}. */
 public class NullAwayError extends Error {
+
+  /** The line of source code associated with the diagnostic offset. */
+  public final String diagnosticLine;
 
   public enum ErrorType {
     METHOD_INITIALIZER("METHOD_NO_INIT"),
@@ -56,6 +61,7 @@ public class NullAwayError extends Error {
       int offset,
       Set<AddAnnotation> annotations) {
     super(messageType, message, region, path, offset, annotations);
+    this.diagnosticLine = getDiagnosticSourceLine(path, offset);
   }
 
   @Override
@@ -112,5 +118,24 @@ public class NullAwayError extends Error {
   public boolean isNonInitializationError() {
     return !this.messageType.equals(ErrorType.METHOD_INITIALIZER.type)
         && !this.messageType.equals(ErrorType.FIELD_INITIALIZER.type);
+  }
+
+  /**
+   * Retrieves the specific line of source code associated with the given diagnostic offset.
+   *
+   * @param path the path to the source file.
+   * @param offset the character offset within the source file.
+   * @return the source code line corresponding to the diagnostics location.
+   */
+  private String getDiagnosticSourceLine(Path path, int offset) {
+    List<String> content = Utility.readFileLines(path);
+    int index = 0;
+    for (String line : content) {
+      if (index + line.length() >= offset) {
+        return line.trim();
+      }
+      index += line.length();
+    }
+    return "";
   }
 }
