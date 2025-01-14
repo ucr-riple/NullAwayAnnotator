@@ -118,7 +118,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
             + values.length);
     int offset = Integer.parseInt(values[4]);
     Path path = Printer.deserializePath(values[5]);
-    String errorMessage = values[1];
+    String errorMessage = values[1].trim();
     String errorType = values[0];
     Region region = new Region(values[2], values[3]);
     Location nonnullTarget =

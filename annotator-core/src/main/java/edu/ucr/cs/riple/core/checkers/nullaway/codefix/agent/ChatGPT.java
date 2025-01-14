@@ -69,7 +69,7 @@ public class ChatGPT {
   /** The prompt to ask ChatGPT to rewrite the {@link Object#equals(Object)} method. */
   private final String dereferenceEqualsMethodRewritePrompt;
 
-  /** The prompt to ask ChatGPT to rewrite the {@link Object#toString()} ()} method. */
+  /** The prompt to ask ChatGPT to rewrite the {@link Object#toString()}} method. */
   private final String dereferenceToStringMethodRewritePrompt;
 
   /** The prompt to ask ChatGPT to rewrite the {@link Object#hashCode()} method. */
@@ -140,32 +140,46 @@ public class ChatGPT {
    * @param error the error to check.
    * @return {@code true} if the error is a false positive, {@code false} otherwise.
    */
-  public boolean checkIfFalsePositiveAtErrorPoint(NullAwayError error) {
+  public Set<MethodRewriteChange> checkIfFalsePositiveAtErrorPoint(NullAwayError error) {
+    final Pattern pattern = Pattern.compile("dereferenced expression (\\w+) is @Nullable");
+    Matcher matcher = pattern.matcher(error.message);
+    if (!matcher.find()) {
+      throw new RuntimeException(
+          "Error message does not match the pattern. Check NullAway compatibility.");
+    }
+    String nullableExpression = matcher.group(1);
     // Build a context for prompt generation
     // Retrieve the callers of the method up to a depth of 3.
     List<Set<MethodRecord>> depthRecord =
         computeBFSOnCallGraph(error.getRegion().clazz, error.getRegion().member);
-    Pattern pattern = Pattern.compile("dereferenced expression (\\S+) is @Nullable");
-    Matcher matcher = pattern.matcher(error.message);
     // Construct the prompt
     StringBuilder prompt = new StringBuilder();
-    String expression = matcher.group(1);
     String enclosingMethod =
-        ASTUtil.getRegionSourceCode(context.config, error.path, error.getRegion());
+        ASTUtil.getRegionSourceCode(context.config, error.path, error.getRegion()).content;
     prompt
         .append("In the method below is there a possibility that the expression: ")
-        .append(expression)
+        .append(nullableExpression)
         .append(" at line: ")
-        .append(error.diagnosticLine)
-        .append(" be null")
+        .append(error.position.diagnosticLine)
+        .append(" be null ?")
         .append("\n")
         .append(enclosingMethod)
         .append("\n")
+        .append("I only need one single word as answer from you.")
+        .append("\n")
         .append(
-            "I only need one single word as answer from you. "
-                + "Just in case it is not possible to be null JUST SAY NO and if it is possible to be null JUST SAY YES");
+            "If it is possible to be null JUST SAY YES and if it is not possible to be null JUST SAY NO");
+    boolean isFalsePositive = ask(prompt.toString()).equalsIgnoreCase("no");
+    if (!isFalsePositive) {
+      return Set.of();
+    }
+    // Construct the code fix
+    MethodRewriteChange change =
+        new MethodRewriteChange(
+            new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member),
+            String.format("((%s) %s)", nullableExpression, nullableExpression));
 
-    return false;
+    return Set.of();
   }
 
   /**
@@ -260,7 +274,7 @@ public class ChatGPT {
    */
   private MethodRewriteChange fixErrorInPlace(NullAwayError error, String prompt) {
     String enclosingMethod =
-        ASTUtil.getRegionSourceCode(context.config, error.path, error.getRegion());
+        ASTUtil.getRegionSourceCode(context.config, error.path, error.getRegion()).content;
     String response = ask(String.format(prompt, enclosingMethod, error.message));
     if (response.isEmpty()) {
       return null;
@@ -333,6 +347,19 @@ public class ChatGPT {
       return extractMessageFromJSONResponse(response.toString());
     } catch (IOException e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  public static void main(String[] args) {
+    String sentence = "dereferenced expression coll is @Nullable";
+    Pattern pattern = Pattern.compile("dereferenced expression (\\w+) is @Nullable");
+    Matcher matcher = pattern.matcher(sentence);
+
+    if (matcher.find()) {
+      String expr = matcher.group(1); // Group 1 captures the word
+      System.out.println("Extracted expression: " + expr);
+    } else {
+      System.out.println("No match found.");
     }
   }
 }

@@ -134,7 +134,7 @@ public class Injector {
    * @param method Method signature.
    * @return Source code of the region of the method.
    */
-  public static String getMethodSourceCode(
+  public static SourceCode getMethodSourceCode(
       @Nullable Path path,
       String encClass,
       String method,
@@ -150,16 +150,8 @@ public class Injector {
         return null;
       }
       Range range = target.getRange().get();
-      String content = Files.readString(path);
-      return content
-              .substring(
-                  ASTUtils.computeIndexFromPosition(content, range.begin),
-                  ASTUtils.computeIndexFromPosition(content, range.end))
-              .trim()
-          // The end position is exclusive, so we need to add 1 to include the last
-          // character which is the enclosing brace.
-          + "\n}";
-    } catch (TargetClassNotFound | IOException e) {
+      return new SourceCode(path, range);
+    } catch (TargetClassNotFound e) {
       return null;
     }
   }
@@ -285,5 +277,39 @@ public class Injector {
             impDecl ->
                 ASTUtils.simpleName(impDecl.getNameAsString())
                     .equals(ASTUtils.simpleName(annotation)));
+  }
+
+  /** Represents the actual source code in the given range. */
+  public static class SourceCode {
+    /** Range of the source code. */
+    public final Range range;
+
+    /** Content of the source code. */
+    public final String content;
+
+    /**
+     * Creates a new source code object.
+     *
+     * @param path Path to the file.
+     * @param range Range of the source code.
+     */
+    public SourceCode(Path path, Range range) {
+      this.range = range;
+      String content;
+      try {
+        content = Files.readString(path);
+        this.content =
+            content
+                    .substring(
+                        ASTUtils.computeIndexFromPosition(content, range.begin),
+                        ASTUtils.computeIndexFromPosition(content, range.end))
+                    .trim()
+                // The end position is exclusive, so we need to add 1 to include the last
+                // character which is the enclosing brace.
+                + "\n}";
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 }

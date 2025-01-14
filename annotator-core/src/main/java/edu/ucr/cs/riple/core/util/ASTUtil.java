@@ -41,7 +41,7 @@ public class ASTUtil {
    * @param region the region to get the source code of.
    * @return the source code of the region.
    */
-  public static String getRegionSourceCode(Config config, Path path, Region region) {
+  public static Injector.SourceCode getRegionSourceCode(Config config, Path path, Region region) {
     return Injector.getMethodSourceCode(path, region.clazz, region.member, config.languageLevel);
   }
 
