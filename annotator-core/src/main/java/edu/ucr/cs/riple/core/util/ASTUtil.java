@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.core.util;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.injector.Injector;
+import edu.ucr.cs.riple.injector.SourceCode;
 import edu.ucr.cs.riple.injector.util.SignatureMatcher;
 import java.nio.file.Path;
 
@@ -41,7 +42,7 @@ public class ASTUtil {
    * @param region the region to get the source code of.
    * @return the source code of the region.
    */
-  public static Injector.SourceCode getRegionSourceCode(Config config, Path path, Region region) {
+  public static SourceCode getRegionSourceCode(Config config, Path path, Region region) {
     return Injector.getMethodSourceCode(path, region.clazz, region.member, config.languageLevel);
   }
 

@@ -140,7 +140,7 @@ public class ChatGPT {
    * @param error the error to check.
    * @return {@code true} if the error is a false positive, {@code false} otherwise.
    */
-  public Set<MethodRewriteChange> checkIfFalsePositiveAtErrorPoint(NullAwayError error) {
+  public boolean checkIfFalsePositiveAtErrorPoint(NullAwayError error) {
     final Pattern pattern = Pattern.compile("dereferenced expression (\\w+) is @Nullable");
     Matcher matcher = pattern.matcher(error.message);
     if (!matcher.find()) {
@@ -168,18 +168,8 @@ public class ChatGPT {
         .append("I only need one single word as answer from you.")
         .append("\n")
         .append(
-            "If it is possible to be null JUST SAY YES and if it is not possible to be null JUST SAY NO");
-    boolean isFalsePositive = ask(prompt.toString()).equalsIgnoreCase("no");
-    if (!isFalsePositive) {
-      return Set.of();
-    }
-    // Construct the code fix
-    MethodRewriteChange change =
-        new MethodRewriteChange(
-            new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member),
-            String.format("((%s) %s)", nullableExpression, nullableExpression));
-
-    return Set.of();
+            "If it is possible to be null JUST SAY YES and if it is NOT possible to be null JUST SAY NO");
+    return ask(prompt.toString()).equalsIgnoreCase("no");
   }
 
   /**

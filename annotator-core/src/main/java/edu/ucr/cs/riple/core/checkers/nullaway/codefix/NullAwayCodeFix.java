@@ -29,6 +29,7 @@ import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent.ChatGPT;
 import edu.ucr.cs.riple.core.util.ASTUtil;
 import edu.ucr.cs.riple.injector.Injector;
+import edu.ucr.cs.riple.injector.SourceCode;
 import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
 import java.util.Set;
 
@@ -41,8 +42,12 @@ public class NullAwayCodeFix {
   /** The {@link Injector} instance used to apply code fixes. */
   private final Injector injector;
 
+  /** Annotation context instance. */
+  private final Context context;
+
   public NullAwayCodeFix(Context context) {
     this.gpt = new ChatGPT(context);
+    this.context = context;
     this.injector = new Injector(context.config.languageLevel);
   }
 
@@ -83,9 +88,23 @@ public class NullAwayCodeFix {
     // Check if it is a false positive
     if (gpt.checkIfFalsePositiveAtErrorPoint(error)) {
       // cast to nonnull.
-      return Set.of();
+      return constructCastToNonNullMethodRewriteForError(error);
     }
 
+    return Set.of();
+  }
+
+  /**
+   * Constructs a {@link MethodRewriteChange} that casts the dereferenced nullable value shown in
+   * the error to non-null.
+   *
+   * @param error the error to fix.
+   * @return a {@link MethodRewriteChange} that represents the code fix.
+   */
+  private Set<MethodRewriteChange> constructCastToNonNullMethodRewriteForError(
+      NullAwayError error) {
+    SourceCode enclosingMethod =
+        ASTUtil.getRegionSourceCode(context.config, error.path, error.getRegion());
     return Set.of();
   }
 

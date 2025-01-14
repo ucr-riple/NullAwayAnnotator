@@ -47,7 +47,6 @@ import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import edu.ucr.cs.riple.injector.util.ASTUtils;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.HashSet;
@@ -277,39 +276,5 @@ public class Injector {
             impDecl ->
                 ASTUtils.simpleName(impDecl.getNameAsString())
                     .equals(ASTUtils.simpleName(annotation)));
-  }
-
-  /** Represents the actual source code in the given range. */
-  public static class SourceCode {
-    /** Range of the source code. */
-    public final Range range;
-
-    /** Content of the source code. */
-    public final String content;
-
-    /**
-     * Creates a new source code object.
-     *
-     * @param path Path to the file.
-     * @param range Range of the source code.
-     */
-    public SourceCode(Path path, Range range) {
-      this.range = range;
-      String content;
-      try {
-        content = Files.readString(path);
-        this.content =
-            content
-                    .substring(
-                        ASTUtils.computeIndexFromPosition(content, range.begin),
-                        ASTUtils.computeIndexFromPosition(content, range.end))
-                    .trim()
-                // The end position is exclusive, so we need to add 1 to include the last
-                // character which is the enclosing brace.
-                + "\n}";
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }
   }
 }
