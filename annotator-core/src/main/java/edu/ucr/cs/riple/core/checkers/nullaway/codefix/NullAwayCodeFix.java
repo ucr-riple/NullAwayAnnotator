@@ -95,11 +95,11 @@ public class NullAwayCodeFix {
     if (ASTParser.isObjectHashCodeMethod(error.getRegion().member)) {
       return gpt.fixDereferenceErrorInHashCodeMethod(error);
     }
-    //    // Check if it is a false positive
-    //    if (gpt.checkIfFalsePositiveAtErrorPoint(error)) {
-    //      // cast to nonnull.
-    //      return constructPreconditionCheckMethodRewriteForError(error);
-    //    }
+    // Check if it is a false positive
+    if (gpt.checkIfFalsePositiveAtErrorPoint(error)) {
+      // cast to nonnull.
+      return constructPreconditionCheckMethodRewriteForError(error);
+    }
     // check if method already annotated as nullable, return nullable.
     CallableDeclaration<?> declaration =
         parser.getCallableDeclaration(
