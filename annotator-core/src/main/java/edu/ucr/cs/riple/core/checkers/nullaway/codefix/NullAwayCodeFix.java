@@ -24,11 +24,12 @@
 
 package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 
+import com.github.javaparser.ast.body.CallableDeclaration;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent.ChatGPT;
-import edu.ucr.cs.riple.core.util.ASTUtil;
+import edu.ucr.cs.riple.core.util.ASTParser;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.SourceCode;
@@ -50,8 +51,12 @@ public class NullAwayCodeFix {
   /** Annotation context instance. */
   private final Context context;
 
+  /** Parser used to parse the source code of the file containing the error. */
+  private final ASTParser parser;
+
   public NullAwayCodeFix(Context context) {
-    this.gpt = new ChatGPT(context);
+    this.parser = new ASTParser(context.config);
+    this.gpt = new ChatGPT(context, parser);
     this.context = context;
     this.injector = new Injector(context.config.languageLevel);
   }
@@ -81,34 +86,98 @@ public class NullAwayCodeFix {
    *     error cannot be fixed.
    */
   private Set<MethodRewriteChange> resolveDereferenceError(NullAwayError error) {
-    if (ASTUtil.isObjectEqualsMethod(error.getRegion().member)) {
+    if (ASTParser.isObjectEqualsMethod(error.getRegion().member)) {
       return gpt.fixDereferenceErrorInEqualsMethod(error);
     }
-    if (ASTUtil.isObjectToStringMethod(error.getRegion().member)) {
+    if (ASTParser.isObjectToStringMethod(error.getRegion().member)) {
       return gpt.fixDereferenceErrorInToStringMethod(error);
     }
-    if (ASTUtil.isObjectHashCodeMethod(error.getRegion().member)) {
+    if (ASTParser.isObjectHashCodeMethod(error.getRegion().member)) {
       return gpt.fixDereferenceErrorInHashCodeMethod(error);
     }
-    // Check if it is a false positive
-    if (gpt.checkIfFalsePositiveAtErrorPoint(error)) {
-      // cast to nonnull.
-      return constructCastToNonNullMethodRewriteForError(error);
+    //    // Check if it is a false positive
+    //    if (gpt.checkIfFalsePositiveAtErrorPoint(error)) {
+    //      // cast to nonnull.
+    //      return constructPreconditionCheckMethodRewriteForError(error);
+    //    }
+    // check if method already annotated as nullable, return nullable.
+    CallableDeclaration<?> declaration =
+        parser.getCallableDeclaration(
+            error.path, error.getRegion().clazz, error.getRegion().member);
+    if (declaration != null && parser.isMethodWithNullableReturn(declaration)) {
+      // make return null statement if null.
+      return constructReturnNullIfExpressionIsNullForError(error);
     }
     return Set.of();
+  }
+
+  /**
+   * Constructs a {@link MethodRewriteChange} that returns null right before if the expression shown
+   * in the error is null.
+   *
+   * <p>Example:
+   *
+   * <pre>{@code
+   * @Nullable Object foo(){
+   *  +if (exp == null) {
+   *  +    return null;
+   *  +}
+   *  return exp.deref();
+   * }
+   * }</pre>
+   *
+   * @param error the error to fix.
+   * @return a {@link MethodRewriteChange} that represents the code fix.
+   */
+  private Set<MethodRewriteChange> constructReturnNullIfExpressionIsNullForError(
+      NullAwayError error) {
+    SourceCode enclosingMethod = parser.getRegionSourceCode(error.path, error.getRegion());
+    if (enclosingMethod == null) {
+      return Set.of();
+    }
+    String[] lines = enclosingMethod.content.split("\n");
+    final Pattern pattern = Pattern.compile("dereferenced expression (\\w+) is @Nullable");
+    Matcher matcher = pattern.matcher(error.message);
+    if (!matcher.find()) {
+      return Set.of();
+    }
+    // calculate the erroneous line in method. We have to adjust the line number to the method's
+    // range. Note that the line number is 1-based in java parser, and we need to adjust it to
+    // 0-based.
+    int errorLine = error.position.lineNumber - (enclosingMethod.range.begin.line - 1);
+    String expression = matcher.group(1);
+    String whitespace = Utility.getLeadingWhitespace(lines[errorLine]);
+    String returnNullStatement =
+        String.format(
+            "%sif (%s == null) {\n%s\treturn null;\n%s}\n",
+            whitespace, expression, whitespace, whitespace);
+    lines[errorLine] = returnNullStatement + lines[errorLine];
+    MethodRewriteChange change =
+        new MethodRewriteChange(
+            new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member),
+            String.join("\n", lines));
+    return Set.of(change);
   }
 
   /**
    * Constructs a {@link MethodRewriteChange} that casts the dereferenced nullable value shown in
    * the error to non-null.
    *
+   * <pre>{@code
+   * void foo(@Nullable Collection<?> coll){
+   * boolean isEmpty = coll == null || coll.isEmpty();
+   * if(!isEmpty) {
+   *  + Preconditions.checkArgument(coll != null, "expected coll to be nonnull here.");
+   *  coll.deref();
+   * }}
+   * }</pre>
+   *
    * @param error the error to fix.
    * @return a {@link MethodRewriteChange} that represents the code fix.
    */
-  private Set<MethodRewriteChange> constructCastToNonNullMethodRewriteForError(
+  private Set<MethodRewriteChange> constructPreconditionCheckMethodRewriteForError(
       NullAwayError error) {
-    SourceCode enclosingMethod =
-        ASTUtil.getRegionSourceCode(context.config, error.path, error.getRegion());
+    SourceCode enclosingMethod = parser.getRegionSourceCode(error.path, error.getRegion());
     if (enclosingMethod == null) {
       return Set.of();
     }

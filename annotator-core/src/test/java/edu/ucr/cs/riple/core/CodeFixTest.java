@@ -117,4 +117,23 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
         .resolveRemainingErrors()
         .start();
   }
+
+  @Test
+  public void returnNullForNullableExpressionInNullableMethodTest() {
+    coreTestHelper
+        .onTarget()
+        .withSourceLines(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "import java.util.Collection;",
+            "public class Foo {",
+            "   public @Nullable String foo(@Nullable Collection<?> coll) {",
+            "     return coll.iterator().next().toString();",
+            "   }",
+            "}")
+        .expectNoReport()
+        .resolveRemainingErrors()
+        .start();
+  }
 }

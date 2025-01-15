@@ -32,7 +32,7 @@ import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.core.registries.method.MethodRecord;
 import edu.ucr.cs.riple.core.registries.method.MethodRegistry;
 import edu.ucr.cs.riple.core.registries.region.MethodRegionRegistry;
-import edu.ucr.cs.riple.core.util.ASTUtil;
+import edu.ucr.cs.riple.core.util.ASTParser;
 import edu.ucr.cs.riple.core.util.JsonParser;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
@@ -87,7 +87,12 @@ public class ChatGPT {
    */
   private final Pattern codeResponsePattern;
 
-  public ChatGPT(Context context) {
+  /**
+   * The {@link ASTParser} instance used to parse the source code of the file containing the error.
+   */
+  private final ASTParser parser;
+
+  public ChatGPT(Context context, ASTParser parser) {
     // read openai-api-key.txt from resources
     this.apiKey = retrieveApiKey();
     this.dereferenceEqualsMethodRewritePrompt =
@@ -98,6 +103,7 @@ public class ChatGPT {
         Utility.readResourceContent("prompts/dereference/hashcode-rewrite.txt");
     this.context = context;
     this.codeResponsePattern = Pattern.compile("```java\\n(.*?)\\n```", Pattern.DOTALL);
+    this.parser = parser;
     try {
       this.url = new URL(URL);
     } catch (MalformedURLException e) {
@@ -154,8 +160,7 @@ public class ChatGPT {
         computeBFSOnCallGraph(error.getRegion().clazz, error.getRegion().member);
     // Construct the prompt
     StringBuilder prompt = new StringBuilder();
-    String enclosingMethod =
-        ASTUtil.getRegionSourceCode(context.config, error.path, error.getRegion()).content;
+    String enclosingMethod = parser.getRegionSourceCode(error.path, error.getRegion()).content;
     prompt
         .append("In the method below is there a possibility that the expression: ")
         .append(nullableExpression)
@@ -271,8 +276,7 @@ public class ChatGPT {
    *     error cannot be fixed.
    */
   private MethodRewriteChange fixErrorInPlace(NullAwayError error, String prompt) {
-    String enclosingMethod =
-        ASTUtil.getRegionSourceCode(context.config, error.path, error.getRegion()).content;
+    String enclosingMethod = parser.getRegionSourceCode(error.path, error.getRegion()).content;
     String response = ask(String.format(prompt, enclosingMethod, error.message));
     if (response.isEmpty()) {
       return null;

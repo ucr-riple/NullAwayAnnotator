@@ -24,26 +24,30 @@
 
 package edu.ucr.cs.riple.core.util;
 
+import com.github.javaparser.ast.body.CallableDeclaration;
+import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
+import com.github.javaparser.ast.type.Type;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.SourceCode;
 import edu.ucr.cs.riple.injector.util.SignatureMatcher;
+import edu.ucr.cs.riple.injector.util.TypeUtils;
 import java.nio.file.Path;
 
 /** AnnotatorNullabilityUtil class for AST operations. */
-public class ASTUtil {
+public class ASTParser {
 
-  /**
-   * Returns the source code of a region.
-   *
-   * @param config Annotator configuration.
-   * @param path the path of the source file.
-   * @param region the region to get the source code of.
-   * @return the source code of the region.
-   */
-  public static SourceCode getRegionSourceCode(Config config, Path path, Region region) {
-    return Injector.getMethodSourceCode(path, region.clazz, region.member, config.languageLevel);
+  private final Config config;
+  private final AnnotationExpr nullableAnnotationExpression;
+
+  public ASTParser(Config config) {
+    this.config = config;
+    // find simple name of the nullable annotation
+    String nullableAnnotationSimpleName =
+        config.nullableAnnot.substring(config.nullableAnnot.lastIndexOf('.') + 1);
+    this.nullableAnnotationExpression = new MarkerAnnotationExpr(nullableAnnotationSimpleName);
   }
 
   /**
@@ -98,5 +102,44 @@ public class ASTUtil {
       return false;
     }
     return matcher.parameterTypes.isEmpty();
+  }
+
+  /**
+   * Returns the source code of a region.
+   *
+   * @param path the path of the source file.
+   * @param region the region to get the source code of.
+   * @return the source code of the region.
+   */
+  public SourceCode getRegionSourceCode(Path path, Region region) {
+    return Injector.getMethodSourceCode(path, region.clazz, region.member, config.languageLevel);
+  }
+
+  /**
+   * Returns the callable declaration of a class.
+   *
+   * @param path the path of the source file.
+   * @param clazz the enclosing class.
+   * @param member Method signature.
+   * @return the callable declaration of a class.
+   */
+  public CallableDeclaration<?> getCallableDeclaration(Path path, String clazz, String member) {
+    return Injector.getCallableDeclaration(path, clazz, member, config.languageLevel);
+  }
+
+  /**
+   * Checks if a method has a nullable return type. The {@code @Nullable} annotation can be either a
+   * type-use or a declaration annotation.
+   *
+   * @param declaration the method to check.
+   * @return true if the method has a nullable return type.
+   */
+  public boolean isMethodWithNullableReturn(CallableDeclaration<?> declaration) {
+    boolean onNode = TypeUtils.isAnnotatedWith(declaration, nullableAnnotationExpression);
+    if (onNode) {
+      return true;
+    }
+    Type returnType = TypeUtils.getTypeFromNode(declaration);
+    return TypeUtils.isAnnotatedWith(returnType, nullableAnnotationExpression);
   }
 }

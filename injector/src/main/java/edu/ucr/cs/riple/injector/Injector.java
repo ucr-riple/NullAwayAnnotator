@@ -126,6 +126,31 @@ public class Injector {
   }
 
   /**
+   * Returns the callable declaration of the method in the class.
+   *
+   * @param path Path to the file containing the method.
+   * @param encClass Enclosing class of the method.
+   * @param method Method signature.
+   * @param level Language level of the source code.
+   * @return Callable declaration of the method.
+   */
+  public static CallableDeclaration<?> getCallableDeclaration(
+      @Nullable Path path,
+      String encClass,
+      String method,
+      ParserConfiguration.LanguageLevel level) {
+    CompilationUnit compilationUnit = parse(path, level);
+    if (compilationUnit == null) {
+      return null;
+    }
+    try {
+      return ASTUtils.getCallableDeclaration(compilationUnit, encClass, method);
+    } catch (TargetClassNotFound e) {
+      return null;
+    }
+  }
+
+  /**
    * Returns the source code of the region of the method in the class.
    *
    * @param path Path to the file containing the method.
@@ -138,21 +163,12 @@ public class Injector {
       String encClass,
       String method,
       ParserConfiguration.LanguageLevel level) {
-    CompilationUnit compilationUnit = parse(path, level);
-    if (compilationUnit == null) {
+    CallableDeclaration<?> target = getCallableDeclaration(path, encClass, method, level);
+    if (target == null || target.getRange().isEmpty()) {
       return null;
     }
-    try {
-      CallableDeclaration<?> target =
-          ASTUtils.getCallableDeclaration(compilationUnit, encClass, method);
-      if (target == null || target.getRange().isEmpty()) {
-        return null;
-      }
-      Range range = target.getRange().get();
-      return new SourceCode(path, range);
-    } catch (TargetClassNotFound e) {
-      return null;
-    }
+    Range range = target.getRange().get();
+    return new SourceCode(path, range);
   }
 
   /**
