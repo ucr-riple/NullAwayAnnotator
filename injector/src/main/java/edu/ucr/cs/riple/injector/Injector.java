@@ -238,6 +238,17 @@ public class Injector {
                     }
                   }
                 }
+                if (change instanceof MethodRewriteChange) {
+                  MethodRewriteChange methodRewriteChange = (MethodRewriteChange) change;
+                  for (String imp : methodRewriteChange.getImports()) {
+                    ImportDeclaration importDeclaration =
+                        StaticJavaParser.parseImport("import " + imp + ";");
+                    if (!imports.contains(importDeclaration)
+                        && !tree.getImports().contains(importDeclaration)) {
+                      imports.add(importDeclaration);
+                    }
+                  }
+                }
               }
             } catch (Exception ex) {
               System.err.println("Encountered Exception: " + ex);

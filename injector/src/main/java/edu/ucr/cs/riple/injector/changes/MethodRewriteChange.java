@@ -24,10 +24,12 @@ package edu.ucr.cs.riple.injector.changes;
 
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.modifications.Replacement;
 import java.util.Objects;
+import java.util.Set;
 import javax.annotation.Nullable;
 
 public class MethodRewriteChange implements ASTChange {
@@ -38,9 +40,26 @@ public class MethodRewriteChange implements ASTChange {
   /** New method to replace the old method. This should be a valid Java method declaration. */
   private final String newMethod;
 
+  /** Set of imports that should be added to the file with the new method. */
+  private final Set<String> imports;
+
   public MethodRewriteChange(OnMethod location, String newMethod) {
+    this(location, newMethod, Set.of());
+  }
+
+  public MethodRewriteChange(OnMethod location, String newMethod, Set<String> imports) {
     this.location = location;
     this.newMethod = newMethod;
+    this.imports = imports;
+  }
+
+  /**
+   * Get the set of imports that should be added to the file with the new method.
+   *
+   * @return the set of imports
+   */
+  public ImmutableSet<String> getImports() {
+    return ImmutableSet.copyOf(imports);
   }
 
   @Nullable
@@ -64,7 +83,7 @@ public class MethodRewriteChange implements ASTChange {
 
   @Override
   public ASTChange copy() {
-    return new MethodRewriteChange(location, newMethod);
+    return new MethodRewriteChange(location, newMethod, imports);
   }
 
   @Override

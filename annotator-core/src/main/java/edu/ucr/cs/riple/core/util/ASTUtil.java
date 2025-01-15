@@ -31,7 +31,7 @@ import edu.ucr.cs.riple.injector.SourceCode;
 import edu.ucr.cs.riple.injector.util.SignatureMatcher;
 import java.nio.file.Path;
 
-/** Utility class for AST operations. */
+/** AnnotatorNullabilityUtil class for AST operations. */
 public class ASTUtil {
 
   /**

@@ -58,7 +58,7 @@ import java.util.stream.Stream;
 import me.tongfei.progressbar.ProgressBar;
 import me.tongfei.progressbar.ProgressBarStyle;
 
-/** Utility class. */
+/** AnnotatorNullabilityUtil class. */
 public class Utility {
 
   /**

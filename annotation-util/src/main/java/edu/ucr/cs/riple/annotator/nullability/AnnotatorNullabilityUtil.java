@@ -26,10 +26,10 @@ package edu.ucr.cs.riple.annotator.nullability;
 
 import javax.annotation.Nullable;
 
-public class Utility {
+public class AnnotatorNullabilityUtil {
 
-  private Utility() {
-    throw new IllegalStateException("Utility class");
+  private AnnotatorNullabilityUtil() {
+    throw new IllegalStateException("AnnotatorNullabilityUtil class");
   }
 
   /**

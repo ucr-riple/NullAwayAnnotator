@@ -38,6 +38,7 @@ application {
 dependencies {
     implementation project(':injector')
     implementation project(':annotator-scanner')
+    compileOnly project(':annotation-util')
     implementation deps.build.guava
     implementation deps.build.gson
     implementation deps.build.progressbar

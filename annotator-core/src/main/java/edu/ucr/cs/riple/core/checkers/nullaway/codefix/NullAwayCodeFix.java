@@ -25,13 +25,17 @@
 package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 
 import edu.ucr.cs.riple.core.Context;
+import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent.ChatGPT;
 import edu.ucr.cs.riple.core.util.ASTUtil;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.SourceCode;
 import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
+import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** A class that provides code fixes for {@link NullAwayError}s. */
 public class NullAwayCodeFix {
@@ -86,11 +90,11 @@ public class NullAwayCodeFix {
       return gpt.fixDereferenceErrorInHashCodeMethod(error);
     }
     // Check if it is a false positive
-    if (gpt.checkIfFalsePositiveAtErrorPoint(error)) {
+    //    if (gpt.checkIfFalsePositiveAtErrorPoint(error)) {
+    if (true) {
       // cast to nonnull.
       return constructCastToNonNullMethodRewriteForError(error);
     }
-
     return Set.of();
   }
 
@@ -105,7 +109,30 @@ public class NullAwayCodeFix {
       NullAwayError error) {
     SourceCode enclosingMethod =
         ASTUtil.getRegionSourceCode(context.config, error.path, error.getRegion());
-    return Set.of();
+    if (enclosingMethod == null) {
+      return Set.of();
+    }
+    String[] lines = enclosingMethod.content.split("\n");
+    final Pattern pattern = Pattern.compile("dereferenced expression (\\w+) is @Nullable");
+    Matcher matcher = pattern.matcher(error.message);
+    if (!matcher.find()) {
+      return Set.of();
+    }
+    // calculate the erroneous line in method. We have to adjust the line number to the method's
+    // range. Note that the line number is 1-based in java parser and we need to adjust it to
+    // 0-based.
+    int errorLine = error.position.lineNumber - (enclosingMethod.range.begin.line - 1);
+    String expression = matcher.group(1);
+    String castToNonNull = String.format("AnnotatorNullabilityUtil.castToNonNull(%s)", expression);
+    String before = lines[errorLine].substring(0, error.position.offsetInLine);
+    String after = lines[errorLine].substring(error.position.offsetInLine + expression.length());
+    lines[errorLine] = before + castToNonNull + after;
+    MethodRewriteChange change =
+        new MethodRewriteChange(
+            new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member),
+            String.join("\n", lines),
+            Set.of(NullAway.CAST_TO_NONNULL_CLASS));
+    return Set.of(change);
   }
 
   /**

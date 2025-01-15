@@ -44,6 +44,9 @@ public class DiagnosticPosition {
   /** This offset is adapted to offset in the program that no operation by Annotator is applied. */
   public final int adaptedOffset;
 
+  /** The offset in the line where the diagnostic is reported. */
+  public final int offsetInLine;
+
   public DiagnosticPosition(Path path, int offset, int adaptedOffset) {
     List<String> content = Utility.readFileLines(path);
     int index = 0;
@@ -57,6 +60,7 @@ public class DiagnosticPosition {
     }
     this.adaptedOffset = adaptedOffset;
     this.offset = offset;
+    this.offsetInLine = offset - index;
     this.lineNumber = lineNum;
     this.diagnosticLine = content.get(lineNumber);
   }
@@ -66,6 +70,7 @@ public class DiagnosticPosition {
     this.lineNumber = 0;
     this.diagnosticLine = "";
     this.adaptedOffset = 0;
+    this.offsetInLine = 0;
   }
 
   @Override
