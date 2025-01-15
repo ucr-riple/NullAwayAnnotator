@@ -26,7 +26,6 @@ package edu.ucr.cs.riple.core.checkers.nullaway;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.annotator.nullability.AnnotatorNullabilityUtil;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.CheckerBaseClass;
 import edu.ucr.cs.riple.core.checkers.DiagnosticPosition;
@@ -66,11 +65,10 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
   public static final String NAME = "NULLAWAY";
 
   /**
-   * Class name for the cast to nonnull method call. In future versions, this package should be
-   * configurable. {@link AnnotatorNullabilityUtil}
+   * Class name for adding precondition statements to the source code. By default, we use {@link
+   * Preconditions}. This should be configurable in the future.
    */
-  public static final String CAST_TO_NONNULL_CLASS =
-      "edu.ucr.cs.riple.annotator.nullability.AnnotatorNullabilityUtil";
+  public static final String PRECONDITION_NAME = "com.google.common.base.Preconditions";
 
   /**
    * Code fix instance for NullAway. It is responsible for generating code fixes for NullAway

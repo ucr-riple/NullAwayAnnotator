@@ -53,6 +53,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import me.tongfei.progressbar.ProgressBar;
@@ -60,6 +62,9 @@ import me.tongfei.progressbar.ProgressBarStyle;
 
 /** AnnotatorNullabilityUtil class. */
 public class Utility {
+
+  /** Pattern to match leading whitespace in a line. */
+  private static final Pattern LEADING_WHITESPACE = Pattern.compile("^\\s+");
 
   /**
    * Executes a shell command in a subprocess. If {@link Config#redirectBuildOutputToStdErr} is
@@ -329,5 +334,16 @@ public class Utility {
     } catch (IOException | URISyntaxException e) {
       throw new RuntimeException("Exception while reading resource: " + resourcePath, e);
     }
+  }
+
+  /**
+   * Returns the leading whitespace of a line.
+   *
+   * @param line The line to get the leading whitespace of.
+   * @return The leading whitespace of the line.
+   */
+  public static String getLeadingWhitespace(String line) {
+    Matcher matcher = LEADING_WHITESPACE.matcher(line);
+    return matcher.find() ? matcher.group() : "";
   }
 }

@@ -29,6 +29,7 @@ import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent.ChatGPT;
 import edu.ucr.cs.riple.core.util.ASTUtil;
+import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.SourceCode;
 import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
@@ -90,8 +91,7 @@ public class NullAwayCodeFix {
       return gpt.fixDereferenceErrorInHashCodeMethod(error);
     }
     // Check if it is a false positive
-    //    if (gpt.checkIfFalsePositiveAtErrorPoint(error)) {
-    if (true) {
+    if (gpt.checkIfFalsePositiveAtErrorPoint(error)) {
       // cast to nonnull.
       return constructCastToNonNullMethodRewriteForError(error);
     }
@@ -119,19 +119,21 @@ public class NullAwayCodeFix {
       return Set.of();
     }
     // calculate the erroneous line in method. We have to adjust the line number to the method's
-    // range. Note that the line number is 1-based in java parser and we need to adjust it to
+    // range. Note that the line number is 1-based in java parser, and we need to adjust it to
     // 0-based.
     int errorLine = error.position.lineNumber - (enclosingMethod.range.begin.line - 1);
     String expression = matcher.group(1);
-    String castToNonNull = String.format("AnnotatorNullabilityUtil.castToNonNull(%s)", expression);
-    String before = lines[errorLine].substring(0, error.position.offsetInLine);
-    String after = lines[errorLine].substring(error.position.offsetInLine + expression.length());
-    lines[errorLine] = before + castToNonNull + after;
+    String preconditionStatement =
+        String.format(
+            "%sPreconditions.checkArgument(%s != null, \"expected %s to be nonnull here.\");\n",
+            Utility.getLeadingWhitespace(lines[errorLine]), expression, expression);
+    lines[errorLine] = preconditionStatement + lines[errorLine];
     MethodRewriteChange change =
         new MethodRewriteChange(
             new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member),
             String.join("\n", lines),
-            Set.of(NullAway.CAST_TO_NONNULL_CLASS));
+            // Add the import required for Preconditions.
+            Set.of(NullAway.PRECONDITION_NAME));
     return Set.of(change);
   }
 
