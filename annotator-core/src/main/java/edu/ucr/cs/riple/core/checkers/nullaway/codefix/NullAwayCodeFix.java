@@ -24,7 +24,9 @@
 
 package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.CallableDeclaration;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
@@ -35,9 +37,9 @@ import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.SourceCode;
 import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
 import edu.ucr.cs.riple.injector.location.OnMethod;
+import edu.ucr.cs.riple.injector.util.ASTUtils;
+import java.util.Iterator;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /** A class that provides code fixes for {@link NullAwayError}s. */
 public class NullAwayCodeFix {
@@ -95,11 +97,11 @@ public class NullAwayCodeFix {
     if (ASTParser.isObjectHashCodeMethod(error.getRegion().member)) {
       return gpt.fixDereferenceErrorInHashCodeMethod(error);
     }
-    // Check if it is a false positive
-    if (gpt.checkIfFalsePositiveAtErrorPoint(error)) {
-      // cast to nonnull.
-      return constructPreconditionCheckMethodRewriteForError(error);
-    }
+    //    // Check if it is a false positive
+    //    if (gpt.checkIfFalsePositiveAtErrorPoint(error)) {
+    //      // cast to nonnull.
+    //      return constructPreconditionCheckMethodRewriteForError(error);
+    //    }
     // check if method already annotated as nullable, return nullable.
     CallableDeclaration<?> declaration =
         parser.getCallableDeclaration(
@@ -108,7 +110,51 @@ public class NullAwayCodeFix {
       // make return null statement if null.
       return constructReturnNullIfExpressionIsNullForError(error);
     }
+    String[] infos = NullAwayError.extractPlaceHolderValue(error);
+    String expression = infos[0];
+    String type = infos[1];
+    String owner = infos[2];
+    if (type.equals("field")) {
+      // check if there is an assignment to the expression in the method body.
+      boolean initializedBeforeUse = checkForInitializationBeforeUse(declaration, expression);
+      if (!initializedBeforeUse) {
+        // look if there is any method initializing this field.
+        Set<OnMethod> methods =
+            context
+                .targetModuleInfo
+                .getFieldInitializationStore()
+                .findInitializerForField(owner, expression);
+        if (!methods.isEmpty()) {
+          System.out.println("Found initializer for field: " + expression);
+        }
+      }
+    }
     return Set.of();
+  }
+
+  /**
+   * Checks if the expression is initialized before use in the method body. TODO: this method only
+   * looks for all assignments flow insensitive. We need to make it flow sensitive.
+   *
+   * @param declaration the method declaration.
+   * @param field the field to check for initialization.
+   * @return true if the expression is initialized before use in the method body.
+   */
+  private boolean checkForInitializationBeforeUse(
+      CallableDeclaration<?> declaration, String field) {
+    // check if the expression is assigned in the method body.
+    Iterator<Node> treeIterator = new ASTUtils.DirectMethodParentIterator(declaration);
+    while (treeIterator.hasNext()) {
+      Node n = treeIterator.next();
+      if (n instanceof VariableDeclarationExpr) {
+        VariableDeclarationExpr v = (VariableDeclarationExpr) n;
+        if (v.getVariables().stream()
+            .anyMatch(variableDeclarator -> variableDeclarator.getNameAsString().equals(field))) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   /**
@@ -136,16 +182,11 @@ public class NullAwayCodeFix {
       return Set.of();
     }
     String[] lines = enclosingMethod.content.split("\n");
-    final Pattern pattern = Pattern.compile("dereferenced expression (\\w+) is @Nullable");
-    Matcher matcher = pattern.matcher(error.message);
-    if (!matcher.find()) {
-      return Set.of();
-    }
     // calculate the erroneous line in method. We have to adjust the line number to the method's
     // range. Note that the line number is 1-based in java parser, and we need to adjust it to
     // 0-based.
     int errorLine = error.position.lineNumber - (enclosingMethod.range.begin.line - 1);
-    String expression = matcher.group(1);
+    String expression = NullAwayError.extractPlaceHolderValue(error)[0];
     String whitespace = Utility.getLeadingWhitespace(lines[errorLine]);
     String returnNullStatement =
         String.format(
@@ -182,16 +223,11 @@ public class NullAwayCodeFix {
       return Set.of();
     }
     String[] lines = enclosingMethod.content.split("\n");
-    final Pattern pattern = Pattern.compile("dereferenced expression (\\w+) is @Nullable");
-    Matcher matcher = pattern.matcher(error.message);
-    if (!matcher.find()) {
-      return Set.of();
-    }
     // calculate the erroneous line in method. We have to adjust the line number to the method's
     // range. Note that the line number is 1-based in java parser, and we need to adjust it to
     // 0-based.
     int errorLine = error.position.lineNumber - (enclosingMethod.range.begin.line - 1);
-    String expression = matcher.group(1);
+    String expression = NullAwayError.extractPlaceHolderValue(error)[0];
     String preconditionStatement =
         String.format(
             "%sPreconditions.checkArgument(%s != null, \"expected %s to be nonnull here.\");\n",

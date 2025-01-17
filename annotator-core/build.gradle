@@ -58,7 +58,7 @@ spotless {
 }
 
 // Should be the latest supporting version of NullAway.
-def NULLAWAY_TEST = "0.10.19"
+def NULLAWAY_TEST = "0.12.4-SNAPSHOT"
 
 tasks.test.dependsOn(':annotator-scanner:publishToMavenLocal')
 tasks.test.dependsOn(':annotation-util:publishToMavenLocal')

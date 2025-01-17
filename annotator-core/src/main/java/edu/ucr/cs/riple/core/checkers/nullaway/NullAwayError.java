@@ -33,6 +33,8 @@ import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** Represents an error reported by {@link NullAway}. */
 public class NullAwayError extends Error {
@@ -113,5 +115,29 @@ public class NullAwayError extends Error {
   public boolean isNonInitializationError() {
     return !this.messageType.equals(ErrorType.METHOD_INITIALIZER.type)
         && !this.messageType.equals(ErrorType.FIELD_INITIALIZER.type);
+  }
+
+  /**
+   * Extracts the placeholder value from the error message.
+   *
+   * @param error the error to extract the placeholder value from.
+   * @return the placeholder value.
+   */
+  public static String[] extractPlaceHolderValue(NullAwayError error) {
+    if (error.messageType.equals("DEREFERENCE_NULLABLE")) {
+      final Pattern pattern =
+          Pattern.compile(
+              "dereferenced expression (\\w+) is @Nullable --- (\\w+) --- ((?:\\w+\\.)*\\w+)");
+      Matcher matcher = pattern.matcher(error.message);
+      if (matcher.find()) {
+        return new String[] {matcher.group(1), matcher.group(2), matcher.group(3)};
+      }
+      throw new IllegalArgumentException(
+          "Error message does not contain a placeholder value."
+              + error.messageType
+              + " "
+              + error.message);
+    }
+    throw new IllegalArgumentException("Error type not supported.");
   }
 }

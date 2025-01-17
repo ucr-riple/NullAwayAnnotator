@@ -96,7 +96,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
   }
 
   @Test
-  public void castToNullDereferenceTest() {
+  public void dereferenceAddPreconditionTest() {
     coreTestHelper
         .onTarget()
         .withSourceLines(
@@ -119,7 +119,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
   }
 
   @Test
-  public void returnNullForNullableExpressionInNullableMethodTest() {
+  public void dereferenceReturnNullForNullableExpressionInNullableMethodTest() {
     coreTestHelper
         .onTarget()
         .withSourceLines(
@@ -130,6 +130,28 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
             "public class Foo {",
             "   public @Nullable String foo(@Nullable Collection<?> coll) {",
             "     return coll.iterator().next().toString();",
+            "   }",
+            "}")
+        .expectNoReport()
+        .resolveRemainingErrors()
+        .start();
+  }
+
+  @Test
+  public void dereferenceFieldInitializedBeforeUseTest() {
+    coreTestHelper
+        .onTarget()
+        .withSourceLines(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "   Object f;",
+            "   public void init() {",
+            "     this.f = new Object();",
+            "   }",
+            "   public String bar() {",
+            "     return f.toString();",
             "   }",
             "}")
         .expectNoReport()

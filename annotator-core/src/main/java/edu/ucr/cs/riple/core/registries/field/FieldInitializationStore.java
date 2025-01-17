@@ -100,6 +100,27 @@ public class FieldInitializationStore extends Registry<FieldInitializationNode> 
         .collect(Collectors.toSet());
   }
 
+  public Set<OnMethod> findInitializerForField(String encClass, String fieldName) {
+    // Set does not have a get() method, instead we use map here which can find the element
+    // efficiently.
+    Map<String, Class> classes = new HashMap<>();
+    findRecordsWithHashHint(
+            candidate ->
+                fieldName.equals(candidate.getFieldName())
+                    && candidate.getClassName().equals(encClass),
+            FieldInitializationNode.hash(encClass))
+        .forEach(
+            node -> {
+              Class clazz = new Class(node.getClassName(), node.getPath());
+              classes.putIfAbsent(clazz.clazz, clazz);
+              classes.get(clazz.clazz).visit(node);
+            });
+    return classes.values().stream()
+        .map(cl -> cl.findInitializer(0))
+        .filter(Objects::nonNull)
+        .collect(Collectors.toSet());
+  }
+
   @Override
   protected Builder<FieldInitializationNode> getBuilder() {
     return values -> {
@@ -188,18 +209,30 @@ public class FieldInitializationStore extends Registry<FieldInitializationNode> 
      * method will nominate the method with the most initialized number (more than 1) of
      * uninitialized fields.
      *
+     * @param minScore The maximum score of the initializer.
      * @return The nominated Initializer method.
      */
-    private OnMethod findInitializer() {
+    private OnMethod findInitializer(int minScore) {
       InitializerMethod maxMethod = null;
-      int maxScore = 1; // Initializer score must be at least 1.
       for (InitializerMethod m : this.initializers.values()) {
-        if (m.fields.size() > maxScore) {
-          maxScore = m.fields.size();
+        if (m.fields.size() > minScore) {
+          minScore = m.fields.size();
           maxMethod = m;
         }
       }
       return maxMethod == null ? null : new OnMethod(path, clazz, maxMethod.signature);
+    }
+
+    /**
+     * Selects an initializer for this class, Each class can have at most one initializer, this
+     * method will nominate the method with the most initialized number (more than 1) of
+     * uninitialized fields.
+     *
+     * @return The nominated Initializer method.
+     */
+    private OnMethod findInitializer() {
+      // Initializer score must be at least 1.
+      return findInitializer(1);
     }
   }
 

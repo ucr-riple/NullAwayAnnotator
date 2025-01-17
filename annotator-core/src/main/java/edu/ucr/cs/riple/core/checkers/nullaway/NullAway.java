@@ -70,18 +70,11 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
    */
   public static final String PRECONDITION_NAME = "com.google.common.base.Preconditions";
 
-  /**
-   * Code fix instance for NullAway. It is responsible for generating code fixes for NullAway
-   * errors.
-   */
-  private final NullAwayCodeFix codeFix;
-
   /** Supported version of NullAway serialization. */
   public static final int VERSION = 3;
 
   public NullAway(Context context) {
     super(context);
-    this.codeFix = new NullAwayCodeFix(context);
   }
 
   @Override
@@ -363,8 +356,9 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
 
   @Override
   public void resolveRemainingErrors() {
-    // Collect regions with remaining errors.
     Utility.buildTarget(context);
+    NullAwayCodeFix codeFix = new NullAwayCodeFix(context);
+    // Collect regions with remaining errors.
     Set<NullAwayError> remainingErrors = deserializeErrors(context.targetModuleInfo);
     Set<MethodRewriteChange> rewrites = new HashSet<>();
     remainingErrors.stream()
@@ -396,7 +390,8 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
             .filter(Fix::isOnField)
             .map(Fix::toField)
             .collect(Collectors.toSet());
-    FieldInitializationStore fieldInitializationStore = new FieldInitializationStore(context);
+    FieldInitializationStore fieldInitializationStore =
+        context.targetModuleInfo.getFieldInitializationStore();
     // Collect selected initializers methods.
     Set<AddAnnotation> initializers =
         fieldInitializationStore.findInitializers(uninitializedFields).stream()

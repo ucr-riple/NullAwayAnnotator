@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.module;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
+import edu.ucr.cs.riple.core.registries.field.FieldInitializationStore;
 import edu.ucr.cs.riple.core.registries.field.FieldRegistry;
 import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.registries.index.NonnullStore;
@@ -52,6 +53,9 @@ public class ModuleInfo {
 
   /** This field is used to store the information about the nonnull annotations in the module. */
   private final NonnullStore nonnullStore;
+
+  /** This field is used to store the information about the field initializations in the module. */
+  private final FieldInitializationStore fieldInitializationStore;
 
   /** The set of modules this moduleInfo is created for. */
   private final ImmutableSet<ModuleConfiguration> configurations;
@@ -100,6 +104,7 @@ public class ModuleInfo {
     this.fieldRegistry = new FieldRegistry(configurations, context);
     this.methodRegistry = new MethodRegistry(context);
     this.regionRegistry = new CompoundRegionRegistry(this, context);
+    this.fieldInitializationStore = new FieldInitializationStore(context);
     ImmutableSet.Builder<AnnotationProcessorHandler> builder = new ImmutableSet.Builder<>();
     if (context.config.generatedCodeDetectors.contains(SourceType.LOMBOK)) {
       builder.add(new LombokHandler(this));
@@ -221,6 +226,15 @@ public class ModuleInfo {
    */
   public ImmutableSet<AnnotationProcessorHandler> getAnnotationProcessorHandlers() {
     return annotationProcessorHandlers;
+  }
+
+  /**
+   * Getter for the created {@link FieldInitializationStore} instance.
+   *
+   * @return The created {@link FieldInitializationStore} instance.
+   */
+  public FieldInitializationStore getFieldInitializationStore() {
+    return fieldInitializationStore;
   }
 
   /** Checks if AnnotatorScanner is executed correctly for the modules. */

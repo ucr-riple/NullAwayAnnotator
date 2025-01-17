@@ -518,10 +518,10 @@ public class ASTUtils {
   }
 
   /**
-   * Iterates over children of a {@link CallableDeclaration} in a depth-first manner, skipping over
-   * any {@link BodyDeclaration}.
+   * Iterates over children of a {@link CallableDeclaration} in a breadth-first manner, skipping
+   * over any {@link BodyDeclaration}.
    */
-  private static final class DirectMethodParentIterator implements Iterator<Node> {
+  public static final class DirectMethodParentIterator implements Iterator<Node> {
 
     private final ArrayDeque<Node> deque = new ArrayDeque<>();
 

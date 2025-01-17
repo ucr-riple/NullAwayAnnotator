@@ -147,13 +147,7 @@ public class ChatGPT {
    * @return {@code true} if the error is a false positive, {@code false} otherwise.
    */
   public boolean checkIfFalsePositiveAtErrorPoint(NullAwayError error) {
-    final Pattern pattern = Pattern.compile("dereferenced expression (\\w+) is @Nullable");
-    Matcher matcher = pattern.matcher(error.message);
-    if (!matcher.find()) {
-      throw new RuntimeException(
-          "Error message does not match the pattern. Check NullAway compatibility.");
-    }
-    String nullableExpression = matcher.group(1);
+    String nullableExpression = NullAwayError.extractPlaceHolderValue(error)[0];
     // Build a context for prompt generation
     // Retrieve the callers of the method up to a depth of 3.
     List<Set<MethodRecord>> depthRecord =
