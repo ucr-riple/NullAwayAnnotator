@@ -42,7 +42,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayDeque;
@@ -64,7 +63,7 @@ public class ChatGPT {
   private static final String MODEL = "gpt-4o";
 
   /** The API key to use for the request from ChatGPT. */
-  private final String apiKey;
+  private static final String API_KEY = retrieveApiKey();
 
   /** The prompt to ask ChatGPT to rewrite the {@link Object#equals(Object)} method. */
   private final String dereferenceEqualsMethodRewritePrompt;
@@ -77,9 +76,6 @@ public class ChatGPT {
 
   /** The {@link Context} instance. */
   private final Context context;
-
-  /** The URL to send the request to ChatGPT. */
-  private final URL url;
 
   /**
    * The pattern to extract the code from the response from ChatGPT. The code is in the format:
@@ -94,7 +90,6 @@ public class ChatGPT {
 
   public ChatGPT(Context context, ASTParser parser) {
     // read openai-api-key.txt from resources
-    this.apiKey = retrieveApiKey();
     this.dereferenceEqualsMethodRewritePrompt =
         Utility.readResourceContent("prompts/dereference/equals-rewrite.txt");
     this.dereferenceToStringMethodRewritePrompt =
@@ -104,11 +99,6 @@ public class ChatGPT {
     this.context = context;
     this.codeResponsePattern = Pattern.compile("```java\\n(.*?)\\n```", Pattern.DOTALL);
     this.parser = parser;
-    try {
-      this.url = new URL(URL);
-    } catch (MalformedURLException e) {
-      throw new RuntimeException("Error Happened creating URL to: " + URL, e);
-    }
   }
 
   /**
@@ -176,7 +166,7 @@ public class ChatGPT {
     if (response.equals("no")) {
       return true;
     }
-    throw new RuntimeException("Invalid response from ChatGPT.");
+    throw new RuntimeException("Invalid response from ChatGPT:" + response);
   }
 
   /**
@@ -218,7 +208,7 @@ public class ChatGPT {
    *
    * @return the API key.
    */
-  private String retrieveApiKey() {
+  private static String retrieveApiKey() {
     return System.getenv("OPENAI_KEY").trim();
   }
 
@@ -303,12 +293,12 @@ public class ChatGPT {
    * @param prompt the question to ask.
    * @return the response from ChatGPT.
    */
-  private String ask(String prompt) {
+  public static String ask(String prompt) {
     try {
       // Making a POST request
-      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+      HttpURLConnection connection = (HttpURLConnection) new URL(URL).openConnection();
       connection.setRequestMethod("POST");
-      connection.setRequestProperty("Authorization", "Bearer " + apiKey);
+      connection.setRequestProperty("Authorization", "Bearer " + API_KEY);
       connection.setRequestProperty("Content-Type", "application/json");
 
       // Request content

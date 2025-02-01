@@ -24,7 +24,13 @@
 
 package edu.ucr.cs.riple.core;
 
+import static org.mockito.ArgumentMatchers.any;
+
+import edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent.ChatGPT;
 import org.junit.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
 
 public class CodeFixTest extends AnnotatorBaseCoreTest {
 
@@ -139,23 +145,30 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   @Test
   public void dereferenceFieldInitializedBeforeUseTest() {
-    coreTestHelper
-        .onTarget()
-        .withSourceLines(
-            "Foo.java",
-            "package test;",
-            "import javax.annotation.Nullable;",
-            "public class Foo {",
-            "   Object f;",
-            "   public void init() {",
-            "     this.f = new Object();",
-            "   }",
-            "   public String bar() {",
-            "     return f.toString();",
-            "   }",
-            "}")
-        .expectNoReport()
-        .resolveRemainingErrors()
-        .start();
+    // Mock the static method globally for all instances
+    try (MockedStatic<ChatGPT> astHelpersMockedStatic = Mockito.mockStatic(ChatGPT.class)) {
+      astHelpersMockedStatic
+          .when(() -> ChatGPT.ask(any()))
+          .thenAnswer((Answer<String>) invocation -> "answer")
+          .thenAnswer(invocation -> "answer 2");
+      coreTestHelper
+          .onTarget()
+          .withSourceLines(
+              "Foo.java",
+              "package test;",
+              "import javax.annotation.Nullable;",
+              "public class Foo {",
+              "   Object f;",
+              "   public void init() {",
+              "     this.f = new Object();",
+              "   }",
+              "   public String bar() {",
+              "     return f.toString();",
+              "   }",
+              "}")
+          .expectNoReport()
+          .resolveRemainingErrors()
+          .start();
+    }
   }
 }
