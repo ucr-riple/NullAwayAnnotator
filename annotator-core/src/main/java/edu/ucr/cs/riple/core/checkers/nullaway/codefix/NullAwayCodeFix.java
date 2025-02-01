@@ -35,11 +35,15 @@ import edu.ucr.cs.riple.core.util.ASTParser;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.SourceCode;
+import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
+import edu.ucr.cs.riple.injector.changes.RemoveMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.util.ASTUtils;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /** A class that provides code fixes for {@link NullAwayError}s. */
 public class NullAwayCodeFix {
@@ -97,11 +101,11 @@ public class NullAwayCodeFix {
     if (ASTParser.isObjectHashCodeMethod(error.getRegion().member)) {
       return gpt.fixDereferenceErrorInHashCodeMethod(error);
     }
-    //    // Check if it is a false positive
-    //    if (gpt.checkIfFalsePositiveAtErrorPoint(error)) {
-    //      // cast to nonnull.
-    //      return constructPreconditionCheckMethodRewriteForError(error);
-    //    }
+    // Check if it is a false positive
+    if (gpt.checkIfFalsePositiveAtErrorPoint(error)) {
+      // cast to nonnull.
+      return constructPreconditionCheckMethodRewriteForError(error);
+    }
     // check if method already annotated as nullable, return nullable.
     CallableDeclaration<?> declaration =
         parser.getCallableDeclaration(
@@ -125,7 +129,24 @@ public class NullAwayCodeFix {
                 .getFieldInitializationStore()
                 .findInitializerForField(owner, expression);
         if (!methods.isEmpty()) {
-          System.out.println("Found initializer for field: " + expression);
+          // continue with the initializer.
+          Set<AddAnnotation> initializerAnnotations =
+              methods.stream()
+                  .map(
+                      method ->
+                          new AddMarkerAnnotation(
+                              new OnMethod(method.path, method.clazz, method.method),
+                              context.config.initializerAnnot))
+                  .collect(Collectors.toSet());
+          // remove annotation from field
+          RemoveMarkerAnnotation removeAnnotation =
+              new RemoveMarkerAnnotation(
+                  context.targetModuleInfo.getFieldRegistry().getLocationOnField(owner, expression),
+                  context.config.nullableAnnot);
+          // Add annotation
+          context.injector.injectAnnotations(initializerAnnotations);
+          // remove nullable
+          context.injector.removeAnnotations(Set.of(removeAnnotation));
         }
       }
     }

@@ -109,6 +109,10 @@ public class CoreTestHelper {
 
   private ParserConfiguration.LanguageLevel languageLevel;
 
+  /**
+   * If true, after executing the test, no remaining errors should be reported in the target module.
+   * Within this mode, the found/expected reports are ignored and not checked.
+   */
   private boolean resolveRemainingErrors;
 
   public CoreTestHelper(Path projectPath, Path outDirPath) {
@@ -258,19 +262,20 @@ public class CoreTestHelper {
 
     // check if resolve remaining errors is set
     if (resolveRemainingErrors) {
-      if (expectedReports.size() != 0) {
+      if (!expectedReports.isEmpty()) {
         throw new IllegalArgumentException(
             "This test is designed to verify code changes for resolving remaining errors. To validate expected reports, create a separate test.");
       }
     }
-
     Annotator annotator = new Annotator(config);
     annotator.start();
     log = annotator.context.log;
     if (predicate == null) {
       predicate = DEFAULT_PREDICATE.create(config);
     }
-    compare(new ArrayList<>(annotator.cache.reports()));
+    if (!resolveRemainingErrors) {
+      compare(new ArrayList<>(annotator.cache.reports()));
+    }
     checkBuildsStatus();
     checkExpectedOutput();
   }
