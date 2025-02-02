@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.modifications.Replacement;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -44,13 +45,23 @@ public class MethodRewriteChange implements ASTChange {
   private final Set<String> imports;
 
   public MethodRewriteChange(OnMethod location, String newMethod) {
-    this(location, newMethod, Set.of());
+    this(location, newMethod, new HashSet<>());
   }
 
   public MethodRewriteChange(OnMethod location, String newMethod, Set<String> imports) {
     this.location = location;
     this.newMethod = newMethod;
     this.imports = imports;
+  }
+
+  /**
+   * Add an import statement to the set of imports that should be added to the file with the new
+   * method.
+   *
+   * @param importStatement the import statement to add
+   */
+  public void addImport(String importStatement) {
+    imports.add(importStatement);
   }
 
   /**

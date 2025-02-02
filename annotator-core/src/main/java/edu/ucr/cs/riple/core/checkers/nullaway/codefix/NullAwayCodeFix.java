@@ -85,6 +85,15 @@ public class NullAwayCodeFix {
   }
 
   /**
+   * Applies the given {@link MethodRewriteChange} to the source code.
+   *
+   * @param changes the changes to apply.
+   */
+  public void apply(Set<MethodRewriteChange> changes) {
+    changes.forEach(injector::rewriteMethod);
+  }
+
+  /**
    * Resolves a dereference error by generating a code fix.
    *
    * @param error the error to fix.
@@ -261,14 +270,5 @@ public class NullAwayCodeFix {
             // Add the import required for Preconditions.
             Set.of(NullAway.PRECONDITION_NAME));
     return Set.of(change);
-  }
-
-  /**
-   * Applies the given {@link MethodRewriteChange} to the source code.
-   *
-   * @param changes the changes to apply.
-   */
-  public void apply(Set<MethodRewriteChange> changes) {
-    changes.forEach(injector::rewriteMethod);
   }
 }

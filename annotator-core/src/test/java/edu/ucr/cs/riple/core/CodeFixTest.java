@@ -27,19 +27,54 @@ package edu.ucr.cs.riple.core;
 import static org.mockito.ArgumentMatchers.any;
 
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent.ChatGPT;
+import java.util.Arrays;
+import org.junit.After;
 import org.junit.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.mockito.stubbing.Answer;
+import org.mockito.stubbing.OngoingStubbing;
 
 public class CodeFixTest extends AnnotatorBaseCoreTest {
+
+  MockedStatic<ChatGPT> responseMockedStatic;
 
   public CodeFixTest() {
     super("nullable-multi-modular");
   }
 
+  private void mockChatGPTResponse(String[] responses) {
+    if (responses == null) {
+      throw new IllegalStateException("Mocked Responses are not set");
+    }
+    MockedStatic<ChatGPT> chatGPTMocked = Mockito.mockStatic(ChatGPT.class);
+    OngoingStubbing<ChatGPT> stubbing = chatGPTMocked.when(() -> ChatGPT.ask(any()));
+    Arrays.stream(responses).forEach(response -> stubbing.thenAnswer(invocation -> response));
+    responseMockedStatic = chatGPTMocked;
+  }
+
+  @After
+  public void close() {
+    if (responseMockedStatic != null) {
+      responseMockedStatic.close();
+    }
+  }
+
   @Test
   public void dereferenceEqualsRewriteTest() {
+    mockChatGPTResponse(
+        new String[] {
+          "```java\n"
+              + "public boolean equals(Object other) {\n"
+              + "  if (other == null) {\n"
+              + "    return false;\n"
+              + "  }\n"
+              + "  if (other instanceof Foo) {\n"
+              + "    return Objects.equals(f, ((Foo) other).f);\n"
+              + "  }\n"
+              + "  return false;\n"
+              + "}\n"
+              + "```"
+        });
     coreTestHelper
         .onTarget()
         .withSourceLines(
@@ -65,6 +100,14 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   @Test
   public void dereferenceHashCodeRewriteTest() {
+    mockChatGPTResponse(
+        new String[] {
+          "```java\n"
+              + "public int hashCode() {\n"
+              + "   return f == null ? 1 : f.hashCode();\n"
+              + "}\n"
+              + "```"
+        });
     coreTestHelper
         .onTarget()
         .withSourceLines(
@@ -84,6 +127,14 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   @Test
   public void dereferenceToStringRewriteTest() {
+    mockChatGPTResponse(
+        new String[] {
+          "```java\n"
+              + "public String toString() {\n"
+              + "  return f == null ? \"null\" : f.toString();\n"
+              + "}\n"
+              + "```"
+        });
     coreTestHelper
         .onTarget()
         .withSourceLines(
@@ -103,6 +154,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   @Test
   public void dereferenceAddPreconditionTest() {
+    mockChatGPTResponse(new String[] {"NO"});
     coreTestHelper
         .onTarget()
         .withSourceLines(
@@ -126,6 +178,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   @Test
   public void dereferenceReturnNullForNullableExpressionInNullableMethodTest() {
+    mockChatGPTResponse(new String[] {"YES"});
     coreTestHelper
         .onTarget()
         .withSourceLines(
@@ -145,30 +198,24 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   @Test
   public void dereferenceFieldInitializedBeforeUseTest() {
-    // Mock the static method globally for all instances
-    try (MockedStatic<ChatGPT> astHelpersMockedStatic = Mockito.mockStatic(ChatGPT.class)) {
-      astHelpersMockedStatic
-          .when(() -> ChatGPT.ask(any()))
-          .thenAnswer((Answer<String>) invocation -> "answer")
-          .thenAnswer(invocation -> "answer 2");
-      coreTestHelper
-          .onTarget()
-          .withSourceLines(
-              "Foo.java",
-              "package test;",
-              "import javax.annotation.Nullable;",
-              "public class Foo {",
-              "   Object f;",
-              "   public void init() {",
-              "     this.f = new Object();",
-              "   }",
-              "   public String bar() {",
-              "     return f.toString();",
-              "   }",
-              "}")
-          .expectNoReport()
-          .resolveRemainingErrors()
-          .start();
-    }
+    mockChatGPTResponse(new String[] {"NO"});
+    coreTestHelper
+        .onTarget()
+        .withSourceLines(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "   Object f;",
+            "   public void init() {",
+            "     this.f = new Object();",
+            "   }",
+            "   public String bar() {",
+            "     return f.toString();",
+            "   }",
+            "}")
+        .expectNoReport()
+        .resolveRemainingErrors()
+        .start();
   }
 }

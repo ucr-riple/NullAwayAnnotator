@@ -102,6 +102,55 @@ public class ChatGPT {
   }
 
   /**
+   * Ask ChatGPT a question and get a response.
+   *
+   * @param prompt the question to ask.
+   * @return the response from ChatGPT.
+   */
+  public static String ask(String prompt) {
+    try {
+      // Making a POST request
+      HttpURLConnection connection = (HttpURLConnection) new URL(URL).openConnection();
+      connection.setRequestMethod("POST");
+      connection.setRequestProperty("Authorization", "Bearer " + API_KEY);
+      connection.setRequestProperty("Content-Type", "application/json");
+
+      // Request content
+      JsonObject message = new JsonObject();
+      message.addProperty("role", "user");
+      message.addProperty("content", prompt); // No need to escape
+      JsonArray messages = new JsonArray();
+      messages.add(message);
+      JsonObject requestBody = new JsonObject();
+      requestBody.addProperty("model", MODEL);
+      requestBody.add("messages", messages);
+      String body = requestBody.toString();
+
+      // Send request
+      connection.setDoOutput(true);
+      OutputStreamWriter writer =
+          new OutputStreamWriter(connection.getOutputStream(), Charset.defaultCharset());
+      writer.write(body);
+      writer.flush();
+      writer.close();
+
+      // Response from ChatGPT
+      BufferedReader br =
+          new BufferedReader(
+              new InputStreamReader(connection.getInputStream(), Charset.defaultCharset()));
+      String line;
+      StringBuilder response = new StringBuilder();
+      while ((line = br.readLine()) != null) {
+        response.append(line);
+      }
+      br.close();
+      return extractMessageFromJSONResponse(response.toString());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
    * Fix a dereference error by generating a code fix. The fix is a rewrite of the {@link
    * Object#equals(Object)} method. Instead of comparing on the field directly that might cause of a
    * dereference error, it should simply call {@code Objects.equals} on the field.
@@ -112,7 +161,11 @@ public class ChatGPT {
    */
   public Set<MethodRewriteChange> fixDereferenceErrorInEqualsMethod(NullAwayError error) {
     MethodRewriteChange change = fixErrorInPlace(error, dereferenceEqualsMethodRewritePrompt);
-    return change == null ? Set.of() : Set.of(change);
+    if (change == null) {
+      return Set.of();
+    }
+    change.addImport("java.util.Objects");
+    return Set.of(change);
   }
 
   /**
@@ -180,7 +233,10 @@ public class ChatGPT {
    */
   public Set<MethodRewriteChange> fixDereferenceErrorInHashCodeMethod(NullAwayError error) {
     MethodRewriteChange change = fixErrorInPlace(error, dereferenceHashCodeMethodRewritePrompt);
-    return change == null ? Set.of() : Set.of(change);
+    if (change == null) {
+      return Set.of();
+    }
+    return Set.of(change);
   }
 
   /**
@@ -285,54 +341,5 @@ public class ChatGPT {
       return matcher.group(1);
     }
     return "";
-  }
-
-  /**
-   * Ask ChatGPT a question and get a response.
-   *
-   * @param prompt the question to ask.
-   * @return the response from ChatGPT.
-   */
-  public static String ask(String prompt) {
-    try {
-      // Making a POST request
-      HttpURLConnection connection = (HttpURLConnection) new URL(URL).openConnection();
-      connection.setRequestMethod("POST");
-      connection.setRequestProperty("Authorization", "Bearer " + API_KEY);
-      connection.setRequestProperty("Content-Type", "application/json");
-
-      // Request content
-      JsonObject message = new JsonObject();
-      message.addProperty("role", "user");
-      message.addProperty("content", prompt); // No need to escape
-      JsonArray messages = new JsonArray();
-      messages.add(message);
-      JsonObject requestBody = new JsonObject();
-      requestBody.addProperty("model", MODEL);
-      requestBody.add("messages", messages);
-      String body = requestBody.toString();
-
-      // Send request
-      connection.setDoOutput(true);
-      OutputStreamWriter writer =
-          new OutputStreamWriter(connection.getOutputStream(), Charset.defaultCharset());
-      writer.write(body);
-      writer.flush();
-      writer.close();
-
-      // Response from ChatGPT
-      BufferedReader br =
-          new BufferedReader(
-              new InputStreamReader(connection.getInputStream(), Charset.defaultCharset()));
-      String line;
-      StringBuilder response = new StringBuilder();
-      while ((line = br.readLine()) != null) {
-        response.append(line);
-      }
-      br.close();
-      return extractMessageFromJSONResponse(response.toString());
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 }
