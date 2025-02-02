@@ -204,7 +204,6 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
         .withSourceLines(
             "Foo.java",
             "package test;",
-            "import javax.annotation.Nullable;",
             "public class Foo {",
             "   Object f;",
             "   public void init() {",
@@ -217,5 +216,28 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
         .expectNoReport()
         .resolveRemainingErrors()
         .start();
+  }
+
+  @Test
+  public void dereferenceFieldFixGenerationUsingSafeUsageTest() {
+    mockChatGPTResponse(new String[] {"NO"});
+    coreTestHelper
+            .onTarget()
+            .withSourceLines(
+                    "Foo.java",
+                    "package test;",
+                    "import javax.annotation.Nullable;",
+                    "public class Foo {",
+                    "   Object f;",
+                    "   public void init() {",
+                    "     this.f = new Object();",
+                    "   }",
+                    "   public String bar() {",
+                    "     return f.toString();",
+                    "   }",
+                    "}")
+            .expectNoReport()
+            .resolveRemainingErrors()
+            .start();
   }
 }
