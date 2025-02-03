@@ -50,8 +50,10 @@ public class Response {
       throw new IllegalArgumentException("Invalid response format: " + response);
     }
     XmlParser parser = new XmlParser(response);
-    this.isAgreement = parser.getArrayValueFromTag("/ans", String.class).orElse("").equalsIgnoreCase("yes");
-    this.isDisagreement = parser.getArrayValueFromTag("/ans", String.class).orElse("").equalsIgnoreCase("no");
+    this.isAgreement =
+        parser.getArrayValueFromTag("/ans", String.class).orElse("").equalsIgnoreCase("yes");
+    this.isDisagreement =
+        parser.getArrayValueFromTag("/ans", String.class).orElse("").equalsIgnoreCase("no");
     if (isAgreement || isDisagreement) {
       this.success = true;
       this.code = null;

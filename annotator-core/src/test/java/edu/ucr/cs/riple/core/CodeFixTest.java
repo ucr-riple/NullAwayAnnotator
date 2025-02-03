@@ -212,44 +212,44 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
         .start();
   }
 
-//  @Test
-//  public void dereferenceFieldFixGenerationUsingSafeUsageTest() {
-//    //    mockChatGPTResponse(new String[] {"YES", "NO"});
-//    coreTestHelper
-//        .onTarget()
-//        .withSourceLines(
-//            "Foo.java",
-//            "package test;",
-//            "public class Foo {",
-//            "   Bar b;",
-//            "   public void setB(Bar b) {",
-//            "     this.b = b;",
-//            "   }",
-//            "   public int run(){",
-//            "     return b.exec();",
-//            "   }",
-//            "   public int calculate(){",
-//            "     if(b == null){",
-//            "       return 0;",
-//            "     }",
-//            "     return b.exec();",
-//            "   }",
-//            "   public void release(){",
-//            "     b = null;",
-//            "   }",
-//            "}")
-//        .withSourceLines(
-//            "Bar.java",
-//            "package test;",
-//            "public class Bar {",
-//            "   public int exec() {",
-//            "     return 0;",
-//            "   }",
-//            "}")
-//        .expectNoReport()
-//        .resolveRemainingErrors()
-//        .start();
-//  }
+  //  @Test
+  //  public void dereferenceFieldFixGenerationUsingSafeUsageTest() {
+  //    //    mockChatGPTResponse(new String[] {"YES", "NO"});
+  //    coreTestHelper
+  //        .onTarget()
+  //        .withSourceLines(
+  //            "Foo.java",
+  //            "package test;",
+  //            "public class Foo {",
+  //            "   Bar b;",
+  //            "   public void setB(Bar b) {",
+  //            "     this.b = b;",
+  //            "   }",
+  //            "   public int run(){",
+  //            "     return b.exec();",
+  //            "   }",
+  //            "   public int calculate(){",
+  //            "     if(b == null){",
+  //            "       return 0;",
+  //            "     }",
+  //            "     return b.exec();",
+  //            "   }",
+  //            "   public void release(){",
+  //            "     b = null;",
+  //            "   }",
+  //            "}")
+  //        .withSourceLines(
+  //            "Bar.java",
+  //            "package test;",
+  //            "public class Bar {",
+  //            "   public int exec() {",
+  //            "     return 0;",
+  //            "   }",
+  //            "}")
+  //        .expectNoReport()
+  //        .resolveRemainingErrors()
+  //        .start();
+  //  }
 
   /**
    * Convert the answer to XML format.
@@ -269,12 +269,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
    */
   private static Response toXMLJava(String... code) {
     String xml =
-        "<success>true</success>\n"
-            + "<code>\n"
-            + "```java\n"
-            + "%s\n"
-            + "```\n"
-            + "</code>\n";
+        "<success>true</success>\n" + "<code>\n" + "```java\n" + "%s\n" + "```\n" + "</code>\n";
     return toXML(String.format(xml, String.join("\n", code)));
   }
 }
