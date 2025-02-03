@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.tools;
 
+import edu.ucr.cs.riple.core.registries.field.FieldInitializationStore;
 import edu.ucr.cs.riple.scanner.Serializer;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -151,6 +152,7 @@ public class Utility {
           .thenAnswer(
               invocation -> {
                 Stream.of(
+                        FieldInitializationStore.FILE_NAME,
                         Serializer.NON_NULL_ELEMENTS_FILE_NAME,
                         Serializer.CLASS_RECORD_FILE_NAME,
                         Serializer.METHOD_IMPACTED_REGION_FILE_NAME,
