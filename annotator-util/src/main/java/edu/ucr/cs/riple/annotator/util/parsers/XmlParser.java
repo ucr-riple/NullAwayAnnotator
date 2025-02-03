@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
@@ -71,7 +72,7 @@ public class XmlParser {
    * @param content The content of the XML file.
    */
   public XmlParser(String content) {
-    InputStream stream = new ByteArrayInputStream(content.getBytes());
+    InputStream stream = new ByteArrayInputStream(content.getBytes(Charset.defaultCharset()));
     this.document = buildDocument(stream);
   }
 
