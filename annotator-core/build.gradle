@@ -67,6 +67,9 @@ tasks.test.dependsOn(':annotation-util:publishToMavenLocal')
 tasks.test.doFirst {
     environment "NULLAWAY_TEST_VERSION", NULLAWAY_TEST
     environment "ANNOTATOR_VERSION", project.version
+    if (!System.getenv().containsKey("OPENAI_KEY")) {
+        environment "OPENAI_KEY", "OPENAI_KEY_FOR_TEST"
+    }
 }
 
 publishing {
