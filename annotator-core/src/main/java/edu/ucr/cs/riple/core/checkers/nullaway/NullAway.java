@@ -142,7 +142,6 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
       } else {
         annotations = Set.of(new AddTypeUseMarkerAnnotation(nonnullTarget, config.nullableAnnot));
       }
-
     } else {
       annotations = Set.of(new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot));
     }
