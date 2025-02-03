@@ -220,24 +220,40 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   @Test
   public void dereferenceFieldFixGenerationUsingSafeUsageTest() {
-    mockChatGPTResponse(new String[] {"NO"});
+    mockChatGPTResponse(new String[] {"YES", "NO"});
     coreTestHelper
-            .onTarget()
-            .withSourceLines(
-                    "Foo.java",
-                    "package test;",
-                    "import javax.annotation.Nullable;",
-                    "public class Foo {",
-                    "   Object f;",
-                    "   public void init() {",
-                    "     this.f = new Object();",
-                    "   }",
-                    "   public String bar() {",
-                    "     return f.toString();",
-                    "   }",
-                    "}")
-            .expectNoReport()
-            .resolveRemainingErrors()
-            .start();
+        .onTarget()
+        .withSourceLines(
+            "Foo.java",
+            "package test;",
+            "public class Foo {",
+            "   Bar b;",
+            "   public void setB(Bar b) {",
+            "     this.b = b;",
+            "   }",
+            "   public int run(){",
+            "     return b.exec();",
+            "   }",
+            "   public int calculate(){",
+            "     if(b == null){",
+            "       return 0;",
+            "     }",
+            "     return b.exec();",
+            "   }",
+            "   public void release(){",
+            "     b = null;",
+            "   }",
+            "}")
+        .withSourceLines(
+            "Bar.java",
+            "package test;",
+            "public class Bar {",
+            "   public int exec() {",
+            "     return 0;",
+            "   }",
+            "}")
+        .expectNoReport()
+        .resolveRemainingErrors()
+        .start();
   }
 }

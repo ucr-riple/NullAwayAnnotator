@@ -32,6 +32,7 @@ import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.core.registries.method.MethodRecord;
 import edu.ucr.cs.riple.core.registries.method.MethodRegistry;
 import edu.ucr.cs.riple.core.registries.region.MethodRegionRegistry;
+import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.core.util.ASTParser;
 import edu.ucr.cs.riple.core.util.JsonParser;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -74,6 +75,12 @@ public class ChatGPT {
   /** The prompt to ask ChatGPT to rewrite the {@link Object#hashCode()} method. */
   private final String dereferenceHashCodeMethodRewritePrompt;
 
+  /** The prompt to ask ChatGPT to check if the error is a false positive at the error point. */
+  private final String checkIfFalsePositiveAtErrorPointPrompt;
+
+  /** The prompt to ask ChatGPT to check if the method is an initializer. */
+  private final String checkIfMethodIsAnInitializerPrompt;
+
   /** The {@link Context} instance. */
   private final Context context;
 
@@ -89,13 +96,16 @@ public class ChatGPT {
   private final ASTParser parser;
 
   public ChatGPT(Context context, ASTParser parser) {
-    // read openai-api-key.txt from resources
     this.dereferenceEqualsMethodRewritePrompt =
         Utility.readResourceContent("prompts/dereference/equals-rewrite.txt");
     this.dereferenceToStringMethodRewritePrompt =
         Utility.readResourceContent("prompts/dereference/tostring-rewrite.txt");
     this.dereferenceHashCodeMethodRewritePrompt =
         Utility.readResourceContent("prompts/dereference/hashcode-rewrite.txt");
+    this.checkIfFalsePositiveAtErrorPointPrompt =
+        Utility.readResourceContent("prompts/inquiry/is-false-positive.txt");
+    this.checkIfMethodIsAnInitializerPrompt =
+        Utility.readResourceContent("prompts/inquiry/is-initializer.txt");
     this.context = context;
     this.codeResponsePattern = Pattern.compile("```java\\n(.*?)\\n```", Pattern.DOTALL);
     this.parser = parser;
@@ -196,28 +206,44 @@ public class ChatGPT {
     List<Set<MethodRecord>> depthRecord =
         computeBFSOnCallGraph(error.getRegion().clazz, error.getRegion().member);
     // Construct the prompt
-    StringBuilder prompt = new StringBuilder();
     String enclosingMethod = parser.getRegionSourceCode(error.path, error.getRegion()).content;
-    prompt
-        .append("In the method below is there a possibility that the expression: ")
-        .append(nullableExpression)
-        .append(" at line: ")
-        .append(error.position.diagnosticLine)
-        .append(" be null ?")
-        .append("\n")
-        .append(enclosingMethod)
-        .append("\n")
-        .append("I only need one single word as answer from you.")
-        .append("\n")
-        .append(
-            "If it is possible to be null JUST SAY YES and if it is NOT possible to be null JUST SAY NO");
-    String response = ask(prompt.toString());
+    String prompt =
+        String.format(
+            checkIfFalsePositiveAtErrorPointPrompt,
+            nullableExpression,
+            error.position.diagnosticLine.trim(),
+            enclosingMethod);
+    String response = ask(prompt);
     response = response.trim().toLowerCase();
     if (response.equals("yes")) {
       return false;
     }
     if (response.equals("no")) {
       return true;
+    }
+    throw new RuntimeException("Invalid response from ChatGPT:" + response);
+  }
+
+  /**
+   * Checks if the method is an initializer and a good candidate to receive an {@code @Initializer}
+   * annotation.
+   *
+   * @param onMethod the method to check.
+   * @return {@code true} if the method is an initializer, {@code false} otherwise.
+   */
+  public boolean checkIfMethodIsAnInitializer(OnMethod onMethod) {
+    // Construct the prompt
+    String enclosingMethod =
+        parser.getRegionSourceCode(onMethod.path, new Region(onMethod.clazz, onMethod.method))
+            .content;
+    String prompt = String.format(checkIfMethodIsAnInitializerPrompt, enclosingMethod);
+    String response = ask(prompt);
+    response = response.trim().toLowerCase();
+    if (response.equals("yes")) {
+      return true;
+    }
+    if (response.equals("no")) {
+      return false;
     }
     throw new RuntimeException("Invalid response from ChatGPT:" + response);
   }

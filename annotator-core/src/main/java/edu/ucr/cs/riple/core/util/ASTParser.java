@@ -32,6 +32,7 @@ import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.SourceCode;
+import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.util.SignatureMatcher;
 import edu.ucr.cs.riple.injector.util.TypeUtils;
 import java.nio.file.Path;
@@ -113,6 +114,16 @@ public class ASTParser {
    */
   public SourceCode getRegionSourceCode(Path path, Region region) {
     return Injector.getMethodSourceCode(path, region.clazz, region.member, config.languageLevel);
+  }
+
+  /**
+   * Returns the callable declaration of a method.
+   *
+   * @param onMethod the method to get the callable declaration of.
+   * @return the callable declaration of a method.
+   */
+  public CallableDeclaration<?> getCallableDeclaration(OnMethod onMethod) {
+    return getCallableDeclaration(onMethod.path, onMethod.clazz, onMethod.method);
   }
 
   /**

@@ -1,0 +1,4 @@
+In the method below is there a possibility that the expression: %s at line: %s be null ?
+%s
+I only need one single word as answer from you.
+If it is possible to be null JUST SAY YES and if it is NOT possible to be null JUST SAY NO.
