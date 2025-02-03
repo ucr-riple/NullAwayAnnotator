@@ -269,29 +269,6 @@ public class Utility {
   }
 
   /**
-   * Returns a progress bar with the given task name.
-   *
-   * @param taskName Task name.
-   * @param steps Number of total steps to show in the progress bar.
-   * @return Progress bar instance.
-   */
-  public static ProgressBar createProgressBar(String taskName, int steps) {
-    return new ProgressBar(
-        taskName,
-        steps,
-        1000,
-        System.out,
-        ProgressBarStyle.ASCII,
-        "",
-        1,
-        false,
-        null,
-        ChronoUnit.SECONDS,
-        0L,
-        Duration.ZERO);
-  }
-
-  /**
    * Writes log in the `log.txt` file at the output directory.
    *
    * @param context Annotator context.
@@ -345,5 +322,28 @@ public class Utility {
   public static String getLeadingWhitespace(String line) {
     Matcher matcher = LEADING_WHITESPACE.matcher(line);
     return matcher.find() ? matcher.group() : "";
+  }
+
+  /**
+   * Returns a progress bar with the given task name.
+   *
+   * @param taskName Task name.
+   * @param steps Number of total steps to show in the progress bar.
+   * @return Progress bar instance.
+   */
+  public static ProgressBar createProgressBar(String taskName, int steps) {
+    return new ProgressBar(
+        taskName,
+        steps,
+        1000,
+        System.out,
+        ProgressBarStyle.ASCII,
+        "",
+        1,
+        false,
+        null,
+        ChronoUnit.SECONDS,
+        0L,
+        Duration.ZERO);
   }
 }

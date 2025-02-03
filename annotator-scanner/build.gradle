@@ -43,8 +43,10 @@ plugins {
 
 dependencies {
     compileOnly deps.apt.autoServiceAnnot
-    annotationProcessor deps.apt.autoService
     compileOnly deps.build.errorProneCheckApi
+    implementation project(':annotator-util')
+
+    annotationProcessor deps.apt.autoService
 
     testImplementation deps.test.errorProneTestHelpers
 }

@@ -51,9 +51,6 @@ subprojects {
         annotationProcessor "com.uber.nullaway:nullaway:" + System.getenv('NULLAWAY_TEST_VERSION')
         annotationProcessor "edu.ucr.cs.riple.annotator:annotator-scanner:" + System.getenv('ANNOTATOR_VERSION')
 
-        // to add Cast to Nonnull
-        compileOnly "edu.ucr.cs.riple.annotator:annotation-util:" + System.getenv('ANNOTATOR_VERSION')
-
         // to add guava
         compileOnly "com.google.guava:guava:32.0.1-jre"
 

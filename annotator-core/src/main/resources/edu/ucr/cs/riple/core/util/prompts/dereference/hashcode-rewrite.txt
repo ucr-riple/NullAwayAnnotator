@@ -40,4 +40,12 @@ And the error I want to be fixed is:
 
 %s
 
-Just give me the fixed code snippet. I will apply the fix to my codebase. Do not import any additional libraries or classes or java comments.
+Just give me the fixed code snippet in xml format in <ans> tag like the example below. I will apply the fix to my codebase. Do not import any additional libraries or classes or java comments.
+<ans>
+  <success>true</success>
+  <code>
+  ```java
+  Your fixed code snippet here
+  ```
+  </code>
+</ans>

@@ -31,6 +31,8 @@ import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent.ChatGPT;
+import edu.ucr.cs.riple.core.registries.index.ErrorStore;
+import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.core.util.ASTParser;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Injector;
@@ -39,8 +41,10 @@ import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
 import edu.ucr.cs.riple.injector.changes.RemoveMarkerAnnotation;
+import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.util.ASTUtils;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
@@ -60,11 +64,14 @@ public class NullAwayCodeFix {
   /** Parser used to parse the source code of the file containing the error. */
   private final ASTParser parser;
 
+  private final ErrorStore errorStore;
+
   public NullAwayCodeFix(Context context) {
-    this.parser = new ASTParser(context.config);
+    this.parser = new ASTParser(context);
     this.gpt = new ChatGPT(context, parser);
     this.context = context;
     this.injector = new Injector(context.config.languageLevel);
+    this.errorStore = new ErrorStore(context, context.targetModuleInfo);
   }
 
   /**
@@ -117,8 +124,7 @@ public class NullAwayCodeFix {
     }
     // check if method already annotated as nullable, return nullable.
     CallableDeclaration<?> declaration =
-        parser.getCallableDeclaration(
-            error.path, error.getRegion().clazz, error.getRegion().member);
+        parser.getCallableDeclaration(error.getRegion().clazz, error.getRegion().member);
     if (declaration != null && parser.isMethodWithNullableReturn(declaration)) {
       // make return null statement if null.
       return constructReturnNullIfExpressionIsNullForError(error);
@@ -165,6 +171,34 @@ public class NullAwayCodeFix {
           }
         }
       }
+      // no initializer found. check if there is any region with safe use of this field.
+      OnField onField =
+          context.targetModuleInfo.getFieldRegistry().getLocationOnField(owner, expression);
+      Set<Region> unsafeRegions = new HashSet<>();
+      Set<Region> safeRegions = new HashSet<>();
+      context
+          .targetModuleInfo
+          .getRegionRegistry()
+          .getImpactedRegions(onField)
+          .forEach(
+              region -> {
+                if (errorStore.getErrorsInRegion(region).isEmpty()) {
+                  safeRegions.add(region);
+                } else {
+                  unsafeRegions.add(region);
+                }
+              });
+      if (!safeRegions.isEmpty()) {
+        // for each unsafe region, consult gpt to generate a fix using safe regions.
+        Set<MethodRewriteChange> changes = new HashSet<>();
+        for (Region region : unsafeRegions) {
+          NullAwayError errorInRegion =
+              (NullAwayError) errorStore.getErrorsInRegion(region).stream().findFirst().get();
+          Set<MethodRewriteChange> change =
+              gpt.fixDereferenceErrorBySafeRegions(errorInRegion, safeRegions);
+          changes.addAll(change);
+        }
+      }
     }
     return Set.of();
   }
@@ -201,7 +235,7 @@ public class NullAwayCodeFix {
    * <p>Example:
    *
    * <pre>{@code
-   * @Nullable Object foo(){
+   * @Nullable Object foo() {
    *  +if (exp == null) {
    *  +    return null;
    *  +}
@@ -214,7 +248,7 @@ public class NullAwayCodeFix {
    */
   private Set<MethodRewriteChange> constructReturnNullIfExpressionIsNullForError(
       NullAwayError error) {
-    SourceCode enclosingMethod = parser.getRegionSourceCode(error.path, error.getRegion());
+    SourceCode enclosingMethod = parser.getRegionSourceCode(error.getRegion());
     if (enclosingMethod == null) {
       return Set.of();
     }
@@ -255,7 +289,7 @@ public class NullAwayCodeFix {
    */
   private Set<MethodRewriteChange> constructPreconditionCheckMethodRewriteForError(
       NullAwayError error) {
-    SourceCode enclosingMethod = parser.getRegionSourceCode(error.path, error.getRegion());
+    SourceCode enclosingMethod = parser.getRegionSourceCode(error.getRegion());
     if (enclosingMethod == null) {
       return Set.of();
     }

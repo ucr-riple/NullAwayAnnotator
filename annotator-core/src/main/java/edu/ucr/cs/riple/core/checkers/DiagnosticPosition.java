@@ -27,7 +27,6 @@ package edu.ucr.cs.riple.core.checkers;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Objects;
 
 /** Represents a position in a file where a diagnostic is reported. */
 public class DiagnosticPosition {
@@ -84,7 +83,7 @@ public class DiagnosticPosition {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(adaptedOffset);
+    return adaptedOffset;
   }
 
   @Override

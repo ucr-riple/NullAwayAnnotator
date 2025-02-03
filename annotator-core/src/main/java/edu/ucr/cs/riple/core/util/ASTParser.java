@@ -29,22 +29,24 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.type.Type;
 import edu.ucr.cs.riple.core.Config;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.SourceCode;
-import edu.ucr.cs.riple.injector.location.OnMethod;
+import edu.ucr.cs.riple.injector.location.OnClass;
 import edu.ucr.cs.riple.injector.util.SignatureMatcher;
 import edu.ucr.cs.riple.injector.util.TypeUtils;
-import java.nio.file.Path;
 
 /** AnnotatorNullabilityUtil class for AST operations. */
 public class ASTParser {
 
   private final Config config;
   private final AnnotationExpr nullableAnnotationExpression;
+  private final Context context;
 
-  public ASTParser(Config config) {
-    this.config = config;
+  public ASTParser(Context context) {
+    this.context = context;
+    this.config = context.config;
     // find simple name of the nullable annotation
     String nullableAnnotationSimpleName =
         config.nullableAnnot.substring(config.nullableAnnot.lastIndexOf('.') + 1);
@@ -108,34 +110,25 @@ public class ASTParser {
   /**
    * Returns the source code of a region.
    *
-   * @param path the path of the source file.
    * @param region the region to get the source code of.
    * @return the source code of the region.
    */
-  public SourceCode getRegionSourceCode(Path path, Region region) {
-    return Injector.getMethodSourceCode(path, region.clazz, region.member, config.languageLevel);
-  }
-
-  /**
-   * Returns the callable declaration of a method.
-   *
-   * @param onMethod the method to get the callable declaration of.
-   * @return the callable declaration of a method.
-   */
-  public CallableDeclaration<?> getCallableDeclaration(OnMethod onMethod) {
-    return getCallableDeclaration(onMethod.path, onMethod.clazz, onMethod.method);
+  public SourceCode getRegionSourceCode(Region region) {
+    OnClass onClass = context.targetModuleInfo.getLocationOnClass(region.clazz);
+    return Injector.getMethodSourceCode(
+        onClass.path, region.clazz, region.member, config.languageLevel);
   }
 
   /**
    * Returns the callable declaration of a class.
    *
-   * @param path the path of the source file.
    * @param clazz the enclosing class.
    * @param member Method signature.
    * @return the callable declaration of a class.
    */
-  public CallableDeclaration<?> getCallableDeclaration(Path path, String clazz, String member) {
-    return Injector.getCallableDeclaration(path, clazz, member, config.languageLevel);
+  public CallableDeclaration<?> getCallableDeclaration(String clazz, String member) {
+    OnClass onClass = context.targetModuleInfo.getLocationOnClass(clazz);
+    return Injector.getCallableDeclaration(onClass.path, clazz, member, config.languageLevel);
   }
 
   /**

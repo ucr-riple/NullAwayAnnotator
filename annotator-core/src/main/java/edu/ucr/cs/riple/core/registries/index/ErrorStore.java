@@ -29,6 +29,7 @@ import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -54,8 +55,8 @@ public class ErrorStore {
   public ErrorStore(Context context, ModuleInfo moduleInfo) {
     this.moduleInfo = moduleInfo;
     this.context = context;
-    root = new Index(context, moduleInfo);
-    root.index();
+    this.root = new Index(context, moduleInfo);
+    this.root.index();
   }
 
   /** Overwrites the current state with the new generated output, */
@@ -116,5 +117,15 @@ public class ErrorStore {
    */
   public int getNumberOfErrorsResolvedByAllFixesWithinCollection(Collection<Fix> fixes) {
     return (int) root.values().stream().filter(error -> error.isResolvableWith(fixes)).count();
+  }
+
+  /**
+   * Returns the set of errors in the given region.
+   *
+   * @param region The given region.
+   * @return Set of errors in the given region.
+   */
+  public Set<Error> getErrorsInRegion(Region region) {
+    return new HashSet<>(root.get(region));
   }
 }

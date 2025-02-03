@@ -26,18 +26,12 @@ package edu.ucr.cs.riple.scanner;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.ErrorProneFlags;
+import edu.ucr.cs.riple.annotator.util.parsers.XmlParser;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import edu.ucr.cs.riple.scanner.generatedcode.SymbolSourceResolver;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import javax.annotation.Nonnull;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 /**
  * provides scanner configuration based on additional flags passed to ErrorProne via
@@ -70,28 +64,22 @@ public class ErrorProneCLIFlagsConfig implements Config {
       throw new IllegalStateException(
           "Error in Scanner Checker configuration, should be set with via error prone flag: (-XepOpt:AnnotatorScanner:ConfigPath)");
     }
-    Document document;
-    try {
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      DocumentBuilder builder = factory.newDocumentBuilder();
-      document = builder.parse(Files.newInputStream(Paths.get(configFilePath)));
-      document.normalize();
-    } catch (IOException | SAXException | ParserConfigurationException e) {
-      throw new RuntimeException("Error in reading/parsing config at path: " + configFilePath, e);
-    }
+    XmlParser parser = new XmlParser(Paths.get(configFilePath));
     String outputDirectoryPathInString =
-        XMLUtil.getValueFromTag(document, "/scanner/path", String.class).orElse("");
+        parser.getValueFromTag("/scanner/path", String.class).orElse("");
     if (outputDirectoryPathInString == null || outputDirectoryPathInString.isEmpty()) {
       throw new IllegalArgumentException(
           "Output path cannot be null, should be set it in config file within <path> tag");
     }
     this.outputDirectory = Paths.get(outputDirectoryPathInString);
     this.serializationIsActive =
-        XMLUtil.getValueFromAttribute(document, "/scanner/serialization", "active", Boolean.class)
+        parser
+            .getValueFromAttribute("/scanner/serialization", "active", Boolean.class)
             .orElse(false);
-    this.symbolSourceResolver = new SymbolSourceResolver(extractRequestedSourceTypes(document));
+    this.symbolSourceResolver = new SymbolSourceResolver(extractRequestedSourceTypes(parser));
     this.nonnullAnnotations =
-        XMLUtil.getArrayValueFromTag(document, "/scanner/annotations/nonnull", String.class)
+        parser
+            .getArrayValueFromTag("/scanner/annotations/nonnull", String.class)
             .orElse(ImmutableSet.of());
     this.serializer = new Serializer(this);
   }
@@ -99,13 +87,14 @@ public class ErrorProneCLIFlagsConfig implements Config {
   /**
    * Extracts set of requested source types to be serialized from the given xml document.
    *
-   * @param document XML document where all configuration values are read from.
+   * @param parser The xml parser to extract the requested source types.
    * @return Immutable set of requested source types.
    */
-  private ImmutableSet<SourceType> extractRequestedSourceTypes(Document document) {
+  private ImmutableSet<SourceType> extractRequestedSourceTypes(XmlParser parser) {
     ImmutableSet.Builder<SourceType> codeDetectors = new ImmutableSet.Builder<>();
-    if (XMLUtil.getValueFromAttribute(
-            document, "/scanner/processor/" + SourceType.LOMBOK.name(), "active", Boolean.class)
+    if (parser
+        .getValueFromAttribute(
+            "/scanner/processor/" + SourceType.LOMBOK.name(), "active", Boolean.class)
         .orElse(false)) {
       codeDetectors.add(SourceType.LOMBOK);
     }

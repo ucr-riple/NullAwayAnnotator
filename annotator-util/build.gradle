@@ -22,27 +22,22 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.annotator.nullability;
+plugins {
+    id 'maven-publish'
+    id "com.vanniktech.maven.publish"
+}
 
-import javax.annotation.Nullable;
+dependencies {
+    implementation deps.build.gson
+    implementation deps.build.progressbar
+    implementation deps.build.guava
+}
 
-public class AnnotatorNullabilityUtil {
-
-  private AnnotatorNullabilityUtil() {
-    throw new IllegalStateException("AnnotatorNullabilityUtil class");
-  }
-
-  /**
-   * Used to cast an object to null and silence the nullability checker.
-   *
-   * @param obj the object to cast to null.
-   * @return null
-   * @param <T> the type of the object.
-   */
-  public static <T> T castToNull(@Nullable T obj) {
-    if (obj == null) {
-      throw new IllegalStateException("Expected obj to be non-null");
+spotless {
+    java {
+        // don't enforce formatting for generated Java code under buildSrc
+        targetExclude 'tests/**/*.java'
+        // tests expected output does not conform to google java format rules.
+        targetExclude '**/test/resources/**/*.java'
     }
-    return obj;
-  }
 }

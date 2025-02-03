@@ -38,7 +38,7 @@ application {
 dependencies {
     implementation project(':injector')
     implementation project(':annotator-scanner')
-    compileOnly project(':annotation-util')
+    implementation project(':annotator-util')
     implementation deps.build.guava
     implementation deps.build.gson
     implementation deps.build.progressbar
@@ -61,7 +61,7 @@ spotless {
 def NULLAWAY_TEST = "0.12.4-SNAPSHOT"
 
 tasks.test.dependsOn(':annotator-scanner:publishToMavenLocal')
-tasks.test.dependsOn(':annotation-util:publishToMavenLocal')
+tasks.test.dependsOn(':annotator-util:publishToMavenLocal')
 
 // Set up environment variables for test configuration tu run with the latest development version.
 tasks.test.doFirst {

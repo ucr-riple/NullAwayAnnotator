@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.util;
+package edu.ucr.cs.riple.annotator.util.parsers;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
