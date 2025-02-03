@@ -572,4 +572,22 @@ public class CoreTest extends AnnotatorBaseCoreTest {
     // No annotation should be added even though it can reduce the number of errors.
     Assert.assertEquals(coreTestHelper.getLog().getInjectedAnnotations().size(), 0);
   }
+
+  @Test
+  public void fieldAssignNullableNonNullArrayContent() {
+    coreTestHelper
+        .onTarget()
+        .withSourceLines(
+            "Main.java",
+            "package test;",
+            "public class Main {",
+            "   Object[] arr = new Object[1];",
+            "   void run() {",
+            "     arr[0] = null;",
+            "   }",
+            "}")
+        .withExpectedReports(new TReport(new OnField("Main.java", "test.Main", Set.of("arr")), -1))
+        .checkExpectedOutput("fieldAssignNullableNonNullArrayContent/expected")
+        .start();
+  }
 }
