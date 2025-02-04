@@ -104,6 +104,7 @@ if (JavaVersion.current().isJava11()) {
     test {
         filter {
             excludeTestsMatching "edu.ucr.cs.riple.core.Java17Test"
+            excludeTestsMatching "edu.ucr.cs.riple.core.LombokTest"
         }
     }
 }
