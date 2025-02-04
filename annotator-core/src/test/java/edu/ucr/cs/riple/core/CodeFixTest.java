@@ -70,7 +70,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
   @Test
   public void dereferenceEqualsRewriteTest() {
     mockChatGPTResponse(
-        toXMLJava(
+        codeFix(
             "public boolean equals(Object other) {",
             "   if (other == null) {",
             "      return false;",
@@ -106,7 +106,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
   @Test
   public void dereferenceHashCodeRewriteTest() {
     mockChatGPTResponse(
-        toXMLJava("public int hashCode() {", "   return f == null ? 1 : f.hashCode();", "}"));
+        codeFix("public int hashCode() {", "   return f == null ? 1 : f.hashCode();", "}"));
     coreTestHelper
         .onTarget()
         .withSourceLines(
@@ -127,7 +127,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
   @Test
   public void dereferenceToStringRewriteTest() {
     mockChatGPTResponse(
-        toXMLJava(
+        codeFix(
             "public String toString() {", "   return f == null ? \"null\" : f.toString();", "}"));
     coreTestHelper
         .onTarget()
@@ -217,7 +217,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
     mockChatGPTResponse(
         DISAGREE,
         DISAGREE,
-        toXMLJava(
+        codeFix(
             "public int run(){",
             "      if (b == null) {",
             "          return 0;",
@@ -276,7 +276,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
    * @param code the code to be converted to XML format.
    * @return the XML formatted answer.
    */
-  private static Response toXMLJava(String... code) {
+  private static Response codeFix(String... code) {
     String xml =
         "<success>true</success>\n" + "<code>\n" + "```java\n" + "%s\n" + "```\n" + "</code>\n";
     return toXML(String.format(xml, String.join("\n", code)));
