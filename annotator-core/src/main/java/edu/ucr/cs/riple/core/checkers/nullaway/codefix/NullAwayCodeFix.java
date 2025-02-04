@@ -142,6 +142,27 @@ public class NullAwayCodeFix {
     return Set.of();
   }
 
+  /**
+   * Resolves a field dereference error by generating a code fix.
+   *
+   * <p>Here are the steps to resolve a field dereference error:
+   *
+   * <ol>
+   *   <li>Check if there is an assignment to the expression in the method body.
+   *   <li>Look if there is any method initializing this field.
+   *   <li>Check if there is any region with safe use of this field.
+   *   <li>Consult gpt to generate a fix for each unsafe region.
+   *   <li>Try to fix by safe regions if exists.
+   *   <li>If no safe region found, of no fix found by safe regions, ask gpt to generate a fix using
+   *       default values or rewrite but avoid adding preconditions.
+   * </ol>
+   *
+   * @param error the error to fix.
+   * @param encClass the class containing the field.
+   * @param field the field to fix.
+   * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty} if no fix
+   *     is found.
+   */
   private Set<MethodRewriteChange> resolveFieldDereferenceError(
       NullAwayError error, String encClass, String field) {
     // check if there is an assignment to the expression in the method body.
@@ -219,6 +240,9 @@ public class NullAwayCodeFix {
       if (!changesForRegion.isEmpty()) {
         changes.addAll(changesForRegion);
       }
+    }
+    if (changes.isEmpty()) {
+      throw new RuntimeException("No fix found for the field dereference error: " + error);
     }
     return changes;
   }
