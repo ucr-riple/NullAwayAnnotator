@@ -31,25 +31,39 @@ import java.util.regex.Pattern;
 /** Response a response from the agent. */
 public class Response {
 
+  /**
+   * Flag to indicate if the response is an agreement. Note if the response is not agreement, it
+   * does not mean that the model disagreed.
+   */
   private final boolean isAgreement;
+
+  /**
+   * Flag to indicate if the response is a disagreement. Note if the response is not disagreement,
+   * it does not mean that the model agreed.
+   */
   private final boolean isDisagreement;
+
+  /** Suggested code from the agent. */
   private final String code;
+
+  /** Flag to indicate if the response is successful. */
   private final boolean success;
-  private static final Pattern RESPONSE_PATTERN = Pattern.compile("<ans>[\\s\\S]*?</ans>");
+
+  private static final Pattern RESPONSE_PATTERN = Pattern.compile("<ans>.*?</ans>", Pattern.DOTALL);
 
   /**
    * The pattern to extract the code from the response from ChatGPT. The code is in the format:
    * {@code ```java\ncode\n```}.
    */
   private static final Pattern CODE_RESPONSE_PATTERN =
-      Pattern.compile("```java\\n(.*?)\\n```", Pattern.DOTALL);
+      Pattern.compile("```java\\s*([\\s\\S]*?)\\s*```");
 
   public Response(String response) {
     Matcher matcher = RESPONSE_PATTERN.matcher(response);
     if (!matcher.find()) {
       throw new IllegalArgumentException("Invalid response format: " + response);
     }
-    XmlParser parser = new XmlParser(response);
+    XmlParser parser = new XmlParser(matcher.group());
     this.isAgreement =
         parser.getArrayValueFromTag("/ans", String.class).orElse("").equalsIgnoreCase("yes");
     this.isDisagreement =
@@ -114,5 +128,15 @@ public class Response {
       return matcher.group(1);
     }
     return "";
+  }
+
+  @Override
+  public String toString() {
+    if (isAgreement) {
+      return "Agreement";
+    } else if (isDisagreement) {
+      return "Disagreement";
+    }
+    return isSuccessFull() ? getCode() : "Failed";
   }
 }

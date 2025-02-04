@@ -24,6 +24,8 @@
 
 package edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent;
 
+import static edu.ucr.cs.riple.core.util.Utility.log;
+
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -203,8 +205,16 @@ public class ChatGPT {
             expression,
             method,
             safeRegionExamples);
+    log("Asking if the error can be fixed by using safe regions");
     Response response = ask(prompt);
-    return Set.of();
+    log("response: " + response);
+    if (!response.isSuccessFull()) {
+      return Set.of();
+    }
+    String code = response.getCode();
+    return Set.of(
+        new MethodRewriteChange(
+            new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member), code));
   }
 
   /**
@@ -259,7 +269,9 @@ public class ChatGPT {
             nullableExpression,
             error.position.diagnosticLine.trim(),
             enclosingMethod);
+    log("Asking if the error is a false positive at the error point");
     Response response = ask(prompt);
+    log("response: " + response);
     return response.isAgreement();
   }
 
@@ -275,7 +287,9 @@ public class ChatGPT {
     String enclosingMethod =
         parser.getRegionSourceCode(new Region(onMethod.clazz, onMethod.method)).content;
     String prompt = String.format(checkIfMethodIsAnInitializerPrompt, enclosingMethod);
+    log("Asking if the method is an initializer: " + onMethod.method);
     Response response = ask(prompt);
+    log("response: " + response);
     return response.isAgreement();
   }
 

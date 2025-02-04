@@ -346,4 +346,13 @@ public class Utility {
         0L,
         Duration.ZERO);
   }
+
+  /**
+   * Log a message to the console.
+   *
+   * @param message the message to log.
+   */
+  public static void log(String message) {
+    System.out.println(message);
+  }
 }

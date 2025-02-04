@@ -72,6 +72,9 @@ public class XmlParser {
    * @param content The content of the XML file.
    */
   public XmlParser(String content) {
+    if (!content.startsWith("<?xml")) {
+      content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + content;
+    }
     InputStream stream = new ByteArrayInputStream(content.getBytes(Charset.defaultCharset()));
     this.document = buildDocument(stream);
   }

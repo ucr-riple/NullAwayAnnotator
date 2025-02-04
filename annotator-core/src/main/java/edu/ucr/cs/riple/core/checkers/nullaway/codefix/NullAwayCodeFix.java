@@ -196,8 +196,12 @@ public class NullAwayCodeFix {
               (NullAwayError) errorStore.getErrorsInRegion(region).stream().findFirst().get();
           Set<MethodRewriteChange> change =
               gpt.fixDereferenceErrorBySafeRegions(errorInRegion, safeRegions);
+          if (!change.isEmpty()) {
+            changes.addAll(change);
+          }
           changes.addAll(change);
         }
+        return changes;
       }
     }
     return Set.of();

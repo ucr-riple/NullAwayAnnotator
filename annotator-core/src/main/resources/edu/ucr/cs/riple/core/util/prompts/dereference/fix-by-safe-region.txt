@@ -5,7 +5,7 @@ I am going to show you couple of other examples in my codebase where the derefer
 Here are the examples(s):
 %s
 Given the examples above, I want you to fix the error in the original method by using the same pattern as in the examples.
-If you can fix the error, please provide the fixed code snippet in XML format. I just need the xml response, no other information is needed.
+If you can fix the error, please provide the fixed code snippet in XML format. I just need the xml response, no other information is needed. If you can provide the fixed code snippet, please provide it in the following format and place the code snippet in the <code> tag within ```java block.
 For examples:
 <ans>
   <success>true</success>
