@@ -37,10 +37,10 @@ import org.mockito.stubbing.OngoingStubbing;
 public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   /** The XML formatted response for the agreement. */
-  private static final Response AGREE = toXML("YES");
+  private static final Response AGREE = toResponse("YES");
 
   /** The XML formatted response for the disagreement. */
-  private static final Response DISAGREE = toXML("NO");
+  private static final Response DISAGREE = toResponse("NO");
 
   MockedStatic<ChatGPT> responseMockedStatic;
 
@@ -266,7 +266,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
    * @param answer the answer to be converted to XML format.
    * @return the XML formatted answer.
    */
-  private static Response toXML(String answer) {
+  private static Response toResponse(String answer) {
     return new Response(String.format("<ans>\n%s\n</ans>", answer));
   }
 
@@ -279,6 +279,6 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
   private static Response codeFix(String... code) {
     String xml =
         "<success>true</success>\n" + "<code>\n" + "```java\n" + "%s\n" + "```\n" + "</code>\n";
-    return toXML(String.format(xml, String.join("\n", code)));
+    return toResponse(String.format(xml, String.join("\n", code)));
   }
 }
