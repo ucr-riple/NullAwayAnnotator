@@ -122,27 +122,41 @@ public class NullAwayCodeFix {
       // cast to nonnull.
       return constructPreconditionCheckMethodRewriteForError(error);
     }
-    // check if method already annotated as nullable, return nullable.
-    CallableDeclaration<?> declaration =
-        parser.getCallableDeclaration(error.getRegion().clazz, error.getRegion().member);
-    if (declaration != null && parser.isMethodWithNullableReturn(declaration)) {
-      // make return null statement if null.
-      return constructReturnNullIfExpressionIsNullForError(error);
+    if (error.getRegion().isOnCallable()) {
+      // check if method already annotated as nullable, return nullable.
+      CallableDeclaration<?> enclosingMethodForError =
+          parser.getCallableDeclaration(error.getRegion().clazz, error.getRegion().member);
+      if (enclosingMethodForError != null
+          && parser.isMethodWithNullableReturn(enclosingMethodForError)) {
+        // make return null statement if null.
+        return constructReturnNullIfExpressionIsNullForError(error);
+      }
     }
     String[] infos = NullAwayError.extractPlaceHolderValue(error);
     String expression = infos[0];
     String type = infos[1];
     String owner = infos[2];
     if (type.equals("field")) {
-      // check if there is an assignment to the expression in the method body.
-      boolean initializedBeforeUse = checkForInitializationBeforeUse(declaration, expression);
+      return resolveFieldDereferenceError(error, owner, expression);
+    }
+    return Set.of();
+  }
+
+  private Set<MethodRewriteChange> resolveFieldDereferenceError(
+      NullAwayError error, String encClass, String field) {
+    // check if there is an assignment to the expression in the method body.
+    if (error.getRegion().isOnCallable()) {
+      CallableDeclaration<?> enclosingMethodForError =
+          parser.getCallableDeclaration(error.getRegion().clazz, error.getRegion().member);
+      boolean initializedBeforeUse =
+          checkForInitializationBeforeUse(enclosingMethodForError, field);
       if (!initializedBeforeUse) {
         // look if there is any method initializing this field.
         Set<OnMethod> methods =
             context
                 .targetModuleInfo
                 .getFieldInitializationStore()
-                .findInitializerForField(owner, expression);
+                .findInitializerForField(encClass, field);
         if (!methods.isEmpty()) {
           // TODO: Maybe we should pick the best candidate rather than the first one.
           // continue with the initializer.
@@ -159,10 +173,7 @@ public class NullAwayCodeFix {
             // remove annotation from field
             RemoveMarkerAnnotation removeAnnotation =
                 new RemoveMarkerAnnotation(
-                    context
-                        .targetModuleInfo
-                        .getFieldRegistry()
-                        .getLocationOnField(owner, expression),
+                    context.targetModuleInfo.getFieldRegistry().getLocationOnField(encClass, field),
                     context.config.nullableAnnot);
             // Add annotation
             context.injector.injectAnnotations(Set.of(initializerAnnotation.get()));
@@ -171,50 +182,49 @@ public class NullAwayCodeFix {
           }
         }
       }
-      // no initializer found. check if there is any region with safe use of this field.
-      OnField onField =
-          context.targetModuleInfo.getFieldRegistry().getLocationOnField(owner, expression);
-      Set<Region> unsafeRegions = new HashSet<>();
-      Set<Region> safeRegions = new HashSet<>();
-      context
-          .targetModuleInfo
-          .getRegionRegistry()
-          .getImpactedRegions(onField)
-          .forEach(
-              region -> {
-                if (errorStore.getErrorsInRegion(region).isEmpty()) {
-                  safeRegions.add(region);
-                } else {
-                  unsafeRegions.add(region);
-                }
-              });
-      Set<MethodRewriteChange> changes = new HashSet<>();
-      // for each unsafe region, consult gpt to generate a fix.
-      for (Region region : unsafeRegions) {
-        NullAwayError errorInRegion =
-            (NullAwayError) errorStore.getErrorsInRegion(region).stream().findFirst().get();
-        Set<MethodRewriteChange> changesForRegion = Set.of();
-        if (!safeRegions.isEmpty()) {
-          // First try to fix by safe regions if exists.
-          changesForRegion = gpt.fixDereferenceErrorBySafeRegions(errorInRegion, safeRegions);
-        }
-        if (changesForRegion.isEmpty()) {
-          // If no safe region found, of no fix found by safe regions, try to fix by precondition
-          // check.
-          changesForRegion =
-              gpt.fixDereferenceErrorByAllRegions(errorInRegion, safeRegions, unsafeRegions);
-        }
-        if (!changesForRegion.isEmpty()) {
-          changes.addAll(changesForRegion);
-        }
-      }
-      return changes;
     }
-    return Set.of();
+    // no initializer found. check if there is any region with safe use of this field.
+    OnField onField =
+        context.targetModuleInfo.getFieldRegistry().getLocationOnField(encClass, field);
+    Set<Region> unsafeRegions = new HashSet<>();
+    Set<Region> safeRegions = new HashSet<>();
+    context
+        .targetModuleInfo
+        .getRegionRegistry()
+        .getImpactedRegions(onField)
+        .forEach(
+            region -> {
+              if (errorStore.getErrorsInRegion(region).isEmpty()) {
+                safeRegions.add(region);
+              } else {
+                unsafeRegions.add(region);
+              }
+            });
+    Set<MethodRewriteChange> changes = new HashSet<>();
+    // for each unsafe region, consult gpt to generate a fix.
+    for (Region region : unsafeRegions) {
+      NullAwayError errorInRegion =
+          (NullAwayError) errorStore.getErrorsInRegion(region).stream().findFirst().get();
+      Set<MethodRewriteChange> changesForRegion = Set.of();
+      if (!safeRegions.isEmpty()) {
+        // First try to fix by safe regions if exists.
+        changesForRegion = gpt.fixDereferenceErrorBySafeRegions(errorInRegion, safeRegions);
+      }
+      if (changesForRegion.isEmpty()) {
+        // If no safe region found, of no fix found by safe regions, try to fix by precondition
+        // check.
+        changesForRegion =
+            gpt.fixDereferenceErrorByAllRegions(errorInRegion, safeRegions, unsafeRegions);
+      }
+      if (!changesForRegion.isEmpty()) {
+        changes.addAll(changesForRegion);
+      }
+    }
+    return changes;
   }
 
   /**
-   * Checks if the expression is initialized before use in the method body.  TODO: this method only
+   * Checks if the expression is initialized before use in the method body. TODO: this method only
    * looks for all assignments flow insensitive. We need to make it flow sensitive.
    *
    * @param declaration the method declaration.

@@ -457,7 +457,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
         .start();
     // No annotation should be added, since they are annotated as @Nonnull although each can reduce
     // the number of errors.
-    Assert.assertEquals(coreTestHelper.getLog().getInjectedAnnotations().size(), 0);
+    Assert.assertEquals(0, coreTestHelper.getLog().getInjectedAnnotations().size());
   }
 
   @Test
@@ -570,6 +570,6 @@ public class CoreTest extends AnnotatorBaseCoreTest {
         .toDepth(5)
         .start();
     // No annotation should be added even though it can reduce the number of errors.
-    Assert.assertEquals(coreTestHelper.getLog().getInjectedAnnotations().size(), 0);
+    Assert.assertEquals(0, coreTestHelper.getLog().getInjectedAnnotations().size());
   }
 }
