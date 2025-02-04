@@ -82,6 +82,12 @@ public class ChatGPT {
    */
   private final String dereferenceFixBySafeRegionsPrompt;
 
+  /**
+   * The prompt to ask ChatGPT to fix the dereference error by generating a code fix using all
+   * regions.
+   */
+  private final String dereferenceFixByAllRegionsPrompt;
+
   /** The prompt to ask ChatGPT to check if the error is a false positive at the error point. */
   private final String checkIfFalsePositiveAtErrorPointPrompt;
 
@@ -104,7 +110,9 @@ public class ChatGPT {
     this.dereferenceHashCodeMethodRewritePrompt =
         Utility.readResourceContent("prompts/dereference/hashcode-rewrite.txt");
     this.dereferenceFixBySafeRegionsPrompt =
-        Utility.readResourceContent("prompts/dereference/fix-by-safe-region.txt");
+        Utility.readResourceContent("prompts/dereference/fix-by-safe-regions.txt");
+    this.dereferenceFixByAllRegionsPrompt =
+        Utility.readResourceContent("prompts/dereference/fix-by-all-regions.txt");
     this.checkIfFalsePositiveAtErrorPointPrompt =
         Utility.readResourceContent("prompts/inquiry/is-false-positive.txt");
     this.checkIfMethodIsAnInitializerPrompt =
@@ -190,11 +198,6 @@ public class ChatGPT {
    */
   public Set<MethodRewriteChange> fixDereferenceErrorBySafeRegions(
       NullAwayError error, Set<Region> safeRegions) {
-    String safeRegionExamples =
-        safeRegions.stream()
-            .filter(Region::isOnCallable)
-            .map(region -> parser.getRegionSourceCode(region).content)
-            .collect(Collectors.joining("\n"));
     String[] info = NullAwayError.extractPlaceHolderValue(error);
     String expression = info[0];
     String method = parser.getRegionSourceCode(error.getRegion()).content;
@@ -204,8 +207,51 @@ public class ChatGPT {
             error.position.diagnosticLine,
             expression,
             method,
-            safeRegionExamples);
+            constructPromptForRegions(safeRegions));
     log("Asking if the error can be fixed by using safe regions");
+    Response response = ask(prompt);
+    log("response: " + response);
+    if (!response.isSuccessFull()) {
+      return Set.of();
+    }
+    String code = response.getCode();
+    return Set.of(
+        new MethodRewriteChange(
+            new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member), code));
+  }
+
+  /**
+   * Fix a dereference error by generating a code fix using all regions. This method should be used
+   * if either the safe regions are not available or the error cannot be fixed by using safe
+   * regions.
+   *
+   * @param error the error to fix.
+   * @param safeRegions regions where no error is present.
+   * @param errorRegions regions where an error is present.
+   * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty set} if the
+   *     error cannot be fixed.
+   */
+  public Set<MethodRewriteChange> fixDereferenceErrorByAllRegions(
+      NullAwayError error, Set<Region> safeRegions, Set<Region> errorRegions) {
+    String[] info = NullAwayError.extractPlaceHolderValue(error);
+    String expression = info[0];
+    String method = parser.getRegionSourceCode(error.getRegion()).content;
+    String regionData =
+        safeRegions.isEmpty()
+            ? "I could not find any use case where the expression does not potentially produce Null Pointer Exception"
+            : "I found these code snippets where the expression does not produce Null Pointer Exception but they did not show any specific pattern to rewrite the method: \n"
+                + constructPromptForRegions(safeRegions);
+    String prompt =
+        String.format(
+            dereferenceFixByAllRegionsPrompt,
+            error.position.diagnosticLine.trim(),
+            expression,
+            method,
+            regionData,
+            constructPromptForRegions(errorRegions),
+            expression,
+            expression);
+    log("Asking if the error can be fixed by using all regions");
     Response response = ask(prompt);
     log("response: " + response);
     if (!response.isSuccessFull()) {
@@ -381,5 +427,19 @@ public class ChatGPT {
     }
     return new MethodRewriteChange(
         new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member), code);
+  }
+
+  /**
+   * Extracts the source code of the regions and constructs a single text that contains the source
+   * of regions.
+   *
+   * @param regions the regions to extract the source code from.
+   * @return the source code of the regions.
+   */
+  private String constructPromptForRegions(Set<Region> regions) {
+    return regions.stream()
+        .filter(Region::isOnCallable)
+        .map(region -> parser.getRegionSourceCode(region).content)
+        .collect(Collectors.joining("\n"));
   }
 }

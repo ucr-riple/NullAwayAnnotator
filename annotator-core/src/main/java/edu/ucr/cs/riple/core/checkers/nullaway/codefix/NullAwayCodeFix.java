@@ -188,27 +188,33 @@ public class NullAwayCodeFix {
                   unsafeRegions.add(region);
                 }
               });
-      if (!safeRegions.isEmpty()) {
-        // for each unsafe region, consult gpt to generate a fix using safe regions.
-        Set<MethodRewriteChange> changes = new HashSet<>();
-        for (Region region : unsafeRegions) {
-          NullAwayError errorInRegion =
-              (NullAwayError) errorStore.getErrorsInRegion(region).stream().findFirst().get();
-          Set<MethodRewriteChange> change =
-              gpt.fixDereferenceErrorBySafeRegions(errorInRegion, safeRegions);
-          if (!change.isEmpty()) {
-            changes.addAll(change);
-          }
-          changes.addAll(change);
+      Set<MethodRewriteChange> changes = new HashSet<>();
+      // for each unsafe region, consult gpt to generate a fix.
+      for (Region region : unsafeRegions) {
+        NullAwayError errorInRegion =
+            (NullAwayError) errorStore.getErrorsInRegion(region).stream().findFirst().get();
+        Set<MethodRewriteChange> changesForRegion = Set.of();
+        if (!safeRegions.isEmpty()) {
+          // First try to fix by safe regions if exists.
+          changesForRegion = gpt.fixDereferenceErrorBySafeRegions(errorInRegion, safeRegions);
         }
-        return changes;
+        if (changesForRegion.isEmpty()) {
+          // If no safe region found, of no fix found by safe regions, try to fix by precondition
+          // check.
+          changesForRegion =
+              gpt.fixDereferenceErrorByAllRegions(errorInRegion, safeRegions, unsafeRegions);
+        }
+        if (!changesForRegion.isEmpty()) {
+          changes.addAll(changesForRegion);
+        }
       }
+      return changes;
     }
     return Set.of();
   }
 
   /**
-   * Checks if the expression is initialized before use in the method body. TODO: this method only
+   * Checks if the expression is initialized before use in the method body.  TODO: this method only
    * looks for all assignments flow insensitive. We need to make it flow sensitive.
    *
    * @param declaration the method declaration.

@@ -42,6 +42,8 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
   /** The XML formatted response for the disagreement. */
   private static final Response DISAGREE = toResponse("NO");
 
+  private static final Response NO_CODE_FIX = toResponse("<success>false</success>");
+
   MockedStatic<ChatGPT> responseMockedStatic;
 
   public CodeFixTest() {
@@ -241,6 +243,49 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
             "     if(b == null){",
             "       return 0;",
             "     }",
+            "     return b.exec();",
+            "   }",
+            "   public void release(){",
+            "     b = null;",
+            "   }",
+            "}")
+        .withSourceLines(
+            "Bar.java",
+            "package test;",
+            "public class Bar {",
+            "   public int exec() {",
+            "     return 0;",
+            "   }",
+            "}")
+        .expectNoReport()
+        .resolveRemainingErrors()
+        .start();
+  }
+
+  @Test
+  public void dereferenceFieldFixGenerationUsingAllUsageTest() {
+    mockChatGPTResponse(
+        DISAGREE,
+        DISAGREE,
+        NO_CODE_FIX,
+        codeFix(
+            "public int run(){",
+            "   if (b == null) {",
+            "       return 0;",
+            "   }",
+            "   return b.exec();",
+            "}"));
+    coreTestHelper
+        .onTarget()
+        .withSourceLines(
+            "Foo.java",
+            "package test;",
+            "public class Foo {",
+            "   Bar b;",
+            "   public void setB(Bar b) {",
+            "     this.b = b;",
+            "   }",
+            "   public int run(){",
             "     return b.exec();",
             "   }",
             "   public void release(){",
