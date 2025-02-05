@@ -26,15 +26,11 @@ package edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent;
 
 import static edu.ucr.cs.riple.core.util.Utility.log;
 
-import com.google.common.base.Preconditions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import edu.ucr.cs.riple.annotator.util.parsers.JsonParser;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
-import edu.ucr.cs.riple.core.registries.method.MethodRecord;
-import edu.ucr.cs.riple.core.registries.method.MethodRegistry;
-import edu.ucr.cs.riple.core.registries.region.MethodRegionRegistry;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.core.util.ASTParser;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -47,10 +43,6 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -303,10 +295,6 @@ public class ChatGPT {
    */
   public boolean checkIfFalsePositiveAtErrorPoint(NullAwayError error) {
     String nullableExpression = NullAwayError.extractPlaceHolderValue(error)[0];
-    // Build a context for prompt generation
-    // Retrieve the callers of the method up to a depth of 3.
-    List<Set<MethodRecord>> depthRecord =
-        computeBFSOnCallGraph(error.getRegion().clazz, error.getRegion().member);
     // Construct the prompt
     String enclosingMethod = parser.getRegionSourceCode(error.getRegion()).content;
     String prompt =
@@ -366,45 +354,6 @@ public class ChatGPT {
    */
   private static String retrieveApiKey() {
     return System.getenv("OPENAI_KEY").trim();
-  }
-
-  /**
-   * Compute a BFS on the call graph to find the callers of the given method up to a depth of 3.
-   *
-   * @param clazz the class name of the target method.
-   * @param member the member name of the target method.
-   * @return A map from depth to the set of methods at that depth.
-   */
-  private List<Set<MethodRecord>> computeBFSOnCallGraph(String clazz, String member) {
-    final MethodRegistry mr = context.targetModuleInfo.getMethodRegistry();
-    MethodRecord current = mr.findMethodByName(clazz, member);
-    Preconditions.checkArgument(
-        current != null, String.format("Method not found: %s#%s", clazz, member));
-    Deque<MethodRecord> deque = new ArrayDeque<>();
-    final MethodRegionRegistry mrr =
-        context.targetModuleInfo.getRegionRegistry().getMethodRegionRegistry();
-    int depth = 0;
-    deque.add(current);
-    List<Set<MethodRecord>> depthRecord = new ArrayList<>();
-    while (!deque.isEmpty() && depth++ < 4) {
-      Set<MethodRecord> currentDepth = new HashSet<>();
-      int size = deque.size();
-      for (int i = 0; i < size; i++) {
-        MethodRecord method = deque.poll();
-        if (method == null) {
-          continue;
-        }
-        currentDepth.add(method);
-        for (MethodRecord caller : mrr.getCallers(method)) {
-          if (caller == null) {
-            continue;
-          }
-          deque.add(caller);
-        }
-      }
-      depthRecord.add(currentDepth);
-    }
-    return depthRecord;
   }
 
   /**

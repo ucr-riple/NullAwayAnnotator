@@ -227,4 +227,9 @@ public class MethodRecord {
   public int hashCode() {
     return hash(location.method, location.clazz);
   }
+
+  @Override
+  public String toString() {
+    return location.clazz + "." + location.method;
+  }
 }

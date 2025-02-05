@@ -264,32 +264,39 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   @Test
   public void dereferenceFieldFixGenerationUsingAllUsageTest() {
-    mockChatGPTResponse(
-        DISAGREE,
-        DISAGREE,
-        NO_CODE_FIX,
-        codeFix(
-            "public int run(){",
-            "   if (b == null) {",
-            "       return 0;",
-            "   }",
-            "   return b.exec();",
-            "}"));
+    //    mockChatGPTResponse(
+    //        DISAGREE,
+    //        DISAGREE,
+    //        NO_CODE_FIX,
+    //        codeFix(
+    //            "public int run(){",
+    //            "   if (b == null) {",
+    //            "       return 0;",
+    //            "   }",
+    //            "   return b.exec();",
+    //            "}"));
     coreTestHelper
         .onTarget()
         .withSourceLines(
             "Foo.java",
             "package test;",
+            "import javax.annotation.Nullable;",
             "public class Foo {",
-            "   Bar b;",
+            "   @Nullable Bar b;",
             "   public void setB(Bar b) {",
             "     this.b = b;",
             "   }",
-            "   public int run(){",
-            "     return b.exec();",
+            "   public int exec(Foo foo){",
+            "     checkB(foo.b);",
+            "     return useB(foo.b);",
             "   }",
-            "   public void release(){",
-            "     b = null;",
+            "   public void checkB(Bar b){",
+            "     if(b == null){",
+            "       throw new IllegalArgumentException();",
+            "     }",
+            "   }",
+            "   public int useB(Bar b){",
+            "     return b.exec();",
             "   }",
             "}")
         .withSourceLines(

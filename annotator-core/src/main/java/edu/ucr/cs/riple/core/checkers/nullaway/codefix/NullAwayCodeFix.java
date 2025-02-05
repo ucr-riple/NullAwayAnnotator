@@ -27,11 +27,16 @@ package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent.ChatGPT;
+import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.ErrorStore;
+import edu.ucr.cs.riple.core.registries.method.MethodRecord;
+import edu.ucr.cs.riple.core.registries.method.MethodRegistry;
+import edu.ucr.cs.riple.core.registries.region.MethodRegionRegistry;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.core.util.ASTParser;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -44,8 +49,12 @@ import edu.ucr.cs.riple.injector.changes.RemoveMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.util.ASTUtils;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -117,11 +126,11 @@ public class NullAwayCodeFix {
     if (ASTParser.isObjectHashCodeMethod(error.getRegion().member)) {
       return gpt.fixDereferenceErrorInHashCodeMethod(error);
     }
-    // Check if it is a false positive
-    if (gpt.checkIfFalsePositiveAtErrorPoint(error)) {
-      // cast to nonnull.
-      return constructPreconditionCheckMethodRewriteForError(error);
-    }
+    //    // Check if it is a false positive
+    //    if (gpt.checkIfFalsePositiveAtErrorPoint(error)) {
+    //      // cast to nonnull.
+    //      return constructPreconditionCheckMethodRewriteForError(error);
+    //    }
     if (error.getRegion().isOnCallable()) {
       // check if method already annotated as nullable, return nullable.
       CallableDeclaration<?> enclosingMethodForError =
@@ -139,6 +148,18 @@ public class NullAwayCodeFix {
     if (type.equals("field")) {
       return resolveFieldDereferenceError(error, owner, expression);
     }
+    if (type.equals("parameter")) {
+      return resolveParameterDereferenceError(error, owner, expression);
+    }
+    return Set.of();
+  }
+
+  private Set<MethodRewriteChange> resolveParameterDereferenceError(
+      NullAwayError error, String owner, String expression) {
+    // Build a context for prompt generation
+    // Retrieve the callers of the method up to a depth of 3.
+    List<Set<MethodRecord>> depthRecord =
+        performBFSOnCallGraph(error.getRegion().clazz, error.getRegion().member);
     return Set.of();
   }
 
@@ -224,8 +245,11 @@ public class NullAwayCodeFix {
     Set<MethodRewriteChange> changes = new HashSet<>();
     // for each unsafe region, consult gpt to generate a fix.
     for (Region region : unsafeRegions) {
-      NullAwayError errorInRegion =
-          (NullAwayError) errorStore.getErrorsInRegion(region).stream().findFirst().get();
+      Optional<Error> optionalError = errorStore.getErrorsInRegion(region).stream().findAny();
+      if (optionalError.isEmpty()) {
+        continue;
+      }
+      NullAwayError errorInRegion = (NullAwayError) optionalError.get();
       Set<MethodRewriteChange> changesForRegion = Set.of();
       if (!safeRegions.isEmpty()) {
         // First try to fix by safe regions if exists.
@@ -355,5 +379,44 @@ public class NullAwayCodeFix {
             // Add the import required for Preconditions.
             Set.of(NullAway.PRECONDITION_NAME));
     return Set.of(change);
+  }
+
+  /**
+   * Performs a BFS on the call graph to find the callers of the given method up to a depth of 3.
+   *
+   * @param clazz the class name of the target method.
+   * @param member the member name of the target method.
+   * @return A map from depth to the set of methods at that depth.
+   */
+  private List<Set<MethodRecord>> performBFSOnCallGraph(String clazz, String member) {
+    final MethodRegistry mr = context.targetModuleInfo.getMethodRegistry();
+    MethodRecord current = mr.findMethodByName(clazz, member);
+    Preconditions.checkArgument(
+        current != null, String.format("Method not found: %s#%s", clazz, member));
+    Deque<MethodRecord> deque = new ArrayDeque<>();
+    final MethodRegionRegistry mrr =
+        context.targetModuleInfo.getRegionRegistry().getMethodRegionRegistry();
+    int depth = 0;
+    deque.add(current);
+    List<Set<MethodRecord>> depthRecord = new ArrayList<>();
+    while (!deque.isEmpty() && depth++ < 4) {
+      Set<MethodRecord> currentDepth = new HashSet<>();
+      int size = deque.size();
+      for (int i = 0; i < size; i++) {
+        MethodRecord method = deque.poll();
+        if (method == null) {
+          continue;
+        }
+        currentDepth.add(method);
+        for (MethodRecord caller : mrr.getCallers(method)) {
+          if (caller == null) {
+            continue;
+          }
+          deque.add(caller);
+        }
+      }
+      depthRecord.add(currentDepth);
+    }
+    return depthRecord;
   }
 }

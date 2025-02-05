@@ -29,6 +29,7 @@ import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.registries.Registry;
 import edu.ucr.cs.riple.core.registries.method.MethodRecord;
+import edu.ucr.cs.riple.core.registries.method.MethodRegistry;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
@@ -48,8 +49,14 @@ public class MethodRegionRegistry extends Registry<RegionRecord> implements Regi
   private final ModuleInfo moduleInfo;
 
   /**
+   * A flag to indicate if the call graph is loaded. This is used to load the graph lazily when
+   * needed.
+   */
+  private boolean callGraphLoaded = false;
+
+  /**
    * A map from method to its callers. This relation is context insensitive and only contains direct
-   * type based calls.
+   * type based calls. Note the graph is not loaded until it is needed.
    */
   private final Map<MethodRecord, Set<MethodRecord>> callers;
 
@@ -61,6 +68,7 @@ public class MethodRegionRegistry extends Registry<RegionRecord> implements Regi
         context);
     this.moduleInfo = moduleInfo;
     this.callers = new HashMap<>();
+    this.callGraphLoaded = false;
   }
 
   /**
@@ -70,6 +78,27 @@ public class MethodRegionRegistry extends Registry<RegionRecord> implements Regi
    * @return Set of callers of the given method.
    */
   public Set<MethodRecord> getCallers(MethodRecord method) {
+    if (!callGraphLoaded) {
+      MethodRegistry methodRegistry = moduleInfo.getMethodRegistry();
+      contents
+          .values()
+          .forEach(
+              record -> {
+                String member = record.member;
+                String encClass = record.encClass;
+                MethodRecord calledMethod = methodRegistry.findMethodByName(encClass, member);
+                if (calledMethod == null) {
+                  return;
+                }
+                MethodRecord caller =
+                    methodRegistry.findMethodByName(record.region.clazz, record.region.member);
+                if (caller == null) {
+                  return;
+                }
+                callers.computeIfAbsent(calledMethod, k -> new HashSet<>()).add(caller);
+              });
+      callGraphLoaded = true;
+    }
     return callers.getOrDefault(method, new HashSet<>());
   }
 
