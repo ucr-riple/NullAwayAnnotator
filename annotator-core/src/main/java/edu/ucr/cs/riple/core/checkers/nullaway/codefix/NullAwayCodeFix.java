@@ -27,16 +27,15 @@ package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
-import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent.ChatGPT;
 import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.ErrorStore;
+import edu.ucr.cs.riple.core.registries.invocation.InvocationRecord;
+import edu.ucr.cs.riple.core.registries.invocation.InvocationRecordRegistry;
 import edu.ucr.cs.riple.core.registries.method.MethodRecord;
-import edu.ucr.cs.riple.core.registries.method.MethodRegistry;
-import edu.ucr.cs.riple.core.registries.region.MethodRegionRegistry;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.core.util.ASTParser;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -49,14 +48,13 @@ import edu.ucr.cs.riple.injector.changes.RemoveMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.util.ASTUtils;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /** A class that provides code fixes for {@link NullAwayError}s. */
 public class NullAwayCodeFix {
@@ -72,8 +70,14 @@ public class NullAwayCodeFix {
 
   /** Parser used to parse the source code of the file containing the error. */
   private final ASTParser parser;
-
+  /**
+   * Error store to retrieve errors in a region.
+   */
   private final ErrorStore errorStore;
+    /**
+     * Invocation record registry to retrieve the callers of a method.
+     */
+  private final InvocationRecordRegistry invocationRecordRegistry;
 
   public NullAwayCodeFix(Context context) {
     this.parser = new ASTParser(context);
@@ -81,6 +85,8 @@ public class NullAwayCodeFix {
     this.context = context;
     this.injector = new Injector(context.config.languageLevel);
     this.errorStore = new ErrorStore(context, context.targetModuleInfo);
+    this.invocationRecordRegistry = new InvocationRecordRegistry(context.targetModuleInfo);
+
   }
 
   /**
@@ -157,9 +163,8 @@ public class NullAwayCodeFix {
   private Set<MethodRewriteChange> resolveParameterDereferenceError(
       NullAwayError error, String owner, String expression) {
     // Build a context for prompt generation
-    // Retrieve the callers of the method up to a depth of 3.
-    List<Set<MethodRecord>> depthRecord =
-        performBFSOnCallGraph(error.getRegion().clazz, error.getRegion().member);
+    InvocationRecord record = invocationRecordRegistry.computeInvocationRecord(owner, error.getRegion().member);
+    String prompt = record.constructCallGraphPrompt(parser);
     return Set.of();
   }
 
@@ -379,44 +384,5 @@ public class NullAwayCodeFix {
             // Add the import required for Preconditions.
             Set.of(NullAway.PRECONDITION_NAME));
     return Set.of(change);
-  }
-
-  /**
-   * Performs a BFS on the call graph to find the callers of the given method up to a depth of 3.
-   *
-   * @param clazz the class name of the target method.
-   * @param member the member name of the target method.
-   * @return A map from depth to the set of methods at that depth.
-   */
-  private List<Set<MethodRecord>> performBFSOnCallGraph(String clazz, String member) {
-    final MethodRegistry mr = context.targetModuleInfo.getMethodRegistry();
-    MethodRecord current = mr.findMethodByName(clazz, member);
-    Preconditions.checkArgument(
-        current != null, String.format("Method not found: %s#%s", clazz, member));
-    Deque<MethodRecord> deque = new ArrayDeque<>();
-    final MethodRegionRegistry mrr =
-        context.targetModuleInfo.getRegionRegistry().getMethodRegionRegistry();
-    int depth = 0;
-    deque.add(current);
-    List<Set<MethodRecord>> depthRecord = new ArrayList<>();
-    while (!deque.isEmpty() && depth++ < 4) {
-      Set<MethodRecord> currentDepth = new HashSet<>();
-      int size = deque.size();
-      for (int i = 0; i < size; i++) {
-        MethodRecord method = deque.poll();
-        if (method == null) {
-          continue;
-        }
-        currentDepth.add(method);
-        for (MethodRecord caller : mrr.getCallers(method)) {
-          if (caller == null) {
-            continue;
-          }
-          deque.add(caller);
-        }
-      }
-      depthRecord.add(currentDepth);
-    }
-    return depthRecord;
   }
 }

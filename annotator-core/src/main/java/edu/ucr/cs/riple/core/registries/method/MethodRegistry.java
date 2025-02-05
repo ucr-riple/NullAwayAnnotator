@@ -58,13 +58,6 @@ public class MethodRegistry extends Registry<MethodRecord> {
   /** Set of all classes flat name declared in module. */
   private Set<String> declaredClasses;
 
-  /**
-   * A type based call graph that maps a method to its callers. This relation is context insensitive
-   * and only contains direct type based calls. This field is not initialized in the constructor and
-   * needs to be initialized by calling {@link #initializeTypeBasedCallGraph()}.
-   */
-  private TypeBasedCallGraph typeBasedCallGraph;
-
   public MethodRegistry(Context context) {
     this(ImmutableSet.of(context.targetConfiguration), context);
   }
@@ -212,24 +205,5 @@ public class MethodRegistry extends Registry<MethodRecord> {
       return false;
     }
     return this.declaredClasses.contains(location.clazz);
-  }
-
-  /** Initializes the type based call graph. */
-  public void initializeTypeBasedCallGraph() {
-    this.typeBasedCallGraph =
-        new TypeBasedCallGraph(
-            this, context.targetModuleInfo.getRegionRegistry().getMethodRegionRegistry());
-  }
-
-  /**
-   * Get callers of the given method.
-   *
-   * @param encClass Fully Qualified name of the class.
-   * @param member Method signature.
-   * @return Set of callers of the given method.
-   */
-  public ImmutableSet<MethodRecord> getCallers(String encClass, String member) {
-    MethodRecord callee = findMethodByName(encClass, member);
-    return callee == null ? ImmutableSet.of() : typeBasedCallGraph.getCallers(callee);
   }
 }

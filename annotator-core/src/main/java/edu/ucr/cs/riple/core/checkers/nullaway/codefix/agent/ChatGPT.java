@@ -86,6 +86,9 @@ public class ChatGPT {
   /** The prompt to ask ChatGPT to check if the method is an initializer. */
   private final String checkIfMethodIsAnInitializerPrompt;
 
+  /** The prompt to ask ChatGPT to check if the parameter is nullable. */
+  private final String checkIfParamIsNullablePrompt;
+
   /** The {@link Context} instance. */
   private final Context context;
 
@@ -109,6 +112,8 @@ public class ChatGPT {
         Utility.readResourceContent("prompts/inquiry/is-false-positive.txt");
     this.checkIfMethodIsAnInitializerPrompt =
         Utility.readResourceContent("prompts/inquiry/is-initializer.txt");
+    this.checkIfParamIsNullablePrompt =
+        Utility.readResourceContent("prompts/inquiry/is-param-nullable.txt");
     this.context = context;
     this.parser = parser;
   }
@@ -325,6 +330,10 @@ public class ChatGPT {
     Response response = ask(prompt);
     log("response: " + response);
     return response.isAgreement();
+  }
+
+  public boolean checkIfParamIsNullable() {
+    return false;
   }
 
   /**

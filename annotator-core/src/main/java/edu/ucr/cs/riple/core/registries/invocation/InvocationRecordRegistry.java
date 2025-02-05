@@ -22,19 +22,23 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.registries.method;
+package edu.ucr.cs.riple.core.registries.invocation;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.core.registries.region.MethodRegionRegistry;
+import edu.ucr.cs.riple.core.module.ModuleInfo;
+import edu.ucr.cs.riple.core.registries.method.MethodRecord;
+import edu.ucr.cs.riple.core.registries.method.MethodRegistry;
 import edu.ucr.cs.riple.core.registries.region.RegionRecord;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/** A type based call graph that maps a method to its callers. */
-public class TypeBasedCallGraph {
+public class InvocationRecordRegistry {
 
   /**
    * A map from method to its callers. This relation is context insensitive and only contains direct
@@ -42,15 +46,18 @@ public class TypeBasedCallGraph {
    */
   private final ImmutableMap<MethodRecord, ImmutableSet<MethodRecord>> map;
 
+  /** Method registry to find methods by name and class. */
+  private final MethodRegistry methodRegistry;
+
   /**
-   * Creates a type based call graph from a method registry and a method region registry.
+   * Creates a type based invocation graph from a module.
    *
-   * @param methodRegistry the method registry.
-   * @param registry the method region registry.
+   * @param module the module to create the graph from.
    */
-  public TypeBasedCallGraph(MethodRegistry methodRegistry, MethodRegionRegistry registry) {
+  public InvocationRecordRegistry(ModuleInfo module) {
     Map<MethodRecord, Set<MethodRecord>> holder = new HashMap<>();
-    for (RegionRecord record : registry.getRecords()) {
+    MethodRegistry methodRegistry = module.getMethodRegistry();
+    for (RegionRecord record : module.getRegionRegistry().getMethodRegionRegistry().getRecords()) {
       MethodRecord caller =
           methodRegistry.findMethodByName(record.region.clazz, record.region.member);
       if (caller == null) {
@@ -60,23 +67,49 @@ public class TypeBasedCallGraph {
       if (callee == null) {
         continue;
       }
-      holder.putIfAbsent(caller, new HashSet<>());
-      holder.get(caller).add(callee);
+      holder.computeIfAbsent(callee, k -> new HashSet<>()).add(caller);
     }
     ImmutableMap.Builder<MethodRecord, ImmutableSet<MethodRecord>> builder = ImmutableMap.builder();
     for (Map.Entry<MethodRecord, Set<MethodRecord>> entry : holder.entrySet()) {
       builder.put(entry.getKey(), ImmutableSet.copyOf(entry.getValue()));
     }
     this.map = builder.build();
+    this.methodRegistry = methodRegistry;
   }
 
   /**
-   * Returns the set of callers of the given method.
+   * Performs a BFS on the call graph to find the callers of the given method up to a depth of 3.
    *
-   * @param callee the method to find its callers.
-   * @return the set of callers of the given method.
+   * @param clazz the class name of the target method.
+   * @param member the member name of the target method.
+   * @return A map from depth to the set of methods at that depth.
    */
-  public ImmutableSet<MethodRecord> getCallers(MethodRecord callee) {
-    return map.getOrDefault(callee, ImmutableSet.of());
+  public InvocationRecord computeInvocationRecord(String clazz, String member) {
+    MethodRecord current = methodRegistry.findMethodByName(clazz, member);
+    Preconditions.checkArgument(
+        current != null, String.format("Method not found: %s#%s", clazz, member));
+    Deque<MethodRecord> deque = new ArrayDeque<>();
+    int depth = 0;
+    deque.add(current);
+    InvocationRecord record = new InvocationRecord();
+    while (!deque.isEmpty() && depth++ < 4) {
+      Set<MethodRecord> calls = new HashSet<>();
+      int size = deque.size();
+      for (int i = 0; i < size; i++) {
+        MethodRecord method = deque.poll();
+        if (method == null) {
+          continue;
+        }
+        calls.add(method);
+        for (MethodRecord caller : map.getOrDefault(method, ImmutableSet.of())) {
+          if (caller == null) {
+            continue;
+          }
+          deque.add(caller);
+        }
+      }
+      record.pushCallers(calls);
+    }
+    return record;
   }
 }
