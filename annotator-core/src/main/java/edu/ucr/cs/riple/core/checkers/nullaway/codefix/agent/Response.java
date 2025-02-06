@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent;
 
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.annotator.util.parsers.XmlParser;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,11 +44,19 @@ public class Response {
    */
   private final boolean isDisagreement;
 
+  /**
+   * Reason for the response. This is only available if the response is an agreement or a
+   * disagreement.
+   */
+  private final String reason;
+
   /** Suggested code from the agent. */
   private final String code;
 
   /** Flag to indicate if the response is successful. */
   private final boolean success;
+
+  private final String content;
 
   private static final Pattern RESPONSE_PATTERN =
       Pattern.compile("<response>.*?</response>", Pattern.DOTALL);
@@ -65,6 +74,7 @@ public class Response {
       throw new IllegalArgumentException("Invalid response format: " + response);
     }
     XmlParser parser = new XmlParser(matcher.group());
+    this.content = matcher.group();
     this.isAgreement =
         parser
             .getArrayValueFromTag("/response/value", String.class)
@@ -75,13 +85,12 @@ public class Response {
             .getArrayValueFromTag("/response/value", String.class)
             .orElse("")
             .equalsIgnoreCase("no");
-    if (isAgreement || isDisagreement) {
-      this.success = true;
-      this.code = null;
-    } else {
-      this.success = parser.getArrayValueFromTag("/response/success", Boolean.class).orElse(false);
-      this.code = parseCode(parser.getValueFromTag("/response/code", String.class).orElse(""));
-    }
+    this.success =
+        isDisagreement
+            || isAgreement
+            || parser.getArrayValueFromTag("/response/success", Boolean.class).orElse(false);
+    this.code = parseCode(parser.getValueFromTag("/response/code", String.class).orElse(""));
+    this.reason = parser.getArrayValueFromTag("/response/reason", String.class).orElse("");
   }
 
   /**
@@ -124,6 +133,29 @@ public class Response {
   }
 
   /**
+   * Returns the value of the tag.
+   *
+   * @param tag the tag to get the value from.
+   * @return the value of the tag.
+   */
+  public String getValueFromTag(String tag) {
+    XmlParser parser = new XmlParser(content);
+    return parser.getValueFromTag(tag, String.class).orElse("");
+  }
+
+  /**
+   * Returns the value of the attribute.
+   *
+   * @param parent the parent tag.
+   * @param tag the tag to get the value from.
+   * @return the value of the attribute.
+   */
+  public ImmutableSet<String> getValuesFromTag(String parent, String tag) {
+    XmlParser parser = new XmlParser(content);
+    return parser.getArrayValueFromTag(parent + "/" + tag, String.class).orElse(ImmutableSet.of());
+  }
+
+  /**
    * Parse the code from the response from ChatGPT.
    *
    * @param code the code from the response.
@@ -140,9 +172,9 @@ public class Response {
   @Override
   public String toString() {
     if (isAgreement) {
-      return "Agreement";
+      return "Agreement: " + reason;
     } else if (isDisagreement) {
-      return "Disagreement";
+      return "Disagreement" + reason;
     }
     return isSuccessFull() ? getCode() : "Failed";
   }

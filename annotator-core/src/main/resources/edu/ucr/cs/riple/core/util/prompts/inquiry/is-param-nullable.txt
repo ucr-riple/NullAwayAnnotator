@@ -2,8 +2,8 @@ In the method below, is there a possibility that the parameter `%s` receives `nu
 - The parameter may be reassigned or modified before it is used.
 - The method may crash if the parameter is null (e.g., dereferenced without checks).
 - A caller might pass null, even if the method does not explicitly expect it.
-- If the parameter is passed to another method, modified, or used in any way that could affect its state, **do not make assumptions about its final value. Request the declaration of those methods**.
-- Ensure you request the declarations of any methods that directly or indirectly impact the parameter before concluding its nullability.
+- If the parameter is passed to, modified by, or checked in another method, do not make conclusions about its final value unless you have the full implementation of those methods. Request the declaration of such methods to understand their impact on the parameter.
+- Ensure you request the declarations of any methods that directly or indirectly impact the parameter before concluding its nullability. This includes methods that are invoked within the method that could potentially check or alter the state of the parameter.
 - For a complete context, consider the relevant call chain levels as provided.
 
 %s
@@ -16,7 +16,7 @@ Here is the call chain for this method, showing the sequence of calls from the m
 Provide the answer in XML format:
 - If the parameter **cannot be null**, respond with: `<response><value>NO</value><reason>YOUR REASON</reason></response>`.
 - If the parameter **can be null**, respond with: `<response><value>YES</value><reason>YOUR REASON</reason></response>`.
-- If there are any methods that modify or impact the parameter before it is used, and their behavior is not described in the context, request their declarations first, in the following format:
+- If there are any methods that directly or indirectly affect the parameter's nullability and are not fully disclosed, request their declarations first, in the following format:
   ```xml
   <response>
     <success>false</success>

@@ -170,6 +170,7 @@ public class NullAwayCodeFix {
         invocationRecordRegistry.computeInvocationRecord(owner, error.getRegion().member);
     String callContext = record.constructCallGraphContext(parser);
     Response response = gpt.checkIfParamIsNullable(error, expression, callContext);
+    System.out.println(response);
     return Set.of();
   }
 

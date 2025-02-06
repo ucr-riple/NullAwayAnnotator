@@ -262,55 +262,51 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
         .start();
   }
 
-  //  @Test
-  //  public void dereferenceNullableParameterCastToNonnullTest() {
-  //    //    mockChatGPTResponse(
-  //    //        DISAGREE,
-  //    //        DISAGREE,
-  //    //        NO_CODE_FIX,
-  //    //        codeFix(
-  //    //            "public int run(){",
-  //    //            "   if (b == null) {",
-  //    //            "       return 0;",
-  //    //            "   }",
-  //    //            "   return b.exec();",
-  //    //            "}"));
-  //    coreTestHelper
-  //        .onTarget()
-  //        .withSourceLines(
-  //            "Foo.java",
-  //            "package test;",
-  //            "import javax.annotation.Nullable;",
-  //            "public class Foo {",
-  //            "   @Nullable Bar b;",
-  //            "   public void setB(Bar b) {",
-  //            "     this.b = b;",
-  //            "   }",
-  //            "   public int exec(Foo foo){",
-  //            "     aaa(foo.b);",
-  //            "     return useB(foo.b);",
-  //            "   }",
-  //            "   public void aaa(Bar b){",
-  //            "     if(b == null){",
-  //            "       throw new IllegalArgumentException();",
-  //            "     }",
-  //            "   }",
-  //            "   public int useB(Bar b){",
-  //            "     return b.exec();",
-  //            "   }",
-  //            "}")
-  //        .withSourceLines(
-  //            "Bar.java",
-  //            "package test;",
-  //            "public class Bar {",
-  //            "   public int exec() {",
-  //            "     return 0;",
-  //            "   }",
-  //            "}")
-  //        .expectNoReport()
-  //        .resolveRemainingErrors()
-  //        .start();
-  //  }
+  @Test
+  public void dereferenceNullableParameterCastToNonnullTest() {
+    //    mockChatGPTResponse(
+    //        DISAGREE,
+    //        DISAGREE,
+    //        NO_CODE_FIX,
+    //        codeFix(
+    //            "public int run(){",
+    //            "   if (b == null) {",
+    //            "       return 0;",
+    //            "   }",
+    //            "   return b.exec();",
+    //            "}"));
+    coreTestHelper
+        .onTarget()
+        .withSourceLines(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "   public int exec(@Nullable Bar b){",
+            "     aaa(b);",
+            "     return useB(b);",
+            "   }",
+            "   public void aaa(Bar b){",
+            "     if(b == null){",
+            "       throw new IllegalArgumentException();",
+            "     }",
+            "   }",
+            "   public int useB(@Nullable Bar b){",
+            "     return b.exec();",
+            "   }",
+            "}")
+        .withSourceLines(
+            "Bar.java",
+            "package test;",
+            "public class Bar {",
+            "   public int exec() {",
+            "     return 0;",
+            "   }",
+            "}")
+        .expectNoReport()
+        .resolveRemainingErrors()
+        .start();
+  }
 
   /**
    * Convert the answer to XML format.

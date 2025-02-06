@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent;
 
 import static edu.ucr.cs.riple.core.util.Utility.log;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import edu.ucr.cs.riple.annotator.util.parsers.JsonParser;
@@ -344,11 +345,14 @@ public class ChatGPT {
     String prompt =
         String.format(
             checkIfParamIsNullablePrompt,
-            error.position.diagnosticLine,
             param,
             context,
             parser.getRegionSourceCode(error.getRegion()).content);
     Response response = ask(prompt);
+    if (!response.isSuccessFull()) {
+      ImmutableSet<String> methods = response.getValuesFromTag("/response/methods", "method");
+      System.out.println(methods);
+    }
     return response;
   }
 
