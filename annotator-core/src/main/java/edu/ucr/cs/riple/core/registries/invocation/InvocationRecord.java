@@ -62,7 +62,7 @@ public class InvocationRecord {
    * @param parser the AST parser.
    * @return a prompt for the call graph.
    */
-  public String constructCallGraphPrompt(ASTParser parser) {
+  public String constructCallGraphContext(ASTParser parser) {
     StringBuilder prompt = new StringBuilder();
     for (int i = 0; i < calls.size(); i++) {
       prompt.append("Depth: ").append(i).append("\n");

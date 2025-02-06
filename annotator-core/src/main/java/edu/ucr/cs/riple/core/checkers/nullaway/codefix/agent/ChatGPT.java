@@ -332,8 +332,24 @@ public class ChatGPT {
     return response.isAgreement();
   }
 
-  public boolean checkIfParamIsNullable() {
-    return false;
+  /**
+   * Check if the parameter is nullable. If it is nullable...
+   *
+   * @param error
+   * @param param
+   * @param context
+   * @return
+   */
+  public Response checkIfParamIsNullable(NullAwayError error, String param, String context) {
+    String prompt =
+        String.format(
+            checkIfParamIsNullablePrompt,
+            error.position.diagnosticLine,
+            param,
+            context,
+            parser.getRegionSourceCode(error.getRegion()).content);
+    Response response = ask(prompt);
+    return response;
   }
 
   /**

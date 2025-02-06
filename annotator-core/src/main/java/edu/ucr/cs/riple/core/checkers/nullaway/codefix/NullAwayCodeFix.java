@@ -31,11 +31,11 @@ import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent.ChatGPT;
+import edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent.Response;
 import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.ErrorStore;
 import edu.ucr.cs.riple.core.registries.invocation.InvocationRecord;
 import edu.ucr.cs.riple.core.registries.invocation.InvocationRecordRegistry;
-import edu.ucr.cs.riple.core.registries.method.MethodRecord;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.core.util.ASTParser;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -44,17 +44,16 @@ import edu.ucr.cs.riple.injector.SourceCode;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
+import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import edu.ucr.cs.riple.injector.changes.RemoveMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
+import edu.ucr.cs.riple.injector.location.OnParameter;
 import edu.ucr.cs.riple.injector.util.ASTUtils;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /** A class that provides code fixes for {@link NullAwayError}s. */
 public class NullAwayCodeFix {
@@ -70,13 +69,11 @@ public class NullAwayCodeFix {
 
   /** Parser used to parse the source code of the file containing the error. */
   private final ASTParser parser;
-  /**
-   * Error store to retrieve errors in a region.
-   */
+
+  /** Error store to retrieve errors in a region. */
   private final ErrorStore errorStore;
-    /**
-     * Invocation record registry to retrieve the callers of a method.
-     */
+
+  /** Invocation record registry to retrieve the callers of a method. */
   private final InvocationRecordRegistry invocationRecordRegistry;
 
   public NullAwayCodeFix(Context context) {
@@ -86,7 +83,6 @@ public class NullAwayCodeFix {
     this.injector = new Injector(context.config.languageLevel);
     this.errorStore = new ErrorStore(context, context.targetModuleInfo);
     this.invocationRecordRegistry = new InvocationRecordRegistry(context.targetModuleInfo);
-
   }
 
   /**
@@ -132,11 +128,11 @@ public class NullAwayCodeFix {
     if (ASTParser.isObjectHashCodeMethod(error.getRegion().member)) {
       return gpt.fixDereferenceErrorInHashCodeMethod(error);
     }
-    //    // Check if it is a false positive
-    //    if (gpt.checkIfFalsePositiveAtErrorPoint(error)) {
-    //      // cast to nonnull.
-    //      return constructPreconditionCheckMethodRewriteForError(error);
-    //    }
+    // Check if it is a false positive
+    if (gpt.checkIfFalsePositiveAtErrorPoint(error)) {
+      // cast to nonnull.
+      return constructPreconditionCheckMethodRewriteForError(error);
+    }
     if (error.getRegion().isOnCallable()) {
       // check if method already annotated as nullable, return nullable.
       CallableDeclaration<?> enclosingMethodForError =
@@ -163,8 +159,17 @@ public class NullAwayCodeFix {
   private Set<MethodRewriteChange> resolveParameterDereferenceError(
       NullAwayError error, String owner, String expression) {
     // Build a context for prompt generation
-    InvocationRecord record = invocationRecordRegistry.computeInvocationRecord(owner, error.getRegion().member);
-    String prompt = record.constructCallGraphPrompt(parser);
+    // Remove annotation from the parameter
+    Set<RemoveAnnotation> removeAnnotations =
+        Set.of(
+            new RemoveMarkerAnnotation(
+                new OnParameter(error.path, error.getRegion().clazz, error.getRegion().member, 0),
+                context.config.nullableAnnot));
+    injector.removeAnnotations(removeAnnotations);
+    InvocationRecord record =
+        invocationRecordRegistry.computeInvocationRecord(owner, error.getRegion().member);
+    String callContext = record.constructCallGraphContext(parser);
+    Response response = gpt.checkIfParamIsNullable(error, expression, callContext);
     return Set.of();
   }
 

@@ -49,7 +49,8 @@ public class Response {
   /** Flag to indicate if the response is successful. */
   private final boolean success;
 
-  private static final Pattern RESPONSE_PATTERN = Pattern.compile("<ans>.*?</ans>", Pattern.DOTALL);
+  private static final Pattern RESPONSE_PATTERN =
+      Pattern.compile("<response>.*?</response>", Pattern.DOTALL);
 
   /**
    * The pattern to extract the code from the response from ChatGPT. The code is in the format:
@@ -65,15 +66,21 @@ public class Response {
     }
     XmlParser parser = new XmlParser(matcher.group());
     this.isAgreement =
-        parser.getArrayValueFromTag("/ans", String.class).orElse("").equalsIgnoreCase("yes");
+        parser
+            .getArrayValueFromTag("/response/value", String.class)
+            .orElse("")
+            .equalsIgnoreCase("yes");
     this.isDisagreement =
-        parser.getArrayValueFromTag("/ans", String.class).orElse("").equalsIgnoreCase("no");
+        parser
+            .getArrayValueFromTag("/response/value", String.class)
+            .orElse("")
+            .equalsIgnoreCase("no");
     if (isAgreement || isDisagreement) {
       this.success = true;
       this.code = null;
     } else {
-      this.success = parser.getArrayValueFromTag("/ans/success", Boolean.class).orElse(false);
-      this.code = parseCode(parser.getValueFromTag("/ans/code", String.class).orElse(""));
+      this.success = parser.getArrayValueFromTag("/response/success", Boolean.class).orElse(false);
+      this.code = parseCode(parser.getValueFromTag("/response/code", String.class).orElse(""));
     }
   }
 

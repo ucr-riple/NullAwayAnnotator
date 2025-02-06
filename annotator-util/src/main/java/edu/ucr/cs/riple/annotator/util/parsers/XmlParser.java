@@ -221,7 +221,9 @@ public class XmlParser {
     }
 
     public T orElse(T other) {
-      return value == null ? other : klass.cast(this.value.iterator().next());
+      return value == null || !this.value.iterator().hasNext()
+          ? other
+          : klass.cast(this.value.iterator().next());
     }
 
     public ImmutableSet<T> orElse(ImmutableSet<T> other) {

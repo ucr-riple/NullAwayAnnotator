@@ -12,5 +12,7 @@ Here are some examples of initializer methods:
 
 Is the given method an initializer method? I know it initializes the fields of the class, but I don't want to consider a setter method as an initializer method.
 %s
-I only need one single word as answer from you in xml format.
-If it is an initializer method JUST SAY <ans>YES</ans> and if it is NOT an initializer method JUST SAY <ans>NO</ans>.
+Please provide a single-word answer and your reason/explanation in XML format. If it is an initializer method, respond with:
+<response><value>YES</value><reason>YOUR REASON</reason></response>
+If it is not an initializer method, respond with:
+<response><value>NO</value><reason>YOUR REASON</reason></response>
