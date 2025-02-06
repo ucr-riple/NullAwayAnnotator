@@ -430,7 +430,7 @@ public class CoreTestHelper {
                         outDirPath.resolve(name + "-scanner.xml")))
             .collect(Collectors.toList());
     builder.checker = NullAway.NAME;
-    builder.nullableAnnotation = "javax.annotation.Nullable";
+    builder.nullableAnnotation = "org.jspecify.annotations.Nullable";
     // In tests, we use NullAway @Initializer annotation.
     builder.initializerAnnotation = "com.uber.nullaway.annotations.Initializer";
     builder.outputDir = outDirPath.toString();

@@ -1,6 +1,6 @@
 package test;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class Main {
    @Nullable Object[] arr = new Object[1];
