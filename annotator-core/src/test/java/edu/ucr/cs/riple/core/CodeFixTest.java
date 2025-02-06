@@ -150,7 +150,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   @Test
   public void dereferenceAddPreconditionTest() {
-    mockChatGPTResponse(AGREE);
+    mockChatGPTResponse(DISAGREE);
     coreTestHelper
         .onTarget()
         .withSourceLines(
@@ -174,7 +174,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   @Test
   public void dereferenceReturnNullForNullableExpressionInNullableMethodTest() {
-    mockChatGPTResponse(AGREE);
+    mockChatGPTResponse(DISAGREE);
     coreTestHelper
         .onTarget()
         .withSourceLines(
@@ -217,7 +217,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
   @Test
   public void dereferenceFieldFixGenerationUsingSafeUsageTest() {
     mockChatGPTResponse(
-        DISAGREE,
+        AGREE,
         DISAGREE,
         codeFix(
             "public int run(){",

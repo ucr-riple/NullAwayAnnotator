@@ -231,6 +231,7 @@ public class NullAwayCodeFix {
             context.injector.injectAnnotations(Set.of(initializerAnnotation.get()));
             // remove nullable
             context.injector.removeAnnotations(Set.of(removeAnnotation));
+            return Set.of();
           }
         }
       }

@@ -80,8 +80,8 @@ public class ChatGPT {
    */
   private final String dereferenceFixByAllRegionsPrompt;
 
-  /** The prompt to ask ChatGPT to check if the error is a false positive at the error point. */
-  private final String checkIfFalsePositiveAtErrorPointPrompt;
+  /** The prompt to ask ChatGPT to check if the expression can be null at the error point. */
+  private final String checkIfExpressionCanBeNullAtErrorPointPrompt;
 
   /** The prompt to ask ChatGPT to check if the method is an initializer. */
   private final String checkIfMethodIsAnInitializerPrompt;
@@ -108,7 +108,7 @@ public class ChatGPT {
         Utility.readResourceContent("prompts/dereference/fix-by-safe-regions.txt");
     this.dereferenceFixByAllRegionsPrompt =
         Utility.readResourceContent("prompts/dereference/fix-by-all-regions.txt");
-    this.checkIfFalsePositiveAtErrorPointPrompt =
+    this.checkIfExpressionCanBeNullAtErrorPointPrompt =
         Utility.readResourceContent("prompts/inquiry/is-false-positive.txt");
     this.checkIfMethodIsAnInitializerPrompt =
         Utility.readResourceContent("prompts/inquiry/is-initializer.txt");
@@ -302,16 +302,16 @@ public class ChatGPT {
     String nullableExpression = NullAwayError.extractPlaceHolderValue(error)[0];
     // Construct the prompt
     String enclosingMethod = parser.getRegionSourceCode(error.getRegion()).content;
-    String prompt =
+    String nullabilityPossibility =
         String.format(
-            checkIfFalsePositiveAtErrorPointPrompt,
+            checkIfExpressionCanBeNullAtErrorPointPrompt,
             nullableExpression,
             error.position.diagnosticLine.trim(),
             enclosingMethod);
-    log("Asking if the error is a false positive at the error point");
-    Response response = ask(prompt);
+    log("Asking if the error can be null at error point point");
+    Response response = ask(nullabilityPossibility);
     log("response: " + response);
-    return response.isAgreement();
+    return response.isDisagreement();
   }
 
   /**
