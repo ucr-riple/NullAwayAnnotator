@@ -44,7 +44,13 @@ public class InvocationRecordRegistry {
    * A map from method to its callers. This relation is context insensitive and only contains direct
    * type based calls.
    */
-  private final ImmutableMap<MethodRecord, ImmutableSet<MethodRecord>> map;
+  private final ImmutableMap<MethodRecord, ImmutableSet<MethodRecord>> callerMap;
+
+  /**
+   * A map from method to it's called methods. This relation is context insensitive and only
+   * contains direct type based calls.
+   */
+  private final ImmutableMap<MethodRecord, ImmutableSet<MethodRecord>> calledMap;
 
   /** Method registry to find methods by name and class. */
   private final MethodRegistry methodRegistry;
@@ -55,7 +61,8 @@ public class InvocationRecordRegistry {
    * @param module the module to create the graph from.
    */
   public InvocationRecordRegistry(ModuleInfo module) {
-    Map<MethodRecord, Set<MethodRecord>> holder = new HashMap<>();
+    Map<MethodRecord, Set<MethodRecord>> callerHolder = new HashMap<>();
+    Map<MethodRecord, Set<MethodRecord>> calledHolder = new HashMap<>();
     MethodRegistry methodRegistry = module.getMethodRegistry();
     for (RegionRecord record : module.getRegionRegistry().getMethodRegionRegistry().getRecords()) {
       MethodRecord caller =
@@ -67,13 +74,21 @@ public class InvocationRecordRegistry {
       if (callee == null) {
         continue;
       }
-      holder.computeIfAbsent(callee, k -> new HashSet<>()).add(caller);
+      callerHolder.computeIfAbsent(callee, k -> new HashSet<>()).add(caller);
+      calledHolder.computeIfAbsent(caller, k -> new HashSet<>()).add(callee);
     }
-    ImmutableMap.Builder<MethodRecord, ImmutableSet<MethodRecord>> builder = ImmutableMap.builder();
-    for (Map.Entry<MethodRecord, Set<MethodRecord>> entry : holder.entrySet()) {
-      builder.put(entry.getKey(), ImmutableSet.copyOf(entry.getValue()));
+    ImmutableMap.Builder<MethodRecord, ImmutableSet<MethodRecord>> callerBuilder =
+        ImmutableMap.builder();
+    for (Map.Entry<MethodRecord, Set<MethodRecord>> entry : callerHolder.entrySet()) {
+      callerBuilder.put(entry.getKey(), ImmutableSet.copyOf(entry.getValue()));
     }
-    this.map = builder.build();
+    ImmutableMap.Builder<MethodRecord, ImmutableSet<MethodRecord>> calledBuilder =
+        ImmutableMap.builder();
+    for (Map.Entry<MethodRecord, Set<MethodRecord>> entry : calledHolder.entrySet()) {
+      calledBuilder.put(entry.getKey(), ImmutableSet.copyOf(entry.getValue()));
+    }
+    this.callerMap = callerBuilder.build();
+    this.calledMap = calledBuilder.build();
     this.methodRegistry = methodRegistry;
   }
 
@@ -91,7 +106,7 @@ public class InvocationRecordRegistry {
     Deque<MethodRecord> deque = new ArrayDeque<>();
     int depth = 0;
     deque.add(current);
-    InvocationRecord record = new InvocationRecord();
+    InvocationRecord record = new InvocationRecord(this);
     while (!deque.isEmpty() && depth++ < 4) {
       Set<MethodRecord> calls = new HashSet<>();
       int size = deque.size();
@@ -101,7 +116,7 @@ public class InvocationRecordRegistry {
           continue;
         }
         calls.add(method);
-        for (MethodRecord caller : map.getOrDefault(method, ImmutableSet.of())) {
+        for (MethodRecord caller : callerMap.getOrDefault(method, ImmutableSet.of())) {
           if (caller == null) {
             continue;
           }
@@ -111,5 +126,15 @@ public class InvocationRecordRegistry {
       record.pushCallers(calls);
     }
     return record;
+  }
+
+  /**
+   * Finds methods that are called by the given method.
+   *
+   * @param method Method to find the called methods for.
+   * @return Methods that are called by the given method.
+   */
+  public Set<MethodRecord> getCalledMethods(MethodRecord method) {
+    return calledMap.getOrDefault(method, ImmutableSet.of());
   }
 }

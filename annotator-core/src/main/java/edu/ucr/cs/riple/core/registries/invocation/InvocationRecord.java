@@ -24,16 +24,25 @@
 
 package edu.ucr.cs.riple.core.registries.invocation;
 
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.registries.method.MethodRecord;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.core.util.ASTParser;
+import edu.ucr.cs.riple.injector.util.SignatureMatcher;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class InvocationRecord {
+
+  /**
+   * Invocation record registry to find methods by name and class. and to find the called methods.
+   */
+  private final InvocationRecordRegistry registry;
 
   /**
    * A list of sets of method records. Each set contains the methods that are called at the same
@@ -41,8 +50,9 @@ public class InvocationRecord {
    */
   private final List<Set<MethodRecord>> calls;
 
-  public InvocationRecord() {
+  public InvocationRecord(InvocationRecordRegistry registry) {
     this.calls = new ArrayList<>(3);
+    this.registry = registry;
   }
 
   /**
@@ -85,5 +95,38 @@ public class InvocationRecord {
       }
     }
     return prompt.toString();
+  }
+
+  /**
+   * Adds the requested methods to the record on the top of the stack. These methods are not present
+   * in the invocation record and are only called within methods.
+   *
+   * @param requests Methods to add.
+   */
+  public void addRequestedMethods(ImmutableSet<String> requests) {
+    Set<MethodRecord> existingMethods =
+        calls.stream().flatMap(Set::stream).collect(Collectors.toSet());
+    Set<MethodRecord> allMethods =
+        existingMethods.stream()
+            .flatMap(methodRecord -> registry.getCalledMethods(methodRecord).stream())
+            .collect(Collectors.toSet());
+    Set<MethodRecord> methodRecords =
+        requests.stream()
+            .map(
+                name -> {
+                  Optional<MethodRecord> optional =
+                      allMethods.stream()
+                          .filter(
+                              methodRecord -> {
+                                SignatureMatcher matcher =
+                                    new SignatureMatcher(methodRecord.location.method);
+                                return matcher.callableName.equals(name);
+                              })
+                          .findFirst();
+                  return optional.orElse(null);
+                })
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+    calls.get(calls.size() - 1).addAll(methodRecords);
   }
 }

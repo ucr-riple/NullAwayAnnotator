@@ -174,7 +174,7 @@ public class Response {
     if (isAgreement) {
       return "Agreement: " + reason;
     } else if (isDisagreement) {
-      return "Disagreement" + reason;
+      return "Disagreement: " + reason;
     }
     return isSuccessFull() ? getCode() : "Failed";
   }

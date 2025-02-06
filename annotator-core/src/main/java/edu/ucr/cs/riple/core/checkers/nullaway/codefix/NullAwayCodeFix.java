@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
@@ -44,11 +45,9 @@ import edu.ucr.cs.riple.injector.SourceCode;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
-import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import edu.ucr.cs.riple.injector.changes.RemoveMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
-import edu.ucr.cs.riple.injector.location.OnParameter;
 import edu.ucr.cs.riple.injector.util.ASTUtils;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -159,19 +158,27 @@ public class NullAwayCodeFix {
   private Set<MethodRewriteChange> resolveParameterDereferenceError(
       NullAwayError error, String owner, String expression) {
     // Build a context for prompt generation
-    // Remove annotation from the parameter
-    Set<RemoveAnnotation> removeAnnotations =
-        Set.of(
-            new RemoveMarkerAnnotation(
-                new OnParameter(error.path, error.getRegion().clazz, error.getRegion().member, 0),
-                context.config.nullableAnnot));
-    injector.removeAnnotations(removeAnnotations);
     InvocationRecord record =
         invocationRecordRegistry.computeInvocationRecord(owner, error.getRegion().member);
-    String callContext = record.constructCallGraphContext(parser);
-    Response response = gpt.checkIfParamIsNullable(error, expression, callContext);
-    System.out.println(response);
-    return Set.of();
+    while (true) {
+      String callContext = record.constructCallGraphContext(parser);
+      Response paramNullabilityPossibility =
+          gpt.checkIfParamIsNullable(error, expression, callContext);
+      if (!paramNullabilityPossibility.isSuccessFull()) {
+        ImmutableSet<String> methods =
+            paramNullabilityPossibility.getValuesFromTag("/response/methods", "method");
+        if (methods.isEmpty()) {
+          throw new IllegalStateException(
+              "Could not determine the nullability of the parameter and did not ask for any methods declaration.");
+        }
+        record.addRequestedMethods(methods);
+      } else {
+        if (paramNullabilityPossibility.isDisagreement()) {
+          return Set.of();
+        }
+        return Set.of();
+      }
+    }
   }
 
   /**
