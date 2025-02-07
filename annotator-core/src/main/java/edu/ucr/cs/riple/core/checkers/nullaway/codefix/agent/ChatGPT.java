@@ -173,6 +173,35 @@ public class ChatGPT {
   }
 
   /**
+   * Extract the message from the JSON response from ChatGPT. The response is in the format:
+   * {"choices":[{"role":"user","content":"..."}]}
+   *
+   * @param response the JSON response.
+   * @return the message from the response.
+   */
+  private static String extractMessageFromJSONResponse(String response) {
+    JsonParser parser = new JsonParser(response);
+    List<JsonObject> choices = parser.getArrayValueFromKey("choices").orElse(List.of());
+    if (choices.isEmpty()) {
+      return "";
+    }
+    JsonObject choice = choices.get(0);
+    return new JsonParser(choice).getValueFromKey("message:content").orElse("").getAsString();
+  }
+
+  /**
+   * This method retrieves the API key from the local machine environment variable. This mechanism
+   * should be changed in future and ask the user to provide a key, or use a different mechanism to
+   * store the key. For now, it is fine to use this method so we don't have to expose the API key in
+   * the code.
+   *
+   * @return the API key.
+   */
+  private static String retrieveApiKey() {
+    return System.getenv("OPENAI_KEY").trim();
+  }
+
+  /**
    * Fix a dereference error by generating a code fix. The fix is a rewrite of the {@link
    * Object#equals(Object)} method. Instead of comparing on the field directly that might cause of a
    * dereference error, it should simply call {@code Objects.equals} on the field.
@@ -367,32 +396,17 @@ public class ChatGPT {
   }
 
   /**
-   * Extract the message from the JSON response from ChatGPT. The response is in the format:
-   * {"choices":[{"role":"user","content":"..."}]}
+   * Extracts the source code of the regions and constructs a single text that contains the source
+   * of regions.
    *
-   * @param response the JSON response.
-   * @return the message from the response.
+   * @param regions the regions to extract the source code from.
+   * @return the source code of the regions.
    */
-  private static String extractMessageFromJSONResponse(String response) {
-    JsonParser parser = new JsonParser(response);
-    List<JsonObject> choices = parser.getArrayValueFromKey("choices").orElse(List.of());
-    if (choices.isEmpty()) {
-      return "";
-    }
-    JsonObject choice = choices.get(0);
-    return new JsonParser(choice).getValueFromKey("message:content").orElse("").getAsString();
-  }
-
-  /**
-   * This method retrieves the API key from the local machine environment variable. This mechanism
-   * should be changed in future and ask the user to provide a key, or use a different mechanism to
-   * store the key. For now, it is fine to use this method so we don't have to expose the API key in
-   * the code.
-   *
-   * @return the API key.
-   */
-  private static String retrieveApiKey() {
-    return System.getenv("OPENAI_KEY").trim();
+  private String constructPromptForRegions(Set<Region> regions) {
+    return regions.stream()
+        .filter(Region::isOnCallable)
+        .map(region -> parser.getRegionSourceCode(region).content)
+        .collect(Collectors.joining("\n"));
   }
 
   /**
@@ -415,19 +429,5 @@ public class ChatGPT {
     }
     return new MethodRewriteChange(
         new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member), code);
-  }
-
-  /**
-   * Extracts the source code of the regions and constructs a single text that contains the source
-   * of regions.
-   *
-   * @param regions the regions to extract the source code from.
-   * @return the source code of the regions.
-   */
-  private String constructPromptForRegions(Set<Region> regions) {
-    return regions.stream()
-        .filter(Region::isOnCallable)
-        .map(region -> parser.getRegionSourceCode(region).content)
-        .collect(Collectors.joining("\n"));
   }
 }
