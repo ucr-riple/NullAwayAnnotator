@@ -194,6 +194,20 @@ public class MethodRegistry extends Registry<MethodRecord> {
   }
 
   /**
+   * Returns ImmutableSet of all methods including constructors declared in the target module for
+   * the given class.
+   *
+   * @param clazz Flat name of the class.
+   * @return ImmutableSet of all methods including constructors declared in the target module for
+   *     the given class.
+   */
+  public ImmutableSet<MethodRecord> getAllMethodsForClass(String clazz) {
+    return contents.values().stream()
+        .filter(method -> method.location.clazz.equals(clazz))
+        .collect(ImmutableSet.toImmutableSet());
+  }
+
+  /**
    * Checks if the passed location is targeting an element declared in the target module.
    *
    * @param location Location of the element.

@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.CallableDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
@@ -37,6 +38,7 @@ import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.ErrorStore;
 import edu.ucr.cs.riple.core.registries.invocation.InvocationRecord;
 import edu.ucr.cs.riple.core.registries.invocation.InvocationRecordRegistry;
+import edu.ucr.cs.riple.core.registries.method.MethodRecord;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.core.util.ASTParser;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -263,6 +265,41 @@ public class NullAwayCodeFix {
                 new RemoveMarkerAnnotation(
                     context.targetModuleInfo.getFieldRegistry().getLocationOnField(encClass, field),
                     context.config.nullableAnnot);
+            // Remove annotation from getter method if exists.
+            Optional<MethodRecord> getterMethod =
+                context
+                    .targetModuleInfo
+                    .getMethodRegistry()
+                    .getAllMethodsForClass(encClass)
+                    .stream()
+                    .filter(
+                        record -> {
+                          CallableDeclaration<?> callable =
+                              parser.getCallableDeclaration(
+                                  record.location.clazz, record.location.method);
+                          if (!(callable instanceof MethodDeclaration)) {
+                            return false;
+                          }
+                          MethodDeclaration methodDeclaration = (MethodDeclaration) callable;
+                          return methodDeclaration.getBody().isPresent()
+                              && methodDeclaration
+                                  .getBody()
+                                  .get()
+                                  .toString()
+                                  .replaceAll("\\s", "")
+                                  .equals(String.format("{return%s;}", field));
+                        })
+                    .findFirst();
+            if (getterMethod.isPresent()) {
+              RemoveMarkerAnnotation removeAnnotationOnGetter =
+                  new RemoveMarkerAnnotation(
+                      new OnMethod(
+                          getterMethod.get().location.path,
+                          getterMethod.get().location.clazz,
+                          getterMethod.get().location.method),
+                      context.config.nullableAnnot);
+              context.injector.removeAnnotations(Set.of(removeAnnotationOnGetter));
+            }
             // Add annotation
             context.injector.injectAnnotations(Set.of(initializerAnnotation.get()));
             // remove nullable

@@ -200,6 +200,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
         .withSourceLines(
             "Foo.java",
             "package test;",
+            "import javax.annotation.Nullable;",
             "public class Foo {",
             "   Object f;",
             "   public void init() {",
@@ -207,6 +208,10 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
             "   }",
             "   public String bar() {",
             "     return f.toString();",
+            "   }",
+            "   @Nullable",
+            "   public Object getF() {",
+            "     return f;",
             "   }",
             "}")
         .expectNoReport()
@@ -306,6 +311,44 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
     //        .expectNoReport()
     //        .resolveRemainingErrors()
     //        .start();
+  }
+
+  @Test
+  public void dereferenceNullableMethodTargetMethodSuppressionTest() {
+    mockChatGPTResponse(
+        DISAGREE,
+        DISAGREE,
+        NO_CODE_FIX,
+        codeFix(
+            "public int run(){",
+            "   if (b == null) {",
+            "       return 0;",
+            "   }",
+            "   return b.exec();",
+            "}"));
+    coreTestHelper
+        .onTarget()
+        .withSourceLines(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "   public int exec(@Nullable Bar b){",
+            "     aaa(b);",
+            "     return useB(b);",
+            "   }",
+            "   public void aaa(Bar b){",
+            "     if(b == null){",
+            "       throw new IllegalArgumentException();",
+            "     }",
+            "   }",
+            "   public Object exec(@Nullable Bar b){",
+            "     return b.exec();",
+            "   }",
+            "}")
+        .expectNoReport()
+        .resolveRemainingErrors()
+        .start();
   }
 
   /**
