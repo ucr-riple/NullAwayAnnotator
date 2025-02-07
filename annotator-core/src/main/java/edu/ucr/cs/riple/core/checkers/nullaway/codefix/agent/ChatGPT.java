@@ -89,6 +89,9 @@ public class ChatGPT {
   /** The prompt to ask ChatGPT to check if the parameter is nullable. */
   private final String checkIfParamIsNullablePrompt;
 
+  /** The prompt to ask ChatGPT to check if the method is returning nullable. */
+  private final String checkIfMethodIsReturningNullablePrompt;
+
   /** The {@link Context} instance. */
   private final Context context;
 
@@ -114,6 +117,8 @@ public class ChatGPT {
         Utility.readResourceContent("prompts/inquiry/is-initializer.txt");
     this.checkIfParamIsNullablePrompt =
         Utility.readResourceContent("prompts/inquiry/is-param-nullable.txt");
+    this.checkIfMethodIsReturningNullablePrompt =
+        Utility.readResourceContent("prompts/inquiry/is-returning-nullable.txt");
     this.context = context;
     this.parser = parser;
   }
@@ -333,20 +338,32 @@ public class ChatGPT {
   }
 
   /**
-   * Check if the parameter is nullable. If it is nullable...
+   * Check if the parameter is nullable given the context of the method.
    *
-   * @param error
-   * @param param
-   * @param context
-   * @return
+   * @param encClass the enclosing class of the method.
+   * @param method the method to check.
+   * @param param the parameter to check. * @return {@code true} if the parameter is nullable,
+   *     {@code false} otherwise.
    */
-  public Response checkIfParamIsNullable(NullAwayError error, String param, String context) {
+  public Response checkIfParamIsNullable(
+      String encClass, String method, String param, String context) {
     return ask(
         String.format(
             checkIfParamIsNullablePrompt,
             param,
             context,
-            parser.getRegionSourceCode(error.getRegion()).content));
+            parser.getRegionSourceCode(new Region(encClass, method)).content));
+  }
+
+  /**
+   * Check if the method is returning nullable given the context of the method.
+   *
+   * @param method the method to check.
+   * @param context the context of the method.
+   * @return {@code true} if the method is returning nullable, {@code false} otherwise.
+   */
+  public Response checkIfMethodIsReturningNullable(String method, String context) {
+    return ask(String.format(checkIfMethodIsReturningNullablePrompt, method, context));
   }
 
   /**

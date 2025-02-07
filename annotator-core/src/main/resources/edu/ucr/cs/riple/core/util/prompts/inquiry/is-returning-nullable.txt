@@ -1,0 +1,33 @@
+In the method below, is there a possibility that the method returns null based only on its body. Consider the following points:
+
+- The method may have multiple return paths.
+- If the method calls another method, do not assume its return value unless you have the full declaration of that method. Request the declaration if needed.
+- The method may throw an exception instead of returning null.
+- Ensure you request the declarations of any methods whose return values directly or indirectly impact this method’s return value before concluding.
+
+%s
+
+Here is the call chain for this method, showing the sequence of calls from the method to its callers at each depth level:
+
+%s
+
+Response Format:
+Provide the answer in XML format:
+
+If the method cannot return null, respond with:
+<response>
+  <value>NO</value>
+  <reason>YOUR REASON</reason>
+</response>
+If the method can return null, respond with:
+<response>
+  <value>YES</value>
+  <reason>YOUR REASON</reason>
+</response>
+If there are any methods that directly or indirectly affect the return value and are not fully disclosed, request their declarations first, in the following format:
+<response>
+  <success>false</success>
+  <methods>
+    <method>methodName</method>
+  </methods>
+</response>

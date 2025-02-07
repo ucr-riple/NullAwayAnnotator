@@ -97,17 +97,18 @@ public class InvocationRecordRegistry {
    *
    * @param clazz the class name of the target method.
    * @param member the member name of the target method.
+   * @param dept the depth to search for callers.
    * @return A map from depth to the set of methods at that depth.
    */
-  public InvocationRecord computeInvocationRecord(String clazz, String member) {
+  public InvocationRecord computeInvocationRecord(String clazz, String member, int dept) {
     MethodRecord current = methodRegistry.findMethodByName(clazz, member);
     Preconditions.checkArgument(
         current != null, String.format("Method not found: %s#%s", clazz, member));
     Deque<MethodRecord> deque = new ArrayDeque<>();
-    int depth = 0;
+    int current_depth = 0;
     deque.add(current);
     InvocationRecord record = new InvocationRecord(this);
-    while (!deque.isEmpty() && depth++ < 4) {
+    while (!deque.isEmpty() && current_depth++ < dept) {
       Set<MethodRecord> calls = new HashSet<>();
       int size = deque.size();
       for (int i = 0; i < size; i++) {

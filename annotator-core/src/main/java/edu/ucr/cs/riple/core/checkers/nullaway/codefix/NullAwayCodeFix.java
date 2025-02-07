@@ -47,7 +47,9 @@ import edu.ucr.cs.riple.injector.SourceCode;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
+import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import edu.ucr.cs.riple.injector.changes.RemoveMarkerAnnotation;
+import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.util.ASTUtils;
@@ -77,6 +79,12 @@ public class NullAwayCodeFix {
   /** Invocation record registry to retrieve the callers of a method. */
   private final InvocationRecordRegistry invocationRecordRegistry;
 
+  /**
+   * Simply returns an empty set meaning no action is needed. The purpose is only increasing
+   * readability.
+   */
+  private static final Set<MethodRewriteChange> NO_ACTION = Set.of();
+
   public NullAwayCodeFix(Context context) {
     this.parser = new ASTParser(context);
     this.gpt = new ChatGPT(context, parser);
@@ -99,7 +107,7 @@ public class NullAwayCodeFix {
       case "DEREFERENCE_NULLABLE":
         return resolveDereferenceError(error);
       default:
-        return Set.of();
+        return NO_ACTION;
     }
   }
 
@@ -149,16 +157,16 @@ public class NullAwayCodeFix {
     String type = infos[1];
     String encClass = infos[2];
     boolean isAnnotated = infos[3].equalsIgnoreCase("true");
-    if (type.equals("field")) {
-      return resolveFieldDereferenceError(error, encClass, expression);
+    switch (type) {
+      case "field":
+        return resolveFieldDereferenceError(error, encClass, expression);
+      case "parameter":
+        return resolveParameterDereferenceError(error, encClass, expression);
+      case "method":
+        return resolveMethodDereferenceError(error, encClass, expression, isAnnotated);
+      default:
+        return NO_ACTION;
     }
-    if (type.equals("parameter")) {
-      return resolveParameterDereferenceError(error, encClass, expression);
-    }
-    if (type.equals("method")) {
-      return resolveMethodDereferenceError(error, encClass, expression, isAnnotated);
-    }
-    return Set.of();
   }
 
   /**
@@ -172,7 +180,30 @@ public class NullAwayCodeFix {
    */
   private Set<MethodRewriteChange> resolveMethodDereferenceError(
       NullAwayError error, String encClass, String method, boolean isAnnotated) {
-    return Set.of();
+    // Build a context for prompt generation
+    if (isAnnotated) {
+      boolean isReturningNullable = checkIfMethodIsReturningNullable(encClass, method);
+      if (!isReturningNullable) {
+        OnMethod methodLocation =
+            context
+                .targetModuleInfo
+                .getMethodRegistry()
+                .findMethodByName(encClass, method)
+                .location;
+        RemoveAnnotation removeNullable =
+            new RemoveMarkerAnnotation(methodLocation, context.config.nullableAnnot);
+        context.injector.removeAnnotations(Set.of(removeNullable));
+        return NO_ACTION;
+      }
+    }
+    // Try to fix by regions using the method as an example.
+    OnMethod methodLocation =
+        context
+            .targetModuleInfo
+            .getMethodRegistry()
+            .findMethodByName(encClass, error.getRegion().member)
+            .location;
+    return fixErrorByRegions(methodLocation);
   }
 
   /**
@@ -189,11 +220,12 @@ public class NullAwayCodeFix {
       NullAwayError error, String encClass, String paramName) {
     // Build a context for prompt generation
     InvocationRecord record =
-        invocationRecordRegistry.computeInvocationRecord(encClass, error.getRegion().member);
-    while (true) {
+        invocationRecordRegistry.computeInvocationRecord(encClass, error.getRegion().member, 3);
+    int count = 0;
+    while (count++ < 10) {
       String callContext = record.constructCallGraphContext(parser);
       Response paramNullabilityPossibility =
-          gpt.checkIfParamIsNullable(error, paramName, callContext);
+          gpt.checkIfParamIsNullable(encClass, error.getRegion().member, paramName, callContext);
       if (!paramNullabilityPossibility.isSuccessFull()) {
         ImmutableSet<String> methods =
             paramNullabilityPossibility.getValuesFromTag("/response/methods", "method");
@@ -204,11 +236,12 @@ public class NullAwayCodeFix {
         record.addRequestedMethodsByNames(methods);
       } else {
         if (paramNullabilityPossibility.isDisagreement()) {
-          return Set.of();
+          return NO_ACTION;
         }
-        return Set.of();
+        return NO_ACTION;
       }
     }
+    return NO_ACTION;
   }
 
   /**
@@ -304,20 +337,36 @@ public class NullAwayCodeFix {
             context.injector.injectAnnotations(Set.of(initializerAnnotation.get()));
             // remove nullable
             context.injector.removeAnnotations(Set.of(removeAnnotation));
-            return Set.of();
+            return NO_ACTION;
           }
         }
       }
     }
-    // no initializer found. check if there is any region with safe use of this field.
+    // no initializer found. Try to fix by regions using the method as an example.
     OnField onField =
         context.targetModuleInfo.getFieldRegistry().getLocationOnField(encClass, field);
+    return fixErrorByRegions(onField);
+  }
+
+  /**
+   * Attempts to fix an error by identifying all impacted regions based on the given location and
+   * generating fixes using example-based reasoning. Prioritizes safe regions for generating fixes.
+   *
+   * <p>The method categorizes regions into safe and unsafe based on whether they contain errors. If
+   * an unsafe region has an error, it first attempts to generate a fix using safe regions. If that
+   * fails, it attempts to generate a fix using all regions.
+   *
+   * @param location the location of the error.
+   * @return a set of {@link MethodRewriteChange} instances representing the code fix, or an empty
+   *     set if no fix is found.
+   */
+  private Set<MethodRewriteChange> fixErrorByRegions(Location location) {
     Set<Region> unsafeRegions = new HashSet<>();
     Set<Region> safeRegions = new HashSet<>();
     context
         .targetModuleInfo
         .getRegionRegistry()
-        .getImpactedRegions(onField)
+        .getImpactedRegions(location)
         .forEach(
             region -> {
               if (errorStore.getErrorsInRegion(region).isEmpty()) {
@@ -334,7 +383,7 @@ public class NullAwayCodeFix {
         continue;
       }
       NullAwayError errorInRegion = (NullAwayError) optionalError.get();
-      Set<MethodRewriteChange> changesForRegion = Set.of();
+      Set<MethodRewriteChange> changesForRegion = NO_ACTION;
       if (!safeRegions.isEmpty()) {
         // First try to fix by safe regions if exists.
         changesForRegion = gpt.fixDereferenceErrorBySafeRegions(errorInRegion, safeRegions);
@@ -349,35 +398,7 @@ public class NullAwayCodeFix {
         changes.addAll(changesForRegion);
       }
     }
-    if (changes.isEmpty()) {
-      throw new RuntimeException("No fix found for the field dereference error: " + error);
-    }
     return changes;
-  }
-
-  /**
-   * Checks if the expression is initialized before use in the method body. TODO: this method only
-   * looks for all assignments flow insensitive. We need to make it flow sensitive.
-   *
-   * @param declaration the method declaration.
-   * @param field the field to check for initialization.
-   * @return true if the expression is initialized before use in the method body.
-   */
-  private boolean checkForInitializationBeforeUse(
-      CallableDeclaration<?> declaration, String field) {
-    // check if the expression is assigned in the method body.
-    Iterator<Node> treeIterator = new ASTUtils.DirectMethodParentIterator(declaration);
-    while (treeIterator.hasNext()) {
-      Node n = treeIterator.next();
-      if (n instanceof VariableDeclarationExpr) {
-        VariableDeclarationExpr v = (VariableDeclarationExpr) n;
-        if (v.getVariables().stream()
-            .anyMatch(variableDeclarator -> variableDeclarator.getNameAsString().equals(field))) {
-          return true;
-        }
-      }
-    }
-    return false;
   }
 
   /**
@@ -402,7 +423,7 @@ public class NullAwayCodeFix {
       NullAwayError error) {
     SourceCode enclosingMethod = parser.getRegionSourceCode(error.getRegion());
     if (enclosingMethod == null) {
-      return Set.of();
+      return NO_ACTION;
     }
     String[] lines = enclosingMethod.content.split("\n");
     // calculate the erroneous line in method. We have to adjust the line number to the method's
@@ -443,7 +464,7 @@ public class NullAwayCodeFix {
       NullAwayError error) {
     SourceCode enclosingMethod = parser.getRegionSourceCode(error.getRegion());
     if (enclosingMethod == null) {
-      return Set.of();
+      return NO_ACTION;
     }
     String[] lines = enclosingMethod.content.split("\n");
     // calculate the erroneous line in method. We have to adjust the line number to the method's
@@ -463,5 +484,65 @@ public class NullAwayCodeFix {
             // Add the import required for Preconditions.
             Set.of(NullAway.PRECONDITION_NAME));
     return Set.of(change);
+  }
+
+  /**
+   * Checks if the expression is initialized before use in the method body. TODO: this method only
+   * looks for all assignments flow insensitive. We need to make it flow sensitive.
+   *
+   * @param declaration the method declaration.
+   * @param field the field to check for initialization.
+   * @return true if the expression is initialized before use in the method body.
+   */
+  private boolean checkForInitializationBeforeUse(
+      CallableDeclaration<?> declaration, String field) {
+    // check if the expression is assigned in the method body.
+    Iterator<Node> treeIterator = new ASTUtils.DirectMethodParentIterator(declaration);
+    while (treeIterator.hasNext()) {
+      Node n = treeIterator.next();
+      if (n instanceof VariableDeclarationExpr) {
+        VariableDeclarationExpr v = (VariableDeclarationExpr) n;
+        if (v.getVariables().stream()
+            .anyMatch(variableDeclarator -> variableDeclarator.getNameAsString().equals(field))) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Checks if the method is returning nullable.
+   *
+   * @param encClass the owner of the method.
+   * @param method the name of the method.
+   * @return true if the method is returning nullable.
+   */
+  private boolean checkIfMethodIsReturningNullable(String encClass, String method) {
+    // Build a context for prompt generation
+    InvocationRecord record = invocationRecordRegistry.computeInvocationRecord(encClass, method, 2);
+    int count = 0;
+    while (count++ < 10) {
+      String callContext = record.constructCallGraphContext(parser);
+      Response methodNullability = gpt.checkIfMethodIsReturningNullable(method, callContext);
+      if (!methodNullability.isSuccessFull()) {
+        ImmutableSet<String> methods =
+            methodNullability.getValuesFromTag("/response/methods", "method");
+        if (methods.isEmpty()) {
+          throw new IllegalStateException(
+              "Could not determine the nullability of the parameter and did not ask for any methods declaration.");
+        }
+        record.addRequestedMethodsByNames(methods);
+      } else {
+        if (methodNullability.isDisagreement()) {
+          return false;
+        }
+        if (methodNullability.isAgreement()) {
+          return true;
+        }
+      }
+    }
+    // At this moment, just to be safe, we assume it is returning nullable.
+    return true;
   }
 }
