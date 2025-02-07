@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.checkers.nullaway;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.CheckerBaseClass;
@@ -137,8 +138,8 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
       if (errorType.equals(NullAwayError.ASSIGN_NULLABLE_TO_NONNULL_ARRAY)) {
         annotations =
             Set.of(
-                new AddTypeUseMarkerAnnotation(nonnullTarget, config.nullableAnnot)
-                    .toDeclaration());
+                new AddTypeUseMarkerAnnotation(nonnullTarget, config.nullableAnnot,
+                    ImmutableList.of(ImmutableList.of(1, 0))));
       } else {
         annotations = Set.of(new AddTypeUseMarkerAnnotation(nonnullTarget, config.nullableAnnot));
       }

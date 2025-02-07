@@ -24,11 +24,13 @@
 
 package edu.ucr.cs.riple.core.tools;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddTypeUseMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -53,6 +55,14 @@ public class TReport extends Report {
     this.expectedValue = effect;
     if (tag != null) {
       this.tag(tag);
+    }
+  }
+
+  public TReport(Location root, ImmutableList<ImmutableList<Integer>> index, int effect) {
+    super(new Fix(new AddTypeUseMarkerAnnotation(root, "org.jspecify.annotations.Nullable", index)), effect);
+    this.expectedValue = effect;
+    if (index != null) {
+      this.setTypeIndex(index);
     }
   }
 

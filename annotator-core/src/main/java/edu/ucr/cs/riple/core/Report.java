@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import edu.ucr.cs.riple.core.cache.downstream.DownstreamImpactCache;
@@ -88,6 +89,8 @@ public class Report {
   /** Status of the report. */
   private Tag tag;
 
+  private ImmutableList<ImmutableList<Integer>> typeIndex;
+
   public Report(Fix root, int localEffect) {
     this.localEffect = localEffect;
     this.root = root;
@@ -98,6 +101,7 @@ public class Report {
     this.lowerBoundEffectOnDownstreamDependencies = 0;
     this.upperBoundEffectOnDownstreamDependencies = 0;
     this.tag = Tag.REJECT;
+    this.typeIndex = ImmutableList.of(ImmutableList.of());
   }
 
   /**
@@ -140,6 +144,13 @@ public class Report {
    */
   public Tag getTag() {
     return this.tag;
+  }
+
+  public void setTypeIndex(ImmutableList<ImmutableList<Integer>> typeIndex) {
+    this.typeIndex = typeIndex;
+  }
+  public ImmutableList<ImmutableList<Integer>> getTypeIndex() {
+    return typeIndex;
   }
 
   /**

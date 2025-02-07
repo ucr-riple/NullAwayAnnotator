@@ -1,5 +1,4 @@
 package test;
-
 import org.jspecify.annotations.Nullable;
 
 public class Main {
