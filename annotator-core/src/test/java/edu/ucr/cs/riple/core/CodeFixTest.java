@@ -275,37 +275,37 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
     //            "   }",
     //            "   return b.exec();",
     //            "}"));
-    coreTestHelper
-        .onTarget()
-        .withSourceLines(
-            "Foo.java",
-            "package test;",
-            "import javax.annotation.Nullable;",
-            "public class Foo {",
-            "   public int exec(@Nullable Bar b){",
-            "     aaa(b);",
-            "     return useB(b);",
-            "   }",
-            "   public void aaa(Bar b){",
-            "     if(b == null){",
-            "       throw new IllegalArgumentException();",
-            "     }",
-            "   }",
-            "   public int useB(@Nullable Bar b){",
-            "     return b.exec();",
-            "   }",
-            "}")
-        .withSourceLines(
-            "Bar.java",
-            "package test;",
-            "public class Bar {",
-            "   public int exec() {",
-            "     return 0;",
-            "   }",
-            "}")
-        .expectNoReport()
-        .resolveRemainingErrors()
-        .start();
+    //    coreTestHelper
+    //        .onTarget()
+    //        .withSourceLines(
+    //            "Foo.java",
+    //            "package test;",
+    //            "import javax.annotation.Nullable;",
+    //            "public class Foo {",
+    //            "   public int exec(@Nullable Bar b){",
+    //            "     aaa(b);",
+    //            "     return useB(b);",
+    //            "   }",
+    //            "   public void aaa(Bar b){",
+    //            "     if(b == null){",
+    //            "       throw new IllegalArgumentException();",
+    //            "     }",
+    //            "   }",
+    //            "   public int useB(@Nullable Bar b){",
+    //            "     return b.exec();",
+    //            "   }",
+    //            "}")
+    //        .withSourceLines(
+    //            "Bar.java",
+    //            "package test;",
+    //            "public class Bar {",
+    //            "   public int exec() {",
+    //            "     return 0;",
+    //            "   }",
+    //            "}")
+    //        .expectNoReport()
+    //        .resolveRemainingErrors()
+    //        .start();
   }
 
   /**

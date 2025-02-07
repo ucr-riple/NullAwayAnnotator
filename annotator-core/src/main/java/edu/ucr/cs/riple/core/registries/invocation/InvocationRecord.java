@@ -101,9 +101,9 @@ public class InvocationRecord {
    * Adds the requested methods to the record on the top of the stack. These methods are not present
    * in the invocation record and are only called within methods.
    *
-   * @param requests Methods to add.
+   * @param requests Names of the requested methods.
    */
-  public void addRequestedMethods(ImmutableSet<String> requests) {
+  public void addRequestedMethodsByNames(ImmutableSet<String> requests) {
     Set<MethodRecord> existingMethods =
         calls.stream().flatMap(Set::stream).collect(Collectors.toSet());
     Set<MethodRecord> allMethods =

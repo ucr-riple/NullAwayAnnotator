@@ -145,25 +145,53 @@ public class NullAwayCodeFix {
     String[] infos = NullAwayError.extractPlaceHolderValue(error);
     String expression = infos[0];
     String type = infos[1];
-    String owner = infos[2];
+    String encClass = infos[2];
+    boolean isAnnotated = infos[3].equalsIgnoreCase("true");
     if (type.equals("field")) {
-      return resolveFieldDereferenceError(error, owner, expression);
+      return resolveFieldDereferenceError(error, encClass, expression);
     }
     if (type.equals("parameter")) {
-      return resolveParameterDereferenceError(error, owner, expression);
+      return resolveParameterDereferenceError(error, encClass, expression);
+    }
+    if (type.equals("method")) {
+      return resolveMethodDereferenceError(error, encClass, expression, isAnnotated);
     }
     return Set.of();
   }
 
+  /**
+   * Resolves a method dereference error by generating a code fix.
+   *
+   * @param error the error to fix.
+   * @param encClass the class containing the method.
+   * @param method the method to fix.
+   * @param isAnnotated true if the method is annotated as nullable.
+   * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty} if no fix
+   */
+  private Set<MethodRewriteChange> resolveMethodDereferenceError(
+      NullAwayError error, String encClass, String method, boolean isAnnotated) {
+    return Set.of();
+  }
+
+  /**
+   * Resolves a parameter dereference error by generating a code fix. At this moment, we only ask if
+   * the parameter is actually non-null.
+   *
+   * @param error the error to fix.
+   * @param encClass the owner of the method.
+   * @param paramName the name of the parameter.
+   * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty} if no fix
+   *     is found.
+   */
   private Set<MethodRewriteChange> resolveParameterDereferenceError(
-      NullAwayError error, String owner, String expression) {
+      NullAwayError error, String encClass, String paramName) {
     // Build a context for prompt generation
     InvocationRecord record =
-        invocationRecordRegistry.computeInvocationRecord(owner, error.getRegion().member);
+        invocationRecordRegistry.computeInvocationRecord(encClass, error.getRegion().member);
     while (true) {
       String callContext = record.constructCallGraphContext(parser);
       Response paramNullabilityPossibility =
-          gpt.checkIfParamIsNullable(error, expression, callContext);
+          gpt.checkIfParamIsNullable(error, paramName, callContext);
       if (!paramNullabilityPossibility.isSuccessFull()) {
         ImmutableSet<String> methods =
             paramNullabilityPossibility.getValuesFromTag("/response/methods", "method");
@@ -171,7 +199,7 @@ public class NullAwayCodeFix {
           throw new IllegalStateException(
               "Could not determine the nullability of the parameter and did not ask for any methods declaration.");
         }
-        record.addRequestedMethods(methods);
+        record.addRequestedMethodsByNames(methods);
       } else {
         if (paramNullabilityPossibility.isDisagreement()) {
           return Set.of();
