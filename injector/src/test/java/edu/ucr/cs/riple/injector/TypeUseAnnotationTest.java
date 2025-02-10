@@ -955,4 +955,148 @@ public class TypeUseAnnotationTest extends BaseInjectorTest {
                 "custom.example.RUntainted"))
         .start();
   }
+
+  @Test
+  public void arrayComprehensiveAdditionTest() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "   Object [] h1 = new Object[4];",
+            "   Object [] h2 = new Object[4];",
+            "   List<Object[]> h3;",
+            "   List<Object[]> h4;",
+            "   List<Object>[] h5;",
+            "   List<Object>[] h6;",
+            "   List<Object>[] h7;",
+            "   List<Object[]>[] h8;",
+            "   List<Object[]>[] h9;",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "   @Nullable Object [] h1 = new Object[4];",
+            "   Object @Nullable [] h2 = new Object[4];",
+            "   List<@Nullable Object[]> h3;",
+            "   List<Object@Nullable []> h4;",
+            "   @Nullable List<Object>[] h5;",
+            "   List<@Nullable Object>[] h6;",
+            "   List<Object>@Nullable [] h7;",
+            "   List<Object@Nullable []>[] h8;",
+            "   List<@Nullable Object[]>[] h9;",
+            "}")
+        .addChanges(
+            new AddTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("h1")),
+                "javax.annotation.Nullable",
+                ImmutableList.of(ImmutableList.of(1, 0))),
+            new AddTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("h2")),
+                "javax.annotation.Nullable",
+                ImmutableList.of(ImmutableList.of(0))),
+            new AddTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("h3")),
+                "javax.annotation.Nullable",
+                ImmutableList.of(ImmutableList.of(1, 1, 0))),
+            new AddTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("h4")),
+                "javax.annotation.Nullable",
+                ImmutableList.of(ImmutableList.of(1, 0))),
+            new AddTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("h5")),
+                "javax.annotation.Nullable",
+                ImmutableList.of(ImmutableList.of(1, 0))),
+            new AddTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("h6")),
+                "javax.annotation.Nullable",
+                ImmutableList.of(ImmutableList.of(1, 1, 0))),
+            new AddTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("h7")),
+                "javax.annotation.Nullable",
+                ImmutableList.of(ImmutableList.of(0))),
+            new AddTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("h8")),
+                "javax.annotation.Nullable",
+                ImmutableList.of(ImmutableList.of(1, 1, 0))),
+            new AddTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("h9")),
+                "javax.annotation.Nullable",
+                ImmutableList.of(ImmutableList.of(1, 1, 1, 0))))
+        .start();
+  }
+
+  @Test
+  public void arrayComprehensiveDeletionTest() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "   @Nullable Object [] h1 = new Object[4];",
+            "   Object @Nullable [] h2 = new Object[4];",
+            "   List<@Nullable Object[]> h3;",
+            "   List<Object@Nullable []> h4;",
+            "   @Nullable List<Object>[] h5;",
+            "   List<@Nullable Object>[] h6;",
+            "   List<Object>@Nullable [] h7;",
+            "   List<Object@Nullable []>[] h8;",
+            "   List<@Nullable Object[]>[] h9;",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "   Object [] h1 = new Object[4];",
+            "   Object [] h2 = new Object[4];",
+            "   List<Object[]> h3;",
+            "   List<Object[]> h4;",
+            "   List<Object>[] h5;",
+            "   List<Object>[] h6;",
+            "   List<Object>[] h7;",
+            "   List<Object[]>[] h8;",
+            "   List<Object[]>[] h9;",
+            "}")
+        .addChanges(
+            new RemoveTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("h1")),
+                "javax.annotation.Nullable",
+                ImmutableList.of(ImmutableList.of(1, 0))),
+            new RemoveTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("h2")),
+                "javax.annotation.Nullable",
+                ImmutableList.of(ImmutableList.of(0))),
+            new RemoveTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("h3")),
+                "javax.annotation.Nullable",
+                ImmutableList.of(ImmutableList.of(1, 1, 0))),
+            new RemoveTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("h4")),
+                "javax.annotation.Nullable",
+                ImmutableList.of(ImmutableList.of(1, 0))),
+            new RemoveTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("h5")),
+                "javax.annotation.Nullable",
+                ImmutableList.of(ImmutableList.of(1, 0))),
+            new RemoveTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("h6")),
+                "javax.annotation.Nullable",
+                ImmutableList.of(ImmutableList.of(1, 1, 0))),
+            new RemoveTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("h7")),
+                "javax.annotation.Nullable",
+                ImmutableList.of(ImmutableList.of(0))),
+            new RemoveTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("h8")),
+                "javax.annotation.Nullable",
+                ImmutableList.of(ImmutableList.of(1, 1, 0))),
+            new RemoveTypeUseMarkerAnnotation(
+                new OnField("Foo.java", "test.Foo", Set.of("h9")),
+                "javax.annotation.Nullable",
+                ImmutableList.of(ImmutableList.of(1, 1, 1, 0))))
+        .start();
+  }
 }

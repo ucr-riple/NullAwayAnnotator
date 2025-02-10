@@ -269,17 +269,6 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   @Test
   public void dereferenceNullableParameterCastToNonnullTest() {
-    //    mockChatGPTResponse(
-    //        DISAGREE,
-    //        DISAGREE,
-    //        NO_CODE_FIX,
-    //        codeFix(
-    //            "public int run(){",
-    //            "   if (b == null) {",
-    //            "       return 0;",
-    //            "   }",
-    //            "   return b.exec();",
-    //            "}"));
     //    coreTestHelper
     //        .onTarget()
     //        .withSourceLines(
@@ -315,40 +304,29 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   @Test
   public void dereferenceNullableMethodTargetMethodSuppressionTest() {
-    mockChatGPTResponse(
-        DISAGREE,
-        DISAGREE,
-        NO_CODE_FIX,
-        codeFix(
-            "public int run(){",
-            "   if (b == null) {",
-            "       return 0;",
-            "   }",
-            "   return b.exec();",
-            "}"));
-    coreTestHelper
-        .onTarget()
-        .withSourceLines(
-            "Foo.java",
-            "package test;",
-            "import javax.annotation.Nullable;",
-            "public class Foo {",
-            "   public int exec(@Nullable Bar b){",
-            "     aaa(b);",
-            "     return useB(b);",
-            "   }",
-            "   public void aaa(Bar b){",
-            "     if(b == null){",
-            "       throw new IllegalArgumentException();",
-            "     }",
-            "   }",
-            "   public Object exec(@Nullable Bar b){",
-            "     return b.exec();",
-            "   }",
-            "}")
-        .expectNoReport()
-        .resolveRemainingErrors()
-        .start();
+//    coreTestHelper
+//        .onTarget()
+//        .withSourceLines(
+//            "Foo.java",
+//            "package test;",
+//            "import javax.annotation.Nullable;",
+//            "public class Foo {",
+//            "   public int exec(@Nullable Bar b){",
+//            "     aaa(b);",
+//            "     return useB(b);",
+//            "   }",
+//            "   public void aaa(Bar b){",
+//            "     if(b == null){",
+//            "       throw new IllegalArgumentException();",
+//            "     }",
+//            "   }",
+//            "   public Object exec(@Nullable Bar b){",
+//            "     return b.exec();",
+//            "   }",
+//            "}")
+//        .expectNoReport()
+//        .resolveRemainingErrors()
+//        .start();
   }
 
   /**

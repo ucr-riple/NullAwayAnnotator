@@ -298,7 +298,7 @@ public class Utility {
   }
 
   /**
-   * Reads the content of a resource file.
+   * <<<<<<< HEAD Reads the content of a resource file.
    *
    * @param resourcePath The path to the resource file.
    * @return The content of the resource file.
@@ -345,6 +345,17 @@ public class Utility {
         ChronoUnit.SECONDS,
         0L,
         Duration.ZERO);
+  }
+
+  /**
+   * Check whether an annotation is a type-use annotation.
+   *
+   * @param annotName annotation name
+   * @return true if we annotName is a type-use annotation, false otherwise
+   */
+  public static boolean isTypeUseAnnotation(String annotName) {
+    return annotName.contains(".jspecify.annotations.Nullable")
+        || annotName.contains(".checkerframework.checker.nullness.qual.Nullable");
   }
 
   /**

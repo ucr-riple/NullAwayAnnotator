@@ -104,6 +104,7 @@ if (JavaVersion.current().isJava11()) {
     test {
         filter {
             excludeTestsMatching "edu.ucr.cs.riple.core.Java17Test"
+            // temporarily exclude LombokTest until we find a solution for the issue.
             excludeTestsMatching "edu.ucr.cs.riple.core.LombokTest"
         }
     }

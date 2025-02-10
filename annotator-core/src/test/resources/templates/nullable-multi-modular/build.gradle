@@ -60,7 +60,7 @@ subprojects {
         compileOnly 'org.jetbrains:annotations:24.0.0'
         compileOnly "org.jspecify:jspecify:0.3.0"
         compileOnly "com.google.code.findbugs:jsr305:3.0.2"
-        errorprone "com.google.errorprone:error_prone_core:2.15.0"
+        errorprone "com.google.errorprone:error_prone_core:2.31.0"
         errorproneJavac "com.google.errorprone:javac:9+181-r4173-1"
     }
 
