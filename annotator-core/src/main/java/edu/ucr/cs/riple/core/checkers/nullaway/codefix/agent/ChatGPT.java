@@ -92,6 +92,9 @@ public class ChatGPT {
   /** The prompt to ask ChatGPT to check if the method is returning nullable. */
   private final String checkIfMethodIsReturningNullablePrompt;
 
+  /** The prompt to ask ChatGPT to check if the method is returning nullable on the call site. */
+  private final String checkIfMethodReturnsNullableAtCallSitePrompt;
+
   /** The {@link Context} instance. */
   private final Context context;
 
@@ -119,6 +122,8 @@ public class ChatGPT {
         Utility.readResourceContent("prompts/inquiry/is-param-nullable.txt");
     this.checkIfMethodIsReturningNullablePrompt =
         Utility.readResourceContent("prompts/inquiry/is-returning-nullable.txt");
+    this.checkIfMethodReturnsNullableAtCallSitePrompt =
+        Utility.readResourceContent("prompts/inquiry/is-nullable-at-call-site.txt");
     this.context = context;
     this.parser = parser;
   }
@@ -395,6 +400,24 @@ public class ChatGPT {
   public Response checkIfMethodIsReturningNullable(String encClass, String method, String context) {
     String methodSource = parser.getRegionSourceCode(new Region(encClass, method)).content;
     String prompt = String.format(checkIfMethodIsReturningNullablePrompt, methodSource, context);
+    return ask(prompt);
+  }
+
+  /**
+   * Checks if the method is returning nullable on the call site.
+   *
+   * @param invocation the invocation of the method.
+   * @param context the context of the method.
+   * @return {@code true} if the method is returning nullable, {@code false} otherwise.
+   */
+  public Response checkIfMethodIsReturningNullableOnCallSite(String invocation, String context) {
+    String prompt =
+        String.format(
+            checkIfMethodReturnsNullableAtCallSitePrompt,
+            invocation,
+            context,
+            invocation,
+            invocation);
     return ask(prompt);
   }
 

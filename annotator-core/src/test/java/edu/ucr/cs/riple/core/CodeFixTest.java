@@ -303,7 +303,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
   }
 
   @Test
-  public void dereferenceNullableMethodTargetMethodSuppressionTest() {
+  public void dereferenceMethodTargetMethodSuppressionTest() {
     mockChatGPTResponse(AGREE, DISAGREE);
     coreTestHelper
         .onTarget()
@@ -328,6 +328,35 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
             "   }",
             "   public String run(){",
             "     return exec(\"A\", \"def\").toString();",
+            "   }",
+            "}")
+        .expectNoReport()
+        .resolveRemainingErrors()
+        .start();
+  }
+
+  @Test
+  public void dereferenceMethodCallSiteSuppressionTest() {
+    coreTestHelper
+        .onTarget()
+        .withSourceLines(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "import java.util.List;",
+            "import java.util.Map;",
+            "import java.util.HashMap;",
+            "public class Foo {",
+            "     public Map<String, String> map = new HashMap<>();",
+            "     @Nullable public String exec(String k, String defaultValue){",
+            "     List<String> keys = List.of(\"A\", \"B\");",
+            "     if(!keys.contains(k)){",
+            "         return defaultValue;",
+            "     }",
+            "     return map.get(k);",
+            "   }",
+            "   public String run(){",
+            "     return exec(\"C\", \"def\").toString();",
             "   }",
             "}")
         .expectNoReport()

@@ -30,9 +30,9 @@ import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.core.util.ASTParser;
 import edu.ucr.cs.riple.injector.util.SignatureMatcher;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -50,9 +50,13 @@ public class InvocationRecord {
    */
   private final List<Set<MethodRecord>> calls;
 
+  /** A list of third-party libraries requests. These libraries source code is not available. */
+  private final List<String> thirdPartyLibs;
+
   public InvocationRecord(InvocationRecordRegistry registry) {
     this.calls = new ArrayList<>(3);
     this.registry = registry;
+    this.thirdPartyLibs = new ArrayList<>();
   }
 
   /**
@@ -94,6 +98,15 @@ public class InvocationRecord {
         prompt.append("\n}\n```\n");
       }
     }
+    if (!thirdPartyLibs.isEmpty()) {
+      prompt.append(
+          "These methods are from third party code and the source code is not available\n");
+      for (String lib : thirdPartyLibs) {
+        prompt.append(lib).append("\n");
+      }
+      prompt.append(
+          "There is no source code for these methods, if you ask about them, I cannot provide you with any information about them, make your best guess.\n");
+    }
     return prompt.toString();
   }
 
@@ -110,23 +123,18 @@ public class InvocationRecord {
         existingMethods.stream()
             .flatMap(methodRecord -> registry.getCalledMethods(methodRecord).stream())
             .collect(Collectors.toSet());
-    Set<MethodRecord> methodRecords =
-        requests.stream()
-            .map(
-                name -> {
-                  Optional<MethodRecord> optional =
-                      allMethods.stream()
-                          .filter(
-                              methodRecord -> {
-                                SignatureMatcher matcher =
-                                    new SignatureMatcher(methodRecord.location.method);
-                                return matcher.callableName.equals(name);
-                              })
-                          .findFirst();
-                  return optional.orElse(null);
-                })
-            .filter(Objects::nonNull)
-            .collect(Collectors.toSet());
+    Set<MethodRecord> methodRecords = new HashSet<>();
+    for (String request : requests) {
+      Optional<MethodRecord> optional =
+          allMethods.stream()
+              .filter(
+                  record -> {
+                    SignatureMatcher matcher = new SignatureMatcher(record.location.method);
+                    return matcher.callableName.equals(request);
+                  })
+              .findFirst();
+      optional.ifPresentOrElse(methodRecords::add, () -> thirdPartyLibs.add(request));
+    }
     calls.get(calls.size() - 1).addAll(methodRecords);
   }
 }

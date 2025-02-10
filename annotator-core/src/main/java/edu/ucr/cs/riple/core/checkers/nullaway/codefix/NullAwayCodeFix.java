@@ -199,6 +199,12 @@ public class NullAwayCodeFix {
             new AddSingleElementAnnotation(methodLocation, "SuppressWarnings", "NullAway", false));
         return NO_ACTION;
       }
+      boolean isReturningNullableOnCallSite =
+          checkIfMethodIsReturningNullableOnCallSite(encClass, method, invocation);
+      if (!isReturningNullableOnCallSite) {
+        // Add precondition here.
+        return NO_ACTION;
+      }
     }
     // Try to fix by regions using the method as an example.
     OnMethod methodLocation =
@@ -523,7 +529,7 @@ public class NullAwayCodeFix {
    * @return true if the method is returning nullable.
    */
   private boolean checkIfMethodIsReturningNullable(String encClass, String method) {
-    // Build a context for prompt generation
+    // Build a record, we only need the method declaration so we set the depth to 1.
     InvocationRecord record = invocationRecordRegistry.computeInvocationRecord(encClass, method, 1);
     int count = 0;
     while (count++ < 10) {
@@ -535,7 +541,7 @@ public class NullAwayCodeFix {
             methodNullability.getValuesFromTag("/response/methods", "method");
         if (methods.isEmpty()) {
           throw new IllegalStateException(
-              "Could not determine the nullability of the parameter and did not ask for any methods declaration.");
+              "Could not determine the nullability of the method return and did not ask for any methods declaration.");
         }
         record.addRequestedMethodsByNames(methods);
       } else {
@@ -543,6 +549,44 @@ public class NullAwayCodeFix {
           return false;
         }
         if (methodNullability.isAgreement()) {
+          return true;
+        }
+      }
+    }
+    // At this moment, just to be safe, we assume it is returning nullable.
+    return true;
+  }
+
+  /**
+   * Checks if the method is returning nullable on call site.
+   *
+   * @param encClass the owner of the method.
+   * @param method the method signature.
+   * @param invocation the invocation expression.
+   * @return true if the method is returning nullable on call site.
+   */
+  private boolean checkIfMethodIsReturningNullableOnCallSite(
+      String encClass, String method, String invocation) {
+    // Build a record, we only need the method declaration so we set the depth to 1.
+    InvocationRecord record = invocationRecordRegistry.computeInvocationRecord(encClass, method, 3);
+    int count = 0;
+    while (count++ < 10) {
+      String callContext = record.constructCallGraphContext(parser);
+      Response invocationNullability =
+          gpt.checkIfMethodIsReturningNullableOnCallSite(invocation, callContext);
+      if (!invocationNullability.isSuccessFull()) {
+        ImmutableSet<String> methods =
+            invocationNullability.getValuesFromTag("/response/methods", "method");
+        if (methods.isEmpty()) {
+          throw new IllegalStateException(
+              "Could not determine the nullability of the invocation and did not ask for any methods declaration.");
+        }
+        record.addRequestedMethodsByNames(methods);
+      } else {
+        if (invocationNullability.isDisagreement()) {
+          return false;
+        }
+        if (invocationNullability.isAgreement()) {
           return true;
         }
       }
