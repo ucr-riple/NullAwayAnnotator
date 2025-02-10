@@ -336,16 +336,16 @@ public class ChatGPT {
     String nullableExpression = NullAwayError.extractPlaceHolderValue(error)[0];
     // Construct the prompt
     String enclosingMethod = parser.getRegionSourceCode(error.getRegion()).content;
-    String nullabilityPossibility =
+    String prompt =
         String.format(
             checkIfExpressionCanBeNullAtErrorPointPrompt,
             nullableExpression,
             error.position.diagnosticLine.trim(),
             enclosingMethod);
     log("Asking if the error can be null at error point point");
-    Response response = ask(nullabilityPossibility);
-    log("response: " + response);
-    return response.isDisagreement();
+    Response nullabilityPossibility = ask(prompt);
+    log("response: " + nullabilityPossibility);
+    return nullabilityPossibility.isDisagreement();
   }
 
   /**
@@ -387,12 +387,15 @@ public class ChatGPT {
   /**
    * Check if the method is returning nullable given the context of the method.
    *
+   * @param encClass the enclosing class of the method.
    * @param method the method to check.
    * @param context the context of the method.
    * @return {@code true} if the method is returning nullable, {@code false} otherwise.
    */
-  public Response checkIfMethodIsReturningNullable(String method, String context) {
-    return ask(String.format(checkIfMethodIsReturningNullablePrompt, method, context));
+  public Response checkIfMethodIsReturningNullable(String encClass, String method, String context) {
+    String methodSource = parser.getRegionSourceCode(new Region(encClass, method)).content;
+    String prompt = String.format(checkIfMethodIsReturningNullablePrompt, methodSource, context);
+    return ask(prompt);
   }
 
   /**

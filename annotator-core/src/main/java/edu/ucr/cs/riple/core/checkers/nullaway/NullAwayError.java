@@ -127,15 +127,16 @@ public class NullAwayError extends Error {
     if (error.messageType.equals("DEREFERENCE_NULLABLE")) {
       final Pattern pattern =
           Pattern.compile(
-              "dereferenced expression (\\w+) is @Nullable --- (\\w+) --- ((?:\\w+\\.)*\\w+) --- (\\w+)");
+              "dereferenced expression (.+?) is @Nullable --- (.+?) --- (.+?) --- (.+?) --- (.+)");
       Matcher matcher = pattern.matcher(error.message);
       if (matcher.find()) {
         return new String[] {
-          matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4)
+          // expression     type              encClass          annotated?        deferred symbol
+          matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4), matcher.group(5)
         };
       }
       throw new IllegalArgumentException(
-          "Error message does not contain a placeholder value."
+          "Error message does not contain a placeholder values: "
               + error.messageType
               + " "
               + error.message);

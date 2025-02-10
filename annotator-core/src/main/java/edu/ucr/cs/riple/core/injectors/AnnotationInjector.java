@@ -82,4 +82,22 @@ public abstract class AnnotationInjector {
    * @param changes Set of annotations to inject.
    */
   public abstract void injectAnnotations(Set<AddAnnotation> changes);
+
+  /**
+   * Removes annotation from the source code.
+   *
+   * @param change Annotation to inject.
+   */
+  public void removeAnnotation(RemoveAnnotation change) {
+    this.removeAnnotations(Set.of(change));
+  }
+
+  /**
+   * Injects annotations to the source code.
+   *
+   * @param change Annotation to inject.
+   */
+  public void injectAnnotation(AddAnnotation change) {
+    this.injectAnnotations(Set.of(change));
+  }
 }

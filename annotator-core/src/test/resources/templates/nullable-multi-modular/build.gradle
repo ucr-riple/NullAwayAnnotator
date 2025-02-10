@@ -55,7 +55,7 @@ subprojects {
         compileOnly "com.google.guava:guava:32.0.1-jre"
 
         // to add @Initializer
-        compileOnly 'com.uber.nullaway:nullaway-annotations:0.10.10'
+        compileOnly 'com.uber.nullaway:nullaway-annotations:' + System.getenv('NULLAWAY_TEST_VERSION')
         // to add jetbrains annotations (testing type use vs type declaration)
         compileOnly 'org.jetbrains:annotations:24.0.0'
         compileOnly "org.jspecify:jspecify:0.3.0"

@@ -304,29 +304,35 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   @Test
   public void dereferenceNullableMethodTargetMethodSuppressionTest() {
-//    coreTestHelper
-//        .onTarget()
-//        .withSourceLines(
-//            "Foo.java",
-//            "package test;",
-//            "import javax.annotation.Nullable;",
-//            "public class Foo {",
-//            "   public int exec(@Nullable Bar b){",
-//            "     aaa(b);",
-//            "     return useB(b);",
-//            "   }",
-//            "   public void aaa(Bar b){",
-//            "     if(b == null){",
-//            "       throw new IllegalArgumentException();",
-//            "     }",
-//            "   }",
-//            "   public Object exec(@Nullable Bar b){",
-//            "     return b.exec();",
-//            "   }",
-//            "}")
-//        .expectNoReport()
-//        .resolveRemainingErrors()
-//        .start();
+    mockChatGPTResponse(AGREE, DISAGREE);
+    coreTestHelper
+        .onTarget()
+        .withSourceLines(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "import java.util.List;",
+            "import java.util.Map;",
+            "import java.util.HashMap;",
+            "public class Foo {",
+            "   @Nullable public String exec(String k, String defaultValue){",
+            "     List<String> keys = List.of(\"A\", \"B\");",
+            "     if(!keys.contains(k)){",
+            "         return defaultValue;",
+            "     }",
+            "     Map<String, String> map = new HashMap<>();",
+            "     for(String key : keys){",
+            "          map.put(key, \"val:\" + key);",
+            "     }",
+            "     return map.get(k);",
+            "   }",
+            "   public String run(){",
+            "     return exec(\"A\", \"def\").toString();",
+            "   }",
+            "}")
+        .expectNoReport()
+        .resolveRemainingErrors()
+        .start();
   }
 
   /**

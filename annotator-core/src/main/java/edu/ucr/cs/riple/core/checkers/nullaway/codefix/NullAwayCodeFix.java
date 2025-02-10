@@ -46,8 +46,8 @@ import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.SourceCode;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
 import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
-import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import edu.ucr.cs.riple.injector.changes.RemoveMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
@@ -156,6 +156,7 @@ public class NullAwayCodeFix {
     String expression = infos[0];
     String type = infos[1];
     String encClass = infos[2];
+    String expressionSymbol = infos[4];
     boolean isAnnotated = infos[3].equalsIgnoreCase("true");
     switch (type) {
       case "field":
@@ -163,7 +164,8 @@ public class NullAwayCodeFix {
       case "parameter":
         return resolveParameterDereferenceError(error, encClass, expression);
       case "method":
-        return resolveMethodDereferenceError(error, encClass, expression, isAnnotated);
+        return resolveMethodDereferenceError(
+            error, encClass, expressionSymbol, expression, isAnnotated);
       default:
         return NO_ACTION;
     }
@@ -173,13 +175,14 @@ public class NullAwayCodeFix {
    * Resolves a method dereference error by generating a code fix.
    *
    * @param error the error to fix.
-   * @param encClass the class containing the method.
-   * @param method the method to fix.
-   * @param isAnnotated true if the method is annotated as nullable.
+   * @param encClass the owner of the method.
+   * @param method the name of the method.
+   * @param invocation invocation expression.
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty} if no fix
+   *     is found.
    */
   private Set<MethodRewriteChange> resolveMethodDereferenceError(
-      NullAwayError error, String encClass, String method, boolean isAnnotated) {
+      NullAwayError error, String encClass, String method, String invocation, boolean isAnnotated) {
     // Build a context for prompt generation
     if (isAnnotated) {
       boolean isReturningNullable = checkIfMethodIsReturningNullable(encClass, method);
@@ -190,9 +193,10 @@ public class NullAwayCodeFix {
                 .getMethodRegistry()
                 .findMethodByName(encClass, method)
                 .location;
-        RemoveAnnotation removeNullable =
-            new RemoveMarkerAnnotation(methodLocation, context.config.nullableAnnot);
-        context.injector.removeAnnotations(Set.of(removeNullable));
+        context.injector.removeAnnotation(
+            new RemoveMarkerAnnotation(methodLocation, context.config.nullableAnnot));
+        context.injector.injectAnnotation(
+            new AddSingleElementAnnotation(methodLocation, "SuppressWarnings", "NullAway", false));
         return NO_ACTION;
       }
     }
@@ -331,12 +335,12 @@ public class NullAwayCodeFix {
                           getterMethod.get().location.clazz,
                           getterMethod.get().location.method),
                       context.config.nullableAnnot);
-              context.injector.removeAnnotations(Set.of(removeAnnotationOnGetter));
+              context.injector.removeAnnotation(removeAnnotationOnGetter);
             }
             // Add annotation
-            context.injector.injectAnnotations(Set.of(initializerAnnotation.get()));
+            context.injector.injectAnnotation(initializerAnnotation.get());
             // remove nullable
-            context.injector.removeAnnotations(Set.of(removeAnnotation));
+            context.injector.removeAnnotation(removeAnnotation);
             return NO_ACTION;
           }
         }
@@ -520,11 +524,12 @@ public class NullAwayCodeFix {
    */
   private boolean checkIfMethodIsReturningNullable(String encClass, String method) {
     // Build a context for prompt generation
-    InvocationRecord record = invocationRecordRegistry.computeInvocationRecord(encClass, method, 2);
+    InvocationRecord record = invocationRecordRegistry.computeInvocationRecord(encClass, method, 1);
     int count = 0;
     while (count++ < 10) {
       String callContext = record.constructCallGraphContext(parser);
-      Response methodNullability = gpt.checkIfMethodIsReturningNullable(method, callContext);
+      Response methodNullability =
+          gpt.checkIfMethodIsReturningNullable(encClass, method, callContext);
       if (!methodNullability.isSuccessFull()) {
         ImmutableSet<String> methods =
             methodNullability.getValuesFromTag("/response/methods", "method");
