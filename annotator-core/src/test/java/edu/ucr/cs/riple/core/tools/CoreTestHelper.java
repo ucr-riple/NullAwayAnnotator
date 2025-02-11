@@ -243,9 +243,14 @@ public class CoreTestHelper {
 
   /** Starts the test process. */
   public void start() {
+    start("javax.annotation.Nullable");
+  }
+
+  /** Starts the test process. */
+  public void start(String annotName) {
     Path configPath = outDirPath.resolve("config.json");
     checkSourcePackages();
-    makeAnnotatorConfigFile(configPath);
+    makeAnnotatorConfigFile(configPath, annotName);
     config = new Config(configPath);
     Annotator annotator = new Annotator(config);
     annotator.start();
@@ -416,7 +421,7 @@ public class CoreTestHelper {
    *
    * @param configPath Path to the config file.
    */
-  public void makeAnnotatorConfigFile(Path configPath) {
+  public void makeAnnotatorConfigFile(Path configPath, String nullableAnnotation) {
     Config.Builder builder = new Config.Builder();
     final int[] id = {0};
     builder.configPaths =
@@ -430,7 +435,8 @@ public class CoreTestHelper {
                         outDirPath.resolve(name + "-scanner.xml")))
             .collect(Collectors.toList());
     builder.checker = NullAway.NAME;
-    builder.nullableAnnotation = "org.jspecify.annotations.Nullable";
+    builder.nullableAnnotation =
+        nullableAnnotation == null ? "javax.annotation.Nullable" : nullableAnnotation;
     // In tests, we use NullAway @Initializer annotation.
     builder.initializerAnnotation = "com.uber.nullaway.annotations.Initializer";
     builder.outputDir = outDirPath.toString();

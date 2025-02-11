@@ -138,8 +138,8 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
       if (errorType.equals(NullAwayError.ASSIGN_NULLABLE_TO_NONNULL_ARRAY)) {
         annotations =
             Set.of(
-                new AddTypeUseMarkerAnnotation(nonnullTarget, config.nullableAnnot,
-                    ImmutableList.of(ImmutableList.of(1, 0))));
+                new AddTypeUseMarkerAnnotation(
+                    nonnullTarget, config.nullableAnnot, ImmutableList.of(ImmutableList.of(1, 0))));
       } else {
         annotations = Set.of(new AddTypeUseMarkerAnnotation(nonnullTarget, config.nullableAnnot));
       }

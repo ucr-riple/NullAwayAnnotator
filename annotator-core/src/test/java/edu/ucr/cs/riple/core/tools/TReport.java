@@ -59,11 +59,10 @@ public class TReport extends Report {
   }
 
   public TReport(Location root, ImmutableList<ImmutableList<Integer>> index, int effect) {
-    super(new Fix(new AddTypeUseMarkerAnnotation(root, "org.jspecify.annotations.Nullable", index)), effect);
+    super(
+        new Fix(new AddTypeUseMarkerAnnotation(root, "org.jspecify.annotations.Nullable", index)),
+        effect);
     this.expectedValue = effect;
-    if (index != null) {
-      this.setTypeIndex(index);
-    }
   }
 
   public TReport(

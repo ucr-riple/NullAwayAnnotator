@@ -76,7 +76,7 @@ public class OffsetChangeHandlingTest {
     root = temporaryFolder.getRoot().toPath();
     CoreTestHelper helper = new CoreTestHelper(root, root).onEmptyProject();
     Path configPath = root.resolve("context.json");
-    helper.makeAnnotatorConfigFile(configPath);
+    helper.makeAnnotatorConfigFile(configPath, "javax.annotation.Nullable");
     Utility.runTestWithMockedBuild(
         root,
         () -> {
