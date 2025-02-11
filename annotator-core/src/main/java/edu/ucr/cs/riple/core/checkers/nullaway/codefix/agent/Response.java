@@ -28,6 +28,8 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.annotator.util.parsers.XmlParser;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /** Response a response from the agent. */
 public class Response {
@@ -56,10 +58,14 @@ public class Response {
   /** Flag to indicate if the response is successful. */
   private final boolean success;
 
+  /** Full content of response, used to retrieve values from custom tags. */
   private final String content;
 
   private static final Pattern RESPONSE_PATTERN =
       Pattern.compile("<response>.*?</response>", Pattern.DOTALL);
+
+  /** The logger instance. */
+  private static final Logger logger = LogManager.getLogger(Response.class);
 
   /**
    * The pattern to extract the code from the response from ChatGPT. The code is in the format:
@@ -69,6 +75,7 @@ public class Response {
       Pattern.compile("```java\\s*([\\s\\S]*?)\\s*```");
 
   public Response(String response) {
+    logger.debug("Creating Response: {}", response);
     Matcher matcher = RESPONSE_PATTERN.matcher(response);
     if (!matcher.find()) {
       throw new IllegalArgumentException("Invalid response format: " + response);
@@ -91,6 +98,7 @@ public class Response {
             || parser.getArrayValueFromTag("/response/success", Boolean.class).orElse(false);
     this.code = parseCode(parser.getValueFromTag("/response/code", String.class).orElse(""));
     this.reason = parser.getArrayValueFromTag("/response/reason", String.class).orElse("");
+    logger.debug("Response created: {}", this);
   }
 
   /**

@@ -134,6 +134,7 @@ public class ChatGPT {
    */
   public static Response ask(String prompt) {
     try {
+      logger.trace("Asking ChatGPT: {}", prompt);
       // Making a POST request
       HttpURLConnection connection = (HttpURLConnection) new URL(URL).openConnection();
       connection.setRequestMethod("POST");
@@ -232,6 +233,7 @@ public class ChatGPT {
    */
   public Set<MethodRewriteChange> fixDereferenceErrorBySafeRegions(
       NullAwayError error, Set<Region> safeRegions) {
+    logger.trace("Attempting to fix dereference error by using safe regions");
     String[] info = NullAwayError.extractPlaceHolderValue(error);
     String expression = info[0];
     String method = parser.getRegionSourceCode(error.getRegion()).content;
@@ -244,11 +246,12 @@ public class ChatGPT {
             constructPromptForRegions(safeRegions));
     logger.trace("Asking if the error can be fixed by using safe regions");
     Response response = ask(prompt);
-    logger.trace("response: " + response);
     if (!response.isSuccessFull()) {
+      logger.trace("Response is not successful");
       return Set.of();
     }
     String code = response.getCode();
+    logger.trace("Fixing the error by using safe regions with code: {}", code);
     return Set.of(
         new MethodRewriteChange(
             new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member), code));
@@ -267,6 +270,7 @@ public class ChatGPT {
    */
   public Set<MethodRewriteChange> fixDereferenceErrorByAllRegions(
       NullAwayError error, Set<Region> safeRegions, Set<Region> errorRegions) {
+    logger.trace("Attempting to fix dereference error by using all regions");
     String[] info = NullAwayError.extractPlaceHolderValue(error);
     String expression = info[0];
     String method = parser.getRegionSourceCode(error.getRegion()).content;
@@ -289,9 +293,11 @@ public class ChatGPT {
     Response response = ask(prompt);
     logger.trace("response: " + response);
     if (!response.isSuccessFull()) {
+      logger.trace("Response is not successful");
       return Set.of();
     }
     String code = response.getCode();
+    logger.trace("Fixing the error by using all regions with code: {}", code);
     return Set.of(
         new MethodRewriteChange(
             new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member), code));
@@ -365,7 +371,6 @@ public class ChatGPT {
     String prompt = String.format(checkIfMethodIsAnInitializerPrompt, enclosingMethod);
     logger.trace("Asking if the method is an initializer: {}", onMethod.method);
     Response response = ask(prompt);
-    logger.trace("response: " + response);
     return response.isAgreement();
   }
 
@@ -379,6 +384,7 @@ public class ChatGPT {
    */
   public Response checkIfParamIsNullable(
       String encClass, String method, String param, String context) {
+    logger.trace("Asking if the parameter is nullable: {}", param);
     return ask(
         String.format(
             checkIfParamIsNullablePrompt,
@@ -396,6 +402,7 @@ public class ChatGPT {
    * @return {@code true} if the method is returning nullable, {@code false} otherwise.
    */
   public Response checkIfMethodIsReturningNullable(String encClass, String method, String context) {
+    logger.trace("Asking if the method is returning nullable: {}", method);
     String methodSource = parser.getRegionSourceCode(new Region(encClass, method)).content;
     String prompt = String.format(checkIfMethodIsReturningNullablePrompt, methodSource, context);
     return ask(prompt);
@@ -409,6 +416,7 @@ public class ChatGPT {
    * @return {@code true} if the method is returning nullable, {@code false} otherwise.
    */
   public Response checkIfMethodIsReturningNullableOnCallSite(String invocation, String context) {
+    logger.trace("Asking if the method is returning nullable on the call site: {}", invocation);
     String prompt =
         String.format(
             checkIfMethodReturnsNullableAtCallSitePrompt,

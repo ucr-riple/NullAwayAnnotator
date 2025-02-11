@@ -57,9 +57,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /** A class that provides code fixes for {@link NullAwayError}s. */
 public class NullAwayCodeFix {
+
+  private static final Logger log = LogManager.getLogger(NullAwayCodeFix.class);
 
   /** The {@link ChatGPT} instance used to generate code fixes. */
   private final ChatGPT gpt;
@@ -103,6 +107,7 @@ public class NullAwayCodeFix {
    *     error cannot be fixed.
    */
   public Set<MethodRewriteChange> fix(NullAwayError error) {
+    log.trace("Fixing error: {}", error);
     switch (error.messageType) {
       case "DEREFERENCE_NULLABLE":
         return resolveDereferenceError(error);
@@ -129,26 +134,33 @@ public class NullAwayCodeFix {
    */
   private Set<MethodRewriteChange> resolveDereferenceError(NullAwayError error) {
     if (ASTParser.isObjectEqualsMethod(error.getRegion().member)) {
+      log.trace("Fixing dereference error in equals method.");
       return gpt.fixDereferenceErrorInEqualsMethod(error);
     }
     if (ASTParser.isObjectToStringMethod(error.getRegion().member)) {
+      log.trace("Fixing dereference error in toString method.");
       return gpt.fixDereferenceErrorInToStringMethod(error);
     }
     if (ASTParser.isObjectHashCodeMethod(error.getRegion().member)) {
+      log.trace("Fixing dereference error in hashCode method.");
       return gpt.fixDereferenceErrorInHashCodeMethod(error);
     }
     // Check if it is a false positive
+    log.trace("Checking if false positive.");
     if (gpt.checkIfFalsePositiveAtErrorPoint(error)) {
+      log.trace("False positive detected.");
       // cast to nonnull.
       return constructPreconditionCheckMethodRewriteForError(error);
     }
     if (error.getRegion().isOnCallable()) {
+      log.trace("Checking if the method is returning nullable.");
       // check if method already annotated as nullable, return nullable.
       CallableDeclaration<?> enclosingMethodForError =
           parser.getCallableDeclaration(error.getRegion().clazz, error.getRegion().member);
       if (enclosingMethodForError != null
           && parser.isMethodWithNullableReturn(enclosingMethodForError)) {
         // make return null statement if null.
+        log.trace("Method is returning nullable. Constructing return null statement.");
         return constructReturnNullIfExpressionIsNullForError(error);
       }
     }
@@ -184,9 +196,12 @@ public class NullAwayCodeFix {
   private Set<MethodRewriteChange> resolveMethodDereferenceError(
       NullAwayError error, String encClass, String method, String invocation, boolean isAnnotated) {
     // Build a context for prompt generation
+    log.trace("Resolving method dereference error.");
     if (isAnnotated) {
+      log.trace("Method is in annotated package. Checking if the method is returning nullable.");
       boolean isReturningNullable = checkIfMethodIsReturningNullable(encClass, method);
       if (!isReturningNullable) {
+        log.trace("Method is not returning nullable. Injecting suppression annotation.");
         OnMethod methodLocation =
             context
                 .targetModuleInfo
@@ -202,6 +217,8 @@ public class NullAwayCodeFix {
       boolean isReturningNullableOnCallSite =
           checkIfMethodIsReturningNullableOnCallSite(encClass, method, invocation);
       if (!isReturningNullableOnCallSite) {
+        log.trace(
+            "Method is not returning nullable on call site. Injecting suppression annotation.");
         // Add precondition here.
         return NO_ACTION;
       }
@@ -213,6 +230,7 @@ public class NullAwayCodeFix {
             .getMethodRegistry()
             .findMethodByName(encClass, error.getRegion().member)
             .location;
+    log.trace("Trying to fix by regions using the method as an example.");
     return fixErrorByRegions(methodLocation);
   }
 
@@ -228,6 +246,7 @@ public class NullAwayCodeFix {
    */
   private Set<MethodRewriteChange> resolveParameterDereferenceError(
       NullAwayError error, String encClass, String paramName) {
+    log.trace("Resolving parameter dereference error.");
     // Build a context for prompt generation
     InvocationRecord record =
         invocationRecordRegistry.computeInvocationRecord(encClass, error.getRegion().member, 3);
@@ -237,6 +256,8 @@ public class NullAwayCodeFix {
       Response paramNullabilityPossibility =
           gpt.checkIfParamIsNullable(encClass, error.getRegion().member, paramName, callContext);
       if (!paramNullabilityPossibility.isSuccessFull()) {
+        log.trace(
+            "Could not determine the nullability of the parameter. Model asked for more info.");
         ImmutableSet<String> methods =
             paramNullabilityPossibility.getValuesFromTag("/response/methods", "method");
         if (methods.isEmpty()) {
@@ -246,8 +267,10 @@ public class NullAwayCodeFix {
         record.addRequestedMethodsByNames(methods);
       } else {
         if (paramNullabilityPossibility.isDisagreement()) {
+          log.trace("Disagreement in the nullability of the parameter.");
           return NO_ACTION;
         }
+        log.trace("Agreement in the nullability of the parameter.");
         return NO_ACTION;
       }
     }
@@ -277,14 +300,17 @@ public class NullAwayCodeFix {
    */
   private Set<MethodRewriteChange> resolveFieldDereferenceError(
       NullAwayError error, String encClass, String field) {
+    log.trace("Resolving field dereference error.");
     // check if there is an assignment to the expression in the method body.
     if (error.getRegion().isOnCallable()) {
       CallableDeclaration<?> enclosingMethodForError =
           parser.getCallableDeclaration(error.getRegion().clazz, error.getRegion().member);
       boolean initializedBeforeUse =
           checkForInitializationBeforeUse(enclosingMethodForError, field);
+      log.trace("Checking if the field is initialized before use: {}", initializedBeforeUse);
       if (!initializedBeforeUse) {
         // look if there is any method initializing this field.
+        log.trace("Checking if there is any method initializing this field.");
         Set<OnMethod> methods =
             context
                 .targetModuleInfo
@@ -303,6 +329,7 @@ public class NullAwayCodeFix {
                               new OnMethod(method.path, method.clazz, method.method),
                               context.config.initializerAnnot));
           if (initializerAnnotation.isPresent()) {
+            log.trace("Found initializer method. Injecting initializer annotation.");
             // remove annotation from field
             RemoveMarkerAnnotation removeAnnotation =
                 new RemoveMarkerAnnotation(
@@ -334,6 +361,9 @@ public class NullAwayCodeFix {
                         })
                     .findFirst();
             if (getterMethod.isPresent()) {
+              log.trace(
+                  "Found getter method. Removing nullable annotation.{}",
+                  getterMethod.get().location.method);
               RemoveMarkerAnnotation removeAnnotationOnGetter =
                   new RemoveMarkerAnnotation(
                       new OnMethod(
@@ -371,6 +401,7 @@ public class NullAwayCodeFix {
    *     set if no fix is found.
    */
   private Set<MethodRewriteChange> fixErrorByRegions(Location location) {
+    log.trace("Fixing error by regions.");
     Set<Region> unsafeRegions = new HashSet<>();
     Set<Region> safeRegions = new HashSet<>();
     context
@@ -386,6 +417,7 @@ public class NullAwayCodeFix {
               }
             });
     Set<MethodRewriteChange> changes = new HashSet<>();
+    log.trace("Safe regions: {} - Unsafe regions: {}", safeRegions.size(), unsafeRegions.size());
     // for each unsafe region, consult gpt to generate a fix.
     for (Region region : unsafeRegions) {
       Optional<Error> optionalError = errorStore.getErrorsInRegion(region).stream().findAny();
@@ -399,12 +431,14 @@ public class NullAwayCodeFix {
         changesForRegion = gpt.fixDereferenceErrorBySafeRegions(errorInRegion, safeRegions);
       }
       if (changesForRegion.isEmpty()) {
+        log.trace("No fix found by safe regions. Trying to fix by all regions.");
         // If no safe region found, of no fix found by safe regions, try to fix by precondition
         // check.
         changesForRegion =
             gpt.fixDereferenceErrorByAllRegions(errorInRegion, safeRegions, unsafeRegions);
       }
       if (!changesForRegion.isEmpty()) {
+        log.trace("Successfully generated a fix for the error.");
         changes.addAll(changesForRegion);
       }
     }
@@ -529,6 +563,7 @@ public class NullAwayCodeFix {
    * @return true if the method is returning nullable.
    */
   private boolean checkIfMethodIsReturningNullable(String encClass, String method) {
+    log.trace("Checking if the method is returning nullable.");
     // Build a record, we only need the method declaration so we set the depth to 1.
     InvocationRecord record = invocationRecordRegistry.computeInvocationRecord(encClass, method, 1);
     int count = 0;
