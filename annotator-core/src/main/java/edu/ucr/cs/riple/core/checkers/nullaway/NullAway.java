@@ -56,6 +56,8 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /** Represents <a href="https://github.com/uber/NullAway">NullAway</a> checker in Annotator. */
 public class NullAway extends CheckerBaseClass<NullAwayError> {
@@ -73,6 +75,9 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
 
   /** Supported version of NullAway serialization. */
   public static final int VERSION = 3;
+
+  /** The logger instance. */
+  private static final Logger logger = LogManager.getLogger(NullAway.class);
 
   public NullAway(Context context) {
     super(context);
@@ -365,6 +370,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     NullAwayCodeFix codeFix = new NullAwayCodeFix(context);
     // Collect regions with remaining errors.
     Set<NullAwayError> remainingErrors = deserializeErrors(context.targetModuleInfo);
+    logger.trace("Resolving remaining errors: {} errors.", remainingErrors.size());
     Set<MethodRewriteChange> rewrites = new HashSet<>();
     remainingErrors.stream()
         .collect(Collectors.groupingBy(NullAwayError::getRegion))

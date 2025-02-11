@@ -87,7 +87,7 @@ public class NullAwayCodeFix {
 
   public NullAwayCodeFix(Context context) {
     this.parser = new ASTParser(context);
-    this.gpt = new ChatGPT(context, parser);
+    this.gpt = new ChatGPT(parser);
     this.context = context;
     this.injector = new Injector(context.config.languageLevel);
     this.errorStore = new ErrorStore(context, context.targetModuleInfo);

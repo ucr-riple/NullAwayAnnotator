@@ -357,13 +357,4 @@ public class Utility {
     return annotName.contains(".jspecify.annotations.Nullable")
         || annotName.contains(".checkerframework.checker.nullness.qual.Nullable");
   }
-
-  /**
-   * Log a message to the console.
-   *
-   * @param message the message to log.
-   */
-  public static void log(String message) {
-    System.out.println(message);
-  }
 }

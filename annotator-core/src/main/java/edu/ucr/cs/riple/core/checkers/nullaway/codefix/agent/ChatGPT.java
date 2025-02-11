@@ -24,12 +24,9 @@
 
 package edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent;
 
-import static edu.ucr.cs.riple.core.util.Utility.log;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import edu.ucr.cs.riple.annotator.util.parsers.JsonParser;
-import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.core.util.ASTParser;
@@ -46,6 +43,8 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /** Wrapper class to interact with ChatGPT to generate code fixes for {@link NullAwayError}s. */
 public class ChatGPT {
@@ -95,15 +94,15 @@ public class ChatGPT {
   /** The prompt to ask ChatGPT to check if the method is returning nullable on the call site. */
   private final String checkIfMethodReturnsNullableAtCallSitePrompt;
 
-  /** The {@link Context} instance. */
-  private final Context context;
+  /** The logger instance. */
+  private static final Logger logger = LogManager.getLogger(ChatGPT.class);
 
   /**
    * The {@link ASTParser} instance used to parse the source code of the file containing the error.
    */
   private final ASTParser parser;
 
-  public ChatGPT(Context context, ASTParser parser) {
+  public ChatGPT(ASTParser parser) {
     this.dereferenceEqualsMethodRewritePrompt =
         Utility.readResourceContent("prompts/dereference/equals-rewrite.txt");
     this.dereferenceToStringMethodRewritePrompt =
@@ -124,7 +123,6 @@ public class ChatGPT {
         Utility.readResourceContent("prompts/inquiry/is-returning-nullable.txt");
     this.checkIfMethodReturnsNullableAtCallSitePrompt =
         Utility.readResourceContent("prompts/inquiry/is-nullable-at-call-site.txt");
-    this.context = context;
     this.parser = parser;
   }
 
@@ -244,9 +242,9 @@ public class ChatGPT {
             expression,
             method,
             constructPromptForRegions(safeRegions));
-    log("Asking if the error can be fixed by using safe regions");
+    logger.trace("Asking if the error can be fixed by using safe regions");
     Response response = ask(prompt);
-    log("response: " + response);
+    logger.trace("response: " + response);
     if (!response.isSuccessFull()) {
       return Set.of();
     }
@@ -287,9 +285,9 @@ public class ChatGPT {
             constructPromptForRegions(errorRegions),
             expression,
             expression);
-    log("Asking if the error can be fixed by using all regions");
+    logger.trace("Asking if the error can be fixed by using all regions");
     Response response = ask(prompt);
-    log("response: " + response);
+    logger.trace("response: " + response);
     if (!response.isSuccessFull()) {
       return Set.of();
     }
@@ -347,9 +345,9 @@ public class ChatGPT {
             nullableExpression,
             error.position.diagnosticLine.trim(),
             enclosingMethod);
-    log("Asking if the error can be null at error point point");
+    logger.trace("Asking if the error can be null at error point point");
     Response nullabilityPossibility = ask(prompt);
-    log("response: " + nullabilityPossibility);
+    logger.trace("response: " + nullabilityPossibility);
     return nullabilityPossibility.isDisagreement();
   }
 
@@ -365,9 +363,9 @@ public class ChatGPT {
     String enclosingMethod =
         parser.getRegionSourceCode(new Region(onMethod.clazz, onMethod.method)).content;
     String prompt = String.format(checkIfMethodIsAnInitializerPrompt, enclosingMethod);
-    log("Asking if the method is an initializer: " + onMethod.method);
+    logger.trace("Asking if the method is an initializer: {}", onMethod.method);
     Response response = ask(prompt);
-    log("response: " + response);
+    logger.trace("response: " + response);
     return response.isAgreement();
   }
 
