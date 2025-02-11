@@ -46,6 +46,9 @@ public class DiagnosticPosition {
   /** The offset in the line where the diagnostic is reported. */
   public final int offsetInLine;
 
+  /** The path to the file where the diagnostic is reported. */
+  public final Path path;
+
   public DiagnosticPosition(Path path, int offset, int adaptedOffset) {
     List<String> content = Utility.readFileLines(path);
     int index = 0;
@@ -57,6 +60,7 @@ public class DiagnosticPosition {
       }
       index += line.length() + 1;
     }
+    this.path = path;
     this.adaptedOffset = adaptedOffset;
     this.offset = offset;
     this.offsetInLine = offset - index;
@@ -70,6 +74,7 @@ public class DiagnosticPosition {
     this.diagnosticLine = "";
     this.adaptedOffset = 0;
     this.offsetInLine = 0;
+    this.path = null;
   }
 
   @Override
@@ -88,6 +93,11 @@ public class DiagnosticPosition {
 
   @Override
   public String toString() {
-    return adaptedOffset + "";
+    return "\n"
+        + ((path == null) ? "" : path.toString())
+        + ":"
+        + lineNumber
+        + "\n"
+        + diagnosticLine;
   }
 }

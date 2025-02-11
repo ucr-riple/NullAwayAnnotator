@@ -197,15 +197,7 @@ public abstract class Error {
 
   @Override
   public String toString() {
-    return "Type='"
-        + messageType
-        + '\''
-        + ", message='"
-        + message
-        + '\''
-        + ", offset='"
-        + position
-        + '\'';
+    return "Type='" + messageType + '\'' + ", message='" + message + '\'' + position;
   }
 
   /**

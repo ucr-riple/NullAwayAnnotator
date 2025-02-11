@@ -353,7 +353,6 @@ public class ChatGPT {
             enclosingMethod);
     logger.trace("Asking if the error can be null at error point point");
     Response nullabilityPossibility = ask(prompt);
-    logger.trace("response: " + nullabilityPossibility);
     return nullabilityPossibility.isDisagreement();
   }
 

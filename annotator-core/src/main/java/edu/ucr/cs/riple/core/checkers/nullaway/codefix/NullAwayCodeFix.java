@@ -154,14 +154,14 @@ public class NullAwayCodeFix {
       return constructPreconditionCheckMethodRewriteForError(error);
     }
     if (error.getRegion().isOnCallable()) {
-      logger.trace("Checking if the method is returning nullable.");
       // check if method already annotated as nullable, return nullable.
       CallableDeclaration<?> enclosingMethodForError =
           parser.getCallableDeclaration(error.getRegion().clazz, error.getRegion().member);
       if (enclosingMethodForError != null
           && parser.isMethodWithNullableReturn(enclosingMethodForError)) {
         // make return null statement if null.
-        logger.trace("Method is returning nullable. Constructing return null statement.");
+        logger.trace(
+            "Method is already annotated as nullable. Constructing return null statement.");
         return constructReturnNullIfExpressionIsNullForError(error);
       }
     }
