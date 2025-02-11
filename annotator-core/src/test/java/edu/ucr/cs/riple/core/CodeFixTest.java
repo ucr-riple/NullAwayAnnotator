@@ -221,16 +221,16 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   @Test
   public void dereferenceFieldFixGenerationUsingSafeUsageTest() {
-    mockChatGPTResponse(
-        AGREE,
-        DISAGREE,
-        codeFix(
-            "public int run(){",
-            "      if (b == null) {",
-            "          return 0;",
-            "      }",
-            "      return b.exec();",
-            "  }"));
+    //    mockChatGPTResponse(
+    //        AGREE,
+    //        DISAGREE,
+    //        codeFix(
+    //            "public int run(){",
+    //            "      if (b == null) {",
+    //            "          return 0;",
+    //            "      }",
+    //            "      return b.exec();",
+    //            "  }"));
     coreTestHelper
         .onTarget()
         .withSourceLines(

@@ -75,7 +75,7 @@ public class Response {
       Pattern.compile("```java\\s*([\\s\\S]*?)\\s*```");
 
   public Response(String response) {
-    logger.debug("Creating Response: {}", response);
+    logger.debug("Creating Response:\n{}", response);
     Matcher matcher = RESPONSE_PATTERN.matcher(response);
     if (!matcher.find()) {
       throw new IllegalArgumentException("Invalid response format: " + response);
@@ -98,7 +98,7 @@ public class Response {
             || parser.getArrayValueFromTag("/response/success", Boolean.class).orElse(false);
     this.code = parseCode(parser.getValueFromTag("/response/code", String.class).orElse(""));
     this.reason = parser.getArrayValueFromTag("/response/reason", String.class).orElse("");
-    logger.debug("Response created: {}", this);
+    logger.debug("Response created:\n{}", this);
   }
 
   /**

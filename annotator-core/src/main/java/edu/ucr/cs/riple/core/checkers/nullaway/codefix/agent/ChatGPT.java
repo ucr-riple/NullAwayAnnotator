@@ -134,7 +134,7 @@ public class ChatGPT {
    */
   public static Response ask(String prompt) {
     try {
-      logger.trace("Asking ChatGPT: {}", prompt);
+      logger.trace("Asking ChatGPT:\n{}", prompt);
       // Making a POST request
       HttpURLConnection connection = (HttpURLConnection) new URL(URL).openConnection();
       connection.setRequestMethod("POST");
@@ -251,7 +251,7 @@ public class ChatGPT {
       return Set.of();
     }
     String code = response.getCode();
-    logger.trace("Fixing the error by using safe regions with code: {}", code);
+    logger.trace("Fixing the error by using safe regions with code:\n{}", code);
     return Set.of(
         new MethodRewriteChange(
             new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member), code));
@@ -297,7 +297,7 @@ public class ChatGPT {
       return Set.of();
     }
     String code = response.getCode();
-    logger.trace("Fixing the error by using all regions with code: {}", code);
+    logger.trace("Fixing the error by using all regions with code:\n{}", code);
     return Set.of(
         new MethodRewriteChange(
             new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member), code));
