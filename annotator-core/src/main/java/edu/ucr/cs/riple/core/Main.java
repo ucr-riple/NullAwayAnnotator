@@ -24,24 +24,47 @@
 
 package edu.ucr.cs.riple.core;
 
-import java.nio.file.Paths;
-
 /** Starting point. */
 public class Main {
 
-  /**
-   * Starting point.
-   *
-   * @param args if flag '--path' is found, all configurations will be set up based on the given
-   *     json file, otherwise they will be set up according to the set of received cli arguments.
-   */
-  public static void main(String[] args) {
-    Config config;
-    if (args.length == 2 && args[0].equals("--path")) {
-      config = new Config(Paths.get(args[1]));
-    } else {
-      config = new Config(args);
-    }
+  //  /**
+  //   * Starting point.
+  //   *
+  //   * @param args if flag '--path' is found, all configurations will be set up based on the given
+  //   *     json file, otherwise they will be set up according to the set of received cli
+  // arguments.
+  //   */
+  //  public static void main(String[] args) {
+  //    Config config;
+  //    if (args.length == 2 && args[0].equals("--path")) {
+  //      config = new Config(Paths.get(args[1]));
+  //    } else {
+  //      config = new Config(args);
+  //    }
+  //    Annotator annotator = new Annotator(config);
+  //    annotator.start();
+  //  }
+
+  public static void main(String[] a) {
+    String[] argsArray = {
+      "-d",
+      "/home/nima/Developer/nullness-benchmarks/conductor/annotator-out",
+      "-bc",
+      "cd /home/nima/Developer/nullness-benchmarks/conductor && ./gradlew clean conductor-core:compileJava --rerun-tasks --no-build-cache",
+      "-cp",
+      "/home/nima/Developer/nullness-benchmarks/conductor/annotator-out/paths.tsv",
+      "-i",
+      "com.uber.nullaway.annotations.Initializer",
+      "-n",
+      "javax.annotation.Nullable",
+      "-cn",
+      "NULLAWAY",
+      "-di", // No value needed
+      "-rre", // No value needed
+      "--depth",
+      "6"
+    };
+    Config config = new Config(argsArray);
     Annotator annotator = new Annotator(config);
     annotator.start();
   }

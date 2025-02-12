@@ -481,8 +481,7 @@ public class Config {
       this.downstreamDependenciesBuildCommand = null;
     }
     this.inferenceActivated = !cmd.hasOption(deactivateInference);
-    this.suppressRemainingErrors =
-        !this.inferenceActivated || cmd.hasOption(suppressRemainingErrorsOption);
+    this.suppressRemainingErrors = cmd.hasOption(suppressRemainingErrorsOption);
     this.nullUnMarkedAnnotation =
         this.suppressRemainingErrors
             ? cmd.getOptionValue(suppressRemainingErrorsOption)
