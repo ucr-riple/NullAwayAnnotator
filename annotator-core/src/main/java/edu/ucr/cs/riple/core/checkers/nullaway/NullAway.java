@@ -396,7 +396,9 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
         Utility.readErrorsFromOutputDirectory(
                 context, context.targetModuleInfo, NullAwayError.class)
             .stream()
-            .filter(e -> e.messageType.equals("FIELD_NO_INIT"))
+            .filter(
+                e ->
+                    e.messageType.equals("FIELD_NO_INIT") || e.messageType.equals("METHOD_NO_INIT"))
             .flatMap(Error::getResolvingFixesStream)
             .filter(Fix::isOnField)
             .map(Fix::toField)
