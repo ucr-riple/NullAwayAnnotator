@@ -106,12 +106,9 @@ public class TypeArgumentChangeVisitor
     if (isAtBase()) {
       return applyOnType(type, change);
     }
-    // if current index is 1, the process component type
-    if (!index.isEmpty()) {
-      boolean onComponentType = index.pollFirst() == 1;
-      if (onComponentType) {
-        return type.getComponentType().accept(this, change);
-      }
+    if (!index.isEmpty() && index.pollFirst() == 1) {
+      // current index is 1, we need to visit the component type.
+      return type.getComponentType().accept(this, change);
     }
     return Collections.emptySet();
   }
