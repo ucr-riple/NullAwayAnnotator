@@ -41,6 +41,12 @@ public class NullAwayError extends Error {
   /** Error type for field initialization errors from NullAway in {@code String}. */
   public static final String FIELD_INITIALIZER_ERROR = "FIELD_NO_INIT";
 
+  /**
+   * Error type for assigning nullable values to non-nullable arrays from NullAway in {@code
+   * String}.
+   */
+  public static final String ASSIGN_NULLABLE_TO_NONNULL_ARRAY = "ASSIGN_NULLABLE_TO_NONNULL_ARRAY";
+
   public NullAwayError(
       String messageType,
       String message,

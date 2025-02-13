@@ -109,12 +109,19 @@ public class CoreTestHelper {
 
   private ParserConfiguration.LanguageLevel languageLevel;
 
+  /**
+   * JSpecify mode activation. Deactivated by default. If activated, the test will enable {<a
+   * href="https://jspecify.dev">JSpecify</a>} mode on NullAway.
+   */
+  private boolean jSpecifyModeEnabled;
+
   public CoreTestHelper(Path projectPath, Path outDirPath) {
     this.projectPath = projectPath;
     this.outDirPath = outDirPath;
     this.expectedReports = new HashSet<>();
     this.projectBuilder = new ProjectBuilder(this, projectPath);
     this.languageLevel = ParserConfiguration.LanguageLevel.JAVA_17;
+    this.jSpecifyModeEnabled = false;
   }
 
   public Module onTarget() {
@@ -238,6 +245,16 @@ public class CoreTestHelper {
 
   public CoreTestHelper withLanguageLevel(ParserConfiguration.LanguageLevel languageLevel) {
     this.languageLevel = languageLevel;
+    return this;
+  }
+
+  /**
+   * Enables JSpecify mode.
+   *
+   * @return This instance of {@link CoreTestHelper}.
+   */
+  public CoreTestHelper enableJSpecifyMode() {
+    this.jSpecifyModeEnabled = true;
     return this;
   }
 
@@ -430,7 +447,9 @@ public class CoreTestHelper {
                         outDirPath.resolve(name + "-scanner.xml")))
             .collect(Collectors.toList());
     builder.checker = NullAway.NAME;
-    builder.nullableAnnotation = "javax.annotation.Nullable";
+    // Set annotation name based on JSpecify mode activation.
+    builder.nullableAnnotation =
+        jSpecifyModeEnabled ? "org.jspecify.annotations.Nullable" : "javax.annotation.Nullable";
     // In tests, we use NullAway @Initializer annotation.
     builder.initializerAnnotation = "com.uber.nullaway.annotations.Initializer";
     builder.outputDir = outDirPath.toString();
@@ -453,17 +472,19 @@ public class CoreTestHelper {
         !getEnvironmentVariable("ANNOTATOR_TEST_DISABLE_PARALLEL_PROCESSING");
     if (downstreamDependencyAnalysisActivated) {
       builder.buildCommand =
-          projectBuilder.computeTargetBuildCommandWithLibraryModelLoaderDependency(this.outDirPath);
+          projectBuilder.computeTargetBuildCommandWithLibraryModelLoaderDependency(
+              this.outDirPath, jSpecifyModeEnabled);
       builder.downstreamBuildCommand =
           projectBuilder.computeDownstreamDependencyBuildCommandWithLibraryModelLoaderDependency(
-              this.outDirPath);
+              this.outDirPath, jSpecifyModeEnabled);
       builder.nullawayLibraryModelLoaderPath =
           Utility.getPathToLibraryModel(outDirPath)
               .resolve(
                   Paths.get(
                       "src", "main", "resources", "edu", "ucr", "cs", "riple", "librarymodel"));
     } else {
-      builder.buildCommand = projectBuilder.computeTargetBuildCommand(this.outDirPath);
+      builder.buildCommand =
+          projectBuilder.computeTargetBuildCommand(this.outDirPath, jSpecifyModeEnabled);
     }
     builder.write(configPath);
   }
