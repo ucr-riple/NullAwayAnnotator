@@ -26,6 +26,7 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
+import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ReferenceType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.WildcardType;
@@ -85,8 +86,7 @@ public class RemoveTypeUseMarkerAnnotation extends TypeUseAnnotationChange
       Modification computeTextModificationOnNode(T node, AnnotationExpr annotationExpr) {
     Type type = TypeUtils.getTypeFromNode(node);
 
-    boolean removeOnDeclaration =
-        typeIndex.stream().anyMatch(index -> index.size() == 1 && index.get(0) == 0);
+    boolean removeOnDeclaration = isTopLevelAnnotationChange(type);
     if (removeOnDeclaration) {
       // Remove the annotation from the declaration if exists e.g. @Annot String f;
       for (AnnotationExpr expr : node.getAnnotations()) {
@@ -125,5 +125,25 @@ public class RemoveTypeUseMarkerAnnotation extends TypeUseAnnotationChange
   @Override
   public ASTChange copy() {
     return new RemoveTypeUseMarkerAnnotation(location, annotationName.fullName, typeIndex);
+  }
+
+  /**
+   * Checks if the annotation is on the declaration of an array type. If the type is an array, the
+   * annotation on the declaration applies to the component type. While this is not the ideal
+   * approach, it serves as a temporary solution. The core issue is that JavaParser does not
+   * recognize the annotation on the type as applying to the component type.
+   *
+   * @param type The type of the node to check if the annotation is on the declaration of an array
+   *     type.
+   * @return true if the annotation is on the declaration of an array type, false otherwise.
+   */
+  private boolean isTopLevelAnnotationChange(Type type) {
+    final ImmutableList<Integer> onArrayComponentType = ImmutableList.of(1, 0);
+    if (type instanceof ArrayType) {
+      if (typeIndex.stream().anyMatch(index -> index.equals(onArrayComponentType))) {
+        return true;
+      }
+    }
+    return typeIndex.stream().anyMatch(index -> index.size() == 1 && index.get(0) == 0);
   }
 }
