@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.registries.invocation;
+package edu.ucr.cs.riple.core.registries.method.invocation;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;

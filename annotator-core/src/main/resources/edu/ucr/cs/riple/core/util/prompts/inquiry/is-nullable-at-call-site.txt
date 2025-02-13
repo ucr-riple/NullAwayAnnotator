@@ -1,15 +1,16 @@
-In the method below, is there a possibility that the method returns null at the given call site? Consider the following points:
+In the method below, is there a possibility that the method returns null at the given call site?
 
+## Guidelines:
 - The method may have multiple return paths; consider all return statements.
 - If the method calls another method, do not assume its return value unless its full declaration is provided. Request its declaration if needed.
 - The method may throw an exception instead of returning null. An exception path should not be considered a null return.
 - Ensure you request the declarations of any methods whose return values directly or indirectly impact this method’s return value before making a conclusion.
-- Carefully analyze all conditions and prior operations that may guarantee a non-null return value.
-- If the return value is guaranteed to be non-null at the call site, the answer should be a definitive NO.
+- If the method returns a value that is determined by a parameter, evaluate based on the actual argument at the given call site.
+- Analyze based only on the specific invocation provided. Do not generalize to all possible inputs.- If the return value is guaranteed to be non-null at the call site, the answer should be a definitive NO.
 - Do not generalize based on all possible inputs—your answer must be based only on the given invocation.
 - Focus only on the given call site, not all possible invocations.
 
-Here is the call site:
+### call site:
 %s
 
 Here is the method definitions and the call chain for this method, showing the sequence of calls from the method to its callers at each depth level:

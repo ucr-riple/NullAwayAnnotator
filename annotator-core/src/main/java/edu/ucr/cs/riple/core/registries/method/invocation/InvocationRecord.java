@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.registries.invocation;
+package edu.ucr.cs.riple.core.registries.method.invocation;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.registries.method.MethodRecord;
@@ -100,12 +100,12 @@ public class InvocationRecord {
     }
     if (!thirdPartyLibs.isEmpty()) {
       prompt.append(
-          "These methods are from third party code and the source code is not available\n");
+          "These methods are from third party code and the source code is not available, consider the default implementation you know about them.\n");
       for (String lib : thirdPartyLibs) {
         prompt.append(lib).append("\n");
       }
       prompt.append(
-          "There is no source code for these methods, if you ask about them, I cannot provide you with any information about them, make your best guess.\n");
+          "There is no source code for these methods, they have the default implementation, if you ask about them, I cannot provide you with any information about them, make your best guess.\n");
     }
     return prompt.toString();
   }
