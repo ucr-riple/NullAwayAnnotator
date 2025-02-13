@@ -364,6 +364,10 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
         .start();
   }
 
+  public void uninitializedFieldTest() {
+
+  }
+
   /**
    * Convert the answer to XML format.
    *
