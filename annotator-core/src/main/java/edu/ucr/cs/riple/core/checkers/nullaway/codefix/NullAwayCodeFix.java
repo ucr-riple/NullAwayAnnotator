@@ -109,12 +109,20 @@ public class NullAwayCodeFix {
    */
   public Set<MethodRewriteChange> fix(NullAwayError error) {
     logger.trace("Fixing error: {}", error);
-    switch (error.messageType) {
-      case "DEREFERENCE_NULLABLE":
-        return resolveDereferenceError(error);
-      default:
-        return NO_ACTION;
-    }
+    return switch (error.messageType) {
+      case "DEREFERENCE_NULLABLE" -> resolveDereferenceError(error);
+      case "FIELD_NO_INIT", "METHOD_NO_INIT" -> resolveUninitializedField(error);
+      case "NULLABLE_RETURN", "WRONG_OVERRIDE_RETURN" -> resolveNullableReturnError(error);
+      default -> NO_ACTION;
+    };
+  }
+
+  private Set<MethodRewriteChange> resolveNullableReturnError(NullAwayError error) {
+    return Set.of();
+  }
+
+  private Set<MethodRewriteChange> resolveUninitializedField(NullAwayError error) {
+    return Set.of();
   }
 
   /**
