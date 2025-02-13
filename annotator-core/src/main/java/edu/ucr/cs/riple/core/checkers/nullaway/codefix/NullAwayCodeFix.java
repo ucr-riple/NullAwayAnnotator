@@ -28,14 +28,22 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
+import edu.ucr.cs.riple.core.Report;
+import edu.ucr.cs.riple.core.cache.TargetModuleCache;
+import edu.ucr.cs.riple.core.cache.downstream.VoidDownstreamImpactCache;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent.ChatGPT;
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent.Response;
+import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
+import edu.ucr.cs.riple.core.evaluators.Evaluator;
+import edu.ucr.cs.riple.core.evaluators.suppliers.TargetModuleSupplier;
 import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.ErrorStore;
+import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.registries.method.MethodRecord;
 import edu.ucr.cs.riple.core.registries.method.invocation.InvocationRecord;
 import edu.ucr.cs.riple.core.registries.method.invocation.InvocationRecordRegistry;
@@ -48,6 +56,7 @@ import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
 import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
+import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import edu.ucr.cs.riple.injector.changes.RemoveMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
@@ -55,8 +64,12 @@ import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.util.ASTUtils;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -75,8 +88,7 @@ public class NullAwayCodeFix {
   /** Parser used to parse the source code of the file containing the error. */
   private final ASTParser parser;
 
-  /** Error store to retrieve errors in a region. */
-  private final ErrorStore errorStore;
+  private ImmutableSet<Report> reports;
 
   /** Invocation record registry to retrieve the callers of a method. */
   private final InvocationRecordRegistry invocationRecordRegistry;
@@ -90,13 +102,37 @@ public class NullAwayCodeFix {
    */
   private static final Set<MethodRewriteChange> NO_ACTION = Set.of();
 
+  /**
+   * The error store instance used to store errors and retrieve the impact of fixes on the source.
+   */
+  private final ErrorStore errorStore;
+
   public NullAwayCodeFix(Context context) {
     this.parser = new ASTParser(context);
     this.gpt = new ChatGPT(parser);
     this.context = context;
     this.injector = new Injector(context.config.languageLevel);
-    this.errorStore = new ErrorStore(context, context.targetModuleInfo);
     this.invocationRecordRegistry = new InvocationRecordRegistry(context.targetModuleInfo);
+    this.errorStore = new ErrorStore(context, context.targetModuleInfo);
+  }
+
+  /**
+   * Collects the impacts of adding rejected fixes on source code along with their triggered errors
+   * only to depth 1.
+   */
+  public void collectImpacts() {
+    // Suggested fixes of target at the current state.
+    ImmutableSet<Fix> fixes =
+        Utility.readFixesFromOutputDirectory(context, context.targetModuleInfo).stream()
+            .collect(ImmutableSet.toImmutableSet());
+    // Initializing required evaluator instances.
+    TargetModuleSupplier supplier =
+        new TargetModuleSupplier(context, new TargetModuleCache(), new VoidDownstreamImpactCache());
+    Evaluator evaluator = new BasicEvaluator(supplier);
+    // For now lets only focus on depth 1.
+    context.config.depth = 1;
+    // Result of the iteration analysis.
+    this.reports = evaluator.evaluate(fixes);
   }
 
   /**
@@ -115,12 +151,53 @@ public class NullAwayCodeFix {
       case "FIELD_NO_INIT":
       case "METHOD_NO_INIT":
         return resolveUninitializedField(error);
+      case "ASSIGN_FIELD_NULLABLE":
+        return resolveAssignFieldNullableError(error);
       case "NULLABLE_RETURN":
       case "WRONG_OVERRIDE_RETURN":
         return resolveNullableReturnError(error);
       default:
         return NO_ACTION;
     }
+  }
+
+  /**
+   * Resolves an assign field nullable error by generating a code fix.
+   *
+   * @param error the error to fix.
+   * @return a {@link MethodRewriteChange} that represents the code fix, or {@code null} if the
+   */
+  private Set<MethodRewriteChange> resolveAssignFieldNullableError(NullAwayError error) {
+    // currently the only solution we follow is to make the field nullable and resolve triggered
+    // errors.
+    // Make the field nullable.
+    Preconditions.checkArgument(error.getResolvingFixes().size() == 1);
+    Fix fix = error.getResolvingFixes().iterator().next();
+    context.injector.injectFixes(Set.of(fix));
+    //
+    Report report = fetchReport(error);
+    if (report == null) {
+      return NO_ACTION;
+    }
+    // Add any annotations that triggered errors contain:
+    Set<Fix> fixes =
+        report.triggeredErrors.stream()
+            .map(Error::getResolvingFixes)
+            .flatMap(Set::stream)
+            .collect(ImmutableSet.toImmutableSet());
+    context.injector.injectFixes(fixes);
+    // Resolve the ones where annotation cannot fix
+    Set<NullAwayError> unresolvableErrors =
+        report.triggeredErrors.stream()
+            .filter(e -> e.getResolvingFixes().isEmpty())
+            .map(e -> (NullAwayError) e)
+            .collect(Collectors.toSet());
+    Set<MethodRewriteChange> changes = new HashSet<>();
+    for (NullAwayError unresolvableError : unresolvableErrors) {
+      Set<MethodRewriteChange> change = fix(unresolvableError);
+      changes.addAll(change);
+    }
+    return changes;
   }
 
   private Set<MethodRewriteChange> resolveNullableReturnError(NullAwayError error) {
@@ -417,29 +494,25 @@ public class NullAwayCodeFix {
    */
   private Set<MethodRewriteChange> fixErrorByRegions(Location location) {
     logger.trace("Fixing error by regions.");
-    Set<Region> unsafeRegions = new HashSet<>();
+    Set<Region> impactedRegions =
+        context.targetModuleInfo.getRegionRegistry().getImpactedRegions(location);
+    Set<NullAwayError> triggeredErrors = getTriggeredErrorsForLocation(location);
+    Map<Region, List<NullAwayError>> unsafeRegionMap =
+        triggeredErrors.stream().collect(Collectors.groupingBy(Error::getRegion));
     Set<Region> safeRegions = new HashSet<>();
-    context
-        .targetModuleInfo
-        .getRegionRegistry()
-        .getImpactedRegions(location)
-        .forEach(
-            region -> {
-              if (errorStore.getErrorsInRegion(region).isEmpty()) {
-                safeRegions.add(region);
-              } else {
-                unsafeRegions.add(region);
-              }
-            });
+
+    impactedRegions.forEach(
+        region -> {
+          if (!unsafeRegionMap.containsKey(region)) {
+            safeRegions.add(region);
+          }
+        });
     Set<MethodRewriteChange> changes = new HashSet<>();
-    logger.trace("Safe regions: {} - Unsafe regions: {}", safeRegions.size(), unsafeRegions.size());
+    logger.trace(
+        "Safe regions: {} - Unsafe regions: {}", safeRegions.size(), unsafeRegionMap.size());
     // for each unsafe region, consult gpt to generate a fix.
-    for (Region region : unsafeRegions) {
-      Optional<Error> optionalError = errorStore.getErrorsInRegion(region).stream().findAny();
-      if (optionalError.isEmpty()) {
-        continue;
-      }
-      NullAwayError errorInRegion = (NullAwayError) optionalError.get();
+    for (Map.Entry<Region, List<NullAwayError>> entry : unsafeRegionMap.entrySet()) {
+      NullAwayError errorInRegion = entry.getValue().get(0);
       Set<MethodRewriteChange> changesForRegion = NO_ACTION;
       if (!safeRegions.isEmpty()) {
         // First try to fix by safe regions if exists.
@@ -450,7 +523,8 @@ public class NullAwayCodeFix {
         // If no safe region found, of no fix found by safe regions, try to fix by precondition
         // check.
         changesForRegion =
-            gpt.fixDereferenceErrorByAllRegions(errorInRegion, safeRegions, unsafeRegions);
+            gpt.fixDereferenceErrorByAllRegions(
+                errorInRegion, safeRegions, unsafeRegionMap.keySet());
       }
       if (!changesForRegion.isEmpty()) {
         logger.trace("Successfully generated a fix for the error.");
@@ -643,5 +717,69 @@ public class NullAwayCodeFix {
     }
     // At this moment, just to be safe, we assume it is returning nullable.
     return true;
+  }
+
+  /**
+   * Fetches the report from the cache that contains at least one of the resolving fixes.
+   *
+   * @param error the error to fetch the report for.
+   * @return the report that contains at least one of the resolving fixes.
+   */
+  @Nullable
+  private Report fetchReport(NullAwayError error) {
+    // TODO: This is a temporary solution. We need to find a better way to fetch the report.
+    return reports.stream()
+        .filter(report -> error.getResolvingFixes().contains(report.root))
+        .findFirst()
+        .orElse(null);
+  }
+
+  /**
+   * Fetches the report from the cache that contains the given location.
+   *
+   * @param location the location to fetch the report for.
+   * @return the report that contains the given location.
+   */
+  @Nullable
+  private Report fetchReport(Location location) {
+    return reports.stream()
+        .filter(
+            report ->
+                report.root.toLocations().size() == 1
+                    && report.root.toLocations().contains(location))
+        .findFirst()
+        .orElse(null);
+  }
+
+  /**
+   * Returns the set of triggered errors if the given location is annotated with {@code @Nullable}.
+   *
+   * @param location the location to get the triggered errors for.
+   * @return the set of triggered errors for the given location.
+   */
+  private Set<NullAwayError> getTriggeredErrorsForLocation(Location location) {
+    Report report = fetchReport(location);
+    if (report == null) {
+      Utility.buildTarget(context);
+      Set<NullAwayError> currentErrors =
+          Utility.readErrorsFromOutputDirectory(
+              context, context.targetModuleInfo, NullAwayError.class);
+      // TODO fix this, this is very time consuming.
+      RemoveAnnotation removeAnnotation =
+          new RemoveMarkerAnnotation(location, context.config.nullableAnnot);
+      context.injector.removeAnnotation(removeAnnotation);
+      Utility.buildTarget(context);
+      Set<NullAwayError> newErrors =
+          Utility.readErrorsFromOutputDirectory(
+              context, context.targetModuleInfo, NullAwayError.class);
+      // Add back the annotation.
+      context.injector.injectAnnotation(
+          new AddMarkerAnnotation(location, context.config.nullableAnnot));
+      // currentErrors - newErrors
+      Set<NullAwayError> triggeredErrors = new HashSet<>(currentErrors);
+      triggeredErrors.removeAll(newErrors);
+      return triggeredErrors;
+    }
+    return report.triggeredErrors.stream().map(e -> (NullAwayError) e).collect(Collectors.toSet());
   }
 }

@@ -66,20 +66,6 @@ public class ErrorStore {
   }
 
   /**
-   * Computes the difference between two collections (A - B).
-   *
-   * @param previousItems B.
-   * @param currentItems A.
-   * @return Corresponding {@link Result} instance storing result of (A - B).
-   */
-  private Result compareByList(Collection<Error> previousItems, Collection<Error> currentItems) {
-    int size = currentItems.size() - previousItems.size();
-    List<Error> temp = new ArrayList<>(currentItems);
-    previousItems.forEach(temp::remove);
-    return new Result(size, temp);
-  }
-
-  /**
    * Computes the difference in items enclosed by the given enclosing class and member in current
    * state and root state.
    *
@@ -88,6 +74,21 @@ public class ErrorStore {
    */
   public Result compareByRegion(Region region) {
     return compareByList(root.get(region), current.get(region));
+  }
+
+  /**
+   * Computes the set of triggered errors in the given regions.
+   *
+   * @param regions The given regions.
+   * @return Set of triggered errors.
+   */
+  public Set<Error> getTriggeredErrorsInRegions(Set<Region> regions) {
+    Set<Error> triggeredErrors = new HashSet<>();
+    for (Region region : regions) {
+      Result errorComparisonResult = compareByRegion(region);
+      triggeredErrors.addAll(errorComparisonResult.dif);
+    }
+    return triggeredErrors;
   }
 
   /**
@@ -120,12 +121,16 @@ public class ErrorStore {
   }
 
   /**
-   * Returns the set of errors in the given region.
+   * Computes the difference between two collections (A - B).
    *
-   * @param region The given region.
-   * @return Set of errors in the given region.
+   * @param previousItems B.
+   * @param currentItems A.
+   * @return Corresponding {@link Result} instance storing result of (A - B).
    */
-  public Set<Error> getErrorsInRegion(Region region) {
-    return new HashSet<>(root.get(region));
+  private Result compareByList(Collection<Error> previousItems, Collection<Error> currentItems) {
+    int size = currentItems.size() - previousItems.size();
+    List<Error> temp = new ArrayList<>(currentItems);
+    previousItems.forEach(temp::remove);
+    return new Result(size, temp);
   }
 }

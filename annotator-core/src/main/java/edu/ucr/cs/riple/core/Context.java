@@ -71,7 +71,11 @@ public class Context {
   /** Checker instance. Used to execute checker specific tasks. */
   public final Checker<? extends Error> checker;
 
+  /** Injector instance, used to parse and inject changes to the source code. */
   public final AnnotationInjector injector;
+
+  /** Reports cache. */
+  public ReportCache reportCache;
 
   /**
    * Builds context from command line arguments.
@@ -89,6 +93,7 @@ public class Context {
     // Checker compatibility check must be after target module info is initialized.
     this.checker.verifyCheckerCompatibility();
     this.injector = new PhysicalInjector(this);
+    this.reportCache = new ReportCache(config);
   }
 
   /**

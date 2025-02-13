@@ -221,16 +221,16 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   @Test
   public void dereferenceFieldFixGenerationUsingSafeUsageTest() {
-    //    mockChatGPTResponse(
-    //        AGREE,
-    //        DISAGREE,
-    //        codeFix(
-    //            "public int run(){",
-    //            "      if (b == null) {",
-    //            "          return 0;",
-    //            "      }",
-    //            "      return b.exec();",
-    //            "  }"));
+    mockChatGPTResponse(
+        AGREE,
+        DISAGREE,
+        codeFix(
+            "public int run(){",
+            "      if (b == null) {",
+            "          return 0;",
+            "      }",
+            "      return b.exec();",
+            "  }"));
     coreTestHelper
         .onTarget()
         .withSourceLines(
@@ -358,6 +358,43 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
             "   public String run(){",
             "     return exec(\"C\", \"def\").toString();",
             "   }",
+            "}")
+        .expectNoReport()
+        .resolveRemainingErrors()
+        .start();
+  }
+
+  @Test
+  public void assignFieldNullable() {
+    coreTestHelper
+        .onTarget()
+        .withSourceLines(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "import java.util.List;",
+            "import java.util.Map;",
+            "import java.util.HashMap;",
+            "public class Foo {",
+            "     Object foo;",
+            "     void close(){",
+            "       foo = null;",
+            "     }",
+            "     void reopen(){",
+            "       foo = new Object();",
+            "     }",
+            "     public String exec1(){",
+            "       return foo.toString();",
+            "     }",
+            "     public String exec2(){",
+            "       return foo.toString();",
+            "     }",
+            "     public String exec3(){",
+            "         if(foo == null){",
+            "            reopen();",
+            "         }",
+            "         return foo.toString();",
+            "     }",
             "}")
         .expectNoReport()
         .resolveRemainingErrors()

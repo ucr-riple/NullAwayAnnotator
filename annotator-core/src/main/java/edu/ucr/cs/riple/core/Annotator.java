@@ -50,24 +50,42 @@ public class Annotator {
   /** Annotator context. */
   public final Context context;
 
-  /** Reports cache. */
-  public final ReportCache cache;
-
   /** Annotator configuration. */
   public final Config config;
+
+  /**
+   * Target module cache instance. Used to store the impact of fixes on the target module to avoid
+   * redundant computations and infinite loops.
+   */
+  public final TargetModuleCache targetModuleCache;
+
+  /**
+   * Downstream impact cache instance. Used to store the impact of fixes on the downstream
+   * dependencies. The downstream impact cache stores the impact of making each public API @Nullable
+   * on downstream dependencies. downstreamImpactCache analyzes effects of all public APIs on
+   * downstream dependencies. Through iterations, since the source code for downstream dependencies
+   * does not change and the computation does not depend on the changes in the target module, it
+   * will compute the same result in each iteration, therefore we perform the analysis only once and
+   * reuse it in each iteration.
+   */
+  public final DownstreamImpactCache downstreamImpactCache;
 
   public Annotator(Config config) {
     this.config = config;
     this.context = new Context(config);
-    this.cache = new ReportCache(config);
+    this.targetModuleCache = new TargetModuleCache();
+    this.downstreamImpactCache =
+        config.downStreamDependenciesAnalysisActivated
+            ? new DownstreamImpactCacheImpl(context)
+            : new VoidDownstreamImpactCache();
   }
 
   /** Starts the annotating process consist of preprocess followed by the "annotate" phase. */
   public void start() {
-    preprocess();
+    this.preprocess();
     long timer = context.log.startTimer();
-    annotate();
-    context.log.stopTimerAndCapture(timer);
+    this.annotate();
+    this.context.log.stopTimerAndCapture(timer);
     Utility.writeLog(context);
   }
 
@@ -88,23 +106,11 @@ public class Annotator {
 
   /** Performs iterations of inference/injection until no unseen fix is suggested. */
   private void annotate() {
-    // The downstream impact cache stores the impact of making each public API @Nullable on
-    // downstream dependencies.
-    // downstreamImpactCache analyzes effects of all public APIs on downstream dependencies.
-    // Through iterations, since the source code for downstream dependencies does not change and the
-    // computation does not depend on the changes in the target module, it will compute the same
-    // result in each iteration, therefore we perform the analysis only once and reuse it in each
-    // iteration.
-    DownstreamImpactCache downstreamImpactCache =
-        config.downStreamDependenciesAnalysisActivated
-            ? new DownstreamImpactCacheImpl(context)
-            : new VoidDownstreamImpactCache();
-    downstreamImpactCache.analyzeDownstreamDependencies();
-    TargetModuleCache targetModuleCache = new TargetModuleCache();
+    ReportCache cache = context.reportCache;
     if (config.inferenceActivated) {
       // Outer loop starts.
       while (cache.isUpdated()) {
-        executeNextIteration(targetModuleCache, downstreamImpactCache);
+        executeNextIteration();
         if (config.disableOuterLoop) {
           break;
         }
@@ -112,7 +118,7 @@ public class Annotator {
       // Perform once last iteration including all fixes.
       if (!config.disableOuterLoop) {
         cache.disable();
-        executeNextIteration(targetModuleCache, downstreamImpactCache);
+        executeNextIteration();
         cache.enable();
       }
     }
@@ -126,17 +132,9 @@ public class Annotator {
     Utility.writeReports(context, cache.reports().stream().collect(ImmutableSet.toImmutableSet()));
   }
 
-  /**
-   * Performs single iteration of inference/injection.
-   *
-   * @param targetModuleCache Target impact cache instance.
-   * @param downstreamImpactCache Downstream impact cache instance to retrieve impact of fixes on
-   *     downstream dependencies.
-   */
-  private void executeNextIteration(
-      TargetModuleCache targetModuleCache, DownstreamImpactCache downstreamImpactCache) {
-    ImmutableSet<Report> latestReports =
-        processTriggeredFixes(targetModuleCache, downstreamImpactCache);
+  /** Performs single iteration of inference/injection. */
+  private void executeNextIteration() {
+    ImmutableSet<Report> latestReports = processTriggeredFixes();
     // Compute boundaries of effects on downstream dependencies.
     latestReports.forEach(
         report -> {
@@ -145,7 +143,7 @@ public class Annotator {
           }
         });
     // Update cached reports store.
-    cache.update(latestReports);
+    context.reportCache.update(latestReports);
     // Tag reports according to selected analysis mode.
     config.mode.tag(downstreamImpactCache, latestReports);
     // Inject approved fixes.
@@ -166,17 +164,14 @@ public class Annotator {
   /**
    * Processes triggered fixes.
    *
-   * @param downstreamImpactCache Downstream impact cache instance.
-   * @param targetModuleCache Target impact cache instance.
    * @return Immutable set of reports from the triggered fixes.
    */
-  private ImmutableSet<Report> processTriggeredFixes(
-      TargetModuleCache targetModuleCache, DownstreamImpactCache downstreamImpactCache) {
+  public ImmutableSet<Report> processTriggeredFixes() {
     Utility.buildTarget(context);
     // Suggested fixes of target at the current state.
     ImmutableSet<Fix> fixes =
         Utility.readFixesFromOutputDirectory(context, context.targetModuleInfo).stream()
-            .filter(fix -> !cache.processedFix(fix))
+            .filter(fix -> !context.reportCache.processedFix(fix))
             .collect(ImmutableSet.toImmutableSet());
     // Initializing required evaluator instances.
     TargetModuleSupplier supplier =

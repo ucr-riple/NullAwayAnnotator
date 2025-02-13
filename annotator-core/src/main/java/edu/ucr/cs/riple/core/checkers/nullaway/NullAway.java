@@ -368,6 +368,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
   public void resolveRemainingErrors() {
     Utility.buildTarget(context);
     NullAwayCodeFix codeFix = new NullAwayCodeFix(context);
+    codeFix.collectImpacts();
     // Collect regions with remaining errors.
     Set<NullAwayError> remainingErrors = deserializeErrors(context.targetModuleInfo);
     logger.trace("Resolving remaining errors: {} errors.", remainingErrors.size());

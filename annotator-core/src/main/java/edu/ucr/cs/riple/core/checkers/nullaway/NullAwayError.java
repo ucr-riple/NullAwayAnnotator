@@ -141,6 +141,6 @@ public class NullAwayError extends Error {
               + " "
               + error.message);
     }
-    throw new IllegalArgumentException("Error type not supported.");
+    throw new IllegalArgumentException("Error type not supported." + error.messageType);
   }
 }

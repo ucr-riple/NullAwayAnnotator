@@ -274,7 +274,7 @@ public class CoreTestHelper {
       predicate = DEFAULT_PREDICATE.create(config);
     }
     if (!resolveRemainingErrors) {
-      compare(new ArrayList<>(annotator.cache.reports()));
+      compare(new ArrayList<>(annotator.context.reportCache.reports()));
     }
     checkBuildsStatus();
     checkExpectedOutput();
