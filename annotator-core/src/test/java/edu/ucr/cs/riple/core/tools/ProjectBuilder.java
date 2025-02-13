@@ -103,18 +103,21 @@ public class ProjectBuilder {
    * root to project root dir, command to compile the project and the computed paths to config files
    * which will be passed through gradle command line arguments.
    *
-   * @param outDirPath Path to serialization output directory,
+   * @param outDirPath      Path to serialization output directory,
+   * @param jSpecifyEnabled Flag to enable jSpecify
    * @return The command to build the project including the command line arguments, this command can
-   *     * be executed from any directory.
+   * * be executed from any directory.
    */
-  public String computeTargetBuildCommand(Path outDirPath) {
+  public String computeTargetBuildCommand(Path outDirPath, boolean jSpecifyEnabled) {
     return String.format(
-        "%s && ./gradlew %s %s -Plibrary-model-loader-path=%s --rerun-tasks",
+        "%s && ./gradlew %s %s -Plibrary-model-loader-path=%s -Pjspecify=%s --rerun-tasks",
         Utility.changeDirCommand(pathToProject),
         computeCompileGradleCommandForModules(modules.subList(0, 1)),
         String.join(" ", Utility.computeConfigPathsWithGradleArguments(outDirPath, modules)),
         Utility.getPathToLibraryModel(outDirPath)
-            .resolve(Paths.get("build", "libs", "librarymodel.jar")));
+            .resolve(Paths.get("build", "libs", "librarymodel.jar")),
+            jSpecifyEnabled
+    );
   }
 
   /**
@@ -123,19 +126,21 @@ public class ProjectBuilder {
    * loader jar and the computed paths to config files which will be passed through gradle command
    * line arguments.
    *
-   * @param outDirPath Path to serialization output directory,
+   * @param outDirPath      Path to serialization output directory,
+   * @param jSpecifyEnabled Flag to enable jSpecify
    * @return The command to build the project including the command line arguments, this command can
-   *     * be executed from any directory.
+   * * be executed from any directory.
    */
-  public String computeTargetBuildCommandWithLibraryModelLoaderDependency(Path outDirPath) {
+  public String computeTargetBuildCommandWithLibraryModelLoaderDependency(Path outDirPath, boolean jSpecifyEnabled) {
     return String.format(
-        "%s && ./gradlew library-model-loader:jar --rerun-tasks && %s && ./gradlew %s %s -Plibrary-model-loader-path=%s --rerun-tasks",
+        "%s && ./gradlew library-model-loader:jar --rerun-tasks && %s && ./gradlew %s %s -Plibrary-model-loader-path=%s -Pjspecify=%s --rerun-tasks",
         Utility.changeDirCommand(outDirPath.resolve("Annotator")),
         Utility.changeDirCommand(pathToProject),
         computeCompileGradleCommandForModules(modules.subList(0, 1)),
         String.join(" ", Utility.computeConfigPathsWithGradleArguments(outDirPath, modules)),
         Utility.getPathToLibraryModel(outDirPath)
-            .resolve(Paths.get("build", "libs", "librarymodel.jar")));
+            .resolve(Paths.get("build", "libs", "librarymodel.jar")),
+            jSpecifyEnabled);
   }
 
   /**
@@ -144,20 +149,23 @@ public class ProjectBuilder {
    * loader jar and the computed paths to config files which will be passed through gradle command
    * line arguments.
    *
-   * @param outDirPath Path to serialization output directory,
+   * @param outDirPath      Path to serialization output directory,
+   * @param jSpecifyEnabled Flag to enable jSpecify
    * @return The command to build the project including the command line arguments, this command can
-   *     * be executed from any directory.
+   * * be executed from any directory.
    */
   public String computeDownstreamDependencyBuildCommandWithLibraryModelLoaderDependency(
-      Path outDirPath) {
+          Path outDirPath, boolean jSpecifyEnabled) {
     return String.format(
-        "%s && ./gradlew library-model-loader:jar --rerun-tasks && %s && ./gradlew %s %s -Plibrary-model-loader-path=%s --rerun-tasks",
+        "%s && ./gradlew library-model-loader:jar --rerun-tasks && %s && ./gradlew %s %s -Plibrary-model-loader-path=%s -Pjspecify=%s --rerun-tasks",
         Utility.changeDirCommand(outDirPath.resolve("Annotator")),
         Utility.changeDirCommand(pathToProject),
         computeCompileGradleCommandForModules(modules.subList(1, modules.size())),
         String.join(" ", Utility.computeConfigPathsWithGradleArguments(outDirPath, modules)),
         Utility.getPathToLibraryModel(outDirPath)
-            .resolve(Paths.get("build", "libs", "librarymodel.jar")));
+            .resolve(Paths.get("build", "libs", "librarymodel.jar")),
+            jSpecifyEnabled
+    );
   }
 
   /**

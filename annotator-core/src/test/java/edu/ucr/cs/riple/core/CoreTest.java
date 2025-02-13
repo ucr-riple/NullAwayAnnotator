@@ -599,6 +599,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
                         == found.getOverallEffect(coreTestHelper.getConfig()))
         .disableBailOut()
         .checkExpectedOutput("fieldAssignNullableNonNullArrayContent/expected")
-        .start("org.jspecify.annotations.Nullable");
+            .enableJSpecify()
+        .start();
   }
 }

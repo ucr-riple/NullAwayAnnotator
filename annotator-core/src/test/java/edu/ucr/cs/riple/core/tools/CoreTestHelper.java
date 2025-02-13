@@ -109,12 +109,15 @@ public class CoreTestHelper {
 
   private ParserConfiguration.LanguageLevel languageLevel;
 
+  private boolean jSpecifyEnabled = false;
+
   public CoreTestHelper(Path projectPath, Path outDirPath) {
     this.projectPath = projectPath;
     this.outDirPath = outDirPath;
     this.expectedReports = new HashSet<>();
     this.projectBuilder = new ProjectBuilder(this, projectPath);
     this.languageLevel = ParserConfiguration.LanguageLevel.JAVA_17;
+    this.jSpecifyEnabled = false;
   }
 
   public Module onTarget() {
@@ -241,16 +244,20 @@ public class CoreTestHelper {
     return this;
   }
 
-  /** Starts the test process. */
-  public void start() {
-    start("javax.annotation.Nullable");
+  /**
+   * Enables JSpecify.
+   * @return This instance of {@link CoreTestHelper}.
+   */
+  public CoreTestHelper enableJSpecify() {
+    this.jSpecifyEnabled = true;
+    return this;
   }
 
   /** Starts the test process. */
-  public void start(String annotName) {
+  public void start() {
     Path configPath = outDirPath.resolve("config.json");
     checkSourcePackages();
-    makeAnnotatorConfigFile(configPath, annotName);
+    makeAnnotatorConfigFile(configPath);
     config = new Config(configPath);
     Annotator annotator = new Annotator(config);
     annotator.start();
@@ -421,7 +428,7 @@ public class CoreTestHelper {
    *
    * @param configPath Path to the config file.
    */
-  public void makeAnnotatorConfigFile(Path configPath, String nullableAnnotation) {
+  public void makeAnnotatorConfigFile(Path configPath) {
     Config.Builder builder = new Config.Builder();
     final int[] id = {0};
     builder.configPaths =
@@ -436,7 +443,7 @@ public class CoreTestHelper {
             .collect(Collectors.toList());
     builder.checker = NullAway.NAME;
     builder.nullableAnnotation =
-        nullableAnnotation == null ? "javax.annotation.Nullable" : nullableAnnotation;
+        jSpecifyEnabled ? "org.jspecify.annotations" : "javax.annotation.Nullable";
     // In tests, we use NullAway @Initializer annotation.
     builder.initializerAnnotation = "com.uber.nullaway.annotations.Initializer";
     builder.outputDir = outDirPath.toString();
@@ -459,17 +466,17 @@ public class CoreTestHelper {
         !getEnvironmentVariable("ANNOTATOR_TEST_DISABLE_PARALLEL_PROCESSING");
     if (downstreamDependencyAnalysisActivated) {
       builder.buildCommand =
-          projectBuilder.computeTargetBuildCommandWithLibraryModelLoaderDependency(this.outDirPath);
+          projectBuilder.computeTargetBuildCommandWithLibraryModelLoaderDependency(this.outDirPath, jSpecifyEnabled);
       builder.downstreamBuildCommand =
           projectBuilder.computeDownstreamDependencyBuildCommandWithLibraryModelLoaderDependency(
-              this.outDirPath);
+              this.outDirPath, jSpecifyEnabled);
       builder.nullawayLibraryModelLoaderPath =
           Utility.getPathToLibraryModel(outDirPath)
               .resolve(
                   Paths.get(
                       "src", "main", "resources", "edu", "ucr", "cs", "riple", "librarymodel"));
     } else {
-      builder.buildCommand = projectBuilder.computeTargetBuildCommand(this.outDirPath);
+      builder.buildCommand = projectBuilder.computeTargetBuildCommand(this.outDirPath, jSpecifyEnabled);
     }
     builder.write(configPath);
   }

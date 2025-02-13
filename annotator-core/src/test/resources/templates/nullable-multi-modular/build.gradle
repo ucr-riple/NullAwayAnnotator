@@ -73,7 +73,7 @@ subprojects {
                 option("NullAway:SerializeFixMetadata", "true")
                 option("NullAway:FixSerializationConfigPath", project.getProperty(project.name + "-nullaway-config-path"))
                 option("NullAway:AcknowledgeLibraryModelsOfAnnotatedCode", "true")
-                option("NullAway:JSpecifyMode", "true")
+                option("NullAway:JSpecifyMode", project.getProperty(project.name + "-jspecify"))
                 option("AnnotatorScanner:ConfigPath", project.getProperty(project.name + "-scanner-config-path"))
             }
         }
