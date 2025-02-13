@@ -36,9 +36,9 @@ import edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent.ChatGPT;
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent.Response;
 import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.ErrorStore;
+import edu.ucr.cs.riple.core.registries.method.MethodRecord;
 import edu.ucr.cs.riple.core.registries.method.invocation.InvocationRecord;
 import edu.ucr.cs.riple.core.registries.method.invocation.InvocationRecordRegistry;
-import edu.ucr.cs.riple.core.registries.method.MethodRecord;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.core.util.ASTParser;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -109,12 +109,18 @@ public class NullAwayCodeFix {
    */
   public Set<MethodRewriteChange> fix(NullAwayError error) {
     logger.trace("Fixing error: {}", error);
-    return switch (error.messageType) {
-      case "DEREFERENCE_NULLABLE" -> resolveDereferenceError(error);
-      case "FIELD_NO_INIT", "METHOD_NO_INIT" -> resolveUninitializedField(error);
-      case "NULLABLE_RETURN", "WRONG_OVERRIDE_RETURN" -> resolveNullableReturnError(error);
-      default -> NO_ACTION;
-    };
+    switch (error.messageType) {
+      case "DEREFERENCE_NULLABLE":
+        return resolveDereferenceError(error);
+      case "FIELD_NO_INIT":
+      case "METHOD_NO_INIT":
+        return resolveUninitializedField(error);
+      case "NULLABLE_RETURN":
+      case "WRONG_OVERRIDE_RETURN":
+        return resolveNullableReturnError(error);
+      default:
+        return NO_ACTION;
+    }
   }
 
   private Set<MethodRewriteChange> resolveNullableReturnError(NullAwayError error) {

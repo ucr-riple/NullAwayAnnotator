@@ -298,7 +298,7 @@ public class Utility {
   }
 
   /**
-   * <<<<<<< HEAD Reads the content of a resource file.
+   * Reads a resource file and returns its content as a String.
    *
    * @param resourcePath The path to the resource file.
    * @return The content of the resource file.
