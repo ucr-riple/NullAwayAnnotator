@@ -575,7 +575,7 @@ public class CoreTest extends AnnotatorBaseCoreTest {
   }
 
   @Test
-  public void fieldAssignNullableNonNullArrayContent() {
+  public void assignNullableToNonnullArrayComponentTypeTest() {
     coreTestHelper
         .onTarget()
         .withSourceLines(
@@ -592,13 +592,8 @@ public class CoreTest extends AnnotatorBaseCoreTest {
                 new OnField("Main.java", "test.Main", Set.of("arr")),
                 ImmutableList.of(ImmutableList.of(1, 0)),
                 -1))
-        .setPredicate(
-            (expected, found) ->
-                expected.root.equals(found.root)
-                    && expected.getOverallEffect(coreTestHelper.getConfig())
-                        == found.getOverallEffect(coreTestHelper.getConfig()))
         .disableBailOut()
-        .checkExpectedOutput("fieldAssignNullableNonNullArrayContent/expected")
+        .checkExpectedOutput("assignNullableToNonnullArrayComponentTypeTest/expected")
         .enableJSpecifyMode()
         .start();
   }

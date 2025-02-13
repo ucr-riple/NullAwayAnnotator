@@ -136,6 +136,8 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
       annotations = Set.of();
     } else if (Utility.isTypeUseAnnotation(config.nullableAnnot)) {
       if (errorType.equals(NullAwayError.ASSIGN_NULLABLE_TO_NONNULL_ARRAY)) {
+        // The typeIndex ImmutableList.of(1, 0) specifies that the annotation
+        // should be applied to the array's component type.
         annotations =
             Set.of(
                 new AddTypeUseMarkerAnnotation(
