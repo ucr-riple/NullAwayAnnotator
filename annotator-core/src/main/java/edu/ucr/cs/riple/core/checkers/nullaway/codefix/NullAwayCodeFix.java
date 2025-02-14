@@ -36,8 +36,6 @@ import edu.ucr.cs.riple.core.cache.TargetModuleCache;
 import edu.ucr.cs.riple.core.cache.downstream.VoidDownstreamImpactCache;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
-import edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent.ChatGPT;
-import edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent.Response;
 import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
 import edu.ucr.cs.riple.core.evaluators.Evaluator;
 import edu.ucr.cs.riple.core.evaluators.suppliers.TargetModuleSupplier;
@@ -153,7 +151,7 @@ public class NullAwayCodeFix {
         return resolveUninitializedField(error);
       case "ASSIGN_FIELD_NULLABLE":
         return resolveAssignFieldNullableError(error);
-      case "NULLABLE_RETURN":
+      case "RETURN_NULLABLE":
       case "WRONG_OVERRIDE_RETURN":
         return resolveNullableReturnError(error);
       default:
@@ -162,7 +160,8 @@ public class NullAwayCodeFix {
   }
 
   /**
-   * Resolves an assign field nullable error by generating a code fix.
+   * Resolves an assign field nullable error by generating a code fix. Currently, the only solution
+   * we follow is making the field {@code @Nullable} and resolving triggered errors.
    *
    * @param error the error to fix.
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code null} if the
@@ -170,11 +169,10 @@ public class NullAwayCodeFix {
   private Set<MethodRewriteChange> resolveAssignFieldNullableError(NullAwayError error) {
     // currently the only solution we follow is to make the field nullable and resolve triggered
     // errors.
-    // Make the field nullable.
     Preconditions.checkArgument(error.getResolvingFixes().size() == 1);
+    // Make the field nullable.
     Fix fix = error.getResolvingFixes().iterator().next();
     context.injector.injectFixes(Set.of(fix));
-    //
     Report report = fetchReport(error);
     if (report == null) {
       return NO_ACTION;
@@ -200,7 +198,26 @@ public class NullAwayCodeFix {
     return changes;
   }
 
+  /** */
   private Set<MethodRewriteChange> resolveNullableReturnError(NullAwayError error) {
+    // Check if it is a false positive
+    logger.trace("Checking if the method is actually returning nullable.");
+    if (gpt.checkIfFalsePositiveAtErrorPoint(error)) {
+      logger.trace("False positive detected at return expression.");
+      // remove nullable form method.
+      context.injector.removeAnnotation(
+          new RemoveMarkerAnnotation(
+              new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member),
+              context.config.nullableAnnot));
+      // add SuppressWarnings
+      context.injector.injectAnnotation(
+          new AddSingleElementAnnotation(
+              new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member),
+              "SuppressWarnings",
+              "NullAway",
+              false));
+      return NO_ACTION;
+    }
     return Set.of();
   }
 

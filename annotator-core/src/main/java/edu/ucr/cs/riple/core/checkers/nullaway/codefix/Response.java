@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent;
+package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.annotator.util.parsers.XmlParser;

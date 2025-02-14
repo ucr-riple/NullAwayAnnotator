@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent;
+package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -342,15 +342,29 @@ public class ChatGPT {
    * @return {@code true} if the error is a false positive, {@code false} otherwise.
    */
   public boolean checkIfFalsePositiveAtErrorPoint(NullAwayError error) {
-    String nullableExpression = NullAwayError.extractPlaceHolderValue(error)[0];
-    // Construct the prompt
     String enclosingMethod = parser.getRegionSourceCode(error.getRegion()).content;
-    String prompt =
-        String.format(
-            checkIfExpressionCanBeNullAtErrorPointPrompt,
-            nullableExpression,
-            error.position.diagnosticLine.trim(),
-            enclosingMethod);
+    String prompt = null;
+    if (error.messageType.equals("DEREFERENCE_NULLABLE")) {
+      // Construct the prompt
+      prompt =
+          String.format(
+              checkIfExpressionCanBeNullAtErrorPointPrompt,
+              // nullable expression
+              NullAwayError.extractPlaceHolderValue(error)[0],
+              error.position.diagnosticLine.trim(),
+              enclosingMethod);
+    }
+    if (error.messageType.equals("RETURN_NULLABLE")) {
+      prompt =
+          String.format(
+              checkIfExpressionCanBeNullAtErrorPointPrompt,
+              error.position.diagnosticLine.trim(),
+              error.position.diagnosticLine.trim(),
+              enclosingMethod);
+    }
+    if (prompt == null) {
+      return false;
+    }
     logger.trace("Asking if the error can be null at error point point");
     Response nullabilityPossibility = ask(prompt);
     return nullabilityPossibility.isDisagreement();

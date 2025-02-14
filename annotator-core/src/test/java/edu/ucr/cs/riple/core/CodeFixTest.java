@@ -26,8 +26,8 @@ package edu.ucr.cs.riple.core;
 
 import static org.mockito.ArgumentMatchers.any;
 
-import edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent.ChatGPT;
-import edu.ucr.cs.riple.core.checkers.nullaway.codefix.agent.Response;
+import edu.ucr.cs.riple.core.checkers.nullaway.codefix.ChatGPT;
+import edu.ucr.cs.riple.core.checkers.nullaway.codefix.Response;
 import org.junit.After;
 import org.junit.Test;
 import org.mockito.MockedStatic;
@@ -365,7 +365,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
   }
 
   @Test
-  public void assignFieldNullable() {
+  public void assignFieldNullableTest() {
     coreTestHelper
         .onTarget()
         .withSourceLines(
@@ -399,6 +399,35 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
             "            reopen();",
             "         }",
             "         return foo.toString();",
+            "     }",
+            "}")
+        .expectNoReport()
+        .resolveRemainingErrors()
+        .start();
+  }
+
+  @Test
+  public void nullableReturnCastToNonnull() {
+    mockChatGPTResponse(DISAGREE);
+    coreTestHelper
+        .onTarget()
+        .withSourceLines(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "     String display(@Nullable String s){",
+            "       boolean isEmpty = s == null || s.isEmpty();",
+            "       if(isEmpty){",
+            "         return \"\";",
+            "       }",
+            "       return s;",
+            "     }",
+            "     String run1(@Nullable String s){",
+            "       return display(s).toString();",
+            "     }",
+            "     String run2(@Nullable String s){",
+            "       return display(s).toString();",
             "     }",
             "}")
         .expectNoReport()
