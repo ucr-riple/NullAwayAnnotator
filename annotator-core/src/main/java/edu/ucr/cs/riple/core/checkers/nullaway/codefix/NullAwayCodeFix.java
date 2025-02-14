@@ -40,7 +40,6 @@ import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
 import edu.ucr.cs.riple.core.evaluators.Evaluator;
 import edu.ucr.cs.riple.core.evaluators.suppliers.TargetModuleSupplier;
 import edu.ucr.cs.riple.core.registries.index.Error;
-import edu.ucr.cs.riple.core.registries.index.ErrorStore;
 import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.registries.method.MethodRecord;
 import edu.ucr.cs.riple.core.registries.method.invocation.InvocationRecord;
@@ -100,18 +99,12 @@ public class NullAwayCodeFix {
    */
   private static final Set<MethodRewriteChange> NO_ACTION = Set.of();
 
-  /**
-   * The error store instance used to store errors and retrieve the impact of fixes on the source.
-   */
-  private final ErrorStore errorStore;
-
   public NullAwayCodeFix(Context context) {
     this.parser = new ASTParser(context);
     this.gpt = new ChatGPT(parser);
     this.context = context;
     this.injector = new Injector(context.config.languageLevel);
     this.invocationRecordRegistry = new InvocationRecordRegistry(context.targetModuleInfo);
-    this.errorStore = new ErrorStore(context, context.targetModuleInfo);
   }
 
   /**
@@ -152,11 +145,34 @@ public class NullAwayCodeFix {
       case "ASSIGN_FIELD_NULLABLE":
         return resolveAssignFieldNullableError(error);
       case "RETURN_NULLABLE":
-      case "WRONG_OVERRIDE_RETURN":
         return resolveNullableReturnError(error);
+      case "WRONG_OVERRIDE_RETURN":
+        return resolveWrongOverrideReturnError(error);
       default:
         return NO_ACTION;
     }
+  }
+
+  private Set<MethodRewriteChange> resolveWrongOverrideReturnError(NullAwayError error) {
+    logger.trace("Fixing wrong override return error.");
+    // make super method nullable.
+    OnMethod methodLocation =
+        context
+            .targetModuleInfo
+            .getMethodRegistry()
+            .findMethodByName(error.getRegion().clazz, error.getRegion().member)
+            .location;
+
+    MethodRecord superMethod =
+        context.targetModuleInfo.getMethodRegistry().getImmediateSuperMethod(methodLocation);
+    if (superMethod == null) {
+      return NO_ACTION;
+    }
+    // add annotation to super method
+    context.injector.injectAnnotation(
+        new AddMarkerAnnotation(superMethod.location, context.config.nullableAnnot));
+    // resolve triggered errors.
+    return fixTriggeredErrorsForLocation(methodLocation);
   }
 
   /**
@@ -202,13 +218,9 @@ public class NullAwayCodeFix {
   private Set<MethodRewriteChange> resolveNullableReturnError(NullAwayError error) {
     // Check if it is a false positive
     logger.trace("Checking if the method is actually returning nullable.");
+    OnMethod onMethod = new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member);
     if (gpt.checkIfFalsePositiveAtErrorPoint(error)) {
       logger.trace("False positive detected at return expression.");
-      // remove nullable form method.
-      context.injector.removeAnnotation(
-          new RemoveMarkerAnnotation(
-              new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member),
-              context.config.nullableAnnot));
       // add SuppressWarnings
       context.injector.injectAnnotation(
           new AddSingleElementAnnotation(
@@ -218,7 +230,11 @@ public class NullAwayCodeFix {
               false));
       return NO_ACTION;
     }
-    return Set.of();
+    // Make the method nullable.
+    context.injector.removeAnnotation(
+        new RemoveMarkerAnnotation(onMethod, context.config.nullableAnnot));
+    // resolve triggered errors.
+    return fixTriggeredErrorsForLocation(onMethod);
   }
 
   private Set<MethodRewriteChange> resolveUninitializedField(NullAwayError error) {
@@ -798,5 +814,12 @@ public class NullAwayCodeFix {
       return triggeredErrors;
     }
     return report.triggeredErrors.stream().map(e -> (NullAwayError) e).collect(Collectors.toSet());
+  }
+
+  private Set<MethodRewriteChange> fixTriggeredErrorsForLocation(Location location) {
+    return getTriggeredErrorsForLocation(location).stream()
+        .map(this::fix)
+        .flatMap(Set::stream)
+        .collect(Collectors.toSet());
   }
 }
