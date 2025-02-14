@@ -238,7 +238,18 @@ public class NullAwayCodeFix {
   }
 
   private Set<MethodRewriteChange> resolveUninitializedField(NullAwayError error) {
-    return Set.of();
+    Set<MethodRewriteChange> changes = new HashSet<>();
+    String[] names = NullAwayError.extractPlaceHolderValue(error);
+    final int[] index = {0};
+    error
+        .getResolvingFixes()
+        .forEach(
+            fix -> {
+              if (fix.isOnField()) {
+                changes.addAll(resolveFieldDereferenceError(fix.toField(), names[index[0]++]));
+              }
+            });
+    return changes;
   }
 
   /**
@@ -297,7 +308,9 @@ public class NullAwayCodeFix {
     boolean isAnnotated = infos[3].equalsIgnoreCase("true");
     switch (type) {
       case "field":
-        return resolveFieldDereferenceError(error, encClass, expression);
+        OnField onField =
+            context.targetModuleInfo.getFieldRegistry().getLocationOnField(encClass, expression);
+        return resolveFieldDereferenceError(onField, expression);
       case "parameter":
         return resolveParameterDereferenceError(error, encClass, expression);
       case "method":
@@ -417,99 +430,83 @@ public class NullAwayCodeFix {
    *       default values or rewrite but avoid adding preconditions.
    * </ol>
    *
-   * @param error the error to fix.
-   * @param encClass the class containing the field.
-   * @param field the field to fix.
+   * @param onField the field to fix.
+   * @param field the field name to fix. A location on field can target multiple inline fields. This
+   *     parameter targets a specific field.
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty} if no fix
    *     is found.
    */
-  private Set<MethodRewriteChange> resolveFieldDereferenceError(
-      NullAwayError error, String encClass, String field) {
-    logger.trace("Resolving field dereference error.");
-    // check if there is an assignment to the expression in the method body.
-    if (error.getRegion().isOnCallable()) {
-      CallableDeclaration<?> enclosingMethodForError =
-          parser.getCallableDeclaration(error.getRegion().clazz, error.getRegion().member);
-      boolean initializedBeforeUse =
-          checkForInitializationBeforeUse(enclosingMethodForError, field);
-      logger.trace("Checking if the field is initialized before use: {}", initializedBeforeUse);
-      if (!initializedBeforeUse) {
-        // look if there is any method initializing this field.
-        logger.trace("Checking if there is any method initializing this field.");
-        Set<OnMethod> methods =
+  private Set<MethodRewriteChange> resolveFieldDereferenceError(OnField onField, String field) {
+    logger.trace("Investigating field nullability.");
+    logger.trace("Checking if there is any method initializing this field.");
+    Set<OnMethod> methods =
+        context
+            .targetModuleInfo
+            .getFieldInitializationStore()
+            .findInitializerForField(onField.clazz, field);
+    if (!methods.isEmpty()) {
+      // TODO: Maybe we should pick the best candidate rather than the first one.
+      // continue with the initializer.
+      Optional<AddAnnotation> initializerAnnotation =
+          methods.stream()
+              .filter(gpt::checkIfMethodIsAnInitializer)
+              .findFirst()
+              .map(
+                  method ->
+                      new AddMarkerAnnotation(
+                          new OnMethod(method.path, method.clazz, method.method),
+                          context.config.initializerAnnot));
+      if (initializerAnnotation.isPresent()) {
+        logger.trace("Found initializer method. Injecting initializer annotation.");
+        // remove annotation from field
+        RemoveMarkerAnnotation removeAnnotation =
+            new RemoveMarkerAnnotation(onField, context.config.nullableAnnot);
+        // Remove annotation from getter method if exists.
+        Optional<MethodRecord> getterMethod =
             context
                 .targetModuleInfo
-                .getFieldInitializationStore()
-                .findInitializerForField(encClass, field);
-        if (!methods.isEmpty()) {
-          // TODO: Maybe we should pick the best candidate rather than the first one.
-          // continue with the initializer.
-          Optional<AddAnnotation> initializerAnnotation =
-              methods.stream()
-                  .filter(gpt::checkIfMethodIsAnInitializer)
-                  .findFirst()
-                  .map(
-                      method ->
-                          new AddMarkerAnnotation(
-                              new OnMethod(method.path, method.clazz, method.method),
-                              context.config.initializerAnnot));
-          if (initializerAnnotation.isPresent()) {
-            logger.trace("Found initializer method. Injecting initializer annotation.");
-            // remove annotation from field
-            RemoveMarkerAnnotation removeAnnotation =
-                new RemoveMarkerAnnotation(
-                    context.targetModuleInfo.getFieldRegistry().getLocationOnField(encClass, field),
-                    context.config.nullableAnnot);
-            // Remove annotation from getter method if exists.
-            Optional<MethodRecord> getterMethod =
-                context
-                    .targetModuleInfo
-                    .getMethodRegistry()
-                    .getAllMethodsForClass(encClass)
-                    .stream()
-                    .filter(
-                        record -> {
-                          CallableDeclaration<?> callable =
-                              parser.getCallableDeclaration(
-                                  record.location.clazz, record.location.method);
-                          if (!(callable instanceof MethodDeclaration)) {
-                            return false;
-                          }
-                          MethodDeclaration methodDeclaration = (MethodDeclaration) callable;
-                          return methodDeclaration.getBody().isPresent()
-                              && methodDeclaration
-                                  .getBody()
-                                  .get()
-                                  .toString()
-                                  .replaceAll("\\s", "")
-                                  .equals(String.format("{return%s;}", field));
-                        })
-                    .findFirst();
-            if (getterMethod.isPresent()) {
-              logger.trace(
-                  "Found getter method. Removing nullable annotation: {}",
-                  getterMethod.get().location.method);
-              RemoveMarkerAnnotation removeAnnotationOnGetter =
-                  new RemoveMarkerAnnotation(
-                      new OnMethod(
-                          getterMethod.get().location.path,
-                          getterMethod.get().location.clazz,
-                          getterMethod.get().location.method),
-                      context.config.nullableAnnot);
-              context.injector.removeAnnotation(removeAnnotationOnGetter);
-            }
-            // Add annotation
-            context.injector.injectAnnotation(initializerAnnotation.get());
-            // remove nullable
-            context.injector.removeAnnotation(removeAnnotation);
-            return NO_ACTION;
-          }
+                .getMethodRegistry()
+                .getAllMethodsForClass(onField.clazz)
+                .stream()
+                .filter(
+                    record -> {
+                      CallableDeclaration<?> callable =
+                          parser.getCallableDeclaration(
+                              record.location.clazz, record.location.method);
+                      if (!(callable instanceof MethodDeclaration)) {
+                        return false;
+                      }
+                      MethodDeclaration methodDeclaration = (MethodDeclaration) callable;
+                      return methodDeclaration.getBody().isPresent()
+                          && methodDeclaration
+                              .getBody()
+                              .get()
+                              .toString()
+                              .replaceAll("\\s", "")
+                              .equals(String.format("{return%s;}", field));
+                    })
+                .findFirst();
+        if (getterMethod.isPresent()) {
+          logger.trace(
+              "Found getter method. Removing nullable annotation: {}",
+              getterMethod.get().location.method);
+          RemoveMarkerAnnotation removeAnnotationOnGetter =
+              new RemoveMarkerAnnotation(
+                  new OnMethod(
+                      getterMethod.get().location.path,
+                      getterMethod.get().location.clazz,
+                      getterMethod.get().location.method),
+                  context.config.nullableAnnot);
+          context.injector.removeAnnotation(removeAnnotationOnGetter);
         }
+        // Add annotation
+        context.injector.injectAnnotation(initializerAnnotation.get());
+        // remove nullable
+        context.injector.removeAnnotation(removeAnnotation);
+        return NO_ACTION;
       }
     }
     // no initializer found. Try to fix by regions using the method as an example.
-    OnField onField =
-        context.targetModuleInfo.getFieldRegistry().getLocationOnField(encClass, field);
     return fixErrorByRegions(onField);
   }
 

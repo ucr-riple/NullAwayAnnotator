@@ -31,6 +31,7 @@ import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -140,6 +141,28 @@ public class NullAwayError extends Error {
               + error.messageType
               + " "
               + error.message);
+    }
+    if (error.messageType.equals("METHOD_NO_INIT")) {
+      String errorMessage = error.message;
+      String prefix = "initializer method does not guarantee @NonNull field";
+      int begin = prefix.length();
+      if (errorMessage.charAt(begin) == 's') {
+        begin += 1;
+      }
+      int end = errorMessage.indexOf(" is initialized along");
+      end = end == -1 ? errorMessage.indexOf(" are initialized along ") : end;
+      if (end == -1) {
+        throw new RuntimeException(
+            "Error message for initializer error not recognized in version "
+                + 3
+                + ": "
+                + errorMessage);
+      }
+      String[] fieldsData = errorMessage.substring(begin, end).split(",");
+      return Arrays.stream(fieldsData)
+          .map(s -> s.substring(0, s.indexOf("(")).trim())
+          .distinct()
+          .toArray(String[]::new);
     }
     throw new IllegalArgumentException("Error type not supported." + error.messageType);
   }
