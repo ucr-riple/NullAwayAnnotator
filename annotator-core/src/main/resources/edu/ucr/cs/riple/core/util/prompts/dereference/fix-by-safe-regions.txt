@@ -11,7 +11,7 @@ For examples:
   <success>true</success>
   <code>
   ```java
-  Your fixed code snippet here
+  Your fixed code snippet here, JUST THE METHOD.
   ```
   </code>
 </response>

@@ -45,7 +45,7 @@ Just give me the fixed code snippet in xml format in <response> tag like the exa
   <success>true</success>
   <code>
   ```java
-  Your fixed code snippet here
+  Your fixed code snippet here, JUST THE METHOD.
   ```
   </code>
 </response>
