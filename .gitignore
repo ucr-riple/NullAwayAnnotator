@@ -4,6 +4,7 @@ build/
 **/build/
 build
 bin/
+# Never comment out the next line, run configurations are stored in this file which can contain sensitive data.
 /.idea/
 *.iml
 local.properties
