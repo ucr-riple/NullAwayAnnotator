@@ -54,6 +54,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
@@ -380,6 +381,12 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                 nullAwayErrors.forEach(
                     error -> {
                       logger.trace("TOP LEVEL CALL TO FIX ERROR: {}", error);
+                      Scanner scanner = new Scanner(System.in);
+                      System.out.print("Press s to skip, any other key to continue: ");
+                      boolean skip = scanner.next().charAt(0) == 's';
+                      if (skip) {
+                        return;
+                      }
                       Set<MethodRewriteChange> change = codeFix.fix(error);
                       if (change != null) {
                         rewrites.addAll(change);

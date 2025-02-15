@@ -118,11 +118,11 @@ public class NullAwayCodeFix {
         Utility.readFixesFromOutputDirectory(context, context.targetModuleInfo).stream()
             .collect(ImmutableSet.toImmutableSet());
     // Initializing required evaluator instances.
+    // For now lets only focus on depth 1.
+    context.config.depth = 1;
     TargetModuleSupplier supplier =
         new TargetModuleSupplier(context, new TargetModuleCache(), new VoidDownstreamImpactCache());
     Evaluator evaluator = new BasicEvaluator(supplier);
-    // For now lets only focus on depth 1.
-    context.config.depth = 1;
     // Result of the iteration analysis.
     this.reports = evaluator.evaluate(fixes);
   }

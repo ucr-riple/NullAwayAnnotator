@@ -54,6 +54,13 @@ public class Main {
   //  }
 
   public static void main(String[] a) {
+    // DELETE LOG:
+    try {
+      Files.deleteIfExists(Paths.get("/tmp/logs/app.log"));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
     // delete dir
     Path outdir = Paths.get("/home/nima/Developer/nullness-benchmarks/conductor/annotator-out/0");
 
