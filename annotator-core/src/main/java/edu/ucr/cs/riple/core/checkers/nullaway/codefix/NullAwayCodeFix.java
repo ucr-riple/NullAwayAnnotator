@@ -255,8 +255,8 @@ public class NullAwayCodeFix {
       return NO_ACTION;
     }
     // Make the method nullable.
-    context.injector.removeAnnotation(
-        new RemoveMarkerAnnotation(onMethod, context.config.nullableAnnot));
+    context.injector.injectAnnotation(
+        new AddMarkerAnnotation(onMethod, context.config.nullableAnnot));
     // resolve triggered errors.
     return fixTriggeredErrorsForLocation(onMethod);
   }

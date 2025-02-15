@@ -54,8 +54,9 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
-import java.util.Scanner;
 import java.util.Set;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -374,6 +375,8 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     // Collect regions with remaining errors.
     logger.trace("Resolving remaining errors: {} errors.", remainingErrors.size());
     Set<MethodRewriteChange> rewrites = new HashSet<>();
+    List<Integer> toSKip = List.of(0);
+    AtomicInteger i = new AtomicInteger();
     remainingErrors.stream()
         .collect(Collectors.groupingBy(NullAwayError::getRegion))
         .forEach(
@@ -381,9 +384,11 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                 nullAwayErrors.forEach(
                     error -> {
                       logger.trace("TOP LEVEL CALL TO FIX ERROR: {}", error);
-                      Scanner scanner = new Scanner(System.in);
-                      System.out.print("Press s to skip, any other key to continue: ");
-                      boolean skip = scanner.next().charAt(0) == 's';
+//                    Scanner scanner = new Scanner(System.in);
+//                    System.out.print("Press s to skip, any other key to continue: ");
+//                    boolean skip = scanner.nextLine().charAt(0) == 's';
+                      boolean skip = toSKip.contains(i.get());
+                      i.getAndIncrement();
                       if (skip) {
                         return;
                       }
