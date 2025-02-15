@@ -676,6 +676,68 @@ public class NullAwayCodeFix {
   }
 
   /**
+   * Returns the set of triggered errors if the given location is annotated with {@code @Nullable}.
+   *
+   * @param location the location to get the triggered errors for.
+   * @return the set of triggered errors for the given location.
+   */
+  private Set<NullAwayError> getTriggeredErrorsForLocation(Location location) {
+    Report report = fetchReport(location);
+    if (report == null) {
+      Utility.buildTarget(context);
+      Set<NullAwayError> currentErrors =
+          Utility.readErrorsFromOutputDirectory(
+              context, context.targetModuleInfo, NullAwayError.class);
+      // TODO fix this, this is very time consuming.
+      RemoveAnnotation removeAnnotation =
+          new RemoveMarkerAnnotation(location, context.config.nullableAnnot);
+      context.injector.removeAnnotation(removeAnnotation);
+      Utility.buildTarget(context);
+      Set<NullAwayError> newErrors =
+          Utility.readErrorsFromOutputDirectory(
+              context, context.targetModuleInfo, NullAwayError.class);
+      // Add back the annotation.
+      context.injector.injectAnnotation(
+          new AddMarkerAnnotation(location, context.config.nullableAnnot));
+      // currentErrors - newErrors
+      Set<NullAwayError> triggeredErrors = new HashSet<>(currentErrors);
+      triggeredErrors.removeAll(newErrors);
+      return triggeredErrors;
+    }
+    return report.triggeredErrors.stream().map(e -> (NullAwayError) e).collect(Collectors.toSet());
+  }
+
+  /**
+   * Fixes the triggered errors for annotating the given location with {@code @Nullable}. It
+   * resolves all the triggered errors by adding annotations and rewriting the code.
+   *
+   * @param location the location to fix the triggered errors for.
+   * @return the set of {@link MethodRewriteChange} instances representing the code fix.
+   */
+  private Set<MethodRewriteChange> fixTriggeredErrorsForLocation(Location location) {
+    logger.trace("Fixing triggered errors for location: {}", location);
+    Set<NullAwayError> errors = getTriggeredErrorsForLocation(location);
+    // add annotations for resolvable errors.
+    Set<Fix> fixes =
+        errors.stream()
+            .filter(e -> !e.getResolvingFixes().isEmpty())
+            .map(e -> e.getResolvingFixes().iterator().next())
+            .collect(Collectors.toSet());
+    logger.trace("Adding annotations for resolvable errors, size: {}", fixes.size());
+    context.injector.injectFixes(fixes);
+    // resolve the ones where annotation cannot fix
+    Set<NullAwayError> unresolvableErrors =
+        errors.stream().filter(e -> e.getResolvingFixes().isEmpty()).collect(Collectors.toSet());
+    Set<MethodRewriteChange> changes = new HashSet<>();
+    for (NullAwayError unresolvableError : unresolvableErrors) {
+      logger.trace("Resolving unresolvable error for triggered error: {}", unresolvableError);
+      Set<MethodRewriteChange> change = fix(unresolvableError);
+      changes.addAll(change);
+    }
+    return changes;
+  }
+
+  /**
    * Checks if the expression is initialized before use in the method body. TODO: this method only
    * looks for all assignments flow insensitive. We need to make it flow sensitive.
    *
@@ -805,67 +867,5 @@ public class NullAwayCodeFix {
                     && report.root.toLocations().contains(location))
         .findFirst()
         .orElse(null);
-  }
-
-  /**
-   * Returns the set of triggered errors if the given location is annotated with {@code @Nullable}.
-   *
-   * @param location the location to get the triggered errors for.
-   * @return the set of triggered errors for the given location.
-   */
-  private Set<NullAwayError> getTriggeredErrorsForLocation(Location location) {
-    Report report = fetchReport(location);
-    if (report == null) {
-      Utility.buildTarget(context);
-      Set<NullAwayError> currentErrors =
-          Utility.readErrorsFromOutputDirectory(
-              context, context.targetModuleInfo, NullAwayError.class);
-      // TODO fix this, this is very time consuming.
-      RemoveAnnotation removeAnnotation =
-          new RemoveMarkerAnnotation(location, context.config.nullableAnnot);
-      context.injector.removeAnnotation(removeAnnotation);
-      Utility.buildTarget(context);
-      Set<NullAwayError> newErrors =
-          Utility.readErrorsFromOutputDirectory(
-              context, context.targetModuleInfo, NullAwayError.class);
-      // Add back the annotation.
-      context.injector.injectAnnotation(
-          new AddMarkerAnnotation(location, context.config.nullableAnnot));
-      // currentErrors - newErrors
-      Set<NullAwayError> triggeredErrors = new HashSet<>(currentErrors);
-      triggeredErrors.removeAll(newErrors);
-      return triggeredErrors;
-    }
-    return report.triggeredErrors.stream().map(e -> (NullAwayError) e).collect(Collectors.toSet());
-  }
-
-  /**
-   * Fixes the triggered errors for annotating the given location with {@code @Nullable}. It
-   * resolves all the triggered errors by adding annotations and rewriting the code.
-   *
-   * @param location the location to fix the triggered errors for.
-   * @return the set of {@link MethodRewriteChange} instances representing the code fix.
-   */
-  private Set<MethodRewriteChange> fixTriggeredErrorsForLocation(Location location) {
-    logger.trace("Fixing triggered errors for location: {}", location);
-    Set<NullAwayError> errors = getTriggeredErrorsForLocation(location);
-    // add annotations for resolvable errors.
-    Set<Fix> fixes =
-        errors.stream()
-            .filter(e -> !e.getResolvingFixes().isEmpty())
-            .map(e -> e.getResolvingFixes().iterator().next())
-            .collect(Collectors.toSet());
-    logger.trace("Adding annotations for resolvable errors, size: {}", fixes.size());
-    context.injector.injectFixes(fixes);
-    // resolve the ones where annotation cannot fix
-    Set<NullAwayError> unresolvableErrors =
-        errors.stream().filter(e -> e.getResolvingFixes().isEmpty()).collect(Collectors.toSet());
-    Set<MethodRewriteChange> changes = new HashSet<>();
-    for (NullAwayError unresolvableError : unresolvableErrors) {
-      logger.trace("Resolving unresolvable error for triggered error: {}", unresolvableError);
-      Set<MethodRewriteChange> change = fix(unresolvableError);
-      changes.addAll(change);
-    }
-    return changes;
   }
 }
