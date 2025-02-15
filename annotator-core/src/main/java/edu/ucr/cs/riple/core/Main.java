@@ -24,80 +24,84 @@
 
 package edu.ucr.cs.riple.core;
 
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 
 /** Starting point. */
 public class Main {
 
-  /**
-   * Starting point.
-   *
-   * @param args if flag '--path' is found, all configurations will be set up based on the given
-   *     json file, otherwise they will be set up according to the set of received cli arguments.
-   */
-  public static void main(String[] args) {
-    Config config;
-    if (args.length == 2 && args[0].equals("--path")) {
-      config = new Config(Paths.get(args[1]));
-    } else {
-      config = new Config(args);
-    }
-    Annotator annotator = new Annotator(config);
-    annotator.start();
-  }
-
-  //  public static void main(String[] a) {
-  //    // delete dir
-  //    Path outdir =
-  // Paths.get("/home/nima/Developer/nullness-benchmarks/conductor/annotator-out/0");
-  //
-  //    if (outdir.toFile().exists()) {
-  //      try {
-  //        Files.walkFileTree(
-  //            outdir,
-  //            new SimpleFileVisitor<Path>() {
-  //              @Override
-  //              public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-  //                  throws IOException {
-  //                Files.delete(file);
-  //                return FileVisitResult.CONTINUE;
-  //              }
-  //
-  //              @Override
-  //              public FileVisitResult postVisitDirectory(Path dir, IOException exc)
-  //                  throws IOException {
-  //                Files.delete(dir);
-  //                return FileVisitResult.CONTINUE;
-  //              }
-  //            });
-  //      } catch (IOException e) {
-  //        throw new RuntimeException(e);
-  //      }
+  //  /**
+  //   * Starting point.
+  //   *
+  //   * @param args if flag '--path' is found, all configurations will be set up based on the given
+  //   *     json file, otherwise they will be set up according to the set of received cli
+  // arguments.
+  //   */
+  //  public static void main(String[] args) {
+  //    Config config;
+  //    if (args.length == 2 && args[0].equals("--path")) {
+  //      config = new Config(Paths.get(args[1]));
+  //    } else {
+  //      config = new Config(args);
   //    }
-  //
-  //    String[] argsArray = {
-  //      "-d",
-  //      "/home/nima/Developer/nullness-benchmarks/conductor/annotator-out",
-  //      "-bc",
-  //      "export JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64 && cd
-  // /home/nima/Developer/nullness-benchmarks/conductor && ./gradlew clean
-  // conductor-core:compileJava --rerun-tasks --no-build-cache",
-  //      "-cp",
-  //      "/home/nima/Developer/nullness-benchmarks/conductor/annotator-out/paths.tsv",
-  //      "-i",
-  //      "com.uber.nullaway.annotations.Initializer",
-  //      "-n",
-  //      "javax.annotation.Nullable",
-  //      "-cn",
-  //      "NULLAWAY",
-  //      "-di", // deactivate inference
-  //      "-rre", // resolve remaining errors
-  //      // "-rboserr", // redirect build output stream and error stream
-  //      "--depth",
-  //      "6"
-  //    };
-  //    Config config = new Config(argsArray);
   //    Annotator annotator = new Annotator(config);
   //    annotator.start();
   //  }
+
+  public static void main(String[] a) {
+    // delete dir
+    Path outdir = Paths.get("/home/nima/Developer/nullness-benchmarks/conductor/annotator-out/0");
+
+    if (outdir.toFile().exists()) {
+      try {
+        Files.walkFileTree(
+            outdir,
+            new SimpleFileVisitor<>() {
+              @Override
+              public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                  throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+              }
+
+              @Override
+              public FileVisitResult postVisitDirectory(Path dir, IOException exc)
+                  throws IOException {
+                Files.delete(dir);
+                return FileVisitResult.CONTINUE;
+              }
+            });
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    String[] argsArray = {
+      "-d",
+      "/home/nima/Developer/nullness-benchmarks/conductor/annotator-out",
+      "-bc",
+      "export JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64 && cd /home/nima/Developer/nullness-benchmarks/conductor && ./gradlew clean conductor-core:compileJava --rerun-tasks --no-build-cache",
+      "-cp",
+      "/home/nima/Developer/nullness-benchmarks/conductor/annotator-out/paths.tsv",
+      "-i",
+      "com.uber.nullaway.annotations.Initializer",
+      "-n",
+      "javax.annotation.Nullable",
+      "-cn",
+      "NULLAWAY",
+      "-di", // deactivate inference
+      "-rre", // resolve remaining errors
+      // "-rboserr", // redirect build output stream and error stream
+      "--depth",
+      "6"
+    };
+    Config config = new Config(argsArray);
+    Annotator annotator = new Annotator(config);
+    annotator.start();
+  }
 }

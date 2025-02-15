@@ -219,7 +219,7 @@ public class NullAwayCodeFix {
     // Check if it is a false positive
     logger.trace("Checking if the method is actually returning nullable.");
     OnMethod onMethod = new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member);
-    if (gpt.checkIfFalsePositiveAtErrorPoint(error)) {
+    if (gpt.checkIfFalsePositiveAtErrorPoint(error, context)) {
       logger.trace("False positive detected at return expression.");
       // add SuppressWarnings
       context.injector.injectAnnotation(
@@ -271,19 +271,19 @@ public class NullAwayCodeFix {
   private Set<MethodRewriteChange> resolveDereferenceError(NullAwayError error) {
     if (ASTParser.isObjectEqualsMethod(error.getRegion().member)) {
       logger.trace("Fixing dereference error in equals method.");
-      return gpt.fixDereferenceErrorInEqualsMethod(error);
+      return gpt.fixDereferenceErrorInEqualsMethod(error, context);
     }
     if (ASTParser.isObjectToStringMethod(error.getRegion().member)) {
       logger.trace("Fixing dereference error in toString method.");
-      return gpt.fixDereferenceErrorInToStringMethod(error);
+      return gpt.fixDereferenceErrorInToStringMethod(error, context);
     }
     if (ASTParser.isObjectHashCodeMethod(error.getRegion().member)) {
       logger.trace("Fixing dereference error in hashCode method.");
-      return gpt.fixDereferenceErrorInHashCodeMethod(error);
+      return gpt.fixDereferenceErrorInHashCodeMethod(error, context);
     }
     // Check if it is a false positive
     logger.trace("Checking if false positive.");
-    if (gpt.checkIfFalsePositiveAtErrorPoint(error)) {
+    if (gpt.checkIfFalsePositiveAtErrorPoint(error, context)) {
       logger.trace("False positive detected.");
       // cast to nonnull.
       return constructPreconditionCheckMethodRewriteForError(error);
@@ -392,7 +392,8 @@ public class NullAwayCodeFix {
     while (count++ < 10) {
       String callContext = record.constructCallGraphContext(parser);
       Response paramNullabilityPossibility =
-          gpt.checkIfParamIsNullable(encClass, error.getRegion().member, paramName, callContext);
+          gpt.checkIfParamIsNullable(
+              encClass, error.getRegion().member, paramName, callContext, context);
       if (!paramNullabilityPossibility.isSuccessFull()) {
         logger.trace(
             "Could not determine the nullability of the parameter. Model asked for more info.");
@@ -449,7 +450,7 @@ public class NullAwayCodeFix {
       // continue with the initializer.
       Optional<AddAnnotation> initializerAnnotation =
           methods.stream()
-              .filter(gpt::checkIfMethodIsAnInitializer)
+              .filter(candidate -> gpt.checkIfMethodIsAnInitializer(candidate, context))
               .findFirst()
               .map(
                   method ->
@@ -546,7 +547,8 @@ public class NullAwayCodeFix {
       Set<MethodRewriteChange> changesForRegion = NO_ACTION;
       if (!safeRegions.isEmpty()) {
         // First try to fix by safe regions if exists.
-        changesForRegion = gpt.fixDereferenceErrorBySafeRegions(errorInRegion, safeRegions);
+        changesForRegion =
+            gpt.fixDereferenceErrorBySafeRegions(errorInRegion, safeRegions, context);
       }
       if (changesForRegion.isEmpty()) {
         logger.trace("No fix found by safe regions. Trying to fix by all regions.");
@@ -554,7 +556,7 @@ public class NullAwayCodeFix {
         // check.
         changesForRegion =
             gpt.fixDereferenceErrorByAllRegions(
-                errorInRegion, safeRegions, unsafeRegionMap.keySet());
+                errorInRegion, safeRegions, unsafeRegionMap.keySet(), context);
       }
       if (!changesForRegion.isEmpty()) {
         logger.trace("Successfully generated a fix for the error.");
@@ -689,7 +691,7 @@ public class NullAwayCodeFix {
     while (count++ < 10) {
       String callContext = record.constructCallGraphContext(parser);
       Response methodNullability =
-          gpt.checkIfMethodIsReturningNullable(encClass, method, callContext);
+          gpt.checkIfMethodIsReturningNullable(encClass, method, callContext, context);
       if (!methodNullability.isSuccessFull()) {
         ImmutableSet<String> methods =
             methodNullability.getValuesFromTag("/response/methods", "method");
@@ -727,7 +729,7 @@ public class NullAwayCodeFix {
     while (count++ < 10) {
       String callContext = record.constructCallGraphContext(parser);
       Response invocationNullability =
-          gpt.checkIfMethodIsReturningNullableOnCallSite(invocation, callContext);
+          gpt.checkIfMethodIsReturningNullableOnCallSite(invocation, callContext, context);
       if (!invocationNullability.isSuccessFull()) {
         ImmutableSet<String> methods =
             invocationNullability.getValuesFromTag("/response/methods", "method");

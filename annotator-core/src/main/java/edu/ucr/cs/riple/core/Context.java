@@ -77,6 +77,9 @@ public class Context {
   /** Reports cache. */
   public ReportCache reportCache;
 
+  /** Cache for response/prompts. */
+  public final Map<String, String> responsePromptCache;
+
   /**
    * Builds context from command line arguments.
    *
@@ -94,6 +97,7 @@ public class Context {
     this.checker.verifyCheckerCompatibility();
     this.injector = new PhysicalInjector(this);
     this.reportCache = new ReportCache(config);
+    this.responsePromptCache = new HashMap<>();
   }
 
   /**

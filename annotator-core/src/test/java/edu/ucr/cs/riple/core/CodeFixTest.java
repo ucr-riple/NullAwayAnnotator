@@ -55,7 +55,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
       throw new IllegalStateException("Mocked Responses are not set");
     }
     MockedStatic<ChatGPT> chatGPTMocked = Mockito.mockStatic(ChatGPT.class);
-    OngoingStubbing<ChatGPT> stubbing = chatGPTMocked.when(() -> ChatGPT.ask(any()));
+    OngoingStubbing<ChatGPT> stubbing = chatGPTMocked.when(() -> ChatGPT.ask(any(), any()));
     for (Response response : responses) {
       stubbing = stubbing.thenAnswer(invocation -> response);
     }

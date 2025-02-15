@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import edu.ucr.cs.riple.annotator.util.parsers.JsonParser;
+import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.core.util.ASTParser;
@@ -41,6 +42,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
@@ -127,14 +129,33 @@ public class ChatGPT {
   }
 
   /**
-   * Ask ChatGPT a question and get a response.
+   * Ask ChatGPT a question and get a response. This method caches the response for the same prompt
+   * to avoid making the same request to ChatGPT multiple times.
    *
    * @param prompt the question to ask.
    * @return the response from ChatGPT.
    */
-  public static Response ask(String prompt) {
+  public static Response ask(String prompt, Context context) {
+    logger.trace("Asking ChatGPT:\n{}", prompt);
+    Map<String, String> responsePromptCache = context.responsePromptCache;
+    if (responsePromptCache.containsKey(prompt)) {
+      logger.trace("Retrieving response from cache");
+      return new Response(responsePromptCache.get(prompt));
+    }
+    String response = sendRequestToOpenAI(prompt);
+    responsePromptCache.put(prompt, response);
+    return new Response(response);
+  }
+
+  /**
+   * Sends an actual request to ChatGPT to get a response for the prompt.
+   *
+   * @param prompt the prompt to ask ChatGPT.
+   * @return the response from ChatGPT.
+   */
+  private static String sendRequestToOpenAI(String prompt) {
+    logger.trace("Sending request to OpenAI...");
     try {
-      logger.trace("Asking ChatGPT:\n{}", prompt);
       // Making a POST request
       HttpURLConnection connection = (HttpURLConnection) new URL(URL).openConnection();
       connection.setRequestMethod("POST");
@@ -170,7 +191,7 @@ public class ChatGPT {
         response.append(line);
       }
       br.close();
-      return new Response(extractMessageFromJSONResponse(response.toString()));
+      return extractMessageFromJSONResponse(response.toString());
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -211,11 +232,14 @@ public class ChatGPT {
    * dereference error, it should simply call {@code Objects.equals} on the field.
    *
    * @param error the error to fix.
+   * @param context
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty set} if the
    *     error cannot be fixed.
    */
-  public Set<MethodRewriteChange> fixDereferenceErrorInEqualsMethod(NullAwayError error) {
-    MethodRewriteChange change = fixErrorInPlace(error, dereferenceEqualsMethodRewritePrompt);
+  public Set<MethodRewriteChange> fixDereferenceErrorInEqualsMethod(
+      NullAwayError error, Context context) {
+    MethodRewriteChange change =
+        fixErrorInPlace(error, dereferenceEqualsMethodRewritePrompt, context);
     if (change == null) {
       return Set.of();
     }
@@ -228,11 +252,12 @@ public class ChatGPT {
    *
    * @param error the error to fix.
    * @param safeRegions the safe regions to use for the fix.
+   * @param context Annotator context.
    * @return a {@link MethodRewriteChange} that represents the code fix, or {{@code empty set} if
    *     the
    */
   public Set<MethodRewriteChange> fixDereferenceErrorBySafeRegions(
-      NullAwayError error, Set<Region> safeRegions) {
+      NullAwayError error, Set<Region> safeRegions, Context context) {
     logger.trace("Attempting to fix dereference error by using safe regions");
     String[] info = NullAwayError.extractPlaceHolderValue(error);
     String expression = info[0];
@@ -245,7 +270,7 @@ public class ChatGPT {
             method,
             constructPromptForRegions(safeRegions));
     logger.trace("Asking if the error can be fixed by using safe regions");
-    Response response = ask(prompt);
+    Response response = ask(prompt, context);
     if (!response.isSuccessFull()) {
       logger.trace("Response is not successful");
       return Set.of();
@@ -265,11 +290,12 @@ public class ChatGPT {
    * @param error the error to fix.
    * @param safeRegions regions where no error is present.
    * @param errorRegions regions where an error is present.
+   * @param context Annotator context.
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty set} if the
    *     error cannot be fixed.
    */
   public Set<MethodRewriteChange> fixDereferenceErrorByAllRegions(
-      NullAwayError error, Set<Region> safeRegions, Set<Region> errorRegions) {
+      NullAwayError error, Set<Region> safeRegions, Set<Region> errorRegions, Context context) {
     logger.trace("Attempting to fix dereference error by using all regions");
     String[] info = NullAwayError.extractPlaceHolderValue(error);
     String expression = info[0];
@@ -290,7 +316,7 @@ public class ChatGPT {
             expression,
             expression);
     logger.trace("Asking if the error can be fixed by using all regions");
-    Response response = ask(prompt);
+    Response response = ask(prompt, context);
     logger.trace("response: " + response);
     if (!response.isSuccessFull()) {
       logger.trace("Response is not successful");
@@ -309,11 +335,14 @@ public class ChatGPT {
    * the toString method on the field.
    *
    * @param error the error to fix.
+   * @param context
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty set} if the
    *     error cannot be fixed.
    */
-  public Set<MethodRewriteChange> fixDereferenceErrorInToStringMethod(NullAwayError error) {
-    MethodRewriteChange change = fixErrorInPlace(error, dereferenceToStringMethodRewritePrompt);
+  public Set<MethodRewriteChange> fixDereferenceErrorInToStringMethod(
+      NullAwayError error, Context context) {
+    MethodRewriteChange change =
+        fixErrorInPlace(error, dereferenceToStringMethodRewritePrompt, context);
     return change == null ? Set.of() : Set.of(change);
   }
 
@@ -323,11 +352,14 @@ public class ChatGPT {
    * hashCode method on the field.
    *
    * @param error the error to fix.
+   * @param context
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty set} if the
    *     error cannot be fixed.
    */
-  public Set<MethodRewriteChange> fixDereferenceErrorInHashCodeMethod(NullAwayError error) {
-    MethodRewriteChange change = fixErrorInPlace(error, dereferenceHashCodeMethodRewritePrompt);
+  public Set<MethodRewriteChange> fixDereferenceErrorInHashCodeMethod(
+      NullAwayError error, Context context) {
+    MethodRewriteChange change =
+        fixErrorInPlace(error, dereferenceHashCodeMethodRewritePrompt, context);
     if (change == null) {
       return Set.of();
     }
@@ -339,9 +371,10 @@ public class ChatGPT {
    * solution is to cast the variable to nonnull.
    *
    * @param error the error to check.
+   * @param context Annotator context.
    * @return {@code true} if the error is a false positive, {@code false} otherwise.
    */
-  public boolean checkIfFalsePositiveAtErrorPoint(NullAwayError error) {
+  public boolean checkIfFalsePositiveAtErrorPoint(NullAwayError error, Context context) {
     String enclosingMethod = parser.getRegionSourceCode(error.getRegion()).content;
     String prompt = null;
     if (error.messageType.equals("DEREFERENCE_NULLABLE")) {
@@ -366,7 +399,7 @@ public class ChatGPT {
       return false;
     }
     logger.trace("Asking if the error can be null at error point point");
-    Response nullabilityPossibility = ask(prompt);
+    Response nullabilityPossibility = ask(prompt, context);
     return nullabilityPossibility.isDisagreement();
   }
 
@@ -375,69 +408,78 @@ public class ChatGPT {
    * annotation.
    *
    * @param onMethod the method to check.
+   * @param context Annotator context.
    * @return {@code true} if the method is an initializer, {@code false} otherwise.
    */
-  public boolean checkIfMethodIsAnInitializer(OnMethod onMethod) {
+  public boolean checkIfMethodIsAnInitializer(OnMethod onMethod, Context context) {
     // Construct the prompt
     String enclosingMethod =
         parser.getRegionSourceCode(new Region(onMethod.clazz, onMethod.method)).content;
     String prompt = String.format(checkIfMethodIsAnInitializerPrompt, enclosingMethod);
     logger.trace("Asking if the method is an initializer: {}", onMethod.method);
-    Response response = ask(prompt);
+    Response response = ask(prompt, context);
     return response.isAgreement();
   }
 
   /**
-   * Check if the parameter is nullable given the context of the method.
+   * Check if the parameter is nullable given the call context of the method.
    *
    * @param encClass the enclosing class of the method.
    * @param method the method to check.
    * @param param the parameter to check. * @return {@code true} if the parameter is nullable,
-   *     {@code false} otherwise.
+   *     {@code false} otherwise. * @param callContext the call context of the method.
+   * @param context Annotator context. * @return {@code true} if the parameter is nullable, {@code
+   *     false} otherwise.
    */
   public Response checkIfParamIsNullable(
-      String encClass, String method, String param, String context) {
+      String encClass, String method, String param, String callContext, Context context) {
     logger.trace("Asking if the parameter is nullable: {}", param);
     return ask(
         String.format(
             checkIfParamIsNullablePrompt,
             param,
-            context,
-            parser.getRegionSourceCode(new Region(encClass, method)).content));
+            callContext,
+            parser.getRegionSourceCode(new Region(encClass, method)).content),
+        context);
   }
 
   /**
-   * Check if the method is returning nullable given the context of the method.
+   * Check if the method is returning nullable given the call context of the method.
    *
    * @param encClass the enclosing class of the method.
    * @param method the method to check.
-   * @param context the context of the method.
+   * @param callContext the context of the method.
+   * @param context Annotator context.
    * @return {@code true} if the method is returning nullable, {@code false} otherwise.
    */
-  public Response checkIfMethodIsReturningNullable(String encClass, String method, String context) {
+  public Response checkIfMethodIsReturningNullable(
+      String encClass, String method, String callContext, Context context) {
     logger.trace("Asking if the method is returning nullable: {}", method);
     String methodSource = parser.getRegionSourceCode(new Region(encClass, method)).content;
-    String prompt = String.format(checkIfMethodIsReturningNullablePrompt, methodSource, context);
-    return ask(prompt);
+    String prompt =
+        String.format(checkIfMethodIsReturningNullablePrompt, methodSource, callContext);
+    return ask(prompt, context);
   }
 
   /**
    * Checks if the method is returning nullable on the call site.
    *
    * @param invocation the invocation of the method.
-   * @param context the context of the method.
+   * @param callContext the context of the method.
+   * @param context Annotator context.
    * @return {@code true} if the method is returning nullable, {@code false} otherwise.
    */
-  public Response checkIfMethodIsReturningNullableOnCallSite(String invocation, String context) {
+  public Response checkIfMethodIsReturningNullableOnCallSite(
+      String invocation, String callContext, Context context) {
     logger.trace("Asking if the method is returning nullable on the call site: {}", invocation);
     String prompt =
         String.format(
             checkIfMethodReturnsNullableAtCallSitePrompt,
             invocation,
-            context,
+            callContext,
             invocation,
             invocation);
-    return ask(prompt);
+    return ask(prompt, context);
   }
 
   /**
@@ -459,12 +501,13 @@ public class ChatGPT {
    *
    * @param error the error to fix.
    * @param prompt the prompt to ask ChatGPT.
+   * @param context Annotator context.
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code null} if the
    *     error cannot be fixed.
    */
-  private MethodRewriteChange fixErrorInPlace(NullAwayError error, String prompt) {
+  private MethodRewriteChange fixErrorInPlace(NullAwayError error, String prompt, Context context) {
     String enclosingMethod = parser.getRegionSourceCode(error.getRegion()).content;
-    Response response = ask(String.format(prompt, enclosingMethod, error.message));
+    Response response = ask(String.format(prompt, enclosingMethod, error.message), context);
     if (!response.isSuccessFull()) {
       return null;
     }
