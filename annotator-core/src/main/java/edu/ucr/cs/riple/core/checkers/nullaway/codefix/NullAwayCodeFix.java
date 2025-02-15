@@ -59,6 +59,7 @@ import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.util.ASTUtils;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -153,6 +154,23 @@ public class NullAwayCodeFix {
     }
   }
 
+  /**
+   * Applies the given {@link MethodRewriteChange} to the source code.
+   *
+   * @param changes the changes to apply.
+   */
+  public void apply(Set<MethodRewriteChange> changes) {
+    changes.forEach(injector::rewriteMethod);
+  }
+
+  /**
+   * Resolves a wrong override return error by generating a code fix. Currently, the only solution
+   * we make the super method nullable and resolve triggered errors.
+   *
+   * @param error the error to fix.
+   * @return a {@link MethodRewriteChange} that represents the code fix, or {@code NO_ACTION} if the
+   *     error cannot be fixed.
+   */
   private Set<MethodRewriteChange> resolveWrongOverrideReturnError(NullAwayError error) {
     logger.trace("Fixing wrong override return error.");
     // make super method nullable.
@@ -162,16 +180,17 @@ public class NullAwayCodeFix {
             .getMethodRegistry()
             .findMethodByName(error.getRegion().clazz, error.getRegion().member)
             .location;
-
     MethodRecord superMethod =
         context.targetModuleInfo.getMethodRegistry().getImmediateSuperMethod(methodLocation);
     if (superMethod == null) {
       return NO_ACTION;
     }
+    logger.trace("Making the super method nullable.");
     // add annotation to super method
     context.injector.injectAnnotation(
         new AddMarkerAnnotation(superMethod.location, context.config.nullableAnnot));
     // resolve triggered errors.
+    logger.trace("Resolving triggered errors for making super method nullable.");
     return fixTriggeredErrorsForLocation(methodLocation);
   }
 
@@ -183,17 +202,20 @@ public class NullAwayCodeFix {
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code null} if the
    */
   private Set<MethodRewriteChange> resolveAssignFieldNullableError(NullAwayError error) {
+    logger.trace("Resolving assign field nullable error.");
     // currently the only solution we follow is to make the field nullable and resolve triggered
     // errors.
     Preconditions.checkArgument(error.getResolvingFixes().size() == 1);
     // Make the field nullable.
     Fix fix = error.getResolvingFixes().iterator().next();
+    logger.trace("Making the field nullable.");
     context.injector.injectFixes(Set.of(fix));
     Report report = fetchReport(error);
     if (report == null) {
       return NO_ACTION;
     }
     // Add any annotations that triggered errors contain:
+    logger.trace("Adding all triggered annotations.");
     Set<Fix> fixes =
         report.triggeredErrors.stream()
             .map(Error::getResolvingFixes)
@@ -207,7 +229,9 @@ public class NullAwayCodeFix {
             .map(e -> (NullAwayError) e)
             .collect(Collectors.toSet());
     Set<MethodRewriteChange> changes = new HashSet<>();
+    logger.trace("Resolving unresolvable errors.");
     for (NullAwayError unresolvableError : unresolvableErrors) {
+      logger.trace("Resolving unresolvable error: {}", unresolvableError);
       Set<MethodRewriteChange> change = fix(unresolvableError);
       changes.addAll(change);
     }
@@ -237,28 +261,28 @@ public class NullAwayCodeFix {
     return fixTriggeredErrorsForLocation(onMethod);
   }
 
+  /**
+   * Resolves an uninitialized field error by generating a code fix.
+   *
+   * @param error the error to fix.
+   * @return a {@link MethodRewriteChange} that represents the code fix, or {@code null} if the
+   */
   private Set<MethodRewriteChange> resolveUninitializedField(NullAwayError error) {
+    // This method is going to analyze the nullability of each field individually.
     Set<MethodRewriteChange> changes = new HashSet<>();
     String[] names = NullAwayError.extractPlaceHolderValue(error);
+    logger.trace("Resolving uninitialized field errors for fields: {}", Arrays.toString(names));
     final int[] index = {0};
     error
         .getResolvingFixes()
         .forEach(
             fix -> {
               if (fix.isOnField()) {
+                logger.trace("Working on field: {}", names[index[0]]);
                 changes.addAll(resolveFieldDereferenceError(fix.toField(), names[index[0]++]));
               }
             });
     return changes;
-  }
-
-  /**
-   * Applies the given {@link MethodRewriteChange} to the source code.
-   *
-   * @param changes the changes to apply.
-   */
-  public void apply(Set<MethodRewriteChange> changes) {
-    changes.forEach(injector::rewriteMethod);
   }
 
   /**
@@ -815,10 +839,33 @@ public class NullAwayCodeFix {
     return report.triggeredErrors.stream().map(e -> (NullAwayError) e).collect(Collectors.toSet());
   }
 
+  /**
+   * Fixes the triggered errors for annotating the given location with {@code @Nullable}. It
+   * resolves all the triggered errors by adding annotations and rewriting the code.
+   *
+   * @param location the location to fix the triggered errors for.
+   * @return the set of {@link MethodRewriteChange} instances representing the code fix.
+   */
   private Set<MethodRewriteChange> fixTriggeredErrorsForLocation(Location location) {
-    return getTriggeredErrorsForLocation(location).stream()
-        .map(this::fix)
-        .flatMap(Set::stream)
-        .collect(Collectors.toSet());
+    logger.trace("Fixing triggered errors for location: {}", location);
+    Set<NullAwayError> errors = getTriggeredErrorsForLocation(location);
+    // add annotations for resolvable errors.
+    Set<Fix> fixes =
+        errors.stream()
+            .filter(e -> !e.getResolvingFixes().isEmpty())
+            .map(e -> e.getResolvingFixes().iterator().next())
+            .collect(Collectors.toSet());
+    logger.trace("Adding annotations for resolvable errors, size: {}", fixes.size());
+    context.injector.injectFixes(fixes);
+    // resolve the ones where annotation cannot fix
+    Set<NullAwayError> unresolvableErrors =
+        errors.stream().filter(e -> e.getResolvingFixes().isEmpty()).collect(Collectors.toSet());
+    Set<MethodRewriteChange> changes = new HashSet<>();
+    for (NullAwayError unresolvableError : unresolvableErrors) {
+      logger.trace("Resolving unresolvable error for triggered error: {}", unresolvableError);
+      Set<MethodRewriteChange> change = fix(unresolvableError);
+      changes.addAll(change);
+    }
+    return changes;
   }
 }

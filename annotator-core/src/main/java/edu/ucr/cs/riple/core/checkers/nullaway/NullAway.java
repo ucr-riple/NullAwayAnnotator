@@ -379,6 +379,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
             (region, nullAwayErrors) ->
                 nullAwayErrors.forEach(
                     error -> {
+                      logger.trace("TOP LEVEL CALL TO FIX ERROR: {}", error);
                       Set<MethodRewriteChange> change = codeFix.fix(error);
                       if (change != null) {
                         rewrites.addAll(change);
