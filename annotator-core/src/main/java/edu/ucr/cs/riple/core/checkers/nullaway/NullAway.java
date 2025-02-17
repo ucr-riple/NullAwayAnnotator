@@ -390,12 +390,11 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       //                    System.out.print("Press s to skip, any other key to
                       // continue: ");
                       //                    boolean skip = scanner.nextLine().charAt(0) == 's';
-                      //                                            boolean skip =
-                      // toSKip.contains(i.get());
-                      //                                            i.getAndIncrement();
-                      //                                            if (skip) {
-                      //                                              return;
-                      //                                            }
+                      //                      boolean skip = toSKip.contains(i.get());
+                      //                      i.getAndIncrement();
+                      //                      if (skip) {
+                      //                        return;
+                      //                      }
                       Set<MethodRewriteChange> change = codeFix.fix(error);
                       if (change != null) {
                         rewrites.addAll(change);

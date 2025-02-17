@@ -387,26 +387,9 @@ public class NullAwayCodeFix {
         return constructCastToNonnullChange(error, callSiteNullability.getReason());
       }
     }
-    if (context
-            .targetModuleInfo
-            .getMethodRegistry()
-            .findMethodByName(encClass, error.getRegion().member)
-        == null) {
-      throw new IllegalStateException(
-          "Could not find the method in the registry: "
-              + encClass
-              + "."
-              + error.getRegion().member
-              + ":"
-              + error);
-    }
     // Try to fix by regions using the method as an example.
     OnMethod methodLocation =
-        context
-            .targetModuleInfo
-            .getMethodRegistry()
-            .findMethodByName(encClass, error.getRegion().member)
-            .location;
+        context.targetModuleInfo.getMethodRegistry().findMethodByName(encClass, method).location;
     logger.trace("Trying to fix by regions using the method as an example.");
     return fixErrorByRegions(methodLocation);
   }

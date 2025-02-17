@@ -132,13 +132,17 @@ public class NullAwayError extends Error {
       Matcher matcher = pattern.matcher(error.message);
       if (matcher.find()) {
         return new String[] {
-          // expression     type              encClass          annotated?        deferred symbol
-          // expression start position
+          // expression
           matcher.group(1),
+          // type
           matcher.group(2),
+          // enclosing class
           matcher.group(3),
+          // annotated?
           matcher.group(4),
+          // deferred symbol
           matcher.group(5),
+          // expression start position
           matcher.group(6)
         };
       }
