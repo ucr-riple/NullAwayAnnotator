@@ -34,6 +34,10 @@ import org.apache.logging.log4j.Logger;
 /** Response a response from the agent. */
 public class Response {
 
+  /** The pattern to extract the response from the response from ChatGPT. */
+  private static final Pattern RESPONSE_PATTERN =
+      Pattern.compile("<response>.*?</response>", Pattern.DOTALL);
+
   /**
    * Flag to indicate if the response is an agreement. Note if the response is not agreement, it
    * does not mean that the model disagreed.
@@ -61,18 +65,15 @@ public class Response {
   /** Full content of response, used to retrieve values from custom tags. */
   private final String content;
 
-  private static final Pattern RESPONSE_PATTERN =
-      Pattern.compile("<response>.*?</response>", Pattern.DOTALL);
-
-  /** The logger instance. */
-  private static final Logger logger = LogManager.getLogger(Response.class);
-
   /**
    * The pattern to extract the code from the response from ChatGPT. The code is in the format:
    * {@code ```java\ncode\n```}.
    */
   private static final Pattern CODE_RESPONSE_PATTERN =
       Pattern.compile("```java\\s*([\\s\\S]*?)\\s*```");
+
+  /** The logger instance. */
+  private static final Logger logger = LogManager.getLogger(Response.class);
 
   public Response(String response) {
     logger.debug("Creating Response:\n{}", response);
@@ -99,6 +100,16 @@ public class Response {
     this.code = parseCode(parser.getValueFromTag("/response/code", String.class).orElse(""));
     this.reason = parser.getArrayValueFromTag("/response/reason", String.class).orElse("");
     logger.debug("Response created:\n{}", this);
+  }
+
+  /** The response instance for agreement. */
+  public static Response agree() {
+    return toResponse("<value>YES</value>");
+  }
+
+  /** The response instance for disagreement. */
+  public static Response disagree() {
+    return toResponse("<value>NO</value>");
   }
 
   /**
@@ -173,6 +184,38 @@ public class Response {
   }
 
   /**
+   * Convert the answer to XML format.
+   *
+   * @param answer the answer to be converted to XML format.
+   * @return the XML formatted answer.
+   */
+  public static Response toResponse(String answer) {
+    return new Response(String.format("<response>\n%s\n</response>", answer));
+  }
+
+  /**
+   * Convert the answer to XML format where the response is a successful generation of code fix.
+   *
+   * @param code the code to be converted to XML format.
+   * @return the XML formatted answer.
+   */
+  public static Response codeFix(String... code) {
+    String xml =
+        "<success>true</success>\n" + "<code>\n" + "```java\n" + "%s\n" + "```\n" + "</code>\n";
+    return toResponse(String.format(xml, String.join("\n", code)));
+  }
+
+  @Override
+  public String toString() {
+    if (isAgreement) {
+      return "Agreement: " + reason;
+    } else if (isDisagreement) {
+      return "Disagreement: " + reason;
+    }
+    return isSuccessFull() ? getCode() : "Failed";
+  }
+
+  /**
    * Parse the code from the response from ChatGPT.
    *
    * @param code the code from the response.
@@ -184,15 +227,5 @@ public class Response {
       return matcher.group(1);
     }
     return "";
-  }
-
-  @Override
-  public String toString() {
-    if (isAgreement) {
-      return "Agreement: " + reason;
-    } else if (isDisagreement) {
-      return "Disagreement: " + reason;
-    }
-    return isSuccessFull() ? getCode() : "Failed";
   }
 }

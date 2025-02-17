@@ -378,14 +378,27 @@ public class NullAwayCodeFix {
             new AddSingleElementAnnotation(methodLocation, "SuppressWarnings", "NullAway", false));
         return NO_ACTION;
       }
-      boolean isReturningNullableOnCallSite =
+      Response callSiteNullability =
           checkIfMethodIsReturningNullableOnCallSite(encClass, method, invocation);
-      if (!isReturningNullableOnCallSite) {
+      if (callSiteNullability.isDisagreement()) {
         logger.trace(
             "Method is not returning nullable on call site. Injecting suppression annotation.");
         // Add precondition here.
-        return NO_ACTION;
+        return constructCastToNonnullChange(error, callSiteNullability.getReason());
       }
+    }
+    if (context
+            .targetModuleInfo
+            .getMethodRegistry()
+            .findMethodByName(encClass, error.getRegion().member)
+        == null) {
+      throw new IllegalStateException(
+          "Could not find the method in the registry: "
+              + encClass
+              + "."
+              + error.getRegion().member
+              + ":"
+              + error);
     }
     // Try to fix by regions using the method as an example.
     OnMethod methodLocation =
@@ -809,9 +822,9 @@ public class NullAwayCodeFix {
    * @param encClass the owner of the method.
    * @param method the method signature.
    * @param invocation the invocation expression.
-   * @return true if the method is returning nullable on call site.
+   * @return response indicating the nullability of the method on call site.
    */
-  private boolean checkIfMethodIsReturningNullableOnCallSite(
+  private Response checkIfMethodIsReturningNullableOnCallSite(
       String encClass, String method, String invocation) {
     // Build a record, we only need the method declaration so we set the depth to 1.
     InvocationRecord record = invocationRecordRegistry.computeInvocationRecord(encClass, method, 3);
@@ -829,16 +842,11 @@ public class NullAwayCodeFix {
         }
         record.addRequestedMethodsByNames(methods);
       } else {
-        if (invocationNullability.isDisagreement()) {
-          return false;
-        }
-        if (invocationNullability.isAgreement()) {
-          return true;
-        }
+        return invocationNullability;
       }
     }
     // At this moment, just to be safe, we assume it is returning nullable.
-    return true;
+    return Response.agree();
   }
 
   /**

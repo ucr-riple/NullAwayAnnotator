@@ -44,6 +44,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -98,6 +99,8 @@ public class ChatGPT {
 
   /** The logger instance. */
   private static final Logger logger = LogManager.getLogger(ChatGPT.class);
+
+  static final AtomicInteger count = new AtomicInteger(0);
 
   /**
    * The {@link ASTParser} instance used to parse the source code of the file containing the error.
@@ -154,6 +157,9 @@ public class ChatGPT {
    * @return the response from ChatGPT.
    */
   private static String sendRequestToOpenAI(String prompt) {
+    if (count.incrementAndGet() > 100) {
+      throw new RuntimeException("Exceeded the limit of 100 requests to OpenAI");
+    }
     logger.trace("Sending request to OpenAI...");
     try {
       // Making a POST request

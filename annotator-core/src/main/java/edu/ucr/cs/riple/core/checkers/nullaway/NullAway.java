@@ -56,6 +56,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
@@ -373,6 +374,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     logger.trace("Resolving remaining errors: {} errors.", remainingErrors.size());
     Set<MethodRewriteChange> rewrites = new HashSet<>();
     List<Integer> toSKip = List.of(0);
+    AtomicBoolean shutdown = new AtomicBoolean(false);
     AtomicInteger i = new AtomicInteger();
     remainingErrors.stream()
         .collect(Collectors.groupingBy(NullAwayError::getRegion))
@@ -380,20 +382,25 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
             (region, nullAwayErrors) ->
                 nullAwayErrors.forEach(
                     error -> {
+                      if (shutdown.get()) {
+                        return;
+                      }
                       logger.trace("TOP LEVEL CALL TO FIX ERROR: {}", error);
                       //                    Scanner scanner = new Scanner(System.in);
                       //                    System.out.print("Press s to skip, any other key to
                       // continue: ");
                       //                    boolean skip = scanner.nextLine().charAt(0) == 's';
-                      //                      boolean skip = toSKip.contains(i.get());
-                      //                      i.getAndIncrement();
-                      //                      if (skip) {
-                      //                        return;
-                      //                      }
+                      //                                            boolean skip =
+                      // toSKip.contains(i.get());
+                      //                                            i.getAndIncrement();
+                      //                                            if (skip) {
+                      //                                              return;
+                      //                                            }
                       Set<MethodRewriteChange> change = codeFix.fix(error);
                       if (change != null) {
                         rewrites.addAll(change);
                       }
+                      shutdown.set(true);
                     }));
     codeFix.apply(rewrites);
   }

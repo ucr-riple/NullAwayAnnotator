@@ -24,6 +24,9 @@
 
 package edu.ucr.cs.riple.core;
 
+import static edu.ucr.cs.riple.core.checkers.nullaway.codefix.Response.agree;
+import static edu.ucr.cs.riple.core.checkers.nullaway.codefix.Response.codeFix;
+import static edu.ucr.cs.riple.core.checkers.nullaway.codefix.Response.disagree;
 import static org.mockito.ArgumentMatchers.any;
 
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.ChatGPT;
@@ -35,14 +38,6 @@ import org.mockito.Mockito;
 import org.mockito.stubbing.OngoingStubbing;
 
 public class CodeFixTest extends AnnotatorBaseCoreTest {
-
-  /** The XML formatted response for the agreement. */
-  private static final Response AGREE = toResponse("<value>YES</value>");
-
-  /** The XML formatted response for the disagreement. */
-  private static final Response DISAGREE = toResponse("<value>NO</value>");
-
-  private static final Response NO_CODE_FIX = toResponse("<success>false</success>");
 
   MockedStatic<ChatGPT> responseMockedStatic;
 
@@ -150,7 +145,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   @Test
   public void dereferenceCastToNonnullTest() {
-    mockChatGPTResponse(DISAGREE);
+    mockChatGPTResponse(disagree());
     coreTestHelper
         .onTarget()
         .withSourceLines(
@@ -175,7 +170,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   @Test
   public void dereferenceReturnNullForNullableExpressionInNullableMethodTest() {
-    mockChatGPTResponse(DISAGREE);
+    mockChatGPTResponse(disagree());
     coreTestHelper
         .onTarget()
         .withSourceLines(
@@ -195,7 +190,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   @Test
   public void dereferenceFieldInitializedBeforeUseTest() {
-    mockChatGPTResponse(AGREE);
+    mockChatGPTResponse(agree());
     coreTestHelper
         .onTarget()
         .withSourceLines(
@@ -223,8 +218,8 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
   @Test
   public void dereferenceFieldFixGenerationUsingSafeUsageTest() {
     mockChatGPTResponse(
-        AGREE,
-        DISAGREE,
+        agree(),
+        disagree(),
         codeFix(
             "public int run(){",
             "      if (b == null) {",
@@ -305,7 +300,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   @Test
   public void dereferenceMethodTargetMethodSuppressionTest() {
-    mockChatGPTResponse(AGREE, DISAGREE);
+    mockChatGPTResponse(agree(), disagree());
     coreTestHelper
         .onTarget()
         .withSourceLines(
@@ -338,6 +333,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   @Test
   public void dereferenceMethodCallSiteSuppressionTest() {
+    mockChatGPTResponse(agree(), agree(), disagree());
     coreTestHelper
         .onTarget()
         .withSourceLines(
@@ -409,7 +405,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   @Test
   public void nullableReturnCastToNonnull() {
-    mockChatGPTResponse(DISAGREE);
+    mockChatGPTResponse(disagree());
     coreTestHelper
         .onTarget()
         .withSourceLines(
@@ -434,27 +430,5 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
         .expectNoReport()
         .resolveRemainingErrors()
         .start();
-  }
-
-  /**
-   * Convert the answer to XML format.
-   *
-   * @param answer the answer to be converted to XML format.
-   * @return the XML formatted answer.
-   */
-  private static Response toResponse(String answer) {
-    return new Response(String.format("<response>\n%s\n</response>", answer));
-  }
-
-  /**
-   * Convert the answer to XML format where the response is a successful generation of code fix.
-   *
-   * @param code the code to be converted to XML format.
-   * @return the XML formatted answer.
-   */
-  private static Response codeFix(String... code) {
-    String xml =
-        "<success>true</success>\n" + "<code>\n" + "```java\n" + "%s\n" + "```\n" + "</code>\n";
-    return toResponse(String.format(xml, String.join("\n", code)));
   }
 }
