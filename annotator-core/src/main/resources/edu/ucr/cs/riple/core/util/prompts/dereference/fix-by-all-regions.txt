@@ -9,10 +9,11 @@ If you can fix the error, please provide the fixed code snippet in XML format. I
 For examples:
 <response>
   <success>true</success>
-  <code>
+  <code><![CDATA[
   ```java
   Your fixed code snippet here, JUST THE METHOD.
   ```
+    ]]>
   </code>
 </response>
 Or if you cannot fix the error. please provide the output in XML format as below.

@@ -89,11 +89,22 @@ public class XmlParser {
     Document document;
     try {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true); // Secure XML parsing
+      factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+      factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+      factory.setIgnoringComments(true);  // Ignore comments
+      factory.setCoalescing(true);  // Merge CDATA into text nodes
       DocumentBuilder builder = factory.newDocumentBuilder();
       document = builder.parse(stream);
       document.normalize();
     } catch (SAXException | ParserConfigurationException | IOException e) {
-      throw new RuntimeException("Error in reading/parsing config at path: " + stream, e);
+      String content;
+        try {
+          content = new String(stream.readAllBytes(), Charset.defaultCharset());
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+        throw new RuntimeException("Error in reading/parsing config at path: " + content, e);
     }
     return document;
   }

@@ -45,8 +45,10 @@ Just give me the fixed code snippet in xml format in <response> tag like the exa
 <response>
   <success>true</success>
   <code>
+  <![CDATA[
   ```java
   Your fixed code snippet here, JUST THE METHOD.
   ```
+    ]]>
   </code>
 </response>

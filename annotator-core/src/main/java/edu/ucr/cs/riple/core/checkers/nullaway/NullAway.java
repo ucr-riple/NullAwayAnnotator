@@ -373,7 +373,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     // Collect regions with remaining errors.
     logger.trace("Resolving remaining errors: {} errors.", remainingErrors.size());
     Set<MethodRewriteChange> rewrites = new HashSet<>();
-    List<Integer> toSKip = List.of(0);
+    List<Integer> toSKip = List.of(0, 1, 2, 3);
     AtomicBoolean shutdown = new AtomicBoolean(false);
     AtomicInteger i = new AtomicInteger();
     remainingErrors.stream()
@@ -390,11 +390,11 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       //                    System.out.print("Press s to skip, any other key to
                       // continue: ");
                       //                    boolean skip = scanner.nextLine().charAt(0) == 's';
-                      //                      boolean skip = toSKip.contains(i.get());
-                      //                      i.getAndIncrement();
-                      //                      if (skip) {
-                      //                        return;
-                      //                      }
+                                            boolean skip = toSKip.contains(i.get());
+                                            i.getAndIncrement();
+                                            if (skip) {
+                                              return;
+                                            }
                       Set<MethodRewriteChange> change = codeFix.fix(error);
                       if (change != null) {
                         rewrites.addAll(change);

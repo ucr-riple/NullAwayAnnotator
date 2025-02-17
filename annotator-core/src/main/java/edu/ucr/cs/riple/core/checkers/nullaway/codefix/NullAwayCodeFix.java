@@ -651,6 +651,7 @@ public class NullAwayCodeFix {
    */
   private Set<MethodRewriteChange> constructCastToNonnullChange(
       NullAwayError error, String reason) {
+    logger.trace("Constructing cast to nonnull change.");
     SourceCode enclosingMethod = parser.getRegionSourceCode(error.getRegion());
     if (enclosingMethod == null) {
       return NO_ACTION;

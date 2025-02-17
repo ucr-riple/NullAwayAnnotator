@@ -34,9 +34,10 @@ And the error I want to be fixed is:
 Just give me the fixed code snippet in xml format in <response> tag like the example below. I will apply the fix to my codebase. Do not import any additional libraries or classes or java comments. If you can provide the fixed code snippet, please provide it in the following format and place the code snippet in the <code> tag within ```java block.
 <response>
   <success>true</success>
-  <code>
+  <code><![CDATA[
   ```java
   Your fixed code snippet here
   ```
+    ]]>
   </code>
 </response>
