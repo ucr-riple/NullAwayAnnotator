@@ -130,7 +130,7 @@ public class NullAwayError extends Error {
         {
           final Pattern pattern =
               Pattern.compile(
-                  "dereferenced expression (.+?) is @Nullable --- (.+?) --- (.+?) --- (.+?) --- (.+?) --- (.+)");
+                  "(?:dereferenced expression|enhanced-for expression) (.+?) is @Nullable --- (.+?) --- (.+?) --- (.+?) --- (.+?) --- (.+)");
           Matcher matcher = pattern.matcher(error.message);
           if (matcher.find()) {
             return new String[] {
