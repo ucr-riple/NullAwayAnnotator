@@ -577,22 +577,28 @@ public class NullAwayCodeFix {
     for (Map.Entry<Region, List<NullAwayError>> entry : unsafeRegionMap.entrySet()) {
       NullAwayError errorInRegion = entry.getValue().get(0);
       Set<MethodRewriteChange> changesForRegion = NO_ACTION;
-      if (!safeRegions.isEmpty()) {
-        // First try to fix by safe regions if exists.
-        changesForRegion =
-            gpt.fixDereferenceErrorBySafeRegions(errorInRegion, safeRegions, context);
-      }
-      if (changesForRegion.isEmpty()) {
-        logger.trace("No fix found by safe regions. Trying to fix by all regions.");
-        // If no safe region found, of no fix found by safe regions, try to fix by precondition
-        // check.
-        changesForRegion =
-            gpt.fixDereferenceErrorByAllRegions(
-                errorInRegion, safeRegions, unsafeRegionMap.keySet(), context);
-      }
-      if (!changesForRegion.isEmpty()) {
-        logger.trace("Successfully generated a fix for the error.");
-        changes.addAll(changesForRegion);
+      if (errorInRegion.messageType.equals("DEREFERENCE_NULLABLE")) {
+        if (!safeRegions.isEmpty()) {
+          // First try to fix by safe regions if exists.
+          changesForRegion =
+              gpt.fixDereferenceErrorBySafeRegions(errorInRegion, safeRegions, context);
+        }
+        if (changesForRegion.isEmpty()) {
+          logger.trace("No fix found by safe regions. Trying to fix by all regions.");
+          // If no safe region found, of no fix found by safe regions, try to fix by precondition
+          // check.
+          changesForRegion =
+              gpt.fixDereferenceErrorByAllRegions(
+                  errorInRegion, safeRegions, unsafeRegionMap.keySet(), context);
+        }
+        if (!changesForRegion.isEmpty()) {
+          logger.trace("Successfully generated a fix for the error.");
+          changes.addAll(changesForRegion);
+        } else {
+          logger.trace("Could not generate a fix for error: " + errorInRegion);
+        }
+      } else {
+        changes.addAll(fix(errorInRegion));
       }
     }
     return changes;
