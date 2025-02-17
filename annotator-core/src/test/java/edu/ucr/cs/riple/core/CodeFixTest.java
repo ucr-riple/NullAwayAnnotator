@@ -431,4 +431,43 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
         .resolveRemainingErrors()
         .start();
   }
+
+  @Test
+  public void uninitializedFieldTest() {
+    coreTestHelper
+        .onTarget()
+        .withSourceLines(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "import java.util.List;",
+            "import java.util.Map;",
+            "import java.util.HashMap;",
+            "import com.uber.nullaway.annotations.EnsuresNonNull;",
+            "public class Foo {",
+            "     Object foo;",
+            "     @EnsuresNonNull(\"foo\")",
+            "     void reopen(){",
+            "       foo = new Object();",
+            "     }",
+            "     public String exec1(){",
+            "       return foo.toString();",
+            "     }",
+            "     public String exec2(){",
+            "       return foo.toString();",
+            "     }",
+            "     public String exec3(){",
+            "       return foo.toString();",
+            "     }",
+            "     public String exec4(){",
+            "         if(foo == null){",
+            "            reopen();",
+            "         }",
+            "         return foo.toString();",
+            "     }",
+            "}")
+        .expectNoReport()
+        .resolveRemainingErrors()
+        .start();
+  }
 }

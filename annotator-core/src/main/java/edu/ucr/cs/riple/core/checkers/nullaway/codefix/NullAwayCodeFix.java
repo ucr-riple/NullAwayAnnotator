@@ -530,6 +530,9 @@ public class NullAwayCodeFix {
       }
     }
     // no initializer found. Try to fix by regions using the method as an example.
+    // Make field nullable if not already.
+    context.injector.injectAnnotation(
+        new AddMarkerAnnotation(onField, context.config.nullableAnnot));
     return fixErrorByRegions(onField);
   }
 
