@@ -390,8 +390,14 @@ public class NullAwayCodeFix {
       }
     }
     // Try to fix by regions using the method as an example.
-    OnMethod methodLocation =
-        context.targetModuleInfo.getMethodRegistry().findMethodByName(encClass, method).location;
+    logger.trace("Looking for method: " + encClass + "#" + method);
+    MethodRecord record =
+        context.targetModuleInfo.getMethodRegistry().findMethodByName(encClass, method);
+    if (record == null) {
+      logger.trace("Method not found: " + encClass + "#" + method);
+      return NO_ACTION;
+    }
+    OnMethod methodLocation = record.location;
     logger.trace("Trying to fix by regions using the method as an example.");
     return fixErrorByRegions(methodLocation);
   }
