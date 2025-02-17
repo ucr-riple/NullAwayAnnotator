@@ -342,6 +342,8 @@ public class NullAwayCodeFix {
       case "method":
         return resolveMethodDereferenceError(
             error, encClass, expressionSymbol, expression, isAnnotated);
+      case "local_variable":
+        logger.trace("not supporting dereference on local variable yet.");
       default:
         return NO_ACTION;
     }

@@ -148,6 +148,7 @@ public class NullAwayError extends Error {
               matcher.group(6)
             };
           }
+          break;
         }
       case "METHOD_NO_INIT":
         String errorMessage = error.message;
