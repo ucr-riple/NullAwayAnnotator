@@ -390,7 +390,6 @@ public class NullAwayCodeFix {
       }
     }
     // Try to fix by regions using the method as an example.
-    logger.trace("Looking for method: " + encClass + "#" + method);
     MethodRecord record =
         context.targetModuleInfo.getMethodRegistry().findMethodByName(encClass, method);
     if (record == null) {
