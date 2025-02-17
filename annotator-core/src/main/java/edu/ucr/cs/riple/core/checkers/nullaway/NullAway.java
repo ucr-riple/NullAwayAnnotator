@@ -373,7 +373,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     // Collect regions with remaining errors.
     logger.trace("Resolving remaining errors: {} errors.", remainingErrors.size());
     Set<MethodRewriteChange> rewrites = new HashSet<>();
-    List<Integer> toSKip = List.of(0, 1, 2, 3, 4, 5, 6, 7);
+    List<Integer> toSKip = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
     AtomicBoolean shutdown = new AtomicBoolean(false);
     AtomicInteger i = new AtomicInteger();
     remainingErrors.stream()

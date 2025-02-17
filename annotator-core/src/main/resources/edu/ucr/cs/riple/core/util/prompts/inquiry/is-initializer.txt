@@ -13,6 +13,16 @@ Here are some examples of initializer methods:
 Is the given method an initializer method? I know it initializes the fields of the class, but I don't want to consider a setter method as an initializer method.
 %s
 Please provide a single-word answer and your reason/explanation in XML format. If it is an initializer method, respond with:
-<response><value>YES</value><reason>YOUR REASON</reason></response>
+```xml
+<response>
+    <value>YES</value>
+    <reason><![CDATA[YOUR REASON]]></reason>
+</response>
+```
 If it is not an initializer method, respond with:
-<response><value>NO</value><reason>YOUR REASON</reason></response>
+```xml
+<response>
+    <value>NO</value>
+    <reason><![CDATA[YOUR REASON]]></reason>
+</response>
+```

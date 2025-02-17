@@ -19,22 +19,27 @@ Provide the answer in **XML format** as follows:
 ```xml
 <response>
   <value>NO</value>
-  <reason>EXPLAIN WHY THE METHOD CANNOT RETURN NULL</reason>
+  <reason><![CDATA[EXPLAIN WHY THE METHOD CANNOT RETURN NULL]]></reason>
 </response>
+```
 
 #### If the method can return null:
+```xml
 <response>
   <value>YES</value>
-  <reason>EXPLAIN WHY THE METHOD CAN RETURN NULL</reason>
+  <reason><![CDATA[EXPLAIN WHY THE METHOD CAN RETURN NULL]]></reason>
 </response>
+```
 
 #### If there are any methods that directly or indirectly affect the return value and are not fully disclosed, request their declarations first, in the following format:
+```xml
 <response>
   <success>false</success>
   <methods>
     <method>methodName</method>
   </methods>
 </response>
+```
 
 Additional Notes:
 Be precise in your reasoning.

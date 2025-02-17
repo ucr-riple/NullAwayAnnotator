@@ -1,6 +1,16 @@
 In the method below is there a possibility that the expression: %s at line: %s be null ?
 %s
 Please give a single-word answer in XML format. If it is possible for the expression to be null, respond with:
-`<response><value>YES</value><reason>YOUR REASON</reason></response>`.
+```xml
+<response>
+    <value>YES</value>
+    <reason><![CDATA[YOUR REASON]]></reason>
+</response>
+```
 If it is not possible for the expression to be null, respond with:
-`<response><value>NO</value><reason>YOUR REASON</reason></response>`.
+```xml
+<response>
+    <value>NO</value>
+    <reason><![CDATA[YOUR REASON]]></reason>
+</response>
+```

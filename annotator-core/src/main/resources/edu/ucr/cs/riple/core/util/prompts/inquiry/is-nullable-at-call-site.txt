@@ -24,13 +24,13 @@ Provide the answer in **XML format** as follows:
 ```xml
 <response>
   <value>NO</value>
-  <reason>EXPLAIN WHY THE INVOCATION %s RESULT CANNOT BE NULL.</reason>
+  <reason><![CDATA[EXPLAIN WHY THE INVOCATION %s RESULT CANNOT BE NULL.]]></reason>
 </response>
 
 #### If the method can return null at the specific call site:
 <response>
   <value>YES</value>
-  <reason>EXPLAIN WHY THE INVOCATION %s RESULT CAN BE NULL.</reason>
+  <reason><![CDATA[EXPLAIN WHY THE INVOCATION %s RESULT CAN BE NULL.]]></reason>
 </response>
 
 #### If there are any methods that directly or indirectly affect the return value and are not fully disclosed, request their declarations first, in the following format:
