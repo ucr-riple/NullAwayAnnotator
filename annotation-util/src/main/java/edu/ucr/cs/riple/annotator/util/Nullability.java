@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Nima Karimipour
+ * Copyright (c) 2025 Nima Karimipour
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,13 +22,14 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'NullAwayAnnotator'
-include 'annotator-core'
-include 'annotator-scanner'
-include 'injector'
-include 'library-model-loader'
-include 'checks'
-include 'checks:ban-mutable-static'
-include 'annotator-util'
-include 'annotation-util'
+package edu.ucr.cs.riple.annotator.util;
 
+public class Nullability {
+
+  public static <T> T castToNonnull(T param, String reason) {
+    if (param == null) {
+      throw new IllegalArgumentException("Expected non-null value for " + reason + " but got null");
+    }
+    return param;
+  }
+}

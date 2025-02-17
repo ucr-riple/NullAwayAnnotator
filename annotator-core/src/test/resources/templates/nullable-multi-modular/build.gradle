@@ -51,9 +51,10 @@ subprojects {
         annotationProcessor "com.uber.nullaway:nullaway:" + System.getenv('NULLAWAY_TEST_VERSION')
         annotationProcessor "edu.ucr.cs.riple.annotator:annotator-scanner:" + System.getenv('ANNOTATOR_VERSION')
 
+        // to add nullability util
+        compileOnly "edu.ucr.cs.riple.annotator:annotation-util:" + System.getenv('ANNOTATOR_VERSION')
         // to add guava
         compileOnly "com.google.guava:guava:32.0.1-jre"
-
         // to add @Initializer
         compileOnly 'com.uber.nullaway:nullaway-annotations:' + System.getenv('NULLAWAY_TEST_VERSION')
         // to add jetbrains annotations (testing type use vs type declaration)

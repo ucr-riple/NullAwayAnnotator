@@ -120,6 +120,15 @@ public class Response {
   }
 
   /**
+   * Gets the reason for the response.
+   *
+   * @return the reason for the response.
+   */
+  public String getReason() {
+    return reason;
+  }
+
+  /**
    * Checks if the response is successful.
    *
    * @return true if the response is successful.

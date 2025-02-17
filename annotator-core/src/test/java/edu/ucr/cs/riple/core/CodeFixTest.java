@@ -149,7 +149,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
   }
 
   @Test
-  public void dereferenceAddPreconditionTest() {
+  public void dereferenceCastToNonnullTest() {
     mockChatGPTResponse(DISAGREE);
     coreTestHelper
         .onTarget()
@@ -159,12 +159,13 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
             "import javax.annotation.Nullable;",
             "import java.util.Collection;",
             "public class Foo {",
-            "   public String toString(@Nullable Collection<?> coll) {",
-            "     boolean isEmpty = coll == null || coll.isEmpty();",
+            "   @Nullable Collection<?> coll;",
+            "   public String toString(Foo f) {",
+            "     boolean isEmpty = f.coll == null || f.coll.isEmpty();",
             "     if(isEmpty) {",
             "       return \"\";",
             "     }",
-            "     return coll.iterator().next().toString();",
+            "     return f.coll.iterator().next().toString();",
             "   }",
             "}")
         .expectNoReport()

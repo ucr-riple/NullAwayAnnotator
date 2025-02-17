@@ -128,12 +128,18 @@ public class NullAwayError extends Error {
     if (error.messageType.equals("DEREFERENCE_NULLABLE")) {
       final Pattern pattern =
           Pattern.compile(
-              "dereferenced expression (.+?) is @Nullable --- (.+?) --- (.+?) --- (.+?) --- (.+)");
+              "dereferenced expression (.+?) is @Nullable --- (.+?) --- (.+?) --- (.+?) --- (.+?) --- (.+)");
       Matcher matcher = pattern.matcher(error.message);
       if (matcher.find()) {
         return new String[] {
           // expression     type              encClass          annotated?        deferred symbol
-          matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4), matcher.group(5)
+          // expression start position
+          matcher.group(1),
+          matcher.group(2),
+          matcher.group(3),
+          matcher.group(4),
+          matcher.group(5),
+          matcher.group(6)
         };
       }
       throw new IllegalArgumentException(

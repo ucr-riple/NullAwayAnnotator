@@ -243,7 +243,8 @@ public class NullAwayCodeFix {
     // Check if it is a false positive
     logger.trace("Checking if the method is actually returning nullable.");
     OnMethod onMethod = new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member);
-    if (gpt.checkIfFalsePositiveAtErrorPoint(error, context)) {
+    Response nullabilityPossibility = gpt.checkNullabilityPossibilityAtErrorPoint(error, context);
+    if (nullabilityPossibility.isDisagreement()) {
       logger.trace("False positive detected at return expression.");
       // add SuppressWarnings
       context.injector.injectAnnotation(
@@ -307,10 +308,11 @@ public class NullAwayCodeFix {
     }
     // Check if it is a false positive
     logger.trace("Checking if false positive.");
-    if (gpt.checkIfFalsePositiveAtErrorPoint(error, context)) {
+    Response nullabilityPossibility = gpt.checkNullabilityPossibilityAtErrorPoint(error, context);
+    if (nullabilityPossibility.isDisagreement()) {
       logger.trace("False positive detected.");
       // cast to nonnull.
-      return constructPreconditionCheckMethodRewriteForError(error);
+      return constructCastToNonnullChange(error, nullabilityPossibility.getReason());
     }
     if (error.getRegion().isOnCallable()) {
       // check if method already annotated as nullable, return nullable.
@@ -641,16 +643,15 @@ public class NullAwayCodeFix {
    * void foo(@Nullable Collection<?> coll){
    * boolean isEmpty = coll == null || coll.isEmpty();
    * if(!isEmpty) {
-   *  + Preconditions.checkArgument(coll != null, "expected coll to be nonnull here.");
-   *  coll.deref();
+   *  Nullability.castToNonnull(coll).deref();
    * }}
    * }</pre>
    *
    * @param error the error to fix.
    * @return a {@link MethodRewriteChange} that represents the code fix.
    */
-  private Set<MethodRewriteChange> constructPreconditionCheckMethodRewriteForError(
-      NullAwayError error) {
+  private Set<MethodRewriteChange> constructCastToNonnullChange(
+      NullAwayError error, String reason) {
     SourceCode enclosingMethod = parser.getRegionSourceCode(error.getRegion());
     if (enclosingMethod == null) {
       return NO_ACTION;
@@ -661,17 +662,20 @@ public class NullAwayCodeFix {
     // 0-based.
     int errorLine = error.position.lineNumber - (enclosingMethod.range.begin.line - 1);
     String expression = NullAwayError.extractPlaceHolderValue(error)[0];
-    String preconditionStatement =
-        String.format(
-            "%sPreconditions.checkArgument(%s != null, \"expected %s to be nonnull here.\");\n",
-            Utility.getLeadingWhitespace(lines[errorLine]), expression, expression);
-    lines[errorLine] = preconditionStatement + lines[errorLine];
+    String castToNonnullStatement =
+        String.format("Nullability.castToNonnull(%s, \"%s\")", expression, "reason...");
+    int start = lines[errorLine].indexOf(expression);
+    int end = start + expression.length();
+    lines[errorLine] =
+        lines[errorLine].substring(0, start)
+            + castToNonnullStatement
+            + lines[errorLine].substring(end);
     MethodRewriteChange change =
         new MethodRewriteChange(
             new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member),
             String.join("\n", lines),
             // Add the import required for Preconditions.
-            Set.of(NullAway.PRECONDITION_NAME));
+            Set.of(NullAway.CAST_TO_NONNULL));
     return Set.of(change);
   }
 

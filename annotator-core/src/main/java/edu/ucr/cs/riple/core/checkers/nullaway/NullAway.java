@@ -53,9 +53,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
@@ -69,11 +69,8 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
    */
   public static final String NAME = "NULLAWAY";
 
-  /**
-   * Class name for adding precondition statements to the source code. By default, we use {@link
-   * Preconditions}. This should be configurable in the future.
-   */
-  public static final String PRECONDITION_NAME = "com.google.common.base.Preconditions";
+  /** Class name for adding cast to nonnull statements. */
+  public static final String CAST_TO_NONNULL = "edu.ucr.cs.riple.annotator.util.Nullability";
 
   /** Supported version of NullAway serialization. */
   public static final int VERSION = 3;
@@ -384,14 +381,15 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                 nullAwayErrors.forEach(
                     error -> {
                       logger.trace("TOP LEVEL CALL TO FIX ERROR: {}", error);
-//                    Scanner scanner = new Scanner(System.in);
-//                    System.out.print("Press s to skip, any other key to continue: ");
-//                    boolean skip = scanner.nextLine().charAt(0) == 's';
-                      boolean skip = toSKip.contains(i.get());
-                      i.getAndIncrement();
-                      if (skip) {
-                        return;
-                      }
+                      //                    Scanner scanner = new Scanner(System.in);
+                      //                    System.out.print("Press s to skip, any other key to
+                      // continue: ");
+                      //                    boolean skip = scanner.nextLine().charAt(0) == 's';
+                      //                      boolean skip = toSKip.contains(i.get());
+                      //                      i.getAndIncrement();
+                      //                      if (skip) {
+                      //                        return;
+                      //                      }
                       Set<MethodRewriteChange> change = codeFix.fix(error);
                       if (change != null) {
                         rewrites.addAll(change);

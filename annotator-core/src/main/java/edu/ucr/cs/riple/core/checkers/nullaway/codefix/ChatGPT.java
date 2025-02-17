@@ -367,14 +367,14 @@ public class ChatGPT {
   }
 
   /**
-   * Check if the error is a false positive at the error point. If it is a false positive, then the
-   * solution is to cast the variable to nonnull.
+   * Check if the expression can be null at the error point. This method only considers the method
+   * body and does not consider the call site.
    *
    * @param error the error to check.
    * @param context Annotator context.
    * @return {@code true} if the error is a false positive, {@code false} otherwise.
    */
-  public boolean checkIfFalsePositiveAtErrorPoint(NullAwayError error, Context context) {
+  public Response checkNullabilityPossibilityAtErrorPoint(NullAwayError error, Context context) {
     String enclosingMethod = parser.getRegionSourceCode(error.getRegion()).content;
     String prompt = null;
     if (error.messageType.equals("DEREFERENCE_NULLABLE")) {
@@ -396,11 +396,10 @@ public class ChatGPT {
               enclosingMethod);
     }
     if (prompt == null) {
-      return false;
+      return null;
     }
     logger.trace("Asking if the error can be null at error point point");
-    Response nullabilityPossibility = ask(prompt, context);
-    return nullabilityPossibility.isDisagreement();
+    return ask(prompt, context);
   }
 
   /**
