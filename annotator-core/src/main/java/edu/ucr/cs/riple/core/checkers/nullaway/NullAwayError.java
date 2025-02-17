@@ -125,55 +125,62 @@ public class NullAwayError extends Error {
    * @return the placeholder value.
    */
   public static String[] extractPlaceHolderValue(NullAwayError error) {
-    if (error.messageType.equals("DEREFERENCE_NULLABLE")) {
-      final Pattern pattern =
-          Pattern.compile(
-              "dereferenced expression (.+?) is @Nullable --- (.+?) --- (.+?) --- (.+?) --- (.+?) --- (.+)");
-      Matcher matcher = pattern.matcher(error.message);
-      if (matcher.find()) {
-        return new String[] {
-          // expression
-          matcher.group(1),
-          // type
-          matcher.group(2),
-          // enclosing class
-          matcher.group(3),
-          // annotated?
-          matcher.group(4),
-          // deferred symbol
-          matcher.group(5),
-          // expression start position
-          matcher.group(6)
-        };
-      }
-      throw new IllegalArgumentException(
-          "Error message does not contain a placeholder values: "
-              + error.messageType
-              + " "
-              + error.message);
+    switch (error.messageType) {
+      case "DEREFERENCE_NULLABLE":
+        {
+          final Pattern pattern =
+              Pattern.compile(
+                  "dereferenced expression (.+?) is @Nullable --- (.+?) --- (.+?) --- (.+?) --- (.+?) --- (.+)");
+          Matcher matcher = pattern.matcher(error.message);
+          if (matcher.find()) {
+            return new String[] {
+              // expression
+              matcher.group(1),
+              // type
+              matcher.group(2),
+              // enclosing class
+              matcher.group(3),
+              // annotated?
+              matcher.group(4),
+              // deferred symbol
+              matcher.group(5),
+              // expression start position
+              matcher.group(6)
+            };
+          }
+        }
+      case "METHOD_NO_INIT":
+        String errorMessage = error.message;
+        String prefix = "initializer method does not guarantee @NonNull field";
+        int begin = prefix.length();
+        if (errorMessage.charAt(begin) == 's') {
+          begin += 1;
+        }
+        int end = errorMessage.indexOf(" is initialized along");
+        end = end == -1 ? errorMessage.indexOf(" are initialized along ") : end;
+        if (end == -1) {
+          throw new RuntimeException(
+              "Error message for initializer error not recognized in version "
+                  + 3
+                  + ": "
+                  + errorMessage);
+        }
+        String[] fieldsData = errorMessage.substring(begin, end).split(",");
+        return Arrays.stream(fieldsData)
+            .map(s -> s.substring(0, s.indexOf("(")).trim())
+            .distinct()
+            .toArray(String[]::new);
+      case "FIELD_NO_INIT":
+        {
+          Pattern pattern = Pattern.compile("@NonNull field (\\w+) not initialized");
+          Matcher matcher = pattern.matcher(error.message);
+          if (matcher.find()) {
+            return new String[] {matcher.group(1)};
+          }
+          break;
+        }
     }
-    if (error.messageType.equals("METHOD_NO_INIT")) {
-      String errorMessage = error.message;
-      String prefix = "initializer method does not guarantee @NonNull field";
-      int begin = prefix.length();
-      if (errorMessage.charAt(begin) == 's') {
-        begin += 1;
-      }
-      int end = errorMessage.indexOf(" is initialized along");
-      end = end == -1 ? errorMessage.indexOf(" are initialized along ") : end;
-      if (end == -1) {
-        throw new RuntimeException(
-            "Error message for initializer error not recognized in version "
-                + 3
-                + ": "
-                + errorMessage);
-      }
-      String[] fieldsData = errorMessage.substring(begin, end).split(",");
-      return Arrays.stream(fieldsData)
-          .map(s -> s.substring(0, s.indexOf("(")).trim())
-          .distinct()
-          .toArray(String[]::new);
-    }
-    throw new IllegalArgumentException("Error type not supported." + error.messageType);
+    throw new IllegalArgumentException(
+        "Error type not supported." + error.messageType + ": " + error.message);
   }
 }
