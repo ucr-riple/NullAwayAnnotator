@@ -53,11 +53,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -373,33 +370,17 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     // Collect regions with remaining errors.
     logger.trace("Resolving remaining errors: {} errors.", remainingErrors.size());
     Set<MethodRewriteChange> rewrites = new HashSet<>();
-    List<Integer> toSKip = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    AtomicBoolean shutdown = new AtomicBoolean(false);
-    AtomicInteger i = new AtomicInteger();
     remainingErrors.stream()
         .collect(Collectors.groupingBy(NullAwayError::getRegion))
         .forEach(
             (region, nullAwayErrors) ->
                 nullAwayErrors.forEach(
                     error -> {
-                      if (shutdown.get()) {
-                        return;
-                      }
-                      //                    Scanner scanner = new Scanner(System.in);
-                      //                    System.out.print("Press s to skip, any other key to
-                      // continue: ");
-                      //                    boolean skip = scanner.nextLine().charAt(0) == 's';
-                      boolean skip = toSKip.contains(i.get());
-                      i.getAndIncrement();
-                      if (skip) {
-                        return;
-                      }
                       logger.trace("TOP LEVEL CALL TO FIX ERROR: {}", error);
                       Set<MethodRewriteChange> change = codeFix.fix(error);
                       if (change != null) {
                         rewrites.addAll(change);
                       }
-                      shutdown.set(true);
                     }));
     codeFix.apply(rewrites);
   }
