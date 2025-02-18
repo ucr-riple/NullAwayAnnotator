@@ -50,6 +50,9 @@ public class Response {
    */
   private final boolean isDisagreement;
 
+  /** Flag to indicate if the response is unknown. */
+  private final boolean isUnknown;
+
   /**
    * Reason for the response. This is only available if the response is an agreement or a
    * disagreement.
@@ -93,8 +96,14 @@ public class Response {
             .getArrayValueFromTag("/response/value", String.class)
             .orElse("")
             .equalsIgnoreCase("no");
+    this.isUnknown =
+        parser
+            .getArrayValueFromTag("/response/value", String.class)
+            .orElse("")
+            .equalsIgnoreCase("unknown");
     this.success =
         isDisagreement
+            || isUnknown
             || isAgreement
             || parser.getArrayValueFromTag("/response/success", Boolean.class).orElse(false);
     this.code = parseCode(parser.getValueFromTag("/response/code", String.class).orElse(""));
@@ -110,6 +119,15 @@ public class Response {
   /** The response instance for disagreement. */
   public static Response disagree() {
     return toResponse("<value>NO</value>");
+  }
+
+  /**
+   * The response instance for unknown. This is used when the model does not know the answer.
+   *
+   * @return the response instance for unknown.
+   */
+  public static Response unknown() {
+    return toResponse("<value>UNKNOWN</value>");
   }
 
   /**

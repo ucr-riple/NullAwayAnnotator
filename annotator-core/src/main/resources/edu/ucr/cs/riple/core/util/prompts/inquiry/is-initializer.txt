@@ -10,19 +10,26 @@ Here are some examples of initializer methods:
 - {@code javax.servlet.Filter.init}
 - {@code javax.servlet.Servlet.init}
 
-Is the given method an initializer method? I know it initializes the fields of the class, but I don't want to consider a setter method as an initializer method.
+Is the given method an initializer method? I know it initializes the fields of the class, but I do not want to consider a setter method as an initializer method.
 %s
 Please provide a single-word answer and your reason/explanation in XML format. If it is an initializer method, respond with:
 ```xml
 <response>
-    <value>YES</value>
     <reason><![CDATA[YOUR REASON]]></reason>
+    <value>YES</value>
 </response>
 ```
 If it is not an initializer method, respond with:
 ```xml
 <response>
-    <value>NO</value>
     <reason><![CDATA[YOUR REASON]]></reason>
+    <value>NO</value>
+</response>
+```
+If you are unsure or need more information, respond with:
+```xml
+<response>
+    <reason><![CDATA[YOUR REASON]]></reason>
+    <value>UNKNOWN</value>
 </response>
 ```

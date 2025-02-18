@@ -306,8 +306,8 @@ public class NullAwayCodeFix {
       logger.trace("Fixing dereference error in hashCode method.");
       return gpt.fixDereferenceErrorInHashCodeMethod(error, context);
     }
-    // Check if it is a false positive
-    logger.trace("Checking if false positive.");
+    // Check nullability possibility.
+    logger.trace("Checking nullability possibility at error point");
     Response nullabilityPossibility = gpt.checkNullabilityPossibilityAtErrorPoint(error, context);
     if (nullabilityPossibility.isDisagreement()) {
       logger.trace("False positive detected.");

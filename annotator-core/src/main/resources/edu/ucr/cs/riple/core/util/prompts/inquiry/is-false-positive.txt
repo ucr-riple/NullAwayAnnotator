@@ -1,16 +1,23 @@
-In the method below is there a possibility that the expression: %s at line: %s be null ?
+In the method below, is there a possibility that the expression "%s" at line "%s" is null?
 %s
-Please give a single-word answer in XML format. If it is possible for the expression to be null, respond with:
+Give a single-word answer in XML format. If it is possible for the expression to be null, respond with:
 ```xml
 <response>
-    <value>YES</value>
     <reason><![CDATA[YOUR REASON]]></reason>
+    <value>YES</value>
 </response>
 ```
 If it is not possible for the expression to be null, respond with:
 ```xml
 <response>
-    <value>NO</value>
     <reason><![CDATA[YOUR REASON]]></reason>
+    <value>NO</value>
+</response>
+```
+If you are unsure or need more information, respond with:
+```xml
+<response>
+    <reason><![CDATA[YOUR REASON]]></reason>
+    <value>UNKNOWN</value>
 </response>
 ```

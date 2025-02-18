@@ -23,17 +23,17 @@ Provide the answer in **XML format** as follows:
 #### If the method **cannot** return `null` at the specific call site:
 ```xml
 <response>
-  <value>NO</value>
   <reason><![CDATA[EXPLAIN WHY THE INVOCATION %s RESULT CANNOT BE NULL.]]></reason>
+  <value>NO</value>
 </response>
 
 #### If the method can return null at the specific call site:
 <response>
-  <value>YES</value>
   <reason><![CDATA[EXPLAIN WHY THE INVOCATION %s RESULT CAN BE NULL.]]></reason>
+  <value>YES</value>
 </response>
 
-#### If there are any methods that directly or indirectly affect the return value and are not fully disclosed, request their declarations first, in the following format:
+#### If you are unsure or If there are any methods that directly or indirectly affect the return value and are not fully disclosed, request their declarations first, in the following format:
 <response>
   <success>false</success>
   <methods>

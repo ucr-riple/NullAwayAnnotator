@@ -17,18 +17,18 @@ Provide the answer in XML format:
 - If the parameter **cannot be null**, respond with:
 ```xml
 <response>
-    <value>NO</value>
     <reason><![CDATA[YOUR REASON]]></reason>
+    <value>NO</value>
 </response>
 ```
 - If the parameter **can be null**, respond with:
 ```xml
 <response>
-    <value>YES</value>
     <reason><![CDATA[YOUR REASON]]></reason>
+    <value>YES</value>
 </response>
 ```
-- If there are any methods that directly or indirectly affect the parameter's nullability and are not fully disclosed, request their declarations first, in the following format:
+- If you are unsure or If there are any methods that directly or indirectly affect the parameter's nullability and are not fully disclosed, request their declarations first, in the following format:
   ```xml
   <response>
     <success>false</success>
