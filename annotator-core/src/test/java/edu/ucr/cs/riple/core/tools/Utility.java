@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.tools;
 
+import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.scanner.Serializer;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -161,7 +162,8 @@ public class Utility {
                             createAFileWithContent(
                                 testDir.resolve("0").resolve(fileName), "HEADER\n"));
                 createAFileWithContent(
-                    testDir.resolve("0").resolve("serialization_version.txt"), "3");
+                    testDir.resolve("0").resolve("serialization_version.txt"),
+                    String.valueOf(NullAway.VERSION));
                 return null;
               });
       runnable.run();
