@@ -107,8 +107,9 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     String[] values = line.split("\t");
     Preconditions.checkArgument(
         values.length == 12,
-        "Expected 12 values to create Error instance in NullAway serialization version 2 but found: "
-            + values.length);
+        String.format(
+            "Expected 12 values to create Error instance in NullAway serialization version %s but found: %s",
+            NullAway.VERSION, values.length));
     int offset = Integer.parseInt(values[4]);
     Path path = Printer.deserializePath(values[5]);
     String errorMessage = values[1];
