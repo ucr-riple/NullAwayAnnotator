@@ -40,6 +40,12 @@ import java.util.regex.Pattern;
 /** Represents an error reported by {@link NullAway}. */
 public class NullAwayError extends Error {
 
+  /**
+   * Contains extra information serialized by NullAway that are not formally structured, this is
+   * only used in the development stage.
+   */
+  final String[] args;
+
   public enum ErrorType {
     METHOD_INITIALIZER("METHOD_NO_INIT"),
     FIELD_INITIALIZER("FIELD_NO_INIT"),
@@ -58,8 +64,10 @@ public class NullAwayError extends Error {
       Region region,
       Path path,
       DiagnosticPosition position,
-      Set<AddAnnotation> annotations) {
+      Set<AddAnnotation> annotations,
+      String[] args) {
     super(messageType, message, region, path, position, annotations);
+    this.args = args;
   }
 
   @Override
@@ -128,27 +136,7 @@ public class NullAwayError extends Error {
     switch (error.messageType) {
       case "DEREFERENCE_NULLABLE":
         {
-          final Pattern pattern =
-              Pattern.compile(
-                  "(?:dereferenced expression|enhanced-for expression) (.+?) is @Nullable --- (.+?) --- (.+?) --- (.+?) --- (.+?) --- (.+)");
-          Matcher matcher = pattern.matcher(error.message);
-          if (matcher.find()) {
-            return new String[] {
-              // expression
-              matcher.group(1),
-              // type
-              matcher.group(2),
-              // enclosing class
-              matcher.group(3),
-              // annotated?
-              matcher.group(4),
-              // deferred symbol
-              matcher.group(5),
-              // expression start position
-              matcher.group(6)
-            };
-          }
-          break;
+          return error.args;
         }
       case "METHOD_NO_INIT":
         String errorMessage = error.message;

@@ -71,7 +71,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
   public static final String CAST_TO_NONNULL = "edu.ucr.cs.riple.annotator.util.Nullability";
 
   /** Supported version of NullAway serialization. */
-  public static final int VERSION = 3;
+  public static final int VERSION = 4;
 
   /** The logger instance. */
   private static final Logger logger = LogManager.getLogger(NullAway.class);
@@ -116,8 +116,8 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     Context context = moduleInfo.getContext();
     String[] values = line.split("\t");
     Preconditions.checkArgument(
-        values.length == 12,
-        "Expected 12 values to create Error instance in NullAway serialization version 2 but found: "
+        values.length == 12 || values.length == 13,
+        "Expected 12 or 13 values to create Error instance in NullAway serialization version 4 but found: "
             + values.length);
     int offset = Integer.parseInt(values[4]);
     Path path = Printer.deserializePath(values[5]);
@@ -128,13 +128,14 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
         Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 6, 12));
     DiagnosticPosition position =
         new DiagnosticPosition(path, offset, context.offsetHandler.getOriginalOffset(path, offset));
+    String[] args = values.length == 13 ? values[12].split("---") : new String[0];
     if (nonnullTarget == null
         && errorType.equals(NullAwayError.ErrorType.METHOD_INITIALIZER.type)) {
       Set<AddAnnotation> annotationsOnField =
           computeAddAnnotationInstancesForUninitializedFields(
               errorMessage, region.clazz, moduleInfo);
       return createError(
-          errorType, errorMessage, region, path, position, annotationsOnField, moduleInfo);
+          errorType, errorMessage, region, path, position, annotationsOnField, moduleInfo, args);
     }
     if (nonnullTarget != null && nonnullTarget.isOnField()) {
       nonnullTarget = extendVariableList(nonnullTarget.toField(), moduleInfo);
@@ -147,7 +148,8 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     } else {
       annotations = Set.of(new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot));
     }
-    return createError(errorType, errorMessage, region, path, position, annotations, moduleInfo);
+    return createError(
+        errorType, errorMessage, region, path, position, annotations, moduleInfo, args);
   }
 
   /**
@@ -424,6 +426,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
    * @param position Diagnostic position where the error is reported.
    * @param annotations Annotations that should be added source file to resolve the error.
    * @param module Module where this error is reported.
+   * @param args Extra information serialized by NullAway that are not formally structured.
    * @return Creates and returns the corresponding {@link NullAwayError} instance using the provided
    *     information.
    */
@@ -434,7 +437,8 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
       Path path,
       DiagnosticPosition position,
       Set<AddAnnotation> annotations,
-      ModuleInfo module) {
+      ModuleInfo module,
+      String[] args) {
     // Filter fixes on elements with explicit nonnull annotations.
     ImmutableSet<AddAnnotation> cleanedAnnotations =
         annotations.stream()
@@ -442,7 +446,8 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                 annot ->
                     !module.getNonnullStore().hasExplicitNonnullAnnotation(annot.getLocation()))
             .collect(ImmutableSet.toImmutableSet());
-    return new NullAwayError(errorType, errorMessage, region, path, position, cleanedAnnotations);
+    return new NullAwayError(
+        errorType, errorMessage, region, path, position, cleanedAnnotations, args);
   }
 
   @Override
