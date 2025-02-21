@@ -30,6 +30,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
+import edu.ucr.cs.riple.core.Main;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
@@ -40,8 +41,10 @@ import edu.ucr.cs.riple.core.registries.region.RegionRecord;
 import edu.ucr.cs.riple.scanner.AnnotatorScanner;
 import edu.ucr.cs.riple.scanner.ScannerConfigWriter;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -345,6 +348,25 @@ public class Utility {
         ChronoUnit.SECONDS,
         0L,
         Duration.ZERO);
+  }
+
+  /**
+   * Checks if there are any changes to commit in the git repository.
+   *
+   * @return true if there are changes to commit, false otherwise.
+   */
+  public static boolean hasChangesToCommit() {
+    try {
+      ProcessBuilder processBuilder = new ProcessBuilder("git", "status", "--porcelain");
+      processBuilder.directory(new java.io.File(Main.PROJECT_PATH));
+      Process process = processBuilder.start();
+      try (BufferedReader reader =
+          new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+        return reader.readLine() != null;
+      }
+    } catch (IOException e) {
+      return false;
+    }
   }
 
   /**

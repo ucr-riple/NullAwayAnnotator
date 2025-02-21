@@ -411,24 +411,29 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                           rewrites.addAll(change);
                         }
                       } catch (Exception e) {
-                        logger.trace("--------Exception occurred in computing fix for: {}", e.getMessage());
+                        logger.trace(
+                            "--------Exception occurred in computing fix for: {}", e.toString());
+                      } finally {
+                        Utility.executeCommand(
+                            config, String.format("cd %s && ./gradlew goJF", Main.PROJECT_PATH));
+                        if (Utility.hasChangesToCommit()) {
+                          Utility.executeCommand(
+                              config, String.format("cd %s && git add .", Main.PROJECT_PATH));
+                          Utility.executeCommand(
+                              config,
+                              String.format(
+                                  "cd %s && git commit -m \"fix: %d\"",
+                                  Main.PROJECT_PATH, counter.get()));
+                          Utility.executeCommand(
+                              config, String.format("cd %s && git push", Main.PROJECT_PATH));
+                          // revert
+                          Utility.executeCommand(
+                              config,
+                              String.format(
+                                  "cd %s && git revert HEAD --no-edit && git push",
+                                  Main.PROJECT_PATH));
+                        }
                       }
-                      Utility.executeCommand(
-                          config, String.format("cd %s && ./gradlew goJF", Main.PROJECT_PATH));
-                      Utility.executeCommand(
-                          config, String.format("cd %s && git add .", Main.PROJECT_PATH));
-                      Utility.executeCommand(
-                          config,
-                          String.format(
-                              "cd %s && git commit -m \"fix: %d\"",
-                              Main.PROJECT_PATH, counter.get()));
-                      Utility.executeCommand(
-                          config, String.format("cd %s && git push", Main.PROJECT_PATH));
-                      // revert
-                      Utility.executeCommand(
-                          config,
-                          String.format(
-                              "cd %s && git revert HEAD --no-edit && git push", Main.PROJECT_PATH));
                     }));
     codeFix.apply(rewrites);
   }
