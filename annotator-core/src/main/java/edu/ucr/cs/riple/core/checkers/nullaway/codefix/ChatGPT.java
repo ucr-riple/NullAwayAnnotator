@@ -100,7 +100,7 @@ public class ChatGPT {
   /** The logger instance. */
   private static final Logger logger = LogManager.getLogger(ChatGPT.class);
 
-  static final AtomicInteger count = new AtomicInteger(0);
+  public static final AtomicInteger count = new AtomicInteger(0);
 
   /**
    * The {@link ASTParser} instance used to parse the source code of the file containing the error.
@@ -157,8 +157,8 @@ public class ChatGPT {
    * @return the response from ChatGPT.
    */
   private static String sendRequestToOpenAI(String prompt) {
-    if (count.incrementAndGet() > 100) {
-      throw new RuntimeException("Exceeded the limit of 100 requests to OpenAI");
+    if (count.incrementAndGet() > 50) {
+      throw new RuntimeException("Exceeded the limit of 50 requests to OpenAI");
     }
     logger.trace("Sending request to OpenAI...");
     try {

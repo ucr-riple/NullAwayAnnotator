@@ -27,8 +27,10 @@ package edu.ucr.cs.riple.core.checkers.nullaway;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
+import edu.ucr.cs.riple.core.Main;
 import edu.ucr.cs.riple.core.checkers.CheckerBaseClass;
 import edu.ucr.cs.riple.core.checkers.DiagnosticPosition;
+import edu.ucr.cs.riple.core.checkers.nullaway.codefix.ChatGPT;
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.NullAwayCodeFix;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
@@ -55,6 +57,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -369,20 +372,63 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     NullAwayCodeFix codeFix = new NullAwayCodeFix(context);
     Set<NullAwayError> remainingErrors = deserializeErrors(context.targetModuleInfo);
     codeFix.collectImpacts();
+    AtomicInteger counter = new AtomicInteger();
     // Collect regions with remaining errors.
     logger.trace("Resolving remaining errors: {} errors.", remainingErrors.size());
     Set<MethodRewriteChange> rewrites = new HashSet<>();
+    Utility.executeCommand(config, String.format("cd %s && git reset --hard", Main.PROJECT_PATH));
+    Utility.executeCommand(config, String.format("cd %s && git pull", Main.PROJECT_PATH));
+    Utility.executeCommand(
+        config, String.format("cd %s && git checkout nimak/auto-code-fix", Main.PROJECT_PATH));
+    Utility.executeCommand(
+        config, String.format("cd %s && git branch -D nimak/auto-code-fix-1", Main.PROJECT_PATH));
+    Utility.executeCommand(
+        config,
+        String.format(
+            "cd %s && git push origin --delete nimak/auto-code-fix-1", Main.PROJECT_PATH));
+    Utility.executeCommand(
+        config, String.format("cd %s && git checkout -b nimak/auto-code-fix-1", Main.PROJECT_PATH));
+    Utility.executeCommand(
+        config,
+        String.format(
+            "cd %s && git push --set-upstream origin nimak/auto-code-fix-1", Main.PROJECT_PATH));
     remainingErrors.stream()
         .collect(Collectors.groupingBy(NullAwayError::getRegion))
         .forEach(
             (region, nullAwayErrors) ->
                 nullAwayErrors.forEach(
                     error -> {
+                      System.out.println("Writing error: " + error);
+                      logger.trace("=".repeat(30));
+                      counter.getAndIncrement();
+                      // cleanup
                       logger.trace("TOP LEVEL CALL TO FIX ERROR: {}", error);
-                      Set<MethodRewriteChange> change = codeFix.fix(error);
-                      if (change != null) {
-                        rewrites.addAll(change);
+                      try {
+                        Set<MethodRewriteChange> change = codeFix.fix(error);
+                        System.out.println("Found fix.");
+                        ChatGPT.count.set(0);
+                        if (change != null) {
+                          rewrites.addAll(change);
+                        }
+                      } catch (Exception e) {
+                        logger.trace("Error: {}", e.getMessage());
                       }
+                      Utility.executeCommand(
+                          config, String.format("cd %s && ./gradlew goJF", Main.PROJECT_PATH));
+                      Utility.executeCommand(
+                          config, String.format("cd %s && git add .", Main.PROJECT_PATH));
+                      Utility.executeCommand(
+                          config,
+                          String.format(
+                              "cd %s && git commit -m \"fix: %d\"",
+                              Main.PROJECT_PATH, counter.get()));
+                      Utility.executeCommand(
+                          config, String.format("cd %s && git push", Main.PROJECT_PATH));
+                      // revert
+                      Utility.executeCommand(
+                          config,
+                          String.format(
+                              "cd %s && git revert HEAD --no-edit && git push", Main.PROJECT_PATH));
                     }));
     codeFix.apply(rewrites);
   }
