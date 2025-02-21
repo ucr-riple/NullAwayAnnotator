@@ -70,7 +70,7 @@ def build = [
         log4japi                : "org.apache.logging.log4j:log4j-api:${versions.log4j}",
         log4jcore               : "org.apache.logging.log4j:log4j-core:${versions.log4j}",
         jgitCore                : "org.eclipse.jgit:org.eclipse.jgit:${versions.jgit}",
-        jgitJsch                : "org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:${versions.jgit}",
+        jgitSsh                 : "org.eclipse.jgit:org.eclipse.jgit.ssh.apache:${versions.jgit}",
 ]
 
 def test = [

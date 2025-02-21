@@ -24,9 +24,6 @@
 
 package edu.ucr.cs.riple.core.util;
 
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
 import java.io.File;
 import java.io.IOException;
 import org.eclipse.jgit.api.Git;
@@ -37,9 +34,6 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.SshSessionFactory;
 import org.eclipse.jgit.transport.SshTransport;
-import org.eclipse.jgit.transport.ssh.jsch.JschConfigSessionFactory;
-import org.eclipse.jgit.transport.ssh.jsch.OpenSshConfig;
-import org.eclipse.jgit.util.FS;
 
 /** Utility class for Git operations. */
 public class GitUtility implements AutoCloseable {
@@ -55,22 +49,9 @@ public class GitUtility implements AutoCloseable {
    * @param repoPath Path to the Git repository.
    */
   public GitUtility(String repoPath) {
-    System.setProperty("org.eclipse.jgit.transport.sshTransport", "org.eclipse.jgit.transport.sshd.SshdSessionFactory");
-    // Set up SSH session factory
-    SshSessionFactory.setInstance(
-        new JschConfigSessionFactory() {
-          @Override
-          protected void configure(OpenSshConfig.Host host, Session session) {
-            // No extra configuration needed
-          }
-
-          @Override
-          protected JSch createDefaultJSch(FS fs) throws JSchException {
-            JSch jsch = super.createDefaultJSch(fs);
-            jsch.addIdentity(System.getProperty("user.home") + "/.ssh/id_rsa"); // Load private key
-            return jsch;
-          }
-        });
+    System.setProperty(
+        "org.eclipse.jgit.transport.sshTransport",
+        "org.eclipse.jgit.transport.sshd.SshdSessionFactory");
     try {
       this.git = Git.open(new File(repoPath));
     } catch (IOException e) {
