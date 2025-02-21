@@ -398,7 +398,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
             (region, nullAwayErrors) ->
                 nullAwayErrors.forEach(
                     error -> {
-                      System.out.println("Writing error: " + error);
+                      System.out.println("Working on error: " + error);
                       logger.trace("=".repeat(30));
                       counter.getAndIncrement();
                       // cleanup
@@ -411,7 +411,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                           rewrites.addAll(change);
                         }
                       } catch (Exception e) {
-                        logger.trace("Error: {}", e.getMessage());
+                        logger.trace("--------Exception occurred in computing fix for: {}", e.getMessage());
                       }
                       Utility.executeCommand(
                           config, String.format("cd %s && ./gradlew goJF", Main.PROJECT_PATH));
