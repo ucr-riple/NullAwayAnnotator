@@ -46,6 +46,9 @@ dependencies {
     implementation deps.build.commonscli
     implementation deps.build.log4japi
     implementation deps.build.log4jcore
+    implementation deps.build.jgitCore
+    implementation deps.build.jgitJsch
+    implementation deps.build.jgitSsh
 
     testImplementation deps.build.commonsio
     testImplementation deps.test.junit

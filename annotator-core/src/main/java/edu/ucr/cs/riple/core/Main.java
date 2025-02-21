@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core;
 
-import edu.ucr.cs.riple.core.util.Utility;
+import edu.ucr.cs.riple.core.util.GitUtility;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -55,6 +55,7 @@ public class Main {
   //  }
 
   public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/conductor";
+  public static final String BRANCH_NAME = "nimak/auto-code-fix-1";
 
   public static void main(String[] a) {
     // DELETE LOG:
@@ -111,27 +112,20 @@ public class Main {
       "6"
     };
     Config config = new Config(argsArray);
-
-    // reset git
-    String newBranchName = "nimak/auto-code-fix-1";
-    Utility.executeCommand(config, String.format("cd %s && git reset --hard", Main.PROJECT_PATH));
-    Utility.executeCommand(config, String.format("cd %s && git pull", Main.PROJECT_PATH));
-    Utility.executeCommand(
-        config, String.format("cd %s && git checkout nimak/auto-code-fix", Main.PROJECT_PATH));
-    Utility.executeCommand(config, String.format("cd %s && git reset --hard", Main.PROJECT_PATH));
-    Utility.executeCommand(config, String.format("cd %s && git pull", Main.PROJECT_PATH));
-    Utility.executeCommand(
-        config, String.format("cd %s && git branch -D %s", Main.PROJECT_PATH, newBranchName));
-    Utility.executeCommand(
-        config,
-        String.format("cd %s && git push origin --delete %s", Main.PROJECT_PATH, newBranchName));
-    Utility.executeCommand(
-        config, String.format("cd %s && git checkout -b %s", Main.PROJECT_PATH, newBranchName));
-    Utility.executeCommand(
-        config,
-        String.format(
-            "cd %s && git push --set-upstream origin %s", Main.PROJECT_PATH, newBranchName));
-
+    // reset git repo
+    try (GitUtility gitUtility = new GitUtility(PROJECT_PATH)) {
+      gitUtility.resetHard();
+      gitUtility.pull();
+      gitUtility.checkoutBranch("nimak/auto-code-fix");
+      gitUtility.resetHard();
+      gitUtility.pull();
+      gitUtility.deleteLocalBranch(BRANCH_NAME);
+      gitUtility.deleteRemoteBranch(BRANCH_NAME);
+      gitUtility.checkoutBranch(BRANCH_NAME);
+      gitUtility.pushBranch(BRANCH_NAME);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
     // Start annotator
     Annotator annotator = new Annotator(config);
     annotator.start();

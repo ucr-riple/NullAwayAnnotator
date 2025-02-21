@@ -38,6 +38,7 @@ import edu.ucr.cs.riple.core.registries.field.FieldInitializationStore;
 import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.registries.region.Region;
+import edu.ucr.cs.riple.core.util.GitUtility;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Printer;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
@@ -400,22 +401,15 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       } finally {
                         Utility.executeCommand(
                             config, String.format("cd %s && ./gradlew goJF", Main.PROJECT_PATH));
-                        if (Utility.hasChangesToCommit()) {
-                          Utility.executeCommand(
-                              config, String.format("cd %s && git add .", Main.PROJECT_PATH));
-                          Utility.executeCommand(
-                              config,
-                              String.format(
-                                  "cd %s && git commit -m \"fix: %d\"",
-                                  Main.PROJECT_PATH, counter.get()));
-                          Utility.executeCommand(
-                              config, String.format("cd %s && git push", Main.PROJECT_PATH));
-                          // revert
-                          Utility.executeCommand(
-                              config,
-                              String.format(
-                                  "cd %s && git revert HEAD --no-edit && git push",
-                                  Main.PROJECT_PATH));
+                        try (GitUtility gitUtility = new GitUtility(Main.PROJECT_PATH)) {
+                          if (gitUtility.hasChangesToCommit()) {
+                            gitUtility.stageAllChanges();
+                            gitUtility.commitChanges(String.format("fix: %d", counter.get()));
+                            gitUtility.pushChanges();
+                            gitUtility.revertLastCommit();
+                          }
+                        } catch (Exception ex) {
+                          System.err.println("Error while pushing changes: " + ex.getMessage());
                         }
                       }
                     }));
