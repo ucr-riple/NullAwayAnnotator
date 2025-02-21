@@ -55,6 +55,7 @@ public class GitUtility implements AutoCloseable {
    * @param repoPath Path to the Git repository.
    */
   public GitUtility(String repoPath) {
+    System.setProperty("org.eclipse.jgit.transport.sshTransport", "org.eclipse.jgit.transport.sshd.SshdSessionFactory");
     // Set up SSH session factory
     SshSessionFactory.setInstance(
         new JschConfigSessionFactory() {

@@ -121,7 +121,7 @@ public class Main {
       gitUtility.pull();
       gitUtility.deleteLocalBranch(BRANCH_NAME);
       gitUtility.deleteRemoteBranch(BRANCH_NAME);
-      gitUtility.checkoutBranch(BRANCH_NAME);
+      gitUtility.createAndCheckoutBranch(BRANCH_NAME);
       gitUtility.pushBranch(BRANCH_NAME);
     } catch (Exception e) {
       throw new RuntimeException(e);
