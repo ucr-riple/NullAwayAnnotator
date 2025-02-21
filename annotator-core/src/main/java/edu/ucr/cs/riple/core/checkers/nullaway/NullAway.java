@@ -376,22 +376,6 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     // Collect regions with remaining errors.
     logger.trace("Resolving remaining errors: {} errors.", remainingErrors.size());
     Set<MethodRewriteChange> rewrites = new HashSet<>();
-    Utility.executeCommand(config, String.format("cd %s && git reset --hard", Main.PROJECT_PATH));
-    Utility.executeCommand(config, String.format("cd %s && git pull", Main.PROJECT_PATH));
-    Utility.executeCommand(
-        config, String.format("cd %s && git checkout nimak/auto-code-fix", Main.PROJECT_PATH));
-    Utility.executeCommand(
-        config, String.format("cd %s && git branch -D nimak/auto-code-fix-1", Main.PROJECT_PATH));
-    Utility.executeCommand(
-        config,
-        String.format(
-            "cd %s && git push origin --delete nimak/auto-code-fix-1", Main.PROJECT_PATH));
-    Utility.executeCommand(
-        config, String.format("cd %s && git checkout -b nimak/auto-code-fix-1", Main.PROJECT_PATH));
-    Utility.executeCommand(
-        config,
-        String.format(
-            "cd %s && git push --set-upstream origin nimak/auto-code-fix-1", Main.PROJECT_PATH));
     remainingErrors.stream()
         .collect(Collectors.groupingBy(NullAwayError::getRegion))
         .forEach(
