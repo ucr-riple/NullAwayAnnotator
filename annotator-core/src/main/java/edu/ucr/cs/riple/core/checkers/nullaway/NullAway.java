@@ -401,12 +401,12 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       } finally {
                         Utility.executeCommand(
                             config, String.format("cd %s && ./gradlew goJF", Main.PROJECT_PATH));
-                        try (GitUtility gitUtility = new GitUtility(Main.PROJECT_PATH)) {
-                          if (gitUtility.hasChangesToCommit()) {
-                            gitUtility.stageAllChanges();
-                            gitUtility.commitChanges(String.format("fix: %d", counter.get()));
-                            gitUtility.pushChanges();
-                            gitUtility.revertLastCommit();
+                        try (GitUtility git = GitUtility.instance()) {
+                          if (git.hasChangesToCommit()) {
+                            git.stageAllChanges();
+                            git.commitChanges(String.format("fix: %d", counter.get()));
+                            git.pushChanges();
+                            git.revertLastCommit();
                           }
                         } catch (Exception ex) {
                           System.err.println("Error while pushing changes: " + ex.getMessage());

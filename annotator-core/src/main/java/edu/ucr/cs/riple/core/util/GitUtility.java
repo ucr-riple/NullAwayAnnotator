@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.core.util;
 
+import edu.ucr.cs.riple.core.Main;
 import java.io.File;
 import java.io.IOException;
 import org.eclipse.jgit.api.Git;
@@ -48,7 +49,7 @@ public class GitUtility implements AutoCloseable {
    *
    * @param repoPath Path to the Git repository.
    */
-  public GitUtility(String repoPath) {
+  private GitUtility(String repoPath) {
     System.setProperty(
         "org.eclipse.jgit.transport.sshTransport",
         "org.eclipse.jgit.transport.sshd.SshdSessionFactory");
@@ -58,6 +59,15 @@ public class GitUtility implements AutoCloseable {
       throw new RuntimeException(e);
     }
     this.transportConfigCallback = createSshTransport();
+  }
+
+  /**
+   * Creates an instance of Git utility working on the project path.
+   *
+   * @return an instance of GitUtility.
+   */
+  public static GitUtility instance() {
+    return new GitUtility(Main.PROJECT_PATH);
   }
 
   /**

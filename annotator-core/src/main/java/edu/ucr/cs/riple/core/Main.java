@@ -55,7 +55,7 @@ public class Main {
   //  }
 
   public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/conductor";
-  public static final String BRANCH_NAME = "nimak/auto-code-fix-1";
+  public static final String BRANCH_NAME = "nimak/auto-code-fix-2";
 
   public static void main(String[] a) {
     // DELETE LOG:
@@ -113,16 +113,16 @@ public class Main {
     };
     Config config = new Config(argsArray);
     // reset git repo
-    try (GitUtility gitUtility = new GitUtility(PROJECT_PATH)) {
-      gitUtility.resetHard();
-      gitUtility.pull();
-      gitUtility.checkoutBranch("nimak/auto-code-fix");
-      gitUtility.resetHard();
-      gitUtility.pull();
-      gitUtility.deleteLocalBranch(BRANCH_NAME);
-      gitUtility.deleteRemoteBranch(BRANCH_NAME);
-      gitUtility.createAndCheckoutBranch(BRANCH_NAME);
-      gitUtility.pushBranch(BRANCH_NAME);
+    try (GitUtility git = GitUtility.instance()) {
+      git.resetHard();
+      git.pull();
+      git.checkoutBranch("nimak/auto-code-fix");
+      git.resetHard();
+      git.pull();
+      git.deleteLocalBranch(BRANCH_NAME);
+      git.deleteRemoteBranch(BRANCH_NAME);
+      git.createAndCheckoutBranch(BRANCH_NAME);
+      git.pushBranch(BRANCH_NAME);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
