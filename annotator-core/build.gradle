@@ -48,6 +48,7 @@ dependencies {
     implementation deps.build.log4jcore
     implementation deps.build.jgitCore
     implementation deps.build.jgitSsh
+    implementation deps.build.sqlite
 
     testImplementation deps.build.commonsio
     testImplementation deps.test.junit

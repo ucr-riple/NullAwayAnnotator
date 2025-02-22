@@ -42,7 +42,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -129,6 +128,7 @@ public class ChatGPT {
     this.checkIfMethodReturnsNullableAtCallSitePrompt =
         Utility.readResourceContent("prompts/inquiry/is-nullable-at-call-site.txt");
     this.parser = parser;
+    ResponseCache.createTable();
   }
 
   /**
@@ -140,13 +140,7 @@ public class ChatGPT {
    */
   public static Response ask(String prompt, Context context) {
     logger.trace("Asking ChatGPT:\n{}", prompt);
-    Map<String, String> responsePromptCache = context.responsePromptCache;
-    if (responsePromptCache.containsKey(prompt)) {
-      logger.trace("Retrieving response from cache");
-      return new Response(responsePromptCache.get(prompt));
-    }
     String response = sendRequestToOpenAI(prompt);
-    responsePromptCache.put(prompt, response);
     return new Response(response);
   }
 
@@ -157,6 +151,16 @@ public class ChatGPT {
    * @return the response from ChatGPT.
    */
   private static String sendRequestToOpenAI(String prompt) {
+    ResponseCache.CachedData cachedResponse = ResponseCache.getCachedResponse(prompt);
+    if (cachedResponse != null) {
+      logger.trace("Retrieving response from cache");
+      String cachedPrompt = cachedResponse.prompt;
+      if (cachedPrompt.equals(prompt)) {
+        return cachedResponse.response;
+      }
+      logger.trace("Cache collision detected: Cached:\n{}\nPrompt:\n{}", cachedPrompt, prompt);
+      throw new RuntimeException("Cache collision detected");
+    }
     if (count.incrementAndGet() > 50) {
       throw new RuntimeException("Exceeded the limit of 50 requests to OpenAI");
     }
@@ -192,12 +196,14 @@ public class ChatGPT {
           new BufferedReader(
               new InputStreamReader(connection.getInputStream(), Charset.defaultCharset()));
       String line;
-      StringBuilder response = new StringBuilder();
+      StringBuilder rawResponse = new StringBuilder();
       while ((line = br.readLine()) != null) {
-        response.append(line);
+        rawResponse.append(line);
       }
       br.close();
-      return extractMessageFromJSONResponse(response.toString());
+      String response = extractMessageFromJSONResponse(rawResponse.toString());
+      ResponseCache.cacheResponse(prompt, response);
+      return response;
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

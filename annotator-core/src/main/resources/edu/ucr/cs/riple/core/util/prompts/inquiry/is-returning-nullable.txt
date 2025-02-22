@@ -31,13 +31,20 @@ Provide the answer in **XML format** as follows:
 </response>
 ```
 
-#### If you are unsure or there are any methods that directly or indirectly affect the return value and are not fully disclosed, request their declarations first, in the following format:
+#### If you are unsure or need more information, respond with where you can ask for more details or what specific information you need.
+
+If additional information is required, list each request inside a `<request>` tag. If no additional information is needed, omit the `<requests>` section.
+
+Respond with:
 ```xml
 <response>
-  <success>false</success>
-  <methods>
-    <method>methodName</method>
-  </methods>
+    <reason><![CDATA[YOUR REASON]]></reason>
+    <value>UNKNOWN</value>
+    <!-- Include <requests> only if additional information is needed -->
+    <requests>
+        <request><![CDATA[YOUR REQUEST 1]]></request>
+        <request><![CDATA[YOUR REQUEST 2]]></request>
+    </requests>
 </response>
 ```
 

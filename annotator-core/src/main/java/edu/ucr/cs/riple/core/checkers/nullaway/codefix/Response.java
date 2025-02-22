@@ -229,6 +229,8 @@ public class Response {
       return "Agreement: " + reason;
     } else if (isDisagreement) {
       return "Disagreement: " + reason;
+    } else if (isUnknown) {
+      return "Unknown: " + reason;
     }
     return isSuccessFull() ? getCode() : "Failed";
   }
