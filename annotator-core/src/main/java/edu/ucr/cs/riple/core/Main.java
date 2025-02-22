@@ -119,10 +119,10 @@ public class Main {
       git.checkoutBranch("nimak/auto-code-fix");
       git.resetHard();
       git.pull();
-      //      git.deleteLocalBranch(BRANCH_NAME);
-      //      git.deleteRemoteBranch(BRANCH_NAME);
-      //      git.createAndCheckoutBranch(BRANCH_NAME);
-      //      git.pushBranch(BRANCH_NAME);
+      git.deleteLocalBranch(BRANCH_NAME);
+      git.deleteRemoteBranch(BRANCH_NAME);
+      git.createAndCheckoutBranch(BRANCH_NAME);
+      git.pushBranch(BRANCH_NAME);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
