@@ -62,8 +62,6 @@ import edu.ucr.cs.riple.injector.util.ASTUtils;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -288,7 +286,8 @@ public class NullAwayCodeFix {
             fix -> {
               if (fix.isOnField()) {
                 logger.trace("Working on field: {}", names[index[0]]);
-                changes.addAll(resolveFieldDereferenceError(fix.toField(), names[index[0]++]));
+                changes.addAll(
+                    resolveFieldDereferenceError(error, fix.toField(), names[index[0]++]));
               }
             });
     return changes;
@@ -344,7 +343,7 @@ public class NullAwayCodeFix {
       case "field":
         OnField onField =
             context.targetModuleInfo.getFieldRegistry().getLocationOnField(encClass, expression);
-        return resolveFieldDereferenceError(onField, expression);
+        return resolveFieldDereferenceError(error, onField, expression);
       case "parameter":
         return resolveParameterDereferenceError(error, encClass, expression);
       case "method":
@@ -406,7 +405,7 @@ public class NullAwayCodeFix {
     }
     OnMethod methodLocation = record.location;
     logger.trace("Trying to fix by regions using the method as an example.");
-    return fixErrorByRegions(methodLocation);
+    return fixErrorByRegions(error, methodLocation);
   }
 
   /**
@@ -474,7 +473,8 @@ public class NullAwayCodeFix {
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty} if no fix
    *     is found.
    */
-  private Set<MethodRewriteChange> resolveFieldDereferenceError(OnField onField, String field) {
+  private Set<MethodRewriteChange> resolveFieldDereferenceError(
+      NullAwayError error, OnField onField, String field) {
     logger.trace("Investigating field nullability.");
     logger.trace("Checking if there is any method initializing this field.");
     Set<OnMethod> methods =
@@ -548,7 +548,7 @@ public class NullAwayCodeFix {
     // Make field nullable if not already.
     context.injector.injectAnnotation(
         new AddMarkerAnnotation(onField, context.config.nullableAnnot));
-    return fixErrorByRegions(onField);
+    return fixErrorByRegions(error, onField);
   }
 
   /**
@@ -559,55 +559,49 @@ public class NullAwayCodeFix {
    * an unsafe region has an error, it first attempts to generate a fix using safe regions. If that
    * fails, it attempts to generate a fix using all regions.
    *
+   * @param error the error to fix.
    * @param location the location of the error.
    * @return a set of {@link MethodRewriteChange} instances representing the code fix, or an empty
    *     set if no fix is found.
    */
-  private Set<MethodRewriteChange> fixErrorByRegions(Location location) {
+  private Set<MethodRewriteChange> fixErrorByRegions(NullAwayError error, Location location) {
     logger.trace("Fixing error by regions.");
     Set<Region> impactedRegions =
         context.targetModuleInfo.getRegionRegistry().getImpactedRegions(location);
     Set<NullAwayError> triggeredErrors = getTriggeredErrorsForLocation(location);
-    Map<Region, List<NullAwayError>> unsafeRegionMap =
-        triggeredErrors.stream().collect(Collectors.groupingBy(Error::getRegion));
+    Set<Region> unsafeRegions =
+        triggeredErrors.stream().map(Error::getRegion).collect(Collectors.toSet());
     Set<Region> safeRegions = new HashSet<>();
 
     impactedRegions.forEach(
         region -> {
-          if (!unsafeRegionMap.containsKey(region)) {
+          if (!unsafeRegions.contains(region)) {
             safeRegions.add(region);
           }
         });
     Set<MethodRewriteChange> changes = new HashSet<>();
-    logger.trace(
-        "Safe regions: {} - Unsafe regions: {}", safeRegions.size(), unsafeRegionMap.size());
-    // for each unsafe region, consult gpt to generate a fix.
-    for (Map.Entry<Region, List<NullAwayError>> entry : unsafeRegionMap.entrySet()) {
-      NullAwayError errorInRegion = entry.getValue().get(0);
-      Set<MethodRewriteChange> changesForRegion = NO_ACTION;
-      if (errorInRegion.messageType.equals("DEREFERENCE_NULLABLE")) {
-        if (!safeRegions.isEmpty()) {
-          // First try to fix by safe regions if exists.
-          changesForRegion =
-              gpt.fixDereferenceErrorBySafeRegions(errorInRegion, safeRegions, context);
-        }
-        if (changesForRegion.isEmpty()) {
-          logger.trace("No fix found by safe regions. Trying to fix by all regions.");
-          // If no safe region found, of no fix found by safe regions, try to fix by precondition
-          // check.
-          changesForRegion =
-              gpt.fixDereferenceErrorByAllRegions(
-                  errorInRegion, safeRegions, unsafeRegionMap.keySet(), context);
-        }
-        if (!changesForRegion.isEmpty()) {
-          logger.trace("Successfully generated a fix for the error.");
-          changes.addAll(changesForRegion);
-        } else {
-          logger.trace("Could not generate a fix for error: " + errorInRegion);
-        }
-      } else {
-        changes.addAll(fix(errorInRegion));
+    logger.trace("Safe regions: {} - Unsafe regions: {}", safeRegions.size(), unsafeRegions.size());
+    Set<MethodRewriteChange> changesForRegion = NO_ACTION;
+    if (error.messageType.equals("DEREFERENCE_NULLABLE")) {
+      if (!safeRegions.isEmpty()) {
+        // First try to fix by safe regions if exists.
+        changesForRegion = gpt.fixDereferenceErrorBySafeRegions(error, safeRegions, context);
       }
+      if (changesForRegion.isEmpty()) {
+        logger.trace("No fix found by safe regions. Trying to fix by all regions.");
+        // If no safe region found, of no fix found by safe regions, try to fix by precondition
+        // check.
+        changesForRegion =
+            gpt.fixDereferenceErrorByAllRegions(error, safeRegions, unsafeRegions, context);
+      }
+      if (!changesForRegion.isEmpty()) {
+        logger.trace("Successfully generated a fix for the error.");
+        changes.addAll(changesForRegion);
+      } else {
+        logger.trace("Could not generate a fix for error: {}", error);
+      }
+    } else {
+      changes.addAll(fix(error));
     }
     return changes;
   }
