@@ -55,9 +55,9 @@ public class Main {
   //  }
 
   // Mac
-  public static final String PROJECT_PATH = "/Users/nima/Desktop/conductor";
+//  public static final String PROJECT_PATH = "/Users/nima/Desktop/conductor";
   // Ubuntu
-  // public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/conductor";
+   public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/conductor";
   public static final String BENCHMARK_NAME = "conductor";
   public static final String BRANCH_NAME = "nimak/auto-code-fix-3";
 
@@ -101,12 +101,11 @@ public class Main {
       String.format("%s/annotator-out", PROJECT_PATH),
       "-bc",
       // For Ubuntu
-      // String.format("export JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64 && cd %s &&
-      // ./gradlew clean conductor-core:compileJava --rerun-tasks --no-build-cache", PROJECT_PATH),
-      // For Mac
-      String.format(
-          "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.0.2.jdk/Contents/Home && cd %s && ./gradlew clean conductor-core:compileJava --rerun-tasks --no-build-cache",
-          PROJECT_PATH),
+       String.format("export JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64 && cd %s && ./gradlew clean conductor-core:compileJava --rerun-tasks --no-build-cache", PROJECT_PATH),
+//      // For Mac
+//      String.format(
+//          "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.0.2.jdk/Contents/Home && cd %s && ./gradlew clean conductor-core:compileJava --rerun-tasks --no-build-cache",
+//          PROJECT_PATH),
       "-cp",
       String.format("%s/annotator-out/paths.tsv", PROJECT_PATH),
       "-i",

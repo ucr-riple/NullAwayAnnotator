@@ -383,15 +383,12 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
             (region, nullAwayErrors) ->
                 nullAwayErrors.forEach(
                     error -> {
-                      System.out.println("Working on error: " + error);
+                      System.out.println("TOP LEVEL CALL TO FIX ERROR: " + error);
                       logger.trace("=".repeat(30));
                       counter.getAndIncrement();
                       // cleanup
                       logger.trace("TOP LEVEL CALL TO FIX ERROR: {}", error);
                       try {
-                        if (!error.position.diagnosticLine.contains("return workflowTask;")) {
-                          return;
-                        }
                         Set<MethodRewriteChange> change = codeFix.fix(error);
                         System.out.println("Found fix.");
                         ChatGPT.count.set(0);
