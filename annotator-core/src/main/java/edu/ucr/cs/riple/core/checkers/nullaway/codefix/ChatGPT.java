@@ -153,7 +153,7 @@ public class ChatGPT {
   private static String sendRequestToOpenAI(String prompt) {
     ResponseCache.CachedData cachedResponse = ResponseCache.getCachedResponse(prompt);
     if (cachedResponse != null) {
-      System.out.println("Cached response found for prompt: " + prompt.substring(0, 5));
+      System.out.println("Cached response found for prompt");
       logger.trace("Retrieving response from cache");
       String cachedPrompt = cachedResponse.prompt;
       if (cachedPrompt.equals(prompt)) {
@@ -166,6 +166,7 @@ public class ChatGPT {
       throw new RuntimeException("Exceeded the limit of 50 requests to OpenAI");
     }
     logger.trace("Sending request to OpenAI...");
+    System.out.println("Sending request to OpenAI...");
     try {
       // Making a POST request
       HttpURLConnection connection = (HttpURLConnection) new URL(URL).openConnection();

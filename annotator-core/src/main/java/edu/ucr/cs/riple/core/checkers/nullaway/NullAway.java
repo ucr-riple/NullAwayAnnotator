@@ -389,6 +389,9 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       // cleanup
                       logger.trace("TOP LEVEL CALL TO FIX ERROR: {}", error);
                       try {
+                        if (!error.position.diagnosticLine.contains("return workflowTask;")) {
+                          return;
+                        }
                         Set<MethodRewriteChange> change = codeFix.fix(error);
                         System.out.println("Found fix.");
                         ChatGPT.count.set(0);
@@ -401,16 +404,16 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       } finally {
                         Utility.executeCommand(
                             config, String.format("cd %s && ./gradlew goJF", Main.PROJECT_PATH));
-                        try (GitUtility git = GitUtility.instance()) {
-                          if (git.hasChangesToCommit()) {
-                            git.stageAllChanges();
-                            git.commitChanges(String.format("fix: %d", counter.get()));
-                            git.pushChanges();
-                            git.revertLastCommit();
-                          }
-                        } catch (Exception ex) {
-                          System.err.println("Error while pushing changes: " + ex.getMessage());
-                        }
+//                        try (GitUtility git = GitUtility.instance()) {
+//                          if (git.hasChangesToCommit()) {
+//                            git.stageAllChanges();
+//                            git.commitChanges(String.format("fix: %d", counter.get()));
+//                            git.pushChanges();
+//                            git.revertLastCommit();
+//                          }
+//                        } catch (Exception ex) {
+//                          System.err.println("Error while pushing changes: " + ex.getMessage());
+//                        }
                       }
                     }));
     codeFix.apply(rewrites);
