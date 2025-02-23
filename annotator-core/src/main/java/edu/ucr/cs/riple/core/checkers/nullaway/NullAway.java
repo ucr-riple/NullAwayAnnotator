@@ -38,6 +38,7 @@ import edu.ucr.cs.riple.core.registries.field.FieldInitializationStore;
 import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.registries.region.Region;
+import edu.ucr.cs.riple.core.util.GitUtility;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Printer;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
@@ -375,7 +376,6 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     AtomicInteger counter = new AtomicInteger();
     // Collect regions with remaining errors.
     logger.trace("Resolving remaining errors: {} errors.", remainingErrors.size());
-    Set<MethodRewriteChange> rewrites = new HashSet<>();
     remainingErrors.stream()
         .collect(Collectors.groupingBy(NullAwayError::getRegion))
         .forEach(
@@ -387,37 +387,30 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       counter.getAndIncrement();
                       // cleanup
                       logger.trace("TOP LEVEL CALL TO FIX ERROR: {}", error);
+                      Set<MethodRewriteChange> changes = Set.of();
                       try {
-                        if (!error.position.diagnosticLine.contains("return workflowTask;")) {
-                          return;
-                        }
-                        Set<MethodRewriteChange> change = codeFix.fix(error);
-                        System.out.println("Found fix.");
+                        changes = codeFix.fix(error);
+                        System.out.println("Found fixes.");
                         ChatGPT.count.set(0);
-                        if (change != null) {
-                          rewrites.addAll(change);
-                        }
                       } catch (Exception e) {
                         System.err.println("Error while fixing-------: " + e.getMessage());
                         logger.trace("--------Exception occurred in computing fix--------", e);
                       } finally {
+                        codeFix.apply(changes);
                         Utility.executeCommand(
                             config, String.format("cd %s && ./gradlew goJF", Main.PROJECT_PATH));
-                        //                        try (GitUtility git = GitUtility.instance()) {
-                        //                          if (git.hasChangesToCommit()) {
-                        //                            git.stageAllChanges();
-                        //                            git.commitChanges(String.format("fix: %d",
-                        // counter.get()));
-                        //                            git.pushChanges();
-                        //                            git.revertLastCommit();
-                        //                          }
-                        //                        } catch (Exception ex) {
-                        //                          System.err.println("Error while pushing changes:
-                        // " + ex.getMessage());
-                        //                        }
+                        try (GitUtility git = GitUtility.instance()) {
+                          if (git.hasChangesToCommit()) {
+                            git.stageAllChanges();
+                            git.commitChanges(String.format("fix: %d", counter.get()));
+                            git.pushChanges();
+                            git.revertLastCommit();
+                          }
+                        } catch (Exception ex) {
+                          System.err.println("Error while pushing changes: " + ex.getMessage());
+                        }
                       }
                     }));
-    codeFix.apply(rewrites);
   }
 
   @Override
