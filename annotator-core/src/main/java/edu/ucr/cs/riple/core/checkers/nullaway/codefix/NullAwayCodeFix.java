@@ -238,7 +238,15 @@ public class NullAwayCodeFix {
     return changes;
   }
 
-  /** */
+  /**
+   * Resolves a nullable return error by generating a code fix. Currently, the only solution we have
+   * is if the method is actually returning nullable, we make the method nullable and resolve
+   * triggered errors.
+   *
+   * @param error the error to fix.
+   * @return a {@link MethodRewriteChange} that represents the code fix, or {@code NO_ACTION} if the
+   *     error cannot be fixed.
+   */
   private Set<MethodRewriteChange> resolveNullableReturnError(NullAwayError error) {
     // Check if it is a false positive
     logger.trace("Checking if the method is actually returning nullable.");
