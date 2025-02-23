@@ -54,8 +54,12 @@ public class Main {
   //    annotator.start();
   //  }
 
-  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/conductor";
-  public static final String BRANCH_NAME = "nimak/auto-code-fix-2";
+  // Mac
+  public static final String PROJECT_PATH = "/Users/nima/Desktop/conductor";
+  // Ubuntu
+  // public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/conductor";
+  public static final String BENCHMARK_NAME = "conductor";
+  public static final String BRANCH_NAME = "nimak/auto-code-fix-3";
 
   public static void main(String[] a) {
     // DELETE LOG:
@@ -94,11 +98,17 @@ public class Main {
 
     String[] argsArray = {
       "-d",
-      "/home/nima/Developer/nullness-benchmarks/conductor/annotator-out",
+      String.format("%s/annotator-out", PROJECT_PATH),
       "-bc",
-      "export JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64 && cd /home/nima/Developer/nullness-benchmarks/conductor && ./gradlew clean conductor-core:compileJava --rerun-tasks --no-build-cache",
+      // For Ubuntu
+      // String.format("export JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64 && cd %s &&
+      // ./gradlew clean conductor-core:compileJava --rerun-tasks --no-build-cache", PROJECT_PATH),
+      // For Mac
+      String.format(
+          "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.0.2.jdk/Contents/Home && cd %s && ./gradlew clean conductor-core:compileJava --rerun-tasks --no-build-cache",
+          PROJECT_PATH),
       "-cp",
-      "/home/nima/Developer/nullness-benchmarks/conductor/annotator-out/paths.tsv",
+      String.format("%s/annotator-out/paths.tsv", PROJECT_PATH),
       "-i",
       "com.uber.nullaway.annotations.Initializer",
       "-n",
@@ -107,7 +117,7 @@ public class Main {
       "NULLAWAY",
       "-di", // deactivate inference
       "-rre", // resolve remaining errors
-      // "-rboserr", // redirect build output stream and error stream
+      //       "-rboserr", // redirect build output stream and error stream
       "--depth",
       "6"
     };

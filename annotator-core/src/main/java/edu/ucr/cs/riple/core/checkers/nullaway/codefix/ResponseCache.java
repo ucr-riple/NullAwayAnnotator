@@ -24,6 +24,8 @@
 
 package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 
+import edu.ucr.cs.riple.core.Main;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -36,7 +38,8 @@ import java.sql.Statement;
 public class ResponseCache {
 
   /** Database file path. */
-  private static final String DB_URL = "jdbc:sqlite:chatgpt_cache.db";
+  private static final String DB_URL =
+      String.format("jdbc:sqlite:databases/%s.db", Main.BENCHMARK_NAME);
 
   /** CachedData class to store the prompt and response. */
   public static class CachedData {
@@ -76,7 +79,7 @@ public class ResponseCache {
   public static String hashPrompt(String prompt) {
     try {
       MessageDigest digest = MessageDigest.getInstance("SHA-256");
-      byte[] hashBytes = digest.digest(prompt.getBytes());
+      byte[] hashBytes = digest.digest(prompt.getBytes(Charset.defaultCharset()));
       StringBuilder hexString = new StringBuilder();
       for (byte b : hashBytes) {
         hexString.append(String.format("%02x", b));

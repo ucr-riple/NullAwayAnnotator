@@ -153,6 +153,7 @@ public class ChatGPT {
   private static String sendRequestToOpenAI(String prompt) {
     ResponseCache.CachedData cachedResponse = ResponseCache.getCachedResponse(prompt);
     if (cachedResponse != null) {
+      System.out.println("Cached response found for prompt: " + prompt.substring(0, 5));
       logger.trace("Retrieving response from cache");
       String cachedPrompt = cachedResponse.prompt;
       if (cachedPrompt.equals(prompt)) {
@@ -244,7 +245,7 @@ public class ChatGPT {
    * dereference error, it should simply call {@code Objects.equals} on the field.
    *
    * @param error the error to fix.
-   * @param context
+   * @param context Annotator context.
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty set} if the
    *     error cannot be fixed.
    */
@@ -347,7 +348,7 @@ public class ChatGPT {
    * the toString method on the field.
    *
    * @param error the error to fix.
-   * @param context
+   * @param context Annotator context.
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty set} if the
    *     error cannot be fixed.
    */
@@ -364,7 +365,7 @@ public class ChatGPT {
    * hashCode method on the field.
    *
    * @param error the error to fix.
-   * @param context
+   * @param context Annotator context.
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty set} if the
    *     error cannot be fixed.
    */
@@ -438,7 +439,8 @@ public class ChatGPT {
    * @param encClass the enclosing class of the method.
    * @param method the method to check.
    * @param param the parameter to check. * @return {@code true} if the parameter is nullable,
-   *     {@code false} otherwise. * @param callContext the call context of the method.
+   *     {@code false} otherwise.
+   * @param callContext the call context of the method.
    * @param context Annotator context. * @return {@code true} if the parameter is nullable, {@code
    *     false} otherwise.
    */

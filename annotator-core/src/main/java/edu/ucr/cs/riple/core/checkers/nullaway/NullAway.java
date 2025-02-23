@@ -399,8 +399,8 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                           rewrites.addAll(change);
                         }
                       } catch (Exception e) {
-                        logger.trace(
-                            "--------Exception occurred in computing fix for: {}", e.toString());
+                        System.err.println("Error while fixing-------: " + e.getMessage());
+                        logger.trace("--------Exception occurred in computing fix--------", e);
                       } finally {
                         Utility.executeCommand(
                             config, String.format("cd %s && ./gradlew goJF", Main.PROJECT_PATH));
