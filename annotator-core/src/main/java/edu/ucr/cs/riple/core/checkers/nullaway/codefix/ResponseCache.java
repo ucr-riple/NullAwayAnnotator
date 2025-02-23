@@ -24,7 +24,6 @@
 
 package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 
-import edu.ucr.cs.riple.core.Main;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -38,8 +37,7 @@ import java.sql.Statement;
 public class ResponseCache {
 
   /** Database file path. */
-  private static final String DB_URL =
-      String.format("jdbc:sqlite:databases/%s.db", Main.BENCHMARK_NAME);
+  private static final String DB_URL = String.format("jdbc:sqlite:databases/%s.db", "Test");
 
   /** CachedData class to store the prompt and response. */
   public static class CachedData {

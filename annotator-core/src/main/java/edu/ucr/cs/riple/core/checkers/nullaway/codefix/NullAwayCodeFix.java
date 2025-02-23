@@ -548,7 +548,15 @@ public class NullAwayCodeFix {
     // Make field nullable if not already.
     context.injector.injectAnnotation(
         new AddMarkerAnnotation(onField, context.config.nullableAnnot));
-    return fixErrorByRegions(error, onField);
+    Set<NullAwayError> triggeredErrors = getTriggeredErrorsForLocation(onField);
+    if (triggeredErrors.isEmpty()) {
+      logger.trace("Expected to have errors for making the field nullable.");
+      return NO_ACTION;
+    }
+    Set<MethodRewriteChange> changes = new HashSet<>();
+    logger.trace("Trying to fix errors for making the field nullable");
+    triggeredErrors.forEach(e -> changes.addAll(fix(e)));
+    return changes;
   }
 
   /**
@@ -571,37 +579,29 @@ public class NullAwayCodeFix {
     Set<NullAwayError> triggeredErrors = getTriggeredErrorsForLocation(location);
     Set<Region> unsafeRegions =
         triggeredErrors.stream().map(Error::getRegion).collect(Collectors.toSet());
-    Set<Region> safeRegions = new HashSet<>();
-
-    impactedRegions.forEach(
-        region -> {
-          if (!unsafeRegions.contains(region)) {
-            safeRegions.add(region);
-          }
-        });
+    Set<Region> safeRegions =
+        impactedRegions.stream()
+            .filter(region -> !unsafeRegions.contains(region))
+            .collect(Collectors.toSet());
     Set<MethodRewriteChange> changes = new HashSet<>();
     logger.trace("Safe regions: {} - Unsafe regions: {}", safeRegions.size(), unsafeRegions.size());
     Set<MethodRewriteChange> changesForRegion = NO_ACTION;
-    if (error.messageType.equals("DEREFERENCE_NULLABLE")) {
-      if (!safeRegions.isEmpty()) {
-        // First try to fix by safe regions if exists.
-        changesForRegion = gpt.fixDereferenceErrorBySafeRegions(error, safeRegions, context);
-      }
-      if (changesForRegion.isEmpty()) {
-        logger.trace("No fix found by safe regions. Trying to fix by all regions.");
-        // If no safe region found, of no fix found by safe regions, try to fix by precondition
-        // check.
-        changesForRegion =
-            gpt.fixDereferenceErrorByAllRegions(error, safeRegions, unsafeRegions, context);
-      }
-      if (!changesForRegion.isEmpty()) {
-        logger.trace("Successfully generated a fix for the error.");
-        changes.addAll(changesForRegion);
-      } else {
-        logger.trace("Could not generate a fix for error: {}", error);
-      }
+    if (!safeRegions.isEmpty()) {
+      // First try to fix by safe regions if exists.
+      changesForRegion = gpt.fixDereferenceErrorBySafeRegions(error, safeRegions, context);
+    }
+    if (changesForRegion.isEmpty()) {
+      logger.trace("No fix found by safe regions. Trying to fix by all regions.");
+      // If no safe region found, of no fix found by safe regions, try to fix by precondition
+      // check.
+      changesForRegion =
+          gpt.fixDereferenceErrorByAllRegions(error, safeRegions, unsafeRegions, context);
+    }
+    if (!changesForRegion.isEmpty()) {
+      logger.trace("Successfully generated a fix for the error.");
+      changes.addAll(changesForRegion);
     } else {
-      changes.addAll(fix(error));
+      logger.trace("-----------Could not generate a fix for error-----------\n{}", error);
     }
     return changes;
   }

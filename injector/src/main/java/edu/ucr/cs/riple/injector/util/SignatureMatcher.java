@@ -46,6 +46,9 @@ public class SignatureMatcher {
    * @param signature Signature to process.
    */
   public SignatureMatcher(String signature) {
+    if (!signature.contains("(")) {
+      throw new RuntimeException("Signature is not a callable declaration: " + signature);
+    }
     this.callableName = ASTUtils.extractCallableName(signature);
     this.parameterTypes = extractParameterTypesFromSignature(signature);
   }

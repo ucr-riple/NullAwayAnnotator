@@ -153,7 +153,7 @@ public class ChatGPT {
   private static String sendRequestToOpenAI(String prompt) {
     ResponseCache.CachedData cachedResponse = ResponseCache.getCachedResponse(prompt);
     if (cachedResponse != null) {
-      System.out.println("Cached response found for prompt");
+      System.out.println("Retrieving response from cache");
       logger.trace("Retrieving response from cache");
       String cachedPrompt = cachedResponse.prompt;
       if (cachedPrompt.equals(prompt)) {
@@ -205,6 +205,8 @@ public class ChatGPT {
       br.close();
       String response = extractMessageFromJSONResponse(rawResponse.toString());
       ResponseCache.cacheResponse(prompt, response);
+      System.out.println("Response received from OpenAI.");
+      logger.trace("Response received from OpenAI.");
       return response;
     } catch (IOException e) {
       throw new RuntimeException(e);
