@@ -110,7 +110,7 @@ public class Main {
       // && ./gradlew clean conductor-core:compileJava --rerun-tasks --no-build-cache",
       //          PROJECT_PATH),
       "-cp",
-      String.format("%s/annotator-out/paths.tsv", PROJECT_PATH),
+      String.format("%s/paths.tsv", PROJECT_PATH),
       "-i",
       "com.uber.nullaway.annotations.Initializer",
       "-n",
