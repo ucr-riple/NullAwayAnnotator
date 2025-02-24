@@ -555,7 +555,7 @@ public class NullAwayCodeFix {
     }
     Set<MethodRewriteChange> changes = new HashSet<>();
     logger.trace("Trying to fix errors for making the field nullable");
-    triggeredErrors.forEach(e -> changes.addAll(fix(e)));
+    triggeredErrors.forEach(e -> changes.addAll(fixErrorByRegions(e, onField)));
     return changes;
   }
 
