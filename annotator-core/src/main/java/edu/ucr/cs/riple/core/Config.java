@@ -153,7 +153,7 @@ public class Config {
   public final ImmutableSet<String> nonnullAnnotations;
 
   /** Depth of the analysis. Default to 5 if not set by the user */
-  public int depth;
+  public final int depth;
 
   /**
    * Activates inference to add {@code @Nullable} qualifiers.

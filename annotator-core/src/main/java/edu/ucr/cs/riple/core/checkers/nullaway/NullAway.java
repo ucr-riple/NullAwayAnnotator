@@ -54,11 +54,13 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -376,6 +378,8 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     AtomicInteger counter = new AtomicInteger();
     // Collect regions with remaining errors.
     logger.trace("Resolving remaining errors: {} errors.", remainingErrors.size());
+    // related to log
+    AtomicLong previousLineNumber = new AtomicLong(Utility.getLineCountOfFile(Main.LOG_PATH));
     remainingErrors.stream()
         .collect(Collectors.groupingBy(NullAwayError::getRegion))
         .forEach(
@@ -399,10 +403,30 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                         codeFix.apply(changes);
                         Utility.executeCommand(
                             config, String.format("cd %s && ./gradlew goJF", Main.PROJECT_PATH));
+                        long currentLineNumber = Utility.getLineCountOfFile(Main.LOG_PATH);
+                        String log =
+                            Utility.getLinesFromFile(
+                                Main.LOG_PATH, previousLineNumber.get(), currentLineNumber);
+                        previousLineNumber.set(currentLineNumber);
+                        // write log at root PROJECT_PATH
+                        try {
+                          Files.writeString(
+                              Paths.get(Main.PROJECT_PATH + "/annotator-log.app"),
+                              String.format("====================\n%s\nLog:\n%s\n", error, log),
+                              Charset.defaultCharset());
+                        } catch (IOException e) {
+                          System.err.println("Error while writing log to file: " + e.getMessage());
+                        }
                         try (GitUtility git = GitUtility.instance()) {
                           if (git.hasChangesToCommit()) {
                             git.stageAllChanges();
-                            git.commitChanges(String.format("fix: %d", counter.get()));
+                            git.commitChanges(
+                                String.format(
+                                    "fix: %d - %s - %s - %s",
+                                    counter.get(),
+                                    error.messageType,
+                                    error.position.diagnosticLine.trim(),
+                                    error.message));
                             git.pushChanges();
                             git.revertLastCommit();
                           }

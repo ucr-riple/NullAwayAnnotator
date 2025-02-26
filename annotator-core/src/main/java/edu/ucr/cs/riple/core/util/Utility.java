@@ -357,4 +357,34 @@ public class Utility {
     return annotName.contains(".jspecify.annotations.Nullable")
         || annotName.contains(".checkerframework.checker.nullness.qual.Nullable");
   }
+
+  /**
+   * Returns the number of lines in a file.
+   *
+   * @param path the path to the file
+   * @return the number of lines in the file
+   */
+  public static long getLineCountOfFile(Path path) {
+    try (Stream<String> lines = Files.lines(path)) {
+      return lines.count();
+    } catch (IOException e) {
+      throw new RuntimeException("Error in getting count of file at: " + path, e);
+    }
+  }
+
+  /**
+   * Returns the lines from a file between the given range.
+   *
+   * @param path the path to the file
+   * @param from the starting line number (inclusive)
+   * @param to the ending line number (exclusive)
+   * @return the lines from the file between the given range
+   */
+  public static String getLinesFromFile(Path path, long from, long to) {
+    try (Stream<String> lines = Files.lines(path)) {
+      return lines.skip(from).limit(to - from).collect(Collectors.joining(System.lineSeparator()));
+    } catch (IOException e) {
+      throw new RuntimeException("Error in getting lines from file at: " + path, e);
+    }
+  }
 }

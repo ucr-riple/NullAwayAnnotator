@@ -151,6 +151,7 @@ public class ChatGPT {
    * @return the response from ChatGPT.
    */
   private static String sendRequestToOpenAI(String prompt) {
+    prompt = preprocessPrompt(prompt);
     ResponseCache.CachedData cachedResponse = ResponseCache.getCachedResponse(prompt);
     if (cachedResponse != null) {
       System.out.println("Retrieving response from cache");
@@ -211,6 +212,19 @@ public class ChatGPT {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  /**
+   * Preprocess the prompt to remove any unnecessary information. For now, it removes all
+   * occurrences {@code @Nullable}.
+   *
+   * @param prompt the prompt to preprocess.
+   * @return the preprocessed prompt.
+   */
+  private static String preprocessPrompt(String prompt) {
+    // remove all occurrences of @Nullable
+    prompt = prompt.replaceAll("@Nullable", "");
+    return prompt;
   }
 
   /**
