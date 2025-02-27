@@ -38,7 +38,6 @@ import edu.ucr.cs.riple.core.registries.field.FieldInitializationStore;
 import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.registries.region.Region;
-import edu.ucr.cs.riple.core.util.GitUtility;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Printer;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
@@ -54,7 +53,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
@@ -386,6 +384,9 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
             (region, nullAwayErrors) ->
                 nullAwayErrors.forEach(
                     error -> {
+                      if (!error.position.diagnosticLine.contains("private String taskType;")) {
+                        return;
+                      }
                       System.out.println("TOP LEVEL CALL TO FIX ERROR: " + error);
                       logger.trace("=".repeat(30));
                       counter.getAndIncrement();
@@ -403,36 +404,42 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                         codeFix.apply(changes);
                         Utility.executeCommand(
                             config, String.format("cd %s && ./gradlew goJF", Main.PROJECT_PATH));
-                        long currentLineNumber = Utility.getLineCountOfFile(Main.LOG_PATH);
-                        String log =
-                            Utility.getLinesFromFile(
-                                Main.LOG_PATH, previousLineNumber.get(), currentLineNumber);
-                        previousLineNumber.set(currentLineNumber);
-                        // write log at root PROJECT_PATH
-                        try {
-                          Files.writeString(
-                              Paths.get(Main.PROJECT_PATH + "/annotator-log.app"),
-                              String.format("====================\n%s\nLog:\n%s\n", error, log),
-                              Charset.defaultCharset());
-                        } catch (IOException e) {
-                          System.err.println("Error while writing log to file: " + e.getMessage());
-                        }
-                        try (GitUtility git = GitUtility.instance()) {
-                          if (git.hasChangesToCommit()) {
-                            git.stageAllChanges();
-                            git.commitChanges(
-                                String.format(
-                                    "fix: %d - %s - %s - %s",
-                                    counter.get(),
-                                    error.messageType,
-                                    error.position.diagnosticLine.trim(),
-                                    error.message));
-                            git.pushChanges();
-                            git.revertLastCommit();
-                          }
-                        } catch (Exception ex) {
-                          System.err.println("Error while pushing changes: " + ex.getMessage());
-                        }
+                        //                        long currentLineNumber =
+                        // Utility.getLineCountOfFile(Main.LOG_PATH);
+                        //                        String log =
+                        //                            Utility.getLinesFromFile(
+                        //                                Main.LOG_PATH, previousLineNumber.get(),
+                        // currentLineNumber);
+                        //                        previousLineNumber.set(currentLineNumber);
+                        //                        // write log at root PROJECT_PATH
+                        //                        try {
+                        //                          Files.writeString(
+                        //                              Paths.get(Main.PROJECT_PATH +
+                        // "/annotator-log.app"),
+                        //
+                        // String.format("====================\n%s\nLog:\n%s\n", error, log),
+                        //                              Charset.defaultCharset());
+                        //                        } catch (IOException e) {
+                        //                          System.err.println("Error while writing log to
+                        // file: " + e.getMessage());
+                        //                        }
+                        //                        try (GitUtility git = GitUtility.instance()) {
+                        //                          if (git.hasChangesToCommit()) {
+                        //                            git.stageAllChanges();
+                        //                            git.commitChanges(
+                        //                                String.format(
+                        //                                    "fix: %d - %s - %s - %s",
+                        //                                    counter.get(),
+                        //                                    error.messageType,
+                        //                                    error.position.diagnosticLine.trim(),
+                        //                                    error.message));
+                        //                            git.pushChanges();
+                        //                            git.revertLastCommit();
+                        //                          }
+                        //                        } catch (Exception ex) {
+                        //                          System.err.println("Error while pushing changes:
+                        // " + ex.getMessage());
+                        //                        }
                       }
                     }));
   }

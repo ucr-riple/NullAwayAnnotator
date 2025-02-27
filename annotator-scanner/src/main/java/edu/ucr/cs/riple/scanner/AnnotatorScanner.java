@@ -49,7 +49,11 @@ import edu.ucr.cs.riple.scanner.out.ClassRecord;
 import edu.ucr.cs.riple.scanner.out.EffectiveMethodRecord;
 import edu.ucr.cs.riple.scanner.out.ImpactedRegion;
 import edu.ucr.cs.riple.scanner.out.MethodRecord;
+import edu.ucr.cs.riple.scanner.scanners.EffectiveMethodScanner;
+import edu.ucr.cs.riple.scanner.scanners.ExpressionToSymbolScanner;
+import edu.ucr.cs.riple.scanner.scanners.OriginScanner;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.lang.model.element.ElementKind;
@@ -111,6 +115,18 @@ public class AnnotatorScanner extends BugChecker
         .getSerializer()
         .serializeImpactedRegionForMethod(
             new ImpactedRegion(config, ASTHelpers.getSymbol(tree), state.getPath()));
+    MethodTree methodTree = state.findEnclosing(MethodTree.class);
+    tree.getArguments()
+        .forEach(
+            arg -> {
+              Set<Symbol> symbols = arg.accept(new ExpressionToSymbolScanner(), null);
+              Set<Symbol> effective = new HashSet<>();
+              for (Symbol symbol : symbols) {
+                effective.addAll(new OriginScanner().scanVariable(methodTree, symbol));
+              }
+              System.out.println(effective);
+            });
+
     return Description.NO_MATCH;
   }
 

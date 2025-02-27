@@ -31,6 +31,7 @@ import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.registries.method.MethodRecord;
 import edu.ucr.cs.riple.core.registries.method.MethodRegistry;
 import edu.ucr.cs.riple.core.registries.region.RegionRecord;
+import edu.ucr.cs.riple.core.util.ASTParser;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
@@ -55,12 +56,16 @@ public class InvocationRecordRegistry {
   /** Method registry to find methods by name and class. */
   private final MethodRegistry methodRegistry;
 
+  /** Parser to parse the AST of the methods and retrieve their source code */
+  private final ASTParser parser;
+
   /**
    * Creates a type based invocation graph from a module.
    *
    * @param module the module to create the graph from.
+   * @param parser ASTParser to parse the AST of the methods and retrieve their source code.
    */
-  public InvocationRecordRegistry(ModuleInfo module) {
+  public InvocationRecordRegistry(ModuleInfo module, ASTParser parser) {
     Map<MethodRecord, Set<MethodRecord>> callerHolder = new HashMap<>();
     Map<MethodRecord, Set<MethodRecord>> calledHolder = new HashMap<>();
     MethodRegistry methodRegistry = module.getMethodRegistry();
@@ -90,20 +95,21 @@ public class InvocationRecordRegistry {
     this.callerMap = callerBuilder.build();
     this.calledMap = calledBuilder.build();
     this.methodRegistry = methodRegistry;
+    this.parser = parser;
   }
 
   /**
    * Performs a BFS on the call graph to find the callers of the given method up to a depth of 3.
    *
    * @param clazz the class name of the target method.
-   * @param member the member name of the target method.
+   * @param method the member name of the target method.
    * @param dept the depth to search for callers.
    * @return A map from depth to the set of methods at that depth.
    */
-  public InvocationRecord computeInvocationRecord(String clazz, String member, int dept) {
-    MethodRecord current = methodRegistry.findMethodByName(clazz, member);
+  public InvocationRecord computeInvocationRecord(String clazz, String method, int dept) {
+    MethodRecord current = methodRegistry.findMethodByName(clazz, method);
     Preconditions.checkArgument(
-        current != null, String.format("Method not found: %s#%s", clazz, member));
+        current != null, String.format("Method not found: %s#%s", clazz, method));
     Deque<MethodRecord> deque = new ArrayDeque<>();
     int current_depth = 0;
     deque.add(current);
@@ -112,12 +118,12 @@ public class InvocationRecordRegistry {
       Set<MethodRecord> calls = new HashSet<>();
       int size = deque.size();
       for (int i = 0; i < size; i++) {
-        MethodRecord method = deque.poll();
-        if (method == null) {
+        MethodRecord node = deque.poll();
+        if (node == null) {
           continue;
         }
-        calls.add(method);
-        for (MethodRecord caller : callerMap.getOrDefault(method, ImmutableSet.of())) {
+        calls.add(node);
+        for (MethodRecord caller : callerMap.getOrDefault(node, ImmutableSet.of())) {
           if (caller == null) {
             continue;
           }
@@ -137,5 +143,14 @@ public class InvocationRecordRegistry {
    */
   public Set<MethodRecord> getCalledMethods(MethodRecord method) {
     return calledMap.getOrDefault(method, ImmutableSet.of());
+  }
+
+  /**
+   * Getter for parser.
+   *
+   * @return AST parser
+   */
+  public ASTParser getParser() {
+    return parser;
   }
 }

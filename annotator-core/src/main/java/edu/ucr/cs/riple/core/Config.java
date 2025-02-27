@@ -153,7 +153,7 @@ public class Config {
   public final ImmutableSet<String> nonnullAnnotations;
 
   /** Depth of the analysis. Default to 5 if not set by the user */
-  public final int depth;
+  public int depth;
 
   /**
    * Activates inference to add {@code @Nullable} qualifiers.
@@ -396,8 +396,8 @@ public class Config {
     // Annotated packages
     Option annotatedPackagesOption =
         new Option("app", "annotated-package-prefix", true, "Annotated packages prefix");
-    checkerNameOption.setRequired(false);
-    options.addOption(checkerNameOption);
+    annotatedPackagesOption.setRequired(false);
+    options.addOption(annotatedPackagesOption);
 
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();

@@ -146,4 +146,17 @@ public class ASTParser {
     Type returnType = TypeUtils.getTypeFromNode(declaration);
     return TypeUtils.isAnnotatedWith(returnType, nullableAnnotationExpression);
   }
+
+  /**
+   * Returns the getter method name for a field.
+   *
+   * @param fieldName the field name.
+   * @return the getter method name.
+   */
+  public static String getterMethod(String fieldName) {
+    if (fieldName.startsWith("is")) {
+      return fieldName;
+    }
+    return "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1) + "()";
+  }
 }

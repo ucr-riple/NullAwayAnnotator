@@ -53,10 +53,14 @@ public class InvocationRecord {
   /** A list of third-party libraries requests. These libraries source code is not available. */
   private final List<String> thirdPartyLibs;
 
+  /** Parser to parse the AST of the methods and retrieve their source code */
+  private final ASTParser parser;
+
   public InvocationRecord(InvocationRecordRegistry registry) {
     this.calls = new ArrayList<>(3);
     this.registry = registry;
     this.thirdPartyLibs = new ArrayList<>();
+    this.parser = registry.getParser();
   }
 
   /**
@@ -73,10 +77,9 @@ public class InvocationRecord {
    * Constructs a prompt for the call graph analysis. The prompt includes the source code of methods
    * at each depth level and consolidates multiple methods from the same class in the final output.
    *
-   * @param parser the AST parser.
    * @return a prompt for the call graph.
    */
-  public String constructCallGraphContext(ASTParser parser) {
+  public String constructCallGraphContext() {
     StringBuilder prompt = new StringBuilder();
     for (int i = 0; i < calls.size(); i++) {
       prompt.append("Depth: ").append(i).append("\n");

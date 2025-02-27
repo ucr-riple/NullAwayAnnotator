@@ -99,7 +99,7 @@ public class NullAwayCodeFix {
     this.gpt = new ChatGPT(parser);
     this.context = context;
     this.injector = new Injector(context.config.languageLevel);
-    this.invocationRecordRegistry = new InvocationRecordRegistry(context.targetModuleInfo);
+    this.invocationRecordRegistry = new InvocationRecordRegistry(context.targetModuleInfo, parser);
   }
 
   /**
@@ -111,6 +111,7 @@ public class NullAwayCodeFix {
     ImmutableSet<Fix> fixes =
         Utility.readFixesFromOutputDirectory(context, context.targetModuleInfo).stream()
             .collect(ImmutableSet.toImmutableSet());
+    context.config.depth = 1;
     // Initializing required evaluator instances.
     TargetModuleSupplier supplier =
         new TargetModuleSupplier(context, new TargetModuleCache(), new VoidDownstreamImpactCache());
@@ -280,7 +281,7 @@ public class NullAwayCodeFix {
             fix -> {
               if (fix.isOnField()) {
                 logger.trace("Working on field: {}", names[index[0]]);
-                changes.addAll(resolveFieldDereferenceError(fix.toField(), names[index[0]++]));
+                changes.addAll(resolveFieldNullabilityError(fix.toField(), names[index[0]++]));
               }
             });
     return changes;
@@ -336,7 +337,7 @@ public class NullAwayCodeFix {
       case "field":
         OnField onField =
             context.targetModuleInfo.getFieldRegistry().getLocationOnField(encClass, expression);
-        return resolveFieldDereferenceError(onField, expression);
+        return resolveFieldNullabilityError(onField, expression);
       case "parameter":
         return resolveParameterDereferenceError(error, encClass, expression);
       case "method":
@@ -420,7 +421,7 @@ public class NullAwayCodeFix {
         invocationRecordRegistry.computeInvocationRecord(encClass, error.getRegion().member, 3);
     int count = 0;
     while (count++ < 10) {
-      String callContext = record.constructCallGraphContext(parser);
+      String callContext = record.constructCallGraphContext();
       Response paramNullabilityPossibility =
           gpt.checkIfParamIsNullable(
               encClass, error.getRegion().member, paramName, callContext, context);
@@ -452,7 +453,6 @@ public class NullAwayCodeFix {
    * <p>Here are the steps to resolve a field dereference error:
    *
    * <ol>
-   *   <li>Check if there is an assignment to the expression in the method body.
    *   <li>Look if there is any method initializing this field.
    *   <li>Check if there is any region with safe use of this field.
    *   <li>Consult gpt to generate a fix for each unsafe region.
@@ -467,7 +467,7 @@ public class NullAwayCodeFix {
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty} if no fix
    *     is found.
    */
-  private Set<MethodRewriteChange> resolveFieldDereferenceError(OnField onField, String field) {
+  private Set<MethodRewriteChange> resolveFieldNullabilityError(OnField onField, String field) {
     logger.trace("Investigating field nullability.");
     logger.trace("Checking if there is any method initializing this field.");
     Set<OnMethod> methods =
@@ -537,6 +537,12 @@ public class NullAwayCodeFix {
         return NO_ACTION;
       }
     }
+
+    InvocationRecord record =
+        invocationRecordRegistry.computeInvocationRecord(
+            onField.clazz, ASTParser.getterMethod(field), 3);
+    String callContext = record.constructCallGraphContext();
+
     // no initializer found. Try to fix by regions using the method as an example.
     // Make field nullable if not already.
     context.injector.injectAnnotation(
@@ -762,7 +768,7 @@ public class NullAwayCodeFix {
     InvocationRecord record = invocationRecordRegistry.computeInvocationRecord(encClass, method, 1);
     int count = 0;
     while (count++ < 10) {
-      String callContext = record.constructCallGraphContext(parser);
+      String callContext = record.constructCallGraphContext();
       Response methodNullability =
           gpt.checkIfMethodIsReturningNullable(encClass, method, callContext, context);
       if (!methodNullability.isSuccessFull()) {
@@ -800,7 +806,7 @@ public class NullAwayCodeFix {
     InvocationRecord record = invocationRecordRegistry.computeInvocationRecord(encClass, method, 3);
     int count = 0;
     while (count++ < 10) {
-      String callContext = record.constructCallGraphContext(parser);
+      String callContext = record.constructCallGraphContext();
       Response invocationNullability =
           gpt.checkIfMethodIsReturningNullableOnCallSite(invocation, callContext, context);
       if (!invocationNullability.isSuccessFull()) {

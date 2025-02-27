@@ -24,28 +24,37 @@
 
 package edu.ucr.cs.riple.core;
 
+import edu.ucr.cs.riple.core.registries.index.Fix;
+import edu.ucr.cs.riple.core.util.GitUtility;
+import edu.ucr.cs.riple.injector.location.OnField;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 
 /** Starting point. */
 public class Main {
 
-  /**
-   * Starting point.
-   *
-   * @param args if flag '--path' is found, all configurations will be set up based on the given
-   *     json file, otherwise they will be set up according to the set of received cli arguments.
-   */
-  public static void main(String[] args) {
-    Config config;
-    if (args.length == 2 && args[0].equals("--path")) {
-      config = new Config(Paths.get(args[1]));
-    } else {
-      config = new Config(args);
-    }
-    Annotator annotator = new Annotator(config);
-    annotator.start();
-  }
+  //  /**
+  //   * Starting point.
+  //   *
+  //   * @param args if flag '--path' is found, all configurations will be set up based on the given
+  //   *     json file, otherwise they will be set up according to the set of received cli
+  // arguments.
+  //   */
+  //  public static void main(String[] args) {
+  //    Config config;
+  //    if (args.length == 2 && args[0].equals("--path")) {
+  //      config = new Config(Paths.get(args[1]));
+  //    } else {
+  //      config = new Config(args);
+  //    }
+  //    Annotator annotator = new Annotator(config);
+  //    annotator.start();
+  //  }
 
   // Mac
   //  public static final String PROJECT_PATH = "/Users/nima/Desktop/conductor";
@@ -54,88 +63,105 @@ public class Main {
   public static final String BENCHMARK_NAME = "conductor";
   public static final String BRANCH_NAME = "nimak/auto-code-fix-4";
   public static final Path LOG_PATH = Paths.get("/tmp/logs/app.log");
+  public static final String ANNOTATED_PACKAGE = "com.netflix.conductor";
 
-  //  public static void main(String[] a) {
-  //    // DELETE LOG:
-  //    try {
-  //      Files.deleteIfExists(LOG_PATH);
-  //    } catch (IOException e) {
-  //      throw new RuntimeException(e);
-  //    }
-  //
-  //    // delete dir
-  //    Path outDir = Paths.get(PROJECT_PATH + "/annotator-out/0");
-  //
-  //    if (outDir.toFile().exists()) {
-  //      try {
-  //        Files.walkFileTree(
-  //            outDir,
-  //            new SimpleFileVisitor<>() {
-  //              @Override
-  //              public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-  //                  throws IOException {
-  //                Files.delete(file);
-  //                return FileVisitResult.CONTINUE;
-  //              }
-  //
-  //              @Override
-  //              public FileVisitResult postVisitDirectory(Path dir, IOException exc)
-  //                  throws IOException {
-  //                Files.delete(dir);
-  //                return FileVisitResult.CONTINUE;
-  //              }
-  //            });
-  //      } catch (IOException e) {
-  //        throw new RuntimeException(e);
-  //      }
-  //    }
-  //
-  //    String[] argsArray = {
-  //      "-d",
-  //      String.format("%s/annotator-out", PROJECT_PATH),
-  //      "-bc",
-  //      // For Ubuntu
-  //      String.format(
-  //          "export JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64 && cd %s && ./gradlew clean
-  // conductor-core:compileJava --rerun-tasks --no-build-cache",
-  //          PROJECT_PATH),
-  //      //      // For Mac
-  //      //      String.format(
-  //      //          "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.0.2.jdk/Contents/Home &&
-  // cd %s
-  //      // && ./gradlew clean conductor-core:compileJava --rerun-tasks --no-build-cache",
-  //      //          PROJECT_PATH),
-  //      "-cp",
-  //      String.format("%s/paths.tsv", PROJECT_PATH),
-  //      "-i",
-  //      "com.uber.nullaway.annotations.Initializer",
-  //      "-n",
-  //      "javax.annotation.Nullable",
-  //      "-cn",
-  //      "NULLAWAY",
-  //      "-di", // deactivate inference
-  //      "-rre", // resolve remaining errors
-  //      //       "-rboserr", // redirect build output stream and error stream
-  //      "--depth",
-  //      "6"
-  //    };
-  //    Config config = new Config(argsArray);
-  //    // reset git repo
-  //    try (GitUtility git = GitUtility.instance()) {
-  //      git.resetHard();
-  //      git.pull();
-  //      git.checkoutBranch("nimak/auto-code-fix");
-  //      git.resetHard();
-  //      git.pull();
-  //      git.deleteLocalBranch(BRANCH_NAME);
-  //      git.deleteRemoteBranch(BRANCH_NAME);
-  //      git.createAndCheckoutBranch(BRANCH_NAME);
-  //      git.pushBranch(BRANCH_NAME);
-  //    } catch (Exception e) {
-  //      throw new RuntimeException(e);
-  //    }
-  //    // Start annotator
-  //    Annotator annotator = new Annotator(config);
-  //    annotator.start();
-  //  }
+  public static void main(String[] a) {
+    // DELETE LOG:
+    try {
+      Files.deleteIfExists(LOG_PATH);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
+    // delete dir
+    Path outDir = Paths.get(PROJECT_PATH + "/annotator-out/0");
+
+    if (outDir.toFile().exists()) {
+      try {
+        Files.walkFileTree(
+            outDir,
+            new SimpleFileVisitor<>() {
+              @Override
+              public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                  throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+              }
+
+              @Override
+              public FileVisitResult postVisitDirectory(Path dir, IOException exc)
+                  throws IOException {
+                Files.delete(dir);
+                return FileVisitResult.CONTINUE;
+              }
+            });
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    String[] argsArray = {
+      "-d",
+      String.format("%s/annotator-out", PROJECT_PATH),
+      "-bc",
+      // For Ubuntu
+      String.format(
+          "export JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64 && cd %s && ./gradlew clean conductor-core:compileJava --rerun-tasks --no-build-cache",
+          PROJECT_PATH),
+      //      // For Mac
+      //      String.format(
+      //          "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.0.2.jdk/Contents/Home &&cd %s
+      // && ./gradlew clean conductor-core:compileJava --rerun-tasks --no-build-cache",
+      //          PROJECT_PATH),
+      "-cp",
+      String.format("%s/paths.tsv", PROJECT_PATH),
+      "-i",
+      "com.uber.nullaway.annotations.Initializer",
+      "-n",
+      "javax.annotation.Nullable",
+      "-cn",
+      "NULLAWAY",
+      "-app",
+      ANNOTATED_PACKAGE,
+      "-di", // deactivate inference
+      "-rre", // resolve remaining errors
+      //       "-rboserr", // redirect build output stream and error stream
+      "--depth",
+      "6"
+    };
+    Config config = new Config(argsArray);
+    // reset git repo
+    try (GitUtility git = GitUtility.instance()) {
+      git.resetHard();
+      git.pull();
+      git.checkoutBranch("nimak/auto-code-fix");
+      git.resetHard();
+      git.pull();
+      //            git.deleteLocalBranch(BRANCH_NAME);
+      //            git.deleteRemoteBranch(BRANCH_NAME);
+      //            git.createAndCheckoutBranch(BRANCH_NAME);
+      //            git.pushBranch(BRANCH_NAME);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    // Start annotator
+    Annotator annotator = new Annotator(config);
+    annotator.start();
+  }
+
+  public static boolean isTheFix(Fix fix) {
+    // METHOD_NO_INIT	initializer method does not guarantee @NonNull fields workflowModel (line
+    // 190), taskDefinition (line 191), workflowTask (line 192), taskInput (line 193), retryTaskId
+    // (line 195), taskId (line 196), deciderService (line 197) are initialized along all
+    // control-flow paths (remember to check for exceptions or early returns).
+    //	com.netflix.conductor.core.execution.mapper.TaskMapperContext$Builder	Builder()	6696
+    //	/home/nima/Developer/nullness-benchmarks/conductor/core/src/main/java/com/netflix/conductor/core/execution/mapper/TaskMapperContext.java	null	null	null	null	null	null
+    if (!fix.isOnField()) {
+      return false;
+    }
+    OnField onField = fix.toField();
+    return onField.clazz.equals(
+            "com.netflix.conductor.core.execution.mapper.TaskMapperContext$Builder")
+        && onField.variables.contains("workflowTask");
+  }
 }

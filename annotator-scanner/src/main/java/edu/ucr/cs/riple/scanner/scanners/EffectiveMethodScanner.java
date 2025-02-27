@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package edu.ucr.cs.riple.scanner;
+package edu.ucr.cs.riple.scanner.scanners;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.util.ASTHelpers;
@@ -31,6 +31,7 @@ import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.util.TreeScanner;
 import com.sun.tools.javac.code.Symbol;
+import edu.ucr.cs.riple.scanner.Config;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -51,7 +52,8 @@ public class EffectiveMethodScanner {
   final class IdentifierScanner extends TreeScanner<Void, Set<Symbol>> {
     @Override
     public Void visitMethodInvocation(MethodInvocationTree node, Set<Symbol> effectiveParameters) {
-      // to skip visiting method arguments, we only visit the method select
+      // If only the invoked method is outside the annotated package, we consider it as an effective
+      // operation and should scan the passed arguments.
       Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(node);
       if (!config.isAnnotatedPackage(methodSymbol)) {
         scan(node.getArguments(), effectiveParameters);
