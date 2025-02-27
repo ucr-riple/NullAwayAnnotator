@@ -79,6 +79,10 @@ public class EffectiveMethodScanner {
    * @return the set of effective parameters
    */
   public Set<Symbol.VarSymbol> scanMethod(MethodTree tree) {
+    if (tree.getBody() == null || tree.getParameters().isEmpty()) {
+      // Method is abstract or has no parameter, it cannot be effective to any parameter.
+      return Set.of();
+    }
     Set<Symbol> effectiveParameters = new HashSet<>();
     scanner.scan(tree, effectiveParameters);
     return effectiveParameters.stream()

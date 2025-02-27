@@ -153,10 +153,6 @@ public class AnnotatorScanner extends BugChecker
     }
     methodRecord.setAnnotationParameterFlags(paramAnnotations);
     config.getSerializer().serializeMethodRecord(methodRecord);
-    if (tree.getBody() == null || tree.getParameters().isEmpty()) {
-      // Method is abstract or has no parameter, it cannot be effective to any parameter.
-      return Description.NO_MATCH;
-    }
     EffectiveMethodScanner scanner = new EffectiveMethodScanner(methodSymbol);
     Set<Symbol.VarSymbol> effectiveParams = scanner.scanMethod(tree);
     effectiveParams.forEach(
