@@ -71,6 +71,7 @@ public abstract class AnnotatorScannerBaseTest<T extends Display> {
           .setSerializationActivation(true)
           .addGeneratedCodeDetectors(ImmutableSet.of(SourceType.LOMBOK))
           .setOutput(root)
+          .setAnnotatedPackages("edu.ucr")
           .writeAsXML(configPath);
     } catch (IOException ex) {
       throw new UncheckedIOException(ex);

@@ -24,10 +24,8 @@
 
 package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 
-import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.Context;
@@ -58,10 +56,8 @@ import edu.ucr.cs.riple.injector.changes.RemoveMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
-import edu.ucr.cs.riple.injector.util.ASTUtils;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -284,8 +280,7 @@ public class NullAwayCodeFix {
             fix -> {
               if (fix.isOnField()) {
                 logger.trace("Working on field: {}", names[index[0]]);
-                changes.addAll(
-                    resolveFieldDereferenceError(error, fix.toField(), names[index[0]++]));
+                changes.addAll(resolveFieldDereferenceError(fix.toField(), names[index[0]++]));
               }
             });
     return changes;
@@ -341,7 +336,7 @@ public class NullAwayCodeFix {
       case "field":
         OnField onField =
             context.targetModuleInfo.getFieldRegistry().getLocationOnField(encClass, expression);
-        return resolveFieldDereferenceError(error, onField, expression);
+        return resolveFieldDereferenceError(onField, expression);
       case "parameter":
         return resolveParameterDereferenceError(error, encClass, expression);
       case "method":
@@ -349,6 +344,7 @@ public class NullAwayCodeFix {
             error, encClass, expressionSymbol, expression, isAnnotated);
       case "local_variable":
         logger.trace("not supporting dereference on local variable yet.");
+        return NO_ACTION;
       default:
         return NO_ACTION;
     }
@@ -471,8 +467,7 @@ public class NullAwayCodeFix {
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty} if no fix
    *     is found.
    */
-  private Set<MethodRewriteChange> resolveFieldDereferenceError(
-      NullAwayError error, OnField onField, String field) {
+  private Set<MethodRewriteChange> resolveFieldDereferenceError(OnField onField, String field) {
     logger.trace("Investigating field nullability.");
     logger.trace("Checking if there is any method initializing this field.");
     Set<OnMethod> methods =
@@ -664,7 +659,7 @@ public class NullAwayCodeFix {
    */
   private Set<MethodRewriteChange> constructCastToNonnullChange(
       NullAwayError error, String reason) {
-    logger.trace("Constructing cast to nonnull change.");
+    logger.trace("Constructing cast to nonnull change for reason: {}", reason);
     SourceCode enclosingMethod = parser.getRegionSourceCode(error.getRegion());
     if (enclosingMethod == null) {
       return NO_ACTION;
@@ -752,31 +747,6 @@ public class NullAwayCodeFix {
       changes.addAll(change);
     }
     return changes;
-  }
-
-  /**
-   * Checks if the expression is initialized before use in the method body. TODO: this method only
-   * looks for all assignments flow insensitive. We need to make it flow sensitive.
-   *
-   * @param declaration the method declaration.
-   * @param field the field to check for initialization.
-   * @return true if the expression is initialized before use in the method body.
-   */
-  private boolean checkForInitializationBeforeUse(
-      CallableDeclaration<?> declaration, String field) {
-    // check if the expression is assigned in the method body.
-    Iterator<Node> treeIterator = new ASTUtils.DirectMethodParentIterator(declaration);
-    while (treeIterator.hasNext()) {
-      Node n = treeIterator.next();
-      if (n instanceof VariableDeclarationExpr) {
-        VariableDeclarationExpr v = (VariableDeclarationExpr) n;
-        if (v.getVariables().stream()
-            .anyMatch(variableDeclarator -> variableDeclarator.getNameAsString().equals(field))) {
-          return true;
-        }
-      }
-    }
-    return false;
   }
 
   /**

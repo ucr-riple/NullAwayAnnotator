@@ -59,10 +59,14 @@ public class ScannerConfigWriter {
   /** Set of {@code @Nonnull} annotations. */
   private ImmutableSet<String> nonnullAnnotations;
 
+  /** Prefix of the packages that should be scanned. */
+  private String annotatedPackages;
+
   public ScannerConfigWriter() {
     this.serializationActivation = false;
     this.activatedGeneratedCodeDetectors = new HashSet<>();
     this.nonnullAnnotations = ImmutableSet.of();
+    this.annotatedPackages = "";
   }
 
   public ScannerConfigWriter setOutput(Path output) {
@@ -82,6 +86,11 @@ public class ScannerConfigWriter {
 
   public ScannerConfigWriter setNonnullAnnotations(ImmutableSet<String> nonnullAnnotations) {
     this.nonnullAnnotations = nonnullAnnotations;
+    return this;
+  }
+
+  public ScannerConfigWriter setAnnotatedPackages(String annotatedPackages) {
+    this.annotatedPackages = annotatedPackages;
     return this;
   }
 
@@ -140,6 +149,11 @@ public class ScannerConfigWriter {
             nonnullElements.setTextContent(nonnull);
             nonnullAnnotations.appendChild(nonnullElements);
           });
+
+      // Annotated packages
+      Element annotatedPackages = doc.createElement("annotatedPackages");
+      annotatedPackages.setTextContent(this.annotatedPackages);
+      rootElement.appendChild(annotatedPackages);
 
       // Writings
       TransformerFactory transformerFactory = TransformerFactory.newInstance();

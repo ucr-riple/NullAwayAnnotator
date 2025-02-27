@@ -177,6 +177,7 @@ public class Utility {
         .addGeneratedCodeDetectors(config.generatedCodeDetectors)
         .setOutput(info.dir)
         .setNonnullAnnotations(config.getNonnullAnnotations())
+        .setAnnotatedPackages(config.annotatedPackages)
         .writeAsXML(info.scannerConfig);
   }
 

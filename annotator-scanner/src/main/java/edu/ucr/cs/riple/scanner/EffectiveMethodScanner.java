@@ -44,12 +44,19 @@ public class EffectiveMethodScanner {
   /** The scanner used to scan the method for identifiers that are methods arguments */
   private final IdentifierScanner scanner;
 
+  /** Configuration of the scanner */
+  private final Config config;
+
   /** Scans the method for identifiers and counts the number of times each parameter is used. */
   final class IdentifierScanner extends TreeScanner<Void, Set<Symbol>> {
     @Override
-    public Void visitMethodInvocation(MethodInvocationTree node, Set<Symbol> unused) {
+    public Void visitMethodInvocation(MethodInvocationTree node, Set<Symbol> effectiveParameters) {
       // to skip visiting method arguments, we only visit the method select
-      scan(node.getMethodSelect(), unused);
+      Symbol.MethodSymbol methodSymbol = ASTHelpers.getSymbol(node);
+      if (!config.isAnnotatedPackage(methodSymbol)) {
+        scan(node.getArguments(), effectiveParameters);
+      }
+      scan(node.getMethodSelect(), effectiveParameters);
       return null;
     }
 
@@ -66,9 +73,10 @@ public class EffectiveMethodScanner {
     }
   }
 
-  public EffectiveMethodScanner(Symbol.MethodSymbol methodSymbol) {
+  public EffectiveMethodScanner(Symbol.MethodSymbol methodSymbol, Config config) {
     this.parameters = ImmutableList.copyOf(methodSymbol.getParameters());
     this.scanner = new IdentifierScanner();
+    this.config = config;
   }
 
   /**

@@ -473,6 +473,7 @@ public class CoreTestHelper {
     builder.cache = true;
     builder.resolveRemainingErrors = resolveRemainingErrors;
     builder.languageLevel = languageLevel;
+    builder.annotatedPackages = "test";
     builder.useCacheImpact = !getEnvironmentVariable("ANNOTATOR_TEST_DISABLE_CACHING");
     builder.useParallelProcessor =
         !getEnvironmentVariable("ANNOTATOR_TEST_DISABLE_PARALLEL_PROCESSING");

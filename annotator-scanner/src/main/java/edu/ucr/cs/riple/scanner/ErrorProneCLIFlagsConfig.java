@@ -26,6 +26,7 @@ package edu.ucr.cs.riple.scanner;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.ErrorProneFlags;
+import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.riple.annotator.util.parsers.XmlParser;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import edu.ucr.cs.riple.scanner.generatedcode.SymbolSourceResolver;
@@ -55,6 +56,9 @@ public class ErrorProneCLIFlagsConfig implements Config {
   /** Immutable set of fully qualified name of {@code @Nonnull} annotations. */
   private final ImmutableSet<String> nonnullAnnotations;
 
+  /** Prefix of the packages that should be scanned. */
+  private final String annotatedPackages;
+
   static final String EP_FL_NAMESPACE = "AnnotatorScanner";
   static final String FL_CONFIG_PATH = EP_FL_NAMESPACE + ":ConfigPath";
 
@@ -81,6 +85,8 @@ public class ErrorProneCLIFlagsConfig implements Config {
         parser
             .getArrayValueFromTag("/scanner/annotations/nonnull", String.class)
             .orElse(ImmutableSet.of());
+    this.annotatedPackages =
+        parser.getValueFromTag("/scanner/annotatedPackages", String.class).orElse("");
     this.serializer = new Serializer(this);
   }
 
@@ -125,5 +131,10 @@ public class ErrorProneCLIFlagsConfig implements Config {
   @Override
   public SymbolSourceResolver getSymbolSourceResolver() {
     return symbolSourceResolver;
+  }
+
+  @Override
+  public boolean isAnnotatedPackage(Symbol symbol) {
+    return symbol.packge().fullname.toString().startsWith(annotatedPackages);
   }
 }

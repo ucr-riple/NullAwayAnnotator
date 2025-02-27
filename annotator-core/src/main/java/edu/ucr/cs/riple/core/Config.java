@@ -180,6 +180,8 @@ public class Config {
   /** If activated, annotator will try to resolve remaining errors mostly by code changes. */
   public final boolean resolveRemainingErrors;
 
+  public final String annotatedPackages;
+
   /**
    * Builds context from command line arguments.
    *
@@ -391,6 +393,12 @@ public class Config {
     resolveRemainingErrorsOption.setRequired(false);
     options.addOption(resolveRemainingErrorsOption);
 
+    // Annotated packages
+    Option annotatedPackagesOption =
+        new Option("app", "annotated-package-prefix", true, "Annotated packages prefix");
+    checkerNameOption.setRequired(false);
+    options.addOption(checkerNameOption);
+
     HelpFormatter formatter = new HelpFormatter();
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
@@ -449,7 +457,7 @@ public class Config {
                 })
             .collect(Collectors.toList());
     Preconditions.checkArgument(
-        moduleConfigurationList.size() > 0, "Target module context paths not found.");
+        !moduleConfigurationList.isEmpty(), "Target module context paths not found.");
     // First line is information for the target module.
     this.target = moduleConfigurationList.get(0);
     this.chain = cmd.hasOption(chainOption.getLongOpt());
@@ -497,6 +505,11 @@ public class Config {
             ? ImmutableSet.of()
             : ImmutableSet.copyOf(cmd.getOptionValue(nonnullAnnotationsOption).split(","));
     this.resolveRemainingErrors = cmd.hasOption(resolveRemainingErrorsOption);
+    this.annotatedPackages = cmd.getOptionValue(annotatedPackagesOption, "");
+    if (this.resolveRemainingErrors && this.annotatedPackages.isEmpty()) {
+      throw new IllegalArgumentException(
+          "Annotated packages prefix must be provided when resolving remaining errors.");
+    }
   }
 
   /**
@@ -607,6 +620,7 @@ public class Config {
         getLanguageLevel(parser.getValueFromKey("LANGUAGE_LEVEL").orElse("17").getAsString());
     this.resolveRemainingErrors =
         parser.getValueFromKey("RESOLVE_REMAINING_ERRORS").orElse(false).getAsBoolean();
+    this.annotatedPackages = parser.getValueFromKey("ANNOTATED_PACKAGES").orElse("").getAsString();
     this.nonnullAnnotations =
         ImmutableSet.copyOf(
             parser
@@ -672,6 +686,7 @@ public class Config {
     public String checker;
     public ParserConfiguration.LanguageLevel languageLevel;
     public boolean resolveRemainingErrors = false;
+    public String annotatedPackages;
 
     public void write(Path path) {
       Preconditions.checkNotNull(
@@ -705,6 +720,7 @@ public class Config {
       json.addProperty("RESOLVE_REMAINING_ERRORS", resolveRemainingErrors);
       json.addProperty("INFERENCE_ACTIVATION", inferenceActivated);
       json.addProperty("LANGUAGE_LEVEL", languageLevel.name().split("_")[1]);
+      json.addProperty("ANNOTATED_PACKAGES", annotatedPackages);
       JsonArray configPathsJson = new JsonArray();
       configPaths.forEach(
           info -> {

@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.scanner;
 
+import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.riple.scanner.generatedcode.SymbolSourceResolver;
 import java.nio.file.Path;
 import javax.annotation.Nonnull;
@@ -67,4 +68,12 @@ public interface Config {
    * @return Using SymbolSourceResolver instance.
    */
   SymbolSourceResolver getSymbolSourceResolver();
+
+  /**
+   * Checks if the given symbol is an annotated package.
+   *
+   * @param symbol Given symbol.
+   * @return true, if the given symbol is an annotated package.
+   */
+  boolean isAnnotatedPackage(Symbol symbol);
 }

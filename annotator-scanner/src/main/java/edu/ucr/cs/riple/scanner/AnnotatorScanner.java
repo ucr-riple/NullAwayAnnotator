@@ -153,7 +153,7 @@ public class AnnotatorScanner extends BugChecker
     }
     methodRecord.setAnnotationParameterFlags(paramAnnotations);
     config.getSerializer().serializeMethodRecord(methodRecord);
-    EffectiveMethodScanner scanner = new EffectiveMethodScanner(methodSymbol);
+    EffectiveMethodScanner scanner = new EffectiveMethodScanner(methodSymbol, config);
     Set<Symbol.VarSymbol> effectiveParams = scanner.scanMethod(tree);
     effectiveParams.forEach(
         symbol ->

@@ -24,6 +24,7 @@
 
 package edu.ucr.cs.riple.scanner;
 
+import com.sun.tools.javac.code.Symbol;
 import edu.ucr.cs.riple.scanner.generatedcode.SymbolSourceResolver;
 import java.nio.file.Path;
 import javax.annotation.Nonnull;
@@ -60,6 +61,11 @@ public class DummyOptionsConfig implements Config {
 
   @Override
   public SymbolSourceResolver getSymbolSourceResolver() {
+    throw new IllegalStateException(ERROR_MESSAGE);
+  }
+
+  @Override
+  public boolean isAnnotatedPackage(Symbol symbol) {
     throw new IllegalStateException(ERROR_MESSAGE);
   }
 }

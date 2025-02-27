@@ -84,7 +84,8 @@ public class EffectiveMethodRecordTest
         .setExpectedOutputs(
             new EffectiveMethodRecordDisplay("edu.ucr.A$1C", "t1(java.lang.Object)", "p1"),
             new EffectiveMethodRecordDisplay(
-                "edu.ucr.A", "foo2(java.lang.Object,java.lang.Object)", "p1"))
+                "edu.ucr.A", "foo2(java.lang.Object,java.lang.Object)", "p1"),
+            new EffectiveMethodRecordDisplay("edu.ucr.A", "bar(java.lang.Object)", "p"))
         .doTest();
   }
 }
