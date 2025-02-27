@@ -33,7 +33,7 @@ def defaultErrorProneVersion =  JavaVersion.current() >= JavaVersion.VERSION_11 
 
 def versions = [
         errorProne              : defaultErrorProneVersion,
-        errorProneApi           : project.hasProperty("epApiVersion") ? epApiVersion : oldestErrorProneApi,
+        errorProneApi           : oldestErrorProneApi,
         autoService             : "1.0-rc7",
         javaparser              : "3.26.2",
         gson                    : "2.11.0",

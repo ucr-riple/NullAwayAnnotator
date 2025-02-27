@@ -31,6 +31,7 @@ import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.util.Name;
 import edu.ucr.cs.riple.scanner.location.SymbolLocation;
 import edu.ucr.cs.riple.scanner.out.ClassRecord;
+import edu.ucr.cs.riple.scanner.out.EffectiveMethodRecord;
 import edu.ucr.cs.riple.scanner.out.ImpactedRegion;
 import edu.ucr.cs.riple.scanner.out.MethodRecord;
 import java.io.FileOutputStream;
@@ -64,6 +65,9 @@ public class Serializer {
   /** Path to write location of elements with explicit {@code @Nonnull} annotation. */
   private final Path nonnullElementsPath;
 
+  /** Path to write effective method records. */
+  private final Path effectiveMethodRecordPath;
+
   /** File name where all field usage data has been stored. */
   public static final String FIELD_IMPACTED_REGION_FILE_NAME = "field_impacted_region_map.tsv";
 
@@ -76,6 +80,9 @@ public class Serializer {
   /** File name where all class data has been stored. */
   public static final String CLASS_RECORD_FILE_NAME = "class_records.tsv";
 
+  /** File name where all effective method records are stored. */
+  public static final String EFFECTIVE_METHOD_RECORD_FILE_NAME = "effective_method_records.tsv";
+
   /** File name where location of elements explicitly annotated as {@code @Nonnull}. */
   public static final String NON_NULL_ELEMENTS_FILE_NAME = "nonnull_elements.tsv";
 
@@ -86,6 +93,7 @@ public class Serializer {
     this.methodRecordPath = outputDirectory.resolve(METHOD_RECORD_FILE_NAME);
     this.classRecordsPath = outputDirectory.resolve(CLASS_RECORD_FILE_NAME);
     this.nonnullElementsPath = outputDirectory.resolve(NON_NULL_ELEMENTS_FILE_NAME);
+    this.effectiveMethodRecordPath = outputDirectory.resolve(EFFECTIVE_METHOD_RECORD_FILE_NAME);
     initializeOutputFiles(config);
   }
 
@@ -139,6 +147,15 @@ public class Serializer {
         this.nonnullElementsPath);
   }
 
+  /**
+   * Serializes the effective method record.
+   *
+   * @param record EffectiveMethodRecord instance.
+   */
+  public void serializeEffectiveMethodRecord(EffectiveMethodRecord record) {
+    appendToFile(record.toString(), this.effectiveMethodRecordPath);
+  }
+
   /** Cleared the content of the file if exists and writes the header in the first line. */
   private void initializeFile(Path path, String header) {
     try {
@@ -165,6 +182,7 @@ public class Serializer {
         initializeFile(methodRecordPath, MethodRecord.header());
         initializeFile(classRecordsPath, ClassRecord.header());
         initializeFile(nonnullElementsPath, SymbolLocation.header());
+        initializeFile(effectiveMethodRecordPath, EffectiveMethodRecord.header());
       }
     } catch (IOException e) {
       throw new RuntimeException("Could not finish resetting serializer", e);
