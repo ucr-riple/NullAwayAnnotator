@@ -141,7 +141,7 @@ public class AnnotatorScanner extends BugChecker
       config
           .getSerializer()
           .serializeOriginRecord(
-              new OriginRecord(encMethodSymbol, calledMethod, formalArgIndex, origins, tree));
+              new OriginRecord(encMethodSymbol, calledMethod, formalArgIndex, origins));
     }
     return Description.NO_MATCH;
   }
