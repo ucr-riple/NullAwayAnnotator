@@ -46,18 +46,18 @@ import javax.lang.model.element.ElementKind;
 public class OriginScanner extends AccumulatorScanner<Symbol> {
 
   @Override
-  public Set<Symbol> visitAssignment(AssignmentTree node, Symbol unused) {
+  public Set<Symbol> visitAssignment(AssignmentTree node, Symbol target) {
     Tree variable = node.getVariable();
     Symbol symbol = ASTHelpers.getSymbol(variable);
-    if (symbol != null && symbol.equals(unused)) {
+    if (symbol != null && symbol.equals(target)) {
       return node.getExpression().accept(new ExpressionToSymbolScanner(), null);
     }
     return Set.of();
   }
 
   @Override
-  public Set<Symbol> visitLambdaExpression(LambdaExpressionTree node, Symbol symbol) {
-    return node.getBody().accept(this, symbol);
+  public Set<Symbol> visitLambdaExpression(LambdaExpressionTree node, Symbol target) {
+    return node.getBody().accept(this, target);
   }
 
   @Override
@@ -73,8 +73,12 @@ public class OriginScanner extends AccumulatorScanner<Symbol> {
   }
 
   @Override
-  public Set<Symbol> visitEnhancedForLoop(EnhancedForLoopTree node, Symbol unused) {
-    return node.getExpression().accept(this, unused);
+  public Set<Symbol> visitEnhancedForLoop(EnhancedForLoopTree node, Symbol target) {
+    Symbol variable = ASTHelpers.getSymbol(node.getVariable());
+    if (variable != null && variable.equals(target)) {
+      return node.getExpression().accept(new ExpressionToSymbolScanner(), null);
+    }
+    return Set.of();
   }
 
   /**

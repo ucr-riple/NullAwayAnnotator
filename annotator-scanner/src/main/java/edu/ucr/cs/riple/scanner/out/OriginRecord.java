@@ -46,14 +46,17 @@ public class OriginRecord {
   /** The set of origins of the parameter. */
   private final Set<Symbol> origins;
 
+  private final int index;
+
   public OriginRecord(
       Symbol.MethodSymbol encMethod,
       Symbol.MethodSymbol calledMethod,
-      Symbol.VarSymbol parameter,
+      int index,
       Set<Symbol> origins) {
     this.encMethod = encMethod;
     this.calledMethod = calledMethod;
-    this.parameter = parameter;
+    this.index = index;
+    this.parameter = calledMethod.getParameters().get(index);
     this.origins = origins;
   }
 
@@ -77,6 +80,7 @@ public class OriginRecord {
     json.addProperty("method", Serializer.serializeSymbol(encMethod));
     json.addProperty("calledMethod", Serializer.serializeSymbol(calledMethod));
     json.addProperty("parameter", Serializer.serializeSymbol(parameter));
+    json.addProperty("index", index);
     JsonArray originsArray = new JsonArray();
     for (Symbol origin : origins) {
       originsArray.add(SymbolLocation.createLocationFromSymbol(origin).tabSeparatedToString());
