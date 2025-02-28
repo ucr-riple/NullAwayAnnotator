@@ -116,6 +116,7 @@ public class AnnotatorScanner extends BugChecker
     if (calledMethod == null) {
       return Description.NO_MATCH;
     }
+    int formalArgSize = calledMethod.getParameters().size();
     config
         .getSerializer()
         .serializeImpactedRegionForMethod(
@@ -128,15 +129,23 @@ public class AnnotatorScanner extends BugChecker
     for (int i = 0; i < tree.getArguments().size(); i++) {
       ExpressionTree arg = tree.getArguments().get(i);
       Set<Symbol> argSymbols = arg.accept(new ExpressionToSymbolScanner(), null);
+      if (argSymbols == null) {
+        continue;
+      }
       Set<Symbol> origins = new HashSet<>();
       for (Symbol symbol : argSymbols) {
         origins.addAll(new OriginScanner().retrieveOrigins(encMethod, symbol));
       }
+      int formalArgIndex =
+          calledMethod.isVarArgs() ? i >= formalArgSize ? formalArgSize - 1 : i : i;
       config
           .getSerializer()
           .serializeOriginRecord(
               new OriginRecord(
-                  encMethodSymbol, calledMethod, calledMethod.getParameters().get(i), origins));
+                  encMethodSymbol,
+                  calledMethod,
+                  calledMethod.getParameters().get(formalArgIndex),
+                  origins));
     }
     return Description.NO_MATCH;
   }

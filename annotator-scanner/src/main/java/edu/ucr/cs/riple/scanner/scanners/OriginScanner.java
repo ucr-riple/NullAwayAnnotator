@@ -79,7 +79,7 @@ public class OriginScanner extends AccumulatorScanner<Symbol> {
    * @return a set of symbols that are the origins of the variable.
    */
   public Set<Symbol> retrieveOrigins(MethodTree tree, Symbol target) {
-    if (target.getKind() != ElementKind.LOCAL_VARIABLE) {
+    if (isOriginal(target)) {
       return Set.of(target);
     }
     Set<Symbol> result = new HashSet<>();
@@ -95,15 +95,28 @@ public class OriginScanner extends AccumulatorScanner<Symbol> {
       Set<Symbol> involvedSymbols = tree.accept(this, current);
       involvedSymbols.forEach(
           symbol -> {
-            if (symbol.getKind() == ElementKind.LOCAL_VARIABLE) {
+            if (isOriginal(symbol)) {
+              result.add(symbol);
+            } else {
               if (!visited.contains(symbol)) {
                 queue.add(symbol);
               }
-            } else {
-              result.add(symbol);
             }
           });
     }
     return result;
+  }
+
+  /**
+   * Check if the symbol is an original symbol. An original symbol is a field, a parameter or a
+   * method return call.
+   *
+   * @param symbol the symbol to check
+   * @return true if the symbol is an original symbol, false otherwise
+   */
+  private static boolean isOriginal(Symbol symbol) {
+    // An exception parameter is not an original symbol but we are not interested in their origins.
+    return !symbol.getKind().equals(ElementKind.LOCAL_VARIABLE)
+        && !symbol.getKind().equals(ElementKind.RESOURCE_VARIABLE);
   }
 }

@@ -37,17 +37,15 @@ public class ExpressionToSymbolScanner extends AccumulatorScanner<Void> {
     Symbol symbol = ASTHelpers.getSymbol(node);
     if (symbol != null) {
       switch (symbol.getKind()) {
-        case ENUM_CONSTANT:
         case FIELD:
         case PARAMETER:
         case LOCAL_VARIABLE:
-        case EXCEPTION_PARAMETER:
         case METHOD:
         case CONSTRUCTOR:
         case RESOURCE_VARIABLE:
           return Set.of(symbol);
         default:
-          break;
+          return Set.of();
       }
     }
     return super.visitIdentifier(node, unused);

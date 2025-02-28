@@ -24,6 +24,8 @@
 
 package edu.ucr.cs.riple.scanner;
 
+import static java.nio.file.StandardOpenOption.APPEND;
+import static java.nio.file.StandardOpenOption.CREATE;
 import static java.util.stream.Collectors.joining;
 
 import com.google.gson.Gson;
@@ -38,9 +40,9 @@ import edu.ucr.cs.riple.scanner.out.ImpactedRegion;
 import edu.ucr.cs.riple.scanner.out.MethodRecord;
 import edu.ucr.cs.riple.scanner.out.OriginRecord;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Writer;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -171,7 +173,9 @@ public class Serializer {
    * @param record OriginRecord instance.
    */
   public void serializeOriginRecord(OriginRecord record) {
-    try (FileWriter writer = new FileWriter(this.parameterOriginPath.toFile(), true)) {
+    try (Writer writer =
+        Files.newBufferedWriter(
+            this.parameterOriginPath.toFile().toPath(), Charset.defaultCharset(), CREATE, APPEND)) {
       Gson gson = new GsonBuilder().setPrettyPrinting().create();
       gson.toJson(record.toJson(), writer);
     } catch (IOException e) {
