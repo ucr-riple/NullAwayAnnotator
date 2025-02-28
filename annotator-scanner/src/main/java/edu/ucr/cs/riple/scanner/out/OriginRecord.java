@@ -79,11 +79,7 @@ public class OriginRecord {
     json.addProperty("parameter", Serializer.serializeSymbol(parameter));
     JsonArray originsArray = new JsonArray();
     for (Symbol origin : origins) {
-      SymbolLocation originLocation = SymbolLocation.createLocationFromSymbol(origin);
-      if (originLocation == null) {
-        continue;
-      }
-      originsArray.add(originLocation.tabSeparatedToString());
+      originsArray.add(SymbolLocation.createLocationFromSymbol(origin).tabSeparatedToString());
     }
     json.add("origins", originsArray);
     return json;

@@ -23,7 +23,6 @@
 package edu.ucr.cs.riple.scanner.location;
 
 import com.sun.tools.javac.code.Symbol;
-import javax.annotation.Nullable;
 
 /**
  * Provides method for symbol locations. This class is copied from <a
@@ -56,7 +55,6 @@ public interface SymbolLocation {
    * @param target Target element.
    * @return subtype of {@link SymbolLocation} matching target's type.
    */
-  @Nullable
   static SymbolLocation createLocationFromSymbol(Symbol target) {
     switch (target.getKind()) {
       case PARAMETER:
