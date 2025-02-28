@@ -26,14 +26,17 @@ package edu.ucr.cs.riple.scanner.scanners;
 
 import com.google.errorprone.util.ASTHelpers;
 import com.sun.source.tree.IdentifierTree;
+import com.sun.source.tree.MemberReferenceTree;
+import com.sun.source.tree.MemberSelectTree;
+import com.sun.source.tree.Tree;
 import com.sun.tools.javac.code.Symbol;
+import java.util.HashSet;
 import java.util.Set;
 
 /** Scanner that finds the symbols of all identifiers in expressions. */
 public class ExpressionToSymbolScanner extends AccumulatorScanner<Void> {
 
-  @Override
-  public Set<Symbol> visitIdentifier(IdentifierTree node, Void unused) {
+  private Symbol defaultResult(Tree node) {
     Symbol symbol = ASTHelpers.getSymbol(node);
     if (symbol != null) {
       switch (symbol.getKind()) {
@@ -41,13 +44,39 @@ public class ExpressionToSymbolScanner extends AccumulatorScanner<Void> {
         case PARAMETER:
         case LOCAL_VARIABLE:
         case METHOD:
-        case CONSTRUCTOR:
         case RESOURCE_VARIABLE:
-          return Set.of(symbol);
+          return symbol;
         default:
-          return Set.of();
+          return null;
       }
     }
-    return super.visitIdentifier(node, unused);
+    return null;
+  }
+
+  @Override
+  public Set<Symbol> visitIdentifier(IdentifierTree node, Void unused) {
+    Symbol symbol = defaultResult(node);
+    return symbol == null ? Set.of() : Set.of(symbol);
+  }
+
+  @Override
+  public Set<Symbol> visitMemberReference(MemberReferenceTree node, Void unused) {
+    Symbol symbol = defaultResult(node);
+    return symbol == null ? Set.of() : Set.of(symbol);
+  }
+
+  @Override
+  public Set<Symbol> visitMemberSelect(MemberSelectTree node, Void unused) {
+    Set<Symbol> onExpression = node.getExpression().accept(this, unused);
+    if (onExpression == null) {
+      onExpression = new HashSet<>();
+    } else {
+      onExpression = new HashSet<>(onExpression);
+    }
+    Symbol symbol = defaultResult(node);
+    if (symbol != null) {
+      onExpression.add(symbol);
+    }
+    return onExpression;
   }
 }

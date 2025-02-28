@@ -88,4 +88,69 @@ public class EffectiveMethodRecordTest
             new EffectiveMethodRecordDisplay("edu.ucr.A", "bar(java.lang.Object)", "p"))
         .doTest();
   }
+
+  @Test
+  public void test() {
+    tester
+        .addSourceLines("edu/ucr/Id.java", "package edu.ucr;", "public interface Id{}")
+        .addSourceLines(
+            "edu/ucr/Registry.java",
+            "package edu.ucr;",
+            "import java.util.*;",
+            "public interface Registry{",
+            "   Id createId(String name, Map<String, String> tags);",
+            "}")
+        .addSourceLines("edu/ucr/Timer.java", "package edu.ucr;", "public interface Timer{}")
+        .addSourceLines(
+            "edu/ucr/PercentileTimer.java",
+            "package edu.ucr;",
+            "public class PercentileTimer implements Timer {",
+            "  static PercentileTimer get(Registry registry, Id id) {",
+            " return null; ",
+            "}",
+            "}")
+        .addSourceLines(
+            "edu/ucr/Foo.java",
+            "package edu.ucr;",
+            "import java.util.*;",
+            "public class Foo {",
+            "   private static final Map<String, Map<Map<String, String>, PercentileTimer>> timers = new HashMap<>();",
+            "   private static Registry registry;",
+            "   private static Map<String, String> toMap(String className, String... additionalTags) {",
+            "      return new HashMap<>();",
+            "   }",
+            "   private static Timer getTimer(String className, String name, String... additionalTags) {",
+            "     Map<String, String> tags = toMap(className, additionalTags);",
+            "     return timers",
+            "         .computeIfAbsent(name, s -> new HashMap<>())",
+            "         .computeIfAbsent(",
+            "                tags,",
+            "                   t -> {",
+            "                     Id id = registry.createId(name, tags);",
+            "                     return PercentileTimer.get(registry, id);",
+            "                   });",
+            "   }",
+            "}")
+        .setExpectedOutputs()
+        .doTest();
+  }
+
+  @Test
+  public void testt() {
+    tester
+        .addSourceLines(
+            "edu/ucr/Foo.java",
+            "package edu.ucr;",
+            "import java.util.*;",
+            "public class Foo {",
+            "   private void run(List<Object> a) {",
+            "     a.forEach(this::display);",
+            "   }",
+            "   public String display(Object a){",
+            "     return a.toString();",
+            "   }",
+            "}")
+        .setExpectedOutputs()
+        .doTest();
+  }
 }

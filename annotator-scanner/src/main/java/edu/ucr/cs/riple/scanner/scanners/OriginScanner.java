@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.scanner.scanners;
 import com.google.errorprone.util.ASTHelpers;
 import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.EnhancedForLoopTree;
+import com.sun.source.tree.LambdaExpressionTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.VariableTree;
@@ -52,6 +53,11 @@ public class OriginScanner extends AccumulatorScanner<Symbol> {
       return node.getExpression().accept(new ExpressionToSymbolScanner(), null);
     }
     return Set.of();
+  }
+
+  @Override
+  public Set<Symbol> visitLambdaExpression(LambdaExpressionTree node, Symbol symbol) {
+    return node.getBody().accept(this, symbol);
   }
 
   @Override

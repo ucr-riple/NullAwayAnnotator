@@ -116,13 +116,13 @@ public class AnnotatorScanner extends BugChecker
     if (calledMethod == null) {
       return Description.NO_MATCH;
     }
-    int formalArgSize = calledMethod.getParameters().size();
     config
         .getSerializer()
         .serializeImpactedRegionForMethod(
             new ImpactedRegion(config, calledMethod, state.getPath()));
+    int formalArgSize = calledMethod.getParameters().size();
     MethodTree encMethod = ASTHelpers.findEnclosingNode(state.getPath(), MethodTree.class);
-    if (encMethod == null) {
+    if (encMethod == null || formalArgSize == 0 || !config.isAnnotatedPackage(calledMethod)) {
       return Description.NO_MATCH;
     }
     Symbol.MethodSymbol encMethodSymbol = ASTHelpers.getSymbol(encMethod);
