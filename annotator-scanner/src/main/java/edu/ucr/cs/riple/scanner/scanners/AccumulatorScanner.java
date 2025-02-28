@@ -5,6 +5,7 @@ import com.sun.tools.javac.code.Symbol;
 import java.util.HashSet;
 import java.util.Set;
 
+/** A scanner that accumulates the results of visiting a tree and returns the result. */
 public class AccumulatorScanner<T> extends TreeScanner<Set<Symbol>, T> {
 
   @Override

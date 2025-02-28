@@ -45,6 +45,7 @@ dependencies {
     compileOnly deps.apt.autoServiceAnnot
     compileOnly deps.build.errorProneCheckApi
     implementation project(':annotator-util')
+    implementation deps.build.gson
 
     annotationProcessor deps.apt.autoService
 

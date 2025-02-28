@@ -37,6 +37,11 @@ import java.util.Queue;
 import java.util.Set;
 import javax.lang.model.element.ElementKind;
 
+/**
+ * Scanner that finds the origin of a variable. An origin is a variable that is either a field, a
+ * parameter or a return result of a method invocation that contributes to the value of the
+ * variable.
+ */
 public class OriginScanner extends AccumulatorScanner<Symbol> {
 
   @Override
@@ -66,7 +71,14 @@ public class OriginScanner extends AccumulatorScanner<Symbol> {
     return node.getExpression().accept(this, unused);
   }
 
-  public Set<Symbol> scanVariable(MethodTree tree, Symbol target) {
+  /**
+   * Retrieve the origins of a variable in a method.
+   *
+   * @param tree the enclosing method.
+   * @param target the variable to find the origins of.
+   * @return a set of symbols that are the origins of the variable.
+   */
+  public Set<Symbol> retrieveOrigins(MethodTree tree, Symbol target) {
     if (target.getKind() != ElementKind.LOCAL_VARIABLE) {
       return Set.of(target);
     }

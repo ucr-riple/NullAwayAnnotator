@@ -29,13 +29,26 @@ import com.sun.source.tree.IdentifierTree;
 import com.sun.tools.javac.code.Symbol;
 import java.util.Set;
 
+/** Scanner that finds the symbols of all identifiers in expressions. */
 public class ExpressionToSymbolScanner extends AccumulatorScanner<Void> {
 
   @Override
   public Set<Symbol> visitIdentifier(IdentifierTree node, Void unused) {
     Symbol symbol = ASTHelpers.getSymbol(node);
     if (symbol != null) {
-      return Set.of(symbol);
+      switch (symbol.getKind()) {
+        case ENUM_CONSTANT:
+        case FIELD:
+        case PARAMETER:
+        case LOCAL_VARIABLE:
+        case EXCEPTION_PARAMETER:
+        case METHOD:
+        case CONSTRUCTOR:
+        case RESOURCE_VARIABLE:
+          return Set.of(symbol);
+        default:
+          break;
+      }
     }
     return super.visitIdentifier(node, unused);
   }

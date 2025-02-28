@@ -37,6 +37,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.ElementKind;
 
+/**
+ * Scanner that finds the effective parameters of a method. An effective parameter is a parameter
+ * that the method performs an operation on other than passing to another method.
+ */
 public class EffectiveMethodScanner {
 
   /** The parameters of the method being scanned. */

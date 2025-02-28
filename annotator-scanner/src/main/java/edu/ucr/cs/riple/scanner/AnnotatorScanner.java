@@ -49,6 +49,7 @@ import edu.ucr.cs.riple.scanner.out.ClassRecord;
 import edu.ucr.cs.riple.scanner.out.EffectiveMethodRecord;
 import edu.ucr.cs.riple.scanner.out.ImpactedRegion;
 import edu.ucr.cs.riple.scanner.out.MethodRecord;
+import edu.ucr.cs.riple.scanner.out.OriginRecord;
 import edu.ucr.cs.riple.scanner.scanners.EffectiveMethodScanner;
 import edu.ucr.cs.riple.scanner.scanners.ExpressionToSymbolScanner;
 import edu.ucr.cs.riple.scanner.scanners.OriginScanner;
@@ -111,22 +112,32 @@ public class AnnotatorScanner extends BugChecker
     if (!config.isActive()) {
       return Description.NO_MATCH;
     }
+    Symbol.MethodSymbol calledMethod = ASTHelpers.getSymbol(tree);
+    if (calledMethod == null) {
+      return Description.NO_MATCH;
+    }
     config
         .getSerializer()
         .serializeImpactedRegionForMethod(
-            new ImpactedRegion(config, ASTHelpers.getSymbol(tree), state.getPath()));
-    MethodTree methodTree = state.findEnclosing(MethodTree.class);
-    tree.getArguments()
-        .forEach(
-            arg -> {
-              Set<Symbol> symbols = arg.accept(new ExpressionToSymbolScanner(), null);
-              Set<Symbol> effective = new HashSet<>();
-              for (Symbol symbol : symbols) {
-                effective.addAll(new OriginScanner().scanVariable(methodTree, symbol));
-              }
-              System.out.println(effective);
-            });
-
+            new ImpactedRegion(config, calledMethod, state.getPath()));
+    MethodTree encMethod = ASTHelpers.findEnclosingNode(state.getPath(), MethodTree.class);
+    if (encMethod == null) {
+      return Description.NO_MATCH;
+    }
+    Symbol.MethodSymbol encMethodSymbol = ASTHelpers.getSymbol(encMethod);
+    for (int i = 0; i < tree.getArguments().size(); i++) {
+      ExpressionTree arg = tree.getArguments().get(i);
+      Set<Symbol> argSymbols = arg.accept(new ExpressionToSymbolScanner(), null);
+      Set<Symbol> origins = new HashSet<>();
+      for (Symbol symbol : argSymbols) {
+        origins.addAll(new OriginScanner().retrieveOrigins(encMethod, symbol));
+      }
+      config
+          .getSerializer()
+          .serializeOriginRecord(
+              new OriginRecord(
+                  encMethodSymbol, calledMethod, calledMethod.getParameters().get(i), origins));
+    }
     return Description.NO_MATCH;
   }
 
