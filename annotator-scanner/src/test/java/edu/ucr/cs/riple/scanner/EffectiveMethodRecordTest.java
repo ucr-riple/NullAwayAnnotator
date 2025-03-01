@@ -31,10 +31,10 @@ import org.junit.Test;
 public class EffectiveMethodRecordTest
     extends AnnotatorScannerBaseTest<EffectiveMethodRecordDisplay> {
 
-  private static final String HEADER = "CLASS\tMETHOD\tPARAMETER";
+  private static final String HEADER = "CLASS\tMETHOD\tPARAMETER\tINDEX";
   private static final String FILE_NAME = "effective_method_records.tsv";
   private static final DisplayFactory<EffectiveMethodRecordDisplay> FACTORY =
-      values -> new EffectiveMethodRecordDisplay(values[0], values[1], values[2]);
+      values -> new EffectiveMethodRecordDisplay(values[0], values[1], values[2], values[3]);
 
   public EffectiveMethodRecordTest() {
     super(FACTORY, HEADER, FILE_NAME);
@@ -82,10 +82,10 @@ public class EffectiveMethodRecordTest
             "  void useIFace(IFace iface){}",
             "}")
         .setExpectedOutputs(
-            new EffectiveMethodRecordDisplay("edu.ucr.A$1C", "t1(java.lang.Object)", "p1"),
+            new EffectiveMethodRecordDisplay("edu.ucr.A$1C", "t1(java.lang.Object)", "p1", "0"),
             new EffectiveMethodRecordDisplay(
-                "edu.ucr.A", "foo2(java.lang.Object,java.lang.Object)", "p1"),
-            new EffectiveMethodRecordDisplay("edu.ucr.A", "bar(java.lang.Object)", "p"))
+                "edu.ucr.A", "foo2(java.lang.Object,java.lang.Object)", "p1", "0"),
+            new EffectiveMethodRecordDisplay("edu.ucr.A", "bar(java.lang.Object)", "p", "0"))
         .doTest();
   }
 
@@ -143,17 +143,9 @@ public class EffectiveMethodRecordTest
             "package edu.ucr;",
             "import java.util.*;",
             "public class Foo {",
-            "  private Object replaceList(List<?> values, String taskId) {",
-            "     List<Object> replacedList = new LinkedList<>();",
-            "     for (Object listVal : values) {",
-            "        if (listVal instanceof String) {",
-            "        } else if (listVal instanceof Map) {",
-            "        } else if (listVal instanceof List) {",
-            "           Object replaced = replaceList((List<?>) listVal, taskId);",
-            "           replacedList.add(replaced);",
-            "        }",
-            "     }",
-            "     return replacedList;",
+            "  private void a(String p1) {}",
+            "  private void b(String p2) {",
+            "    a(p2);",
             "  }",
             "}")
         .setExpectedOutputs()

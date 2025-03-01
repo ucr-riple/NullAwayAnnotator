@@ -36,9 +36,12 @@ public class EffectiveMethodRecord {
   /** Symbol of the method. */
   private final Symbol.MethodSymbol methodSymbol;
 
+  private final int index;
+
   public EffectiveMethodRecord(Symbol.MethodSymbol methodSymbol, Symbol.VarSymbol parameter) {
     this.parameter = parameter;
     this.methodSymbol = methodSymbol;
+    this.index = methodSymbol.getParameters().indexOf(parameter);
   }
 
   @Override
@@ -62,10 +65,12 @@ public class EffectiveMethodRecord {
         + "\t"
         + Serializer.serializeSymbol(methodSymbol)
         + "\t"
-        + Serializer.serializeSymbol(parameter);
+        + Serializer.serializeSymbol(parameter)
+        + "\t"
+        + index;
   }
 
   public static String header() {
-    return "CLASS\tMETHOD\tPARAMETER";
+    return "CLASS\tMETHOD\tPARAMETER\tINDEX";
   }
 }

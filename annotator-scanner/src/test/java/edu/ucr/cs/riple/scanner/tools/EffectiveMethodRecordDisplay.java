@@ -31,11 +31,13 @@ public class EffectiveMethodRecordDisplay implements Display {
   private final String clazz;
   private final String method;
   private final String parameter;
+  private final String index;
 
-  public EffectiveMethodRecordDisplay(String clazz, String method, String parameter) {
+  public EffectiveMethodRecordDisplay(String clazz, String method, String parameter, String index) {
     this.clazz = clazz;
     this.method = method;
     this.parameter = parameter;
+    this.index = index;
   }
 
   @Override
@@ -46,12 +48,13 @@ public class EffectiveMethodRecordDisplay implements Display {
     EffectiveMethodRecordDisplay that = (EffectiveMethodRecordDisplay) o;
     return Objects.equals(clazz, that.clazz)
         && Objects.equals(method, that.method)
-        && Objects.equals(parameter, that.parameter);
+        && Objects.equals(parameter, that.parameter)
+        && Objects.equals(index, that.index);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(clazz, method, parameter);
+    return Objects.hash(clazz, method, parameter, index);
   }
 
   @Override
@@ -65,6 +68,9 @@ public class EffectiveMethodRecordDisplay implements Display {
         + '\''
         + ", parameter='"
         + parameter
+        + '\''
+        + ", index='"
+        + index
         + '\''
         + '}';
   }

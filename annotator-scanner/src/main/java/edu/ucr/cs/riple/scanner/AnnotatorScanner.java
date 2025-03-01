@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.lang.model.element.ElementKind;
 
 @AutoService(BugChecker.class)
@@ -136,6 +137,10 @@ public class AnnotatorScanner extends BugChecker
       for (Symbol symbol : argSymbols) {
         origins.addAll(new OriginScanner().retrieveOrigins(encMethod, symbol));
       }
+      if (origins.isEmpty()) {
+        continue;
+      }
+      origins = origins.stream().filter(config::isAnnotatedPackage).collect(Collectors.toSet());
       int formalArgIndex =
           calledMethod.isVarArgs() ? i >= formalArgSize ? formalArgSize - 1 : i : i;
       config

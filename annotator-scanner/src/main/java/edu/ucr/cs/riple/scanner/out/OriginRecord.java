@@ -79,6 +79,7 @@ public class OriginRecord {
     json.addProperty("class", Serializer.serializeSymbol(encMethod.enclClass()));
     json.addProperty("method", Serializer.serializeSymbol(encMethod));
     json.addProperty("calledMethod", Serializer.serializeSymbol(calledMethod));
+    json.addProperty("calledMethodClass", Serializer.serializeSymbol(calledMethod.enclClass()));
     json.addProperty("parameter", Serializer.serializeSymbol(parameter));
     json.addProperty("index", index);
     JsonArray originsArray = new JsonArray();
