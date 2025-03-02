@@ -22,44 +22,40 @@
  * THE SOFTWARE.
  */
 
-
 package edu.ucr.cs.riple.core.registries.method;
 
 import edu.ucr.cs.riple.injector.location.OnMethod;
-
 import java.util.Objects;
 
 public class EffectiveMethodRecord {
-    /**
-     * Method that uses the parameter in an effective way.
-     */
-    public final OnMethod method;
-    /**
-     * The parameter name that is used in an effective way.
-     */
-    public final String parameter;
-    /**
-     * The index of the parameter in the method.
-     */
-    public final int index;
+  /** Method that uses the parameter in an effective way. */
+  public final OnMethod method;
 
-    public EffectiveMethodRecord(OnMethod method, String parameter, int index) {
-        this.method = method;
-        this.parameter = parameter;
-        this.index = index;
-    }
+  /** The parameter name that is used in an effective way. */
+  public final String parameter;
 
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof EffectiveMethodRecord)) {
-            return false;
-        }
-        EffectiveMethodRecord that = (EffectiveMethodRecord) o;
-        return index == that.index && Objects.equals(method, that.method) && Objects.equals(parameter, that.parameter);
-    }
+  /** The index of the parameter in the method. */
+  public final int index;
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(method, parameter, index);
+  public EffectiveMethodRecord(OnMethod method, String parameter, int index) {
+    this.method = method;
+    this.parameter = parameter;
+    this.index = index;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof EffectiveMethodRecord)) {
+      return false;
     }
+    EffectiveMethodRecord that = (EffectiveMethodRecord) o;
+    return index == that.index
+        && Objects.equals(method, that.method)
+        && Objects.equals(parameter, that.parameter);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(method, parameter, index);
+  }
 }

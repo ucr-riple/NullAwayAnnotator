@@ -256,6 +256,30 @@ public class FieldRegistry extends Registry<ClassFieldRecord> {
   }
 
   /**
+   * Returns all declared fields in the given class.
+   *
+   * @return ImmutableSet of fields location.
+   */
+  public ImmutableSet<OnField> getDeclaredFieldsInClass(String clazz) {
+    ImmutableSet.Builder<OnField> builder = ImmutableSet.builder();
+    contents
+        .values()
+        .forEach(
+            record -> {
+              if (!record.clazz.equals(clazz)) {
+                return;
+              }
+              record.fields.forEach(
+                  fieldDeclarationRecord -> {
+                    builder.add(
+                        new OnField(
+                            record.pathToSourceFile, record.clazz, fieldDeclarationRecord.names));
+                  });
+            });
+    return builder.build();
+  }
+
+  /**
    * Checks if the given location is a field and declared in the module this registry is created
    * for.
    *

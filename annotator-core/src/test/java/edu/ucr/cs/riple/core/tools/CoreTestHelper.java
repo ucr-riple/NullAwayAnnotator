@@ -218,7 +218,6 @@ public class CoreTestHelper {
 
   public CoreTestHelper deactivateInference() {
     this.deactivateInference = true;
-    this.suppressRemainingErrors = true;
     return this;
   }
 

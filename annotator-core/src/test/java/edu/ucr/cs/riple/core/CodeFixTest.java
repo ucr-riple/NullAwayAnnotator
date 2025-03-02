@@ -470,4 +470,28 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
         .resolveRemainingErrors()
         .start();
   }
+
+  @Test
+  public void getterForNullableFieldTest() {
+    mockChatGPTResponse(agree(), agree());
+    coreTestHelper
+        .onTarget()
+        .withSourceLines(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "     Object foo;",
+            "     void init(){",
+            "       this.foo = new Object();",
+            "     }",
+            "     public Object getFoo(){",
+            "       return foo;",
+            "     }",
+            "}")
+        .expectNoReport()
+        .toDepth(1)
+        .resolveRemainingErrors()
+        .start();
+  }
 }

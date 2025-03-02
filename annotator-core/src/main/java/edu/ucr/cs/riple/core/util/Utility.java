@@ -305,10 +305,10 @@ public class Utility {
    * @return The content of the file as a String.
    */
   public static String readFile(Path path) {
-    try{
-        return Files.readString(path, Charset.defaultCharset());
-    }catch (IOException e){
-        throw new RuntimeException("Exception while reading file: " + path, e);
+    try {
+      return Files.readString(path, Charset.defaultCharset());
+    } catch (IOException e) {
+      throw new RuntimeException("Exception while reading file: " + path, e);
     }
   }
 

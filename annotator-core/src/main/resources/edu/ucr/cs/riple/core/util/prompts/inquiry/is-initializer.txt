@@ -10,6 +10,8 @@ Here are some examples of initializer methods:
 - {@code javax.servlet.Filter.init}
 - {@code javax.servlet.Servlet.init}
 
+or any method that has a name that starts with "init" or "initialize" and is not a setter method.
+
 Is the given method an initializer method? I know it initializes the fields of the class, but I do not want to consider a setter method as an initializer method.
 %s
 Please provide a single-word answer and your reason/explanation in XML format. If it is an initializer method, respond with:

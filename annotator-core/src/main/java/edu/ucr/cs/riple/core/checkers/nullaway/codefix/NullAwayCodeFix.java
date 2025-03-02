@@ -61,6 +61,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -256,6 +257,27 @@ public class NullAwayCodeFix {
               "NullAway",
               false));
       return NO_ACTION;
+    }
+    logger.trace("Checking if the method is a getter for field.");
+    String returnedField = checkIfMethodIsGetter(onMethod);
+    if (returnedField != null) {
+      logger.trace("The method is identified as a getter method for field: {}", returnedField);
+      OnField onField =
+          context
+              .targetModuleInfo
+              .getFieldRegistry()
+              .getLocationOnField(onMethod.clazz, returnedField);
+      logger.trace("Checking if the field is nullable.");
+      boolean investigateFieldNullability = investigateFieldNullability(onField, returnedField);
+      if (!investigateFieldNullability) {
+        logger.trace(
+            "Field is not nullable. Removed annotation from field and added initializer to the method.");
+        return NO_ACTION;
+      } else {
+        logger.trace("Field is nullable, keeping the annotation on the field.");
+      }
+    } else {
+      logger.trace("Not a getter method.");
     }
     // Make the method nullable.
     context.injector.injectAnnotation(
@@ -795,6 +817,44 @@ public class NullAwayCodeFix {
       }
     }
     return true;
+  }
+
+  /**
+   * Checks if the given method is a getter for one the enclosing class's field and returns the name
+   * of the corresponding field.
+   *
+   * @param onMethod the method to check.
+   * @return field name if the method is a getter, null otherwise.
+   */
+  @Nullable
+  private String checkIfMethodIsGetter(OnMethod onMethod) {
+    ImmutableSet<OnField> fields =
+        context.targetModuleInfo.getFieldRegistry().getDeclaredFieldsInClass(onMethod.clazz);
+    Set<String> names =
+        fields.stream()
+            .flatMap(field -> field.variables.stream())
+            .map(String::toLowerCase)
+            .collect(Collectors.toSet());
+    String methodName = onMethod.method.toLowerCase();
+    for (String name : names) {
+      boolean nameMatchesGetter =
+          methodName.contains("get" + name) || methodName.contains("is" + name);
+      if (!nameMatchesGetter) {
+        continue;
+      }
+      SourceCode sourceCode =
+          parser.getRegionSourceCode(new Region(onMethod.clazz, onMethod.method));
+      if (sourceCode == null) {
+        continue;
+      }
+      // check content:
+      String content = sourceCode.content.replaceAll("\\s+", "");
+      boolean contentMatchesGetter = content.contains(onMethod.method + "{return" + name + ";}");
+      if (contentMatchesGetter) {
+        return name;
+      }
+    }
+    return null;
   }
 
   /**

@@ -22,40 +22,36 @@
  * THE SOFTWARE.
  */
 
-
 package edu.ucr.cs.riple.core.registries.method;
 
 import com.github.javaparser.utils.Pair;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import edu.ucr.cs.riple.annotator.util.parsers.JsonParser;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.location.OnMethod;
-
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class EffectiveMethodRegistry {
 
-    private final ImmutableMultimap<OnMethod, Pair<String, Integer>> effectiveMethods;
+  private final ImmutableMultimap<OnMethod, Pair<String, Integer>> effectiveMethods;
 
-    public EffectiveMethodRegistry(Path path) {
-        ImmutableMultimap.Builder<OnMethod, Pair<String, Integer>> builder = ImmutableMultimap.builder();
+  public EffectiveMethodRegistry(Path path) {
+    ImmutableMultimap.Builder<OnMethod, Pair<String, Integer>> builder =
+        ImmutableMultimap.builder();
 
-        String content = Utility.readFile(path);
-        content = content.replace("}{" , "},{");
-        content = "[" + content + "]";
-        content = "{\"effectiveMethods\":" + content + "}";
+    String content = Utility.readFile(path);
+    content = content.replace("}{", "},{");
+    content = "[" + content + "]";
+    content = "{\"effectiveMethods\":" + content + "}";
 
-        JsonObject json = JsonParser.parseJson(content);
-        JsonArray effectiveMethods = json.getAsJsonArray("effectiveMethods");
-        for(int i = 0; i < effectiveMethods.size(); i++) {
-            JsonObject effectiveMethod = effectiveMethods.get(i).getAsJsonObject();
-        }
-
-        this.effectiveMethods = builder.build();
-
+    JsonObject json = JsonParser.parseJson(content);
+    JsonArray effectiveMethods = json.getAsJsonArray("effectiveMethods");
+    for (int i = 0; i < effectiveMethods.size(); i++) {
+      JsonObject effectiveMethod = effectiveMethods.get(i).getAsJsonObject();
     }
+
+    this.effectiveMethods = builder.build();
+  }
 }

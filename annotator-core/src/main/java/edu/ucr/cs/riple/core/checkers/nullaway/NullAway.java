@@ -389,11 +389,11 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       System.out.println("TOP LEVEL CALL TO FIX ERROR: " + error);
                       logger.trace("=".repeat(30));
                       counter.incrementAndGet();
-                      if (counter.get() == 16) {
-                        System.out.println("At index: " + counter.get());
-                      } else {
-                        return;
-                      }
+                      //                      if (counter.get() == 16) {
+                      //                        System.out.println("At index: " + counter.get());
+                      //                      } else {
+                      //                        return;
+                      //                      }
                       // cleanup
                       logger.trace("TOP LEVEL CALL TO FIX ERROR: {}", error);
                       Set<MethodRewriteChange> changes = Set.of();
