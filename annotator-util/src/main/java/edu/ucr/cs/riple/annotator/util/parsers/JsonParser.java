@@ -163,7 +163,7 @@ public class JsonParser {
    * @param content The content to parse.
    * @return The JsonObject parsed from the content.
    */
-  private static JsonObject parseJson(String content) {
+  public static JsonObject parseJson(String content) {
     try {
       return com.google.gson.JsonParser.parseString(content).getAsJsonObject();
     } catch (JsonSyntaxException e) {

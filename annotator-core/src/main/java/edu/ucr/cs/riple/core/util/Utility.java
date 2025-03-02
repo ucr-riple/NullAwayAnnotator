@@ -299,6 +299,20 @@ public class Utility {
   }
 
   /**
+   * Read the content of a file and return as a String.
+   *
+   * @param path The path to the file.
+   * @return The content of the file as a String.
+   */
+  public static String readFile(Path path) {
+    try{
+        return Files.readString(path, Charset.defaultCharset());
+    }catch (IOException e){
+        throw new RuntimeException("Exception while reading file: " + path, e);
+    }
+  }
+
+  /**
    * Reads a resource file and returns its content as a String.
    *
    * @param resourcePath The path to the resource file.
