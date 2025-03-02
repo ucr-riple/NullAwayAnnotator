@@ -168,8 +168,17 @@ public class NullAwayError extends Error {
           }
           break;
         }
+      case "PASS_NULLABLE":
+        {
+          Pattern pattern = Pattern.compile("passing @Nullable parameter '(\\w+)' where @NonNull is required");
+          Matcher matcher = pattern.matcher(error.message);
+          if (matcher.find()) {
+            return new String[] {matcher.group(1)};
+          }
+          break;
+        }
     }
     throw new IllegalArgumentException(
-        "Error type not supported." + error.messageType + ": " + error.message);
+        "Error type not supported to extract values from: " + error.messageType + ": " + error.message);
   }
 }

@@ -845,6 +845,7 @@ public class NullAwayCodeFix {
     if (report != null) {
       return report.triggeredErrors;
     }
+    logger.trace("Impact not found, re-evaluating the location.");
     ImmutableSet<Fix> fixes = error.getResolvingFixes();
     context.config.depth = 1;
     // Initializing required evaluator instances.
@@ -876,6 +877,7 @@ public class NullAwayCodeFix {
           .map(e -> (NullAwayError) e)
           .collect(Collectors.toSet());
     }
+    logger.trace("Impact not found, re-evaluating the location.");
     RemoveAnnotation removeAnnotation =
         new RemoveMarkerAnnotation(location, context.config.nullableAnnot);
     context.injector.removeAnnotation(removeAnnotation);
