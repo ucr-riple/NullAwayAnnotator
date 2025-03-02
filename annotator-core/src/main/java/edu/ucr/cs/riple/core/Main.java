@@ -60,8 +60,9 @@ public class Main {
   //  public static final String PROJECT_PATH = "/Users/nima/Desktop/conductor";
   // Ubuntu
   public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/conductor";
-  public static final String BENCHMARK_NAME = "conductor";
-  public static final String BRANCH_NAME = "nimak/auto-code-fix-4";
+  //  public static final String BENCHMARK_NAME = "conductor";
+  public static final String BENCHMARK_NAME = "Test";
+  public static final String BRANCH_NAME = "nimak/auto-code-fix-6";
   public static final Path LOG_PATH = Paths.get("/tmp/logs/app.log");
   public static final String ANNOTATED_PACKAGE = "com.netflix.conductor";
 
@@ -137,10 +138,10 @@ public class Main {
       git.checkoutBranch("nimak/auto-code-fix");
       git.resetHard();
       git.pull();
-      //            git.deleteLocalBranch(BRANCH_NAME);
-      //            git.deleteRemoteBranch(BRANCH_NAME);
-      //            git.createAndCheckoutBranch(BRANCH_NAME);
-      //            git.pushBranch(BRANCH_NAME);
+      git.deleteLocalBranch(BRANCH_NAME);
+      git.deleteRemoteBranch(BRANCH_NAME);
+      git.createAndCheckoutBranch(BRANCH_NAME);
+      git.pushBranch(BRANCH_NAME);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

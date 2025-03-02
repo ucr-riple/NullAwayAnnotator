@@ -143,6 +143,8 @@ public class NullAwayCodeFix {
       case "WRONG_OVERRIDE_RETURN":
         return resolveWrongOverrideReturnError(error);
       default:
+        logger.trace(
+            "Error type not supported: {}. Error message: {}", error.messageType, error.message);
         return NO_ACTION;
     }
   }
@@ -281,7 +283,25 @@ public class NullAwayCodeFix {
             fix -> {
               if (fix.isOnField()) {
                 logger.trace("Working on field: {}", names[index[0]]);
-                changes.addAll(resolveFieldNullabilityError(fix.toField(), names[index[0]++]));
+                boolean checkFieldNullability =
+                    investigateFieldNullability(fix.toField(), names[index[0]]);
+                if (!checkFieldNullability) {
+                  logger.trace("Field is not nullable. Removed annotation from field.");
+                  return;
+                } else {
+                  // Make field nullable if not already.
+                  context.injector.injectAnnotation(
+                      new AddMarkerAnnotation(fix.toField(), context.config.nullableAnnot));
+                  Set<NullAwayError> triggeredErrors = getTriggeredErrorsForLocation(fix.toField());
+                  if (triggeredErrors.isEmpty()) {
+                    logger.trace("Expected to have errors for making the field nullable.");
+                    return;
+                  }
+                  Set<MethodRewriteChange> c = new HashSet<>();
+                  logger.trace("Trying to fix errors for making the field nullable");
+                  triggeredErrors.forEach(e -> c.addAll(fix(e)));
+                  changes.addAll(c);
+                }
               }
             });
     return changes;
@@ -367,7 +387,7 @@ public class NullAwayCodeFix {
     logger.trace("Resolving method dereference error.");
     if (isAnnotated) {
       logger.trace("Method is in annotated package. Checking if the method is returning nullable.");
-      boolean isReturningNullable = checkIfMethodIsReturningNullable(encClass, method);
+      boolean isReturningNullable = investigateMethodReturnNullability(encClass, method);
       if (!isReturningNullable) {
         logger.trace("Method is not returning nullable. Injecting suppression annotation.");
         OnMethod methodLocation =
@@ -468,80 +488,15 @@ public class NullAwayCodeFix {
    *     is found.
    */
   private Set<MethodRewriteChange> resolveFieldNullabilityError(OnField onField, String field) {
-    logger.trace("Investigating field nullability.");
-    logger.trace("Checking if there is any method initializing this field.");
-    Set<OnMethod> methods =
-        context
-            .targetModuleInfo
-            .getFieldInitializationStore()
-            .findInitializerForField(onField.clazz, field);
-    if (!methods.isEmpty()) {
-      // TODO: Maybe we should pick the best candidate rather than the first one.
-      // continue with the initializer.
-      Optional<AddAnnotation> initializerAnnotation =
-          methods.stream()
-              .filter(candidate -> gpt.checkIfMethodIsAnInitializer(candidate, context))
-              .findFirst()
-              .map(
-                  method ->
-                      new AddMarkerAnnotation(
-                          new OnMethod(method.path, method.clazz, method.method),
-                          context.config.initializerAnnot));
-      if (initializerAnnotation.isPresent()) {
-        logger.trace("Found initializer method. Injecting initializer annotation.");
-        // remove annotation from field
-        RemoveMarkerAnnotation removeAnnotation =
-            new RemoveMarkerAnnotation(onField, context.config.nullableAnnot);
-        // Remove annotation from getter method if exists.
-        Optional<MethodRecord> getterMethod =
-            context
-                .targetModuleInfo
-                .getMethodRegistry()
-                .getAllMethodsForClass(onField.clazz)
-                .stream()
-                .filter(
-                    record -> {
-                      CallableDeclaration<?> callable =
-                          parser.getCallableDeclaration(
-                              record.location.clazz, record.location.method);
-                      if (!(callable instanceof MethodDeclaration)) {
-                        return false;
-                      }
-                      MethodDeclaration methodDeclaration = (MethodDeclaration) callable;
-                      return methodDeclaration.getBody().isPresent()
-                          && methodDeclaration
-                              .getBody()
-                              .get()
-                              .toString()
-                              .replaceAll("\\s", "")
-                              .equals(String.format("{return%s;}", field));
-                    })
-                .findFirst();
-        if (getterMethod.isPresent()) {
-          logger.trace(
-              "Found getter method. Removing nullable annotation: {}",
-              getterMethod.get().location.method);
-          RemoveMarkerAnnotation removeAnnotationOnGetter =
-              new RemoveMarkerAnnotation(
-                  new OnMethod(
-                      getterMethod.get().location.path,
-                      getterMethod.get().location.clazz,
-                      getterMethod.get().location.method),
-                  context.config.nullableAnnot);
-          context.injector.removeAnnotation(removeAnnotationOnGetter);
-        }
-        // Add annotation
-        context.injector.injectAnnotation(initializerAnnotation.get());
-        // remove nullable
-        context.injector.removeAnnotation(removeAnnotation);
-        return NO_ACTION;
-      }
+    boolean fieldNullabilityCheck = investigateFieldNullability(onField, field);
+    if (!fieldNullabilityCheck) {
+      logger.trace("Field is not nullable. removed annotation from field and getter.");
+      return NO_ACTION;
     }
-
-    InvocationRecord record =
-        invocationRecordRegistry.computeInvocationRecord(
-            onField.clazz, ASTParser.getterMethod(field), 3);
-    String callContext = record.constructCallGraphContext();
+    //    InvocationRecord record =
+    //        invocationRecordRegistry.computeInvocationRecord(
+    //            onField.clazz, ASTParser.getterMethod(field), 3);
+    //    String callContext = record.constructCallGraphContext();
 
     // no initializer found. Try to fix by regions using the method as an example.
     // Make field nullable if not already.
@@ -762,7 +717,7 @@ public class NullAwayCodeFix {
    * @param method the name of the method.
    * @return true if the method is returning nullable.
    */
-  private boolean checkIfMethodIsReturningNullable(String encClass, String method) {
+  private boolean investigateMethodReturnNullability(String encClass, String method) {
     logger.trace("Checking if the method is returning nullable.");
     // Build a record, we only need the method declaration so we set the depth to 1.
     InvocationRecord record = invocationRecordRegistry.computeInvocationRecord(encClass, method, 1);
@@ -789,6 +744,87 @@ public class NullAwayCodeFix {
       }
     }
     // At this moment, just to be safe, we assume it is returning nullable.
+    return true;
+  }
+
+  /**
+   * Investigates the nullability of a field by checking if there is any method initializing it.
+   *
+   * @param onField the field to investigate.
+   * @param field the field name to investigate. A location on field can target multiple inline
+   *     fields.
+   * @return true if the field is nullable, false otherwise.
+   */
+  private boolean investigateFieldNullability(OnField onField, String field) {
+    logger.trace("Investigating field nullability.");
+    logger.trace("Checking if there is any method initializing field: {}", field);
+    Set<OnMethod> methods =
+        context
+            .targetModuleInfo
+            .getFieldInitializationStore()
+            .findInitializerForField(onField.clazz, field);
+    if (!methods.isEmpty()) {
+      // TODO: Maybe we should pick the best candidate rather than the first one.
+      // continue with the initializer.
+      Optional<AddAnnotation> initializerAnnotation =
+          methods.stream()
+              .filter(candidate -> gpt.checkIfMethodIsAnInitializer(candidate, context))
+              .findFirst()
+              .map(
+                  method ->
+                      new AddMarkerAnnotation(
+                          new OnMethod(method.path, method.clazz, method.method),
+                          context.config.initializerAnnot));
+      if (initializerAnnotation.isPresent()) {
+        logger.trace("Found initializer method. Injecting initializer annotation.");
+        // remove annotation from field
+        RemoveMarkerAnnotation removeAnnotation =
+            new RemoveMarkerAnnotation(onField, context.config.nullableAnnot);
+        // Remove annotation from getter method if exists.
+        Optional<MethodRecord> getterMethod =
+            context
+                .targetModuleInfo
+                .getMethodRegistry()
+                .getAllMethodsForClass(onField.clazz)
+                .stream()
+                .filter(
+                    record -> {
+                      CallableDeclaration<?> callable =
+                          parser.getCallableDeclaration(
+                              record.location.clazz, record.location.method);
+                      if (!(callable instanceof MethodDeclaration)) {
+                        return false;
+                      }
+                      MethodDeclaration methodDeclaration = (MethodDeclaration) callable;
+                      return methodDeclaration.getBody().isPresent()
+                          && methodDeclaration
+                              .getBody()
+                              .get()
+                              .toString()
+                              .replaceAll("\\s", "")
+                              .equals(String.format("{return%s;}", field));
+                    })
+                .findFirst();
+        if (getterMethod.isPresent()) {
+          logger.trace(
+              "Found getter method. Removing nullable annotation: {}",
+              getterMethod.get().location.method);
+          RemoveMarkerAnnotation removeAnnotationOnGetter =
+              new RemoveMarkerAnnotation(
+                  new OnMethod(
+                      getterMethod.get().location.path,
+                      getterMethod.get().location.clazz,
+                      getterMethod.get().location.method),
+                  context.config.nullableAnnot);
+          context.injector.removeAnnotation(removeAnnotationOnGetter);
+        }
+        // Add initializer annotation to initializer method.
+        context.injector.injectAnnotation(initializerAnnotation.get());
+        // Remove nullable from field.
+        context.injector.removeAnnotation(removeAnnotation);
+        return false;
+      }
+    }
     return true;
   }
 
