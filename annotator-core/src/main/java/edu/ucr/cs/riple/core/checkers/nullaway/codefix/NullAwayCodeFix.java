@@ -461,6 +461,7 @@ public class NullAwayCodeFix {
           return NO_ACTION;
         }
         logger.trace("Agreement in the nullability of the parameter.");
+        logger.trace("We are not supporting dereference on nullable parameter yet!!!");
         return NO_ACTION;
       }
     }

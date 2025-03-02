@@ -62,7 +62,7 @@ public class Main {
   public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/conductor";
   public static final String BENCHMARK_NAME = "conductor";
   //  public static final String BENCHMARK_NAME = "Test";
-  public static final String BRANCH_NAME = "nimak/auto-code-fix-7";
+  public static final String BRANCH_NAME = "nimak/auto-code-fix-8";
   public static final Path LOG_PATH = Paths.get("/tmp/logs/app.log");
   public static final String ANNOTATED_PACKAGE = "com.netflix.conductor";
 
