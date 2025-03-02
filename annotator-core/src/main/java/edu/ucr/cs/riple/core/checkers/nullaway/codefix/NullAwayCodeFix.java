@@ -61,7 +61,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -205,21 +204,21 @@ public class NullAwayCodeFix {
     Fix fix = error.getResolvingFixes().iterator().next();
     logger.trace("Making the field nullable.");
     context.injector.injectFixes(Set.of(fix));
-    Report report = fetchReport(error);
-    if (report == null) {
+    ImmutableSet<Error> triggeredErrors = getTriggeredErrorsFromError(error);
+    if (triggeredErrors == null) {
       return NO_ACTION;
     }
     // Add any annotations that triggered errors contain:
     logger.trace("Adding all triggered annotations.");
     Set<Fix> fixes =
-        report.triggeredErrors.stream()
+        triggeredErrors.stream()
             .map(Error::getResolvingFixes)
             .flatMap(Set::stream)
             .collect(ImmutableSet.toImmutableSet());
     context.injector.injectFixes(fixes);
     // Resolve the ones where annotation cannot fix
     Set<NullAwayError> unresolvableErrors =
-        report.triggeredErrors.stream()
+        triggeredErrors.stream()
             .filter(e -> e.getResolvingFixes().isEmpty())
             .map(e -> (NullAwayError) e)
             .collect(Collectors.toSet());
@@ -292,7 +291,8 @@ public class NullAwayCodeFix {
                   // Make field nullable if not already.
                   context.injector.injectAnnotation(
                       new AddMarkerAnnotation(fix.toField(), context.config.nullableAnnot));
-                  Set<NullAwayError> triggeredErrors = getTriggeredErrorsForLocation(fix.toField());
+                  Set<NullAwayError> triggeredErrors =
+                      getTriggeredErrorsFromLocation(fix.toField());
                   if (triggeredErrors.isEmpty()) {
                     logger.trace("Expected to have errors for making the field nullable.");
                     return;
@@ -502,7 +502,7 @@ public class NullAwayCodeFix {
     // Make field nullable if not already.
     context.injector.injectAnnotation(
         new AddMarkerAnnotation(onField, context.config.nullableAnnot));
-    Set<NullAwayError> triggeredErrors = getTriggeredErrorsForLocation(onField);
+    Set<NullAwayError> triggeredErrors = getTriggeredErrorsFromLocation(onField);
     if (triggeredErrors.isEmpty()) {
       logger.trace("Expected to have errors for making the field nullable.");
       return NO_ACTION;
@@ -530,7 +530,7 @@ public class NullAwayCodeFix {
     logger.trace("Fixing error by regions.");
     Set<Region> impactedRegions =
         context.targetModuleInfo.getRegionRegistry().getImpactedRegions(location);
-    Set<NullAwayError> triggeredErrors = getTriggeredErrorsForLocation(location);
+    Set<NullAwayError> triggeredErrors = getTriggeredErrorsFromLocation(location);
     Set<Region> unsafeRegions =
         triggeredErrors.stream().map(Error::getRegion).collect(Collectors.toSet());
     Set<Region> safeRegions =
@@ -649,38 +649,6 @@ public class NullAwayCodeFix {
   }
 
   /**
-   * Returns the set of triggered errors if the given location is annotated with {@code @Nullable}.
-   *
-   * @param location the location to get the triggered errors for.
-   * @return the set of triggered errors for the given location.
-   */
-  private Set<NullAwayError> getTriggeredErrorsForLocation(Location location) {
-    Report report = fetchReport(location);
-    if (report == null) {
-      Utility.buildTarget(context);
-      Set<NullAwayError> currentErrors =
-          Utility.readErrorsFromOutputDirectory(
-              context, context.targetModuleInfo, NullAwayError.class);
-      // TODO fix this, this is very time consuming.
-      RemoveAnnotation removeAnnotation =
-          new RemoveMarkerAnnotation(location, context.config.nullableAnnot);
-      context.injector.removeAnnotation(removeAnnotation);
-      Utility.buildTarget(context);
-      Set<NullAwayError> newErrors =
-          Utility.readErrorsFromOutputDirectory(
-              context, context.targetModuleInfo, NullAwayError.class);
-      // Add back the annotation.
-      context.injector.injectAnnotation(
-          new AddMarkerAnnotation(location, context.config.nullableAnnot));
-      // currentErrors - newErrors
-      Set<NullAwayError> triggeredErrors = new HashSet<>(currentErrors);
-      triggeredErrors.removeAll(newErrors);
-      return triggeredErrors;
-    }
-    return report.triggeredErrors.stream().map(e -> (NullAwayError) e).collect(Collectors.toSet());
-  }
-
-  /**
    * Fixes the triggered errors for annotating the given location with {@code @Nullable}. It
    * resolves all the triggered errors by adding annotations and rewriting the code.
    *
@@ -689,7 +657,7 @@ public class NullAwayCodeFix {
    */
   private Set<MethodRewriteChange> fixTriggeredErrorsForLocation(Location location) {
     logger.trace("Fixing triggered errors for location: {}", location);
-    Set<NullAwayError> errors = getTriggeredErrorsForLocation(location);
+    Set<NullAwayError> errors = getTriggeredErrorsFromLocation(location);
     // add annotations for resolvable errors.
     Set<Fix> fixes =
         errors.stream()
@@ -867,13 +835,27 @@ public class NullAwayCodeFix {
    * @param error the error to fetch the report for.
    * @return the report that contains at least one of the resolving fixes.
    */
-  @Nullable
-  private Report fetchReport(NullAwayError error) {
+  private ImmutableSet<Error> getTriggeredErrorsFromError(NullAwayError error) {
     // TODO: This is a temporary solution. We need to find a better way to fetch the report.
-    return reports.stream()
-        .filter(report -> error.getResolvingFixes().contains(report.root))
-        .findFirst()
-        .orElse(null);
+    Report report =
+        reports.stream()
+            .filter(r -> error.getResolvingFixes().contains(r.root))
+            .findFirst()
+            .orElse(null);
+    if (report != null) {
+      return report.triggeredErrors;
+    }
+    ImmutableSet<Fix> fixes = error.getResolvingFixes();
+    context.config.depth = 1;
+    // Initializing required evaluator instances.
+    TargetModuleSupplier supplier =
+        new TargetModuleSupplier(context, new TargetModuleCache(), new VoidDownstreamImpactCache());
+    Evaluator evaluator = new BasicEvaluator(supplier);
+    // Result of the iteration analysis.
+    ImmutableSet<Report> newReports = evaluator.evaluate(fixes);
+    return newReports.stream()
+        .flatMap(input -> input.triggeredErrors.stream())
+        .collect(ImmutableSet.toImmutableSet());
   }
 
   /**
@@ -882,14 +864,37 @@ public class NullAwayCodeFix {
    * @param location the location to fetch the report for.
    * @return the report that contains the given location.
    */
-  @Nullable
-  private Report fetchReport(Location location) {
-    return reports.stream()
-        .filter(
-            report ->
-                report.root.toLocations().size() == 1
-                    && report.root.toLocations().contains(location))
-        .findFirst()
-        .orElse(null);
+  private Set<NullAwayError> getTriggeredErrorsFromLocation(Location location) {
+    Report report =
+        reports.stream()
+            .filter(
+                r -> r.root.toLocations().size() == 1 && r.root.toLocations().contains(location))
+            .findFirst()
+            .orElse(null);
+    if (report != null) {
+      return report.triggeredErrors.stream()
+          .map(e -> (NullAwayError) e)
+          .collect(Collectors.toSet());
+    }
+    RemoveAnnotation removeAnnotation =
+        new RemoveMarkerAnnotation(location, context.config.nullableAnnot);
+    context.injector.removeAnnotation(removeAnnotation);
+    ImmutableSet<Fix> fixes =
+        ImmutableSet.of(new Fix(new AddMarkerAnnotation(location, context.config.nullableAnnot)));
+    context.config.depth = 1;
+    // Initializing required evaluator instances.
+    TargetModuleSupplier supplier =
+        new TargetModuleSupplier(context, new TargetModuleCache(), new VoidDownstreamImpactCache());
+    Evaluator evaluator = new BasicEvaluator(supplier);
+    // Result of the iteration analysis.
+    Utility.buildTarget(context);
+    ImmutableSet<Report> newReports = evaluator.evaluate(fixes);
+    // Add back the annotation.
+    context.injector.injectAnnotation(
+        new AddMarkerAnnotation(location, context.config.nullableAnnot));
+    return newReports.stream()
+        .flatMap(input -> input.triggeredErrors.stream())
+        .map(e -> (NullAwayError) e)
+        .collect(Collectors.toSet());
   }
 }

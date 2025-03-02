@@ -388,9 +388,10 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                     error -> {
                       System.out.println("TOP LEVEL CALL TO FIX ERROR: " + error);
                       logger.trace("=".repeat(30));
-                      //                      if(counter.incrementAndGet() == 20) {
+                      //                      counter.incrementAndGet();
+                      //                      if (counter.incrementAndGet() == 20) {
                       //                        System.out.println("At index: " + counter.get());
-                      //                      }else{
+                      //                      } else {
                       //                        return;
                       //                      }
                       // cleanup
@@ -398,7 +399,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       Set<MethodRewriteChange> changes = Set.of();
                       try {
                         changes = codeFix.fix(error);
-                        System.out.println("Found fixes.");
+                        System.out.println("Finished processing.");
                         ChatGPT.count.set(0);
                       } catch (Exception e) {
                         System.err.println("Error while fixing-------: " + e.getMessage());
