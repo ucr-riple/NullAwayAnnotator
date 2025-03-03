@@ -111,6 +111,8 @@ public abstract class Location {
         return new OnMethod(path, clazz, values[2]);
       case PARAMETER:
         return new OnParameter(path, clazz, values[2], Integer.parseInt(values[4]));
+      case LOCAL_VARIABLE:
+        return new OnLocalVariable(path, clazz, values[2], values[3]);
       default:
         throw new RuntimeException(
             "Cannot reach this statement, values: " + Arrays.toString(values));
