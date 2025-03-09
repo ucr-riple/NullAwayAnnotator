@@ -59,6 +59,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import me.tongfei.progressbar.ProgressBar;
 import me.tongfei.progressbar.ProgressBarStyle;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
 
 /** AnnotatorNullabilityUtil class. */
 public class Utility {
@@ -401,5 +403,11 @@ public class Utility {
     } catch (IOException e) {
       throw new RuntimeException("Error in getting lines from file at: " + path, e);
     }
+  }
+
+  private static void forceFlushLog(){
+    LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+    ctx.stop();
+    ctx.start();
   }
 }
