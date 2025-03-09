@@ -59,12 +59,12 @@ public class Main {
   // Mac
   //  public static final String PROJECT_PATH = "/Users/nima/Desktop/conductor";
   // Ubuntu
-  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/conductor";
-  public static final String BENCHMARK_NAME = "conductor";
+  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/eureka";
+  public static final String BENCHMARK_NAME = "eureka";
   //  public static final String BENCHMARK_NAME = "Test";
-  public static final String BRANCH_NAME = "nimak/auto-code-fix-8";
+  public static final String BRANCH_NAME = "nimak/auto-code-fix-0";
   public static final Path LOG_PATH = Paths.get("/tmp/logs/app.log");
-  public static final String ANNOTATED_PACKAGE = "com.netflix.conductor";
+  public static final String ANNOTATED_PACKAGE = "netflix.eureka";
 
   public static void main(String[] a) {
     // DELETE LOG:
@@ -107,7 +107,7 @@ public class Main {
       "-bc",
       // For Ubuntu
       String.format(
-          "export JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64 && cd %s && ./gradlew clean conductor-core:compileJava --rerun-tasks --no-build-cache",
+          "export JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64 && cd %s && ./gradlew clean eureka-core:compileJava --rerun-tasks --no-build-cache",
           PROJECT_PATH),
       //      // For Mac
       //      String.format(

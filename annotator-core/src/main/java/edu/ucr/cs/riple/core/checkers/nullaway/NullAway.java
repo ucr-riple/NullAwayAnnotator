@@ -389,11 +389,11 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       System.out.println("TOP LEVEL CALL TO FIX ERROR: " + error);
                       logger.trace("=".repeat(30));
                       counter.incrementAndGet();
-                      //                      if (counter.get() == 16) {
-                      //                        System.out.println("At index: " + counter.get());
-                      //                      } else {
-                      //                        return;
-                      //                      }
+//                                            if (counter.get() == 14) {
+//                                              System.out.println("At index: " + counter.get());
+//                                            } else {
+//                                              return;
+//                                            }
                       // cleanup
                       logger.trace("TOP LEVEL CALL TO FIX ERROR: {}", error);
                       Set<MethodRewriteChange> changes = Set.of();
@@ -415,10 +415,16 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                         previousLineNumber.set(currentLineNumber);
                         // write log at root PROJECT_PATH
                         try {
+                          // write to repo
                           Files.writeString(
-                              Paths.get(Main.PROJECT_PATH + "/annotator-log.app"),
+                              Paths.get(Main.PROJECT_PATH + String.format("/log-%d.log", counter.get())),
                               String.format("====================\n%s\nLog:\n%s\n", error, log),
                               Charset.defaultCharset());
+                          // write to filesystem
+                          Files.writeString(
+                                  Paths.get("/tmp/logs" + String.format("/log-%d.log", counter.get())),
+                                  String.format("====================\n%s\nLog:\n%s\n", error, log),
+                                  Charset.defaultCharset());
                         } catch (IOException e) {
                           System.err.println("Error while writing log to file: " + e.getMessage());
                         }

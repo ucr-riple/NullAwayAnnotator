@@ -178,8 +178,8 @@ public class Serializer {
             this.parameterOriginPath.toFile().toPath(), Charset.defaultCharset(), CREATE, APPEND)) {
       Gson gson = new GsonBuilder().setPrettyPrinting().create();
       gson.toJson(record.toJson(), writer);
-    } catch (IOException e) {
-      throw new RuntimeException("Error writing to file", e);
+    } catch (Exception e) {
+      System.err.println(e.getMessage());
     }
   }
 
