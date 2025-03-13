@@ -378,6 +378,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     AtomicInteger counter = new AtomicInteger(0);
     // Collect regions with remaining errors.
     logger.trace("Resolving remaining errors: {} errors.", remainingErrors.size());
+    Utility.forceFlushLog();
     // related to log
     AtomicLong previousLineNumber = new AtomicLong(Utility.getLineCountOfFile(Main.LOG_PATH));
     remainingErrors.stream()
@@ -409,6 +410,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                         Utility.executeCommand(
                             config, String.format("cd %s && ./gradlew goJF", Main.PROJECT_PATH));
                         long currentLineNumber = Utility.getLineCountOfFile(Main.LOG_PATH);
+                        Utility.forceFlushLog();
                         String log =
                             Utility.getLinesFromFile(
                                 Main.LOG_PATH, previousLineNumber.get(), currentLineNumber);

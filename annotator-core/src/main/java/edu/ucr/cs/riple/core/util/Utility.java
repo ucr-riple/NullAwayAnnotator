@@ -405,7 +405,10 @@ public class Utility {
     }
   }
 
-  private static void forceFlushLog(){
+  /**
+   * Force flushes the log.
+   */
+  public static void forceFlushLog(){
     LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
     ctx.stop();
     ctx.start();
