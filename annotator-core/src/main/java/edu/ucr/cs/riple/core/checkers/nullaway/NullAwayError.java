@@ -32,14 +32,12 @@ import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
-import edu.ucr.cs.riple.injector.location.Location;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /** Represents an error reported by {@link NullAway}. */
 public class NullAwayError extends Error {
@@ -241,7 +239,8 @@ public class NullAwayError extends Error {
 
   public JsonArray getOrigins() {
     if (!infos.has("origins")) {
-      throw new IllegalArgumentException("Error does not have origins: " + messageType + ": " + message);
+      throw new IllegalArgumentException(
+          "Error does not have origins: " + messageType + ": " + message);
     }
     return infos.getAsJsonArray("origins");
   }

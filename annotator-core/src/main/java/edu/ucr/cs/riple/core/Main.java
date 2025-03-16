@@ -60,7 +60,7 @@ public class Main {
   //  public static final String PROJECT_PATH = "/Users/nima/Desktop/conductor";
   // Ubuntu
   public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/EventBus";
-//  public static final String BENCHMARK_NAME = "EventBus";
+  //  public static final String BENCHMARK_NAME = "EventBus";
   public static final String BENCHMARK_NAME = "Test";
   public static final String BRANCH_NAME = "nimak/auto-code-fix-0";
   public static final Path LOG_PATH = Paths.get("/tmp/logs/app.log");

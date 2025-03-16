@@ -375,25 +375,24 @@ public class NullAwayCodeFix {
     return resolveDereferenceErrorElementType(error, info);
   }
 
-  private Set<MethodRewriteChange> resolveDereferenceErrorElementType(NullAwayError error, NullAwayError.NullableExpressionInfo info){
+  private Set<MethodRewriteChange> resolveDereferenceErrorElementType(
+      NullAwayError error, NullAwayError.NullableExpressionInfo info) {
     switch (info.kind) {
       case "field":
         OnField onField =
-                context
-                        .targetModuleInfo
-                        .getFieldRegistry()
-                        .getLocationOnField(info.clazz, info.symbol);
+            context.targetModuleInfo.getFieldRegistry().getLocationOnField(info.clazz, info.symbol);
         return resolveFieldNullabilityError(onField, info.symbol);
       case "parameter":
         return resolveParameterDereferenceError(error, info.clazz, info.symbol);
       case "method":
         return resolveMethodDereferenceError(
-                error, info.clazz, info.symbol, info.expression, info.isAnnotated);
+            error, info.clazz, info.symbol, info.expression, info.isAnnotated);
       case "local_variable":
         JsonArray origins = error.getOrigins();
         Set<MethodRewriteChange> ans = new HashSet<>();
         for (JsonElement origin : origins) {
-          NullAwayError.NullableExpressionInfo i = new NullAwayError.NullableExpressionInfo(origin.getAsJsonObject());
+          NullAwayError.NullableExpressionInfo i =
+              new NullAwayError.NullableExpressionInfo(origin.getAsJsonObject());
           ans.addAll(resolveDereferenceErrorElementType(error, i));
         }
         return ans;
