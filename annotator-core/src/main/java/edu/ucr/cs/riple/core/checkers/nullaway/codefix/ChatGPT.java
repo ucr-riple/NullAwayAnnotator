@@ -289,8 +289,7 @@ public class ChatGPT {
   public Set<MethodRewriteChange> fixDereferenceErrorBySafeRegions(
       NullAwayError error, Set<Region> safeRegions, Context context) {
     logger.trace("Attempting to fix dereference error by using safe regions");
-    String[] info = NullAwayError.extractPlaceHolderValue(error);
-    String expression = info[0];
+    String expression = error.getNullableExpression();
     String method = parser.getRegionSourceCode(error.getRegion()).content;
     String prompt =
         String.format(
@@ -327,8 +326,7 @@ public class ChatGPT {
   public Set<MethodRewriteChange> fixDereferenceErrorByAllRegions(
       NullAwayError error, Set<Region> safeRegions, Set<Region> errorRegions, Context context) {
     logger.trace("Attempting to fix dereference error by using all regions");
-    String[] info = NullAwayError.extractPlaceHolderValue(error);
-    String expression = info[0];
+    String expression = error.getNullableExpression();
     String method = parser.getRegionSourceCode(error.getRegion()).content;
     String regionData =
         safeRegions.isEmpty()
@@ -413,7 +411,7 @@ public class ChatGPT {
           String.format(
               checkIfExpressionCanBeNullAtErrorPointPrompt,
               // nullable expression
-              NullAwayError.extractPlaceHolderValue(error)[0],
+              error.getNullableExpressionInfo(),
               error.position.diagnosticLine.trim(),
               enclosingMethod);
     }

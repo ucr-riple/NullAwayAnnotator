@@ -119,21 +119,6 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
   }
 
   /**
-   * { "message_type": "DEREFERENCE_NULLABLE", "message": "dereferenced expression
-   * resourceRecordSetWithHostedZone is @Nullable", "enc_class":
-   * "com.netflix.eureka.aws.Route53Binder", "enc_member": "unbindFromDomain(java.lang.String)",
-   * "offset": 9441, "path":
-   * "/Users/nima/Developer/eureka/eureka-core/src/main/java/com/netflix/eureka/aws/Route53Binder.java",
-   * "origins": [ { "target_kind": "METHOD", "target_class": "com.netflix.eureka.aws.Route53Binder",
-   * "target_method": "getResourceRecordSetWithHostedZone(java.lang.String)", "target_param":
-   * "null", "target_index": "null", "target_path":
-   * "/Users/nima/Developer/eureka/eureka-core/src/main/java/com/netflix/eureka/aws/Route53Binder.java"
-   * } ], "infos": { "expression": "resourceRecordSetWithHostedZone", "kind": "local_variable",
-   * "class": "com.netflix.eureka.aws.Route53Binder", "isAnnotated": true, "symbol":
-   * "resourceRecordSetWithHostedZone", "position": 9441 } },
-   */
-
-  /**
    * Deserializes an error from a JSON object.
    *
    * @param moduleInfo Module info.
@@ -146,6 +131,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     Path path = Paths.get(obj.get("path").getAsString());
     String errorMessage = obj.get("message").getAsString();
     String errorType = obj.get("message_type").getAsString();
+    JsonObject infos = obj.get("infos").getAsJsonObject();
     Region region =
         new Region(obj.get("enc_class").getAsString(), obj.get("enc_member").getAsString());
     Location nonnullTarget =
@@ -160,7 +146,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
           computeAddAnnotationInstancesForUninitializedFields(
               errorMessage, region.clazz, moduleInfo);
       return createError(
-          errorType, errorMessage, region, path, position, annotationsOnField, moduleInfo);
+          errorType, errorMessage, region, path, position, infos, annotationsOnField, moduleInfo);
     }
     if (nonnullTarget != null && nonnullTarget.isOnField()) {
       nonnullTarget = extendVariableList(nonnullTarget.toField(), moduleInfo);
@@ -173,7 +159,8 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     } else {
       annotations = Set.of(new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot));
     }
-    return createError(errorType, errorMessage, region, path, position, annotations, moduleInfo);
+    return createError(
+        errorType, errorMessage, region, path, position, infos, annotations, moduleInfo);
   }
 
   /**
@@ -205,7 +192,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
           computeAddAnnotationInstancesForUninitializedFields(
               errorMessage, region.clazz, moduleInfo);
       return createError(
-          errorType, errorMessage, region, path, position, annotationsOnField, moduleInfo);
+          errorType, errorMessage, region, path, position, null, annotationsOnField, moduleInfo);
     }
     if (nonnullTarget != null && nonnullTarget.isOnField()) {
       nonnullTarget = extendVariableList(nonnullTarget.toField(), moduleInfo);
@@ -218,7 +205,8 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     } else {
       annotations = Set.of(new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot));
     }
-    return createError(errorType, errorMessage, region, path, position, annotations, moduleInfo);
+    return createError(
+        errorType, errorMessage, region, path, position, null, annotations, moduleInfo);
   }
 
   /**
@@ -467,7 +455,9 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                         System.out.println("Finished processing.");
                         ChatGPT.count.set(0);
                       } catch (Exception e) {
-                        System.err.println("Error while fixing-------: " + e.getMessage());
+                        System.err.println(
+                            "Error while fixing-------: " + e.getMessage() + " \n " + e);
+                        e.printStackTrace(System.out);
                         logger.trace("--------Exception occurred in computing fix--------", e);
                       } finally {
                         codeFix.apply(changes);
@@ -563,6 +553,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
       Region region,
       Path path,
       DiagnosticPosition position,
+      JsonObject infos,
       Set<AddAnnotation> annotations,
       ModuleInfo module) {
     // Filter fixes on elements with explicit nonnull annotations.
@@ -572,7 +563,8 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                 annot ->
                     !module.getNonnullStore().hasExplicitNonnullAnnotation(annot.getLocation()))
             .collect(ImmutableSet.toImmutableSet());
-    return new NullAwayError(errorType, errorMessage, region, path, position, cleanedAnnotations);
+    return new NullAwayError(
+        errorType, errorMessage, region, path, position, infos, cleanedAnnotations);
   }
 
   @Override

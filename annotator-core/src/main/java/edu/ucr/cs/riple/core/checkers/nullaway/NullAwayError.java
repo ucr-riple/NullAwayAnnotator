@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.checkers.nullaway;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.gson.JsonObject;
 import edu.ucr.cs.riple.core.checkers.DiagnosticPosition;
 import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.Fix;
@@ -40,6 +41,9 @@ import java.util.regex.Pattern;
 /** Represents an error reported by {@link NullAway}. */
 public class NullAwayError extends Error {
 
+  /** Additional information about the error. */
+  private final JsonObject infos;
+
   public enum ErrorType {
     METHOD_INITIALIZER("METHOD_NO_INIT"),
     FIELD_INITIALIZER("FIELD_NO_INIT"),
@@ -52,14 +56,46 @@ public class NullAwayError extends Error {
     }
   }
 
+  /** Contains information about the nullable expression causing the error. */
+  public static class NullableExpressionInfo {
+    /** The expression that is nullable. */
+    public final String expression;
+
+    /** Whether the expression is in annotated packages. */
+    public final boolean isAnnotated;
+
+    /** Kind of the expression. */
+    public final String kind;
+
+    /** Enclosing class of the expression. */
+    public final String clazz;
+
+    /** Position of the expression. */
+    public final int position;
+
+    /** Symbol of the expression. */
+    public final String symbol;
+
+    public NullableExpressionInfo(JsonObject obj) {
+      this.expression = obj.get("expression").getAsString();
+      this.isAnnotated = obj.get("isAnnotated").getAsBoolean();
+      this.kind = obj.get("kind").getAsString();
+      this.clazz = obj.get("class").getAsString();
+      this.position = obj.get("position").getAsInt();
+      this.symbol = obj.get("symbol").getAsString();
+    }
+  }
+
   public NullAwayError(
       String messageType,
       String message,
       Region region,
       Path path,
       DiagnosticPosition position,
+      JsonObject infos,
       Set<AddAnnotation> annotations) {
     super(messageType, message, region, path, position, annotations);
+    this.infos = infos;
   }
 
   @Override
@@ -119,19 +155,46 @@ public class NullAwayError extends Error {
   }
 
   /**
-   * Extracts the placeholder value from the error message.
+   * Returns the nullable expression information.
    *
-   * @param error the error to extract the placeholder value from.
-   * @return the placeholder value.
+   * @return the nullable expression information.
    */
-  public static String[] extractPlaceHolderValue(NullAwayError error) {
-    switch (error.messageType) {
+  public NullableExpressionInfo getNullableExpressionInfo() {
+    return new NullableExpressionInfo(infos);
+  }
+
+  /**
+   * Returns the nullable expression causing the error.
+   *
+   * @return the nullable expression.
+   */
+  public String getNullableExpression() {
+    switch (messageType) {
       case "DEREFERENCE_NULLABLE":
-        {
-          return new String[0];
-        }
+        return getNullableExpressionInfo().expression;
+      case "PASS_NULLABLE":
+        Pattern pattern = Pattern.compile("@NonNull field (\\w+) not initialized");
+        Matcher matcher = pattern.matcher(message);
+        return matcher.group(1);
+      default:
+        throw new IllegalArgumentException(
+            "Error type not supported to extract nullable expression from: "
+                + messageType
+                + ": "
+                + message);
+    }
+  }
+
+  /**
+   * Returns the uninitialized fields from the error message if the error is an initialization
+   * error.
+   *
+   * @return the uninitialized fields.
+   */
+  public String[] getUninitializedFieldsFromErrorMessage() {
+    switch (messageType) {
       case "METHOD_NO_INIT":
-        String errorMessage = error.message;
+        String errorMessage = message;
         String prefix = "initializer method does not guarantee @NonNull field";
         int begin = prefix.length();
         if (errorMessage.charAt(begin) == 's') {
@@ -154,27 +217,15 @@ public class NullAwayError extends Error {
       case "FIELD_NO_INIT":
         {
           Pattern pattern = Pattern.compile("@NonNull field (\\w+) not initialized");
-          Matcher matcher = pattern.matcher(error.message);
-          if (matcher.find()) {
-            return new String[] {matcher.group(1)};
-          }
-          break;
+          Matcher matcher = pattern.matcher(message);
+          return new String[] {matcher.group(1)};
         }
-      case "PASS_NULLABLE":
-        {
-          Pattern pattern =
-              Pattern.compile("passing @Nullable parameter '(\\w+)' where @NonNull is required");
-          Matcher matcher = pattern.matcher(error.message);
-          if (matcher.find()) {
-            return new String[] {matcher.group(1)};
-          }
-          break;
-        }
+      default:
+        throw new IllegalArgumentException(
+            "Error type not supported to extract uninitialized fields from: "
+                + messageType
+                + ": "
+                + message);
     }
-    throw new IllegalArgumentException(
-        "Error type not supported to extract values from: "
-            + error.messageType
-            + ": "
-            + error.message);
   }
 }

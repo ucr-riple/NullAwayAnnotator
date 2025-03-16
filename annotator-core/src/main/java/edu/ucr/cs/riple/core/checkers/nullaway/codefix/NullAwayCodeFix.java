@@ -295,7 +295,7 @@ public class NullAwayCodeFix {
   private Set<MethodRewriteChange> resolveUninitializedField(NullAwayError error) {
     // This method is going to analyze the nullability of each field individually.
     Set<MethodRewriteChange> changes = new HashSet<>();
-    String[] names = NullAwayError.extractPlaceHolderValue(error);
+    String[] names = error.getUninitializedFieldsFromErrorMessage();
     logger.trace("Resolving uninitialized field errors for fields: {}", Arrays.toString(names));
     final int[] index = {0};
     error
@@ -369,22 +369,20 @@ public class NullAwayCodeFix {
         return constructReturnNullIfExpressionIsNullForError(error);
       }
     }
-    String[] infos = NullAwayError.extractPlaceHolderValue(error);
-    String expression = infos[0];
-    String type = infos[1];
-    String encClass = infos[2];
-    String expressionSymbol = infos[4];
-    boolean isAnnotated = infos[3].equalsIgnoreCase("true");
-    switch (type) {
+    NullAwayError.NullableExpressionInfo info = error.getNullableExpressionInfo();
+    switch (info.kind) {
       case "field":
         OnField onField =
-            context.targetModuleInfo.getFieldRegistry().getLocationOnField(encClass, expression);
-        return resolveFieldNullabilityError(onField, expression);
+            context
+                .targetModuleInfo
+                .getFieldRegistry()
+                .getLocationOnField(info.clazz, info.expression);
+        return resolveFieldNullabilityError(onField, info.expression);
       case "parameter":
-        return resolveParameterDereferenceError(error, encClass, expression);
+        return resolveParameterDereferenceError(error, info.clazz, info.expression);
       case "method":
         return resolveMethodDereferenceError(
-            error, encClass, expressionSymbol, expression, isAnnotated);
+            error, info.clazz, info.symbol, info.expression, info.isAnnotated);
       case "local_variable":
         logger.trace("not supporting dereference on local variable yet.");
         return NO_ACTION;
@@ -612,7 +610,7 @@ public class NullAwayCodeFix {
     // range. Note that the line number is 1-based in java parser, and we need to adjust it to
     // 0-based.
     int errorLine = error.position.lineNumber - (enclosingMethod.range.begin.line - 1);
-    String expression = NullAwayError.extractPlaceHolderValue(error)[0];
+    String expression = error.getNullableExpression();
     String whitespace = Utility.getLeadingWhitespace(lines[errorLine]);
     String returnNullStatement =
         String.format(
@@ -653,7 +651,7 @@ public class NullAwayCodeFix {
     // range. Note that the line number is 1-based in java parser, and we need to adjust it to
     // 0-based.
     int errorLine = error.position.lineNumber - (enclosingMethod.range.begin.line - 1);
-    String expression = NullAwayError.extractPlaceHolderValue(error)[0];
+    String expression = error.getNullableExpression();
     String castToNonnullStatement =
         String.format("Nullability.castToNonnull(%s, \"%s\")", expression, "reason...");
     int start = lines[errorLine].indexOf(expression);
