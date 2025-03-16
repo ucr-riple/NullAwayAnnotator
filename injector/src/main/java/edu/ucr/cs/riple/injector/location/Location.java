@@ -118,6 +118,36 @@ public abstract class Location {
   }
 
   /**
+   * Creates an instance of {@link Location} based on values written in a JSON object.
+   *
+   * @param object The JSON object containing the values.
+   * @return Corresponding {@link Location} instance.
+   */
+  public static Location createLocationFromJson(JsonObject object) {
+    LocationKind kind = LocationKind.getKind(object.get("target_kind").getAsString());
+    String clazz = object.get("target_class").getAsString();
+    String method = object.get("target_method").getAsString();
+    String path = object.get("target_path").getAsString();
+    String param = object.get("target_param").getAsString();
+    int index =
+        object.get("target_index").getAsString().equals("null")
+            ? -1
+            : Integer.parseInt(object.get("target_index").getAsString());
+    switch (kind) {
+      case FIELD:
+        return new OnField(path, clazz, Sets.newHashSet(param));
+      case METHOD:
+        return new OnMethod(path, clazz, method);
+      case PARAMETER:
+        return new OnParameter(path, clazz, method, index);
+      case LOCAL_VARIABLE:
+        return new OnLocalVariable(path, clazz, method, param);
+      default:
+        throw new RuntimeException("Cannot reach this statement, kind: " + kind);
+    }
+  }
+
+  /**
    * If this location is of kind {@link LocationKind#METHOD}, calls the consumer on the location.
    *
    * @param consumer The consumer to be called.

@@ -26,6 +26,8 @@ package edu.ucr.cs.riple.core.checkers.nullaway;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
+import com.google.gson.JsonObject;
+import edu.ucr.cs.riple.annotator.util.parsers.JsonParser;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.Main;
 import edu.ucr.cs.riple.core.checkers.CheckerBaseClass;
@@ -49,7 +51,6 @@ import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnParameter;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -57,6 +58,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -90,25 +92,88 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
   public Set<NullAwayError> deserializeErrors(ModuleInfo module) {
     ImmutableSet<Path> paths =
         module.getModuleConfiguration().stream()
-            .map(configuration -> configuration.dir.resolve("errors.tsv"))
+            .map(configuration -> configuration.dir.resolve("errors.json"))
             .collect(ImmutableSet.toImmutableSet());
     Set<NullAwayError> errors = new HashSet<>();
     paths.forEach(
         path -> {
-          try {
-            try (BufferedReader br = Files.newBufferedReader(path, Charset.defaultCharset())) {
-              String line;
-              // Skip header.
-              br.readLine();
-              while ((line = br.readLine()) != null) {
-                errors.add(deserializeErrorFromTSVLine(module, line));
-              }
-            }
-          } catch (IOException e) {
-            throw new RuntimeException("Exception happened in reading errors at: " + path, e);
+          //            try (BufferedReader br = Files.newBufferedReader(path,
+          // Charset.defaultCharset())) {
+          //              String line;
+          //              // Skip header.
+          //              br.readLine();
+          //              while ((line = br.readLine()) != null) {
+          //                errors.add(deserializeErrorFromTSVLine(module, line));
+          //              }
+          //            }
+          String content = Utility.readFile(path).trim();
+          if (!content.isEmpty()) {
+            content = content.substring(0, content.length() - 1);
           }
+          content = "{ \"errors\": [" + content + "]}";
+          JsonParser parser = new JsonParser(content);
+          List<JsonObject> errorsJson = parser.getArrayValueFromKey("errors").orElse(List.of());
+          errorsJson.forEach(err -> errors.add(deserializeErrorFromJson(module, err)));
         });
     return errors;
+  }
+
+  /**
+   * { "message_type": "DEREFERENCE_NULLABLE", "message": "dereferenced expression
+   * resourceRecordSetWithHostedZone is @Nullable", "enc_class":
+   * "com.netflix.eureka.aws.Route53Binder", "enc_member": "unbindFromDomain(java.lang.String)",
+   * "offset": 9441, "path":
+   * "/Users/nima/Developer/eureka/eureka-core/src/main/java/com/netflix/eureka/aws/Route53Binder.java",
+   * "origins": [ { "target_kind": "METHOD", "target_class": "com.netflix.eureka.aws.Route53Binder",
+   * "target_method": "getResourceRecordSetWithHostedZone(java.lang.String)", "target_param":
+   * "null", "target_index": "null", "target_path":
+   * "/Users/nima/Developer/eureka/eureka-core/src/main/java/com/netflix/eureka/aws/Route53Binder.java"
+   * } ], "infos": { "expression": "resourceRecordSetWithHostedZone", "kind": "local_variable",
+   * "class": "com.netflix.eureka.aws.Route53Binder", "isAnnotated": true, "symbol":
+   * "resourceRecordSetWithHostedZone", "position": 9441 } },
+   */
+
+  /**
+   * Deserializes an error from a JSON object.
+   *
+   * @param moduleInfo Module info.
+   * @param obj Given JSON object.
+   * @return the deserialized error corresponding to the values in the given JSON object.
+   */
+  private NullAwayError deserializeErrorFromJson(ModuleInfo moduleInfo, JsonObject obj) {
+    Context context = moduleInfo.getContext();
+    int offset = obj.get("offset").getAsInt();
+    Path path = Paths.get(obj.get("path").getAsString());
+    String errorMessage = obj.get("message").getAsString();
+    String errorType = obj.get("message_type").getAsString();
+    Region region =
+        new Region(obj.get("enc_class").getAsString(), obj.get("enc_member").getAsString());
+    Location nonnullTarget =
+        obj.has("nonnull_target")
+            ? Location.createLocationFromJson(obj.get("nonnull_target").getAsJsonObject())
+            : null;
+    DiagnosticPosition position =
+        new DiagnosticPosition(path, offset, context.offsetHandler.getOriginalOffset(path, offset));
+    if (nonnullTarget == null
+        && errorType.equals(NullAwayError.ErrorType.METHOD_INITIALIZER.type)) {
+      Set<AddAnnotation> annotationsOnField =
+          computeAddAnnotationInstancesForUninitializedFields(
+              errorMessage, region.clazz, moduleInfo);
+      return createError(
+          errorType, errorMessage, region, path, position, annotationsOnField, moduleInfo);
+    }
+    if (nonnullTarget != null && nonnullTarget.isOnField()) {
+      nonnullTarget = extendVariableList(nonnullTarget.toField(), moduleInfo);
+    }
+    Set<AddAnnotation> annotations;
+    if (nonnullTarget == null) {
+      annotations = Set.of();
+    } else if (Utility.isTypeUseAnnotation(config.nullableAnnot)) {
+      annotations = Set.of(new AddTypeUseMarkerAnnotation(nonnullTarget, config.nullableAnnot));
+    } else {
+      annotations = Set.of(new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot));
+    }
+    return createError(errorType, errorMessage, region, path, position, annotations, moduleInfo);
   }
 
   /**
@@ -134,14 +199,13 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
         Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 6, 12));
     DiagnosticPosition position =
         new DiagnosticPosition(path, offset, context.offsetHandler.getOriginalOffset(path, offset));
-    String[] args = values.length == 13 ? values[12].split("---") : new String[0];
     if (nonnullTarget == null
         && errorType.equals(NullAwayError.ErrorType.METHOD_INITIALIZER.type)) {
       Set<AddAnnotation> annotationsOnField =
           computeAddAnnotationInstancesForUninitializedFields(
               errorMessage, region.clazz, moduleInfo);
       return createError(
-          errorType, errorMessage, region, path, position, annotationsOnField, moduleInfo, args);
+          errorType, errorMessage, region, path, position, annotationsOnField, moduleInfo);
     }
     if (nonnullTarget != null && nonnullTarget.isOnField()) {
       nonnullTarget = extendVariableList(nonnullTarget.toField(), moduleInfo);
@@ -154,8 +218,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     } else {
       annotations = Set.of(new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot));
     }
-    return createError(
-        errorType, errorMessage, region, path, position, annotations, moduleInfo, args);
+    return createError(errorType, errorMessage, region, path, position, annotations, moduleInfo);
   }
 
   /**
@@ -390,11 +453,12 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       System.out.println("TOP LEVEL CALL TO FIX ERROR: " + error);
                       logger.trace("=".repeat(30));
                       counter.incrementAndGet();
-//                                            if (counter.get() == 14) {
-//                                              System.out.println("At index: " + counter.get());
-//                                            } else {
-//                                              return;
-//                                            }
+                      //                                            if (counter.get() == 14) {
+                      //                                              System.out.println("At index:
+                      // " + counter.get());
+                      //                                            } else {
+                      //                                              return;
+                      //                                            }
                       // cleanup
                       logger.trace("TOP LEVEL CALL TO FIX ERROR: {}", error);
                       Set<MethodRewriteChange> changes = Set.of();
@@ -419,14 +483,15 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                         try {
                           // write to repo
                           Files.writeString(
-                              Paths.get(Main.PROJECT_PATH + String.format("/log-%d.log", counter.get())),
+                              Paths.get(
+                                  Main.PROJECT_PATH + String.format("/log-%d.log", counter.get())),
                               String.format("====================\n%s\nLog:\n%s\n", error, log),
                               Charset.defaultCharset());
                           // write to filesystem
                           Files.writeString(
-                                  Paths.get("/tmp/logs" + String.format("/log-%d.log", counter.get())),
-                                  String.format("====================\n%s\nLog:\n%s\n", error, log),
-                                  Charset.defaultCharset());
+                              Paths.get("/tmp/logs" + String.format("/log-%d.log", counter.get())),
+                              String.format("====================\n%s\nLog:\n%s\n", error, log),
+                              Charset.defaultCharset());
                         } catch (IOException e) {
                           System.err.println("Error while writing log to file: " + e.getMessage());
                         }
@@ -489,7 +554,6 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
    * @param position Diagnostic position where the error is reported.
    * @param annotations Annotations that should be added source file to resolve the error.
    * @param module Module where this error is reported.
-   * @param args Extra information serialized by NullAway that are not formally structured.
    * @return Creates and returns the corresponding {@link NullAwayError} instance using the provided
    *     information.
    */
@@ -500,8 +564,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
       Path path,
       DiagnosticPosition position,
       Set<AddAnnotation> annotations,
-      ModuleInfo module,
-      String[] args) {
+      ModuleInfo module) {
     // Filter fixes on elements with explicit nonnull annotations.
     ImmutableSet<AddAnnotation> cleanedAnnotations =
         annotations.stream()
@@ -509,8 +572,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                 annot ->
                     !module.getNonnullStore().hasExplicitNonnullAnnotation(annot.getLocation()))
             .collect(ImmutableSet.toImmutableSet());
-    return new NullAwayError(
-        errorType, errorMessage, region, path, position, cleanedAnnotations, args);
+    return new NullAwayError(errorType, errorMessage, region, path, position, cleanedAnnotations);
   }
 
   @Override

@@ -494,4 +494,30 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
         .resolveRemainingErrors()
         .start();
   }
+
+  @Test
+  public void localVariableInitializedFieldTest() {
+    mockChatGPTResponse(agree(), agree());
+    coreTestHelper
+        .onTarget()
+        .withSourceLines(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "     @Nullable Object f1;",
+            "     void init(){",
+            "       this.f1 = new Object();",
+            "     }",
+            "     public void baz(){",
+            "       Object local = f1;",
+            "       local.toString();",
+            "     }",
+            "}")
+        .expectNoReport()
+        .deactivateInference()
+        .toDepth(1)
+        .resolveRemainingErrors()
+        .start();
+  }
 }

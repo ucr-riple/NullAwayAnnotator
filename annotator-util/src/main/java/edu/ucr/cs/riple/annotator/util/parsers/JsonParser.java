@@ -39,6 +39,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import javax.annotation.Nullable;
 
 /** A utility class for parsing JSON files. */
 public class JsonParser {
@@ -71,6 +72,27 @@ public class JsonParser {
    */
   public JsonParser(JsonObject jsonObject) {
     this.json = jsonObject;
+  }
+
+  /**
+   * Used to retrieve the JSON object.
+   *
+   * @param key The key to search for in the JSON object. The key should be in the format of
+   *     "key1:key2:key3".
+   * @return The JSON object.
+   */
+  @Nullable
+  public JsonObject get(String key) {
+    String[] keys = key.split(":");
+    JsonObject current = json;
+    for (String k : keys) {
+      if (current.keySet().contains(k)) {
+        current = (JsonObject) current.get(k);
+      } else {
+        return null;
+      }
+    }
+    return current;
   }
 
   /**
