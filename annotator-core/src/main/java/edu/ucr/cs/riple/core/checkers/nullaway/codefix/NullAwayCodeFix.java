@@ -382,10 +382,10 @@ public class NullAwayCodeFix {
                 context
                         .targetModuleInfo
                         .getFieldRegistry()
-                        .getLocationOnField(info.clazz, info.expression);
-        return resolveFieldNullabilityError(onField, info.expression);
+                        .getLocationOnField(info.clazz, info.symbol);
+        return resolveFieldNullabilityError(onField, info.symbol);
       case "parameter":
-        return resolveParameterDereferenceError(error, info.clazz, info.expression);
+        return resolveParameterDereferenceError(error, info.clazz, info.symbol);
       case "method":
         return resolveMethodDereferenceError(
                 error, info.clazz, info.symbol, info.expression, info.isAnnotated);

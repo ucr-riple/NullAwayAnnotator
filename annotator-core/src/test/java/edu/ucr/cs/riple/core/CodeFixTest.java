@@ -513,6 +513,12 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
             "       Object local = f1;",
             "       local.toString();",
             "     }",
+            "     public void safeBaz(){",
+            "          if(f1 != null){",
+            "               Object local = f1;",
+            "               local.toString();",
+            "          }",
+            "     }",
             "}")
         .expectNoReport()
         .deactivateInference()
