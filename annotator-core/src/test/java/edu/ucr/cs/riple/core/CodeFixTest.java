@@ -497,6 +497,16 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   @Test
   public void localVariableInitializedFieldTest() {
+    mockChatGPTResponse(
+        agree(),
+        codeFix(
+            "public void baz(){",
+            "   if(f1 == null){",
+            "     return;",
+            "   }",
+            "   Object local = f1;",
+            "   local.toString();",
+            "}"));
     coreTestHelper
         .onTarget()
         .withSourceLines(
