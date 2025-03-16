@@ -28,6 +28,8 @@ import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.cache.TargetModuleCache;
@@ -370,22 +372,31 @@ public class NullAwayCodeFix {
       }
     }
     NullAwayError.NullableExpressionInfo info = error.getNullableExpressionInfo();
+    return resolveDereferenceErrorElementType(error, info);
+  }
+
+  private Set<MethodRewriteChange> resolveDereferenceErrorElementType(NullAwayError error, NullAwayError.NullableExpressionInfo info){
     switch (info.kind) {
       case "field":
         OnField onField =
-            context
-                .targetModuleInfo
-                .getFieldRegistry()
-                .getLocationOnField(info.clazz, info.expression);
+                context
+                        .targetModuleInfo
+                        .getFieldRegistry()
+                        .getLocationOnField(info.clazz, info.expression);
         return resolveFieldNullabilityError(onField, info.expression);
       case "parameter":
         return resolveParameterDereferenceError(error, info.clazz, info.expression);
       case "method":
         return resolveMethodDereferenceError(
-            error, info.clazz, info.symbol, info.expression, info.isAnnotated);
+                error, info.clazz, info.symbol, info.expression, info.isAnnotated);
       case "local_variable":
-        logger.trace("not supporting dereference on local variable yet.");
-        return NO_ACTION;
+        JsonArray origins = error.getOrigins();
+        Set<MethodRewriteChange> ans = new HashSet<>();
+        for (JsonElement origin : origins) {
+          NullAwayError.NullableExpressionInfo i = new NullAwayError.NullableExpressionInfo(origin.getAsJsonObject());
+          ans.addAll(resolveDereferenceErrorElementType(error, i));
+        }
+        return ans;
       default:
         return NO_ACTION;
     }

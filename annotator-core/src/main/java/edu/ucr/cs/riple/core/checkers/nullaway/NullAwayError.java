@@ -25,18 +25,21 @@
 package edu.ucr.cs.riple.core.checkers.nullaway;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import edu.ucr.cs.riple.core.checkers.DiagnosticPosition;
 import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.location.Location;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /** Represents an error reported by {@link NullAway}. */
 public class NullAwayError extends Error {
@@ -218,6 +221,13 @@ public class NullAwayError extends Error {
         {
           Pattern pattern = Pattern.compile("@NonNull field (\\w+) not initialized");
           Matcher matcher = pattern.matcher(message);
+          if (!matcher.find()) {
+            throw new RuntimeException(
+                "Error message for initializer error not recognized in version "
+                    + 4
+                    + ": "
+                    + message);
+          }
           return new String[] {matcher.group(1)};
         }
       default:
@@ -227,5 +237,12 @@ public class NullAwayError extends Error {
                 + ": "
                 + message);
     }
+  }
+
+  public JsonArray getOrigins() {
+    if (!infos.has("origins")) {
+      throw new IllegalArgumentException("Error does not have origins: " + messageType + ": " + message);
+    }
+    return infos.getAsJsonArray("origins");
   }
 }

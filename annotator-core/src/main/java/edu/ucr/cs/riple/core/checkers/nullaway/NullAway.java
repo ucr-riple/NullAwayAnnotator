@@ -132,6 +132,9 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     String errorMessage = obj.get("message").getAsString();
     String errorType = obj.get("message_type").getAsString();
     JsonObject infos = obj.get("infos").getAsJsonObject();
+    if (obj.has("origins")) {
+      infos.add("origins", obj.get("origins").getAsJsonArray());
+    }
     Region region =
         new Region(obj.get("enc_class").getAsString(), obj.get("enc_member").getAsString());
     Location nonnullTarget =
