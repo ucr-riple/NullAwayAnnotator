@@ -57,14 +57,14 @@ public class Main {
   //  }
 
   // Mac
-  //  public static final String PROJECT_PATH = "/Users/nima/Desktop/conductor";
+    public static final String PROJECT_PATH = "/Users/nima/Developer/eureka";
   // Ubuntu
-  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/EventBus";
+//  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/eureka";
   //  public static final String BENCHMARK_NAME = "EventBus";
   public static final String BENCHMARK_NAME = "Test";
   public static final String BRANCH_NAME = "nimak/auto-code-fix-0";
   public static final Path LOG_PATH = Paths.get("/tmp/logs/app.log");
-  public static final String ANNOTATED_PACKAGE = "org.greenrobot.eventbus";
+  public static final String ANNOTATED_PACKAGE = "netflix.eureka";
 
   public static void main(String[] a) {
     // DELETE LOG:
@@ -106,14 +106,13 @@ public class Main {
       String.format("%s/annotator-out", PROJECT_PATH),
       "-bc",
       // For Ubuntu
-      String.format(
-          "export JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64 && cd %s && ./gradlew clean compileJava --rerun-tasks --no-build-cache",
-          PROJECT_PATH),
+//      String.format(
+//          "export JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64 && cd %s && ./gradlew clean compileJava --rerun-tasks --no-build-cache",
+//          PROJECT_PATH),
       //      // For Mac
-      //      String.format(
-      //          "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.0.2.jdk/Contents/Home &&cd %s
-      // && ./gradlew clean conductor-core:compileJava --rerun-tasks --no-build-cache",
-      //          PROJECT_PATH),
+            String.format(
+                "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.0.2.jdk/Contents/Home &&cd %s && ./gradlew clean eureka-core:compileJava --rerun-tasks --no-build-cache",
+                PROJECT_PATH),
       "-cp",
       String.format("%s/paths.tsv", PROJECT_PATH),
       "-i",
@@ -126,25 +125,25 @@ public class Main {
       ANNOTATED_PACKAGE,
       "-di", // deactivate inference
       "-rre", // resolve remaining errors
-      //       "-rboserr", // redirect build output stream and error stream
+             "-rboserr", // redirect build output stream and error stream
       "--depth",
       "6"
     };
     Config config = new Config(argsArray);
     // reset git repo
-    try (GitUtility git = GitUtility.instance()) {
-      git.resetHard();
-      git.pull();
-      git.checkoutBranch("nimak/auto-code-fix");
-      git.resetHard();
-      git.pull();
-      git.deleteLocalBranch(BRANCH_NAME);
-      git.deleteRemoteBranch(BRANCH_NAME);
-      git.createAndCheckoutBranch(BRANCH_NAME);
-      git.pushBranch(BRANCH_NAME);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+//    try (GitUtility git = GitUtility.instance()) {
+//      git.resetHard();
+//      git.pull();
+//      git.checkoutBranch("nimak/auto-code-fix");
+//      git.resetHard();
+//      git.pull();
+//      git.deleteLocalBranch(BRANCH_NAME);
+//      git.deleteRemoteBranch(BRANCH_NAME);
+//      git.createAndCheckoutBranch(BRANCH_NAME);
+//      git.pushBranch(BRANCH_NAME);
+//    } catch (Exception e) {
+//      throw new RuntimeException(e);
+//    }
     // Start annotator
     Annotator annotator = new Annotator(config);
     annotator.start();
