@@ -33,7 +33,16 @@ Provide the answer in **XML format** as follows:
 
 #### If you are unsure or need more information, respond with where you can ask for more details or what specific information you need.
 
-If additional information is required, list each request inside a `<request>` tag. If no additional information is needed, omit the `<requests>` section.
+#### If you are unsure or If there are any methods that directly or indirectly affect the return value and are not fully disclosed, request their declarations first, in the following format:
+<response>
+  <reason><![CDATA[YOUR REASON]]></reason>
+  <value>UNKNOWN</value>
+  <methods>
+    <method>methodName</method>
+  </methods>
+</response>
+
+If additional information is required other than method declaration, list each request inside a `<request>` tag. If no additional information is needed, omit the `<requests>` section.
 
 Respond with:
 ```xml

@@ -426,7 +426,7 @@ public class ChatGPT {
     if (prompt == null) {
       return null;
     }
-    logger.trace("Asking if the error can be null at error point point");
+    logger.trace("Asking if the expression can be null at error point point");
     return ask(prompt, context);
   }
 

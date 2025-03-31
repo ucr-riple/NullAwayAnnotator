@@ -485,7 +485,11 @@ public class NullAwayCodeFix {
           throw new IllegalStateException(
               "Could not determine the nullability of the parameter and did not ask for any methods declaration.");
         }
-        record.addRequestedMethodsByNames(methods);
+        boolean updated = record.addRequestedMethodsByNames(methods);
+        if (!updated) {
+          logger.warn("Could not add requested methods by names.");
+          break;
+        }
       } else {
         if (paramNullabilityPossibility.isDisagreement()) {
           logger.trace("Disagreement in the nullability of the parameter.");
@@ -733,7 +737,11 @@ public class NullAwayCodeFix {
           throw new IllegalStateException(
               "Could not determine the nullability of the method return and did not ask for any methods declaration.");
         }
-        record.addRequestedMethodsByNames(methods);
+        boolean updated = record.addRequestedMethodsByNames(methods);
+        if (!updated) {
+          logger.warn("Could not add requested methods by names.");
+          break;
+        }
       } else {
         if (methodNullability.isDisagreement()) {
           return false;
@@ -890,7 +898,11 @@ public class NullAwayCodeFix {
           throw new IllegalStateException(
               "Could not determine the nullability of the invocation and did not ask for any methods declaration.");
         }
-        record.addRequestedMethodsByNames(methods);
+        boolean updated = record.addRequestedMethodsByNames(methods);
+        if (!updated) {
+          logger.warn("Could not add requested methods by names.");
+          break;
+        }
       } else {
         return invocationNullability;
       }

@@ -103,7 +103,6 @@ public class Response {
             .equalsIgnoreCase("unknown");
     this.success =
         isDisagreement
-            || isUnknown
             || isAgreement
             || parser.getArrayValueFromTag("/response/success", Boolean.class).orElse(false);
     this.code = parseCode(parser.getValueFromTag("/response/code", String.class).orElse(""));

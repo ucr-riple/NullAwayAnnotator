@@ -40,7 +40,6 @@ import edu.ucr.cs.riple.core.registries.field.FieldInitializationStore;
 import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.registries.region.Region;
-import edu.ucr.cs.riple.core.util.GitUtility;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
@@ -388,12 +387,12 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       System.out.println("TOP LEVEL CALL TO FIX ERROR: " + error);
                       logger.trace("=".repeat(30));
                       counter.incrementAndGet();
-                      //                      if (error.position.diagnosticLine.contains("return
-                      // applications.get();")) {
-                      //                        System.out.println("At index: " + counter.get());
-                      //                      } else {
-                      //                        return;
-                      //                      }
+                      if (error.position.diagnosticLine.contains(
+                          "overriddenInstanceStatus.name()")) {
+                        System.out.println("At index: " + counter.get());
+                      } else {
+                        return;
+                      }
                       // cleanup
                       logger.trace("TOP LEVEL CALL TO FIX ERROR: {}", error);
                       Set<MethodRewriteChange> changes = Set.of();
@@ -432,22 +431,23 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                         } catch (IOException e) {
                           System.err.println("Error while writing log to file: " + e.getMessage());
                         }
-                        try (GitUtility git = GitUtility.instance()) {
-                          if (git.hasChangesToCommit()) {
-                            git.stageAllChanges();
-                            git.commitChanges(
-                                String.format(
-                                    "fix: %d - %s - %s - %s",
-                                    counter.get(),
-                                    error.messageType,
-                                    error.position.diagnosticLine.trim(),
-                                    error.message));
-                            git.pushChanges();
-                            git.revertLastCommit();
-                          }
-                        } catch (Exception ex) {
-                          System.err.println("Error while pushing changes: " + ex.getMessage());
-                        }
+                        //                        try (GitUtility git = GitUtility.instance()) {
+                        //                          if (git.hasChangesToCommit()) {
+                        //                            git.stageAllChanges();
+                        //                            git.commitChanges(
+                        //                                String.format(
+                        //                                    "fix: %d - %s - %s - %s",
+                        //                                    counter.get(),
+                        //                                    error.messageType,
+                        //                                    error.position.diagnosticLine.trim(),
+                        //                                    error.message));
+                        //                            git.pushChanges();
+                        //                            git.revertLastCommit();
+                        //                          }
+                        //                        } catch (Exception ex) {
+                        //                          System.err.println("Error while pushing changes:
+                        // " + ex.getMessage());
+                        //                        }
                       }
                     }));
   }

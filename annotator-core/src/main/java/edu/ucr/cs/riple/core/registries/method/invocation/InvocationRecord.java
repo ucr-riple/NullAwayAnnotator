@@ -36,6 +36,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class InvocationRecord {
 
@@ -55,6 +57,9 @@ public class InvocationRecord {
 
   /** Parser to parse the AST of the methods and retrieve their source code */
   private final ASTParser parser;
+
+  /** The logger instance. */
+  private static final Logger logger = LogManager.getLogger(InvocationRecord.class);
 
   public InvocationRecord(InvocationRecordRegistry registry) {
     this.calls = new ArrayList<>(3);
@@ -118,8 +123,10 @@ public class InvocationRecord {
    * in the invocation record and are only called within methods.
    *
    * @param requests Names of the requested methods.
+   * @return true if the requested methods are added to the record, false otherwise.
    */
-  public void addRequestedMethodsByNames(ImmutableSet<String> requests) {
+  public boolean addRequestedMethodsByNames(ImmutableSet<String> requests) {
+    logger.trace("Adding requested methods to invocation record: {}", requests);
     Set<MethodRecord> existingMethods =
         calls.stream().flatMap(Set::stream).collect(Collectors.toSet());
     Set<MethodRecord> allMethods =
@@ -128,16 +135,23 @@ public class InvocationRecord {
             .collect(Collectors.toSet());
     Set<MethodRecord> methodRecords = new HashSet<>();
     for (String request : requests) {
+      // if for any reason the requested method name contains receiver, just pick the method:
+      if (request.contains(".")) {
+        request = request.substring(request.lastIndexOf(".") + 1);
+      }
+      String finalRequest = request;
       Optional<MethodRecord> optional =
           allMethods.stream()
               .filter(
                   record -> {
                     SignatureMatcher matcher = new SignatureMatcher(record.location.method);
-                    return matcher.callableName.equals(request);
+                    return matcher.callableName.equals(finalRequest);
                   })
               .findFirst();
-      optional.ifPresentOrElse(methodRecords::add, () -> thirdPartyLibs.add(request));
+      optional.ifPresentOrElse(methodRecords::add, () -> thirdPartyLibs.add(finalRequest));
     }
+    int total = calls.stream().mapToInt(Set::size).sum();
     calls.get(calls.size() - 1).addAll(methodRecords);
+    return total < calls.stream().mapToInt(Set::size).sum();
   }
 }
