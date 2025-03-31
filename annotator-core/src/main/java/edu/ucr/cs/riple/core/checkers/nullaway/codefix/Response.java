@@ -218,7 +218,12 @@ public class Response {
    */
   public static Response codeFix(String... code) {
     String xml =
-        "<success>true</success>\n" + "<code>\n" + "```java\n" + "%s\n" + "```\n" + "</code>\n";
+        "<success>true</success>\n"
+            + "<code><![CDATA[\n"
+            + "```java\n"
+            + "%s\n"
+            + "```\n"
+            + "]]></code>\n";
     return toResponse(String.format(xml, String.join("\n", code)));
   }
 

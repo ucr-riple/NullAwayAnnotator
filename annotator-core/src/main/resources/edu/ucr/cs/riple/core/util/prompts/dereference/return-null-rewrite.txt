@@ -1,0 +1,20 @@
+Rewrite the method below:
+
+```java
+%s
+```
+
+So that at line "%s", if the dereferenced expression "%s" is null, the method return null.
+
+Rewrite the null check closest to dereference and add the @Nullable annotation on the method declaration. If you can provide a default value (such as Set.of() or any other value depending on the code ) for the dereferenced expression or rewrite the code snippet to avoid the error.
+
+Just give me the fixed code snippet in xml format in <response> tag like the example below. I will apply the fix to my codebase. Do not import any additional libraries or classes or java comments. If you can provide the fixed code snippet, please provide it in the following format and place the code snippet in the <code> tag within ```java block.
+<response>
+  <success>true</success>
+  <code><![CDATA[
+  ```java
+  Your fixed code snippet here
+  ```
+    ]]>
+  </code>
+</response>

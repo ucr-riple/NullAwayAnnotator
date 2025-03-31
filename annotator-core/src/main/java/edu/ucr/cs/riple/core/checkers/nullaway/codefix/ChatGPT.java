@@ -81,6 +81,9 @@ public class ChatGPT {
    */
   private final String dereferenceFixByAllRegionsPrompt;
 
+  /** Prompt to return null if the expression is null within a nullable method. */
+  private final String rewriteReturnNullForNullableMethodPrompt;
+
   /** The prompt to ask ChatGPT to check if the expression can be null at the error point. */
   private final String checkIfExpressionCanBeNullAtErrorPointPrompt;
 
@@ -117,6 +120,8 @@ public class ChatGPT {
         Utility.readResourceContent("prompts/dereference/fix-by-safe-regions.txt");
     this.dereferenceFixByAllRegionsPrompt =
         Utility.readResourceContent("prompts/dereference/fix-by-all-regions.txt");
+    this.rewriteReturnNullForNullableMethodPrompt =
+        Utility.readResourceContent("prompts/dereference/return-null-rewrite.txt");
     this.checkIfExpressionCanBeNullAtErrorPointPrompt =
         Utility.readResourceContent("prompts/inquiry/is-false-positive.txt");
     this.checkIfMethodIsAnInitializerPrompt =
@@ -372,6 +377,36 @@ public class ChatGPT {
     MethodRewriteChange change =
         fixErrorInPlace(error, dereferenceToStringMethodRewritePrompt, context);
     return change == null ? Set.of() : Set.of(change);
+  }
+
+  /**
+   * Fixes the dereference error by returning null in a nullable method.
+   *
+   * @param error the error to fix.
+   * @param context Annotator context.
+   * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty set} if
+   *     model fails.
+   */
+  public Set<MethodRewriteChange> fixDereferenceByReturningNullInNullableMethod(
+      NullAwayError error, Context context) {
+    String enclosingMethod = parser.getRegionSourceCode(error.getRegion()).content;
+    Response response =
+        ask(
+            String.format(
+                rewriteReturnNullForNullableMethodPrompt,
+                enclosingMethod,
+                error.position.diagnosticLine,
+                error.getNullableExpression()),
+            context);
+    if (!response.isSuccessFull()) {
+      logger.trace("Response is not successful");
+      return Set.of();
+    }
+    String code = response.getCode();
+    logger.trace("Fixing the error by returning null earlier");
+    return Set.of(
+        new MethodRewriteChange(
+            new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member), code));
   }
 
   /**

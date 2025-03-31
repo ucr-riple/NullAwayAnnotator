@@ -62,7 +62,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
@@ -158,13 +157,6 @@ public class NullAwayCodeFix {
    * @param changes the changes to apply.
    */
   public void apply(Set<MethodRewriteChange> changes) {
-    changes.forEach(new Consumer<MethodRewriteChange>() {
-      @Override
-      public void accept(MethodRewriteChange methodRewriteChange) {
-        System.out.println("Applying: " + methodRewriteChange);
-
-      }
-    });
     changes.forEach(injector::rewriteMethod);
   }
 
@@ -377,7 +369,16 @@ public class NullAwayCodeFix {
         // make return null statement if null.
         logger.trace(
             "Method is already annotated as nullable. Constructing return null statement.");
-        return constructReturnNullIfExpressionIsNullForError(error);
+        Set<MethodRewriteChange> changes =
+            gpt.fixDereferenceByReturningNullInNullableMethod(error, context);
+        apply(changes);
+        // add back annotation
+        // TODO: REWRITE ONLY METHOD BODY.
+        context.injector.injectAnnotation(
+            new AddMarkerAnnotation(
+                new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member),
+                context.config.nullableAnnot));
+        return NO_ACTION;
       }
     }
     NullAwayError.NullableExpressionInfo info = error.getNullableExpressionInfo();
@@ -602,49 +603,6 @@ public class NullAwayCodeFix {
       logger.trace("-----------Could not generate a fix for error-----------\n{}", error);
     }
     return changes;
-  }
-
-  /**
-   * Constructs a {@link MethodRewriteChange} that returns null right before if the expression shown
-   * in the error is null.
-   *
-   * <p>Example:
-   *
-   * <pre>{@code
-   * @Nullable Object foo() {
-   *  +if (exp == null) {
-   *  +    return null;
-   *  +}
-   *  return exp.deref();
-   * }
-   * }</pre>
-   *
-   * @param error the error to fix.
-   * @return a {@link MethodRewriteChange} that represents the code fix.
-   */
-  private Set<MethodRewriteChange> constructReturnNullIfExpressionIsNullForError(
-      NullAwayError error) {
-    SourceCode enclosingMethod = parser.getRegionSourceCode(error.getRegion());
-    if (enclosingMethod == null) {
-      return NO_ACTION;
-    }
-    String[] lines = enclosingMethod.content.split("\n");
-    // calculate the erroneous line in method. We have to adjust the line number to the method's
-    // range. Note that the line number is 1-based in java parser, and we need to adjust it to
-    // 0-based.
-    int errorLine = error.position.lineNumber - (enclosingMethod.range.begin.line - 1);
-    String expression = error.getNullableExpression();
-    String whitespace = Utility.getLeadingWhitespace(lines[errorLine]);
-    String returnNullStatement =
-        String.format(
-            "%sif (%s == null) {\n%s\treturn null;\n%s}\n",
-            whitespace, expression, whitespace, whitespace);
-    lines[errorLine] = returnNullStatement + lines[errorLine];
-    MethodRewriteChange change =
-        new MethodRewriteChange(
-            new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member),
-            String.join("\n", lines));
-    return Set.of(change);
   }
 
   /**

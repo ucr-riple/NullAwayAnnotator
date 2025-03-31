@@ -170,7 +170,15 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
 
   @Test
   public void dereferenceReturnNullForNullableExpressionInNullableMethodTest() {
-    mockChatGPTResponse(disagree());
+    mockChatGPTResponse(
+        agree(),
+        codeFix(
+            "public String foo(Collection<?> coll) {",
+            "   if (coll == null || coll.isEmpty()) {",
+            "      return null;",
+            "   }",
+            "   return coll.iterator().next().toString();",
+            "}"));
     coreTestHelper
         .onTarget()
         .withSourceLines(

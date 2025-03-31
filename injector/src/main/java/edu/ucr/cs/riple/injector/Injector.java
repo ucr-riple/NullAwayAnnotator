@@ -230,9 +230,6 @@ public class Injector {
     Set<FileOffsetStore> offsets = new HashSet<>();
     map.forEach(
         (path, changeList) -> {
-          if(path.toString().equals("/home/nima/Developer/nullness-benchmarks/litiengine/src/de/gurkenlabs/litiengine/gui/screens/ScreenManager.java")){
-            System.out.println("Target");
-          }
           mergeTypeArgumentIndices(changeList);
           CompilationUnit tree = parse(path, languageLevel);
           if (tree == null) {
