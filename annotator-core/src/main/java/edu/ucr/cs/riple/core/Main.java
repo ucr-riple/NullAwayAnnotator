@@ -59,12 +59,12 @@ public class Main {
   // Mac
   //  public static final String PROJECT_PATH = "/Users/nima/Desktop/conductor";
   // Ubuntu
-  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/EventBus";
-  //  public static final String BENCHMARK_NAME = "EventBus";
-  public static final String BENCHMARK_NAME = "Test";
+  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/eureka";
+  public static final String BENCHMARK_NAME = "Eureka";
+  //  public static final String BENCHMARK_NAME = "Test";
   public static final String BRANCH_NAME = "nimak/auto-code-fix-0";
   public static final Path LOG_PATH = Paths.get("/tmp/logs/app.log");
-  public static final String ANNOTATED_PACKAGE = "org.greenrobot.eventbus";
+  public static final String ANNOTATED_PACKAGE = "netflix.eureka";
 
   public static void main(String[] a) {
     // DELETE LOG:

@@ -411,7 +411,7 @@ public class ChatGPT {
           String.format(
               checkIfExpressionCanBeNullAtErrorPointPrompt,
               // nullable expression
-              error.getNullableExpressionInfo(),
+              error.getNullableExpression(),
               error.position.diagnosticLine.trim(),
               enclosingMethod);
     }

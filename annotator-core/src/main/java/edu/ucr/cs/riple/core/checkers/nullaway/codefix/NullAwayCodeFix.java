@@ -284,6 +284,7 @@ public class NullAwayCodeFix {
     // Make the method nullable.
     context.injector.injectAnnotation(
         new AddMarkerAnnotation(onMethod, context.config.nullableAnnot));
+    logger.trace("Made the method nullable and resolving triggered errors.");
     // resolve triggered errors.
     return fixTriggeredErrorsForLocation(onMethod);
   }

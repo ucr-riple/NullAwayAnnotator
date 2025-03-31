@@ -42,7 +42,6 @@ import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.core.util.GitUtility;
 import edu.ucr.cs.riple.core.util.Utility;
-import edu.ucr.cs.riple.injector.Printer;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
@@ -97,15 +96,6 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     Set<NullAwayError> errors = new HashSet<>();
     paths.forEach(
         path -> {
-          //            try (BufferedReader br = Files.newBufferedReader(path,
-          // Charset.defaultCharset())) {
-          //              String line;
-          //              // Skip header.
-          //              br.readLine();
-          //              while ((line = br.readLine()) != null) {
-          //                errors.add(deserializeErrorFromTSVLine(module, line));
-          //              }
-          //            }
           String content = Utility.readFile(path).trim();
           if (!content.isEmpty()) {
             content = content.substring(0, content.length() - 1);
@@ -164,52 +154,6 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     }
     return createError(
         errorType, errorMessage, region, path, position, infos, annotations, moduleInfo);
-  }
-
-  /**
-   * Deserializes an error from a TSV line.
-   *
-   * @param moduleInfo Module info.
-   * @param line Given TSV line.
-   * @return the deserialized error corresponding to the values in the given tsv line.
-   */
-  private NullAwayError deserializeErrorFromTSVLine(ModuleInfo moduleInfo, String line) {
-    Context context = moduleInfo.getContext();
-    String[] values = line.split("\t");
-    Preconditions.checkArgument(
-        values.length == 12 || values.length == 13,
-        "Expected 12 or 13 values to create Error instance in NullAway serialization version 4 but found: "
-            + values.length);
-    int offset = Integer.parseInt(values[4]);
-    Path path = Printer.deserializePath(values[5]);
-    String errorMessage = values[1].trim();
-    String errorType = values[0];
-    Region region = new Region(values[2], values[3]);
-    Location nonnullTarget =
-        Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 6, 12));
-    DiagnosticPosition position =
-        new DiagnosticPosition(path, offset, context.offsetHandler.getOriginalOffset(path, offset));
-    if (nonnullTarget == null
-        && errorType.equals(NullAwayError.ErrorType.METHOD_INITIALIZER.type)) {
-      Set<AddAnnotation> annotationsOnField =
-          computeAddAnnotationInstancesForUninitializedFields(
-              errorMessage, region.clazz, moduleInfo);
-      return createError(
-          errorType, errorMessage, region, path, position, null, annotationsOnField, moduleInfo);
-    }
-    if (nonnullTarget != null && nonnullTarget.isOnField()) {
-      nonnullTarget = extendVariableList(nonnullTarget.toField(), moduleInfo);
-    }
-    Set<AddAnnotation> annotations;
-    if (nonnullTarget == null) {
-      annotations = Set.of();
-    } else if (Utility.isTypeUseAnnotation(config.nullableAnnot)) {
-      annotations = Set.of(new AddTypeUseMarkerAnnotation(nonnullTarget, config.nullableAnnot));
-    } else {
-      annotations = Set.of(new AddMarkerAnnotation(nonnullTarget, config.nullableAnnot));
-    }
-    return createError(
-        errorType, errorMessage, region, path, position, null, annotations, moduleInfo);
   }
 
   /**
@@ -444,12 +388,12 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       System.out.println("TOP LEVEL CALL TO FIX ERROR: " + error);
                       logger.trace("=".repeat(30));
                       counter.incrementAndGet();
-                      //                                            if (counter.get() == 14) {
-                      //                                              System.out.println("At index:
-                      // " + counter.get());
-                      //                                            } else {
-                      //                                              return;
-                      //                                            }
+                      //                      if (error.position.diagnosticLine.contains("return
+                      // applications.get();")) {
+                      //                        System.out.println("At index: " + counter.get());
+                      //                      } else {
+                      //                        return;
+                      //                      }
                       // cleanup
                       logger.trace("TOP LEVEL CALL TO FIX ERROR: {}", error);
                       Set<MethodRewriteChange> changes = Set.of();
