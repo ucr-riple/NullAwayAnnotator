@@ -38,33 +38,34 @@ import java.nio.file.attribute.BasicFileAttributes;
 /** Starting point. */
 public class Main {
 
-  //  /**
-  //   * Starting point.
-  //   *
-  //   * @param args if flag '--path' is found, all configurations will be set up based on the given
-  //   *     json file, otherwise they will be set up according to the set of received cli
-  // arguments.
-  //   */
-  //  public static void main(String[] args) {
-  //    Config config;
-  //    if (args.length == 2 && args[0].equals("--path")) {
-  //      config = new Config(Paths.get(args[1]));
-  //    } else {
-  //      config = new Config(args);
+  //    /**
+  //     * Starting point.
+  //     *
+  //     * @param args if flag '--path' is found, all configurations will be set up based on the
+  // given
+  //     *     json file, otherwise they will be set up according to the set of received cli
+  //   arguments.
+  //     */
+  //    public static void main(String[] args) {
+  //      Config config;
+  //      if (args.length == 2 && args[0].equals("--path")) {
+  //        config = new Config(Paths.get(args[1]));
+  //      } else {
+  //        config = new Config(args);
+  //      }
+  //      Annotator annotator = new Annotator(config);
+  //      annotator.start();
   //    }
-  //    Annotator annotator = new Annotator(config);
-  //    annotator.start();
-  //  }
 
   // Mac
   //  public static final String PROJECT_PATH = "/Users/nima/Desktop/conductor";
   // Ubuntu
-  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/eureka";
-  public static final String BENCHMARK_NAME = "Eureka";
+  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/litiengine";
+  public static final String BENCHMARK_NAME = "litiengine";
   //  public static final String BENCHMARK_NAME = "Test";
   public static final String BRANCH_NAME = "nimak/auto-code-fix-0";
   public static final Path LOG_PATH = Paths.get("/tmp/logs/app.log");
-  public static final String ANNOTATED_PACKAGE = "netflix.eureka";
+  public static final String ANNOTATED_PACKAGE = "de.gurkenlabs.litiengine";
 
   public static void main(String[] a) {
     // DELETE LOG:
@@ -138,10 +139,10 @@ public class Main {
       git.checkoutBranch("nimak/auto-code-fix");
       git.resetHard();
       git.pull();
-      //      git.deleteLocalBranch(BRANCH_NAME);
-      //      git.deleteRemoteBranch(BRANCH_NAME);
-      //      git.createAndCheckoutBranch(BRANCH_NAME);
-      //      git.pushBranch(BRANCH_NAME);
+      git.deleteLocalBranch(BRANCH_NAME);
+      git.deleteRemoteBranch(BRANCH_NAME);
+      git.createAndCheckoutBranch(BRANCH_NAME);
+      git.pushBranch(BRANCH_NAME);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

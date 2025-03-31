@@ -111,4 +111,9 @@ public class MethodRewriteChange implements ASTChange {
   public int hashCode() {
     return Objects.hash(getLocation(), newMethod);
   }
+
+  @Override
+  public String toString() {
+    return "OnMethod: " + location + "\n" + newMethod;
+  }
 }

@@ -62,6 +62,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
@@ -157,6 +158,13 @@ public class NullAwayCodeFix {
    * @param changes the changes to apply.
    */
   public void apply(Set<MethodRewriteChange> changes) {
+    changes.forEach(new Consumer<MethodRewriteChange>() {
+      @Override
+      public void accept(MethodRewriteChange methodRewriteChange) {
+        System.out.println("Applying: " + methodRewriteChange);
+
+      }
+    });
     changes.forEach(injector::rewriteMethod);
   }
 

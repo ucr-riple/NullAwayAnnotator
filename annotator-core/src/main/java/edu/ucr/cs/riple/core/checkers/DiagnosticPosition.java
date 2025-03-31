@@ -65,7 +65,11 @@ public class DiagnosticPosition {
     this.offset = offset;
     this.offsetInLine = offset - index;
     this.lineNumber = lineNum;
-    this.diagnosticLine = content.get(lineNumber);
+    // TODO FIX THIS:
+    if (lineNum >= content.size()) {
+      lineNum = content.size() - 1;
+    }
+    this.diagnosticLine = content.get(lineNum);
   }
 
   public DiagnosticPosition() {
