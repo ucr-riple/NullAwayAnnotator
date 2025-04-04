@@ -60,6 +60,7 @@ import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -814,14 +815,12 @@ public class NullAwayCodeFix {
     ImmutableSet<OnField> fields =
         context.targetModuleInfo.getFieldRegistry().getDeclaredFieldsInClass(onMethod.clazz);
     Set<String> names =
-        fields.stream()
-            .flatMap(field -> field.variables.stream())
-            .map(String::toLowerCase)
-            .collect(Collectors.toSet());
-    String methodName = onMethod.method.toLowerCase();
+        fields.stream().flatMap(field -> field.variables.stream()).collect(Collectors.toSet());
+    String methodName = onMethod.method.toLowerCase(Locale.getDefault());
     for (String name : names) {
+      String lowerCaseName = name.toLowerCase(Locale.getDefault());
       boolean nameMatchesGetter =
-          methodName.contains("get" + name) || methodName.contains("is" + name);
+          methodName.contains("get" + lowerCaseName) || methodName.contains("is" + lowerCaseName);
       if (!nameMatchesGetter) {
         continue;
       }
@@ -832,9 +831,10 @@ public class NullAwayCodeFix {
       }
       // check content:
       String content = sourceCode.content.replaceAll("\\s+", "");
+      content = content.toLowerCase(Locale.getDefault());
       boolean contentMatchesGetter =
-          content.contains(onMethod.method + "{return" + name + ";}")
-              || content.contains(onMethod.method + "{return" + "this." + name + ";}");
+          content.contains(methodName + "{return" + lowerCaseName + ";}")
+              || content.contains(methodName + "{return" + "this." + lowerCaseName + ";}");
       if (contentMatchesGetter) {
         return name;
       }
