@@ -700,8 +700,8 @@ public class NullAwayCodeFix {
         ImmutableSet<String> methods =
             methodNullability.getValuesFromTag("/response/methods", "method");
         if (methods.isEmpty()) {
-          throw new IllegalStateException(
-              "Could not determine the nullability of the method return and did not ask for any methods declaration.");
+          logger.trace("Could not determine the nullability and model did not ask for any method.");
+          return true;
         }
         boolean updated = record.addRequestedMethodsByNames(methods);
         if (!updated) {
@@ -832,7 +832,9 @@ public class NullAwayCodeFix {
       }
       // check content:
       String content = sourceCode.content.replaceAll("\\s+", "");
-      boolean contentMatchesGetter = content.contains(onMethod.method + "{return" + name + ";}");
+      boolean contentMatchesGetter =
+          content.contains(onMethod.method + "{return" + name + ";}")
+              || content.contains(onMethod.method + "{return" + "this." + name + ";}");
       if (contentMatchesGetter) {
         return name;
       }
