@@ -33,6 +33,7 @@ import edu.ucr.cs.riple.core.Main;
 import edu.ucr.cs.riple.core.checkers.CheckerBaseClass;
 import edu.ucr.cs.riple.core.checkers.DiagnosticPosition;
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.ChatGPT;
+import edu.ucr.cs.riple.core.checkers.nullaway.codefix.AdvancedNullAwayCodeFix;
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.NullAwayCodeFix;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
@@ -76,6 +77,8 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
 
   /** Class name for adding cast to nonnull statements. */
   public static final String CAST_TO_NONNULL = "edu.ucr.cs.riple.annotator.util.Nullability";
+
+  public static final String NULL_UNMARKED = "org.jspecify.annotations.NullUnmarked";
 
   /** Supported version of NullAway serialization. */
   public static final int VERSION = 4;
@@ -280,7 +283,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                 })
             // Filter null values from map above.
             .filter(Objects::nonNull)
-            .map(node -> new AddMarkerAnnotation(node.location, config.nullUnMarkedAnnotation))
+            .map(node -> new AddMarkerAnnotation(node.location, NULL_UNMARKED))
             .collect(Collectors.toSet());
 
     // For errors within static initialization blocks, add a @NullUnmarked annotation on the
@@ -295,7 +298,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                 error ->
                     new AddMarkerAnnotation(
                         context.targetModuleInfo.getLocationOnClass(error.getRegion().clazz),
-                        config.nullUnMarkedAnnotation))
+                        NULL_UNMARKED))
             .collect(Collectors.toSet()));
     Set<AddAnnotation> result = new HashSet<>(nullUnMarkedAnnotations);
 
@@ -360,7 +363,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                 error ->
                     new AddMarkerAnnotation(
                         context.targetModuleInfo.getLocationOnClass(error.getRegion().clazz),
-                        config.nullUnMarkedAnnotation))
+                        NULL_UNMARKED))
             .collect(Collectors.toSet());
     context.getInjector().injectAnnotations(nullUnMarkedAnnotations);
     // update log
@@ -370,7 +373,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
   @Override
   public void resolveRemainingErrors() {
     Utility.buildTarget(context);
-    NullAwayCodeFix codeFix = new NullAwayCodeFix(context);
+    NullAwayCodeFix codeFix = new AdvancedNullAwayCodeFix(context);
     Set<NullAwayError> remainingErrors = deserializeErrors(context.targetModuleInfo);
     codeFix.collectImpacts();
     AtomicInteger counter = new AtomicInteger(0);

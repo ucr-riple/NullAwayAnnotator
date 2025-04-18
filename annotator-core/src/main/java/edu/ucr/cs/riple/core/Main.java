@@ -127,6 +127,7 @@ public class Main {
       ANNOTATED_PACKAGE,
       "-di", // deactivate inference
       "-rre", // resolve remaining errors
+      "basic",
       //       "-rboserr", // redirect build output stream and error stream
       "--depth",
       "6"

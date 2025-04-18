@@ -123,10 +123,10 @@ public class Annotator {
         cache.enable();
       }
     }
-    if (config.suppressRemainingErrors) {
+    if (config.resolveRemainingErrorMode.isSuppression()) {
       context.checker.suppressRemainingErrors();
     }
-    if (config.resolveRemainingErrors) {
+    if (config.resolveRemainingErrorMode.isResolution()) {
       context.checker.resolveRemainingErrors();
     }
     System.out.println("\nFinished annotating.");

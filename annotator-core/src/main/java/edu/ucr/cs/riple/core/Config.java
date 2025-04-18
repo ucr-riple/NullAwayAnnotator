@@ -53,6 +53,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import javax.annotation.Nullable;
+
 /**
  * Configuration class which controls all the parameters of the Annotator received either from the
  * command line arguments or the given json file.
@@ -60,15 +62,15 @@ import org.apache.commons.cli.ParseException;
 public class Config {
 
   /**
-   * If activated, annotator will bail out from the search tree as soon as the effectiveness gets
+   * If activated, Annotator will bail out from the search tree as soon as the effectiveness gets
    * zero or less.
    */
   public final boolean bailout;
 
-  /** If activated, impact of fixes will be computed in parallel. */
+  /** If activated, the impact of fixes will be computed in parallel. */
   public final boolean useParallelGraphProcessor;
 
-  /** If activated, impact of fixes will be cached. */
+  /** If activated, the impact of fixes will be cached. */
   public final boolean useImpactCache;
 
   /**
@@ -98,7 +100,7 @@ public class Config {
   /** Info of target module. */
   public final ModuleConfiguration target;
 
-  /** Path to directory where all outputs of checker and scanner checker is located. */
+  /** Path to the directory where all outputs of checker and scanner checker is located. */
   public final Path globalDir;
 
   /** Command to build the target module. */
@@ -110,7 +112,7 @@ public class Config {
   /** Fully qualified name of the {@code initializer} annotation. */
   public final String initializerAnnot;
 
-  /** If enabled, effects of public API on downstream dependencies will be considered. */
+  /** If enabled, the effects of public API on downstream dependencies will be considered. */
   public final boolean downStreamDependenciesAnalysisActivated;
 
   /** Sets of context path information for all downstream dependencies. */
@@ -119,7 +121,7 @@ public class Config {
   /**
    * Path to NullAway library model loader resource directory, which enables the communication
    * between annotator and NullAway when processing downstream dependencies. Annotator will write
-   * annotation on files in this directory and the using Library Model Loader reads them.
+   * annotation on files in this directory, and the using Library Model Loader reads them.
    */
   public final Path nullawayLibraryModelLoaderPath;
 
@@ -134,16 +136,6 @@ public class Config {
 
   /** Global counter for assigning unique id for each instance. */
   private int moduleCounterID;
-
-  /**
-   * If activated, Annotator will try to suppress all remaining errors. The logic is specific to the
-   * checker suppression mechanism. Annotator will simply call {@link
-   * edu.ucr.cs.riple.core.checkers.Checker#suppressRemainingErrors} methods.
-   */
-  public final boolean suppressRemainingErrors;
-
-  /** Fully qualified NullUnmarked annotation. */
-  public final String nullUnMarkedAnnotation;
 
   /**
    * Set of {@code @Nonnull} annotations to be acknowledged by Annotator. If an element is annotated
@@ -177,10 +169,94 @@ public class Config {
   /** Language level to use when parsing Java code. Defaults to Java 17. */
   public final ParserConfiguration.LanguageLevel languageLevel;
 
-  /** If activated, annotator will try to resolve remaining errors mostly by code changes. */
-  public final boolean resolveRemainingErrors;
-
+  /**
+   * Prefix of the packages that should be considered as annotated.
+   */
   public final String annotatedPackages;
+
+  /**
+   * Mode to resolve remaining errors.
+   */
+  public final ResolveRemainingErrorMode resolveRemainingErrorMode;
+
+  /**
+   * Mode to resolve remaining errors.
+   * {@link ResolveRemainingErrorMode#DISABLED} will not resolve remaining errors.
+   * {@link ResolveRemainingErrorMode#SUPPRESS} will suppress remaining errors by using suppression annotations.
+   * {@link ResolveRemainingErrorMode#BASIC} will resolve remaining errors by using simply providing code location to model and ask for a fix.
+   * {@link ResolveRemainingErrorMode#ADVANCED} will resolve remaining errors by using an agentic model to provide a fix.
+   */
+  public enum ResolveRemainingErrorMode{
+    DISABLED,
+    SUPPRESS,
+    BASIC,
+    ADVANCED;
+
+    /**
+     * Returns the {@link ResolveRemainingErrorMode} from the string representation.
+     * @param mode string representation of the mode.
+     * @return the {@link ResolveRemainingErrorMode}.
+     */
+    public static ResolveRemainingErrorMode fromString(@Nullable String mode) {
+        if (mode == null) {
+            return DISABLED;
+        }
+        switch (mode) {
+            case "disabled":
+            return DISABLED;
+            case "suppress":
+            return SUPPRESS;
+            case "basic":
+            return BASIC;
+            case "advanced":
+            return ADVANCED;
+            default:
+            throw new IllegalArgumentException("Unsupported resolve remaining error mode: " + mode);
+        }
+    }
+
+    /**
+     * Returns true if the mode is {@link ResolveRemainingErrorMode#DISABLED}.
+     * @return true if the mode is {@link ResolveRemainingErrorMode#DISABLED}.
+     */
+    public boolean isDisabled() {
+        return this == DISABLED;
+    }
+
+    /**
+     * Returns true if the mode is {@link ResolveRemainingErrorMode#SUPPRESS}.
+     * @return true if the mode is {@link ResolveRemainingErrorMode#SUPPRESS}.
+     */
+    public boolean isSuppression() {
+      return this == SUPPRESS;
+    }
+
+    /**
+     * Returns true if the mode is {@link ResolveRemainingErrorMode#BASIC}.
+     * @return true if the mode is {@link ResolveRemainingErrorMode#BASIC}.
+     */
+    public boolean isBasic() {
+      return this == BASIC;
+      }
+
+    /**
+     * Returns true if the mode is {@link ResolveRemainingErrorMode#ADVANCED}.
+     * @return true if the mode is {@link ResolveRemainingErrorMode#ADVANCED}.
+     */
+
+    public boolean isAdvanced() {
+      return this == ADVANCED;
+      }
+
+    /**
+     * Returns true if the mode is {@link ResolveRemainingErrorMode#BASIC} or {@link ResolveRemainingErrorMode#ADVANCED}.
+     * This means that the mode is resolution.
+     * @return true if the mode is {@link ResolveRemainingErrorMode#BASIC} or {@link ResolveRemainingErrorMode#ADVANCED}.
+     */
+    public boolean isResolution() {
+      return this == ADVANCED || this == BASIC;
+    }
+  }
 
   /**
    * Builds context from command line arguments.
@@ -343,12 +419,6 @@ public class Config {
     analysisMode.setRequired(false);
     options.addOption(analysisMode);
 
-    // Suppress remaining error activation
-    Option suppressRemainingErrorsOption =
-        new Option("sre", "suppress-remaining-errors", true, "Suppresses remaining errors");
-    suppressRemainingErrorsOption.setRequired(false);
-    options.addOption(suppressRemainingErrorsOption);
-
     // Disable inference
     Option deactivateInference =
         new Option("di", "deactivate-inference", false, "Deactivates inference.");
@@ -389,7 +459,7 @@ public class Config {
 
     // Resolve remaining errors
     Option resolveRemainingErrorsOption =
-        new Option("rre", "resolve-remaining-errors", false, "Resolves remaining errors.");
+        new Option("rrem", "resolve-remaining-errors-mode", true, "Resolves remaining errors mode [DISABLED, SUPPRESS, BASIC, ADVANCED].");
     resolveRemainingErrorsOption.setRequired(false);
     options.addOption(resolveRemainingErrorsOption);
 
@@ -458,7 +528,7 @@ public class Config {
             .collect(Collectors.toList());
     Preconditions.checkArgument(
         !moduleConfigurationList.isEmpty(), "Target module context paths not found.");
-    // First line is information for the target module.
+    // The first line is information for the target module.
     this.target = moduleConfigurationList.get(0);
     this.chain = cmd.hasOption(chainOption.getLongOpt());
     this.redirectBuildOutputToStdErr =
@@ -489,11 +559,6 @@ public class Config {
       this.downstreamDependenciesBuildCommand = null;
     }
     this.inferenceActivated = !cmd.hasOption(deactivateInference);
-    this.suppressRemainingErrors = cmd.hasOption(suppressRemainingErrorsOption);
-    this.nullUnMarkedAnnotation =
-        this.suppressRemainingErrors
-            ? cmd.getOptionValue(suppressRemainingErrorsOption)
-            : "org.jspecify.annotations.NullUnmarked";
     this.moduleCounterID = 0;
     this.generatedCodeDetectors =
         cmd.hasOption(disableRegionDetectionByLombok)
@@ -504,9 +569,9 @@ public class Config {
         !cmd.hasOption(nonnullAnnotationsOption)
             ? ImmutableSet.of()
             : ImmutableSet.copyOf(cmd.getOptionValue(nonnullAnnotationsOption).split(","));
-    this.resolveRemainingErrors = cmd.hasOption(resolveRemainingErrorsOption);
+    this.resolveRemainingErrorMode = ResolveRemainingErrorMode.fromString(cmd.getOptionValue(resolveRemainingErrorsOption));
     this.annotatedPackages = cmd.getOptionValue(annotatedPackagesOption, "");
-    if (this.resolveRemainingErrors && this.annotatedPackages.isEmpty()) {
+    if (!this.resolveRemainingErrorMode.isDisabled() && this.annotatedPackages.isEmpty()) {
       throw new IllegalArgumentException(
           "Annotated packages prefix must be provided when resolving remaining errors.");
     }
@@ -600,15 +665,8 @@ public class Config {
                 .getAsString());
     this.downstreamConfigurations = ImmutableSet.copyOf(moduleConfigurationList);
     this.moduleCounterID = 0;
-    this.suppressRemainingErrors =
-        parser.getValueFromKey("SUPPRESS_REMAINING_ERRORS").orElse(false).getAsBoolean();
     this.inferenceActivated =
         parser.getValueFromKey("INFERENCE_ACTIVATION").orElse(true).getAsBoolean();
-    this.nullUnMarkedAnnotation =
-        parser
-            .getValueFromKey("ANNOTATION:NULL_UNMARKED")
-            .orElse("org.jspecify.annotations.NullUnmarked")
-            .getAsString();
     boolean lombokCodeDetectorActivated =
         parser
             .getValueFromKey("PROCESSORS:" + SourceType.LOMBOK.name() + ":ACTIVATION")
@@ -618,8 +676,8 @@ public class Config {
         lombokCodeDetectorActivated ? Sets.immutableEnumSet(SourceType.LOMBOK) : ImmutableSet.of();
     this.languageLevel =
         getLanguageLevel(parser.getValueFromKey("LANGUAGE_LEVEL").orElse("17").getAsString());
-    this.resolveRemainingErrors =
-        parser.getValueFromKey("RESOLVE_REMAINING_ERRORS").orElse(false).getAsBoolean();
+    this.resolveRemainingErrorMode =
+        ResolveRemainingErrorMode.fromString(parser.getValueFromKey("RESOLVE_REMAINING_ERRORS").orElse("DISABLED").getAsString());
     this.annotatedPackages = parser.getValueFromKey("ANNOTATED_PACKAGES").orElse("").getAsString();
     this.nonnullAnnotations =
         ImmutableSet.copyOf(
@@ -685,8 +743,8 @@ public class Config {
     public int depth = 1;
     public String checker;
     public ParserConfiguration.LanguageLevel languageLevel;
-    public boolean resolveRemainingErrors = false;
     public String annotatedPackages;
+    public String resolveRemainingErrorsMode = "DISABLED";
 
     public void write(Path path) {
       Preconditions.checkNotNull(
@@ -716,8 +774,7 @@ public class Config {
       json.addProperty("DEPTH", depth);
       json.addProperty("EXHAUSTIVE_SEARCH", exhaustiveSearch);
       json.addProperty("REDIRECT_BUILD_OUTPUT_TO_STDERR", redirectBuildOutputToStdErr);
-      json.addProperty("SUPPRESS_REMAINING_ERRORS", suppressRemainingErrors);
-      json.addProperty("RESOLVE_REMAINING_ERRORS", resolveRemainingErrors);
+      json.addProperty("RESOLVE_REMAINING_ERRORS_MODE", resolveRemainingErrorsMode);
       json.addProperty("INFERENCE_ACTIVATION", inferenceActivated);
       json.addProperty("LANGUAGE_LEVEL", languageLevel.name().split("_")[1]);
       json.addProperty("ANNOTATED_PACKAGES", annotatedPackages);
