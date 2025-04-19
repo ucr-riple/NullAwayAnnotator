@@ -266,13 +266,13 @@ public class ConfigurationTest {
 
           // Check default mode.
           config = makeConfigWithFlags(baseFlags);
-          assertFalse(config.suppressRemainingErrors);
+          assertFalse(config.resolveRemainingErrorMode.isSuppression());
 
-          CLIFlag flag = new CLIFlagWithValue("sre", "edu.ucr.example.NullUnmarked");
+          CLIFlag flag = new CLIFlagWithValue("rrem", "SUPPRESS");
           baseFlags.add(flag);
           config = makeConfigWithFlags(baseFlags);
-          assertTrue(config.suppressRemainingErrors);
-          assertEquals(config.nullUnMarkedAnnotation, "edu.ucr.example.NullUnmarked");
+          assertTrue(config.resolveRemainingErrorMode.isSuppression());
+          assertEquals(NullAway.NULL_UNMARKED, "org.jspecify.annotations.NullUnmarked");
         });
   }
 

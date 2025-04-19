@@ -47,7 +47,6 @@ import edu.ucr.cs.riple.core.registries.method.invocation.InvocationRecordRegist
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.core.util.ASTParser;
 import edu.ucr.cs.riple.core.util.Utility;
-import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.SourceCode;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
@@ -68,7 +67,10 @@ import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** A class that provides code fixes for {@link NullAwayError}s. This models uses an agentic structured prompting to resolve errors. */
+/**
+ * A class that provides code fixes for {@link NullAwayError}s. This models uses an agentic
+ * structured prompting to resolve errors.
+ */
 public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
 
   /** Invocation record registry to retrieve the callers of a method. */
@@ -96,6 +98,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code null} if the
    *     error cannot be fixed.
    */
+  @Override
   public Set<MethodRewriteChange> fix(NullAwayError error) {
     logger.trace("Fixing error: {}", error);
     switch (error.messageType) {

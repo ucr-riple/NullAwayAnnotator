@@ -81,9 +81,6 @@ public class CoreTestHelper {
   /** Bailout activation. Deactivated by default */
   private boolean disableBailout = false;
 
-  /** Suppress remaining errors mode activation. Deactivated by default */
-  private boolean suppressRemainingErrors = false;
-
   /** Downstream dependency analysis activation. Deactivated by default */
   private boolean downstreamDependencyAnalysisActivated = false;
 
@@ -107,13 +104,11 @@ public class CoreTestHelper {
   /** Annotator log instance after the test execution. */
   private Log log;
 
+  /** Language level of sources. */
   private ParserConfiguration.LanguageLevel languageLevel;
 
-  /**
-   * If true, after executing the test, no remaining errors should be reported in the target module.
-   * Within this mode, the found/expected reports are ignored and not checked.
-   */
-  private boolean resolveRemainingErrors;
+  /** Resolve remaining error mode. Deactivated by default. */
+  private Config.ResolveRemainingErrorMode resolveRemainingErrorsMode;
 
   public CoreTestHelper(Path projectPath, Path outDirPath) {
     this.projectPath = projectPath;
@@ -121,7 +116,7 @@ public class CoreTestHelper {
     this.expectedReports = new HashSet<>();
     this.projectBuilder = new ProjectBuilder(this, projectPath);
     this.languageLevel = ParserConfiguration.LanguageLevel.JAVA_17;
-    this.resolveRemainingErrors = false;
+    this.resolveRemainingErrorsMode = Config.ResolveRemainingErrorMode.DISABLED;
   }
 
   public Module onTarget() {
@@ -212,7 +207,7 @@ public class CoreTestHelper {
    * @return This instance of {@link CoreTestHelper}.
    */
   public CoreTestHelper suppressRemainingErrors() {
-    this.suppressRemainingErrors = true;
+    this.resolveRemainingErrorsMode = Config.ResolveRemainingErrorMode.SUPPRESS;
     return this;
   }
 
@@ -248,7 +243,7 @@ public class CoreTestHelper {
   }
 
   public CoreTestHelper resolveRemainingErrors() {
-    this.resolveRemainingErrors = true;
+    this.resolveRemainingErrorsMode = Config.ResolveRemainingErrorMode.ADVANCED;
     return this;
   }
 
@@ -260,7 +255,7 @@ public class CoreTestHelper {
     config = new Config(configPath);
 
     // check if resolve remaining errors is set
-    if (resolveRemainingErrors) {
+    if (resolveRemainingErrorsMode.isAdvanced()) {
       if (!expectedReports.isEmpty()) {
         throw new IllegalArgumentException(
             "This test is designed to verify code changes for resolving remaining errors. To validate expected reports, create a separate test.");
@@ -272,7 +267,7 @@ public class CoreTestHelper {
     if (predicate == null) {
       predicate = DEFAULT_PREDICATE.create(config);
     }
-    if (!resolveRemainingErrors) {
+    if (!resolveRemainingErrorsMode.isResolution()) {
       compare(new ArrayList<>(annotator.context.reportCache.reports()));
     }
     checkBuildsStatus();
@@ -302,16 +297,14 @@ public class CoreTestHelper {
         }
       }
     }
-    if (suppressRemainingErrors || resolveRemainingErrors) {
+    if (!resolveRemainingErrorsMode.isDisabled()) {
       // Check no error will be reported in Target module
       Utility.executeCommand(config.buildCommand);
       Path path = outDirPath.resolve("0").resolve("errors.tsv");
       try {
         List<String> lines = Files.readAllLines(path);
         if (lines.size() != 1) {
-          String feature =
-              suppressRemainingErrors ? "Suppress Remaining Errors" : "Resolve Remaining Errors";
-          fail(feature + " Mode did not resolve all errors:\n" + lines);
+          fail(resolveRemainingErrorsMode.name() + " Mode did not resolve all errors:\n" + lines);
         }
       } catch (IOException e) {
         throw new RuntimeException("Exception happened while reading file at: " + path);
@@ -466,11 +459,10 @@ public class CoreTestHelper {
     builder.downStreamDependenciesAnalysisActivated = downstreamDependencyAnalysisActivated;
     builder.mode = mode;
     builder.inferenceActivated = !deactivateInference;
-    builder.suppressRemainingErrors = suppressRemainingErrors;
     builder.useCacheImpact = true;
     builder.sourceTypes.add(SourceType.LOMBOK);
     builder.cache = true;
-    builder.resolveRemainingErrors = resolveRemainingErrors;
+    builder.resolveRemainingErrorsMode = resolveRemainingErrorsMode.name();
     builder.languageLevel = languageLevel;
     builder.annotatedPackages = "test";
     builder.useCacheImpact = !getEnvironmentVariable("ANNOTATOR_TEST_DISABLE_CACHING");

@@ -99,9 +99,7 @@ public class ChatGPT {
   /** The prompt to ask ChatGPT to check if the method is returning nullable on the call site. */
   private final String checkIfMethodReturnsNullableAtCallSitePrompt;
 
-  /**
-   * Simple prompt to ask ChatGPT to fix the error in place.
-   */
+  /** Simple prompt to ask ChatGPT to fix the error in place. */
   private final String basicFixRequestPrompt;
 
   /** The logger instance. */
@@ -127,8 +125,7 @@ public class ChatGPT {
         Utility.readResourceContent("prompts/dereference/fix-by-all-regions.txt");
     this.rewriteReturnNullForNullableMethodPrompt =
         Utility.readResourceContent("prompts/dereference/return-null-rewrite.txt");
-    this.basicFixRequestPrompt =
-        Utility.readResourceContent("prompts/basic-fix-request.txt");
+    this.basicFixRequestPrompt = Utility.readResourceContent("prompts/basic-fix-request.txt");
     this.checkIfExpressionCanBeNullAtErrorPointPrompt =
         Utility.readResourceContent("prompts/inquiry/is-false-positive.txt");
     this.checkIfMethodIsAnInitializerPrompt =

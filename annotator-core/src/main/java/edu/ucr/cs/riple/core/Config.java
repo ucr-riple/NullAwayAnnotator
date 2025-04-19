@@ -40,11 +40,9 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -52,8 +50,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-
-import javax.annotation.Nullable;
 
 /**
  * Configuration class which controls all the parameters of the Annotator received either from the
@@ -169,24 +165,21 @@ public class Config {
   /** Language level to use when parsing Java code. Defaults to Java 17. */
   public final ParserConfiguration.LanguageLevel languageLevel;
 
-  /**
-   * Prefix of the packages that should be considered as annotated.
-   */
+  /** Prefix of the packages that should be considered as annotated. */
   public final String annotatedPackages;
 
-  /**
-   * Mode to resolve remaining errors.
-   */
+  /** Mode to resolve remaining errors. */
   public final ResolveRemainingErrorMode resolveRemainingErrorMode;
 
   /**
-   * Mode to resolve remaining errors.
-   * {@link ResolveRemainingErrorMode#DISABLED} will not resolve remaining errors.
-   * {@link ResolveRemainingErrorMode#SUPPRESS} will suppress remaining errors by using suppression annotations.
-   * {@link ResolveRemainingErrorMode#BASIC} will resolve remaining errors by using simply providing code location to model and ask for a fix.
-   * {@link ResolveRemainingErrorMode#ADVANCED} will resolve remaining errors by using an agentic model to provide a fix.
+   * Mode to resolve remaining errors. {@link ResolveRemainingErrorMode#DISABLED} will not resolve
+   * remaining errors. {@link ResolveRemainingErrorMode#SUPPRESS} will suppress remaining errors by
+   * using suppression annotations. {@link ResolveRemainingErrorMode#BASIC} will resolve remaining
+   * errors by using simply providing code location to model and ask for a fix. {@link
+   * ResolveRemainingErrorMode#ADVANCED} will resolve remaining errors by using an agentic model to
+   * provide a fix.
    */
-  public enum ResolveRemainingErrorMode{
+  public enum ResolveRemainingErrorMode {
     DISABLED,
     SUPPRESS,
     BASIC,
@@ -194,37 +187,41 @@ public class Config {
 
     /**
      * Returns the {@link ResolveRemainingErrorMode} from the string representation.
+     *
      * @param mode string representation of the mode.
      * @return the {@link ResolveRemainingErrorMode}.
      */
     public static ResolveRemainingErrorMode fromString(@Nullable String mode) {
-        if (mode == null) {
-            return DISABLED;
-        }
-        switch (mode) {
-            case "disabled":
-            return DISABLED;
-            case "suppress":
-            return SUPPRESS;
-            case "basic":
-            return BASIC;
-            case "advanced":
-            return ADVANCED;
-            default:
-            throw new IllegalArgumentException("Unsupported resolve remaining error mode: " + mode);
-        }
+      if (mode == null) {
+        return DISABLED;
+      }
+      mode = mode.toLowerCase(Locale.getDefault());
+      switch (mode) {
+        case "disabled":
+          return DISABLED;
+        case "suppress":
+          return SUPPRESS;
+        case "basic":
+          return BASIC;
+        case "advanced":
+          return ADVANCED;
+        default:
+          throw new IllegalArgumentException("Unsupported resolve remaining error mode: " + mode);
+      }
     }
 
     /**
      * Returns true if the mode is {@link ResolveRemainingErrorMode#DISABLED}.
+     *
      * @return true if the mode is {@link ResolveRemainingErrorMode#DISABLED}.
      */
     public boolean isDisabled() {
-        return this == DISABLED;
+      return this == DISABLED;
     }
 
     /**
      * Returns true if the mode is {@link ResolveRemainingErrorMode#SUPPRESS}.
+     *
      * @return true if the mode is {@link ResolveRemainingErrorMode#SUPPRESS}.
      */
     public boolean isSuppression() {
@@ -233,25 +230,28 @@ public class Config {
 
     /**
      * Returns true if the mode is {@link ResolveRemainingErrorMode#BASIC}.
+     *
      * @return true if the mode is {@link ResolveRemainingErrorMode#BASIC}.
      */
     public boolean isBasic() {
       return this == BASIC;
-      }
+    }
 
     /**
      * Returns true if the mode is {@link ResolveRemainingErrorMode#ADVANCED}.
+     *
      * @return true if the mode is {@link ResolveRemainingErrorMode#ADVANCED}.
      */
-
     public boolean isAdvanced() {
       return this == ADVANCED;
-      }
+    }
 
     /**
-     * Returns true if the mode is {@link ResolveRemainingErrorMode#BASIC} or {@link ResolveRemainingErrorMode#ADVANCED}.
-     * This means that the mode is resolution.
-     * @return true if the mode is {@link ResolveRemainingErrorMode#BASIC} or {@link ResolveRemainingErrorMode#ADVANCED}.
+     * Returns true if the mode is {@link ResolveRemainingErrorMode#BASIC} or {@link
+     * ResolveRemainingErrorMode#ADVANCED}. This means that the mode is resolution.
+     *
+     * @return true if the mode is {@link ResolveRemainingErrorMode#BASIC} or {@link
+     *     ResolveRemainingErrorMode#ADVANCED}.
      */
     public boolean isResolution() {
       return this == ADVANCED || this == BASIC;
@@ -459,7 +459,11 @@ public class Config {
 
     // Resolve remaining errors
     Option resolveRemainingErrorsOption =
-        new Option("rrem", "resolve-remaining-errors-mode", true, "Resolves remaining errors mode [DISABLED, SUPPRESS, BASIC, ADVANCED].");
+        new Option(
+            "rrem",
+            "resolve-remaining-errors-mode",
+            true,
+            "Resolves remaining errors mode [DISABLED, SUPPRESS, BASIC, ADVANCED].");
     resolveRemainingErrorsOption.setRequired(false);
     options.addOption(resolveRemainingErrorsOption);
 
@@ -569,7 +573,8 @@ public class Config {
         !cmd.hasOption(nonnullAnnotationsOption)
             ? ImmutableSet.of()
             : ImmutableSet.copyOf(cmd.getOptionValue(nonnullAnnotationsOption).split(","));
-    this.resolveRemainingErrorMode = ResolveRemainingErrorMode.fromString(cmd.getOptionValue(resolveRemainingErrorsOption));
+    this.resolveRemainingErrorMode =
+        ResolveRemainingErrorMode.fromString(cmd.getOptionValue(resolveRemainingErrorsOption));
     this.annotatedPackages = cmd.getOptionValue(annotatedPackagesOption, "");
     if (!this.resolveRemainingErrorMode.isDisabled() && this.annotatedPackages.isEmpty()) {
       throw new IllegalArgumentException(
@@ -677,7 +682,8 @@ public class Config {
     this.languageLevel =
         getLanguageLevel(parser.getValueFromKey("LANGUAGE_LEVEL").orElse("17").getAsString());
     this.resolveRemainingErrorMode =
-        ResolveRemainingErrorMode.fromString(parser.getValueFromKey("RESOLVE_REMAINING_ERRORS").orElse("DISABLED").getAsString());
+        ResolveRemainingErrorMode.fromString(
+            parser.getValueFromKey("RESOLVE_REMAINING_ERRORS").orElse("DISABLED").getAsString());
     this.annotatedPackages = parser.getValueFromKey("ANNOTATED_PACKAGES").orElse("").getAsString();
     this.nonnullAnnotations =
         ImmutableSet.copyOf(
@@ -735,7 +741,6 @@ public class Config {
     public Path nullawayLibraryModelLoaderPath;
     public AnalysisMode mode = AnalysisMode.LOCAL;
     public String downstreamBuildCommand;
-    public boolean suppressRemainingErrors = false;
     public String nullUnmarkedAnnotation = "org.jspecify.annotations.NullUnmarked";
     public boolean inferenceActivated = true;
     public boolean useCacheImpact = false;

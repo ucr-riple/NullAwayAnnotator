@@ -22,27 +22,25 @@
  * THE SOFTWARE.
  */
 
-
 package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
-
 import java.util.Set;
 
 /**
- * A class that provides code fixes for {@link NullAwayError}s. This mode just simply provides the code snippet with an error and asks for a fix.
+ * A class that provides code fixes for {@link NullAwayError}s. This mode just simply provides the
+ * code snippet with an error and asks for a fix.
  */
-public class BasicNullAwayCodeFix extends NullAwayCodeFix{
+public class BasicNullAwayCodeFix extends NullAwayCodeFix {
 
+  public BasicNullAwayCodeFix(Context context) {
+    super(context);
+  }
 
-    public BasicNullAwayCodeFix(Context context) {
-        super(context);
-    }
-
-    @Override
-    public Set<MethodRewriteChange> fix(NullAwayError error) {
-        return Set.of();
-    }
+  @Override
+  public Set<MethodRewriteChange> fix(NullAwayError error) {
+    return Set.of();
+  }
 }
