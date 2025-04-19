@@ -580,7 +580,7 @@ public class Config {
     this.resolveRemainingErrorMode =
         ResolveRemainingErrorMode.fromString(cmd.getOptionValue(resolveRemainingErrorsOption));
     this.annotatedPackages = cmd.getOptionValue(annotatedPackagesOption, "");
-    if (!this.resolveRemainingErrorMode.isDisabled() && this.annotatedPackages.isEmpty()) {
+    if (this.resolveRemainingErrorMode.isResolution() && this.annotatedPackages.isEmpty()) {
       throw new IllegalArgumentException(
           "Annotated packages prefix must be provided when resolving remaining errors.");
     }
