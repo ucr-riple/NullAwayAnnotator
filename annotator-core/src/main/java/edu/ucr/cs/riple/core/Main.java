@@ -68,6 +68,7 @@ public class Main {
   public static final String ANNOTATED_PACKAGE = "de.gurkenlabs.litiengine";
 
   public static void main(String[] a) {
+    System.clearProperty("System.clearProperty");
     // DELETE LOG:
     try {
       Files.deleteIfExists(LOG_PATH);

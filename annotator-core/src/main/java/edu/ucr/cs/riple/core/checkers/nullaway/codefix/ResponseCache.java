@@ -52,6 +52,7 @@ public class ResponseCache {
     public CachedData(String prompt, String response) {
       this.prompt = prompt;
       this.response = response;
+      System.out.println(DB_URL);
     }
   }
 
