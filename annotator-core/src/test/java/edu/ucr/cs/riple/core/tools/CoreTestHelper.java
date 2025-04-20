@@ -249,6 +249,7 @@ public class CoreTestHelper {
 
   /** Starts the test process. */
   public void start() {
+    System.setProperty("ANNOTATOR_TEST_MODE", "active");
     Path configPath = outDirPath.resolve("config.json");
     checkSourcePackages();
     makeAnnotatorConfigFile(configPath);
