@@ -76,7 +76,7 @@ public class GitUtility implements AutoCloseable {
    * @throws Exception if an error occurs during the reset operation.
    */
   public void resetHard() throws Exception {
-    if(Main.TEST_MODE){
+    if (Main.TEST_MODE) {
       return;
     }
     git.reset().setMode(ResetCommand.ResetType.HARD).call();
@@ -88,7 +88,7 @@ public class GitUtility implements AutoCloseable {
    * @throws Exception if an error occurs during the pull operation.
    */
   public void pull() throws Exception {
-    if(Main.TEST_MODE){
+    if (Main.TEST_MODE) {
       return;
     }
     git.pull().setTransportConfigCallback(transportConfigCallback).call();
@@ -101,7 +101,7 @@ public class GitUtility implements AutoCloseable {
    *     <p>throws Exception if an error occurs during the checkout operation.
    */
   public void checkoutBranch(String branchName) throws Exception {
-    if(Main.TEST_MODE){
+    if (Main.TEST_MODE) {
       return;
     }
     git.checkout().setName(branchName).call();
@@ -114,7 +114,7 @@ public class GitUtility implements AutoCloseable {
    * @throws Exception if an error occurs during the delete operation.
    */
   public void deleteLocalBranch(String branchName) throws Exception {
-    if(Main.TEST_MODE){
+    if (Main.TEST_MODE) {
       return;
     }
     git.branchDelete().setBranchNames(branchName).setForce(true).call();
@@ -127,7 +127,7 @@ public class GitUtility implements AutoCloseable {
    * @throws Exception if an error occurs during the delete operation.
    */
   public void deleteRemoteBranch(String branchName) throws Exception {
-    if(Main.TEST_MODE){
+    if (Main.TEST_MODE) {
       return;
     }
     git.push()
@@ -143,7 +143,7 @@ public class GitUtility implements AutoCloseable {
    * @throws Exception if an error occurs during the create and checkout operation.
    */
   public void createAndCheckoutBranch(String branchName) throws Exception {
-    if(Main.TEST_MODE){
+    if (Main.TEST_MODE) {
       return;
     }
     git.checkout().setCreateBranch(true).setName(branchName).call();
@@ -156,7 +156,7 @@ public class GitUtility implements AutoCloseable {
    * @throws Exception if an error occurs during the push operation.
    */
   public void pushBranch(String branchName) throws Exception {
-    if(Main.TEST_MODE){
+    if (Main.TEST_MODE) {
       return;
     }
     git.push()
@@ -173,7 +173,7 @@ public class GitUtility implements AutoCloseable {
    * @throws Exception if an error occurs during the status check operation.
    */
   public boolean hasChangesToCommit() throws Exception {
-    if(Main.TEST_MODE){
+    if (Main.TEST_MODE) {
       return false;
     }
     Status status = git.status().call();
@@ -186,7 +186,7 @@ public class GitUtility implements AutoCloseable {
    * @throws Exception if an error occurs during the stage operation.
    */
   public void stageAllChanges() throws Exception {
-    if(Main.TEST_MODE){
+    if (Main.TEST_MODE) {
       return;
     }
     git.add().addFilepattern(".").call();
@@ -199,7 +199,7 @@ public class GitUtility implements AutoCloseable {
    * @throws Exception if an error occurs during the commit operation.
    */
   public void commitChanges(String message) throws Exception {
-    if(Main.TEST_MODE){
+    if (Main.TEST_MODE) {
       return;
     }
     git.commit().setMessage(message).call();
@@ -211,7 +211,7 @@ public class GitUtility implements AutoCloseable {
    * @throws Exception if an error occurs during the push operation.
    */
   public void pushChanges() throws Exception {
-    if(Main.TEST_MODE){
+    if (Main.TEST_MODE) {
       return;
     }
     git.push().setTransportConfigCallback(transportConfigCallback).call();
@@ -223,7 +223,7 @@ public class GitUtility implements AutoCloseable {
    * @throws Exception if an error occurs during the revert operation.
    */
   public void revertLastCommit() throws Exception {
-    if(Main.TEST_MODE){
+    if (Main.TEST_MODE) {
       return;
     }
     RevCommit head = git.getRepository().parseCommit(git.getRepository().resolve("HEAD"));

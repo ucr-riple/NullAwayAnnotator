@@ -60,7 +60,7 @@ public class Main {
   // Mac
   //  public static final String PROJECT_PATH = "/Users/nima/Desktop/conductor";
   // Ubuntu
-  public static final boolean TEST_MODE = System.getenv("ANNOTATOR_TEST_MODE") != null;
+  public static final boolean TEST_MODE = System.getProperty("ANNOTATOR_TEST_MODE") != null;
   public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/litiengine";
   public static final String BENCHMARK_NAME = "litiengine";
   public static final String BRANCH_NAME = "nimak/auto-code-fix-4";

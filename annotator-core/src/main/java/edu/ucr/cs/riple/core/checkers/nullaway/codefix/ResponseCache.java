@@ -39,7 +39,7 @@ public class ResponseCache {
 
   /** Database file path. */
   private static final String DB_URL =
-          String.format("jdbc:sqlite:databases/%s.db", Main.TEST_MODE ? "Test" : Main.BENCHMARK_NAME);
+      String.format("jdbc:sqlite:databases/%s.db", Main.TEST_MODE ? "Test" : Main.BENCHMARK_NAME);
 
   /** CachedData class to store the prompt and response. */
   public static class CachedData {

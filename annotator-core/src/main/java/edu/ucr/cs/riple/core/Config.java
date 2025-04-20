@@ -687,7 +687,10 @@ public class Config {
         getLanguageLevel(parser.getValueFromKey("LANGUAGE_LEVEL").orElse("17").getAsString());
     this.resolveRemainingErrorMode =
         ResolveRemainingErrorMode.fromString(
-            parser.getValueFromKey("RESOLVE_REMAINING_ERRORS_MODE").orElse("DISABLED").getAsString());
+            parser
+                .getValueFromKey("RESOLVE_REMAINING_ERRORS_MODE")
+                .orElse("DISABLED")
+                .getAsString());
     this.annotatedPackages = parser.getValueFromKey("ANNOTATED_PACKAGES").orElse("").getAsString();
     this.nonnullAnnotations =
         ImmutableSet.copyOf(
