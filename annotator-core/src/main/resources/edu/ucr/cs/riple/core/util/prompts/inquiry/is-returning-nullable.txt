@@ -8,7 +8,7 @@ In the method below, is there a possibility that the method returns null based o
 
 %s
 
-Here is the method definitions in addition for the method inquired:
+Here are the method definitions in addition to the method inquired:
 
 %s
 

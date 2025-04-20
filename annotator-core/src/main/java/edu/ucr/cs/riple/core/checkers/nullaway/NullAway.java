@@ -33,6 +33,7 @@ import edu.ucr.cs.riple.core.Main;
 import edu.ucr.cs.riple.core.checkers.CheckerBaseClass;
 import edu.ucr.cs.riple.core.checkers.DiagnosticPosition;
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.AdvancedNullAwayCodeFix;
+import edu.ucr.cs.riple.core.checkers.nullaway.codefix.BasicNullAwayCodeFix;
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.ChatGPT;
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.NullAwayCodeFix;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
@@ -373,7 +374,10 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
   @Override
   public void resolveRemainingErrors() {
     Utility.buildTarget(context);
-    NullAwayCodeFix codeFix = new AdvancedNullAwayCodeFix(context);
+    NullAwayCodeFix codeFix =
+        config.resolveRemainingErrorMode.isAdvanced()
+            ? new AdvancedNullAwayCodeFix(context)
+            : new BasicNullAwayCodeFix(context);
     Set<NullAwayError> remainingErrors = deserializeErrors(context.targetModuleInfo);
     codeFix.collectImpacts();
     AtomicInteger counter = new AtomicInteger(0);

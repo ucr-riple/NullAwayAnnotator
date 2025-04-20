@@ -32,6 +32,7 @@ import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.core.util.ASTParser;
 import edu.ucr.cs.riple.core.util.Utility;
+import edu.ucr.cs.riple.injector.SourceCode;
 import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.io.BufferedReader;
@@ -125,7 +126,6 @@ public class ChatGPT {
         Utility.readResourceContent("prompts/dereference/fix-by-all-regions.txt");
     this.rewriteReturnNullForNullableMethodPrompt =
         Utility.readResourceContent("prompts/dereference/return-null-rewrite.txt");
-    this.basicFixRequestPrompt = Utility.readResourceContent("prompts/basic-fix-request.txt");
     this.checkIfExpressionCanBeNullAtErrorPointPrompt =
         Utility.readResourceContent("prompts/inquiry/is-false-positive.txt");
     this.checkIfMethodIsAnInitializerPrompt =
@@ -136,6 +136,7 @@ public class ChatGPT {
         Utility.readResourceContent("prompts/inquiry/is-returning-nullable.txt");
     this.checkIfMethodReturnsNullableAtCallSitePrompt =
         Utility.readResourceContent("prompts/inquiry/is-nullable-at-call-site.txt");
+    this.basicFixRequestPrompt = Utility.readResourceContent("prompts/basic-fix-request.txt");
     this.parser = parser;
     ResponseCache.createTable();
   }
@@ -431,6 +432,63 @@ public class ChatGPT {
       return Set.of();
     }
     return Set.of(change);
+  }
+
+  /**
+   * Fixes the error using the basic prompt. The prompt includes the surrounding code of the error
+   * and the error info.
+   *
+   * @param error the error to fix.
+   * @param context Annotator context.
+   * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty set} if the
+   *     model fails.
+   */
+  public Set<MethodRewriteChange> fixUsingBasicPrompt(NullAwayError error, Context context) {
+    SourceCode src = parser.getRegionSourceCode(error.getRegion());
+    int linesNumber = src.range.getLineCount();
+    int firstLine = linesNumber - 20;
+    if (firstLine < 0) {
+      firstLine = 0;
+    }
+    int lastLine = linesNumber + 20;
+    String errorContext = "";
+    // check if src.range is including the first and last line
+    if (src.range.begin.line - 1 < firstLine && src.range.end.line - 1 > lastLine) {
+      // the method already includes the first and last line
+      errorContext = src.content;
+    } else {
+      if (src.range.begin.line - 1 < firstLine) {
+        firstLine = src.range.begin.line - 1;
+      }
+      if (src.range.end.line - 1 > lastLine) {
+        lastLine = src.range.end.line - 1;
+      }
+      errorContext = Utility.getLinesFromFile(error.path, firstLine, lastLine);
+    }
+    String region =
+        "the "
+            + (error.getRegion().isOnCallable() ? "method: " : "declaration of field: ")
+            + error.getRegion().member;
+    String prompt =
+        String.format(
+            basicFixRequestPrompt,
+            error.messageType,
+            error.message,
+            error.position.diagnosticLine,
+            region,
+            errorContext,
+            error.getRegion().member);
+    Response response = ask(prompt, context);
+    if (!response.isSuccessFull()) {
+      return Set.of();
+    }
+    String code = response.getCode();
+    if (code.isEmpty()) {
+      return Set.of();
+    }
+    return Set.of(
+        new MethodRewriteChange(
+            new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member), code));
   }
 
   /**

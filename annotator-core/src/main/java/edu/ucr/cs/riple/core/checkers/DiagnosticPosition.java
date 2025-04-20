@@ -100,7 +100,8 @@ public class DiagnosticPosition {
     return "\n"
         + ((path == null) ? "" : path.toString())
         + ":"
-        + lineNumber
+        // we add 1 to the line number because it is 0-based
+        + (lineNumber + 1)
         + "\n"
         + diagnosticLine;
   }

@@ -41,6 +41,6 @@ public class BasicNullAwayCodeFix extends NullAwayCodeFix {
 
   @Override
   public Set<MethodRewriteChange> fix(NullAwayError error) {
-    return Set.of();
+    return gpt.fixUsingBasicPrompt(error, context);
   }
 }

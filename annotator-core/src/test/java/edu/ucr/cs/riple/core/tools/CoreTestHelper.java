@@ -243,7 +243,11 @@ public class CoreTestHelper {
   }
 
   public CoreTestHelper resolveRemainingErrors() {
-    this.resolveRemainingErrorsMode = Config.ResolveRemainingErrorMode.ADVANCED;
+    return resolveRemainingErrors(Config.ResolveRemainingErrorMode.ADVANCED);
+  }
+
+  public CoreTestHelper resolveRemainingErrors(Config.ResolveRemainingErrorMode mode) {
+    this.resolveRemainingErrorsMode = mode;
     return this;
   }
 

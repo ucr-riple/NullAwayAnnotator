@@ -1,7 +1,7 @@
 I want to check if the given method is an initializer method.
 Initializer methods are assumed by NullAway to always be called before any other method of the class that is not a constructor or called from a constructor.
 This means a non-null field is considered to be properly initialized if it's set by such an initializer method.
-By design, NullAway doesn't check for such initialization, since an important use case of initializer methods is documenting methods used by annotation processors or external frameworks as part of object set up (e.g. {@code android.app.Activity.onCreate} or {@code javax.annotation.processing.Processor.init})
+By design, NullAway doesn't check for such initialization, since an important use case of initializer methods is documenting methods used by annotation processors or external frameworks as part of object setup (e.g. {@code android.app.Activity.onCreate} or {@code javax.annotation.processing.Processor.init})
 
 Here are some examples of initializer methods:
 - {@code android.app.Activity.onCreate}

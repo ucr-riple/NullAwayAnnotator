@@ -1,0 +1,21 @@
+I want to resolve a warning reported by NullAway.
+The error is of the type of "%s" and the full error message is: "%s".
+The line with the error is: "%s".
+
+The error is within "%s" and the code surrounding the error is:
+```java
+%s
+```
+
+Give me the fixed code snippet (ONLY THE METHOD REWRITE OF "%s") in XML format in <response> tag like the example below. I will apply the fix to my codebase.
+Do not import any additional libraries or classes or java comments.
+If you can provide the fixed code snippet, provide it in the following format and place the code snippet in the <code> tag within ```java block.
+<response>
+  <success>true</success>
+  <code><![CDATA[
+  ```java
+  Your fixed code snippet here
+  ```
+    ]]>
+  </code>
+</response>

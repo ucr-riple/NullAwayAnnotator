@@ -543,4 +543,25 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
         .resolveRemainingErrors()
         .start();
   }
+
+  @Test
+  public void nullableMethodReturnFixUsingBasicPrompt() {
+    coreTestHelper
+        .onTarget()
+        .withSourceLines(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "     @Nullable Object f1;",
+            "     Object getF1(){",
+            "       return f1;",
+            "     }",
+            "}")
+        .expectNoReport()
+        .deactivateInference()
+        .toDepth(1)
+        .resolveRemainingErrors(Config.ResolveRemainingErrorMode.BASIC)
+        .start();
+  }
 }

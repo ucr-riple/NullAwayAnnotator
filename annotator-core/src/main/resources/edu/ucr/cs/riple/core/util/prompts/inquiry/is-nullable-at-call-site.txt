@@ -13,7 +13,7 @@ In the method below, is there a possibility that the method returns null at the 
 ### call site:
 %s
 
-Here is the method definitions and the call chain for this method, showing the sequence of calls from the method to its callers at each depth level:
+Here are the method definitions and the call chain for this method, showing the sequence of calls from the method to its callers at each depth level:
 
 %s
 
