@@ -353,7 +353,7 @@ public class ChatGPT {
             constructPromptForRegions(errorRegions),
             expression,
             expression);
-    logger.trace("Asking if the error can be fixed by using all regions");
+   logger.trace("Asking if the error can be fixed by using all regions");
     Response response = ask(prompt, context);
     logger.trace("response: " + response);
     if (!response.isSuccessFull()) {
@@ -445,13 +445,12 @@ public class ChatGPT {
    */
   public Set<MethodRewriteChange> fixUsingBasicPrompt(NullAwayError error, Context context) {
     SourceCode src = parser.getRegionSourceCode(error.getRegion());
-    int linesNumber = src.range.getLineCount();
-    int firstLine = linesNumber - 20;
+    int firstLine = error.position.lineNumber - 20;
     if (firstLine < 0) {
       firstLine = 0;
     }
-    int lastLine = linesNumber + 20;
-    String errorContext = "";
+    int lastLine = error.position.lineNumber + 20;
+    String errorContext;
     // check if src.range is including the first and last line
     if (src.range.begin.line - 1 < firstLine && src.range.end.line - 1 > lastLine) {
       // the method already includes the first and last line
@@ -559,12 +558,13 @@ public class ChatGPT {
   public Response checkIfParamIsNullable(
       String encClass, String method, String param, String callContext, Context context) {
     logger.trace("Asking if the parameter is nullable: {}", param);
-    return ask(
-        String.format(
+    String prompt = String.format(
             checkIfParamIsNullablePrompt,
             param,
             callContext,
-            parser.getRegionSourceCode(new Region(encClass, method)).content),
+            parser.getRegionSourceCode(new Region(encClass, method)).content);
+    return ask(
+        prompt,
         context);
   }
 
