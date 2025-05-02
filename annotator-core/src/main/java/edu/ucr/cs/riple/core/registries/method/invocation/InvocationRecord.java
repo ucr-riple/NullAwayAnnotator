@@ -52,8 +52,11 @@ public class InvocationRecord {
    */
   private final List<Set<MethodRecord>> calls;
 
-  /** A list of third-party libraries requests. These libraries source code is not available. */
-  private final List<String> thirdPartyLibs;
+  /**
+   * Contains third-party method declarations not found in the source code. These methods will be
+   * provided to the model as plain-text descriptions only.
+   */
+  private final Set<String> thirdPartyLibs;
 
   /** Parser to parse the AST of the methods and retrieve their source code */
   private final ASTParser parser;
@@ -64,7 +67,7 @@ public class InvocationRecord {
   public InvocationRecord(InvocationRecordRegistry registry) {
     this.calls = new ArrayList<>(3);
     this.registry = registry;
-    this.thirdPartyLibs = new ArrayList<>();
+    this.thirdPartyLibs = new HashSet<>();
     this.parser = registry.getParser();
   }
 

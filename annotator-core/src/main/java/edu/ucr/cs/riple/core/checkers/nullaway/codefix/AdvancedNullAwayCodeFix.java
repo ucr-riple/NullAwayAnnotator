@@ -76,6 +76,9 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
   /** Invocation record registry to retrieve the callers of a method. */
   private final InvocationRecordRegistry invocationRecordRegistry;
 
+  /** Basic nullaway code fix to handle unknown cases. */
+  private final BasicNullAwayCodeFix basicNullAwayCodeFix;
+
   /** The logger instance. */
   private static final Logger logger = LogManager.getLogger(AdvancedNullAwayCodeFix.class);
 
@@ -88,6 +91,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
   public AdvancedNullAwayCodeFix(Context context) {
     super(context);
     this.invocationRecordRegistry = new InvocationRecordRegistry(context.targetModuleInfo, parser);
+    this.basicNullAwayCodeFix = new BasicNullAwayCodeFix(context);
   }
 
   /**
@@ -402,21 +406,25 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
             new AddSingleElementAnnotation(methodLocation, "SuppressWarnings", "NullAway", false));
         return NO_ACTION;
       }
-      Response callSiteNullability =
-          checkIfMethodIsReturningNullableOnCallSite(encClass, method, invocation);
-      if (callSiteNullability.isDisagreement()) {
-        logger.trace(
-            "Method is not returning nullable on call site. Injecting suppression annotation.");
-        // Add precondition here.
-        return constructCastToNonnullChange(error, callSiteNullability.getReason());
-      }
+    }
+    Response callSiteNullability =
+        isAnnotated
+            ? checkIfMethodIsReturningNullableOnCallSite(encClass, method, invocation)
+            : checkIfMethodIsReturningNullableOnCallSite(
+                error.getRegion().clazz, error.getRegion().member, invocation);
+    if (callSiteNullability.isDisagreement()) {
+      logger.trace(
+          "Method is not returning nullable on call site. Injecting suppression annotation.");
+      // Add precondition here.
+      return constructCastToNonnullChange(error, callSiteNullability.getReason());
     }
     // Try to fix by regions using the method as an example.
     MethodRecord record =
         context.targetModuleInfo.getMethodRegistry().findMethodByName(encClass, method);
     if (record == null) {
       logger.trace("Method not found: " + encClass + "#" + method);
-      return NO_ACTION;
+      logger.trace("Asking simple model to fix dereference error.");
+      return basicNullAwayCodeFix.fix(error);
     }
     OnMethod methodLocation = record.location;
     logger.trace("Trying to fix by regions using the method as an example.");

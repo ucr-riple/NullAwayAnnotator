@@ -64,7 +64,7 @@ public class Main {
   public static final boolean DEBUG_MODE = false;
   public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/eureka";
   public static final String BENCHMARK_NAME = "eureka";
-  public static final String BRANCH_NAME = "nimak/auto-code-fix-basic-0";
+  public static final String BRANCH_NAME = "nimak/auto-code-fix-1";
   public static final Path LOG_PATH = Paths.get("/tmp/logs/app.log");
   public static final String ANNOTATED_PACKAGE = "com.netflix.eureka";
 
@@ -129,7 +129,7 @@ public class Main {
       ANNOTATED_PACKAGE,
       "-di", // deactivate inference
       "-rrem", // resolve remaining errors
-      "basic",
+      "advanced",
       //       "-rboserr", // redirect build output stream and error stream
       "--depth",
       "6"

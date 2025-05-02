@@ -35,6 +35,7 @@ Provide the answer in **XML format** as follows:
 
 #### If you are unsure or If there are any methods that directly or indirectly affect the return value and are not fully disclosed, request their declarations first, in the following format:
 <response>
+  <reason><![CDATA[EXPLAIN WHY THIS METHOD DECLARATION IS NECESSARY AND WHY YOU CANNOT MAKE A CONFIDENT DECISION WITHOUT IT]]></reason>
   <success>false</success>
   <methods>
     <method>methodName</method>

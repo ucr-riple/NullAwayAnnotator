@@ -395,8 +395,9 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       System.out.println("TOP LEVEL CALL TO FIX ERROR: " + error);
                       logger.trace("=".repeat(30));
                       counter.incrementAndGet();
-                      //                      if
-                      // (error.position.diagnosticLine.contains("this.miscEntities.get(renderType).values(), renderType == RenderType.NORMAL);")) {
+                      //                      if (error.position.diagnosticLine.contains(
+                      //                          "return
+                      // this.applications.get().getRegisteredApplications(appName);")) {
                       //                        System.out.println("At index: " + counter.get());
                       //                      } else {
                       //                        return;
