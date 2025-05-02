@@ -353,7 +353,7 @@ public class ChatGPT {
             constructPromptForRegions(errorRegions),
             expression,
             expression);
-   logger.trace("Asking if the error can be fixed by using all regions");
+    logger.trace("Asking if the error can be fixed by using all regions");
     Response response = ask(prompt, context);
     logger.trace("response: " + response);
     if (!response.isSuccessFull()) {
@@ -558,14 +558,13 @@ public class ChatGPT {
   public Response checkIfParamIsNullable(
       String encClass, String method, String param, String callContext, Context context) {
     logger.trace("Asking if the parameter is nullable: {}", param);
-    String prompt = String.format(
+    String prompt =
+        String.format(
             checkIfParamIsNullablePrompt,
             param,
             callContext,
             parser.getRegionSourceCode(new Region(encClass, method)).content);
-    return ask(
-        prompt,
-        context);
+    return ask(prompt, context);
   }
 
   /**

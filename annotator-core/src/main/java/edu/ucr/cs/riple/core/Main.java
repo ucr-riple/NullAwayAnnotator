@@ -61,6 +61,7 @@ public class Main {
   //  public static final String PROJECT_PATH = "/Users/nima/Desktop/conductor";
   // Ubuntu
   public static final boolean TEST_MODE = System.getProperty("ANNOTATOR_TEST_MODE") != null;
+  public static final boolean DEBUG_MODE = false;
   public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/eureka";
   public static final String BENCHMARK_NAME = "eureka";
   public static final String BRANCH_NAME = "nimak/auto-code-fix-basic-0";
