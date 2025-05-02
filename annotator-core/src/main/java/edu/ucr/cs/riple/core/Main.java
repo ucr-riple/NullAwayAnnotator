@@ -71,89 +71,89 @@ public class Main {
   public static final String ANNOTATED_PACKAGE = "de.gurkenlabs.litiengine";
 
   public static void main(String[] a) {
-//    System.clearProperty("ANNOTATOR_TEST_MODE");
-//    // DELETE LOG:
-//    try {
-//      Files.deleteIfExists(LOG_PATH);
-//    } catch (IOException e) {
-//      throw new RuntimeException(e);
-//    }
-//
-//    // delete dir
-//    Path outDir = Paths.get(PROJECT_PATH + "/annotator-out/0");
-//
-//    if (outDir.toFile().exists()) {
-//      try {
-//        Files.walkFileTree(
-//            outDir,
-//            new SimpleFileVisitor<>() {
-//              @Override
-//              public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-//                  throws IOException {
-//                Files.delete(file);
-//                return FileVisitResult.CONTINUE;
-//              }
-//
-//              @Override
-//              public FileVisitResult postVisitDirectory(Path dir, IOException exc)
-//                  throws IOException {
-//                Files.delete(dir);
-//                return FileVisitResult.CONTINUE;
-//              }
-//            });
-//      } catch (IOException e) {
-//        throw new RuntimeException(e);
-//      }
-//    }
-//
-//    String[] argsArray = {
-//      "-d",
-//      String.format("%s/annotator-out", PROJECT_PATH),
-//      "-bc",
-//      // For Ubuntu
-//      String.format(
-//          "export JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64 && cd %s && ./gradlew clean compileJava --rerun-tasks --no-build-cache",
-//          PROJECT_PATH),
-//      //      // For Mac
-//      //      String.format(
-//      //          "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.0.2.jdk/Contents/Home &&cd %s
-//      // && ./gradlew clean conductor-core:compileJava --rerun-tasks --no-build-cache",
-//      //          PROJECT_PATH),
-//      "-cp",
-//      String.format("%s/paths.tsv", PROJECT_PATH),
-//      "-i",
-//      "com.uber.nullaway.annotations.Initializer",
-//      "-n",
-//      "javax.annotation.Nullable",
-//      "-cn",
-//      "NULLAWAY",
-//      "-app",
-//      ANNOTATED_PACKAGE,
-//      "-di", // deactivate inference
-//      "-rrem", // resolve remaining errors
-//      "advanced",
-//      //       "-rboserr", // redirect build output stream and error stream
-//      "--depth",
-//      "6"
-//    };
-//    Config config = new Config(argsArray);
-//    // reset git repo
-//    try (GitUtility git = GitUtility.instance()) {
-//      git.resetHard();
-//      git.pull();
-//      git.checkoutBranch("nimak/auto-code-fix");
-//      git.resetHard();
-//      git.pull();
-//      git.deleteLocalBranch(BRANCH_NAME);
-//      git.deleteRemoteBranch(BRANCH_NAME);
-//      git.createAndCheckoutBranch(BRANCH_NAME);
-//      git.pushBranch(BRANCH_NAME);
-//    } catch (Exception e) {
-//      throw new RuntimeException(e);
-//    }
-//    // Start annotator
-//    Annotator annotator = new Annotator(config);
-//    annotator.start();
+    System.clearProperty("ANNOTATOR_TEST_MODE");
+    // DELETE LOG:
+    try {
+      Files.deleteIfExists(LOG_PATH);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
+    // delete dir
+    Path outDir = Paths.get(PROJECT_PATH + "/annotator-out/0");
+
+    if (outDir.toFile().exists()) {
+      try {
+        Files.walkFileTree(
+            outDir,
+            new SimpleFileVisitor<>() {
+              @Override
+              public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                  throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+              }
+
+              @Override
+              public FileVisitResult postVisitDirectory(Path dir, IOException exc)
+                  throws IOException {
+                Files.delete(dir);
+                return FileVisitResult.CONTINUE;
+              }
+            });
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    String[] argsArray = {
+      "-d",
+      String.format("%s/annotator-out", PROJECT_PATH),
+      "-bc",
+      // For Ubuntu
+      String.format(
+          "export JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64 && cd %s && ./gradlew clean compileJava --rerun-tasks --no-build-cache",
+          PROJECT_PATH),
+      //      // For Mac
+      //      String.format(
+      //          "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.0.2.jdk/Contents/Home &&cd %s
+      // && ./gradlew clean conductor-core:compileJava --rerun-tasks --no-build-cache",
+      //          PROJECT_PATH),
+      "-cp",
+      String.format("%s/paths.tsv", PROJECT_PATH),
+      "-i",
+      "com.uber.nullaway.annotations.Initializer",
+      "-n",
+      "javax.annotation.Nullable",
+      "-cn",
+      "NULLAWAY",
+      "-app",
+      ANNOTATED_PACKAGE,
+      "-di", // deactivate inference
+      "-rrem", // resolve remaining errors
+      "advanced",
+      //       "-rboserr", // redirect build output stream and error stream
+      "--depth",
+      "6"
+    };
+    Config config = new Config(argsArray);
+    // reset git repo
+    try (GitUtility git = GitUtility.instance()) {
+      git.resetHard();
+      git.pull();
+      git.checkoutBranch("nimak/auto-code-fix");
+      git.resetHard();
+      git.pull();
+      git.deleteLocalBranch(BRANCH_NAME);
+      git.deleteRemoteBranch(BRANCH_NAME);
+      git.createAndCheckoutBranch(BRANCH_NAME);
+      git.pushBranch(BRANCH_NAME);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    // Start annotator
+    Annotator annotator = new Annotator(config);
+    annotator.start();
     // copy the logs /tmp/logs directory under Desktop/logs/{project}/{branch}
     Path sourceDir = Paths.get("/tmp/logs");
     Path destDir = Paths.get(System.getProperty("user.home"), "Desktop", "logs", BENCHMARK_NAME, BRANCH_NAME.split("/")[1]);
