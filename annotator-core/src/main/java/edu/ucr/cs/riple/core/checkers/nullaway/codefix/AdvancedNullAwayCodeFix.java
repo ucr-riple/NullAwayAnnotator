@@ -424,6 +424,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
     if (record == null) {
       logger.trace("Method not found: " + encClass + "#" + method);
       logger.trace("Asking simple model to fix dereference error.");
+
       return basicNullAwayCodeFix.fix(error);
     }
     OnMethod methodLocation = record.location;

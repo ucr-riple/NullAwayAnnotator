@@ -33,7 +33,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.stream.Stream;
 
 /** Starting point. */
 public class Main {
@@ -62,96 +64,115 @@ public class Main {
   // Ubuntu
   public static final boolean TEST_MODE = System.getProperty("ANNOTATOR_TEST_MODE") != null;
   public static final boolean DEBUG_MODE = false;
-  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/eureka";
-  public static final String BENCHMARK_NAME = "eureka";
-  public static final String BRANCH_NAME = "nimak/auto-code-fix-1";
+  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/litiengine";
+  public static final String BENCHMARK_NAME = PROJECT_PATH.split("/")[PROJECT_PATH.split("/").length - 1];
+  public static final String BRANCH_NAME = "nimak/auto-code-fix-5";
   public static final Path LOG_PATH = Paths.get("/tmp/logs/app.log");
-  public static final String ANNOTATED_PACKAGE = "com.netflix.eureka";
+  public static final String ANNOTATED_PACKAGE = "de.gurkenlabs.litiengine";
 
   public static void main(String[] a) {
-    System.clearProperty("ANNOTATOR_TEST_MODE");
-    // DELETE LOG:
-    try {
-      Files.deleteIfExists(LOG_PATH);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+//    System.clearProperty("ANNOTATOR_TEST_MODE");
+//    // DELETE LOG:
+//    try {
+//      Files.deleteIfExists(LOG_PATH);
+//    } catch (IOException e) {
+//      throw new RuntimeException(e);
+//    }
+//
+//    // delete dir
+//    Path outDir = Paths.get(PROJECT_PATH + "/annotator-out/0");
+//
+//    if (outDir.toFile().exists()) {
+//      try {
+//        Files.walkFileTree(
+//            outDir,
+//            new SimpleFileVisitor<>() {
+//              @Override
+//              public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+//                  throws IOException {
+//                Files.delete(file);
+//                return FileVisitResult.CONTINUE;
+//              }
+//
+//              @Override
+//              public FileVisitResult postVisitDirectory(Path dir, IOException exc)
+//                  throws IOException {
+//                Files.delete(dir);
+//                return FileVisitResult.CONTINUE;
+//              }
+//            });
+//      } catch (IOException e) {
+//        throw new RuntimeException(e);
+//      }
+//    }
+//
+//    String[] argsArray = {
+//      "-d",
+//      String.format("%s/annotator-out", PROJECT_PATH),
+//      "-bc",
+//      // For Ubuntu
+//      String.format(
+//          "export JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64 && cd %s && ./gradlew clean compileJava --rerun-tasks --no-build-cache",
+//          PROJECT_PATH),
+//      //      // For Mac
+//      //      String.format(
+//      //          "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.0.2.jdk/Contents/Home &&cd %s
+//      // && ./gradlew clean conductor-core:compileJava --rerun-tasks --no-build-cache",
+//      //          PROJECT_PATH),
+//      "-cp",
+//      String.format("%s/paths.tsv", PROJECT_PATH),
+//      "-i",
+//      "com.uber.nullaway.annotations.Initializer",
+//      "-n",
+//      "javax.annotation.Nullable",
+//      "-cn",
+//      "NULLAWAY",
+//      "-app",
+//      ANNOTATED_PACKAGE,
+//      "-di", // deactivate inference
+//      "-rrem", // resolve remaining errors
+//      "advanced",
+//      //       "-rboserr", // redirect build output stream and error stream
+//      "--depth",
+//      "6"
+//    };
+//    Config config = new Config(argsArray);
+//    // reset git repo
+//    try (GitUtility git = GitUtility.instance()) {
+//      git.resetHard();
+//      git.pull();
+//      git.checkoutBranch("nimak/auto-code-fix");
+//      git.resetHard();
+//      git.pull();
+//      git.deleteLocalBranch(BRANCH_NAME);
+//      git.deleteRemoteBranch(BRANCH_NAME);
+//      git.createAndCheckoutBranch(BRANCH_NAME);
+//      git.pushBranch(BRANCH_NAME);
+//    } catch (Exception e) {
+//      throw new RuntimeException(e);
+//    }
+//    // Start annotator
+//    Annotator annotator = new Annotator(config);
+//    annotator.start();
+    // copy the logs /tmp/logs directory under Desktop/logs/{project}/{branch}
+    Path sourceDir = Paths.get("/tmp/logs");
+    Path destDir = Paths.get(System.getProperty("user.home"), "Desktop", "logs", BENCHMARK_NAME, BRANCH_NAME.split("/")[1]);
+    try(Stream<Path> p = Files.walk(sourceDir)){
+      p.forEach(sourcePath -> {
+                  try {
+                    Path targetPath = destDir.resolve(sourceDir.relativize(sourcePath));
+                    if (Files.isDirectory(sourcePath)) {
+                      Files.createDirectories(targetPath);
+                    } else {
+                      Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                    }
+                  } catch (IOException e) {
+                    System.err.println("Failed to copy: " + sourcePath + " -> " + e.getMessage());
+                  }
+                });
+    }catch (IOException e){
+      System.err.println("Failed to copy: " + e.getMessage());
     }
-
-    // delete dir
-    Path outDir = Paths.get(PROJECT_PATH + "/annotator-out/0");
-
-    if (outDir.toFile().exists()) {
-      try {
-        Files.walkFileTree(
-            outDir,
-            new SimpleFileVisitor<>() {
-              @Override
-              public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-                  throws IOException {
-                Files.delete(file);
-                return FileVisitResult.CONTINUE;
-              }
-
-              @Override
-              public FileVisitResult postVisitDirectory(Path dir, IOException exc)
-                  throws IOException {
-                Files.delete(dir);
-                return FileVisitResult.CONTINUE;
-              }
-            });
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }
-
-    String[] argsArray = {
-      "-d",
-      String.format("%s/annotator-out", PROJECT_PATH),
-      "-bc",
-      // For Ubuntu
-      String.format(
-          "export JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64 && cd %s && ./gradlew clean compileJava --rerun-tasks --no-build-cache",
-          PROJECT_PATH),
-      //      // For Mac
-      //      String.format(
-      //          "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.0.2.jdk/Contents/Home &&cd %s
-      // && ./gradlew clean conductor-core:compileJava --rerun-tasks --no-build-cache",
-      //          PROJECT_PATH),
-      "-cp",
-      String.format("%s/paths.tsv", PROJECT_PATH),
-      "-i",
-      "com.uber.nullaway.annotations.Initializer",
-      "-n",
-      "javax.annotation.Nullable",
-      "-cn",
-      "NULLAWAY",
-      "-app",
-      ANNOTATED_PACKAGE,
-      "-di", // deactivate inference
-      "-rrem", // resolve remaining errors
-      "advanced",
-      //       "-rboserr", // redirect build output stream and error stream
-      "--depth",
-      "6"
-    };
-    Config config = new Config(argsArray);
-    // reset git repo
-    try (GitUtility git = GitUtility.instance()) {
-      git.resetHard();
-      git.pull();
-      git.checkoutBranch("nimak/auto-code-fix");
-      git.resetHard();
-      git.pull();
-      git.deleteLocalBranch(BRANCH_NAME);
-      git.deleteRemoteBranch(BRANCH_NAME);
-      git.createAndCheckoutBranch(BRANCH_NAME);
-      git.pushBranch(BRANCH_NAME);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-    // Start annotator
-    Annotator annotator = new Annotator(config);
-    annotator.start();
   }
 
   public static boolean isTheFix(Fix fix) {
