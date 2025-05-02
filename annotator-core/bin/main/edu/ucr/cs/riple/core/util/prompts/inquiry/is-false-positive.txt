@@ -1,0 +1,32 @@
+In the method below, is there a possibility that the expression "%s" at line "%s" is null?
+%s
+Give a single-word answer in XML format. If it is possible for the expression to be null, respond with:
+```xml
+<response>
+    <reason><![CDATA[YOUR REASON]]></reason>
+    <value>YES</value>
+</response>
+```
+If it is not possible for the expression to be null, respond with:
+```xml
+<response>
+    <reason><![CDATA[YOUR REASON]]></reason>
+    <value>NO</value>
+</response>
+```
+If you are unsure or need more information, respond with where you can ask for more details or what specific information you need.
+
+If additional information is required, list each request inside a `<request>` tag. If no additional information is needed, omit the `<requests>` section.
+
+Respond with:
+```xml
+<response>
+    <reason><![CDATA[YOUR REASON]]></reason>
+    <value>UNKNOWN</value>
+    <!-- Include <requests> only if additional information is needed -->
+    <requests>
+        <request><![CDATA[YOUR REQUEST 1]]></request>
+        <request><![CDATA[YOUR REQUEST 2]]></request>
+    </requests>
+</response>
+```

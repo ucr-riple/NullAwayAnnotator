@@ -1,0 +1,46 @@
+I want to check if the given method is an initializer method.
+Initializer methods are assumed by NullAway to always be called before any other method of the class that is not a constructor or called from a constructor.
+This means a non-null field is considered to be properly initialized if it's set by such an initializer method.
+By design, NullAway doesn't check for such initialization, since an important use case of initializer methods is documenting methods used by annotation processors or external frameworks as part of object set up (e.g. {@code android.app.Activity.onCreate} or {@code javax.annotation.processing.Processor.init})
+
+Here are some examples of initializer methods:
+- {@code android.app.Activity.onCreate}
+- {@code javax.annotation.processing.Processor.init}
+- {@code javax.servlet.http.HttpServlet.init}
+- {@code javax.servlet.Filter.init}
+- {@code javax.servlet.Servlet.init}
+
+or any method that has a name that starts with "init" or "initialize" and is not a setter method.
+
+Is the given method an initializer method? I know it initializes the fields of the class, but I do not want to consider a setter method as an initializer method.
+%s
+Please provide a single-word answer and your reason/explanation in XML format. If it is an initializer method, respond with:
+```xml
+<response>
+    <reason><![CDATA[YOUR REASON]]></reason>
+    <value>YES</value>
+</response>
+```
+If it is not an initializer method, respond with:
+```xml
+<response>
+    <reason><![CDATA[YOUR REASON]]></reason>
+    <value>NO</value>
+</response>
+```
+If you are unsure or need more information, respond with where you can ask for more details or what specific information you need.
+
+If additional information is required, list each request inside a `<request>` tag. If no additional information is needed, omit the `<requests>` section.
+
+Respond with:
+```xml
+<response>
+    <reason><![CDATA[YOUR REASON]]></reason>
+    <value>UNKNOWN</value>
+    <!-- Include <requests> only if additional information is needed -->
+    <requests>
+        <request><![CDATA[YOUR REQUEST 1]]></request>
+        <request><![CDATA[YOUR REQUEST 2]]></request>
+    </requests>
+</response>
+```

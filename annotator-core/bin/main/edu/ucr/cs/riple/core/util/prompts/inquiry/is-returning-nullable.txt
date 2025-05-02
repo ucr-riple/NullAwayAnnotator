@@ -1,0 +1,54 @@
+In the method below, is there a possibility that the method returns null based only on its body? Consider the following points:
+
+- The method may have multiple return paths; consider all return statements.
+- If the method calls another method, do not assume its return value unless its full declaration is provided. Request its declaration if needed.
+- The method may throw an exception instead of returning null. An exception path should not be considered a null return.
+- Ensure you request the declarations of any methods whose return values directly or indirectly impact this method’s return value before making a conclusion.
+- Carefully analyze all conditions and prior operations that may guarantee a non-null return value.
+
+%s
+
+Here is the method definitions in addition for the method inquired:
+
+%s
+
+Response Format:
+Provide the answer in **XML format** as follows:
+
+#### If the method **cannot** return `null`:
+```xml
+<response>
+  <reason><![CDATA[EXPLAIN WHY THE METHOD CANNOT RETURN NULL]]></reason>
+  <value>NO</value>
+</response>
+```
+
+#### If the method can return null:
+```xml
+<response>
+  <reason><![CDATA[EXPLAIN WHY THE METHOD CAN RETURN NULL]]></reason>
+  <value>YES</value>
+</response>
+```
+
+#### If you are unsure or need more information, respond with where you can ask for more details or what specific information you need.
+
+If additional information is required, list each request inside a `<request>` tag. If no additional information is needed, omit the `<requests>` section.
+
+Respond with:
+```xml
+<response>
+    <reason><![CDATA[YOUR REASON]]></reason>
+    <value>UNKNOWN</value>
+    <!-- Include <requests> only if additional information is needed -->
+    <requests>
+        <request><![CDATA[YOUR REQUEST 1]]></request>
+        <request><![CDATA[YOUR REQUEST 2]]></request>
+    </requests>
+</response>
+```
+
+Additional Notes:
+Be precise in your reasoning.
+If a method’s return value depends on another method not provided, request its declaration before making a conclusion.
+If the method can return null in some cases but not others, explain under what conditions it can happen.

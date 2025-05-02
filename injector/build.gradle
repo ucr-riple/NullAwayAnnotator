@@ -24,6 +24,22 @@
 
 plugins {
     id 'com.github.sherter.google-java-format' version '0.9'
+    id 'maven-publish'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id "com.vanniktech.maven.publish"
+}
+
+application {
+    mainClass = 'edu.ucr.cs.riple.injector.Main'
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': application.mainClass
+        )
+    }
 }
 
 dependencies {

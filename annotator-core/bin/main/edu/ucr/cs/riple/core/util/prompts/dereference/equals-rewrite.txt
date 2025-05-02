@@ -1,0 +1,43 @@
+I want to resolve a warning reported by NullAway.
+I am going to show you couple of examples how this specific type of error is fixed and how I want them to get fixed in my codebase.
+The error is of type of dereferencing a nullable value inside the object equals method.
+I think if the dereferenced value is null, the method should check if the other object is null and prevent crashing by replacing the dereferenced value with a call to Objects.equal.
+
+See the example below:
+
+Example 1:
+```java
+public boolean equals(Object obj) {
+  if (obj == null) {
+    return false;
+  }
+  return this.f1.equals(((Foo) obj).f1); // NullAway: dereferenced expression f1 is @Nullable
+}
+```
+The fix should be:
+```java
+public boolean equals(Object obj) {
+  if (obj == null) {
+    return false;
+  }
+  return Objects.equal(this.f1, ((Foo) obj).f1);
+}
+
+Here is the code snippet that I want to be fixed:
+
+%s
+
+And the error I want to be fixed is:
+
+%s
+
+Just give me the fixed code snippet in xml format in <response> tag like the example below. I will apply the fix to my codebase. Do not import any additional libraries or classes or java comments. If you can provide the fixed code snippet, please provide it in the following format and place the code snippet in the <code> tag within ```java block.
+<response>
+  <success>true</success>
+  <code><![CDATA[
+  ```java
+  Your fixed code snippet here
+  ```
+    ]]>
+  </code>
+</response>

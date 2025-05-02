@@ -1,0 +1,23 @@
+I want to resolve a warning reported by NullAway.
+I am getting the error that in line: %s, the dereferenced expression %s is @Nullable and can produce Null Pointer Exception. In the method below:
+%s
+I am going to show you couple of other examples in my codebase where the dereferenced expression is used in a way that cannot produce Null Pointer Exception.
+Here are the examples(s):
+%s
+Given the examples above, I want you to fix the error in the original method by using the same pattern as in the examples.
+If you can fix the error, please provide the fixed code snippet in XML format. I just need the xml response, no other information is needed. If you can provide the fixed code snippet, please provide it in the following format and place the code snippet in the <code> tag within ```java block.
+For examples:
+<response>
+  <success>true</success>
+  <code>
+  <![CDATA[
+  ```java
+  Your fixed code snippet here, JUST THE METHOD.
+  ```
+    ]]>
+  </code>
+</response>
+Or if you cannot fix the error, please provide the reason in XML format.
+<response>
+  <success>false</success>
+</response>

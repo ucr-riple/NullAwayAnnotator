@@ -22,7 +22,10 @@
 
 package edu.ucr.cs.riple.injector;
 
+import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.Range;
+import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.AnnotationMemberDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -40,7 +43,14 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.WildcardType;
 import com.github.javaparser.ast.visitor.GenericVisitorWithDefaults;
+import com.github.javaparser.ast.visitor.TreeVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -48,8 +58,9 @@ import java.util.stream.Stream;
 
 public class Main {
 
-  static final AnnotationExpr ANNOTATION = new MarkerAnnotationExpr("RUntainted");
-  //  static final AnnotationExpr ANNOTATION = new MarkerAnnotationExpr("RPolyTainted");
+//  static AnnotationExpr ANNOTATION = new MarkerAnnotationExpr("RUntainted");
+//    static  AnnotationExpr ANNOTATION = new MarkerAnnotationExpr("RPolyTainted");
+  static AnnotationExpr ANNOTATION;
   static int TOP_LEVEL_COUNT = 0;
   static int TYPE_ARG_COUNT = 0;
 
@@ -114,34 +125,35 @@ public class Main {
   //    System.out.println(allChanges.size());
   //  }
 
-  //  public static void main(String[] args) throws IOException {
-  //    String directory = "/Users/nima/Developer/NullAwayAnnotator/sample";
-  //    try (Stream<Path> paths = Files.walk(Paths.get(directory))) {
-  //      paths.forEach(
-  //          path -> {
-  //            if (path.toString().endsWith(".java")) {
-  //              try {
-  //                StaticJavaParser.setConfiguration(
-  //                    new ParserConfiguration()
-  //                        .setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17));
-  //                CompilationUnit tree = StaticJavaParser.parse(path.toFile());
-  //                TreeVisitor visitor =
-  //                    new TreeVisitor() {
-  //                      @Override
-  //                      public void process(Node node) {
-  //                        node.accept(new AnnotationVisitor(), null);
-  //                      }
-  //                    };
-  //                visitor.visitBreadthFirst(tree);
-  //              } catch (FileNotFoundException e) {
-  //                System.out.println("Exception for : " + path + " " + e);
-  //              }
-  //            }
-  //          });
-  //    }
-  //    System.out.println("Top-level: " + TOP_LEVEL_COUNT);
-  //    System.out.println("Type arg: " + TYPE_ARG_COUNT);
-  //  }
+    public static void main(String[] args) throws IOException {
+      ANNOTATION = new MarkerAnnotationExpr(args[1]);
+      String directory = args[0];
+      try (Stream<Path> paths = Files.walk(Paths.get(directory))) {
+        paths.forEach(
+            path -> {
+              if (path.toString().endsWith(".java")) {
+                try {
+                  StaticJavaParser.setConfiguration(
+                      new ParserConfiguration()
+                          .setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17));
+                  CompilationUnit tree = StaticJavaParser.parse(path.toFile());
+                  TreeVisitor visitor =
+                      new TreeVisitor() {
+                        @Override
+                        public void process(Node node) {
+                          node.accept(new AnnotationVisitor(), null);
+                        }
+                      };
+                  visitor.visitBreadthFirst(tree);
+                } catch (FileNotFoundException e) {
+                  System.out.println("Exception for : " + path + " " + e);
+                }
+              }
+            });
+      }
+      System.out.println("Top-level: " + TOP_LEVEL_COUNT);
+      System.out.println("Type arg: " + TYPE_ARG_COUNT);
+    }
 
   static class AnnotationVisitor extends VoidVisitorAdapter<Void> {
 

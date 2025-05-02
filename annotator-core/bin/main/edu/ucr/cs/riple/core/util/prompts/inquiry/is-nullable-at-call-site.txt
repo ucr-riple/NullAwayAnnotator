@@ -1,0 +1,47 @@
+In the method below, is there a possibility that the method returns null at the given call site?
+
+## Guidelines:
+- The method may have multiple return paths; consider all return statements.
+- If the method calls another method, do not assume its return value unless its full declaration is provided. Request its declaration if needed.
+- The method may throw an exception instead of returning null. An exception path should not be considered a null return.
+- Ensure you request the declarations of any methods whose return values directly or indirectly impact this method’s return value before making a conclusion.
+- If the method returns a value that is determined by a parameter, evaluate based on the actual argument at the given call site.
+- Analyze based only on the specific invocation provided. Do not generalize to all possible inputs.- If the return value is guaranteed to be non-null at the call site, the answer should be a definitive NO.
+- Do not generalize based on all possible inputs—your answer must be based only on the given invocation.
+- Focus only on the given call site, not all possible invocations.
+
+### call site:
+%s
+
+Here is the method definitions and the call chain for this method, showing the sequence of calls from the method to its callers at each depth level:
+
+%s
+
+Response Format:
+Provide the answer in **XML format** as follows:
+
+#### If the method **cannot** return `null` at the specific call site:
+```xml
+<response>
+  <reason><![CDATA[EXPLAIN WHY THE INVOCATION %s RESULT CANNOT BE NULL.]]></reason>
+  <value>NO</value>
+</response>
+
+#### If the method can return null at the specific call site:
+<response>
+  <reason><![CDATA[EXPLAIN WHY THE INVOCATION %s RESULT CAN BE NULL.]]></reason>
+  <value>YES</value>
+</response>
+
+#### If you are unsure or If there are any methods that directly or indirectly affect the return value and are not fully disclosed, request their declarations first, in the following format:
+<response>
+  <success>false</success>
+  <methods>
+    <method>methodName</method>
+  </methods>
+</response>
+
+Additional Notes:
+Be precise in your reasoning.
+If a method’s return value depends on another method not provided, request its declaration before making a conclusion.
+If the method can return null in this case but not in others, explain why it happens specifically for this call.
