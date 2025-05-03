@@ -63,9 +63,10 @@ public class Main {
   //  public static final String PROJECT_PATH = "/Users/nima/Desktop/conductor";
   // Ubuntu
   public static final boolean TEST_MODE = System.getProperty("ANNOTATOR_TEST_MODE") != null;
-  public static final boolean DEBUG_MODE = false;
+  public static final boolean DEBUG_MODE = true;
   public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/litiengine";
-  public static final String BENCHMARK_NAME = PROJECT_PATH.split("/")[PROJECT_PATH.split("/").length - 1];
+  public static final String BENCHMARK_NAME =
+      PROJECT_PATH.split("/")[PROJECT_PATH.split("/").length - 1];
   public static final String BRANCH_NAME = "nimak/auto-code-fix-5";
   public static final Path LOG_PATH = Paths.get("/tmp/logs/app.log");
   public static final String ANNOTATED_PACKAGE = "de.gurkenlabs.litiengine";
@@ -137,6 +138,7 @@ public class Main {
       "6"
     };
     Config config = new Config(argsArray);
+    System.out.println("Starting annotator...");
     // reset git repo
     try (GitUtility git = GitUtility.instance()) {
       git.resetHard();
@@ -154,25 +156,43 @@ public class Main {
     // Start annotator
     Annotator annotator = new Annotator(config);
     annotator.start();
-    // copy the logs /tmp/logs directory under Desktop/logs/{project}/{branch}
-    Path sourceDir = Paths.get("/tmp/logs");
-    Path destDir = Paths.get(System.getProperty("user.home"), "Desktop", "logs", BENCHMARK_NAME, BRANCH_NAME.split("/")[1]);
-    try(Stream<Path> p = Files.walk(sourceDir)){
-      p.forEach(sourcePath -> {
-                  try {
-                    Path targetPath = destDir.resolve(sourceDir.relativize(sourcePath));
-                    if (Files.isDirectory(sourcePath)) {
-                      Files.createDirectories(targetPath);
-                    } else {
-                      Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-                    }
-                  } catch (IOException e) {
-                    System.err.println("Failed to copy: " + sourcePath + " -> " + e.getMessage());
-                  }
-                });
-    }catch (IOException e){
-      System.err.println("Failed to copy: " + e.getMessage());
+    if (actualRunEnabled()) {
+      // copy the logs /tmp/logs directory under Desktop/logs/{project}/{branch}
+      Path sourceDir = Paths.get("/tmp/logs");
+      Path destDir =
+          Paths.get(
+              System.getProperty("user.home"),
+              "Desktop",
+              "logs",
+              BENCHMARK_NAME,
+              BRANCH_NAME.split("/")[1]);
+      try (Stream<Path> p = Files.walk(sourceDir)) {
+        p.forEach(
+            sourcePath -> {
+              try {
+                Path targetPath = destDir.resolve(sourceDir.relativize(sourcePath));
+                if (Files.isDirectory(sourcePath)) {
+                  Files.createDirectories(targetPath);
+                } else {
+                  Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                }
+              } catch (IOException e) {
+                System.err.println("Failed to copy: " + sourcePath + " -> " + e.getMessage());
+              }
+            });
+      } catch (IOException e) {
+        System.err.println("Failed to copy: " + e.getMessage());
+      }
     }
+  }
+
+  /**
+   * Checks if the annotator is running in actual mode (not in test or debug mode).
+   *
+   * @return true if the annotator is running in actual mode, false otherwise.
+   */
+  public static boolean actualRunEnabled() {
+    return !TEST_MODE && !DEBUG_MODE;
   }
 
   public static boolean isTheFix(Fix fix) {

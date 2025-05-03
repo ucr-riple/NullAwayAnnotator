@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core.util;
 
 import com.github.javaparser.ast.body.CallableDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.type.Type;
@@ -139,6 +140,10 @@ public class ASTParser {
    * @return true if the method has a nullable return type.
    */
   public boolean isMethodWithNullableReturn(CallableDeclaration<?> declaration) {
+    // Check if the method is a constructor, as constructors do not have a return type.
+    if (declaration instanceof ConstructorDeclaration) {
+      return false;
+    }
     boolean onNode = TypeUtils.isAnnotatedWith(declaration, nullableAnnotationExpression);
     if (onNode) {
       return true;
