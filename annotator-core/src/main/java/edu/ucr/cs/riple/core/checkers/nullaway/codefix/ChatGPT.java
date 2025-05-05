@@ -28,6 +28,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import edu.ucr.cs.riple.annotator.util.parsers.JsonParser;
 import edu.ucr.cs.riple.core.Context;
+import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.core.util.ASTParser;
@@ -85,6 +86,9 @@ public class ChatGPT {
   /** Prompt to return null if the expression is null within a nullable method. */
   private final String rewriteReturnNullForNullableMethodPrompt;
 
+  /** Prompt to rewrite the expression to be non-nullable using cast to nonnull. */
+  private final String rewriteCastToNonnullPrompt;
+
   /** The prompt to ask ChatGPT to check if the expression can be null at the error point. */
   private final String checkIfExpressionCanBeNullAtErrorPointPrompt;
 
@@ -126,6 +130,8 @@ public class ChatGPT {
         Utility.readResourceContent("prompts/dereference/fix-by-all-regions.txt");
     this.rewriteReturnNullForNullableMethodPrompt =
         Utility.readResourceContent("prompts/dereference/return-null-rewrite.txt");
+    this.rewriteCastToNonnullPrompt =
+        Utility.readResourceContent("prompts/dereference/cast-to-nonnull-rewrite.txt");
     this.checkIfExpressionCanBeNullAtErrorPointPrompt =
         Utility.readResourceContent("prompts/inquiry/is-false-positive.txt");
     this.checkIfMethodIsAnInitializerPrompt =
@@ -412,6 +418,40 @@ public class ChatGPT {
     return Set.of(
         new MethodRewriteChange(
             new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member), code));
+  }
+
+  /**
+   * Fixes the dereference error by returning null in a nullable method.
+   *
+   * @param error the error to fix.
+   * @param context Annotator context.
+   * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty set} if
+   *     model fails.
+   */
+  public Set<MethodRewriteChange> fixDereferenceByAddingCastToNonnull(
+      NullAwayError error, String reason, Context context) {
+    String enclosingMethod = parser.getRegionSourceCode(error.getRegion()).content;
+    String prompt =
+        String.format(
+            rewriteCastToNonnullPrompt,
+            reason,
+            error.getNullableExpression(),
+            enclosingMethod,
+            error.position.diagnosticLine,
+            error.getNullableExpression(),
+            error.getNullableExpression());
+    Response response = ask(prompt, context);
+    if (!response.isSuccessFull()) {
+      logger.trace("Response is not successful");
+      return Set.of();
+    }
+    String code = response.getCode();
+    logger.trace("Fixing the error by adding castToNonnull");
+    return Set.of(
+        new MethodRewriteChange(
+            new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member),
+            code,
+            Set.of(NullAway.CAST_TO_NONNULL)));
   }
 
   /**

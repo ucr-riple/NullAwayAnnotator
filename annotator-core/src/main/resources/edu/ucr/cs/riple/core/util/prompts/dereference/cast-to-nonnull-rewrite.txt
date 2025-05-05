@@ -1,0 +1,48 @@
+For the reason you mentioned earlier:
+
+"%s"
+
+in the method below, the expression %s is not nullable at the point it is used.
+
+```java
+%s
+```
+Please Summarize the reason in max 5 words and rewrite the method so that at the line "%s", at the occurrence of: "%s" is replaced with `NullabilityUtil.castToNonnull(%s, summary of reason)`
+Replace "REASON" with the exact reason summary I provide to you (maximum 5 words), not with a generic explanation like "checked to be nonnull".
+see the example below, for expression `foo.getBar()`, to wrap it with `NullabilityUtil.castToNonnull(foo.getBar(), "reason")`.
+
+```java
+public t(){
+    String l = foo.getBar();
+}
+```
+
+will be:
+```java
+public t(){
+    String l = NullabilityUtil.castToNonnull(foo.getBar(), "checked to be nonnull");
+}
+```
+
+### Instructions:
+
+Do not import any additional classes.
+
+Do not add Java comments.
+
+Only modify relevant lines as required.
+
+Return only the modified method wrapped in the XML format shown below.
+
+Place the Java code inside the <code> tag using a CDATA block with ```java formatting.
+
+Just give me the fixed code snippet in XML format in <response> tag like the example below. I will apply the fix to my codebase. Do not import any additional libraries or classes or add java comments. If you can provide the fixed code snippet, please provide it in the following format and place the code snippet in the <code> tag within ```java block.
+<response>
+  <success>true</success>
+  <code><![CDATA[
+  ```java
+  Your fixed code snippet here
+  ```
+    ]]>
+  </code>
+</response>

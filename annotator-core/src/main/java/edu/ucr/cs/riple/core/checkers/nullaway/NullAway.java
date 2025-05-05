@@ -395,12 +395,12 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       System.out.println("TOP LEVEL CALL TO FIX ERROR: " + error);
                       logger.trace("=".repeat(30));
                       counter.incrementAndGet();
-                      if (error.position.diagnosticLine.contains(
-                          "this.hostControl.setTitle(Game.info().getTitle());")) {
-                        System.out.println("At index: " + counter.get());
-                      } else {
-                        return;
-                      }
+                      //                      if (error.position.diagnosticLine.contains("return
+                      // this.sliderComponent;")) {
+                      //                        System.out.println("At index: " + counter.get());
+                      //                      } else {
+                      //                        return;
+                      //                      }
                       // cleanup
                       logger.trace("TOP LEVEL CALL TO FIX ERROR: {}", error);
                       Set<MethodRewriteChange> changes = Set.of();

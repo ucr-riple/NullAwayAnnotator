@@ -34,7 +34,6 @@ import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.Report;
 import edu.ucr.cs.riple.core.cache.TargetModuleCache;
 import edu.ucr.cs.riple.core.cache.downstream.VoidDownstreamImpactCache;
-import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.core.evaluators.BasicEvaluator;
 import edu.ucr.cs.riple.core.evaluators.Evaluator;
@@ -592,31 +591,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
   private Set<MethodRewriteChange> constructCastToNonnullChange(
       NullAwayError error, String reason) {
     logger.trace("Constructing cast to nonnull change for reason: {}", reason);
-    SourceCode enclosingMethod = parser.getRegionSourceCode(error.getRegion());
-    if (enclosingMethod == null) {
-      return NO_ACTION;
-    }
-    String[] lines = enclosingMethod.content.split("\n");
-    // calculate the erroneous line in method. We have to adjust the line number to the method's
-    // range. Note that the line number is 1-based in java parser, and we need to adjust it to
-    // 0-based.
-    int errorLine = error.position.lineNumber - (enclosingMethod.range.begin.line - 1);
-    String expression = error.getNullableExpression();
-    String castToNonnullStatement =
-        String.format("Nullability.castToNonnull(%s, \"%s\")", expression, "reason...");
-    int start = lines[errorLine].indexOf(expression);
-    int end = start + expression.length();
-    lines[errorLine] =
-        lines[errorLine].substring(0, start)
-            + castToNonnullStatement
-            + lines[errorLine].substring(end);
-    MethodRewriteChange change =
-        new MethodRewriteChange(
-            new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member),
-            String.join("\n", lines),
-            // Add the import required for Preconditions.
-            Set.of(NullAway.CAST_TO_NONNULL));
-    return Set.of(change);
+    return gpt.fixDereferenceByAddingCastToNonnull(error, reason, context);
   }
 
   /**
