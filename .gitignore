@@ -30,8 +30,3 @@ gradle-app.setting
 
 /runner/jars/core.jar
 **/__pycache__/
-
-# Ignore the cache directory for the ChatGPT
-/databases/
-# Ignore all database files
-*.db
