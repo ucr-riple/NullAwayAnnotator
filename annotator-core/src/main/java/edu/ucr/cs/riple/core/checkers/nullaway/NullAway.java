@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.core.checkers.nullaway;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonObject;
+import edu.ucr.cs.riple.annotator.util.io.TSVFiles;
 import edu.ucr.cs.riple.annotator.util.parsers.JsonParser;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.Main;
@@ -379,6 +380,9 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
             ? new AdvancedNullAwayCodeFix(context)
             : new BasicNullAwayCodeFix(context);
     Set<NullAwayError> remainingErrors = deserializeErrors(context.targetModuleInfo);
+    // initialize commit file:
+    TSVFiles.initialize(
+        Main.COMMIT_HASH_PATH, "ID" + "\t" + NullAwayError.header() + "\t" + "HASH");
     codeFix.collectImpacts();
     AtomicInteger counter = new AtomicInteger(0);
     // Collect regions with remaining errors.
@@ -416,31 +420,29 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       } finally {
                         codeFix.apply(changes);
                         Utility.executeCommand(
-                            config, String.format("cd %s && ./gradlew goJF", Main.PROJECT_PATH));
+                            config,
+                            String.format("cd %s && ./gradlew spotlessApply", Main.PROJECT_PATH));
                         long currentLineNumber = Utility.getLineCountOfFile(Main.LOG_PATH);
                         Utility.forceFlushLog();
                         String log =
                             Utility.getLinesFromFile(
                                 Main.LOG_PATH, previousLineNumber.get(), currentLineNumber);
                         previousLineNumber.set(currentLineNumber);
-                        // write log at root PROJECT_PATH
-                        try {
-                          // write to repo
-                          Files.writeString(
-                              Paths.get(
-                                  Main.PROJECT_PATH + String.format("/log-%d.log", counter.get())),
-                              String.format("====================\n%s\nLog:\n%s\n", error, log),
-                              Charset.defaultCharset());
-                          // write to filesystem
-                          Files.writeString(
-                              Paths.get("/tmp/logs" + String.format("/log-%d.log", counter.get())),
-                              String.format("====================\n%s\nLog:\n%s\n", error, log),
-                              Charset.defaultCharset());
-                        } catch (IOException e) {
-                          System.err.println("Error while writing log to file: " + e.getMessage());
-                        }
                         try (GitUtility git = GitUtility.instance()) {
                           if (git.hasChangesToCommit()) {
+                            // write to repo
+                            Files.writeString(
+                                Paths.get(
+                                    Main.PROJECT_PATH
+                                        + String.format("/log-%d.log", counter.get())),
+                                String.format("====================\n%s\nLog:\n%s\n", error, log),
+                                Charset.defaultCharset());
+                            // write to filesystem
+                            Files.writeString(
+                                Paths.get(
+                                    "/tmp/logs" + String.format("/log-%d.log", counter.get())),
+                                String.format("====================\n%s\nLog:\n%s\n", error, log),
+                                Charset.defaultCharset());
                             git.stageAllChanges();
                             git.commitChanges(
                                 String.format(
@@ -449,6 +451,10 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                                     error.messageType,
                                     error.position.diagnosticLine.trim(),
                                     error.message));
+                            String commitHash = git.getLatestCommitHash();
+                            TSVFiles.addRow(
+                                counter.get() + "\t" + error.toTSV() + "\t" + commitHash,
+                                Main.COMMIT_HASH_PATH);
                             git.pushChanges();
                             git.revertLastCommit();
                           }

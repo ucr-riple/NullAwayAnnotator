@@ -63,13 +63,14 @@ public class Main {
   //  public static final String PROJECT_PATH = "/Users/nima/Desktop/conductor";
   // Ubuntu
   public static final boolean TEST_MODE = System.getProperty("ANNOTATOR_TEST_MODE") != null;
-  public static final boolean DEBUG_MODE = true;
-  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/litiengine";
+  public static final boolean DEBUG_MODE = false;
+  public static final String PROJECT_PATH = "/home/nima/Developer/git/nullness-benchmarks/mockito";
   public static final String BENCHMARK_NAME =
       PROJECT_PATH.split("/")[PROJECT_PATH.split("/").length - 1];
-  public static final String BRANCH_NAME = "nimak/auto-code-fix-5";
+  public static final String BRANCH_NAME = "nimak/auto-code-fix-1";
   public static final Path LOG_PATH = Paths.get("/tmp/logs/app.log");
-  public static final String ANNOTATED_PACKAGE = "de.gurkenlabs.litiengine";
+  public static final Path COMMIT_HASH_PATH = Paths.get("/tmp/logs/commits.tsv");
+  public static final String ANNOTATED_PACKAGE = "org.mockito";
 
   public static void main(String[] a) {
     System.clearProperty("ANNOTATOR_TEST_MODE");

@@ -33,15 +33,14 @@ import com.google.gson.GsonBuilder;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.util.Name;
+import edu.ucr.cs.riple.annotator.util.io.TSVFiles;
 import edu.ucr.cs.riple.scanner.location.SymbolLocation;
 import edu.ucr.cs.riple.scanner.out.ClassRecord;
 import edu.ucr.cs.riple.scanner.out.EffectiveMethodRecord;
 import edu.ucr.cs.riple.scanner.out.ImpactedRegion;
 import edu.ucr.cs.riple.scanner.out.MethodRecord;
 import edu.ucr.cs.riple.scanner.out.OriginRecord;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Writer;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -115,7 +114,7 @@ public class Serializer {
    * @param impactedRegion ImpactedRegion instance which will be serialized to output.
    */
   public void serializeImpactedRegionForMethod(ImpactedRegion impactedRegion) {
-    appendToFile(impactedRegion.toString(), this.methodImpactedRegionPath);
+    TSVFiles.addRow(impactedRegion.toString(), this.methodImpactedRegionPath);
   }
 
   /**
@@ -125,7 +124,7 @@ public class Serializer {
    * @param fieldAccessRegion Region where the field access occurred.
    */
   public void serializeFieldAccessRecord(ImpactedRegion fieldAccessRegion) {
-    appendToFile(fieldAccessRegion.toString(), this.fieldImpactedRegionPath);
+    TSVFiles.addRow(fieldAccessRegion.toString(), this.fieldImpactedRegionPath);
   }
 
   /**
@@ -135,7 +134,7 @@ public class Serializer {
    * @param classRecord ClassInfo instance.
    */
   public void serializeClassRecord(ClassRecord classRecord) {
-    appendToFile(classRecord.toString(), this.classRecordsPath);
+    TSVFiles.addRow(classRecord.toString(), this.classRecordsPath);
   }
 
   /**
@@ -144,7 +143,7 @@ public class Serializer {
    * @param methodRecord MethodInfo instance.
    */
   public void serializeMethodRecord(MethodRecord methodRecord) {
-    appendToFile(methodRecord.toString(), this.methodRecordPath);
+    TSVFiles.addRow(methodRecord.toString(), this.methodRecordPath);
   }
 
   /**
@@ -153,7 +152,7 @@ public class Serializer {
    * @param symbol Symbol of the node with {@code @Nonnull} annotations.
    */
   public void serializeNonnullSym(Symbol symbol) {
-    appendToFile(
+    TSVFiles.addRow(
         SymbolLocation.createLocationFromSymbol(symbol).tabSeparatedToString(),
         this.nonnullElementsPath);
   }
@@ -164,7 +163,7 @@ public class Serializer {
    * @param record EffectiveMethodRecord instance.
    */
   public void serializeEffectiveMethodRecord(EffectiveMethodRecord record) {
-    appendToFile(record.toString(), this.effectiveMethodRecordPath);
+    TSVFiles.addRow(record.toString(), this.effectiveMethodRecordPath);
   }
 
   /**
@@ -183,34 +182,18 @@ public class Serializer {
     }
   }
 
-  /** Cleared the content of the file if exists and writes the header in the first line. */
-  private void initializeFile(Path path, String header) {
-    try {
-      Files.deleteIfExists(path);
-    } catch (IOException e) {
-      throw new RuntimeException("Could not clear file at: " + path, e);
-    }
-    try (OutputStream os = new FileOutputStream(path.toFile())) {
-      header += "\n";
-      os.write(header.getBytes(Charset.defaultCharset()), 0, header.length());
-      os.flush();
-    } catch (IOException e) {
-      throw new RuntimeException("Could not finish resetting File at Path: " + path, e);
-    }
-  }
-
   /** Initializes every file which will be re-generated in the new run of NullAway. */
   private void initializeOutputFiles(Config config) {
     try {
       Files.createDirectories(config.getOutputDirectory());
       if (config.isActive()) {
-        initializeFile(methodImpactedRegionPath, ImpactedRegion.header());
-        initializeFile(fieldImpactedRegionPath, ImpactedRegion.header());
-        initializeFile(methodRecordPath, MethodRecord.header());
-        initializeFile(classRecordsPath, ClassRecord.header());
-        initializeFile(nonnullElementsPath, SymbolLocation.header());
-        initializeFile(effectiveMethodRecordPath, EffectiveMethodRecord.header());
-        initializeFile(parameterOriginPath, OriginRecord.header());
+        TSVFiles.initialize(methodImpactedRegionPath, ImpactedRegion.header());
+        TSVFiles.initialize(fieldImpactedRegionPath, ImpactedRegion.header());
+        TSVFiles.initialize(methodRecordPath, MethodRecord.header());
+        TSVFiles.initialize(classRecordsPath, ClassRecord.header());
+        TSVFiles.initialize(nonnullElementsPath, SymbolLocation.header());
+        TSVFiles.initialize(effectiveMethodRecordPath, EffectiveMethodRecord.header());
+        TSVFiles.initialize(parameterOriginPath, OriginRecord.header());
       }
     } catch (IOException e) {
       throw new RuntimeException("Could not finish resetting serializer", e);
@@ -307,28 +290,6 @@ public class Serializer {
       // In this case, we still would like to continue the serialization instead of returning null
       // and not serializing anything.
       return path;
-    }
-  }
-
-  /**
-   * Appends the given string as a row in the file which tha path is given.
-   *
-   * @param row Row to append.
-   * @param path Path to target file.
-   */
-  private void appendToFile(String row, Path path) {
-    // Since there is no method available in API of either javac or errorprone to inform NullAway
-    // that the analysis is finished, we cannot open a single stream and flush it within a finalize
-    // method. Must open and close a new stream everytime we are appending a new line to a file.
-    if (row == null || row.equals("")) {
-      return;
-    }
-    row = row + "\n";
-    try (OutputStream os = new FileOutputStream(path.toFile(), true)) {
-      os.write(row.getBytes(Charset.defaultCharset()), 0, row.length());
-      os.flush();
-    } catch (IOException e) {
-      throw new RuntimeException("Error happened for writing at file: " + path, e);
     }
   }
 }

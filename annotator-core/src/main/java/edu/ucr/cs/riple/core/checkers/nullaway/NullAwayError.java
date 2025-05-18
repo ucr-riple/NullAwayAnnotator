@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.core.checkers.nullaway;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import edu.ucr.cs.riple.annotator.util.io.TSVFiles;
 import edu.ucr.cs.riple.core.checkers.DiagnosticPosition;
 import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.Fix;
@@ -237,11 +238,39 @@ public class NullAwayError extends Error {
     }
   }
 
+  /**
+   * Return the origins of the nullable expression causing the error.
+   *
+   * @return the origins of the nullable expression.
+   */
   public JsonArray getOrigins() {
     if (!infos.has("origins")) {
       throw new IllegalArgumentException(
           "Error does not have origins: " + messageType + ": " + message);
     }
     return infos.getAsJsonArray("origins");
+  }
+
+  /**
+   * Return TSV representation of the error.
+   *
+   * @return TSV representation of the error.
+   */
+  public String toTSV() {
+    return String.join(
+        "\t",
+        messageType,
+        TSVFiles.escapeSpecialCharacters(message),
+        TSVFiles.escapeSpecialCharacters(position.diagnosticLine),
+        path + ":" + position.lineNumber);
+  }
+
+  /**
+   * Returns the header for the TSV file.
+   *
+   * @return the header for the TSV file.
+   */
+  public static String header() {
+    return String.join("\t", "TYPE", "Message", "EXPRESSION", "PATH");
   }
 }

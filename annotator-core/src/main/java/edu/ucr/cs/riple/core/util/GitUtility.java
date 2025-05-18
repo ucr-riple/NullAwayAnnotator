@@ -167,20 +167,6 @@ public class GitUtility implements AutoCloseable {
   }
 
   /**
-   * Checks if there are changes to commit in the Git repository.
-   *
-   * @return true if there are changes to commit, false otherwise.
-   * @throws Exception if an error occurs during the status check operation.
-   */
-  public boolean hasChangesToCommit() throws Exception {
-    if (!Main.actualRunEnabled()) {
-      return false;
-    }
-    Status status = git.status().call();
-    return !status.isClean();
-  }
-
-  /**
    * Stages all changes in the Git repository.
    *
    * @throws Exception if an error occurs during the stage operation.
@@ -235,6 +221,34 @@ public class GitUtility implements AutoCloseable {
   @Override
   public void close() {
     git.close();
+  }
+
+  /**
+   * Gets the latest commit hash in the Git repository.
+   *
+   * @return the latest commit hash.
+   * @throws Exception if an error occurs during the operation.
+   */
+  public String getLatestCommitHash() throws Exception {
+    if (!Main.actualRunEnabled()) {
+      return null;
+    }
+    RevCommit commit = git.log().setMaxCount(1).call().iterator().next();
+    return commit.getId().getName();
+  }
+
+  /**
+   * Checks if there are changes to commit in the Git repository.
+   *
+   * @return true if there are changes to commit, false otherwise.
+   * @throws Exception if an error occurs during the status check operation.
+   */
+  public boolean hasChangesToCommit() throws Exception {
+    if (!Main.actualRunEnabled()) {
+      return false;
+    }
+    Status status = git.status().call();
+    return !status.isClean();
   }
 
   /**
