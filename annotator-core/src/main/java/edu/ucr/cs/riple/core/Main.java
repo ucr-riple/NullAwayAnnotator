@@ -64,16 +64,21 @@ public class Main {
   // Ubuntu
   public static final boolean TEST_MODE = System.getProperty("ANNOTATOR_TEST_MODE") != null;
   public static final boolean DEBUG_MODE = false;
-  public static final String PROJECT_PATH = "/home/nima/Developer/git/nullness-benchmarks/mockito";
+  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/glide";
   public static final String BENCHMARK_NAME =
       PROJECT_PATH.split("/")[PROJECT_PATH.split("/").length - 1];
-  public static final String BRANCH_NAME = "nimak/auto-code-fix-1";
+  public static final int VERSION = 1;
+  public static final boolean IS_BASELINE = true;
+  public static final String BRANCH_NAME =
+      String.format("nimak/agentic-%s-%s", IS_BASELINE ? "basic" : "advanced", VERSION);
   public static final Path LOG_PATH = Paths.get("/tmp/logs/app.log");
   public static final Path COMMIT_HASH_PATH = Paths.get("/tmp/logs/commits.tsv");
-  public static final String ANNOTATED_PACKAGE = "org.mockito";
+  public static final String ANNOTATED_PACKAGE = "com.bumptech.glide";
+  public static final String BUILD_COMMAND = "compileJava";
 
   public static void main(String[] a) {
     System.clearProperty("ANNOTATOR_TEST_MODE");
+    System.out.println("Running " + BENCHMARK_NAME + " on " + BRANCH_NAME);
     // DELETE LOG:
     try {
       Files.deleteIfExists(LOG_PATH);
@@ -114,8 +119,8 @@ public class Main {
       "-bc",
       // For Ubuntu
       String.format(
-          "export JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64 && cd %s && ./gradlew clean compileJava --rerun-tasks --no-build-cache",
-          PROJECT_PATH),
+          "export JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64 && cd %s && ANDROID_HOME=/home/nima/Android/Sdk ./gradlew clean %s --rerun-tasks --no-build-cache",
+          PROJECT_PATH, BUILD_COMMAND),
       //      // For Mac
       //      String.format(
       //          "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.0.2.jdk/Contents/Home &&cd %s
@@ -133,8 +138,8 @@ public class Main {
       ANNOTATED_PACKAGE,
       "-di", // deactivate inference
       "-rrem", // resolve remaining errors
-      "advanced",
-      //       "-rboserr", // redirect build output stream and error stream
+      IS_BASELINE ? "basic" : "advanced",
+      //             "-rboserr", // redirect build output stream and error stream
       "--depth",
       "6"
     };

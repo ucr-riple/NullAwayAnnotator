@@ -579,6 +579,7 @@ public class Config {
             : ImmutableSet.copyOf(cmd.getOptionValue(nonnullAnnotationsOption).split(","));
     this.resolveRemainingErrorMode =
         ResolveRemainingErrorMode.fromString(cmd.getOptionValue(resolveRemainingErrorsOption));
+    System.out.println("Resolve remaining errors mode: " + this.resolveRemainingErrorMode);
     this.annotatedPackages = cmd.getOptionValue(annotatedPackagesOption, "");
     if (this.resolveRemainingErrorMode.isResolution() && this.annotatedPackages.isEmpty()) {
       throw new IllegalArgumentException(
