@@ -374,6 +374,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
 
   @Override
   public void resolveRemainingErrors() {
+    long timer = System.currentTimeMillis();
     Utility.buildTarget(context);
     NullAwayCodeFix codeFix =
         config.resolveRemainingErrorMode.isAdvanced()
@@ -463,6 +464,9 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                         }
                       }
                     }));
+    long elapsed = System.currentTimeMillis() - timer;
+    TSVFiles.initialize(Main.TIMER_PATH, "TIME_IN_MILLIS");
+    TSVFiles.addRow(String.valueOf(elapsed), Main.COMMIT_HASH_PATH);
   }
 
   @Override

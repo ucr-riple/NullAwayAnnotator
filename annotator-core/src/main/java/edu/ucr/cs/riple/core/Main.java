@@ -59,22 +59,26 @@ public class Main {
   //      annotator.start();
   //    }
 
+  // PROJECT SPECIFIC CONFIGURATION
   // Mac
   //  public static final String PROJECT_PATH = "/Users/nima/Desktop/conductor";
   // Ubuntu
-  public static final boolean TEST_MODE = System.getProperty("ANNOTATOR_TEST_MODE") != null;
-  public static final boolean DEBUG_MODE = false;
-  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/glide";
+  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/libgdx";
+  public static final String BUILD_COMMAND = "compileJava";
+  public static final String ANNOTATED_PACKAGE = "com.badlogic.gdx";
+  public static final boolean IS_BASELINE = true;
+  public static final int VERSION = 1;
+
+  // COMMON CONFIGURATION
   public static final String BENCHMARK_NAME =
       PROJECT_PATH.split("/")[PROJECT_PATH.split("/").length - 1];
-  public static final int VERSION = 1;
-  public static final boolean IS_BASELINE = true;
   public static final String BRANCH_NAME =
       String.format("nimak/agentic-%s-%s", IS_BASELINE ? "basic" : "advanced", VERSION);
   public static final Path LOG_PATH = Paths.get("/tmp/logs/app.log");
   public static final Path COMMIT_HASH_PATH = Paths.get("/tmp/logs/commits.tsv");
-  public static final String ANNOTATED_PACKAGE = "com.bumptech.glide";
-  public static final String BUILD_COMMAND = "compileJava";
+  public static final Path TIMER_PATH = Paths.get("/tmp/logs/timer.txt");
+  public static final boolean TEST_MODE = System.getProperty("ANNOTATOR_TEST_MODE") != null;
+  public static final boolean DEBUG_MODE = false;
 
   public static void main(String[] a) {
     System.clearProperty("ANNOTATOR_TEST_MODE");
