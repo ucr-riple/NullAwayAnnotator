@@ -466,7 +466,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                     }));
     long elapsed = System.currentTimeMillis() - timer;
     TSVFiles.initialize(Main.TIMER_PATH, "TIME_IN_MILLIS");
-    TSVFiles.addRow(String.valueOf(elapsed), Main.COMMIT_HASH_PATH);
+    TSVFiles.addRow(String.valueOf(elapsed), Main.TIMER_PATH);
   }
 
   @Override
