@@ -63,9 +63,9 @@ public class Main {
   // Mac
   //  public static final String PROJECT_PATH = "/Users/nima/Desktop/conductor";
   // Ubuntu
-  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/libgdx";
+  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/litiengine";
   public static final String BUILD_COMMAND = "compileJava";
-  public static final String ANNOTATED_PACKAGE = "com.badlogic.gdx";
+  public static final String ANNOTATED_PACKAGE = "de.gurkenlabs.litiengine";
   public static final boolean IS_BASELINE = true;
   public static final int VERSION = 1;
 
