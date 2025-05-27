@@ -63,11 +63,13 @@ public class Main {
   // Mac
   //  public static final String PROJECT_PATH = "/Users/nima/Desktop/conductor";
   // Ubuntu
-  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/litiengine";
+  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/conductor";
   public static final String BUILD_COMMAND = "compileJava";
-  public static final String ANNOTATED_PACKAGE = "de.gurkenlabs.litiengine";
-  public static final boolean IS_BASELINE = true;
+  public static final String ANNOTATED_PACKAGE = "com.netflix.conductor";
+  public static final boolean IS_BASELINE = false;
   public static final int VERSION = 1;
+  public static final boolean DEBUG_MODE = true;
+  public static final String DEBUG_LINE = "private Builder() {}";
 
   // COMMON CONFIGURATION
   public static final String BENCHMARK_NAME =
@@ -78,7 +80,6 @@ public class Main {
   public static final Path COMMIT_HASH_PATH = Paths.get("/tmp/logs/commits.tsv");
   public static final Path TIMER_PATH = Paths.get("/tmp/logs/timer.txt");
   public static final boolean TEST_MODE = System.getProperty("ANNOTATOR_TEST_MODE") != null;
-  public static final boolean DEBUG_MODE = false;
 
   public static void main(String[] a) {
     System.clearProperty("ANNOTATOR_TEST_MODE");
