@@ -22,79 +22,25 @@
 
 package edu.ucr.cs.riple.injector.changes;
 
-import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
-import com.github.javaparser.ast.nodeTypes.NodeWithRange;
-import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnMethod;
-import edu.ucr.cs.riple.injector.modifications.Replacement;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import javax.annotation.Nullable;
 
-public class MethodRewriteChange implements ASTChange {
-
-  /** Location of the method to be rewritten. */
-  private final OnMethod location;
-
-  /** New method to replace the old method. This should be a valid Java method declaration. */
-  private final String newMethod;
-
-  /** Set of imports that should be added to the file with the new method. */
-  private final Set<String> imports;
+/** A change that rewrites a method declaration in the source code. */
+public class MethodRewriteChange extends RegionRewrite {
 
   public MethodRewriteChange(OnMethod location, String newMethod) {
     this(location, newMethod, new HashSet<>());
   }
 
   public MethodRewriteChange(OnMethod location, String newMethod, Set<String> imports) {
-    this.location = location;
-    this.newMethod = newMethod;
-    this.imports = imports;
-  }
-
-  /**
-   * Add an import statement to the set of imports that should be added to the file with the new
-   * method.
-   *
-   * @param importStatement the import statement to add
-   */
-  public void addImport(String importStatement) {
-    imports.add(importStatement);
-  }
-
-  /**
-   * Get the set of imports that should be added to the file with the new method.
-   *
-   * @return the set of imports
-   */
-  public ImmutableSet<String> getImports() {
-    return ImmutableSet.copyOf(imports);
-  }
-
-  @Nullable
-  @Override
-  public <T extends NodeWithAnnotations<?> & NodeWithRange<?>>
-      Replacement computeTextModificationOn(T node) {
-    if (node.getRange().isEmpty()) {
-      return null;
-    }
-    // find the indent of the first line of the method
-    int indent = node.getRange().get().begin.column - 1;
-    // indent the new method
-    String indentedMethod = newMethod.replaceAll("\n", "\n" + " ".repeat(indent));
-    return new Replacement(indentedMethod, node.getRange().get().begin, node.getRange().get().end);
-  }
-
-  @Override
-  public Location getLocation() {
-    return location;
+    super(location, newMethod, imports);
   }
 
   @Override
   public ASTChange copy() {
-    return new MethodRewriteChange(location, newMethod, imports);
+    return new MethodRewriteChange((OnMethod) location, newRegion, imports);
   }
 
   @Override
@@ -104,16 +50,6 @@ public class MethodRewriteChange implements ASTChange {
     }
     MethodRewriteChange that = (MethodRewriteChange) o;
     return Objects.equals(getLocation(), that.getLocation())
-        && Objects.equals(newMethod, that.newMethod);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(getLocation(), newMethod);
-  }
-
-  @Override
-  public String toString() {
-    return "OnMethod: " + location + "\n" + newMethod;
+        && Objects.equals(newRegion, that.newRegion);
   }
 }

@@ -22,82 +22,25 @@
 
 package edu.ucr.cs.riple.injector.changes;
 
-import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
-import com.github.javaparser.ast.nodeTypes.NodeWithRange;
-import com.google.common.collect.ImmutableSet;
-import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
-import edu.ucr.cs.riple.injector.modifications.Replacement;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import javax.annotation.Nullable;
 
-public class FieldRewriteChange implements ASTChange {
-
-  /** Location of the field to be rewritten. */
-  private final OnField location;
-
-  /**
-   * New field declaration to replace the old declaration. This should be a valid Java field
-   * declaration.
-   */
-  private final String newField;
-
-  /** Set of imports that should be added to the file with the new declaration. */
-  private final Set<String> imports;
+/** A change that rewrites a field declaration in the source code. */
+public class FieldRewriteChange extends RegionRewrite {
 
   public FieldRewriteChange(OnField location, String newField) {
     this(location, newField, new HashSet<>());
   }
 
   public FieldRewriteChange(OnField location, String newField, Set<String> imports) {
-    this.location = location;
-    this.newField = newField;
-    this.imports = imports;
-  }
-
-  /**
-   * Add an import statement to the set of imports that should be added to the file with the new
-   * method.
-   *
-   * @param importStatement the import statement to add
-   */
-  public void addImport(String importStatement) {
-    imports.add(importStatement);
-  }
-
-  /**
-   * Get the set of imports that should be added to the file with the new method.
-   *
-   * @return the set of imports
-   */
-  public ImmutableSet<String> getImports() {
-    return ImmutableSet.copyOf(imports);
-  }
-
-  @Nullable
-  @Override
-  public <T extends NodeWithAnnotations<?> & NodeWithRange<?>>
-      Replacement computeTextModificationOn(T node) {
-    if (node.getRange().isEmpty()) {
-      return null;
-    }
-    // find the indent of the method's first line
-    int indent = node.getRange().get().begin.column - 1;
-    // indent the new method
-    String indentedMethod = newField.replaceAll("\n", "\n" + " ".repeat(indent));
-    return new Replacement(indentedMethod, node.getRange().get().begin, node.getRange().get().end);
-  }
-
-  @Override
-  public Location getLocation() {
-    return location;
+    super(location, newField, imports);
   }
 
   @Override
   public ASTChange copy() {
-    return new FieldRewriteChange(location, newField, imports);
+    return new FieldRewriteChange((OnField) location, newRegion, imports);
   }
 
   @Override
@@ -107,16 +50,6 @@ public class FieldRewriteChange implements ASTChange {
     }
     FieldRewriteChange that = (FieldRewriteChange) o;
     return Objects.equals(getLocation(), that.getLocation())
-        && Objects.equals(newField, that.newField);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(getLocation(), newField);
-  }
-
-  @Override
-  public String toString() {
-    return "OnField: " + location + "\n" + newField;
+        && Objects.equals(newRegion, that.newRegion);
   }
 }

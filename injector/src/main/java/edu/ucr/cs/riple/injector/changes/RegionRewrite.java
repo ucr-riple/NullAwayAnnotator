@@ -22,4 +22,82 @@
 
 package edu.ucr.cs.riple.injector.changes;
 
-public class RegionRewrite implements ASTChange {}
+import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import com.github.javaparser.ast.nodeTypes.NodeWithRange;
+import com.google.common.collect.ImmutableSet;
+import edu.ucr.cs.riple.injector.location.Location;
+import edu.ucr.cs.riple.injector.modifications.Replacement;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import javax.annotation.Nullable;
+
+public abstract class RegionRewrite implements ASTChange {
+
+  /** Location of the region to be rewritten. */
+  protected final Location location;
+
+  /** New region content to replace the old region. */
+  protected final String newRegion;
+
+  /** Set of imports that should be added to the file with the new declaration. */
+  protected final Set<String> imports;
+
+  public RegionRewrite(Location location, String newRegion) {
+    this(location, newRegion, new HashSet<>());
+  }
+
+  public RegionRewrite(Location location, String newRegion, Set<String> imports) {
+    this.location = location;
+    this.newRegion = newRegion;
+    this.imports = imports;
+  }
+
+  @Nullable
+  @Override
+  public <T extends NodeWithAnnotations<?> & NodeWithRange<?>>
+      Replacement computeTextModificationOn(T node) {
+    if (node.getRange().isEmpty()) {
+      return null;
+    }
+    // find the indent of the method's first line
+    int indent = node.getRange().get().begin.column - 1;
+    // indent the new method
+    String indentedMethod = newRegion.replaceAll("\n", "\n" + " ".repeat(indent));
+    return new Replacement(indentedMethod, node.getRange().get().begin, node.getRange().get().end);
+  }
+
+  /**
+   * Add an import statement to the set of imports that should be added to the file with the new
+   * method.
+   *
+   * @param importStatement the import statement to add
+   */
+  public void addImport(String importStatement) {
+    imports.add(importStatement);
+  }
+
+  /**
+   * Get the set of imports that should be added to the file with the new method.
+   *
+   * @return the set of imports
+   */
+  public ImmutableSet<String> getImports() {
+    return ImmutableSet.copyOf(imports);
+  }
+
+  @Override
+  public Location getLocation() {
+    return location;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getLocation(), newRegion);
+  }
+
+  @Override
+  public String toString() {
+    return "location=" + location + ", content='" + newRegion + '\'' + '}';
+  }
+}
