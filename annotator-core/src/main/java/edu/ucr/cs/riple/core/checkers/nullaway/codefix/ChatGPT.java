@@ -30,6 +30,7 @@ import edu.ucr.cs.riple.annotator.util.parsers.JsonParser;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
+import edu.ucr.cs.riple.core.registries.method.invocation.InvocationRecord;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.core.util.ASTParser;
 import edu.ucr.cs.riple.core.util.Utility;
@@ -306,13 +307,13 @@ public class ChatGPT {
       NullAwayError error, Set<Region> safeRegions, Context context) {
     logger.trace("Attempting to fix dereference error by using safe regions");
     String expression = error.getNullableExpression();
-    String method = parser.getRegionSourceCode(error.getRegion()).content;
+    String region = parser.getRegionSourceCode(error.getRegion()).content;
     String prompt =
         String.format(
             dereferenceFixBySafeRegionsPrompt,
             error.position.diagnosticLine,
             expression,
-            method,
+            region,
             constructPromptForRegions(safeRegions));
     logger.trace("Asking if the error can be fixed by using safe regions");
     Response response = ask(prompt, context);
@@ -539,6 +540,11 @@ public class ChatGPT {
    * @return {@code true} if the error is a false positive, {@code false} otherwise.
    */
   public Response checkNullabilityPossibilityAtErrorPoint(NullAwayError error, Context context) {
+    if (!error.getRegion().isOnCallable()) {
+      // If the error is not on a callable, we cannot check if the expression and assume it can be
+      // null.
+      return Response.agree();
+    }
     String enclosingMethod = parser.getRegionSourceCode(error.getRegion()).content;
     String prompt = null;
     if (error.messageType.equals("DEREFERENCE_NULLABLE")) {
@@ -634,13 +640,14 @@ public class ChatGPT {
    * @return {@code true} if the method is returning nullable, {@code false} otherwise.
    */
   public Response checkIfMethodIsReturningNullableOnCallSite(
-      String invocation, String callContext, Context context) {
+      String invocation, InvocationRecord callContext, Context context) {
     logger.trace("Asking if the method is returning nullable on the call site: {}", invocation);
     String prompt =
         String.format(
             checkIfMethodReturnsNullableAtCallSitePrompt,
+            callContext.getRoot(),
             invocation,
-            callContext,
+            callContext.constructCallGraphContext(),
             invocation,
             invocation);
     return ask(prompt, context);

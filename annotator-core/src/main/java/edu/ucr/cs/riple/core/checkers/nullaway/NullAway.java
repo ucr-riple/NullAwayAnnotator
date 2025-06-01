@@ -397,9 +397,10 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
             (region, nullAwayErrors) ->
                 nullAwayErrors.forEach(
                     error -> {
-                      System.out.println("TOP LEVEL CALL TO FIX ERROR: " + error);
-                      logger.trace("=".repeat(30));
                       counter.incrementAndGet();
+                      System.out.println(
+                          counter.get() + " : TOP LEVEL CALL TO FIX ERROR: " + error);
+                      logger.trace("=".repeat(30));
                       if (Main.DEBUG_MODE) {
                         if (error.position.diagnosticLine.contains(Main.DEBUG_LINE)) {
                           System.out.println("At index: " + counter.get());
@@ -408,7 +409,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                         }
                       }
                       // cleanup
-                      logger.trace("TOP LEVEL CALL TO FIX ERROR: {}", error);
+                      logger.trace("{} : TOP LEVEL CALL TO FIX ERROR: {}", counter.get(), error);
                       Set<MethodRewriteChange> changes = Set.of();
                       try {
                         changes = codeFix.fix(error);
@@ -418,7 +419,10 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                         System.err.println(
                             "Error while fixing-------: " + e.getMessage() + " \n " + e);
                         e.printStackTrace(System.out);
-                        logger.trace("--------Exception occurred in computing fix--------", e);
+                        logger.trace(
+                            "--------Exception occurred in computing fix-------- | "
+                                + counter.get(),
+                            e);
                       } finally {
                         codeFix.apply(changes);
                         Utility.executeCommand(

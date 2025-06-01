@@ -287,7 +287,11 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
                   }
                   Set<MethodRewriteChange> c = new HashSet<>();
                   logger.trace("Trying to fix errors for making the field nullable");
-                  triggeredErrors.forEach(e -> c.addAll(fix(e)));
+                  triggeredErrors.forEach(
+                      nullAwayError -> {
+                        logger.trace("Working on triggered error: {}", nullAwayError);
+                        c.addAll(fix(nullAwayError));
+                      });
                   changes.addAll(c);
                 }
               }
@@ -303,6 +307,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
    *     error cannot be fixed.
    */
   private Set<MethodRewriteChange> resolveDereferenceError(NullAwayError error) {
+    logger.trace("Resolving dereference error: {}", error);
     if (ASTParser.isObjectEqualsMethod(error.getRegion().member)) {
       logger.trace("Fixing dereference error in equals method.");
       return gpt.fixDereferenceErrorInEqualsMethod(error, context);
@@ -540,6 +545,9 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
    *     set if no fix is found.
    */
   private Set<MethodRewriteChange> fixErrorByRegions(NullAwayError error, Location location) {
+    if (!error.isFixableByRegionExample()) {
+      return Set.of();
+    }
     logger.trace("Fixing error by regions.");
     Set<Region> impactedRegions =
         context.targetModuleInfo.getRegionRegistry().getImpactedRegions(location);
@@ -604,6 +612,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
   private Set<MethodRewriteChange> fixTriggeredErrorsForLocation(Location location) {
     logger.trace("Fixing triggered errors for location: {}", location);
     Set<NullAwayError> errors = getTriggeredErrorsFromLocation(location);
+    logger.trace("Triggered errors size: {}", errors.size());
     // add annotations for resolvable errors.
     Set<Fix> fixes =
         errors.stream()
@@ -799,9 +808,8 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
     InvocationRecord record = invocationRecordRegistry.computeInvocationRecord(encClass, method, 3);
     int count = 0;
     while (count++ < 10) {
-      String callContext = record.constructCallGraphContext();
       Response invocationNullability =
-          gpt.checkIfMethodIsReturningNullableOnCallSite(invocation, callContext, context);
+          gpt.checkIfMethodIsReturningNullableOnCallSite(invocation, record, context);
       if (!invocationNullability.isSuccessFull()) {
         ImmutableSet<String> methods =
             invocationNullability.getValuesFromTag("/response/methods", "method");

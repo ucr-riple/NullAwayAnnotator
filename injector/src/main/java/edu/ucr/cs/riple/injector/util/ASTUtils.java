@@ -35,9 +35,11 @@ import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumConstantDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.RecordDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.google.common.base.Preconditions;
@@ -284,6 +286,36 @@ public class ASTUtils {
         if (matcher.matchesCallableDeclaration(callableDeclaration)) {
           target = callableDeclaration;
           break;
+        }
+      }
+    }
+    return target;
+  }
+
+  /**
+   * Returns the field declaration with the given name in the compilation unit.
+   *
+   * @param cu Compilation unit where the target field declaration is located.
+   * @param encClass Enclosing the class name.
+   * @param field Field name.
+   * @return The field declaration with the given name, or null if it is not found.
+   * @throws TargetClassNotFound if the target class source code is not found.
+   */
+  @Nullable
+  public static FieldDeclaration getFieldDeclaration(
+      CompilationUnit cu, String encClass, String field) throws TargetClassNotFound {
+    NodeList<BodyDeclaration<?>> members =
+        ASTUtils.getTypeDeclarationMembersByFlatName(cu, encClass);
+    FieldDeclaration target = null;
+    for (BodyDeclaration<?> bodyDeclaration : members) {
+      if (bodyDeclaration instanceof FieldDeclaration) {
+        FieldDeclaration fieldDeclaration = (FieldDeclaration) bodyDeclaration;
+        NodeList<VariableDeclarator> vars = fieldDeclaration.asFieldDeclaration().getVariables();
+        for (VariableDeclarator v : vars) {
+          if (v.getName().toString().equals(field)) {
+            target = fieldDeclaration;
+            break;
+          }
         }
       }
     }

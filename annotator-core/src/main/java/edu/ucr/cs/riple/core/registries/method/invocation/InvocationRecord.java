@@ -122,6 +122,18 @@ public class InvocationRecord {
   }
 
   /**
+   * Returns the root of the invocation record. This is used to identify the starting point of the
+   * call graph.
+   *
+   * @return the root of the invocation record, which is null in this implementation.
+   */
+  public String getRoot() {
+    MethodRecord root = calls.get(0).iterator().next();
+    return parser.getRegionSourceCode(new Region(root.location.clazz, root.location.method))
+        .content;
+  }
+
+  /**
    * Adds the requested methods to the record on the top of the stack. These methods are not present
    * in the invocation record and are only called within methods.
    *

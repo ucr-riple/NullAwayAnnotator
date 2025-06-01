@@ -175,9 +175,23 @@ public class NullAwayError extends Error {
       case "DEREFERENCE_NULLABLE":
         return getNullableExpressionInfo().expression;
       case "PASS_NULLABLE":
-        Pattern pattern = Pattern.compile("@NonNull field (\\w+) not initialized");
+        Pattern pattern =
+            Pattern.compile("passing @Nullable parameter '(\\w+)' where @NonNull is required");
         Matcher matcher = pattern.matcher(message);
+        if (!matcher.find()) {
+          throw new IllegalStateException(
+              "Could not extract nullable expression from message: " + message);
+        }
         return matcher.group(1);
+      case "FIELD_NO_INIT":
+        // The message is of the form "@NonNull field <field> not initialized"
+        Pattern fieldPattern = Pattern.compile("@NonNull field (\\w+) not initialized");
+        Matcher fieldMatcher = fieldPattern.matcher(message);
+        if (!fieldMatcher.find()) {
+          throw new IllegalStateException(
+              "Could not extract nullable expression from message: " + message);
+        }
+        return fieldMatcher.group(1);
       default:
         throw new IllegalArgumentException(
             "Error type not supported to extract nullable expression from: "
@@ -185,6 +199,17 @@ public class NullAwayError extends Error {
                 + ": "
                 + message);
     }
+  }
+
+  /**
+   * Return true if the error can be fixed by a region example.
+   *
+   * @return true if the error can be fixed by a region example.
+   */
+  public boolean isFixableByRegionExample() {
+    return messageType.equals("DEREFERENCE_NULLABLE")
+        || messageType.equals("PASS_NULLABLE")
+        || messageType.equals("FIELD_NO_INIT");
   }
 
   /**
@@ -245,8 +270,7 @@ public class NullAwayError extends Error {
    */
   public JsonArray getOrigins() {
     if (!infos.has("origins")) {
-      throw new IllegalArgumentException(
-          "Error does not have origins: " + messageType + ": " + message);
+      throw new IllegalArgumentException("Error does not have origins, " + this);
     }
     return infos.getAsJsonArray("origins");
   }

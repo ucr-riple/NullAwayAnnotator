@@ -1,5 +1,9 @@
 In the method below, is there a possibility that the method returns null at the given call site?
 
+```java
+%s
+```
+
 ## Guidelines:
 - The method may have multiple return paths; consider all return statements.
 - If the method calls another method, do not assume its return value unless its full declaration is provided. Request its declaration if needed.

@@ -116,7 +116,7 @@ public class ASTParser {
    */
   public SourceCode getRegionSourceCode(Region region) {
     OnClass onClass = context.targetModuleInfo.getLocationOnClass(region.clazz);
-    return Injector.getMethodSourceCode(
+    return Injector.getRegionSourceCode(
         onClass.path, region.clazz, region.member, config.languageLevel);
   }
 

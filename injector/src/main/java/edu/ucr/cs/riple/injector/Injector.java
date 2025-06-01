@@ -32,6 +32,7 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.CallableDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.google.common.collect.ImmutableList;
 import edu.ucr.cs.riple.injector.changes.ASTChange;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
@@ -46,6 +47,7 @@ import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import edu.ucr.cs.riple.injector.util.ASTUtils;
+import edu.ucr.cs.riple.injector.util.SignatureMatcher;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -151,23 +153,55 @@ public class Injector {
   }
 
   /**
+   * Returns the callable declaration of the method in the class.
+   *
+   * @param path Path to the file containing the method.
+   * @param encClass Enclosing class of the method.
+   * @param field Field name.
+   * @param level Language level of the source code.
+   * @return Callable declaration of the method.
+   */
+  public static FieldDeclaration getFieldDeclaration(
+      @Nullable Path path, String encClass, String field, ParserConfiguration.LanguageLevel level) {
+    CompilationUnit compilationUnit = parse(path, level);
+    if (compilationUnit == null) {
+      return null;
+    }
+    try {
+      return ASTUtils.getFieldDeclaration(compilationUnit, encClass, field);
+    } catch (TargetClassNotFound e) {
+      return null;
+    }
+  }
+
+  /**
    * Returns the source code of the region of the method in the class.
    *
    * @param path Path to the file containing the method.
    * @param encClass Enclosing class of the method.
-   * @param method Method signature.
+   * @param member Member representation. This can be a method signature or a field name.
    * @return Source code of the region of the method.
    */
-  public static SourceCode getMethodSourceCode(
+  @Nullable
+  public static SourceCode getRegionSourceCode(
       @Nullable Path path,
       String encClass,
-      String method,
+      String member,
       ParserConfiguration.LanguageLevel level) {
-    CallableDeclaration<?> target = getCallableDeclaration(path, encClass, method, level);
-    if (target == null || target.getRange().isEmpty()) {
-      return null;
+    Range range;
+    if (SignatureMatcher.isCallableDeclaration(member)) {
+      CallableDeclaration<?> target = getCallableDeclaration(path, encClass, member, level);
+      if (target == null || target.getRange().isEmpty()) {
+        return null;
+      }
+      range = target.getRange().get();
+    } else {
+      FieldDeclaration target = getFieldDeclaration(path, encClass, member, level);
+      if (target == null || target.getRange().isEmpty()) {
+        return null;
+      }
+      range = target.getRange().get();
     }
-    Range range = target.getRange().get();
     return new SourceCode(path, range);
   }
 

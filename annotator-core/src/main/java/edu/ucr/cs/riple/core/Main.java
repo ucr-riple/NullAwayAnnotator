@@ -69,7 +69,7 @@ public class Main {
   public static final boolean IS_BASELINE = false;
   public static final int VERSION = 1;
   public static final boolean DEBUG_MODE = true;
-  public static final String DEBUG_LINE = "private Builder() {}";
+  public static final String DEBUG_LINE = "private Status status;";
 
   // COMMON CONFIGURATION
   public static final String BENCHMARK_NAME =
