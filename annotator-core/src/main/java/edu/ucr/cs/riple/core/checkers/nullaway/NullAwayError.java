@@ -176,7 +176,7 @@ public class NullAwayError extends Error {
         return getNullableExpressionInfo().expression;
       case "PASS_NULLABLE":
         Pattern pattern =
-            Pattern.compile("passing @Nullable parameter '(\\w+)' where @NonNull is required");
+            Pattern.compile("passing @Nullable parameter '([^']+)' where @NonNull is required");
         Matcher matcher = pattern.matcher(message);
         if (!matcher.find()) {
           throw new IllegalStateException(
@@ -185,7 +185,8 @@ public class NullAwayError extends Error {
         return matcher.group(1);
       case "FIELD_NO_INIT":
         // The message is of the form "@NonNull field <field> not initialized"
-        Pattern fieldPattern = Pattern.compile("@NonNull field (\\w+) not initialized");
+        Pattern fieldPattern =
+            Pattern.compile("@NonNull (?:static )?field (?:[\\w$]+\\.)*(\\w+) not initialized");
         Matcher fieldMatcher = fieldPattern.matcher(message);
         if (!fieldMatcher.find()) {
           throw new IllegalStateException(
@@ -243,7 +244,8 @@ public class NullAwayError extends Error {
             .toArray(String[]::new);
       case "FIELD_NO_INIT":
         {
-          Pattern pattern = Pattern.compile("@NonNull static field (\\w+) not initialized");
+          Pattern pattern =
+              Pattern.compile("@NonNull (?:static )?field (?:[\\w$]+\\.)*(\\w+) not initialized");
           Matcher matcher = pattern.matcher(message);
           if (!matcher.find()) {
             throw new RuntimeException(

@@ -29,7 +29,6 @@ import com.google.common.io.RecursiveDeleteOption;
 import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.util.GitUtility;
 import edu.ucr.cs.riple.injector.location.OnField;
-
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -66,13 +65,14 @@ public class Main {
   // Mac
   //  public static final String PROJECT_PATH = "/Users/nima/Desktop/conductor";
   // Ubuntu
-  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/gson";
-  public static final String BUILD_COMMAND = "compileJava";
-  public static final String ANNOTATED_PACKAGE = "com.google.gson";
+  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/jadx";
+  public static final String BUILD_COMMAND = "jadx-core:compileJava";
+  public static final String ANNOTATED_PACKAGE = "jadx.core";
   public static final boolean IS_BASELINE = false;
   public static final int VERSION = 1;
   public static final boolean DEBUG_MODE = false;
-  public static final String DEBUG_LINE = "private Status status;";
+  public static final String DEBUG_LINE =
+      "return genericDeclaration instanceof Class ? (Class<?>) genericDeclaration : null;";
 
   // COMMON CONFIGURATION
   public static final String BENCHMARK_NAME =
