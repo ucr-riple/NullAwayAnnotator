@@ -243,7 +243,7 @@ public class NullAwayError extends Error {
             .toArray(String[]::new);
       case "FIELD_NO_INIT":
         {
-          Pattern pattern = Pattern.compile("@NonNull field (\\w+) not initialized");
+          Pattern pattern = Pattern.compile("@NonNull static field (\\w+) not initialized");
           Matcher matcher = pattern.matcher(message);
           if (!matcher.find()) {
             throw new RuntimeException(

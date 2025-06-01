@@ -82,7 +82,7 @@ public class Response {
     logger.debug("Creating Response:\n{}", response);
     Matcher matcher = RESPONSE_PATTERN.matcher(response);
     if (!matcher.find()) {
-      throw new IllegalArgumentException("Invalid response format: " + response);
+      throw new IllegalArgumentException("Invalid response format:\n" + response);
     }
     XmlParser parser = new XmlParser(matcher.group());
     this.content = matcher.group();

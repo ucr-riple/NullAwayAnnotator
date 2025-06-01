@@ -24,9 +24,12 @@
 
 package edu.ucr.cs.riple.core;
 
+import com.google.common.io.MoreFiles;
+import com.google.common.io.RecursiveDeleteOption;
 import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.util.GitUtility;
 import edu.ucr.cs.riple.injector.location.OnField;
+
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -63,12 +66,12 @@ public class Main {
   // Mac
   //  public static final String PROJECT_PATH = "/Users/nima/Desktop/conductor";
   // Ubuntu
-  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/conductor";
+  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/gson";
   public static final String BUILD_COMMAND = "compileJava";
-  public static final String ANNOTATED_PACKAGE = "com.netflix.conductor";
+  public static final String ANNOTATED_PACKAGE = "com.google.gson";
   public static final boolean IS_BASELINE = false;
   public static final int VERSION = 1;
-  public static final boolean DEBUG_MODE = true;
+  public static final boolean DEBUG_MODE = false;
   public static final String DEBUG_LINE = "private Status status;";
 
   // COMMON CONFIGURATION
@@ -86,7 +89,7 @@ public class Main {
     System.out.println("Running " + BENCHMARK_NAME + " on " + BRANCH_NAME);
     // DELETE LOG:
     try {
-      Files.deleteIfExists(LOG_PATH);
+      MoreFiles.deleteRecursively(LOG_PATH.getParent(), RecursiveDeleteOption.ALLOW_INSECURE);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
