@@ -26,7 +26,7 @@ package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
-import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
+import edu.ucr.cs.riple.injector.changes.RegionRewrite;
 import java.util.Set;
 
 /**
@@ -40,7 +40,7 @@ public class BasicNullAwayCodeFix extends NullAwayCodeFix {
   }
 
   @Override
-  public Set<MethodRewriteChange> fix(NullAwayError error) {
+  public Set<RegionRewrite> fix(NullAwayError error) {
     return gpt.fixUsingBasicPrompt(error, context);
   }
 }

@@ -38,6 +38,7 @@ import edu.ucr.cs.riple.core.util.ASTParser;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
+import edu.ucr.cs.riple.injector.changes.RegionRewrite;
 import java.util.Set;
 
 public abstract class NullAwayCodeFix {
@@ -66,21 +67,20 @@ public abstract class NullAwayCodeFix {
 
   /**
    * Generates a code fix for the given {@link NullAwayError}. The fix is rewrites of sets of
-   * methods.
+   * regions.
    *
    * @param error the error to fix.
-   * @return a {@link MethodRewriteChange} that represents the code fix, or {@code null} if the
-   *     error cannot be fixed.
+   * @return a set of {@link RegionRewrite} instances representing the code fix.
    */
-  public abstract Set<MethodRewriteChange> fix(NullAwayError error);
+  public abstract Set<RegionRewrite> fix(NullAwayError error);
 
   /**
    * Applies the given {@link MethodRewriteChange} to the source code.
    *
    * @param changes the changes to apply.
    */
-  public void apply(Set<MethodRewriteChange> changes) {
-    changes.forEach(injector::rewriteMethod);
+  public void apply(Set<RegionRewrite> changes) {
+    changes.forEach(injector::rewriteRegions);
   }
 
   /**

@@ -26,7 +26,11 @@ import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.injector.location.Location;
+import edu.ucr.cs.riple.injector.location.OnField;
+import edu.ucr.cs.riple.injector.location.OnMethod;
 import edu.ucr.cs.riple.injector.modifications.Replacement;
+import edu.ucr.cs.riple.injector.util.SignatureMatcher;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -51,6 +55,38 @@ public abstract class RegionRewrite implements ASTChange {
     this.location = location;
     this.newRegion = newRegion;
     this.imports = imports;
+  }
+
+  /**
+   * Factory method to create a {@link RegionRewrite} based on the provided path, enclosing class,
+   *
+   * @param path the path to the file where the change should be applied
+   * @param encClass Enclosing class of the member to be rewritten
+   * @param member the member to be rewritten, which can be a method or a field
+   * @param newRegion the new region content that will replace the old region
+   * @return a {@link RegionRewrite} instance, either a {@link MethodRewriteChange} or a {@link
+   *     FieldRewriteChange}.
+   */
+  public static RegionRewrite of(Path path, String encClass, String member, String newRegion) {
+    return of(path, encClass, member, newRegion, new HashSet<>());
+  }
+
+  /**
+   * Factory method to create a {@link RegionRewrite} based on the provided path, enclosing class,
+   *
+   * @param path the path to the file where the change should be applied
+   * @param encClass Enclosing class of the member to be rewritten
+   * @param member the member to be rewritten, which can be a method or a field
+   * @param newRegion the new region content that will replace the old region
+   * @return a {@link RegionRewrite} instance, either a {@link MethodRewriteChange} or a {@link
+   *     FieldRewriteChange}.
+   */
+  public static RegionRewrite of(
+      Path path, String encClass, String member, String newRegion, Set<String> imports) {
+    if (SignatureMatcher.isCallableDeclaration(member)) {
+      return new MethodRewriteChange(new OnMethod(path, encClass, member), newRegion, imports);
+    }
+    return new FieldRewriteChange(new OnField(path, encClass, Set.of(member)), newRegion, imports);
   }
 
   @Nullable

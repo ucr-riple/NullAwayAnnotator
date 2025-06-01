@@ -51,6 +51,7 @@ import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
 import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
+import edu.ucr.cs.riple.injector.changes.RegionRewrite;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import edu.ucr.cs.riple.injector.changes.RemoveMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
@@ -85,7 +86,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
    * Simply returns an empty set, meaning no action is needed. The purpose is only increasing
    * readability.
    */
-  private static final Set<MethodRewriteChange> NO_ACTION = Set.of();
+  private static final Set<RegionRewrite> NO_ACTION = Set.of();
 
   public AdvancedNullAwayCodeFix(Context context) {
     super(context);
@@ -102,7 +103,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
    *     error cannot be fixed.
    */
   @Override
-  public Set<MethodRewriteChange> fix(NullAwayError error) {
+  public Set<RegionRewrite> fix(NullAwayError error) {
     logger.trace("Fixing error: {}", error);
     switch (error.messageType) {
       case "DEREFERENCE_NULLABLE":
@@ -131,7 +132,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code NO_ACTION} if the
    *     error cannot be fixed.
    */
-  private Set<MethodRewriteChange> resolveWrongOverrideReturnError(NullAwayError error) {
+  private Set<RegionRewrite> resolveWrongOverrideReturnError(NullAwayError error) {
     logger.trace("Fixing wrong override return error.");
     // make super method nullable.
     OnMethod methodLocation =
@@ -161,7 +162,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
    * @param error the error to fix.
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code null} if the
    */
-  private Set<MethodRewriteChange> resolveAssignFieldNullableError(NullAwayError error) {
+  private Set<RegionRewrite> resolveAssignFieldNullableError(NullAwayError error) {
     logger.trace("Resolving assign field nullable error.");
     // currently the only solution we follow is to make the field nullable and resolve triggered
     // errors.
@@ -188,11 +189,11 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
             .filter(e -> e.getResolvingFixes().isEmpty())
             .map(e -> (NullAwayError) e)
             .collect(Collectors.toSet());
-    Set<MethodRewriteChange> changes = new HashSet<>();
+    Set<RegionRewrite> changes = new HashSet<>();
     logger.trace("Resolving unresolvable errors.");
     for (NullAwayError unresolvableError : unresolvableErrors) {
       logger.trace("Resolving unresolvable error: {}", unresolvableError);
-      Set<MethodRewriteChange> change = fix(unresolvableError);
+      Set<RegionRewrite> change = fix(unresolvableError);
       changes.addAll(change);
     }
     return changes;
@@ -207,7 +208,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code NO_ACTION} if the
    *     error cannot be fixed.
    */
-  private Set<MethodRewriteChange> resolveNullableReturnError(NullAwayError error) {
+  private Set<RegionRewrite> resolveNullableReturnError(NullAwayError error) {
     // Check if it is a false positive
     logger.trace("Checking if the method is actually returning nullable.");
     OnMethod onMethod = new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member);
@@ -258,9 +259,9 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
    * @param error the error to fix.
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code null} if the
    */
-  private Set<MethodRewriteChange> resolveUninitializedField(NullAwayError error) {
+  private Set<RegionRewrite> resolveUninitializedField(NullAwayError error) {
     // This method is going to analyze the nullability of each field individually.
-    Set<MethodRewriteChange> changes = new HashSet<>();
+    Set<RegionRewrite> changes = new HashSet<>();
     String[] names = error.getUninitializedFieldsFromErrorMessage();
     logger.trace("Resolving uninitialized field errors for fields: {}", Arrays.toString(names));
     final int[] index = {0};
@@ -274,9 +275,8 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
                     investigateFieldNullability(fix.toField(), names[index[0]]);
                 if (!checkFieldNullability) {
                   logger.trace("Field is not nullable. Removed annotation from field.");
-                  return;
                 } else {
-                  // Make field nullable if not already.
+                  // Make the field nullable if not already.
                   context.injector.injectAnnotation(
                       new AddMarkerAnnotation(fix.toField(), context.config.nullableAnnot));
                   Set<NullAwayError> triggeredErrors =
@@ -285,7 +285,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
                     logger.trace("Expected to have errors for making the field nullable.");
                     return;
                   }
-                  Set<MethodRewriteChange> c = new HashSet<>();
+                  Set<RegionRewrite> c = new HashSet<>();
                   logger.trace("Trying to fix errors for making the field nullable");
                   triggeredErrors.forEach(
                       nullAwayError -> {
@@ -306,7 +306,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code null} if the
    *     error cannot be fixed.
    */
-  private Set<MethodRewriteChange> resolveDereferenceError(NullAwayError error) {
+  private Set<RegionRewrite> resolveDereferenceError(NullAwayError error) {
     logger.trace("Resolving dereference error: {}", error);
     if (ASTParser.isObjectEqualsMethod(error.getRegion().member)) {
       logger.trace("Fixing dereference error in equals method.");
@@ -334,10 +334,10 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
           parser.getCallableDeclaration(error.getRegion().clazz, error.getRegion().member);
       if (enclosingMethodForError != null
           && parser.isMethodWithNullableReturn(enclosingMethodForError)) {
-        // make return null statement if null.
+        // make "return null" statement if null.
         logger.trace(
             "Method is already annotated as nullable. Constructing return null statement.");
-        Set<MethodRewriteChange> changes =
+        Set<RegionRewrite> changes =
             gpt.fixDereferenceByReturningNullInNullableMethod(error, context);
         apply(changes);
         // add back annotation
@@ -353,7 +353,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
     return resolveDereferenceErrorElementType(error, info);
   }
 
-  private Set<MethodRewriteChange> resolveDereferenceErrorElementType(
+  private Set<RegionRewrite> resolveDereferenceErrorElementType(
       NullAwayError error, NullAwayError.NullableExpressionInfo info) {
     switch (info.kind) {
       case "field":
@@ -367,7 +367,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
             error, info.clazz, info.symbol, info.expression, info.isAnnotated);
       case "local_variable":
         JsonArray origins = error.getOrigins();
-        Set<MethodRewriteChange> ans = new HashSet<>();
+        Set<RegionRewrite> ans = new HashSet<>();
         for (JsonElement origin : origins) {
           NullAwayError.NullableExpressionInfo i =
               new NullAwayError.NullableExpressionInfo(origin.getAsJsonObject());
@@ -389,7 +389,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty} if no fix
    *     is found.
    */
-  private Set<MethodRewriteChange> resolveMethodDereferenceError(
+  private Set<RegionRewrite> resolveMethodDereferenceError(
       NullAwayError error, String encClass, String method, String invocation, boolean isAnnotated) {
     // Build a context for prompt generation
     logger.trace("Resolving method dereference error.");
@@ -446,7 +446,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty} if no fix
    *     is found.
    */
-  private Set<MethodRewriteChange> resolveParameterDereferenceError(
+  private Set<RegionRewrite> resolveParameterDereferenceError(
       NullAwayError error, String encClass, String paramName) {
     logger.trace("Resolving parameter dereference error.");
     // Build a context for prompt generation
@@ -505,7 +505,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty} if no fix
    *     is found.
    */
-  private Set<MethodRewriteChange> resolveFieldNullabilityError(OnField onField, String field) {
+  private Set<RegionRewrite> resolveFieldNullabilityError(OnField onField, String field) {
     boolean fieldNullabilityCheck = investigateFieldNullability(onField, field);
     if (!fieldNullabilityCheck) {
       logger.trace("Field is not nullable. removed annotation from field and getter.");
@@ -525,7 +525,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
       logger.trace("Expected to have errors for making the field nullable.");
       return NO_ACTION;
     }
-    Set<MethodRewriteChange> changes = new HashSet<>();
+    Set<RegionRewrite> changes = new HashSet<>();
     logger.trace("Trying to fix errors for making the field nullable");
     triggeredErrors.forEach(e -> changes.addAll(fixErrorByRegions(e, onField)));
     return changes;
@@ -544,7 +544,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
    * @return a set of {@link MethodRewriteChange} instances representing the code fix, or an empty
    *     set if no fix is found.
    */
-  private Set<MethodRewriteChange> fixErrorByRegions(NullAwayError error, Location location) {
+  private Set<RegionRewrite> fixErrorByRegions(NullAwayError error, Location location) {
     if (!error.isFixableByRegionExample()) {
       return Set.of();
     }
@@ -558,9 +558,9 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
         impactedRegions.stream()
             .filter(region -> !unsafeRegions.contains(region))
             .collect(Collectors.toSet());
-    Set<MethodRewriteChange> changes = new HashSet<>();
+    Set<RegionRewrite> changes = new HashSet<>();
     logger.trace("Safe regions: {} - Unsafe regions: {}", safeRegions.size(), unsafeRegions.size());
-    Set<MethodRewriteChange> changesForRegion = NO_ACTION;
+    Set<RegionRewrite> changesForRegion = NO_ACTION;
     if (!safeRegions.isEmpty()) {
       // First try to fix by safe regions if exists.
       changesForRegion = gpt.fixDereferenceErrorBySafeRegions(error, safeRegions, context);
@@ -596,8 +596,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
    * @param error the error to fix.
    * @return a {@link MethodRewriteChange} that represents the code fix.
    */
-  private Set<MethodRewriteChange> constructCastToNonnullChange(
-      NullAwayError error, String reason) {
+  private Set<RegionRewrite> constructCastToNonnullChange(NullAwayError error, String reason) {
     logger.trace("Constructing cast to nonnull change for reason: {}", reason);
     return gpt.fixDereferenceByAddingCastToNonnull(error, reason, context);
   }
@@ -609,7 +608,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
    * @param location the location to fix the triggered errors for.
    * @return the set of {@link MethodRewriteChange} instances representing the code fix.
    */
-  private Set<MethodRewriteChange> fixTriggeredErrorsForLocation(Location location) {
+  private Set<RegionRewrite> fixTriggeredErrorsForLocation(Location location) {
     logger.trace("Fixing triggered errors for location: {}", location);
     Set<NullAwayError> errors = getTriggeredErrorsFromLocation(location);
     logger.trace("Triggered errors size: {}", errors.size());
@@ -624,10 +623,10 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
     // resolve the ones where annotation cannot fix
     Set<NullAwayError> unresolvableErrors =
         errors.stream().filter(e -> e.getResolvingFixes().isEmpty()).collect(Collectors.toSet());
-    Set<MethodRewriteChange> changes = new HashSet<>();
+    Set<RegionRewrite> changes = new HashSet<>();
     for (NullAwayError unresolvableError : unresolvableErrors) {
       logger.trace("Resolving unresolvable error for triggered error: {}", unresolvableError);
-      Set<MethodRewriteChange> change = fix(unresolvableError);
+      Set<RegionRewrite> change = fix(unresolvableError);
       changes.addAll(change);
     }
     return changes;

@@ -49,7 +49,7 @@ import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddSingleElementAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddTypeUseMarkerAnnotation;
-import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
+import edu.ucr.cs.riple.injector.changes.RegionRewrite;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnParameter;
@@ -410,7 +410,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       }
                       // cleanup
                       logger.trace("{} : TOP LEVEL CALL TO FIX ERROR: {}", counter.get(), error);
-                      Set<MethodRewriteChange> changes = Set.of();
+                      Set<RegionRewrite> changes = Set.of();
                       try {
                         changes = codeFix.fix(error);
                         System.out.println("Finished processing.");

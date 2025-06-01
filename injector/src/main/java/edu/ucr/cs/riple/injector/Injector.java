@@ -39,6 +39,7 @@ import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AnnotationChange;
 import edu.ucr.cs.riple.injector.changes.ChangeVisitor;
 import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
+import edu.ucr.cs.riple.injector.changes.RegionRewrite;
 import edu.ucr.cs.riple.injector.changes.RemoveAnnotation;
 import edu.ucr.cs.riple.injector.changes.TypeUseAnnotationChange;
 import edu.ucr.cs.riple.injector.exceptions.ParseException;
@@ -210,7 +211,7 @@ public class Injector {
    *
    * @param change Method rewrite change.
    */
-  public void rewriteMethod(MethodRewriteChange change) {
+  public void rewriteRegions(RegionRewrite change) {
     start(Set.of(change));
   }
 
