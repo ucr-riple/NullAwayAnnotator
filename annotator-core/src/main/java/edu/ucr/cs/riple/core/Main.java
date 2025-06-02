@@ -65,9 +65,9 @@ public class Main {
   // Mac
   //  public static final String PROJECT_PATH = "/Users/nima/Desktop/conductor";
   // Ubuntu
-  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/spring-boot";
-  public static final String BUILD_COMMAND = ":spring-boot-project:spring-boot:compileJava";
-  public static final String ANNOTATED_PACKAGE = "org.springframework.boot";
+  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/eureka";
+  public static final String BUILD_COMMAND = "eureka-core:compileJava";
+  public static final String ANNOTATED_PACKAGE = "com.netflix.eureka";
   public static final boolean IS_BASELINE = false;
   public static final int VERSION = 1;
   public static final boolean DEBUG_MODE = false;
