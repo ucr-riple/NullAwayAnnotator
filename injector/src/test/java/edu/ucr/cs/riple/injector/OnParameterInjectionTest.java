@@ -709,4 +709,32 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
                 "javax.annotation.Nullable"))
         .start();
   }
+
+  @Test
+  public void additionOnParameterOnMethodWithMultiDimension() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "   public Foo(double x, final Object[][] content){}",
+            "   public Foo(double x, final Object[] content){}",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "   public Foo(@Nullable double x, final Object[][] content){}",
+            "   public Foo(@Nullable double x, final Object[] content){}",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnParameter("Foo.java", "test.Foo", "Foo(double,Array[])", 0),
+                "javax.annotation.Nullable"),
+            new AddMarkerAnnotation(
+                new OnParameter("Foo.java", "test.Foo", "Foo(double,Object[])", 0),
+                "javax.annotation.Nullable"))
+        .start();
+  }
 }

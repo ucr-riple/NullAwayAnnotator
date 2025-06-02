@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.injector.util;
 
 import com.github.javaparser.ast.body.CallableDeclaration;
+import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.Type;
 import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
@@ -153,6 +154,13 @@ public class SignatureMatcher {
   private static String getTypeName(Type type) {
     if (type.isPrimitiveType()) {
       return type.asPrimitiveType().asString();
+    }
+    if (type.isArrayType()) {
+      // Multidimensional arrays are represented as "Array[]".
+      ArrayType arrayType = type.asArrayType();
+      if (arrayType.getComponentType().isArrayType()) {
+        return "Array[]";
+      }
     }
     if (type.isClassOrInterfaceType()) {
       return type.asClassOrInterfaceType().getNameAsString();

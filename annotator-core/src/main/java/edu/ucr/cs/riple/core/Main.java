@@ -70,9 +70,8 @@ public class Main {
   public static final String ANNOTATED_PACKAGE = "de.gurkenlabs.litiengine";
   public static final boolean IS_BASELINE = false;
   public static final int VERSION = 1;
-  public static final boolean DEBUG_MODE = false;
-  public static final String DEBUG_LINE =
-      "return genericDeclaration instanceof Class ? (Class<?>) genericDeclaration : null;";
+  public static final boolean DEBUG_MODE = true;
+  public static final String DEBUG_LINE = "return this.sliderComponent;";
 
   // COMMON CONFIGURATION
   public static final String BENCHMARK_NAME =
