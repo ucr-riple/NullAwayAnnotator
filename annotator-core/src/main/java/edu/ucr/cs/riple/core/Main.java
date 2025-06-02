@@ -65,12 +65,12 @@ public class Main {
   // Mac
   //  public static final String PROJECT_PATH = "/Users/nima/Desktop/conductor";
   // Ubuntu
-  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/mockito";
-  public static final String BUILD_COMMAND = "compileJava";
-  public static final String ANNOTATED_PACKAGE = "org.mockito";
+  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/spring-boot";
+  public static final String BUILD_COMMAND = ":spring-boot-project:spring-boot:compileJava";
+  public static final String ANNOTATED_PACKAGE = "org.springframework.boot";
   public static final boolean IS_BASELINE = false;
   public static final int VERSION = 1;
-  public static final boolean DEBUG_MODE = true;
+  public static final boolean DEBUG_MODE = false;
   public static final String DEBUG_LINE = "return (Class<T>) PRIMITIVE_TYPES.get(clazz);";
 
   // COMMON CONFIGURATION
