@@ -308,7 +308,7 @@ public class OnMethodInjectionTest extends BaseInjectorTest {
                 new OnMethod(
                     "Foo.java",
                     "test.Foo",
-                    "getTargetForCall(com.ibm.wala.ipa.callgraph.CGNode[],com.ibm.wala.classLoader.CallSiteReference[][][],com.ibm.wala.classLoader.IClass,com.ibm.wala.ipa.callgraph.propagation.InstanceKey[][])"),
+                    "getTargetForCall(com.ibm.wala.ipa.callgraph.CGNode[],Array[],com.ibm.wala.classLoader.IClass,Array[])"),
                 "javax.annotation.Nullable"))
         .start();
   }
