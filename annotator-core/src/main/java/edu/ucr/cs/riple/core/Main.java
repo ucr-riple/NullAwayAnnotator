@@ -70,8 +70,8 @@ public class Main {
   public static final String ANNOTATED_PACKAGE = "org.mockito";
   public static final boolean IS_BASELINE = false;
   public static final int VERSION = 1;
-  public static final boolean DEBUG_MODE = false;
-  public static final String DEBUG_LINE = "return this.sliderComponent;";
+  public static final boolean DEBUG_MODE = true;
+  public static final String DEBUG_LINE = "return (Class<T>) PRIMITIVE_TYPES.get(clazz);";
 
   // COMMON CONFIGURATION
   public static final String BENCHMARK_NAME =

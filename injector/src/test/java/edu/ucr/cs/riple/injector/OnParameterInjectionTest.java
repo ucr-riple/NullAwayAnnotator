@@ -737,4 +737,34 @@ public class OnParameterInjectionTest extends BaseInjectorTest {
                 "javax.annotation.Nullable"))
         .start();
   }
+
+  @Test
+  public void additionOnParameterOnMethodWithWildCardParameterType() {
+    injectorTestHelper
+        .addInput(
+            "test/A.java",
+            "package test;",
+            "public class A {",
+            "   boolean paramsMatch(Class<?>[] types, Object[] params) {",
+            "     return true;",
+            "   }",
+            "}")
+        .expectOutput(
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class A {",
+            "   boolean paramsMatch(@Nullable Class<?>[] types, Object[] params) {",
+            "     return true;",
+            "   }",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnParameter(
+                    "test/A.java",
+                    "test.A",
+                    "paramsMatch(java.lang.Class[],java.lang.Object[])",
+                    0),
+                "javax.annotation.Nullable"))
+        .start();
+  }
 }

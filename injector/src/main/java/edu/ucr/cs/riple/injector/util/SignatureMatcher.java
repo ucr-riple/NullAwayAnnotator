@@ -160,6 +160,8 @@ public class SignatureMatcher {
       ArrayType arrayType = type.asArrayType();
       if (arrayType.getComponentType().isArrayType()) {
         return "Array[]";
+      } else {
+        return getTypeName(arrayType.getComponentType()) + "[]";
       }
     }
     if (type.isClassOrInterfaceType()) {
