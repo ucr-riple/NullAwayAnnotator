@@ -37,61 +37,78 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 /** Starting point. */
 public class Main {
 
-  //    /**
-  //     * Starting point.
-  //     *
-  //     * @param args if flag '--path' is found, all configurations will be set up based on the
-  // given
-  //     *     json file, otherwise they will be set up according to the set of received cli
-  //   arguments.
-  //     */
-  //    public static void main(String[] args) {
-  //      Config config;
-  //      if (args.length == 2 && args[0].equals("--path")) {
-  //        config = new Config(Paths.get(args[1]));
-  //      } else {
-  //        config = new Config(args);
-  //      }
-  //      Annotator annotator = new Annotator(config);
-  //      annotator.start();
-  //    }
+  static class Benchmark {
+    public final String annotatedPackage;
+    public final String path;
+    public final String buildCommand;
+
+    public Benchmark(String annotatedPackage, String path, String buildCommand) {
+      this.annotatedPackage = annotatedPackage;
+      this.path = path;
+      this.buildCommand = buildCommand;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (!(o instanceof Benchmark)) {
+        return false;
+      }
+      Benchmark benchmark = (Benchmark) o;
+      return Objects.equals(annotatedPackage, benchmark.annotatedPackage)
+          && Objects.equals(path, benchmark.path)
+          && Objects.equals(buildCommand, benchmark.buildCommand);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(annotatedPackage, path, buildCommand);
+    }
+  }
+
+  // Benchmarks
+  static final Map<String, Benchmark> benchmarks;
+
+  static {
+    benchmarks = Map.of("libgdx", new Benchmark("com.badlogic.gdx", "libgdx", "compileJava"));
+  }
 
   // PROJECT SPECIFIC CONFIGURATION
-  // Mac
-  //  public static final String PROJECT_PATH = "/Users/nima/Desktop/conductor";
   // Ubuntu
-  public static final String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/eureka";
-  public static final String BUILD_COMMAND = "eureka-core:compileJava";
-  public static final String ANNOTATED_PACKAGE = "com.netflix.eureka";
-  public static final boolean IS_BASELINE = false;
-  public static final int VERSION = 1;
   public static final boolean DEBUG_MODE = false;
   public static final String DEBUG_LINE = "return (Class<T>) PRIMITIVE_TYPES.get(clazz);";
 
   // COMMON CONFIGURATION
-  public static final String BENCHMARK_NAME =
-      PROJECT_PATH.split("/")[PROJECT_PATH.split("/").length - 1];
-  public static final String BRANCH_NAME =
-      String.format("nimak/agentic-%s-%s", IS_BASELINE ? "basic" : "advanced", VERSION);
   public static final Path LOG_PATH = Paths.get("/tmp/logs/app.log");
   public static final Path COMMIT_HASH_PATH = Paths.get("/tmp/logs/commits.tsv");
   public static final Path TIMER_PATH = Paths.get("/tmp/logs/timer.txt");
-  public static final boolean TEST_MODE = System.getProperty("ANNOTATOR_TEST_MODE") != null;
 
-  public static void main(String[] a) {
+  public static void main(String[] args) {
     System.clearProperty("ANNOTATOR_TEST_MODE");
-    System.out.println("Running " + BENCHMARK_NAME + " on " + BRANCH_NAME);
+    String benchmarkName = args[0];
+    boolean isBaseline = false;
+    if (args.length > 1) {
+      isBaseline = args[1].equals("basic");
+    }
+    System.out.println("Running " + benchmarkName);
     // DELETE LOG:
     try {
       MoreFiles.deleteRecursively(LOG_PATH.getParent(), RecursiveDeleteOption.ALLOW_INSECURE);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+
+    Benchmark benchmark = benchmarks.get(benchmarkName);
+    if (benchmark == null) {
+      throw new IllegalArgumentException("Unknown benchmark: " + benchmarkName);
+    }
+    String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/" + benchmark.path;
 
     // delete dir
     Path outDir = Paths.get(PROJECT_PATH + "/annotator-out/0");
@@ -127,7 +144,7 @@ public class Main {
       // For Ubuntu
       String.format(
           "export JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64 && cd %s && ANDROID_HOME=/home/nima/Android/Sdk ./gradlew clean %s --rerun-tasks --no-build-cache",
-          PROJECT_PATH, BUILD_COMMAND),
+          PROJECT_PATH, benchmark.buildCommand),
       //      // For Mac
       //      String.format(
       //          "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.0.2.jdk/Contents/Home &&cd %s
@@ -142,34 +159,38 @@ public class Main {
       "-cn",
       "NULLAWAY",
       "-app",
-      ANNOTATED_PACKAGE,
+      benchmark.annotatedPackage,
       "-di", // deactivate inference
       "-rrem", // resolve remaining errors
-      IS_BASELINE ? "basic" : "advanced",
+      isBaseline ? "basic" : "advanced",
       //             "-rboserr", // redirect build output stream and error stream
       "--depth",
       "6"
     };
     Config config = new Config(argsArray);
+    config.benchmarkName = benchmarkName;
+    config.benchmarkPath = PROJECT_PATH;
+
+    System.out.println("Running on branch name: " + config.branchName());
     System.out.println("Starting annotator...");
     // reset git repo
-    try (GitUtility git = GitUtility.instance()) {
+    try (GitUtility git = GitUtility.instance(config)) {
       git.resetHard();
       git.pull();
       git.checkoutBranch("nimak/auto-code-fix");
       git.resetHard();
       git.pull();
-      git.deleteLocalBranch(BRANCH_NAME);
-      git.deleteRemoteBranch(BRANCH_NAME);
-      git.createAndCheckoutBranch(BRANCH_NAME);
-      git.pushBranch(BRANCH_NAME);
+      git.deleteLocalBranch(config.branchName());
+      git.deleteRemoteBranch(config.branchName());
+      git.createAndCheckoutBranch(config.branchName());
+      git.pushBranch(config.branchName());
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
     // Start annotator
     Annotator annotator = new Annotator(config);
     annotator.start();
-    if (actualRunEnabled()) {
+    if (config.actualRunEnabled()) {
       // copy the logs /tmp/logs directory under Desktop/logs/{project}/{branch}
       Path sourceDir = Paths.get("/tmp/logs");
       Path destDir =
@@ -177,8 +198,8 @@ public class Main {
               System.getProperty("user.home"),
               "Desktop",
               "logs",
-              BENCHMARK_NAME,
-              BRANCH_NAME.split("/")[1]);
+              config.benchmarkName,
+              config.branchName().split("/")[1]);
       try (Stream<Path> p = Files.walk(sourceDir)) {
         p.forEach(
             sourcePath -> {
@@ -197,15 +218,6 @@ public class Main {
         System.err.println("Failed to copy: " + e.getMessage());
       }
     }
-  }
-
-  /**
-   * Checks if the annotator is running in actual mode (not in test or debug mode).
-   *
-   * @return true if the annotator is running in actual mode, false otherwise.
-   */
-  public static boolean actualRunEnabled() {
-    return !TEST_MODE && !DEBUG_MODE;
   }
 
   public static boolean isTheFix(Fix fix) {

@@ -61,7 +61,7 @@ public abstract class NullAwayCodeFix {
   public NullAwayCodeFix(Context context) {
     this.context = context;
     this.parser = new ASTParser(context);
-    this.gpt = new ChatGPT(parser);
+    this.gpt = new ChatGPT(context.config, parser);
     this.injector = new Injector(context.config.languageLevel);
   }
 

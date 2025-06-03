@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import edu.ucr.cs.riple.annotator.util.parsers.JsonParser;
+import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
@@ -114,12 +115,14 @@ public class ChatGPT {
 
   public static final AtomicInteger count = new AtomicInteger(0);
 
+  private final ResponseCache responseCache;
+
   /**
    * The {@link ASTParser} instance used to parse the source code of the file containing the error.
    */
   private final ASTParser parser;
 
-  public ChatGPT(ASTParser parser) {
+  public ChatGPT(Config config, ASTParser parser) {
     this.dereferenceEqualsMethodRewritePrompt =
         Utility.readResourceContent("prompts/dereference/equals-rewrite.txt");
     this.dereferenceToStringMethodRewritePrompt =
@@ -146,7 +149,8 @@ public class ChatGPT {
         Utility.readResourceContent("prompts/inquiry/is-nullable-at-call-site.txt");
     this.basicFixRequestPrompt = Utility.readResourceContent("prompts/basic-fix-request.txt");
     this.parser = parser;
-    ResponseCache.createTable();
+    this.responseCache = new ResponseCache(config);
+    this.responseCache.createTable();
   }
 
   /**
@@ -156,9 +160,24 @@ public class ChatGPT {
    * @param prompt the question to ask.
    * @return the response from ChatGPT.
    */
-  public static Response ask(String prompt, Context context) {
+  public Response ask(String prompt, Context context) {
     logger.trace("Asking ChatGPT:\n{}", prompt);
+    prompt = preprocessPrompt(prompt);
+    ResponseCache.CachedData cachedResponse = responseCache.getCachedResponse(prompt);
+    if (cachedResponse != null) {
+      System.out.println("Retrieving response from cache");
+      logger.trace("Retrieving response from cache");
+      String cachedPrompt = cachedResponse.prompt;
+      if (cachedPrompt.equals(prompt)) {
+        return new Response(cachedResponse.response);
+      }
+      logger.trace("Cache collision detected: Cached:\n{}\nPrompt:\n{}", cachedPrompt, prompt);
+      throw new RuntimeException("Cache collision detected");
+    }
     String response = sendRequestToOpenAI(prompt);
+    responseCache.cacheResponse(prompt, response);
+    logger.trace("Cached response");
+    System.out.println("Cached response");
     return new Response(response);
   }
 
@@ -169,18 +188,6 @@ public class ChatGPT {
    * @return the response from ChatGPT.
    */
   private static String sendRequestToOpenAI(String prompt) {
-    prompt = preprocessPrompt(prompt);
-    ResponseCache.CachedData cachedResponse = ResponseCache.getCachedResponse(prompt);
-    if (cachedResponse != null) {
-      System.out.println("Retrieving response from cache");
-      logger.trace("Retrieving response from cache");
-      String cachedPrompt = cachedResponse.prompt;
-      if (cachedPrompt.equals(prompt)) {
-        return cachedResponse.response;
-      }
-      logger.trace("Cache collision detected: Cached:\n{}\nPrompt:\n{}", cachedPrompt, prompt);
-      throw new RuntimeException("Cache collision detected");
-    }
     if (count.incrementAndGet() > 50) {
       throw new RuntimeException("Exceeded the limit of 50 requests to OpenAI");
     }
@@ -223,7 +230,6 @@ public class ChatGPT {
       }
       br.close();
       String response = extractMessageFromJSONResponse(rawResponse.toString());
-      ResponseCache.cacheResponse(prompt, response);
       System.out.println("Response received from OpenAI.");
       logger.trace("Response received from OpenAI.");
       return response;

@@ -427,19 +427,20 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                         codeFix.apply(changes);
                         Utility.executeCommand(
                             config,
-                            String.format("cd %s && ./gradlew spotlessApply", Main.PROJECT_PATH));
+                            String.format(
+                                "cd %s && ./gradlew spotlessApply", config.benchmarkPath));
                         long currentLineNumber = Utility.getLineCountOfFile(Main.LOG_PATH);
                         Utility.forceFlushLog();
                         String log =
                             Utility.getLinesFromFile(
                                 Main.LOG_PATH, previousLineNumber.get(), currentLineNumber);
                         previousLineNumber.set(currentLineNumber);
-                        try (GitUtility git = GitUtility.instance()) {
+                        try (GitUtility git = GitUtility.instance(config)) {
                           if (git.hasChangesToCommit()) {
                             // write to repo
                             Files.writeString(
                                 Paths.get(
-                                    Main.PROJECT_PATH
+                                    config.benchmarkPath
                                         + String.format("/log-%d.log", counter.get())),
                                 String.format("====================\n%s\nLog:\n%s\n", error, log),
                                 Charset.defaultCharset());

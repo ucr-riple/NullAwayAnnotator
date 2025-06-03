@@ -42,16 +42,14 @@ import edu.ucr.cs.riple.scanner.ScannerConfigWriter;
 import edu.ucr.cs.riple.scanner.generatedcode.SourceType;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -317,15 +315,16 @@ public class Utility {
   /**
    * Reads a resource file and returns its content as a String.
    *
-   * @param resourcePath The path to the resource file.
+   * @param resourcePath The path to the resource file, e.g., "/data/myfile.txt".
    * @return The content of the resource file.
    */
   public static String readResourceContent(String resourcePath) {
-    try {
-      return Files.readString(
-          Paths.get(Objects.requireNonNull(Utility.class.getResource(resourcePath)).toURI()),
-          Charset.defaultCharset());
-    } catch (IOException | URISyntaxException e) {
+    try (InputStream in = Utility.class.getResourceAsStream(resourcePath)) {
+      if (in == null) {
+        throw new IllegalArgumentException("Resource not found: " + resourcePath);
+      }
+      return new String(in.readAllBytes(), Charset.defaultCharset());
+    } catch (IOException e) {
       throw new RuntimeException("Exception while reading resource: " + resourcePath, e);
     }
   }

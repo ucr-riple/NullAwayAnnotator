@@ -24,7 +24,7 @@
 
 package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 
-import edu.ucr.cs.riple.core.Main;
+import edu.ucr.cs.riple.core.Config;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -38,8 +38,7 @@ import java.sql.Statement;
 public class ResponseCache {
 
   /** Database file path. */
-  private static final String DB_URL =
-      String.format("jdbc:sqlite:databases/%s.db", Main.TEST_MODE ? "Test" : Main.BENCHMARK_NAME);
+  private final String DB_URL;
 
   /** CachedData class to store the prompt and response. */
   public static class CachedData {
@@ -55,8 +54,15 @@ public class ResponseCache {
     }
   }
 
+  public ResponseCache(Config config) {
+    this.DB_URL =
+        String.format(
+            "jdbc:sqlite:%s/Desktop/%s.db",
+            System.getProperty("user.home"), config.isTestMode ? "Test" : config.benchmarkName);
+  }
+
   /** Creates the SQLite database and the cache table if it does not exist. */
-  public static void createTable() {
+  public void createTable() {
     String createTableSQL =
         "CREATE TABLE IF NOT EXISTS cache ("
             + "hash TEXT PRIMARY KEY, "
@@ -76,7 +82,7 @@ public class ResponseCache {
    * @param prompt The prompt to hash.
    * @return The hash of the prompt in hexadecimal format.
    */
-  public static String hashPrompt(String prompt) {
+  public String hashPrompt(String prompt) {
     try {
       MessageDigest digest = MessageDigest.getInstance("SHA-256");
       byte[] hashBytes = digest.digest(prompt.getBytes(Charset.defaultCharset()));
@@ -96,7 +102,7 @@ public class ResponseCache {
    * @param prompt The prompt to search for in the cache.
    * @return A CachedData object containing the prompt and response, or null if not found.
    */
-  public static CachedData getCachedResponse(String prompt) {
+  public CachedData getCachedResponse(String prompt) {
     String selectSQL = "SELECT prompt, response FROM cache WHERE hash = ?";
 
     try (Connection conn = DriverManager.getConnection(DB_URL);
@@ -128,7 +134,7 @@ public class ResponseCache {
    * @param prompt The prompt to cache.
    * @param response The response to cache.
    */
-  public static void cacheResponse(String prompt, String response) {
+  public void cacheResponse(String prompt, String response) {
     // SQL statement for inserting a new prompt-response pair
     String insertSQL = "INSERT OR FAIL INTO cache (hash, prompt, response) " + "VALUES (?, ?, ?)";
     try (Connection conn = DriverManager.getConnection(DB_URL);

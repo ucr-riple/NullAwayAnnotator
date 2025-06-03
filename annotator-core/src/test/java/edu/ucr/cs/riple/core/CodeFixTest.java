@@ -27,15 +27,12 @@ package edu.ucr.cs.riple.core;
 import static edu.ucr.cs.riple.core.checkers.nullaway.codefix.Response.agree;
 import static edu.ucr.cs.riple.core.checkers.nullaway.codefix.Response.codeFix;
 import static edu.ucr.cs.riple.core.checkers.nullaway.codefix.Response.disagree;
-import static org.mockito.ArgumentMatchers.any;
 
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.ChatGPT;
 import edu.ucr.cs.riple.core.checkers.nullaway.codefix.Response;
 import org.junit.After;
 import org.junit.Test;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-import org.mockito.stubbing.OngoingStubbing;
 
 public class CodeFixTest extends AnnotatorBaseCoreTest {
 
@@ -46,15 +43,16 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
   }
 
   private void mockChatGPTResponse(Response... responses) {
-    if (responses == null) {
-      throw new IllegalStateException("Mocked Responses are not set");
-    }
-    MockedStatic<ChatGPT> chatGPTMocked = Mockito.mockStatic(ChatGPT.class);
-    OngoingStubbing<ChatGPT> stubbing = chatGPTMocked.when(() -> ChatGPT.ask(any(), any()));
-    for (Response response : responses) {
-      stubbing = stubbing.thenAnswer(invocation -> response);
-    }
-    responseMockedStatic = chatGPTMocked;
+    //    if (responses == null) {
+    //      throw new IllegalStateException("Mocked Responses are not set");
+    //    }
+    //    MockedStatic<ChatGPT> chatGPTMocked = Mockito.mockStatic(ChatGPT.class);
+    //    OngoingStubbing<ChatGPT> stubbing = chatGPTMocked.when(() ->
+    // ChatGPT.sendRequestToOpenAI(any()));
+    //    for (Response response : responses) {
+    //      stubbing = stubbing.thenAnswer(invocation -> response);
+    //    }
+    //    responseMockedStatic = chatGPTMocked;
   }
 
   @After
