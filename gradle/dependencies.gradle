@@ -45,11 +45,10 @@ def versions = [
         nullaway                : "0.10.19",
         mockito                 : "5.15.2",
         junit                   : "4.13.2",
-        log4j                   : "2.24.3",
         jgit                    : "6.10.0.202406032230-r",
-        sqlite                  : "3.49.1.0"
-
-
+        sqlite                  : "3.49.1.0",
+        slf4j                   : "2.0.17",
+        logback                 : "1.5.18"
 ]
 
 def apt = [
@@ -69,11 +68,11 @@ def build = [
         errorProneCheckApi      : "com.google.errorprone:error_prone_check_api:${versions.errorProneApi}",
         nullaway                : "com.uber.nullaway:nullaway:${versions.nullaway}",
         gson                    : "com.google.code.gson:gson:${versions.gson}",
-        log4japi                : "org.apache.logging.log4j:log4j-api:${versions.log4j}",
-        log4jcore               : "org.apache.logging.log4j:log4j-core:${versions.log4j}",
         jgitCore                : "org.eclipse.jgit:org.eclipse.jgit:${versions.jgit}",
         jgitSsh                 : "org.eclipse.jgit:org.eclipse.jgit.ssh.apache:${versions.jgit}",
         sqlite                  : "org.xerial:sqlite-jdbc:${versions.sqlite}",
+        slf4j                   : "org.slf4j:slf4j-api:${versions.slf4j}",
+        logback                 : "ch.qos.logback:logback-classic:${versions.logback}"
 ]
 
 def test = [

@@ -28,8 +28,8 @@ import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.annotator.util.parsers.XmlParser;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Response a response from the agent. */
 public class Response {
@@ -75,11 +75,10 @@ public class Response {
   private static final Pattern CODE_RESPONSE_PATTERN =
       Pattern.compile("```java\\s*([\\s\\S]*?)\\s*```");
 
-  /** The logger instance. */
-  private static final Logger logger = LogManager.getLogger(Response.class);
-
   public Response(String response) {
-    logger.debug("Creating Response:\n{}", response);
+    /** The logger instance. */
+    Logger logger = LoggerFactory.getLogger(Response.class);
+    logger.trace("Creating Response:\n{}", response);
     Matcher matcher = RESPONSE_PATTERN.matcher(response);
     if (!matcher.find()) {
       throw new IllegalArgumentException("Invalid response format:\n" + response);
@@ -107,7 +106,7 @@ public class Response {
             || parser.getArrayValueFromTag("/response/success", Boolean.class).orElse(false);
     this.code = parseCode(parser.getValueFromTag("/response/code", String.class).orElse(""));
     this.reason = parser.getArrayValueFromTag("/response/reason", String.class).orElse("");
-    logger.debug("Response created:\n{}", this);
+    logger.trace("Response created:\n{}", this);
   }
 
   /** The response instance for agreement. */

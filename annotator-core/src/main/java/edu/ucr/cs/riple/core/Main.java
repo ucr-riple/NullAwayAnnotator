@@ -24,9 +24,18 @@
 
 package edu.ucr.cs.riple.core;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.FileAppender;
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
 import edu.ucr.cs.riple.core.util.GitUtility;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -36,16 +45,11 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Map;
 import java.util.Objects;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.config.Configurator;
-import org.apache.logging.log4j.core.config.builder.api.AppenderComponentBuilder;
-import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilder;
-import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory;
-import org.apache.logging.log4j.core.config.builder.api.RootLoggerComponentBuilder;
-import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 
 /** Starting point. */
 public class Main {
+
+  public static final int VERSION = 2;
 
   public static class Benchmark {
     public final String annotatedPackage;
@@ -79,7 +83,10 @@ public class Main {
   static final Map<String, Benchmark> benchmarks;
 
   static {
-    benchmarks = Map.of("libgdx", new Benchmark("com.badlogic.gdx", "libgdx", "compileJava"));
+    benchmarks =
+        Map.of(
+            "libgdx", new Benchmark("com.badlogic.gdx", "libgdx", "compileJava"),
+            "zuul", new Benchmark("com.netflix", "zuul", "zuul-core:compileJava"));
   }
 
   // PROJECT SPECIFIC CONFIGURATION
@@ -88,9 +95,12 @@ public class Main {
   public static final String DEBUG_LINE = "return (Class<T>) PRIMITIVE_TYPES.get(clazz);";
 
   public static void main(String[] args) {
-    System.clearProperty("ANNOTATOR_TEST_MODE");
     String benchmarkName = args[0];
     boolean isBaseline = args.length > 1 && args[1].equals("baseline");
+    String branchName = String.format("nimak/agentic-%s-%s", isBaseline ? "basic" : "advanced", 2);
+    Path logRootPath = configureLogging(benchmarkName, branchName);
+
+    System.clearProperty("ANNOTATOR_TEST_MODE");
     System.out.println(
         "Running "
             + benchmarkName
@@ -127,12 +137,16 @@ public class Main {
       "--depth",
       "6"
     };
+
     Config config = new Config(argsArray);
     config.benchmarkName = benchmarkName;
     config.benchmarkPath = PROJECT_PATH;
+    config.logPath = logRootPath.resolve("app.log");
+    config.commitHashPath = logRootPath.resolve("commits.tsv");
+    config.timerPath = logRootPath.resolve("timers.tsv");
+
     System.out.println("Running on branch name: " + config.branchName());
     System.out.println("Starting annotator...");
-    configureLogging(config);
     // reset git repo
     try (GitUtility git = GitUtility.instance(config)) {
       git.resetHard();
@@ -181,50 +195,60 @@ public class Main {
     }
   }
 
-  public static void configureLogging(Config config) {
+  public static Path configureLogging(String benchmarkName, String branchName) {
+    System.out.println(
+        "Configuring logging for benchmark: " + benchmarkName + ", branch: " + branchName);
+    Path root =
+        Paths.get(
+            System.getProperty("user.home"),
+            "Desktop",
+            "logs",
+            benchmarkName,
+            branchName.split("/")[1]);
+    System.out.println("Root path for logs: " + root);
     // Delete log
-    config.logPath =
-        Paths.get(
-            String.format(
-                "%s/Desktop/logs/%s/%s/app.log",
-                System.getProperty("user.home"), config.benchmarkName, config.branchName()));
-    config.commitHashPath =
-        Paths.get(
-            String.format(
-                "%s/Desktop/logs/%s/%s/commits.tsv",
-                System.getProperty("user.home"), config.benchmarkName, config.branchName()));
-    config.timerPath =
-        Paths.get(
-            String.format(
-                "%s/Desktop/logs/%s/%s/timer.tsv",
-                System.getProperty("user.home"), config.benchmarkName, config.branchName()));
     try {
-      MoreFiles.deleteRecursively(config.logPath.getParent(), RecursiveDeleteOption.ALLOW_INSECURE);
+      if (Files.exists(root)) {
+        MoreFiles.deleteRecursively(root, RecursiveDeleteOption.ALLOW_INSECURE);
+      }
+      Files.createDirectories(root);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    ConfigurationBuilder<BuiltConfiguration> builder =
-        ConfigurationBuilderFactory.newConfigurationBuilder();
-    // Set status level
-    builder.setStatusLevel(Level.WARN);
-    // ===== Console Appender (commented out in XML)
-    AppenderComponentBuilder console =
-        builder.newAppender("Console", "Console").addAttribute("target", "SYSTEM_OUT");
-    console.add(
-        builder.newLayout("PatternLayout").addAttribute("pattern", "---%c{1}.%M---%n%msg%n"));
-    builder.add(console);
-    // ===== File Appender
-    AppenderComponentBuilder file =
-        builder.newAppender("FileLogger", "File").addAttribute("fileName", "/tmp/logs/app.log");
-    file.add(builder.newLayout("PatternLayout").addAttribute("pattern", "---%c{1}.%M---%n%msg%n"));
-    builder.add(file);
-    // ===== Root Logger
-    RootLoggerComponentBuilder rootLogger = builder.newRootLogger(Level.TRACE);
-    rootLogger.add(builder.newAppenderRef("FileLogger"));
-    // Uncomment this to enable console logging:
-    // rootLogger.add(builder.newAppenderRef("Console"));
-    builder.add(rootLogger);
-    // Initialize configuration
-    Configurator.initialize(builder.build());
+    String filePath = root.resolve("app.log").toString();
+
+    LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+    context.reset();
+
+    PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+    encoder.setContext(context);
+    encoder.setPattern("%d{HH:mm:ss.SSS} %-5level %class.%method%n%msg%n");
+    encoder.start();
+
+    FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
+    fileAppender.setContext(context);
+    fileAppender.setFile(filePath);
+    fileAppender.setEncoder(encoder);
+    fileAppender.start();
+
+    Logger rootLogger = context.getLogger(Logger.ROOT_LOGGER_NAME);
+    rootLogger.detachAndStopAllAppenders();
+    rootLogger.addAppender(fileAppender);
+    rootLogger.setLevel(Level.WARN);  // Suppress most external INFO logs
+
+    Logger myLogger = context.getLogger("edu.ucr.cs.riple"); // or your base package
+    myLogger.setLevel(Level.TRACE);  // See your trace/debug logs
+    // or WARN if too noisy
+
+
+    File file = new File(filePath);
+    System.out.println("Log path exists: " + file.exists());
+    System.out.println("Can write to log path: " + file.canWrite());
+
+    System.out.println("Testing...");
+    LoggerFactory.getLogger(Main.class).trace("TEST TRACE LOG");
+    System.out.println("Test log written to: " + filePath);
+
+    return root;
   }
 }

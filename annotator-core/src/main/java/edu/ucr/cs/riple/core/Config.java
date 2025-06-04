@@ -62,8 +62,8 @@ import org.apache.commons.cli.ParseException;
 public class Config {
 
   /**
-   * If activated, Annotator will bail out from the search tree as soon as the effectiveness gets
-   * zero or less.
+   * If activated, the Annotator will bail out from the search tree as soon as the effectiveness
+   * gets zero or less.
    */
   public final boolean bailout;
 
@@ -181,10 +181,9 @@ public class Config {
   public Path commitHashPath;
   public Path timerPath;
   public boolean isTestMode = System.getProperty("ANNOTATOR_TEST_MODE") != null;
-  public int version = 2;
 
   public String branchName() {
-    return String.format("nimak/agentic-%s-%s", resolveRemainingErrorMode.name(), version);
+    return String.format("nimak/agentic-%s-%s", resolveRemainingErrorMode.name(), Main.VERSION);
   }
 
   /**

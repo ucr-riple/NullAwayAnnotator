@@ -44,11 +44,12 @@ dependencies {
     implementation deps.build.progressbar
     implementation deps.build.javaparser
     implementation deps.build.commonscli
-    implementation deps.build.log4japi
-    implementation deps.build.log4jcore
     implementation deps.build.jgitCore
     implementation deps.build.jgitSsh
     implementation deps.build.sqlite
+    implementation deps.build.slf4j
+    implementation deps.build.logback
+
 
     testImplementation deps.build.commonsio
     testImplementation deps.test.junit

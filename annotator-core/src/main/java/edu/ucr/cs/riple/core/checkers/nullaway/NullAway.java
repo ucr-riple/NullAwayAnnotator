@@ -66,8 +66,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Represents <a href="https://github.com/uber/NullAway">NullAway</a> checker in Annotator. */
 public class NullAway extends CheckerBaseClass<NullAwayError> {
@@ -86,10 +86,11 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
   public static final int VERSION = 4;
 
   /** The logger instance. */
-  private static final Logger logger = LogManager.getLogger(NullAway.class);
+  private final Logger logger;
 
   public NullAway(Context context) {
     super(context);
+    this.logger = LoggerFactory.getLogger(NullAway.class);
   }
 
   @Override
@@ -388,7 +389,6 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     AtomicInteger counter = new AtomicInteger(0);
     // Collect regions with remaining errors.
     logger.trace("Resolving remaining errors: {} errors.", remainingErrors.size());
-    Utility.forceFlushLog();
     // related to log
     AtomicLong previousLineNumber = new AtomicLong(Utility.getLineCountOfFile(config.logPath));
     remainingErrors.stream()
@@ -429,14 +429,16 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                             config,
                             String.format(
                                 "cd %s && ./gradlew spotlessApply", config.benchmarkPath));
+                        System.out.println("Writing log to file...");
                         long currentLineNumber = Utility.getLineCountOfFile(config.logPath);
-                        Utility.forceFlushLog();
+                        System.out.println("Current line number: " + currentLineNumber);
                         String log =
                             Utility.getLinesFromFile(
                                 config.logPath, previousLineNumber.get(), currentLineNumber);
                         previousLineNumber.set(currentLineNumber);
                         try (GitUtility git = GitUtility.instance(config)) {
                           if (git.hasChangesToCommit()) {
+                            System.out.println("Pushing changes to git...");
                             // write to repo
                             Files.writeString(
                                 Paths.get(
@@ -449,7 +451,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                                 config
                                     .logPath
                                     .getParent()
-                                    .resolve(String.format("/log-%d.log", counter.get())),
+                                    .resolve(String.format("log-%d.log", counter.get())),
                                 String.format("====================\n%s\nLog:\n%s\n", error, log),
                                 Charset.defaultCharset());
                             git.stageAllChanges();

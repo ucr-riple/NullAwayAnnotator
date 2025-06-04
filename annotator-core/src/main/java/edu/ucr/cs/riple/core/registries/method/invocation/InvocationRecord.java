@@ -36,8 +36,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InvocationRecord {
 
@@ -62,13 +62,14 @@ public class InvocationRecord {
   private final ASTParser parser;
 
   /** The logger instance. */
-  private static final Logger logger = LogManager.getLogger(InvocationRecord.class);
+  private final Logger logger;
 
   public InvocationRecord(InvocationRecordRegistry registry) {
     this.calls = new ArrayList<>(3);
     this.registry = registry;
     this.thirdPartyLibs = new HashSet<>();
     this.parser = registry.getParser();
+    this.logger = LoggerFactory.getLogger(InvocationRecord.class);
   }
 
   /**

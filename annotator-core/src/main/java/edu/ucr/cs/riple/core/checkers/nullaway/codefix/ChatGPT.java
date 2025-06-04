@@ -50,8 +50,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Wrapper class to interact with ChatGPT to generate code fixes for {@link NullAwayError}s. */
 public class ChatGPT {
@@ -111,7 +111,7 @@ public class ChatGPT {
   private final String basicFixRequestPrompt;
 
   /** The logger instance. */
-  private static final Logger logger = LogManager.getLogger(ChatGPT.class);
+  private final Logger logger;
 
   public static final AtomicInteger count = new AtomicInteger(0);
 
@@ -151,6 +151,7 @@ public class ChatGPT {
     this.parser = parser;
     this.responseCache = new ResponseCache(config);
     this.responseCache.createTable();
+    this.logger = LoggerFactory.getLogger(ChatGPT.class);
   }
 
   /**
@@ -174,6 +175,7 @@ public class ChatGPT {
       logger.trace("Cache collision detected: Cached:\n{}\nPrompt:\n{}", cachedPrompt, prompt);
       throw new RuntimeException("Cache collision detected");
     }
+    logger.trace("Sending request to OpenAI...");
     String response = sendRequestToOpenAI(prompt);
     responseCache.cacheResponse(prompt, response);
     logger.trace("Cached response");
@@ -191,7 +193,6 @@ public class ChatGPT {
     if (count.incrementAndGet() > 50) {
       throw new RuntimeException("Exceeded the limit of 50 requests to OpenAI");
     }
-    logger.trace("Sending request to OpenAI...");
     System.out.println("Sending request to OpenAI...");
     try {
       // Making a POST request
@@ -231,7 +232,6 @@ public class ChatGPT {
       br.close();
       String response = extractMessageFromJSONResponse(rawResponse.toString());
       System.out.println("Response received from OpenAI.");
-      logger.trace("Response received from OpenAI.");
       return response;
     } catch (IOException e) {
       throw new RuntimeException(e);

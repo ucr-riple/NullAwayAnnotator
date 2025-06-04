@@ -64,8 +64,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A class that provides code fixes for {@link NullAwayError}s. This models uses an agentic
@@ -80,7 +80,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
   private final BasicNullAwayCodeFix basicNullAwayCodeFix;
 
   /** The logger instance. */
-  private static final Logger logger = LogManager.getLogger(AdvancedNullAwayCodeFix.class);
+  private final Logger logger;
 
   /**
    * Simply returns an empty set, meaning no action is needed. The purpose is only increasing
@@ -92,6 +92,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
     super(context);
     this.invocationRecordRegistry = new InvocationRecordRegistry(context.targetModuleInfo, parser);
     this.basicNullAwayCodeFix = new BasicNullAwayCodeFix(context);
+    this.logger = LoggerFactory.getLogger(AdvancedNullAwayCodeFix.class);
   }
 
   /**
@@ -469,7 +470,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
         }
         boolean updated = record.addRequestedMethodsByNames(methods);
         if (!updated) {
-          logger.warn("Could not add requested methods by names.");
+          logger.trace("Could not add requested methods by names.");
           break;
         }
       } else {
@@ -657,7 +658,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
         }
         boolean updated = record.addRequestedMethodsByNames(methods);
         if (!updated) {
-          logger.warn("Could not add requested methods by names.");
+          logger.trace("Could not add requested methods by names.");
           break;
         }
       } else {
@@ -818,7 +819,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
         }
         boolean updated = record.addRequestedMethodsByNames(methods);
         if (!updated) {
-          logger.warn("Could not add requested methods by names.");
+          logger.trace("Could not add requested methods by names.");
           break;
         }
       } else {
