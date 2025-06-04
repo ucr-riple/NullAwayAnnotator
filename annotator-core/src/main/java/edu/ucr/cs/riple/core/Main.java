@@ -33,8 +33,6 @@ import ch.qos.logback.core.FileAppender;
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
 import edu.ucr.cs.riple.core.util.GitUtility;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -45,6 +43,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Map;
 import java.util.Objects;
+import org.slf4j.LoggerFactory;
 
 /** Starting point. */
 public class Main {
@@ -99,7 +98,6 @@ public class Main {
     boolean isBaseline = args.length > 1 && args[1].equals("baseline");
     String branchName = String.format("nimak/agentic-%s-%s", isBaseline ? "basic" : "advanced", 2);
     Path logRootPath = configureLogging(benchmarkName, branchName);
-
     System.clearProperty("ANNOTATOR_TEST_MODE");
     System.out.println(
         "Running "
@@ -234,21 +232,16 @@ public class Main {
     Logger rootLogger = context.getLogger(Logger.ROOT_LOGGER_NAME);
     rootLogger.detachAndStopAllAppenders();
     rootLogger.addAppender(fileAppender);
-    rootLogger.setLevel(Level.WARN);  // Suppress most external INFO logs
+    rootLogger.setLevel(Level.WARN); // Suppress most external INFO logs
 
     Logger myLogger = context.getLogger("edu.ucr.cs.riple"); // or your base package
-    myLogger.setLevel(Level.TRACE);  // See your trace/debug logs
+    myLogger.setLevel(Level.TRACE); // See your trace/debug logs
+
+    Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+      rootLogger.error("Uncaught exception in thread: {}", thread.getName(), throwable);
+    });
+
     // or WARN if too noisy
-
-
-    File file = new File(filePath);
-    System.out.println("Log path exists: " + file.exists());
-    System.out.println("Can write to log path: " + file.canWrite());
-
-    System.out.println("Testing...");
-    LoggerFactory.getLogger(Main.class).trace("TEST TRACE LOG");
-    System.out.println("Test log written to: " + filePath);
-
     return root;
   }
 }

@@ -436,24 +436,28 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                             Utility.getLinesFromFile(
                                 config.logPath, previousLineNumber.get(), currentLineNumber);
                         previousLineNumber.set(currentLineNumber);
+                        try {
+                          // write to repo
+                          Files.writeString(
+                              Paths.get(
+                                  config.benchmarkPath
+                                      + String.format("/log-%d.log", counter.get())),
+                              String.format("====================\n%s\nLog:\n%s\n", error, log),
+                              Charset.defaultCharset());
+                          // write to filesystem
+                          Files.writeString(
+                              config
+                                  .logPath
+                                  .getParent()
+                                  .resolve(String.format("log-%d.log", counter.get())),
+                              String.format("====================\n%s\nLog:\n%s\n", error, log),
+                              Charset.defaultCharset());
+                        } catch (Exception e) {
+                          logger.trace("Error while writing log to file: ", e);
+                        }
                         try (GitUtility git = GitUtility.instance(config)) {
                           if (git.hasChangesToCommit()) {
                             System.out.println("Pushing changes to git...");
-                            // write to repo
-                            Files.writeString(
-                                Paths.get(
-                                    config.benchmarkPath
-                                        + String.format("/log-%d.log", counter.get())),
-                                String.format("====================\n%s\nLog:\n%s\n", error, log),
-                                Charset.defaultCharset());
-                            // write to filesystem
-                            Files.writeString(
-                                config
-                                    .logPath
-                                    .getParent()
-                                    .resolve(String.format("log-%d.log", counter.get())),
-                                String.format("====================\n%s\nLog:\n%s\n", error, log),
-                                Charset.defaultCharset());
                             git.stageAllChanges();
                             git.commitChanges(
                                 String.format(
@@ -462,11 +466,11 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                                     error.messageType,
                                     error.position.diagnosticLine.trim(),
                                     error.message));
+                            git.pushChanges();
                             String commitHash = git.getLatestCommitHash();
                             TSVFiles.addRow(
                                 counter.get() + "\t" + error.toTSV() + "\t" + commitHash,
                                 config.commitHashPath);
-                            git.pushChanges();
                             git.revertLastCommit();
                           }
                         } catch (Exception ex) {
