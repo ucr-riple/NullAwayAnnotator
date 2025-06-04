@@ -27,10 +27,13 @@ package edu.ucr.cs.riple.core.util;
 import edu.ucr.cs.riple.core.Config;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.TransportConfigCallback;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.SshSessionFactory;
@@ -96,6 +99,15 @@ public class GitUtility implements AutoCloseable {
       return;
     }
     git.pull().setTransportConfigCallback(transportConfigCallback).call();
+  }
+
+  public void safePull() throws Exception {
+    if (!config.actualRunEnabled()) {
+      return;
+    }
+    if(branchExistsOnRemote(git.getRepository().getBranch())) {
+      this.pull();
+    }
   }
 
   /**
@@ -253,6 +265,26 @@ public class GitUtility implements AutoCloseable {
     }
     Status status = git.status().call();
     return !status.isClean();
+  }
+
+  /**
+   * Checks if a branch exists on the remote repository.
+   *
+   * @param branchName the name of the branch to check.
+   * @return true if the branch exists on the remote, false otherwise.
+   * @throws Exception if an error occurs during the operation.
+   */
+  public boolean branchExistsOnRemote(String branchName) throws Exception{
+    if (!config.actualRunEnabled()) {
+      return false;
+    }
+    Collection<Ref> refs = git.lsRemote().setHeads(true).call();
+    for (Ref ref : refs) {
+      if (ref.getName().endsWith(branchName)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

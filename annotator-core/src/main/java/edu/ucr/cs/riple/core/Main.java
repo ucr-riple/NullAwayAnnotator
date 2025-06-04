@@ -148,7 +148,7 @@ public class Main {
     // reset git repo
     try (GitUtility git = GitUtility.instance(config)) {
       git.resetHard();
-      git.pull();
+      git.safePull();
       git.checkoutBranch("nimak/auto-code-fix");
       git.resetHard();
       git.pull();
