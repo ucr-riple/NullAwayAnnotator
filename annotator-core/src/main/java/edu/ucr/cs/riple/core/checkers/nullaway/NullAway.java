@@ -383,14 +383,14 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     Set<NullAwayError> remainingErrors = deserializeErrors(context.targetModuleInfo);
     // initialize commit file:
     TSVFiles.initialize(
-        Main.COMMIT_HASH_PATH, "ID" + "\t" + NullAwayError.header() + "\t" + "HASH");
+        config.commitHashPath, "ID" + "\t" + NullAwayError.header() + "\t" + "HASH");
     codeFix.collectImpacts();
     AtomicInteger counter = new AtomicInteger(0);
     // Collect regions with remaining errors.
     logger.trace("Resolving remaining errors: {} errors.", remainingErrors.size());
     Utility.forceFlushLog();
     // related to log
-    AtomicLong previousLineNumber = new AtomicLong(Utility.getLineCountOfFile(Main.LOG_PATH));
+    AtomicLong previousLineNumber = new AtomicLong(Utility.getLineCountOfFile(config.logPath));
     remainingErrors.stream()
         .collect(Collectors.groupingBy(NullAwayError::getRegion))
         .forEach(
@@ -429,11 +429,11 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                             config,
                             String.format(
                                 "cd %s && ./gradlew spotlessApply", config.benchmarkPath));
-                        long currentLineNumber = Utility.getLineCountOfFile(Main.LOG_PATH);
+                        long currentLineNumber = Utility.getLineCountOfFile(config.logPath);
                         Utility.forceFlushLog();
                         String log =
                             Utility.getLinesFromFile(
-                                Main.LOG_PATH, previousLineNumber.get(), currentLineNumber);
+                                config.logPath, previousLineNumber.get(), currentLineNumber);
                         previousLineNumber.set(currentLineNumber);
                         try (GitUtility git = GitUtility.instance(config)) {
                           if (git.hasChangesToCommit()) {
@@ -446,8 +446,10 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                                 Charset.defaultCharset());
                             // write to filesystem
                             Files.writeString(
-                                Paths.get(
-                                    "/tmp/logs" + String.format("/log-%d.log", counter.get())),
+                                config
+                                    .logPath
+                                    .getParent()
+                                    .resolve(String.format("/log-%d.log", counter.get())),
                                 String.format("====================\n%s\nLog:\n%s\n", error, log),
                                 Charset.defaultCharset());
                             git.stageAllChanges();
@@ -461,7 +463,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                             String commitHash = git.getLatestCommitHash();
                             TSVFiles.addRow(
                                 counter.get() + "\t" + error.toTSV() + "\t" + commitHash,
-                                Main.COMMIT_HASH_PATH);
+                                config.commitHashPath);
                             git.pushChanges();
                             git.revertLastCommit();
                           }
@@ -471,8 +473,8 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       }
                     }));
     long elapsed = System.currentTimeMillis() - timer;
-    TSVFiles.initialize(Main.TIMER_PATH, "TIME_IN_MILLIS");
-    TSVFiles.addRow(String.valueOf(elapsed), Main.TIMER_PATH);
+    TSVFiles.initialize(config.timerPath, "TIME_IN_MILLIS");
+    TSVFiles.addRow(String.valueOf(elapsed), config.timerPath);
   }
 
   @Override

@@ -177,8 +177,11 @@ public class Config {
 
   public String benchmarkPath;
   public String benchmarkName;
+  public Path logPath;
+  public Path commitHashPath;
+  public Path timerPath;
   public boolean isTestMode = System.getProperty("ANNOTATOR_TEST_MODE") != null;
-  public int version = 1;
+  public int version = 2;
 
   public String branchName() {
     return String.format("nimak/agentic-%s-%s", resolveRemainingErrorMode.name(), version);

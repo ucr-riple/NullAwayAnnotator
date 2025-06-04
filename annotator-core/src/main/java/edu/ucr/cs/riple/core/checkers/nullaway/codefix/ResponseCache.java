@@ -57,7 +57,7 @@ public class ResponseCache {
   public ResponseCache(Config config) {
     this.DB_URL =
         String.format(
-            "jdbc:sqlite:%s/Desktop/%s.db",
+            "jdbc:sqlite:%s/Desktop/logs/dbs/%s.db",
             System.getProperty("user.home"), config.isTestMode ? "Test" : config.benchmarkName);
   }
 
