@@ -111,6 +111,14 @@ public class Response {
     logger.trace("Response created:\n{}", this);
   }
 
+  /**
+   * Factory method to create a Response instance from a response string. It validates the response
+   * and sends it to the constructor.
+   *
+   * @param response the response string to create the Response instance from.
+   * @return an Optional containing the Response instance if the response is valid, otherwise an
+   *     empty Optional.
+   */
   public static Optional<Response> tryCreate(String response) {
     Logger logger = LoggerFactory.getLogger(Response.class);
     logger.trace("Creating Response:\n{}", response);

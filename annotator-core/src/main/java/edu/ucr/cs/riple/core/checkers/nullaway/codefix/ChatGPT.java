@@ -114,9 +114,14 @@ public class ChatGPT {
   /** The logger instance. */
   private final Logger logger;
 
+  /** Counter to keep track of the number of requests sent to ChatGPT per error. */
   public static final AtomicInteger count = new AtomicInteger(0);
 
+  /** Cache for the responses from ChatGPT. */
   private final ResponseCache responseCache;
+
+  /** Limit of retries to get a valid response from ChatGPT. */
+  private static final int RETRY_LIMIT = 5;
 
   /**
    * The {@link ASTParser} instance used to parse the source code of the file containing the error.
@@ -186,7 +191,7 @@ public class ChatGPT {
     logger.trace("Sending request to OpenAI...");
     String response = sendRequestToOpenAI(prompt);
     String current = response;
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < RETRY_LIMIT; i++) {
       Optional<Response> maybe;
       try {
         maybe = Response.tryCreate(current);
