@@ -119,7 +119,9 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
       case "WRONG_OVERRIDE_RETURN":
         return resolveWrongOverrideReturnError(error);
       default:
-        throw new IllegalStateException("Unknown error type: " + error.messageType);
+        logger.trace("Error type not recognized: {}", error.messageType);
+        return NO_ACTION;
+        //        throw new IllegalStateException("Unknown error type: " + error.messageType);
     }
   }
 

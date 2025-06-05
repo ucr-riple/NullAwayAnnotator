@@ -47,6 +47,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -161,7 +162,7 @@ public class ChatGPT {
    * @param prompt the question to ask.
    * @return the response from ChatGPT.
    */
-  public Response ask(String prompt, Context context) {
+  public Response ask(String prompt) {
     logger.trace("Asking ChatGPT:\n{}", prompt);
     prompt = preprocessPrompt(prompt);
     ResponseCache.CachedData cachedResponse = responseCache.getCachedResponse(prompt);
@@ -170,17 +171,50 @@ public class ChatGPT {
       logger.trace("Retrieving response from cache");
       String cachedPrompt = cachedResponse.prompt;
       if (cachedPrompt.equals(prompt)) {
-        return new Response(cachedResponse.response);
+        logger.trace("Cache hit for prompt: {}", prompt);
+        Optional<Response> response = Response.tryCreate(cachedResponse.response);
+        if (response.isPresent()) {
+          return response.get();
+        }
+        logger.trace(
+            "Cached response could not be parsed or validated, moving to send request to OpenAI");
+      } else {
+        logger.trace("Cache collision detected: Cached:\n{}\nPrompt:\n{}", cachedPrompt, prompt);
+        throw new RuntimeException("Cache collision detected");
       }
-      logger.trace("Cache collision detected: Cached:\n{}\nPrompt:\n{}", cachedPrompt, prompt);
-      throw new RuntimeException("Cache collision detected");
     }
     logger.trace("Sending request to OpenAI...");
     String response = sendRequestToOpenAI(prompt);
-    responseCache.cacheResponse(prompt, response);
-    logger.trace("Cached response");
-    System.out.println("Cached response");
-    return new Response(response);
+    String current = response;
+    for (int i = 0; i < 5; i++) {
+      Optional<Response> maybe;
+      try {
+        maybe = Response.tryCreate(current);
+        if (maybe.isPresent()) {
+          logger.trace("Cached response");
+          System.out.println("Cached response");
+          responseCache.cacheResponse(prompt, response);
+          return maybe.get();
+        }
+      } catch (Exception e) {
+        logger.warn("Failed to create Response from OpenAI response: {}", e.getMessage());
+        String promptWithFailure =
+            "Your previous response could not be parsed or validated.\n\n"
+                + "Original prompt:\n"
+                + prompt
+                + "\n\n"
+                + "Your last response was:\n"
+                + current
+                + "\n\n"
+                + "The error encountered was:\n"
+                + e.getMessage()
+                + "\n\n"
+                + "Please try again, ensuring that the response follows the format described in the original prompt.";
+        current = sendRequestToOpenAI(promptWithFailure); // ask ChatGPT again
+      }
+    }
+    logger.error("Failed to create valid Response after retries.");
+    throw new IllegalStateException("Failed to create valid Response after retries.");
   }
 
   /**
@@ -307,8 +341,7 @@ public class ChatGPT {
    * @param error the error to fix.
    * @param safeRegions the safe regions to use for the fix.
    * @param context Annotator context.
-   * @return a {@link MethodRewriteChange} that represents the code fix, or {{@code empty set} if
-   *     the
+   * @return a {@link MethodRewriteChange} that represents the code fix, or {{@code empty set}.
    */
   public Set<RegionRewrite> fixDereferenceErrorBySafeRegions(
       NullAwayError error, Set<Region> safeRegions, Context context) {
@@ -323,7 +356,7 @@ public class ChatGPT {
             region,
             constructPromptForRegions(safeRegions));
     logger.trace("Asking if the error can be fixed by using safe regions");
-    Response response = ask(prompt, context);
+    Response response = ask(prompt);
     if (!response.isSuccessFull()) {
       logger.trace("Response is not successful");
       return Set.of();
@@ -367,7 +400,7 @@ public class ChatGPT {
             expression,
             expression);
     logger.trace("Asking if the error can be fixed by using all regions");
-    Response response = ask(prompt, context);
+    Response response = ask(prompt);
     logger.trace("response: " + response);
     if (!response.isSuccessFull()) {
       logger.trace("Response is not successful");
@@ -413,8 +446,7 @@ public class ChatGPT {
                 rewriteReturnNullForNullableMethodPrompt,
                 enclosingMethod,
                 error.position.diagnosticLine,
-                error.getNullableExpression()),
-            context);
+                error.getNullableExpression()));
     if (!response.isSuccessFull()) {
       logger.trace("Response is not successful");
       return Set.of();
@@ -446,7 +478,7 @@ public class ChatGPT {
             error.position.diagnosticLine,
             error.getNullableExpression(),
             error.getNullableExpression());
-    Response response = ask(prompt, context);
+    Response response = ask(prompt);
     if (!response.isSuccessFull()) {
       logger.trace("Response is not successful");
       return Set.of();
@@ -525,7 +557,7 @@ public class ChatGPT {
             region,
             errorContext,
             error.getRegion().member);
-    Response response = ask(prompt, context);
+    Response response = ask(prompt);
     if (!response.isSuccessFull()) {
       return Set.of();
     }
@@ -575,7 +607,7 @@ public class ChatGPT {
       return null;
     }
     logger.trace("Asking if the expression can be null at error point point");
-    return ask(prompt, context);
+    return ask(prompt);
   }
 
   /**
@@ -592,7 +624,7 @@ public class ChatGPT {
         parser.getRegionSourceCode(new Region(onMethod.clazz, onMethod.method)).content;
     String prompt = String.format(checkIfMethodIsAnInitializerPrompt, enclosingMethod);
     logger.trace("Asking if the method is an initializer: {}", onMethod.method);
-    Response response = ask(prompt, context);
+    Response response = ask(prompt);
     return response.isAgreement();
   }
 
@@ -616,7 +648,7 @@ public class ChatGPT {
             param,
             callContext,
             parser.getRegionSourceCode(new Region(encClass, method)).content);
-    return ask(prompt, context);
+    return ask(prompt);
   }
 
   /**
@@ -634,7 +666,7 @@ public class ChatGPT {
     String methodSource = parser.getRegionSourceCode(new Region(encClass, method)).content;
     String prompt =
         String.format(checkIfMethodIsReturningNullablePrompt, methodSource, callContext);
-    return ask(prompt, context);
+    return ask(prompt);
   }
 
   /**
@@ -656,7 +688,7 @@ public class ChatGPT {
             callContext.constructCallGraphContext(),
             invocation,
             invocation);
-    return ask(prompt, context);
+    return ask(prompt);
   }
 
   /**
@@ -684,7 +716,7 @@ public class ChatGPT {
    */
   private MethodRewriteChange fixErrorInPlace(NullAwayError error, String prompt, Context context) {
     String enclosingMethod = parser.getRegionSourceCode(error.getRegion()).content;
-    Response response = ask(String.format(prompt, enclosingMethod, error.message), context);
+    Response response = ask(String.format(prompt, enclosingMethod, error.message));
     if (!response.isSuccessFull()) {
       return null;
     }

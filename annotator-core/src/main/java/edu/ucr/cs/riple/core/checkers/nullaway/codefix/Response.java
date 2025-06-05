@@ -24,8 +24,11 @@
 
 package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 
+import com.github.javaparser.ParserConfiguration;
+import com.github.javaparser.StaticJavaParser;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.annotator.util.parsers.XmlParser;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
@@ -75,8 +78,7 @@ public class Response {
   private static final Pattern CODE_RESPONSE_PATTERN =
       Pattern.compile("```java\\s*([\\s\\S]*?)\\s*```");
 
-  public Response(String response) {
-    /** The logger instance. */
+  private Response(String response) {
     Logger logger = LoggerFactory.getLogger(Response.class);
     logger.trace("Creating Response:\n{}", response);
     Matcher matcher = RESPONSE_PATTERN.matcher(response);
@@ -107,6 +109,39 @@ public class Response {
     this.code = parseCode(parser.getValueFromTag("/response/code", String.class).orElse(""));
     this.reason = parser.getArrayValueFromTag("/response/reason", String.class).orElse("");
     logger.trace("Response created:\n{}", this);
+  }
+
+  public static Optional<Response> tryCreate(String response) {
+    Logger logger = LoggerFactory.getLogger(Response.class);
+    logger.trace("Creating Response:\n{}", response);
+    Matcher matcher = RESPONSE_PATTERN.matcher(response);
+    if (!matcher.find()) {
+      logger.warn("Invalid response format");
+      return Optional.empty();
+    }
+    XmlParser parser = new XmlParser(matcher.group());
+    boolean isAgreement =
+        parser
+            .getArrayValueFromTag("/response/value", String.class)
+            .orElse("")
+            .equalsIgnoreCase("yes");
+    if (isAgreement) {
+      String codeSnippet = parser.getValueFromTag("/response/code", String.class).orElse("");
+      validateJavaCode(codeSnippet);
+    }
+    return Optional.of(new Response(response));
+  }
+
+  /**
+   * Validates the Java code by parsing it. This is used to ensure that the code is valid Java code.
+   *
+   * @param code the code to validate.
+   */
+  private static void validateJavaCode(String code) {
+    ParserConfiguration configuration = new ParserConfiguration();
+    configuration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_21);
+    StaticJavaParser.setConfiguration(configuration);
+    StaticJavaParser.parse("class A {\n" + code + "\n}");
   }
 
   /** The response instance for agreement. */

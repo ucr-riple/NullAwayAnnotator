@@ -33,7 +33,6 @@ import ch.qos.logback.core.FileAppender;
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
 import edu.ucr.cs.riple.core.util.GitUtility;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -96,8 +95,6 @@ public class Main {
   public static void main(String[] args) {
     String benchmarkName = args[0];
     boolean isBaseline = args.length > 1 && args[1].equals("baseline");
-    String branchName = String.format("nimak/agentic-%s-%s", isBaseline ? "basic" : "advanced", 2);
-    Path logRootPath = configureLogging(benchmarkName, branchName);
     System.clearProperty("ANNOTATOR_TEST_MODE");
     System.out.println(
         "Running "
@@ -139,9 +136,7 @@ public class Main {
     Config config = new Config(argsArray);
     config.benchmarkName = benchmarkName;
     config.benchmarkPath = PROJECT_PATH;
-    config.logPath = logRootPath.resolve("app.log");
-    config.commitHashPath = logRootPath.resolve("commits.tsv");
-    config.timerPath = logRootPath.resolve("timers.tsv");
+    configureLogging(config);
 
     System.out.println("Running on branch name: " + config.branchName());
     System.out.println("Starting annotator...");
@@ -193,16 +188,19 @@ public class Main {
     }
   }
 
-  public static Path configureLogging(String benchmarkName, String branchName) {
+  public static Path configureLogging(Config config) {
     System.out.println(
-        "Configuring logging for benchmark: " + benchmarkName + ", branch: " + branchName);
+        "Configuring logging for benchmark: "
+            + config.benchmarkName
+            + ", branch: "
+            + config.branchName());
     Path root =
         Paths.get(
             System.getProperty("user.home"),
             "Desktop",
             "logs",
-            benchmarkName,
-            branchName.split("/")[1]);
+            config.benchmarkName,
+            config.branchName().split("/")[1]);
     System.out.println("Root path for logs: " + root);
     // Delete log
     try {
@@ -237,10 +235,13 @@ public class Main {
     Logger myLogger = context.getLogger("edu.ucr.cs.riple"); // or your base package
     myLogger.setLevel(Level.TRACE); // See your trace/debug logs
 
-    Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-      rootLogger.error("Uncaught exception in thread: {}", thread.getName(), throwable);
-    });
-
+    Thread.setDefaultUncaughtExceptionHandler(
+        (thread, throwable) -> {
+          rootLogger.error("Uncaught exception in thread: {}", thread.getName(), throwable);
+        });
+    config.logPath = root.resolve("app.log");
+    config.commitHashPath = root.resolve("commits.tsv");
+    config.timerPath = root.resolve("timers.tsv");
     // or WARN if too noisy
     return root;
   }

@@ -175,6 +175,7 @@ public class Config {
   /** Mode to resolve remaining errors. */
   public final ResolveRemainingErrorMode resolveRemainingErrorMode;
 
+  /// START OF CONFIGURATION FOR RUNNING BENCHMARKS
   public String benchmarkPath;
   public String benchmarkName;
   public Path logPath;
@@ -183,8 +184,12 @@ public class Config {
   public boolean isTestMode = System.getProperty("ANNOTATOR_TEST_MODE") != null;
 
   public String branchName() {
-    return String.format("nimak/agentic-%s-%s", resolveRemainingErrorMode.name(), Main.VERSION);
+    return (String.format("nimak/agentic-%s-%s", resolveRemainingErrorMode.name(), Main.VERSION)
+            + (Main.DEBUG_MODE ? "-debug" : ""))
+        .toLowerCase(Locale.getDefault());
   }
+
+  /// END OF CONFIGURATION FOR RUNNING BENCHMARKS
 
   /**
    * Checks if the annotator is running in actual mode (not in test or debug mode).

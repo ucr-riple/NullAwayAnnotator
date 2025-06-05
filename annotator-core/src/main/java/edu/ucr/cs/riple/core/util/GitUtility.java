@@ -28,7 +28,6 @@ import edu.ucr.cs.riple.core.Config;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.Status;
@@ -105,7 +104,7 @@ public class GitUtility implements AutoCloseable {
     if (!config.actualRunEnabled()) {
       return;
     }
-    if(branchExistsOnRemote(git.getRepository().getBranch())) {
+    if (branchExistsOnRemote(git.getRepository().getBranch())) {
       this.pull();
     }
   }
@@ -274,7 +273,7 @@ public class GitUtility implements AutoCloseable {
    * @return true if the branch exists on the remote, false otherwise.
    * @throws Exception if an error occurs during the operation.
    */
-  public boolean branchExistsOnRemote(String branchName) throws Exception{
+  public boolean branchExistsOnRemote(String branchName) throws Exception {
     if (!config.actualRunEnabled()) {
       return false;
     }
