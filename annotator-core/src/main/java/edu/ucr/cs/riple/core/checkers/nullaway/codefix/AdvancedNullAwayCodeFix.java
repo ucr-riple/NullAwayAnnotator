@@ -311,15 +311,15 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
     logger.trace("Resolving dereference error: {}", error);
     if (ASTParser.isObjectEqualsMethod(error.getRegion().member)) {
       logger.trace("Fixing dereference error in equals method.");
-      return gpt.fixDereferenceErrorInEqualsMethod(error, context);
+      return gpt.fixDereferenceErrorInEqualsMethod(error);
     }
     if (ASTParser.isObjectToStringMethod(error.getRegion().member)) {
       logger.trace("Fixing dereference error in toString method.");
-      return gpt.fixDereferenceErrorInToStringMethod(error, context);
+      return gpt.fixDereferenceErrorInToStringMethod(error);
     }
     if (ASTParser.isObjectHashCodeMethod(error.getRegion().member)) {
       logger.trace("Fixing dereference error in hashCode method.");
-      return gpt.fixDereferenceErrorInHashCodeMethod(error, context);
+      return gpt.fixDereferenceErrorInHashCodeMethod(error);
     }
     // Check nullability possibility.
     logger.trace("Checking nullability possibility at error point");

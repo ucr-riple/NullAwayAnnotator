@@ -90,7 +90,7 @@ public class Main {
   // PROJECT SPECIFIC CONFIGURATION
   // Ubuntu
   public static final boolean DEBUG_MODE = false;
-  public static final String DEBUG_LINE = "return (Class<T>) PRIMITIVE_TYPES.get(clazz);";
+  public static final String DEBUG_LINE = "public static Files files;";
 
   public static void main(String[] args) {
     String benchmarkName = args[0];

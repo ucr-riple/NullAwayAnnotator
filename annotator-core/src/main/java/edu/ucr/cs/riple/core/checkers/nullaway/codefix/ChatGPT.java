@@ -47,7 +47,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -177,9 +176,9 @@ public class ChatGPT {
       String cachedPrompt = cachedResponse.prompt;
       if (cachedPrompt.equals(prompt)) {
         logger.trace("Cache hit for prompt: {}", prompt);
-        Optional<Response> response = Response.tryCreate(cachedResponse.response);
-        if (response.isPresent()) {
-          return response.get();
+        Response.ParseResult response = Response.tryCreate(cachedResponse.response);
+        if (response.success) {
+          return response.response;
         }
         logger.trace(
             "Cached response could not be parsed or validated, moving to send request to OpenAI");
@@ -192,29 +191,24 @@ public class ChatGPT {
     String response = sendRequestToOpenAI(prompt);
     String current = response;
     for (int i = 0; i < RETRY_LIMIT; i++) {
-      Optional<Response> maybe;
-      try {
-        maybe = Response.tryCreate(current);
-        if (maybe.isPresent()) {
-          logger.trace("Cached response");
-          System.out.println("Cached response");
-          responseCache.cacheResponse(prompt, response);
-          return maybe.get();
-        }
-      } catch (Exception e) {
-        logger.warn("Failed to create Response from OpenAI response: {}", e.getMessage());
+      Response.ParseResult maybe = Response.tryCreate(current);
+      if (maybe.success) {
+        logger.trace("Cached response");
+        System.out.println("Cached response");
+        responseCache.cacheResponse(prompt, response);
+        return maybe.response;
+      } else {
+        logger.warn("Failed to create Response from OpenAI response: {}", maybe.errorMessage);
         String promptWithFailure =
             "Your previous response could not be parsed or validated.\n\n"
-                + "Original prompt:\n"
-                + prompt
-                + "\n\n"
                 + "Your last response was:\n"
                 + current
                 + "\n\n"
-                + "The error encountered was:\n"
-                + e.getMessage()
+                + "The error encountered while parsing the response is:\n"
+                + maybe.errorMessage
                 + "\n\n"
-                + "Please try again, ensuring that the response follows the format described in the original prompt.";
+                + "Please try again, ensuring that the response is valid does not cause the same error.\n\n"
+                + "Give your response in the same format as before and just update the response to fix the error.\n\n";
         current = sendRequestToOpenAI(promptWithFailure); // ask ChatGPT again
       }
     }
@@ -325,14 +319,11 @@ public class ChatGPT {
    * dereference error, it should simply call {@code Objects.equals} on the field.
    *
    * @param error the error to fix.
-   * @param context Annotator context.
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty set} if the
    *     error cannot be fixed.
    */
-  public Set<RegionRewrite> fixDereferenceErrorInEqualsMethod(
-      NullAwayError error, Context context) {
-    MethodRewriteChange change =
-        fixErrorInPlace(error, dereferenceEqualsMethodRewritePrompt, context);
+  public Set<RegionRewrite> fixDereferenceErrorInEqualsMethod(NullAwayError error) {
+    MethodRewriteChange change = fixErrorInPlace(error, dereferenceEqualsMethodRewritePrompt);
     if (change == null) {
       return Set.of();
     }
@@ -423,14 +414,11 @@ public class ChatGPT {
    * the toString method on the field.
    *
    * @param error the error to fix.
-   * @param context Annotator context.
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty set} if the
    *     error cannot be fixed.
    */
-  public Set<RegionRewrite> fixDereferenceErrorInToStringMethod(
-      NullAwayError error, Context context) {
-    MethodRewriteChange change =
-        fixErrorInPlace(error, dereferenceToStringMethodRewritePrompt, context);
+  public Set<RegionRewrite> fixDereferenceErrorInToStringMethod(NullAwayError error) {
+    MethodRewriteChange change = fixErrorInPlace(error, dereferenceToStringMethodRewritePrompt);
     return change == null ? Set.of() : Set.of(change);
   }
 
@@ -505,14 +493,11 @@ public class ChatGPT {
    * hashCode method on the field.
    *
    * @param error the error to fix.
-   * @param context Annotator context.
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty set} if the
    *     error cannot be fixed.
    */
-  public Set<RegionRewrite> fixDereferenceErrorInHashCodeMethod(
-      NullAwayError error, Context context) {
-    MethodRewriteChange change =
-        fixErrorInPlace(error, dereferenceHashCodeMethodRewritePrompt, context);
+  public Set<RegionRewrite> fixDereferenceErrorInHashCodeMethod(NullAwayError error) {
+    MethodRewriteChange change = fixErrorInPlace(error, dereferenceHashCodeMethodRewritePrompt);
     if (change == null) {
       return Set.of();
     }
@@ -715,11 +700,10 @@ public class ChatGPT {
    *
    * @param error the error to fix.
    * @param prompt the prompt to ask ChatGPT.
-   * @param context Annotator context.
    * @return a {@link MethodRewriteChange} that represents the code fix, or {@code null} if the
    *     error cannot be fixed.
    */
-  private MethodRewriteChange fixErrorInPlace(NullAwayError error, String prompt, Context context) {
+  private MethodRewriteChange fixErrorInPlace(NullAwayError error, String prompt) {
     String enclosingMethod = parser.getRegionSourceCode(error.getRegion()).content;
     Response response = ask(String.format(prompt, enclosingMethod, error.message));
     if (!response.isSuccessFull()) {

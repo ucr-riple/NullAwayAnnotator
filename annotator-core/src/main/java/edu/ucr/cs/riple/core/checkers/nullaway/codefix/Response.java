@@ -28,7 +28,6 @@ import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.StaticJavaParser;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.annotator.util.parsers.XmlParser;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
@@ -78,6 +77,26 @@ public class Response {
   private static final Pattern CODE_RESPONSE_PATTERN =
       Pattern.compile("```java\\s*([\\s\\S]*?)\\s*```");
 
+  public static class ParseResult {
+    public final Response response;
+    public final String errorMessage;
+    public final boolean success;
+
+    public ParseResult(boolean success, Response response, String message) {
+      this.success = success;
+      this.response = response;
+      this.errorMessage = message;
+    }
+
+    public static ParseResult success(Response response) {
+      return new ParseResult(true, response, null);
+    }
+
+    public static ParseResult failure(String message) {
+      return new ParseResult(false, null, message);
+    }
+  }
+
   private Response(String response) {
     Logger logger = LoggerFactory.getLogger(Response.class);
     logger.trace("Creating Response:\n{}", response);
@@ -119,25 +138,28 @@ public class Response {
    * @return an Optional containing the Response instance if the response is valid, otherwise an
    *     empty Optional.
    */
-  public static Optional<Response> tryCreate(String response) {
+  public static ParseResult tryCreate(String response) {
     Logger logger = LoggerFactory.getLogger(Response.class);
-    logger.trace("Creating Response:\n{}", response);
-    Matcher matcher = RESPONSE_PATTERN.matcher(response);
-    if (!matcher.find()) {
-      logger.warn("Invalid response format");
-      return Optional.empty();
+    logger.trace("Trying to create Response:\n{}", response);
+    try {
+      Matcher matcher = RESPONSE_PATTERN.matcher(response);
+      if (!matcher.find()) {
+        logger.warn("Invalid response format");
+        return ParseResult.failure(
+            "Invalid response format, should be: " + RESPONSE_PATTERN.pattern());
+      }
+      XmlParser parser = new XmlParser(matcher.group());
+      boolean isSuccess =
+          parser.getArrayValueFromTag("/response/success", Boolean.class).orElse(false);
+      if (isSuccess) {
+        String codeSnippet =
+            parseCode(parser.getValueFromTag("/response/code", String.class).orElse(""));
+        validateJavaCode(codeSnippet);
+      }
+      return ParseResult.success(new Response(response));
+    } catch (Exception e) {
+      return ParseResult.failure(e.getMessage());
     }
-    XmlParser parser = new XmlParser(matcher.group());
-    boolean isAgreement =
-        parser
-            .getArrayValueFromTag("/response/value", String.class)
-            .orElse("")
-            .equalsIgnoreCase("yes");
-    if (isAgreement) {
-      String codeSnippet = parser.getValueFromTag("/response/code", String.class).orElse("");
-      validateJavaCode(codeSnippet);
-    }
-    return Optional.of(new Response(response));
   }
 
   /**
@@ -149,7 +171,11 @@ public class Response {
     ParserConfiguration configuration = new ParserConfiguration();
     configuration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_21);
     StaticJavaParser.setConfiguration(configuration);
-    StaticJavaParser.parse("class A {\n" + code + "\n}");
+    try {
+      StaticJavaParser.parse("class A {\n" + code + "\n}");
+    } catch (Exception e) {
+      throw new IllegalArgumentException(e.getMessage());
+    }
   }
 
   /** The response instance for agreement. */
@@ -287,7 +313,7 @@ public class Response {
    * @param code the code from the response.
    * @return the parsed code.
    */
-  private String parseCode(String code) {
+  private static String parseCode(String code) {
     Matcher matcher = CODE_RESPONSE_PATTERN.matcher(code.trim());
     if (matcher.find()) {
       return matcher.group(1);

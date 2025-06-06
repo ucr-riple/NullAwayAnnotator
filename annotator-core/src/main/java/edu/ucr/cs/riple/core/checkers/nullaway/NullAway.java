@@ -431,7 +431,6 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                                 "cd %s && ./gradlew spotlessApply", config.benchmarkPath));
                         System.out.println("Writing log to file...");
                         long currentLineNumber = Utility.getLineCountOfFile(config.logPath);
-                        System.out.println("Current line number: " + currentLineNumber);
                         String log =
                             Utility.getLinesFromFile(
                                 config.logPath, previousLineNumber.get(), currentLineNumber);
