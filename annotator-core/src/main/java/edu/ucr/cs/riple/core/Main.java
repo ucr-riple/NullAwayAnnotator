@@ -84,7 +84,8 @@ public class Main {
     benchmarks =
         Map.of(
             "libgdx", new Benchmark("com.badlogic.gdx", "libgdx", "compileJava"),
-            "zuul", new Benchmark("com.netflix", "zuul", "zuul-core:compileJava"));
+            "zuul", new Benchmark("com.netflix", "zuul", "zuul-core:compileJava"),
+            "eureka", new Benchmark("com.netflix.eureka", "eureka", "eureka-core:compileJava"));
   }
 
   // PROJECT SPECIFIC CONFIGURATION
@@ -95,12 +96,13 @@ public class Main {
   public static void main(String[] args) {
     String benchmarkName = args[0];
     boolean isBaseline = args.length > 1 && args[1].equals("baseline");
+    boolean isDisabled = args.length > 1 && args[1].equals("disabled");
     System.clearProperty("ANNOTATOR_TEST_MODE");
     System.out.println(
         "Running "
             + benchmarkName
             + " benchmark in "
-            + (isBaseline ? "baseline" : "advanced")
+            + (isDisabled ? "disabled" : (isBaseline ? "baseline" : "advanced"))
             + " mode.");
     Benchmark benchmark = benchmarks.get(benchmarkName);
     if (benchmark == null) {
@@ -127,8 +129,8 @@ public class Main {
       benchmark.annotatedPackage,
       "-di", // deactivate inference
       "-rrem", // resolve remaining errors
-      isBaseline ? "basic" : "advanced",
-      //             "-rboserr", // redirect build output stream and error stream
+      isDisabled ? "disabled" :isBaseline ? "basic" : "advanced",
+      //"-rboserr", // redirect build output stream and error stream
       "--depth",
       "6"
     };
