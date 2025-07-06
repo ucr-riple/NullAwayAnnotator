@@ -94,6 +94,7 @@ public class Main {
   public static final String DEBUG_LINE = "public static Files files;";
 
   public static void main(String[] args) {
+    System.out.println("Received arguments: " + String.join(", ", args));
     String benchmarkName = args[0];
     boolean isBaseline = args.length > 1 && args[1].equals("basic");
     boolean isDisabled = args.length > 1 && args[1].equals("disabled");
@@ -128,7 +129,7 @@ public class Main {
       "NULLAWAY",
       "-app",
       benchmark.annotatedPackage,
-      "-di", // deactivate inference
+      isDisabled ? "" : "-di", // deactivate inference
       "-rrem", // resolve remaining errors
       isDisabled ? "disabled" :isBaseline ? "basic" : "advanced",
       //"-rboserr", // redirect build output stream and error stream

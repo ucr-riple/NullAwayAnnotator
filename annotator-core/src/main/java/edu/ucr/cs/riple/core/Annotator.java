@@ -106,6 +106,7 @@ public class Annotator {
 
   /** Performs iterations of inference/injection until no unseen fix is suggested. */
   private void annotate() {
+    System.out.println("Annotating..." + config.inferenceActivated);
     downstreamImpactCache.analyzeDownstreamDependencies();
     ReportCache cache = context.reportCache;
     if (config.inferenceActivated) {
