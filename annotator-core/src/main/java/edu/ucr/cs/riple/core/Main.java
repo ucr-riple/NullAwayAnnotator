@@ -95,14 +95,15 @@ public class Main {
 
   public static void main(String[] args) {
     String benchmarkName = args[0];
-    boolean isBaseline = args.length > 1 && args[1].equals("baseline");
+    boolean isBaseline = args.length > 1 && args[1].equals("basic");
     boolean isDisabled = args.length > 1 && args[1].equals("disabled");
+    boolean verbose = args.length > 2 && args[2].equals("verbose");
     System.clearProperty("ANNOTATOR_TEST_MODE");
     System.out.println(
         "Running "
             + benchmarkName
             + " benchmark in "
-            + (isDisabled ? "disabled" : (isBaseline ? "baseline" : "advanced"))
+            + (isDisabled ? "disabled" : (isBaseline ? "basic" : "advanced"))
             + " mode.");
     Benchmark benchmark = benchmarks.get(benchmarkName);
     if (benchmark == null) {
@@ -131,6 +132,7 @@ public class Main {
       "-rrem", // resolve remaining errors
       isDisabled ? "disabled" :isBaseline ? "basic" : "advanced",
       //"-rboserr", // redirect build output stream and error stream
+      verbose ? "-rboserr": "",
       "--depth",
       "6"
     };
