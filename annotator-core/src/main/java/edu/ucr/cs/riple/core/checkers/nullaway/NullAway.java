@@ -383,14 +383,17 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
             : new BasicNullAwayCodeFix(context);
     Set<NullAwayError> remainingErrors = deserializeErrors(context.targetModuleInfo);
     // initialize commit file:
-    TSVFiles.initialize(
-        config.commitHashPath, "ID" + "\t" + NullAwayError.header() + "\t" + "HASH");
+    if(config.actualRunEnabled()){
+          TSVFiles.initialize(
+              config.commitHashPath, "ID" + "\t" + NullAwayError.header() + "\t" + "HASH");
+    }
+
     codeFix.collectImpacts();
     AtomicInteger counter = new AtomicInteger(0);
     // Collect regions with remaining errors.
     logger.trace("Resolving remaining errors: {} errors.", remainingErrors.size());
     // related to log
-    AtomicLong previousLineNumber = new AtomicLong(Utility.getLineCountOfFile(config.logPath));
+    AtomicLong previousLineNumber = config.actualRunEnabled() ? new AtomicLong(Utility.getLineCountOfFile(config.logPath)) : new AtomicLong(0);
     remainingErrors.stream()
         .collect(Collectors.groupingBy(NullAwayError::getRegion))
         .forEach(
@@ -425,6 +428,9 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                             e);
                       } finally {
                         codeFix.apply(changes);
+                        if(!config.actualRunEnabled()){
+                          return;
+                        }
                         Utility.executeCommand(
                             config,
                             String.format(
@@ -478,8 +484,10 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       }
                     }));
     long elapsed = System.currentTimeMillis() - timer;
-    TSVFiles.initialize(config.timerPath, "TIME_IN_MILLIS");
-    TSVFiles.addRow(String.valueOf(elapsed), config.timerPath);
+    if(config.actualRunEnabled()){
+          TSVFiles.initialize(config.timerPath, "TIME_IN_MILLIS");
+          TSVFiles.addRow(String.valueOf(elapsed), config.timerPath);
+    }
   }
 
   @Override
