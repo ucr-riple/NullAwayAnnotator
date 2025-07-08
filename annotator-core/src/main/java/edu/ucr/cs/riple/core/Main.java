@@ -40,9 +40,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.concurrent.Immutable;
 
 /** Starting point. */
 public class Main {
@@ -81,11 +84,32 @@ public class Main {
   static final Map<String, Benchmark> benchmarks;
 
   static {
-    benchmarks =
-        Map.of(
-            "libgdx", new Benchmark("com.badlogic.gdx", "libgdx", "compileJava"),
-            "zuul", new Benchmark("com.netflix", "zuul", "zuul-core:compileJava"),
-            "eureka", new Benchmark("com.netflix.eureka", "eureka", "eureka-core:compileJava"));
+    benchmarks = new HashMap<>();
+    benchmarks.put(
+        "libgdx", new Benchmark("com.badlogic.gdx", "libgdx", "gdx:compileJava"));
+    benchmarks.put(
+        "zuul", new Benchmark("com.netflix", "zuul", "zuul-core:compileJava"));
+    benchmarks.put(
+        "eureka", new Benchmark("com.netflix.eureka", "eureka", "eureka-core:compileJava"));
+    benchmarks.put(
+        "conductor", new Benchmark("com.netflix.conductor", "conductor", "conductor-core:compileJava"));
+    benchmarks.put(
+        "EventBus", new Benchmark("org.greenrobot.eventbus", "EventBus", "compileJava"));
+    benchmarks.put(
+        "glide", new Benchmark("com.bumptech.glide", "glide", "library:compileDebugJavaWithJavac"));
+    benchmarks.put(
+        "jadx", new Benchmark("jadx.core", "jadx", "jadx-core:compileJava"));
+    benchmarks.put(
+        "litiengine", new Benchmark("de.gurkenlabs.litiengine", "litiengine", "compileJava"));
+    benchmarks.put(
+        "retrofit", new Benchmark("retrofit2", "retrofit", "compileJava"));
+    benchmarks.put(
+        "spring-boot",
+        new Benchmark("org.springframework.boot", "spring-boot", ":spring-boot-project:spring-boot:compileJava"));
+    benchmarks.put(
+        "wala-util", new Benchmark("com.ibm.wala", "wala", "compileJava"));
+    benchmarks.put(
+        "gson", new Benchmark("com.google.gson", "gson", ":gson:compileJava"));
   }
 
   // PROJECT SPECIFIC CONFIGURATION
