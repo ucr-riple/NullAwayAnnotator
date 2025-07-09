@@ -40,9 +40,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
+
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.Immutable;
@@ -121,8 +124,8 @@ public class Main {
     System.out.println("Received arguments: " + String.join(", ", args));
     String benchmarkName = args[0];
     boolean isBaseline = args.length > 1 && args[1].equals("basic");
-    boolean isDisabled = args.length > 1 && args[1].equals("disabled");
-    boolean verbose = args.length > 2 && args[2].equals("verbose");
+    boolean isDisabled = args.length > 1 && args[1].equals("disable");
+    boolean verbose = Arrays.asList(args).contains("verbose");
     System.clearProperty("ANNOTATOR_TEST_MODE");
     System.out.println(
         "Running "

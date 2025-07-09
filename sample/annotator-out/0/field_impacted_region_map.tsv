@@ -1,0 +1,13 @@
+REGION_CLASS	REGION_MEMBER	USED_MEMBER	USED_CLASS	SOURCE_TYPE
+com.example.Test	f5	f4	com.example.Test	SOURCE
+com.example.Test	f4	f4	com.example.Test	SOURCE
+com.example.Test	m1()	f1	com.example.Test	SOURCE
+com.example.Test	m1()	f1	com.example.Test	SOURCE
+com.example.Test	m1()	f2	com.example.Test	SOURCE
+com.example.Test	m1()	f6	com.example.Test	SOURCE
+com.example.Test	m2()	f3	com.example.Test	SOURCE
+com.example.Test	m2()	f3	com.example.Test	SOURCE
+com.example.Test	m2()	f2	com.example.Test	SOURCE
+com.example.Test	m2()	f6	com.example.Test	SOURCE
+com.example.Test	m3()	f5	com.example.Test	SOURCE
+com.example.Test	m4()	f6	com.example.Test	SOURCE
