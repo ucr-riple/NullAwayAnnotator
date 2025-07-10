@@ -572,9 +572,9 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
                     "package test;",
                     "import javax.annotation.Nullable;",
                     "public class Foo {",
-                    "   @Nullable Object f;",
+                    "   @Nullable Integer f;",
                     "   void run() {",
-                    "       check(f);",
+                    "       int i = 0 + f;",
                     "   }",
                     "   void check(Object param){}",
                     "}")

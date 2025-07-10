@@ -193,6 +193,24 @@ public class NullAwayError extends Error {
               "Could not extract nullable expression from message: " + message);
         }
         return fieldMatcher.group(1);
+      case "UNBOX_NULLABLE":
+        // The message is of the form "unboxing @Nullable expression 'x' to primitive type"
+        Pattern unboxPattern = Pattern.compile("unboxing of a @Nullable value - (\\w+)");
+        Matcher unboxMatcher = unboxPattern.matcher(message);
+        if (!unboxMatcher.find()) {
+          throw new IllegalStateException(
+              "Could not extract nullable expression from message: " + message);
+        }
+        return unboxMatcher.group(1);
+      case "SWITCH_EXPRESSION_NULLABLE":
+          // The message is of the form "switch expression s is @Nullable"
+          Pattern swtitchPattern = Pattern.compile("switch expression (\\w+) is @Nullable");
+          Matcher swtitchMatcher = swtitchPattern.matcher(message);
+          if (!swtitchMatcher.find()) {
+            throw new IllegalStateException(
+                    "Could not extract nullable expression from message: " + message);
+          }
+          return swtitchMatcher.group(1);
       default:
         throw new IllegalArgumentException(
             "Error type not supported to extract nullable expression from: "
@@ -272,7 +290,7 @@ public class NullAwayError extends Error {
    */
   public JsonArray getOrigins() {
     if (!infos.has("origins")) {
-      throw new IllegalArgumentException("Error does not have origins, " + this);
+      new JsonArray();
     }
     return infos.getAsJsonArray("origins");
   }

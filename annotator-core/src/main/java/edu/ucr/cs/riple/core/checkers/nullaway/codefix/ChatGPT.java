@@ -46,6 +46,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -118,6 +119,8 @@ public class ChatGPT {
   /** Counter to keep track of the number of requests sent to ChatGPT per error. */
   public static final AtomicInteger count = new AtomicInteger(0);
 
+  public static final  Set<String> askedPrompts = new HashSet<>();
+
   /** Cache for the responses from ChatGPT. */
   private final ResponseCache responseCache;
 
@@ -173,6 +176,14 @@ public class ChatGPT {
   public Response ask(String prompt) {
     logger.trace("Asking ChatGPT:\n{}", prompt);
     prompt = preprocessPrompt(prompt);
+    if(askedPrompts.contains(prompt)) {
+      count.incrementAndGet();
+    }else{
+      askedPrompts.add(prompt);
+    }
+    if (count.get() > 50) {
+      throw new RuntimeException("Exceeded the limit of 50 requests to OpenAI");
+    }
     ResponseCache.CachedData cachedResponse = responseCache.getCachedResponse(prompt);
     if (cachedResponse != null) {
       System.out.println("Retrieving response from cache");
@@ -227,9 +238,6 @@ public class ChatGPT {
    * @return the response from ChatGPT.
    */
   private static String sendRequestToOpenAI(String prompt) {
-    if (count.incrementAndGet() > 50) {
-      throw new RuntimeException("Exceeded the limit of 50 requests to OpenAI");
-    }
     System.out.println("Sending request to OpenAI...");
     try {
       // Making a POST request

@@ -377,6 +377,9 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
             error, info.clazz, info.symbol, info.expression, info.isAnnotated);
       case "local_variable":
         JsonArray origins = error.getOrigins();
+        if(origins.isEmpty()){
+          return resolveRemainingErrors(error);
+        }
         Set<RegionRewrite> ans = new HashSet<>();
         for (JsonElement origin : origins) {
           NullAwayError.NullableExpressionInfo i =

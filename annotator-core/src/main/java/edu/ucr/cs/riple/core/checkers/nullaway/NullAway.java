@@ -415,9 +415,10 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       logger.trace("{} : TOP LEVEL CALL TO FIX ERROR: {}", counter.get(), error);
                       Set<RegionRewrite> changes = Set.of();
                       try {
+                        ChatGPT.count.set(0);
+                        ChatGPT.askedPrompts.clear();
                         changes = codeFix.fix(error);
                         System.out.println("Finished processing.");
-                        ChatGPT.count.set(0);
                       } catch (Exception e) {
                         System.err.println(
                             "Error while fixing-------: " + e.getMessage() + " \n " + e);
