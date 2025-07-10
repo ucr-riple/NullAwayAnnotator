@@ -34,4 +34,8 @@ public class Nullability {
     }
     return param;
   }
+
+  public static <T> T castToNonnull(@Nullable T param) {
+    return param;
+  }
 }

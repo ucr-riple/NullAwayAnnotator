@@ -107,6 +107,8 @@ public class ChatGPT {
   /** The prompt to ask ChatGPT to check if the method is returning nullable on the call site. */
   private final String checkIfMethodReturnsNullableAtCallSitePrompt;
 
+  private final String remainingCastToNonnull;
+
   /** Simple prompt to ask ChatGPT to fix the error in place. */
   private final String basicFixRequestPrompt;
 
@@ -152,6 +154,8 @@ public class ChatGPT {
         Utility.readResourceContent("prompts/inquiry/is-returning-nullable.txt");
     this.checkIfMethodReturnsNullableAtCallSitePrompt =
         Utility.readResourceContent("prompts/inquiry/is-nullable-at-call-site.txt");
+    this.remainingCastToNonnull =
+        Utility.readResourceContent("prompts/dereference/remaining-fix-request.txt");
     this.basicFixRequestPrompt = Utility.readResourceContent("prompts/basic-fix-request.txt");
     this.parser = parser;
     this.responseCache = new ResponseCache(config);
@@ -485,6 +489,41 @@ public class ChatGPT {
             error.getRegion().member,
             code,
             Set.of(NullAway.CAST_TO_NONNULL)));
+  }
+
+  /**
+   * Fixes the dereference error by returning null in a nullable method.
+   *
+   * @param error the error to fix.
+   * @param context Annotator context.
+   * @return a {@link MethodRewriteChange} that represents the code fix, or {@code empty set} if
+   *     model fails.
+   */
+  public Set<RegionRewrite> fixDereferenceByRemainingCastToNonnull(
+          NullAwayError error, Context context) {
+    String enclosingMethod = parser.getRegionSourceCode(error.getRegion()).content;
+    String prompt =
+            String.format(
+                    rewriteCastToNonnullPrompt,
+                    error.getNullableExpression(),
+                    enclosingMethod,
+                    error.position.diagnosticLine,
+                    error.getNullableExpression(),
+                    error.getNullableExpression());
+    Response response = ask(prompt);
+    if (!response.isSuccessFull()) {
+      logger.trace("Response is not successful");
+      return Set.of();
+    }
+    String code = response.getCode();
+    logger.trace("Fixing the error by adding castToNonnull");
+    return Set.of(
+            RegionRewrite.of(
+                    error.path,
+                    error.getRegion().clazz,
+                    error.getRegion().member,
+                    code,
+                    Set.of(NullAway.CAST_TO_NONNULL)));
   }
 
   /**

@@ -118,11 +118,20 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
         return resolveNullableReturnError(error);
       case "WRONG_OVERRIDE_RETURN":
         return resolveWrongOverrideReturnError(error);
+      case "SWITCH_EXPRESSION_NULLABLE":
+      case "PASS_NULLABLE":
+      case "UNBOX_NULLABLE":
+        return resolveRemainingErrors(error);
       default:
         logger.trace("Error type not recognized: {}", error.messageType);
         return NO_ACTION;
         //        throw new IllegalStateException("Unknown error type: " + error.messageType);
     }
+  }
+
+  private Set<RegionRewrite> resolveRemainingErrors(NullAwayError error) {
+    logger.trace("Resolving remaining cast to nonnull");
+    return gpt.fixDereferenceByRemainingCastToNonnull(error, context);
   }
 
   /**
