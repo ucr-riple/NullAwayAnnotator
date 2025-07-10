@@ -504,7 +504,7 @@ public class ChatGPT {
     String enclosingMethod = parser.getRegionSourceCode(error.getRegion()).content;
     String prompt =
             String.format(
-                    rewriteCastToNonnullPrompt,
+                    remainingCastToNonnull,
                     error.getNullableExpression(),
                     enclosingMethod,
                     error.position.diagnosticLine,

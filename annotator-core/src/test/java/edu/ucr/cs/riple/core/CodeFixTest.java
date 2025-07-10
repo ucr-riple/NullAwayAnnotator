@@ -579,6 +579,7 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
                     "   void check(Object param){}",
                     "}")
             .expectNoReport()
+            .deactivateInference()
             .resolveRemainingErrors()
             .start();
   }
