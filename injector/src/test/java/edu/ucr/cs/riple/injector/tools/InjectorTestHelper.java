@@ -30,6 +30,7 @@ import static org.junit.Assert.fail;
 import com.github.javaparser.ParserConfiguration;
 import edu.ucr.cs.riple.injector.Injector;
 import edu.ucr.cs.riple.injector.changes.ASTChange;
+import edu.ucr.cs.riple.injector.changes.RegionRewrite;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -91,6 +92,30 @@ public class InjectorTestHelper {
               + "This method is private and must only be accessed via reflection. Direct calls are not allowed.\n"
               + "Please update the logic to align with changes in the Injector class.",
           e);
+    }
+    for (String key : files) {
+      try {
+        String found =
+            FileUtils.readFileToString(
+                pathOf(rootPath.resolve("src"), key).toFile(), Charset.defaultCharset());
+        String expected =
+            FileUtils.readFileToString(
+                pathOf(rootPath.resolve("expected"), key).toFile(), Charset.defaultCharset());
+        if (!expected.equals(found)) {
+          fail("Expected:\n" + expected + "\nBut found:\n" + found);
+        }
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
+
+  public void rewrite() {
+    Injector injector = new Injector(ParserConfiguration.LanguageLevel.JAVA_17);
+    for (ASTChange change : changes) {
+      if (change instanceof RegionRewrite) {
+        injector.rewriteRegions((RegionRewrite) change);
+      }
     }
     for (String key : files) {
       try {

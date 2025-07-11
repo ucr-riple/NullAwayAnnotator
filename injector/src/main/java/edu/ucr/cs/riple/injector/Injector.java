@@ -33,9 +33,13 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.google.common.collect.ImmutableList;
 import edu.ucr.cs.riple.injector.changes.ASTChange;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
+import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
 import edu.ucr.cs.riple.injector.changes.AnnotationChange;
 import edu.ucr.cs.riple.injector.changes.ChangeVisitor;
 import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
@@ -45,10 +49,13 @@ import edu.ucr.cs.riple.injector.changes.TypeUseAnnotationChange;
 import edu.ucr.cs.riple.injector.exceptions.ParseException;
 import edu.ucr.cs.riple.injector.exceptions.TargetClassNotFound;
 import edu.ucr.cs.riple.injector.location.Location;
+import edu.ucr.cs.riple.injector.location.OnMethod;
+import edu.ucr.cs.riple.injector.location.OnParameter;
 import edu.ucr.cs.riple.injector.modifications.Modification;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import edu.ucr.cs.riple.injector.util.ASTUtils;
 import edu.ucr.cs.riple.injector.util.SignatureMatcher;
+import edu.ucr.cs.riple.injector.util.TypeUtils;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -212,7 +219,31 @@ public class Injector {
    * @param change Method rewrite change.
    */
   public void rewriteRegions(RegionRewrite change) {
+    Set<AddAnnotation> existing = new HashSet<>();
+    AnnotationExpr nullable = new MarkerAnnotationExpr("Nullable");
+    // Check if annot already exists.
+    if (change.getLocation().isOnMethod()) {
+      OnMethod onMethod = change.getLocation().toMethod();
+      CallableDeclaration<?> callable =
+          getCallableDeclaration(onMethod.path, onMethod.clazz, onMethod.method, languageLevel);
+      boolean onReturnType = TypeUtils.isAnnotatedWith(callable, nullable);
+      if (onReturnType) {
+        existing.add(new AddMarkerAnnotation(change.getLocation(), "Nullable"));
+      }
+      for (int i = 0; i < callable.getParameters().size(); i++) {
+        Parameter param = callable.getParameter(i);
+        if (TypeUtils.isAnnotatedWith(param, nullable)) {
+          OnParameter paramLocation =
+              new OnParameter(onMethod.path, onMethod.clazz, onMethod.method, i);
+          existing.add(new AddMarkerAnnotation(paramLocation, "Nullable"));
+        }
+      }
+    }
     start(Set.of(change));
+    // add any annotation if missed in rewrite.
+    if (!existing.isEmpty()) {
+      start(existing);
+    }
   }
 
   /**
@@ -253,12 +284,12 @@ public class Injector {
    * user and the user should use the public methods to apply changes.
    *
    * @param changes Set of changes.
-   * @return Offset changes of source file.
+   * @return Offset changes of the source file.
    */
   @SuppressWarnings("unchecked")
   private <T extends ASTChange> Set<FileOffsetStore> start(Set<T> changes) {
     changes = changes.stream().map(t -> (T) t.copy()).collect(Collectors.toSet());
-    // Start method does not support addition and deletion on same element. Should be split into
+    // Start method does not support addition and deletion on the same element. Should be split into
     // call for addition and deletion separately.
     Map<Path, List<ASTChange>> map =
         changes.stream().collect(groupingBy(change -> change.getLocation().path));

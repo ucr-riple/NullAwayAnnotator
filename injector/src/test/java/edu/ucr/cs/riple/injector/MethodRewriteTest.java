@@ -33,7 +33,9 @@ public class MethodRewriteTest extends BaseInjectorTest {
   @Test
   public void singleMethodRewriteBasicTest() {
     final String rewriteContent =
-        "public int hashCode() {\n" + "   return f == null ? 1 : f.hashCode();\n" + "}";
+        "public String bar(Object param) {\n"
+            + "   return f == null ? \"default\" : f.toString();\n"
+            + "}";
     injectorTestHelper
         .addInput(
             "Foo.java",
@@ -41,8 +43,8 @@ public class MethodRewriteTest extends BaseInjectorTest {
             "import javax.annotation.Nullable;",
             "public class Foo {",
             "   @Nullable Object f;",
-            "   public int hashCode() {",
-            "      return f.hashCode();",
+            "   @Nullable public String bar(@Nullable Object param) {",
+            "      return f.toString();",
             "   }",
             "}")
         .expectOutput(
@@ -50,13 +52,13 @@ public class MethodRewriteTest extends BaseInjectorTest {
             "import javax.annotation.Nullable;",
             "public class Foo {",
             "   @Nullable Object f;",
-            "   public int hashCode() {",
-            "      return f == null ? 1 : f.hashCode();",
+            "   @Nullable public String bar(@Nullable Object param) {",
+            "      return f == null ? \"default\" : f.toString();",
             "   }",
             "}")
         .addChanges(
             new MethodRewriteChange(
-                new OnMethod("Foo.java", "test.Foo", "hashCode()"), rewriteContent))
-        .start();
+                new OnMethod("Foo.java", "test.Foo", "bar(Object)"), rewriteContent))
+        .rewrite();
   }
 }

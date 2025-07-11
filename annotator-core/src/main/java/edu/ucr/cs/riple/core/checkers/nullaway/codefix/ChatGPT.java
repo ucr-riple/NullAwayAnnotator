@@ -189,7 +189,7 @@ public class ChatGPT {
       logger.trace("Retrieving response from cache");
       String cachedPrompt = cachedResponse.prompt;
       if (cachedPrompt.equals(prompt)) {
-        logger.trace("Cache hit for prompt: {}", prompt);
+        logger.trace("Cache hit for prompt");
         Response.ParseResult response = Response.tryCreate(cachedResponse.response);
         if (response.success) {
           return response.response;

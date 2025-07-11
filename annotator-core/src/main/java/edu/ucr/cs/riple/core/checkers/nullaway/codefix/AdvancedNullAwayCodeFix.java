@@ -45,7 +45,6 @@ import edu.ucr.cs.riple.core.registries.method.invocation.InvocationRecord;
 import edu.ucr.cs.riple.core.registries.method.invocation.InvocationRecordRegistry;
 import edu.ucr.cs.riple.core.registries.region.Region;
 import edu.ucr.cs.riple.core.util.ASTParser;
-import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.SourceCode;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
@@ -608,6 +607,26 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
     return gpt.fixDereferenceByAddingCastToNonnull(error, reason, context);
   }
 
+  private Set<NullAwayError> getTriggeredErrorsFromFixes(Set<Fix> f) {
+    ImmutableSet<Fix> fixes = ImmutableSet.copyOf(f);
+    context.config.depth = 1;
+    // Initializing required evaluator instances.
+    TargetModuleSupplier supplier =
+        new TargetModuleSupplier(context, new TargetModuleCache(), new VoidDownstreamImpactCache());
+    Evaluator evaluator = new BasicEvaluator(supplier);
+    // Result of the iteration analysis.
+    ImmutableSet<Report> newReports = evaluator.evaluate(fixes);
+    Set<NullAwayError> errors = new HashSet<>();
+    for (Report r : newReports) {
+      for (Error e : r.triggeredErrors) {
+        if (e instanceof NullAwayError) {
+          errors.add((NullAwayError) e);
+        }
+      }
+    }
+    return errors;
+  }
+
   /**
    * Fixes the triggered errors for annotating the given location with {@code @Nullable}. It
    * resolves all the triggered errors by adding annotations and rewriting the code.
@@ -626,6 +645,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
             .map(e -> e.getResolvingFixes().iterator().next())
             .collect(Collectors.toSet());
     logger.trace("Adding annotations for resolvable errors, size: {}", fixes.size());
+    getTriggeredErrorsFromFixes(fixes);
     context.injector.injectFixes(fixes);
     // resolve the ones where annotation cannot fix
     Set<NullAwayError> unresolvableErrors =
@@ -896,7 +916,6 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
         new TargetModuleSupplier(context, new TargetModuleCache(), new VoidDownstreamImpactCache());
     Evaluator evaluator = new BasicEvaluator(supplier);
     // Result of the iteration analysis.
-    Utility.buildTarget(context);
     ImmutableSet<Report> newReports = evaluator.evaluate(fixes);
     // Add back the annotation.
     context.injector.injectAnnotation(
