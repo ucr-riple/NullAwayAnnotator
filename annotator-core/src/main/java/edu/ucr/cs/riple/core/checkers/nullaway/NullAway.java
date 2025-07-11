@@ -430,23 +430,26 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                         changes = codeFix.fix(error);
                         System.out.println("Finished processing.");
                       } catch (Exception e) {
+                        changes = Set.of();
                         success = false;
                         System.err.println(
                             "Error while fixing-------: " + e.getMessage() + " \n " + e);
                         e.printStackTrace(System.out);
                         logger.trace(
-                            "--------Exception occurred in computing fix-------- | "
-                                + counter.get(),
+                            "--------Exception occurred in computing fix-------- | {}",
+                            counter.get(),
                             e);
-                        return;
                       }
                       codeFix.apply(changes);
                       if (!config.actualRunEnabled()) {
                         return;
                       }
-                      Utility.executeCommand(
-                          config,
-                          String.format("cd %s && ./gradlew spotlessApply", config.benchmarkPath));
+                      if (success) {
+                        Utility.executeCommand(
+                            config,
+                            String.format(
+                                "cd %s && ./gradlew spotlessApply", config.benchmarkPath));
+                      }
                       System.out.println("Writing log to file...");
                       long currentLineNumber = Utility.getLineCountOfFile(config.logPath);
                       String log =
@@ -471,7 +474,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       } catch (Exception e) {
                         logger.trace("Error while writing log to file: ", e);
                       }
-                      if(!success){
+                      if (!success) {
                         return;
                       }
                       try (GitUtility git = GitUtility.instance(config)) {
