@@ -566,22 +566,21 @@ public class CodeFixTest extends AnnotatorBaseCoreTest {
   @Test
   public void remainingResolveTest() {
     coreTestHelper
-            .onTarget()
-            .withSourceLines(
-                    "Foo.java",
-                    "package test;",
-                    "import javax.annotation.Nullable;",
-                    "public class Foo {",
-                    "   @Nullable Integer f;",
-                    "   void run() {",
-                    "       int i = 0 + f;",
-                    "   }",
-                    "   void check(Object param){}",
-                    "}")
-            .expectNoReport()
-            .deactivateInference()
-            .resolveRemainingErrors()
-            .start();
+        .onTarget()
+        .withSourceLines(
+            "Foo.java",
+            "package test;",
+            "import javax.annotation.Nullable;",
+            "public class Foo {",
+            "   @Nullable Integer f;",
+            "   void run() {",
+            "       int i = 0 + f;",
+            "   }",
+            "   void check(Object param){}",
+            "}")
+        .expectNoReport()
+        .deactivateInference()
+        .resolveRemainingErrors()
+        .start();
   }
-
 }

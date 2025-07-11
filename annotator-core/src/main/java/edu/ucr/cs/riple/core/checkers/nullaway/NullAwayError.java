@@ -203,14 +203,14 @@ public class NullAwayError extends Error {
         }
         return unboxMatcher.group(1);
       case "SWITCH_EXPRESSION_NULLABLE":
-          // The message is of the form "switch expression s is @Nullable"
-          Pattern swtitchPattern = Pattern.compile("switch expression (\\w+) is @Nullable");
-          Matcher swtitchMatcher = swtitchPattern.matcher(message);
-          if (!swtitchMatcher.find()) {
-            throw new IllegalStateException(
-                    "Could not extract nullable expression from message: " + message);
-          }
-          return swtitchMatcher.group(1);
+        // The message is of the form "switch expression s is @Nullable"
+        Pattern swtitchPattern = Pattern.compile("switch expression (\\w+) is @Nullable");
+        Matcher swtitchMatcher = swtitchPattern.matcher(message);
+        if (!swtitchMatcher.find()) {
+          throw new IllegalStateException(
+              "Could not extract nullable expression from message: " + message);
+        }
+        return swtitchMatcher.group(1);
       default:
         throw new IllegalArgumentException(
             "Error type not supported to extract nullable expression from: "

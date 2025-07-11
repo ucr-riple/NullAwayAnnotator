@@ -377,7 +377,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
             error, info.clazz, info.symbol, info.expression, info.isAnnotated);
       case "local_variable":
         JsonArray origins = error.getOrigins();
-        if(origins.isEmpty()){
+        if (origins.isEmpty()) {
           return resolveRemainingErrors(error);
         }
         Set<RegionRewrite> ans = new HashSet<>();
@@ -486,13 +486,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
           break;
         }
       } else {
-        if (paramNullabilityPossibility.isDisagreement()) {
-          logger.trace("Disagreement in the nullability of the parameter.");
-          return NO_ACTION;
-        }
-        logger.trace("Agreement in the nullability of the parameter.");
-        logger.trace("We are not supporting dereference on nullable parameter yet!!!");
-        return NO_ACTION;
+        return resolveRemainingErrors(error);
       }
     }
     return NO_ACTION;

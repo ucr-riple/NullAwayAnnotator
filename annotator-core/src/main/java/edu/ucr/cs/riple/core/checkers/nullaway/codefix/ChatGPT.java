@@ -119,7 +119,7 @@ public class ChatGPT {
   /** Counter to keep track of the number of requests sent to ChatGPT per error. */
   public static final AtomicInteger count = new AtomicInteger(0);
 
-  public static final  Set<String> askedPrompts = new HashSet<>();
+  public static final Set<String> askedPrompts = new HashSet<>();
 
   /** Cache for the responses from ChatGPT. */
   private final ResponseCache responseCache;
@@ -176,9 +176,8 @@ public class ChatGPT {
   public Response ask(String prompt) {
     logger.trace("Asking ChatGPT:\n{}", prompt);
     prompt = preprocessPrompt(prompt);
-    if(askedPrompts.contains(prompt)) {
+    if (!askedPrompts.contains(prompt)) {
       count.incrementAndGet();
-    }else{
       askedPrompts.add(prompt);
     }
     if (count.get() > 50) {
@@ -508,16 +507,16 @@ public class ChatGPT {
    *     model fails.
    */
   public Set<RegionRewrite> fixDereferenceByRemainingCastToNonnull(
-          NullAwayError error, Context context) {
+      NullAwayError error, Context context) {
     String enclosingMethod = parser.getRegionSourceCode(error.getRegion()).content;
     String prompt =
-            String.format(
-                    remainingCastToNonnull,
-                    error.getNullableExpression(),
-                    enclosingMethod,
-                    error.position.diagnosticLine,
-                    error.getNullableExpression(),
-                    error.getNullableExpression());
+        String.format(
+            remainingCastToNonnull,
+            error.getNullableExpression(),
+            enclosingMethod,
+            error.position.diagnosticLine,
+            error.getNullableExpression(),
+            error.getNullableExpression());
     Response response = ask(prompt);
     if (!response.isSuccessFull()) {
       logger.trace("Response is not successful");
@@ -526,12 +525,12 @@ public class ChatGPT {
     String code = response.getCode();
     logger.trace("Fixing the error by adding castToNonnull");
     return Set.of(
-            RegionRewrite.of(
-                    error.path,
-                    error.getRegion().clazz,
-                    error.getRegion().member,
-                    code,
-                    Set.of(NullAway.CAST_TO_NONNULL)));
+        RegionRewrite.of(
+            error.path,
+            error.getRegion().clazz,
+            error.getRegion().member,
+            code,
+            Set.of(NullAway.CAST_TO_NONNULL)));
   }
 
   /**

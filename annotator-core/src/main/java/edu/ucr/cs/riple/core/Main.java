@@ -44,16 +44,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Predicate;
-
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.concurrent.Immutable;
 
 /** Starting point. */
 public class Main {
 
   public static final int VERSION = 2;
+
+  public static final int BUILD_VERSION = 5;
 
   public static class Benchmark {
     public final String annotatedPackage;
@@ -88,31 +86,28 @@ public class Main {
 
   static {
     benchmarks = new HashMap<>();
-    benchmarks.put(
-        "libgdx", new Benchmark("com.badlogic.gdx", "libgdx", "gdx:compileJava"));
-    benchmarks.put(
-        "zuul", new Benchmark("com.netflix", "zuul", "zuul-core:compileJava"));
+    benchmarks.put("libgdx", new Benchmark("com.badlogic.gdx", "libgdx", "gdx:compileJava"));
+    benchmarks.put("zuul", new Benchmark("com.netflix", "zuul", "zuul-core:compileJava"));
     benchmarks.put(
         "eureka", new Benchmark("com.netflix.eureka", "eureka", "eureka-core:compileJava"));
     benchmarks.put(
-        "conductor", new Benchmark("com.netflix.conductor", "conductor", "conductor-core:compileJava"));
-    benchmarks.put(
-        "EventBus", new Benchmark("org.greenrobot.eventbus", "EventBus", "compileJava"));
+        "conductor",
+        new Benchmark("com.netflix.conductor", "conductor", "conductor-core:compileJava"));
+    benchmarks.put("EventBus", new Benchmark("org.greenrobot.eventbus", "EventBus", "compileJava"));
     benchmarks.put(
         "glide", new Benchmark("com.bumptech.glide", "glide", "library:compileDebugJavaWithJavac"));
-    benchmarks.put(
-        "jadx", new Benchmark("jadx.core", "jadx", "jadx-core:compileJava"));
+    benchmarks.put("jadx", new Benchmark("jadx.core", "jadx", "jadx-core:compileJava"));
     benchmarks.put(
         "litiengine", new Benchmark("de.gurkenlabs.litiengine", "litiengine", "compileJava"));
-    benchmarks.put(
-        "retrofit", new Benchmark("retrofit2", "retrofit", "compileJava"));
+    benchmarks.put("retrofit", new Benchmark("retrofit2", "retrofit", "compileJava"));
     benchmarks.put(
         "spring-boot",
-        new Benchmark("org.springframework.boot", "spring-boot", ":spring-boot-project:spring-boot:compileJava"));
-    benchmarks.put(
-        "wala-util", new Benchmark("com.ibm.wala", "wala", "compileJava"));
-    benchmarks.put(
-        "gson", new Benchmark("com.google.gson", "gson", ":gson:compileJava"));
+        new Benchmark(
+            "org.springframework.boot",
+            "spring-boot",
+            ":spring-boot-project:spring-boot:compileJava"));
+    benchmarks.put("wala-util", new Benchmark("com.ibm.wala", "wala-util", "compileJava"));
+    benchmarks.put("gson", new Benchmark("com.google.gson", "gson", ":gson:compileJava"));
   }
 
   // PROJECT SPECIFIC CONFIGURATION
@@ -121,6 +116,7 @@ public class Main {
   public static final String DEBUG_LINE = "public static Files files;";
 
   public static void main(String[] args) {
+    System.out.println("ANNOTATOR VERSION: " + VERSION + ", BUILD: " + BUILD_VERSION);
     System.out.println("Received arguments: " + String.join(", ", args));
     String benchmarkName = args[0];
     boolean isBaseline = args.length > 1 && args[1].equals("basic");
@@ -158,9 +154,9 @@ public class Main {
       benchmark.annotatedPackage,
       isDisabled ? "" : "-di", // deactivate inference
       "-rrem", // resolve remaining errors
-      isDisabled ? "disabled" :isBaseline ? "basic" : "advanced",
-      //"-rboserr", // redirect build output stream and error stream
-      verbose ? "-rboserr": "",
+      isDisabled ? "disabled" : isBaseline ? "basic" : "advanced",
+      // "-rboserr", // redirect build output stream and error stream
+      verbose ? "-rboserr" : "",
       "--depth",
       "6"
     };

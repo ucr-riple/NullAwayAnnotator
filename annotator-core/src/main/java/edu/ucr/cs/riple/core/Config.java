@@ -197,7 +197,7 @@ public class Config {
    * @return true if the annotator is running in actual mode, false otherwise.
    */
   public boolean actualRunEnabled() {
-    if(resolveRemainingErrorMode.isDisabled()){
+    if (resolveRemainingErrorMode.isDisabled()) {
       return false;
     }
     return !isTestMode && !Main.DEBUG_MODE;
