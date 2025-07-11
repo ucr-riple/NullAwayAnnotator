@@ -82,8 +82,6 @@ public class Context {
   /** Cache for response/prompts. */
   public final Map<String, String> responsePromptCache;
 
-  public final Map<Region, String> regionSourceMap;
-
   /**
    * Builds context from command line arguments.
    *
@@ -102,7 +100,6 @@ public class Context {
     this.injector = new PhysicalInjector(this);
     this.reportCache = new ReportCache(config);
     this.responsePromptCache = new HashMap<>();
-    this.regionSourceMap = new HashMap<>();
   }
 
   /**

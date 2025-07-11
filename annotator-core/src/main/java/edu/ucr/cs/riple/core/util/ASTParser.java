@@ -120,13 +120,6 @@ public class ASTParser {
         onClass.path, region.clazz, region.member, config.languageLevel);
   }
 
-  public String getRegionSourceCodeContent(Region region) {
-    if(context.regionSourceMap.containsKey(region)){
-      return context.regionSourceMap.get(region);
-    }
-    return getRegionSourceCode(region).content;
-  }
-
   /**
    * Returns the callable declaration of a class.
    *

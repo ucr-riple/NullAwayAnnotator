@@ -660,11 +660,11 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
     for (Fix fix : fixes) {
       logger.trace("Injecting fix as part of solution without checking impact: {}", fix);
     }
-    getTriggeredErrorsFromFixes(fixes);
     context.injector.injectFixes(fixes);
     // resolve the ones where annotation cannot fix
     Set<NullAwayError> unresolvableErrors =
         errors.stream().filter(e -> e.getResolvingFixes().isEmpty()).collect(Collectors.toSet());
+    unresolvableErrors.addAll(getTriggeredErrorsFromFixes(fixes));
     Set<RegionRewrite> changes = new HashSet<>();
     for (NullAwayError unresolvableError : unresolvableErrors) {
       logger.trace("Resolving unresolvable error for triggered error: {}", unresolvableError);
