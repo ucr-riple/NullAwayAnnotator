@@ -56,6 +56,7 @@ import edu.ucr.cs.riple.injector.changes.RemoveMarkerAnnotation;
 import edu.ucr.cs.riple.injector.location.Location;
 import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnMethod;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
@@ -130,7 +131,9 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
 
   private Set<RegionRewrite> resolveRemainingErrors(NullAwayError error) {
     logger.trace("Resolving remaining cast to nonnull");
-    return gpt.fixDereferenceByRemainingCastToNonnull(error, context);
+    Set<RegionRewrite> rws = gpt.fixDereferenceByRemainingCastToNonnull(error, context);
+    apply(rws);
+    return NO_ACTION;
   }
 
   /**
@@ -173,7 +176,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
    */
   private Set<RegionRewrite> resolveAssignFieldNullableError(NullAwayError error) {
     logger.trace("Resolving assign field nullable error.");
-    // currently the only solution we follow is to make the field nullable and resolve triggered
+    // currently, the only solution we follow is to make the field nullable and resolve triggered
     // errors.
     Preconditions.checkArgument(error.getResolvingFixes().size() == 1);
     // Make the field nullable.
@@ -243,7 +246,8 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
               .getFieldRegistry()
               .getLocationOnField(onMethod.clazz, returnedField);
       logger.trace("Checking if the field is nullable.");
-      boolean investigateFieldNullability = investigateFieldNullability(onField, returnedField);
+      boolean investigateFieldNullability =
+          investigateFieldNullability(onField.path, onField.clazz, returnedField);
       if (!investigateFieldNullability) {
         logger.trace(
             "Field is not nullable. Removed annotation from field and added initializer to the method.");
@@ -273,38 +277,37 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
     Set<RegionRewrite> changes = new HashSet<>();
     String[] names = error.getUninitializedFieldsFromErrorMessage();
     logger.trace("Resolving uninitialized field errors for fields: {}", Arrays.toString(names));
-    final int[] index = {0};
-    error
-        .getResolvingFixes()
-        .forEach(
-            fix -> {
-              if (fix.isOnField()) {
-                logger.trace("Working on field: {}", names[index[0]]);
-                boolean checkFieldNullability =
-                    investigateFieldNullability(fix.toField(), names[index[0]]);
-                if (!checkFieldNullability) {
-                  logger.trace("Field is not nullable. Removed annotation from field.");
-                } else {
-                  // Make the field nullable if not already.
-                  context.injector.injectAnnotation(
-                      new AddMarkerAnnotation(fix.toField(), context.config.nullableAnnot));
-                  Set<NullAwayError> triggeredErrors =
-                      getTriggeredErrorsFromLocation(fix.toField());
-                  if (triggeredErrors.isEmpty()) {
-                    logger.trace("Expected to have errors for making the field nullable.");
-                    return;
-                  }
-                  Set<RegionRewrite> c = new HashSet<>();
-                  logger.trace("Trying to fix errors for making the field nullable");
-                  triggeredErrors.forEach(
-                      nullAwayError -> {
-                        logger.trace("Working on triggered error: {}", nullAwayError);
-                        c.addAll(fix(nullAwayError));
-                      });
-                  changes.addAll(c);
-                }
-              }
+    Path path = error.path;
+    String clazz = error.getRegion().clazz;
+    for (String name : names) {
+      logger.trace("Working on field: {}", name);
+      boolean checkFieldNullability = investigateFieldNullability(path, clazz, name);
+      OnField onField = new OnField(path, clazz, Set.of(name));
+      if (!checkFieldNullability) {
+        logger.trace("Field is not nullable. Removed annotation from field.");
+        // add @SuppressWarnings to the field.
+        context.injector.injectAnnotation(
+                new AddSingleElementAnnotation(
+                        onField, "SuppressWarnings", "NullAway.Init", false));
+      } else {
+        // Make the field nullable if not already.
+        context.injector.injectAnnotation(
+            new AddMarkerAnnotation(onField, context.config.nullableAnnot));
+        Set<NullAwayError> triggeredErrors = getTriggeredErrorsFromLocation(onField);
+        if (triggeredErrors.isEmpty()) {
+          logger.trace("Expected to have errors for making the field nullable.");
+          continue;
+        }
+        Set<RegionRewrite> c = new HashSet<>();
+        logger.trace("Trying to fix errors for making the field nullable");
+        triggeredErrors.forEach(
+            nullAwayError -> {
+              logger.trace("Working on triggered error: {}", nullAwayError);
+              c.addAll(fix(nullAwayError));
             });
+        changes.addAll(c);
+      }
+    }
     return changes;
   }
 
@@ -319,15 +322,21 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
     logger.trace("Resolving dereference error: {}", error);
     if (ASTParser.isObjectEqualsMethod(error.getRegion().member)) {
       logger.trace("Fixing dereference error in equals method.");
-      return gpt.fixDereferenceErrorInEqualsMethod(error);
+      Set<RegionRewrite> rws = gpt.fixDereferenceErrorInEqualsMethod(error);
+      apply(rws);
+      return NO_ACTION;
     }
     if (ASTParser.isObjectToStringMethod(error.getRegion().member)) {
       logger.trace("Fixing dereference error in toString method.");
-      return gpt.fixDereferenceErrorInToStringMethod(error);
+      Set<RegionRewrite> rws =  gpt.fixDereferenceErrorInToStringMethod(error);
+      apply(rws);
+      return NO_ACTION;
     }
     if (ASTParser.isObjectHashCodeMethod(error.getRegion().member)) {
       logger.trace("Fixing dereference error in hashCode method.");
-      return gpt.fixDereferenceErrorInHashCodeMethod(error);
+      Set<RegionRewrite> rws =  gpt.fixDereferenceErrorInHashCodeMethod(error);
+      apply(rws);
+      return NO_ACTION;
     }
     // Check nullability possibility.
     logger.trace("Checking nullability possibility at error point");
@@ -512,7 +521,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
    *     is found.
    */
   private Set<RegionRewrite> resolveFieldNullabilityError(OnField onField, String field) {
-    boolean fieldNullabilityCheck = investigateFieldNullability(onField, field);
+    boolean fieldNullabilityCheck = investigateFieldNullability(onField.path, onField.clazz, field);
     if (!fieldNullabilityCheck) {
       logger.trace("Field is not nullable. removed annotation from field and getter.");
       return NO_ACTION;
@@ -573,14 +582,15 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
     }
     if (changesForRegion.isEmpty()) {
       logger.trace("No fix found by safe regions. Trying to fix by all regions.");
-      // If no safe region found, of no fix found by safe regions, try to fix by precondition
-      // check.
+      // If no safe region found, of no fix found by safe regions, try to fix by all regions.
       changesForRegion =
           gpt.fixDereferenceErrorByAllRegions(error, safeRegions, unsafeRegions, context);
     }
     if (!changesForRegion.isEmpty()) {
       logger.trace("Successfully generated a fix for the error.");
       changes.addAll(changesForRegion);
+      apply(changesForRegion);
+      changes = NO_ACTION;
     } else {
       logger.trace("-----------Could not generate a fix for error-----------\n{}", error);
     }
@@ -604,7 +614,9 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
    */
   private Set<RegionRewrite> constructCastToNonnullChange(NullAwayError error, String reason) {
     logger.trace("Constructing cast to nonnull change for reason: {}", reason);
-    return gpt.fixDereferenceByAddingCastToNonnull(error, reason, context);
+    Set<RegionRewrite> rws = gpt.fixDereferenceByAddingCastToNonnull(error, reason, context);
+    apply(rws);
+    return NO_ACTION;
   }
 
   private Set<NullAwayError> getTriggeredErrorsFromFixes(Set<Fix> f) {
@@ -645,6 +657,9 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
             .map(e -> e.getResolvingFixes().iterator().next())
             .collect(Collectors.toSet());
     logger.trace("Adding annotations for resolvable errors, size: {}", fixes.size());
+    for (Fix fix : fixes) {
+      logger.trace("Injecting fix as part of solution without checking impact: {}", fix);
+    }
     getTriggeredErrorsFromFixes(fixes);
     context.injector.injectFixes(fixes);
     // resolve the ones where annotation cannot fix
@@ -703,19 +718,20 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
   /**
    * Investigates the nullability of a field by checking if there is any method initializing it.
    *
-   * @param onField the field to investigate.
+   * @param path the path of the file containing the field.
+   * @param clazz class flat name containing the field.
    * @param field the field name to investigate. A location on field can target multiple inline
    *     fields.
    * @return true if the field is nullable, false otherwise.
    */
-  private boolean investigateFieldNullability(OnField onField, String field) {
+  private boolean investigateFieldNullability(Path path, String clazz, String field) {
     logger.trace("Investigating field nullability.");
     logger.trace("Checking if there is any method initializing field: {}", field);
     Set<OnMethod> methods =
         context
             .targetModuleInfo
             .getFieldInitializationStore()
-            .findInitializerForField(onField.clazz, field);
+            .findInitializerForField(clazz, field);
     if (!methods.isEmpty()) {
       // TODO: Maybe we should pick the best candidate rather than the first one.
       // continue with the initializer.
@@ -732,14 +748,11 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
         logger.trace("Found initializer method. Injecting initializer annotation.");
         // remove annotation from field
         RemoveMarkerAnnotation removeAnnotation =
-            new RemoveMarkerAnnotation(onField, context.config.nullableAnnot);
+            new RemoveMarkerAnnotation(
+                new OnField(path, clazz, Set.of(field)), context.config.nullableAnnot);
         // Remove annotation from getter method if exists.
         Optional<MethodRecord> getterMethod =
-            context
-                .targetModuleInfo
-                .getMethodRegistry()
-                .getAllMethodsForClass(onField.clazz)
-                .stream()
+            context.targetModuleInfo.getMethodRegistry().getAllMethodsForClass(clazz).stream()
                 .filter(
                     record -> {
                       CallableDeclaration<?> callable =

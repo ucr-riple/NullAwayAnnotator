@@ -33,6 +33,8 @@ import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.registries.index.Error;
+import edu.ucr.cs.riple.core.registries.region.Region;
+import edu.ucr.cs.riple.injector.SourceCode;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import edu.ucr.cs.riple.injector.offsets.OffsetChange;
 import java.nio.file.Path;
@@ -80,6 +82,8 @@ public class Context {
   /** Cache for response/prompts. */
   public final Map<String, String> responsePromptCache;
 
+  public final Map<Region, String> regionSourceMap;
+
   /**
    * Builds context from command line arguments.
    *
@@ -98,6 +102,7 @@ public class Context {
     this.injector = new PhysicalInjector(this);
     this.reportCache = new ReportCache(config);
     this.responsePromptCache = new HashMap<>();
+    this.regionSourceMap = new HashMap<>();
   }
 
   /**

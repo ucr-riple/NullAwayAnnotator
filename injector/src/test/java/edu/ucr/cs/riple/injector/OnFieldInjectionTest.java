@@ -119,4 +119,27 @@ public class OnFieldInjectionTest extends BaseInjectorTest {
                 "javax.annotation.Nullable"))
         .start();
   }
+
+  @Test
+  public void onMultipleFieldDeclaration() {
+    injectorTestHelper
+        .addInput(
+            "Foo.java",
+            "package edu.ucr;",
+            "import javax.annotation.Nullable;",
+            "public class Test {",
+            "   Object h, f, c = new Object();",
+            "}")
+        .expectOutput(
+            "package edu.ucr;",
+            "import javax.annotation.Nullable;",
+            "public class Test {",
+            "   @Nullable Object h, f, c = new Object();",
+            "}")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnField("Foo.java", "edu.ucr.Test", Collections.singleton("h")),
+                "javax.annotation.Nullable"))
+        .start();
+  }
 }

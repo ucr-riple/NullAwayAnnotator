@@ -102,9 +102,8 @@ public class InvocationRecord {
           String methodBody =
               String.format(
                   "%s",
-                  parser.getRegionSourceCode(
-                          new Region(method.location.clazz, method.location.method))
-                      .content);
+                  parser.getRegionSourceCodeContent(
+                          new Region(method.location.clazz, method.location.method)));
           prompt.append(methodBody);
         }
         prompt.append("\n}\n```\n");
@@ -130,8 +129,7 @@ public class InvocationRecord {
    */
   public String getRoot() {
     MethodRecord root = calls.get(0).iterator().next();
-    return parser.getRegionSourceCode(new Region(root.location.clazz, root.location.method))
-        .content;
+    return parser.getRegionSourceCodeContent(new Region(root.location.clazz, root.location.method));
   }
 
   /**

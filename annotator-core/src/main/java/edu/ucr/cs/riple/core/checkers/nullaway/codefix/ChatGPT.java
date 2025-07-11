@@ -131,8 +131,10 @@ public class ChatGPT {
    * The {@link ASTParser} instance used to parse the source code of the file containing the error.
    */
   private final ASTParser parser;
+  private final Context context;
 
-  public ChatGPT(Config config, ASTParser parser) {
+  public ChatGPT(Context context, ASTParser parser) {
+    this.context = context;
     this.dereferenceEqualsMethodRewritePrompt =
         Utility.readResourceContent("prompts/dereference/equals-rewrite.txt");
     this.dereferenceToStringMethodRewritePrompt =
@@ -161,7 +163,7 @@ public class ChatGPT {
         Utility.readResourceContent("prompts/dereference/remaining-fix-request.txt");
     this.basicFixRequestPrompt = Utility.readResourceContent("prompts/basic-fix-request.txt");
     this.parser = parser;
-    this.responseCache = new ResponseCache(config);
+    this.responseCache = new ResponseCache(context.config);
     this.responseCache.createTable();
     this.logger = LoggerFactory.getLogger(ChatGPT.class);
   }
@@ -354,7 +356,7 @@ public class ChatGPT {
       NullAwayError error, Set<Region> safeRegions, Context context) {
     logger.trace("Attempting to fix dereference error by using safe regions");
     String expression = error.getNullableExpression();
-    String region = parser.getRegionSourceCode(error.getRegion()).content;
+    String region = parser.getRegionSourceCodeContent(error.getRegion());
     String prompt =
         String.format(
             dereferenceFixBySafeRegionsPrompt,
@@ -370,6 +372,7 @@ public class ChatGPT {
     }
     String code = response.getCode();
     logger.trace("Fixing the error by using safe regions with code:\n{}", code);
+    context.regionSourceMap.put(error.getRegion(), code);
     return Set.of(
         RegionRewrite.of(error.path, error.getRegion().clazz, error.getRegion().member, code));
   }
@@ -390,7 +393,7 @@ public class ChatGPT {
       NullAwayError error, Set<Region> safeRegions, Set<Region> errorRegions, Context context) {
     logger.trace("Attempting to fix dereference error by using all regions");
     String expression = error.getNullableExpression();
-    String method = parser.getRegionSourceCode(error.getRegion()).content;
+    String method = parser.getRegionSourceCodeContent(error.getRegion());
     String regionData =
         safeRegions.isEmpty()
             ? "I could not find any use case where the expression does not potentially produce Null Pointer Exception"
@@ -415,6 +418,7 @@ public class ChatGPT {
     }
     String code = response.getCode();
     logger.trace("Fixing the error by using all regions with code:\n{}", code);
+    context.regionSourceMap.put(error.getRegion(), code);
     return Set.of(
         RegionRewrite.of(error.path, error.getRegion().clazz, error.getRegion().member, code));
   }
@@ -443,7 +447,7 @@ public class ChatGPT {
    */
   public Set<RegionRewrite> fixDereferenceByReturningNullInNullableMethod(
       NullAwayError error, Context context) {
-    String enclosingMethod = parser.getRegionSourceCode(error.getRegion()).content;
+    String enclosingMethod = parser.getRegionSourceCodeContent(error.getRegion());
     Response response =
         ask(
             String.format(
@@ -457,6 +461,7 @@ public class ChatGPT {
     }
     String code = response.getCode();
     logger.trace("Fixing the error by returning null earlier");
+    context.regionSourceMap.put(error.getRegion(), code);
     return Set.of(
         new MethodRewriteChange(
             new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member), code));
@@ -472,7 +477,7 @@ public class ChatGPT {
    */
   public Set<RegionRewrite> fixDereferenceByAddingCastToNonnull(
       NullAwayError error, String reason, Context context) {
-    String enclosingMethod = parser.getRegionSourceCode(error.getRegion()).content;
+    String enclosingMethod = parser.getRegionSourceCodeContent(error.getRegion());
     String prompt =
         String.format(
             rewriteCastToNonnullPrompt,
@@ -489,6 +494,7 @@ public class ChatGPT {
     }
     String code = response.getCode();
     logger.trace("Fixing the error by adding castToNonnull");
+    context.regionSourceMap.put(error.getRegion(), code);
     return Set.of(
         RegionRewrite.of(
             error.path,
@@ -508,7 +514,7 @@ public class ChatGPT {
    */
   public Set<RegionRewrite> fixDereferenceByRemainingCastToNonnull(
       NullAwayError error, Context context) {
-    String enclosingMethod = parser.getRegionSourceCode(error.getRegion()).content;
+    String enclosingMethod = parser.getRegionSourceCodeContent(error.getRegion());
     String prompt =
         String.format(
             remainingCastToNonnull,
@@ -524,6 +530,7 @@ public class ChatGPT {
     }
     String code = response.getCode();
     logger.trace("Fixing the error by adding castToNonnull");
+    context.regionSourceMap.put(error.getRegion(), code);
     return Set.of(
         RegionRewrite.of(
             error.path,
@@ -619,7 +626,7 @@ public class ChatGPT {
       // null.
       return Response.agree();
     }
-    String regionMember = parser.getRegionSourceCode(error.getRegion()).content;
+    String regionMember = parser.getRegionSourceCodeContent(error.getRegion());
     String prompt = null;
     if (error.messageType.equals("DEREFERENCE_NULLABLE")) {
       // Construct the prompt
@@ -657,7 +664,7 @@ public class ChatGPT {
   public boolean checkIfMethodIsAnInitializer(OnMethod onMethod, Context context) {
     // Construct the prompt
     String enclosingMethod =
-        parser.getRegionSourceCode(new Region(onMethod.clazz, onMethod.method)).content;
+        parser.getRegionSourceCodeContent(new Region(onMethod.clazz, onMethod.method));
     String prompt = String.format(checkIfMethodIsAnInitializerPrompt, enclosingMethod);
     logger.trace("Asking if the method is an initializer: {}", onMethod.method);
     Response response = ask(prompt);
@@ -683,7 +690,7 @@ public class ChatGPT {
             checkIfParamIsNullablePrompt,
             param,
             callContext,
-            parser.getRegionSourceCode(new Region(encClass, method)).content);
+            parser.getRegionSourceCodeContent(new Region(encClass, method)));
     return ask(prompt);
   }
 
@@ -699,7 +706,7 @@ public class ChatGPT {
   public Response checkIfMethodIsReturningNullable(
       String encClass, String method, String callContext, Context context) {
     logger.trace("Asking if the method is returning nullable: {}", method);
-    String methodSource = parser.getRegionSourceCode(new Region(encClass, method)).content;
+    String methodSource = parser.getRegionSourceCodeContent(new Region(encClass, method));
     String prompt =
         String.format(checkIfMethodIsReturningNullablePrompt, methodSource, callContext);
     return ask(prompt);
@@ -737,7 +744,7 @@ public class ChatGPT {
   private String constructPromptForRegions(Set<Region> regions) {
     return regions.stream()
         .filter(Region::isOnCallable)
-        .map(region -> parser.getRegionSourceCode(region).content)
+        .map(region -> parser.getRegionSourceCodeContent(region))
         .collect(Collectors.joining("\n"));
   }
 
@@ -750,7 +757,7 @@ public class ChatGPT {
    *     error cannot be fixed.
    */
   private MethodRewriteChange fixErrorInPlace(NullAwayError error, String prompt) {
-    String enclosingMethod = parser.getRegionSourceCode(error.getRegion()).content;
+    String enclosingMethod = parser.getRegionSourceCodeContent(error.getRegion());
     Response response = ask(String.format(prompt, enclosingMethod, error.message));
     if (!response.isSuccessFull()) {
       return null;
@@ -759,6 +766,7 @@ public class ChatGPT {
     if (code.isEmpty()) {
       return null;
     }
+    context.regionSourceMap.put(error.getRegion(), code);
     return new MethodRewriteChange(
         new OnMethod(error.path, error.getRegion().clazz, error.getRegion().member), code);
   }
