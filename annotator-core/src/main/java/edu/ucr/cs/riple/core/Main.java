@@ -116,8 +116,8 @@ public class Main {
   public static final String DEBUG_LINE =
       "private InvokeCustomNode(MethodInfo mth, InvokeType invokeType, int argsCount) {";
 
-  public static void main(String[] arg) {
-    String[] args = new String[] {"jadx", "advanced"};
+  public static void main(String[] args) {
+    // String[] args = new String[] {"jadx", "advanced"};
     System.out.println("ANNOTATOR VERSION: " + VERSION + ", BUILD: " + BUILD_VERSION);
     System.out.println("Received arguments: " + String.join(", ", args));
     String benchmarkName = args[0];
