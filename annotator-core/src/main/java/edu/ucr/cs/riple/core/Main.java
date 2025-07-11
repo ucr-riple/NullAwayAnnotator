@@ -112,7 +112,7 @@ public class Main {
 
   // PROJECT SPECIFIC CONFIGURATION
   // Ubuntu
-  public static final boolean DEBUG_MODE = true;
+  public static final boolean DEBUG_MODE = false;
   public static final String DEBUG_LINE =
       "private InvokeCustomNode(MethodInfo mth, InvokeType invokeType, int argsCount) {";
 
