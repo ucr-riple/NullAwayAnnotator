@@ -84,6 +84,8 @@ public class Main {
   // Benchmarks
   static final Map<String, Benchmark> benchmarks;
 
+  public static final Path PROMPTS_PATH = Paths.get("/home/nima/Desktop/new-prompts.txt");
+
   static {
     benchmarks = new HashMap<>();
     benchmarks.put("libgdx", new Benchmark("com.badlogic.gdx", "libgdx", "gdx:compileJava"));
@@ -112,11 +114,11 @@ public class Main {
 
   // PROJECT SPECIFIC CONFIGURATION
   // Ubuntu
-  public static final boolean DEBUG_MODE = true;
-  public static final String DEBUG_LINE = "private static Map<String, Long> execTimes;";
+  public static final boolean DEBUG_MODE = false;
+  public static final String DEBUG_LINE = "return elseRegion;";
 
   public static void main(String[] args) {
-    args = new String[] {"jadx", "advanced"};
+    //    args = new String[] {"jadx", "advanced"};
     System.out.println("ANNOTATOR VERSION: " + VERSION + ", BUILD: " + BUILD_VERSION);
     System.out.println("Received arguments: " + String.join(", ", args));
     String benchmarkName = args[0];

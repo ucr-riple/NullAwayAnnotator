@@ -28,6 +28,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import edu.ucr.cs.riple.annotator.util.parsers.JsonParser;
 import edu.ucr.cs.riple.core.Context;
+import edu.ucr.cs.riple.core.Main;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.core.registries.method.invocation.InvocationRecord;
@@ -39,6 +40,7 @@ import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
 import edu.ucr.cs.riple.injector.changes.RegionRewrite;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.io.BufferedReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -202,8 +204,20 @@ public class ChatGPT {
         logger.trace("Cache collision detected: Cached:\n{}\nPrompt:\n{}", cachedPrompt, prompt);
         throw new RuntimeException("Cache collision detected");
       }
+    } else {
+      logger.trace("Not found in cache...");
+      System.out.println("Not found in cache...");
     }
     logger.trace("Sending request to OpenAI...");
+
+    try (FileWriter writer = new FileWriter(Main.PROMPTS_PATH.toFile(), true)) {
+      writer.append("NEW PROMPT").append("-".repeat(20));
+      writer.write(prompt);
+      writer.append("\n").append("-".repeat(20)).append("\n");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
     String response = sendRequestToOpenAI(prompt);
     String current = response;
     for (int i = 0; i < RETRY_LIMIT; i++) {
