@@ -28,6 +28,7 @@ import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.io.File;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -60,9 +61,10 @@ public class ResponseCache {
     this.cache = new HashMap<>();
     this.dir = Paths.get("/home/nima/Desktop/logs/db_cache/" + config.benchmarkName);
     File dir = this.dir.toFile();
-    Pattern pattern = Pattern.compile("^\\d+\\.txt$");
+    Pattern pattern = Pattern.compile("^(\\d+)\\.txt$");
     File[] files = dir.listFiles();
     Preconditions.checkState(files != null);
+    System.out.println("Loading cache from " + dir.getAbsolutePath());
     for (File file : files) {
       if (file.isFile()) {
         Matcher matcher = pattern.matcher(file.getName());
@@ -77,6 +79,7 @@ public class ResponseCache {
         }
       }
     }
+    System.out.println("Loaded " + cache.size() + " entries from cache.");
   }
 
   /**
@@ -104,8 +107,8 @@ public class ResponseCache {
     int id = ++lastID;
     // write to file, I don't have in utility
     try {
-      Files.write(dir.resolve(id + ".txt"), prompt.getBytes());
-      Files.write(dir.resolve(id + "_response.txt"), response.getBytes());
+      Files.write(dir.resolve(id + ".txt"), prompt.getBytes(Charset.defaultCharset()));
+      Files.write(dir.resolve(id + "_response.txt"), response.getBytes(Charset.defaultCharset()));
     } catch (Exception e) {
       throw new RuntimeException("Could not write to cache file.", e);
     }

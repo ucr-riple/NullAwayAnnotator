@@ -182,10 +182,12 @@ public class Config {
   public Path commitHashPath;
   public Path timerPath;
   public boolean isTestMode = System.getProperty("ANNOTATOR_TEST_MODE") != null;
+  public boolean combined = false;
 
   public String branchName() {
     return (String.format("nimak/agentic-%s-%s", resolveRemainingErrorMode.name(), Main.VERSION)
-            + (Main.DEBUG_MODE ? "-debug" : ""))
+            + (Main.DEBUG_MODE ? "-debug" : "")
+            + (combined ? "-combined" : ""))
         .toLowerCase(Locale.getDefault());
   }
 

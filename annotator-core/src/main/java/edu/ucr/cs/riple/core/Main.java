@@ -118,20 +118,22 @@ public class Main {
   public static final String DEBUG_LINE = "return elseRegion;";
 
   public static void main(String[] args) {
-    //    args = new String[] {"jadx", "advanced"};
+    //        args = new String[] {"eureka", "advanced"};
     System.out.println("ANNOTATOR VERSION: " + VERSION + ", BUILD: " + BUILD_VERSION);
     System.out.println("Received arguments: " + String.join(", ", args));
     String benchmarkName = args[0];
     boolean isBaseline = args.length > 1 && args[1].equals("basic");
     boolean isDisabled = args.length > 1 && args[1].equals("disable");
     boolean verbose = Arrays.asList(args).contains("verbose");
+    boolean combined = Arrays.asList(args).contains("--combined");
     System.clearProperty("ANNOTATOR_TEST_MODE");
     System.out.println(
         "Running "
             + benchmarkName
             + " benchmark in "
             + (isDisabled ? "disabled" : (isBaseline ? "basic" : "advanced"))
-            + " mode.");
+            + " mode."
+            + (combined ? " Combined mode is ON." : ""));
     Benchmark benchmark = benchmarks.get(benchmarkName);
     if (benchmark == null) {
       throw new IllegalArgumentException("Unknown benchmark: " + benchmarkName);
@@ -167,6 +169,7 @@ public class Main {
     Config config = new Config(argsArray);
     config.benchmarkName = benchmarkName;
     config.benchmarkPath = PROJECT_PATH;
+    config.combined = combined;
     configureLogging(config);
 
     System.out.println("Running on branch name: " + config.branchName());

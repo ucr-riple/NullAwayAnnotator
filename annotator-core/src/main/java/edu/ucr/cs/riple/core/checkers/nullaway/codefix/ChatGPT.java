@@ -24,6 +24,9 @@
 
 package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 
+import static java.nio.file.StandardOpenOption.APPEND;
+import static java.nio.file.StandardOpenOption.CREATE;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import edu.ucr.cs.riple.annotator.util.parsers.JsonParser;
@@ -40,13 +43,14 @@ import edu.ucr.cs.riple.injector.changes.MethodRewriteChange;
 import edu.ucr.cs.riple.injector.changes.RegionRewrite;
 import edu.ucr.cs.riple.injector.location.OnMethod;
 import java.io.BufferedReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -166,7 +170,6 @@ public class ChatGPT {
     this.basicFixRequestPrompt = Utility.readResourceContent("prompts/basic-fix-request.txt");
     this.parser = parser;
     this.responseCache = new ResponseCache(context.config);
-    this.responseCache.createTable();
     this.logger = LoggerFactory.getLogger(ChatGPT.class);
   }
 
@@ -210,12 +213,14 @@ public class ChatGPT {
     }
     logger.trace("Sending request to OpenAI...");
 
-    try (FileWriter writer = new FileWriter(Main.PROMPTS_PATH.toFile(), true)) {
+    try (Writer writer =
+        Files.newBufferedWriter(
+            Main.PROMPTS_PATH.toFile().toPath(), Charset.defaultCharset(), CREATE, APPEND)) {
       writer.append("NEW PROMPT").append("-".repeat(20));
       writer.write(prompt);
       writer.append("\n").append("-".repeat(20)).append("\n");
     } catch (IOException e) {
-      e.printStackTrace();
+      System.out.println("Could not write prompt to file: " + e.getMessage());
     }
 
     String response = sendRequestToOpenAI(prompt);

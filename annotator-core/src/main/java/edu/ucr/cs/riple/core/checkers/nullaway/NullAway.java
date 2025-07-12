@@ -427,7 +427,13 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       logger.trace("{} : TOP LEVEL CALL TO FIX ERROR: {}", counter.get(), error);
                       Set<RegionRewrite> changes;
                       boolean success = true;
+                      Utility.buildTarget(context);
+                      int before =
+                          Utility.readErrorsFromOutputDirectory(
+                                  context, context.targetModuleInfo, NullAwayError.class)
+                              .size();
                       try {
+
                         changes = codeFix.fix(error);
                         System.out.println("Finished processing.");
                       } catch (Exception e) {
@@ -440,11 +446,45 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                             "--------Exception occurred in computing fix-------- | {}",
                             counter.get(),
                             e);
+                        try (GitUtility git = GitUtility.instance(config)) {
+                          git.resetHard();
+                        } catch (Exception ex) {
+                          System.err.println("Error while resetting: " + ex.getMessage());
+                        }
                       }
                       codeFix.apply(changes);
                       if (!config.actualRunEnabled()) {
                         return;
                       }
+                      if (config.combined) {
+                        Utility.buildTarget(context);
+                        int after;
+                        try {
+                          after =
+                              Utility.readErrorsFromOutputDirectory(
+                                      context, context.targetModuleInfo, NullAwayError.class)
+                                  .size();
+                        } catch (Exception e) {
+                          System.out.println(
+                              "Patch caused compilation error, setting after to max value.");
+                          after = Integer.MAX_VALUE;
+                        }
+                        try (GitUtility git = GitUtility.instance(config)) {
+                          if (after < before) {
+                            logger.trace(
+                                "Patch reduced errors from {} to {}, committing.", before, after);
+                            System.out.println("Patch reduced errors, committing.");
+                            git.commitChanges("fix: " + error);
+                          } else {
+                            System.out.println("Patch did not reduce errors, resetting.");
+                            git.resetHard();
+                          }
+                        } catch (Exception ex) {
+                          System.err.println("Error while resetting: " + ex.getMessage());
+                        }
+                        return;
+                      }
+
                       if (success) {
                         Utility.executeCommand(
                             config,
