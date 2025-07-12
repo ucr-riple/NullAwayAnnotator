@@ -51,7 +51,7 @@ public class Main {
 
   public static final int VERSION = 2;
 
-  public static final int BUILD_VERSION = 5;
+  public static final int BUILD_VERSION = 6;
 
   public static class Benchmark {
     public final String annotatedPackage;

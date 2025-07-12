@@ -24,21 +24,23 @@
 
 package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 
+import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.Config;
-import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import edu.ucr.cs.riple.core.util.Utility;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ResponseCache {
 
-  /** Database file path. */
-  private final String DB_URL;
+  private final Map<String, String> cache;
+  private int lastID = 0;
+  public final Path dir;
 
   /** CachedData class to store the prompt and response. */
   public static class CachedData {
@@ -55,44 +57,25 @@ public class ResponseCache {
   }
 
   public ResponseCache(Config config) {
-    this.DB_URL =
-        String.format(
-            "jdbc:sqlite:%s/Desktop/logs/dbs/%s.db",
-            System.getProperty("user.home"), config.isTestMode ? "Test" : config.benchmarkName);
-  }
-
-  /** Creates the SQLite database and the cache table if it does not exist. */
-  public void createTable() {
-    String createTableSQL =
-        "CREATE TABLE IF NOT EXISTS cache ("
-            + "hash TEXT PRIMARY KEY, "
-            + "prompt TEXT, "
-            + "response TEXT)";
-    try (Connection conn = DriverManager.getConnection(DB_URL);
-        Statement stmt = conn.createStatement()) {
-      stmt.execute(createTableSQL);
-    } catch (SQLException e) {
-      throw new RuntimeException("Error creating cache table: " + e.getMessage(), e);
-    }
-  }
-
-  /**
-   * Hashes the prompt using SHA-256 algorithm.
-   *
-   * @param prompt The prompt to hash.
-   * @return The hash of the prompt in hexadecimal format.
-   */
-  public String hashPrompt(String prompt) {
-    try {
-      MessageDigest digest = MessageDigest.getInstance("SHA-256");
-      byte[] hashBytes = digest.digest(prompt.getBytes(Charset.defaultCharset()));
-      StringBuilder hexString = new StringBuilder();
-      for (byte b : hashBytes) {
-        hexString.append(String.format("%02x", b));
+    this.cache = new HashMap<>();
+    this.dir = Paths.get("/home/nima/Desktop/logs/db_cache/" + config.benchmarkName);
+    File dir = this.dir.toFile();
+    Pattern pattern = Pattern.compile("^\\d+\\.txt$");
+    File[] files = dir.listFiles();
+    Preconditions.checkState(files != null);
+    for (File file : files) {
+      if (file.isFile()) {
+        Matcher matcher = pattern.matcher(file.getName());
+        if (matcher.matches()) {
+          int id = Integer.parseInt(matcher.group(1));
+          if (id > lastID) {
+            lastID = id;
+          }
+          String prompt = Utility.readFile(dir.toPath().resolve(file.getName()));
+          String response = Utility.readFile(dir.toPath().resolve(id + "_response.txt"));
+          cache.put(prompt, response);
+        }
       }
-      return hexString.toString(); // Return hash in hexadecimal format
-    } catch (NoSuchAlgorithmException e) {
-      throw new RuntimeException("Error hashing prompt: " + e.getMessage(), e);
     }
   }
 
@@ -103,28 +86,10 @@ public class ResponseCache {
    * @return A CachedData object containing the prompt and response, or null if not found.
    */
   public CachedData getCachedResponse(String prompt) {
-    String selectSQL = "SELECT prompt, response FROM cache WHERE hash = ?";
-
-    try (Connection conn = DriverManager.getConnection(DB_URL);
-        PreparedStatement stmt = conn.prepareStatement(selectSQL)) {
-      // Set the hash of the prompt as the search key
-      stmt.setString(1, hashPrompt(prompt));
-      // Execute the query
-      try (ResultSet rs = stmt.executeQuery()) {
-        if (rs.next()) {
-          // Retrieve the stored prompt and response from the result set
-          String storedPrompt = rs.getString("prompt");
-          String cachedResponse = rs.getString("response");
-          // Return both prompt and response as a CachedData object
-          return new CachedData(storedPrompt, cachedResponse);
-        } else {
-          // No cache found for the given prompt
-          return null;
-        }
-      }
-    } catch (SQLException e) {
-      throw new RuntimeException("Error retrieving cached response: " + e.getMessage(), e);
+    if (cache.containsKey(prompt)) {
+      return new CachedData(prompt, cache.get(prompt));
     }
+    return null;
   }
 
   /**
@@ -135,22 +100,14 @@ public class ResponseCache {
    * @param response The response to cache.
    */
   public void cacheResponse(String prompt, String response) {
-    // SQL statement for inserting a new prompt-response pair
-    String insertSQL = "INSERT OR FAIL INTO cache (hash, prompt, response) " + "VALUES (?, ?, ?)";
-    try (Connection conn = DriverManager.getConnection(DB_URL);
-        PreparedStatement stmt = conn.prepareStatement(insertSQL)) {
-      stmt.setString(1, hashPrompt(prompt));
-      stmt.setString(2, prompt);
-      stmt.setString(3, response);
-      stmt.executeUpdate();
-    } catch (SQLException e) {
-      // Check for SQLState related to unique constraint violation which occurs on hash collision
-      if ("23000".equals(e.getSQLState())) {
-        throw new RuntimeException(
-            "Hash collision detected: A prompt with the same hash already exists.", e);
-      } else {
-        throw new RuntimeException("Error caching response: " + e.getMessage(), e);
-      }
+    cache.put(prompt, response);
+    int id = ++lastID;
+    // write to file, I don't have in utility
+    try {
+      Files.write(dir.resolve(id + ".txt"), prompt.getBytes());
+      Files.write(dir.resolve(id + "_response.txt"), response.getBytes());
+    } catch (Exception e) {
+      throw new RuntimeException("Could not write to cache file.", e);
     }
   }
 }
