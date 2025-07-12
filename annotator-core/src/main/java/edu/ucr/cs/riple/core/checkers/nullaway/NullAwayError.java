@@ -228,7 +228,9 @@ public class NullAwayError extends Error {
   public boolean isFixableByRegionExample() {
     return messageType.equals("DEREFERENCE_NULLABLE")
         || messageType.equals("PASS_NULLABLE")
-        || messageType.equals("FIELD_NO_INIT");
+        || messageType.equals("FIELD_NO_INIT")
+        || messageType.equals("UNBOX_NULLABLE")
+        || messageType.equals("SWITCH_EXPRESSION_NULLABLE");
   }
 
   /**

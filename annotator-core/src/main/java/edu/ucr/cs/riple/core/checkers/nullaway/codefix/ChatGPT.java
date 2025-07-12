@@ -27,7 +27,6 @@ package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import edu.ucr.cs.riple.annotator.util.parsers.JsonParser;
-import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.Context;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
@@ -131,6 +130,7 @@ public class ChatGPT {
    * The {@link ASTParser} instance used to parse the source code of the file containing the error.
    */
   private final ASTParser parser;
+
   private final Context context;
 
   public ChatGPT(Context context, ASTParser parser) {

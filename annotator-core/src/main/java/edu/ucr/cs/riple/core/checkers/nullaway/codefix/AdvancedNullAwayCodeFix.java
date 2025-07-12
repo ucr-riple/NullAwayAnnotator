@@ -60,6 +60,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -88,11 +89,37 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
    */
   private static final Set<RegionRewrite> NO_ACTION = Set.of();
 
+  private final Set<LocationErrorPair> fixErrorByRegionsVisited = new HashSet<>();
+
   public AdvancedNullAwayCodeFix(Context context) {
     super(context);
     this.invocationRecordRegistry = new InvocationRecordRegistry(context.targetModuleInfo, parser);
     this.basicNullAwayCodeFix = new BasicNullAwayCodeFix(context);
     this.logger = LoggerFactory.getLogger(AdvancedNullAwayCodeFix.class);
+  }
+
+  private static class LocationErrorPair {
+    Location location;
+    NullAwayError error;
+
+    public LocationErrorPair(Location location, NullAwayError error) {
+      this.location = location;
+      this.error = error;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (!(o instanceof LocationErrorPair)) {
+        return false;
+      }
+      LocationErrorPair that = (LocationErrorPair) o;
+      return Objects.equals(location, that.location) && Objects.equals(error, that.error);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(location, error);
+    }
   }
 
   /**
@@ -127,6 +154,12 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
         return NO_ACTION;
         //        throw new IllegalStateException("Unknown error type: " + error.messageType);
     }
+  }
+
+  @Override
+  public void reset() {
+    super.reset();
+    this.fixErrorByRegionsVisited.clear();
   }
 
   private Set<RegionRewrite> resolveRemainingErrors(NullAwayError error) {
@@ -287,8 +320,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
         logger.trace("Field is not nullable. Removed annotation from field.");
         // add @SuppressWarnings to the field.
         context.injector.injectAnnotation(
-                new AddSingleElementAnnotation(
-                        onField, "SuppressWarnings", "NullAway.Init", false));
+            new AddSingleElementAnnotation(onField, "SuppressWarnings", "NullAway.Init", false));
       } else {
         // Make the field nullable if not already.
         context.injector.injectAnnotation(
@@ -328,13 +360,13 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
     }
     if (ASTParser.isObjectToStringMethod(error.getRegion().member)) {
       logger.trace("Fixing dereference error in toString method.");
-      Set<RegionRewrite> rws =  gpt.fixDereferenceErrorInToStringMethod(error);
+      Set<RegionRewrite> rws = gpt.fixDereferenceErrorInToStringMethod(error);
       apply(rws);
       return NO_ACTION;
     }
     if (ASTParser.isObjectHashCodeMethod(error.getRegion().member)) {
       logger.trace("Fixing dereference error in hashCode method.");
-      Set<RegionRewrite> rws =  gpt.fixDereferenceErrorInHashCodeMethod(error);
+      Set<RegionRewrite> rws = gpt.fixDereferenceErrorInHashCodeMethod(error);
       apply(rws);
       return NO_ACTION;
     }
@@ -563,6 +595,12 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
     if (!error.isFixableByRegionExample()) {
       return Set.of();
     }
+    LocationErrorPair pair = new LocationErrorPair(location, error);
+    if (fixErrorByRegionsVisited.contains(pair)) {
+      logger.trace("Already visited this error and location pair. Skipping to avoid cycles.");
+      return NO_ACTION;
+    }
+    fixErrorByRegionsVisited.add(pair);
     logger.trace("Fixing error by regions.");
     Set<Region> impactedRegions =
         context.targetModuleInfo.getRegionRegistry().getImpactedRegions(location);

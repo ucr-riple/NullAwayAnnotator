@@ -100,4 +100,8 @@ public abstract class NullAwayCodeFix {
     // Result of the iteration analysis.
     this.reports = evaluator.evaluate(fixes);
   }
+
+  public void reset() {
+    System.out.println("Resetting NullAwayCodeFix state.");
+  }
 }

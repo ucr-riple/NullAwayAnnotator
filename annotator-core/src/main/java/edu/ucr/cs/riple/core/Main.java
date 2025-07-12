@@ -112,12 +112,11 @@ public class Main {
 
   // PROJECT SPECIFIC CONFIGURATION
   // Ubuntu
-  public static final boolean DEBUG_MODE = false;
-  public static final String DEBUG_LINE =
-      "private InvokeCustomNode(MethodInfo mth, InvokeType invokeType, int argsCount) {";
+  public static final boolean DEBUG_MODE = true;
+  public static final String DEBUG_LINE = "private static Map<String, Long> execTimes;";
 
   public static void main(String[] args) {
-    // String[] args = new String[] {"jadx", "advanced"};
+    args = new String[] {"jadx", "advanced"};
     System.out.println("ANNOTATOR VERSION: " + VERSION + ", BUILD: " + BUILD_VERSION);
     System.out.println("Received arguments: " + String.join(", ", args));
     String benchmarkName = args[0];
@@ -142,7 +141,7 @@ public class Main {
       String.format("%s/annotator-out", PROJECT_PATH),
       "-bc",
       String.format(
-          "export JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64 && cd %s && ANDROID_HOME=/home/nima/Android/Sdk ./gradlew clean %s --rerun-tasks --no-build-cache",
+          "export JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64 && cd %s && ANDROID_HOME=/home/nima/Android/Sdk ./gradlew %s",
           PROJECT_PATH, benchmark.buildCommand),
       "-cp",
       String.format("%s/paths.tsv", PROJECT_PATH),

@@ -33,8 +33,6 @@ import edu.ucr.cs.riple.core.log.Log;
 import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.core.module.ModuleInfo;
 import edu.ucr.cs.riple.core.registries.index.Error;
-import edu.ucr.cs.riple.core.registries.region.Region;
-import edu.ucr.cs.riple.injector.SourceCode;
 import edu.ucr.cs.riple.injector.offsets.FileOffsetStore;
 import edu.ucr.cs.riple.injector.offsets.OffsetChange;
 import java.nio.file.Path;

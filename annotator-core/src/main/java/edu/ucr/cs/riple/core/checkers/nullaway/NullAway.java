@@ -411,6 +411,7 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                       logger.trace("CHATGPT.PROMPTS SIZE = {}", ChatGPT.askedPrompts.size());
                       ChatGPT.count.set(0);
                       ChatGPT.askedPrompts.clear();
+                      codeFix.reset();
                       logger.trace(
                           "Both set to {} and cleared {}",
                           ChatGPT.count,
