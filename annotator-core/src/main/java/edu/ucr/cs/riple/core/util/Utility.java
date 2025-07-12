@@ -44,6 +44,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -304,7 +305,7 @@ public class Utility {
    */
   public static String readFile(Path path) {
     try {
-      return Files.readString(path, Charset.defaultCharset());
+      return Files.readString(path, StandardCharsets.UTF_8);
     } catch (IOException e) {
       throw new RuntimeException("Exception while reading file: " + path, e);
     }

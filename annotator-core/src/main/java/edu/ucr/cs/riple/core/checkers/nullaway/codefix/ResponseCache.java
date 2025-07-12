@@ -28,7 +28,7 @@ import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.io.File;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -73,7 +73,7 @@ public class ResponseCache {
           if (id > lastID) {
             lastID = id;
           }
-          String prompt = Utility.readFile(dir.toPath().resolve(file.getName()));
+          String prompt = normalize(Utility.readFile(dir.toPath().resolve(file.getName())));
           String response = Utility.readFile(dir.toPath().resolve(id + "_response.txt"));
           cache.put(prompt, response);
         }
@@ -89,6 +89,7 @@ public class ResponseCache {
    * @return A CachedData object containing the prompt and response, or null if not found.
    */
   public CachedData getCachedResponse(String prompt) {
+    prompt = normalize(prompt);
     if (cache.containsKey(prompt)) {
       return new CachedData(prompt, cache.get(prompt));
     }
@@ -103,14 +104,19 @@ public class ResponseCache {
    * @param response The response to cache.
    */
   public void cacheResponse(String prompt, String response) {
+    prompt = normalize(prompt);
     cache.put(prompt, response);
     int id = ++lastID;
     // write to file, I don't have in utility
     try {
-      Files.write(dir.resolve(id + ".txt"), prompt.getBytes(Charset.defaultCharset()));
-      Files.write(dir.resolve(id + "_response.txt"), response.getBytes(Charset.defaultCharset()));
+      Files.write(dir.resolve(id + ".txt"), prompt.getBytes(StandardCharsets.UTF_8));
+      Files.write(dir.resolve(id + "_response.txt"), response.getBytes(StandardCharsets.UTF_8));
     } catch (Exception e) {
       throw new RuntimeException("Could not write to cache file.", e);
     }
+  }
+
+  private static String normalize(String prompt) {
+    return prompt.replace("\r\n", "\n").replaceAll("\\s+", " ").trim();
   }
 }

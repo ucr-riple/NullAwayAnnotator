@@ -473,7 +473,8 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                           if (after < before) {
                             logger.trace(
                                 "Patch reduced errors from {} to {}, committing.", before, after);
-                            System.out.printf("Patch reduced errors from %d to %d, committing.%n", before, after);
+                            System.out.printf(
+                                "Patch reduced errors from %d to %d, committing.%n", before, after);
                             git.stageAllChanges();
                             git.commitChanges("fix: " + error);
                           } else {

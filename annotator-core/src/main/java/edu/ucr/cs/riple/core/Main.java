@@ -191,6 +191,16 @@ public class Main {
     // Start annotator
     Annotator annotator = new Annotator(config);
     annotator.start();
+
+    // push
+    try (GitUtility git = GitUtility.instance(config)) {
+      System.out.printf("Pushing changes to branch %s...%n", config.branchName());
+      git.stageAllChanges();
+      git.commitChanges("Done");
+      git.pushBranch(config.branchName());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public static void deleteOutDir(Benchmark benchmark) {
