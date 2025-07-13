@@ -195,7 +195,7 @@ public class NullAwayError extends Error {
         return fieldMatcher.group(1);
       case "UNBOX_NULLABLE":
         // The message is of the form "unboxing @Nullable expression 'x' to primitive type"
-        Pattern unboxPattern = Pattern.compile("unboxing of a @Nullable value - (\\w+)");
+        Pattern unboxPattern = Pattern.compile("unboxing of a @Nullable value - (.+)");
         Matcher unboxMatcher = unboxPattern.matcher(message);
         if (!unboxMatcher.find()) {
           throw new IllegalStateException(
@@ -204,7 +204,7 @@ public class NullAwayError extends Error {
         return unboxMatcher.group(1);
       case "SWITCH_EXPRESSION_NULLABLE":
         // The message is of the form "switch expression s is @Nullable"
-        Pattern swtitchPattern = Pattern.compile("switch expression (\\w+) is @Nullable");
+        Pattern swtitchPattern = Pattern.compile("switch expression (.+) is @Nullable");
         Matcher swtitchMatcher = swtitchPattern.matcher(message);
         if (!swtitchMatcher.find()) {
           throw new IllegalStateException(

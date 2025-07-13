@@ -183,9 +183,9 @@ public class ChatGPT {
   public Response ask(String prompt) {
     logger.trace("Asking ChatGPT:\n{}", prompt);
     prompt = preprocessPrompt(prompt);
-    if (!askedPrompts.contains(prompt)) {
+    if (!askedPrompts.contains(ResponseCache.normalize(prompt))) {
       count.incrementAndGet();
-      askedPrompts.add(prompt);
+      askedPrompts.add(ResponseCache.normalize(prompt));
     }
     if (count.get() > 50) {
       throw new RuntimeException("Exceeded the limit of 50 requests to OpenAI");
@@ -194,25 +194,12 @@ public class ChatGPT {
     if (cachedResponse != null) {
       System.out.println("Retrieving response from cache");
       logger.trace("Retrieving response from cache");
-      String cachedPrompt = cachedResponse.prompt;
-      if (cachedPrompt.equals(prompt)) {
-        logger.trace("Cache hit for prompt");
-        Response.ParseResult response = Response.tryCreate(cachedResponse.response);
-        if (response.success) {
-          return response.response;
-        }
-        logger.trace(
-            "Cached response could not be parsed or validated, moving to send request to OpenAI");
-      } else {
-        logger.trace("Cache collision detected: Cached:\n{}\nPrompt:\n{}", cachedPrompt, prompt);
-        throw new RuntimeException("Cache collision detected");
-      }
-    } else {
-      logger.trace("Not found in cache...");
-      System.out.println("Not found in cache...");
+      Response.ParseResult response = Response.tryCreate(cachedResponse.response);
+      return response.response;
     }
+    logger.trace("Not found in cache...");
+    System.out.println("Not found in cache...");
     logger.trace("Sending request to OpenAI...");
-
     try (Writer writer =
         Files.newBufferedWriter(
             Main.PROMPTS_PATH.toFile().toPath(), Charset.defaultCharset(), CREATE, APPEND)) {

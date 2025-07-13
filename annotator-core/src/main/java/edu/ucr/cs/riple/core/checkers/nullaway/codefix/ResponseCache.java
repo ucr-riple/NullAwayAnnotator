@@ -24,7 +24,6 @@
 
 package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 
-import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.core.Config;
 import edu.ucr.cs.riple.core.util.Utility;
 import java.io.File;
@@ -59,11 +58,16 @@ public class ResponseCache {
 
   public ResponseCache(Config config) {
     this.cache = new HashMap<>();
-    this.dir = Paths.get("/home/nima/Desktop/logs/db_cache/" + config.benchmarkName);
+    this.dir =
+        Paths.get(
+            "/home/nima/Desktop/logs/db_cache/"
+                + (config.isTestMode ? "Test" : config.benchmarkName));
     File dir = this.dir.toFile();
     Pattern pattern = Pattern.compile("^(\\d+)\\.txt$");
     File[] files = dir.listFiles();
-    Preconditions.checkState(files != null);
+    if (files == null) {
+      files = new File[0];
+    }
     System.out.println("Loading cache from " + dir.getAbsolutePath());
     for (File file : files) {
       if (file.isFile()) {
@@ -116,7 +120,7 @@ public class ResponseCache {
     }
   }
 
-  private static String normalize(String prompt) {
+  public static String normalize(String prompt) {
     return prompt.replace("\r\n", "\n").replaceAll("\\s+", " ").trim();
   }
 }

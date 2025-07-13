@@ -115,10 +115,10 @@ public class Main {
   // PROJECT SPECIFIC CONFIGURATION
   // Ubuntu
   public static final boolean DEBUG_MODE = false;
-  public static final String DEBUG_LINE = "return elseRegion;";
+  public static final String DEBUG_LINE = "return createTime;";
 
   public static void main(String[] args) {
-    //        args = new String[] {"eureka", "advanced"};
+    //    args = new String[] {"conductor", "advanced"};
     System.out.println("ANNOTATOR VERSION: " + VERSION + ", BUILD: " + BUILD_VERSION);
     System.out.println("Received arguments: " + String.join(", ", args));
     String benchmarkName = args[0];

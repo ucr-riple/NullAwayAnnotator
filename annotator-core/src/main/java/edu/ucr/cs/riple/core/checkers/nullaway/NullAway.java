@@ -433,7 +433,6 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                                   context, context.targetModuleInfo, NullAwayError.class)
                               .size();
                       try {
-
                         changes = codeFix.fix(error);
                         System.out.println("Finished processing.");
                       } catch (Exception e) {
@@ -478,7 +477,13 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                             git.stageAllChanges();
                             git.commitChanges("fix: " + error);
                           } else {
-                            System.out.println("Patch did not reduce errors, resetting.");
+                            logger.trace(
+                                "Patch did not reduced errors was {}, now is: {}, resetting.",
+                                before,
+                                after);
+                            System.out.printf(
+                                "Patch did not reduced errors was %d, now is: %d, resetting.%n",
+                                before, after);
                             git.resetHard();
                           }
                         } catch (Exception ex) {
