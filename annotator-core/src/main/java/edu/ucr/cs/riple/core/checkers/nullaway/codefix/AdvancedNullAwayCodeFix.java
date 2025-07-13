@@ -479,10 +479,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
     MethodRecord record =
         context.targetModuleInfo.getMethodRegistry().findMethodByName(encClass, method);
     if (record == null) {
-      logger.trace("Method not found: " + encClass + "#" + method);
-      logger.trace("Asking simple model to fix dereference error.");
-
-      return basicNullAwayCodeFix.fix(error);
+      return resolveRemainingErrors(error);
     }
     OnMethod methodLocation = record.location;
     logger.trace("Trying to fix by regions using the method as an example.");

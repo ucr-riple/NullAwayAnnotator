@@ -456,9 +456,19 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                         return;
                       }
                       if (config.combined) {
-                        Utility.buildTarget(context);
                         int after;
                         try {
+                          context.targetModuleInfo.getModuleConfiguration().stream()
+                              .map(configuration -> configuration.dir.resolve("errors.json"))
+                              .forEach(
+                                  path -> {
+                                    try {
+                                      Files.deleteIfExists(path);
+                                    } catch (IOException e) {
+                                      throw new RuntimeException(e);
+                                    }
+                                  });
+                          Utility.buildTarget(context);
                           after =
                               Utility.readErrorsFromOutputDirectory(
                                       context, context.targetModuleInfo, NullAwayError.class)

@@ -24,14 +24,10 @@
 
 package edu.ucr.cs.riple.core.checkers.nullaway.codefix;
 
-import static java.nio.file.StandardOpenOption.APPEND;
-import static java.nio.file.StandardOpenOption.CREATE;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import edu.ucr.cs.riple.annotator.util.parsers.JsonParser;
 import edu.ucr.cs.riple.core.Context;
-import edu.ucr.cs.riple.core.Main;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAwayError;
 import edu.ucr.cs.riple.core.registries.method.invocation.InvocationRecord;
@@ -46,11 +42,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -197,19 +191,7 @@ public class ChatGPT {
       Response.ParseResult response = Response.tryCreate(cachedResponse.response);
       return response.response;
     }
-    logger.trace("Not found in cache...");
-    System.out.println("Not found in cache...");
     logger.trace("Sending request to OpenAI...");
-    try (Writer writer =
-        Files.newBufferedWriter(
-            Main.PROMPTS_PATH.toFile().toPath(), Charset.defaultCharset(), CREATE, APPEND)) {
-      writer.append("NEW PROMPT").append("-".repeat(20));
-      writer.write(prompt);
-      writer.append("\n").append("-".repeat(20)).append("\n");
-    } catch (IOException e) {
-      System.out.println("Could not write prompt to file: " + e.getMessage());
-    }
-
     String response = sendRequestToOpenAI(prompt);
     String current = response;
     for (int i = 0; i < RETRY_LIMIT; i++) {

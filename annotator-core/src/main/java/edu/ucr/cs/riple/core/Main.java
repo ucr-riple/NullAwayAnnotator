@@ -32,6 +32,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
+import edu.ucr.cs.riple.annotator.util.io.TSVFiles;
 import edu.ucr.cs.riple.core.util.GitUtility;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -115,7 +116,8 @@ public class Main {
   // PROJECT SPECIFIC CONFIGURATION
   // Ubuntu
   public static final boolean DEBUG_MODE = false;
-  public static final String DEBUG_LINE = "return createTime;";
+  public static final String DEBUG_LINE =
+      "String name = input.get(\"subWorkflowName\").toString();";
 
   public static void main(String[] args) {
     //    args = new String[] {"conductor", "advanced"};
@@ -197,7 +199,9 @@ public class Main {
       System.out.printf("Pushing changes to branch %s...%n", config.branchName());
       git.stageAllChanges();
       git.commitChanges("Done");
-      git.pushBranch(config.branchName());
+      git.pushChanges();
+      String commitHash = git.getLatestCommitHash();
+      TSVFiles.addRow(1 + "\t" + "combined" + "\t" + commitHash, config.commitHashPath);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

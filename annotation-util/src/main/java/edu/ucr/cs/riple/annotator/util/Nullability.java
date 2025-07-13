@@ -29,9 +29,6 @@ import org.jspecify.annotations.Nullable;
 public class Nullability {
 
   public static <T> T castToNonnull(@Nullable T param, String reason) {
-    if (param == null) {
-      throw new IllegalArgumentException("Expected non-null value for " + reason + " but got null");
-    }
     return param;
   }
 
