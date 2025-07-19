@@ -1,3 +1,0 @@
-kind	class	method	param	index	uri	reason	annotation	rootClass	rootMethod
-FIELD	com.example.Test	null	f2	null	/Users/nima/Developer/NullAwayAnnotator/sample/src/main/java/edu/ucr/cs/riple/annotator/sample/Test.java	ASSIGN_FIELD_NULLABLE	nullable	com.example.Test	f2
-FIELD	com.example.Test	null	f6	null	/Users/nima/Developer/NullAwayAnnotator/sample/src/main/java/edu/ucr/cs/riple/annotator/sample/Test.java	ASSIGN_FIELD_NULLABLE	nullable	com.example.Test	m4()

@@ -1,8 +1,0 @@
-REGION_CLASS	REGION_MEMBER	USED_MEMBER	USED_CLASS	SOURCE_TYPE
-com.example.Test	f6	Object()	java.lang.Object	SOURCE
-com.example.Test	m1()	toString()	java.lang.Object	SOURCE
-com.example.Test	m1()	toString()	java.lang.Object	SOURCE
-com.example.Test	m1()	toString()	java.lang.Object	SOURCE
-com.example.Test	m2()	hashCode()	java.lang.Object	SOURCE
-com.example.Test	m2()	hashCode()	java.lang.Object	SOURCE
-com.example.Test	m2()	hashCode()	java.lang.Object	SOURCE

@@ -1,5 +1,0 @@
-id	class	method	parent	flags	annotations	visibility	non-primitive-return	path
-1	com.example.Test	m1()	0	[]		package	true	/Users/nima/Developer/NullAwayAnnotator/sample/src/main/java/edu/ucr/cs/riple/annotator/sample/Test.java
-2	com.example.Test	m2()	0	[]		package	false	/Users/nima/Developer/NullAwayAnnotator/sample/src/main/java/edu/ucr/cs/riple/annotator/sample/Test.java
-3	com.example.Test	m3()	0	[]		package	true	/Users/nima/Developer/NullAwayAnnotator/sample/src/main/java/edu/ucr/cs/riple/annotator/sample/Test.java
-4	com.example.Test	m4()	0	[]		package	false	/Users/nima/Developer/NullAwayAnnotator/sample/src/main/java/edu/ucr/cs/riple/annotator/sample/Test.java
