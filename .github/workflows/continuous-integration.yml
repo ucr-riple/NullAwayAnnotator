@@ -57,6 +57,11 @@ jobs:
         with:
           name: Test report
           path: build/reports/tests/test
+      - name: Archive annotator-core.jar
+        uses: action/upload-artifact@v4
+        with:
+          name: annotator-core-jar
+          path: annotator-core/build/libs/annotator-core-*.jar
   parallel-processing-enabled-caching-disabled:
     runs-on: ubuntu-latest
     steps:
