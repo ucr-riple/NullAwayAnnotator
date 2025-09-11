@@ -214,6 +214,13 @@ To view descriptions of all flags, simply run the JAR with the `--help` option.
 
 - `Annotator` version `1.3.6` is compatible with `NullAway` version `0.10.10` and above.
 
+## Annotator with Auto Fix Capability
+
+To run the annotator with automatic fix support, use the flag -rrem ADVANCED.
+You must also set an API key in the environment variable OPENAI_KEY. The annotator will use this key to access the OpenAI API and generate fixes for reported errors.
+
+This feature additionally requires NullAway version `0.12.4-SNAPSHOT` from this [repp](https://github.com/nimakarimipour/NullAway.git) built at this commit: `d0c7d8390964ee5dc95d6bf93ae76b85913b2342`
+
 ## License
 
 `Annotator` is released under the MIT License. See the [LICENSE](LICENSE) file for more information.
