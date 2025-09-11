@@ -58,10 +58,7 @@ public class ResponseCache {
 
   public ResponseCache(Config config) {
     this.cache = new HashMap<>();
-    this.dir =
-        Paths.get(
-            "/home/nima/Desktop/logs/db_cache/"
-                + (config.isTestMode ? "Test" : config.benchmarkName));
+    this.dir = config.globalDir.resolve("response_cache");
     File dir = this.dir.toFile();
     Pattern pattern = Pattern.compile("^(\\d+)\\.txt$");
     File[] files = dir.listFiles();

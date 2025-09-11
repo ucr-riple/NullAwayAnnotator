@@ -43,7 +43,6 @@ import edu.ucr.cs.riple.core.registries.field.FieldInitializationStore;
 import edu.ucr.cs.riple.core.registries.index.Error;
 import edu.ucr.cs.riple.core.registries.index.Fix;
 import edu.ucr.cs.riple.core.registries.region.Region;
-import edu.ucr.cs.riple.core.util.GitUtility;
 import edu.ucr.cs.riple.core.util.Utility;
 import edu.ucr.cs.riple.injector.changes.AddAnnotation;
 import edu.ucr.cs.riple.injector.changes.AddMarkerAnnotation;
@@ -382,21 +381,11 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
             ? new AdvancedNullAwayCodeFix(context)
             : new BasicNullAwayCodeFix(context);
     Set<NullAwayError> remainingErrors = deserializeErrors(context.targetModuleInfo);
-    // initialize commit file:
-    if (config.actualRunEnabled()) {
-      TSVFiles.initialize(
-          config.commitHashPath, "ID" + "\t" + NullAwayError.header() + "\t" + "HASH");
-    }
 
     codeFix.collectImpacts();
     AtomicInteger counter = new AtomicInteger(0);
     // Collect regions with remaining errors.
     logger.trace("Resolving remaining errors: {} errors.", remainingErrors.size());
-    // related to log
-    AtomicLong previousLineNumber =
-        config.actualRunEnabled()
-            ? new AtomicLong(Utility.getLineCountOfFile(config.logPath))
-            : new AtomicLong(0);
     remainingErrors.stream()
         .collect(Collectors.groupingBy(NullAwayError::getRegion))
         .forEach(
@@ -416,13 +405,6 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                           "Both set to {} and cleared {}",
                           ChatGPT.count,
                           ChatGPT.askedPrompts.size());
-                      if (Main.DEBUG_MODE) {
-                        if (error.position.diagnosticLine.contains(Main.DEBUG_LINE)) {
-                          System.out.println("At index: " + counter.get());
-                        } else {
-                          return;
-                        }
-                      }
                       // cleanup
                       logger.trace("{} : TOP LEVEL CALL TO FIX ERROR: {}", counter.get(), error);
                       Set<RegionRewrite> changes;
@@ -437,7 +419,6 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                         System.out.println("Finished processing.");
                       } catch (Exception e) {
                         changes = Set.of();
-                        success = false;
                         System.err.println(
                             "Error while fixing-------: " + e.getMessage() + " \n " + e);
                         e.printStackTrace(System.out);
@@ -445,18 +426,9 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                             "--------Exception occurred in computing fix-------- | {}",
                             counter.get(),
                             e);
-                        try (GitUtility git = GitUtility.instance(config)) {
-                          git.resetHard();
-                        } catch (Exception ex) {
-                          System.err.println("Error while resetting: " + ex.getMessage());
-                        }
                       }
                       codeFix.apply(changes);
-                      if (!config.actualRunEnabled()) {
-                        return;
-                      }
-                      if (config.combined) {
-                        int after;
+
                         try {
                           context.targetModuleInfo.getModuleConfiguration().stream()
                               .map(configuration -> configuration.dir.resolve("errors.json"))
@@ -469,99 +441,12 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
                                     }
                                   });
                           Utility.buildTarget(context);
-                          after =
-                              Utility.readErrorsFromOutputDirectory(
-                                      context, context.targetModuleInfo, NullAwayError.class)
-                                  .size();
                         } catch (Exception e) {
                           System.out.println(
                               "Patch caused compilation error, setting after to max value.");
-                          after = Integer.MAX_VALUE;
                         }
-                        try (GitUtility git = GitUtility.instance(config)) {
-                          if (after < before) {
-                            logger.trace(
-                                "Patch reduced errors from {} to {}, committing.", before, after);
-                            System.out.printf(
-                                "Patch reduced errors from %d to %d, committing.%n", before, after);
-                            git.stageAllChanges();
-                            git.commitChanges("fix: " + error);
-                          } else {
-                            logger.trace(
-                                "Patch did not reduced errors was {}, now is: {}, resetting.",
-                                before,
-                                after);
-                            System.out.printf(
-                                "Patch did not reduced errors was %d, now is: %d, resetting.%n",
-                                before, after);
-                            git.resetHard();
-                          }
-                        } catch (Exception ex) {
-                          System.err.println("Error while resetting: " + ex.getMessage());
-                        }
-                        return;
-                      }
 
-                      if (success) {
-                        Utility.executeCommand(
-                            config,
-                            String.format(
-                                "cd %s && ./gradlew spotlessApply", config.benchmarkPath));
-                      }
-                      System.out.println("Writing log to file...");
-                      long currentLineNumber = Utility.getLineCountOfFile(config.logPath);
-                      String log =
-                          Utility.getLinesFromFile(
-                              config.logPath, previousLineNumber.get(), currentLineNumber);
-                      previousLineNumber.set(currentLineNumber);
-                      try {
-                        // write to repo
-                        Files.writeString(
-                            Paths.get(
-                                config.benchmarkPath + String.format("/log-%d.log", counter.get())),
-                            String.format("====================\n%s\nLog:\n%s\n", error, log),
-                            Charset.defaultCharset());
-                        // write to filesystem
-                        Files.writeString(
-                            config
-                                .logPath
-                                .getParent()
-                                .resolve(String.format("log-%d.log", counter.get())),
-                            String.format("====================\n%s\nLog:\n%s\n", error, log),
-                            Charset.defaultCharset());
-                      } catch (Exception e) {
-                        logger.trace("Error while writing log to file: ", e);
-                      }
-                      if (!success) {
-                        return;
-                      }
-                      try (GitUtility git = GitUtility.instance(config)) {
-                        if (git.hasChangesToCommit()) {
-                          System.out.println("Pushing changes to git...");
-                          git.stageAllChanges();
-                          git.commitChanges(
-                              String.format(
-                                  "fix: %d - %s - %s - %s",
-                                  counter.get(),
-                                  error.messageType,
-                                  error.position.diagnosticLine.trim(),
-                                  error.message));
-                          git.pushChanges();
-                          String commitHash = git.getLatestCommitHash();
-                          TSVFiles.addRow(
-                              counter.get() + "\t" + error.toTSV() + "\t" + commitHash,
-                              config.commitHashPath);
-                          git.revertLastCommit();
-                        }
-                      } catch (Exception ex) {
-                        System.err.println("Error while pushing changes: " + ex.getMessage());
-                      }
                     }));
-    long elapsed = System.currentTimeMillis() - timer;
-    if (config.actualRunEnabled()) {
-      TSVFiles.initialize(config.timerPath, "TIME_IN_MILLIS");
-      TSVFiles.addRow(String.valueOf(elapsed), config.timerPath);
-    }
   }
 
   @Override

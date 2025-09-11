@@ -77,9 +77,6 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
   /** Invocation record registry to retrieve the callers of a method. */
   private final InvocationRecordRegistry invocationRecordRegistry;
 
-  /** Basic nullaway code fix to handle unknown cases. */
-  private final BasicNullAwayCodeFix basicNullAwayCodeFix;
-
   /** The logger instance. */
   private final Logger logger;
 
@@ -94,7 +91,6 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
   public AdvancedNullAwayCodeFix(Context context) {
     super(context);
     this.invocationRecordRegistry = new InvocationRecordRegistry(context.targetModuleInfo, parser);
-    this.basicNullAwayCodeFix = new BasicNullAwayCodeFix(context);
     this.logger = LoggerFactory.getLogger(AdvancedNullAwayCodeFix.class);
   }
 
@@ -145,14 +141,9 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
         return resolveNullableReturnError(error);
       case "WRONG_OVERRIDE_RETURN":
         return resolveWrongOverrideReturnError(error);
-      case "SWITCH_EXPRESSION_NULLABLE":
-      case "PASS_NULLABLE":
-      case "UNBOX_NULLABLE":
-        return resolveRemainingErrors(error);
       default:
         logger.trace("Error type not recognized: {}", error.messageType);
         return NO_ACTION;
-        //        throw new IllegalStateException("Unknown error type: " + error.messageType);
     }
   }
 
@@ -160,13 +151,6 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
   public void reset() {
     super.reset();
     this.fixErrorByRegionsVisited.clear();
-  }
-
-  private Set<RegionRewrite> resolveRemainingErrors(NullAwayError error) {
-    logger.trace("Resolving remaining cast to nonnull");
-    Set<RegionRewrite> rws = gpt.fixDereferenceByRemainingCastToNonnull(error, context);
-    apply(rws);
-    return NO_ACTION;
   }
 
   /**
@@ -418,7 +402,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
       case "local_variable":
         JsonArray origins = error.getOrigins();
         if (origins.isEmpty()) {
-          return resolveRemainingErrors(error);
+          return NO_ACTION;
         }
         Set<RegionRewrite> ans = new HashSet<>();
         for (JsonElement origin : origins) {
@@ -479,7 +463,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
     MethodRecord record =
         context.targetModuleInfo.getMethodRegistry().findMethodByName(encClass, method);
     if (record == null) {
-      return resolveRemainingErrors(error);
+      return NO_ACTION;
     }
     OnMethod methodLocation = record.location;
     logger.trace("Trying to fix by regions using the method as an example.");
@@ -523,7 +507,7 @@ public class AdvancedNullAwayCodeFix extends NullAwayCodeFix {
           break;
         }
       } else {
-        return resolveRemainingErrors(error);
+        return NO_ACTION;
       }
     }
     return NO_ACTION;
