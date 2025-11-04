@@ -74,13 +74,14 @@ publishing {
         }
     }
 
-    mavenPublishing {
-        publishToMavenCentral(SonatypeHost.S01)
-    }
-
     repositories {
         mavenLocal()
     }
+}
+
+mavenPublishing {
+    publishToMavenCentral(SonatypeHost.S01)
+    signAllPublications()
 }
 
 jar {

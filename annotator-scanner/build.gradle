@@ -49,8 +49,7 @@ dependencies {
     testImplementation deps.test.errorProneTestHelpers
 }
 
-publishing {
-    mavenPublishing {
-        publishToMavenCentral(SonatypeHost.S01)
-    }
+mavenPublishing {
+    publishToMavenCentral(SonatypeHost.S01)
+    signAllPublications()
 }
