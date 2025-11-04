@@ -1,5 +1,11 @@
 ## CHANGELOG
 
+### Version 1.3.16
+- Updated the JavaParser dependency.
+- Fixed a bug related to annotation injection on array reference types and their component types.
+- Added support for inserting type-use annotations for JSpecify.
+- Added support for annotating the component type of local variable array declarations.
+
 ### Version 1.3.15
 - Improved logging for failure in the module configuration to run Annotator.
 - Updated javaparser dependency.
