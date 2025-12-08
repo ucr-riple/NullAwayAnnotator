@@ -1,15 +1,10 @@
-For the reason you mentioned earlier:
-
-"%s"
-
-in the method below, the expression %s is not nullable at the point it is used.
+In the method below, the expression %s is not nullable at the point it is used.
 
 ```java
 %s
 ```
-Please Summarize the reason in max 5 words and rewrite the method so that at the line "%s", at the occurrence of: "%s" is replaced with `Nullability.castToNonnull(%s, summary of reason)`
-Replace "REASON" with the exact reason summary I provide to you (maximum 5 words), not with a generic explanation like "checked to be nonnull".
-see the example below, for expression `foo.getBar()`, to wrap it with `Nullability.castToNonnull(foo.getBar(), "reason")`.
+Please rewrite the method so that at the line "%s", at the occurrence of: "%s" is replaced with `Nullability.castToNonnull(%s)`
+See the example below, for expression `foo.getBar()`, wrap it with `Nullability.castToNonnull(foo.getBar())`.
 
 ```java
 public t(){
@@ -20,7 +15,7 @@ public t(){
 will be:
 ```java
 public t(){
-    String l = Nullability.castToNonnull(foo.getBar(), "checked to be nonnull");
+    String l = Nullability.castToNonnull(foo.getBar());
 }
 ```
 

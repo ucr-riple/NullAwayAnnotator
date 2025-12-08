@@ -1,10 +1,10 @@
-in the method below, the expression %s is not nullable at the point it is used.
+In the method below, the expression %s is not nullable at the point it is used.
 
 ```java
 %s
 ```
-At the line "%s", at the occurrence of: "%s" should be replaced with `Nullability.castToNonnull(%s)`
-see the example below, for expression `foo.getBar()`, to wrap it with `Nullability.castToNonnull(foo.getBar())`.
+Please rewrite the method so that at the line "%s", at the occurrence of: "%s" is replaced with `Nullability.castToNonnull(%s)`
+See the example below, for expression `foo.getBar()`, wrap it with `Nullability.castToNonnull(foo.getBar())`.
 
 ```java
 public t(){

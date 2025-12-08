@@ -107,8 +107,6 @@ public class ChatGPT {
   /** The prompt to ask ChatGPT to check if the method is returning nullable on the call site. */
   private final String checkIfMethodReturnsNullableAtCallSitePrompt;
 
-  private final String remainingCastToNonnull;
-
   /** Simple prompt to ask ChatGPT to fix the error in place. */
   private final String basicFixRequestPrompt;
 
@@ -159,8 +157,6 @@ public class ChatGPT {
         Utility.readResourceContent("prompts/inquiry/is-returning-nullable.txt");
     this.checkIfMethodReturnsNullableAtCallSitePrompt =
         Utility.readResourceContent("prompts/inquiry/is-nullable-at-call-site.txt");
-    this.remainingCastToNonnull =
-        Utility.readResourceContent("prompts/dereference/remaining-fix-request.txt");
     this.basicFixRequestPrompt = Utility.readResourceContent("prompts/basic-fix-request.txt");
     this.parser = parser;
     this.responseCache = new ResponseCache(context.config);
@@ -501,7 +497,7 @@ public class ChatGPT {
     String enclosingMethod = parser.getRegionSourceCode(error.getRegion()).content;
     String prompt =
         String.format(
-            remainingCastToNonnull,
+            rewriteCastToNonnullPrompt,
             error.getNullableExpression(),
             enclosingMethod,
             error.position.diagnosticLine,
