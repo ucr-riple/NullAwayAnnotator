@@ -1,52 +1,56 @@
-In the method below, is there a possibility that the method returns null at the given call site?
+Determine if the method below can return null **at the specific call site provided**.
 
+**Method:**
 ```java
 %s
 ```
 
-## Guidelines:
-- The method may have multiple return paths; consider all return statements.
-- If the method calls another method, do not assume its return value unless its full declaration is provided. Request its declaration if needed.
-- The method may throw an exception instead of returning null. An exception path should not be considered a null return.
-- Ensure you request the declarations of any methods whose return values directly or indirectly impact this method’s return value before making a conclusion.
-- If the method returns a value that is determined by a parameter, evaluate based on the actual argument at the given call site.
-- Analyze based only on the specific invocation provided. Do not generalize to all possible inputs.- If the return value is guaranteed to be non-null at the call site, the answer should be a definitive NO.
-- Do not generalize based on all possible inputs—your answer must be based only on the given invocation.
-- Focus only on the given call site, not all possible invocations.
+### Analysis Guidelines:
+- **Analyze only this specific call site**, not all possible invocations of the method
+- Consider all return paths within the method
+- If the method calls other methods, do not assume their return values unless their full declarations are provided
+- Exception paths should not be considered null returns (exceptions are not null values)
+- If the method's return value depends on a parameter, evaluate based on the actual argument passed at this call site
+- Request declarations of any methods whose return values directly or indirectly impact this method's return value
 
 ### call site:
 %s
 
-Here are the method definitions and the call chain for this method, showing the sequence of calls from the method to its callers at each depth level:
+**Call chain and method definitions:**
+The following shows the call chain and relevant method definitions:
 
 %s
 
-Response Format:
-Provide the answer in **XML format** as follows:
+### Response Format:
 
-#### If the method **cannot** return `null` at the specific call site:
+**If the method CANNOT return null at this specific call site:**
 ```xml
 <response>
   <reason><![CDATA[EXPLAIN WHY THE INVOCATION %s RESULT CANNOT BE NULL.]]></reason>
   <value>NO</value>
 </response>
+```
 
-#### If the method can return null at the specific call site:
+**If the method CAN return null at this specific call site:**
+```xml
 <response>
   <reason><![CDATA[EXPLAIN WHY THE INVOCATION %s RESULT CAN BE NULL.]]></reason>
   <value>YES</value>
 </response>
+```
 
-#### If you are unsure or If there are any methods that directly or indirectly affect the return value and are not fully disclosed, request their declarations first, in the following format:
+**If you need declarations of other methods to make a determination:**
+```xml
 <response>
-  <reason><![CDATA[EXPLAIN WHY THIS METHOD DECLARATION IS NECESSARY AND WHY YOU CANNOT MAKE A CONFIDENT DECISION WITHOUT IT]]></reason>
+  <reason><![CDATA[Explain why you need these method declarations to make a confident decision]]></reason>
   <success>false</success>
   <methods>
     <method>methodName</method>
   </methods>
 </response>
+```
 
-Additional Notes:
-Be precise in your reasoning.
-If a method’s return value depends on another method not provided, request its declaration before making a conclusion.
-If the method can return null in this case but not in others, explain why it happens specifically for this call.
+### Important Notes:
+- Be precise and specific in your reasoning
+- If the method's return value depends on another method not provided, request its declaration
+- If the method can return null in some cases but not this one, explain why this specific invocation is different

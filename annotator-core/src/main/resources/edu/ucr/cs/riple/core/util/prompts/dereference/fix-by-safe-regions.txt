@@ -1,23 +1,39 @@
-I want to resolve a warning reported by NullAway.
-I am getting the error that in line: %s, the dereferenced expression %s is @Nullable and can produce Null Pointer Exception. In the method below:
+Resolve a NullAway warning by learning from safe usage patterns in the codebase.
+
+**Error:** At line %s, the dereferenced expression `%s` is @Nullable and can cause a NullPointerException.
+
+**Method with error:**
 %s
-I am going to show you a couple of other examples in my codebase where the dereferenced expression is used in a way that cannot produce Null Pointer Exception.
-Here are the examples(s):
+
+**Safe usage examples from the codebase:**
+The examples below show where the same dereferenced expression is used safely without causing NullPointerExceptions:
 %s
-Given the examples above, I want you to fix the error in the original method by using the same pattern as in the examples.
-If you can fix the error, please provide the fixed code snippet in XML format. I just need the XML response, no other information is needed. If you can provide the fixed code snippet, please provide it in the following format and place the code snippet in the <code> tag within ```java block.
-For example,
+
+### Task:
+Analyze the safe usage patterns in the examples above and apply the same pattern to fix the error in the original method. The examples demonstrate how the codebase typically handles this nullable expression safely.
+
+### Requirements:
+- Use the same null-handling pattern shown in the examples
+- Maintain consistency with the existing codebase style
+- Do not import any additional libraries or classes
+- Do not add Java comments
+- Only modify relevant lines as required
+- Return only the modified method
+
+### Response Format:
+
+**If you can apply the pattern from the examples:**
 <response>
   <success>true</success>
-  <code>
-  <![CDATA[
+  <code><![CDATA[
   ```java
-  Your fixed code snippet here, JUST THE METHOD.
+  Your fixed code snippet here
   ```
     ]]>
   </code>
 </response>
-Or if you cannot fix the error, please provide the reason in XML format.
+
+**If you cannot apply the pattern (e.g., examples don't provide a clear solution):**
 <response>
   <success>false</success>
 </response>

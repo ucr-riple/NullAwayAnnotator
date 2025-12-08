@@ -1,15 +1,25 @@
-I want to resolve a warning reported by NullAway.
-The error is of the type of "%s" and the full error message is: "%s".
-The line with the error is: "%s".
+Resolve a NullAway warning in the code below.
 
-The error is within "%s" and the code surrounding the error is:
+**Error Type:** %s
+**Full Error Message:** %s
+**Error Line:** %s
+
+**Location:** %s
+
+**Code Context:**
 ```java
 %s
 ```
 
-Give me the fixed code snippet (ONLY THE METHOD REWRITE OF "%s") in XML format in <response> tag like the example below. I will apply the fix to my codebase.
-Do not import any additional libraries or classes or java comments.
-If you can provide the fixed code snippet, provide it in the following format and place the code snippet in the <code> tag within ```java block.
+Provide the fixed code snippet for "%s" in XML format.
+
+### Requirements:
+- Do not import any additional libraries or classes
+- Do not add Java comments
+- Only modify relevant lines as required
+- Return only the modified method
+
+### Response Format:
 <response>
   <success>true</success>
   <code><![CDATA[

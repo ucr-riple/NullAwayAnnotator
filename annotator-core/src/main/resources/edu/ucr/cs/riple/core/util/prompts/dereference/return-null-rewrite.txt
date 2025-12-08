@@ -1,14 +1,23 @@
-Rewrite the method below:
+Rewrite the method below to handle the nullable dereference:
 
 ```java
 %s
 ```
 
-So that at the line "%s", if the dereferenced expression "%s" is null, the method returns null.
+At line "%s", the dereferenced expression "%s" is @Nullable.
 
-Rewrite the null check closest to dereference and add the @Nullable annotation on the method declaration. If you can provide a default value (such as Set.of() or any other value depending on the code) for the dereferenced expression or rewrite the code snippet to avoid the error.
+Apply the following fix strategy:
+1. Add a null check closest to the dereference point
+2. If null, return null from the method
+3. Add the @Nullable annotation to the method declaration to indicate it can now return null
 
-Just give me the fixed code snippet in XML format in <response> tag like the example below. I will apply the fix to my codebase. Do not import any additional libraries or classes or java comments. If you can provide the fixed code snippet, please provide it in the following format and place the code snippet in the <code> tag within ```java block.
+### Requirements:
+- Do not import any additional libraries or classes
+- Do not add Java comments
+- Only modify relevant lines as required
+- Return only the modified method
+
+### Response Format:
 <response>
   <success>true</success>
   <code><![CDATA[

@@ -1,7 +1,6 @@
-I want to resolve a warning reported by NullAway.
-I am going to show you a couple of examples of how this specific type of error is fixed and how I want them to get fixed in my codebase.
-The error is of the type of dereferencing a nullable value inside the object equals method.
-I think if the dereferenced value is null, the method should check if the other object is null and prevent crashing by replacing the dereferenced value with a call to Objects.equal.
+Resolve a NullAway warning for dereferencing a nullable value inside an equals method.
+
+When a field being compared is @Nullable, use Objects.equal() to safely handle null values instead of calling .equals() directly, which would crash if the field is null.
 
 See the example below:
 
@@ -22,6 +21,7 @@ public boolean equals(Object obj) {
   }
   return Objects.equal(this.f1, ((Foo) obj).f1);
 }
+```
 
 Here is the code snippet that I want to be fixed:
 
@@ -31,7 +31,15 @@ And the error I want to be fixed is:
 
 %s
 
-Just give me the fixed code snippet in XML format in <response> tag like the example below. I will apply the fix to my codebase. Do not import any additional libraries or classes or java comments. If you can provide the fixed code snippet, please provide it in the following format and place the code snippet in the <code> tag within ```java block.
+Provide the fixed code snippet in XML format using the <response> tag as shown below.
+
+### Requirements:
+- Do not import any additional libraries or classes
+- Do not add Java comments
+- Only modify relevant lines as required
+- Return only the modified method
+
+### Response Format:
 <response>
   <success>true</success>
   <code><![CDATA[

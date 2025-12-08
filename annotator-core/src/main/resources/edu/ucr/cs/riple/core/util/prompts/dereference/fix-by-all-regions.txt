@@ -1,33 +1,47 @@
-I want to resolve a warning reported by NullAway.
-I am getting the error that in line: %s, the dereferenced expression %s is @Nullable and can produce Null Pointer Exception. In the method below:
+Resolve a NullAway warning where a nullable expression is being dereferenced.
+
+**Error:** At line %s, the dereferenced expression `%s` is @Nullable and can cause a NullPointerException.
+
+**Method with error:**
 %s
+
+**Additional context:**
 %s
-Here are all the other places where the dereferenced expression is used:
+
+**Other places where the dereferenced expression is used:**
 %s
-Given the information above, I want you to fix the error by rewriting the code snippet in the method below. If you can provide a default value (such as Set.of() or any other value depending on the code) for the dereferenced expression or rewrite the code snippet to avoid the error.
-If you can fix the error, please provide the fixed code snippet in XML format. I just need the XML response, no other information is needed. If you can provide the fixed code snippet, please provide it in the following format and place the code snippet in the <code> tag within ```java block.
-For example,
+
+### Task:
+Fix the error by rewriting the method. Consider these approaches:
+- Provide a safe default value (e.g., Set.of(), empty collections, or appropriate defaults based on context)
+- Add null checks with appropriate fallback behavior
+- Restructure the code to avoid the dereference
+
+### Acceptance Criteria:
+- **DO NOT** simply add a null check that throws an exception (e.g., `if (expr == null) throw new IllegalArgumentException()`)
+- Provide a meaningful fix that handles the null case gracefully
+
+### Response Format:
+
+**If you can provide a meaningful fix:**
 <response>
   <success>true</success>
   <code><![CDATA[
   ```java
-  Your fixed code snippet here, JUST THE METHOD.
+  Your fixed code snippet here
   ```
     ]]>
   </code>
 </response>
-Or if you cannot fix the error. please provide the output in XML format as below.
+
+**If you cannot provide a meaningful fix (e.g., only solution is throwing an exception):**
 <response>
   <success>false</success>
 </response>
-If your answer is simply to do a null check and throw an exception, such as below:
 
+**Note:** If your fix is simply adding a null check like this, respond with `<success>false</success>`:
 ```java
 if(%s == null) {
   throw new IllegalArgumentException("The %s is null");
 }
 ```
-Still response with no success.
-<response>
-  <success>false</success>
-</response>

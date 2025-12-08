@@ -1,24 +1,33 @@
-In the method below, is there a possibility that the expression "%s" at line "%s" is null?
+Determine if the expression "%s" at line "%s" can possibly be null in the method below.
+
+**Method:**
 %s
-Give a single-word answer in XML format. If it is possible for the expression to be null, respond with:
+
+### Analysis Requirements:
+- Examine all code paths leading to the expression
+- Consider variable assignments, method return values, and control flow
+- Look for null checks, initializations, and guarantees from prior operations
+- Consider the semantics and contracts of called methods
+
+### Response Format:
+
+**If the expression CAN be null:**
 ```xml
 <response>
     <reason><![CDATA[YOUR REASON]]></reason>
     <value>YES</value>
 </response>
 ```
-If it is not possible for the expression to be null, respond with:
+
+**If the expression CANNOT be null:**
 ```xml
 <response>
     <reason><![CDATA[YOUR REASON]]></reason>
     <value>NO</value>
 </response>
 ```
-If you are unsure or need more information, respond with where you can ask for more details or what specific information you need.
 
-If additional information is required, list each request inside a `<request>` tag. If no additional information is needed, omit the `<requests>` section.
-
-Respond with:
+**If you need more information to make a determination:**
 ```xml
 <response>
     <reason><![CDATA[YOUR REASON]]></reason>
