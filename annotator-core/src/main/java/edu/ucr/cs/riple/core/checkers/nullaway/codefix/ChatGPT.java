@@ -389,6 +389,7 @@ public class ChatGPT {
             expression,
             method,
             regionData,
+            constructPromptForRegions(errorRegions),
             );
     logger.trace("Asking if the error can be fixed by using all regions");
     Response response = ask(prompt);

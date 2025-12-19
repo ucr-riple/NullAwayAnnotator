@@ -5,6 +5,9 @@ Resolve a NullAway warning where a nullable expression is being dereferenced.
 **Method with error:**
 %s
 
+**Places where the dereferenced expression is used safeley:**
+%s
+
 **Other places where the dereferenced expression is used:**
 %s
 
