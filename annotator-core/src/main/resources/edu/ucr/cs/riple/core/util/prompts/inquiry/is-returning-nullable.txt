@@ -1,60 +1,63 @@
-Determine if the method below can return null by analyzing its implementation.
+In the method below, is there a possibility that the method returns null based only on its body? Consider the following points:
 
-**Method to analyze:**
+- The method may have multiple return paths; consider all return statements.
+- If the method calls another method, do not assume its return value unless its full declaration is provided. Request its declaration if needed.
+- The method may throw an exception instead of returning null. An exception path should not be considered a null return.
+- Ensure you request the declarations of any methods whose return values directly or indirectly impact this method’s return value before making a conclusion.
+- Carefully analyze all conditions and prior operations that may guarantee a non-null return value.
+
 %s
 
-### Analysis Guidelines:
-- Examine all return paths and return statements
-- If the method calls other methods, do not assume their return values unless declarations are provided
-- Exception paths should not be considered null returns (exceptions are not null values)
-- Carefully analyze conditions and operations that may guarantee a non-null return value
-- Request declarations of any methods whose return values directly or indirectly impact this method's return value
+Here are the method definitions in addition to the method inquired:
 
-**Additional method definitions provided:**
 %s
 
-### Response Format:
+Response Format:
+Provide the answer in **XML format** as follows:
 
-**If the method CANNOT return null:**
+#### If the method **cannot** return `null`:
 ```xml
 <response>
-  <reason><![CDATA[Explain why the method cannot return null]]></reason>
+  <reason><![CDATA[EXPLAIN WHY THE METHOD CANNOT RETURN NULL]]></reason>
   <value>NO</value>
 </response>
 ```
 
-**If the method CAN return null:**
+#### If the method can return null:
 ```xml
 <response>
-  <reason><![CDATA[Explain why the method can return null and under what conditions]]></reason>
+  <reason><![CDATA[EXPLAIN WHY THE METHOD CAN RETURN NULL]]></reason>
   <value>YES</value>
 </response>
 ```
 
-**If you need declarations of other methods to make a determination:**
-```xml
+#### If you are unsure or need more information, respond with where you can ask for more details or what specific information you need.
+
+#### If you are unsure or If there are any methods that directly or indirectly affect the return value and are not fully disclosed, request their declarations first, in the following format:
 <response>
-  <reason><![CDATA[Explain why you need these method declarations to make a confident decision]]></reason>
+  <reason><![CDATA[YOUR REASON]]></reason>
   <value>UNKNOWN</value>
   <methods>
     <method>methodName</method>
   </methods>
 </response>
-```
 
-**If you need additional information beyond method declarations:**
+If additional information is required other than method declaration, list each request inside a `<request>` tag. If no additional information is needed, omit the `<requests>` section.
+
+Respond with:
 ```xml
 <response>
-    <reason><![CDATA[Explain what additional information you need]]></reason>
+    <reason><![CDATA[YOUR REASON]]></reason>
     <value>UNKNOWN</value>
+    <!-- Include <requests> only if additional information is needed -->
     <requests>
-        <request><![CDATA[Specific request 1]]></request>
-        <request><![CDATA[Specific request 2]]></request>
+        <request><![CDATA[YOUR REQUEST 1]]></request>
+        <request><![CDATA[YOUR REQUEST 2]]></request>
     </requests>
 </response>
 ```
 
-### Important Notes:
-- Be precise and specific in your reasoning
-- If a method's return value depends on another method not provided, request its declaration
-- If the method can return null in some cases but not others, explain the specific conditions
+Additional Notes:
+Be precise in your reasoning.
+If a method’s return value depends on another method not provided, request its declaration before making a conclusion.
+If the method can return null in some cases but not others, explain under what conditions it can happen.

@@ -390,8 +390,7 @@ public class ChatGPT {
             method,
             regionData,
             constructPromptForRegions(errorRegions),
-            expression,
-            expression);
+            );
     logger.trace("Asking if the error can be fixed by using all regions");
     Response response = ask(prompt);
     logger.trace("response: " + response);
@@ -462,10 +461,10 @@ public class ChatGPT {
     String prompt =
         String.format(
             rewriteCastToNonnullPrompt,
-            reason,
             error.getNullableExpression(),
             enclosingMethod,
             error.position.diagnosticLine,
+            error.getNullableExpression(),
             error.getNullableExpression(),
             error.getNullableExpression());
     Response response = ask(prompt);
@@ -501,6 +500,7 @@ public class ChatGPT {
             error.getNullableExpression(),
             enclosingMethod,
             error.position.diagnosticLine,
+            error.getNullableExpression(),
             error.getNullableExpression(),
             error.getNullableExpression());
     Response response = ask(prompt);
@@ -621,7 +621,7 @@ public class ChatGPT {
       prompt =
           String.format(
               checkIfExpressionCanBeNullAtErrorPointPrompt,
-              error.position.diagnosticLine.trim(),
+              error.getNullableExpression(),
               error.position.diagnosticLine.trim(),
               regionMember);
     }
@@ -668,8 +668,8 @@ public class ChatGPT {
         String.format(
             checkIfParamIsNullablePrompt,
             param,
-            callContext,
-            parser.getRegionSourceCode(new Region(encClass, method)));
+            parser.getRegionSourceCode(new Region(encClass, method)).content,
+            callContext);
     return ask(prompt);
   }
 

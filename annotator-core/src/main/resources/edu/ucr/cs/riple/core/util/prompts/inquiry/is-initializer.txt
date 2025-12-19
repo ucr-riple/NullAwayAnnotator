@@ -1,49 +1,38 @@
-Determine if the given method is an initializer method according to NullAway's definition.
+I want to check if the given method is an initializer method.
+Initializer methods are assumed by NullAway to always be called before any other method of the class that is not a constructor or called from a constructor.
+This means a non-null field is considered to be properly initialized if it's set by such an initializer method.
+By design, NullAway doesn't check for such initialization, since an important use case of initializer methods is documenting methods used by annotation processors or external frameworks as part of object setup (e.g. {@code android.app.Activity.onCreate} or {@code javax.annotation.processing.Processor.init})
 
-### What is an Initializer Method?
-Initializer methods are assumed by NullAway to always be called before any other method of the class (except constructors). NullAway trusts that non-null fields set by initializer methods are properly initialized and doesn't verify the initialization.
+Here are some examples of initializer methods:
+- {@code android.app.Activity.onCreate}
+- {@code javax.annotation.processing.Processor.init}
+- {@code javax.servlet.http.HttpServlet.init}
+- {@code javax.servlet.Filter.init}
+- {@code javax.servlet.Servlet.init}
 
-### Common Patterns:
-Initializer methods typically include:
-- Framework lifecycle methods (e.g., `android.app.Activity.onCreate`, `javax.servlet.http.HttpServlet.init`)
-- Methods called by annotation processors or dependency injection frameworks
-- Setup methods invoked by external frameworks as part of object initialization
+or any method that has a name that starts with "init" or "initialize" and is not a setter method.
 
-### Examples of Initializer Methods:
-- `android.app.Activity.onCreate`
-- `javax.annotation.processing.Processor.init`
-- `javax.servlet.http.HttpServlet.init`
-- `javax.servlet.Filter.init`
-- `javax.servlet.Servlet.init`
-
-### Important Distinction:
-**Setter methods are NOT initializer methods**, even if they initialize fields. Setters are meant to be called multiple times to update state, while initializers are expected to be called once during object setup.
-
-### Method to Analyze:
+Is the given method an initializer method? I know it initializes the fields of the class, but I do not want to consider a setter method as an initializer method.
 %s
-
-### Question:
-Is this method an initializer method as defined above?
-
-### Response Format:
-
-**If it IS an initializer method:**
+Please provide a single-word answer and your reason/explanation in XML format. If it is an initializer method, respond with:
 ```xml
 <response>
     <reason><![CDATA[YOUR REASON]]></reason>
     <value>YES</value>
 </response>
 ```
-
-**If it is NOT an initializer method:**
+If it is not an initializer method, respond with:
 ```xml
 <response>
     <reason><![CDATA[YOUR REASON]]></reason>
     <value>NO</value>
 </response>
 ```
+If you are unsure or need more information, respond with where you can ask for more details or what specific information you need.
 
-**If you need more information to make a determination:**
+If additional information is required, list each request inside a `<request>` tag. If no additional information is needed, omit the `<requests>` section.
+
+Respond with:
 ```xml
 <response>
     <reason><![CDATA[YOUR REASON]]></reason>

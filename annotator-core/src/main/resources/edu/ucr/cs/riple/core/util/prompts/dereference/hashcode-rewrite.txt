@@ -48,12 +48,16 @@ Provide the fixed code snippet in XML format using the <response> tag as shown b
 - Only modify relevant lines as required
 - Return only the modified method
 
+Please only provide the fixed code snippet in XML format above. I just need the XML response, no other information is needed. If you can provide the fixed code snippet, please provide it in the following format and place the code snippet in the <code> tag within ```java block. Your response should only be the xml format below, no additional text.
+
 ### Response Format:
+
+**Provide a meaningful fix:**
 <response>
   <success>true</success>
   <code><![CDATA[
   ```java
-  Your fixed code snippet here
+  Your fixed code snippet here, JUST THE METHOD.
   ```
     ]]>
   </code>

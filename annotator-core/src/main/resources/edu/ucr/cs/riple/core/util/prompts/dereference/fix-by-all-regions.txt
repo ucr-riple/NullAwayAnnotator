@@ -5,43 +5,24 @@ Resolve a NullAway warning where a nullable expression is being dereferenced.
 **Method with error:**
 %s
 
-**Additional context:**
-%s
-
 **Other places where the dereferenced expression is used:**
 %s
 
 ### Task:
-Fix the error by rewriting the method. Consider these approaches:
-- Provide a safe default value (e.g., Set.of(), empty collections, or appropriate defaults based on context)
-- Add null checks with appropriate fallback behavior
-- Restructure the code to avoid the dereference
+Fix the error by rewriting the method. 
+Do not add any import
 
-### Acceptance Criteria:
-- **DO NOT** simply add a null check that throws an exception (e.g., `if (expr == null) throw new IllegalArgumentException()`)
-- Provide a meaningful fix that handles the null case gracefully
+Please only provide the fixed code snippet in XML format above. I just need the XML response, no other information is needed. If you can provide the fixed code snippet, please provide it in the following format and place the code snippet in the <code> tag within ```java block. Your response should only be the xml format below, no additional text.
 
 ### Response Format:
 
-**If you can provide a meaningful fix:**
+**Provide a meaningful fix:**
 <response>
   <success>true</success>
   <code><![CDATA[
   ```java
-  Your fixed code snippet here
+  Your fixed code snippet here, JUST THE METHOD.
   ```
     ]]>
   </code>
 </response>
-
-**If you cannot provide a meaningful fix (e.g., only solution is throwing an exception):**
-<response>
-  <success>false</success>
-</response>
-
-**Note:** If your fix is simply adding a null check like this, respond with `<success>false</success>`:
-```java
-if(%s == null) {
-  throw new IllegalArgumentException("The %s is null");
-}
-```
