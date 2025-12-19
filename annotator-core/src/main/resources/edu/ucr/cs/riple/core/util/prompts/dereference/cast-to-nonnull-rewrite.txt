@@ -3,18 +3,38 @@ In the method below, the expression %s is not nullable at the point it is used.
 ```java
 %s
 ```
-Please rewrite the method so that at the line "%s", at the occurrence of: "%s" is replaced with `Nullability.castToNonnull(%s)`
-See the example below, for expression `foo.getBar()`, wrap it with `Nullability.castToNonnull(foo.getBar())`.
+Please rewrite the method so that at the line "%s", at the occurrence of: "%s" is replaced with `Nullability.castToNonnull(%s)`.
 
+**Important**: If the expression "%s" is a local variable, wrap the cast at its declaration point (on the right-hand side of the assignment), NOT at the use point. For all other expressions, wrap the cast at the use point.
+
+See the examples below:
+
+**Example 1: Local variable** - If `bar` is a local variable, wrap at declaration:
 ```java
-public t(){
+public void test(){
+    String bar = foo.getBar();
+    System.out.println(bar);  // bar is used here
+}
+```
+
+will be:
+```java
+public void test(){
+    String bar = Nullability.castToNonnull(foo.getBar());
+    System.out.println(bar);  // cast applied at declaration
+}
+```
+
+**Example 2: Non-local expression** - For method calls or field access, wrap at use:
+```java
+public void test(){
     String l = foo.getBar();
 }
 ```
 
 will be:
 ```java
-public t(){
+public void test(){
     String l = Nullability.castToNonnull(foo.getBar());
 }
 ```
