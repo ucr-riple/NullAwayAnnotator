@@ -132,8 +132,46 @@ public class ASTUtils {
     String flatNameExcludingPackageName =
         packageName.isEmpty() ? flatName : flatName.substring(packageName.length() + 1);
     List<String> keys = new ArrayList<>(Arrays.asList(flatNameExcludingPackageName.split("\\$")));
-    Node cursor = findTopLevelClassDeclarationOnCompilationUnit(cu, keys.get(0));
-    keys.remove(0);
+    keys.removeIf(String::isEmpty); // Remove all empty strings from split result
+
+    // Try to find top-level class by testing progressively longer combinations
+    // This handles cases where class names contain $ characters (e.g., $Gson$Types)
+    Node cursor = null;
+    int classNamePartsCount = 0;
+
+    for (int i = 1; i <= keys.size(); i++) {
+      StringBuilder potentialClassName = new StringBuilder();
+      for (int j = 0; j < i; j++) {
+        if (j > 0) {
+          potentialClassName.append("$");
+        }
+        potentialClassName.append(keys.get(j));
+      }
+      try {
+        // Check if this is the top-level class
+        // If original name started with $, prepend it to the reconstructed name
+        String testName =
+            flatNameExcludingPackageName.startsWith("$")
+                ? "$" + potentialClassName.toString()
+                : potentialClassName.toString();
+        cursor = findTopLevelClassDeclarationOnCompilationUnit(cu, testName);
+        classNamePartsCount = i;
+        break;
+      } catch (TargetClassNotFound e) {
+        // Not found, try next combination
+      }
+    }
+
+    if (cursor == null) {
+      throw new TargetClassNotFound("Top-Level", flatNameExcludingPackageName, cu);
+    }
+
+    // Remove the top-level class parts from keys
+    for (int i = 0; i < classNamePartsCount; i++) {
+      keys.remove(0);
+    }
+
+    // Process remaining keys as inner classes
     for (String key : keys) {
       String indexString = extractIntegerFromBeginningOfStringInString(key);
       String actualName = key.substring(indexString.length());

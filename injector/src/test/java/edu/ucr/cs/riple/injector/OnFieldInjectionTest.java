@@ -142,4 +142,23 @@ public class OnFieldInjectionTest extends BaseInjectorTest {
                 "javax.annotation.Nullable"))
         .start();
   }
+
+  @Test
+  public void fieldInClassWithDollarSignInName() {
+    injectorTestHelper
+        .addInputSourceFile(
+            "com/google/gson/internal/$Gson$Types.java",
+            "com/google/gson/internal/$Gson$Types.java")
+        .expectOutputFile("expected/com/google/gson/internal/$Gson$Types.java")
+        .addChanges(
+            new AddMarkerAnnotation(
+                new OnField(
+                    "com/google/gson/internal/$Gson$Types.java",
+                    "com.google.gson.internal.$Gson$Types$ParameterizedTypeImpl",
+                    Collections.singleton("ownerType")),
+                "javax.annotation.Nullable"))
+        .start();
+  }
 }
+
+

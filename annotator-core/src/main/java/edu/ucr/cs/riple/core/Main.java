@@ -115,12 +115,12 @@ public class Main {
 
   // PROJECT SPECIFIC CONFIGURATION
   // Ubuntu
-  public static final boolean DEBUG_MODE = false;
+  public static final boolean DEBUG_MODE = true;
   public static final String DEBUG_LINE =
-      "String name = input.get(\"subWorkflowName\").toString();";
+      "this.ownerType = ownerType == null ? null : canonicalize(ownerType);";
 
   public static void main(String[] args) {
-    //    args = new String[] {"conductor", "advanced"};
+//    args = new String[] {"gson", "advanced"};
     System.out.println("ANNOTATOR VERSION: " + VERSION + ", BUILD: " + BUILD_VERSION);
     System.out.println("Received arguments: " + String.join(", ", args));
     String benchmarkName = args[0];
@@ -140,14 +140,17 @@ public class Main {
     if (benchmark == null) {
       throw new IllegalArgumentException("Unknown benchmark: " + benchmarkName);
     }
-    String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/" + benchmark.path;
+    if(verbose){
+      System.out.println("Running in verbose mode");
+    }
+    String PROJECT_PATH = "/Users/nima/Developer/" + benchmark.path;
     deleteOutDir(benchmark);
     String[] argsArray = {
       "-d",
       String.format("%s/annotator-out", PROJECT_PATH),
       "-bc",
       String.format(
-          "export JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64 && cd %s && ANDROID_HOME=/home/nima/Android/Sdk ./gradlew %s",
+          "cd %s && ./gradlew %s",
           PROJECT_PATH, benchmark.buildCommand),
       "-cp",
       String.format("%s/paths.tsv", PROJECT_PATH),
@@ -177,19 +180,21 @@ public class Main {
     System.out.println("Running on branch name: " + config.branchName());
     System.out.println("Starting annotator...");
     // reset git repo
-    try (GitUtility git = GitUtility.instance(config)) {
-      git.resetHard();
-      git.safePull();
-      git.checkoutBranch("nimak/auto-code-fix");
-      git.resetHard();
-      git.pull();
-      git.deleteLocalBranch(config.branchName());
-      git.deleteRemoteBranch(config.branchName());
-      git.createAndCheckoutBranch(config.branchName());
-      git.pushBranch(config.branchName());
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+//    try (GitUtility git = GitUtility.instance(config)) {
+//      System.out.println("Performing git operations...");
+//      git.resetHard();
+//      git.safePull();
+//      git.checkoutBranch("nimak/auto-code-fix");
+//      git.resetHard();
+//      git.pull();
+//      git.deleteLocalBranch(config.branchName());
+//      git.deleteRemoteBranch(config.branchName());
+//      git.createAndCheckoutBranch(config.branchName());
+//      git.pushBranch(config.branchName());
+//    } catch (Exception e) {
+//      System.out.println("Error during annotator: " + e.getMessage());
+//      throw new RuntimeException(e);
+//    }
     // Start annotator
     Annotator annotator = new Annotator(config);
     annotator.start();
@@ -208,7 +213,7 @@ public class Main {
   }
 
   public static void deleteOutDir(Benchmark benchmark) {
-    String PROJECT_PATH = "/home/nima/Developer/nullness-benchmarks/" + benchmark.path;
+    String PROJECT_PATH = "/Users/nima/Developer/" + benchmark.path;
     // delete dir
     Path outDir = Paths.get(PROJECT_PATH + "/annotator-out/0");
     if (outDir.toFile().exists()) {
