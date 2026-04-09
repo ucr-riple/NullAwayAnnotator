@@ -378,7 +378,7 @@ public class Config {
             "ll",
             "language-level",
             true,
-            "Java language level to use when parsing code. Supported values are 11 and 17.  Defaults to 17.");
+            "Java language level to use when parsing code. Supported values are 11, 17 and 21.  Defaults to 17.");
     languageLevelOption.setRequired(false);
     options.addOption(languageLevelOption);
 
@@ -502,6 +502,8 @@ public class Config {
         return ParserConfiguration.LanguageLevel.JAVA_11;
       case "17":
         return ParserConfiguration.LanguageLevel.JAVA_17;
+      case "21":
+        return ParserConfiguration.LanguageLevel.JAVA_21;
       default:
         throw new IllegalArgumentException("Unsupported language level: " + languageLevelString);
     }

@@ -182,6 +182,7 @@ Here are some useful __optional__ arguments that can alter the default configura
 |--------------------------------------------------------|-------------|
 | `-n,--nullable <arg>`                                  | Sets custom `@Nullable` annotation. |
 | `-rboserr, --redirect-build-output-stderr`             | Redirects build outputs to `STD Err`. |
+| `-ll, --language-level <arg>`                          | Parser language level. Supported values: `11`, `17`, `21`. Defaults to `17`. Required when the target project uses Java 21 syntax (e.g. record patterns, switch patterns). |
 
 
 To learn more about all the __optional__ arguments, please refer to [OPTIONS.md](./OPTIONS.md)

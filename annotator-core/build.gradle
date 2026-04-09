@@ -96,9 +96,11 @@ shadowJar {
 // Exclude tests not supported by Java 11.
 if (JavaVersion.current().isJava11()) {
     // exclude Java17Test which is designed to test Java 17 features.
+    // exclude Java21Test which is designed to test Java 21 features.
     test {
         filter {
             excludeTestsMatching "edu.ucr.cs.riple.core.Java17Test"
+            excludeTestsMatching "edu.ucr.cs.riple.core.Java21Test"
             // temporarily exclude LombokTest until we find a solution for the issue.
             excludeTestsMatching "edu.ucr.cs.riple.core.LombokTest"
         }
