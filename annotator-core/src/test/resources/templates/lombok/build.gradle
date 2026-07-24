@@ -49,8 +49,8 @@ subprojects {
             annotationProcessor files(libraryloader)
         }
         // Add lombok
-        compileOnly 'org.projectlombok:lombok:1.18.24'
-        annotationProcessor 'org.projectlombok:lombok:1.18.24'
+        compileOnly 'org.projectlombok:lombok:1.18.30'
+        annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
         annotationProcessor "com.uber.nullaway:nullaway:" + System.getenv('NULLAWAY_TEST_VERSION')
         annotationProcessor "edu.ucr.cs.riple.annotator:annotator-scanner:" + System.getenv('ANNOTATOR_VERSION')
@@ -59,7 +59,7 @@ subprojects {
         compileOnly 'com.uber.nullaway:nullaway-annotations:0.10.10'
         compileOnly "org.jspecify:jspecify:0.3.0"
         compileOnly "com.google.code.findbugs:jsr305:3.0.2"
-        errorprone "com.google.errorprone:error_prone_core:2.31.0"
+        errorprone "com.google.errorprone:error_prone_core:2.36.0"
         errorproneJavac "com.google.errorprone:javac:9+181-r4173-1"
     }
 
@@ -81,5 +81,7 @@ subprojects {
         }
         options.compilerArgs << "-Xmaxerrs" << "100000"
         options.compilerArgs << "-Xmaxwarns" << "100000"
+        // NullAway JSpecify mode requires this flag on JDK < 22 (we build/test on JDK 21).
+        options.compilerArgs << "-XDaddTypeAnnotationsToSymbol=true"
     }
 }

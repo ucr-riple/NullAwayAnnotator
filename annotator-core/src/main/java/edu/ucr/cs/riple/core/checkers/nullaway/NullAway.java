@@ -46,6 +46,7 @@ import edu.ucr.cs.riple.injector.location.OnField;
 import edu.ucr.cs.riple.injector.location.OnParameter;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,6 +55,16 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /** Represents <a href="https://github.com/uber/NullAway">NullAway</a> checker in Annotator. */
 public class NullAway extends CheckerBaseClass<NullAwayError> {
@@ -63,8 +74,15 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
    */
   public static final String NAME = "NULLAWAY";
 
-  /** Supported version of NullAway serialization. */
-  public static final int VERSION = 3;
+  /** Latest supported version of NullAway serialization. */
+  public static final int VERSION = 4;
+
+  /**
+   * All NullAway serialization versions this Annotator can consume. Version 3 serializes errors as
+   * TSV ({@code errors.tsv}); version 4 (introduced in uber/NullAway#1322) switches to XML ({@code
+   * errors.xml}) to carry structured auto-fix metadata.
+   */
+  private static final ImmutableSet<Integer> SUPPORTED_VERSIONS = ImmutableSet.of(3, 4);
 
   public NullAway(Context context) {
     super(context);
@@ -72,27 +90,137 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
 
   @Override
   public Set<NullAwayError> deserializeErrors(ModuleInfo module) {
-    ImmutableSet<Path> paths =
-        module.getModuleConfiguration().stream()
-            .map(configuration -> configuration.dir.resolve("errors.tsv"))
-            .collect(ImmutableSet.toImmutableSet());
     Set<NullAwayError> errors = new HashSet<>();
-    paths.forEach(
-        path -> {
-          try {
-            try (BufferedReader br = Files.newBufferedReader(path, Charset.defaultCharset())) {
-              String line;
-              // Skip header.
-              br.readLine();
-              while ((line = br.readLine()) != null) {
-                errors.add(deserializeErrorFromTSVLine(module, line));
+    module
+        .getModuleConfiguration()
+        .forEach(
+            configuration -> {
+              // Version 4+ serializes errors as XML; earlier versions use TSV. Dispatch on which
+              // output file NullAway produced.
+              Path xmlPath = configuration.dir.resolve("errors.xml");
+              if (Files.exists(xmlPath)) {
+                errors.addAll(deserializeErrorsFromXML(module, xmlPath));
+              } else {
+                errors.addAll(
+                    deserializeErrorsFromTSV(module, configuration.dir.resolve("errors.tsv")));
               }
-            }
-          } catch (IOException e) {
-            throw new RuntimeException("Exception happened in reading errors at: " + path, e);
-          }
-        });
+            });
     return errors;
+  }
+
+  /**
+   * Deserializes errors from a NullAway v3 {@code errors.tsv} file.
+   *
+   * @param module Module info.
+   * @param path Path to the {@code errors.tsv} file.
+   * @return Set of deserialized errors.
+   */
+  private Set<NullAwayError> deserializeErrorsFromTSV(ModuleInfo module, Path path) {
+    Set<NullAwayError> errors = new HashSet<>();
+    try (BufferedReader br = Files.newBufferedReader(path, Charset.defaultCharset())) {
+      String line;
+      // Skip header.
+      br.readLine();
+      while ((line = br.readLine()) != null) {
+        errors.add(deserializeErrorFromTSVLine(module, line));
+      }
+    } catch (IOException e) {
+      throw new RuntimeException("Exception happened in reading errors at: " + path, e);
+    }
+    return errors;
+  }
+
+  /**
+   * Deserializes errors from a NullAway v4 {@code errors.xml} file. The file is a stream of
+   * standalone {@code <error>} fragments with no enclosing root element, so it is wrapped in a
+   * synthetic root before parsing.
+   *
+   * @param module Module info.
+   * @param path Path to the {@code errors.xml} file.
+   * @return Set of deserialized errors.
+   */
+  private Set<NullAwayError> deserializeErrorsFromXML(ModuleInfo module, Path path) {
+    Set<NullAwayError> errors = new HashSet<>();
+    String content;
+    try {
+      content = Files.readString(path, Charset.defaultCharset());
+    } catch (IOException e) {
+      throw new RuntimeException("Exception happened in reading errors at: " + path, e);
+    }
+    if (content.isBlank()) {
+      return errors;
+    }
+    try {
+      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+      DocumentBuilder builder = factory.newDocumentBuilder();
+      Document document =
+          builder.parse(new InputSource(new StringReader("<errors>" + content + "</errors>")));
+      NodeList errorNodes = document.getDocumentElement().getElementsByTagName("error");
+      for (int i = 0; i < errorNodes.getLength(); i++) {
+        errors.add(deserializeErrorFromXMLElement(module, (Element) errorNodes.item(i)));
+      }
+    } catch (ParserConfigurationException | SAXException | IOException e) {
+      throw new RuntimeException("Exception happened in parsing errors XML at: " + path, e);
+    }
+    return errors;
+  }
+
+  /**
+   * Deserializes an error from a NullAway v4 {@code <error>} XML element.
+   *
+   * @param moduleInfo Module info.
+   * @param error The {@code <error>} element.
+   * @return the deserialized error corresponding to the given XML element.
+   */
+  private NullAwayError deserializeErrorFromXMLElement(ModuleInfo moduleInfo, Element error) {
+    String errorType = getDirectChildText(error, "message_type");
+    String errorMessage = getDirectChildText(error, "message");
+    Region region =
+        new Region(getDirectChildText(error, "enc_class"), getDirectChildText(error, "enc_member"));
+    int offset = Integer.parseInt(getDirectChildText(error, "offset"));
+    Path path = Printer.deserializePath(getDirectChildText(error, "path"));
+    Location nonnullTarget = null;
+    Element nonnullTargetElement = getDirectChild(error, "nonnull_target");
+    if (nonnullTargetElement != null) {
+      String[] locationValues =
+          new String[] {
+            getDirectChildText(nonnullTargetElement, "target_kind"),
+            getDirectChildText(nonnullTargetElement, "target_class"),
+            getDirectChildText(nonnullTargetElement, "target_method"),
+            getDirectChildText(nonnullTargetElement, "target_param"),
+            getDirectChildText(nonnullTargetElement, "target_index"),
+            getDirectChildText(nonnullTargetElement, "target_path"),
+          };
+      nonnullTarget = Location.createLocationFromArrayInfo(locationValues);
+    }
+    return createErrorFromParsedValues(
+        moduleInfo, errorType, errorMessage, region, offset, path, nonnullTarget);
+  }
+
+  /**
+   * Returns the first direct child element of {@code parent} with the given tag name, or {@code
+   * null} if none exists.
+   */
+  private static @Nullable Element getDirectChild(Element parent, String tag) {
+    NodeList children = parent.getChildNodes();
+    for (int i = 0; i < children.getLength(); i++) {
+      Node node = children.item(i);
+      if (node.getNodeType() == Node.ELEMENT_NODE && node.getNodeName().equals(tag)) {
+        return (Element) node;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Returns the text content of the first direct child element of {@code parent} with the given tag
+   * name, or the literal string {@code "null"} if none exists (matching the placeholder used in the
+   * TSV format).
+   */
+  private static String getDirectChildText(Element parent, String tag) {
+    Element child = getDirectChild(parent, tag);
+    return child == null ? "null" : child.getTextContent();
   }
 
   /**
@@ -103,13 +231,12 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
    * @return the deserialized error corresponding to the values in the given tsv line.
    */
   private NullAwayError deserializeErrorFromTSVLine(ModuleInfo moduleInfo, String line) {
-    Context context = moduleInfo.getContext();
     String[] values = line.split("\t");
     Preconditions.checkArgument(
         values.length == 12,
         String.format(
-            "Expected 12 values to create Error instance in NullAway serialization version %s but found: %s",
-            NullAway.VERSION, values.length));
+            "Expected 12 values to create Error instance in NullAway serialization version 3 but found: %s",
+            values.length));
     int offset = Integer.parseInt(values[4]);
     Path path = Printer.deserializePath(values[5]);
     String errorMessage = values[1];
@@ -117,6 +244,33 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     Region region = new Region(values[2], values[3]);
     Location nonnullTarget =
         Location.createLocationFromArrayInfo(Arrays.copyOfRange(values, 6, 12));
+    return createErrorFromParsedValues(
+        moduleInfo, errorType, errorMessage, region, offset, path, nonnullTarget);
+  }
+
+  /**
+   * Builds a {@link NullAwayError} from the fields common to all serialization versions. Shared by
+   * the TSV (v3) and XML (v4) deserialization paths.
+   *
+   * @param moduleInfo Module info.
+   * @param errorType Error type reported by NullAway.
+   * @param errorMessage Error message reported by NullAway.
+   * @param region Region where the error is reported.
+   * @param offset Offset of the program point where the error is reported.
+   * @param path Path to the containing source file.
+   * @param nonnullTarget Location of the {@code @Nonnull} target of a pseudo-assignment, or {@code
+   *     null} if not applicable.
+   * @return the deserialized error.
+   */
+  private NullAwayError createErrorFromParsedValues(
+      ModuleInfo moduleInfo,
+      String errorType,
+      String errorMessage,
+      Region region,
+      int offset,
+      Path path,
+      @Nullable Location nonnullTarget) {
+    Context context = moduleInfo.getContext();
     if (nonnullTarget == null && errorType.equals(NullAwayError.METHOD_INITIALIZER_ERROR)) {
       Set<AddAnnotation> annotationsOnField =
           computeAddAnnotationInstancesForUninitializedFields(
@@ -189,6 +343,9 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
             // extremely dependent on the format of NullAway error messages. Should be watched
             // carefully and updated if the format is changed by NullAway (maybe regex?).
             .map(s -> s.substring(0, s.indexOf("(")).trim())
+            // Since v4, NullAway wraps field names in single quotes (e.g. 'foo' (line z)); strip
+            // them to recover the bare field name.
+            .map(s -> s.replace("'", ""))
             .collect(Collectors.toSet());
     if (fields.size() == 0) {
       throw new RuntimeException(
@@ -438,9 +595,9 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
       int version =
           Integer.parseInt(Files.readString(pathToSerializationVersion, Charset.defaultCharset()));
       Preconditions.checkArgument(
-          version == VERSION,
-          "This Annotator version only supports NullAway serialization version "
-              + VERSION
+          SUPPORTED_VERSIONS.contains(version),
+          "This Annotator version only supports NullAway serialization versions "
+              + SUPPORTED_VERSIONS
               + ", but found: "
               + version
               + ", Please update Annotator or NullAway accordingly.");
