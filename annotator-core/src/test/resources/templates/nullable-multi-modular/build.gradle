@@ -57,7 +57,7 @@ subprojects {
         compileOnly 'org.jetbrains:annotations:24.0.0'
         compileOnly "org.jspecify:jspecify:0.3.0"
         compileOnly "com.google.code.findbugs:jsr305:3.0.2"
-        errorprone "com.google.errorprone:error_prone_core:2.31.0"
+        errorprone "com.google.errorprone:error_prone_core:2.36.0"
         errorproneJavac "com.google.errorprone:javac:9+181-r4173-1"
     }
 
@@ -79,5 +79,7 @@ subprojects {
         }
         options.compilerArgs << "-Xmaxerrs" << "100000"
         options.compilerArgs << "-Xmaxwarns" << "100000"
+        // NullAway JSpecify mode requires this flag on JDK < 22 (we build/test on JDK 21).
+        options.compilerArgs << "-XDaddTypeAnnotationsToSymbol=true"
     }
 }
