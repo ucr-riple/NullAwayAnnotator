@@ -30,10 +30,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.utils.Pair;
 import com.google.common.collect.ImmutableSet;
 import edu.ucr.cs.riple.core.checkers.nullaway.FixSerializationConfig;
 import edu.ucr.cs.riple.core.checkers.nullaway.NullAway;
+import edu.ucr.cs.riple.core.module.ModuleConfiguration;
 import edu.ucr.cs.riple.scanner.ScannerConfigWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -274,6 +276,58 @@ public class ConfigurationTest {
           assertTrue(config.suppressRemainingErrors);
           assertEquals(config.nullUnMarkedAnnotation, "edu.ucr.example.NullUnmarked");
         });
+  }
+
+  @Test
+  public void testLanguageLevelFlag() {
+    runTestWithMockedBuild(
+        testDir,
+        () -> {
+          // Defaults to Java 17 when the flag is not present.
+          assertEquals(
+              ParserConfiguration.LanguageLevel.JAVA_17,
+              makeConfigWithFlags(requiredFlagsCli).languageLevel);
+
+          Map<String, ParserConfiguration.LanguageLevel> levels =
+              Map.of(
+                  "11", ParserConfiguration.LanguageLevel.JAVA_11,
+                  "21", ParserConfiguration.LanguageLevel.JAVA_21,
+                  "25", ParserConfiguration.LanguageLevel.JAVA_25,
+                  "17_PREVIEW", ParserConfiguration.LanguageLevel.JAVA_17_PREVIEW);
+          levels.forEach(
+              (flagValue, expectedLevel) -> {
+                List<CLIFlag> flags = new ArrayList<>(requiredFlagsCli);
+                flags.add(new CLIFlagWithValue("ll", flagValue));
+                assertEquals(expectedLevel, makeConfigWithFlags(flags).languageLevel);
+              });
+
+          List<CLIFlag> unknownLevelFlags = new ArrayList<>(requiredFlagsCli);
+          unknownLevelFlags.add(new CLIFlagWithValue("ll", "1000"));
+          IllegalArgumentException ex =
+              assertThrows(
+                  IllegalArgumentException.class, () -> makeConfigWithFlags(unknownLevelFlags));
+          assertTrue(ex.getMessage().contains("Unsupported language level: 1000"));
+        });
+  }
+
+  @Test
+  public void testLanguageLevelSurvivesSerialization() {
+    Path configPath = testDir.resolve("config.json");
+    Config.Builder builder = new Config.Builder();
+    builder.buildCommand = "./gradlew compileJava";
+    builder.initializerAnnotation = "edu.ucr.Initializer";
+    builder.nullableAnnotation = "javax.annotation.Nullable";
+    builder.outputDir = testDir.toString();
+    builder.checker = NullAway.NAME;
+    builder.configPaths =
+        List.of(
+            new ModuleConfiguration(
+                0, testDir, testDir.resolve("nullaway.xml"), testDir.resolve("scanner.xml")));
+    for (ParserConfiguration.LanguageLevel level : ParserConfiguration.LanguageLevel.values()) {
+      builder.languageLevel = level;
+      builder.write(configPath);
+      assertEquals(level, new Config(configPath).languageLevel);
+    }
   }
 
   /**

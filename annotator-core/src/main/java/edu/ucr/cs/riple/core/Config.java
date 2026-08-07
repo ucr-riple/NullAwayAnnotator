@@ -179,6 +179,12 @@ public class Config {
   public final ParserConfiguration.LanguageLevel languageLevel;
 
   /**
+   * Prefix shared by every {@link ParserConfiguration.LanguageLevel} constant, stripped from the
+   * serialized form and prepended back when reading it.
+   */
+  private static final String LANGUAGE_LEVEL_PREFIX = "JAVA_";
+
+  /**
    * Builds context from command line arguments.
    *
    * @param args arguments.
@@ -498,14 +504,24 @@ public class Config {
    * @param languageLevelString string representation of the language level.
    * @return the language level.
    */
-  private ParserConfiguration.LanguageLevel getLanguageLevel(String languageLevelString) {
+  private static ParserConfiguration.LanguageLevel getLanguageLevel(String languageLevelString) {
     return Enums.getIfPresent(
-            ParserConfiguration.LanguageLevel.class, "JAVA_" + languageLevelString)
+            ParserConfiguration.LanguageLevel.class, LANGUAGE_LEVEL_PREFIX + languageLevelString)
         .toJavaUtil()
         .orElseThrow(
             () ->
-                new IllegalArgumentException(
-                    "Unsupported language level: " + languageLevelString));
+                new IllegalArgumentException("Unsupported language level: " + languageLevelString));
+  }
+
+  /**
+   * Gets the string representation of the language level, the inverse of {@link
+   * #getLanguageLevel(String)}.
+   *
+   * @param languageLevel the language level.
+   * @return string representation of the language level.
+   */
+  private static String getLanguageLevelString(ParserConfiguration.LanguageLevel languageLevel) {
+    return languageLevel.name().substring(LANGUAGE_LEVEL_PREFIX.length());
   }
 
   /**
@@ -692,7 +708,7 @@ public class Config {
       json.addProperty("REDIRECT_BUILD_OUTPUT_TO_STDERR", redirectBuildOutputToStdErr);
       json.addProperty("SUPPRESS_REMAINING_ERRORS", suppressRemainingErrors);
       json.addProperty("INFERENCE_ACTIVATION", inferenceActivated);
-      json.addProperty("LANGUAGE_LEVEL", languageLevel.name().split("_")[1]);
+      json.addProperty("LANGUAGE_LEVEL", getLanguageLevelString(languageLevel));
       JsonArray configPathsJson = new JsonArray();
       configPaths.forEach(
           info -> {
