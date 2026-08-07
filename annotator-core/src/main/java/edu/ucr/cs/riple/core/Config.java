@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core;
 
 import com.github.javaparser.ParserConfiguration;
+import com.google.common.base.Enums;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -378,7 +379,7 @@ public class Config {
             "ll",
             "language-level",
             true,
-            "Java language level to use when parsing code. Supported values are 11, 17 and 21.  Defaults to 17.");
+            "Java language level to use when parsing code. Accepts any release supported by the bundled parser, e.g. 11, 17, 21, 25. Defaults to 17.");
     languageLevelOption.setRequired(false);
     options.addOption(languageLevelOption);
 
@@ -491,22 +492,20 @@ public class Config {
   }
 
   /**
-   * Gets the language level from the string representation. "11" for Java 11 and "17" for Java 17.
+   * Gets the language level from the string representation, e.g. "17" for Java 17. Accepts every
+   * release the bundled parser knows, so a target project on a current JDK can be read as-is.
    *
    * @param languageLevelString string representation of the language level.
    * @return the language level.
    */
   private ParserConfiguration.LanguageLevel getLanguageLevel(String languageLevelString) {
-    switch (languageLevelString) {
-      case "11":
-        return ParserConfiguration.LanguageLevel.JAVA_11;
-      case "17":
-        return ParserConfiguration.LanguageLevel.JAVA_17;
-      case "21":
-        return ParserConfiguration.LanguageLevel.JAVA_21;
-      default:
-        throw new IllegalArgumentException("Unsupported language level: " + languageLevelString);
-    }
+    return Enums.getIfPresent(
+            ParserConfiguration.LanguageLevel.class, "JAVA_" + languageLevelString)
+        .toJavaUtil()
+        .orElseThrow(
+            () ->
+                new IllegalArgumentException(
+                    "Unsupported language level: " + languageLevelString));
   }
 
   /**
