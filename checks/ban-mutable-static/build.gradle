@@ -23,7 +23,7 @@
  */
 
 plugins {
-    id "net.ltgt.errorprone" version "2.0.1" apply false
+    id "net.ltgt.errorprone" version "5.1.0" apply false
 }
 
 dependencies {
