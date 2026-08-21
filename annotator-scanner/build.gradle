@@ -22,8 +22,6 @@
  * THE SOFTWARE.
  */
 
-import com.vanniktech.maven.publish.SonatypeHost
-
 buildscript {
     repositories {
         mavenCentral()
@@ -36,7 +34,7 @@ buildscript {
 }
 
 plugins {
-    id "net.ltgt.errorprone" version "2.0.1" apply false
+    id "net.ltgt.errorprone" version "5.1.0" apply false
     id 'maven-publish'
     id "com.vanniktech.maven.publish"
 }
@@ -50,5 +48,5 @@ dependencies {
 }
 
 mavenPublishing {
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    publishToMavenCentral()
 }

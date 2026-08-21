@@ -22,10 +22,8 @@
  * THE SOFTWARE.
  */
 
-import com.vanniktech.maven.publish.SonatypeHost
-
 plugins {
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'com.gradleup.shadow' version '9.6.1'
     id 'maven-publish'
     id 'application'
     id "com.vanniktech.maven.publish"
@@ -69,8 +67,8 @@ tasks.test.doFirst {
 
 publishing {
     publications {
-        shadow(MavenPublication) { publication ->
-            project.shadow.component(publication)
+        shadow(MavenPublication) {
+            from components.shadow
         }
     }
 
@@ -80,7 +78,7 @@ publishing {
 }
 
 mavenPublishing {
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    publishToMavenCentral()
 }
 
 jar {
@@ -93,16 +91,18 @@ shadowJar {
     archiveClassifier = null
 }
 
-// Exclude tests not supported by Java 11.
-if (JavaVersion.current().isJava11()) {
-    // exclude Java17Test which is designed to test Java 17 features.
-    // exclude Java21Test which is designed to test Java 21 features.
+// Java21Test builds a target project with Java 21 language features.
+if (!JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_21)) {
     test {
         filter {
-            excludeTestsMatching "edu.ucr.cs.riple.core.Java17Test"
             excludeTestsMatching "edu.ucr.cs.riple.core.Java21Test"
-            // temporarily exclude LombokTest until we find a solution for the issue.
-            excludeTestsMatching "edu.ucr.cs.riple.core.LombokTest"
         }
+    }
+}
+
+// temporarily exclude LombokTest until we find a solution for the issue.
+test {
+    filter {
+        excludeTestsMatching "edu.ucr.cs.riple.core.LombokTest"
     }
 }

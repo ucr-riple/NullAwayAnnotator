@@ -22,9 +22,9 @@
 import net.ltgt.gradle.errorprone.CheckSeverity
 
 plugins{
-    id "net.ltgt.errorprone" version "2.0.1" apply false
-    id "com.vanniktech.maven.publish" version "0.28.0" apply false
-    id("com.diffplug.gradle.spotless") version "6.25.0" apply false
+    id "net.ltgt.errorprone" version "5.1.0" apply false
+    id "com.vanniktech.maven.publish" version "0.37.0" apply false
+    id("com.diffplug.spotless") version "8.10.0" apply false
 }
 
 allprojects {
@@ -35,6 +35,20 @@ allprojects {
         systemProperties = [
                 'junit.jupiter.execution.parallel.enabled': 'true',
                 'junit.jupiter.execution.parallel.mode.default': 'concurrent'
+        ]
+        // Tests that drive javac through Error Prone need access to its internals, which
+        // are encapsulated since JDK 16.
+        jvmArgs += [
+                "--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
+                "--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
+                "--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED",
+                "--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED",
+                "--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
+                "--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED",
+                "--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+                "--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
+                "--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
+                "--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED"
         ]
     }
 }
@@ -49,7 +63,6 @@ subprojects { proj ->
 
     proj.dependencies {
         errorprone deps.build.errorProneCore
-        errorproneJavac deps.build.errorProneJavac
         if(proj.name != "ban-mutable-static"){
             annotationProcessor project(":checks:ban-mutable-static")
         }
@@ -77,8 +90,10 @@ subprojects { proj ->
         google()
     }
 
-    sourceCompatibility = 1.11
-    targetCompatibility = 1.11
+    java {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
 
     spotless {
         java {
