@@ -185,10 +185,11 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
     Set<String> fields =
         Arrays.stream(fieldsData)
             // NullAway serializes line number right after a field name starting with an open
-            // parentheses. (e.g. foo (line z)). This approach of extracting field names is
-            // extremely dependent on the format of NullAway error messages. Should be watched
-            // carefully and updated if the format is changed by NullAway (maybe regex?).
-            .map(s -> s.substring(0, s.indexOf("(")).trim())
+            // parentheses. (e.g. foo (line z)). Since 0.13.8 the name itself is quoted
+            // (e.g. 'foo' (line z)). This approach of extracting field names is extremely
+            // dependent on the format of NullAway error messages. Should be watched carefully
+            // and updated if the format is changed by NullAway (maybe regex?).
+            .map(s -> unquote(s.substring(0, s.indexOf("(")).trim()))
             .collect(Collectors.toSet());
     if (fields.size() == 0) {
       throw new RuntimeException(
@@ -198,6 +199,19 @@ public class NullAway extends CheckerBaseClass<NullAwayError> {
               + errorMessage);
     }
     return fields;
+  }
+
+  /**
+   * Removes the enclosing single quotes NullAway puts around syntax element references in its error
+   * messages, leaving an unquoted name untouched.
+   *
+   * @param name Name as it appears in the error message.
+   * @return Name without the enclosing quotes.
+   */
+  private static String unquote(String name) {
+    return name.length() > 1 && name.charAt(0) == '\'' && name.charAt(name.length() - 1) == '\''
+        ? name.substring(1, name.length() - 1)
+        : name;
   }
 
   /**

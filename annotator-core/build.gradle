@@ -54,14 +54,12 @@ spotless {
     }
 }
 
-// Should be the latest supporting version of NullAway.
-def NULLAWAY_TEST = "0.12.4"
-
 tasks.test.dependsOn(':annotator-scanner:publishToMavenLocal')
 
 // Set up environment variables for test configuration tu run with the latest development version.
 tasks.test.doFirst {
-    environment "NULLAWAY_TEST_VERSION", NULLAWAY_TEST
+    environment "NULLAWAY_TEST_VERSION", deps.versions.nullaway
+    environment "ERROR_PRONE_TEST_VERSION", deps.versions.errorProne
     environment "ANNOTATOR_VERSION", project.version
 }
 
