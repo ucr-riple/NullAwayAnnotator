@@ -23,7 +23,7 @@
  */
 
 // The oldest version of Error Prone that we support running on
-def oldestErrorProneApi = "2.4.0"
+def oldestErrorProneApi = "2.36.0"
 // Latest Error Prone that still runs on the JDK 17 floor, also used by the test target projects.
 // 2.45.0 and later ship class file 65 and need JDK 21 to load.
 def latestErrorProneVersion = "2.42.0"
