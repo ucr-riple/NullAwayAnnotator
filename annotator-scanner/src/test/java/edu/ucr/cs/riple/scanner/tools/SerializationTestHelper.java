@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.scanner.tools;
 
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.common.base.Preconditions;
@@ -39,7 +40,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.openjdk.tools.javac.util.Assert;
 
 public class SerializationTestHelper<T extends Display> {
 
@@ -168,7 +168,7 @@ public class SerializationTestHelper<T extends Display> {
     String fullExpectedMessage = "Caused by: " + exception.getName() + ": " + expectedErrorMessage;
     prepareTest();
     AssertionError ex = assertThrows(AssertionError.class, () -> compilationTestHelper.doTest());
-    Assert.check(ex.getMessage().contains(fullExpectedMessage));
+    assertTrue(ex.getMessage().contains(fullExpectedMessage));
   }
 
   /** Runs the test. */
