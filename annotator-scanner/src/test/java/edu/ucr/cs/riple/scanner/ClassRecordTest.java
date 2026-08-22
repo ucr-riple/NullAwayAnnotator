@@ -27,6 +27,7 @@ package edu.ucr.cs.riple.scanner;
 import com.google.common.base.Preconditions;
 import edu.ucr.cs.riple.scanner.tools.ClassRecordDisplay;
 import edu.ucr.cs.riple.scanner.tools.DisplayFactory;
+import java.nio.file.Path;
 import org.junit.Test;
 
 public class ClassRecordTest extends AnnotatorScannerBaseTest<ClassRecordDisplay> {
@@ -36,9 +37,11 @@ public class ClassRecordTest extends AnnotatorScannerBaseTest<ClassRecordDisplay
         Preconditions.checkArgument(values.length == 2, "Expected to find 2 values on each line");
         // Outputs are written in Temp Directory and is not known at compile time, therefore,
         // relative paths are getting compared.
-        ClassRecordDisplay display = new ClassRecordDisplay(values[0], values[1]);
-        display.path = display.path.substring(display.path.indexOf("edu/ucr/"));
-        return new ClassRecordDisplay(values[0], values[1].substring(1));
+        String normalizedPath = Path.of(values[1]).normalize().toString().replace('\\', '/');
+        int relativePathStart = normalizedPath.indexOf("edu/ucr/");
+        Preconditions.checkArgument(
+            relativePathStart >= 0, "Expected source path under edu/ucr/: %s", normalizedPath);
+        return new ClassRecordDisplay(values[0], normalizedPath.substring(relativePathStart));
       };
   private static final String HEADER = "class\tpath";
   private static final String FILE_NAME = "class_records.tsv";
