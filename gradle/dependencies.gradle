@@ -24,8 +24,9 @@
 
 // The oldest version of Error Prone that we support running on
 def oldestErrorProneApi = "2.4.0"
-// Latest released Error Prone version that we've tested with
-def latestErrorProneVersion = "2.14.0"
+// Latest Error Prone that still runs on the JDK 17 floor, also used by the test target projects.
+// 2.45.0 and later ship class file 65 and need JDK 21 to load.
+def latestErrorProneVersion = "2.42.0"
 
 
 def versions = [
@@ -39,7 +40,8 @@ def versions = [
         commonsio               : "2.11.0",
         progressbar             : "0.9.2",
         junitjupiter            : "5.7.2",
-        nullaway                : "0.10.19",
+        // Latest NullAway that still writes the serialization version NullAway.VERSION reads
+        nullaway                : "0.13.8",
         mockito                 : "5.2.0",
         junit                   : "4.13.2"
 ]
