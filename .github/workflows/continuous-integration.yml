@@ -53,10 +53,13 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build --scan --no-daemon
       - name: Archive test report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Test report
-          path: build/reports/tests/test
+          path: |
+            **/build/reports/tests/test
+            **/build/test-results/test
   parallel-processing-enabled-caching-disabled:
     runs-on: ubuntu-latest
     steps:

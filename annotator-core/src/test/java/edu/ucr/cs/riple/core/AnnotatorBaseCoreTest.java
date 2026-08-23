@@ -26,9 +26,11 @@ package edu.ucr.cs.riple.core;
 
 import edu.ucr.cs.riple.core.tools.CoreTestHelper;
 import edu.ucr.cs.riple.core.tools.Utility;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -41,6 +43,16 @@ import org.junit.runners.JUnit4;
 @Ignore
 @RunWith(JUnit4.class)
 public abstract class AnnotatorBaseCoreTest {
+
+  /**
+   * Directories of the repository that the copy below must not walk. Gradle writes into them while
+   * the tests run, so a file can vanish between listing and reading it, and the copy of the
+   * repository is only used to build the library models loader from source anyway.
+   */
+  private static final Set<String> VOLATILE_DIRECTORIES = Set.of("build", ".git", ".gradle");
+
+  private static final FileFilter EXCLUDE_VOLATILE_DIRECTORIES =
+      file -> !(file.isDirectory() && VOLATILE_DIRECTORIES.contains(file.getName()));
 
   /** Temporary folder for each test. */
   @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -72,7 +84,9 @@ public abstract class AnnotatorBaseCoreTest {
     try {
       // Create a separate library models loader to avoid races between unit tests.
       FileUtils.copyDirectory(
-          repositoryDirectory.toFile(), outDirPath.resolve("Annotator").toFile());
+          repositoryDirectory.toFile(),
+          outDirPath.resolve("Annotator").toFile(),
+          EXCLUDE_VOLATILE_DIRECTORIES);
       FileUtils.copyDirectory(pathToUnitTestDir.toFile(), unitTestProjectPath.toFile());
       // Copy using gradle wrappers.
       FileUtils.copyFile(
