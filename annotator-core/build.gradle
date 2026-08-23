@@ -98,6 +98,15 @@ if (!JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_21)) {
     }
 }
 
+// Java25Test builds a target project with language features released after Java 21.
+if (!JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_25)) {
+    test {
+        filter {
+            excludeTestsMatching "edu.ucr.cs.riple.core.Java25Test"
+        }
+    }
+}
+
 // temporarily exclude LombokTest until we find a solution for the issue.
 test {
     filter {

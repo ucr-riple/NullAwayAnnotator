@@ -25,6 +25,7 @@
 package edu.ucr.cs.riple.core;
 
 import com.github.javaparser.ParserConfiguration;
+import com.google.common.base.Enums;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -176,6 +177,12 @@ public class Config {
 
   /** Language level to use when parsing Java code. Defaults to Java 17. */
   public final ParserConfiguration.LanguageLevel languageLevel;
+
+  /**
+   * Prefix shared by every {@link ParserConfiguration.LanguageLevel} constant, stripped from the
+   * serialized form and prepended back when reading it.
+   */
+  private static final String LANGUAGE_LEVEL_PREFIX = "JAVA_";
 
   /**
    * Builds context from command line arguments.
@@ -378,7 +385,7 @@ public class Config {
             "ll",
             "language-level",
             true,
-            "Java language level to use when parsing code. Supported values are 11, 17 and 21.  Defaults to 17.");
+            "Java language level to use when parsing code. Accepts any release supported by the bundled parser, e.g. 11, 17, 21, 25. Defaults to 17.");
     languageLevelOption.setRequired(false);
     options.addOption(languageLevelOption);
 
@@ -491,22 +498,30 @@ public class Config {
   }
 
   /**
-   * Gets the language level from the string representation. "11" for Java 11 and "17" for Java 17.
+   * Gets the language level from the string representation, e.g. "17" for Java 17. Accepts every
+   * release the bundled parser knows, so a target project on a current JDK can be read as-is.
    *
    * @param languageLevelString string representation of the language level.
    * @return the language level.
    */
-  private ParserConfiguration.LanguageLevel getLanguageLevel(String languageLevelString) {
-    switch (languageLevelString) {
-      case "11":
-        return ParserConfiguration.LanguageLevel.JAVA_11;
-      case "17":
-        return ParserConfiguration.LanguageLevel.JAVA_17;
-      case "21":
-        return ParserConfiguration.LanguageLevel.JAVA_21;
-      default:
-        throw new IllegalArgumentException("Unsupported language level: " + languageLevelString);
-    }
+  private static ParserConfiguration.LanguageLevel getLanguageLevel(String languageLevelString) {
+    return Enums.getIfPresent(
+            ParserConfiguration.LanguageLevel.class, LANGUAGE_LEVEL_PREFIX + languageLevelString)
+        .toJavaUtil()
+        .orElseThrow(
+            () ->
+                new IllegalArgumentException("Unsupported language level: " + languageLevelString));
+  }
+
+  /**
+   * Gets the string representation of the language level, the inverse of {@link
+   * #getLanguageLevel(String)}.
+   *
+   * @param languageLevel the language level.
+   * @return string representation of the language level.
+   */
+  private static String getLanguageLevelString(ParserConfiguration.LanguageLevel languageLevel) {
+    return languageLevel.name().substring(LANGUAGE_LEVEL_PREFIX.length());
   }
 
   /**
@@ -693,7 +708,7 @@ public class Config {
       json.addProperty("REDIRECT_BUILD_OUTPUT_TO_STDERR", redirectBuildOutputToStdErr);
       json.addProperty("SUPPRESS_REMAINING_ERRORS", suppressRemainingErrors);
       json.addProperty("INFERENCE_ACTIVATION", inferenceActivated);
-      json.addProperty("LANGUAGE_LEVEL", languageLevel.name().split("_")[1]);
+      json.addProperty("LANGUAGE_LEVEL", getLanguageLevelString(languageLevel));
       JsonArray configPathsJson = new JsonArray();
       configPaths.forEach(
           info -> {
