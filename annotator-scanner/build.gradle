@@ -35,7 +35,6 @@ buildscript {
 
 plugins {
     id "net.ltgt.errorprone" version "5.1.0" apply false
-    id 'maven-publish'
     id "com.vanniktech.maven.publish"
 }
 
