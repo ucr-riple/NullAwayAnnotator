@@ -24,9 +24,8 @@
 
 plugins {
     id 'com.gradleup.shadow' version '9.6.1'
-    id 'maven-publish'
     id 'application'
-    id "com.vanniktech.maven.publish"
+    id "com.vanniktech.maven.publish.base"
 }
 
 application {
@@ -63,20 +62,33 @@ tasks.test.doFirst {
     environment "ANNOTATOR_VERSION", project.version
 }
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 publishing {
     publications {
-        shadow(MavenPublication) {
-            from components.shadow
-        }
-    }
+        maven(MavenPublication) {
+            from components.java
 
-    repositories {
-        mavenLocal()
+            // All runtime dependencies are bundled into the primary shadow JAR. Keep them in
+            // Gradle module metadata for consumers of the nonshadow variants, but not in the POM.
+            pom.withXml {
+                asNode().dependencies.dependency.toList().each {
+                    it.parent().remove(it)
+                }
+            }
+        }
     }
 }
 
 mavenPublishing {
     publishToMavenCentral()
+    pomFromGradleProperties()
+    if (providers.gradleProperty("RELEASE_SIGNING_ENABLED").getOrElse("true").toBoolean()) {
+        signAllPublications()
+    }
 }
 
 jar {
@@ -86,7 +98,7 @@ jar {
 
 // To remove the "-all" postfix from the produced jar file.
 shadowJar {
-    archiveClassifier = null
+    archiveClassifier = ""
 }
 
 // Java21Test builds a target project with Java 21 language features.
