@@ -126,7 +126,7 @@ dependencies {
     // Nullable annotations
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
     // JSpecify annotations for NullUnmarked
-    compileOnly "org.jspecify:jspecify:0.3.0"
+    compileOnly "org.jspecify:jspecify:1.0.1"
     //All other target project dependencies
 }  
 
