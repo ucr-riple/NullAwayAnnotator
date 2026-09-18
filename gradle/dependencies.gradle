@@ -40,8 +40,8 @@ def versions = [
         commonsio               : "2.11.0",
         progressbar             : "0.9.2",
         junitjupiter            : "5.7.2",
-        // Latest NullAway that still writes the serialization version NullAway.VERSION reads
-        nullaway                : "0.13.8",
+        // Latest NullAway; writes serialization version 4 (errors.xml), see NullAway.SUPPORTED_VERSIONS
+        nullaway                : "0.14.1",
         mockito                 : "5.2.0",
         junit                   : "4.13.2"
 ]
