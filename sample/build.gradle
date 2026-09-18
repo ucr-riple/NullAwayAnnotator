@@ -41,7 +41,7 @@ dependencies {
     // Nullable annotations
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
     // JSpecify annotations for NullUnmarked
-    compileOnly "org.jspecify:jspecify:0.3.0"
+    compileOnly "org.jspecify:jspecify:1.0.1"
 
     annotationProcessor "com.uber.nullaway:nullaway:0.10.10"
     errorprone "com.google.errorprone:error_prone_core:2.4.0"
